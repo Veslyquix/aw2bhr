@@ -658,6 +658,8 @@ SECTIONS
 		src/crt0.o(.text);
 
 		asm/code.o(.text);
+        src/design.o(.text); 
+		asm/code-0800119C.o(.text);
 		src/proc.o(.text);
 		asm/code-0801D390.o(.text);
 		*libgcc.a:_call_via_rX.o(.text);
