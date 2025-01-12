@@ -1,7 +1,6 @@
 #include "global.h"
 
 #include "design.h"
-
 void MakeTileSimple(int x, int y, int tileID) {
   if (tileID < 0) {
     return;
@@ -26,7 +25,7 @@ u8 IsTerrainAtCoordsType(int x, int y, int terrainID) {
              ->terrainMap_1432[gUnknown_08499590->tileMap_417A[y] + x] ==
          terrainID;
 }
-extern void sub_08008BB8(int x, int y);
+
 void SetTerrainAt(int x, int y, int terrainID) {
 
   gUnknown_08499590->terrainMap_1432[gUnknown_08499590->tileMap_417A[y] + x] =
@@ -112,4 +111,127 @@ int GetDesignRoomOption(int id) {
   }
   }
   return 0;
+}
+
+u16 sub_080012DC(int val) {
+  u16 var;
+
+  var = 0;
+  switch (val) {
+  case 6:
+    var = 0x1C2;
+    break;
+  case 38:
+    var = 0x1C7;
+    break;
+  case 70:
+    var = 0x1CC;
+    break;
+  case 102:
+    var = 0x1d1;
+    break;
+  case 134:
+    var = 0x1d6;
+    break;
+  case 8:
+    var = 0x1C0;
+    break;
+  case 40:
+    var = 0x1c5;
+    break;
+  case 72:
+    var = 0x1ca;
+    break;
+  case 104:
+    var = 0x1cf;
+    break;
+  case 136:
+    var = 0x1d4;
+    break;
+  case 10:
+    var = 0x1c3;
+    break;
+  case 42:
+    var = 0x1c8;
+    break;
+  case 74:
+    var = 0x1cd;
+    break;
+  case 106:
+    var = 0x1d2;
+    break;
+  case 138:
+    var = 0x1d7;
+    break;
+  case 11:
+    var = 0x1c4;
+    break;
+  case 43:
+    var = 0x1c9;
+    break;
+  case 75:
+    var = 0x1ce;
+    break;
+  case 107:
+    var = 0x1d3;
+    break;
+  case 139:
+    var = 0x1d8;
+    break;
+  case 14:
+    var = 0x1c1;
+    break;
+  case 46:
+    var = 0x1c6;
+    break;
+  case 78:
+    var = 0x1cb;
+    break;
+  case 110:
+    var = 0x1d0;
+    break;
+  case 142:
+    var = 0x1d5;
+    break;
+  case 17:
+    var = 0x180;
+    break;
+  }
+  return var;
+}
+
+u8 IsTerrainLand(int x, int y) {
+  u8 terrain = gUnknown_08499590
+                   ->terrainMap_1432[gUnknown_08499590->tileMap_417A[y] + x];
+  int var;
+  int var2;
+  if (terrain == _River) {
+    var = sub_080094EC(x, y);
+  } else {
+    var = 0;
+  }
+  var2 = sub_08008C34(x, y);
+  return ((terrain != _Sea) && (terrain != _Shoal) && (terrain != _Reef) &&
+          (!var2) && (!var));
+}
+
+u8 IsTerrainWater(int x, int y) {
+  u8 terrain = gUnknown_08499590
+                   ->terrainMap_1432[gUnknown_08499590->tileMap_417A[y] + x];
+  return ((terrain != _Sea) && (terrain != _Shoal) && (terrain != _Reef));
+}
+
+int IsTerrainWaterOrRiver(int x, int y) {
+  u8 terrain = gUnknown_08499590
+                   ->terrainMap_1432[gUnknown_08499590->tileMap_417A[y] + x];
+  return ((terrain != _Sea) && (terrain != _Shoal) && (terrain != _Reef) &&
+          (terrain != _River));
+}
+
+u32 GetMostFittingTile_unkMapA22(int x, int y) {
+  // ...
+  u16 unk =
+      gUnknown_08499590->unkMap_0A22[gUnknown_08499590->tileMap_417A[y] + x];
+
+  return GetMostFittingTile(x, y, unk); // 17d0
 }

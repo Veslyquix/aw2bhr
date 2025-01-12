@@ -318,6 +318,657 @@ GetDesignRoomOption:
 .LFE4:
 .Lfe4:
 	.size	 GetDesignRoomOption,.Lfe4-GetDesignRoomOption
+	.align	2, 0
+	.globl	sub_080012DC
+	.type	 sub_080012DC,function
+	.thumb_func
+sub_080012DC:
+.LFB5:
+.LM38:
+
+.LM39:
+
+.LBB3:
+.LM40:
+
+	mov	r2, #0x0
+.LM41:
+
+	sub	r0, r0, #0x6
+	cmp	r0, #0x88
+	bls	.LCB374
+	b	.L46	@long jump
+.LCB374:
+	lsl	r0, r0, #0x2
+	ldr	r1, .L75
+	add	r0, r0, r1
+	ldr	r0, [r0]
+	mov	pc, r0
+.L76:
+	.align	2, 0
+.L75:
+	.word	.L73
+	.align	2, 0
+	.align	2, 0
+.L73:
+	.word	.L47
+	.word	.L46
+	.word	.L52
+	.word	.L46
+	.word	.L57
+	.word	.L62
+	.word	.L46
+	.word	.L46
+	.word	.L67
+	.word	.L46
+	.word	.L46
+	.word	.L72
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L48
+	.word	.L46
+	.word	.L53
+	.word	.L46
+	.word	.L58
+	.word	.L63
+	.word	.L46
+	.word	.L46
+	.word	.L68
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L49
+	.word	.L46
+	.word	.L54
+	.word	.L46
+	.word	.L59
+	.word	.L64
+	.word	.L46
+	.word	.L46
+	.word	.L69
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L50
+	.word	.L46
+	.word	.L55
+	.word	.L46
+	.word	.L60
+	.word	.L65
+	.word	.L46
+	.word	.L46
+	.word	.L70
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L46
+	.word	.L51
+	.word	.L46
+	.word	.L56
+	.word	.L46
+	.word	.L61
+	.word	.L66
+	.word	.L46
+	.word	.L46
+	.word	.L71
+.L47:
+.LM42:
+
+	mov	r2, #0xe1
+	lsl	r2, r2, #0x1
+.LM43:
+
+	b	.L46
+.L48:
+.LM44:
+
+	ldr	r2, .L77
+.LM45:
+
+	b	.L46
+.L78:
+	.align	2, 0
+.L77:
+	.word	0x1c7
+.L49:
+.LM46:
+
+	mov	r2, #0xe6
+	lsl	r2, r2, #0x1
+.LM47:
+
+	b	.L46
+.L50:
+.LM48:
+
+	ldr	r2, .L79
+.LM49:
+
+	b	.L46
+.L80:
+	.align	2, 0
+.L79:
+	.word	0x1d1
+.L51:
+.LM50:
+
+	mov	r2, #0xeb
+	lsl	r2, r2, #0x1
+.LM51:
+
+	b	.L46
+.L52:
+.LM52:
+
+	mov	r2, #0xe0
+	lsl	r2, r2, #0x1
+.LM53:
+
+	b	.L46
+.L53:
+.LM54:
+
+	ldr	r2, .L81
+.LM55:
+
+	b	.L46
+.L82:
+	.align	2, 0
+.L81:
+	.word	0x1c5
+.L54:
+.LM56:
+
+	mov	r2, #0xe5
+	lsl	r2, r2, #0x1
+.LM57:
+
+	b	.L46
+.L55:
+.LM58:
+
+	ldr	r2, .L83
+.LM59:
+
+	b	.L46
+.L84:
+	.align	2, 0
+.L83:
+	.word	0x1cf
+.L56:
+.LM60:
+
+	mov	r2, #0xea
+	lsl	r2, r2, #0x1
+.LM61:
+
+	b	.L46
+.L57:
+.LM62:
+
+	ldr	r2, .L85
+.LM63:
+
+	b	.L46
+.L86:
+	.align	2, 0
+.L85:
+	.word	0x1c3
+.L58:
+.LM64:
+
+	mov	r2, #0xe4
+	lsl	r2, r2, #0x1
+.LM65:
+
+	b	.L46
+.L59:
+.LM66:
+
+	ldr	r2, .L87
+.LM67:
+
+	b	.L46
+.L88:
+	.align	2, 0
+.L87:
+	.word	0x1cd
+.L60:
+.LM68:
+
+	mov	r2, #0xe9
+	lsl	r2, r2, #0x1
+.LM69:
+
+	b	.L46
+.L61:
+.LM70:
+
+	ldr	r2, .L89
+.LM71:
+
+	b	.L46
+.L90:
+	.align	2, 0
+.L89:
+	.word	0x1d7
+.L62:
+.LM72:
+
+	mov	r2, #0xe2
+	lsl	r2, r2, #0x1
+.LM73:
+
+	b	.L46
+.L63:
+.LM74:
+
+	ldr	r2, .L91
+.LM75:
+
+	b	.L46
+.L92:
+	.align	2, 0
+.L91:
+	.word	0x1c9
+.L64:
+.LM76:
+
+	mov	r2, #0xe7
+	lsl	r2, r2, #0x1
+.LM77:
+
+	b	.L46
+.L65:
+.LM78:
+
+	ldr	r2, .L93
+.LM79:
+
+	b	.L46
+.L94:
+	.align	2, 0
+.L93:
+	.word	0x1d3
+.L66:
+.LM80:
+
+	mov	r2, #0xec
+	lsl	r2, r2, #0x1
+.LM81:
+
+	b	.L46
+.L67:
+.LM82:
+
+	ldr	r2, .L95
+.LM83:
+
+	b	.L46
+.L96:
+	.align	2, 0
+.L95:
+	.word	0x1c1
+.L68:
+.LM84:
+
+	mov	r2, #0xe3
+	lsl	r2, r2, #0x1
+.LM85:
+
+	b	.L46
+.L69:
+.LM86:
+
+	ldr	r2, .L97
+.LM87:
+
+	b	.L46
+.L98:
+	.align	2, 0
+.L97:
+	.word	0x1cb
+.L70:
+.LM88:
+
+	mov	r2, #0xe8
+	lsl	r2, r2, #0x1
+.LM89:
+
+	b	.L46
+.L71:
+.LM90:
+
+	ldr	r2, .L99
+.LM91:
+
+	b	.L46
+.L100:
+	.align	2, 0
+.L99:
+	.word	0x1d5
+.L72:
+.LM92:
+
+	mov	r2, #0xc0
+	lsl	r2, r2, #0x1
+.L46:
+.LM93:
+
+	add	r0, r2, #0
+.LM94:
+
+.LBE3:
+	bx	lr
+.LFE5:
+.Lfe5:
+	.size	 sub_080012DC,.Lfe5-sub_080012DC
+	.align	2, 0
+	.globl	IsTerrainLand
+	.type	 IsTerrainLand,function
+	.thumb_func
+IsTerrainLand:
+.LFB6:
+.LM95:
+
+	push	{r4, r5, r6, r7, lr}
+	add	r5, r0, #0
+	add	r6, r1, #0
+.LM96:
+
+.LBB4:
+	ldr	r0, .L105
+	ldr	r1, [r0]
+	lsl	r2, r6, #0x1
+	ldr	r3, .L105+0x4
+	add	r0, r1, r3
+	add	r0, r0, r2
+	ldrh	r0, [r0]
+	add	r0, r0, r5
+	ldr	r2, .L105+0x8
+	add	r1, r1, r2
+	add	r1, r1, r0
+	ldrb	r4, [r1]
+.LM97:
+
+	cmp	r4, #0x2
+	bne	.L102	@cond_branch
+.LM98:
+
+	add	r0, r5, #0
+	add	r1, r6, #0
+	bl	sub_080094EC
+	add	r7, r0, #0
+.LM99:
+
+	b	.L103
+.L106:
+	.align	2, 0
+.L105:
+	.word	gUnknown_08499590
+	.word	0x417a
+	.word	0x1432
+.L102:
+.LM100:
+
+	mov	r7, #0x0
+.L103:
+.LM101:
+
+	add	r0, r5, #0
+	add	r1, r6, #0
+	bl	sub_08008C34
+.LM102:
+
+	mov	r1, #0x0
+	cmp	r4, #0x7
+	beq	.L104	@cond_branch
+	cmp	r4, #0xd
+	beq	.L104	@cond_branch
+	cmp	r4, #0x13
+	beq	.L104	@cond_branch
+	cmp	r0, #0
+	bne	.L104	@cond_branch
+	cmp	r7, #0
+	bne	.L104	@cond_branch
+	mov	r1, #0x1
+.L104:
+	add	r0, r1, #0
+.LM103:
+
+.LBE4:
+	pop	{r4, r5, r6, r7}
+	pop	{r1}
+	bx	r1
+.LFE6:
+.Lfe6:
+	.size	 IsTerrainLand,.Lfe6-IsTerrainLand
+	.align	2, 0
+	.globl	IsTerrainWater
+	.type	 IsTerrainWater,function
+	.thumb_func
+IsTerrainWater:
+.LFB7:
+.LM104:
+
+	push	{r4, lr}
+.LM105:
+
+.LBB5:
+	ldr	r2, .L109
+	ldr	r3, [r2]
+	lsl	r1, r1, #0x1
+	ldr	r4, .L109+0x4
+	add	r2, r3, r4
+	add	r2, r2, r1
+	ldrh	r1, [r2]
+	add	r1, r1, r0
+	ldr	r0, .L109+0x8
+	add	r3, r3, r0
+	add	r3, r3, r1
+	ldrb	r2, [r3]
+.LM106:
+
+	mov	r0, #0x0
+	cmp	r2, #0x7
+	beq	.L108	@cond_branch
+	cmp	r2, #0xd
+	beq	.L108	@cond_branch
+	mov	r1, #0x13
+	eor	r1, r1, r2
+	neg	r0, r1
+	orr	r0, r0, r1
+	lsr	r0, r0, #0x1f
+.L108:
+.LM107:
+
+.LBE5:
+	pop	{r4}
+	pop	{r1}
+	bx	r1
+.L110:
+	.align	2, 0
+.L109:
+	.word	gUnknown_08499590
+	.word	0x417a
+	.word	0x1432
+.LFE7:
+.Lfe7:
+	.size	 IsTerrainWater,.Lfe7-IsTerrainWater
+	.align	2, 0
+	.globl	IsTerrainWaterOrRiver
+	.type	 IsTerrainWaterOrRiver,function
+	.thumb_func
+IsTerrainWaterOrRiver:
+.LFB8:
+.LM108:
+
+	push	{r4, lr}
+.LM109:
+
+.LBB6:
+	ldr	r2, .L113
+	ldr	r3, [r2]
+	lsl	r1, r1, #0x1
+	ldr	r4, .L113+0x4
+	add	r2, r3, r4
+	add	r2, r2, r1
+	ldrh	r1, [r2]
+	add	r1, r1, r0
+	ldr	r0, .L113+0x8
+	add	r3, r3, r0
+	add	r3, r3, r1
+	ldrb	r2, [r3]
+.LM110:
+
+	mov	r0, #0x0
+	cmp	r2, #0x7
+	beq	.L112	@cond_branch
+	cmp	r2, #0xd
+	beq	.L112	@cond_branch
+	cmp	r2, #0x13
+	beq	.L112	@cond_branch
+	mov	r1, #0x2
+	eor	r1, r1, r2
+	neg	r0, r1
+	orr	r0, r0, r1
+	lsr	r0, r0, #0x1f
+.L112:
+.LM111:
+
+.LBE6:
+	pop	{r4}
+	pop	{r1}
+	bx	r1
+.L114:
+	.align	2, 0
+.L113:
+	.word	gUnknown_08499590
+	.word	0x417a
+	.word	0x1432
+.LFE8:
+.Lfe8:
+	.size	 IsTerrainWaterOrRiver,.Lfe8-IsTerrainWaterOrRiver
+	.align	2, 0
+	.globl	GetMostFittingTile_unkMapA22
+	.type	 GetMostFittingTile_unkMapA22,function
+	.thumb_func
+GetMostFittingTile_unkMapA22:
+.LFB9:
+.LM112:
+
+	push	{r4, r5, lr}
+.LM113:
+
+.LBB7:
+	ldr	r2, .L116
+	ldr	r3, [r2]
+	lsl	r4, r1, #0x1
+	ldr	r5, .L116+0x4
+	add	r2, r3, r5
+	add	r2, r2, r4
+	ldrh	r2, [r2]
+	add	r2, r2, r0
+	lsl	r2, r2, #0x1
+	ldr	r4, .L116+0x8
+	add	r3, r3, r4
+	add	r3, r3, r2
+	ldrh	r2, [r3]
+.LM114:
+
+	bl	GetMostFittingTile
+.LM115:
+
+.LBE7:
+	pop	{r4, r5}
+	pop	{r1}
+	bx	r1
+.L117:
+	.align	2, 0
+.L116:
+	.word	gUnknown_08499590
+	.word	0x417a
+	.word	0xa22
+.LFE9:
+.Lfe9:
+	.size	 GetMostFittingTile_unkMapA22,.Lfe9-GetMostFittingTile_unkMapA22
 
 	.section	.text
 .Letext0:
@@ -383,7 +1034,7 @@ GetDesignRoomOption:
 	.byte	0x5
 	.byte	0x2
 	.4byte	.LM1
-	.byte	0x18
+	.byte	0x17
 	.byte	0x0
 	.byte	0x5
 	.byte	0x2
@@ -567,6 +1218,396 @@ GetDesignRoomOption:
 	.byte	0x0
 	.byte	0x5
 	.byte	0x2
+	.4byte	.LM38
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM39
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM40
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM41
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM42
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM43
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM44
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM45
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM46
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM47
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM48
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM49
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM50
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM51
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM52
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM53
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM54
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM55
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM56
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM57
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM58
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM59
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM60
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM61
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM62
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM63
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM64
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM65
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM66
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM67
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM68
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM69
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM70
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM71
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM72
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM73
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM74
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM75
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM76
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM77
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM78
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM79
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM80
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM81
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM82
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM83
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM84
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM85
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM86
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM87
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM88
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM89
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM90
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM91
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM92
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM93
+	.byte	0x17
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM94
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM95
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM96
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM97
+	.byte	0x18
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM98
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM99
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM100
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM101
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM102
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM103
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM104
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM105
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM106
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM107
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM108
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM109
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM110
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM111
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM112
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM113
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM114
+	.byte	0x17
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM115
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
 	.4byte	.Letext0
 	.byte	0x0
 	.byte	0x1
@@ -675,6 +1716,20 @@ GetDesignRoomOption:
 	.byte	0x13
 	.byte	0,0
 	.byte	0x7
+	.byte	0x34
+	.byte	0x0
+	.byte	0x3
+	.byte	0x8
+	.byte	0x3a
+	.byte	0xb
+	.byte	0x3b
+	.byte	0xb
+	.byte	0x49
+	.byte	0x13
+	.byte	0x2
+	.byte	0xa
+	.byte	0,0
+	.byte	0x8
 	.byte	0x16
 	.byte	0x0
 	.byte	0x3
@@ -686,13 +1741,13 @@ GetDesignRoomOption:
 	.byte	0x49
 	.byte	0x13
 	.byte	0,0
-	.byte	0x8
+	.byte	0x9
 	.byte	0x35
 	.byte	0x0
 	.byte	0x49
 	.byte	0x13
 	.byte	0,0
-	.byte	0x9
+	.byte	0xa
 	.byte	0x13
 	.byte	0x0
 	.byte	0x3
@@ -700,13 +1755,13 @@ GetDesignRoomOption:
 	.byte	0x3c
 	.byte	0xc
 	.byte	0,0
-	.byte	0xa
+	.byte	0xb
 	.byte	0xf
 	.byte	0x0
 	.byte	0xb
 	.byte	0xb
 	.byte	0,0
-	.byte	0xb
+	.byte	0xc
 	.byte	0xf
 	.byte	0x0
 	.byte	0xb
@@ -714,7 +1769,7 @@ GetDesignRoomOption:
 	.byte	0x49
 	.byte	0x13
 	.byte	0,0
-	.byte	0xc
+	.byte	0xd
 	.byte	0x15
 	.byte	0x1
 	.byte	0x1
@@ -722,13 +1777,13 @@ GetDesignRoomOption:
 	.byte	0x27
 	.byte	0xc
 	.byte	0,0
-	.byte	0xd
+	.byte	0xe
 	.byte	0x5
 	.byte	0x0
 	.byte	0x49
 	.byte	0x13
 	.byte	0,0
-	.byte	0xe
+	.byte	0xf
 	.byte	0x13
 	.byte	0x1
 	.byte	0x1
@@ -742,7 +1797,7 @@ GetDesignRoomOption:
 	.byte	0x3b
 	.byte	0xb
 	.byte	0,0
-	.byte	0xf
+	.byte	0x10
 	.byte	0xd
 	.byte	0x0
 	.byte	0x3
@@ -756,7 +1811,7 @@ GetDesignRoomOption:
 	.byte	0x38
 	.byte	0xa
 	.byte	0,0
-	.byte	0x10
+	.byte	0x11
 	.byte	0x1
 	.byte	0x1
 	.byte	0x1
@@ -764,13 +1819,13 @@ GetDesignRoomOption:
 	.byte	0x49
 	.byte	0x13
 	.byte	0,0
-	.byte	0x11
+	.byte	0x12
 	.byte	0x21
 	.byte	0x0
 	.byte	0x2f
 	.byte	0x5
 	.byte	0,0
-	.byte	0x12
+	.byte	0x13
 	.byte	0x34
 	.byte	0x0
 	.byte	0x3
@@ -788,7 +1843,7 @@ GetDesignRoomOption:
 	.byte	0,0
 
 	.section	.debug_info
-	.4byte	0x6cc
+	.4byte	0x876
 	.2byte	0x2
 	.4byte	.debug_abbrev
 	.byte	0x4
@@ -809,7 +1864,7 @@ GetDesignRoomOption:
 	.ascii	"MakeTileSimple\000"
 
 	.byte	0x1
-	.byte	0x5
+	.byte	0x4
 	.byte	0x1
 	.4byte	.LFB1
 	.4byte	.LFE1
@@ -819,7 +1874,7 @@ GetDesignRoomOption:
 	.ascii	"x\000"
 
 	.byte	0x1
-	.byte	0x5
+	.byte	0x4
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x55
@@ -827,7 +1882,7 @@ GetDesignRoomOption:
 	.ascii	"y\000"
 
 	.byte	0x1
-	.byte	0x5
+	.byte	0x4
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x54
@@ -835,7 +1890,7 @@ GetDesignRoomOption:
 	.ascii	"tileID\000"
 
 	.byte	0x1
-	.byte	0x5
+	.byte	0x4
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x53
@@ -851,7 +1906,7 @@ GetDesignRoomOption:
 	.ascii	"IsTerrainAtCoordsType\000"
 
 	.byte	0x1
-	.byte	0x10
+	.byte	0xf
 	.byte	0x1
 	.4byte	0x103
 	.4byte	.LFB2
@@ -862,7 +1917,7 @@ GetDesignRoomOption:
 	.ascii	"x\000"
 
 	.byte	0x1
-	.byte	0x10
+	.byte	0xf
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x54
@@ -870,7 +1925,7 @@ GetDesignRoomOption:
 	.ascii	"y\000"
 
 	.byte	0x1
-	.byte	0x10
+	.byte	0xf
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x51
@@ -878,7 +1933,7 @@ GetDesignRoomOption:
 	.ascii	"terrainID\000"
 
 	.byte	0x1
-	.byte	0x10
+	.byte	0xf
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x55
@@ -886,7 +1941,7 @@ GetDesignRoomOption:
 	.ascii	"result\000"
 
 	.byte	0x1
-	.byte	0x11
+	.byte	0x10
 	.4byte	0x97
 	.byte	0x0
 	.byte	0x4
@@ -900,7 +1955,7 @@ GetDesignRoomOption:
 	.ascii	"SetTerrainAt\000"
 
 	.byte	0x1
-	.byte	0x1e
+	.byte	0x1d
 	.byte	0x1
 	.4byte	.LFB3
 	.4byte	.LFE3
@@ -910,7 +1965,7 @@ GetDesignRoomOption:
 	.ascii	"x\000"
 
 	.byte	0x1
-	.byte	0x1e
+	.byte	0x1d
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x54
@@ -918,7 +1973,7 @@ GetDesignRoomOption:
 	.ascii	"y\000"
 
 	.byte	0x1
-	.byte	0x1e
+	.byte	0x1d
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x55
@@ -926,7 +1981,7 @@ GetDesignRoomOption:
 	.ascii	"terrainID\000"
 
 	.byte	0x1
-	.byte	0x1e
+	.byte	0x1d
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x52
@@ -937,7 +1992,7 @@ GetDesignRoomOption:
 	.ascii	"GetDesignRoomOption\000"
 
 	.byte	0x1
-	.byte	0x27
+	.byte	0x26
 	.byte	0x1
 	.4byte	0x97
 	.4byte	.LFB4
@@ -948,534 +2003,736 @@ GetDesignRoomOption:
 	.ascii	"id\000"
 
 	.byte	0x1
-	.byte	0x27
+	.byte	0x26
 	.4byte	0x97
 	.byte	0x1
 	.byte	0x50
 	.byte	0x0
+	.byte	0x5
+	.4byte	0x1ca
+	.byte	0x1
+	.ascii	"sub_080012DC\000"
+
+	.byte	0x1
+	.byte	0x74
+	.byte	0x1
+	.4byte	0x1ca
+	.4byte	.LFB5
+	.4byte	.LFE5
+	.byte	0x1
+	.byte	0x5d
+	.byte	0x3
+	.ascii	"val\000"
+
+	.byte	0x1
+	.byte	0x74
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x50
 	.byte	0x7
+	.ascii	"var\000"
+
+	.byte	0x1
+	.byte	0x75
+	.4byte	0x1ca
+	.byte	0x1
+	.byte	0x52
+	.byte	0x0
+	.byte	0x4
+	.ascii	"u16\000"
+
+	.byte	0x2
+	.byte	0x7
+	.byte	0x5
+	.4byte	0x239
+	.byte	0x1
+	.ascii	"IsTerrainLand\000"
+
+	.byte	0x1
+	.byte	0xcb
+	.byte	0x1
+	.4byte	0x103
+	.4byte	.LFB6
+	.4byte	.LFE6
+	.byte	0x1
+	.byte	0x5d
+	.byte	0x3
+	.ascii	"x\000"
+
+	.byte	0x1
+	.byte	0xcb
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x55
+	.byte	0x3
+	.ascii	"y\000"
+
+	.byte	0x1
+	.byte	0xcb
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x56
+	.byte	0x7
+	.ascii	"terrain\000"
+
+	.byte	0x1
+	.byte	0xcc
+	.4byte	0x103
+	.byte	0x1
+	.byte	0x54
+	.byte	0x7
+	.ascii	"var\000"
+
+	.byte	0x1
+	.byte	0xce
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x57
+	.byte	0x7
+	.ascii	"var2\000"
+
+	.byte	0x1
+	.byte	0xcf
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x50
+	.byte	0x0
+	.byte	0x5
+	.4byte	0x285
+	.byte	0x1
+	.ascii	"IsTerrainWater\000"
+
+	.byte	0x1
+	.byte	0xda
+	.byte	0x1
+	.4byte	0x103
+	.4byte	.LFB7
+	.4byte	.LFE7
+	.byte	0x1
+	.byte	0x5d
+	.byte	0x3
+	.ascii	"x\000"
+
+	.byte	0x1
+	.byte	0xda
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x50
+	.byte	0x3
+	.ascii	"y\000"
+
+	.byte	0x1
+	.byte	0xda
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x51
+	.byte	0x6
+	.ascii	"terrain\000"
+
+	.byte	0x1
+	.byte	0xdb
+	.4byte	0x103
+	.byte	0x0
+	.byte	0x5
+	.4byte	0x2d8
+	.byte	0x1
+	.ascii	"IsTerrainWaterOrRiver\000"
+
+	.byte	0x1
+	.byte	0xe0
+	.byte	0x1
+	.4byte	0x97
+	.4byte	.LFB8
+	.4byte	.LFE8
+	.byte	0x1
+	.byte	0x5d
+	.byte	0x3
+	.ascii	"x\000"
+
+	.byte	0x1
+	.byte	0xe0
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x50
+	.byte	0x3
+	.ascii	"y\000"
+
+	.byte	0x1
+	.byte	0xe0
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x51
+	.byte	0x6
+	.ascii	"terrain\000"
+
+	.byte	0x1
+	.byte	0xe1
+	.4byte	0x103
+	.byte	0x0
+	.byte	0x5
+	.4byte	0x32e
+	.byte	0x1
+	.ascii	"GetMostFittingTile_unkMapA22\000"
+
+	.byte	0x1
+	.byte	0xe7
+	.byte	0x1
+	.4byte	0x32e
+	.4byte	.LFB9
+	.4byte	.LFE9
+	.byte	0x1
+	.byte	0x5d
+	.byte	0x3
+	.ascii	"x\000"
+
+	.byte	0x1
+	.byte	0xe7
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x50
+	.byte	0x3
+	.ascii	"y\000"
+
+	.byte	0x1
+	.byte	0xe7
+	.4byte	0x97
+	.byte	0x1
+	.byte	0x51
+	.byte	0x6
+	.ascii	"unk\000"
+
+	.byte	0x1
+	.byte	0xe9
+	.4byte	0x1ca
+	.byte	0x0
+	.byte	0x4
+	.ascii	"u32\000"
+
+	.byte	0x4
+	.byte	0x7
+	.byte	0x8
 	.ascii	"int8_t\000"
 
 	.byte	0x2
 	.byte	0x23
-	.4byte	0x199
+	.4byte	0x343
 	.byte	0x4
 	.ascii	"signed char\000"
 
 	.byte	0x1
 	.byte	0x6
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int16_t\000"
 
 	.byte	0x2
 	.byte	0x24
-	.4byte	0x1b7
+	.4byte	0x361
 	.byte	0x4
 	.ascii	"short int\000"
 
 	.byte	0x2
 	.byte	0x5
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int32_t\000"
 
 	.byte	0x2
 	.byte	0x25
 	.4byte	0x97
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int64_t\000"
 
 	.byte	0x2
 	.byte	0x26
-	.4byte	0x1e2
+	.4byte	0x38c
 	.byte	0x4
 	.ascii	"long long int\000"
 
 	.byte	0x8
 	.byte	0x5
-	.byte	0x7
+	.byte	0x8
 	.ascii	"uint8_t\000"
 
 	.byte	0x2
 	.byte	0x27
-	.4byte	0x202
+	.4byte	0x3ac
 	.byte	0x4
 	.ascii	"unsigned char\000"
 
 	.byte	0x1
 	.byte	0x8
-	.byte	0x7
+	.byte	0x8
 	.ascii	"uint16_t\000"
 
 	.byte	0x2
 	.byte	0x28
-	.4byte	0x223
+	.4byte	0x3cd
 	.byte	0x4
 	.ascii	"short unsigned int\000"
 
 	.byte	0x2
 	.byte	0x7
-	.byte	0x7
+	.byte	0x8
 	.ascii	"uint32_t\000"
 
 	.byte	0x2
 	.byte	0x29
-	.4byte	0x249
+	.4byte	0x3f3
 	.byte	0x4
 	.ascii	"unsigned int\000"
 
 	.byte	0x4
 	.byte	0x7
-	.byte	0x7
+	.byte	0x8
 	.ascii	"uint64_t\000"
 
 	.byte	0x2
 	.byte	0x2a
-	.4byte	0x269
+	.4byte	0x413
 	.byte	0x4
 	.ascii	"long long unsigned int\000"
 
 	.byte	0x8
 	.byte	0x7
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int_least8_t\000"
 
 	.byte	0x2
 	.byte	0x2e
-	.4byte	0x199
-	.byte	0x7
+	.4byte	0x343
+	.byte	0x8
 	.ascii	"int_least16_t\000"
 
 	.byte	0x2
 	.byte	0x2f
-	.4byte	0x1b7
-	.byte	0x7
+	.4byte	0x361
+	.byte	0x8
 	.ascii	"int_least32_t\000"
 
 	.byte	0x2
 	.byte	0x30
 	.4byte	0x97
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int_least64_t\000"
 
 	.byte	0x2
 	.byte	0x31
-	.4byte	0x1e2
-	.byte	0x7
+	.4byte	0x38c
+	.byte	0x8
 	.ascii	"uint_least8_t\000"
 
 	.byte	0x2
 	.byte	0x32
-	.4byte	0x202
-	.byte	0x7
+	.4byte	0x3ac
+	.byte	0x8
 	.ascii	"uint_least16_t\000"
 
 	.byte	0x2
 	.byte	0x33
-	.4byte	0x223
-	.byte	0x7
+	.4byte	0x3cd
+	.byte	0x8
 	.ascii	"uint_least32_t\000"
 
 	.byte	0x2
 	.byte	0x34
-	.4byte	0x249
-	.byte	0x7
+	.4byte	0x3f3
+	.byte	0x8
 	.ascii	"uint_least64_t\000"
 
 	.byte	0x2
 	.byte	0x35
-	.4byte	0x269
-	.byte	0x7
+	.4byte	0x413
+	.byte	0x8
 	.ascii	"int_fast8_t\000"
 
 	.byte	0x2
 	.byte	0x39
 	.4byte	0x97
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int_fast16_t\000"
 
 	.byte	0x2
 	.byte	0x3a
 	.4byte	0x97
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int_fast32_t\000"
 
 	.byte	0x2
 	.byte	0x3b
 	.4byte	0x97
-	.byte	0x7
+	.byte	0x8
 	.ascii	"int_fast64_t\000"
 
 	.byte	0x2
 	.byte	0x3c
-	.4byte	0x1e2
-	.byte	0x7
+	.4byte	0x38c
+	.byte	0x8
 	.ascii	"uint_fast8_t\000"
 
 	.byte	0x2
 	.byte	0x3d
-	.4byte	0x249
-	.byte	0x7
+	.4byte	0x3f3
+	.byte	0x8
 	.ascii	"uint_fast16_t\000"
 
 	.byte	0x2
 	.byte	0x3e
-	.4byte	0x249
-	.byte	0x7
+	.4byte	0x3f3
+	.byte	0x8
 	.ascii	"uint_fast32_t\000"
 
 	.byte	0x2
 	.byte	0x3f
-	.4byte	0x249
-	.byte	0x7
+	.4byte	0x3f3
+	.byte	0x8
 	.ascii	"uint_fast64_t\000"
 
 	.byte	0x2
 	.byte	0x40
-	.4byte	0x269
-	.byte	0x7
+	.4byte	0x413
+	.byte	0x8
 	.ascii	"intptr_t\000"
 
 	.byte	0x2
 	.byte	0x44
 	.4byte	0x97
-	.byte	0x7
+	.byte	0x8
 	.ascii	"uintptr_t\000"
 
 	.byte	0x2
 	.byte	0x45
-	.4byte	0x249
-	.byte	0x7
+	.4byte	0x3f3
+	.byte	0x8
 	.ascii	"intmax_t\000"
 
 	.byte	0x2
 	.byte	0x49
-	.4byte	0x1e2
-	.byte	0x7
+	.4byte	0x38c
+	.byte	0x8
 	.ascii	"uintmax_t\000"
 
 	.byte	0x2
 	.byte	0x4a
-	.4byte	0x269
-	.byte	0x7
+	.4byte	0x413
+	.byte	0x8
 	.ascii	"u8\000"
 
 	.byte	0x3
 	.byte	0x6
-	.4byte	0x1f3
-	.byte	0x7
+	.4byte	0x39d
+	.byte	0x8
 	.ascii	"u16\000"
 
 	.byte	0x3
 	.byte	0x7
-	.4byte	0x213
-	.byte	0x7
+	.4byte	0x3bd
+	.byte	0x8
 	.ascii	"u32\000"
 
 	.byte	0x3
 	.byte	0x8
-	.4byte	0x239
-	.byte	0x7
+	.4byte	0x3e3
+	.byte	0x8
 	.ascii	"u64\000"
 
 	.byte	0x3
 	.byte	0x9
-	.4byte	0x259
-	.byte	0x7
+	.4byte	0x403
+	.byte	0x8
 	.ascii	"s8\000"
 
 	.byte	0x3
 	.byte	0xa
-	.4byte	0x18b
-	.byte	0x7
+	.4byte	0x335
+	.byte	0x8
 	.ascii	"s16\000"
 
 	.byte	0x3
 	.byte	0xb
-	.4byte	0x1a8
-	.byte	0x7
+	.4byte	0x352
+	.byte	0x8
 	.ascii	"s32\000"
 
 	.byte	0x3
 	.byte	0xc
-	.4byte	0x1c4
-	.byte	0x7
+	.4byte	0x36e
+	.byte	0x8
 	.ascii	"s64\000"
 
 	.byte	0x3
 	.byte	0xd
-	.4byte	0x1d3
-	.byte	0x7
+	.4byte	0x37d
+	.byte	0x8
 	.ascii	"vu8\000"
 
 	.byte	0x3
 	.byte	0xf
-	.4byte	0x472
+	.4byte	0x61c
+	.byte	0x9
+	.4byte	0x5bb
 	.byte	0x8
-	.4byte	0x411
-	.byte	0x7
 	.ascii	"vu16\000"
 
 	.byte	0x3
 	.byte	0x10
-	.4byte	0x483
+	.4byte	0x62d
+	.byte	0x9
+	.4byte	0x5c5
 	.byte	0x8
-	.4byte	0x41b
-	.byte	0x7
 	.ascii	"vu32\000"
 
 	.byte	0x3
 	.byte	0x11
-	.4byte	0x494
+	.4byte	0x63e
+	.byte	0x9
+	.4byte	0x5d0
 	.byte	0x8
-	.4byte	0x426
-	.byte	0x7
 	.ascii	"vu64\000"
 
 	.byte	0x3
 	.byte	0x12
-	.4byte	0x4a5
+	.4byte	0x64f
+	.byte	0x9
+	.4byte	0x5db
 	.byte	0x8
-	.4byte	0x431
-	.byte	0x7
 	.ascii	"vs8\000"
 
 	.byte	0x3
 	.byte	0x13
-	.4byte	0x4b5
+	.4byte	0x65f
+	.byte	0x9
+	.4byte	0x5e6
 	.byte	0x8
-	.4byte	0x43c
-	.byte	0x7
 	.ascii	"vs16\000"
 
 	.byte	0x3
 	.byte	0x14
-	.4byte	0x4c6
+	.4byte	0x670
+	.byte	0x9
+	.4byte	0x5f0
 	.byte	0x8
-	.4byte	0x446
-	.byte	0x7
 	.ascii	"vs32\000"
 
 	.byte	0x3
 	.byte	0x15
-	.4byte	0x4d7
+	.4byte	0x681
+	.byte	0x9
+	.4byte	0x5fb
 	.byte	0x8
-	.4byte	0x451
-	.byte	0x7
 	.ascii	"vs64\000"
 
 	.byte	0x3
 	.byte	0x16
-	.4byte	0x4e8
+	.4byte	0x692
+	.byte	0x9
+	.4byte	0x606
 	.byte	0x8
-	.4byte	0x45c
-	.byte	0x7
 	.ascii	"f32\000"
 
 	.byte	0x3
 	.byte	0x18
-	.4byte	0x4f8
+	.4byte	0x6a2
 	.byte	0x4
 	.ascii	"float\000"
 
 	.byte	0x4
 	.byte	0x4
-	.byte	0x7
+	.byte	0x8
 	.ascii	"f64\000"
 
 	.byte	0x3
 	.byte	0x19
-	.4byte	0x50c
+	.4byte	0x6b6
 	.byte	0x4
 	.ascii	"double\000"
 
 	.byte	0x8
 	.byte	0x4
-	.byte	0x7
+	.byte	0x8
 	.ascii	"bool8\000"
 
 	.byte	0x3
 	.byte	0x1b
-	.4byte	0x411
-	.byte	0x7
+	.4byte	0x5bb
+	.byte	0x8
 	.ascii	"bool16\000"
 
 	.byte	0x3
 	.byte	0x1c
-	.4byte	0x41b
-	.byte	0x7
+	.4byte	0x5c5
+	.byte	0x8
 	.ascii	"bool32\000"
 
 	.byte	0x3
 	.byte	0x1d
-	.4byte	0x426
-	.byte	0x7
+	.4byte	0x5d0
+	.byte	0x8
 	.ascii	"ptrdiff_t\000"
 
 	.byte	0x4
 	.byte	0x6
-	.4byte	0x550
+	.4byte	0x6fa
 	.byte	0x4
 	.ascii	"long int\000"
 
 	.byte	0x4
 	.byte	0x5
-	.byte	0x7
+	.byte	0x8
 	.ascii	"size_t\000"
 
 	.byte	0x4
 	.byte	0xa
-	.4byte	0x56a
+	.4byte	0x714
 	.byte	0x4
 	.ascii	"long unsigned int\000"
 
 	.byte	0x4
 	.byte	0x7
-	.byte	0x7
+	.byte	0x8
 	.ascii	"wchar_t\000"
 
 	.byte	0x4
 	.byte	0x11
 	.4byte	0x97
-	.byte	0x9
+	.byte	0xa
 	.ascii	"ProcCmd\000"
 
 	.byte	0x1
-	.byte	0x7
+	.byte	0x8
 	.ascii	"ProcPtr\000"
 
 	.byte	0x5
 	.byte	0x7
-	.4byte	0x5a7
-	.byte	0xa
+	.4byte	0x751
+	.byte	0xb
 	.byte	0x4
-	.byte	0x7
+	.byte	0x8
 	.ascii	"ProcFunc\000"
 
 	.byte	0x5
 	.byte	0x8
-	.4byte	0x5b9
-	.byte	0xb
-	.byte	0x4
-	.4byte	0x5bf
+	.4byte	0x763
 	.byte	0xc
-	.4byte	0x5cb
-	.byte	0x1
+	.byte	0x4
+	.4byte	0x769
 	.byte	0xd
-	.4byte	0x598
-	.byte	0x0
+	.4byte	0x775
+	.byte	0x1
 	.byte	0xe
-	.4byte	0x67a
+	.4byte	0x742
+	.byte	0x0
+	.byte	0xf
+	.4byte	0x824
 	.ascii	"Unk_0201E450\000"
 
 	.2byte	0x4b8c
 	.byte	0x6
 	.byte	0x1f
-	.byte	0xf
+	.byte	0x10
 	.ascii	"sizeX\000"
 
 	.byte	0x6
 	.byte	0x20
-	.4byte	0x41b
+	.4byte	0x5c5
 	.byte	0x2
 	.byte	0x23
 	.byte	0x0
-	.byte	0xf
+	.byte	0x10
 	.ascii	"sizeY\000"
 
 	.byte	0x6
 	.byte	0x21
-	.4byte	0x41b
+	.4byte	0x5c5
 	.byte	0x2
 	.byte	0x23
 	.byte	0x2
-	.byte	0xf
+	.byte	0x10
 	.ascii	"_pad_0x0004\000"
 
 	.byte	0x6
 	.byte	0x22
-	.4byte	0x67a
+	.4byte	0x824
 	.byte	0x2
 	.byte	0x23
 	.byte	0x4
-	.byte	0xf
+	.byte	0x10
 	.ascii	"unkMap_0A22\000"
 
 	.byte	0x6
 	.byte	0x23
-	.4byte	0x687
+	.4byte	0x831
 	.byte	0x3
 	.byte	0x23
 	.byte	0xa2,0x14
-	.byte	0xf
+	.byte	0x10
 	.ascii	"terrainMap_1432\000"
 
 	.byte	0x6
 	.byte	0x24
-	.4byte	0x694
+	.4byte	0x83e
 	.byte	0x3
 	.byte	0x23
 	.byte	0xb2,0x28
-	.byte	0xf
+	.byte	0x10
 	.ascii	"_pad_0x193a\000"
 
 	.byte	0x6
 	.byte	0x25
-	.4byte	0x6a1
+	.4byte	0x84b
 	.byte	0x3
 	.byte	0x23
 	.byte	0xba,0x32
-	.byte	0xf
+	.byte	0x10
 	.ascii	"tileMap_417A\000"
 
 	.byte	0x6
 	.byte	0x26
-	.4byte	0x687
+	.4byte	0x831
 	.byte	0x4
 	.byte	0x23
 	.byte	0xfa,0x82,0x1
 	.byte	0x0
-	.byte	0x10
-	.4byte	0x687
-	.4byte	0x202
 	.byte	0x11
+	.4byte	0x831
+	.4byte	0x3ac
+	.byte	0x12
 	.2byte	0xa1d
 	.byte	0x0
-	.byte	0x10
-	.4byte	0x694
-	.4byte	0x41b
 	.byte	0x11
+	.4byte	0x83e
+	.4byte	0x5c5
+	.byte	0x12
 	.2byte	0x507
 	.byte	0x0
-	.byte	0x10
-	.4byte	0x6a1
-	.4byte	0x411
 	.byte	0x11
+	.4byte	0x84b
+	.4byte	0x5bb
+	.byte	0x12
 	.2byte	0x507
 	.byte	0x0
-	.byte	0x10
-	.4byte	0x6ae
-	.4byte	0x202
 	.byte	0x11
+	.4byte	0x858
+	.4byte	0x3ac
+	.byte	0x12
 	.2byte	0x283f
 	.byte	0x0
-	.byte	0x12
+	.byte	0x13
 	.ascii	"gUnknown_08499590\000"
 
 	.byte	0x6
 	.byte	0x29
-	.4byte	0x6c9
+	.4byte	0x873
 	.byte	0x1
 	.byte	0x1
-	.byte	0xb
+	.byte	0xc
 	.byte	0x4
-	.4byte	0x5cb
+	.4byte	0x775
 	.byte	0x0
 
 	.section	.debug_pubnames
-	.4byte	0x64
+	.4byte	0xd5
 	.2byte	0x2
 	.4byte	.debug_info
-	.4byte	0x6d0
+	.4byte	0x87a
 	.4byte	0x4e
 	.ascii	"MakeTileSimple\000"
 
@@ -1487,6 +2744,21 @@ GetDesignRoomOption:
 
 	.4byte	0x153
 	.ascii	"GetDesignRoomOption\000"
+
+	.4byte	0x18b
+	.ascii	"sub_080012DC\000"
+
+	.4byte	0x1d1
+	.ascii	"IsTerrainLand\000"
+
+	.4byte	0x239
+	.ascii	"IsTerrainWater\000"
+
+	.4byte	0x285
+	.ascii	"IsTerrainWaterOrRiver\000"
+
+	.4byte	0x2d8
+	.ascii	"GetMostFittingTile_unkMapA22\000"
 
 	.4byte	0x0
 

@@ -1,429 +1,8 @@
 	.include "macro.inc"
 	.syntax unified
-
-
-	thumb_func_start sub_080012DC
-sub_080012DC: @ 0x080012DC
-	movs r2, #0
-	subs r0, #6
-	cmp r0, #0x88
-	bls _080012E6
-	b _080015E0
-_080012E6:
-	lsls r0, r0, #2
-	ldr r1, _080012F0 @ =_080012F4
-	adds r0, r0, r1
-	ldr r0, [r0]
-	mov pc, r0
-	.align 2, 0
-_080012F0: .4byte _080012F4
-_080012F4: @ jump table
-	.4byte _08001518 @ case 0
-	.4byte _080015E0 @ case 1
-	.4byte _0800153E @ case 2
-	.4byte _080015E0 @ case 3
-	.4byte _08001562 @ case 4
-	.4byte _0800158C @ case 5
-	.4byte _080015E0 @ case 6
-	.4byte _080015E0 @ case 7
-	.4byte _080015B2 @ case 8
-	.4byte _080015E0 @ case 9
-	.4byte _080015E0 @ case 10
-	.4byte _080015DC @ case 11
-	.4byte _080015E0 @ case 12
-	.4byte _080015E0 @ case 13
-	.4byte _080015E0 @ case 14
-	.4byte _080015E0 @ case 15
-	.4byte _080015E0 @ case 16
-	.4byte _080015E0 @ case 17
-	.4byte _080015E0 @ case 18
-	.4byte _080015E0 @ case 19
-	.4byte _080015E0 @ case 20
-	.4byte _080015E0 @ case 21
-	.4byte _080015E0 @ case 22
-	.4byte _080015E0 @ case 23
-	.4byte _080015E0 @ case 24
-	.4byte _080015E0 @ case 25
-	.4byte _080015E0 @ case 26
-	.4byte _080015E0 @ case 27
-	.4byte _080015E0 @ case 28
-	.4byte _080015E0 @ case 29
-	.4byte _080015E0 @ case 30
-	.4byte _080015E0 @ case 31
-	.4byte _0800151E @ case 32
-	.4byte _080015E0 @ case 33
-	.4byte _08001544 @ case 34
-	.4byte _080015E0 @ case 35
-	.4byte _0800156C @ case 36
-	.4byte _08001592 @ case 37
-	.4byte _080015E0 @ case 38
-	.4byte _080015E0 @ case 39
-	.4byte _080015BC @ case 40
-	.4byte _080015E0 @ case 41
-	.4byte _080015E0 @ case 42
-	.4byte _080015E0 @ case 43
-	.4byte _080015E0 @ case 44
-	.4byte _080015E0 @ case 45
-	.4byte _080015E0 @ case 46
-	.4byte _080015E0 @ case 47
-	.4byte _080015E0 @ case 48
-	.4byte _080015E0 @ case 49
-	.4byte _080015E0 @ case 50
-	.4byte _080015E0 @ case 51
-	.4byte _080015E0 @ case 52
-	.4byte _080015E0 @ case 53
-	.4byte _080015E0 @ case 54
-	.4byte _080015E0 @ case 55
-	.4byte _080015E0 @ case 56
-	.4byte _080015E0 @ case 57
-	.4byte _080015E0 @ case 58
-	.4byte _080015E0 @ case 59
-	.4byte _080015E0 @ case 60
-	.4byte _080015E0 @ case 61
-	.4byte _080015E0 @ case 62
-	.4byte _080015E0 @ case 63
-	.4byte _08001528 @ case 64
-	.4byte _080015E0 @ case 65
-	.4byte _0800154C @ case 66
-	.4byte _080015E0 @ case 67
-	.4byte _08001572 @ case 68
-	.4byte _0800159C @ case 69
-	.4byte _080015E0 @ case 70
-	.4byte _080015E0 @ case 71
-	.4byte _080015C2 @ case 72
-	.4byte _080015E0 @ case 73
-	.4byte _080015E0 @ case 74
-	.4byte _080015E0 @ case 75
-	.4byte _080015E0 @ case 76
-	.4byte _080015E0 @ case 77
-	.4byte _080015E0 @ case 78
-	.4byte _080015E0 @ case 79
-	.4byte _080015E0 @ case 80
-	.4byte _080015E0 @ case 81
-	.4byte _080015E0 @ case 82
-	.4byte _080015E0 @ case 83
-	.4byte _080015E0 @ case 84
-	.4byte _080015E0 @ case 85
-	.4byte _080015E0 @ case 86
-	.4byte _080015E0 @ case 87
-	.4byte _080015E0 @ case 88
-	.4byte _080015E0 @ case 89
-	.4byte _080015E0 @ case 90
-	.4byte _080015E0 @ case 91
-	.4byte _080015E0 @ case 92
-	.4byte _080015E0 @ case 93
-	.4byte _080015E0 @ case 94
-	.4byte _080015E0 @ case 95
-	.4byte _0800152E @ case 96
-	.4byte _080015E0 @ case 97
-	.4byte _08001552 @ case 98
-	.4byte _080015E0 @ case 99
-	.4byte _0800157C @ case 100
-	.4byte _080015A2 @ case 101
-	.4byte _080015E0 @ case 102
-	.4byte _080015E0 @ case 103
-	.4byte _080015CC @ case 104
-	.4byte _080015E0 @ case 105
-	.4byte _080015E0 @ case 106
-	.4byte _080015E0 @ case 107
-	.4byte _080015E0 @ case 108
-	.4byte _080015E0 @ case 109
-	.4byte _080015E0 @ case 110
-	.4byte _080015E0 @ case 111
-	.4byte _080015E0 @ case 112
-	.4byte _080015E0 @ case 113
-	.4byte _080015E0 @ case 114
-	.4byte _080015E0 @ case 115
-	.4byte _080015E0 @ case 116
-	.4byte _080015E0 @ case 117
-	.4byte _080015E0 @ case 118
-	.4byte _080015E0 @ case 119
-	.4byte _080015E0 @ case 120
-	.4byte _080015E0 @ case 121
-	.4byte _080015E0 @ case 122
-	.4byte _080015E0 @ case 123
-	.4byte _080015E0 @ case 124
-	.4byte _080015E0 @ case 125
-	.4byte _080015E0 @ case 126
-	.4byte _080015E0 @ case 127
-	.4byte _08001538 @ case 128
-	.4byte _080015E0 @ case 129
-	.4byte _0800155C @ case 130
-	.4byte _080015E0 @ case 131
-	.4byte _08001582 @ case 132
-	.4byte _080015AC @ case 133
-	.4byte _080015E0 @ case 134
-	.4byte _080015E0 @ case 135
-	.4byte _080015D2 @ case 136
-_08001518:
-	movs r2, #0xe1
-	lsls r2, r2, #1
-	b _080015E0
-_0800151E:
-	ldr r2, _08001524 @ =0x000001C7
-	b _080015E0
-	.align 2, 0
-_08001524: .4byte 0x000001C7
-_08001528:
-	movs r2, #0xe6
-	lsls r2, r2, #1
-	b _080015E0
-_0800152E:
-	ldr r2, _08001534 @ =0x000001D1
-	b _080015E0
-	.align 2, 0
-_08001534: .4byte 0x000001D1
-_08001538:
-	movs r2, #0xeb
-	lsls r2, r2, #1
-	b _080015E0
-_0800153E:
-	movs r2, #0xe0
-	lsls r2, r2, #1
-	b _080015E0
-_08001544:
-	ldr r2, _08001548 @ =0x000001C5
-	b _080015E0
-	.align 2, 0
-_08001548: .4byte 0x000001C5
-_0800154C:
-	movs r2, #0xe5
-	lsls r2, r2, #1
-	b _080015E0
-_08001552:
-	ldr r2, _08001558 @ =0x000001CF
-	b _080015E0
-	.align 2, 0
-_08001558: .4byte 0x000001CF
-_0800155C:
-	movs r2, #0xea
-	lsls r2, r2, #1
-	b _080015E0
-_08001562:
-	ldr r2, _08001568 @ =0x000001C3
-	b _080015E0
-	.align 2, 0
-_08001568: .4byte 0x000001C3
-_0800156C:
-	movs r2, #0xe4
-	lsls r2, r2, #1
-	b _080015E0
-_08001572:
-	ldr r2, _08001578 @ =0x000001CD
-	b _080015E0
-	.align 2, 0
-_08001578: .4byte 0x000001CD
-_0800157C:
-	movs r2, #0xe9
-	lsls r2, r2, #1
-	b _080015E0
-_08001582:
-	ldr r2, _08001588 @ =0x000001D7
-	b _080015E0
-	.align 2, 0
-_08001588: .4byte 0x000001D7
-_0800158C:
-	movs r2, #0xe2
-	lsls r2, r2, #1
-	b _080015E0
-_08001592:
-	ldr r2, _08001598 @ =0x000001C9
-	b _080015E0
-	.align 2, 0
-_08001598: .4byte 0x000001C9
-_0800159C:
-	movs r2, #0xe7
-	lsls r2, r2, #1
-	b _080015E0
-_080015A2:
-	ldr r2, _080015A8 @ =0x000001D3
-	b _080015E0
-	.align 2, 0
-_080015A8: .4byte 0x000001D3
-_080015AC:
-	movs r2, #0xec
-	lsls r2, r2, #1
-	b _080015E0
-_080015B2:
-	ldr r2, _080015B8 @ =0x000001C1
-	b _080015E0
-	.align 2, 0
-_080015B8: .4byte 0x000001C1
-_080015BC:
-	movs r2, #0xe3
-	lsls r2, r2, #1
-	b _080015E0
-_080015C2:
-	ldr r2, _080015C8 @ =0x000001CB
-	b _080015E0
-	.align 2, 0
-_080015C8: .4byte 0x000001CB
-_080015CC:
-	movs r2, #0xe8
-	lsls r2, r2, #1
-	b _080015E0
-_080015D2:
-	ldr r2, _080015D8 @ =0x000001D5
-	b _080015E0
-	.align 2, 0
-_080015D8: .4byte 0x000001D5
-_080015DC:
-	movs r2, #0xc0
-	lsls r2, r2, #1
-_080015E0:
-	adds r0, r2, #0
-	bx lr
-
-	thumb_func_start sub_080015E4
-sub_080015E4: @ 0x080015E4
-	push {r4, r5, r6, r7, lr}
-	adds r5, r0, #0
-	adds r6, r1, #0
-	ldr r0, _08001614 @ =gUnknown_08499590
-	ldr r1, [r0]
-	lsls r2, r6, #1
-	ldr r3, _08001618 @ =0x0000417A
-	adds r0, r1, r3
-	adds r0, r0, r2
-	ldrh r0, [r0]
-	adds r0, r0, r5
-	ldr r2, _0800161C @ =0x00001432
-	adds r1, r1, r2
-	adds r1, r1, r0
-	ldrb r4, [r1]
-	cmp r4, #2
-	bne _08001620
-	adds r0, r5, #0
-	adds r1, r6, #0
-	bl sub_080094EC
-	adds r7, r0, #0
-	b _08001622
-	.align 2, 0
-_08001614: .4byte gUnknown_08499590
-_08001618: .4byte 0x0000417A
-_0800161C: .4byte 0x00001432
-_08001620:
-	movs r7, #0
-_08001622:
-	adds r0, r5, #0
-	adds r1, r6, #0
-	bl sub_08008C34
-	movs r1, #0
-	cmp r4, #7
-	beq _08001642
-	cmp r4, #0xd
-	beq _08001642
-	cmp r4, #0x13
-	beq _08001642
-	cmp r0, #0
-	bne _08001642
-	cmp r7, #0
-	bne _08001642
-	movs r1, #1
-_08001642:
-	adds r0, r1, #0
-	pop {r4, r5, r6, r7}
-	pop {r1}
-	bx r1
-	.align 2, 0
-
-	thumb_func_start sub_0800164C
-sub_0800164C: @ 0x0800164C
-	push {r4, lr}
-	ldr r2, _08001680 @ =gUnknown_08499590
-	ldr r3, [r2]
-	lsls r1, r1, #1
-	ldr r4, _08001684 @ =0x0000417A
-	adds r2, r3, r4
-	adds r2, r2, r1
-	ldrh r1, [r2]
-	adds r1, r1, r0
-	ldr r0, _08001688 @ =0x00001432
-	adds r3, r3, r0
-	adds r3, r3, r1
-	ldrb r2, [r3]
-	movs r0, #0
-	cmp r2, #7
-	beq _0800167A
-	cmp r2, #0xd
-	beq _0800167A
-	movs r1, #0x13
-	eors r1, r2
-	rsbs r0, r1, #0
-	orrs r0, r1
-	lsrs r0, r0, #0x1f
-_0800167A:
-	pop {r4}
-	pop {r1}
-	bx r1
-	.align 2, 0
-_08001680: .4byte gUnknown_08499590
-_08001684: .4byte 0x0000417A
-_08001688: .4byte 0x00001432
-
-	thumb_func_start sub_0800168C
-sub_0800168C: @ 0x0800168C
-	push {r4, lr}
-	ldr r2, _080016C4 @ =gUnknown_08499590
-	ldr r3, [r2]
-	lsls r1, r1, #1
-	ldr r4, _080016C8 @ =0x0000417A
-	adds r2, r3, r4
-	adds r2, r2, r1
-	ldrh r1, [r2]
-	adds r1, r1, r0
-	ldr r0, _080016CC @ =0x00001432
-	adds r3, r3, r0
-	adds r3, r3, r1
-	ldrb r2, [r3]
-	movs r0, #0
-	cmp r2, #7
-	beq _080016BE
-	cmp r2, #0xd
-	beq _080016BE
-	cmp r2, #0x13
-	beq _080016BE
-	movs r1, #2
-	eors r1, r2
-	rsbs r0, r1, #0
-	orrs r0, r1
-	lsrs r0, r0, #0x1f
-_080016BE:
-	pop {r4}
-	pop {r1}
-	bx r1
-	.align 2, 0
-_080016C4: .4byte gUnknown_08499590
-_080016C8: .4byte 0x0000417A
-_080016CC: .4byte 0x00001432
-
-	thumb_func_start sub_080016D0
-sub_080016D0: @ 0x080016D0
-	push {r4, r5, lr}
-	ldr r2, _080016F8 @ =gUnknown_08499590
-	ldr r3, [r2]
-	lsls r4, r1, #1
-	ldr r5, _080016FC @ =0x0000417A
-	adds r2, r3, r5
-	adds r2, r2, r4
-	ldrh r2, [r2]
-	adds r2, r2, r0
-	lsls r2, r2, #1
-	ldr r4, _08001700 @ =0x00000A22
-	adds r3, r3, r4
-	adds r3, r3, r2
-	ldrh r2, [r3]
-	bl sub_08001704
-	pop {r4, r5}
-	pop {r1}
-	bx r1
-	.align 2, 0
-_080016F8: .4byte gUnknown_08499590
-_080016FC: .4byte 0x0000417A
-_08001700: .4byte 0x00000A22
-
-	thumb_func_start sub_08001704
-sub_08001704: @ 0x08001704
+    
+	thumb_func_start GetMostFittingTile
+GetMostFittingTile: @ 0x08001704
 	push {r4, r5, r6, r7, lr}
 	adds r6, r0, #0
 	adds r7, r1, #0
@@ -13184,7 +12763,7 @@ sub_08007D70: @ 0x08007D70
 	push {r4, r5, lr}
 	adds r4, r0, #0
 	adds r5, r1, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -13198,7 +12777,7 @@ sub_08007D70: @ 0x08007D70
 	adds r4, #1
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -13246,12 +12825,12 @@ sub_08007DD0: @ 0x08007DD0
 	ble _08007DF6
 	subs r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r6, r0, #8
 _08007DF6:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #7
 	orrs r6, r0
 	mov r1, sb
@@ -13263,7 +12842,7 @@ _08007DF6:
 	bge _08007E1C
 	adds r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #6
 	orrs r6, r0
 _08007E1C:
@@ -13271,13 +12850,13 @@ _08007E1C:
 	ble _08007E2C
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #5
 	orrs r6, r0
 _08007E2C:
 	adds r0, r4, #0
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #4
 	orrs r6, r0
 	mov r2, sb
@@ -13290,7 +12869,7 @@ _08007E2C:
 	bge _08007E54
 	adds r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #3
 	orrs r6, r0
 _08007E54:
@@ -13305,13 +12884,13 @@ _08007E54:
 	ble _08007E72
 	subs r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #2
 	orrs r6, r0
 _08007E72:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #1
 	orrs r6, r0
 	mov r1, r8
@@ -13322,7 +12901,7 @@ _08007E72:
 	bge _08007E94
 	adds r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	orrs r6, r0
 _08007E94:
 	mov r2, sb
@@ -13653,7 +13232,7 @@ _0800812A:
 _08008142:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -13684,7 +13263,7 @@ _0800816A:
 	bl MakeTileSimple
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -13739,7 +13318,7 @@ sub_080081E0: @ 0x080081E0
 	subs r7, r4, #1
 	adds r0, r7, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800822E
 	mov r1, sb
@@ -13763,7 +13342,7 @@ sub_080081E0: @ 0x080081E0
 _0800822E:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800825E
 	mov r3, sb
@@ -13795,7 +13374,7 @@ _0800825E:
 	adds r7, r4, #1
 	adds r0, r7, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080082A0
 	mov r0, r8
@@ -13821,7 +13400,7 @@ _080082A0:
 	subs r5, r4, #1
 	adds r0, r5, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080082D8
 	mov r3, sb
@@ -13853,7 +13432,7 @@ _080082D8:
 	adds r5, r4, #1
 	adds r0, r5, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _08008316
 	ldr r1, [r7]
@@ -13886,7 +13465,7 @@ _08008316:
 	subs r6, r4, #1
 	adds r0, r6, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800835A
 	ldr r1, [r7]
@@ -13908,7 +13487,7 @@ _08008316:
 _0800835A:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800838A
 	mov r3, sb
@@ -13939,7 +13518,7 @@ _0800838A:
 	adds r6, r4, #1
 	adds r0, r6, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080083C8
 	ldr r1, [r7]
@@ -13988,7 +13567,7 @@ sub_080083E0: @ 0x080083E0
 	subs r7, r4, #1
 	adds r0, r7, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800842E
 	mov r1, sb
@@ -14012,7 +13591,7 @@ sub_080083E0: @ 0x080083E0
 _0800842E:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800845E
 	mov r3, sb
@@ -14044,7 +13623,7 @@ _0800845E:
 	adds r7, r4, #1
 	adds r0, r7, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080084A0
 	mov r0, r8
@@ -14070,7 +13649,7 @@ _080084A0:
 	subs r5, r4, #1
 	adds r0, r5, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080084D8
 	mov r3, sb
@@ -14102,7 +13681,7 @@ _080084D8:
 	adds r5, r4, #1
 	adds r0, r5, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _08008516
 	ldr r1, [r7]
@@ -14135,7 +13714,7 @@ _08008516:
 	subs r6, r4, #1
 	adds r0, r6, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800855A
 	ldr r1, [r7]
@@ -14157,7 +13736,7 @@ _08008516:
 _0800855A:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800858A
 	mov r3, sb
@@ -14188,7 +13767,7 @@ _0800858A:
 	adds r6, r4, #1
 	adds r0, r6, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080085C8
 	ldr r1, [r7]
@@ -15101,14 +14680,14 @@ sub_08008D14: @ 0x08008D14
 	cmp r4, #0
 	ble _08008D28
 	subs r1, r4, #1
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r6, r0, #3
 _08008D28:
 	cmp r5, #0
 	ble _08008D38
 	subs r0, r5, #1
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #2
 	orrs r6, r0
 _08008D38:
@@ -15120,7 +14699,7 @@ _08008D38:
 	bge _08008D50
 	adds r0, r5, #1
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #1
 	orrs r6, r0
 _08008D50:
@@ -15131,7 +14710,7 @@ _08008D50:
 	bge _08008D64
 	adds r1, r4, #1
 	adds r0, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	orrs r6, r0
 _08008D64:
 	adds r0, r6, #0
@@ -16143,7 +15722,7 @@ _08009598:
 	subs r4, r6, #1
 	adds r0, r5, #0
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	mov r8, r4
 	cmp r0, #0
 	beq _080095AA
@@ -16158,14 +15737,14 @@ _080095B0:
 	subs r4, r5, #1
 	adds r0, r4, #0
 	mov r1, r8
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080095C4
 	b _08009708
 _080095C4:
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080095D2
 	movs r7, #1
@@ -16186,7 +15765,7 @@ _080095E8:
 	adds r4, r5, #1
 	adds r0, r4, #0
 	mov r1, r8
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080095F8
 	b _08009708
@@ -16204,7 +15783,7 @@ _08009608:
 	adds r4, r5, #1
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	mov r8, r4
 	cmp r0, #0
 	beq _0800961A
@@ -16217,12 +15796,12 @@ _0800961A:
 	subs r4, r6, #1
 	mov r0, r8
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	bne _08009708
 	adds r0, r5, #0
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080096DC
 	b _08009708
@@ -16234,7 +15813,7 @@ _0800963E:
 	adds r4, r6, #1
 	adds r0, r5, #0
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	mov r8, r4
 	cmp r0, #0
 	beq _08009658
@@ -16247,12 +15826,12 @@ _08009658:
 	subs r4, r5, #1
 	adds r0, r4, #0
 	mov r1, r8
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	bne _08009708
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800967C
 	movs r7, #1
@@ -16269,7 +15848,7 @@ _0800967C:
 	adds r4, r5, #1
 	adds r0, r4, #0
 	mov r1, r8
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	bne _08009708
 	adds r0, r4, #0
@@ -16281,7 +15860,7 @@ _080096A2:
 	subs r4, r5, #1
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	mov r8, r4
 	cmp r0, #0
 	beq _080096B8
@@ -16294,12 +15873,12 @@ _080096B8:
 	subs r4, r6, #1
 	mov r0, r8
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	bne _08009708
 	adds r0, r5, #0
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _080096DC
 	movs r7, #1
@@ -16316,13 +15895,13 @@ _080096DC:
 	adds r4, r6, #1
 	mov r0, r8
 	adds r1, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	bne _08009708
 	adds r0, r5, #0
 	adds r1, r4, #0
 _08009700:
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	beq _0800970A
 _08009708:
@@ -17616,7 +17195,7 @@ sub_0800A098: @ 0x0800A098
 	subs r6, r4, #1
 	adds r0, r6, #0
 	adds r1, r5, #0
-	bl sub_0800164C
+	bl IsTerrainWater
 	cmp r0, #0
 	bne _0800A146
 	mov r0, r8
@@ -17675,7 +17254,7 @@ _0800A146:
 	adds r6, r4, #1
 	adds r0, r6, #0
 	adds r1, r5, #0
-	bl sub_0800164C
+	bl IsTerrainWater
 	cmp r0, #0
 	bne _0800A1C6
 	ldr r1, [r7]
@@ -17734,7 +17313,7 @@ _0800A1C6:
 	subs r6, r5, #1
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_0800164C
+	bl IsTerrainWater
 	cmp r0, #0
 	bne _0800A246
 	ldr r7, _0800A2E8 @ =gUnknown_08499590
@@ -17795,7 +17374,7 @@ _0800A246:
 	adds r6, r5, #1
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_0800164C
+	bl IsTerrainWater
 	cmp r0, #0
 	bne _0800A2C2
 	ldr r1, [r7]
@@ -18317,7 +17896,7 @@ sub_0800A6AC: @ 0x0800A6AC
 	bne _0800A6CA
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	cmp r0, #0
 	bne _0800A6D0
 _0800A6CA:
@@ -18335,12 +17914,12 @@ _0800A6D0:
 	ble _0800A6EA
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r5, r0, #8
 _0800A6EA:
 	adds r0, r4, #0
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #7
 	orrs r5, r0
 	mov r1, r8
@@ -18352,7 +17931,7 @@ _0800A6EA:
 	bge _0800A710
 	adds r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #6
 	orrs r5, r0
 _0800A710:
@@ -18360,7 +17939,7 @@ _0800A710:
 	ble _0800A720
 	subs r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #5
 	orrs r5, r0
 _0800A720:
@@ -18375,7 +17954,7 @@ _0800A720:
 	bge _0800A73E
 	adds r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #3
 	orrs r5, r0
 _0800A73E:
@@ -18389,13 +17968,13 @@ _0800A73E:
 	ble _0800A75A
 	subs r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #2
 	orrs r5, r0
 _0800A75A:
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #1
 	orrs r5, r0
 	ldr r0, [r7]
@@ -18405,7 +17984,7 @@ _0800A75A:
 	bge _0800A77A
 	adds r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	orrs r5, r0
 _0800A77A:
 	ldr r0, _0800A794 @ =gUnknown_08486BC4
@@ -18430,7 +18009,7 @@ sub_0800A798: @ 0x0800A798
 	push {r7}
 	adds r4, r0, #0
 	adds r6, r1, #0
-	bl sub_0800164C
+	bl IsTerrainWater
 	cmp r0, #0
 	bne _0800A7B0
 	movs r0, #1
@@ -18447,12 +18026,12 @@ _0800A7B0:
 	ble _0800A7CA
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r5, r0, #8
 _0800A7CA:
 	adds r0, r4, #0
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #7
 	orrs r5, r0
 	mov r1, r8
@@ -18464,7 +18043,7 @@ _0800A7CA:
 	bge _0800A7F0
 	adds r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #6
 	orrs r5, r0
 _0800A7F0:
@@ -18472,7 +18051,7 @@ _0800A7F0:
 	ble _0800A800
 	subs r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #5
 	orrs r5, r0
 _0800A800:
@@ -18493,7 +18072,7 @@ _0800A810:
 	bge _0800A82A
 	adds r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #3
 	orrs r5, r0
 _0800A82A:
@@ -18507,13 +18086,13 @@ _0800A82A:
 	ble _0800A846
 	subs r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #2
 	orrs r5, r0
 _0800A846:
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #1
 	orrs r5, r0
 	ldr r0, [r7]
@@ -18523,7 +18102,7 @@ _0800A846:
 	bge _0800A866
 	adds r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	orrs r5, r0
 _0800A866:
 	ldr r0, _0800A880 @ =gUnknown_08486BC4
@@ -18558,12 +18137,12 @@ sub_0800A884: @ 0x0800A884
 	ble _0800A8A8
 	subs r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r5, r0, #8
 _0800A8A8:
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #7
 	orrs r5, r0
 	mov r1, r8
@@ -18575,7 +18154,7 @@ _0800A8A8:
 	bge _0800A8CE
 	adds r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #6
 	orrs r5, r0
 _0800A8CE:
@@ -18583,7 +18162,7 @@ _0800A8CE:
 	ble _0800A8DE
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #5
 	orrs r5, r0
 _0800A8DE:
@@ -18599,7 +18178,7 @@ _0800A8DE:
 	bge _0800A8FE
 	adds r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #3
 	orrs r5, r0
 _0800A8FE:
@@ -18614,13 +18193,13 @@ _0800A8FE:
 	ble _0800A91C
 	subs r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #2
 	orrs r5, r0
 _0800A91C:
 	adds r0, r4, #0
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #1
 	orrs r5, r0
 	mov r2, r8
@@ -18631,7 +18210,7 @@ _0800A91C:
 	bge _0800A93E
 	adds r0, r4, #1
 	adds r1, r6, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	orrs r5, r0
 _0800A93E:
 	ldr r0, _0800A958 @ =gUnknown_084867C4
@@ -18787,12 +18366,12 @@ _0800AA58:
 	ble _0800AA70
 	subs r1, r5, #1
 	adds r0, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r0, #0
 _0800AA70:
 	adds r0, r7, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 	mov r1, sb
 	ldr r0, [r1]
@@ -18803,14 +18382,14 @@ _0800AA70:
 	bge _0800AA92
 	adds r1, r5, #1
 	adds r0, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800AA92:
 	cmp r5, #0
 	ble _0800AAA0
 	subs r1, r5, #1
 	adds r0, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800AAA0:
 	mov r2, sb
@@ -18842,12 +18421,12 @@ _0800AABC:
 	ble _0800AADE
 	subs r1, r5, #1
 	adds r0, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r0, #0
 _0800AADE:
 	adds r0, r7, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 	mov r1, r8
 	ldr r0, [r1]
@@ -18857,14 +18436,14 @@ _0800AADE:
 	bge _0800AAFE
 	adds r1, r5, #1
 	adds r0, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800AAFE:
 	cmp r5, #0
 	ble _0800AB0C
 	subs r1, r5, #1
 	adds r0, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800AB0C:
 	mov r2, sb
@@ -18889,12 +18468,12 @@ _0800AB24:
 	ble _0800AB3C
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r0, #0
 _0800AB3C:
 	adds r0, r4, #0
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 	mov r1, sb
 	ldr r0, [r1]
@@ -18917,12 +18496,12 @@ _0800AB54:
 	ble _0800AB76
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r0, #0
 _0800AB76:
 	adds r0, r4, #0
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 	mov r1, r8
 	ldr r0, [r1]
@@ -18933,14 +18512,14 @@ _0800AB84:
 	bge _0800AB96
 	adds r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800AB96:
 	cmp r4, #0
 	ble _0800ABA4
 	subs r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800ABA4:
 	mov r2, sb
@@ -18953,7 +18532,7 @@ _0800ABA4:
 	adds r0, r4, #1
 	adds r1, r5, #0
 _0800ABB6:
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800ABBC:
 	adds r0, r6, #0
@@ -19404,7 +18983,7 @@ sub_0800AF74: @ 0x0800AF74
 	push {r4, r5, lr}
 	adds r4, r0, #0
 	adds r5, r1, #0
-	bl sub_0800168C
+	bl IsTerrainWaterOrRiver
 	cmp r0, #0
 	bne _0800AF8C
 	adds r0, r4, #0
@@ -19821,7 +19400,7 @@ _0800B2D0:
 	adds r0, r5, #0
 	adds r1, r6, #0
 	adds r2, r4, #0
-	bl sub_08001704
+	bl GetMostFittingTile
 	adds r4, r0, #0
 	adds r0, r5, #0
 	adds r1, r6, #0
@@ -19898,7 +19477,7 @@ _0800B35E:
 	adds r0, r5, #0
 	adds r1, r6, #0
 	adds r2, r4, #0
-	bl sub_08001704
+	bl GetMostFittingTile
 	adds r4, r0, #0
 	adds r0, r5, #0
 	adds r1, r6, #0
@@ -20158,7 +19737,7 @@ _0800B568:
 	ble _0800B578
 	subs r1, r5, #1
 	adds r0, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r0, #0
 _0800B578:
 	ldr r0, [r7]
@@ -20168,14 +19747,14 @@ _0800B578:
 	bge _0800B58C
 	adds r1, r5, #1
 	adds r0, r4, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800B58C:
 	cmp r4, #0
 	ble _0800B59A
 	subs r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800B59A:
 	ldr r0, [r7]
@@ -20185,7 +19764,7 @@ _0800B59A:
 	bge _0800B5AE
 	adds r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	adds r6, r6, r0
 _0800B5AE:
 	cmp r6, #4
@@ -20267,12 +19846,12 @@ sub_0800B61C: @ 0x0800B61C
 	ble _0800B642
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r6, r0, #8
 _0800B642:
 	adds r0, r4, #0
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #7
 	orrs r6, r0
 	mov r1, sb
@@ -20284,7 +19863,7 @@ _0800B642:
 	bge _0800B668
 	adds r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #6
 	orrs r6, r0
 _0800B668:
@@ -20292,13 +19871,13 @@ _0800B668:
 	ble _0800B678
 	subs r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #5
 	orrs r6, r0
 _0800B678:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #4
 	orrs r6, r0
 	mov r0, sb
@@ -20311,7 +19890,7 @@ _0800B678:
 	bge _0800B6A0
 	adds r0, r4, #1
 	adds r1, r5, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #3
 	orrs r6, r0
 _0800B6A0:
@@ -20326,13 +19905,13 @@ _0800B6A0:
 	ble _0800B6BE
 	subs r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #2
 	orrs r6, r0
 _0800B6BE:
 	adds r0, r4, #0
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	lsls r0, r0, #1
 	orrs r6, r0
 	mov r1, r8
@@ -20343,7 +19922,7 @@ _0800B6BE:
 	bge _0800B6E0
 	adds r0, r4, #1
 	adds r1, r7, #0
-	bl sub_080015E4
+	bl IsTerrainLand
 	orrs r6, r0
 _0800B6E0:
 	ldr r1, _0800B6FC @ =gUnknown_084861C4
@@ -20802,7 +20381,7 @@ _0800BA0C:
 _0800BA12:
 	subs r0, r4, #1
 	subs r1, r5, #1
-	bl sub_080015E4
+	bl IsTerrainLand
 	movs r2, #0x31
 	cmp r0, #0
 	bne _0800BA80
@@ -20814,7 +20393,7 @@ _0800BA22:
 	ble _0800BA38
 	subs r0, r4, #1
 	subs r1, r5, #1
-	bl sub_080015E4
+	bl IsTerrainLand
 	movs r2, #0xd3
 	cmp r0, #0
 	bne _0800BA80
@@ -21725,7 +21304,7 @@ sub_0800C124: @ 0x0800C124
 	push {r7}
 	adds r4, r0, #0
 	adds r5, r1, #0
-	bl sub_0800164C
+	bl IsTerrainWater
 	cmp r0, #0
 	beq _0800C1AC
 	adds r0, r4, #0
@@ -22074,7 +21653,7 @@ _0800C3EC:
 	bl MakeTileSimple
 	adds r0, r6, #0
 	adds r1, r7, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r5, r0, #0
 	adds r0, r6, #0
 	adds r1, r7, #0
@@ -22095,7 +21674,7 @@ _0800C42C:
 	bne _0800C446
 	adds r0, r6, #0
 	adds r1, r7, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r5, r0, #0
 	adds r0, r6, #0
 	adds r1, r7, #0
@@ -23505,7 +23084,7 @@ sub_0800CEF8: @ 0x0800CEF8
 	bge _0800CF1C
 	adds r4, #1
 	adds r0, r4, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -27248,7 +26827,7 @@ sub_0800EBFC: @ 0x0800EBFC
 	bl MakeTileSimple
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -28282,7 +27861,7 @@ _0800F508:
 	bl MakeTileSimple
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl sub_080016D0
+	bl GetMostFittingTile_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0

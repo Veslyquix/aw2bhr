@@ -40,6 +40,12 @@ struct Unk_0201E450 {
 
 extern struct Unk_0201E450 * gUnknown_08499590;
 
+extern void sub_08008BB8(int x, int y);
+extern int sub_080094EC(int x, int y);
+extern int sub_08008C34(int x, int y);
+extern int GetMostFittingTile(int x, int y, u16 tile); 
+
+
 
 
 
