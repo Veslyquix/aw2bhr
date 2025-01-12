@@ -12,7 +12,7 @@ void MakeTileSimple(int x, int y, int tileID) {
   return;
 }
 
-u8 IsTerrainAtCoordsType(int x, int y, int terrainID) {
+int IsTerrainAtCoordsType(int x, int y, int terrainID) {
   int result = 0;
 
   if (x < 0 || y < 0) {
@@ -228,10 +228,155 @@ int IsTerrainWaterOrRiver(int x, int y) {
           (terrain != _River));
 }
 
-u32 GetMostFittingTile_unkMapA22(int x, int y) {
+u32 GetTileWithShadow_unkMapA22(int x, int y) {
   // ...
   u16 unk =
       gUnknown_08499590->unkMap_0A22[gUnknown_08499590->tileMap_417A[y] + x];
 
-  return GetMostFittingTile(x, y, unk); // 17d0
+  return GetTileWithShadow(x, y, unk); // 17d0
+}
+#define tMap_0848591C_size 49
+extern s16 gUnknown_0848591C[tMap_0848591C_size * 2];
+// extern short * gUnknown_0848597e; // accessed as 848591c+0x62
+int GetTileWithShadow(int x, int y, int tile) {
+  int i;
+  s16 *tMapA;
+  s16 *tMapB;
+  tMapA = gUnknown_0848591C;
+  tMapB = &gUnknown_0848591C[tMap_0848591C_size];
+
+  if (x <= 0) {
+    for (i = 0; i < tMap_0848591C_size; ++i) {
+      if (tile == *tMapB) {
+        return (int)*tMapA;
+      }
+      tMapA++;
+      tMapB++;
+    }
+  } else {
+    int y_ = gUnknown_08499590->tileMap_417A[y] - 1;
+    // if these tiles/terrain/something, use shadows?
+    switch (gUnknown_08499590->terrainMap_1432[y_ + x]) {
+    case 3:
+    case 4:
+    case 6:
+    case 8:
+    case 10:
+    case 0xb:
+    case 0xe:
+    case 0x26:
+    case 0x28:
+    case 0x2a:
+    case 0x2b:
+    case 0x2e:
+    case 0x46:
+    case 0x48:
+    case 0x4a:
+    case 0x4b:
+    case 0x4e:
+    case 0x66:
+    case 0x68:
+    case 0x6a:
+    case 0x6b:
+    case 0x6e:
+    case 0x86:
+    case 0x88:
+    case 0x8a:
+    case 0x8b:
+    case 0x8e:
+      for (i = 0; i < tMap_0848591C_size; ++i) {
+        if (tile == *tMapA) {
+          // 0x21 is the Plain with shadow on the left in the tileset
+          if (*tMapB == 0x21 && (IsTerrainAtCoordsType(x, y + 1, _Mtn))) {
+            return 0x3; // Mountain top with left shadow in tileset
+          } else {
+            return (int)*tMapB;
+          }
+        }
+        tMapA++;
+        tMapB++;
+      }
+      break;
+    default:
+      for (i = 0; i < tMap_0848591C_size; ++i) {
+        if (tile == *tMapB) {
+          return (int)*tMapA;
+        }
+        tMapA++;
+        tMapB++;
+      }
+    }
+  }
+
+  return -1;
+}
+
+// this cuts out the part where it replaces plain with shadow with mountaintop
+// with shadow
+int GetTileWithShadow2(int x, int y, int tile) {
+  int i;
+  s16 *tMapA;
+  s16 *tMapB;
+  tMapA = gUnknown_0848591C;
+  tMapB = &gUnknown_0848591C[tMap_0848591C_size];
+
+  if (x <= 0) {
+    for (i = 0; i < tMap_0848591C_size; ++i) {
+      if (tile == *tMapB) {
+        return (int)*tMapA;
+      }
+      tMapA++;
+      tMapB++;
+    }
+  } else {
+    int y_ = gUnknown_08499590->tileMap_417A[y] - 1;
+    // if these tiles/terrain/something, use shadows?
+    switch (gUnknown_08499590->terrainMap_1432[y_ + x]) {
+    case 3:
+    case 4:
+    case 6:
+    case 8:
+    case 10:
+    case 0xb:
+    case 0xe:
+    case 0x26:
+    case 0x28:
+    case 0x2a:
+    case 0x2b:
+    case 0x2e:
+    case 0x46:
+    case 0x48:
+    case 0x4a:
+    case 0x4b:
+    case 0x4e:
+    case 0x66:
+    case 0x68:
+    case 0x6a:
+    case 0x6b:
+    case 0x6e:
+    case 0x86:
+    case 0x88:
+    case 0x8a:
+    case 0x8b:
+    case 0x8e:
+      for (i = 0; i < tMap_0848591C_size; ++i) {
+        if (tile == *tMapA) {
+          return (int)*tMapB;
+        }
+        tMapA++;
+        tMapB++;
+      }
+      break;
+    default:
+      for (i = 0; i < tMap_0848591C_size; ++i) {
+        if (tile == *tMapB) {
+          return (int)*tMapA;
+        }
+        tMapA++;
+        tMapB++;
+      }
+    }
+  }
+
+  return -1;
 }

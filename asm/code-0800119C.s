@@ -1,505 +1,8 @@
 	.include "macro.inc"
 	.syntax unified
     
-	thumb_func_start GetMostFittingTile
-GetMostFittingTile: @ 0x08001704
-	push {r4, r5, r6, r7, lr}
-	adds r6, r0, #0
-	adds r7, r1, #0
-	adds r5, r2, #0
-	ldr r3, _08001730 @ =gUnknown_0848591C
-	adds r4, r3, #0
-	adds r4, #0x62
-	cmp r6, #0
-	bgt _08001734
-	movs r1, #0
-_08001718:
-	movs r2, #0
-	ldrsh r0, [r4, r2]
-	cmp r5, r0
-	bne _08001722
-	b _080019D6
-_08001722:
-	adds r3, #2
-	adds r4, #2
-	adds r1, #1
-	cmp r1, #0x30
-	ble _08001718
-	b _080019FA
-	.align 2, 0
-_08001730: .4byte gUnknown_0848591C
-_08001734:
-	ldr r0, _08001764 @ =gUnknown_08499590
-	ldr r1, [r0]
-	lsls r0, r7, #1
-	mov ip, r0
-	ldr r2, _08001768 @ =0x0000417A
-	adds r0, r1, r2
-	add r0, ip
-	ldrh r0, [r0]
-	subs r0, #1
-	adds r0, r0, r6
-	ldr r2, _0800176C @ =0x00001432
-	adds r1, r1, r2
-	adds r1, r1, r0
-	ldrb r0, [r1]
-	subs r0, #3
-	cmp r0, #0x8b
-	bls _08001758
-	b _080019E6
-_08001758:
-	lsls r0, r0, #2
-	ldr r1, _08001770 @ =_08001774
-	adds r0, r0, r1
-	ldr r0, [r0]
-	mov pc, r0
-	.align 2, 0
-_08001764: .4byte gUnknown_08499590
-_08001768: .4byte 0x0000417A
-_0800176C: .4byte 0x00001432
-_08001770: .4byte _08001774
-_08001774: @ jump table
-	.4byte _080019A4 @ case 0
-	.4byte _080019A4 @ case 1
-	.4byte _080019E6 @ case 2
-	.4byte _080019A4 @ case 3
-	.4byte _080019E6 @ case 4
-	.4byte _080019A4 @ case 5
-	.4byte _080019E6 @ case 6
-	.4byte _080019A4 @ case 7
-	.4byte _080019A4 @ case 8
-	.4byte _080019E6 @ case 9
-	.4byte _080019E6 @ case 10
-	.4byte _080019A4 @ case 11
-	.4byte _080019E6 @ case 12
-	.4byte _080019E6 @ case 13
-	.4byte _080019E6 @ case 14
-	.4byte _080019E6 @ case 15
-	.4byte _080019E6 @ case 16
-	.4byte _080019E6 @ case 17
-	.4byte _080019E6 @ case 18
-	.4byte _080019E6 @ case 19
-	.4byte _080019E6 @ case 20
-	.4byte _080019E6 @ case 21
-	.4byte _080019E6 @ case 22
-	.4byte _080019E6 @ case 23
-	.4byte _080019E6 @ case 24
-	.4byte _080019E6 @ case 25
-	.4byte _080019E6 @ case 26
-	.4byte _080019E6 @ case 27
-	.4byte _080019E6 @ case 28
-	.4byte _080019E6 @ case 29
-	.4byte _080019E6 @ case 30
-	.4byte _080019E6 @ case 31
-	.4byte _080019E6 @ case 32
-	.4byte _080019E6 @ case 33
-	.4byte _080019E6 @ case 34
-	.4byte _080019A4 @ case 35
-	.4byte _080019E6 @ case 36
-	.4byte _080019A4 @ case 37
-	.4byte _080019E6 @ case 38
-	.4byte _080019A4 @ case 39
-	.4byte _080019A4 @ case 40
-	.4byte _080019E6 @ case 41
-	.4byte _080019E6 @ case 42
-	.4byte _080019A4 @ case 43
-	.4byte _080019E6 @ case 44
-	.4byte _080019E6 @ case 45
-	.4byte _080019E6 @ case 46
-	.4byte _080019E6 @ case 47
-	.4byte _080019E6 @ case 48
-	.4byte _080019E6 @ case 49
-	.4byte _080019E6 @ case 50
-	.4byte _080019E6 @ case 51
-	.4byte _080019E6 @ case 52
-	.4byte _080019E6 @ case 53
-	.4byte _080019E6 @ case 54
-	.4byte _080019E6 @ case 55
-	.4byte _080019E6 @ case 56
-	.4byte _080019E6 @ case 57
-	.4byte _080019E6 @ case 58
-	.4byte _080019E6 @ case 59
-	.4byte _080019E6 @ case 60
-	.4byte _080019E6 @ case 61
-	.4byte _080019E6 @ case 62
-	.4byte _080019E6 @ case 63
-	.4byte _080019E6 @ case 64
-	.4byte _080019E6 @ case 65
-	.4byte _080019E6 @ case 66
-	.4byte _080019A4 @ case 67
-	.4byte _080019E6 @ case 68
-	.4byte _080019A4 @ case 69
-	.4byte _080019E6 @ case 70
-	.4byte _080019A4 @ case 71
-	.4byte _080019A4 @ case 72
-	.4byte _080019E6 @ case 73
-	.4byte _080019E6 @ case 74
-	.4byte _080019A4 @ case 75
-	.4byte _080019E6 @ case 76
-	.4byte _080019E6 @ case 77
-	.4byte _080019E6 @ case 78
-	.4byte _080019E6 @ case 79
-	.4byte _080019E6 @ case 80
-	.4byte _080019E6 @ case 81
-	.4byte _080019E6 @ case 82
-	.4byte _080019E6 @ case 83
-	.4byte _080019E6 @ case 84
-	.4byte _080019E6 @ case 85
-	.4byte _080019E6 @ case 86
-	.4byte _080019E6 @ case 87
-	.4byte _080019E6 @ case 88
-	.4byte _080019E6 @ case 89
-	.4byte _080019E6 @ case 90
-	.4byte _080019E6 @ case 91
-	.4byte _080019E6 @ case 92
-	.4byte _080019E6 @ case 93
-	.4byte _080019E6 @ case 94
-	.4byte _080019E6 @ case 95
-	.4byte _080019E6 @ case 96
-	.4byte _080019E6 @ case 97
-	.4byte _080019E6 @ case 98
-	.4byte _080019A4 @ case 99
-	.4byte _080019E6 @ case 100
-	.4byte _080019A4 @ case 101
-	.4byte _080019E6 @ case 102
-	.4byte _080019A4 @ case 103
-	.4byte _080019A4 @ case 104
-	.4byte _080019E6 @ case 105
-	.4byte _080019E6 @ case 106
-	.4byte _080019A4 @ case 107
-	.4byte _080019E6 @ case 108
-	.4byte _080019E6 @ case 109
-	.4byte _080019E6 @ case 110
-	.4byte _080019E6 @ case 111
-	.4byte _080019E6 @ case 112
-	.4byte _080019E6 @ case 113
-	.4byte _080019E6 @ case 114
-	.4byte _080019E6 @ case 115
-	.4byte _080019E6 @ case 116
-	.4byte _080019E6 @ case 117
-	.4byte _080019E6 @ case 118
-	.4byte _080019E6 @ case 119
-	.4byte _080019E6 @ case 120
-	.4byte _080019E6 @ case 121
-	.4byte _080019E6 @ case 122
-	.4byte _080019E6 @ case 123
-	.4byte _080019E6 @ case 124
-	.4byte _080019E6 @ case 125
-	.4byte _080019E6 @ case 126
-	.4byte _080019E6 @ case 127
-	.4byte _080019E6 @ case 128
-	.4byte _080019E6 @ case 129
-	.4byte _080019E6 @ case 130
-	.4byte _080019A4 @ case 131
-	.4byte _080019E6 @ case 132
-	.4byte _080019A4 @ case 133
-	.4byte _080019E6 @ case 134
-	.4byte _080019A4 @ case 135
-	.4byte _080019A4 @ case 136
-	.4byte _080019E6 @ case 137
-	.4byte _080019E6 @ case 138
-	.4byte _080019A4 @ case 139
-_080019A4:
-	movs r1, #0
-_080019A6:
-	movs r2, #0
-	ldrsh r0, [r3, r2]
-	cmp r5, r0
-	bne _080019CA
-	movs r1, #0
-	ldrsh r0, [r4, r1]
-	cmp r0, #0x21
-	bne _080019C4
-	adds r0, r6, #0
-	adds r1, r7, #1
-	movs r2, #3
-	bl IsTerrainAtCoordsType
-	cmp r0, #0
-	bne _080019DC
-_080019C4:
-	movs r2, #0
-	ldrsh r0, [r4, r2]
-	b _080019FE
-_080019CA:
-	adds r3, #2
-	adds r4, #2
-	adds r1, #1
-	cmp r1, #0x30
-	ble _080019A6
-	b _080019FA
-_080019D6:
-	movs r1, #0
-	ldrsh r0, [r3, r1]
-	b _080019FE
-_080019DC:
-	movs r0, #3
-	b _080019FE
-_080019E0:
-	movs r2, #0
-	ldrsh r0, [r3, r2]
-	b _080019FE
-_080019E6:
-	movs r1, #0
-_080019E8:
-	movs r2, #0
-	ldrsh r0, [r4, r2]
-	cmp r5, r0
-	beq _080019E0
-	adds r3, #2
-	adds r4, #2
-	adds r1, #1
-	cmp r1, #0x30
-	ble _080019E8
-_080019FA:
-	movs r0, #1
-	rsbs r0, r0, #0
-_080019FE:
-	pop {r4, r5, r6, r7}
-	pop {r1}
-	bx r1
 
-	thumb_func_start sub_08001A04
-sub_08001A04: @ 0x08001A04
-	push {r4, r5, r6, r7, lr}
-	adds r7, r0, #0
-	adds r6, r1, #0
-	adds r5, r2, #0
-	ldr r4, _08001A30 @ =gUnknown_0848591C
-	adds r3, r4, #0
-	adds r3, #0x62
-	cmp r7, #0
-	bgt _08001A34
-	movs r1, #0
-_08001A18:
-	movs r2, #0
-	ldrsh r0, [r3, r2]
-	cmp r5, r0
-	bne _08001A22
-	b _08001CB6
-_08001A22:
-	adds r4, #2
-	adds r3, #2
-	adds r1, #1
-	cmp r1, #0x30
-	ble _08001A18
-	b _08001CDC
-	.align 2, 0
-_08001A30: .4byte gUnknown_0848591C
-_08001A34:
-	ldr r0, _08001A60 @ =gUnknown_08499590
-	ldr r1, [r0]
-	lsls r2, r6, #1
-	ldr r6, _08001A64 @ =0x0000417A
-	adds r0, r1, r6
-	adds r0, r0, r2
-	ldrh r0, [r0]
-	subs r0, #1
-	adds r0, r0, r7
-	ldr r2, _08001A68 @ =0x00001432
-	adds r1, r1, r2
-	adds r1, r1, r0
-	ldrb r0, [r1]
-	subs r0, #3
-	cmp r0, #0x8b
-	bls _08001A56
-	b _08001CC8
-_08001A56:
-	lsls r0, r0, #2
-	ldr r1, _08001A6C @ =_08001A70
-	adds r0, r0, r1
-	ldr r0, [r0]
-	mov pc, r0
-	.align 2, 0
-_08001A60: .4byte gUnknown_08499590
-_08001A64: .4byte 0x0000417A
-_08001A68: .4byte 0x00001432
-_08001A6C: .4byte _08001A70
-_08001A70: @ jump table
-	.4byte _08001CA0 @ case 0
-	.4byte _08001CA0 @ case 1
-	.4byte _08001CC8 @ case 2
-	.4byte _08001CA0 @ case 3
-	.4byte _08001CC8 @ case 4
-	.4byte _08001CA0 @ case 5
-	.4byte _08001CC8 @ case 6
-	.4byte _08001CA0 @ case 7
-	.4byte _08001CA0 @ case 8
-	.4byte _08001CC8 @ case 9
-	.4byte _08001CC8 @ case 10
-	.4byte _08001CA0 @ case 11
-	.4byte _08001CC8 @ case 12
-	.4byte _08001CC8 @ case 13
-	.4byte _08001CC8 @ case 14
-	.4byte _08001CC8 @ case 15
-	.4byte _08001CC8 @ case 16
-	.4byte _08001CC8 @ case 17
-	.4byte _08001CC8 @ case 18
-	.4byte _08001CC8 @ case 19
-	.4byte _08001CC8 @ case 20
-	.4byte _08001CC8 @ case 21
-	.4byte _08001CC8 @ case 22
-	.4byte _08001CC8 @ case 23
-	.4byte _08001CC8 @ case 24
-	.4byte _08001CC8 @ case 25
-	.4byte _08001CC8 @ case 26
-	.4byte _08001CC8 @ case 27
-	.4byte _08001CC8 @ case 28
-	.4byte _08001CC8 @ case 29
-	.4byte _08001CC8 @ case 30
-	.4byte _08001CC8 @ case 31
-	.4byte _08001CC8 @ case 32
-	.4byte _08001CC8 @ case 33
-	.4byte _08001CC8 @ case 34
-	.4byte _08001CA0 @ case 35
-	.4byte _08001CC8 @ case 36
-	.4byte _08001CA0 @ case 37
-	.4byte _08001CC8 @ case 38
-	.4byte _08001CA0 @ case 39
-	.4byte _08001CA0 @ case 40
-	.4byte _08001CC8 @ case 41
-	.4byte _08001CC8 @ case 42
-	.4byte _08001CA0 @ case 43
-	.4byte _08001CC8 @ case 44
-	.4byte _08001CC8 @ case 45
-	.4byte _08001CC8 @ case 46
-	.4byte _08001CC8 @ case 47
-	.4byte _08001CC8 @ case 48
-	.4byte _08001CC8 @ case 49
-	.4byte _08001CC8 @ case 50
-	.4byte _08001CC8 @ case 51
-	.4byte _08001CC8 @ case 52
-	.4byte _08001CC8 @ case 53
-	.4byte _08001CC8 @ case 54
-	.4byte _08001CC8 @ case 55
-	.4byte _08001CC8 @ case 56
-	.4byte _08001CC8 @ case 57
-	.4byte _08001CC8 @ case 58
-	.4byte _08001CC8 @ case 59
-	.4byte _08001CC8 @ case 60
-	.4byte _08001CC8 @ case 61
-	.4byte _08001CC8 @ case 62
-	.4byte _08001CC8 @ case 63
-	.4byte _08001CC8 @ case 64
-	.4byte _08001CC8 @ case 65
-	.4byte _08001CC8 @ case 66
-	.4byte _08001CA0 @ case 67
-	.4byte _08001CC8 @ case 68
-	.4byte _08001CA0 @ case 69
-	.4byte _08001CC8 @ case 70
-	.4byte _08001CA0 @ case 71
-	.4byte _08001CA0 @ case 72
-	.4byte _08001CC8 @ case 73
-	.4byte _08001CC8 @ case 74
-	.4byte _08001CA0 @ case 75
-	.4byte _08001CC8 @ case 76
-	.4byte _08001CC8 @ case 77
-	.4byte _08001CC8 @ case 78
-	.4byte _08001CC8 @ case 79
-	.4byte _08001CC8 @ case 80
-	.4byte _08001CC8 @ case 81
-	.4byte _08001CC8 @ case 82
-	.4byte _08001CC8 @ case 83
-	.4byte _08001CC8 @ case 84
-	.4byte _08001CC8 @ case 85
-	.4byte _08001CC8 @ case 86
-	.4byte _08001CC8 @ case 87
-	.4byte _08001CC8 @ case 88
-	.4byte _08001CC8 @ case 89
-	.4byte _08001CC8 @ case 90
-	.4byte _08001CC8 @ case 91
-	.4byte _08001CC8 @ case 92
-	.4byte _08001CC8 @ case 93
-	.4byte _08001CC8 @ case 94
-	.4byte _08001CC8 @ case 95
-	.4byte _08001CC8 @ case 96
-	.4byte _08001CC8 @ case 97
-	.4byte _08001CC8 @ case 98
-	.4byte _08001CA0 @ case 99
-	.4byte _08001CC8 @ case 100
-	.4byte _08001CA0 @ case 101
-	.4byte _08001CC8 @ case 102
-	.4byte _08001CA0 @ case 103
-	.4byte _08001CA0 @ case 104
-	.4byte _08001CC8 @ case 105
-	.4byte _08001CC8 @ case 106
-	.4byte _08001CA0 @ case 107
-	.4byte _08001CC8 @ case 108
-	.4byte _08001CC8 @ case 109
-	.4byte _08001CC8 @ case 110
-	.4byte _08001CC8 @ case 111
-	.4byte _08001CC8 @ case 112
-	.4byte _08001CC8 @ case 113
-	.4byte _08001CC8 @ case 114
-	.4byte _08001CC8 @ case 115
-	.4byte _08001CC8 @ case 116
-	.4byte _08001CC8 @ case 117
-	.4byte _08001CC8 @ case 118
-	.4byte _08001CC8 @ case 119
-	.4byte _08001CC8 @ case 120
-	.4byte _08001CC8 @ case 121
-	.4byte _08001CC8 @ case 122
-	.4byte _08001CC8 @ case 123
-	.4byte _08001CC8 @ case 124
-	.4byte _08001CC8 @ case 125
-	.4byte _08001CC8 @ case 126
-	.4byte _08001CC8 @ case 127
-	.4byte _08001CC8 @ case 128
-	.4byte _08001CC8 @ case 129
-	.4byte _08001CC8 @ case 130
-	.4byte _08001CA0 @ case 131
-	.4byte _08001CC8 @ case 132
-	.4byte _08001CA0 @ case 133
-	.4byte _08001CC8 @ case 134
-	.4byte _08001CA0 @ case 135
-	.4byte _08001CA0 @ case 136
-	.4byte _08001CC8 @ case 137
-	.4byte _08001CC8 @ case 138
-	.4byte _08001CA0 @ case 139
-_08001CA0:
-	movs r1, #0
-_08001CA2:
-	movs r6, #0
-	ldrsh r0, [r4, r6]
-	cmp r5, r0
-	beq _08001CBC
-	adds r4, #2
-	adds r3, #2
-	adds r1, #1
-	cmp r1, #0x30
-	ble _08001CA2
-	b _08001CDC
-_08001CB6:
-	movs r1, #0
-	ldrsh r0, [r4, r1]
-	b _08001CE0
-_08001CBC:
-	movs r2, #0
-	ldrsh r0, [r3, r2]
-	b _08001CE0
-_08001CC2:
-	movs r6, #0
-	ldrsh r0, [r4, r6]
-	b _08001CE0
-_08001CC8:
-	movs r1, #0
-_08001CCA:
-	movs r2, #0
-	ldrsh r0, [r3, r2]
-	cmp r5, r0
-	beq _08001CC2
-	adds r4, #2
-	adds r3, #2
-	adds r1, #1
-	cmp r1, #0x30
-	ble _08001CCA
-_08001CDC:
-	movs r0, #1
-	rsbs r0, r0, #0
-_08001CE0:
-	pop {r4, r5, r6, r7}
-	pop {r1}
-	bx r1
-	.align 2, 0
+
 
 	thumb_func_start sub_08001CE8
 sub_08001CE8: @ 0x08001CE8
@@ -12763,7 +12266,7 @@ sub_08007D70: @ 0x08007D70
 	push {r4, r5, lr}
 	adds r4, r0, #0
 	adds r5, r1, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -12777,7 +12280,7 @@ sub_08007D70: @ 0x08007D70
 	adds r4, #1
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -13232,7 +12735,7 @@ _0800812A:
 _08008142:
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -13263,7 +12766,7 @@ _0800816A:
 	bl MakeTileSimple
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -19400,7 +18903,7 @@ _0800B2D0:
 	adds r0, r5, #0
 	adds r1, r6, #0
 	adds r2, r4, #0
-	bl GetMostFittingTile
+	bl GetTileWithShadow
 	adds r4, r0, #0
 	adds r0, r5, #0
 	adds r1, r6, #0
@@ -19477,7 +18980,7 @@ _0800B35E:
 	adds r0, r5, #0
 	adds r1, r6, #0
 	adds r2, r4, #0
-	bl GetMostFittingTile
+	bl GetTileWithShadow
 	adds r4, r0, #0
 	adds r0, r5, #0
 	adds r1, r6, #0
@@ -19546,7 +19049,7 @@ _0800B3EA:
 	adds r0, r5, #0
 	adds r1, r6, #0
 	movs r2, #1
-	bl sub_08001A04
+	bl GetTileWithShadow2
 	adds r4, r0, #0
 	adds r0, r5, #0
 	adds r1, r6, #0
@@ -19617,7 +19120,7 @@ _0800B478:
 	adds r0, r5, #0
 	adds r1, r6, #0
 	movs r2, #1
-	bl sub_08001A04
+	bl GetTileWithShadow2
 	adds r4, r0, #0
 	adds r0, r5, #0
 	adds r1, r6, #0
@@ -21653,7 +21156,7 @@ _0800C3EC:
 	bl MakeTileSimple
 	adds r0, r6, #0
 	adds r1, r7, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r5, r0, #0
 	adds r0, r6, #0
 	adds r1, r7, #0
@@ -21674,7 +21177,7 @@ _0800C42C:
 	bne _0800C446
 	adds r0, r6, #0
 	adds r1, r7, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r5, r0, #0
 	adds r0, r6, #0
 	adds r1, r7, #0
@@ -23084,7 +22587,7 @@ sub_0800CEF8: @ 0x0800CEF8
 	bge _0800CF1C
 	adds r4, #1
 	adds r0, r4, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -26827,7 +26330,7 @@ sub_0800EBFC: @ 0x0800EBFC
 	bl MakeTileSimple
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
@@ -27861,7 +27364,7 @@ _0800F508:
 	bl MakeTileSimple
 	adds r0, r4, #0
 	adds r1, r5, #0
-	bl GetMostFittingTile_unkMapA22
+	bl GetTileWithShadow_unkMapA22
 	adds r2, r0, #0
 	adds r0, r4, #0
 	adds r1, r5, #0
