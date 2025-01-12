@@ -380,3 +380,25 @@ int GetTileWithShadow2(int x, int y, int tile) {
 
   return -1;
 }
+
+u32 sub_08001CE8(void) {
+  return gUnknown_0200B224[gUnknown_0200B0B0->unk4 << 1];
+}
+
+int sub_08001D04(u32 param) {
+  u8 *data = gUnknown_084859E0;
+  int result = 0xe;
+
+  for (;; data += 2) {
+    if (*data == param) {
+      result = data[1];
+      break;
+    }
+
+    if (*data == 0xff) {
+      break;
+    }
+  }
+
+  return result;
+}

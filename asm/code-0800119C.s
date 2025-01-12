@@ -1,47 +1,6 @@
 	.include "macro.inc"
 	.syntax unified
     
-
-
-
-	thumb_func_start sub_08001CE8
-sub_08001CE8: @ 0x08001CE8
-	ldr r1, _08001CFC @ =gUnknown_0200B224
-	ldr r0, _08001D00 @ =gUnknown_0200B0B0
-	ldr r0, [r0]
-	ldrh r0, [r0, #0x28]
-	lsls r0, r0, #2
-	adds r0, r0, r1
-	movs r1, #0
-	ldrsh r0, [r0, r1]
-	bx lr
-	.align 2, 0
-_08001CFC: .4byte gUnknown_0200B224
-_08001D00: .4byte gUnknown_0200B0B0
-
-	thumb_func_start sub_08001D04
-sub_08001D04: @ 0x08001D04
-	adds r3, r0, #0
-	ldr r2, _08001D0C @ =gUnknown_084859E0
-	movs r0, #0xe
-	b _08001D12
-	.align 2, 0
-_08001D0C: .4byte gUnknown_084859E0
-_08001D10:
-	adds r2, #2
-_08001D12:
-	ldrb r1, [r2]
-	cmp r1, r3
-	bne _08001D1C
-	ldrb r0, [r2, #1]
-	b _08001D20
-_08001D1C:
-	cmp r1, #0xff
-	bne _08001D10
-_08001D20:
-	bx lr
-	.align 2, 0
-
 	thumb_func_start sub_08001D24
 sub_08001D24: @ 0x08001D24
 	push {r4, r5, lr}
