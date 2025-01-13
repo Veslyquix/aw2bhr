@@ -121,6 +121,8 @@ struct activeMap {
   u16 unk38; 
   u16 unk3a;
   u16 previousTile; 
+  u8 unk6[0x4c-0x3e];
+  u16 unk4c; 
 };
 
 // clang-format on

@@ -402,3 +402,31 @@ int sub_08001D04(u32 param) {
 
   return result;
 }
+
+int sub_08001D24(int param) {
+
+  int result = 0;
+  // gUnknown_0200B224[gUnknown_0200B0B0->unk4 << 1];
+  int i;
+  s8 val = gUnknown_0200B0B0->unk1[7];
+  if (!val) {
+    param &= 0x1F;
+    for (i = 0; i <= 16; i++) {
+      if ((gUnknown_0200B224[i * 2] & 0x1F) == param) {
+        return i;
+      }
+    }
+  } else {
+
+    param &= 0x3F;
+    for (i = 0; i <= 19; ++i) {
+      if ((gUnknown_0200B224[i * 2] & 0x3F) == param) {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+void sub_08001D8C(void) { gUnknown_0200B0B0->unk4c = 0xA; }
+void sub_08001D9C(void) { gUnknown_0200B0B0->unk4c = 0; }
