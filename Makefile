@@ -69,6 +69,24 @@ C_SRCS := $(shell find $(SRC_DIR) -name *.c)
 ASM_SRCS := $(shell find $(SRC_DIR) -name *.s) $(shell find $(ASM_DIR) -name *.s)
 DATA_SRCS := $(shell find data -name *.s)
 
+# `make SPLIT=1` builds from the per-function units in build/functions instead
+# of the four monolithic asm/*.s, using the matching generated linker script.
+# Both must produce the same ROM -- that equality is the acceptance test for
+# the split, and it is stronger than the text-level check in verify_split.py
+# because it also proves 4,505 separate objects land at the same addresses.
+#
+# Opt-in so the default build stays byte-for-byte upstream's, which keeps the
+# comparison honest and merges clean.
+#
+# Regenerate the inputs first:
+#     python tools/split_asm.py && python tools/gen_lds.py
+FUNC_DIR := $(BUILD_DIR)/functions
+ifeq ($(SPLIT),1)
+  FUNC_SRCS := $(shell find $(FUNC_DIR) -name *.s)
+  ASM_SRCS := $(shell find $(SRC_DIR) -name *.s)
+  LDS := $(BUILD_NAME).split.lds
+endif
+
 C_GENERATED :=
 
 # ===========
@@ -87,6 +105,10 @@ endif
 C_OBJS := $(C_SRCS:%.c=$(BUILD_DIR)/%.o)
 ASM_OBJS := $(ASM_SRCS:%.s=$(BUILD_DIR)/%.o)
 DATA_OBJS := $(DATA_SRCS:%.s=$(BUILD_DIR)/%.o)
+
+# Unit objects sit beside their sources, already under $(BUILD_DIR), so they
+# take the %.s -> %.o rule below rather than the $(BUILD_DIR)/%.o one.
+ASM_OBJS += $(FUNC_SRCS:%.s=%.o)
 
 ALL_OBJS := $(C_OBJS) $(ASM_OBJS) $(DATA_OBJS)
 ALL_DEPS := $(ALL_OBJS:%.o=%.d)
@@ -138,6 +160,11 @@ $(BUILD_DIR)/%.d: $(BUILD_DIR)/%.o
 $(BUILD_DIR)/%.o: %.s
 	@echo "[ AS]	$<"
 	@$(AS) $(ASFLAGS) $< -o $@ --MD $(BUILD_DIR)/$*.d
+
+# Per-function unit object (SPLIT=1). Source and object share a directory, so
+# this cannot go through the rule above. Silent: 4,505 echo lines is noise.
+$(FUNC_DIR)/%.o: $(FUNC_DIR)/%.s
+	@$(AS) $(ASFLAGS) $< -o $@ --MD $(FUNC_DIR)/$*.d
 
 ifneq (clean,$(MAKECMDGOALS))
   -include $(ALL_DEPS)

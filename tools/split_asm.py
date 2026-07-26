@@ -105,6 +105,19 @@ def plan_units(af):
             elif label in definer:
                 union(i, definer[label])
 
+    # A function at a non-word-aligned address cannot start its own object. The
+    # linker aligns every input .text section to 4, so such a function is pushed
+    # forward 2 bytes and everything after it in the ROM shifts -- including the
+    # stored function pointers, which is how a 2-byte slip turns into millions of
+    # differing bytes. Four functions in the corpus are like this, all declared
+    # `non_word_aligned_thumb_func_start`, and each is preceded by a word-aligned
+    # function; travelling with that predecessor keeps every unit boundary
+    # word-aligned. Keyed on the address rather than the directive because the
+    # address is what the linker actually reacts to.
+    for i, fn in enumerate(af.funcs):
+        if fn.addr % 4 and i > 0:
+            union(i, i - 1)
+
     groups = {}
     for i in range(n):
         groups.setdefault(find(i), []).append(i)
