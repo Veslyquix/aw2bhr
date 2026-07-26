@@ -489,7 +489,7 @@ def _run(args: list[str], timeout: int = 300) -> dict:
     try:
         proc = subprocess.run(
             [sys.executable, *args], cwd=awlib.REPO, capture_output=True,
-            text=True, timeout=timeout)
+            text=True, timeout=timeout, stdin=subprocess.DEVNULL)
     except subprocess.TimeoutExpired:
         return {"ok": False, "error": f"timed out after {timeout}s"}
     return {
@@ -498,6 +498,90 @@ def _run(args: list[str], timeout: int = 300) -> dict:
         "stdout": proc.stdout[-4000:],
         "stderr": proc.stderr[-2000:],
     }
+
+
+@mcp.tool()
+def start_function(name_or_addr: str) -> dict:
+    """Scaffold a matching attempt: target assembly, a stub, and what it touches.
+
+    Call this first, then write C and submit it with `try_match`. The returned
+    signature is inferred from register use and is often wrong -- it is a
+    starting point, and try_match is what settles it.
+    """
+    rec = _resolve(name_or_addr)
+    if rec is None:
+        return {"error": f"no function matching {name_or_addr!r}"}
+    res = _run(["tools/newfunc.py", rec["name"]])
+    if not res["ok"]:
+        return {"step": "scaffold", **res}
+
+    work = os.path.join(awlib.REPO, "work", rec["name"])
+    out = {
+        "name": rec["name"],
+        "addr": rec["addr_hex"],
+        "size": rec["size"],
+        "mode": rec["mode"],
+        "work_dir": f"work/{rec['name']}",
+        "calls": rec["calls"],
+        "data_refs": rec["data_refs"],
+    }
+    fe = _fe_names().get(rec["name"])
+    if fe:
+        out["fe_name"] = fe
+        out["fe_note"] = (f"Shape-matches {fe} in the Fire Emblem decomps -- "
+                          f"start from their C for this function.")
+    for key, fname in (("target_asm", "target.s"), ("stub", rec["name"] + ".c")):
+        path = os.path.join(work, fname)
+        if os.path.exists(path):
+            out[key] = "".join(awlib.read_lines(path))
+    return out
+
+
+@mcp.tool()
+def try_match(name_or_addr: str, c_code: str, show_diff: bool = True) -> dict:
+    """Compile candidate C for one function and report whether it matches.
+
+    This is the verdict the whole pipeline exists to produce. `matched` is true
+    only when the compiled bytes and relocations are identical to the original,
+    so it cannot be talked into a false positive -- if it says matched, the ROM
+    still builds.
+
+    On a miss you get the byte counts, where the first difference is, and an
+    instruction-level diff. Rewrite and call again. If three attempts have not
+    converged, the benchmark says a fourth rarely helps -- change approach or
+    move on rather than resubmitting a near-identical body.
+    """
+    rec = _resolve(name_or_addr)
+    if rec is None:
+        return {"error": f"no function matching {name_or_addr!r}"}
+
+    name = rec["name"]
+    work = os.path.join(awlib.REPO, "work", name)
+    if not os.path.isdir(work):
+        scaffold = _run(["tools/newfunc.py", name])
+        if not scaffold["ok"]:
+            return {"step": "scaffold", **scaffold}
+
+    awlib.write_text(os.path.join(work, name + ".c"), c_code)
+
+    args = ["tools/trymatch.py", name]
+    if show_diff:
+        args.append("--diff")
+    res = _run(args)
+
+    out = {
+        "name": name,
+        "size": rec["size"],
+        "matched": res["exit_code"] == 0,
+        "report": res["stdout"][-6000:],
+    }
+    if res["stderr"].strip():
+        out["stderr"] = res["stderr"][-1500:]
+    if out["matched"]:
+        out["next"] = ("Move the C into src/, delete the function from asm/, "
+                       "regenerate with reindex, and confirm `make compare` "
+                       "still reproduces the ROM.")
+    return out
 
 
 @mcp.tool()

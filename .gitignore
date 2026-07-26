@@ -169,3 +169,7 @@ dkms.conf
 build/
 aw2bhr.split.lds
 tools/__pycache__/
+
+# Per-function agent scratch (regenerate: tools/newfunc.py). Candidate C that
+# matches is promoted into src/; nothing here is a source of truth.
+work/
