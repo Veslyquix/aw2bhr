@@ -70,6 +70,13 @@ def build():
 
     order = {fn.name: i for i, fn in enumerate(funcs)}
 
+    # Sorted adjacency, not the raw sets. Set iteration order for strings varies
+    # with PYTHONHASHSEED, and where the graph has cycles the depth a node
+    # settles on depends on the order its callees are finalised -- so the same
+    # commit produced different depths, and therefore a different work queue,
+    # between runs. Sorting pins the traversal.
+    adj = {name: sorted(cs) for name, cs in callees.items()}
+
     # Depth = longest path to a leaf. Iterative post-order with an explicit
     # stack; recursion would blow the stack and cycles must not hang us.
     depth = {}
@@ -82,7 +89,7 @@ def build():
             name, expanded = stack.pop()
             if expanded:
                 best = 0
-                for c in callees.get(name, ()):
+                for c in adj.get(name, ()):
                     d = depth.get(c, 0)
                     if d is not WORKING and isinstance(d, int) and d >= 0:
                         best = max(best, d + 1)
@@ -92,7 +99,7 @@ def build():
                 continue
             depth[name] = WORKING          # cycle guard
             stack.append((name, True))
-            for c in callees.get(name, ()):
+            for c in adj.get(name, ()):
                 if c not in depth:
                     stack.append((c, False))
     for k, v in list(depth.items()):
