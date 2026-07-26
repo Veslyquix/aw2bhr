@@ -1,0 +1,447 @@
+#!/usr/bin/env python3
+"""Generate progress/index.html -- a memory map of decompilation progress.
+
+Every function in the ROM's code region is one rectangle, sized by its byte
+count and placed in the address band it lives in, so the picture is literally a
+map of the cartridge rather than a bar chart.
+
+Three states, reported separately and never added together:
+
+  matched     compiled from C in src/ and proven by `make compare`
+  identified  named by shape-matching the Fire Emblem decomps, still assembly
+  unstarted   still assembly, still anonymous
+
+`identified` is deliberately not counted as progress. Knowing a function is
+m4aSoundInit is worth having, but the assembly has not become C and the ROM does
+not depend on it -- rolling it into a single percentage would overstate the work
+done, which is the one thing a progress page must not do.
+
+Functions already decompiled are no longer in asm/, so their addresses come from
+the linker map instead. Without it the map would show only what is left and
+would silently omit everything finished.
+
+Usage:
+    python tools/progress_map.py [--out progress/index.html]
+"""
+
+import argparse
+import html
+import json
+import os
+import re
+import sys
+from collections import defaultdict
+
+import awlib
+
+OUT = os.path.join("progress", "index.html")
+BAND = 32 * 1024                      # address band per treemap module
+WIDTH, HEIGHT = 1240, 780
+
+COLOUR = {"matched": "#0ca30c", "identified": "#fab219"}
+CLS = {"matched": "m", "identified": "p", "unstarted": "u"}
+
+
+# ---------------------------------------------------------------- data
+
+def load_asm_functions():
+    path = os.path.join(awlib.DATA_DIR, "functions.json")
+    if not os.path.exists(path):
+        print("error: data/functions.json missing -- run tools/index_functions.py")
+        return None
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def load_fe_names():
+    path = os.path.join(awlib.DATA_DIR, "fe_matches.json")
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        return {h["name"]: h["fe_name"] for h in json.load(fh)["matches"]}
+
+
+MAP_OBJ_RE = re.compile(r'^\s\.text\s+0x([0-9a-f]{8})\s+0x([0-9a-f]+)\s+(\S+)')
+MAP_SYM_RE = re.compile(r'^\s+0x([0-9a-f]{8})\s{2,}(\S+)\s*$')
+
+
+def c_objects():
+    """Objects the linker sees for each src/*.c -- the decompiled units.
+
+    The link runs from build/, so the map names them `src/proc.o`, not
+    `build/src/proc.o`. Deriving the set from the C sources rather than
+    pattern-matching a path also keeps src/crt0.o and src/rom-header.o out,
+    which are hand-written assembly and were never decompiled.
+    """
+    src = os.path.join(awlib.REPO, "src")
+    if not os.path.isdir(src):
+        return set()
+    return {"src/%s.o" % os.path.splitext(e)[0]
+            for e in os.listdir(src) if e.endswith(".c")}
+
+
+def load_matched_from_map(known):
+    """Functions built from C, recovered from the linker map.
+
+    They are no longer in asm/, so the map is the only place their addresses
+    survive. Anything already in the assembly index is skipped, so a function
+    cannot be counted twice.
+    """
+    path = os.path.join(awlib.REPO, "aw2bhr.map")
+    if not os.path.exists(path):
+        print("note: aw2bhr.map missing -- run `make` for completed functions "
+              "to appear; showing assembly only")
+        return []
+
+    wanted = c_objects()
+    out, cur_obj, cur_end = [], None, None
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for ln in fh:
+            m = MAP_OBJ_RE.match(ln)
+            if m:
+                cur_obj = m.group(3).replace("\\", "/")
+                cur_end = int(m.group(1), 16) + int(m.group(2), 16)
+                continue
+            m = MAP_SYM_RE.match(ln)
+            if not m or cur_obj not in wanted:
+                continue
+            name, addr = m.group(2), int(m.group(1), 16)
+            if name in known or name.startswith("."):
+                continue
+            out.append({"name": name, "addr": addr, "obj": cur_obj,
+                        "end": cur_end})
+
+    out.sort(key=lambda r: r["addr"])
+    for i, r in enumerate(out):
+        nxt = out[i + 1] if i + 1 < len(out) else None
+        # Bound by the object's own section end: the last function in a unit
+        # would otherwise absorb the gap to whatever was linked after it.
+        limit = r["end"]
+        if nxt is not None and nxt["obj"] == r["obj"]:
+            limit = min(limit, nxt["addr"])
+        r["size"] = max(2, limit - r["addr"])
+    return out
+
+
+def collect():
+    asm = load_asm_functions()
+    if asm is None:
+        return None
+    fe = load_fe_names()
+    known = {r["name"] for r in asm}
+
+    items = []
+    for r in asm:
+        items.append({
+            "name": r["name"], "addr": r["addr"], "size": max(2, r["size"]),
+            "status": "identified" if r["name"] in fe else "unstarted",
+            "note": fe.get(r["name"], ""),
+        })
+    for r in load_matched_from_map(known):
+        items.append({"name": r["name"], "addr": r["addr"],
+                      "size": max(2, r["size"]), "status": "matched",
+                      "note": os.path.basename(r["obj"])})
+    items.sort(key=lambda r: r["addr"])
+    return items
+
+
+# ---------------------------------------------------------------- treemap
+
+def _worst(row, side):
+    total = sum(row)
+    if total <= 0 or side <= 0:
+        return float("inf")
+    return max(side * side * max(row) / (total * total),
+               total * total / (side * side * min(row)))
+
+
+def _layout_row(row, x, y, dx, dy):
+    covered = sum(row)
+    rects = []
+    if dx >= dy:
+        w = covered / dy if dy else 0
+        cy = y
+        for s in row:
+            h = s / w if w else 0
+            rects.append((x, cy, w, h))
+            cy += h
+        return rects, x + w, y, dx - w, dy
+    h = covered / dx if dx else 0
+    cx = x
+    for s in row:
+        w = s / h if h else 0
+        rects.append((cx, y, w, h))
+        cx += w
+    return rects, x, y + h, dx, dy - h
+
+
+def squarify(sizes, x, y, dx, dy):
+    """Squarified treemap over `sizes` (descending), scaled to fill dx*dy."""
+    total = sum(sizes)
+    if total <= 0 or dx <= 0 or dy <= 0:
+        return []
+    scale = dx * dy / total
+    remaining = [s * scale for s in sizes]
+    out = []
+    while remaining and dx > 1e-9 and dy > 1e-9:
+        side = min(dx, dy)
+        row, i = [remaining[0]], 1
+        while i < len(remaining):
+            if _worst(row + [remaining[i]], side) <= _worst(row, side):
+                row.append(remaining[i])
+                i += 1
+            else:
+                break
+        rects, x, y, dx, dy = _layout_row(row, x, y, dx, dy)
+        out.extend(rects)
+        remaining = remaining[i:]
+    return out
+
+
+# ---------------------------------------------------------------- render
+
+def band_key(addr):
+    base = addr - (addr % BAND)
+    return base
+
+
+def render_svg(items):
+    bands = defaultdict(list)
+    for it in items:
+        bands[band_key(it["addr"])].append(it)
+
+    order = sorted(bands, key=lambda b: -sum(i["size"] for i in bands[b]))
+    band_sizes = [sum(i["size"] for i in bands[b]) for b in order]
+    outer = squarify(band_sizes, 0, 0, WIDTH, HEIGHT)
+
+    parts = []
+    for base, (bx, by, bw, bh) in zip(order, outer):
+        group = sorted(bands[base], key=lambda i: -i["size"])
+        done = sum(i["size"] for i in group if i["status"] == "matched")
+        total = sum(i["size"] for i in group)
+        pct = done / total * 100 if total else 0
+
+        parts.append('<g class="mod">')
+        parts.append('<rect class="mframe" x="%.1f" y="%.1f" width="%.1f" '
+                     'height="%.1f"/>' % (bx, by, max(0, bw), max(0, bh)))
+        if bw > 90 and bh > 16:
+            parts.append('<text class="mlabel" x="%.1f" y="%.1f">0x%08X'
+                         '<tspan class="mpct"> %.1f%%</tspan></text>'
+                         % (bx + 3, by + 11, base, pct))
+
+        pad_top = 14 if (bw > 90 and bh > 16) else 2
+        inner = squarify([i["size"] for i in group],
+                         bx + 1, by + pad_top, max(0, bw - 2),
+                         max(0, bh - pad_top - 1))
+        for it, (x, y, w, h) in zip(group, inner):
+            parts.append(
+                '<rect class="c %s" x="%.1f" y="%.1f" width="%.1f" height="%.1f"'
+                ' data-n="%s" data-a="%08X" data-s="%d" data-t="%s" data-p="%s"/>'
+                % (CLS[it["status"]], x, y, max(0.4, w), max(0.4, h),
+                   html.escape(it["name"], quote=True), it["addr"], it["size"],
+                   it["status"], html.escape(it["note"], quote=True)))
+        parts.append('</g>')
+    return "".join(parts), order, bands
+
+
+def tile(kind, n, nbytes, tot_n, tot_b, blurb):
+    return (
+        '<div class="tile %s"><div class="tile-label">%s</div>'
+        '<div class="tile-num">%s<span class="tile-unit"> functions</span></div>'
+        '<div class="tile-sub">%.2f%% of functions &middot; %s bytes '
+        '(%.2f%% of code)<br>%s</div></div>'
+        % (kind, kind, "{:,}".format(n),
+           n / tot_n * 100 if tot_n else 0, "{:,}".format(nbytes),
+           nbytes / tot_b * 100 if tot_b else 0, blurb))
+
+
+CSS = """
+:root {
+  color-scheme: light dark;
+  --surface:#fcfcfb; --panel:#f2f1ee; --ink:#0b0b0b; --ink-2:#52514e;
+  --frame:#d8d7d2; --cell-unstarted:#e4e3df;
+}
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) {
+  --surface:#1a1a19; --panel:#232322; --ink:#fff; --ink-2:#c3c2b7;
+  --frame:#3d3d3b; --cell-unstarted:#33332f;
+} }
+:root[data-theme="dark"] {
+  --surface:#1a1a19; --panel:#232322; --ink:#fff; --ink-2:#c3c2b7;
+  --frame:#3d3d3b; --cell-unstarted:#33332f;
+}
+:root[data-theme="light"] {
+  --surface:#fcfcfb; --panel:#f2f1ee; --ink:#0b0b0b; --ink-2:#52514e;
+  --frame:#d8d7d2; --cell-unstarted:#e4e3df;
+}
+body { background:var(--surface); color:var(--ink);
+  font:14px/1.5 ui-sans-serif, system-ui, sans-serif;
+  margin:0; padding:24px clamp(12px,4vw,48px); }
+h1 { font-size:20px; margin:0 0 2px; }
+.sub { color:var(--ink-2); margin:0 0 18px; font-size:13px; max-width:78ch; }
+.tiles { display:flex; gap:12px; flex-wrap:wrap; margin:0 0 18px; }
+.tile { background:var(--panel); border:1px solid var(--frame);
+  border-radius:8px; padding:10px 16px 12px; min-width:210px;
+  border-top:3px solid var(--frame); }
+.tile.matched { border-top-color:#0ca30c; }
+.tile.identified { border-top-color:#fab219; }
+.tile-label { font-size:12px; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--ink-2); }
+.tile-num { font-size:26px; font-weight:650; font-variant-numeric:tabular-nums; }
+.tile-unit { font-size:13px; font-weight:400; color:var(--ink-2); }
+.tile-sub { font-size:12px; color:var(--ink-2); }
+.legend { display:flex; gap:18px; align-items:center; font-size:12.5px;
+  color:var(--ink-2); margin:0 0 8px; flex-wrap:wrap; }
+.sw { display:inline-block; width:11px; height:11px; border-radius:3px;
+  margin-right:6px; vertical-align:-1px; }
+.map-wrap { overflow-x:auto; }
+svg { display:block; border-radius:6px; }
+.mframe { fill:none; stroke:var(--frame); stroke-width:1; }
+.mlabel { font:600 10.5px ui-monospace, monospace; fill:var(--ink); }
+.mpct { font-weight:400; fill:var(--ink-2); }
+.c { shape-rendering:crispEdges; }
+.c.u { fill:var(--cell-unstarted); }
+.c.m { fill:#0ca30c; }
+.c.p { fill:#fab219; }
+.c:hover { stroke:var(--ink); stroke-width:1; }
+#tip { position:fixed; pointer-events:none; background:var(--panel);
+  color:var(--ink); border:1px solid var(--frame); border-radius:6px;
+  padding:6px 9px; font-size:12px; display:none; z-index:9; max-width:340px;
+  box-shadow:0 4px 14px rgb(0 0 0 / .25); }
+#tip .mono { font-family:ui-monospace, monospace; }
+table { border-collapse:collapse; margin-top:22px; font-size:13px; }
+th, td { padding:4px 12px; text-align:left; border-bottom:1px solid var(--frame); }
+th { color:var(--ink-2); font-weight:600; font-size:12px; }
+td.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.mono { font-family:ui-monospace, monospace; font-size:12px; }
+.foot { color:var(--ink-2); font-size:12px; margin-top:20px; max-width:78ch; }
+"""
+
+SCRIPT = """
+(function () {
+  var tip = document.getElementById("tip");
+  var svg = document.querySelector("svg");
+  if (!svg) return;
+  svg.addEventListener("mousemove", function (e) {
+    var t = e.target;
+    if (!t.classList || !t.classList.contains("c")) { tip.style.display="none"; return; }
+    tip.innerHTML = "<span class='mono'>" + t.dataset.n + "</span><br>0x" +
+      t.dataset.a + " &middot; " + t.dataset.s + " bytes &middot; " + t.dataset.t +
+      (t.dataset.p ? "<br>" + t.dataset.p : "");
+    tip.style.display = "block";
+    var x = e.clientX + 14, y = e.clientY + 14;
+    var r = tip.getBoundingClientRect();
+    if (x + r.width  > innerWidth  - 8) x = e.clientX - r.width  - 10;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 10;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  });
+  svg.addEventListener("mouseleave", function(){ tip.style.display="none"; });
+})();
+"""
+
+
+def build(out_rel):
+    items = collect()
+    if items is None:
+        return 1
+
+    tot_n = len(items)
+    tot_b = sum(i["size"] for i in items)
+    by = defaultdict(lambda: [0, 0])
+    for i in items:
+        by[i["status"]][0] += 1
+        by[i["status"]][1] += i["size"]
+
+    svg_body, order, bands = render_svg(items)
+
+    rows = []
+    for base in sorted(bands):
+        group = bands[base]
+        n = len(group)
+        b = sum(i["size"] for i in group)
+        m = sum(1 for i in group if i["status"] == "matched")
+        mb = sum(i["size"] for i in group if i["status"] == "matched")
+        ident = sum(1 for i in group if i["status"] == "identified")
+        rows.append(
+            "<tr><td class='mono'>0x%08X</td><td class='num'>%s</td>"
+            "<td class='num'>%s</td><td class='num'>%s</td>"
+            "<td class='num'>%.2f%%</td><td class='num'>%.2f%%</td>"
+            "<td class='num'>%s</td></tr>"
+            % (base, "{:,}".format(n), "{:,}".format(b), "{:,}".format(m),
+               m / n * 100 if n else 0, mb / b * 100 if b else 0,
+               "{:,}".format(ident) if ident else ""))
+
+    doc = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advance Wars 2 &middot; decomp progress</title>
+<style>%s</style></head><body>
+
+<h1>Advance Wars 2: Black Hole Rising &mdash; decompilation progress</h1>
+<p class="sub">%s functions &middot; %s bytes of code &middot; %d address bands
+&middot; each rectangle is one function, sized by bytes and placed where it
+lives in the cartridge. Band labels show the share matched by bytes.
+Matched and identified are reported separately &mdash; deliberately no combined
+figure, because an identified function is still assembly.</p>
+
+<div class="tiles">%s%s%s</div>
+
+<div class="legend">
+  <span><span class="sw" style="background:#0ca30c"></span>matched &mdash; built from C in src/, proven by <span class="mono">make compare</span></span>
+  <span><span class="sw" style="background:#fab219"></span>identified &mdash; named from the Fire Emblem decomps, still assembly</span>
+  <span><span class="sw" style="background:var(--cell-unstarted);border:1px solid var(--frame)"></span>unstarted</span>
+</div>
+
+<div class="map-wrap">
+<svg width="%d" height="%d" viewBox="0 0 %d %d" role="img"
+     aria-label="Treemap of decompilation progress by address">%s</svg>
+</div>
+<div id="tip"></div>
+
+<table>
+<thead><tr><th>address band</th><th>funcs</th><th>bytes</th><th>matched</th>
+<th>%% of funcs</th><th>%% of bytes</th><th>identified</th></tr></thead>
+<tbody>%s</tbody></table>
+
+<p class="foot">Generated by <span class="mono">tools/progress_map.py</span> &mdash;
+do not edit by hand. Regenerate after
+<span class="mono">tools/index_functions.py</span> and a build, since completed
+functions are read from <span class="mono">aw2bhr.map</span> rather than from
+<span class="mono">asm/</span>, which no longer contains them.
+The ROM is %s bytes; only the %s-byte code region is mapped here. The remaining
+data is still <span class="mono">.incbin</span> and is a separate problem.</p>
+
+<script>%s</script>
+</body></html>
+""" % (CSS,
+       "{:,}".format(tot_n), "{:,}".format(tot_b), len(bands),
+       tile("matched", by["matched"][0], by["matched"][1], tot_n, tot_b,
+            "byte-for-byte; the ROM depends on these"),
+       tile("identified", by["identified"][0], by["identified"][1], tot_n, tot_b,
+            "named, not yet decompiled"),
+       tile("unstarted", by["unstarted"][0], by["unstarted"][1], tot_n, tot_b,
+            "still anonymous assembly"),
+       WIDTH, HEIGHT, WIDTH, HEIGHT, svg_body,
+       "".join(rows),
+       "{:,}".format(8388608), "{:,}".format(tot_b),
+       SCRIPT)
+
+    path = os.path.join(awlib.REPO, out_rel.replace("/", os.sep))
+    awlib.write_text(path, doc)
+    print("wrote %s  (%s functions, %s bands, %s KB)"
+          % (out_rel, "{:,}".format(tot_n), len(bands),
+             "{:,}".format(len(doc) // 1024)))
+    for k in ("matched", "identified", "unstarted"):
+        print("  %-11s %5s functions  %9s bytes"
+              % (k, "{:,}".format(by[k][0]), "{:,}".format(by[k][1])))
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-o", "--out", default=OUT)
+    args = ap.parse_args()
+    return build(args.out.replace("\\", "/"))
+
+
+if __name__ == "__main__":
+    sys.exit(main())
