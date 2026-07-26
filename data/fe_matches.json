@@ -1,0 +1,560 @@
+{
+ "min_insns": 12,
+ "reference_functions": 2181,
+ "reference_signatures": {
+  "full": 1295,
+  "ops": 1292
+ },
+ "eligible": 3254,
+ "matches": [
+  {
+   "name": "sub_08000360",
+   "addr": "0x08000360",
+   "size": 72,
+   "src": "code.s",
+   "fe_name": "Checksum32",
+   "strength": "full",
+   "insns": 18
+  },
+  {
+   "name": "sub_080003A8",
+   "addr": "0x080003A8",
+   "size": 56,
+   "src": "code.s",
+   "fe_name": "TmFillRect",
+   "strength": "full",
+   "insns": 14
+  },
+  {
+   "name": "sub_080003E0",
+   "addr": "0x080003E0",
+   "size": 92,
+   "src": "code.s",
+   "fe_name": "TmCopyRect",
+   "strength": "full",
+   "insns": 23
+  },
+  {
+   "name": "sub_0800043C",
+   "addr": "0x0800043C",
+   "size": 88,
+   "src": "code.s",
+   "fe_name": "TmApplyTsa",
+   "strength": "full",
+   "insns": 21
+  },
+  {
+   "name": "sub_08000494",
+   "addr": "0x08000494",
+   "size": 172,
+   "src": "code.s",
+   "fe_name": "PutOamHi",
+   "strength": "full",
+   "insns": 39
+  },
+  {
+   "name": "sub_080116A0",
+   "addr": "0x080116A0",
+   "size": 72,
+   "src": "code.s",
+   "fe_name": "FadeExists",
+   "strength": "full",
+   "insns": 22
+  },
+  {
+   "name": "sub_0802EA24",
+   "addr": "0x0802EA24",
+   "size": 56,
+   "src": "code-0801D390.s",
+   "fe_name": "StartSioErrorScreen",
+   "strength": "full",
+   "insns": 17
+  },
+  {
+   "name": "sub_08039B88",
+   "addr": "0x08039B88",
+   "size": 44,
+   "src": "code-0801D390.s",
+   "fe_name": "IsSioBigTransferActive",
+   "strength": "full",
+   "insns": 14
+  },
+  {
+   "name": "sub_0806F744",
+   "addr": "0x0806F744",
+   "size": 132,
+   "src": "code-0806CFC8.s",
+   "fe_name": "SoundMain",
+   "strength": "full",
+   "insns": 51
+  },
+  {
+   "name": "sub_0806FB84",
+   "addr": "0x0806FB84",
+   "size": 80,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ClearChain",
+   "strength": "full",
+   "insns": 38
+  },
+  {
+   "name": "sub_0806FC34",
+   "addr": "0x0806FC34",
+   "size": 28,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_patt",
+   "strength": "full",
+   "insns": 13
+  },
+  {
+   "name": "sub_0806FC64",
+   "addr": "0x0806FC64",
+   "size": 48,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_rept",
+   "strength": "full",
+   "insns": 22
+  },
+  {
+   "name": "sub_0806FCC8",
+   "addr": "0x0806FCC8",
+   "size": 48,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_voice",
+   "strength": "full",
+   "insns": 20
+  },
+  {
+   "name": "sub_0806FD98",
+   "addr": "0x0806FD98",
+   "size": 76,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aSoundVSync",
+   "strength": "full",
+   "insns": 33
+  },
+  {
+   "name": "sub_0806FDE4",
+   "addr": "0x0806FDE4",
+   "size": 600,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayMain",
+   "strength": "full",
+   "insns": 289
+  },
+  {
+   "name": "sub_0807004C",
+   "addr": "0x0807004C",
+   "size": 68,
+   "src": "code-0806CFC8.s",
+   "fe_name": "TrackStop_rev01",
+   "strength": "full",
+   "insns": 30
+  },
+  {
+   "name": "sub_08070090",
+   "addr": "0x08070090",
+   "size": 48,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ChnVolSetAsm",
+   "strength": "full",
+   "insns": 24
+  },
+  {
+   "name": "sub_080700C0",
+   "addr": "0x080700C0",
+   "size": 512,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_note_rev01",
+   "strength": "full",
+   "insns": 245
+  },
+  {
+   "name": "sub_080702C0",
+   "addr": "0x080702C0",
+   "size": 64,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_endtie_rev01",
+   "strength": "full",
+   "insns": 32
+  },
+  {
+   "name": "sub_08070300",
+   "addr": "0x08070300",
+   "size": 28,
+   "src": "code-0806CFC8.s",
+   "fe_name": "clear_modM",
+   "strength": "full",
+   "insns": 13
+  },
+  {
+   "name": "sub_08070350",
+   "addr": "0x08070350",
+   "size": 100,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MidiKey2fr",
+   "strength": "full",
+   "insns": 44
+  },
+  {
+   "name": "sub_080703D4",
+   "addr": "0x080703D4",
+   "size": 32,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayFadeOut",
+   "strength": "full",
+   "insns": 13
+  },
+  {
+   "name": "sub_080703F4",
+   "addr": "0x080703F4",
+   "size": 120,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aSoundInit",
+   "strength": "full",
+   "insns": 37
+  },
+  {
+   "name": "sub_08070478",
+   "addr": "0x08070478",
+   "size": 44,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aSongNumStart",
+   "strength": "full",
+   "insns": 17
+  },
+  {
+   "name": "sub_080704A4",
+   "addr": "0x080704A4",
+   "size": 76,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aSongNumStartOrChange",
+   "strength": "full",
+   "insns": 31
+  },
+  {
+   "name": "sub_080704F0",
+   "addr": "0x080704F0",
+   "size": 84,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aSongNumStartOrContinue",
+   "strength": "full",
+   "insns": 34
+  },
+  {
+   "name": "sub_08070620",
+   "addr": "0x08070620",
+   "size": 32,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aMPlayFadeOutPause",
+   "strength": "full",
+   "insns": 12
+  },
+  {
+   "name": "sub_08070640",
+   "addr": "0x08070640",
+   "size": 40,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aMPlayFadeInContinue",
+   "strength": "full",
+   "insns": 16
+  },
+  {
+   "name": "sub_08070668",
+   "addr": "0x08070668",
+   "size": 72,
+   "src": "code-0806CFC8.s",
+   "fe_name": "m4aMPlayImmInit",
+   "strength": "full",
+   "insns": 35
+  },
+  {
+   "name": "sub_080706B0",
+   "addr": "0x080706B0",
+   "size": 280,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayExtender",
+   "strength": "full",
+   "insns": 99
+  },
+  {
+   "name": "sub_080707F4",
+   "addr": "0x080707F4",
+   "size": 248,
+   "src": "code-0806CFC8.s",
+   "fe_name": "SoundInit_rev01",
+   "strength": "full",
+   "insns": 89
+  },
+  {
+   "name": "sub_080708EC",
+   "addr": "0x080708EC",
+   "size": 164,
+   "src": "code-0806CFC8.s",
+   "fe_name": "SampFreqSet_rev01",
+   "strength": "full",
+   "insns": 58
+  },
+  {
+   "name": "sub_08070990",
+   "addr": "0x08070990",
+   "size": 152,
+   "src": "code-0806CFC8.s",
+   "fe_name": "SoundMode_rev01",
+   "strength": "full",
+   "insns": 68
+  },
+  {
+   "name": "sub_08070A28",
+   "addr": "0x08070A28",
+   "size": 84,
+   "src": "code-0806CFC8.s",
+   "fe_name": "SoundClear_rev01",
+   "strength": "full",
+   "insns": 37
+  },
+  {
+   "name": "sub_08070A7C",
+   "addr": "0x08070A7C",
+   "size": 124,
+   "src": "code-0806CFC8.s",
+   "fe_name": "SoundVSyncOff_rev01",
+   "strength": "full",
+   "insns": 46
+  },
+  {
+   "name": "sub_08070AF8",
+   "addr": "0x08070AF8",
+   "size": 60,
+   "src": "code-0806CFC8.s",
+   "fe_name": "SoundVSyncOn_rev01",
+   "strength": "full",
+   "insns": 23
+  },
+  {
+   "name": "sub_08070B34",
+   "addr": "0x08070B34",
+   "size": 120,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayOpen_rev01",
+   "strength": "full",
+   "insns": 52
+  },
+  {
+   "name": "sub_08070BAC",
+   "addr": "0x08070BAC",
+   "size": 228,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayStart_rev01",
+   "strength": "full",
+   "insns": 109
+  },
+  {
+   "name": "sub_08070C90",
+   "addr": "0x08070C90",
+   "size": 64,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayStop_rev01",
+   "strength": "full",
+   "insns": 29
+  },
+  {
+   "name": "sub_08070CD0",
+   "addr": "0x08070CD0",
+   "size": 200,
+   "src": "code-0806CFC8.s",
+   "fe_name": "FadeOutBody_rev01",
+   "strength": "full",
+   "insns": 96
+  },
+  {
+   "name": "sub_08070D98",
+   "addr": "0x08070D98",
+   "size": 180,
+   "src": "code-0806CFC8.s",
+   "fe_name": "TrkVolPitSet_rev01",
+   "strength": "full",
+   "insns": 90
+  },
+  {
+   "name": "sub_08070E4C",
+   "addr": "0x08070E4C",
+   "size": 168,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MidiKey2CgbFr",
+   "strength": "full",
+   "insns": 77
+  },
+  {
+   "name": "sub_08070EF4",
+   "addr": "0x08070EF4",
+   "size": 80,
+   "src": "code-0806CFC8.s",
+   "fe_name": "CgbOscOff",
+   "strength": "full",
+   "insns": 30
+  },
+  {
+   "name": "sub_08070F44",
+   "addr": "0x08070F44",
+   "size": 104,
+   "src": "code-0806CFC8.s",
+   "fe_name": "CgbModVol",
+   "strength": "full",
+   "insns": 52
+  },
+  {
+   "name": "sub_08070FAC",
+   "addr": "0x08070FAC",
+   "size": 1100,
+   "src": "code-0806CFC8.s",
+   "fe_name": "CgbSound",
+   "strength": "full",
+   "insns": 501
+  },
+  {
+   "name": "sub_080713F8",
+   "addr": "0x080713F8",
+   "size": 40,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayTempoControl",
+   "strength": "full",
+   "insns": 17
+  },
+  {
+   "name": "sub_08071420",
+   "addr": "0x08071420",
+   "size": 104,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayVolumeControl",
+   "strength": "full",
+   "insns": 50
+  },
+  {
+   "name": "sub_08071488",
+   "addr": "0x08071488",
+   "size": 116,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayPitchControl",
+   "strength": "full",
+   "insns": 56
+  },
+  {
+   "name": "sub_080714FC",
+   "addr": "0x080714FC",
+   "size": 104,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MPlayPanpotControl",
+   "strength": "full",
+   "insns": 50
+  },
+  {
+   "name": "sub_08071564",
+   "addr": "0x08071564",
+   "size": 32,
+   "src": "code-0806CFC8.s",
+   "fe_name": "MP_clear_modM",
+   "strength": "full",
+   "insns": 15
+  },
+  {
+   "name": "sub_0807166C",
+   "addr": "0x0807166C",
+   "size": 344,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_memacc",
+   "strength": "full",
+   "insns": 129
+  },
+  {
+   "name": "sub_080717C4",
+   "addr": "0x080717C4",
+   "size": 32,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_xcmd",
+   "strength": "full",
+   "insns": 12
+  },
+  {
+   "name": "sub_080717F8",
+   "addr": "0x080717F8",
+   "size": 72,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ply_xwave",
+   "strength": "full",
+   "insns": 27
+  },
+  {
+   "name": "sub_080722B8",
+   "addr": "0x080722B8",
+   "size": 76,
+   "src": "code-0806CFC8.s",
+   "fe_name": "StartFadeCore",
+   "strength": "full",
+   "insns": 32
+  },
+  {
+   "name": "sub_08072924",
+   "addr": "0x08072924",
+   "size": 36,
+   "src": "code-0806CFC8.s",
+   "fe_name": "CallDelayed_OnLoop",
+   "strength": "full",
+   "insns": 16
+  },
+  {
+   "name": "sub_08072948",
+   "addr": "0x08072948",
+   "size": 40,
+   "src": "code-0806CFC8.s",
+   "fe_name": "CallDelayedArg_OnLoop",
+   "strength": "full",
+   "insns": 17
+  },
+  {
+   "name": "sub_0807298C",
+   "addr": "0x0807298C",
+   "size": 32,
+   "src": "code-0806CFC8.s",
+   "fe_name": "CallDelayedArg",
+   "strength": "full",
+   "insns": 13
+  },
+  {
+   "name": "sub_080729EC",
+   "addr": "0x080729EC",
+   "size": 44,
+   "src": "code-0806CFC8.s",
+   "fe_name": "Register2dChrMove",
+   "strength": "full",
+   "insns": 21
+  },
+  {
+   "name": "sub_08073CB8",
+   "addr": "0x08073CB8",
+   "size": 60,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ApplyBitmap",
+   "strength": "full",
+   "insns": 29
+  },
+  {
+   "name": "sub_08073CF4",
+   "addr": "0x08073CF4",
+   "size": 40,
+   "src": "code-0806CFC8.s",
+   "fe_name": "ApplyBitmapLine",
+   "strength": "full",
+   "insns": 19
+  },
+  {
+   "name": "sub_08073D64",
+   "addr": "0x08073D64",
+   "size": 52,
+   "src": "code-0806CFC8.s",
+   "fe_name": "PutAppliedBitmap",
+   "strength": "full",
+   "insns": 25
+  }
+ ]
+}
