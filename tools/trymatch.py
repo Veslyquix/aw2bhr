@@ -123,6 +123,33 @@ def disassemble(obj_rel, lo, hi):
     return keep
 
 
+def record_best(workdir, name, pct):
+    """Keep the highest-scoring candidate seen, beside the current one.
+
+    An iteration that scores worse overwrites the source that scored better, so
+    without this the best attempt is simply lost -- one agent reported reaching
+    88.2% and left a 25% regression behind it, with no way back. best.c is never
+    read by the build; it exists so a handoff starts from the best known point
+    rather than the last one.
+    """
+    meta = os.path.join(workdir, "best.json")
+    prev = -1.0
+    if os.path.exists(meta):
+        try:
+            with open(meta, encoding="utf-8") as fh:
+                prev = json.load(fh).get("percent", -1.0)
+        except (ValueError, OSError):
+            prev = -1.0
+    if pct <= prev:
+        print("  best so far: %.1f%% (kept in best.c)" % prev)
+        return
+    src = os.path.join(workdir, name + ".c")
+    awlib.write_text(os.path.join(workdir, "best.c"),
+                     "".join(awlib.read_lines(src)))
+    awlib.write_text(meta, json.dumps({"percent": round(pct, 2)}) + "\n")
+    print("  new best: %.1f%% (saved to best.c)" % pct)
+
+
 def check(name, want_diff=False, keep_going=False):
     rec, unit = resolve(name)
     if rec is None or unit is None:
@@ -205,6 +232,7 @@ def check(name, want_diff=False, keep_going=False):
     common = min(len(tgt_fn), len(cand_fn))
     pct = (common - n_diff) / size * 100 if size else 0
     print("  bytes: %d of %d differ  (%.1f%% identical)" % (n_diff, common, pct))
+    record_best(workdir, name, pct)
     first = next((i for i, (a, b) in enumerate(zip(tgt_fn, cand_fn)) if a != b), common)
     print("  first difference at +0x%x" % first)
 

@@ -134,10 +134,12 @@ def stub(fn, rec, n_args, returns):
         " * anything past r3 arrives on the stack as ldr rN, [sp, #...].\n"
         % n_args)
     notes = []
+    # Listed in full, not clipped. A silently truncated list reads as complete,
+    # and a global left off it is one the reader never goes looking for.
     if rec["calls"]:
-        notes.append(" * calls: " + ", ".join(rec["calls"][:12]))
+        notes.append(" * calls: " + ", ".join(rec["calls"]))
     if rec["data_refs"]:
-        notes.append(" * touches: " + ", ".join(rec["data_refs"][:12]))
+        notes.append(" * touches: " + ", ".join(rec["data_refs"]))
     note_block = ("/*\n" + "\n".join(notes) + "\n */\n") if notes else ""
 
     return (
