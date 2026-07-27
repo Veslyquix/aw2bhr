@@ -239,6 +239,29 @@ something between them.
 `get_best_mode` picks the narrowest mode containing the field, so a 5-bit field
 at bit 0 would be QImode — `ldrb`, not `ldrh`.
 
+**The bitfield container type sets the load width.** `u32 priority : 2` reads
+with `ldr`, `u16 priority : 2` with `ldrh`, `u8` with `ldrb` — same field, same
+offset, three different instructions. When a bitfield struct near-misses only on
+the load, change the container before changing anything else. `struct BgCnt`
+shipped with a `u16` container and had to become `u32`; the shadows are read a
+word at a time even though the register they mirror is 16-bit.
+
+**Storing through a union member is not free.** Two ways it costs a match, both
+observed while merging the headers:
+
+- *The constant gets re-materialised.* A run of `g = 0` stores shares one
+  `mov rN, #0`. Change any one of them to `g.raw = 0` and agbcc reloads the
+  zero at that point, +2 bytes, padded to +4. `sub_080122EC` grew by four bytes
+  this way and shifted 4,172 symbols downstream.
+- *Read-modify-write operands swap.* `g.raw8 |= 0x80` emits
+  `orr const, const, value`; a plain `u8` lvalue emits `orr value, value, const`.
+  Two bytes, no size change, so the link succeeds and only the ROM hash notices.
+
+Neither bites when the union store stands alone or ends a run — `sub_08012358`
+and `sub_0801237C` both match with `.raw`. It bites when the store *interrupts*
+a run of another type. The fix is to cast to the scalar type at that one call
+site (`*(u16 *)&g = 0`), not to change the declared type of the global.
+
 ---
 
 ## Control flow
@@ -463,67 +486,58 @@ found it on iteration 134 of its first run. See the address-taking rule under
 
 ---
 
-## Known type conflicts, deliberately unresolved
+## Where the globals live
 
-These compile today only because they are separate translation units. A shared
-header must reconcile them, and the typed model is the correct one in both
-cases.
+**Never declare a global in your `.c` file.** All 97 of them are already
+declared, with a merged type, in one of two headers:
 
-- `gUnknown_030030E0`, `gUnknown_030030A4`, `gUnknown_030030DC` —
-  `src/decomp/c_08012358.c` says `extern u16`; `c_08078B08.c` says
-  `union BlendCntBuf` and two `struct WinCnt`.
-- `gUnknown_03002B6C` — `include/hardware.h:147` says `extern u8`, but every
-  read site does a 32-bit `ldr` with bitfield extracts (it is a BGCNT mirror).
-  `src/title-screen.c:162` does `|= 0x80` against the u8 declaration, so the
-  read and write sites disagree. Changing the header would break a currently
-  matching file.
-- `gUnknown_03001FE8` — `src/decomp/c_080122EC.c:12` says `extern u16`;
-  `c_08013C54.c` needs `struct BgCnt` (char_base at bits 2-3, proved by
-  `lsls #28; lsrs #30` then `<<14` added to `0x06000000`).
+- `include/unknown-globals.h` — 88 globals and their structs. Reached through
+  `global.h`, so it needs no `#include`.
+- `include/hardware.h` — the nine display-register shadows
+  (`gUnknown_03002B6C`, `gUnknown_030030A4`, `gUnknown_030030E0` and
+  neighbours), because they need the register types defined there. Add
+  `#include "hardware.h"` if you touch one.
 
-**Expect eleven more of these.** `c_080122EC.c` declares **13** globals as bare
-`extern u16` in one block, including both of the above. The shared header will
-have to reconcile all thirteen at once rather than one at a time, so it is worth
-typing them together rather than discovering each through a conflict.
+Every struct there is a **superset**: the variants that preceded it disagreed
+only about which bytes they had bothered to name, never about offsets, member
+types or total size. So adding a field is normal — narrow a `filler_XX` into an
+`unkXX` and leave everything around it alone. Moving a field, changing a member
+type, or changing the total size will silently break a match in a file you are
+not looking at, because agbcc picks the instruction from the member type and the
+index stride from `sizeof`.
+
+If the merged type is genuinely wrong for your function, that is a real finding
+and worth reporting — but check the union first. `gUnknown_03002B6C` is reached
+as a word, a halfword *and* a byte, and all three spellings exist on it.
 
 ---
 
 ## Data models worked out so far
 
+**The layouts are in `include/unknown-globals.h`, not here.** This section is
+what the layouts do not record: what a field means, which function proved it,
+and which globals belong together. When the two disagree, the header is right —
+it is the one the compiler reads.
+
 ```c
-/* 0x60 = 96 bytes, exactly 30 entries (proved from a loop bound).
-   FIVE different views of this exist across src/decomp/ -- use the merged one:
+/* gUnknown_03001470 (struct Unk03001470) -- 0x60 bytes, exactly 30 entries
+   (proved from a loop bound). Four views of this existed before the merge:
      unk00 non-zero = slot in use, and a lookup key (sub_08015BD0 scans it)
      unk08 cleared by sub_08015C30
      unk26 indexes into gUnknown_0200E438
-     unk38 set to 1 by sub_08029FC4                                       */
-struct UnkBar {
-    u32 unk00; u8 filler_04[4]; u32 unk08; u8 filler_0C[0x1a];
-    u16 unk26; u8 filler_28[0x10]; u16 unk38; u8 filler_3A[0x26];
-};
-extern struct UnkBar gUnknown_03001470[30];
-extern s16 gUnknown_03001FBC;   /* current index; s16, proved by ldrsh */
+     unk38 set to 1 by sub_08029FC4
+   gUnknown_03001FBC is the current index -- s16, proved by ldrsh. */
 
 /* The {u16;u16} pair needs a union where a caller compares one as a word:
      gUnknown_03003F24 live/scratch, gUnknown_03003100 committed source,
      gUnknown_030044A4 backup. The call sequence
         bl sub_0802C57C; bl <work>; bl sub_0802C594
-   appears 7+ times -- save, work, restore. */
-union Unk802C57CBuf { struct Unk802C57C pos; u32 raw; };
+   appears 7+ times -- save, work, restore. Only 03003F24 and 03003100 are
+   declared as union Unk802C57CBuf; the rest are the bare struct. */
 
-/* 0x4c bytes */
-struct UnkFoo {
-    u8 filler_00[0x30]; struct UnkVec unk30; u8 filler_38[4];
-    u16 unk3c; u16 unk3e; u8 filler_40[4]; u32 unk44; u8 filler_48[4];
-};
-extern struct UnkFoo gUnknown_0200E438[];
-
-/* sprite list: 16-byte entries, layer-head array + bump allocator */
-struct SpriteEntry {
-    struct SpriteEntry *next; u16 oam1; u16 oam0; u16 oam2; u16 *object;
-};
-extern struct SpriteEntry gUnknown_0200D510[];    /* layer heads */
-extern struct SpriteEntry *gUnknown_03002B24;     /* pool cursor */
+/* sprite list: 16-byte entries, layer-head array + bump allocator.
+     gUnknown_0200D510  layer heads
+     gUnknown_03002B24  pool cursor */
 
 /* 0x48 bytes of bit arrays; gUnknown_02028078 is a shadow copy of the same
    type (proved by a 0x48-length memcpy in sub_0803BCA0).
@@ -538,11 +552,9 @@ extern u8 *gUnknown_08499590;
 
 /* 0x03003F24 / 0x030044A4 — a live pair and its backup, 7 callers each.
    sub_0802C57C saves, sub_0802C594 restores. Likely a cursor position. */
-struct Unk802C57C { u16 unk00; u16 unk02; };
 
 /* 0x0849B018 — pointer to a struct with a bitmask byte at +9. 13 callers.
    sub_0802F460(s8 index) tests bit `index` of it and returns bool8. */
-struct Unk0849B018 { u8 filler_00[9]; u8 unk09; };
 
 /* 0x08090CD8 — const pointer to a one-word wrapper whose field 0 points at a
    large RAM block holding a 32-slot ring of 0x88-byte records:
@@ -559,7 +571,6 @@ struct Unk0849B018 { u8 filler_00[9]; u8 unk09; };
                      08015638 return-by-value
      unk3c (u16)     080157A4 set, 080157D0 get
      unk3e (u16)     080157F4 set                                        */
-struct UnkVec { u32 unk00; u32 unk04; };
 
 /* 0x0200C528 -- 0x18-byte entries, >= 10, indexed by s16.
    +0x00 pointer, non-NULL = slot in use (sub_08019260 scans 0..9)
@@ -573,16 +584,12 @@ struct UnkVec { u32 unk00; u32 unk04; };
 /* 0x03002B80 -- a single struct, not an array. +0x0000 u8 flag set to 1,
    +0x0358 u16 set to arg+1 by sub_0801B768. At least 0x35a bytes. */
 
-/* 0x08499598 -- ALSO reached with a second, wider layout. Four files had four
-   different views of this struct before one agent merged them; the merged
-   version below is verified (both its functions still match against it), but
-   src/decomp/ still carries the per-file variants. Reconcile these together
-   with the 13 `extern u16` globals above when the shared header lands, not
-   piecemeal -- a partial merge just creates a fifth variant.
-     +0x1E u8  bool-ish (sub_0804415C)   +0x20 u32 (sub_08044094)
+/* 0x08499598 -- eight different views of this existed before the merge, the
+   widest disagreement in the tree. They all agreed on 0x3C, proved by
+   `lsls #4; subs; lsls #2` (x*15*4). Fields and who proved them:
+     +0x1e u8  bool-ish (sub_0804415C)   +0x20 u32 (sub_08044094)
      +0x24 u8  written 0 (sub_0804438C)  +0x25 u8  (sub_08044374)
-     +0x31 u8  set to 1 (sub_0802C154)
-   Entry size 0x3C, proved by `lsls #4; subs; lsls #2` (x*15*4) in all four. */
+     +0x31 u8  set to 1 (sub_0802C154) */
 
 /* 0x08499598 -- pointer to 0x3C-byte records; index is (i<<4 - i)<<2.
    +0x13 u8 (written with +0x14)   +0x14 u16 from gUnknown_03004080
@@ -612,12 +619,15 @@ struct UnkVec { u32 unk00; u32 unk04; };
    Note 0801D96C indexes gUnknown_0200E438 DIRECTLY by its argument, while the
    08015xxx accessors go through gUnknown_03001470[a].unk26. */
 
-/* struct BgCnt mirrors -- FOUR known so far, each with its own tilemap pointer
-   and its own charblock base:
-     gUnknown_03002B6C, gUnknown_03001FE8, gUnknown_030030B4 (+ one in
-     title-screen.c). gUnknown_030030B4 pairs with u16 *gUnknown_08499580 and
-     lives at 0x0600D800, not the 0x06000000 the others use.
-   All are non-const tilemap pointers, re-ldr'd every loop iteration. */
+/* struct BgCnt mirrors -- THREE, each with its own tilemap pointer and its own
+   charblock base. All are union BgCntBuf in hardware.h:
+     gUnknown_03002B6C + u16 *gUnknown_08499578
+     gUnknown_03001FE8 + u16 *gUnknown_0849957C
+     gUnknown_030030B4 + u16 *gUnknown_08499580, which writes 0x0600D800
+                         rather than the 0x06000000 the other two use.
+   The tilemap pointers are non-const, re-ldr'd every loop iteration.
+   title-screen.c is a fourth *user* of gUnknown_03002B6C, not a fourth mirror
+   -- it sets bit 7 as a byte. */
 
 /* 0x0200C420 / 0x0200C500 -- u32[2] save/restore pair, 08016E74 saves and
    08016E8C restores. Same idiom as 0x03003F24 / 0x030044A4. */
@@ -646,10 +656,10 @@ struct UnkVec { u32 unk00; u32 unk04; };
      *p = (*p & ~(1 << bit)) | (value << bit);
    Four spellings of that last line compile byte-identically. */
 
-/* two copies of a 16-entry pointer-list idiom */
-extern void *gUnknown_03002FA0[16];      /* list A */
-extern volatile u16 gUnknown_030030E8;   /* list A count, capped at 16 */
-extern void *gUnknown_03000000[16];      /* list B */
+/* two copies of a 16-entry pointer-list idiom. The header declares the arrays
+   without a bound; 16 is the cap the code enforces, not a proved extent.
+     gUnknown_03002FA0  list A, counted by volatile u16 gUnknown_030030E8
+     gUnknown_03000000  list B                                            */
 ```
 
 `BLEND_EFFECT_ALPHA/BRIGHTEN/DARKEN/NONE` are referenced by macros in
