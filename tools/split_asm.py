@@ -177,6 +177,27 @@ def load_promoted():
     return {n: e for e in entries for n in e["functions"]}
 
 
+def prune(out_dir, keep):
+    """Remove unit outputs the current plan no longer writes to `out_dir`.
+
+    Promotion stops a unit being emitted to build/functions, but its previous
+    .s and .o stay on disk -- and the Makefile picks up *every* .s under that
+    directory. The stale object then gets linked next to the C one and the link
+    fails with a duplicate definition of the promoted function. The same applies
+    to any unit that gets renamed or regrouped, so anything the plan does not
+    name is removed rather than just the promoted ones.
+    """
+    if not os.path.isdir(out_dir):
+        return []
+    gone = []
+    for entry in sorted(os.listdir(out_dir)):
+        stem, ext = os.path.splitext(entry)
+        if ext in (".s", ".o", ".d") and stem not in keep:
+            os.remove(os.path.join(out_dir, entry))
+            gone.append(entry)
+    return gone
+
+
 def build(clean=False):
     if clean and os.path.isdir(OUT_DIR):
         shutil.rmtree(OUT_DIR)
@@ -186,6 +207,7 @@ def build(clean=False):
     files = awlib.load_all()
     manifest = []
     total_funcs = 0
+    written = {OUT_DIR: set(), PROMOTED_DIR: set()}
 
     for af in files:
         units = plan_units(af)
@@ -214,6 +236,7 @@ def build(clean=False):
             out_dir = PROMOTED_DIR if owners else OUT_DIR
             os.makedirs(out_dir, exist_ok=True)
             awlib.write_text(os.path.join(out_dir, u.filename), u.render())
+            written[out_dir].add(os.path.splitext(u.filename)[0])
             total_funcs += len(u.funcs)
             manifest.append({
                 "unit": u.name,
@@ -228,6 +251,14 @@ def build(clean=False):
                 "header_chars": len(u.header),
                 "promoted": next(iter(owners)) if owners else None,
             })
+
+    for out_dir, keep in written.items():
+        gone = prune(out_dir, keep)
+        if gone:
+            rel = os.path.relpath(out_dir, awlib.REPO).replace("\\", "/")
+            print("pruned %d stale file(s) from %s: %s"
+                  % (len(gone), rel, ", ".join(gone[:6])
+                     + (" ..." if len(gone) > 6 else "")))
 
     awlib.write_text(MANIFEST, json.dumps(manifest, indent=1) + "\n")
     return manifest, total_funcs, files

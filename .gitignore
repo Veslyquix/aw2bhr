@@ -173,3 +173,8 @@ tools/__pycache__/
 # Per-function agent scratch (regenerate: tools/newfunc.py). Candidate C that
 # matches is promoted into src/; nothing here is a source of truth.
 work/
+
+# Third-party checkouts. See vendor/README.md for what to clone and at
+# which commit; the README itself is tracked.
+vendor/*
+!vendor/README.md

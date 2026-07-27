@@ -587,6 +587,48 @@ def try_match(name_or_addr: str, c_code: str, show_diff: bool = True) -> dict:
 
 
 @mcp.tool()
+def permute(name_or_addr: str, seconds: int = 300, threads: int = 4) -> dict:
+    """Brute-force register allocation with decomp-permuter. Slow; last resort.
+
+    Use this only for a candidate that is already semantically correct and stuck
+    on which register something landed in -- typically above 80%, with the same
+    instructions in the same order. It cannot fix a wrong struct layout or a
+    wrong control-flow shape, and running it on one wastes the whole budget.
+
+    It starts from `work/<fn>/best.c`, so get the score as high as you can by
+    hand first. Every result is re-checked with the same byte-level test
+    `try_match` uses, because the permuter's own score only diffs objdump text.
+
+    Blocks for up to `seconds`. Returns matched=false with the best score
+    reached if the search came up empty, which is a common and normal outcome.
+    """
+    rec = _resolve(name_or_addr)
+    if rec is None:
+        return {"error": f"no function matching {name_or_addr!r}"}
+
+    name = rec["name"]
+    if not os.path.isdir(os.path.join(awlib.REPO, "work", name)):
+        return {"error": f"no work directory for {name} -- run start_function "
+                         "and get a near-miss candidate before permuting"}
+
+    res = _run(["tools/permute.py", name, "--seconds", str(seconds),
+                "-j", str(threads)], timeout=seconds + 300)
+    out = {
+        "name": name,
+        "matched": res["exit_code"] == 0,
+        "report": res["stdout"][-6000:],
+    }
+    if res["stderr"].strip():
+        out["stderr"] = res["stderr"][-1500:]
+    if not out["matched"]:
+        out["next"] = ("The search found nothing that matches at the byte "
+                       "level. work/<fn>/<fn>.c is unchanged. Re-running with "
+                       "a longer --seconds sometimes helps, but a different "
+                       "starting point usually helps more.")
+    return out
+
+
+@mcp.tool()
 def compile_probe(c_code: str, name_or_addr: str | None = None) -> dict:
     """Compile candidate C and return the assembly agbcc produced. No verdict.
 

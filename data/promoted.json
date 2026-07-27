@@ -204,6 +204,15 @@
   "size": 48
  },
  {
+  "file": "src/decomp/c_0802F460.c",
+  "obj": "src/decomp/c_0802F460.o",
+  "addr_hex": "0x0802F460",
+  "functions": [
+   "sub_0802F460"
+  ],
+  "size": 32
+ },
+ {
   "file": "src/decomp/c_0803CA54.c",
   "obj": "src/decomp/c_0803CA54.o",
   "addr_hex": "0x0803CA54",

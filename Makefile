@@ -70,9 +70,16 @@ LDS := $(BUILD_NAME).lds
 # assembles the same functions from asm/*.s, and linking both would be a
 # duplicate definition. Keeping it buildable means the ROM stays reproducible
 # from upstream sources alone -- a second, independent check on our C.
-C_SRCS := $(shell find $(SRC_DIR) -name *.c -not -path '*/decomp/*')
-ASM_SRCS := $(shell find $(SRC_DIR) -name *.s) $(shell find $(ASM_DIR) -name *.s)
-DATA_SRCS := $(shell find data -name *.s)
+#
+# The `-name` patterns are quoted deliberately. Unquoted, the shell expands them
+# against the repo root before find ever sees them, so a single stray .c file
+# there turns `-name *.c` into `-name thatfile.c` and C_SRCS comes out EMPTY.
+# Nothing errors: make just links whatever objects already exist in build/, so
+# the ROM silently builds from stale code. This happened -- decomp-permuter's
+# --debug mode drops a debug_source.c in the working directory.
+C_SRCS := $(shell find $(SRC_DIR) -name '*.c' -not -path '*/decomp/*')
+ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s') $(shell find $(ASM_DIR) -name '*.s')
+DATA_SRCS := $(shell find data -name '*.s')
 
 # `make SPLIT=1` builds from the per-function units in build/functions instead
 # of the four monolithic asm/*.s, using the matching generated linker script.
@@ -87,9 +94,9 @@ DATA_SRCS := $(shell find data -name *.s)
 #     python tools/split_asm.py && python tools/gen_lds.py
 FUNC_DIR := $(BUILD_DIR)/functions
 ifeq ($(SPLIT),1)
-  FUNC_SRCS := $(shell find $(FUNC_DIR) -name *.s)
-  ASM_SRCS := $(shell find $(SRC_DIR) -name *.s)
-  C_SRCS += $(shell find $(SRC_DIR)/decomp -name *.c 2>/dev/null)
+  FUNC_SRCS := $(shell find $(FUNC_DIR) -name '*.s')
+  ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s')
+  C_SRCS += $(shell find $(SRC_DIR)/decomp -name '*.c' 2>/dev/null)
   LDS := $(BUILD_NAME).split.lds
 endif
 
@@ -106,6 +113,12 @@ SYM := $(ROM:%.gba=%.sym)
 
 ifeq (,$(findstring $(C_GENERATED),$(C_SRCS)))
 C_SRCS += $(C_GENERATED)
+endif
+
+# Source discovery failing silently is worse than any build error: make would
+# link the objects already in build/ and `compare` would pass on stale code.
+ifeq ($(strip $(C_SRCS)),)
+  $(error C_SRCS is empty -- source discovery failed, see the note above it)
 endif
 
 C_OBJS := $(C_SRCS:%.c=$(BUILD_DIR)/%.o)

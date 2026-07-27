@@ -62,6 +62,44 @@ def run(script, timeout=900, cwd=None):
     return proc.returncode, proc.stdout, proc.stderr
 
 
+def stream(script, log_path=None, cwd=None):
+    """Like run(), but echo output as it arrives instead of at the end.
+
+    run() buffers, which is right for a compile that takes a second and wrong
+    for anything long: a search that prints a live progress line looks exactly
+    like a hung process for as long as it runs. Returns (returncode, text).
+    """
+    root = cwd or REPO_POSIX
+    full = "cd %s || exit 1\n%s" % (shlex.quote(root), script)
+    argv = (["wsl", "-d", DISTRO, "-e", "bash", "-c", full]
+            if os.name == "nt" else ["bash", "-c", full])
+    # Binary, and read1() rather than iterating lines: the permuter's progress
+    # counter is redrawn with a carriage return and never emits a newline, so
+    # line-buffered reading would show nothing until the run ended -- the exact
+    # problem this function exists to avoid.
+    proc = subprocess.Popen(argv, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
+    chunks = []
+    log = open(log_path, "w", encoding="utf-8") if log_path else None
+    try:
+        while True:
+            chunk = proc.stdout.read1(4096)
+            if not chunk:
+                break
+            text = chunk.decode("utf-8", errors="replace")
+            chunks.append(text)
+            if log:
+                log.write(text)
+                log.flush()
+            sys.stdout.write(text)
+            sys.stdout.flush()
+    finally:
+        if log:
+            log.close()
+        proc.stdout.close()
+    return proc.wait(), "".join(chunks)
+
+
 _VAR_RE_CACHE = {}
 
 

@@ -132,6 +132,62 @@ plain `ldrh`; a plain `s16` global emits `ldrsh`, which is wrong.
 store emits a spurious extra `ldrh` and a stray `orr`. Qualify only the access
 being read-modified.
 
+**A dead reload immediately before a store means the field is `volatile`.**
+`s->x++` on a volatile field compiles to `ldrb r0,[r1]; adds r0,#1;
+ldrb rN,[r1]; strb r0,[r1]` — the second load is of the same address, into a
+register nothing reads. Plain fields and full-width bitfields (`u8 x:8`,
+`u16 x:8`, `u32 x:8`) all give the clean three-instruction form; a narrow
+bitfield (`u8 x:5`) gives a long extract/mask/merge instead. So **load, compute,
+load the same address again, store** identifies a volatile field and nothing
+else. Worth checking early — it took `sub_080308B4` from 10% to 91% in one edit.
+
+**`const` on the global's declaration makes its load survive intervening
+stores.** `extern T *const gFoo;` read by name emits one `ldr` that GCC reuses
+across later `strb`/`strh`. Reaching the same object through a pointer
+(`const T *p = &g;`, or `T *const *pp; (*pp)->m`) does **not** get this. Read it
+off the assembly: a global loaded once and kept live across stores wants `const`
+on the declaration; one reloaded at each use does not.
+
+**Strict aliasing is off.** A `u16` store invalidates a cached pointer load
+exactly as a `u8` store does. So when the original keeps a pointer live across
+stores, the source is reusing *one evaluation* held in a local, not re-reading
+the global — no aliasing rule would let the compiler do that by itself.
+
+---
+
+## `-fforce-addr`
+
+This flag is in `CFLAGS` and is the least obvious thing in the build.
+
+**It routes a symbol's address through `.rodata` when the global is used both
+before and after a loop.** GCC emits `.LC0: .word gSym`, puts `.word .LC0` in
+the function's pool, and every access gains an extra `ldr`, growing the function
+by 4 bytes. Confirmed against minimal repros: before-only, after-only, and
+either side of an `if` are all fine; before **and** after any loop — `for`,
+`while`, `do`/`while`, any index type — always triggers it.
+
+**Tell:** `R_ARM_ABS32 .rodata` where you expected `R_ARM_ABS32 gSym`, plus a
+doubled `ldr rX,[rY]` at each access.
+
+**To reproduce it in source**, bind the address to a local and use that for the
+accesses *after* the loop:
+
+```c
+struct Foo *const *pp = &gSym;   /* by name before the loop is fine --   */
+...                              /* CSE merges those into this pseudo    */
+(*pp)->field++;                  /* after the loop, go through pp        */
+```
+
+This costs the `&gSym` pseudo one reference and register allocation is sensitive
+to that, which is what leaves `sub_080308B4` at 96%.
+
+**Do not remove the flag.** It is tempting: `sub_080308B4` matches exactly under
+`-fno-force-addr`. But the ROM builds to `14dd0b22c894…` with it, and upstream's
+own matching sources — `src/proc.c` and `src/title-screen.c` — generate
+different code without it. All 31 files in `src/decomp/` happen to be identical
+either way, so nothing promoted so far has exercised it; `sub_080308B4` is the
+first function that does, which is why this went unnoticed until now.
+
 ---
 
 ## Workflow
@@ -140,6 +196,15 @@ being read-modified.
   spending an attempt. One agent matched four functions in one `try_match` each
   by probing locally first. Explore with `compile_probe`, spend `try_match` on
   the verdict.
+- **`python tools/trymatch.py <fn> --diff` is the same check the MCP tool runs**,
+  against the same `work/<fn>/<fn>.c`. Iterating locally and using `try_match`
+  only to confirm costs nothing and is how the 0802 cluster was done.
+- **Put several variants in one probe file.** A single compile answers a codegen
+  question that would otherwise take five attempts — this is how the `volatile`
+  reload tell and the `-fforce-addr` rule above were both isolated.
+- **Ask of every global: is it `const`? is the field `volatile`?** The scaffold
+  says nothing about either, and both are readable off the assembly by the rules
+  above. For the 0802 cluster each was decisive.
 - **`include/unknown-functions.h` has ~39 real prototypes.** The scaffold
   surfaces them. They are ground truth and the compiler enforces them —
   disagreeing gives `conflicting types`, not a mismatch.
@@ -159,13 +224,22 @@ being read-modified.
 
 ## Known blocked functions
 
-Both are semantically correct and blocked on register allocation — the case
-`decomp-permuter` exists to brute-force.
+All three are semantically correct and blocked on register allocation. That is
+what `decomp-permuter` exists to brute-force, and it is wired up:
+
+```
+python tools/permute.py sub_080308B4 --seconds 600 -j 6
+```
+
+It starts from `work/<fn>/best.c`, searches, and re-checks every result with
+`trymatch` — the permuter's own score diffs objdump text, which is weaker than
+byte equality, so it is a search signal and not a verdict. See `vendor/README.md`.
 
 | function | best | obstacle |
 |---|---|---|
 | `sub_08063980` | 80% | `orrs r1, r0` vs `orrs r0, r1`. 14 source forms tried — pointer locals, separate result variables, `u8`/`u16`/`u32`/`s16`/`int` parameters, multiply instead of shift, casting the shift, reordering operands, hoisting the shift. All produced the same. GCC coalesces the result into the parameter's register because the parameter is dead after the shift. |
 | `sub_08001158` | 88.2% | 8 bytes. The original computes `y * 2` before loading the `0x417A` pool constant, killing `y`'s register early so both pool constants land in r4. Hoisting the multiply naively regresses to 29%. |
+| `sub_080308B4` | 96% | Size, instructions, order and offsets all identical; `src` and `&gUnknown_08090CD8` are swapped between r4 and r5. The model is provably right — drop the `pp`/`ctrl` scaffolding and compile with `-fno-force-addr` and it matches byte-for-byte with correct relocations. The scaffolding exists only to reproduce `-fforce-addr`, and it is what perturbs the allocation. |
 
 ---
 
@@ -219,6 +293,23 @@ extern struct Unk02028030 gUnknown_02028030;
 /* +0x0A22 u16 tiles[]  indexed by rowOffset[y] + x, value masked to 0x1FF */
 /* +0x417A u16 rowOffset[] indexed by y                                    */
 extern u8 *gUnknown_08499590;
+
+/* 0x03003F24 / 0x030044A4 — a live pair and its backup, 7 callers each.
+   sub_0802C57C saves, sub_0802C594 restores. Likely a cursor position. */
+struct Unk802C57C { u16 unk00; u16 unk02; };
+
+/* 0x0849B018 — pointer to a struct with a bitmask byte at +9. 13 callers.
+   sub_0802F460(s8 index) tests bit `index` of it and returns bool8. */
+struct Unk0849B018 { u8 filler_00[9]; u8 unk09; };
+
+/* 0x08090CD8 — const pointer to a one-word wrapper whose field 0 points at a
+   large RAM block holding a 32-slot ring of 0x88-byte records:
+     buf+0x0006  u8            sender id
+     buf+0x0020  volatile u16  sequence counter, post-incremented per record
+     buf+0x012C  entry[48]     the records
+     buf+0x1AAD  volatile u8   ring write index, masked to 0x1F
+   entry: u8 type (0xAF) | u8 sender | u16 seq | u16 len (20) | u8 payload[20]
+   Offsets confirmed by a byte-exact match under -fno-force-addr. */
 
 /* two copies of a 16-entry pointer-list idiom */
 extern void *gUnknown_03002FA0[16];      /* list A */
