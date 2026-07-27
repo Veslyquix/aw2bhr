@@ -77,6 +77,34 @@ def split_source(name, text):
     return None, None
 
 
+def decl_chunks(lines):
+    """Split a declaration section into whole declarations.
+
+    A chunk is one brace-balanced construct: a `struct X { ... };` block or a
+    single `extern ...;` line. De-duplicating at line level instead silently
+    destroys source -- two different structs both contain a line `{` and a line
+    `};`, so dropping the repeats leaves the second one without its braces.
+    """
+    chunks, cur, depth = [], [], 0
+    for ln in lines:
+        s = ln.strip()
+        if not s and not cur:
+            continue
+        if s == INCLUDE_LINE.strip():
+            continue
+        if s.startswith("/*") or s.startswith("*") or s.startswith("//"):
+            if not cur:
+                continue                      # stray comment between decls
+        cur.append(ln)
+        depth += ln.count("{") - ln.count("}")
+        if depth <= 0 and (s.endswith(";") or s.endswith("}")):
+            chunks.append("".join(cur))
+            cur, depth = [], 0
+    if cur:
+        chunks.append("".join(cur))
+    return chunks
+
+
 def merge(run, index):
     """One .c source for a contiguous run of functions."""
     decls, bodies = [], []
@@ -88,13 +116,11 @@ def merge(run, index):
         if head is None:
             return None, "could not locate the definition of %s in %s" % (
                 name, os.path.relpath(path, awlib.REPO))
-        for ln in head:
-            s = ln.strip()
-            if not s or s == INCLUDE_LINE.strip():
-                continue
-            if s not in seen:
-                seen.add(s)
-                decls.append(ln)
+        for chunk in decl_chunks(head):
+            key = " ".join(chunk.split())     # whitespace-insensitive identity
+            if key not in seen:
+                seen.add(key)
+                decls.append(chunk)
         bodies.append("".join(body).rstrip() + "\n")
 
     addrs = ", ".join("%s @ %s" % (n, index[n]["addr_hex"]) for n in run)
@@ -128,10 +154,11 @@ def all_matched(index):
     """Every function with a candidate in work/ that currently matches."""
     if not os.path.isdir(WORK):
         return []
+    already = {n for e in load_promoted() for n in e["functions"]}
     out = []
     for name in sorted(os.listdir(WORK)):
-        if name not in index:
-            continue
+        if name not in index or name in already:
+            continue          # checking a promoted function again is just noise
         if not os.path.exists(os.path.join(WORK, name, name + ".c")):
             continue
         ok, _ = verify(name)

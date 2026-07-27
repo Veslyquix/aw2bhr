@@ -12,6 +12,7 @@ extern u16 gUnknown_03002020;
 extern u16 gUnknown_03002B28;
 extern u16 gUnknown_03001FFC;
 #include "hardware.h"
+
 extern u8 gUnknown_03002B40;
 extern u8 gUnknown_03002B4C;
 extern u8 gUnknown_03002EFC;

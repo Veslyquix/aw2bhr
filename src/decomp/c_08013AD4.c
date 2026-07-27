@@ -8,9 +8,6 @@
  */
 
 extern u16 gUnknown_03002F00;
-/*
- * touches: gUnknown_03002F00
- */
 
 void sub_08013AD4(u8 a1)
 {

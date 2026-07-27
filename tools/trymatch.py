@@ -137,8 +137,12 @@ def check(name, want_diff=False, keep_going=False):
         return 2
 
     # Target: assemble the original unit if that has not been done already.
-    unit_s = "build/functions/%s" % unit["file"]
-    unit_o = "build/functions/%s.o" % unit["unit"]
+    # Promoted units live outside build/functions, so take the directory from
+    # the manifest -- otherwise a function stops being re-verifiable the moment
+    # it is promoted, which is precisely when regression checking matters.
+    unit_dir = unit.get("dir", "build/functions")
+    unit_s = "%s/%s" % (unit_dir, unit["file"])
+    unit_o = "%s/%s.o" % (unit_dir, unit["unit"])
     if not os.path.exists(os.path.join(awlib.REPO, unit_o.replace("/", os.sep))):
         rc, _, se = agbenv.assemble(unit_s, unit_o)
         if rc != 0:

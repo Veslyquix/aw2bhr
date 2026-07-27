@@ -7,10 +7,6 @@
  * sub_08000650 @ 0x08000650
  */
 
-/* sub_08000650 @ 0x08000650, 4 bytes, THUMB.
- * Signature below is inferred from register use and may be wrong.
- */
-
 void sub_08000650(void)
 {
     

@@ -126,6 +126,13 @@ def stub(fn, rec, n_args, returns):
     args = ", ".join("int a%d" % (i + 1) for i in range(n_args)) or "void"
     ret = "int" if returns else "void"
     body = "    return 0;" if returns else "    "
+    how = (
+        " * No prototype exists for this one. %d argument register(s) are read\n"
+        " * before being written, so it takes at least that many -- but the\n"
+        " * count is a floor, not the answer: a struct passed by value occupies\n"
+        " * two consecutive registers and looks like two arguments here, and\n"
+        " * anything past r3 arrives on the stack as ldr rN, [sp, #...].\n"
+        % n_args)
     notes = []
     if rec["calls"]:
         notes.append(" * calls: " + ", ".join(rec["calls"][:12]))
@@ -137,10 +144,10 @@ def stub(fn, rec, n_args, returns):
         '#include "global.h"\n\n'
         '%s'
         '/* %s @ %s, %d bytes, %s.\n'
-        ' * Signature below is inferred from register use and may be wrong.\n'
+        '%s'
         ' */\n'
         '%s %s(%s)\n{\n%s\n}\n'
-        % (note_block, fn, rec["addr_hex"], rec["size"], rec["mode"],
+        % (note_block, fn, rec["addr_hex"], rec["size"], rec["mode"], how,
            ret, fn, args, body))
 
 
