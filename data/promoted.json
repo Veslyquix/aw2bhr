@@ -213,6 +213,15 @@
   "size": 32
  },
  {
+  "file": "src/decomp/c_080308B4.c",
+  "obj": "src/decomp/c_080308B4.o",
+  "addr_hex": "0x080308B4",
+  "functions": [
+   "sub_080308B4"
+  ],
+  "size": 124
+ },
+ {
   "file": "src/decomp/c_0803CA54.c",
   "obj": "src/decomp/c_0803CA54.o",
   "addr_hex": "0x0803CA54",

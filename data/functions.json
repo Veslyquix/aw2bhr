@@ -35692,7 +35692,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "named": false,
   "kind": "game",
   "trivial": false,

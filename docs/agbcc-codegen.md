@@ -178,8 +178,22 @@ struct Foo *const *pp = &gSym;   /* by name before the loop is fine --   */
 (*pp)->field++;                  /* after the loop, go through pp        */
 ```
 
-This costs the `&gSym` pseudo one reference and register allocation is sensitive
-to that, which is what leaves `sub_080308B4` at 96%.
+**Where you take the address decides the allocation.** Writing that as an
+initialiser, `struct Foo *const *pp = &gSym;`, held `sub_080308B4` at 96% with
+`src` and `&gSym` swapped between r4 and r5. Splitting the declaration from the
+assignment, and putting the assignment *after* the first real statement, matches:
+
+```c
+struct Foo *const *pp;                  /* declare with the others   */
+entry = &gSym->buf->ring[gSym->buf->i]; /* first real statement      */
+pp = &gSym;                             /* take the address here     */
+```
+
+Found by decomp-permuter, which reached it as `new_var = &(*pp)` — a no-op that
+costs a pseudo and flips the same decision. The two forms are equivalent; the
+readable one is what is committed. Worth trying by hand before reaching for the
+permuter, because an initialiser is the natural way to write this and it is
+wrong.
 
 **Do not remove the flag.** It is tempting: `sub_080308B4` matches exactly under
 `-fno-force-addr`. But the ROM builds to `14dd0b22c894…` with it, and upstream's
@@ -224,11 +238,11 @@ first function that does, which is why this went unnoticed until now.
 
 ## Known blocked functions
 
-All three are semantically correct and blocked on register allocation. That is
-what `decomp-permuter` exists to brute-force, and it is wired up:
+Both are semantically correct and blocked on register allocation. That is what
+`decomp-permuter` exists to brute-force, and it is wired up:
 
 ```
-python tools/permute.py sub_080308B4 --seconds 600 -j 6
+python tools/permute.py sub_08063980 --seconds 600 -j 6
 ```
 
 It starts from `work/<fn>/best.c`, searches, and re-checks every result with
@@ -239,7 +253,10 @@ byte equality, so it is a search signal and not a verdict. See `vendor/README.md
 |---|---|---|
 | `sub_08063980` | 80% | `orrs r1, r0` vs `orrs r0, r1`. 14 source forms tried — pointer locals, separate result variables, `u8`/`u16`/`u32`/`s16`/`int` parameters, multiply instead of shift, casting the shift, reordering operands, hoisting the shift. All produced the same. GCC coalesces the result into the parameter's register because the parameter is dead after the shift. |
 | `sub_08001158` | 88.2% | 8 bytes. The original computes `y * 2` before loading the `0x417A` pool constant, killing `y`'s register early so both pool constants land in r4. Hoisting the multiply naively regresses to 29%. |
-| `sub_080308B4` | 96% | Size, instructions, order and offsets all identical; `src` and `&gUnknown_08090CD8` are swapped between r4 and r5. The model is provably right — drop the `pp`/`ctrl` scaffolding and compile with `-fno-force-addr` and it matches byte-for-byte with correct relocations. The scaffolding exists only to reproduce `-fforce-addr`, and it is what perturbs the allocation. |
+
+`sub_080308B4` was the third, at 96%, and is now **matched** — decomp-permuter
+found it on iteration 134 of its first run. See the address-taking rule under
+`-fforce-addr` above; the fix was moving one assignment out of a declaration.
 
 ---
 
