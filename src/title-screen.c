@@ -159,7 +159,9 @@ void sub_0806CA98(struct ProcTitleScreen * proc)
 
     gDispIo.disp_ct.mode = 0;
     SetDispEnable(1, 0, 0, 0, 1);
-    gUnknown_03002B6C |= 0x80;
+    /* Through the union member agbcc swaps the operands of the `orr` and the
+     * two bytes stop matching; a plain u8 lvalue keeps the ROM's order. */
+    *(u8 *)&gUnknown_03002B6C |= 0x80;
     gDispIo.disp_ct.obj_mapping = 1;
 
     sub_0801237C();

@@ -7,14 +7,6 @@
  * sub_08022ADC @ 0x08022ADC
  */
 
-struct Unk802C57C
-{
-    u16 unk00;
-    u16 unk02;
-};
-extern struct Unk802C57C gUnknown_030033E0;
-extern struct Unk802C57C gUnknown_030033E4;
-
 void sub_08022ADC(void)
 {
     gUnknown_030033E0.unk00 = gUnknown_030033E4.unk00 << 4;

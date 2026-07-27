@@ -7,8 +7,6 @@
  * sub_080248F8 @ 0x080248F8
  */
 
-extern u8 * gUnknown_08499590;
-
 u8 sub_080248F8(void)
 {
     return gUnknown_08499590[0x4233];

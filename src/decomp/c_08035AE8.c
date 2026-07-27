@@ -7,8 +7,6 @@
  * sub_08035AE8 @ 0x08035AE8
  */
 
-extern const s16 gUnknown_08090EAC[];
-
 s16 sub_08035AE8(s16 a)
 {
     return gUnknown_08090EAC[a & 1];

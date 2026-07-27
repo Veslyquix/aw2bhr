@@ -7,9 +7,6 @@
  * sub_08060554 @ 0x08060554
  */
 
-extern u16 gUnknown_03004780;
-extern u16 gUnknown_030045D4;
-
 void sub_08060554(void)
 {
     gUnknown_03004780 = 2;

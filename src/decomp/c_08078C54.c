@@ -9,20 +9,11 @@
 
 #include "hardware.h"
 
-union BlendCntBuf
-{
-    struct BlendCnt bits;
-    u16 raw;
-};
 struct Unk8078C54
 {
     u8 filler_00[0x68];
     u16 unk_68;
 };
-extern union BlendCntBuf gUnknown_030030E0;
-extern struct WinCnt gUnknown_030030A4;
-extern struct WinCnt gUnknown_030030DC;
-extern u16 gUnknown_03001FFC;
 struct Unk8078CC8
 {
     u8 filler_00[0x68];
@@ -40,10 +31,10 @@ void sub_08078C54(struct Unk8078C54 * proc)
     *(vu16 *)&gUnknown_030030E0 = (*(vu16 *)&gUnknown_030030E0 & 0xFFE0) | 0x1F;
     gUnknown_030030E0.bits.target1_enable_bd = 1;
 
-    gUnknown_030030A4.win0_enable_blend = 1;
-    gUnknown_030030DC.win0_enable_blend = 1;
-    gUnknown_030030A4.win1_enable_blend = 1;
-    gUnknown_030030DC.win1_enable_blend = 1;
+    gUnknown_030030A4.bits.win0_enable_blend = 1;
+    gUnknown_030030DC.bits.win0_enable_blend = 1;
+    gUnknown_030030A4.bits.win1_enable_blend = 1;
+    gUnknown_030030DC.bits.win1_enable_blend = 1;
 
     proc->unk_68 = 0;
 }
@@ -59,10 +50,10 @@ void sub_08078CC8(struct Unk8078CC8 * proc)
     *(vu16 *)&gUnknown_030030E0 = (*(vu16 *)&gUnknown_030030E0 & 0xFFE0) | 0x1F;
     gUnknown_030030E0.bits.target1_enable_bd = 1;
 
-    gUnknown_030030A4.win0_enable_blend = 1;
-    gUnknown_030030DC.win0_enable_blend = 1;
-    gUnknown_030030A4.win1_enable_blend = 1;
-    gUnknown_030030DC.win1_enable_blend = 1;
+    gUnknown_030030A4.bits.win0_enable_blend = 1;
+    gUnknown_030030DC.bits.win0_enable_blend = 1;
+    gUnknown_030030A4.bits.win1_enable_blend = 1;
+    gUnknown_030030DC.bits.win1_enable_blend = 1;
 
     proc->unk_68 = 0;
 }

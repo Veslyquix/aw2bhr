@@ -7,9 +7,6 @@
  * sub_0802813C @ 0x0802813C
  */
 
-extern void *gUnknown_08499E38[];
-extern u8 gUnknown_02028E40;
-
 void *sub_0802813C(void)
 {
     return gUnknown_08499E38[gUnknown_02028E40];

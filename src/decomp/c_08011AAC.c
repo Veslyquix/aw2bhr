@@ -7,9 +7,6 @@
  * sub_08011AAC @ 0x08011AAC
  */
 
-extern void *gUnknown_03002FA0[];
-extern volatile u16 gUnknown_030030E8;
-
 void sub_08011AAC(void *a1)
 {
     void **p;

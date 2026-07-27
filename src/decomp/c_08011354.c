@@ -7,11 +7,6 @@
  * sub_08011354 @ 0x08011354
  */
 
-extern u8 gUnknown_03002B40;
-extern u8 gUnknown_03002B44;
-extern u8 gUnknown_03002B4C;
-extern u8 gUnknown_03002EFC;
-
 void sub_08011354(void)
 {
     gUnknown_03002B40 = 0;

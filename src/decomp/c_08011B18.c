@@ -7,8 +7,6 @@
  * sub_08011B18 @ 0x08011B18
  */
 
-extern void *gUnknown_03000000[];
-
 void sub_08011B18(void)
 {
     u8 i;

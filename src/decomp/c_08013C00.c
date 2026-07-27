@@ -7,19 +7,7 @@
  * sub_08013C00 @ 0x08013C00
  */
 
-struct BgCnt
-{
-    u32 priority : 2;
-    u32 char_base : 2;
-    u32 pad_4 : 2;
-    u32 mosaic : 1;
-    u32 color_mode : 1;
-    u32 screen_base : 5;
-    u32 area_overflow : 1;
-    u32 screen_size : 2;
-};
-extern u16 *gUnknown_08499578;
-extern struct BgCnt gUnknown_03002B6C;
+#include "hardware.h"
 
 void sub_08013C00(void)
 {
@@ -29,5 +17,5 @@ void sub_08013C00(void)
         gUnknown_08499578[i] = 0;
 
     for (i = 0; i < 0x10; i++)
-        *(u16 *)(0x06000000 + gUnknown_03002B6C.char_base * 0x4000 + i * 2) = 0;
+        *(u16 *)(0x06000000 + gUnknown_03002B6C.bits.chr_block * 0x4000 + i * 2) = 0;
 }

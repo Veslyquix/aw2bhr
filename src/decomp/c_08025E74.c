@@ -7,14 +7,6 @@
  * sub_08025E74 @ 0x08025E74
  */
 
-struct Unk08499594
-{
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 filler_01[0x0b];
-};
-extern struct Unk08499594 *gUnknown_08499594;
-extern u16 gUnknown_030032C0;
-
 void sub_08025E74(void)
 {
     int i;

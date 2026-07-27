@@ -7,19 +7,6 @@
  * sub_08019260 @ 0x08019260
  */
 
-struct UnkC528Node
-{
-    u8 filler_00[4];
-    struct UnkC528Node *unk04;
-};
-struct UnkC528
-{
-    struct UnkC528Node *unk00;
-    struct UnkC528Node *unk04;
-    u8 filler_08[0x10];
-};
-extern struct UnkC528 gUnknown_0200C528[];
-
 int sub_08019260(void)
 {
     s16 i;

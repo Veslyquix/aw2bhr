@@ -7,19 +7,6 @@
  * sub_08025CF0 @ 0x08025CF0
  */
 
-struct Unk08499598
-{
-    /* 0x00 */ u8 filler_00[0x13];
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u16 unk14;
-    /* 0x16 */ u8 filler_16[0x05];
-    /* 0x1b */ u8 unk1b;
-    /* 0x1c */ u8 filler_1c[0x1e];
-    /* 0x3a */ u8 unk3a;
-    /* 0x3b */ u8 filler_3b[0x01];
-};
-extern struct Unk08499598 *gUnknown_08499598;
-
 u8 sub_08025CF0(int index)
 {
     return gUnknown_08499598[index].unk3a;

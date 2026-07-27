@@ -6,6 +6,7 @@
 
 #include "types.h"
 
+#include "unknown-globals.h"
 #include "unknown-functions.h"
 
 #define SECTION(name) __attribute__((section(name)))

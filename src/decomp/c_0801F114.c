@@ -7,18 +7,6 @@
  * sub_0801F114 @ 0x0801F114
  */
 
-struct Unk0200F920Entry
-{
-    u16 unk00;
-    u16 unk02;
-};
-struct Unk0200F920
-{
-    u8 filler_00[8];
-    struct Unk0200F920Entry unk08[32];
-};
-extern struct Unk0200F920 gUnknown_0200F920[];
-
 void sub_0801F114(void)
 {
     s32 i;

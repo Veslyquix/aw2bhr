@@ -7,8 +7,6 @@
  * sub_08057D44 @ 0x08057D44
  */
 
-extern u32 * gUnknown_08555450[];
-
 u32 sub_08057D44(int a1, int a2)
 {
     return gUnknown_08555450[a2][a1];

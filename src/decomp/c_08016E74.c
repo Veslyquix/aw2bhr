@@ -7,9 +7,6 @@
  * sub_08016E74 @ 0x08016E74
  */
 
-extern u32 gUnknown_0200C420[2];
-extern u32 gUnknown_0200C500[2];
-
 void sub_08016E74(void)
 {
     gUnknown_0200C500[0] = gUnknown_0200C420[0];

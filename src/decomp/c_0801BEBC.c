@@ -7,17 +7,6 @@
  * PutSprite @ 0x0801BEBC, PutSpriteExt @ 0x0801BEFC
  */
 
-struct SpriteEntry
-{
-    /* 00 */ struct SpriteEntry * next;
-    /* 04 */ u16 oam1;
-    /* 06 */ u16 oam0;
-    /* 08 */ u16 oam2;
-    /* 0C */ u16 * object;
-};
-extern struct SpriteEntry gUnknown_0200D510[];
-extern struct SpriteEntry * gUnknown_03002B24;
-
 void PutSprite(u32 layer, u32 x, u32 y, u16 * object, u32 oam2)
 {
     gUnknown_03002B24->next = gUnknown_0200D510[layer].next;

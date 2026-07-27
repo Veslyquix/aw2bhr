@@ -39,16 +39,20 @@ struct IO_ALIGNED(2) DispStat
     /* bit  8 */ u16 vcount_compare : 8;
 };
 
+// The bitfield container is u32, not u16, because the IWRAM shadow copies
+// (gUnknown_03002B6C and friends) are read with `ldr` in the ROM -- see
+// sub_08013C00. A u16 container makes agbcc emit `ldrh` and the match breaks.
+// The register itself is still 16-bit; only the shadow is word-accessed.
 struct IO_ALIGNED(2) BgCnt
 {
-    /* bit  0 */ u16 priority : 2;
-    /* bit  2 */ u16 chr_block : 2;
-    /* bit  4 */ u16 : 2;
-    /* bit  6 */ u16 mosaic : 1;
-    /* bit  7 */ u16 color_depth : 1;
-    /* bit  8 */ u16 tm_block : 5;
-    /* bit 13 */ u16 wrap : 1;
-    /* bit 14 */ u16 size : 2;
+    /* bit  0 */ u32 priority : 2;
+    /* bit  2 */ u32 chr_block : 2;
+    /* bit  4 */ u32 : 2;
+    /* bit  6 */ u32 mosaic : 1;
+    /* bit  7 */ u32 color_depth : 1;
+    /* bit  8 */ u32 tm_block : 5;
+    /* bit 13 */ u32 wrap : 1;
+    /* bit 14 */ u32 size : 2;
 };
 
 struct IO_ALIGNED(4) WinCnt
@@ -103,6 +107,38 @@ struct IO_ALIGNED(2) BlendCnt
     u16 target2_enable_bd : 1;
 };
 
+// The IWRAM shadows of the display registers are read field-by-field but
+// cleared wholesale with a 16-bit store (sub_080122EC and sub_08012358 do
+// nothing else), so one symbol has to offer both views and the shadows are
+// declared as unions rather than as the bare struct.
+//
+// gUnknown_03002B6C manages all three widths: `ldr` for the bitfields
+// (sub_08013C00), `strh` to clear it (sub_080122EC), and `ldrb`/`strb` to set
+// bit 7 (sub_0806CA98, sub_08037260).
+//
+// Storing through a union member is not always free -- agbcc re-materialises
+// constants and can swap the operands of a read-modify-write. Where that costs
+// a match the call site casts to the scalar type instead; both places that do
+// say so.
+union BgCntBuf
+{
+    struct BgCnt bits;
+    u16 raw;
+    u8 raw8;
+};
+
+union WinCntBuf
+{
+    struct WinCnt bits;
+    u16 raw;
+};
+
+union BlendCntBuf
+{
+    struct BlendCnt bits;
+    u16 raw;
+};
+
 struct DispIo
 {
     /* 00 */ struct DispCnt disp_ct;
@@ -142,10 +178,19 @@ struct DispIo
 #endif
 };
 
+extern struct DispIo gDispIo;
+
+// IWRAM shadows of the display registers. Every other unnamed global lives in
+// unknown-globals.h; these are here because they need the types above.
+extern union BgCntBuf gUnknown_03001FE8;
+extern u16 gUnknown_03001FFC;
 extern u16 gUnknown_03002020;
 extern u16 gUnknown_03002B28;
-extern u8 gUnknown_03002B6C;
-extern struct DispIo gDispIo;
+extern union BgCntBuf gUnknown_03002B6C;
+extern union WinCntBuf gUnknown_030030A4;
+extern union BgCntBuf gUnknown_030030B4;
+extern union WinCntBuf gUnknown_030030DC;
+extern union BlendCntBuf gUnknown_030030E0;
 
 struct KeySt
 {

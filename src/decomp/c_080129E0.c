@@ -7,8 +7,6 @@
  * sub_080129E0 @ 0x080129E0
  */
 
-extern u32 gUnknown_03001FD4;
-
 u32 sub_080129E0(void)
 {
     u32 x = gUnknown_03001FD4 * 4;

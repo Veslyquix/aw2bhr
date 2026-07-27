@@ -7,8 +7,6 @@
  * sub_08013AD4 @ 0x08013AD4, sub_08013AEC @ 0x08013AEC, sub_08013AFC @ 0x08013AFC, sub_08013B0C @ 0x08013B0C
  */
 
-extern u16 gUnknown_03002F00;
-
 void sub_08013AD4(u8 a1)
 {
     gUnknown_03002F00 |= 1 << a1;

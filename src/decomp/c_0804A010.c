@@ -7,8 +7,6 @@
  * sub_0804A010 @ 0x0804A010
  */
 
-extern u8 gUnknown_02028E41[];
-
 void sub_0804A010(void)
 {
     gUnknown_02028E41[0] = 0xa5;

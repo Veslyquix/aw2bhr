@@ -7,8 +7,6 @@
  * sub_08034F8C @ 0x08034F8C
  */
 
-extern s8 gUnknown_030030F0;
-
 void sub_08034F8C(void)
 {
     if (gUnknown_030030F0 != 0)

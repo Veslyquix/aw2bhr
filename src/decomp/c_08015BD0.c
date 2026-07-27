@@ -7,15 +7,6 @@
  * sub_08015BD0 @ 0x08015BD0
  */
 
-struct UnkBar
-{
-    u32 unk00;
-    u8 filler_04[0x22];
-    u16 unk26;
-    u8 filler_28[0x38];
-};
-extern struct UnkBar gUnknown_03001470[];
-
 s8 sub_08015BD0(s32 a)
 {
     u8 i;

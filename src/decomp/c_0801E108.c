@@ -7,8 +7,6 @@
  * SetObjAffine @ 0x0801E108
  */
 
-extern u16 gUnknown_03002520[];
-
 void SetObjAffine(int index, s16 pa, s16 pb, s16 pc, s16 pd)
 {
     gUnknown_03002520[index * 16 + 3] = pa;

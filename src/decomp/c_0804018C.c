@@ -14,7 +14,6 @@ struct UnkProc0849FB44
     u8 filler_00[0x4c];
     s32 unk_4c;
 };
-extern const struct ProcCmd gUnknown_0849FB44[];
 
 void sub_0804018C(s32 arg0)
 {

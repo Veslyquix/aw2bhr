@@ -7,8 +7,6 @@
  * sub_08003948 @ 0x08003948
  */
 
-extern u16 *gUnknown_0200B0B0;
-
 void sub_08003948(void)
 {
     *gUnknown_0200B0B0 &= ~8;
