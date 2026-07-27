@@ -430,6 +430,18 @@ data is still <span class="mono">.incbin</span> and is a separate problem.</p>
     print("wrote %s  (%s functions, %s bands, %s KB)"
           % (out_rel, "{:,}".format(tot_n), len(bands),
              "{:,}".format(len(doc) // 1024)))
+
+    # Mirror to the workspace root, beside rom/ and aw2bhr/, which is where the
+    # equivalent page lives in the other decomp projects and so where it gets
+    # looked for. Written from the same string in the same run, so the two
+    # cannot drift; the in-repo copy is the one under version control and is
+    # what gives progress a history.
+    mirror = os.path.join(os.path.dirname(awlib.REPO), "progress", "index.html")
+    try:
+        awlib.write_text(mirror, doc)
+        print("mirrored to %s" % mirror)
+    except OSError as exc:
+        print("note: could not mirror to the workspace root (%s)" % exc)
     for k in ("matched", "identified", "unstarted"):
         print("  %-11s %5s functions  %9s bytes"
               % (k, "{:,}".format(by[k][0]), "{:,}".format(by[k][1])))
