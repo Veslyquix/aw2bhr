@@ -24,6 +24,7 @@ from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import agbenv  # noqa: E402
 import awlib  # noqa: E402
 from mcp.server.fastmcp import FastMCP  # noqa: E402
 
@@ -583,6 +584,45 @@ def try_match(name_or_addr: str, c_code: str, show_diff: bool = True) -> dict:
                        "tools/promote.py, which re-verifies the match first; "
                        "do not edit src/ or asm/ yourself.")
     return out
+
+
+@mcp.tool()
+def compile_probe(c_code: str, name_or_addr: str | None = None) -> dict:
+    """Compile candidate C and return the assembly agbcc produced. No verdict.
+
+    Use this to test a hypothesis. It does not count as an attempt and does not
+    touch the work directory, so you can try ten spellings of an expression for
+    the cost of ten seconds and only spend a `try_match` once the assembly looks
+    right. One agent matched four functions in one attempt apiece this way.
+
+    Reading the output against the target tells you most of what a diff would,
+    without needing a candidate good enough to score.
+    """
+    import tempfile
+    stem = (_resolve(name_or_addr) or {}).get("name") or "probe"
+    rel = "build/probe/%s.c" % stem
+    awlib.write_text(os.path.join(awlib.REPO, rel.replace("/", os.sep)), c_code)
+
+    f = agbenv.flags()
+    out_s = "build/probe/%s.s" % stem
+    rc, so, se = agbenv.run(
+        'mkdir -p build/probe\n'
+        '%s %s %s | iconv -f UTF-8 -t CP932 | %s %s -o %s'
+        % (f["CPP"], f["CPPFLAGS"], rel, f["CC1"], f["CFLAGS"], out_s))
+    if rc != 0:
+        return {"ok": False,
+                "error": "compile failed -- note -Werror is on, so a warning "
+                         "is fatal",
+                "stderr": (se or so)[-3000:]}
+
+    path = os.path.join(awlib.REPO, out_s.replace("/", os.sep))
+    text = "".join(awlib.read_lines(path)) if os.path.exists(path) else ""
+    # Strip directives and debug line markers; only instructions matter here.
+    body = [ln.rstrip() for ln in text.splitlines()
+            if ln.strip() and not ln.strip().startswith((".file", ".loc", ".ident"))]
+    return {"ok": True, "asm": "\n".join(body[:400]),
+            "lines": len(body),
+            "note": "Assembly only -- run try_match for a byte-level verdict."}
 
 
 @mcp.tool()

@@ -257,5 +257,25 @@
    "sub_08057D44"
   ],
   "size": 20
+ },
+ {
+  "file": "src/decomp/c_08078B08.c",
+  "obj": "src/decomp/c_08078B08.o",
+  "addr_hex": "0x08078B08",
+  "functions": [
+   "sub_08078B08",
+   "sub_08078B74"
+  ],
+  "size": 212
+ },
+ {
+  "file": "src/decomp/c_08078C54.c",
+  "obj": "src/decomp/c_08078C54.o",
+  "addr_hex": "0x08078C54",
+  "functions": [
+   "sub_08078C54",
+   "sub_08078CC8"
+  ],
+  "size": 236
  }
 ]
