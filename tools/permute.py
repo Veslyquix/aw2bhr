@@ -17,6 +17,12 @@ Every candidate it produces is re-checked here with tools/trymatch.py, which
 compares the encoded bytes and the relocations. A permuter score of 0 that
 trymatch rejects is a real outcome, not a bug.
 
+Measured, the two are not even monotonically related: on both blocked functions
+the permuter's best-scoring candidate was a byte-level *regression* -- 35 -> 30
+while bytes went 80% -> 75%, and 220 -> 80 while bytes went 88.2% -> 55.9%.
+That is why the original source is restored when nothing matches, and why
+best.c is only ever moved forward by trymatch's own measurement.
+
 **target.o must contain the target function and nothing else.** The scorer
 disassembles the whole object, so a multi-function unit would make every score
 meaningless while still looking like it worked. This refuses to run in that case
@@ -204,12 +210,15 @@ def base_score(pdir):
 
 def run(pdir, seconds, threads):
     rel = os.path.relpath(pdir, awlib.REPO).replace(os.sep, "/")
-    # SIGINT rather than the default SIGTERM: the permuter installs a handler
-    # for it and shuts its worker threads down, so the run ends with its output
-    # directories complete. Exit 124 is timeout's "time ran out", which is the
-    # normal way for this to finish.
-    cmd = ("timeout -s INT %d python3 vendor/decomp-permuter/permuter.py %s "
-           "--better-only --stop-on-zero -j %d" % (seconds, shq(rel), threads))
+    # SIGINT first, so the permuter's own handler shuts the workers down and the
+    # output directories are left complete. `-k 30` is not optional: measured, a
+    # run took SIGINT at 900s and was still going at 2906s, holding every core
+    # it had. Whatever swallows the signal -- the multiprocessing pool, most
+    # likely -- a wall-clock limit that does not actually stop the process is
+    # worse than no limit, because nothing is watching it any more.
+    cmd = ("timeout -s INT -k 30 %d python3 vendor/decomp-permuter/permuter.py "
+           "%s --better-only --stop-on-zero -j %d"
+           % (seconds, shq(rel), threads))
     log = os.path.join(pdir, "permuter.log")
     print("\nrunning for up to %ds with %d threads; live output below, also"
           % (seconds, threads))

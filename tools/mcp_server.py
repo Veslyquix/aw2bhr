@@ -640,8 +640,12 @@ def compile_probe(c_code: str, name_or_addr: str | None = None) -> dict:
     Reading the output against the target tells you most of what a diff would,
     without needing a candidate good enough to score.
     """
-    import tempfile
-    stem = (_resolve(name_or_addr) or {}).get("name") or "probe"
+    # name_or_addr is optional and only names the scratch file. Guarding here
+    # rather than inside _resolve, which is entitled to assume a string: without
+    # it, omitting the argument -- exactly what "optional" invites -- failed with
+    # an AttributeError on None that pointed nowhere near the cause.
+    stem = (_resolve(name_or_addr) or {}).get("name") if name_or_addr else None
+    stem = stem or "probe"
     rel = "build/probe/%s.c" % stem
     awlib.write_text(os.path.join(awlib.REPO, rel.replace("/", os.sep)), c_code)
 
