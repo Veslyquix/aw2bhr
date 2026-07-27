@@ -32,6 +32,9 @@ import awlib
 
 OUT_DIR = os.path.join(awlib.REPO, "build", "functions")
 MANIFEST = os.path.join(OUT_DIR, "units.json")
+# Units whose functions now come from C. Written, so the split can still be
+# proven lossless, but kept out of the directory the Makefile globs.
+PROMOTED_DIR = os.path.join(awlib.REPO, "build", "promoted")
 
 def file_header(af):
     """The leading `.include`/`.syntax` block, copied verbatim.
@@ -164,11 +167,22 @@ def plan_units(af):
     return units
 
 
+def load_promoted():
+    """function name -> the C object that now provides it."""
+    path = os.path.join(awlib.DATA_DIR, "promoted.json")
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        entries = json.load(fh)
+    return {n: e for e in entries for n in e["functions"]}
+
+
 def build(clean=False):
     if clean and os.path.isdir(OUT_DIR):
         shutil.rmtree(OUT_DIR)
     os.makedirs(OUT_DIR, exist_ok=True)
 
+    promoted = load_promoted()
     files = awlib.load_all()
     manifest = []
     total_funcs = 0
@@ -176,18 +190,43 @@ def build(clean=False):
     for af in files:
         units = plan_units(af)
         for u in units:
-            awlib.write_text(os.path.join(OUT_DIR, u.filename), u.render())
+            names = [f.name for f in u.funcs]
+            owners = {promoted[n]["obj"] for n in names if n in promoted}
+
+            # A unit is emitted or not as a whole, so a promoted run cannot
+            # share one with a function that is still assembly -- the C object
+            # would supply some symbols and the unit the rest, at the same
+            # addresses.
+            if owners and not all(n in promoted for n in names):
+                left = [n for n in names if n not in promoted]
+                raise SystemExit(
+                    "error: unit %s mixes promoted and unpromoted functions "
+                    "(%s still assembly). Promote them together or not at all."
+                    % (u.name, ", ".join(left[:5])))
+            if len(owners) > 1:
+                raise SystemExit(
+                    "error: unit %s is claimed by more than one C object: %s"
+                    % (u.name, ", ".join(sorted(owners))))
+
+            # Promoted units are still written, just somewhere the build does
+            # not look, so verify_split.py can go on proving the split
+            # reconstructs asm/*.s byte-for-byte after the swap.
+            out_dir = PROMOTED_DIR if owners else OUT_DIR
+            os.makedirs(out_dir, exist_ok=True)
+            awlib.write_text(os.path.join(out_dir, u.filename), u.render())
             total_funcs += len(u.funcs)
             manifest.append({
                 "unit": u.name,
                 "file": u.filename,
+                "dir": os.path.relpath(out_dir, awlib.REPO).replace("\\", "/"),
                 "src": u.src,
                 "is_preamble": u.is_preamble,
                 "addr_hex": f"0x{u.addr:08X}" if u.funcs else None,
-                "functions": [f.name for f in u.funcs],
+                "functions": names,
                 "n_functions": len(u.funcs),
                 "size": sum(f.size for f in u.funcs),
                 "header_chars": len(u.header),
+                "promoted": next(iter(owners)) if owners else None,
             })
 
     awlib.write_text(MANIFEST, json.dumps(manifest, indent=1) + "\n")

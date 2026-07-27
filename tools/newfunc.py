@@ -58,7 +58,71 @@ def infer_signature(fn):
     return n_args, returns
 
 
+def declared_prototype(name):
+    """An existing declaration for this function, if the headers have one.
+
+    include/unknown-functions.h carries ~39 hand-written prototypes for
+    functions still in assembly. They are ground truth and beat anything
+    inferred from register use -- and because the compiler sees them too, a
+    definition that disagrees fails with `conflicting types` rather than merely
+    failing to match. Surfacing them is worth an attempt or two per function.
+    """
+    inc = os.path.join(awlib.REPO, "include")
+    if not os.path.isdir(inc):
+        return None, None
+    pat = re.compile(r'^\s*[A-Za-z_].*\b%s\s*\(' % re.escape(name))
+    for dirpath, _, filenames in os.walk(inc):
+        for entry in sorted(filenames):
+            if not entry.endswith(".h"):
+                continue
+            path = os.path.join(dirpath, entry)
+            for ln in awlib.read_lines(path):
+                if pat.match(ln) and ln.split("//")[0].rstrip().endswith(";"):
+                    rel = os.path.relpath(path, awlib.REPO).replace("\\", "/")
+                    return ln.split("//")[0].strip().rstrip(";"), rel
+    return None, None
+
+
+def name_params(proto, name):
+    """Turn `void PutSprite(u32, u32, u16 *)` into a definable signature.
+
+    A declaration may leave parameters unnamed, which is legal to declare and
+    illegal to define, so unnamed ones get a1, a2, ... Parameters that already
+    carry names are left exactly as written.
+    """
+    head, _, rest = proto.partition("(")
+    params = rest.rsplit(")", 1)[0].strip()
+    if params in ("", "void"):
+        return "%s(void)" % head.strip()
+    out = []
+    for i, raw in enumerate(params.split(",")):
+        p = raw.strip()
+        tail = p.rstrip("*& ").split()
+        # already named if the last token is an identifier beyond the type
+        if len(tail) > 1 and not p.endswith("*"):
+            out.append(p)
+        else:
+            out.append("%s a%d" % (p, i + 1))
+    return "%s(%s)" % (head.strip(), ", ".join(out))
+
+
 def stub(fn, rec, n_args, returns):
+    proto, proto_src = declared_prototype(fn)
+    if proto:
+        sig = name_params(proto, fn)
+        ret = "void" if proto.strip().startswith("void") else "int"
+        body = "    " if ret == "void" else "    return 0;"
+        return (
+            '#include "global.h"\n\n'
+            '/* %s @ %s, %d bytes, %s.\n'
+            ' * Signature below is DECLARED in %s -- it is authoritative.\n'
+            ' * The compiler sees that header too, so a definition that\n'
+            ' * disagrees will not compile.\n'
+            ' */\n'
+            '%s\n{\n%s\n}\n'
+            % (fn, rec["addr_hex"], rec["size"], rec["mode"], proto_src,
+               sig, body))
+
     args = ", ".join("int a%d" % (i + 1) for i in range(n_args)) or "void"
     ret = "int" if returns else "void"
     body = "    return 0;" if returns else "    "

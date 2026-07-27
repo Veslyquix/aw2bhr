@@ -70,7 +70,12 @@ def verify(verbose=False):
         pieces = []
         saw_preamble = False
         for entry in entries:
-            path = os.path.join(OUT_DIR, entry["file"])
+            # Promoted units live outside build/functions so the build ignores
+            # them, but they are still checked: the split must go on proving it
+            # reconstructs asm/*.s even after functions move to C.
+            root = (os.path.join(awlib.REPO, entry["dir"])
+                    if entry.get("dir") else OUT_DIR)
+            path = os.path.join(root, entry["file"])
             if not os.path.exists(path):
                 print(f"FAIL {af.base}: missing unit file {entry['file']}")
                 ok = False
@@ -125,7 +130,9 @@ def check_self_contained(verbose=False):
 
     bad = []
     for entry in manifest:
-        path = os.path.join(OUT_DIR, entry["file"])
+        root = (os.path.join(awlib.REPO, entry["dir"])
+                if entry.get("dir") else OUT_DIR)
+        path = os.path.join(root, entry["file"])
         defined, referenced = set(), set()
         for ln in awlib.read_lines(path):
             d = awlib.LOCAL_DEF_RE.match(ln)

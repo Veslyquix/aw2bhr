@@ -578,9 +578,10 @@ def try_match(name_or_addr: str, c_code: str, show_diff: bool = True) -> dict:
     if res["stderr"].strip():
         out["stderr"] = res["stderr"][-1500:]
     if out["matched"]:
-        out["next"] = ("Move the C into src/, delete the function from asm/, "
-                       "regenerate with reindex, and confirm `make compare` "
-                       "still reproduces the ROM.")
+        out["next"] = ("Done -- nothing further is needed for this function. "
+                       "Getting it into the ROM is a separate step run by "
+                       "tools/promote.py, which re-verifies the match first; "
+                       "do not edit src/ or asm/ yourself.")
     return out
 
 

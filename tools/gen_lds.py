@@ -78,8 +78,19 @@ def generate():
             return None, 0
         seen.add(base)
         out.append(f"{indent}/* {base} -- {len(entries)} units */\n")
+        emitted_objs = set()
         for e in entries:
-            out.append(f"{indent}{OBJ_PREFIX}/{e['unit']}.o(.text);\n")
+            obj = e.get("promoted")
+            if obj:
+                # This address range now comes from C. The object covers the
+                # whole run, so emit it once however many functions it holds.
+                if obj in emitted_objs:
+                    continue
+                emitted_objs.add(obj)
+                out.append(f"{indent}{obj}(.text);  /* {len(e['functions'])} "
+                           f"function(s), was {e['unit']} */\n")
+            else:
+                out.append(f"{indent}{OBJ_PREFIX}/{e['unit']}.o(.text);\n")
         expanded += len(entries)
 
     missing = set(by_src) - seen

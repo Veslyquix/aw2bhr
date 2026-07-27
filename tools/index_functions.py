@@ -39,14 +39,18 @@ def decompiled_symbols():
     if not os.path.isdir(src):
         return names
     sig = re.compile(r'^[A-Za-z_][\w \*]*?\b([A-Za-z_]\w*)\s*\([^;]*\)\s*\{?\s*$')
-    for entry in os.listdir(src):
-        if not entry.endswith(".c"):
-            continue
-        with open(os.path.join(src, entry), encoding="utf-8", errors="replace") as fh:
-            for ln in fh:
-                m = sig.match(ln)
-                if m:
-                    names.add(m.group(1))
+    # Recursive: promoted functions live in src/decomp/, and missing them would
+    # leave them queued as outstanding work after they are already in the ROM.
+    for dirpath, _, filenames in os.walk(src):
+        for entry in sorted(filenames):
+            if not entry.endswith(".c"):
+                continue
+            with open(os.path.join(dirpath, entry), encoding="utf-8",
+                      errors="replace") as fh:
+                for ln in fh:
+                    m = sig.match(ln)
+                    if m:
+                        names.add(m.group(1))
     return names
 
 
@@ -66,7 +70,11 @@ def build():
                 "mode": fn.mode,
                 "directive": fn.directive,
                 "src": fn.src,
-                "status": "asm",
+                # Promoted functions stay in asm/ as reference -- the build
+                # simply stops emitting their unit -- so presence in the
+                # assembly no longer means outstanding. Without this the work
+                # queue keeps handing out functions that are already in the ROM.
+                "status": "matched" if fn.name in done else "asm",
                 "named": not anon,
                 "kind": "bios" if fn.name in BIOS_SYSCALLS else "game",
                 "trivial": awlib.is_trivial(fn),

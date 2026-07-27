@@ -76,8 +76,13 @@ def c_objects():
     src = os.path.join(awlib.REPO, "src")
     if not os.path.isdir(src):
         return set()
-    return {"src/%s.o" % os.path.splitext(e)[0]
-            for e in os.listdir(src) if e.endswith(".c")}
+    out = set()
+    for dirpath, _, filenames in os.walk(src):
+        rel = os.path.relpath(dirpath, awlib.REPO).replace("\\", "/")
+        for e in filenames:
+            if e.endswith(".c"):
+                out.add("%s/%s.o" % (rel, os.path.splitext(e)[0]))
+    return out
 
 
 def load_matched_from_map(known):
@@ -132,10 +137,19 @@ def collect():
 
     items = []
     for r in asm:
+        # Promoted functions remain in asm/ as reference, so presence there says
+        # nothing; the index's status does. Taking it from the index also keeps
+        # the page honest regardless of which build wrote aw2bhr.map last -- the
+        # upstream build deliberately excludes src/decomp.
+        if r.get("status") == "matched":
+            status, note = "matched", "promoted from assembly"
+        elif r["name"] in fe:
+            status, note = "identified", fe[r["name"]]
+        else:
+            status, note = "unstarted", ""
         items.append({
             "name": r["name"], "addr": r["addr"], "size": max(2, r["size"]),
-            "status": "identified" if r["name"] in fe else "unstarted",
-            "note": fe.get(r["name"], ""),
+            "status": status, "note": note,
         })
     for r in load_matched_from_map(known):
         items.append({"name": r["name"], "addr": r["addr"],

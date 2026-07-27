@@ -65,7 +65,12 @@ ASFLAGS := -mcpu=arm7tdmi -I asm/include -I include
 LDFLAGS :=
 
 LDS := $(BUILD_NAME).lds
-C_SRCS := $(shell find $(SRC_DIR) -name *.c)
+# src/decomp holds functions promoted out of assembly on this branch. They are
+# excluded from the default build on purpose: that build is upstream's, still
+# assembles the same functions from asm/*.s, and linking both would be a
+# duplicate definition. Keeping it buildable means the ROM stays reproducible
+# from upstream sources alone -- a second, independent check on our C.
+C_SRCS := $(shell find $(SRC_DIR) -name *.c -not -path '*/decomp/*')
 ASM_SRCS := $(shell find $(SRC_DIR) -name *.s) $(shell find $(ASM_DIR) -name *.s)
 DATA_SRCS := $(shell find data -name *.s)
 
@@ -84,6 +89,7 @@ FUNC_DIR := $(BUILD_DIR)/functions
 ifeq ($(SPLIT),1)
   FUNC_SRCS := $(shell find $(FUNC_DIR) -name *.s)
   ASM_SRCS := $(shell find $(SRC_DIR) -name *.s)
+  C_SRCS += $(shell find $(SRC_DIR)/decomp -name *.c 2>/dev/null)
   LDS := $(BUILD_NAME).split.lds
 endif
 
