@@ -127,6 +127,12 @@ union BgCntBuf
     u8 raw8;
 };
 
+union DispStatBuf
+{
+    struct DispStat bits;
+    u16 raw;
+};
+
 union WinCntBuf
 {
     struct WinCnt bits;
@@ -184,6 +190,13 @@ extern struct DispIo gDispIo;
 // unknown-globals.h; these are here because they need the types above.
 extern union BgCntBuf gUnknown_03001FE8;
 extern u16 gUnknown_03001FFC;
+// REG_DISPSTAT's shadow. Declared u8 until wave 6, which was not merely narrow:
+// sub_08012A34 clears bit 4 with `mov #0x11; rsbs`, and a scalar `&= ~0x10`
+// emits a bare `mov #0xef`. The `mov #N; neg` is the bitfield tell, so the
+// original reached this through struct DispStat -- bits 3 and 4 are exactly
+// vblank_int_enable and hblank_int_enable. It needs the union because
+// sub_08012AD4 also pushes it to 0x04000004 as a halfword.
+extern union DispStatBuf gUnknown_030020B4;
 extern u16 gUnknown_03002020;
 extern u16 gUnknown_03002B28;
 extern union BgCntBuf gUnknown_03002B6C;
@@ -198,6 +211,49 @@ extern union BlendCntBuf gUnknown_030030E0;
 // register here is a one-liner; hand-rolling the cast a second time is how two
 // spellings of the same address end up in the tree.
 #define REG_BASE 0x04000000
+
+// DISPSTAT. gDispIo.disp_stat is the RAM shadow, but sub_08063980 bypasses it
+// and pokes the hardware register directly to set the VCOUNT compare value in
+// bits 8-15. It does not go through `struct DispStat` either: an 8-bit field at
+// bit 8 of a u16 container is QImode to get_best_mode, so the bitfield spelling
+// narrows the store to `strb r0, [r1, #1]` and is the wrong shape entirely.
+//
+// REG_DISPSTAT_LO is deliberately NOT volatile, and that is load-bearing rather
+// than sloppy: with a `vu8` read the byte lands in a plain pseudo, combine's
+// commutative canonicalisation reorders the following `orr`, and the function
+// comes out with the OR accumulating into the wrong register. See the "orr
+// operand order" note in docs/agbcc-codegen.md.
+#define REG_OFFSET_DISPSTAT 0x004
+#define REG_DISPSTAT    (*(vu16 *)(REG_BASE + REG_OFFSET_DISPSTAT))
+#define REG_DISPSTAT_LO (*(u8 *)(REG_BASE + REG_OFFSET_DISPSTAT))
+
+// Timers. sub_0802ECEC arms timer 3 with a reload of -n and 0xc3
+// (enable | irq | 1024-cycle prescaler).
+#define REG_OFFSET_TM0CNT_L 0x100
+#define REG_OFFSET_TM0CNT_H 0x102
+#define REG_OFFSET_TM1CNT_L 0x104
+#define REG_OFFSET_TM1CNT_H 0x106
+#define REG_OFFSET_TM2CNT_L 0x108
+#define REG_OFFSET_TM2CNT_H 0x10A
+#define REG_OFFSET_TM3CNT_L 0x10C
+#define REG_OFFSET_TM3CNT_H 0x10E
+
+#define REG_TM0CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_TM0CNT_L))
+#define REG_TM0CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_TM0CNT_H))
+#define REG_TM1CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_TM1CNT_L))
+#define REG_TM1CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_TM1CNT_H))
+#define REG_TM2CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_TM2CNT_L))
+#define REG_TM2CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_TM2CNT_H))
+#define REG_TM3CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_TM3CNT_L))
+#define REG_TM3CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_TM3CNT_H))
+
+#define TIMER_PRESCALE_1    0x0000
+#define TIMER_PRESCALE_64   0x0001
+#define TIMER_PRESCALE_256  0x0002
+#define TIMER_PRESCALE_1024 0x0003
+#define TIMER_CASCADE       0x0004
+#define TIMER_IRQ           0x0040
+#define TIMER_ENABLE        0x0080
 
 #define REG_OFFSET_SIOMULTI0 0x120
 #define REG_OFFSET_SIOMULTI1 0x122

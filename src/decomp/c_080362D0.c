@@ -1,14 +1,19 @@
 #include "global.h"
-#include "hardware.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0801295C.
- * sub_0801295C @ 0x0801295C
+ * contiguous block at 0x080362D0.
+ * sub_080362D0 @ 0x080362D0
  */
 
-void sub_0801295C(void)
+struct Unk080362D0
 {
-    gUnknown_030020B4.bits.vblank_int_enable = 1;
+    /* 0x00 */ u8 filler_00[0x3e];
+    /* 0x3e */ u16 unk3e;
+};
+
+void sub_080362D0(struct Unk080362D0 *p)
+{
+    p->unk3e--;
 }

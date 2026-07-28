@@ -68,7 +68,8 @@ struct Unk0200E438 /* 0x4c */
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
     /* 0x1c */ u16 unk1c;
-    /* 0x1e */ u8 filler_1e[0x12];
+    /* 0x1e */ u8 filler_1e[0x0e];
+    /* 0x2c */ u32 unk2c; /* returned by sub_0801DA44 */
     /* 0x30 */ struct UnkVec unk30;
     /* 0x38 */ u8 filler_38[0x04];
     /* 0x3c */ u16 unk3c;
@@ -106,7 +107,9 @@ struct Unk0200B0B0 /* >= 0x4e */
     /* 0x02 */ u16 unk02;
     /* 0x04 */ u16 unk04;
     /* 0x06 */ u8 unk06;
-    /* 0x07 */ u8 filler_07[0x45];
+    /* 0x07 */ u8 filler_07[0x28];
+    /* 0x2f */ u8 unk2f; /* set by sub_080078D4 */
+    /* 0x30 */ u8 filler_30[0x1c];
     /* 0x4c */ u16 unk4c;
 };
 
@@ -116,7 +119,8 @@ struct Unk0200F720 /* 0x10 */
     /* 0x06 */ u16 unk06;
     /* 0x08 */ u16 unk08;
     /* 0x0a */ u16 unk0a;
-    /* 0x0c */ u8 filler_0c[0x04];
+    /* 0x0c */ u16 unk0c; /* 0x0c/0x0e set together by sub_0801E294 */
+    /* 0x0e */ u16 unk0e;
 };
 
 struct Unk0200F920Entry
@@ -201,6 +205,21 @@ struct Unk03002B80 /* 0x35a */
     /* 0x358 */ u16 unk358;
 };
 
+/* 0x03002F50 -- an 8-byte-entry stack, with gUnknown_03002F24 as its cursor.
+ * sub_0801A604 resets the cursor to the base; sub_0801A614 fills one entry and
+ * bumps the cursor by 8; sub_0801A664 pops (compares the cursor against the
+ * base for empty, then steps back 8 and reads the entry it uncovered).
+ * The four bytes are read back with `ldrb; lsls #24; asrs #24`, so they are
+ * signed; +0x04 is a whole word copied from another struct's +0x20. */
+struct Unk03002F50 /* 0x08 */
+{
+    /* 0x00 */ s8 unk00;
+    /* 0x01 */ s8 unk01;
+    /* 0x02 */ s8 unk02;
+    /* 0x03 */ s8 unk03;
+    /* 0x04 */ u32 unk04;
+};
+
 /* Three byte-sized flags reached off one symbol. Not three separate globals:
  * every access goes through one pool word for 0x030030F0 plus a displacement,
  * so the original had a single aggregate here.
@@ -246,7 +265,9 @@ struct Unk03003FC0 /* 0x47 */
 {
     /* 0x00 */ u8 filler_00[0x02];
     /* 0x02 */ u8 unk02;
-    /* 0x03 */ u8 filler_03[0x40];
+    /* 0x03 */ u8 filler_03[0x2f];
+    /* 0x32 */ u8 unk32;
+    /* 0x33 */ u8 filler_33[0x10];
     /* 0x43 */ u8 unk43;
     /* 0x44 */ u8 unk44;
     /* 0x45 */ u8 unk45;
@@ -367,7 +388,12 @@ struct Unk0849A354
 
 struct Unk0849B018 /* 0x0a */
 {
-    /* 0x00 */ u8 filler_00[0x09];
+    /* 0x00 */ u8 filler_00[0x04];
+    /* 0x04 */ volatile u16 unk04; /* volatile: sub_08030574's plain `= 5` emits a
+                                    * dead `ldrh` of the field right before the
+                                    * `strh`, which a non-volatile member does not */
+    /* 0x06 */ s8 unk06; /* signed: sub_0802F4F4 reads it ldrb; lsls #24; asrs #24 */
+    /* 0x07 */ u8 filler_07[0x02];
     /* 0x09 */ u8 unk09;
 };
 
@@ -376,6 +402,19 @@ struct Unk0849CD88 /* 0x24 */
     /* 0x00 */ u8 filler_00[0x14];
     /* 0x14 */ u32 unk14;
     /* 0x18 */ u8 filler_18[0x0c];
+};
+
+/* 0x0849D5F8 -- ROM pointer to a >= 0x46 byte record, ~12 callers, reloaded
+ * at every use (so not const). unk20 is indexed by unk45, which is signed:
+ * every reader of +0x45 and of the +0x20 array either uses `ldrsb` or the
+ * `ldrb; lsls #24; asrs #24` byte-twin, so both are s8 objects. */
+struct Unk0849D5F8 /* >= 0x46 */
+{
+    /* 0x00 */ u8 filler_00[0x1e];
+    /* 0x1e */ u8 unk1e;
+    /* 0x1f */ u8 unk1f;
+    /* 0x20 */ s8 unk20[0x25];
+    /* 0x45 */ s8 unk45;
 };
 
 struct Unk08580934_Sub
@@ -397,6 +436,16 @@ struct Unk08580934
  *   unk2c    u32 compared against a caller's value (sub_080206B0 scans it)
  *   unk3c[]  4 bytes, 0xff = empty (sub_0803BD14 counts the leading non-0xff)
  */
+/* A gfx/palette pointer pair; sub_08043A80 fetches unk00 and sub_08043A90
+ * unk04, and sub_08044AB8 feeds both to sub_08039A5C (Decompress +
+ * ApplyPaletteExt).
+ */
+struct Unk084A06F0 /* 0x08 */
+{
+    /* 0x00 */ void *unk00;
+    /* 0x04 */ void *unk04;
+};
+
 struct Unk085C77A0 /* 0x5c */
 {
     /* 0x00 */ u8 filler_00[0x28];
@@ -408,9 +457,25 @@ struct Unk085C77A0 /* 0x5c */
     /* 0x40 */ u8 filler_40[0x1c];
 };
 
+/* Stride 0x104; sub_08042E18 reads unk16. */
+struct Unk085D3DD0 /* 0x104 */
+{
+    /* 0x00 */ u8 filler_00[0x16];
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 filler_17[0xed];
+};
+
 struct Unk085D5ABC /* 0x5c */
 {
-    /* 0x00 */ u8 filler_00[0x1e];
+    /* 0x00 */ u8 filler_00[0x06];
+    /* 0x06 */ u16 unk06;
+    /* 0x08 */ u8 filler_08[0x02];
+    /* 0x0a */ u8 unk0a;
+    /* 0x0b */ u8 filler_0b[0x01];
+    /* 0x0c */ u8 unk0c;
+    /* 0x0d */ u8 filler_0d[0x02];
+    /* 0x0f */ u8 unk0f;
+    /* 0x10 */ u8 filler_10[0x0e];
     /* 0x1e */ u8 unk1e[2][0x1a];
     /* 0x52 */ u8 filler_52[0x0a];
 };
@@ -428,6 +493,10 @@ extern struct Unk0200F920 gUnknown_0200F920[];
 extern struct Unk02028030 gUnknown_02028030;
 extern struct Unk020280C0 gUnknown_020280C0[];
 extern struct Unk02028360 gUnknown_02028360[];
+/* 0xff-terminated byte list scanned by sub_0803BFBC; sub_08043C98 hands
+ * out its address.
+ */
+extern u8 gUnknown_020288A0[];
 extern u8 gUnknown_02028E40;
 extern u8 gUnknown_02028E41[];
 extern struct Unk02029A10Group gUnknown_02029A10[];
@@ -435,7 +504,19 @@ extern struct Unk02029A10Group gUnknown_02029A10[];
 /* -------------------------------------------------------------- IWRAM -- */
 
 extern void *gUnknown_03000000[];
+/* Neighbours 0x030005C8 and 0x030005CA, all three u16 (ldrh). sub_0803B350
+ * sets this one; sub_0803B37C sets it to 0x100 and the other two to 0xFFFF.
+ * sub_0803B414 passes it as the third argument of sub_08071420 seven times. */
+extern u16 gUnknown_030005CC;
+/* SIGNED: sub_08057CA4 reads it back with `ldrsh`. Written 0 and 1 as flags
+ * by sub_08057B2E and sub_08057BCC. */
+extern s16 gUnknown_030005E8[];
 extern u8 gUnknown_03000650[];
+/* A callback slot: sub_0801F4A4 stores &sub_0801F4B4 into it and nothing else
+ * touches it yet, so the pointed-to signature is only as good as sub_0801F4B4's
+ * own prototype in unknown-functions.h. Declared unprototyped on purpose.
+ */
+extern void (*gUnknown_030013EC)();
 extern u16 gUnknown_03001400;
 extern u16 gUnknown_03001404;
 extern u16 gUnknown_03001418;
@@ -443,26 +524,51 @@ extern struct Unk03001470 gUnknown_03001470[];
 extern s16 gUnknown_03001FBC;
 extern u32 gUnknown_03001FD4;
 extern u32 gUnknown_03001FE0;
+/* A callback, not a data word: sub_080198F0 does `ldr r0,[r0]; cmp r0,#0;
+ * beq; bl _call_via_r0` and then tests the result with `lsls #24`. Cleared by
+ * sub_080198C4 and sub_08017F0C; saved/restored alongside gUnknown_03002F20
+ * by sub_080171B4 / sub_08017540. */
+extern bool8 (*gUnknown_03001FF0)(void);
 extern u16 gUnknown_03001FF8;
 extern u16 gUnknown_03002000;
 extern u16 gUnknown_0300200C;
 extern struct Unk03002040 gUnknown_03002040;
-extern u8 gUnknown_030020B4;
+/* gUnknown_030020B4 is the REG_DISPSTAT shadow -- declared in hardware.h */
 extern u8 gUnknown_030020B8;
 extern u8 gUnknown_030024E4;
+/* A small mode enum, 0/1/2. sub_08013D40 and sub_08014BB4 clear it,
+ * sub_08014468 sets it to 1, sub_080145BC resets 2 -> 0. */
+extern u8 gUnknown_03002514;
 extern u16 gUnknown_0300251C;
 extern u16 gUnknown_03002520[];
 extern struct SpriteEntry *gUnknown_03002B24;
 extern u8 gUnknown_03002B30;
 extern u16 gUnknown_03002B34;
+/* SIGNED: the getter sub_08017988 reads it with `ldrsh`. Set to 1 by
+ * sub_08017970 and to 0 by sub_0801797C. */
+extern s16 gUnknown_03002B38;
 extern u8 gUnknown_03002B40;
 extern u8 gUnknown_03002B44;
 extern u8 gUnknown_03002B4C;
+/* A 0/1 phase flag, always ldrh/strh. Six users test it and then write the
+ * value they did not see (sub_08011050, sub_080110E8, sub_08011290 and
+ * friends): a "switch to state N, or bail out if already there" guard. */
+extern u16 gUnknown_03002B5C;
 extern u8 gUnknown_03002B68;
 extern struct Unk03002B80 gUnknown_03002B80;
+/* Always ldrh/strh, compared against 0 and 1. sub_080199C4 clears it,
+ * sub_080199D0 sets it from a u8 argument, sub_08019674 copies a u16 into it. */
+extern u16 gUnknown_03002EE4;
 extern u8 gUnknown_03002EFC;
 extern u16 gUnknown_03002F00;
 extern u16 gUnknown_03002F18;
+/* A callback like gUnknown_03001FF0: sub_080183C0 null-checks it and calls it
+ * through `bl _call_via_r0`, discarding the result. Set by sub_080198A0 and by
+ * sub_08018B18 (from a list node), cleared by sub_080198AC. */
+extern void (*gUnknown_03002F20)(void);
+/* The stack cursor for gUnknown_03002F50 below. */
+extern struct Unk03002F50 *gUnknown_03002F24;
+extern struct Unk03002F50 gUnknown_03002F50[];
 extern void *gUnknown_03002FA0[];
 /* 0x40 bytes = 16 entries. The IRQ handler table: crt0.s indexes it by the
  * interrupt's word offset and `bx`es to the entry; sub_0801BAE0 fills entries
@@ -495,12 +601,19 @@ extern struct Unk03003FC0 gUnknown_03003FC0;
 extern u16 gUnknown_03004080;
 extern struct Unk802C57C gUnknown_03004090;
 extern struct Unk802C57C gUnknown_030040A4;
+/* Word cell; sub_0804138C clears it, sub_08041398 reads it. Callers keep
+ * only the low halfword (sub_08029234 stores it with strh).
+ */
+extern u32 gUnknown_030040A8;
 /* Two callback slots installed by sub_0803662C. sub_080366F4 calls
  * gUnknown_030040D0 with no arguments after a NULL test.
  */
 extern void (*gUnknown_030040D0)(void);
 extern struct Unk030040D8 *gUnknown_030040D8;
 extern void (*gUnknown_030040EC)(void);
+/* A bitmask, ANDed against gUnknown_03004008 in sub_080369BC to gate a frame.
+ * u16 (ldrh); cleared by sub_08036B28 and sub_08036B34. */
+extern u16 gUnknown_030043F4;
 extern struct Unk802C57C gUnknown_030044A4;
 extern struct Unk030044E0 *gUnknown_030044E0;
 extern u16 gUnknown_03004518;
@@ -511,6 +624,9 @@ extern u16 gUnknown_03004780;
  * per record by sub_08078608 and its siblings.
  */
 extern u32 gUnknown_03005944;
+/* A word-sized 0/1 flag: sub_08082412 toggles it with `~g & 1`, five sites
+ * test the whole word, and sub_080846F4 returns just its low byte. */
+extern u32 gUnknown_03005968;
 /* Five words, cleared/filled as a unit by sub_08078740 and sub_08078758. */
 extern u32 gUnknown_030059C0[];
 
@@ -518,6 +634,13 @@ extern u32 gUnknown_030059C0[];
 
 extern struct Unk08090CD8 *const gUnknown_08090CD8;
 extern const s16 gUnknown_08090EAC[];
+/* 0x280 bytes = 20 uncompressed 4bpp tiles; sub_08037258 returns its address.
+ * Non-const because nothing constrains it yet and const is the direction that
+ * breaks under -Werror. */
+extern u8 gUnknown_080913BC[];
+/* 0x1a4-byte compressed blob, handed to Decompress(u8 *, void *) by
+ * sub_0802D5B8 via the accessor sub_08037250 -- hence u8 *, not const. */
+extern u8 gUnknown_080D3FE4[];
 extern const struct ProcCmd gUnknown_086140D4[];
 extern u8 gUnknown_0810BE60[];
 extern u8 gUnknown_0810E6E0[];
@@ -528,6 +651,7 @@ extern const u8 gUnknown_08108264[][32];
  * ever handed to Decompress(u8 *, void *), whose prototype takes u8 *. */
 extern u8 gUnknown_08126244[];
 extern u8 gUnknown_0812653C[];
+extern u8 gUnknown_081268F8[]; /* handed out by sub_0801F49C */
 extern u16 *gUnknown_08499578;
 extern u16 *gUnknown_0849957C;
 extern u16 *gUnknown_08499580;
@@ -539,11 +663,14 @@ extern const struct Unk0849A2C8 gUnknown_0849A2C8[];
 extern const struct Unk0849A354 gUnknown_0849A354[];
 extern struct Unk0849B018 *gUnknown_0849B018;
 extern const struct Unk0849CD88 gUnknown_0849CD88[];
+extern struct Unk0849D5F8 *gUnknown_0849D5F8;
 extern const struct ProcCmd gUnknown_0849FB44[];
+extern const struct Unk084A06F0 gUnknown_084A06F0[];
 extern u32 *gUnknown_08555450[];
 extern struct Unk08580934 *gUnknown_08580934;
 extern const struct Unk085C77A0 gUnknown_085C77A0[];
 extern const s16 gUnknown_08580E64[];
+extern const struct Unk085D3DD0 gUnknown_085D3DD0[];
 extern const struct Unk085D5ABC gUnknown_085D5ABC[];
 
 #endif // UNKNOWN_GLOBALS_H

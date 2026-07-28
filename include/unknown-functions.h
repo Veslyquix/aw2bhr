@@ -14,6 +14,9 @@ void sub_0801163C(s16, ProcPtr);
 void Decompress(u8 *, void *);
 
 void sub_08012358(void);
+/* Unprototyped: only ever called, never with a settled signature. r0 selects
+ * among three cases and r1 is forwarded; fill this in when it is matched. */
+void sub_0801BB10();
 void sub_0801237C(void);
 void sub_08012C58(void *); // possibly "SetupBackgrounds"
 
@@ -29,6 +32,12 @@ void sub_080152C0(s32, u8);
 s8 sub_08015BD0(s32);
 
 void sub_0801BD00(s32, s32, void *, s32);
+/* Only referenced as a value, by sub_0801F4A4 storing it in gUnknown_030013EC.
+ * Its assembly takes five arguments (r0-r3 plus one halfword on the stack), but
+ * nothing calls it, so the argument list is left unprototyped rather than
+ * guessed -- fill it in when sub_0801F4B4 itself is matched.
+ */
+void sub_0801F4B4();
 void PutSprite(u32, u32, u32, u16 *, u32);
 void PutSpriteExt(u32, u32, u32, u16 *, u32);
 

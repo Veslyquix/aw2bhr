@@ -1,14 +1,17 @@
 #include "global.h"
-#include "hardware.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0801295C.
- * sub_0801295C @ 0x0801295C
+ * contiguous block at 0x0802ECEC.
+ * sub_0802ECEC @ 0x0802ECEC
  */
 
-void sub_0801295C(void)
+#include "hardware.h"
+
+
+void sub_0802ECEC(int cycles)
 {
-    gUnknown_030020B4.bits.vblank_int_enable = 1;
+    REG_TM3CNT_L = -cycles;
+    REG_TM3CNT_H = TIMER_ENABLE | TIMER_IRQ | TIMER_PRESCALE_1024;
 }
