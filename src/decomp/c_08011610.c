@@ -1,0 +1,68 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08011610.
+ * sub_08011610 @ 0x08011610, sub_0801163C @ 0x0801163C, sub_08011668 @ 0x08011668, sub_08011684 @ 0x08011684
+ */
+
+#include "hardware.h"
+#include "proc.h"
+struct Unk11610Proc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x64);
+    /* 64 */ u16 unk64;
+};
+struct Unk1163CProc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x64);
+    /* 64 */ u16 unk64;
+};
+struct Unk11668Proc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x64);
+    /* 64 */ u16 unk64;
+};
+struct Unk11684Proc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x64);
+    /* 64 */ u16 unk64;
+};
+
+/* r1 is never written before the `bl`, so the parent is this wrapper's own
+ * second parameter passed straight through -- confirmed at the call site,
+ * sub_08072030 does `adds r1, r0, #0; movs r0, #4; bl sub_08011610`. */
+void sub_08011610(int a, ProcPtr parent)
+{
+    struct Unk11610Proc *proc = Proc_StartBlocking(gUnknown_0848923C, parent);
+
+    proc->unk64 = a;
+    gUnknown_030030E0.bits.effect = 2;
+}
+
+void sub_0801163C(int a, ProcPtr parent)
+{
+    struct Unk1163CProc *proc = Proc_StartBlocking(gUnknown_0848925C, parent);
+
+    proc->unk64 = a;
+    gUnknown_030030E0.bits.effect = 2;
+}
+
+void sub_08011668(int a)
+{
+    struct Unk11668Proc *proc = Proc_Start(gUnknown_0848929C, PROC_TREE_3);
+
+    proc->unk64 = a;
+}
+
+void sub_08011684(int a)
+{
+    struct Unk11684Proc *proc = Proc_Start(gUnknown_084892C4, PROC_TREE_3);
+
+    proc->unk64 = a;
+}

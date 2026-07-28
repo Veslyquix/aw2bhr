@@ -213,9 +213,20 @@ extern union DispStatBuf gUnknown_030020B4;
 extern u16 gUnknown_03002020;
 extern u16 gUnknown_03002B28;
 extern union BgCntBuf gUnknown_03002B6C;
+// Both WinCnt shadows are written at BYTE 0, i.e. through the win0_* group:
+// sub_08011300 clears win0_enable_bg0..obj on 030030A4 and sets
+// win0_enable_bg0..blend on 030030DC in the same breath. Nothing yet reaches
+// bytes 1-3 of either, so which hardware register each shadow feeds (WININ vs
+// WINOUT) is still unproved -- only the offsets are.
 extern union WinCntBuf gUnknown_030030A4;
 extern union BgCntBuf gUnknown_030030B4;
 extern union WinCntBuf gUnknown_030030DC;
+// `effect` (2 bits at bit 6) is set to 2 -- brighten -- by the four +0x64 proc
+// wrappers sub_08011588/080115B4/08011610/0801163C. That store is `ldrb;
+// movs #0x3f; ands; movs #0x80; orrs; strb`, which is byte-identical to a
+// scalar `(x & 0x3f) | 0x80` and so is not by itself proof of the bitfield;
+// the complement mask 0x3F simply has bit 7 clear, so it does not get the
+// `mov #N; neg` pair. sub_08010FA0 is the independent bitfield evidence.
 extern union BlendCntBuf gUnknown_030030E0;
 
 // Serial communication. The display registers are reached through gDispIo
@@ -239,6 +250,33 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define REG_OFFSET_DISPSTAT 0x004
 #define REG_DISPSTAT    (*(vu16 *)(REG_BASE + REG_OFFSET_DISPSTAT))
 #define REG_DISPSTAT_LO (*(u8 *)(REG_BASE + REG_OFFSET_DISPSTAT))
+
+// VCOUNT. No RAM shadow: sub_08052E84 reads the register itself, masks the low
+// byte and gates on the visible area.
+#define REG_OFFSET_VCOUNT 0x006
+#define REG_VCOUNT (*(vu16 *)(REG_BASE + REG_OFFSET_VCOUNT))
+
+// BG scroll. Write-only registers, so unlike the display-control registers
+// there is nothing to shadow and no gDispIo path -- sub_08052E84 writes them
+// directly. Note agbcc CSEs the second absolute address against the first and
+// emits `adds rN, #4` between the two stores rather than a second pool word.
+#define REG_OFFSET_BG0HOFS 0x010
+#define REG_OFFSET_BG0VOFS 0x012
+#define REG_OFFSET_BG1HOFS 0x014
+#define REG_OFFSET_BG1VOFS 0x016
+#define REG_OFFSET_BG2HOFS 0x018
+#define REG_OFFSET_BG2VOFS 0x01A
+#define REG_OFFSET_BG3HOFS 0x01C
+#define REG_OFFSET_BG3VOFS 0x01E
+
+#define REG_BG0HOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG0HOFS))
+#define REG_BG0VOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG0VOFS))
+#define REG_BG1HOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG1HOFS))
+#define REG_BG1VOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG1VOFS))
+#define REG_BG2HOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG2HOFS))
+#define REG_BG2VOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG2VOFS))
+#define REG_BG3HOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG3HOFS))
+#define REG_BG3VOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG3VOFS))
 
 // BLDCNT. gDispIo.blend_ct is the RAM shadow; sub_080129B4 writes the register
 // directly with a whole halfword rather than going through it.
@@ -350,9 +388,13 @@ extern union BlendCntBuf gUnknown_030030E0;
 
 struct KeySt
 {
-    /* 00 */ u8 repeat_delay; // initial delay before generating auto-repeat presses
-    /* 01 */ u8 repeat_interval; // time between auto-repeat presses
-    /* 02 */ u8 repeat_clock; // (decreased by one each frame, reset to repeat_delay when Presses change and repeat_interval when reaches 0)
+    /* 00 */ u16 unk00; // a key bitmask, read with `ldrh [r0]` and tested against
+                        // key bits: sub_0803B0EC uses 0x200 (L), sub_0803B1CC
+                        // 0x100 (R). This slot was inherited from FE8's
+                        // KeyStatusBuffer, where 00/01/02 are repeat_delay /
+                        // repeat_interval / repeat_clock; AW2 disagrees, and
+                        // nothing in this tree ever named those three.
+    /* 02 */ u8 filler_02[0x02];
     /* 04 */ u16 held; // keys that are currently held down
     /* 06 */ u16 repeated; // auto-repeated keys
     /* 08 */ u16 pressed; // keys that went down this frame

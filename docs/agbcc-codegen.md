@@ -190,7 +190,12 @@ shaped word is *not* evidence of a bitfield. The real bitfield store picks
 QImode via `get_best_mode` and builds its mask in SImode with no pool word:
 `ldrb; mov r0,#0x9; neg r0,r0; and; strb`. **`mov #N; neg` where a bare `movs`
 would have done is a positive tell for a bitfield store** — the hand-rolled
-equivalent emits `mov r3,#0xf3`, one instruction shorter.
+equivalent emits `mov r3,#0xf3`, one instruction shorter. **The tell only runs
+one way: a bitfield whose complement mask has bit 7 clear emits a bare `movs`
+too, so `movs #M; ands` is not evidence against a bitfield.** See "Read a
+bitfield's position and width straight off `mov #N; neg`" under Bitfields —
+`sub_08011588`'s `ldrb; movs #0x3f; ands; movs #0x80; orrs; strb` looks exactly
+like a scalar `(x & 0x3f) | 0x80` and is a two-bit field at bit 6.
 
 **The double-shift rule is per-access, not per-function.** A plain three-
 instruction read (`lsrs; movs; ands`) feeding a genuine bitfield write is a
@@ -664,6 +669,27 @@ to r0. `sub_080413A4` is 16 bytes for what looks like 12 bytes of work. Do not
 read that redundant move as a wrong return type or a wrong form; nothing
 removes it.
 
+**All of that is about an expression whose *value* is the address. The moment
+the same expression is dereferenced for a member, `g + i` changes columns and
+splitting the address into its own statement becomes load-bearing.** The probe
+above never dereferences, so it does not cover the common case, and the table's
+second row reads as though `(g + i)->f` were safe. It is not — that spelling
+and plain `g[i].f` are byte-identical, both deref-first:
+
+| source | codegen |
+|---|---|
+| `g[i].f` / `(g + i)->f` / `(&g[i])->f`, all inline in the statement that uses the member | `ldr rB,=g; ldr rI,[rB]; <index math into rB>; add rB,rB,rI; ldrb` — deref first, **index add writes the index's register** |
+| `p = &g[i];` as its **own statement**, then `p->f` | `ldr rB,=g; <index math into rI>; ldr rB,[rB]; add rB,rB,rI; ldrb` — deref after the index math, **add writes the pointer's register** |
+
+Same instructions, same length; only the position of `ldr rB,[rB]` and which
+register the add writes. `sub_08008B70` needs the second row and neither inline
+spelling reaches it. The mechanism is just expansion order — inside one address
+expression the PLUS expands its pointer operand (the deref) before its index
+operand, and only a statement boundary forces the address to be built first.
+Read backwards: **an index multiply sitting between a pointer global's pool
+`ldr` and its `ldr [rB]` means the original bound the element address to a
+local in a statement of its own.**
+
 For an **array global** `extern struct T g[];` there is no deref to schedule,
 and the rule is a real constraint rather than a choice: under `-fforce-addr`,
 repeating `g[i].member` for *two different members of the same element*
@@ -689,6 +715,60 @@ into one scale. Near-miss: `u32 off = ...; p = (T *)(off + (u8 *)g);` gets the
 add order right but loads the base late; the `ldr` only hoists when the whole
 address is one expression.
 
+**That table is about where the base `add` sits. Which register it *writes* is
+a separate knob, and the only thing found to move it is naming the address
+twice — a pointer local plus a following `+=`.** Same instructions, same
+order, only the destination differs, and on a register-tight function that
+difference is a whole extra `push`:
+
+```c
+p = g + a * 4;              /* ldr rB,=g ; lsl rI,#3 ; add rI,rI,rB -- dest = INDEX */
+p = g; p += a * 4;          /* ldr rB,=g ; lsl rI,#3 ; add rB,rI,rB -- dest = BASE  */
+```
+
+`sub_0801E0C8` needs the second. Under the first spelling the pointer inherits
+the index's register, the pool `ldr` takes the register the second parameter
+arrived in, and the parameter has to be copied out of the way — `push {r4, lr}`,
+two extra `adds rD, rS, #0` copies, and a five-register body where the ROM has
+four. Ruled out, all identical to the one-expression form: `&g[a * 4]`,
+`a * 4 + g`, `g + (a << 2)`, `(T *)((u8 *)g + a * 8)`, an initialiser instead of
+an assignment, declaring the index local before the pointer, and an extra unused
+parameter. This is the same "a `+=` in a separate statement escapes the fold"
+split the pool-fold table records for a *constant* offset; it holds for a
+variable index too, and there it changes allocation rather than the pool.
+
+**A shared address that CSE builds across several store statements is not the
+same code as one assigned to a pointer local.** With a local, expansion
+interleaves each term's shift with its add and accumulates into the base's
+register. Written out as N full store expressions with no local, GCC emits
+*both* shifts first, then both adds, and threads the result through the index
+registers instead:
+
+```c
+p = g + cx * 2 + cy * 64;                 /* ldr rB,[rB] ; lsl rX,#2 ; add rB,rB,rX
+   p[0] = 0; p[1] = 0; p[0x20] = 0;          ; lsl rY,#7 ; add rB,rB,rY   */
+
+*(g + cx * 2 + cy * 64) = 0;              /* ldr rB,[rB] ; lsl rY,#7 ; lsl rX,#2
+*(g + cx * 2 + cy * 64 + 1) = 0;             ; add rX,rX,rB ; add rY,rY,rX */
+*(g + cx * 2 + cy * 64 + 0x20) = 0;
+```
+
+Same length, same instruction multiset — a pure register permutation, so only
+the ROM hash notices. `sub_080223E0` and `sub_080225CC` are the second form.
+Ruled out, all producing the interleaved shape: binding the deref to a local
+first, `&g[cx*2]` then `p += cy*64` (or `p = &p[cy*64]`), `(u16 *)((u8 *)g +
+cx*4 + cy*128)` in one or two statements, `<<` instead of `*`, both operand
+orders of the sum, and every parenthesisation of the three terms. A 2D-array
+spelling (`u16 (*)[32]`, `map[cy*2][cx*2]`) *does* produce the two-shifts-first
+shape but with the two coordinates mirrored — the base folds into the outer
+subscript's term there and into the *first-added* term here — so it is a useful
+tell that you are on the right axis and not the answer.
+
+Note the coordinates still have to be locals: inline them into the store
+expressions and the tilemap's pool `ldr` hoists to the top of the function,
+which is the "the `ldr` only hoists when the whole address is one expression"
+row above.
+
 **Binding the scaled index moves the `lsls` ahead of the address setup.** For
 `*(u16 *)(base + C + i*2)` with `base` a pointer local and `C` a pool-sized
 constant, every inline spelling loads the constant first; binding the scaled
@@ -711,6 +791,29 @@ Do not confuse this with the `p += C` rule in the fold table above. Splitting
 — for a base that is already a pointer *local* rather than a pointer *global*,
 both spellings emit the add on the base either way. Only the index binding moves
 anything.
+
+**Two `return`s versus one result local swaps the array base and the scaled
+index between r0 and r1.** Same instructions, same order, same length — the only
+thing that moves is which register each half of `g[i]`'s address lands in, so
+this presents as a pure register permutation with nothing in the expression to
+blame:
+
+```
+if (c) return g[i] + K; return v;   ldr r1,=g ; lsl r0,rI,#1 ; add r0,r0,r1 ; ldrh r0,[r0]
+r = v; if (c) r = g[i] + K;         ldr r0,=g ; lsl r1,rI,#1 ; add r1,r1,r0 ; ldrh r0,[r1]
+return r;
+```
+
+The second row is `sub_0804B830`. Read it as: **the base register is r0 when the
+loaded value has to be moved into a variable that already exists, and r1 when
+the load *is* the return value.** Ruled out as alternative causes, all
+byte-identical to the two-return form: inverting the condition and returning
+early, a `u16` local for the loaded element, a pointer local for the array base,
+`*(g + i)` instead of `g[i]`, an `int` return with a `(u16)` cast, and a `u32`
+index local. Worth reaching for whenever an `if`-with-two-exits near-misses on
+exactly this permutation, and it belongs on the type-and-binding checklist
+alongside "does a value need to stay live longer?" — a result variable is a
+liveness edit wearing an ordinary-looking source form.
 
 **`mul r0,r0,r1` and `mul r0,r1,r0` are the same THUMB encoding** (`MUL Rd,Rm`).
 agbcc prints one, the target assembly prints the other. Not a diff.
@@ -978,6 +1081,29 @@ and is not one. Note also that `mov #N; neg` is the tell only where a bare
 `mov r1, #0xfe` with no `neg`, because the store is QImode and the constant
 narrows before it is materialised. That carries no bitfield signal at all.
 
+**And the `neg` only appears when the QImode complement mask has bit 7 set.
+A bitfield store can equally well emit a bare `movs`, so the absence of a
+`mov #N; neg` pair is NOT evidence against a bitfield.** `mask_rtx` builds the
+complement in the access mode and hands it to `immed_double_const`, which
+keeps the value negative only when its top bit and the discarded high bits
+agree — i.e. only when bit 7 of the byte mask is set. Every row above happens
+to clear a bit in the top half of the byte; a field in the *bottom* half goes
+the other way:
+
+| field | complement, QImode | emitted |
+|---|---|---|
+| 1 bit at bit 4 | `0xEF` — bit 7 set | `mov #0x11; neg` |
+| 1 bit at bit 3 | `0xF7` — bit 7 set | `mov #0x9; neg` |
+| **2 bits at bit 6** | **`0x3F` — bit 7 clear** | **`movs #0x3f`** |
+
+`sub_08011588` (and its three siblings) is `gUnknown_030030E0.bits.effect = 2`
+and compiles to `ldrb; movs #0x3f; ands; movs #0x80; orrs; strb` — the exact
+shape the "`ldrh` plus a pool word is a plain mask" rule above would have you
+read as a scalar `(x & 0x3f) | 0x80`. Both spellings are available here, and
+the bitfield one is the one that is right; the discriminator is the mask's
+sign, not its shape. Read the two rules together: `mov #N; neg` proves a
+bitfield, a bare `movs #M` proves nothing either way.
+
 **The `mov #N; neg` tell is confirmed for the AND side, and it is the *only*
 side that carries a signal.** One probe, one field, all four spellings:
 
@@ -996,6 +1122,43 @@ evidence of a bitfield" note above, which only said the OR is ambiguous across
 *different* objects — it is ambiguous for the *same field*, so a matched setter
 is not evidence that a scalar model is right.
 
+**But the AND side loses its signal too, for exactly one class of field: one
+that touches the top bit of the access mode.** Then the clear is
+`movs #<positive>; ands`, four instructions, and is **byte-identical to the
+plain scalar `&= ~mask`** — the same collapse the OR side always has. Wave 9
+probe, twelve spellings through a pointer parameter, `u8` container throughout:
+
+| source | codegen |
+|---|---|
+| `p->b7 = 0` (1 bit @ bit 7) | `ldrb; mov #0x7f; and; strb` — **4** |
+| `*p &= ~0x80` (plain `u8`) | `ldrb; mov #0x7f; and; strb` — **byte-identical** |
+| `p->b6 = 0` (1 bit @ bit 6) | `ldrb; mov #0x41; neg; and; strb` — 5 |
+| `*p &= ~0x40` (plain `u8`) | `ldrb; mov #0xbf; and; strb` — 4 |
+| `p->hi = 0` (2 bits @ 6..7) | `ldrb; mov #0x3f; and; strb` — 4 |
+| `p->hi = 0` (3 bits @ 5..7) | `ldrb; mov #0x1f; and; strb` — 4 |
+| `p->lo = 0` (6 bits @ 0..5) | `ldrb; mov #0x40; neg; and; strb` — 5 |
+| `u16 hi:4` @ bits 12..15 | `ldrb [r0,#1]; mov #0xf; and; strb [r0,#1]` — 4 |
+| `u16 mid:6` @ bits 6..11 | `ldrh; ldr =-0xfc1; and; strh` — HImode, pool word |
+
+Mechanism, so the boundary is predictable rather than remembered: `mask_rtx`
+builds the complement in SImode, then `immed_double_const` truncates it to the
+access mode **unless its in-mode sign bit is 1**. Clearing any field that
+excludes the mode's top bit leaves that bit set, the constant stays negative
+(`0xFFFFFFxx`), and THUMB needs `mov #N; neg`. Clearing a field that *includes*
+the top bit zeroes it, the constant truncates to a positive 8-bit value, and a
+bare `movs` suffices. The mode is `get_best_mode`'s, so "top bit" means bit 7 of
+the byte the field lives in — including byte 1 of a `u16` container, per the
+`hi:4` row.
+
+Two consequences. **A `movs #0x7f`-shaped mask next to `mov #N; neg` masks in
+one function is not a scalar `&=` mixed in with bitfield writes** — it is the
+top-bit field of the same bitfield struct, and reading it as a raw `&=` will
+cost you the whole function. `sub_0805319C` writes all eight bits of
+`gUnknown_03004504` and bit 7's clear is the odd one out for this reason alone.
+And **for a field at the mode's top bit, neither accessor of a set/clear pair
+distinguishes bitfield from scalar** — the paragraph above holds only for
+fields that do not reach bit 7.
+
 Worked example, four adjacent functions on `gUnknown_030020B4`: `sub_0801295C`
 (`|= 8`) and `sub_08012A24` (`|= 0x10`) both match against the header's plain
 `u8`, and `sub_08012A34` (`movs #0x11; rsbs`) and `sub_08012AD4`
@@ -1012,6 +1175,67 @@ block and falls through into B. Read it backwards: the fallthrough value is the
 *second* return in the source. Writing the logically equivalent inverse gives a
 ~90% near-miss with the branches swapped — a one-attempt fix, always try it
 first.
+
+**But first settle whether the source branched at all. `if (C) return A;
+return B;`, `return C ? A : B;` and `return C;` are three different shapes, and
+the paragraph above only describes the first.** All three are the obvious way
+to write a two-valued function and the choice is not cosmetic. One probe, two
+globals, measured on the four functions this came from:
+
+| source | codegen | length |
+|---|---|---|
+| `if (c) return 2; return 1;` | `cmp; bne L; mov r0,#1; b E;` **pool**; `L: mov r0,#2; E: bx lr` | 24 |
+| `return c ? 2 : 1;` | `mov r1,#1; cmp; beq L; mov r1,#2; L: add r0,r1,#0; bx lr;` **pool** | 24 |
+| `if (c) return 1; return 0;` | `cmp; bne L; mov r0,#0; b E;` **pool**; `L: mov r0,#1; E: bx lr` | 20 |
+| `return c;` (0/1 result) | `cmp; beq L; mov r0,#1; L: bx lr;` **pool** | 16 |
+
+Two things fall out. **The ternary is the same length as the `if`/`return`
+pair** — no size signal at all, same failure class as the `|=` operand swap —
+and the tells are that the ternary computes into **r1** and ends with a
+redundant `adds r0, r1, #0`, and that its literal pool lands **after** the
+`bx lr` instead of in the middle of the function. Read a pool sitting between
+the two return blocks as the `if`/`return` form. **The boolean form, by
+contrast, does have a 4-byte signal**, because it keeps the true-value block as
+a fallthrough and never materialises the zero: a function that visibly stores
+both constants did not write `return c;`.
+
+`sub_0803BB44`/`sub_0803BB5C`/`sub_0803BB74` are the first row and
+`sub_0803BB90` is the third — so even a leaf returning a plain 0/1 wants the
+long spelling here, and reaching for `return x != 0;` because it is the natural
+C costs four bytes.
+
+**A `while` loop that opens with a bare `b` to the bottom test, rather than a
+duplicated entry guard, had a SIDE EFFECT in its condition.** GCC rotates a
+`while` by copying the exit test into the preheader, and `duplicate_loop_exit_
+test` refuses when the test block modifies anything. So the two shapes are a
+direct readout of the source, and `sub_08012B00` and `sub_080130C8` are the two
+of them sitting 0x5c8 bytes apart with otherwise identical bodies:
+
+```c
+while (n != 0)      { *p += d; p++; n -= 2; }   /* cmp; beq end -- guard COPIED
+                                                   to the top, then body, then
+                                                   the same cmp at the bottom */
+while ((n -= 2) != 0) { *p += d; p++; }         /* b .Ltest -- no guard at all,
+                                                   body, then the decrement and
+                                                   the test at .Ltest */
+```
+
+Read backwards: **an unconditional `b` into the middle of the loop means the
+decrement (or whatever else the condition mutates) belongs *inside* the
+condition.** Writing the side effect as the last statement of the body instead
+produces the duplicated guard and misses by four bytes.
+
+**In the same pair: `*p += v` puts a *narrow* `v` first and a *word* `v`
+second.** `adds rD, rV, rLoaded` versus `adds rD, rLoaded, rV` — the value's
+own register leads when the parameter is `u16`, the loaded halfword leads when
+it is `int`/`u32`. There is a size signal too (the `u16` carries the
+`lsl #16; lsr #16` pair the fill-loop rule predicts), but the operand order is
+the cheaper check and it settles the type on its own:
+
+```
+adds r0, r2, r0   <- u16 delta (sub_08012B00)
+adds r0, r0, r1   <- int delta (sub_080130C8)
+```
 
 **Two guards: `&&` and two separate `if`s are different code, and the block
 order tells you which.** Both compute the same thing and both are 60 bytes; the
@@ -1033,12 +1257,70 @@ near-miss with that one branch inverted.** `sub_08026FD0` is the case.
 **`i < N` unsigned canonicalises to `cmp #N-1; bls`.** Do not "correct" the
 source to `<=` chasing the asm.
 
+**A two-sided clamp: whether the second compare reads the *offset* register or
+the *result* register says whether the source had a result variable.** Two
+spellings of `clamp(a - C, 0, M)`, both 20 bytes, same instruction count, and
+they differ in two registers and the branch polarity:
+
+```c
+v = a - C; if (v < 0) return 0;      /* sub r0,r0,#C ; cmp r0,#0 ; bge L    */
+           if (v > M) return M;      /* mov r0,#0 ; b END ; L: cmp r0,#M    */
+           return v;                 /*    -- parameter mutated in place    */
+
+v = a - C; r = 0;                    /* add r1,r0,#0 ; sub r1,#C ; mov r0,#0 */
+if (v >= 0) { r = v;                 /* cmp r1,#0 ; blt END ; add r0,r1,#0   */
+              if (r > M) r = M; }    /* cmp r0,#M ; ble END ; mov r0,#M      */
+return r;                            /*    -- ROM shape                      */
+```
+
+The early-return form has nothing to keep the pre-clamp value in, so it
+subtracts into the parameter's own register and the zero becomes a separate
+block reached by an unconditional `b`. The result-variable form gives the
+subtraction a register of its own, materialises the `0` **before** the first
+compare, and — the sharpest tell — makes the *second* `cmp` read the copy
+(`r0`) rather than the offset (`r1`). Read backwards: **`movs rD, #0` sitting
+ahead of the first `cmp`, with a redundant-looking `adds rD, rS, #0` between the
+two compares, is a result variable seeded to the out-of-range value.**
+`sub_08074C5C` and `sub_08074C70` are the pair, and this is a different case
+from the missing-return rule below — here both paths do return.
+
 **Two-sided signed range checks** become one unsigned compare:
 `cmp rN,#0x3f; bhi` after `subs #0x60` is `if (id >= 0x60 && id < 0xa0)`, with
 the subtraction CSE'd into the following `id -= 0x60`.
 
 **Cross-jumping is automatic** — write independent `return` statements with
 textually identical tails and agbcc merges them.
+
+**Picking one of two constants: a `?:` inside an expression and an `if`/`else`
+statement are different code, and the presence of an unconditional `b` says
+which.** This is the one-value analogue of the branch-polarity rule and it costs
+a whole instruction plus a register role, so read it before drafting. One probe,
+one body (`track->flags |= <0xc or 0x3, on a byte test>`), three spellings:
+
+| source | codegen |
+|---|---|
+| `x = c ? A : B;` **as its own statement**, then `mem \|= x` | `mov rX,#B ; cmp ; bne L ; mov rX,#A ; L:` — **one arm, no `b`**, and the `mem` load lands *after* the merge |
+| `mem \|= (c ? A : B)` — the `?:` **inside** the expression | `cmp ; bne L1 ; mov rX,#A ; b L2 ; L1: mov rX,#B ; L2:` — **both arms**, and the `mem` load is hoisted *above* the `cmp` |
+| `if (c) mem \|= A; else mem \|= B;` | both arms, and the `mem` load is **duplicated inside each arm** |
+
+So an unconditional `b` between two `mov`s of different constants rules out the
+statement form outright — agbcc rewrites that one into "store the else value,
+then conditionally overwrite it", which is one instruction shorter. Going the
+other way, a *single* `mov` before the `cmp` means the source assigned a local in
+a statement of its own. `switch` with one `case` plus `default` is byte-identical
+to the `if`/`else` statement, and so is initialising the local to 0 first.
+
+Two consequences that are easy to misread. **The position of the memory operand's
+load is decided by this choice, not by operand order in the source** — writing
+`(c ? A : B) | mem` rather than `mem | (c ? A : B)` does not move it, and neither
+does binding the load to a local in an earlier statement. And **the `if`/`else`
+form emits a second `movs #0`** where the expression form shares one with the
+neighbouring zero stores, which is the constant-splitting rule under
+Register-allocation rules showing up without any local being involved.
+
+`sub_08071564` (m4a `ClearModM`) wants the *third* shape's dead `movs` and the
+*first* shape's single post-merge load at the same time, and no spelling found
+reaches both — see the parked draft in `work/sub_08071564/`.
 
 **A loop whose entry test and bottom test read the same value through
 *different* expressions had two different expressions in the source.** GCC
@@ -1093,11 +1375,31 @@ in one probe, same array, same 42 stores of a constant:
 | `for (i = 0; i < N; i++) p[-1 - i] = 0;` — addresses descend | starts at `p-N`, `adds #1` — **ascends** |
 
 The stores are independent, so the reversal is legal and GCC always takes it;
-the counter runs N-1..0 with `bge` either way. `sub_080745C0` is the case. Note
-this only applies where GCC actually reverses — an ascending `p[i]` over an
-array with a *known bound* is turned into a pointer-vs-base compare with no
-counter at all (`cmp r0,r1; bge`), which is a different shape again and is the
-tell that the source indexed a sized array member rather than a bare pointer.
+the counter runs N-1..0 with `bge` either way. `sub_080745C0` is the case.
+
+**A counter surviving to the exit test versus a pointer-vs-base compare says
+which of the two the source indexed — and this file had the two the wrong way
+round.** It read "an ascending `p[i]` over an array with a *known bound* is
+turned into a pointer-vs-base compare with no counter at all, which is the tell
+that the source indexed a sized array member rather than a bare pointer." It is
+the **bare pointer** that loses the counter. One probe, ten `s32` stores of
+zero, three spellings, identical loop bodies otherwise:
+
+| source | exit test |
+|---|---|
+| `p->arr[i] = 0` — sized member `s32 arr[10]` through a pointer **parameter** | `mov r1,#9` … `sub r1,#1; cmp r1,#0; bge` — **counter kept** |
+| `gStruct.arr[i] = 0` — the same member on a **global** | counter kept, identical but for the base `ldr` |
+| `q[i] = 0` — bare `s32 *` parameter | `add r1,r0,#0; add r1,#0x24` … `sub r1,#4;` **`cmp r1,r0; bge`** |
+
+Biv elimination needs a base value that is still live in a register at the exit
+test. A bare pointer parameter is exactly that, so the counter is eliminated
+against it; a member address is a base *plus a constant* the source never names,
+and a global's base is a relocated address, so both keep the counter. This is
+the same boundary as "biv elimination never fires against a static array base"
+in the reverse-loop section below — that section had it right. Read backwards:
+**`cmp rCursor, rBase; bge` means the source subscripted a bare pointer; a
+counter compared against zero means it subscripted an array member.**
+`sub_080750A4` is the member row and matched first try from it.
 
 **The counter's initial value and its branch condition together say which of
 three source loops it was, and the difference is not cosmetic — it is two
@@ -1252,6 +1554,29 @@ once to test, once to increment — agbcc CSEs them into one without `volatile`,
 and the function comes out short. `volatile` keeps both while still emitting a
 plain `ldrh`; a plain `s16` global emits `ldrsh`, which is wrong.
 
+**The store-forwarding twin of that rule, and it is the commoner shape: a read
+of a scalar global that follows a *store* to it reloads only if the global is
+`volatile`.** The rule above is about two reads; here the first access writes,
+and without `volatile` GCC forwards the value it just stored instead of
+re-reading. Two instructions, so there is a clear size signal:
+
+```c
+g++;  if (tbl[g] == 0) g = 0;    /* volatile u32 g */
+      ldr r0,[r2] ; add r0,#1 ; str r0,[r2]
+      ldr r1,=tbl ; ldr r0,[r2] ; lsl r0,#2 ; add r0,r0,r1 ; ldr r0,[r0]
+
+g++;  if (tbl[g] == 0) g = 0;    /* plain u32 g -- the reload is gone */
+      ldr r0,[r2] ; add r0,#1 ; str r0,[r2]
+      ldr r1,=tbl ;              lsl r0,#2 ; add r0,r0,r1 ; ldr r0,[r0]
+```
+
+Read backwards: **`ldr rN,[rB]` on an address that was just `str`ed to, with no
+intervening call or opaque store, is a `volatile` global.** `sub_0802EC64` is
+the case, and this is the whole difference between it matching and coming out
+four bytes short. Note the `ldr rB,=tbl` for the *next* statement is emitted
+before the reload in both, so the reload's position is not the tell — its
+presence is.
+
 **A load and a store of the same address, storing back exactly what was
 loaded, is a self-assignment — and it only survives on a `volatile` lvalue.**
 `g = g;` on a plain global emits *nothing at all*: the whole load/store pair is
@@ -1351,6 +1676,16 @@ global and the `movs #0` is not an operand of anything (`sub_08017988`).
 `sub_08034F8C` is the
 case; a `u8` there collapses to one `ldrb`, and an `s8 a:8` bitfield is
 byte-identical to the plain `s8`.
+
+**The read-modify-write twin at halfword width behaves identically, so read
+`ldrh` + `ldrsh` of one address the same way.** `sub_08034FC0` is
+`extern s16 g; if (g != 0) g--;` and compiles to
+`ldr r1,=g; ldrh r2,[r1]; movs r3,#0; ldrsh r0,[r1,r3]; cmp r0,#0; beq;
+subs r0,r2,#1; strh r0,[r1]` — the guard reads the object in HImode-signed, the
+decrement's operand comes off the plain `ldrh`, and neither `volatile` nor a
+local is involved anywhere. Two loads of the same halfword in *different* modes
+is therefore the `s16` signature, not a `volatile` tell; the `volatile` rule
+above needs the two loads to be the **same** width.
 
 **`const` on the global's declaration makes its load survive intervening
 stores.** `extern T *const gFoo;` read by name emits one `ldr` that GCC reuses
@@ -1526,6 +1861,34 @@ through *one* member of an aggregate. Reaching the same bytes through a bare
 `extern u8 gArr[]` plus a neighbouring `extern s16 gVal` cannot do that, because
 two symbols also cost two pool words; that is how `sub_080745C0` proved its 42
 bytes and the halfword after them are one record and not three globals.
+
+**That aggregate escape hatch does NOT transfer to a pointer global, and neither
+does `const`.** Wrapping the same `extern T *g;` and re-running the identical
+loop, five declarations, one probe (`sub_0801A6C0`, which reads `g` inside a
+loop and again after it):
+
+| declaration, and how the two accesses are spelled | `.rodata`? |
+|---|---|
+| `extern T *g;` — `g[i].m` in the loop, `g->m` after | **yes** |
+| `extern T *const g;` — same | **yes** |
+| `extern struct { T *p; } g;` — `g.p[i].m` / `g.p->m` | **yes** |
+| `extern T *g[];` — `g[0][i].m` / `g[0]->m` | **yes** |
+| `T **pp = &g;` — `g[i].m` in the loop, `(*pp)->m` after | **no** |
+
+The member spelling escapes only when the *object itself* is the aggregate
+(`gStruct.member` above); a one-member wrapper around a pointer does not,
+because the load that must survive is still a scalar `ldr` of a symbol. For a
+pointer global the pointer local is the only fix. Read the last row the useful
+way round: **`&gSym` is not a "use" for force-addr purposes** — taking the
+address is fine on either side of the loop, and it is only a memory reference
+by name that counts.
+
+Worth knowing while you are here: **the `.rodata` word is itself re-read after
+an intervening store**, exactly like an ordinary global, even though GCC marks
+it unchanging and will happily hoist it out of a loop. So a doubled
+`ldr; ldr` reappearing *after* the loop is force-addr behaving normally and
+says nothing about `const` — which is the inference `gUnknown_0808E5C8`'s
+header comment originally got wrong.
 
 **To reproduce it in source**, bind the address to a local and use that for the
 accesses *after* the loop:
@@ -1765,10 +2128,84 @@ loud and free — `STRUCT_PAD(0x29, 0x26)` is
 `size of array '_pad_0x29' is negative`, a compile error, not a mismatch — so
 write the `PROC_HEADER` version first and let the compiler tell you.
 
+**"Parameter" is too narrow — the trap fires on `Proc_Start*`'s own return
+value too, and that reading is much harder to trust.** `sub_080337D8` is
+`bl Proc_StartBlocking` followed immediately by `str r4,[r0,#0x20]` and
+`str r5,[r0,#0x24]` — proc_prev and proc_sleepTime, which `Proc_Start` in
+`src/proc.c` has just initialised three instructions earlier. It looks
+impossible, so the instinct is to doubt `PROC_HEADER` instead of the object;
+do not. `src/proc.c` is a matching source, so the 0x29 layout is pinned by the
+build, and the answer is simply that the wrapper does not treat what it got
+back as a Proc. Model the whole prefix as `u8 filler_00[0x20];` in the `.c`,
+exactly as for the parameter case — the codegen is identical either way for
+members past the header, so nothing is lost by using filler when in doubt.
+
 Also worth knowing here: a member offset that needs a runtime `adds rB, #imm`
 in this family is almost always just the THUMB displacement limit
-(`strb`/`ldrb` 0–31), not an address being taken. `+0x36` and `+0x50` both
-produce it from a plain `p->member = v`.
+(`strb`/`ldrb` 0–31, `strh`/`ldrh` 0–62 even), not an address being taken.
+`+0x36`, `+0x50` and `+0x64` all produce it from a plain `p->member = v`.
+
+**The wrappers come in matched pairs, and spotting the pair is worth more than
+reading either one.** At 0x08071EF0–0x08071F70 six consecutive wrappers cover
+four scripts in exactly two shapes: a tree-3 `Proc_Start` taking only the
+payload, and a `Proc_StartBlocking` forwarding its own second parameter as the
+parent — the same script appearing in both. They differ only by the presence of
+`movs r1, #3` (28 bytes vs 24), so once you have written one of each the rest
+are a symbol substitution. The payload here is a **halfword** at +0x64, and the
+argument is still `int`: `adds r4, r0, #0` with no `lsl #16; lsr #16` in front of
+it rules out a `u16` parameter, because one that has to survive a `bl` would
+carry the narrowing whatever the store width. `+0x3d` and `+0x58` do too. The same
+holds one width up — `strh`/`ldrh` is 0–62 even, so a **halfword** member at
+`+0x64` gets `adds r0, #0x64; strh r1, [r0]` while the `str` at `+0x5c` two
+lines above it folds. `sub_08076770` and `sub_080767A8` write the same `+0x64`
+field and both do it; word members at `+0x54`/`+0x58`/`+0x60` in the same family
+never do.
+
+**This family is the one place a setter's argument width *is* recoverable, and
+it is free.** The Workflow section states the negative half — a bare
+`adds r4, r0, #0` saved across the `bl` and later stored with `strb` is an
+`int`. The positive half is just as reliable, because every argument here has to
+survive a call and PROMOTE_MODE narrows it in the prologue whatever the eventual
+store width:
+
+| prologue, before the `bl` | parameter |
+|---|---|
+| `adds r4, r0, #0` | `int` / `s32` — even where the store is `strb`/`strh` |
+| `adds r4, r0, #0 ; lsl #24 ; lsr #24` | `u8` |
+| `adds r4, r0, #0 ; lsl #16 ; lsr #16` | `u16` |
+
+`sub_0806A4B0` is the `u8` row (stored `strb` at +0x3d) and `sub_0806E5CC` the
+`u16` row (stored `strh` at +0x34). Read the shift, not the store.
+
+**The epilogue says whether the starter hands the proc back**, by the general
+`pop {r0}` / `pop {r1}` rule — and in this family the returned value is always
+the `bl`'s own result, since nothing else touches r0 afterwards. So
+`pop {r4, r5, r6} ; pop {r1} ; bx r1` on a proc starter is one extra source line
+and nothing else changes:
+
+```c
+ProcPtr f(...) { struct T *proc = Proc_Start(g, parent); ...; return proc; }
+```
+
+`sub_080677BC` is the case; every other member of a 13-function wave-9 batch
+popped into r0 and is `void`.
+
+**A permuted callee-saved allocation in a multi-argument starter is not a signal
+— do not chase it.** With three payload arguments the prologue copies r0/r1/r2
+into r4/r5/r6, but *which* of the three each lands in is decided by the
+allocator and is neither parameter order nor store order:
+
+```
+sub_08068014  r0->r4 r1->r5 r2->r6   stores a, b, c   (offsets 2c, 30, 34)
+sub_08069FAC  r0->r6 r1->r4 r2->r5   stores b, a, c   (offsets 34, 38, 3c)
+```
+
+Store order alone would have predicted `b->r4, a->r5, c->r6` for the second and
+it is wrong. Both reproduce exactly from the naive source, so the recipe is:
+read the parameter-to-register map off the prologue, read the *store* order off
+the body, write the statements in store order naming the parameters by their
+argument register, and let the permutation fall out. Trying to reverse-engineer
+the permutation into a source feature is wasted effort.
 
 ---
 
@@ -1816,11 +2253,33 @@ not evidence. The tells:
   `thumb_func_start`. `sub_0802C62A` is padding between `sub_0802C604` and
   `sub_0802C62C`. Not a function, not asm the game runs, nothing to match.
 
-The 0x0806F734–0x0807031C block is the m4a/MP2K sound driver, hand-written
-assembly in every GBA game that uses it. `sub_0806F744` loads
-`gUnknown_03007FF0` and compares `[r0]` against `0x68736D53` — that is the
-canonical `SOUND_INFO_PTR` and m4a's `"Smsh"` ID_NUMBER. This driver is already
-solved in other decomps and should be lifted rather than re-derived.
+The 0x0806F734–0x080718E4 block is the m4a/MP2K sound driver. `sub_0806F744`
+loads `gUnknown_03007FF0` and compares `[r0]` against `0x68736D53` — that is the
+canonical `SOUND_INFO_PTR` and m4a's `"Smsh"` ID_NUMBER.
+
+**It is `m4a.c` interleaved with `m4a_asm.s`, not one hand-written block.** This
+paragraph used to end "solved in other decomps and should be lifted rather than
+re-derived"; wave 8 matched three entry points as ordinary C and wave 9 matched
+two more, so the *code* cannot be lifted wholesale. The **data** can: this ROM's
+`MusicPlayerInfo` and `MusicPlayerTrack` are the canonical MP2K layouts with
+nothing moved, now named as far as +0x22 and +0x1f respectively in
+`include/unknown-globals.h`.
+
+Wave 9 spent four probes talking itself into a bogus "+1 shift" here first, so
+the trap is worth stating: **the modulation block is `modM, mod, modT`, and a
+public layout quoted from memory tends to drop `mod`.** Leave it out and every
+field from +0x17 up looks off by one, which is exactly consistent enough to
+believe. Do not reconstruct an MP2K struct from recall — read the LFO update at
+0x0806FEF8, which names six of these fields in twenty instructions.
+
+**Two more things worth knowing before scoping a batch here.** The driver keeps
+*both* copies of some routines — `ClearModM` exists hand-written at
+`sub_08070300` (track in **r1**) and compiled at `sub_08071564` (track in r0),
+with the two zero stores in opposite orders. So an FE name tells you *which
+routine* this is and nothing about which half of the file it came from; check r0
+first, every time. And the hand-written half is first-class evidence about the
+layout even though it will never match: `sub_080700C0` (ply_note) and the LFO
+block above are where nine of the ten named track fields came from.
 
 Cheap pre-filter when scoping a batch:
 
@@ -1892,6 +2351,36 @@ reached zero score in **4,566 iterations, under five minutes**, having invented
 mechanism* and then write the idiom the original would have used, rather than
 committing the self-assignment.
 
+**The free-liveness trick is word-only, and wave 9 hit the wall.** The store
+above emits nothing because it is a redundant SImode `str`; the same shape on a
+`u16` member does **not** vanish, so you pay two bytes for the liveness and the
+idiom is unusable there. One probe, one struct, the same "keep this value live
+past the multiply" goal:
+
+```c
+mplayInfo->ident = ident;            /* u32 member, value from a local  -> deleted   */
+mplayInfo->tempoD = mplayInfo->tempoD; /* u16 member, direct            -> load AND store both deleted */
+d = mplayInfo->tempoD; ...; mplayInfo->tempoD = d;   /* u16 via a local -> `strh` SURVIVES */
+```
+
+Note the middle row is not a workaround: deleting the load too is exactly what
+removes the liveness you were buying. So on a halfword member the trick has no
+form that both keeps the value live and costs nothing. It *does* work — the
+third row produces the target's `mov rD,rX ; mul` copy shape and its
+`push {r4, lr}` — which is how the mechanism was confirmed; it just cannot be
+spent. `sub_080713F8` (m4a `MPlayTempoControl`) is parked one dead `strh` away
+on exactly this.
+
+**And the vehicle has to be a store to MEMORY. A dead assignment to a local
+buys nothing at all** — `life_analysis` deletes a dead register set before the
+liveness it would have created is ever recorded, so the value dies at its last
+real use exactly as if you had not written the line. Four spellings tried on
+`sub_0801A6C0`, all byte-identical to omitting them: `i = v;` on a dead counter,
+`p = (T *)v;` on a dead pointer, a store immediately overwritten on the next
+line (`g.m = v; g.m = 0;` — agbcc drops the first), and the same pair on a
+different member. Reach for the idiom only where the extra reference lands in a
+real, surviving store.
+
 `decomp-permuter` is still wired up and is still the right tool when the
 obstacle really is allocation:
 
@@ -1925,6 +2414,19 @@ Also worth knowing before reading a permuter run's numbers: its score and byte
 equality are not monotonically related. On both of the late two its best-scoring
 candidate was a byte-level regression (80% -> 75%, 88.2% -> 55.9%).
 
+**Currently open: `sub_0801A6C0`, parked at 98.4% — one byte.** A clear-loop
+plus three zero stores, exact in every respect except which of two values live
+across the loop gets r3 and which gets r4 (the base pointer and the hoisted
+zero, swapped). The full list of what was ruled out is in
+`work/sub_0801A6C0/sub_0801A6C0.c` and is long enough to be evidence in its own
+right: every statement order, every loop form, four types for the constant,
+the dead-statement trick above, and 106,936 permuter iterations in 600s that
+never beat the starting point. Per the paragraph above, read that as the axis
+being wrong. The one thing that *does* move the tie-break is giving the zero a
+third reference — which is how the draft gets to one byte — so whatever the
+original wrote, it kept that constant live past the loop for a reason that is
+not visible in the three stores that follow it.
+
 ---
 
 ## Where the globals live
@@ -1946,6 +2448,31 @@ types or total size. So adding a field is normal — narrow a `filler_XX` into a
 type, or changing the total size will silently break a match in a file you are
 not looking at, because agbcc picks the instruction from the member type and the
 index stride from `sizeof`.
+
+**"Moving a field" means moving the *byte offset*, not moving the declaration —
+re-basing a nested array is safe and is sometimes the only way forward.** When a
+new function reaches a sub-record at an offset *below* the sub-array's declared
+base, the base is wrong and no amount of adding members reaches it: the offset
+would have to be a negative member offset. Slide the array base down and rename
+every member up by the same amount, and the absolute offset of every existing
+access is unchanged, so the change is byte-neutral by construction and the
+edits to the promoted files are mechanical. Wave 9 did this to
+`struct Unk085D3DD0`: `sub_08039F18` reaches `base + a*0x104 + b*0x44 + 0x38`
+and the sub-array was declared at +0x40, so it moved to +0x38 and
+`unk40[b].unk06` became `unk38[b].unk0e` in five places. All fourteen functions
+in `c_08042E2C.c` plus `c_08042DCC.c`, `c_08042E18.c` and `c_08043D84.c` still
+match. Two things worth carrying:
+
+- **Verify it, do not reason it.** The check is `python tools/sync_work.py`
+  followed by `trymatch` on every function in the files `grep -rl` names. For a
+  multi-function promoted file `sync_work.py` deliberately leaves the drafts
+  alone, so edit `work/<fn>/<fn>.c` to match your rename and `trymatch` each one
+  — that is a real verdict, and it is what makes this a 30-second change rather
+  than a leap of faith.
+- **A re-base often falls out exactly, and that is corroboration.** At +0x38 the
+  record array covers `struct Unk085D3DD0` to the byte (`0x38 + 3*0x44 == 0x104`)
+  and the old `filler_c8[0x3c]` tail disappears — the trailing filler was itself
+  an artefact of the wrong base. An extent that had been guessed became proved.
 
 **The header covers the globals promoted functions reach, not every global in
 the ROM.** In an unworked address range, finding your global absent is the
@@ -2184,7 +2711,7 @@ extern u8 *gUnknown_08499590;
      gUnknown_03002FA0  list A, counted by volatile u16 gUnknown_030030E8
      gUnknown_03000000  list B                                            */
 
-/* 0x08063E28-0x080640EC is a 20.12 FIXED-POINT MATRIX LIBRARY, and it is the
+/* 0x08063DDC-0x080640EC is a 20.12 FIXED-POINT MATRIX LIBRARY, and it is the
    one cluster here with no global at all -- every routine takes its operands
    as pointer parameters, so the types live in the .c files rather than in
    unknown-globals.h. Recorded here because the layout is what makes the whole
@@ -2192,16 +2719,28 @@ extern u8 *gUnknown_08499590;
      struct Mtx43 { s32 m[4][3]; }   0x30 bytes, row stride 0x0c
      struct Vec3  { s32 x, y, z; }   0x0c bytes
    0x1000 == 1.0, and every product is renormalised with `asrs #0xc`.
-   The layout is proved twice over: sub_08063F98 loads the identity and its
+   The layout is proved three times over: sub_08063F98 loads the identity and its
    three 0x1000 stores land at +0x00/+0x10/+0x20, which are m[0][0], m[1][1]
    and m[2][2] only under a 0x0c row stride; and sub_08063E28 reserves exactly
    `sub sp, #0x30` for one temporary and walks its right-hand operand's columns
    at 0x0c while walking rows at 4.
+     08063DDC  Vec3 x Mtx43, rows 0-2 only -- the DIRECTION transform. It reads
+               the matrix column-wise (+0x00/+0x0c/+0x18, then +0x04/+0x10/+0x1c,
+               then +0x08/+0x14/+0x20), which is the same 0x0c row stride seen
+               from the other side and is a third independent proof of it.
+               Skipping row 3 is what makes it the direction rather than the
+               point transform.
      08063E28  multiply, into a caller-supplied dst (aliasing-safe: it detects
                dst == either operand and routes through the stack temporary,
                then calls 08063FB8 to copy it out)
      08063F98  load identity      08063FB8  copy (element-wise, NOT `*dst = *src`)
      080640C8  Vec3 dot product, `>> 12`
+     080640EC  Vec3 cross product, `>> 12`
+   The whole block is the naive spelling with no locals anywhere. The vector
+   operands' components stay live in r4-r6 across all three output stores
+   without a local, because the stores are SImode and a word store does not
+   invalidate a cached load -- see the sub_08044178 / sub_08064BC8 split under
+   Aliasing. Reaching for a local here is the wrong instinct and costs a frame.
    Row 3 is the translation: 08063E28's last three terms add a[3][j] after the
    shift instead of multiplying it. Still unworked in this block: sub_08064214
    (08063E28's only caller) and the rest of 0x08064xxx. */

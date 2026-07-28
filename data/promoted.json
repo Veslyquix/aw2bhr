@@ -27,6 +27,24 @@
   "size": 16
  },
  {
+  "file": "src/decomp/c_08000D9C.c",
+  "obj": "src/decomp/c_08000D9C.o",
+  "addr_hex": "0x08000D9C",
+  "functions": [
+   "sub_08000D9C"
+  ],
+  "size": 36
+ },
+ {
+  "file": "src/decomp/c_08001124.c",
+  "obj": "src/decomp/c_08001124.o",
+  "addr_hex": "0x08001124",
+  "functions": [
+   "sub_08001124"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_08001158.c",
   "obj": "src/decomp/c_08001158.o",
   "addr_hex": "0x08001158",
@@ -119,6 +137,33 @@
   "size": 36
  },
  {
+  "file": "src/decomp/c_08008B70.c",
+  "obj": "src/decomp/c_08008B70.o",
+  "addr_hex": "0x08008B70",
+  "functions": [
+   "sub_08008B70"
+  ],
+  "size": 72
+ },
+ {
+  "file": "src/decomp/c_080094EC.c",
+  "obj": "src/decomp/c_080094EC.o",
+  "addr_hex": "0x080094EC",
+  "functions": [
+   "sub_080094EC"
+  ],
+  "size": 76
+ },
+ {
+  "file": "src/decomp/c_0800B4F0.c",
+  "obj": "src/decomp/c_0800B4F0.o",
+  "addr_hex": "0x0800B4F0",
+  "functions": [
+   "sub_0800B4F0"
+  ],
+  "size": 56
+ },
+ {
   "file": "src/decomp/c_08010EE8.c",
   "obj": "src/decomp/c_08010EE8.o",
   "addr_hex": "0x08010EE8",
@@ -155,6 +200,15 @@
   "size": 12
  },
  {
+  "file": "src/decomp/c_08011300.c",
+  "obj": "src/decomp/c_08011300.o",
+  "addr_hex": "0x08011300",
+  "functions": [
+   "sub_08011300"
+  ],
+  "size": 84
+ },
+ {
   "file": "src/decomp/c_08011354.c",
   "obj": "src/decomp/c_08011354.o",
   "addr_hex": "0x08011354",
@@ -174,6 +228,16 @@
   "size": 56
  },
  {
+  "file": "src/decomp/c_08011588.c",
+  "obj": "src/decomp/c_08011588.o",
+  "addr_hex": "0x08011588",
+  "functions": [
+   "sub_08011588",
+   "sub_080115B4"
+  ],
+  "size": 88
+ },
+ {
   "file": "src/decomp/c_080115E0.c",
   "obj": "src/decomp/c_080115E0.o",
   "addr_hex": "0x080115E0",
@@ -182,6 +246,18 @@
    "sub_080115F8"
   ],
   "size": 48
+ },
+ {
+  "file": "src/decomp/c_08011610.c",
+  "obj": "src/decomp/c_08011610.o",
+  "addr_hex": "0x08011610",
+  "functions": [
+   "sub_08011610",
+   "sub_0801163C",
+   "sub_08011668",
+   "sub_08011684"
+  ],
+  "size": 144
  },
  {
   "file": "src/decomp/c_08011A84.c",
@@ -227,6 +303,15 @@
    "sub_08011BC4"
   ],
   "size": 16
+ },
+ {
+  "file": "src/decomp/c_08011C18.c",
+  "obj": "src/decomp/c_08011C18.o",
+  "addr_hex": "0x08011C18",
+  "functions": [
+   "sub_08011C18"
+  ],
+  "size": 64
  },
  {
   "file": "src/decomp/c_0801224C.c",
@@ -322,6 +407,15 @@
   "size": 48
  },
  {
+  "file": "src/decomp/c_08012B00.c",
+  "obj": "src/decomp/c_08012B00.o",
+  "addr_hex": "0x08012B00",
+  "functions": [
+   "sub_08012B00"
+  ],
+  "size": 36
+ },
+ {
   "file": "src/decomp/c_08012BC8.c",
   "obj": "src/decomp/c_08012BC8.o",
   "addr_hex": "0x08012BC8",
@@ -367,6 +461,15 @@
   "size": 40
  },
  {
+  "file": "src/decomp/c_08012FA4.c",
+  "obj": "src/decomp/c_08012FA4.o",
+  "addr_hex": "0x08012FA4",
+  "functions": [
+   "sub_08012FA4"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_08013028.c",
   "obj": "src/decomp/c_08013028.o",
   "addr_hex": "0x08013028",
@@ -374,6 +477,17 @@
    "sub_08013028"
   ],
   "size": 12
+ },
+ {
+  "file": "src/decomp/c_08013098.c",
+  "obj": "src/decomp/c_08013098.o",
+  "addr_hex": "0x08013098",
+  "functions": [
+   "sub_08013098",
+   "sub_080130B0",
+   "sub_080130C8"
+  ],
+  "size": 68
  },
  {
   "file": "src/decomp/c_08013324.c",
@@ -535,6 +649,15 @@
   "size": 32
  },
  {
+  "file": "src/decomp/c_08014BD4.c",
+  "obj": "src/decomp/c_08014BD4.o",
+  "addr_hex": "0x08014BD4",
+  "functions": [
+   "sub_08014BD4"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_08015184.c",
   "obj": "src/decomp/c_08015184.o",
   "addr_hex": "0x08015184",
@@ -589,6 +712,15 @@
   "size": 60
  },
  {
+  "file": "src/decomp/c_08015738.c",
+  "obj": "src/decomp/c_08015738.o",
+  "addr_hex": "0x08015738",
+  "functions": [
+   "sub_08015738"
+  ],
+  "size": 64
+ },
+ {
   "file": "src/decomp/c_08015778.c",
   "obj": "src/decomp/c_08015778.o",
   "addr_hex": "0x08015778",
@@ -632,6 +764,15 @@
    "sub_08015820"
   ],
   "size": 36
+ },
+ {
+  "file": "src/decomp/c_08015844.c",
+  "obj": "src/decomp/c_08015844.o",
+  "addr_hex": "0x08015844",
+  "functions": [
+   "sub_08015844"
+  ],
+  "size": 52
  },
  {
   "file": "src/decomp/c_080158D4.c",
@@ -900,6 +1041,15 @@
   "size": 32
  },
  {
+  "file": "src/decomp/c_08018C0C.c",
+  "obj": "src/decomp/c_08018C0C.o",
+  "addr_hex": "0x08018C0C",
+  "functions": [
+   "sub_08018C0C"
+  ],
+  "size": 72
+ },
+ {
   "file": "src/decomp/c_08018C54.c",
   "obj": "src/decomp/c_08018C54.o",
   "addr_hex": "0x08018C54",
@@ -907,6 +1057,15 @@
    "sub_08018C54"
   ],
   "size": 44
+ },
+ {
+  "file": "src/decomp/c_08018C80.c",
+  "obj": "src/decomp/c_08018C80.o",
+  "addr_hex": "0x08018C80",
+  "functions": [
+   "sub_08018C80"
+  ],
+  "size": 60
  },
  {
   "file": "src/decomp/c_08018CBC.c",
@@ -946,6 +1105,15 @@
    "sub_08018D90"
   ],
   "size": 48
+ },
+ {
+  "file": "src/decomp/c_08018DC0.c",
+  "obj": "src/decomp/c_08018DC0.o",
+  "addr_hex": "0x08018DC0",
+  "functions": [
+   "sub_08018DC0"
+  ],
+  "size": 56
  },
  {
   "file": "src/decomp/c_08018EE4.c",
@@ -1053,6 +1221,24 @@
   "size": 16
  },
  {
+  "file": "src/decomp/c_0801A700.c",
+  "obj": "src/decomp/c_0801A700.o",
+  "addr_hex": "0x0801A700",
+  "functions": [
+   "sub_0801A700"
+  ],
+  "size": 24
+ },
+ {
+  "file": "src/decomp/c_0801B6A8.c",
+  "obj": "src/decomp/c_0801B6A8.o",
+  "addr_hex": "0x0801B6A8",
+  "functions": [
+   "sub_0801B6A8"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_0801B768.c",
   "obj": "src/decomp/c_0801B768.o",
   "addr_hex": "0x0801B768",
@@ -1071,6 +1257,15 @@
   "size": 16
  },
  {
+  "file": "src/decomp/c_0801BB88.c",
+  "obj": "src/decomp/c_0801BB88.o",
+  "addr_hex": "0x0801BB88",
+  "functions": [
+   "sub_0801BB88"
+  ],
+  "size": 60
+ },
+ {
   "file": "src/decomp/c_0801BCF4.c",
   "obj": "src/decomp/c_0801BCF4.o",
   "addr_hex": "0x0801BCF4",
@@ -1078,6 +1273,15 @@
    "sub_0801BCF4"
   ],
   "size": 12
+ },
+ {
+  "file": "src/decomp/c_0801BE44.c",
+  "obj": "src/decomp/c_0801BE44.o",
+  "addr_hex": "0x0801BE44",
+  "functions": [
+   "sub_0801BE44"
+  ],
+  "size": 52
  },
  {
   "file": "src/decomp/c_0801BEBC.c",
@@ -1236,6 +1440,15 @@
   "size": 12
  },
  {
+  "file": "src/decomp/c_0801E0C8.c",
+  "obj": "src/decomp/c_0801E0C8.o",
+  "addr_hex": "0x0801E0C8",
+  "functions": [
+   "sub_0801E0C8"
+  ],
+  "size": 40
+ },
+ {
   "file": "src/decomp/c_0801E108.c",
   "obj": "src/decomp/c_0801E108.o",
   "addr_hex": "0x0801E108",
@@ -1328,6 +1541,24 @@
   "size": 24
  },
  {
+  "file": "src/decomp/c_0801F838.c",
+  "obj": "src/decomp/c_0801F838.o",
+  "addr_hex": "0x0801F838",
+  "functions": [
+   "sub_0801F838"
+  ],
+  "size": 80
+ },
+ {
+  "file": "src/decomp/c_080215D0.c",
+  "obj": "src/decomp/c_080215D0.o",
+  "addr_hex": "0x080215D0",
+  "functions": [
+   "sub_080215D0"
+  ],
+  "size": 44
+ },
+ {
   "file": "src/decomp/c_080215FC.c",
   "obj": "src/decomp/c_080215FC.o",
   "addr_hex": "0x080215FC",
@@ -1344,6 +1575,24 @@
    "sub_08021D08"
   ],
   "size": 8
+ },
+ {
+  "file": "src/decomp/c_080223E0.c",
+  "obj": "src/decomp/c_080223E0.o",
+  "addr_hex": "0x080223E0",
+  "functions": [
+   "sub_080223E0"
+  ],
+  "size": 72
+ },
+ {
+  "file": "src/decomp/c_080225CC.c",
+  "obj": "src/decomp/c_080225CC.o",
+  "addr_hex": "0x080225CC",
+  "functions": [
+   "sub_080225CC"
+  ],
+  "size": 76
  },
  {
   "file": "src/decomp/c_08022AAC.c",
@@ -1466,6 +1715,15 @@
   "size": 44
  },
  {
+  "file": "src/decomp/c_080260D0.c",
+  "obj": "src/decomp/c_080260D0.o",
+  "addr_hex": "0x080260D0",
+  "functions": [
+   "sub_080260D0"
+  ],
+  "size": 48
+ },
+ {
   "file": "src/decomp/c_08026190.c",
   "obj": "src/decomp/c_08026190.o",
   "addr_hex": "0x08026190",
@@ -1483,6 +1741,15 @@
    "sub_080261C8"
   ],
   "size": 32
+ },
+ {
+  "file": "src/decomp/c_08026588.c",
+  "obj": "src/decomp/c_08026588.o",
+  "addr_hex": "0x08026588",
+  "functions": [
+   "sub_08026588"
+  ],
+  "size": 40
  },
  {
   "file": "src/decomp/c_080266D4.c",
@@ -1512,6 +1779,24 @@
   "size": 36
  },
  {
+  "file": "src/decomp/c_08026D44.c",
+  "obj": "src/decomp/c_08026D44.o",
+  "addr_hex": "0x08026D44",
+  "functions": [
+   "sub_08026D44"
+  ],
+  "size": 36
+ },
+ {
+  "file": "src/decomp/c_08026F28.c",
+  "obj": "src/decomp/c_08026F28.o",
+  "addr_hex": "0x08026F28",
+  "functions": [
+   "sub_08026F28"
+  ],
+  "size": 52
+ },
+ {
   "file": "src/decomp/c_08026F9C.c",
   "obj": "src/decomp/c_08026F9C.o",
   "addr_hex": "0x08026F9C",
@@ -1538,6 +1823,15 @@
    "sub_0802813C"
   ],
   "size": 24
+ },
+ {
+  "file": "src/decomp/c_08028848.c",
+  "obj": "src/decomp/c_08028848.o",
+  "addr_hex": "0x08028848",
+  "functions": [
+   "sub_08028848"
+  ],
+  "size": 44
  },
  {
   "file": "src/decomp/c_08028874.c",
@@ -1613,6 +1907,15 @@
   "size": 24
  },
  {
+  "file": "src/decomp/c_0802C2A0.c",
+  "obj": "src/decomp/c_0802C2A0.o",
+  "addr_hex": "0x0802C2A0",
+  "functions": [
+   "sub_0802C2A0"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_0802C57C.c",
   "obj": "src/decomp/c_0802C57C.o",
   "addr_hex": "0x0802C57C",
@@ -1621,6 +1924,15 @@
    "sub_0802C594"
   ],
   "size": 48
+ },
+ {
+  "file": "src/decomp/c_0802C5F0.c",
+  "obj": "src/decomp/c_0802C5F0.o",
+  "addr_hex": "0x0802C5F0",
+  "functions": [
+   "sub_0802C5F0"
+  ],
+  "size": 20
  },
  {
   "file": "src/decomp/c_0802C62C.c",
@@ -1641,6 +1953,25 @@
   "size": 36
  },
  {
+  "file": "src/decomp/c_0802C78C.c",
+  "obj": "src/decomp/c_0802C78C.o",
+  "addr_hex": "0x0802C78C",
+  "functions": [
+   "sub_0802C78C",
+   "sub_0802C7A0"
+  ],
+  "size": 40
+ },
+ {
+  "file": "src/decomp/c_0802DBF8.c",
+  "obj": "src/decomp/c_0802DBF8.o",
+  "addr_hex": "0x0802DBF8",
+  "functions": [
+   "sub_0802DBF8"
+  ],
+  "size": 48
+ },
+ {
   "file": "src/decomp/c_0802EAFC.c",
   "obj": "src/decomp/c_0802EAFC.o",
   "addr_hex": "0x0802EAFC",
@@ -1648,6 +1979,15 @@
    "sub_0802EAFC"
   ],
   "size": 44
+ },
+ {
+  "file": "src/decomp/c_0802EC64.c",
+  "obj": "src/decomp/c_0802EC64.o",
+  "addr_hex": "0x0802EC64",
+  "functions": [
+   "sub_0802EC64"
+  ],
+  "size": 36
  },
  {
   "file": "src/decomp/c_0802ECEC.c",
@@ -1686,6 +2026,15 @@
   "size": 16
  },
  {
+  "file": "src/decomp/c_080303B0.c",
+  "obj": "src/decomp/c_080303B0.o",
+  "addr_hex": "0x080303B0",
+  "functions": [
+   "sub_080303B0"
+  ],
+  "size": 24
+ },
+ {
   "file": "src/decomp/c_08030574.c",
   "obj": "src/decomp/c_08030574.o",
   "addr_hex": "0x08030574",
@@ -1711,6 +2060,15 @@
    "sub_080311D0"
   ],
   "size": 8
+ },
+ {
+  "file": "src/decomp/c_08031418.c",
+  "obj": "src/decomp/c_08031418.o",
+  "addr_hex": "0x08031418",
+  "functions": [
+   "sub_08031418"
+  ],
+  "size": 24
  },
  {
   "file": "src/decomp/c_08031B6C.c",
@@ -1740,6 +2098,62 @@
   "size": 16
  },
  {
+  "file": "src/decomp/c_08031E44.c",
+  "obj": "src/decomp/c_08031E44.o",
+  "addr_hex": "0x08031E44",
+  "functions": [
+   "sub_08031E44"
+  ],
+  "size": 40
+ },
+ {
+  "file": "src/decomp/c_08032454.c",
+  "obj": "src/decomp/c_08032454.o",
+  "addr_hex": "0x08032454",
+  "functions": [
+   "sub_08032454",
+   "sub_08032468"
+  ],
+  "size": 48
+ },
+ {
+  "file": "src/decomp/c_08032D4C.c",
+  "obj": "src/decomp/c_08032D4C.o",
+  "addr_hex": "0x08032D4C",
+  "functions": [
+   "sub_08032D4C"
+  ],
+  "size": 20
+ },
+ {
+  "file": "src/decomp/c_080337D8.c",
+  "obj": "src/decomp/c_080337D8.o",
+  "addr_hex": "0x080337D8",
+  "functions": [
+   "sub_080337D8"
+  ],
+  "size": 40
+ },
+ {
+  "file": "src/decomp/c_080338C0.c",
+  "obj": "src/decomp/c_080338C0.o",
+  "addr_hex": "0x080338C0",
+  "functions": [
+   "sub_080338C0",
+   "sub_080338DC"
+  ],
+  "size": 60
+ },
+ {
+  "file": "src/decomp/c_080342DC.c",
+  "obj": "src/decomp/c_080342DC.o",
+  "addr_hex": "0x080342DC",
+  "functions": [
+   "sub_080342DC"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_08034308.c",
   "obj": "src/decomp/c_08034308.o",
   "addr_hex": "0x08034308",
@@ -1754,6 +2168,15 @@
   "addr_hex": "0x0803433C",
   "functions": [
    "sub_0803433C"
+  ],
+  "size": 20
+ },
+ {
+  "file": "src/decomp/c_08034380.c",
+  "obj": "src/decomp/c_08034380.o",
+  "addr_hex": "0x08034380",
+  "functions": [
+   "sub_08034380"
   ],
   "size": 20
  },
@@ -1841,6 +2264,15 @@
   "size": 16
  },
  {
+  "file": "src/decomp/c_08034FC0.c",
+  "obj": "src/decomp/c_08034FC0.o",
+  "addr_hex": "0x08034FC0",
+  "functions": [
+   "sub_08034FC0"
+  ],
+  "size": 24
+ },
+ {
   "file": "src/decomp/c_08035000.c",
   "obj": "src/decomp/c_08035000.o",
   "addr_hex": "0x08035000",
@@ -1884,6 +2316,15 @@
   "addr_hex": "0x08035B68",
   "functions": [
    "sub_08035B68"
+  ],
+  "size": 24
+ },
+ {
+  "file": "src/decomp/c_08035CF4.c",
+  "obj": "src/decomp/c_08035CF4.o",
+  "addr_hex": "0x08035CF4",
+  "functions": [
+   "sub_08035CF4"
   ],
   "size": 24
  },
@@ -1980,6 +2421,17 @@
   "size": 20
  },
  {
+  "file": "src/decomp/c_080386A0.c",
+  "obj": "src/decomp/c_080386A0.o",
+  "addr_hex": "0x080386A0",
+  "functions": [
+   "sub_080386A0",
+   "sub_080386B4",
+   "sub_080386C8"
+  ],
+  "size": 60
+ },
+ {
   "file": "src/decomp/c_080386DC.c",
   "obj": "src/decomp/c_080386DC.o",
   "addr_hex": "0x080386DC",
@@ -1987,6 +2439,15 @@
    "sub_080386DC"
   ],
   "size": 16
+ },
+ {
+  "file": "src/decomp/c_08039634.c",
+  "obj": "src/decomp/c_08039634.o",
+  "addr_hex": "0x08039634",
+  "functions": [
+   "sub_08039634"
+  ],
+  "size": 28
  },
  {
   "file": "src/decomp/c_08039930.c",
@@ -2007,6 +2468,24 @@
   "size": 32
  },
  {
+  "file": "src/decomp/c_08039BB4.c",
+  "obj": "src/decomp/c_08039BB4.o",
+  "addr_hex": "0x08039BB4",
+  "functions": [
+   "sub_08039BB4"
+  ],
+  "size": 40
+ },
+ {
+  "file": "src/decomp/c_08039F18.c",
+  "obj": "src/decomp/c_08039F18.o",
+  "addr_hex": "0x08039F18",
+  "functions": [
+   "sub_08039F18"
+  ],
+  "size": 64
+ },
+ {
   "file": "src/decomp/c_0803AF70.c",
   "obj": "src/decomp/c_0803AF70.o",
   "addr_hex": "0x0803AF70",
@@ -2016,6 +2495,15 @@
   "size": 8
  },
  {
+  "file": "src/decomp/c_0803B1CC.c",
+  "obj": "src/decomp/c_0803B1CC.o",
+  "addr_hex": "0x0803B1CC",
+  "functions": [
+   "sub_0803B1CC"
+  ],
+  "size": 32
+ },
+ {
   "file": "src/decomp/c_0803B350.c",
   "obj": "src/decomp/c_0803B350.o",
   "addr_hex": "0x0803B350",
@@ -2023,6 +2511,15 @@
    "sub_0803B350"
   ],
   "size": 12
+ },
+ {
+  "file": "src/decomp/c_0803B55C.c",
+  "obj": "src/decomp/c_0803B55C.o",
+  "addr_hex": "0x0803B55C",
+  "functions": [
+   "sub_0803B55C"
+  ],
+  "size": 28
  },
  {
   "file": "src/decomp/c_0803B5F4.c",
@@ -2061,6 +2558,15 @@
   "size": 20
  },
  {
+  "file": "src/decomp/c_0803B788.c",
+  "obj": "src/decomp/c_0803B788.o",
+  "addr_hex": "0x0803B788",
+  "functions": [
+   "sub_0803B788"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_0803B828.c",
   "obj": "src/decomp/c_0803B828.o",
   "addr_hex": "0x0803B828",
@@ -2077,6 +2583,45 @@
    "sub_0803B8C4"
   ],
   "size": 28
+ },
+ {
+  "file": "src/decomp/c_0803B9EC.c",
+  "obj": "src/decomp/c_0803B9EC.o",
+  "addr_hex": "0x0803B9EC",
+  "functions": [
+   "sub_0803B9EC",
+   "sub_0803BA00"
+  ],
+  "size": 48
+ },
+ {
+  "file": "src/decomp/c_0803BADC.c",
+  "obj": "src/decomp/c_0803BADC.o",
+  "addr_hex": "0x0803BADC",
+  "functions": [
+   "sub_0803BADC"
+  ],
+  "size": 28
+ },
+ {
+  "file": "src/decomp/c_0803BB44.c",
+  "obj": "src/decomp/c_0803BB44.o",
+  "addr_hex": "0x0803BB44",
+  "functions": [
+   "sub_0803BB44",
+   "sub_0803BB5C",
+   "sub_0803BB74"
+  ],
+  "size": 72
+ },
+ {
+  "file": "src/decomp/c_0803BB90.c",
+  "obj": "src/decomp/c_0803BB90.o",
+  "addr_hex": "0x0803BB90",
+  "functions": [
+   "sub_0803BB90"
+  ],
+  "size": 20
  },
  {
   "file": "src/decomp/c_0803BC7C.c",
@@ -2097,6 +2642,15 @@
    "sub_0803BCD0"
   ],
   "size": 12
+ },
+ {
+  "file": "src/decomp/c_0803BD14.c",
+  "obj": "src/decomp/c_0803BD14.o",
+  "addr_hex": "0x0803BD14",
+  "functions": [
+   "sub_0803BD14"
+  ],
+  "size": 64
  },
  {
   "file": "src/decomp/c_0803BD54.c",
@@ -2126,6 +2680,15 @@
    "sub_0803BF08"
   ],
   "size": 8
+ },
+ {
+  "file": "src/decomp/c_0803BF70.c",
+  "obj": "src/decomp/c_0803BF70.o",
+  "addr_hex": "0x0803BF70",
+  "functions": [
+   "sub_0803BF70"
+  ],
+  "size": 28
  },
  {
   "file": "src/decomp/c_0803BF90.c",
@@ -2260,6 +2823,15 @@
   "size": 100
  },
  {
+  "file": "src/decomp/c_0803CC84.c",
+  "obj": "src/decomp/c_0803CC84.o",
+  "addr_hex": "0x0803CC84",
+  "functions": [
+   "sub_0803CC84"
+  ],
+  "size": 52
+ },
+ {
   "file": "src/decomp/c_0803CD14.c",
   "obj": "src/decomp/c_0803CD14.o",
   "addr_hex": "0x0803CD14",
@@ -2334,6 +2906,24 @@
   "size": 12
  },
  {
+  "file": "src/decomp/c_0803F2B8.c",
+  "obj": "src/decomp/c_0803F2B8.o",
+  "addr_hex": "0x0803F2B8",
+  "functions": [
+   "sub_0803F2B8"
+  ],
+  "size": 32
+ },
+ {
+  "file": "src/decomp/c_0803F3E4.c",
+  "obj": "src/decomp/c_0803F3E4.o",
+  "addr_hex": "0x0803F3E4",
+  "functions": [
+   "sub_0803F3E4"
+  ],
+  "size": 28
+ },
+ {
   "file": "src/decomp/c_0803F5C8.c",
   "obj": "src/decomp/c_0803F5C8.o",
   "addr_hex": "0x0803F5C8",
@@ -2359,6 +2949,15 @@
    "sub_0804018C"
   ],
   "size": 24
+ },
+ {
+  "file": "src/decomp/c_08041180.c",
+  "obj": "src/decomp/c_08041180.o",
+  "addr_hex": "0x08041180",
+  "functions": [
+   "sub_08041180"
+  ],
+  "size": 32
  },
  {
   "file": "src/decomp/c_0804129C.c",
@@ -2872,6 +3471,15 @@
   "size": 8
  },
  {
+  "file": "src/decomp/c_08049BAC.c",
+  "obj": "src/decomp/c_08049BAC.o",
+  "addr_hex": "0x08049BAC",
+  "functions": [
+   "sub_08049BAC"
+  ],
+  "size": 44
+ },
+ {
   "file": "src/decomp/c_08049BD8.c",
   "obj": "src/decomp/c_08049BD8.o",
   "addr_hex": "0x08049BD8",
@@ -2962,6 +3570,15 @@
   "size": 20
  },
  {
+  "file": "src/decomp/c_0804AFB0.c",
+  "obj": "src/decomp/c_0804AFB0.o",
+  "addr_hex": "0x0804AFB0",
+  "functions": [
+   "sub_0804AFB0"
+  ],
+  "size": 28
+ },
+ {
   "file": "src/decomp/c_0804B0B4.c",
   "obj": "src/decomp/c_0804B0B4.o",
   "addr_hex": "0x0804B0B4",
@@ -2980,6 +3597,15 @@
   "size": 20
  },
  {
+  "file": "src/decomp/c_0804B830.c",
+  "obj": "src/decomp/c_0804B830.o",
+  "addr_hex": "0x0804B830",
+  "functions": [
+   "sub_0804B830"
+  ],
+  "size": 32
+ },
+ {
   "file": "src/decomp/c_0804BA4C.c",
   "obj": "src/decomp/c_0804BA4C.o",
   "addr_hex": "0x0804BA4C",
@@ -2987,6 +3613,24 @@
    "sub_0804BA4C"
   ],
   "size": 24
+ },
+ {
+  "file": "src/decomp/c_08052E84.c",
+  "obj": "src/decomp/c_08052E84.o",
+  "addr_hex": "0x08052E84",
+  "functions": [
+   "sub_08052E84"
+  ],
+  "size": 36
+ },
+ {
+  "file": "src/decomp/c_0805319C.c",
+  "obj": "src/decomp/c_0805319C.o",
+  "addr_hex": "0x0805319C",
+  "functions": [
+   "sub_0805319C"
+  ],
+  "size": 56
  },
  {
   "file": "src/decomp/c_080546BC.c",
@@ -3089,6 +3733,15 @@
   "size": 20
  },
  {
+  "file": "src/decomp/c_0805C974.c",
+  "obj": "src/decomp/c_0805C974.o",
+  "addr_hex": "0x0805C974",
+  "functions": [
+   "sub_0805C974"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_0805CDF0.c",
   "obj": "src/decomp/c_0805CDF0.o",
   "addr_hex": "0x0805CDF0",
@@ -3153,6 +3806,15 @@
   "size": 36
  },
  {
+  "file": "src/decomp/c_08061E80.c",
+  "obj": "src/decomp/c_08061E80.o",
+  "addr_hex": "0x08061E80",
+  "functions": [
+   "sub_08061E80"
+  ],
+  "size": 24
+ },
+ {
   "file": "src/decomp/c_08062FB8.c",
   "obj": "src/decomp/c_08062FB8.o",
   "addr_hex": "0x08062FB8",
@@ -3207,6 +3869,15 @@
   "size": 28
  },
  {
+  "file": "src/decomp/c_08063DDC.c",
+  "obj": "src/decomp/c_08063DDC.o",
+  "addr_hex": "0x08063DDC",
+  "functions": [
+   "sub_08063DDC"
+  ],
+  "size": 76
+ },
+ {
   "file": "src/decomp/c_08063F98.c",
   "obj": "src/decomp/c_08063F98.o",
   "addr_hex": "0x08063F98",
@@ -3224,6 +3895,15 @@
    "sub_080640C8"
   ],
   "size": 36
+ },
+ {
+  "file": "src/decomp/c_080640EC.c",
+  "obj": "src/decomp/c_080640EC.o",
+  "addr_hex": "0x080640EC",
+  "functions": [
+   "sub_080640EC"
+  ],
+  "size": 56
  },
  {
   "file": "src/decomp/c_08064124.c",
@@ -3343,11 +4023,29 @@
   "size": 24
  },
  {
+  "file": "src/decomp/c_080673B0.c",
+  "obj": "src/decomp/c_080673B0.o",
+  "addr_hex": "0x080673B0",
+  "functions": [
+   "sub_080673B0"
+  ],
+  "size": 32
+ },
+ {
   "file": "src/decomp/c_080673D0.c",
   "obj": "src/decomp/c_080673D0.o",
   "addr_hex": "0x080673D0",
   "functions": [
    "sub_080673D0"
+  ],
+  "size": 32
+ },
+ {
+  "file": "src/decomp/c_080673F0.c",
+  "obj": "src/decomp/c_080673F0.o",
+  "addr_hex": "0x080673F0",
+  "functions": [
+   "sub_080673F0"
   ],
   "size": 32
  },
@@ -3361,6 +4059,15 @@
   "size": 16
  },
  {
+  "file": "src/decomp/c_080677BC.c",
+  "obj": "src/decomp/c_080677BC.o",
+  "addr_hex": "0x080677BC",
+  "functions": [
+   "sub_080677BC"
+  ],
+  "size": 44
+ },
+ {
   "file": "src/decomp/c_0806780C.c",
   "obj": "src/decomp/c_0806780C.o",
   "addr_hex": "0x0806780C",
@@ -3368,6 +4075,15 @@
    "sub_0806780C"
   ],
   "size": 20
+ },
+ {
+  "file": "src/decomp/c_08067898.c",
+  "obj": "src/decomp/c_08067898.o",
+  "addr_hex": "0x08067898",
+  "functions": [
+   "sub_08067898"
+  ],
+  "size": 36
  },
  {
   "file": "src/decomp/c_080678BC.c",
@@ -3407,6 +4123,15 @@
   "size": 20
  },
  {
+  "file": "src/decomp/c_08068014.c",
+  "obj": "src/decomp/c_08068014.o",
+  "addr_hex": "0x08068014",
+  "functions": [
+   "sub_08068014"
+  ],
+  "size": 36
+ },
+ {
   "file": "src/decomp/c_0806978C.c",
   "obj": "src/decomp/c_0806978C.o",
   "addr_hex": "0x0806978C",
@@ -3417,6 +4142,24 @@
   "size": 48
  },
  {
+  "file": "src/decomp/c_08069FAC.c",
+  "obj": "src/decomp/c_08069FAC.o",
+  "addr_hex": "0x08069FAC",
+  "functions": [
+   "sub_08069FAC"
+  ],
+  "size": 36
+ },
+ {
+  "file": "src/decomp/c_0806A4B0.c",
+  "obj": "src/decomp/c_0806A4B0.o",
+  "addr_hex": "0x0806A4B0",
+  "functions": [
+   "sub_0806A4B0"
+  ],
+  "size": 28
+ },
+ {
   "file": "src/decomp/c_0806C06C.c",
   "obj": "src/decomp/c_0806C06C.o",
   "addr_hex": "0x0806C06C",
@@ -3424,6 +4167,15 @@
    "sub_0806C06C"
   ],
   "size": 8
+ },
+ {
+  "file": "src/decomp/c_0806C874.c",
+  "obj": "src/decomp/c_0806C874.o",
+  "addr_hex": "0x0806C874",
+  "functions": [
+   "sub_0806C874"
+  ],
+  "size": 20
  },
  {
   "file": "src/decomp/c_0806C8D4.c",
@@ -3480,6 +4232,24 @@
   "size": 24
  },
  {
+  "file": "src/decomp/c_0806E228.c",
+  "obj": "src/decomp/c_0806E228.o",
+  "addr_hex": "0x0806E228",
+  "functions": [
+   "sub_0806E228"
+  ],
+  "size": 24
+ },
+ {
+  "file": "src/decomp/c_0806E5CC.c",
+  "obj": "src/decomp/c_0806E5CC.o",
+  "addr_hex": "0x0806E5CC",
+  "functions": [
+   "sub_0806E5CC"
+  ],
+  "size": 36
+ },
+ {
   "file": "src/decomp/c_0806E5F0.c",
   "obj": "src/decomp/c_0806E5F0.o",
   "addr_hex": "0x0806E5F0",
@@ -3489,6 +4259,16 @@
   "size": 8
  },
  {
+  "file": "src/decomp/c_0806E698.c",
+  "obj": "src/decomp/c_0806E698.o",
+  "addr_hex": "0x0806E698",
+  "functions": [
+   "sub_0806E698",
+   "sub_0806E6B4"
+  ],
+  "size": 48
+ },
+ {
   "file": "src/decomp/c_0806E6C8.c",
   "obj": "src/decomp/c_0806E6C8.o",
   "addr_hex": "0x0806E6C8",
@@ -3496,6 +4276,15 @@
    "sub_0806E6C8"
   ],
   "size": 24
+ },
+ {
+  "file": "src/decomp/c_0806E6E0.c",
+  "obj": "src/decomp/c_0806E6E0.o",
+  "addr_hex": "0x0806E6E0",
+  "functions": [
+   "sub_0806E6E0"
+  ],
+  "size": 20
  },
  {
   "file": "src/decomp/c_0806E728.c",
@@ -3525,6 +4314,15 @@
   "size": 8
  },
  {
+  "file": "src/decomp/c_0806F710.c",
+  "obj": "src/decomp/c_0806F710.o",
+  "addr_hex": "0x0806F710",
+  "functions": [
+   "sub_0806F710"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_080703B8.c",
   "obj": "src/decomp/c_080703B8.o",
   "addr_hex": "0x080703B8",
@@ -3544,6 +4342,24 @@
   "size": 32
  },
  {
+  "file": "src/decomp/c_08070640.c",
+  "obj": "src/decomp/c_08070640.o",
+  "addr_hex": "0x08070640",
+  "functions": [
+   "sub_08070640"
+  ],
+  "size": 40
+ },
+ {
+  "file": "src/decomp/c_080719C0.c",
+  "obj": "src/decomp/c_080719C0.o",
+  "addr_hex": "0x080719C0",
+  "functions": [
+   "sub_080719C0"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_08071B98.c",
   "obj": "src/decomp/c_08071B98.o",
   "addr_hex": "0x08071B98",
@@ -3551,6 +4367,39 @@
    "sub_08071B98"
   ],
   "size": 4
+ },
+ {
+  "file": "src/decomp/c_08071EF0.c",
+  "obj": "src/decomp/c_08071EF0.o",
+  "addr_hex": "0x08071EF0",
+  "functions": [
+   "sub_08071EF0",
+   "sub_08071F0C",
+   "sub_08071F28",
+   "sub_08071F40",
+   "sub_08071F58",
+   "sub_08071F70"
+  ],
+  "size": 152
+ },
+ {
+  "file": "src/decomp/c_0807249C.c",
+  "obj": "src/decomp/c_0807249C.o",
+  "addr_hex": "0x0807249C",
+  "functions": [
+   "sub_0807249C"
+  ],
+  "size": 28
+ },
+ {
+  "file": "src/decomp/c_08072970.c",
+  "obj": "src/decomp/c_08072970.o",
+  "addr_hex": "0x08072970",
+  "functions": [
+   "sub_08072970",
+   "sub_0807298C"
+  ],
+  "size": 60
  },
  {
   "file": "src/decomp/c_08072C28.c",
@@ -3589,6 +4438,15 @@
   "size": 32
  },
  {
+  "file": "src/decomp/c_080736C4.c",
+  "obj": "src/decomp/c_080736C4.o",
+  "addr_hex": "0x080736C4",
+  "functions": [
+   "sub_080736C4"
+  ],
+  "size": 20
+ },
+ {
   "file": "src/decomp/c_08073900.c",
   "obj": "src/decomp/c_08073900.o",
   "addr_hex": "0x08073900",
@@ -3603,6 +4461,15 @@
   "addr_hex": "0x08073AE8",
   "functions": [
    "sub_08073AE8"
+  ],
+  "size": 24
+ },
+ {
+  "file": "src/decomp/c_08073C88.c",
+  "obj": "src/decomp/c_08073C88.o",
+  "addr_hex": "0x08073C88",
+  "functions": [
+   "sub_08073C88"
   ],
   "size": 24
  },
@@ -3635,6 +4502,16 @@
   "size": 32
  },
  {
+  "file": "src/decomp/c_08074714.c",
+  "obj": "src/decomp/c_08074714.o",
+  "addr_hex": "0x08074714",
+  "functions": [
+   "sub_08074714",
+   "sub_0807472C"
+  ],
+  "size": 48
+ },
+ {
   "file": "src/decomp/c_08074AAC.c",
   "obj": "src/decomp/c_08074AAC.o",
   "addr_hex": "0x08074AAC",
@@ -3642,6 +4519,43 @@
    "sub_08074AAC"
   ],
   "size": 36
+ },
+ {
+  "file": "src/decomp/c_08074C5C.c",
+  "obj": "src/decomp/c_08074C5C.o",
+  "addr_hex": "0x08074C5C",
+  "functions": [
+   "sub_08074C5C",
+   "sub_08074C70"
+  ],
+  "size": 40
+ },
+ {
+  "file": "src/decomp/c_08074ED0.c",
+  "obj": "src/decomp/c_08074ED0.o",
+  "addr_hex": "0x08074ED0",
+  "functions": [
+   "sub_08074ED0"
+  ],
+  "size": 28
+ },
+ {
+  "file": "src/decomp/c_080750A4.c",
+  "obj": "src/decomp/c_080750A4.o",
+  "addr_hex": "0x080750A4",
+  "functions": [
+   "sub_080750A4"
+  ],
+  "size": 28
+ },
+ {
+  "file": "src/decomp/c_080758BC.c",
+  "obj": "src/decomp/c_080758BC.o",
+  "addr_hex": "0x080758BC",
+  "functions": [
+   "sub_080758BC"
+  ],
+  "size": 40
  },
  {
   "file": "src/decomp/c_08075F1C.c",
@@ -3660,6 +4574,60 @@
    "sub_0807639C"
   ],
   "size": 20
+ },
+ {
+  "file": "src/decomp/c_08076770.c",
+  "obj": "src/decomp/c_08076770.o",
+  "addr_hex": "0x08076770",
+  "functions": [
+   "sub_08076770"
+  ],
+  "size": 40
+ },
+ {
+  "file": "src/decomp/c_080767A8.c",
+  "obj": "src/decomp/c_080767A8.o",
+  "addr_hex": "0x080767A8",
+  "functions": [
+   "sub_080767A8"
+  ],
+  "size": 24
+ },
+ {
+  "file": "src/decomp/c_080780D0.c",
+  "obj": "src/decomp/c_080780D0.o",
+  "addr_hex": "0x080780D0",
+  "functions": [
+   "sub_080780D0"
+  ],
+  "size": 20
+ },
+ {
+  "file": "src/decomp/c_0807813C.c",
+  "obj": "src/decomp/c_0807813C.o",
+  "addr_hex": "0x0807813C",
+  "functions": [
+   "sub_0807813C"
+  ],
+  "size": 20
+ },
+ {
+  "file": "src/decomp/c_08078480.c",
+  "obj": "src/decomp/c_08078480.o",
+  "addr_hex": "0x08078480",
+  "functions": [
+   "sub_08078480"
+  ],
+  "size": 24
+ },
+ {
+  "file": "src/decomp/c_080784E4.c",
+  "obj": "src/decomp/c_080784E4.o",
+  "addr_hex": "0x080784E4",
+  "functions": [
+   "sub_080784E4"
+  ],
+  "size": 32
  },
  {
   "file": "src/decomp/c_08078540.c",
@@ -3689,6 +4657,15 @@
    "sub_080786A4"
   ],
   "size": 232
+ },
+ {
+  "file": "src/decomp/c_080786F0.c",
+  "obj": "src/decomp/c_080786F0.o",
+  "addr_hex": "0x080786F0",
+  "functions": [
+   "sub_080786F0"
+  ],
+  "size": 80
  },
  {
   "file": "src/decomp/c_08078740.c",

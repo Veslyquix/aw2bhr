@@ -130,7 +130,7 @@ struct Unk0200C420 /* 0xe0 */
                            * unsigned compare, and it returns 0 rather than
                            * underflowing. Its one caller (sub_08049360)
                            * discards the result. */
-    /* 0x04 */ u32 unk04;
+    /* 0x04 */ u32 unk04; /* sub_0803BB90 is the predicate `unk04 != 0` */
     /* 0x08 */ u8 unk08; /* sub_08016A14 bumps it while bit 0 is clear */
     /* 0x09 */ u8 filler_09[0x17];
     /* 0x20 */ u8 unk20[0x18];
@@ -150,7 +150,12 @@ struct Unk0200B0B0 /* >= 0x76 */
     /* 0x02 */ u16 unk02;
     /* 0x04 */ u16 unk04;
     /* 0x06 */ u8 unk06;
-    /* 0x07 */ u8 filler_07[0x21];
+    /* 0x07 */ u8 filler_07[0x0a];
+    /* 0x11 */ s8 unk11; /* SIGNED: sub_08000D9C reads it `movs r0,#0x11;
+                          * ldrsb r0,[r1,r0]` -- the register offset is ldrsb
+                          * having no immediate form, and the sign extension is
+                          * the object's, not a cast. Written 0x14 when zero. */
+    /* 0x12 */ u8 filler_12[0x16];
     /* 0x28 */ u16 unk28; /* index into gUnknown_0200B224 (sub_08001CE8) */
     /* 0x2a */ u8 filler_2a[0x05];
     /* 0x2f */ u8 unk2f; /* set by sub_080078D4 */
@@ -180,6 +185,25 @@ struct Unk0200B224 /* 0x04 */
 {
     /* 0x00 */ s16 unk00;
     /* 0x02 */ u8 filler_02[0x02];
+};
+
+/* Stride 0x0c, proved by `lsls #1; adds; lsls #2` in sub_08011C18, which is
+ * also the only reader so far -- it clears all four members of all 48 entries.
+ * The word members hoist their offset onto the base (`adds r5, r4, #4`) while
+ * the byte and halfword ones fold into a displacement, which is the array-
+ * global rule in docs/agbcc-codegen.md and is what fixes the layout.
+ * unk08 and unk0a are VOLATILE: each store is preceded by a load of its own
+ * address into a register nothing reads, which for a QI/HImode aggregate
+ * member is the volatile tell. The two words carry no such signal -- SImode
+ * never gets the dead load -- so they are left plain.
+ */
+struct Unk0200B3B4 /* 0x0c */
+{
+    /* 0x00 */ u32 unk00;
+    /* 0x04 */ u32 unk04;
+    /* 0x08 */ volatile u16 unk08;
+    /* 0x0a */ volatile u8 unk0a;
+    /* 0x0b */ u8 filler_0b[0x01];
 };
 
 struct Unk0200F720 /* 0x10 */
@@ -232,8 +256,15 @@ struct Unk02028030 /* 0x48 */
 
 struct Unk020280C0 /* 0x1c */
 {
-    /* 0x00 */ u8 filler_00[0x13];
-    /* 0x13 */ u8 unk13;
+    /* 0x00 */ u8 filler_00[0x02];
+    /* 0x02 */ u8 unk02[0x11]; /* a NUL-terminated byte string: sub_0803CCB8
+                                * hands &g[i].unk02 to the copier sub_0803CC84,
+                                * which walks it until a zero byte. The extent
+                                * is the space available before unk13, not a
+                                * proved bound. */
+    /* 0x13 */ u8 unk13; /* 0xff = the slot is empty; sub_0803CCB8 refuses to
+                          * copy the name out when it holds 0xff, and
+                          * sub_0803CD14 returns it. */
     /* 0x14 */ u8 filler_14[0x08];
 };
 
@@ -335,6 +366,28 @@ struct Unk03001470 /* 0x60 */
     /* 0x3a */ u8 filler_3a[0x26];
 };
 
+/* Defined here, out of address order, because struct Unk030020A8 below holds a
+ * pointer to one. The ROM word gUnknown_0808E5C8 points at an array of these:
+ * sub_0801A6C0 clears unk00 of entries [0..0x80] with a stride of 0x0c, then
+ * zeroes entry 0's unk04. unk04 is a `next` link -- sub_0801A700 pops the list
+ * whose head is gUnknown_030020A8.unk04 with `head = head->unk04` and returns
+ * the popped node's unk00. The last four bytes are unreached. */
+struct Unk0808E5C8 /* 0x0c */
+{
+    /* 0x00 */ u32 unk00;
+    /* 0x04 */ struct Unk0808E5C8 *unk04;
+    /* 0x08 */ u8 filler_08[0x04];
+};
+
+/* Exactly 8 bytes -- gUnknown_030020B0 is the next symbol. sub_0801A6C0
+ * initialises it (`strh` at +0, `str` at +4) and sub_0801A700 pops unk04. */
+struct Unk030020A8 /* 0x08 */
+{
+    /* 0x00 */ u16 unk00;
+    /* 0x02 */ u8 filler_02[0x02];
+    /* 0x04 */ struct Unk0808E5C8 *unk04;
+};
+
 struct Unk03002040 /* 0x58 */
 {
     /* 0x00 */ u8 filler_00[0x50];
@@ -424,8 +477,13 @@ union Unk802C57CBuf
 struct Unk03003FC0 /* 0x47 */
 {
     /* 0x00 */ u8 filler_00[0x01];
-    /* 0x01 */ u8 unk01; /* set to 3 by sub_0803B8C4, alongside Proc_Start */
-    /* 0x02 */ u8 unk02;
+    /* 0x01 */ u8 unk01; /* a mode selector written immediately before a
+                          * Proc_Start on tree 3, once per mode: 1 by
+                          * sub_0803BADC, 2 by sub_0803BA00, 3 by
+                          * sub_0803B8C4 -- three near-identical starters that
+                          * differ only in this constant and the script */
+    /* 0x02 */ u8 unk02; /* set by sub_0803BCD0; sub_0803BD14 uses it to index
+                          * gUnknown_085C77A0[] */
     /* 0x03 */ u8 unk03;
     /* 0x04 */ u8 unk04; /* strb, sub_08018C54 */
     /* 0x05 */ u8 filler_05[0x01];
@@ -434,11 +492,26 @@ struct Unk03003FC0 /* 0x47 */
     /* 0x08 */ u8 unk08; /* a mode flag: the whole sub_08042E2C..sub_0804301C
                           * table-lookup family reads it and returns a fixed
                           * fallback when it is zero */
-    /* 0x09 */ u8 filler_09[0x24];
+    /* 0x09 */ u8 filler_09[0x03];
+    /* 0x0c */ u8 unk0c; /* two predicates read it plain `ldrb`: sub_0802C78C
+                          * is `!= 1` and sub_0802C7A0 is `!= 0`, so it is a
+                          * small enum rather than a flag */
+    /* 0x0d */ u8 filler_0d[0x1f];
+    /* 0x2c */ u8 unk2c; /* sub_08035CF4 returns whether it equals 1 */
     /* 0x2d */ u8 unk2d; /* set to 0/1/2 by sub_08035558/sub_08035538/sub_08035548 */
     /* 0x2e */ u8 filler_2e[0x04];
     /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 filler_33[0x10];
+    /* 0x33 */ u8 filler_33[0x05];
+    /* 0x38 */ u8 unk38[0x05]; /* A byte array, not a scalar: sub_08018C0C
+                                * writes it as `.unk38[i]` with a variable
+                                * index (the `adds rB,#0x38` on the BASE that
+                                * only the member-array spelling produces).
+                                * The index is the same small slot id that
+                                * indexes gUnknown_08499598, so 5 is borrowed
+                                * from gUnknown_030040F8's player-slot count
+                                * and is NOT proved -- the extent may be
+                                * anything up to 0x43. */
+    /* 0x3d */ u8 filler_3d[0x06];
     /* 0x43 */ u8 unk43;
     /* 0x44 */ u8 unk44;
     /* 0x45 */ u8 unk45;
@@ -567,7 +640,11 @@ struct Unk08499598 /* 0x3c */
     /* 0x10 */ u8 filler_10[0x03];
     /* 0x13 */ u8 unk13;
     /* 0x14 */ u16 unk14;
-    /* 0x16 */ u8 filler_16[0x04];
+    /* 0x16 */ u16 unk16; /* a running count: sub_08026588 does `unk16++` and
+                           * then keeps unk18 as its high-water mark, comparing
+                           * the two with `cmp; bls` -- an unsigned compare, so
+                           * both halfwords are unsigned */
+    /* 0x18 */ u16 unk18;
     /* 0x1a */ u8 unk1a; /* sub_0803D6D0 snapshots [0..4] of these into
                           * gUnknown_030040F8, one per player slot */
     /* 0x1b */ u8 unk1b;
@@ -583,7 +660,10 @@ struct Unk08499598 /* 0x3c */
     /* 0x2a */ u8 unk2a; /* sub_08026F9C/sub_08026FD0 compare it between two
                           * entries; both reach it as element [n + 1], so the
                           * runtime offset is 0x3c + 0x2a = 0x66 */
-    /* 0x2b */ u8 filler_2b[0x06];
+    /* 0x2b */ u8 filler_2b[0x02];
+    /* 0x2d */ u8 unk2d; /* bit 7 is a flag: sub_08026D44 returns
+                          * `(unk2d & 0x80) == 0` */
+    /* 0x2e */ u8 filler_2e[0x03];
     /* 0x31 */ u8 unk31;
     /* 0x32 */ u8 filler_32[0x08];
     /* 0x3a */ u8 unk3a;
@@ -615,7 +695,11 @@ struct Unk084995A0 /* 0x08 */
 
 struct Unk0849B018 /* 0x0a */
 {
-    /* 0x00 */ u8 filler_00[0x04];
+    /* 0x00 */ u8 filler_00[0x01];
+    /* 0x01 */ u8 unk01; /* sub_080303B0 returns whether it equals 2. Read with
+                          * a plain `ldrb` and never stored here, so nothing
+                          * settles volatile either way -- unlike unk04. */
+    /* 0x02 */ u8 filler_02[0x02];
     /* 0x04 */ volatile u16 unk04; /* volatile: sub_08030574's plain `= 5` emits a
                                     * dead `ldrh` of the field right before the
                                     * `strh`, which a non-volatile member does not */
@@ -681,6 +765,10 @@ struct Unk0849D5F8 /* >= 0x46 */
  * unk01 to 0 and sub_0803BF10 walks it. unk00 is set to 2/3/4 by
  * sub_0803BDF8/sub_0803BE10/sub_0803BE28 and to a u8 argument by sub_0803B930.
  */
+/* A cursor/limit pair, in that order: sub_0803BF70 raises gUnknown_03002F1C
+ * when unk01 differs from unk00, and sub_0803BFA4 loads gUnknown_020288B0 with
+ * unk01 + 1. Both bytes are read with a bare `ldrb`, so the signedness is
+ * open. */
 struct Unk0849ECDC /* >= 0x02 */
 {
     /* 0x00 */ u8 unk00;
@@ -817,28 +905,40 @@ struct Unk085C77A0 /* 0x5c */
     /* 0x29 */ u8 filler_29[0x03];
     /* 0x2c */ u32 unk2c;
     /* 0x30 */ u8 filler_30[0x0c];
-    /* 0x3c */ u8 unk3c[4];
+    /* 0x3c */ u8 unk3c[4]; /* 0xff means "empty". The extent 4 is proved:
+                             * sub_0803BD14 scans for the first entry that is
+                             * not 0xff with a literal `i < 4` bound and
+                             * returns the index, i.e. a count of leading
+                             * occupied slots. */
     /* 0x40 */ u8 filler_40[0x1c];
 };
 
 /* Stride 0x104; sub_08042E18 reads unk16. */
-/* The 0x44-byte sub-record at +0x40 of struct Unk085D3DD0. Stride proved by
+/* The 0x44-byte sub-record at +0x38 of struct Unk085D3DD0. Stride proved by
  * `lsls #4; adds` (x17) sharing the outer `lsls #2` with the x65 outer index in
  * sub_08042E2C, sub_08042E84, sub_08042EDC, sub_08042FC4 and sub_0804301C --
  * i.e. base + a*0x104 + b*0x44 + K, with K running 0x40, 0x46, 0x48, 0x4a,
- * 0x4e. Placing the sub-array at +0x40 is what makes those five K values fall
- * on member offsets 0, 6, 8, 0x0a, 0x0e. The extent (2) is NOT proved: nothing
- * bounds b, and 2 is simply the most that fits before 0x104. */
+ * 0x4e.
+ *
+ * The array base was +0x40 until wave 9. sub_08039F18 reaches this record with
+ * the same a*0x104 + b*0x44 index math and K = 0x38, which +0x40 cannot express
+ * (it would be member offset -8), so the array starts at +0x38 and every member
+ * above moved up by 8. The new base also makes the record array cover the
+ * struct exactly: 0x38 + 3 * 0x44 == 0x104, so the extent is 3 and the old
+ * `filler_c8[0x3c]` tail is gone -- that tail was itself an artefact of the
+ * wrong base. Anything citing the old numbering wants +8 added to it. */
 struct Unk085D3DD0Entry /* 0x44 */
 {
-    /* 0x00 */ u32 unk00;
-    /* 0x04 */ u8 filler_04[0x02];
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s16 unk08;
-    /* 0x0a */ s16 unk0a;
+    /* 0x00 */ u32 unk00; /* indexes gUnknown_08610A38 (sub_08039F18) */
+    /* 0x04 */ u8 filler_04[0x04];
+    /* 0x08 */ u32 unk08;
     /* 0x0c */ u8 filler_0c[0x02];
     /* 0x0e */ s16 unk0e;
-    /* 0x10 */ u8 filler_10[0x34];
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ u8 filler_14[0x02];
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ u8 filler_18[0x2c];
 };
 
 struct Unk085D3DD0 /* 0x104 */
@@ -850,9 +950,8 @@ struct Unk085D3DD0 /* 0x104 */
     /* 0x0a */ u8 filler_0a[0x0b];
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 filler_17[0x29];
-    /* 0x40 */ struct Unk085D3DD0Entry unk40[2];
-    /* 0xc8 */ u8 filler_c8[0x3c];
+    /* 0x17 */ u8 filler_17[0x21];
+    /* 0x38 */ struct Unk085D3DD0Entry unk38[3];
 };
 
 struct Unk085D5ABC /* 0x5c */
@@ -897,6 +996,53 @@ struct Unk085D5ABC /* 0x5c */
  *     settled. sub_0806FC50 independently gives patternLevel at +0x02,
  *     cmdPtr at +0x40 and patternStack[] at +0x44 (it is ply_pend).
  *
+ * Wave 9 added the tempo block and the modulation block, and the second of them
+ * says this ROM's MusicPlayerTrack is NOT byte-for-byte the pokeemerald one:
+ *
+ *   MusicPlayerInfo -- sub_080713F8 (MPlayTempoControl) is
+ *     `tempoU = tempo; tempoI = (tempoD * tempoU) >> 8`, which names three
+ *     consecutive halfwords at once and fixes them against the public layout:
+ *     +0x1c tempoD (the multiplier, read), +0x1e tempoU (written from the
+ *     parameter), +0x20 tempoI (the product). tempoC at +0x22 follows from the
+ *     public layout and from fadeOI already being pinned at +0x24; it is the
+ *     only unproved member of the block, so it stays `filler`.
+ *
+ *   MusicPlayerTrack -- the whole modulation/LFO block is now named, and it is
+ *     the CANONICAL MP2K one with nothing inserted or moved. Read the tell
+ *     first, because it is easy to talk yourself into a shifted layout here:
+ *     the block runs modM, mod, modT, and a public layout quoted from memory
+ *     that omits `mod` makes every field from +0x17 up look like it is +1.
+ *     It is not. The proof is one basic block, the LFO update inside the
+ *     hand-written MPlayMain at 0x0806FEF8-0x0806FF54, which names six fields
+ *     in twenty instructions and leaves no room to slide any of them:
+ *
+ *       if (track->lfoSpeed && track->mod)          ldrb +0x19 ; ldrb +0x17
+ *         if (track->lfoDelayC) track->lfoDelayC--; ldrb/strb  +0x1c
+ *         else {
+ *           track->lfoSpeedC += track->lfoSpeed;    ldrb/strb  +0x1a, += +0x19
+ *           v = (lfoSpeedC >= 0x40) ? 0x80 - lfoSpeedC : (s8)lfoSpeedC;
+ *           v = v * track->mod >> 6;                ldrb +0x17 ; muls ; asrs #6
+ *           if (v != track->modM) {                 ldrb +0x16 ; eors ; lsls #24
+ *             track->modM = v;                      strb +0x16
+ *             ... test track->modT, OR the flags    ldrb +0x18 ; ldrb +0x00
+ *
+ *     +0x17 is therefore `mod`, the modulation depth: read twice, multiplied
+ *     into the LFO value, never written here. +0x16 is `modM`, the applied
+ *     depth. That tail is ClearModM inlined, which is what sub_08071564 is.
+ *
+ *     Three more offsets from the hand-written half, all consistent with it:
+ *       +0x19 lfoSpeed   sub_08070328 (ply_lfos) stores its argument there
+ *       +0x1b lfoDelay   sub_080700C0 (ply_note) does
+ *       +0x1c lfoDelayC  `ldrb [r5,#0x1b]; strb [r5,#0x1c]`, then calls
+ *                        ClearModM when the value is non-zero
+ *       +0x1d priority   sub_080700C0 adds it to MusicPlayerInfo +0x09 and
+ *                        clamps the sum to 0xff, which also pins that +0x09
+ *
+ *     So the public MusicPlayerTrack IS safe to lift here. Note the general
+ *     point: the hand-written half will never match, but it is first-class
+ *     evidence about the layout, and it is where most of these came from.
+ *
+ *
  * Fields marked `filler` are the canonical names carried over from the public
  * layout but unproved HERE; narrow one when a function needs it, do not move
  * anything.
@@ -905,6 +1051,13 @@ struct Unk085D5ABC /* 0x5c */
 #define MUSICPLAYER_STATUS_PAUSE 0x80000000
 #define FADE_VOL_SHIFT 2
 #define TEMPORARY_FADE 0x0001
+#define FADE_IN 0x0002 /* sub_08070640 stores a bare 2 into fadeOV */
+
+/* MusicPlayerTrack::flags. Only these two are reached from matched code:
+ * sub_08071564 ORs 0x0c when modT is zero and 0x03 otherwise, which is
+ * PITCHG/VOLCHG in the public layout and the only place either value occurs. */
+#define MPT_FLG_VOLCHG 0x03
+#define MPT_FLG_PITCHG 0x0C
 
 struct ToneData /* 0x0c */
 {
@@ -925,7 +1078,21 @@ struct MusicPlayerTrack /* 0x50 */
     /* 0x01 */ u8 wait;
     /* 0x02 */ u8 patternLevel;
     /* 0x03 */ u8 repN;
-    /* 0x04 */ u8 filler_04[0x1a];
+    /* 0x04 */ u8 filler_04[0x12]; /* the canonical MP2K names for these, none
+                                    * of them reached from C yet: gateTime key
+                                    * velocity runningStatus keyM pitM keyShift
+                                    * keyShiftX tune pitX bend bendRange volMR
+                                    * volML vol volX pan panX. sub_080700C0
+                                    * uses +0x05 as key and +0x06 as velocity,
+                                    * which agrees. */
+    /* 0x16 */ u8 modM;
+    /* 0x17 */ u8 mod;
+    /* 0x18 */ u8 modT;
+    /* 0x19 */ u8 lfoSpeed;
+    /* 0x1a */ u8 lfoSpeedC;
+    /* 0x1b */ u8 lfoDelay;
+    /* 0x1c */ u8 lfoDelayC;
+    /* 0x1d */ u8 priority;
     /* 0x1e */ u8 echoVolume;
     /* 0x1f */ u8 echoLength;
     /* 0x20 */ void *chan;
@@ -939,7 +1106,14 @@ struct MusicPlayerInfo /* 0x40 */
 {
     /* 0x00 */ void *songHeader;
     /* 0x04 */ u32 status;
-    /* 0x08 */ u8 filler_08[0x1c];
+    /* 0x08 */ u8 filler_08[0x01]; /* trackCount */
+    /* 0x09 */ u8 priority;        /* sub_080700C0 adds it to the track's own
+                                    * priority at +0x1d and clamps to 0xff */
+    /* 0x0a */ u8 filler_0a[0x12]; /* cmd unk_0b clock gap[8] memAccArea */
+    /* 0x1c */ u16 tempoD;
+    /* 0x1e */ u16 tempoU;
+    /* 0x20 */ u16 tempoI;
+    /* 0x22 */ u8 filler_22[0x02]; /* tempoC */
     /* 0x24 */ u16 fadeOI;
     /* 0x26 */ u16 fadeOC;
     /* 0x28 */ u16 fadeOV;
@@ -954,6 +1128,9 @@ struct MusicPlayerInfo /* 0x40 */
 
 extern struct Unk0200B0B0 *gUnknown_0200B0B0;
 extern struct Unk0200B224 gUnknown_0200B224[];
+/* Exactly 48 entries: sub_08011C18 clears 0..0x2f (`cmp #0x2f; bls`) at stride
+ * 0x0c, and 0x0200B3B4 + 48*0x0c == 0x0200B5F4, the next symbol. */
+extern struct Unk0200B3B4 gUnknown_0200B3B4[];
 /* Exactly 0x20 bytes -- gUnknown_0200B614 is the next symbol, and every user
  * indexes 0..0x1f. SIGNED: the ARM routine sub_08000234 reads it with `ldrsb`
  * and adds the value to a palette component. sub_080136C4 clears all 32. */
@@ -1005,6 +1182,11 @@ extern u16 gUnknown_03000040;
  * function, so they are two scalars rather than one aggregate. */
 extern u16 gUnknown_03000044;
 extern u16 gUnknown_03000046;
+/* The second of the two DMA/CpuFastSet descriptors -- sub_0801BB88 fills both
+ * in one go, splitting the OAM shadow at object `a`: 03000278 gets
+ * (shadow, OAM, 0, a) and 03000268 gets (shadow + a*8, OAM + a*8, a*8, 0x80-a).
+ * Same shape as struct Unk03000278, hence the shared type. */
+extern struct Unk03000278 gUnknown_03000268;
 extern struct Unk03000278 gUnknown_03000278;
 extern struct Unk03000288 gUnknown_03000288[];
 /* Serial/link block, all four plain 32-bit words -- every access in the ROM is
@@ -1022,6 +1204,11 @@ extern u32 gUnknown_03000564;
 extern u32 gUnknown_03000568;
 extern u32 gUnknown_03000570;
 extern u32 gUnknown_03000574;
+/* A cursor into gUnknown_08090C44, zeroed by sub_0802EA5C. VOLATILE: in
+ * sub_0802EC64 the `++` stores the incremented word and then re-`ldr`s the very
+ * same address to index the table, which a plain word cell CSEs away (two
+ * instructions shorter). Word-wide: every access is `ldr`/`str`. */
+extern volatile u32 gUnknown_03000578;
 /* A pair of "current"/"requested" ids, both u16 and both compared against the
  * sentinel 0xFFFF (sub_0803B524, sub_0803B640, sub_0803B660). sub_0803B37C
  * resets both to 0xFFFF; sub_0803B5F4 resets only 0x030005CA.
@@ -1082,6 +1269,7 @@ extern u16 gUnknown_03001FF8;
 extern u16 gUnknown_03002000;
 extern u16 gUnknown_0300200C;
 extern struct Unk03002040 gUnknown_03002040;
+extern struct Unk030020A8 gUnknown_030020A8;
 /* gUnknown_030020B4 is the REG_DISPSTAT shadow -- declared in hardware.h */
 extern u8 gUnknown_030020B8;
 extern u8 gUnknown_030024E4;
@@ -1135,8 +1323,8 @@ extern u16 gUnknown_03002F00;
  * byte-identical either way (verified with trymatch after the change). */
 extern volatile u16 gUnknown_03002F18;
 extern struct Unk03002F08 gUnknown_03002F08;
-/* A 0/1 flag, always ldrh/strh. sub_08013028 and sub_080160DC set it,
- * sub_08016094 tests it and clears it. */
+/* A 0/1 flag, always ldrh/strh. sub_08013028, sub_080160DC and sub_0803BF70
+ * set it, sub_08016094 tests it and clears it. */
 extern u16 gUnknown_03002F1C;
 /* A callback like gUnknown_03001FF0: sub_080183C0 null-checks it and calls it
  * through `bl _call_via_r0`, discarding the result. Set by sub_080198A0 and by
@@ -1175,6 +1363,11 @@ extern u16 gUnknown_030032C0;
 extern struct Unk802C57C gUnknown_030032C4;
 extern u16 gUnknown_030032D8;
 extern struct Unk03003338 *gUnknown_03003338;
+/* A row-pointer table for the gUnknown_08499590 screen: sub_0801F838 fills
+ * gUnknown_03003340[y][x] for y < height (+2) and x < width (+0) with a u8.
+ * Word elements (`lsls #2` on the index) each holding a byte pointer, and the
+ * symbol address is added directly, so this is an array and not a pointer. */
+extern u8 *gUnknown_03003340[];
 extern struct Unk802C57C gUnknown_030033E0;
 extern struct Unk802C57C gUnknown_030033E4;
 /* Read `ldrh` in a dozen places across code.s and code-0806CFC8.s and stored
@@ -1192,6 +1385,11 @@ extern union Unk802C57CBuf gUnknown_03003F24;
  * sub_0803BB44/BB5C/BB74 and sub_0803B8E0/B904 all read one with
  * `ldrb; lsl #24; asr #24`. The getters at 0803BC7C/BC88/BC94 return the same
  * bytes zero-extended, i.e. as u8.
+ * sub_0803BB44/BB5C/BB74 map elements 1/2/3 to 1 when zero and 2 otherwise,
+ * and they return u8: sub_0803BB14 narrows sub_0803BB44's result with
+ * `lsls #24; lsrs #24` before comparing it, which an int return would not
+ * emit. Their own bodies cannot say so -- both return types are byte-identical
+ * there, so the call site is the only evidence.
  */
 extern s8 gUnknown_03003F30[];
 extern int gUnknown_03003F40;
@@ -1209,6 +1407,12 @@ extern u32 gUnknown_030040A8;
  */
 extern void (*gUnknown_030040D0)(void);
 extern struct Unk030040D8 *gUnknown_030040D8;
+/* A mode flag compared against 1. sub_0805C974 is the whole of
+ * `if (gUnknown_030040DC == 1) return 1; return 0;` and is its only reader, so
+ * the width rests on a single `ldrb` -- narrow by the "a lone ldrb constrains
+ * the accessor, not the object" rule, and nothing else in the ROM touches it.
+ * Signedness unproved. */
+extern u8 gUnknown_030040DC;
 /* SIGNED: sub_08034FC0 reads it back with `ldrsh` for its `!= 0` guard before
  * decrementing. sub_08034FB0 increments it. */
 extern s16 gUnknown_030040E8;
@@ -1219,6 +1423,12 @@ extern void (*gUnknown_030040EC)(void);
  * +0x4C4. All three write with `strb` through a variable index, so this is a
  * u8 array; no reader has settled the signedness. */
 extern u8 gUnknown_030040F8[];
+/* A word-wide flag set, tested a bit at a time. `s32` and not `u32` only
+ * because src/title-screen.c already carries that spelling for it; every
+ * access so far is `ldr` + a mask, so the signedness is not settled by
+ * anything. sub_080338DC tests bit 0, sub_080369BC ANDs it with
+ * gUnknown_030043F4, and title-screen.c tests bits 0 and 1. */
+extern s32 gUnknown_03004008;
 /* A bitmask, ANDed against gUnknown_03004008 in sub_080369BC to gate a frame.
  * u16 (ldrh); cleared by sub_08036B28 and sub_08036B34. */
 extern u16 gUnknown_030043F4;
@@ -1231,6 +1441,10 @@ extern struct Unk030044E0 *gUnknown_030044E0;
 extern struct Unk03004504 gUnknown_03004504;
 extern u16 gUnknown_03004518;
 extern u16 gUnknown_03004538;
+/* A u16 lookup table, not a pointer: sub_0804B830 adds the symbol address to
+ * `index * 2` directly and reads it with `ldrh`. Extent unproved -- its one
+ * reader indexes it with an unchecked u16 argument. */
+extern u16 gUnknown_030045A8[];
 extern u16 gUnknown_030045D4;
 /* A zero-terminated list of small ids. sub_0805D344 walks it with
  * `while (gUnknown_030045F0[i] != 0)`, sub_0805CDF0/sub_0805CE20 seed it with
@@ -1290,12 +1504,31 @@ extern u32 gUnknown_030059C0[];
 
 /* ---------------------------------------------------------------- ROM -- */
 
+/* A ROM word holding the address of a RAM array of 0x0c-byte records; see
+ * struct Unk0808E5C8. Non-const, but for the usual -Werror reason and NOT
+ * because sub_0801A6C0 re-`ldr`s the deref after its `strh` to
+ * gUnknown_030020A8 -- that reload is not evidence either way. Probed: under
+ * `-fforce-addr` even the `.rodata` word GCC synthesises for a const-qualified
+ * pointer is re-read across an intervening HImode store, so a const
+ * declaration reloads exactly the same way. The const tell in
+ * docs/agbcc-codegen.md is about a re-read surviving a store, and nothing here
+ * survives one. */
+extern struct Unk0808E5C8 *gUnknown_0808E5C8;
+/* ROM table of word-sized entries walked by the gUnknown_03000578 cursor;
+ * sub_0802EC64 wraps the cursor back to 0 when the entry is 0, so the table is
+ * NULL-terminated. Nothing has dereferenced an entry yet, so `void *[]` is the
+ * weakest model that reproduces the clean pool word and the `ldr`/`cmp #0`. */
+extern void *gUnknown_08090C44[];
 extern struct Unk08090CD8 *const gUnknown_08090CD8;
 extern const s16 gUnknown_08090EAC[];
 /* 0x280 bytes = 20 uncompressed 4bpp tiles; sub_08037258 returns its address.
  * Non-const because nothing constrains it yet and const is the direction that
  * breaks under -Werror. */
 extern u8 gUnknown_080913BC[];
+/* 0x400 bytes of uncompressed ROM data, copied verbatim over the buffer
+ * gUnknown_0849959C points at by sub_080215D0 (`for (i = 0; i <= 0x3ff; i++)`,
+ * one `ldrb`/`strb` per byte). Non-const for the usual -Werror reason. */
+extern u8 gUnknown_080C1BC4[];
 /* 0x1a4-byte compressed blob, handed to Decompress(u8 *, void *) by
  * sub_0802D5B8 via the accessor sub_08037250 -- hence u8 *, not const. */
 extern u8 gUnknown_080D3FE4[];
@@ -1312,9 +1545,18 @@ extern u8 gUnknown_0812653C[];
 extern u8 gUnknown_081268F8[]; /* handed out by sub_0801F49C */
 /* Two proc scripts started as a pair -- sub_08011550/sub_080115E0 run 0848923C
  * and sub_0801156C/sub_080115F8 run 0848925C, in both cases stashing a u16 at
- * +0x64 of the new proc. */
+ * +0x64 of the new proc. Three more pairs do the same thing and additionally
+ * set gUnknown_030030E0.bits.effect: sub_08011588/sub_080115B4 (Proc_Start on
+ * tree 3) and sub_08011610/sub_0801163C (Proc_StartBlocking). */
 extern const struct ProcCmd gUnknown_0848923C[];
 extern const struct ProcCmd gUnknown_0848925C[];
+/* A second such pair, with four starters between them. Started on tree 3
+ * without the blend write by sub_08011668 (0848929C) and sub_08011684
+ * (084892C4), and via Proc_StartBlocking by sub_08013098 (0848929C) and
+ * sub_080130B0 (084892C4); all four stash a u16 at +0x64 of the new proc,
+ * exactly as 0848923C/0848925C do. */
+extern const struct ProcCmd gUnknown_0848929C[];
+extern const struct ProcCmd gUnknown_084892C4[];
 /* A proc script: sub_08014BC0 and sub_08014C74 both hand it to Proc_Start. */
 extern const struct ProcCmd gUnknown_0848A140[];
 /* A proc script: sub_08045F80 hands it to Proc_Start on tree 3. */
@@ -1328,6 +1570,10 @@ extern u16 *gUnknown_08499584;
 extern u8 *gUnknown_08499590;
 extern struct Unk08499594 *gUnknown_08499594;
 extern struct Unk08499598 *gUnknown_08499598;
+/* Pointer to a 0x400-byte RAM buffer; sub_080215D0 copies gUnknown_080C1BC4
+ * over all of it byte by byte. The deref is hoisted out of that loop despite
+ * the `strb`, so the source bound it to a local. */
+extern u8 *gUnknown_0849959C;
 extern struct Unk084995A0 *gUnknown_084995A0;
 /* ROM byte table indexed by a u8 read out of a caller-supplied pointer;
  * sub_08042084 returns whether the entry is non-zero. The address is odd, so
@@ -1335,6 +1581,9 @@ extern struct Unk084995A0 *gUnknown_084995A0;
  * prototype in unknown-functions.h takes it. */
 extern const u8 gUnknown_084995C1[];
 extern void *gUnknown_08499E38[];
+/* A proc script: sub_08028848 hands it to Proc_Start on tree 3 and stashes two
+ * u16 arguments at +0x64 and +0x66 of the new proc. */
+extern const struct ProcCmd gUnknown_08499FAC[];
 /* A proc script: sub_08028ED0 is its sole user and hands it to
  * Proc_StartBlocking. */
 extern const struct ProcCmd gUnknown_08499FEC[];
@@ -1345,32 +1594,81 @@ extern const struct ProcCmd gUnknown_08499FEC[];
 extern const u8 gUnknown_0849A0F0[];
 extern const struct Unk0849A2C8 gUnknown_0849A2C8[];
 extern const struct Unk0849A354 gUnknown_0849A354[];
+/* A script for the gUnknown_0200C528 list system, not a proc script: its three
+ * users hand its ADDRESS around (sub_0802C280 -> sub_080193B0, which stores it
+ * into gUnknown_0200C528[i].unk00 and .unk04; sub_0802C290 -> sub_0801930C),
+ * and sub_0802C2A0 returns whether its pointer argument equals it. Nothing has
+ * indexed or dereferenced it, so `const u8 []` is the weakest model that gives
+ * the clean pool word; widen it when sub_080193B0 is matched. */
+extern const u8 gUnknown_0849A8F0[];
 extern struct Unk0849B018 *gUnknown_0849B018;
 extern struct Unk0849B01C *gUnknown_0849B01C;
 extern struct Unk0849B060 *gUnknown_0849B060;
 /* Proc scripts, all only ever handed to Proc_Start/Proc_StartBlocking:
+ *   0849B3CC  sub_080342DC, blocking, parent forwarded
  *   0849B8B8  sub_08034308, blocking, parent forwarded
+ *   0849BB50  sub_080338C0, Proc_Find, stashes a word at +0x38
  *   0849BC98  sub_0803433C, parent forwarded
  *   0849D56C  sub_08037F80, tree 3
+ *   0849D77C  sub_08039634, tree 3, stashes words at +0x54/+0x58
  *   0849D7FC  sub_08039930, parent forwarded, stashes a word at +0x54
+ *   0849D82C  sub_08039BB4, tree 3, stashes bytes at +0x29/+0x2a and a
+ *             halfword at +0x2c
+ *   0849E728  sub_0803B55C, tree 3, stashes a HALFWORD at +0x64
  *   0849E778  sub_0803B6E8, tree 3, stashes a word at +0x54
  *   0849E7A0  sub_0803B774, tree 3
- *   0849ECE0  sub_0803B8C4, tree 3
- *   0849F5D0  sub_0803D960, blocking, stashes 6 at +0x64 */
+ *   0849E7B8  sub_0803B788, tree 3
+ *   0849EAAC  sub_0803B9EC, tree 3
+ *   0849EBBC  sub_0803BADC, tree 3, after gUnknown_03003FC0.unk01 = 1
+ *   0849EC1C  sub_0803BA00, tree 3, after gUnknown_03003FC0.unk01 = 2
+ *   0849ECE0  sub_0803B8C4, tree 3, after gUnknown_03003FC0.unk01 = 3
+ *   0849F5D0  sub_0803D960, blocking, stashes 6 at +0x64
+ *   0849F888  sub_0803F2B8, blocking, parent forwarded (4th param), stashes
+ *             words at +0x2c/+0x30/+0x4c
+ *   0849F918  sub_0803F3E4, parent forwarded (3rd param), stashes words at
+ *             +0x2c/+0x30 */
+extern const struct ProcCmd gUnknown_0849B3CC[];
+/*   0849B284  sub_08031418, parent forwarded, stashes 0 at +0x58
+ *   0849B2A4  sub_08031E44, parent forwarded, stashes 100/100/72 at
+ *             +0x68/+0x64/+0x66
+ *   0849B62C  sub_08032454 starts it (parent forwarded) and sub_08032468
+ *             Proc_EndEach's it
+ *   0849B6B0  sub_08032D4C, parent forwarded, no payload
+ *   0849BB28  sub_080337D8, blocking, parent forwarded (3rd param), stashes
+ *             words at +0x20/+0x24 -- see c_080337D8.c, the object is NOT a
+ *             Proc */
+extern const struct ProcCmd gUnknown_0849B284[];
+extern const struct ProcCmd gUnknown_0849B2A4[];
+extern const struct ProcCmd gUnknown_0849B62C[];
+extern const struct ProcCmd gUnknown_0849B6B0[];
 extern const struct ProcCmd gUnknown_0849B8B8[];
+extern const struct ProcCmd gUnknown_0849BB28[];
+extern const struct ProcCmd gUnknown_0849BB50[];
 extern const struct ProcCmd gUnknown_0849BC98[];
 extern const struct Unk0849CD88 gUnknown_0849CD88[];
 extern const struct ProcCmd gUnknown_0849D56C[];
 extern struct Unk0849D5F8 *gUnknown_0849D5F8;
+extern const struct ProcCmd gUnknown_0849D77C[];
 extern const struct ProcCmd gUnknown_0849D7FC[];
+extern const struct ProcCmd gUnknown_0849D82C[];
+extern const struct ProcCmd gUnknown_0849E728[];
 extern const struct ProcCmd gUnknown_0849E778[];
 extern const struct ProcCmd gUnknown_0849E7A0[];
+extern const struct ProcCmd gUnknown_0849E7B8[];
+extern const struct ProcCmd gUnknown_0849EAAC[];
+extern const struct ProcCmd gUnknown_0849EBBC[];
+extern const struct ProcCmd gUnknown_0849EC1C[];
 extern struct Unk0849ECDC *gUnknown_0849ECDC;
 extern const struct ProcCmd gUnknown_0849ECE0[];
 extern const struct ProcCmd gUnknown_0849F5D0[];
+extern const struct ProcCmd gUnknown_0849F888[];
+extern const struct ProcCmd gUnknown_0849F918[];
 extern const struct ProcCmd gUnknown_0849FB44[];
 /* A proc script: sub_08042C10 hands it to Proc_Start on tree 3. */
 extern const struct ProcCmd gUnknown_0849FC0C[];
+/* A proc script: sub_08041180 hands it to Proc_Find and writes +0x40 (u16) of
+ * the proc it returns. */
+extern const struct ProcCmd gUnknown_0849FD44[];
 /* Named proc scripts reached from this file. Declared non-const to agree with
  * the existing declaration in src/title-screen.c. */
 extern struct ProcCmd ProcScr_MainMenu[];
@@ -1420,27 +1718,57 @@ extern struct Unk08580934 *gUnknown_08580934;
 /* Proc scripts in the 0x0858xxxx table, each proved by being the sole argument
  * of a Proc_Start/Proc_Find call. `const` because that is what proc.h's
  * prototypes take; they are ROM data and nothing writes them.
+ *   08580E94  Proc_Start, sub_080673B0 (fills +0x2c/+0x38/+0x3c)
  *   08580EAC  Proc_Start, sub_080673D0 (fills +0x2c/+0x38/+0x3c)
+ *   08580EC4  Proc_Start, sub_080673F0 (fills +0x2c/+0x38/+0x3c)
+ *             -- 08580E94/08580EAC/08580EC4 are three consecutive 0x18-byte
+ *             scripts with three identical starters, one per variant
  *   08580FE4  Proc_Find,  sub_0806780C (+0x5c)
  *   08580FF4  Proc_Find,  sub_080678BC (+0x60) and sub_080678D4 (+0x3c)
  *   08581014  Proc_Find,  sub_08067A24 (+0x50, u8)
  *   08581068  Proc_Find,  sub_08067C7C (+0x38)
  *   085810E4  Proc_Start, sub_08067DD4 (no fields written)
  *   08581420  Proc_Find,  sub_0806978C/sub_080697A4 (+0x36, u8 = 0/1)
- *   08582AF4  Proc_Start, sub_0806E210 (+0x58)
+ *   08582AF4  Proc_Start, sub_0806E210 (+0x58) and Proc_Find, sub_0806E228,
+ *             both writing +0x58 = arg + 1
+ *
+ * 08580FE4 is reached twice with different arities: sub_0806780C finds it and
+ * writes +0x5c = 1, while sub_080677BC starts it under its own fourth argument
+ * and writes +0x2c/+0x30/+0x34/+0x38/+0x58 as well as the same +0x5c = 1.
  */
+extern const struct ProcCmd gUnknown_08580E94[];
 extern const struct ProcCmd gUnknown_08580EAC[];
+extern const struct ProcCmd gUnknown_08580EC4[];
 extern const struct ProcCmd gUnknown_08580FE4[];
 extern const struct ProcCmd gUnknown_08580FF4[];
 extern const struct ProcCmd gUnknown_08581014[];
 extern const struct ProcCmd gUnknown_08581068[];
 extern const struct ProcCmd gUnknown_085810E4[];
+/* More 0x0858xxxx proc scripts, each the sole script argument of one starter:
+ *   08581108  Proc_Find,  sub_0806A4B0 (+0x3d, u8 -- the argument narrows with
+ *             `lsl #24; lsr #24` before the bl, which is PROMOTE_MODE on a u8
+ *             parameter that has to survive a call, so the parameter really is
+ *             u8 here rather than the int a bare strb would leave ambiguous)
+ *   08581138  Proc_Start, sub_08068014 (+0x2c/+0x30/+0x34 = args, +0x40 = 0)
+ *   08581480  Proc_Start, sub_08069FAC (+0x34/+0x38/+0x3c = args, +0x40 = 0)
+ *   08581AC8  Proc_Start(.., PROC_TREE_3), sub_0806C874 (no fields written)
+ */
+extern const struct ProcCmd gUnknown_08581108[];
+extern const struct ProcCmd gUnknown_08581138[];
 extern const struct ProcCmd gUnknown_08581420[];
+extern const struct ProcCmd gUnknown_08581480[];
+extern const struct ProcCmd gUnknown_08581AC8[];
 extern const struct ProcCmd gUnknown_08582AF4[];
 extern const struct Unk085C77A0 gUnknown_085C77A0[];
 extern const s16 gUnknown_08580E64[];
 extern const struct Unk085D3DD0 gUnknown_085D3DD0[];
 extern const struct Unk085D5ABC gUnknown_085D5ABC[];
+/* ROM table of string pointers, indexed by a u32 (`lsls #2`; sub_08039F18
+ * takes the index out of gUnknown_085D3DD0[..].unk38[..].unk00). The pointed-to
+ * bytes are a NUL-terminated string: sub_08039F18's result goes straight into
+ * sub_08039544, which copies bytes until the first zero. Left non-const because
+ * sub_08039544 is not prototyped yet and takes it as a plain u8 *. */
+extern u8 *gUnknown_08610A38[];
 /* Proc scripts. sub_0807639C and sub_0807F8D0 hand 08614460 / 08616740 to
  * Proc_Start(script, parent); sub_08078540 hands 08615AAC to
  * Proc_StartBlocking and stashes a pointer at +0x54 of the new proc. */
@@ -1454,11 +1782,85 @@ extern const struct ProcCmd gUnknown_08616740[];
  *   08582C24  Proc_Start,         sub_0806E8C8 (+0x58/+0x5c = 0, +0x60 = arg)
  *   086141B4  Proc_Start(.., PROC_TREE_VSYNC), sub_08073900 (+0x5c = arg)
  *   086142E4  Proc_StartBlocking, sub_08074AAC (+0x2c = arg, +0x30 = 0)
+ *
+ * And the same family again:
+ *   08582B2C  Proc_Start,         sub_0806E5CC (+0x34 u16 = arg, +0x2c = 0x140,
+ *                                 +0x30 = 0xa0 -- 320x160, so the pair is a
+ *                                 screen-sized extent rather than two flags)
+ *   08582B74  Proc_StartBlocking, sub_0806E698, started under the starter's own
+ *                                 first argument, and +0x5c of the new proc is
+ *                                 copied from +0x5c of that parent -- so the
+ *                                 parent is a proc of this same shape
+ *   08582B94  Proc_StartBlocking, sub_0806E6B4 AND sub_0806E6E0, two identical
+ *                                 20-byte starters on one script, neither
+ *                                 writing a field
+ *   08582D74  Proc_StartBlocking, sub_0806F710 (no fields written). This one
+ *                                 sits immediately above the m4a/MP2K span, but
+ *                                 it takes its parent in r0 like every other
+ *                                 member of this family, so it is ordinary
+ *                                 compiler output and not m4a_asm.s.
+ *   0861418C  Proc_Start(.., PROC_TREE_VSYNC), sub_080736C4 (no fields written)
+ *   086141DC  Proc_Start(.., PROC_TREE_VSYNC), sub_08073C88 (+0x5c = arg)
  */
+extern const struct ProcCmd gUnknown_08582B2C[];
+extern const struct ProcCmd gUnknown_08582B74[];
+extern const struct ProcCmd gUnknown_08582B94[];
 extern const struct ProcCmd gUnknown_08582BB4[];
 extern const struct ProcCmd gUnknown_08582BE4[];
 extern const struct ProcCmd gUnknown_08582C24[];
+extern const struct ProcCmd gUnknown_08582D74[];
+/* Proc scripts from the 0x080719C0-0x0807298C starter family. The +0x64 group
+ * is six starters over four scripts, in two shapes that pair off: a tree-3
+ * Proc_Start taking only the payload, and a Proc_StartBlocking that forwards
+ * its own second parameter as the parent. Both stash one HALFWORD at +0x64
+ * (`adds r0,#0x64; strh` -- 0x64 is past the strh displacement limit, so the
+ * runtime add is forced and says nothing about the source).
+ *   08613E08  Proc_Start tree 3,  sub_080719C0 (no fields written)
+ *   08613E64  Proc_Start tree 3,  sub_08071EF0 (+0x64) and
+ *             Proc_StartBlocking, sub_08071F28 (+0x64), parent forwarded
+ *   08613E84  Proc_Start tree 3,  sub_08071F0C (+0x64) and
+ *             Proc_StartBlocking, sub_08071F40 (+0x64), parent forwarded
+ *   08613EA4  Proc_StartBlocking, sub_08071F58 (+0x64), parent forwarded
+ *   08613EC4  Proc_StartBlocking, sub_08071F70 (+0x64), parent forwarded
+ *   08613F0C  Proc_StartBlocking, sub_0807249C (+0x58 word), parent is that
+ *             starter's FIRST parameter
+ *   08613F34  Proc_Start tree 3,  sub_08072970 (+0x2c/+0x34 words)
+ *   08613F44  Proc_Start tree 3,  sub_0807298C (+0x2c/+0x30/+0x34 words) */
+extern const struct ProcCmd gUnknown_08613E08[];
+extern const struct ProcCmd gUnknown_08613E64[];
+extern const struct ProcCmd gUnknown_08613E84[];
+extern const struct ProcCmd gUnknown_08613EA4[];
+extern const struct ProcCmd gUnknown_08613EC4[];
+extern const struct ProcCmd gUnknown_08613F0C[];
+extern const struct ProcCmd gUnknown_08613F34[];
+extern const struct ProcCmd gUnknown_08613F44[];
+extern const struct ProcCmd gUnknown_0861418C[];
 extern const struct ProcCmd gUnknown_086141B4[];
+extern const struct ProcCmd gUnknown_086141DC[];
 extern const struct ProcCmd gUnknown_086142E4[];
+/* Proc scripts from the 0x08074xxx-0x08078xxx starter family:
+ *   086142B4  Proc_Start,         sub_08074714 (+0x58 = 0xc00), and
+ *             Proc_Find,          sub_0807472C (+0x58 = arg << 10) -- one
+ *             script with a starter and a poker, so +0x58 is one u32 field
+ *   08614344  Proc_Start,         sub_08074ED0 (+0x54 = arg, +0x58 = 0)
+ *   086143E0  Proc_Start,         sub_080758BC (+0x2c/+0x30/+0x38 = args,
+ *                                 +0x34 = 0 as a HALFWORD, +0x3c/+0x40 = 0)
+ *   086144FC  Proc_Start,         sub_08076770 (+0x2c/+0x30/+0x58 = args,
+ *                                 +0x5c = 0, +0x64 = 0 halfword), and
+ *             Proc_Find,          sub_080767A8 (+0x64 = 1 halfword)
+ *   0861485C  Proc_Start(.., PROC_TREE_3), sub_0807813C (no fields written)
+ *   08614894  Proc_Start(.., PROC_TREE_3), sub_080780D0 (no fields written)
+ *   0861598C  Proc_StartBlocking, sub_08078480 (+0x54 = arg) -- same shape as
+ *                                 08615AAC / sub_08078540
+ *   08615A8C  Proc_StartBlocking, sub_080784E4 (+0x58/+0x5c/+0x60 = args)
+ */
+extern const struct ProcCmd gUnknown_086142B4[];
+extern const struct ProcCmd gUnknown_08614344[];
+extern const struct ProcCmd gUnknown_086143E0[];
+extern const struct ProcCmd gUnknown_086144FC[];
+extern const struct ProcCmd gUnknown_0861485C[];
+extern const struct ProcCmd gUnknown_08614894[];
+extern const struct ProcCmd gUnknown_0861598C[];
+extern const struct ProcCmd gUnknown_08615A8C[];
 
 #endif // UNKNOWN_GLOBALS_H

@@ -33,8 +33,15 @@ void sub_08012C58(void *); // possibly "SetupBackgrounds"
 void sub_08011B34(void *);
 void sub_08011B5C(void *);
 
-void sub_08013098(s16, ProcPtr);
-void sub_080130B0(s16, ProcPtr);
+/* `int`, not `s16` -- the same correction wave 7 made to the eight starters
+ * above, and for the same reason. Both open with a bare `adds r4, r0, #0`;
+ * declaring the parameter `s16` adds `lsl #16; lsr #16` (PROMOTE_MODE widening
+ * a narrow parameter that has to survive the `bl`) and cannot match. Their only
+ * call sites are ProcCmd_1D_0801D0E4/ProcCmd_1E_0801D104 in proc.c, which pass
+ * `dataImm` -- already sign-extended by its `ldrsh`, so the caller side emits
+ * the same code either way. */
+void sub_08013098(int, ProcPtr);
+void sub_080130B0(int, ProcPtr);
 /* Starts gUnknown_0848936C and stashes three halfwords at +0x64/+0x66/+0x68 of
  * the new proc; a NULL fourth argument selects Proc_Start on tree 3 over
  * Proc_StartBlocking. The three values are bare `strh` stores, which fixes them

@@ -34,7 +34,7 @@ int sub_08042E2C(int a, int b)
     if (gUnknown_03003FC0.unk08 == 0)
         return 10;
 
-    return gUnknown_085D3DD0[a].unk40[b].unk06;
+    return gUnknown_085D3DD0[a].unk38[b].unk0e;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -61,7 +61,7 @@ int sub_08042E84(int a, int b)
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk40[b].unk08;
+    return gUnknown_085D3DD0[a].unk38[b].unk10;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -88,7 +88,7 @@ int sub_08042EDC(int a, int b)
     if (gUnknown_03003FC0.unk08 == 0)
         return 100;
 
-    return gUnknown_085D3DD0[a].unk40[b].unk0e + 100;
+    return gUnknown_085D3DD0[a].unk38[b].unk16 + 100;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -161,7 +161,7 @@ int sub_08042FC4(int a, int b)
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk40[b].unk0a;
+    return gUnknown_085D3DD0[a].unk38[b].unk12;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -188,7 +188,7 @@ u32 sub_0804301C(int a, int b)
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk40[b].unk00;
+    return gUnknown_085D3DD0[a].unk38[b].unk08;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
