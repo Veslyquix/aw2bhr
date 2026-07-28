@@ -229,6 +229,50 @@ def instructions(fn):
     return out
 
 
+BRANCH_TARGET_RE = re.compile(
+    r'^\s*(?:b|beq|bne|bcs|bcc|bmi|bpl|bvs|bvc|bhi|bls|bge|blt|bgt|ble)'
+    r'(?:\.[nw])?\s+(\S+)')
+
+
+def control_flow(fn):
+    """(n_branches, n_backward, n_labels) for one function.
+
+    `n_backward` is the count of branches whose target label is defined earlier
+    in the body -- i.e. loops. It is the single best predictor of how hard a
+    function is to match, and it is nearly independent of size.
+
+    Wave 12 matched four functions of 280-368 bytes in five `try_match`
+    attempts, having previously topped out at 124. Three of the four had no
+    backward branch. A long straight-line function is many INDEPENDENT
+    decisions, each of which fails with a diff pointing at itself; a short loop
+    is one coupled decision where a wrong shape makes every later byte differ
+    and teaches you nothing. So size is a bad difficulty proxy once control flow
+    is known, and the scheduler should prefer `n_backward == 0` over `small`.
+    """
+    labels_seen, n_br, n_back, n_lab = set(), 0, 0, 0
+    for ln in fn.lines:
+        s = ln.split("@")[0].strip()
+        if not s:
+            continue
+        if LABEL_RE.match(s):
+            labels_seen.add(s.split(":", 1)[0])
+            n_lab += 1
+            s = s.split(":", 1)[1].strip()
+            if not s:
+                continue
+        if s.startswith(".") or MACRO_RE.match(s):
+            continue
+        m = BRANCH_TARGET_RE.match(s)
+        if m:
+            n_br += 1
+            # A target already defined above this point is a back edge. Targets
+            # we have not seen yet are forward branches -- `if`/`else` and the
+            # tail jumps every THUMB function is full of.
+            if m.group(1) in labels_seen:
+                n_back += 1
+    return n_br, n_back, n_lab
+
+
 TRIVIAL_MAX_INSNS = 4
 # The only things allowed to precede the return in a stub. Deliberately narrow:
 # arithmetic means the function computes something, however small, so it is

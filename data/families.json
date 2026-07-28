@@ -36,52 +36,12 @@
  "counts": {
   "families": 98,
   "members": 698,
-  "unmatched_members": 341,
-  "entirely_unmatched_families": 42,
+  "unmatched_members": 146,
+  "entirely_unmatched_families": 38,
   "fuzzy_clusters": 20
  },
  "batching_plan": {
   "cold": [
-   {
-    "id": "F005",
-    "n_members": 19,
-    "n_unmatched": 19,
-    "n_insns": 5,
-    "sizes": [
-     16
-    ],
-    "representative": "sub_0800484C",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x0800484C",
-     "0x08085298"
-    ],
-    "varies": [
-     "bl S",
-     "bl S"
-    ],
-    "members": [
-     "sub_0800484C",
-     "sub_08004A20",
-     "sub_08017648",
-     "sub_080184C8",
-     "sub_0801A538",
-     "sub_0802D0A4",
-     "sub_0802D158",
-     "sub_0802D4A0",
-     "sub_0802DCA4",
-     "sub_080354FC",
-     "sub_0803661C",
-     "sub_080375BC",
-     "sub_0803AF90",
-     "sub_08041DD8",
-     "sub_08041DE8",
-     "sub_08045298",
-     "sub_0805315C",
-     "sub_08062028",
-     "sub_08085298"
-    ]
-   },
    {
     "id": "F011",
     "n_members": 9,
@@ -115,39 +75,9 @@
     ]
    },
    {
-    "id": "F020",
-    "n_members": 7,
-    "n_unmatched": 7,
-    "n_insns": 12,
-    "sizes": [
-     32
-    ],
-    "representative": "sub_08019850",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x08019850",
-     "0x0806E198"
-    ],
-    "varies": [
-     "ldr r0,L",
-     "bl S",
-     "lsls r0,r0,#",
-     "asrs r0,r0,#"
-    ],
-    "members": [
-     "sub_08019850",
-     "sub_0803ACD0",
-     "sub_0803B16C",
-     "sub_0803C2FC",
-     "sub_0804B160",
-     "sub_080670D8",
-     "sub_0806E198"
-    ]
-   },
-   {
     "id": "F022",
     "n_members": 7,
-    "n_unmatched": 7,
+    "n_unmatched": 0,
     "n_insns": 75,
     "sizes": [
      188
@@ -281,57 +211,6 @@
     ]
    },
    {
-    "id": "F041",
-    "n_members": 4,
-    "n_unmatched": 4,
-    "n_insns": 20,
-    "sizes": [
-     48
-    ],
-    "representative": "sub_08017E8C",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x08017E8C",
-     "0x0801903C"
-    ],
-    "varies": [
-     "bl S",
-     "movs r0,#"
-    ],
-    "members": [
-     "sub_08017E8C",
-     "sub_08017EBC",
-     "sub_08018F04",
-     "sub_0801903C"
-    ]
-   },
-   {
-    "id": "F043",
-    "n_members": 4,
-    "n_unmatched": 4,
-    "n_insns": 31,
-    "sizes": [
-     72
-    ],
-    "representative": "sub_08023DCC",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x08023DCC",
-     "0x08023EA4"
-    ],
-    "varies": [
-     "bl S",
-     "bl S",
-     "bl S"
-    ],
-    "members": [
-     "sub_08023DCC",
-     "sub_08023E14",
-     "sub_08023E5C",
-     "sub_08023EA4"
-    ]
-   },
-   {
     "id": "F045",
     "n_members": 4,
     "n_unmatched": 4,
@@ -456,292 +335,105 @@
      "sub_0804B3CC",
      "sub_0804C0E8"
     ]
-   }
-  ],
-  "with_exemplar": [
+   },
    {
-    "id": "F000",
-    "n_members": 72,
-    "n_unmatched": 59,
-    "n_insns": 5,
+    "id": "F056",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 6,
     "sizes": [
      16
     ],
-    "representative": "sub_08004B2C",
-    "exemplar_src": "src/decomp/c_08004A60.c",
+    "representative": "sub_0800483C",
+    "exemplar_src": null,
     "addr_span": [
-     "0x08004B2C",
-     "0x080879A0"
+     "0x0800483C",
+     "0x0806C78C"
     ],
     "varies": [
-     "ldr r0,L",
-     "bl S"
-    ],
-    "members": [
-     "sub_080111AC",
-     "sub_08011218",
-     "sub_08012A74",
-     "sub_08013378",
-     "sub_0801C7A4",
-     "sub_080251AC",
-     "sub_080272B4",
-     "sub_0802A528",
-     "sub_0802D40C",
-     "sub_0802D41C",
-     "sub_0802D42C",
-     "sub_0802D43C",
-     "sub_08031430",
-     "sub_08031CE4",
-     "sub_08031E6C",
-     "sub_080320F4",
-     "sub_08032D60",
-     "sub_08035010",
-     "sub_08037628",
-     "sub_08037780",
-     "sub_08037F70",
-     "sub_08039750",
-     "sub_0803B15C",
-     "sub_0803B254",
-     "sub_0803B33C",
-     "sub_0803F540",
-     "sub_08045F08",
-     "sub_08045F94",
-     "sub_080470E8",
-     "sub_08049B70",
-     "sub_0804AE10",
-     "sub_08065700",
-     "sub_08067820",
-     "sub_08067A3C",
-     "sub_08067D4C",
-     "sub_08067DE8",
-     "sub_080697BC",
-     "sub_0806A444",
-     "sub_0806A490",
-     "sub_0806A4A0",
-     "sub_0806A4CC",
-     "sub_0806D840",
-     "sub_08071B88",
-     "sub_08072304",
-     "sub_08072598",
-     "sub_08074028",
-     "sub_08074744",
-     "sub_08074F1C",
-     "sub_08075304",
-     "sub_080755E0",
-     "sub_080763B0",
-     "sub_08076798",
-     "sub_08078240",
-     "sub_08078958",
-     "sub_08078E04",
-     "sub_08078EC4",
-     "sub_0807AE84",
-     "sub_0807F8C0",
-     "sub_080879A0"
-    ]
-   },
-   {
-    "id": "F001",
-    "n_members": 50,
-    "n_unmatched": 43,
-    "n_insns": 4,
-    "sizes": [
-     12
-    ],
-    "representative": "sub_08015544",
-    "exemplar_src": "src/decomp/c_08015544.c",
-    "addr_span": [
-     "0x08003960",
-     "0x0808A820"
-    ],
-    "varies": [
-     "bl S"
-    ],
-    "members": [
-     "sub_08003960",
-     "sub_080049DC",
-     "sub_08004E38",
-     "sub_08011CA0",
-     "sub_080128C4",
-     "sub_08012AA0",
-     "sub_08019D00",
-     "sub_08019E38",
-     "sub_08019E44",
-     "sub_0801C798",
-     "sub_08024268",
-     "sub_080246A8",
-     "sub_080268F4",
-     "sub_08028EE4",
-     "sub_0802C5AC",
-     "sub_0802D44C",
-     "sub_080358AC",
-     "sub_080358B8",
-     "sub_080364D4",
-     "sub_080392BC",
-     "sub_0803AF78",
-     "sub_0803AF84",
-     "sub_0803B9AC",
-     "sub_0803BF98",
-     "sub_0803CEAC",
-     "sub_0803D8DC",
-     "sub_0803DE08",
-     "sub_08041DCC",
-     "sub_0804495C",
-     "sub_08045ED4",
-     "sub_08045FBC",
-     "sub_08052F14",
-     "sub_0805DB64",
-     "sub_0805DFE8",
-     "sub_0806B6FC",
-     "sub_0807046C",
-     "sub_080705D8",
-     "sub_0807857C",
-     "sub_08078884",
-     "sub_08078890",
-     "sub_0807BD50",
-     "sub_08086A4C",
-     "sub_0808A820"
-    ]
-   },
-   {
-    "id": "F003",
-    "n_members": 34,
-    "n_unmatched": 21,
-    "n_insns": 5,
-    "sizes": [
-     12
-    ],
-    "representative": "sub_08004A60",
-    "exemplar_src": "src/decomp/c_08004A60.c",
-    "addr_span": [
-     "0x080005F0",
-     "0x08071FC4"
-    ],
-    "varies": [
+     "bl S",
      "movs r0,#",
      "bl S"
     ],
     "members": [
-     "sub_080005F0",
-     "sub_08004818",
-     "sub_0800494C",
-     "sub_080051D4",
-     "sub_080051E0",
-     "sub_08023348",
-     "sub_08023354",
-     "sub_0802A508",
-     "sub_0803B5E8",
-     "sub_0803B8B8",
-     "sub_0803D914",
-     "sub_0803D920",
-     "sub_080412E8",
-     "sub_08041DC0",
-     "sub_08045F18",
-     "sub_08046D24",
-     "sub_080470DC",
-     "sub_0804856C",
-     "sub_0804A03C",
-     "sub_0806C79C",
-     "sub_0806C7A8"
+     "sub_0800483C",
+     "sub_0803B890",
+     "sub_0806C78C"
     ]
    },
    {
-    "id": "F002",
-    "n_members": 50,
-    "n_unmatched": 16,
-    "n_insns": 6,
+    "id": "F057",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 26,
     "sizes": [
-     20
+     64
     ],
-    "representative": "sub_0802BF80",
-    "exemplar_src": "src/decomp/c_0802BF80.c",
+    "representative": "sub_08004EDC",
+    "exemplar_src": null,
     "addr_span": [
-     "0x080039BC",
-     "0x0808AA74"
+     "0x08004EDC",
+     "0x08004F5C"
     ],
     "varies": [
-     "ldr r0,L",
-     "movs r1,#",
-     "bl S"
+     "lsls r0,r0,#",
+     "movs r0,#"
     ],
     "members": [
-     "sub_080039BC",
-     "sub_080039D0",
-     "sub_0802817C",
-     "sub_080281C4",
-     "sub_0802A514",
-     "sub_0802A538",
-     "sub_0802A7B0",
-     "sub_0802BCD8",
-     "sub_080364E0",
-     "sub_0803A53C",
-     "sub_0803AF5C",
-     "sub_0803B0D8",
-     "sub_0803B240",
-     "sub_0803C2E8",
-     "sub_0803DDF4",
-     "sub_08049B14"
+     "sub_08004EDC",
+     "sub_08004F1C",
+     "sub_08004F5C"
     ]
    },
    {
-    "id": "F010",
-    "n_members": 10,
-    "n_unmatched": 8,
-    "n_insns": 7,
+    "id": "F058",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 5,
     "sizes": [
-     28
+     12
     ],
-    "representative": "sub_08044924",
-    "exemplar_src": "src/decomp/c_08044924.c",
+    "representative": "sub_0800553C",
+    "exemplar_src": null,
     "addr_span": [
-     "0x080252EC",
-     "0x080736D8"
+     "0x0800553C",
+     "0x08005554"
     ],
     "varies": [
-     "ldr r0,L",
-     "bl S",
-     "ldr r0,L",
-     "bl S"
+     "movs r0,#"
     ],
     "members": [
-     "sub_080252EC",
-     "sub_080370F0",
-     "sub_0803A59C",
-     "sub_08049FF4",
-     "sub_0806AA64",
-     "sub_0806F2C0",
-     "sub_080735D0",
-     "sub_080736D8"
+     "sub_0800553C",
+     "sub_08005548",
+     "sub_08005554"
     ]
    },
    {
-    "id": "F018",
-    "n_members": 8,
-    "n_unmatched": 7,
-    "n_insns": 6,
+    "id": "F059",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 45,
     "sizes": [
-     20
+     124
     ],
-    "representative": "sub_08048558",
-    "exemplar_src": "src/decomp/c_08048558.c",
+    "representative": "sub_080055B8",
+    "exemplar_src": null,
     "addr_span": [
-     "0x08002EB4",
-     "0x0805DB50"
+     "0x080055B8",
+     "0x080056B0"
     ],
     "varies": [
-     "bl S",
-     "bl S",
-     "bl S"
+     "movs r0,#",
+     "movs r2,#"
     ],
     "members": [
-     "sub_08002EB4",
-     "sub_08028154",
-     "sub_0802CD00",
-     "sub_0802CD14",
-     "sub_08034FD8",
-     "sub_08034FEC",
-     "sub_0805DB50"
+     "sub_080055B8",
+     "sub_08005634",
+     "sub_080056B0"
     ]
-   },
+   }
+  ],
+  "with_exemplar": [
    {
     "id": "F031",
     "n_members": 6,
@@ -906,7 +598,7 @@
     ]
    },
    {
-    "id": "F016",
+    "id": "F017",
     "n_members": 8,
     "n_unmatched": 1,
     "n_insns": 4,
@@ -957,8 +649,8 @@
   {
    "id": "F000",
    "n_members": 72,
-   "n_unmatched": 59,
-   "n_matched": 13,
+   "n_unmatched": 0,
+   "n_matched": 72,
    "n_insns": 5,
    "sizes": [
     16
@@ -1174,56 +866,56 @@
      "addr": "0x080111AC",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08011218",
      "addr": "0x08011218",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08012A74",
      "addr": "0x08012A74",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08013378",
      "addr": "0x08013378",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0801C7A4",
      "addr": "0x0801C7A4",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080251AC",
      "addr": "0x080251AC",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080272B4",
      "addr": "0x080272B4",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802A528",
      "addr": "0x0802A528",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802C144",
@@ -1279,259 +971,259 @@
      "addr": "0x0802D40C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802D41C",
      "addr": "0x0802D41C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802D42C",
      "addr": "0x0802D42C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802D43C",
      "addr": "0x0802D43C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08031430",
      "addr": "0x08031430",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08031CE4",
      "addr": "0x08031CE4",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08031E6C",
      "addr": "0x08031E6C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080320F4",
      "addr": "0x080320F4",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08032D60",
      "addr": "0x08032D60",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08035010",
      "addr": "0x08035010",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08037628",
      "addr": "0x08037628",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08037780",
      "addr": "0x08037780",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08037F70",
      "addr": "0x08037F70",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08039750",
      "addr": "0x08039750",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B15C",
      "addr": "0x0803B15C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B254",
      "addr": "0x0803B254",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B33C",
      "addr": "0x0803B33C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803F540",
      "addr": "0x0803F540",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08045F08",
      "addr": "0x08045F08",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08045F94",
      "addr": "0x08045F94",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080470E8",
      "addr": "0x080470E8",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08049B70",
      "addr": "0x08049B70",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0804AE10",
      "addr": "0x0804AE10",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08065700",
      "addr": "0x08065700",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08067820",
      "addr": "0x08067820",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08067A3C",
      "addr": "0x08067A3C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08067D4C",
      "addr": "0x08067D4C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08067DE8",
      "addr": "0x08067DE8",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080697BC",
      "addr": "0x080697BC",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806A444",
      "addr": "0x0806A444",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806A490",
      "addr": "0x0806A490",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806A4A0",
      "addr": "0x0806A4A0",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806A4CC",
      "addr": "0x0806A4CC",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806D840",
      "addr": "0x0806D840",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08071B88",
      "addr": "0x08071B88",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08072304",
      "addr": "0x08072304",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08072598",
      "addr": "0x08072598",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080733B8",
@@ -1545,113 +1237,113 @@
      "addr": "0x08074028",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08074744",
      "addr": "0x08074744",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08074F1C",
      "addr": "0x08074F1C",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08075304",
      "addr": "0x08075304",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080755E0",
      "addr": "0x080755E0",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080763B0",
      "addr": "0x080763B0",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08076798",
      "addr": "0x08076798",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078240",
      "addr": "0x08078240",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078958",
      "addr": "0x08078958",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078E04",
      "addr": "0x08078E04",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078EC4",
      "addr": "0x08078EC4",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0807AE84",
      "addr": "0x0807AE84",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0807F8C0",
      "addr": "0x0807F8C0",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080879A0",
      "addr": "0x080879A0",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F001",
    "n_members": 50,
-   "n_unmatched": 43,
-   "n_matched": 7,
+   "n_unmatched": 0,
+   "n_matched": 50,
    "n_insns": 4,
    "sizes": [
     12
    ],
-   "representative": "sub_08015544",
+   "representative": "sub_08003960",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08015544.c",
+   "exemplar_src": "src/decomp/c_08003960.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -1723,42 +1415,42 @@
      "addr": "0x08003960",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080049DC",
      "addr": "0x080049DC",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08004E38",
      "addr": "0x08004E38",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08011CA0",
      "addr": "0x08011CA0",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080128C4",
      "addr": "0x080128C4",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08012AA0",
      "addr": "0x08012AA0",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08015544",
@@ -1786,112 +1478,112 @@
      "addr": "0x08019D00",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08019E38",
      "addr": "0x08019E38",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08019E44",
      "addr": "0x08019E44",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0801C798",
      "addr": "0x0801C798",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08024268",
      "addr": "0x08024268",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080246A8",
      "addr": "0x080246A8",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080268F4",
      "addr": "0x080268F4",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08028EE4",
      "addr": "0x08028EE4",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802C5AC",
      "addr": "0x0802C5AC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802D44C",
      "addr": "0x0802D44C",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080358AC",
      "addr": "0x080358AC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080358B8",
      "addr": "0x080358B8",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080364D4",
      "addr": "0x080364D4",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080392BC",
      "addr": "0x080392BC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803AF78",
      "addr": "0x0803AF78",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803AF84",
      "addr": "0x0803AF84",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B3E0",
@@ -1926,162 +1618,162 @@
      "addr": "0x0803B9AC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803BF98",
      "addr": "0x0803BF98",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803CEAC",
      "addr": "0x0803CEAC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803D8DC",
      "addr": "0x0803D8DC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803DE08",
      "addr": "0x0803DE08",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08041DCC",
      "addr": "0x08041DCC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0804495C",
      "addr": "0x0804495C",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08045ED4",
      "addr": "0x08045ED4",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08045FBC",
      "addr": "0x08045FBC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08052F14",
      "addr": "0x08052F14",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0805DB64",
      "addr": "0x0805DB64",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0805DFE8",
      "addr": "0x0805DFE8",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806B6FC",
      "addr": "0x0806B6FC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0807046C",
      "addr": "0x0807046C",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080705D8",
      "addr": "0x080705D8",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0807857C",
      "addr": "0x0807857C",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078884",
      "addr": "0x08078884",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078890",
      "addr": "0x08078890",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0807BD50",
      "addr": "0x0807BD50",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08086A4C",
      "addr": "0x08086A4C",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0808A820",
      "addr": "0x0808A820",
      "size": 12,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F002",
    "n_members": 50,
-   "n_unmatched": 16,
-   "n_matched": 34,
+   "n_unmatched": 0,
+   "n_matched": 50,
    "n_insns": 6,
    "sizes": [
     20
    ],
-   "representative": "sub_0802BF80",
+   "representative": "sub_080039BC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802BF80.c",
+   "exemplar_src": "src/decomp/c_080039BC.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -2269,56 +1961,56 @@
      "addr": "0x080039BC",
      "size": 20,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080039D0",
      "addr": "0x080039D0",
      "size": 20,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802817C",
      "addr": "0x0802817C",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080281C4",
      "addr": "0x080281C4",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802A514",
      "addr": "0x0802A514",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802A538",
      "addr": "0x0802A538",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802A7B0",
      "addr": "0x0802A7B0",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802BCD8",
      "addr": "0x0802BCD8",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802BF80",
@@ -2360,7 +2052,7 @@
      "addr": "0x080364E0",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08037F80",
@@ -2374,28 +2066,28 @@
      "addr": "0x0803A53C",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803AF5C",
      "addr": "0x0803AF5C",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B0D8",
      "addr": "0x0803B0D8",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B240",
      "addr": "0x0803B240",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B774",
@@ -2430,14 +2122,14 @@
      "addr": "0x0803C2E8",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803DDF4",
      "addr": "0x0803DDF4",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08042B70",
@@ -2486,7 +2178,7 @@
      "addr": "0x08049B14",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08049BD8",
@@ -2619,15 +2311,15 @@
   {
    "id": "F003",
    "n_members": 34,
-   "n_unmatched": 21,
-   "n_matched": 13,
+   "n_unmatched": 0,
+   "n_matched": 34,
    "n_insns": 5,
    "sizes": [
     12
    ],
-   "representative": "sub_08004A60",
+   "representative": "sub_080005F0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004A60.c",
+   "exemplar_src": "src/decomp/c_080005F0.c",
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -2725,21 +2417,21 @@
      "addr": "0x080005F0",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08004818",
      "addr": "0x08004818",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0800494C",
      "addr": "0x0800494C",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08004A60",
@@ -2774,35 +2466,35 @@
      "addr": "0x080051D4",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080051E0",
      "addr": "0x080051E0",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08023348",
      "addr": "0x08023348",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08023354",
      "addr": "0x08023354",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802A508",
      "addr": "0x0802A508",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802C0CC",
@@ -2830,91 +2522,91 @@
      "addr": "0x0803B5E8",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B8B8",
      "addr": "0x0803B8B8",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803D914",
      "addr": "0x0803D914",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803D920",
      "addr": "0x0803D920",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080412E8",
      "addr": "0x080412E8",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08041DC0",
      "addr": "0x08041DC0",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08045F18",
      "addr": "0x08045F18",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08046D24",
      "addr": "0x08046D24",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080470DC",
      "addr": "0x080470DC",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0804856C",
      "addr": "0x0804856C",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0804A03C",
      "addr": "0x0804A03C",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806C79C",
      "addr": "0x0806C79C",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806C7A8",
      "addr": "0x0806C7A8",
      "size": 12,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08071F88",
@@ -3229,15 +2921,15 @@
   {
    "id": "F005",
    "n_members": 19,
-   "n_unmatched": 19,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 19,
    "n_insns": 5,
    "sizes": [
     16
    ],
    "representative": "sub_0800484C",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0800484C.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -3305,133 +2997,133 @@
      "addr": "0x0800484C",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08004A20",
      "addr": "0x08004A20",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08017648",
      "addr": "0x08017648",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080184C8",
      "addr": "0x080184C8",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0801A538",
      "addr": "0x0801A538",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802D0A4",
      "addr": "0x0802D0A4",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802D158",
      "addr": "0x0802D158",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802D4A0",
      "addr": "0x0802D4A0",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802DCA4",
      "addr": "0x0802DCA4",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080354FC",
      "addr": "0x080354FC",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803661C",
      "addr": "0x0803661C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080375BC",
      "addr": "0x080375BC",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803AF90",
      "addr": "0x0803AF90",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08041DD8",
      "addr": "0x08041DD8",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08041DE8",
      "addr": "0x08041DE8",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08045298",
      "addr": "0x08045298",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0805315C",
      "addr": "0x0805315C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08062028",
      "addr": "0x08062028",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08085298",
      "addr": "0x08085298",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -4109,15 +3801,15 @@
   {
    "id": "F010",
    "n_members": 10,
-   "n_unmatched": 8,
-   "n_matched": 2,
+   "n_unmatched": 0,
+   "n_matched": 10,
    "n_insns": 7,
    "sizes": [
     28
    ],
-   "representative": "sub_08044924",
+   "representative": "sub_080252EC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08044924.c",
+   "exemplar_src": "src/decomp/c_080252EC.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -4203,21 +3895,21 @@
      "addr": "0x080252EC",
      "size": 28,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080370F0",
      "addr": "0x080370F0",
      "size": 28,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803A59C",
      "addr": "0x0803A59C",
      "size": 28,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08044924",
@@ -4238,35 +3930,35 @@
      "addr": "0x08049FF4",
      "size": 28,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806AA64",
      "addr": "0x0806AA64",
      "size": 28,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806F2C0",
      "addr": "0x0806F2C0",
      "size": 28,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080735D0",
      "addr": "0x080735D0",
      "size": 28,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080736D8",
      "addr": "0x080736D8",
      "size": 28,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -4682,6 +4374,132 @@
    "n_members": 8,
    "n_unmatched": 0,
    "n_matched": 8,
+   "n_insns": 6,
+   "sizes": [
+    20
+   ],
+   "representative": "sub_08002EB4",
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08002EB4.c",
+   "shape": [
+    "push {lr}",
+    "bl S",
+    "bl S",
+    "bl S",
+    "pop {r0}",
+    "bx r0"
+   ],
+   "varies": [
+    {
+     "index": 1,
+     "insn": "bl S",
+     "values": [
+      "sub_08002DEC",
+      "sub_08013C00",
+      "sub_0801A614",
+      "sub_0801A614",
+      "sub_08023348",
+      "sub_08023354",
+      "sub_08024268",
+      "sub_0805E5AC"
+     ],
+     "distinct": 7
+    },
+    {
+     "index": 2,
+     "insn": "bl S",
+     "values": [
+      "sub_08002D7C",
+      "sub_08013AEC",
+      "sub_0801A168",
+      "sub_0801A168",
+      "sub_0803662C",
+      "sub_0803662C",
+      "sub_08013C00",
+      "sub_0805E718"
+     ],
+     "distinct": 6
+    },
+    {
+     "index": 3,
+     "insn": "bl S",
+     "values": [
+      "sub_08002E5C",
+      "sub_08024584",
+      "sub_0802D4B0",
+      "sub_0802D504",
+      "sub_08024268",
+      "sub_08024268",
+      "sub_08013AEC",
+      "sub_0805F4CC"
+     ],
+     "distinct": 7
+    }
+   ],
+   "members": [
+    {
+     "name": "sub_08002EB4",
+     "addr": "0x08002EB4",
+     "size": 20,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08028154",
+     "addr": "0x08028154",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_0802CD00",
+     "addr": "0x0802CD00",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_0802CD14",
+     "addr": "0x0802CD14",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08034FD8",
+     "addr": "0x08034FD8",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08034FEC",
+     "addr": "0x08034FEC",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08048558",
+     "addr": "0x08048558",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_0805DB50",
+     "addr": "0x0805DB50",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    }
+   ]
+  },
+  {
+   "id": "F015",
+   "n_members": 8,
+   "n_unmatched": 0,
+   "n_matched": 8,
    "n_insns": 9,
    "sizes": [
     24
@@ -4777,7 +4595,7 @@
    ]
   },
   {
-   "id": "F015",
+   "id": "F016",
    "n_members": 8,
    "n_unmatched": 0,
    "n_matched": 8,
@@ -4886,7 +4704,7 @@
    ]
   },
   {
-   "id": "F016",
+   "id": "F017",
    "n_members": 8,
    "n_unmatched": 1,
    "n_matched": 7,
@@ -4995,7 +4813,7 @@
    ]
   },
   {
-   "id": "F017",
+   "id": "F018",
    "n_members": 8,
    "n_unmatched": 0,
    "n_matched": 8,
@@ -5123,132 +4941,6 @@
    ]
   },
   {
-   "id": "F018",
-   "n_members": 8,
-   "n_unmatched": 7,
-   "n_matched": 1,
-   "n_insns": 6,
-   "sizes": [
-    20
-   ],
-   "representative": "sub_08048558",
-   "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08048558.c",
-   "shape": [
-    "push {lr}",
-    "bl S",
-    "bl S",
-    "bl S",
-    "pop {r0}",
-    "bx r0"
-   ],
-   "varies": [
-    {
-     "index": 1,
-     "insn": "bl S",
-     "values": [
-      "sub_08002DEC",
-      "sub_08013C00",
-      "sub_0801A614",
-      "sub_0801A614",
-      "sub_08023348",
-      "sub_08023354",
-      "sub_08024268",
-      "sub_0805E5AC"
-     ],
-     "distinct": 7
-    },
-    {
-     "index": 2,
-     "insn": "bl S",
-     "values": [
-      "sub_08002D7C",
-      "sub_08013AEC",
-      "sub_0801A168",
-      "sub_0801A168",
-      "sub_0803662C",
-      "sub_0803662C",
-      "sub_08013C00",
-      "sub_0805E718"
-     ],
-     "distinct": 6
-    },
-    {
-     "index": 3,
-     "insn": "bl S",
-     "values": [
-      "sub_08002E5C",
-      "sub_08024584",
-      "sub_0802D4B0",
-      "sub_0802D504",
-      "sub_08024268",
-      "sub_08024268",
-      "sub_08013AEC",
-      "sub_0805F4CC"
-     ],
-     "distinct": 7
-    }
-   ],
-   "members": [
-    {
-     "name": "sub_08002EB4",
-     "addr": "0x08002EB4",
-     "size": 20,
-     "src": "code.s",
-     "status": "asm"
-    },
-    {
-     "name": "sub_08028154",
-     "addr": "0x08028154",
-     "size": 20,
-     "src": "code-0801D390.s",
-     "status": "asm"
-    },
-    {
-     "name": "sub_0802CD00",
-     "addr": "0x0802CD00",
-     "size": 20,
-     "src": "code-0801D390.s",
-     "status": "asm"
-    },
-    {
-     "name": "sub_0802CD14",
-     "addr": "0x0802CD14",
-     "size": 20,
-     "src": "code-0801D390.s",
-     "status": "asm"
-    },
-    {
-     "name": "sub_08034FD8",
-     "addr": "0x08034FD8",
-     "size": 20,
-     "src": "code-0801D390.s",
-     "status": "asm"
-    },
-    {
-     "name": "sub_08034FEC",
-     "addr": "0x08034FEC",
-     "size": 20,
-     "src": "code-0801D390.s",
-     "status": "asm"
-    },
-    {
-     "name": "sub_08048558",
-     "addr": "0x08048558",
-     "size": 20,
-     "src": "code-0801D390.s",
-     "status": "matched"
-    },
-    {
-     "name": "sub_0805DB50",
-     "addr": "0x0805DB50",
-     "size": 20,
-     "src": "code-0801D390.s",
-     "status": "asm"
-    }
-   ]
-  },
-  {
    "id": "F019",
    "n_members": 7,
    "n_unmatched": 0,
@@ -5343,15 +5035,15 @@
   {
    "id": "F020",
    "n_members": 7,
-   "n_unmatched": 7,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 7,
    "n_insns": 12,
    "sizes": [
     32
    ],
    "representative": "sub_08019850",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08019850.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -5430,49 +5122,49 @@
      "addr": "0x08019850",
      "size": 32,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803ACD0",
      "addr": "0x0803ACD0",
      "size": 32,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B16C",
      "addr": "0x0803B16C",
      "size": 32,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803C2FC",
      "addr": "0x0803C2FC",
      "size": 32,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0804B160",
      "addr": "0x0804B160",
      "size": 32,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080670D8",
      "addr": "0x080670D8",
      "size": 32,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806E198",
      "addr": "0x0806E198",
      "size": 32,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -5573,7 +5265,7 @@
   {
    "id": "F022",
    "n_members": 7,
-   "n_unmatched": 7,
+   "n_unmatched": 0,
    "n_matched": 0,
    "n_insns": 75,
    "sizes": [
@@ -5723,49 +5415,49 @@
      "addr": "0x0805CA60",
      "size": 188,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "parked"
     },
     {
      "name": "sub_0805CBCC",
      "addr": "0x0805CBCC",
      "size": 188,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "parked"
     },
     {
      "name": "sub_0805CD34",
      "addr": "0x0805CD34",
      "size": 188,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "parked"
     },
     {
      "name": "sub_0805CE50",
      "addr": "0x0805CE50",
      "size": 188,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "parked"
     },
     {
      "name": "sub_0805CFBC",
      "addr": "0x0805CFBC",
      "size": 188,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "parked"
     },
     {
      "name": "sub_0805D078",
      "addr": "0x0805D078",
      "size": 188,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "parked"
     },
     {
      "name": "sub_0805D134",
      "addr": "0x0805D134",
      "size": 188,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "parked"
     }
    ]
   },
@@ -7331,15 +7023,15 @@
   {
    "id": "F041",
    "n_members": 4,
-   "n_unmatched": 4,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 4,
    "n_insns": 20,
    "sizes": [
     48
    ],
    "representative": "sub_08017E8C",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08017E8C.c",
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -7392,28 +7084,28 @@
      "addr": "0x08017E8C",
      "size": 48,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08017EBC",
      "addr": "0x08017EBC",
      "size": 48,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08018F04",
      "addr": "0x08018F04",
      "size": 48,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0801903C",
      "addr": "0x0801903C",
      "size": 48,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -7506,15 +7198,15 @@
   {
    "id": "F043",
    "n_members": 4,
-   "n_unmatched": 4,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 4,
    "n_insns": 31,
    "sizes": [
     72
    ],
    "representative": "sub_08023DCC",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08023DCC.c",
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "lsls r0,r0,#",
@@ -7589,28 +7281,28 @@
      "addr": "0x08023DCC",
      "size": 72,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08023E14",
      "addr": "0x08023E14",
      "size": 72,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08023E5C",
      "addr": "0x08023E5C",
      "size": 72,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08023EA4",
      "addr": "0x08023EA4",
      "size": 72,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -11897,7 +11589,7 @@
   },
   {
    "id": "Z003",
-   "anchor": "F015",
+   "anchor": "F016",
    "n_members": 15,
    "n_exact": 8,
    "n_added": 7,

@@ -93,6 +93,7 @@ def build():
     for af in files:
         for fn in af.funcs:
             anon = bool(ANON_RE.match(fn.name))
+            cf = awlib.control_flow(fn)
             records.append({
                 "name": fn.name,
                 "addr": fn.addr,
@@ -121,6 +122,14 @@ def build():
                 "kind": "bios" if fn.name in BIOS_SYSCALLS else "game",
                 "trivial": awlib.is_trivial(fn),
                 "difficulty": awlib.difficulty(fn),
+                # Control-flow shape. `backward_branches == 0` means no loop,
+                # which wave 12 found matters more than size: four straight-line
+                # functions of 280-368 bytes fell in five try_match attempts
+                # after the project had never matched anything over 124. See
+                # awlib.control_flow for why.
+                "branches": cf[0],
+                "backward_branches": cf[1],
+                "labels": cf[2],
                 "calls": sorted({t for _, t in fn.calls}),
                 "data_refs": sorted(set(fn.data_refs)),
                 "n_lines": len(fn.lines),

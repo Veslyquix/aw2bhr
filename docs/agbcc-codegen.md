@@ -182,6 +182,41 @@ a `ldrb`/`ldrh` accessor, check what its callers do with the result before
 picking the narrow type; if any of them narrows, that is evidence and the
 accessor's own bytes are not.
 
+**The forwarding carve-out is one-directional, and wave 12 found the hole.** A
+narrowing that IS present proves a narrow return. A narrowing that is ABSENT
+proves `int` only when the forwarded value is still *used* after the `bl`. When
+the `bl` is the last instruction before the epilogue — which is every 12-byte
+forwarder in family F001 — a **missing `return` keyword** produces the identical
+bytes, because the callee's result is already sitting in r0:
+
+```c
+int f(void) { return g(); }   /* g declared int */   ->  bl g ; pop {r1} ; bx r1
+s8  f(void) {        g(); }   /* g declared s8  */   ->  bl g ; pop {r1} ; bx r1
+```
+
+Both compile clean under `-Werror`: **agbcc does not warn about control reaching
+the end of a non-void function.** `sub_0801A168` (`bl sub_0801537C`, sixteen
+bytes, no shift) is the case, and it is why `sub_0801537C`'s return width is
+recorded in `include/unknown-functions.h` as undecidable rather than fixed at
+`int`. Probed three ways — `int` caller with `s8` callee, `s8` caller with `s8`
+callee, and an `s8` local in between — all three emit `lsl #0x18; asr #0x18`
+after the `bl`, so the re-narrowing is driven by the CALLEE's declaration and
+not the caller's: agbcc never trusts a callee to have narrowed its own result.
+
+So the usable form of the rule is: *narrowing present at a caller* ⇒ narrow
+return; *narrowing absent at a caller that stores, compares or re-passes the
+value* ⇒ `int` return; *narrowing absent at a bare tail forwarder* ⇒ **nothing
+proved**. Check which one you have before claiming a width.
+
+**The `sub_08042E18` reading three paragraphs up cites the wrong caller, and
+this is what that mistake looks like.** `sub_08042DFC` is itself a bare
+`bl sub_08042E18; pop {r1}; bx r1` tail forwarder — the third case, worth
+nothing. The conclusion is right anyway, but the evidence for it is
+`sub_0807F630`, the *other* caller, which does `bl sub_08042E18; adds r1, r0,
+#0; bl sub_08026AC0` — it re-passes the value as an argument with no narrowing,
+which is the second case and is decisive. Two callers, one informative; the
+uninformative one is the one that got written down.
+
 **Forwarding is *not* the only such call site — a caller that merely TESTS the
 result exposes the width just as well, and that shape is far more common.**
 `if (f(x))` on a `u8`-returning `f` is `bl f; lsls r0, r0, #0x18; cmp r0, #0`,
@@ -267,6 +302,38 @@ excluded `u16`, leaving `int`. Both prototypes had said `s16` since wave 7 and
 the correction is byte-neutral for every file that already matched — verified by
 recompiling `src/proc.c` and `src/title-screen.c` and comparing against
 `build/src/*.o`.
+
+**But check that the narrowed value really does feed the call before applying
+that. "There is a `bl` after the prologue" is not the condition — the condition
+is that the call CONSUMES the value, and a `(void)` callee does not.** Family
+F041 (`sub_08017E8C`, `sub_08017EBC`, `sub_08018F04`, `sub_0801903C`) opens
+`adds r4,r0,#0; lsls r4,#0x10; lsrs r4,#0x10; bl f` and looks exactly like the
+paragraph above, but all four `f`s take no arguments — r0 is simply left alone
+across the `bl` — so the narrowing belongs to the parameter after all and `int`
+is 4 bytes short. **Tell: no argument register is written between the prologue
+and the `bl`.** Where a value *is* being set up for the call you will see the
+copy into r0 (`adds r0, r4, #0`); its absence means the incoming r0 is dead at
+the call and the shift pair is PROMOTE_MODE, not a cast at a use.
+
+**And when it is the parameter, the shift pair does not carry the SIGN — a
+second pair at the point of use does.** agbcc's `PROMOTE_MODE` forces
+`UNSIGNEDP = 1` for every sub-word parameter, so an `s16` parameter is
+zero-extended at entry and then sign-extended again wherever it is used as an
+`s16`. Same family, one probe:
+
+```
+push {r4,lr} ; adds r4,r0,#0 ; lsls r4,#0x10 ; lsrs r4,#0x10   <- entry: ALWAYS lsr
+bl f
+ldr r0,=g ; lsls r4,#0x10 ; asrs r4,#0x10 ; <index math>       <- use: asr => s16
+```
+
+`s16 a` with `g[a]`, and `u16 a` with `g[(s16)a]`, are byte-identical, so the
+declaration is a free choice and the *object's* index type is what settles it
+(here `gUnknown_0200C528` is documented as s16-indexed). Read backwards: **a
+`lsls #16; lsrs #16` in the prologue followed later by a `lsls #16; asrs #16` on
+the same register is one narrow parameter, not a narrowing plus a cast** — the
+proc-wrapper table's `u16` row is only the first pair and does not distinguish
+`u16` from `s16`.
 
 **`ldrh` plus a pool word is a plain mask; `ldrb` plus `mov`/`neg` is a
 bitfield.** The width of the constant tells you nothing. `*p &= ~8` through a
@@ -1745,6 +1812,46 @@ is the only one of the four that is also correct C. The 13-member
 `Proc_Find` existence-predicate family at 0x08078150-0x0808AA88 is all short
 form, and `src/decomp/c_080457A4.c` already recorded this correctly.
 
+**Both of those tables are the `bl f; cmp; beq; mov #1` shape. There is a
+THIRD, BRANCHLESS shape for a returned `!=`, and it is not a different source
+spelling — the same `return x != K;` produces one or the other depending on `x`
+and `K`.** It is `(t | -t) >> 31` with `t = x ^ K`, i.e.
+
+```
+mvn r0, r0 ; neg r1, r0 ; orr r1, r1, r0 ; lsr r1, r1, #0x1f   <- x != -1
+mov r1,#5 ; eor r0,r0,r1 ; neg r1,r0 ; orr r1,r1,r0 ; lsr #0x1f <- x != 5
+lsl r1,#0x18 ; lsr r1,#0x18 ; neg r0,r1 ; orr r0,r0,r1 ; lsr #0x1f  <- (u8)x != 0
+```
+
+Two independent triggers, one probe, fourteen spellings, agbcc `-O2`:
+
+| `return … ;` | shape |
+|---|---|
+| `x != 0`, `x` a plain `int` — parameter, local, or a `bl` result | **branching** |
+| `!!x`, `x ? 1 : 0` on the same `int` | branching — identical to the row above |
+| `(x & 0xff) != 0`, `(x ^ y) != 0`, `(x - 1) != 0`, `(x >> 3) != 0` | branching — *computing* the operand is NOT the trigger |
+| `x != -1`, `x != 1`, `x != 5` — any **non-zero** constant | **branchless** |
+| `(u8)x != 0`, `(s8)x != 0`, or `x != 0` on a `u8` **parameter** | **branchless** |
+| `x == 0`, `x == -1` — `==` in any form | branching, and it costs an extra `mov rD, #0` |
+| `x < 0` | neither: a lone `lsr r0, r0, #0x1f` |
+
+So the triggers are **a non-zero compare constant** or **a narrowing conversion
+on the operand** — and an explicit mask that computes the same value as the cast
+is *not* one of them, which is the counter-intuitive half. `mvn` rather than
+`eor` is just `x ^ -1` peepholed, so **`mvns` followed by `neg`/`orr`/`lsr #31`
+reads directly as `!= -1`.**
+
+Family F020 (seven 32-byte leaves: `sub_08019850`, `sub_0803ACD0`,
+`sub_0803B16C`, `sub_0803C2FC`, `sub_0804B160`, `sub_080670D8`, `sub_0806E198`)
+is the whole shape in one line — `return <lookup>(script) != -1;` — with the
+`lsls #N; asrs #N` in front of the `mvns` being the callee's signed return width
+re-extended at the call site (`#0x18` for an `s8`-returning callee, `#0x10` for
+an `s16` one). Probed and byte-identical there, so none of them is evidence:
+`bool8` vs `int` return, and binding the call result to an `s8`/`s16` local
+before the compare. The explicit `if (…) return TRUE; return FALSE;` spelling is
+*not* — it emits the branching four-block form from the table above and is four
+bytes longer.
+
 **A `while` loop that opens with a bare `b` to the bottom test, rather than a
 duplicated entry guard, had a SIDE EFFECT in its condition.** GCC rotates a
 `while` by copying the exit test into the preheader, and `duplicate_loop_exit_
@@ -2327,6 +2434,18 @@ once to test, once to increment — agbcc CSEs them into one without `volatile`,
 and the function comes out short. `volatile` keeps both while still emitting a
 plain `ldrh`; a plain `s16` global emits `ldrsh`, which is wrong.
 
+> **Two extra `volatile` tells live in the "Large functions" section below,
+> because both were found on a 364-byte register flush and both are easier to
+> spot there.** In brief: (a) *n* reads of one global with its address held in
+> one callee-saved register across stores to absolute `0x040000xx` addresses is
+> volatile, because agbcc CAN prove a constant hardware address does not alias a
+> symbol and will otherwise CSE the load down to one; and (b) an absolute
+> address loaded as a fresh pool word where `adds rN, #k` off a live cursor
+> would have reached it is volatile too — a volatile MEM sets `do_not_record` in
+> `cse_insn` and takes the address equivalences with it. (b) is the only
+> `volatile` tell found so far that shows up as a *size* difference (4 bytes per
+> broken chain) rather than as a register or an instruction diff.
+
 **The store-forwarding twin of that rule, and it is the commoner shape: a read
 of a scalar global that follows a *store* to it reloads only if the global is
 `volatile`.** The rule above is about two reads; here the first access writes,
@@ -2697,6 +2816,57 @@ own `.rodata` word cannot work here — the split already owns those bytes as
 `incbin` data, so the compiler's word would be a duplicate at a different
 address and the pool relocation would not resolve to the ROM's.
 
+### The `.rodata` address-constant reroute — what those words really are
+
+**The advice above is a workaround, not a model of the source, and it is NOT
+always byte-reachable. Measure before committing to it.** The third `.LC` block
+is at **0x0816D9E0-0x0816DA37** and it is the one that settles what these words
+are, because it comes with its own negative control:
+
+```
+0x0816D9E0 -> 0x030046B0   0x0816D9E4 -> 0x030045F0    sub_0805CA60
+0x0816D9E8 -> 0x030046B0   0x0816D9EC -> 0x030045F0    sub_0805CB1C
+0x0816D9F0 -> 0x030046B0   0x0816D9F4 -> 0x030045F0    sub_0805CBCC
+   ... thirteen PAIRS, in function address order, all the same two values
+```
+
+Thirteen builders at 0x0805CA60-0x0805D1F0 each get one pair; the two members of
+the same family that have **no loop**, `sub_0805CDF0` and `sub_0805CE20`, get no
+pair at all. That is the rule's own prediction, so these words are the
+compiler's `.LC` pool and the source is the plain
+`gUnknown_030046B0 = gUnknown_030045F0;` — which the header for those addresses
+now records instead of a declaration.
+
+Both models were compiled against the same 188-byte target, one probe each:
+
+| model | result |
+|---|---|
+| direct: `gUnknown_030046B0 = gUnknown_030045F0` | **every instruction and every register identical**; 99.5%, one byte, the `.rodata`+4 addend in the pool |
+| workaround: `u8 **const gUnknown_0816D9E0` + `pp = &g` | 95.7%, 8 bytes — the `adds r6, r3, #0` copy sits **4th** in the loop preheader where the ROM has it **last** |
+
+**No source spelling moves that copy**, and the controlled probe says why: add
+the workaround's extra locals, its tail temp, an explicit `if` guard round the
+loop, a `do { … } while (0)` body and a `**pp` spelling with no locals at all to
+the *direct* version and the copy stays last in every one of them. The preheader
+order is decided by whether the address word is a **constant-pool entry**
+(unchanging, `CONSTANT_POOL_ADDRESS_P`) or a named symbol, and C cannot ask for
+the former. So when the workaround stalls at a preheader or scheduling diff,
+stop — you are not looking at a source problem, and the direct spelling is both
+the truth and unverifiable per-function. Park it with the direct draft; see
+`data/parked.json` for the seven at 0x0805CA60-0x0805D134.
+
+Two corollaries worth carrying:
+
+- **A near-miss whose relocations read `R_ARM_ABS32 .rodata` with addends 0, 4,
+  8 … is this, and `trymatch` cannot bless it.** `reloc_equivalent` needs both
+  symbol names to appear in `nm aw2bhr.elf`, and a section symbol never does.
+  Do not read the addend byte as a codegen diff.
+- The workaround's relocation *is* checkable and *does* rebuild the ROM, so the
+  functions already matched that way (`sub_0806DDF4`, `sub_08066D30`, the
+  `gUnknown_08090CD8` users) are genuine matches. It is only the claim "a global
+  lives at that address" that is wrong, and it is wrong in `unknown-globals.h`
+  wherever a `.LC` block is declared.
+
 Two consequences for reading such a function. The `const` is not decoration:
 it is what lets LICM hoist the outer load into a loop preheader while the inner
 deref stays in the body, and an unqualified declaration leaves both in the loop.
@@ -2887,6 +3057,331 @@ problem — check, and if the check is negative, record that it was.
 
 ---
 
+## Working a function of 150+ bytes
+
+Every rule above was found under 128 bytes. Wave 12 took the first family over
+150 (seven 188-byte list builders at 0x0805CA60-0x0805D134) and the method that
+worked is different enough to write down, because the >256-byte band is 356
+functions and 126KB and this is the only account of it.
+
+**Size is not difficulty; the number of *distinct decisions* is.** Those 188
+bytes are 75 instructions and only about eight decisions: two pointer levels,
+one loop shape, one compare constant, one callee. The whole function fell out of
+a first draft that was structurally right, and then took nine probes to settle a
+single question. A 40-byte bitfield accessor can be harder. So do not budget by
+byte count — skim the target and count the things you would have to guess.
+
+**Read the assembly into a line-by-line C sketch BEFORE writing any C.** Not a
+paraphrase — annotate every instruction with what it computes, in the target's
+own order, and only then collapse it into statements. At 75 instructions the
+alternative is drafting from a remembered impression of the shape, and a wrong
+loop makes every byte after it differ and tells you nothing.
+
+**Outside-in is right, but the useful cut is entry block / preheader / loop body
+/ tail, not "prologue then body".** Those four regions fail independently and
+each has its own cause:
+
+| region | what it is deciding | what moves it |
+|---|---|---|
+| entry block | which values must survive the loop | the number of live pointer locals |
+| preheader | LICM hoists, then strength reduction's biv init | almost nothing in the source — see below |
+| loop body | instruction selection, the real content | types, bindings, statement order |
+| tail | whether a global is re-read after the loop | `const`, and aliasing |
+
+**The preheader is where you find out whether the function is winnable.** Its
+contents are emitted by passes, not by statements: LICM appends its hoists in
+loop order, then `strength_reduce` appends the induction-variable setup, so the
+biv init is normally *last*. Anything after the biv init was emitted by a later
+pass and **you cannot reach it by rewriting statements** — that is exactly what
+stalled the 0x0805CA60 workaround at 95.7% (see `-fforce-addr`). If a candidate
+is otherwise exact and the only diff is a preheader permutation, spend one probe
+on a controlled test — take the *feature you suspect* and add it to a spelling
+that already gets the preheader right — rather than a dozen on rephrasing.
+
+**The high-register prologue is a register-pressure readout and nothing more.**
+`mov r7, sb; mov r6, r8; push {r6, r7}` says the function needs eight or more
+simultaneously live values, so expect a genuine loop with several carried
+pointers. It says nothing about the source shape, and it is not a hint that the
+function is hard: here r8/sb held two *symbol addresses* that `-fforce-addr` was
+keeping alive across the loop, which is the least interesting thing they could
+have been. Read it as "count the live values, then check your draft carries the
+same number" — a draft one live value short or long shows up as a different
+`push` list before you diff anything else.
+
+**Do the whole batch's constant-substitution pass in one shot at the end, and
+verify with `trymatch.py` in a shell loop, not with seven MCP calls.** Once the
+representative is right the siblings are a table (compare constant, callee,
+global) and a 20-line Python script that writes seven files; the seven verdicts
+come back in one command. Getting all seven to the identical percentage with the
+identical first-difference offset is also the check that you read the table
+right — a sibling that lands somewhere else has a constant wrong.
+
+**What wasted time, so you can skip it:** trying to fix a near-miss by adding
+locals. At this size the instinct is that a stubborn instruction order wants one
+more binding, and five of the nine probes were variants of that. Every one of
+them changed the register *assignment* and none changed the instruction *order*.
+Binding a subexpression is a register-allocation lever; it is not a scheduling
+lever, and above ~100 bytes most of what is left is scheduling.
+
+---
+
+## Large functions — 256 bytes and up
+
+The section above stops at 188 bytes and warns that the >256 band is unexplored.
+It is not any more. Four functions in the 280–368 byte band were matched in one
+sitting:
+
+| function | bytes | probe rounds | `try_match` attempts |
+|---|---|---|---|
+| `sub_0804D928` | 280 | 5 | 2 |
+| `sub_0804E3B4` | 280 | 0 | 1 |
+| `sub_08012420` | 364 | 3 | 1 |
+| `sub_08063E28` | 368 | 1 | 1 |
+
+1292 bytes for five attempts. Before this the largest matched function in the
+tree was 124 bytes, so every number below is the first measurement of its kind
+and should be re-checked rather than trusted.
+
+**The headline result is that the large band is CHEAPER per byte, not dearer.**
+1292 bytes is more than the twenty-odd sub-64-byte accessors the same effort
+buys, and one of the four (`sub_08063E28`, the biggest) matched off its first
+probe with no register fighting at all. The reason is structural and it
+generalises:
+
+**Three of the four have no loop. A large straight-line function is N
+INDEPENDENT decisions, and independent decisions are cheap.** `sub_08012420` is
+27 statements, each of which fails on its own and whose diff points straight at
+itself; getting 26 right and one wrong leaves 26 right. A 60-byte loop is one
+coupled decision where a wrong shape makes every later byte differ and teaches
+nothing. So **size is anti-correlated with difficulty once you condition on
+control flow**, and the practical rule is: prefer a big straight-line function
+to a small loopy one. You can tell which you have in ten seconds — look for a
+branch whose target label is numerically *below* it. `sub_08063E28` at 368 bytes
+has two forward branches and no backward one.
+
+### Attack order for a straight-line function
+
+The entry / preheader / body / tail cut in the section above is for loops. For
+straight-line code the useful cut is different, and the middle step is the one
+nobody would think to do:
+
+1. **The frame.** `sub sp, #N` is the size of the locals and `push` is the live
+   count. `sub sp, #8` plus `mov r4, sp` before a call means one 8-byte local
+   whose address is taken and survives the call.
+2. **The address arithmetic, before you understand a single statement.** agbcc
+   CSEs absolute addresses, so a run of stores to fixed addresses comes out as
+   one pool word followed by `adds rN, #k` / `subs rN, #k` steps. That chain is
+   a **direct readout of the source's statement order**. In `sub_08012420` the
+   four BGxCNT writes (0x04000008..0x0400000E) hang off the MOSAIC pool word
+   with `subs r1, #0x44` and three `adds r1, #2`, which is only reachable if
+   MOSAIC is written *first* — an ordering that looks arbitrary in the listing
+   and is not guessable. Do this before drafting: it costs nothing and it is the
+   one thing at this size that a draft cannot recover from getting wrong.
+3. Then the statements, one at a time, in that order.
+
+Two freebies that come with the territory: a store to a `volatile` lvalue may
+not be reordered, so for any register-flush routine the emitted store order *is*
+the source order; and a stack local reached as `[r4, #N]` rather than `[sp, #N]`
+is not a hint about the source — THUMB has no SP-relative `ldrb`/`strb`/`ldrh`,
+so any byte or halfword access to a stack local needs the frame in a low
+register and that is the whole reason `r4` is pushed.
+
+**The high-register prologue does not appear in this band, and expecting it is a
+mis-set expectation worth correcting.** None of the four needs `mov r7, sb;
+mov r6, r8`; the biggest uses `push {r4, r5, r6, lr}` and the 364-byte one uses
+`push {r4, lr}`. `sb`/`r8` are bought by *simultaneously live* values, which is
+a loop property — a straight-line function of any length needs about three
+registers because nothing lives across statements. Read a high-register prologue
+as "there is a loop carrying five-plus pointers", never as "this function is
+big".
+
+### Rules found in this band
+
+Each was isolated with a controlled `compile_probe` and each one alone was the
+whole difference between a near-miss and a match.
+
+**`x * 0x100` and `x << 8` are DIFFERENT CODE when `x` is a narrow global, and
+the difference is whether the global gets re-read.** The C front end's
+`shorten_binary_op` applies to `MULT_EXPR` and not to shifts, so `g * 0x100`
+stays a HImode multiply with a real `(mem:HI)` operand while `g << 8` promotes
+to `int` first and its load becomes an ordinary SImode pseudo — which CSE will
+then satisfy from an earlier load of the same global several statements back.
+
+```c
+oam.tileNum = (gUnknown_0300453C << 8) + 0x60;   /* lsl r1, r3, #8   -- reuses r3 from 3 statements up */
+oam.tileNum = gUnknown_0300453C * 0x100 + 0x60;  /* ldrh r1,[r5]; lsl r1,r1,#8 -- reloads */
+```
+
+Two bytes, and `sub_0804D928`/`sub_0804E3B4` turn on exactly this and nothing
+else. **Read backwards: a global that is re-read where an identical earlier
+value was still live tells you the source used `*` and not `<<`.** This is the
+first case found where the *arithmetic operator* rather than a type or a binding
+is the discriminator, so add it to the checklist next to "toggle `volatile` on
+the operand" — it is the same class of one-token fix.
+
+**Binding a table element to a local blocks the `ldrh` -> `ldrb` narrowing at a
+bitfield store.** Assigning a `u16` array element into a bitfield narrower than
+16 bits lets `force_to_mode` push the store's byte mask back through the shift
+and into the load itself:
+
+```c
+oam.paletteNum = tbl[i];            /* mov r0,#0xf ; ldrb r1,[r0] ; ...  -- narrowed, mask hoisted */
+v = tbl[i]; oam.paletteNum = v;     /* ldrh r1,[r0] ; mov r0,#0xf ; ...  -- kept */
+```
+
+Identical length, so it is a pure opcode-and-order diff with nothing in the
+expression to blame. Ten spellings in one probe: `const`, non-`const`, a
+`u16 t[][3]` row, a 6-byte struct member, an `int` temp and a `u16` temp — only
+the *presence of a temp* matters, and `int` and `u16` temps behave the same.
+`volatile` on the table also keeps the `ldrh`, so check the cheaper cause first.
+
+**`u16 ^ u16` keeps its zero-extension only while BOTH operands are memory.**
+`shorten_binary_op` computes the xor in HImode, and extending a HImode *value*
+to SImode for use as an array index is a real `lsl #16; lsr #16` (merged with
+the index scaling into `lsl #16; lsr #15`). Bind either operand to a local and
+combine deletes the extension, because `reg_nonzero_bits` on a pseudo loaded by
+`ldrh` already proves the high half is zero:
+
+```c
+tbl[gA ^ gB]            /* eors ; lsl #0x10 ; lsr #0xf ; adds  */
+t = gA; ... tbl[t ^ gB] /* eors ; lsl #0x1  ;             adds  */
+```
+
+So **the shift pair in front of an array index is positive evidence that both
+sides are spelled as direct global reads** — one of the few places where the
+absence of a local is provable.
+
+**A broken absolute-address chain is a `volatile` tell, and unlike every other
+volatile tell it costs BYTES.** With the source globals non-volatile, agbcc
+reaches 0x04000052 as `adds r2, #0x34` off the 0x0400001E left in the BGxOFS
+cursor, and 0x04000020 as `subs r2, #0x32` off that. Make the globals volatile
+and both become fresh pool words. A volatile MEM sets `do_not_record` in
+`cse_insn`, and the address equivalences go with it. That is 8 bytes across two
+chains in `sub_08012420`, i.e. impossible to misread once you know to look for
+it — **so when a large register-flush candidate is short by a multiple of 4 and
+the missing instructions are pool words, suspect volatile before anything
+else.**
+
+**The classic volatile tell — a value reloaded while its address stays in a
+callee-saved register — is worth 16 bytes in this band.** `sub_08012420`
+subtracts one of two scroll origins from eight different globals in eight
+consecutive statements and reloads the subtrahend every time. It has to be
+`volatile`: nothing between the reads writes IWRAM, and agbcc *can* prove that a
+`strh` to an absolute 0x040000xx address does not alias a symbol, so a plain
+`u16` is CSEd down to one `ldrh` each. Both this and the paragraph above are now
+recorded on the globals themselves in `hardware.h` and `unknown-globals.h`.
+
+**`mul rD, rD, rS` in agbcc's output and `muls rD, rS, rD` in `asm/` are one
+encoding.** THUMB MUL is destination-tied and has a single form; the two are
+just gas's input syntax and objdump's output syntax. `sub_08063E28` has 36 of
+them and they all read backwards. Do not spend an attempt on it.
+
+### Families survive into the large band, and they are still free
+
+`sub_0804D928` and `sub_0804E3B4` are 280-byte twins differing in exactly two
+things: one immediate (`+0x60` vs `+0xc0`) and one pool symbol. The second cost
+one `try_match` and zero probes. **So the wave 5–11 family method is not a
+small-function method** — if anything the payoff scales with size, because the
+per-member cost stays at one substitution while the bytes per member go up.
+Diff the siblings' assembly against the representative first, exactly as at
+small sizes; here `data/functions.json` flagged them by having identical size,
+difficulty, call count and data-ref count, which is a cheap screen worth
+running over the rest of the >256 band.
+
+### The permuter — measured, and the previous verdict does not hold here
+
+The benchmark note that decomp-permuter underperforms on ARM/GBA was taken on
+small functions. It is wrong at this size, and by a wide margin.
+
+Controlled experiment, because a random flail proves nothing: take the real
+near-miss that blocked `sub_0804D928` — 276 of 280 bytes, 60.7% byte identity,
+permuter base score 360, one missing instruction plus an r4/r5 swap — and run
+`tools/permute.py` from it. The correct fix is known (`<< 8` -> `* 0x100`), so
+"did it find something" has a ground truth. Three independent runs, 600-second
+budget, 4 threads:
+
+| run | iterations to score 0 | wall clock | verdict |
+|---|---|---|---|
+| 1 | 26 | a few seconds | **byte-exact match** |
+| 2 | ~196 | 5 s | **byte-exact match** |
+| 3 | 39 | 2 s | **byte-exact match** |
+
+Three for three, every one inside 1% of the budget. And it did **not** find my
+fix — it found a different one:
+
+```c
+int new_var;
+new_var = 8;
+oam.tileNum = (gUnknown_0300453C << new_var) + 0x60;
+```
+
+Hiding the shift amount in a variable defeats the same constant-folding that
+`* 0x100` defeats, and reaches the identical bytes. That is worth noting twice
+over: the permuter is not limited to permuting register pressure, and a
+permuter win is **not** the original source. Take the bytes, then find the
+spelling a human would have written — `* 0x100` is what shipped in the work
+file, not `new_var`.
+
+Why it works here and not on the 40-byte accessors: the randomizer's edits are
+per-statement, so its search space grows with the statement count while the
+number of *wrong* statements stays at one. A 280-byte straight-line function is
+close to the best case it has. **Recommendation: on a >256-byte near-miss above
+about 50%, run the permuter for 300 s BEFORE the third hand rewrite.** On a
+small function the existing advice still stands.
+
+Caveats that cost nothing to respect: it starts from `work/<fn>/best.c`, so get
+the score up by hand first; it re-checks with `trymatch`, so a score of 0 that
+`trymatch` rejects is a real and expected outcome; and it overwrites
+`work/<fn>/<fn>.c` on a win, so back up a curated source before running it on a
+function you have already matched.
+
+### What wasted time
+
+- **Reasoning about CSE and alias-analysis internals instead of probing the
+  source axis.** Four probe rounds went on working out *why* one load of a
+  global was CSEd and another was not. The answer was a one-token source change
+  that a three-variant probe found immediately. At this size the compiler's
+  behaviour is not derivable from first principles in less time than it takes to
+  measure it — put three spellings of the suspect statement in one file and read
+  the answer off. The internals are worth writing down *after* the probe, not
+  before.
+- **`do { … } while (0)` used as a CSE breaker. It is not one.** Wrapped round a
+  statement it does not force that statement's own global read to be reloaded;
+  it only raises loop depth and moves register-allocation priority, and it can
+  add a stray `mov rN, sp` in the statement *after* it. Two rounds lost. Use it
+  for the allocation-priority problem it is documented for and nothing else.
+- **Chasing a register permutation while the instruction COUNT was still
+  wrong.** `sub_0804D928` had an r4/r5 swap through the whole body and one
+  missing instruction; the swap corrected itself the moment the instruction
+  appeared. At this size a permutation sitting next to a size difference is
+  almost always a symptom of the size difference. Get the count right, then look
+  at registers — and note this is the opposite of the small-function instinct,
+  where a permutation usually is the whole problem.
+
+### Is the band tractable with the current method?
+
+Yes, for the straight-line part of it, with no new tooling — that is what these
+four demonstrate. Three things would make the rest cheaper, in order of value:
+
+1. **A branch-shape screen in `tools/functions.py`/`families.py`.** The single
+   best predictor found here is "no backward branch", and nothing currently
+   surfaces it. `data/functions.json` carries size, difficulty, calls and
+   data-refs but not loop count, so picking straight-line targets out of the 357
+   unmatched functions in the 257–512 band is manual today. Adding
+   `backward_branches` and `basic_blocks` to the index is a small change and
+   would let a wave sort the whole band by tractability.
+2. **The `>512` band is 172 functions and 152KB and is untested.** Everything
+   here is a claim about 280–368 bytes. The one structural worry is that at that
+   size a function almost certainly has loops, which puts it back under the
+   150+ section's rules rather than these.
+3. **Nothing about the C or the compiler blocked me** — no parked diff, no
+   unreachable codegen, no flag override needed. The blockers were all "which
+   spelling", and the permuter now demonstrably closes that class in seconds at
+   this size. If a large function does stall, the honest next step is the
+   permuter and not a fourth hand rewrite.
+
+---
+
 ## Workflow
 
 - **A near-miss whose only difference is a pool word's relocation may be a
@@ -2922,6 +3417,18 @@ problem — check, and if the check is negative, record that it was.
   is a leftover, not a regression. Run **`python tools/sync_work.py`** (all) or
   `python tools/sync_work.py <fn>` (one) to refresh the drafts from
   `src/decomp/` before reading anything into a failure there.
+- **After editing a shared header, re-verify by comparing `.text`, never whole
+  `.o` files — a whole-object compare reports every dependent file as changed
+  and all of it is noise.** `CFLAGS` carries `-g -ffix-debug-line`, so the line
+  numbers of every included header are baked into `.debug_line`/`.stab`.
+  Inserting one prototype into `include/unknown-functions.h` shifts every line
+  number below it and changes the object of *every* file that includes
+  `global.h` — `src/proc.c` included, which cannot possibly be affected
+  semantically. Wave 12 added ~40 prototypes and saw all 16 spot-checked
+  objects differ; extracting `.text` with
+  `arm-none-eabi-objcopy -O binary --only-section=.text` showed all 16
+  identical. `trymatch.py` already does exactly this, which is why it is the
+  right regression check and a byte-diff of `build/**/*.o` is not.
 - **When a batch is a run of wrappers over consecutive ROM symbols, dump those
   symbols out of `baserom.gba` — the data names the family for you and costs one
   Python call.** The `-fforce-addr` section says to dump the words before
@@ -2941,6 +3448,28 @@ problem — check, and if the check is negative, record that it was.
   It does **not** change what you declare: `const u8 []` is still the weakest
   model that gives the clean pool word, and stays right until something indexes
   the table.
+- **A run of bare `bl`s with no argument setup carries NO information about
+  whether the source nested the calls, and "does anything move r0 between them"
+  is not the tell it looks like.** The instinct is that `h(g(f()))` shows up as
+  r0 flowing straight through — but three independent statements leave r0 alone
+  too, so both spellings are the *same* instruction stream. One probe, agbcc
+  `-O2`, all three 20 bytes and byte-identical:
+
+  ```c
+  void f1(void){ va(); vb(); vc(); }        /* void(void) callees          */
+  void f2(void){ na(); nb(); nc(); }        /* int(void), results dropped  */
+  void f3(void){ ic(ib(ia())); }            /* fully nested                */
+  ```
+
+  All three are `push {lr}; bl; bl; bl; pop {r0}; bx r0`. The evidence is
+  entirely on the **callee** side: nesting requires the second and third callees
+  to take a parameter, so if each callee reads no argument register before
+  writing it, nesting is not merely unlikely, it is not expressible. Check the
+  callees' own prologues and epilogues before drafting; the wrapper cannot tell
+  you. (Wave 12's seven-member `bl`×3 family — `sub_08002EB4`, `sub_08028154`,
+  `sub_0802CD00`, `sub_0802CD14`, `sub_08034FD8`, `sub_08034FEC`,
+  `sub_0805DB50` — is all three-statement on exactly this reading, and
+  `src/decomp/c_08048558.c` was already the matched exemplar.)
 - **The ban on local declarations is about *globals*, not about struct types.**
   A struct that only describes a pointer *parameter* — an object no header
   declares — belongs in your `.c`. `c_08012C30.c`, `c_08013D4C.c`,
@@ -3228,6 +3757,52 @@ the body, write the statements in store order naming the parameters by their
 argument register, and let the permutation fall out. Trying to reverse-engineer
 the permutation into a source feature is wasted effort.
 
+**Two `bl`s with nothing between them: `f(); g();` and `g(f())` are
+byte-identical, and NOTHING in the wrapper tells them apart. The discriminator
+is entirely on the callee side — whether `g` takes a parameter at all.** The
+tempting reading is "if the source had nested them r0 would be moved, so a
+clean `bl; bl` must be two statements". It is exactly backwards: r0 already
+holds the result, so the nest is the spelling that needs *no* instruction. One
+probe, five shapes, `push {lr}; bl …; bl …; pop {r0}; bx r0` throughout:
+
+| source | between the two `bl`s |
+|---|---|
+| `f(); g0();` — `int f(void)`, `void g0(void)` | nothing |
+| `g(f());` — `int f(void)`, `void g(int)` | **nothing — byte-identical to the row above** |
+| `gu8(fu8());` — `u8` on both sides | `lsl #24 ; lsr #24` |
+| `g(fu8());` — narrow return, wide parameter | `lsl #24 ; lsr #24` |
+| `gu8(f());` — wide return, narrow parameter | `lsl #24 ; lsr #24` |
+
+So the collapse needs **both** sides word-wide; any narrow type at either end
+costs a visible 4 bytes. The practical consequence: for a bare `bl f; bl g`
+wrapper, go and read `g`'s own body. If `g` reads r0 before writing it, `g(f())`
+is available and the wrapper cannot decide between the two. If `g` takes no
+argument — it opens with a `bl`, a pool `ldr` or a `movs` into r0 — the nest is
+not expressible in C at all and the answer is two statements, for free. All 19
+members of family F005 (16-byte `push {lr}; bl; bl; pop {r0}; bx r0`,
+0x0800484C–0x08085298) are the nullary case and all 19 matched first try on it.
+
+**One family, several unrelated callee systems — so the wrapper's shape names
+nothing, and neither does the script's address.** The 16-byte
+`push {lr}; ldr r0,=g; bl f; pop {r0}; bx r0` family (F000 in
+`data/families.json`, 72 members) reads as a run of proc pokers and is not one:
+across 29 members in the 0x0804–0x0808 range the callee was `Proc_EndEach`
+(22), `sub_080193B0` (the `gUnknown_0200C528` script list), `sub_0806377C` (the
+`gUnknown_03001470` slot list), `sub_08067504` (`Proc_BreakEach` open-coded over
+`sProcArray`), and `sub_0803B4DC`/`sub_0803B524` (sound ids, where the pool word
+is a plain integer and not a symbol at all). **The callee decides the global's
+type; the address does not.** Two of these — `gUnknown_08580C7C` and
+`gUnknown_08581F40` — sit *inside* the 0x0858xxxx block that
+`unknown-globals.h` documents as proc scripts and are `gUnknown_03001470`-list
+blobs, provable only from their install/remove pair (`sub_080152EC(g, 3)` next
+door, `sub_0806377C(g)` here). Typing them `const struct ProcCmd []` by
+neighbourhood would have been wrong and byte-neutral, i.e. invisible.
+
+The practical consequence is that the work in such a family is entirely in the
+header: settle each callee's prototype and each global's type from *its own*
+call sites, and every member is then one line. All 29 matched from a single
+pass with zero `try_match` attempts spent exploring.
+
 ---
 
 ## When the assembly is not compiler output
@@ -3328,6 +3903,18 @@ spellings. **So "the permuter cannot find these" is not the rule -- the rule is
 that it cannot find a change to the type model, and it is very good at finding a
 change to liveness or statement structure.** Reach for it once a diff is a pure
 register permutation AND a type sweep has come back flat.
+
+**That gating is right for small functions and too strict above ~256 bytes.**
+Measured on `sub_0804D928` (280 bytes) from a real 60.7% near-miss whose diff
+was one MISSING INSTRUCTION plus a register swap -- not a pure permutation, and
+so exactly the case the paragraph above says not to bother with -- three
+independent runs reached a byte-exact match in 26, ~196 and 39 iterations, all
+inside six seconds of a 600-second budget. The randomizer edits per statement,
+so its search space grows with the statement count while the number of wrong
+statements stays at one; a long straight-line function is close to its best
+case. Numbers, the fix it found, and the caveats are under "Large functions".
+**Above 256 bytes, run it for 300 s before the third hand rewrite, whatever the
+diff looks like.**
 
 The transferable lesson, since it has now paid twice: **when a diff is a pure
 register permutation and the expression shape is already right, the next move is
@@ -3873,6 +4460,24 @@ found by measurement and both matter:
 
 - **Forwarders and wrappers** (4–8 instructions). The largest populations in the
   ROM by a wide margin and essentially free once the shape is written once.
+  **F001 is the floor of this**: 50 members of `push {lr}; bl S; pop {r0}; bx r0`
+  and nothing else, 12 bytes each. Wave 12 took the 43 open ones in a single
+  probe with zero `try_match` attempts spent exploring, because *the wrappers
+  are not the work — the callee prototypes are*. Two things follow, and both
+  cost time if they are learned per-function:
+  - **The wrapper's arity is invisible from the wrapper.** It sets up no
+    argument register, so `void f(void)` and `void f(a, b) { g(a, b); }` are the
+    same twelve bytes; ten of the 43 turned out to pass one or two parameters
+    straight through, and every one of those arities came from reading the
+    CALLEE's prologue for which of r0–r3 it reads before writing. Note this is
+    not the same as the 12-byte row in the Proc-wrapper size histogram further
+    up, which is `CALLEE(K)` with a pool word — no pool word here at all.
+  - **The wrapper's `pop {r0}` says nothing about the callee's return.** It
+    overwrites r0 before the branch, so an `int`-returning and a `void` callee
+    are indistinguishable at the call. Read the callee's own epilogue. (The one
+    member that pops into r1 instead, `sub_0801A168`, is the exception that
+    opened the missing-`return` hole documented in "Reading types off the
+    assembly".)
 - **Long straight-line functions differing only in globals.** The best find is
   F022: seven 188-byte, 75-instruction functions at 0x0805CA60–0x0805D2xx that
   differ in two globals and one compared constant (`cmp r0,#1` vs `#4` vs `#5`).
@@ -3881,6 +4486,14 @@ found by measurement and both matter:
 - **Bitfield predicates.** The 5×44-byte family at 0x08045848 is
   `(gPtr[...])->bits >> 5 == 1` with different table offsets.
 - **Getter/setter one-liners** (`ldr r1,L; movs r0,#; strh r0,[r1]; bx lr`).
+- **Literal duplicates.** A family's `varies` list is the whole difference
+  between its members, so an *empty* entry for every index means two members are
+  byte-for-byte the same function. F043 is four 72-byte wrappers that are two
+  duplicated bodies: `sub_08023DCC` == `sub_08023E14` and `sub_08023E5C` ==
+  `sub_08023EA4`, same callees, same global, same relocations. Do not go looking
+  for a distinguishing constant — write one body and instantiate it twice. Read
+  `varies` before reading the assembly of the second member; it is the cheapest
+  diff in the tree and it answers "what do I actually have to change" outright.
 
 ### What does not cluster, and must not be made to
 

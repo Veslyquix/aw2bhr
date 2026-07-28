@@ -217,8 +217,30 @@ extern volatile u16 gUnknown_03001FFC;
 // vblank_int_enable and hblank_int_enable. It needs the union because
 // sub_08012AD4 also pushes it to 0x04000004 as a halfword.
 extern union DispStatBuf gUnknown_030020B4;
-extern u16 gUnknown_03002020;
-extern u16 gUnknown_03002B28;
+// The two BLDALPHA coefficient shadows -- sub_08012420 pushes them to the
+// register as `gUnknown_03002020 + (gUnknown_03002B28 << 8)`.
+//
+// VOLATILE. Neither is read twice in that function, so the tell is not a
+// repeated load: it is that the ADDRESS of the register being written stops
+// being CSEd against the running BGxOFS cursor. Non-volatile, agbcc reaches
+// 0x04000052 as `adds r2, #0x34` off the 0x0400001E left over from BG3VOFS and
+// 0x04000020 as `subs r2, #0x32` off that; the ROM loads both as fresh pool
+// words. A volatile MEM makes cse_insn set do_not_record, which drops the
+// address equivalences with it -- so a broken absolute-address chain is a
+// volatile tell in its own right, one that costs 8 bytes rather than a
+// register. The ~15 promoted writers all store a plain value and are
+// byte-identical either way (re-verified with trymatch).
+extern volatile u16 gUnknown_03002020;
+extern volatile u16 gUnknown_03002B28;
+// BG2 and BG3 affine parameter blocks, 16 bytes each: sub_08012420 pushes them
+// to 0x04000020 and 0x04000030 as four `ldr`/`str` word pairs apiece, with
+// displacements 0/4/8/0xc off one pool word. Modelled as four words rather
+// than as `struct BgAffineDstData` because that is all the copy shows -- it
+// never touches pa/pb/pc/pd individually. Volatile for the same address-chain
+// reason as the pair above; sub_08063994 is the only other reader and may
+// settle the member types.
+extern volatile u32 gUnknown_030024D0[4];
+extern volatile u32 gUnknown_03003020[4];
 extern union BgCntBuf gUnknown_03002B6C;
 // Both WinCnt shadows are written at BYTE 0, i.e. through the win0_* group:
 // sub_08011300 clears win0_enable_bg0..obj on 030030A4 and sets
@@ -268,6 +290,13 @@ extern union BlendCntBuf gUnknown_030030E0;
 // commutative canonicalisation reorders the following `orr`, and the function
 // comes out with the OR accumulating into the wrong register. See the "orr
 // operand order" note in docs/agbcc-codegen.md.
+// DISPCNT. gDispIo.disp_ct is the RAM shadow; sub_08012420 pushes it whole,
+// with a `ldrh` on the struct rather than through any field, and materialises
+// the address as `movs r1, #0x80; lsls r1, #0x13` rather than a pool word --
+// which is what 0x04000000 costs when the constant has no low bits.
+#define REG_OFFSET_DISPCNT 0x000
+#define REG_DISPCNT (*(vu16 *)(REG_BASE + REG_OFFSET_DISPCNT))
+
 #define REG_OFFSET_DISPSTAT 0x004
 #define REG_DISPSTAT    (*(vu16 *)(REG_BASE + REG_OFFSET_DISPSTAT))
 #define REG_DISPSTAT_LO (*(u8 *)(REG_BASE + REG_OFFSET_DISPSTAT))
@@ -298,6 +327,37 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define REG_BG2VOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG2VOFS))
 #define REG_BG3HOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG3HOFS))
 #define REG_BG3VOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG3VOFS))
+
+// BG control. Shadowed in IWRAM by gUnknown_03002B6C / gUnknown_03001FE8 /
+// gUnknown_030030B4 / gUnknown_0300251C, which sub_08012420 pushes here as
+// whole halfwords. Note the ROM reaches all four off the MOSAIC pool word --
+// `subs r1, #0x44` then three `adds r1, #2` -- so MOSAIC precedes them in the
+// source and no separate pool word for 0x04000008 exists.
+#define REG_OFFSET_BG0CNT 0x008
+#define REG_OFFSET_BG1CNT 0x00A
+#define REG_OFFSET_BG2CNT 0x00C
+#define REG_OFFSET_BG3CNT 0x00E
+
+#define REG_BG0CNT (*(vu16 *)(REG_BASE + REG_OFFSET_BG0CNT))
+#define REG_BG1CNT (*(vu16 *)(REG_BASE + REG_OFFSET_BG1CNT))
+#define REG_BG2CNT (*(vu16 *)(REG_BASE + REG_OFFSET_BG2CNT))
+#define REG_BG3CNT (*(vu16 *)(REG_BASE + REG_OFFSET_BG3CNT))
+
+// The BG2 and BG3 affine parameter blocks, 0x10 bytes each (pa/pb/pc/pd then
+// the two 8.8 origins). sub_08012420 copies them a WORD at a time out of
+// gUnknown_030024D0 / gUnknown_03003020, so they are indexed rather than named
+// -- eight separate lvalues, which is what produces the `adds r2, #4` chain
+// between the stores. A `vu32 *` cursor would emit displacements instead; see
+// the note on REG_OFFSET_DMA3SAD for the same distinction the other way up.
+#define REG_OFFSET_BG2AFFIN 0x020
+#define REG_OFFSET_BG3AFFIN 0x030
+
+#define REG_BG2AFFIN(i) (*(vu32 *)(REG_BASE + REG_OFFSET_BG2AFFIN + (i) * 4))
+#define REG_BG3AFFIN(i) (*(vu32 *)(REG_BASE + REG_OFFSET_BG3AFFIN + (i) * 4))
+
+// MOSAIC. Shadowed by gUnknown_030030C4.
+#define REG_OFFSET_MOSAIC 0x04C
+#define REG_MOSAIC (*(vu16 *)(REG_BASE + REG_OFFSET_MOSAIC))
 
 // Window bounds and window control. gDispIo has no members for these -- the
 // win0_left/top/right/bottom names in the SetWin* macros belong to the #if 0
