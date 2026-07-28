@@ -36,5 +36,5 @@ void sub_080122EC(void)
     *(u16 *)&gUnknown_03002B6C = 0;
     *(u16 *)&gUnknown_03001FE8 = 0;
     *(u16 *)&gUnknown_030030B4 = 0;
-    gUnknown_0300251C = 0;
+    *(u16 *)&gUnknown_0300251C = 0;
 }

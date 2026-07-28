@@ -229,8 +229,16 @@ def instructions(fn):
     return out
 
 
+# `bhs`/`blo` are the unsigned aliases of `bcs`/`bcc`, and `asm/` is objdump
+# output, which emits the alias spellings. Omitting them made a loop whose back
+# edge is `cmp r4, r6; blo <top>` -- i.e. `for (i = 0; i < n; i++)` with an
+# unsigned counter -- invisible, reporting `backward_branches == 0` for a
+# function that has a loop. Found in wave 13 by agent A2, which measured the
+# blast radius ROM-wide: 16 of the 3572 functions the index called straight-line
+# actually have a back edge, four of them >=256 bytes, and `sub_080378A8` (two
+# nested loops) was handed out as a straight-line target on the strength of it.
 BRANCH_TARGET_RE = re.compile(
-    r'^\s*(?:b|beq|bne|bcs|bcc|bmi|bpl|bvs|bvc|bhi|bls|bge|blt|bgt|ble)'
+    r'^\s*(?:b|beq|bne|bcs|bcc|bhs|blo|bmi|bpl|bvs|bvc|bhi|bls|bge|blt|bgt|ble)'
     r'(?:\.[nw])?\s+(\S+)')
 
 

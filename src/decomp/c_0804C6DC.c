@@ -1,0 +1,49 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0804C6DC.
+ * sub_0804C6DC @ 0x0804C6DC
+ */
+
+/* One of the ~40 sprite-attribute setters between 0x0804B180 and 0x08053614.
+ * Rebuilds the OBJ attributes of the gUnknown_03001470 slot named by
+ * gUnknown_03001FBC, re-seats it at its gUnknown_02029A10 entry's position and
+ * arms a continuation.
+ *
+ * Twin of sub_0804CC38: the two differ in exactly one immediate (the tile base,
+ * 0x50 vs 0x80) and one pool symbol (the continuation), which is the same pair
+ * of discriminators sub_0804D928/sub_0804E3B4 turn on. Same three spellings as
+ * those two -- `pal`/`prio` bound to locals so the bitfield store does not
+ * narrow the table `ldrh` to `ldrb`, `* 0x100` rather than `<< 8`, and both
+ * globals of the priority index read directly so the `lsl #16; lsr #15` pair
+ * survives.
+ *
+ * x and y are `u16` here even though the call site emits `ldrsh`: converting a
+ * u16 memory operand to the s16 parameter is a sign-extension of the low half,
+ * which combine folds into the load. The `ldrh` + `lsl #16; asr #16` in
+ * sub_0804D290 is the same members read into an int subtraction instead. */
+void sub_0804C6DC(void)
+{
+    struct OamData oam;
+    u16 pal;
+    u16 prio;
+
+    sub_0801566C(gUnknown_03001FBC, (struct UnkVec *)&oam);
+    gUnknown_03001470[gUnknown_03001FBC].unk28 = 0;
+    gUnknown_03001470[gUnknown_03001FBC].unk2c = 0;
+    gUnknown_03001470[gUnknown_03001FBC].unk30 = gUnknown_0300453C;
+    gUnknown_03001470[gUnknown_03001FBC].unk34 = gUnknown_0300451C;
+    oam.hFlip = gUnknown_0300453C ^ 1;
+    pal = gUnknown_08551D0C[gUnknown_0300453C][0];
+    oam.paletteNum = pal;
+    oam.tileNum = gUnknown_0300453C * 0x100 + 0x50;
+    prio = gUnknown_085523A4[gUnknown_0300453C ^ gUnknown_0300450C];
+    oam.priority = prio;
+    sub_08015608(gUnknown_03001FBC, *(struct UnkVec *)&oam);
+    sub_080155C0(gUnknown_03001FBC,
+                 gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].x,
+                 gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y);
+    sub_08015928(gUnknown_03001FBC, (u32)sub_0804C8C8);
+}

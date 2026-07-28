@@ -148,7 +148,19 @@ def setup(rec, unit, prefer_best):
     rel_src = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
     rel_base = os.path.relpath(os.path.join(pdir, "base.c"),
                                awlib.REPO).replace(os.sep, "/")
-    rc, _, se = agbenv.run("%s %s -P %s -o %s"
+    # pycparser cannot parse GCC attributes, so any source reaching hardware.h
+    # died at load time with `Syntax error in base.c ... struct
+    # __attribute__((aligned(4))) DispCnt` -- which took every function touching
+    # a hardware register off the permuter entirely, including textbook cases
+    # like sub_0806EB5C (exact size, one register swap). Define the attribute
+    # away for the parse.
+    #
+    # base.c is also what compile.sh builds, so this is only safe if stripping
+    # is byte-neutral. Measured before committing to it: seven promoted files
+    # that include hardware.h, compiled both ways and compared on .text alone
+    # -- all seven identical, c_08012420.c (364 B, uses REG_BG3CNT) included.
+    # Re-measure if a struct ever needs alignment the ABI does not already give.
+    rc, _, se = agbenv.run('%s %s -P -D"__attribute__(x)=" %s -o %s'
                            % (f["CPP"], f["CPPFLAGS"], shq(rel_src),
                               shq(rel_base)))
     if rc != 0:

@@ -42,7 +42,7 @@ void sub_08012420(void)
     REG_BG0CNT = gUnknown_03002B6C.raw;
     REG_BG1CNT = gUnknown_03001FE8.raw;
     REG_BG2CNT = gUnknown_030030B4.raw;
-    REG_BG3CNT = gUnknown_0300251C;
+    REG_BG3CNT = gUnknown_0300251C.raw;
     REG_BLDCNT = gUnknown_030030E0.raw;
     REG_BLDALPHA = gUnknown_03002020 + (gUnknown_03002B28 << 8);
     REG_BLDY = gUnknown_03001FFC;

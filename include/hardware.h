@@ -249,6 +249,8 @@ extern union BgCntBuf gUnknown_03002B6C;
 // WINOUT) is still unproved -- only the offsets are.
 extern union WinCntBuf gUnknown_030030A4;
 extern union BgCntBuf gUnknown_030030B4;
+/* The BG3 shadow -- see the note left in its place in unknown-globals.h. */
+extern union BgCntBuf gUnknown_0300251C;
 extern union WinCntBuf gUnknown_030030DC;
 // `effect` (2 bits at bit 6) is set to 2 -- brighten -- by the four +0x64 proc
 // wrappers sub_08011588/080115B4/08011610/0801163C. That store is `ldrb;
@@ -540,7 +542,10 @@ struct KeySt
                         // KeyStatusBuffer, where 00/01/02 are repeat_delay /
                         // repeat_interval / repeat_clock; AW2 disagrees, and
                         // nothing in this tree ever named those three.
-    /* 02 */ u8 filler_02[0x02];
+    /* 02 */ u16 unk02; // a second key bitmask, distinct from unk00 and from
+                        // `held`: sub_0802966C tests it against 0x50
+                        // (Right|Up) and 0xa0 (Left|Down) to step a cursor
+                        // forwards and backwards. Was filler until wave 13.
     /* 04 */ u16 held; // keys that are currently held down
     /* 06 */ u16 repeated; // auto-repeated keys
     /* 08 */ u16 pressed; // keys that went down this frame

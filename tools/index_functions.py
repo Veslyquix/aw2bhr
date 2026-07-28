@@ -68,6 +68,14 @@ def decompiled_symbols():
     # sub_080366E8 sat promoted-but-counted-as-asm until this was added, which
     # also means the work queue kept offering them after they were in the ROM.
     fptr = re.compile(r'^[A-Za-z_][\w \*]*\(\s*\*\s*([A-Za-z_]\w*)\s*\(')
+    # A signature whose parameter list does not close on the first line -- eight
+    # `u8` parameters wrap -- matches neither of the above, because `sig` wants
+    # the closing paren on the same line. Same consequence as the fptr case:
+    # sub_08036F68 was promoted, is in the ROM, and both builds reproduced the
+    # SHA1 while the index still called it `asm` and the work queue would have
+    # handed it out again. Match the opening line instead: a name followed by
+    # `(` with no `)` and no `;` after it.
+    open_sig = re.compile(r'^[A-Za-z_][\w \*]*?\b([A-Za-z_]\w*)\s*\([^;)]*$')
     # Recursive: promoted functions live in src/decomp/, and missing them would
     # leave them queued as outstanding work after they are already in the ROM.
     for dirpath, _, filenames in os.walk(src):
@@ -77,7 +85,7 @@ def decompiled_symbols():
             with open(os.path.join(dirpath, entry), encoding="utf-8",
                       errors="replace") as fh:
                 for ln in fh:
-                    m = sig.match(ln) or fptr.match(ln)
+                    m = sig.match(ln) or fptr.match(ln) or open_sig.match(ln)
                     if m:
                         names.add(m.group(1))
     return names

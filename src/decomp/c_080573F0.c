@@ -25,8 +25,9 @@ void sub_0805741C(u16 a)
      * gUnknown_030030B4.raw: an aggregate-member destination swaps the
      * operands of the `orr` that builds the value (see docs/agbcc-codegen.md),
      * and the ROM has the loaded halfword as the OR's destination. The
-     * gUnknown_0300251C store two lines down is the same expression against a
-     * scalar lvalue and needs no cast. */
+     * gUnknown_0300251C store two lines down is the same expression and takes
+     * the same cast, for the same reason -- that symbol became a union in
+     * wave 13 when sub_08065990 read its chr_block bitfield. */
     *(u16 *)&gUnknown_030030B4 = gUnknown_085538AE[a ^ 1] | 0x608;
-    gUnknown_0300251C = gUnknown_085538AE[a] | 0x70C;
+    *(u16 *)&gUnknown_0300251C = gUnknown_085538AE[a] | 0x70C;
 }
