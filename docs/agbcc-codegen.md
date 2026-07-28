@@ -14,18 +14,52 @@ decided by how the source is *phrased*, not by what it computes.**
 
 | assembly | meaning |
 |---|---|
-| `ldrb` | `u8` |
+| `ldrb` | `u8` — **or an `s8` object read in a `u8` context**, see below |
 | `ldrh` | `u16` |
 | `ldrsh` | `s16` **object** (not a cast) |
 | `ldr` | `u32` or pointer |
 | `lsls #16; lsrs #16` | `u16` truncation |
 | `lsls #24; lsrs #24` | `u8` truncation |
 | `lsls #16; asrs #16` | `s16` |
+| `ldrb; lsls #24; asrs #24` | `s8` **object** (not a cast) — the byte twin of the `ldrsh` row |
 | `lsrs #3` vs `asrs #3` | index is `u32` vs `int` |
 | `lsls #a; lsrs #b`, `a+b != 32` | **bitfield read.** Plain `(x >> 2) & 3` compiles to three instructions (`lsrs; movs; ands`); the two-instruction double shift only comes from GCC's `extract_bit_field`. Load width gives the bitfield's base type. |
 
 Scaled index `lsls #1; adds; lsls #5` = `x * 96` — an array of 96-byte structs.
 Model unknown regions with explicit `u8 filler_XX[N];`.
+
+**Signedness is a property of the object, and must be settled across every
+access in the ROM — never from the function you are matching.** A bare `ldrb`
+does *not* prove the object is unsigned: read an `s8` through a `u8`-typed
+expression and the truncation cancels the extension. The same byte, at +1 of
+`gUnknown_03003F30`:
+
+```
+sub_0803BB44:  ldrb r0,[r0,#1]; lsls #24; asrs #24   <- s8 object, int context
+sub_0803BC7C:  ldrb r0,[r0,#1]                        <- s8 object, u8 context
+```
+
+If *any* access sign-extends, the object is signed and every bare-`ldrb` reader
+is a `u8`-returning accessor of a signed object. Note also that the extension
+comes from the object, not the return type, so `s8 f(void)` and `int f(void)`
+returning the same global are byte-identical — a function's return type is not
+recoverable here.
+
+**A clean pool word plus a non-zero displacement proves the symbol names an
+aggregate.** This is the sharpest tool for finding a global whose declared type
+is too narrow:
+
+| codegen | source |
+|---|---|
+| `.4byte gSym` + `strb r0,[r1,#0x1]` | `gAggregate.member` at +1, or `gArray[1]` |
+| `.4byte gSym+0x1` + `strb r0,[r1]` | `(&gScalar)[1]`, `*((u8 *)&gScalar + 1)` |
+
+Pointer arithmetic off a *scalar* always sinks the constant into the
+relocation, so a neighbouring byte is simply unreachable from a scalar
+declaration. A clean pool word with a runtime displacement is therefore proof
+that the header's type for that symbol is wrong, not merely narrow — that is
+what forced `gUnknown_030030F0` from `s8` to a 3-byte struct. Struct vs array
+is then settled separately, by whether any function indexes it with a variable.
 
 **`ldrh` plus a pool word is a plain mask; `ldrb` plus `mov`/`neg` is a
 bitfield.** The width of the constant tells you nothing. `*p &= ~8` through a
@@ -141,20 +175,43 @@ misled more than one agent, in both directions.
 So the offset folds into the displacement only when the address is
 (one scaled index) + base + constant **and** the access is byte or halfword.
 Anywhere else, the plain subscript already produces the add and it says nothing
-about the source. Only after excluding all three is a folded pool word
-(`.4byte gSym+0x12`) evidence that the source took the member's address.
+about the source.
 
-**The pool-fold has a different cause than this file used to claim.** It is not
-that "a pointer variable makes the base a pseudo, so nothing is left to fold" —
-`&arr[n-1]` folds the `-1` into the relocation even through a pseudo base. What
-actually prevents the fold is flattening the scale into the source: `u8 *base =
-g; base + (expr - 1) * 0x20;` keeps the `subs` at runtime, while every subscript
-spelling folds it. **Pool-order tell:** the base symbol loaded *first*, before
-the pointer global it indexes through, is the signature of the flat-`u8 *` form.
+**What decides the pool-fold: how the constant reaches the address
+expression.** It folds when it arrives as an **addend on a pointer value**; it
+does not fold when it arrives as a **member offset of an aggregate type**.
+Eleven spellings under the real CFLAGS give three outcomes, and they are
+diagnostic:
 
-Watch for reassociation: `&s->unk10[i]` folds to `base + (0x10 + i)`, putting
-the add on the *index* register. Splitting `u8 *b = s->unk10;` out first puts it
-back on the base.
+| codegen | source |
+|---|---|
+| `.4byte g+0x20`, no runtime add | `((u8*)g)[i+0x20]`, `((u8*)g)[0x20+i]`, `u8 *p = (u8*)g + 0x20; p[i]`, `*((u8*)g + 0x20 + i)` |
+| `ldr rB,=g; add rB,#0x20; add rI,rI,rB` — add on the **base** | `gStruct.unk20[i]`; `s = &gStruct; s->unk20[i]`; `u8 *p = (u8*)g;` **`p += 0x20;`** `p[i]` |
+| `ldr rB,=g; add rI,rI,rB; add rI,#0x20` — add on the **index** | `u8 *p = (u8*)&g; p[i+0x20]` |
+
+Two consequences, both of which this file previously had backwards. A folded
+pool word (`.4byte gSym+0x12`) is evidence the source did **not** go through a
+struct member — the member spelling reliably *suppresses* the fold, so it is
+not evidence that the source took the member's address. And for a
+**struct-typed global**, splitting `u8 *b = s->unk10;` out first changes
+nothing: direct, via-pointer-local and bound-out all emit identical code. That
+splitting rule applies to *pointer*-typed bases only. Note the third row: for
+the pointer case a `+=` in a **separate statement** escapes the fold, while the
+same arithmetic inside one expression does not.
+
+**With split declarations, agbcc emits setup instructions in source-statement
+order.** Same instructions, same registers, three positions for one `mov rN,#0`:
+
+| source | where the `mov #0` lands |
+|---|---|
+| `u32 v = 0;` as an initialiser, before the pointers | first, ahead of the base `ldr` |
+| no `v` — store the literal directly | last, after the cursor computation (loop-invariant motion drops it in the preheader) |
+| `base = g; v = 0; p = base + 4;` as three statements | second, exactly where the source puts it |
+
+An initialiser and an assignment are **not** interchangeable for scheduling.
+This is more general than the `-fforce-addr` section's "splitting the
+declaration from the assignment matches" note, and has nothing to do with
+`-fforce-addr`; it decided `sub_08078740`.
 
 **Binding an array *element* address is a diagnostic, not a prohibition.** This
 entry has been wrong twice; read the target and pick the column.
@@ -169,6 +226,23 @@ which one is correct depends entirely on what the original did:
 
 Neither is "safe". Some functions need the first (`sub_080266DC`,
 `sub_08028874`), some need the second (`sub_08061DA8`).
+
+The discriminator is narrower than that left column suggests: binding the
+**deref** hoists the load, binding the **element** does nothing.
+
+```
+T *b = g; &b[i]   -> ldr r1,=g ; ldr r1,[r1] ; lsl r0,r0,#3 ; add r1,r1,r0 ; add r0,r1,#0
+&g[i]  /  g+i     -> ldr r1,=g ; lsl r0,r0,#3 ; ldr r1,[r1] ; add r1,r1,r0 ; add r0,r1,#0
+T *p = &g[i]; p   -> identical to &g[i]
+```
+
+So for a *pointer* global, the "binding an element address is a diagnostic"
+warning above does not apply — it is a no-op there, and only binding the deref
+moves anything. Also: the trailing `adds r0, r1, #0` is inherent to all four
+spellings — the address lands in the index-add's destination and agbcc moves it
+to r0. `sub_080413A4` is 16 bytes for what looks like 12 bytes of work. Do not
+read that redundant move as a wrong return type or a wrong form; nothing
+removes it.
 
 For an **array global** `extern struct T g[];` there is no deref to schedule,
 and the rule is a real constraint rather than a choice: under `-fforce-addr`,
@@ -232,6 +306,10 @@ difference.
 and a `u8 hi:5` bitfield at bit 3 assigned zero both give
 `ldrb; mov r0,#7; and r0,r0,r1; strb`. Another one not worth an attempt.
 
+**A third of these:** for `sub_08014074`, `s8` fields, `u8` fields written with
+`0xFE`, and a bare `u8 *` parameter indexed `p[0x3a]`/`p[0x39]` all compiled
+byte-identically.
+
 **Consecutive bitfield writes to one global collapse** into a single
 load/store chain. Separate stores to the same address mean the source had
 something between them.
@@ -246,21 +324,57 @@ the load, change the container before changing anything else. `struct BgCnt`
 shipped with a `u16` container and had to become `u32`; the shadows are read a
 word at a time even though the register they mirror is 16-bit.
 
-**Storing through a union member is not free.** Two ways it costs a match, both
-observed while merging the headers:
+**An aggregate-member lvalue is not interchangeable with a scalar one.** Two
+ways the difference costs a match. This was first written up as a *union*
+effect; it is not. A plain `struct` does it identically, at offset 0 and at
++2, and through a pointer local. The discriminator is aggregate member vs
+scalar, and `union` has nothing to do with it.
+
+- ***`|=` swaps its operands.*** `g.member |= 0x80` emits
+  `orr const, const, value`; a scalar lvalue emits `orr value, value, const`.
+  Two bytes, no size change, so the link succeeds and only the ROM hash
+  notices. **This is `|=` only** — `&=`, `^=` and `+=` are byte-identical for
+  both forms, with movs-sized and pool-sized constants alike, and casting does
+  not change it (`*(u16 *)g |= 8`, `((u16 *)g)[0] |= 8` and `g[0] |= 8` all
+  give the scalar form).
+
+  Read the other way this is a **positive tell**: `orr` with the *constant's*
+  register as the destination means the source had a struct or union member.
+  That is what took `sub_08003934` from a near-miss to a match, and why its
+  neighbour `sub_08003948` (`&= ~8`) needed no such trick. It is also why the
+  three type migrations in wave 5 were byte-neutral: none of them went through
+  `|=`.
 
 - *The constant gets re-materialised.* A run of `g = 0` stores shares one
   `mov rN, #0`. Change any one of them to `g.raw = 0` and agbcc reloads the
   zero at that point, +2 bytes, padded to +4. `sub_080122EC` grew by four bytes
-  this way and shifted 4,172 symbols downstream.
-- *Read-modify-write operands swap.* `g.raw8 |= 0x80` emits
-  `orr const, const, value`; a plain `u8` lvalue emits `orr value, value, const`.
-  Two bytes, no size change, so the link succeeds and only the ROM hash notices.
+  this way and shifted 4,172 symbols downstream. This one does not bite when
+  the store stands alone or ends a run — `sub_08012358` and `sub_0801237C` both
+  match with `.raw`. It bites when the store *interrupts* a run of another
+  type, and the fix is to cast at that one call site (`*(u16 *)&g = 0`), not to
+  change the declared type of the global.
 
-Neither bites when the union store stands alone or ends a run — `sub_08012358`
-and `sub_0801237C` both match with `.raw`. It bites when the store *interrupts*
-a run of another type. The fix is to cast to the scalar type at that one call
-site (`*(u16 *)&g = 0`), not to change the declared type of the global.
+**Consecutive bitfield writes share the load/store pair, not the mask
+arithmetic.** Two adjacent 1-bit fields in one byte, both assigned zero
+back-to-back, give one `ldrb`/`strb` but **two** separate `mov`/`neg`/`and`
+triples — the masks are not folded together. Reading a single `and` as two
+merged bitfield writes will burn attempts.
+
+**Read a bitfield's position and width straight off `mov #N; neg`.** Since
+`-N == ~(N-1)`, the cleared bits are exactly the bits of `N-1`:
+
+| encoding | mask | field |
+|---|---|---|
+| `movs #0x20; rsbs` | `~0x1F` | 5 bits at bit 0 |
+| `movs #0xd; rsbs`  | `~0x0C` | 2 bits at bit 2 |
+| `movs #0x11; rsbs` | `~0x10` | **1 bit at bit 4** |
+| `mov #0x9; neg`    | `~0x08` | 1 bit at bit 3 |
+
+The `0x11` row is the trap: it reads like a two-bit mask clearing bits 0 and 4
+and is not one. Note also that `mov #N; neg` is the tell only where a bare
+`movs` would have sufficed — storing `-2` through a plain `s8` lvalue gives
+`mov r1, #0xfe` with no `neg`, because the store is QImode and the constant
+narrows before it is materialised. That carries no bitfield signal at all.
 
 ---
 
@@ -287,6 +401,38 @@ loop.** `movs r2,#0x1f; ...; adds r1,#4; subs r2,#1; cmp r2,#0; bge` comes from
 a plain `for (j = 0; j < 32; j++)`; GCC reverses only the counter so the exit
 test is against zero. Do not rewrite the source as a reverse loop. A counter
 starting at N-1 with `bge` is N iterations.
+
+**But a *descending* pointer compared against the array base is a genuine
+reverse loop, and the branch condition says so.** Pointer comparison in C is
+unsigned, so a **signed** conditional branch between two address registers can
+only come from the source casting them to a signed integer type:
+
+- `bcs`/`bcc` between addresses — a real pointer compare, `p >= base`
+- `bge`/`blt` between addresses — `(int)p >= (int)base`
+
+Nothing else produces the signed form. Roughly thirty spellings were tried
+against `sub_08078740`: `p >= base`, `p - base >= 0` (two extra instructions,
+it computes the difference), and every index-loop form — `for (i = 4; i >= 0;
+i--)`, `do/while`, `while (i-- > 0)`, bounded array, struct member, `register
+int`, ascending counter with descending pointer, comma-operator dual induction
+— all keep a separate counter and compare against zero. Biv elimination never
+fires against a static array base. The cast spelling is byte-exact but unusual
+C; treat it as *a* correct answer rather than certainly the original's.
+
+**`while (n--)` has its own shape:** `subs rN,#1` *before* the loop guard, then
+`cmp rN,#-1` materialised as `mov #1; neg`. The post-decrement's `!= 0` test on
+the old value is rewritten as `!= -1` on the new one. `while (--n)` and the
+`for` forms compare against zero instead. This identified `sub_0808B6E8` as
+`memcpy` on sight.
+
+**Varargs: `push {r2,r3}` … `add sp,#8` is agbcc's pretend-args pair, and the
+block starts at the register holding the *last named* parameter.** So the named
+argument count is the index of the first pushed register **plus one** —
+`push {r2,r3}` means *three* named args plus `...`, and `push {r0,r1,r2,r3}`
+means one. A function consisting of *only* that pair is a stubbed-out varargs
+debug printf, not a function with stack locals: the `add sp` releases the
+pretend-args area, not a frame. `sub_08013428` is one, and there are likely
+more — free matches once you know the shape.
 
 **A function may deliberately have no final return.** `sub_0803CBD8` falls
 through leaving its argument in r0, which is what the original does. UB in C,
@@ -397,9 +543,20 @@ first function that does, which is why this went unnoticed until now.
 - **`python tools/trymatch.py <fn> --diff` is the same check the MCP tool runs**,
   against the same `work/<fn>/<fn>.c`. Iterating locally and using `try_match`
   only to confirm costs nothing and is how the 0802 cluster was done.
-- **Put several variants in one probe file.** A single compile answers a codegen
-  question that would otherwise take five attempts — this is how the `volatile`
-  reload tell and the `-fforce-addr` rule above were both isolated.
+- **Put several variants — or your entire batch of functions — in one probe
+  file.** A single compile answers a codegen question that would otherwise take
+  five attempts; this is how the `volatile` reload tell and the `-fforce-addr`
+  rule above were both isolated. Understated, though: in wave 5 two agents put
+  their *whole batch* in one probe, read all eleven against their targets in
+  one call, and spent **zero** `try_match` attempts — `trymatch.py` gave the
+  verdicts. For a batch of small functions that is the entire job in one call.
+- **`work/<fn>/<fn>.c` and `src/decomp/c_<fn>.c` can disagree, and the promoted
+  file is the truth.** Drafts of already-promoted functions go stale — most
+  carry pre-header local `extern`s and now fail with `conflicting types`. That
+  is a leftover, not a regression, and it produced three false alarms in a
+  single session. Using a promoted neighbour as a regression check is the right
+  move; just read it from `src/decomp/`, and sync the draft if you need
+  `trymatch` on it.
 - **Ask of every global: is it `const`? is the field `volatile`?** The scaffold
   says nothing about either, and both are readable off the assembly by the rules
   above. For the 0802 cluster each was decisive.
@@ -453,7 +610,57 @@ first function that does, which is why this went unnoticed until now.
   `s16`.** `sub_0801B768` with `s16` compiled four bytes longer, carrying a
   `lsls #16; asrs #16` the original does not have.
 - To settle a return type: `get_function` on a caller and see what happens to r0
-  right after the `bl`.
+  right after the `bl`. Settle a **global's** type from callers too — a
+  function-pointer global's setter is byte-identical to a `void *` or `u32`
+  one's (`sub_080366C4` and `sub_08037B84` are the same three instructions).
+  The evidence is only ever at the call sites: `ldr r0,=sub_XXXXXXXX` at the
+  setter, or `bl _call_via_r0` on the loaded value at the reader.
+- **Do not reflexively `const`-qualify ROM data globals.** Check whether a real
+  prototype in `unknown-functions.h` already takes them non-const — under
+  `-Werror` a `const u8 *` breaks `Decompress(u8 *, void *)`. That, not the
+  caller, was decisive for `sub_0801F48C`/`sub_0801F494`.
+
+---
+
+## When the assembly is not compiler output
+
+**Check this before drafting anything.** Some of the ROM was never compiled,
+and no C will ever match it. These are not hard functions — they are the wrong
+kind of thing, and they are actively attractive to a scheduler: tiny, high
+fan-in, sitting next to easy matches. Ten of one wave-5 agent's sixteen targets
+were in this category.
+
+The known ones are listed in `data/asm-resident.json` with their evidence, and
+the index marks them `status: "asm-resident"` so the work queue skips them.
+Adding to that list is a claim that needs evidence — "I could not match it" is
+not evidence. The tells:
+
+- **Two entry points in one instruction stream.** A `thumb_func_start` whose
+  body falls through into a `non_word_aligned_thumb_func_start`, with *both*
+  reachable by `bl`. `sub_0806FC08` is a single `ldr r2,[r1,#0x40]` two bytes
+  above `sub_0806FC0A`. No compiler emits this.
+- **`bx pc; nop` followed by an `arm_func_start` holding one `b`.** A linker
+  THUMB→ARM interworking veneer, synthesised when a THUMB `bl` targets an ARM
+  symbol. The splitter cuts it at the mode change, so the index reports a
+  4-byte "function" that is half of an 8-byte veneer. Six of these sit at
+  `sub_080718E8`–`sub_08071910`.
+- **A result returned in a register other than r0**, e.g. `sub_0807031C`.
+- **Raw `.hword` data inside the instruction stream** the disassembler could
+  not decode — `sub_0806F740` is `.hword 0xFF1E`.
+- **A unit that is only a `bx r3` tail plus a literal pool** — the split drew a
+  boundary mid-function, and the "function" is not one. `sub_0807003C`.
+
+The 0x0806F734–0x0807031C block is the m4a/MP2K sound driver, hand-written
+assembly in every GBA game that uses it. `sub_0806F744` loads
+`gUnknown_03007FF0` and compares `[r0]` against `0x68736D53` — that is the
+canonical `SOUND_INFO_PTR` and m4a's `"Smsh"` ID_NUMBER. This driver is already
+solved in other decomps and should be lifted rather than re-derived.
+
+Cheap pre-filter when scoping a batch:
+
+```
+grep -n "arm_func_start\|non_word_aligned_thumb_func_start" asm/<file>.s
+```
 
 ---
 
@@ -495,11 +702,11 @@ found it on iteration 134 of its first run. See the address-taking rule under
 
 ## Where the globals live
 
-**Never declare a global in your `.c` file.** All 97 of them are already
-declared, with a merged type, in one of two headers:
+**Never declare a global in your `.c` file.** The declarations live in one of
+two headers:
 
-- `include/unknown-globals.h` — 88 globals and their structs. Reached through
-  `global.h`, so it needs no `#include`.
+- `include/unknown-globals.h` — the bulk of them, with their structs. Reached
+  through `global.h`, so it needs no `#include`.
 - `include/hardware.h` — the nine display-register shadows
   (`gUnknown_03002B6C`, `gUnknown_030030A4`, `gUnknown_030030E0` and
   neighbours), because they need the register types defined there. Add
@@ -513,9 +720,38 @@ type, or changing the total size will silently break a match in a file you are
 not looking at, because agbcc picks the instruction from the member type and the
 index stride from `sizeof`.
 
-If the merged type is genuinely wrong for your function, that is a real finding
-and worth reporting — but check the union first. `gUnknown_03002B6C` is reached
-as a word, a halfword *and* a byte, and all three spellings exist on it.
+**The header covers the globals promoted functions reach, not every global in
+the ROM.** In an unworked address range, finding your global absent is the
+normal case, not a sign you are confused — one wave-5 agent hit it nine times
+out of ten. It is also not the "wrong merged type" case. **Add the declaration
+to `include/unknown-globals.h`, in address order, and put nothing in your
+`.c`.** The prohibition is on declaring locally, not on extending the header. A
+new struct or a new extern is a pure addition and cannot break an existing
+match.
+
+If the merged type is genuinely **wrong**, widen it — but check the union
+first (`gUnknown_03002B6C` is reached as a word, a halfword *and* a byte, and
+all three spellings exist on it), and then run the check, which is cheap and
+complete:
+
+```
+grep -rl <global> src/        # every promoted file that could break
+python tools/trymatch.py <fn> # the verdict, one per file listed
+```
+
+That is usually one file and about thirty seconds, and it is the difference
+between reporting a blocker and landing four more matches. Widening is safe
+*when you run it*. Three globals were widened this way in wave 5 —
+`gUnknown_030030F0` (`s8` → 3-byte struct), `gUnknown_0200B0B0` (`u16 *` →
+struct pointer), `gUnknown_0200C420` (`u32[2]` → 0xe0-byte struct) — touching
+five already-matching files, all still byte-exact.
+
+Two practical notes. The headers are edited **concurrently** during a wave, so
+re-grep for your anchor immediately before editing and never trust a line
+number from earlier in the session. And when a global's type changes, the
+stale `work/<fn>/<fn>.c` drafts of already-promoted functions will fail to
+compile with `conflicting types` — see the Workflow note on that; it is not a
+regression.
 
 ---
 
@@ -636,8 +872,11 @@ extern u8 *gUnknown_08499590;
    title-screen.c is a fourth *user* of gUnknown_03002B6C, not a fourth mirror
    -- it sets bit 7 as a byte. */
 
-/* 0x0200C420 / 0x0200C500 -- u32[2] save/restore pair, 08016E74 saves and
-   08016E8C restores. Same idiom as 0x03003F24 / 0x030044A4. */
+/* 0x0200C420 / 0x0200C500 -- 08016E74 saves and 08016E8C restores, same idiom
+   as 0x03003F24 / 0x030044A4. But only the FIRST TWO WORDS are the pair:
+   gUnknown_0200C500 really is 8 bytes, while gUnknown_0200C420 runs 0xe0 bytes
+   to it (per the map) and the rest is unrelated. unk20 is a 0x18-byte array
+   indexed by `a % 24` (sub_08017860, via __modsi3 in sub_08043AA0). */
 
 /* 0x020280C0 -- RAM, 0x1C entries, indexed by u8. NOT a pointer: the symbol
    address is added directly. +0x13 u8. */

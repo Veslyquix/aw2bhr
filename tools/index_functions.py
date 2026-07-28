@@ -31,6 +31,17 @@ BIOS_SYSCALLS = {
 
 ANON_RE = re.compile(r'^sub_[0-9A-Fa-f]{8}$')
 
+# Linker veneers and hand-written driver assembly. See the file's own comment
+# for why these are called out rather than left in the queue.
+ASM_RESIDENT_FILE = os.path.join(awlib.DATA_DIR, "asm-resident.json")
+
+
+def asm_resident():
+    if not os.path.isfile(ASM_RESIDENT_FILE):
+        return {}
+    with open(ASM_RESIDENT_FILE, encoding="utf-8") as fh:
+        return json.load(fh).get("functions", {})
+
 
 def decompiled_symbols():
     """Function names already living in src/*.c -- these are done."""
@@ -57,6 +68,7 @@ def decompiled_symbols():
 def build():
     files = awlib.load_all()
     done = decompiled_symbols()
+    resident = asm_resident()
     records = []
 
     for af in files:
@@ -74,7 +86,12 @@ def build():
                 # simply stops emitting their unit -- so presence in the
                 # assembly no longer means outstanding. Without this the work
                 # queue keeps handing out functions that are already in the ROM.
-                "status": "matched" if fn.name in done else "asm",
+                # asm-resident is a third state: not outstanding and never
+                # will be, because the assembly is not compiler output.
+                "status": ("matched" if fn.name in done
+                           else "asm-resident" if fn.name in resident
+                           else "asm"),
+                "asm_resident_reason": resident.get(fn.name),
                 "named": not anon,
                 "kind": "bios" if fn.name in BIOS_SYSCALLS else "game",
                 "trivial": awlib.is_trivial(fn),
