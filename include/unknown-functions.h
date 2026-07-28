@@ -3,14 +3,20 @@
 
 #include "global.h"
 
-void sub_08011550(s16);
-void sub_0801156C(s16);
-void sub_08011588(s16);
-void sub_080115B4(s16);
-void sub_080115E0(s16, ProcPtr);
-void sub_080115F8(s16, ProcPtr);
-void sub_08011610(s16, ProcPtr);
-void sub_0801163C(s16, ProcPtr);
+/* These eight take a 32-bit first argument, not the s16 they were declared with
+ * until wave 7. All eight open with a bare `adds r4, r0, #0` and no extension,
+ * and the ROM's own ARM PROMOTE_MODE zero-extends any sub-word parameter that
+ * has to survive a call -- `s16` compiles to `adds r4, r0, #0; lsl #16; lsr #16`
+ * and cannot match. Their callers in proc.c pass `dataImm`, which is s16, so
+ * the caller side is unaffected either way. */
+void sub_08011550(int);
+void sub_0801156C(int);
+void sub_08011588(int);
+void sub_080115B4(int);
+void sub_080115E0(int, ProcPtr);
+void sub_080115F8(int, ProcPtr);
+void sub_08011610(int, ProcPtr);
+void sub_0801163C(int, ProcPtr);
 void Decompress(u8 *, void *);
 
 void sub_08012358(void);

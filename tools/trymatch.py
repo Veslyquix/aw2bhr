@@ -100,6 +100,90 @@ def relocations(obj_rel, lo, hi):
     return out
 
 
+def symbol_addresses():
+    """name -> final linked address, read from the last built ELF.
+
+    Only used to resolve relocations, so a stale or missing ELF costs nothing
+    beyond falling back to the plain symbol comparison.
+    """
+    if symbol_addresses.cache is not None:
+        return symbol_addresses.cache
+    syms = {}
+    if os.path.exists(os.path.join(awlib.REPO, "aw2bhr.elf")):
+        prefix = agbenv.makefile_var("PREFIX") or "arm-none-eabi-"
+        rc, so, _ = agbenv.run('%snm "aw2bhr.elf"' % prefix)
+        if rc == 0:
+            for ln in so.splitlines():
+                parts = ln.split()
+                if len(parts) == 3:
+                    try:
+                        syms[parts[2]] = int(parts[0], 16)
+                    except ValueError:
+                        pass
+    symbol_addresses.cache = syms
+    return syms
+
+
+symbol_addresses.cache = None
+
+
+def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
+    """True if the two sides differ only in which symbol names the same address.
+
+    asm/ is disassembled output, so a pool word holding an address gets
+    symbolized as whichever symbol happens to sit at that address. A candidate
+    spelling the same address as `base + N` emits a different symbol with the
+    difference carried in the inline addend -- ARM .text uses REL, so the addend
+    lives in the data word. Both link to the identical byte, but comparing
+    symbol names alone calls it a mismatch.
+
+    sub_08011B34 is the case that found this: the original's pool word relocates
+    against gUnknown_03000040 with addend 0, the candidate's against
+    gUnknown_03000000 with addend 0x40, and 0x03000000 + 0x40 == 0x03000040.
+    It was rejected at 39 of 40 bytes despite producing an identical ROM.
+
+    Deliberately strict: same offsets, same types, ABS32 only, both symbols
+    known, and every differing byte must fall inside a relocation site.
+    """
+    if t_rel is None or c_rel is None or len(tgt_fn) != len(cand_fn):
+        return False
+    if len(t_rel) != len(c_rel) or not t_rel:
+        return False
+
+    syms = symbol_addresses()
+    sites = []
+    for (t_off, t_typ, t_sym), (c_off, c_typ, c_sym) in zip(t_rel, c_rel):
+        if t_off != c_off or t_typ != c_typ or t_typ != "R_ARM_ABS32":
+            return False
+        t_name, t_extra = _split_sym(t_sym)
+        c_name, c_extra = _split_sym(c_sym)
+        if t_name not in syms or c_name not in syms:
+            return False
+        if t_off + 4 > len(tgt_fn):
+            return False
+        t_addr = syms[t_name] + t_extra + int.from_bytes(
+            tgt_fn[t_off:t_off + 4], "little")
+        c_addr = syms[c_name] + c_extra + int.from_bytes(
+            cand_fn[c_off:c_off + 4], "little")
+        if t_addr != c_addr:
+            return False
+        sites.append(t_off)
+
+    for i, (a, b) in enumerate(zip(tgt_fn, cand_fn)):
+        if a != b and not any(off <= i < off + 4 for off in sites):
+            return False
+    return True
+
+
+def _split_sym(field):
+    """objdump prints `sym` or `sym+0xN`; return (name, extra)."""
+    name, _, rest = field.partition("+")
+    try:
+        return name, int(rest, 16) if rest else 0
+    except ValueError:
+        return name, 0
+
+
 def disassemble(obj_rel, lo, hi):
     prefix = agbenv.makefile_var("PREFIX") or "arm-none-eabi-"
     rc, so, _ = agbenv.run(
@@ -212,20 +296,38 @@ def check(name, want_diff=False, keep_going=False):
         print("  size:  match (%d bytes)" % size)
 
     same = tgt_fn == cand_fn and len(cand) == size
-    if same:
-        t_rel = relocations(unit_o, offset, offset + size)
-        c_rel = relocations(cand_o, 0, size)
-        if t_rel is not None and c_rel is not None and t_rel != c_rel:
-            same = False
-            print("  bytes: match, but relocations differ")
-            for side, rels in (("original ", t_rel), ("candidate", c_rel)):
-                for r in rels[:8]:
-                    print("    %s +0x%03x %-18s %s" % (side, r[0], r[1], r[2]))
-        else:
-            print("  relocs: match")
+    t_rel = relocations(unit_o, offset, offset + size)
+    c_rel = relocations(cand_o, 0, size)
+    equivalent = False
 
     if same:
-        print("\nMATCH -- byte-for-byte identical to the original")
+        if t_rel is not None and c_rel is not None and t_rel != c_rel:
+            if reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
+                equivalent = True
+            else:
+                same = False
+                print("  bytes: match, but relocations differ")
+                for side, rels in (("original ", t_rel), ("candidate", c_rel)):
+                    for r in rels[:8]:
+                        print("    %s +0x%03x %-18s %s" % (side, r[0], r[1], r[2]))
+        else:
+            print("  relocs: match")
+    elif len(cand) == size and reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
+        same = equivalent = True
+
+    if same:
+        if equivalent:
+            print("  relocs: name different symbols that resolve to the same"
+                  " address")
+            for (t_off, _, t_sym), (_, _, c_sym) in zip(t_rel, c_rel):
+                if t_sym != c_sym:
+                    print("    +0x%03x  original %s  candidate %s"
+                          % (t_off, t_sym, c_sym))
+            print("\nMATCH -- links to identical bytes. The pool word is the"
+                  " same address\n  spelled against a different symbol, which"
+                  " is a disassembly artefact,\n  not a difference in the ROM.")
+        else:
+            print("\nMATCH -- byte-for-byte identical to the original")
         return 0
 
     n_diff = sum(1 for a, b in zip(tgt_fn, cand_fn) if a != b)

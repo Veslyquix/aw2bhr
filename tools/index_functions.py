@@ -50,6 +50,12 @@ def decompiled_symbols():
     if not os.path.isdir(src):
         return names
     sig = re.compile(r'^[A-Za-z_][\w \*]*?\b([A-Za-z_]\w*)\s*\([^;]*\)\s*\{?\s*$')
+    # A function returning a function pointer nests its own name inside
+    # parentheses -- `void (*f(void))(void)` -- so `sig`, which expects the name
+    # immediately before the argument list, never matches one. sub_080366DC and
+    # sub_080366E8 sat promoted-but-counted-as-asm until this was added, which
+    # also means the work queue kept offering them after they were in the ROM.
+    fptr = re.compile(r'^[A-Za-z_][\w \*]*\(\s*\*\s*([A-Za-z_]\w*)\s*\(')
     # Recursive: promoted functions live in src/decomp/, and missing them would
     # leave them queued as outstanding work after they are already in the ROM.
     for dirpath, _, filenames in os.walk(src):
@@ -59,7 +65,7 @@ def decompiled_symbols():
             with open(os.path.join(dirpath, entry), encoding="utf-8",
                       errors="replace") as fh:
                 for ln in fh:
-                    m = sig.match(ln)
+                    m = sig.match(ln) or fptr.match(ln)
                     if m:
                         names.add(m.group(1))
     return names

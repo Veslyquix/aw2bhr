@@ -227,6 +227,22 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define REG_DISPSTAT    (*(vu16 *)(REG_BASE + REG_OFFSET_DISPSTAT))
 #define REG_DISPSTAT_LO (*(u8 *)(REG_BASE + REG_OFFSET_DISPSTAT))
 
+// BLDCNT. gDispIo.blend_ct is the RAM shadow; sub_080129B4 writes the register
+// directly with a whole halfword rather than going through it.
+#define REG_OFFSET_BLDCNT 0x050
+#define REG_BLDCNT (*(vu16 *)(REG_BASE + REG_OFFSET_BLDCNT))
+
+// DMA. sub_080111BC disarms channel 0 by zeroing its control halfword.
+#define REG_OFFSET_DMA0SAD   0x0B0
+#define REG_OFFSET_DMA0DAD   0x0B4
+#define REG_OFFSET_DMA0CNT_L 0x0B8
+#define REG_OFFSET_DMA0CNT_H 0x0BA
+
+#define REG_DMA0SAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA0SAD))
+#define REG_DMA0DAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA0DAD))
+#define REG_DMA0CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_DMA0CNT_L))
+#define REG_DMA0CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_DMA0CNT_H))
+
 // Timers. sub_0802ECEC arms timer 3 with a reload of -n and 0xc3
 // (enable | irq | 1024-cycle prescaler).
 #define REG_OFFSET_TM0CNT_L 0x100
