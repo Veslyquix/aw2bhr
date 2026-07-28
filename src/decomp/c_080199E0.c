@@ -9,7 +9,6 @@
 
 #include "hardware.h"
 
-
 void sub_080199E0(void)
 {
     gUnknown_03003FC0.unk03 = gUnknown_03003FC0.unk02;

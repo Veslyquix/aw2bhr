@@ -9,7 +9,6 @@
 
 #include "hardware.h"
 
-
 void sub_0801296C(void)
 {
     gDispIo.disp_ct.forced_blank = 1;

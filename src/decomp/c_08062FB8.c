@@ -7,8 +7,14 @@
  * sub_08062FB8 @ 0x08062FB8
  */
 
-#include "hardware.h"
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08062FB8.
+ * sub_08062FB8 @ 0x08062FB8
+ */
 
+#include "hardware.h"
 struct Unk08062FB8
 {
     /* 0x00 */ u8 filler_00[0x16];

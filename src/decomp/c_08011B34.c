@@ -1,5 +1,12 @@
 #include "global.h"
 
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08011B34.
+ * sub_08011B34 @ 0x08011B34
+ */
+
 /* The bound is spelled `+ 16` here, but asm/code.s shows the pool word
  * symbolized as `gUnknown_03000040` -- that is the disassembler naming the
  * raw value 0x03000040, which is one past this 16-pointer array and happens

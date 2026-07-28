@@ -7,6 +7,13 @@
  * sub_080122EC @ 0x080122EC
  */
 
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080122EC.
+ * sub_080122EC @ 0x080122EC
+ */
+
 #include "hardware.h"
 
 void sub_080122EC(void)

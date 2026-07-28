@@ -7,6 +7,13 @@
  * sub_0803CBD8 @ 0x0803CBD8
  */
 
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0803CBD8.
+ * sub_0803CBD8 @ 0x0803CBD8
+ */
+
 int sub_0803CBD8(int id)
 {
     if (id >= 0x60 && id < 0xa0)

@@ -9,7 +9,6 @@
 
 #include "proc.h"
 
-
 void sub_08014BB4(void)
 {
     gUnknown_03002514 = 0;
