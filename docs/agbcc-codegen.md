@@ -408,15 +408,20 @@ first function that does, which is why this went unnoticed until now.
   disagreeing gives `conflicting types`, not a mismatch.
 - **`include/hardware.h` has struct layouts worth reusing** (`BlendCnt`,
   `WinCnt`, `SetWinEnable`, `SetDispEnable`, `ApplyPalette*`). What looks like
-  arbitrary masking is often one of these.
-  **But it has no `REG_*` MMIO macros** — `gDispIo` is a RAM shadow. Anything
-  writing `0x04000000`-range addresses hand-rolls the pointer cast. There are no
-  `REG_SIOCNT` / `REG_RCNT` / `REG_SIODATA8` either; `sub_08062FB8` is the first
-  function here to touch `0x04000128` / `0x0400012A` / `0x04000134` and casts
-  them by hand. Worth adding to `hardware.h` before a second link function
-  hand-rolls a different spelling. `vu16` and plain `u16` compile identically
-  there, so `volatile` costs nothing and is the honest choice.
+  arbitrary masking is often one of these. It also has the serial registers
+  (`REG_SIOCNT`, `REG_RCNT`, `REG_SIODATA8` and the rest of the block) with the
+  `REG_BASE`/`REG_OFFSET_*` scaffolding — if you need an MMIO address that is
+  not there yet, add it in that form rather than casting inline. `vu16` and
+  plain `u16` compile identically, so `volatile` costs nothing and is honest.
+  The display registers are the exception: they are reached through the
+  `gDispIo` RAM shadow, not a `REG_DISPCNT`.
 - **`global.h` does not include `hardware.h`.** Include it yourself.
+- **Never write an `extern` in your `.c` file.** All 97 globals are already
+  declared with a merged type — see "Where the globals live" above. Adding a
+  local one either shadows the shared type or conflicts with it, and it is how
+  the tree grew eight incompatible views of `gUnknown_08499598` the first time.
+  If the merged type is wrong for your function, say so in your report; do not
+  route around it.
 - **Grep `src/decomp/` for the globals the scaffold lists, before drafting
   anything.** This ROM is full of template instances — routines duplicated per
   BG layer, per slot, per bit offset. One wave matched `sub_08013C54` by copying
@@ -429,9 +434,11 @@ first function that does, which is why this went unnoticed until now.
   completely different function (three-way range dispatch, deliberate missing
   return). Ten seconds of checking; the failure mode is silently burning
   attempts on something that only looks like its neighbour.
-- **Unclaimed and near-free right now:** `sub_0803CAF0` (offset 0x08) and
-  `sub_0803CB0C` (offset 0x00) sit between `sub_0803CAD4` and `sub_0803CB24` in
-  `asm/code-0801D390.s` and are 28-byte getters of the same template.
+- **Unclaimed and near-free right now:** `sub_0803CB0C` (offset 0x00) and
+  `sub_0803CA28` (offset 0x30) are further instances of the `Unk02028030`
+  accessor template, whose promoted siblings are `c_0803CA00.c` through
+  `c_0803CB24.c`. Confirm against the assembly first — `sub_0803CBD8` sits in
+  the same family by name and is a different function entirely.
 - The inferred argument count in a stub is a **floor**, and it can also read
   *low*: the inference counts a read-modify-write of r0 as a write, so
   `sub_0801B768` was reported as taking no arguments while opening with
