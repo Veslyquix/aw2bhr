@@ -7,7 +7,7 @@
  * sub_0803CAF0 @ 0x0803CAF0, sub_0803CB0C @ 0x0803CB0C
  */
 
-int sub_0803CAF0(u32 id)
+u8 sub_0803CAF0(u32 id)
 {
     struct Unk02028030 *s = &gUnknown_02028030;
     u32 idx = id >> 3;

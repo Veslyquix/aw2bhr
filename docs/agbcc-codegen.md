@@ -175,13 +175,98 @@ unrecoverable claim survives only for leaf functions ending in a bare `bx lr`.
 The **third** carve-out is a caller that *forwards* the result. `return f(x);`
 re-narrows when `f` is declared to return `u8` — `bl f; lsls #24; lsrs #24` —
 and emits nothing when `f` returns `int`. Four bytes, so it is impossible to
-miss. That makes the forwarding call site the only place a leaf accessor's
-return width is ever visible, and it **overrules the accessor's own body**:
-`sub_08042E18` is `ldrb` and nothing else, was promoted as `u8`, and is
-byte-identical as `int` — but its one caller `sub_08042DFC` has no narrowing,
-so `int` is the answer. When you promote a `ldrb`/`ldrh` accessor, check
-whether anything forwards it before picking the narrow type; if something does,
-that is evidence and the accessor's own bytes are not.
+miss. It **overrules the accessor's own body**: `sub_08042E18` is `ldrb` and
+nothing else, was promoted as `u8`, and is byte-identical as `int` — but its one
+caller `sub_08042DFC` has no narrowing, so `int` is the answer. When you promote
+a `ldrb`/`ldrh` accessor, check what its callers do with the result before
+picking the narrow type; if any of them narrows, that is evidence and the
+accessor's own bytes are not.
+
+**Forwarding is *not* the only such call site — a caller that merely TESTS the
+result exposes the width just as well, and that shape is far more common.**
+`if (f(x))` on a `u8`-returning `f` is `bl f; lsls r0, r0, #0x18; cmp r0, #0`,
+with **no `lsrs`**: only zero-ness is wanted, so the truncating left shift alone
+does the job. On an `int`-returning `f` the same source is a bare
+`bl f; cmp r0, #0`. Wave 11's 0x0803C354–0x0803C670 predicate block is a
+controlled experiment for this, because both callees appear inside one matched
+function: `sub_0803C48C` tests `sub_0803CAB8` *with* the `lsls #24` and
+`sub_0803CBD8` *without*, four instructions apart. So a lone `lsls #24` after a
+`bl`, with no `lsrs` and a `cmp` behind it, is not a mask, a bitfield or a
+`s8`/`u8` object load — it is the callee's declared return type, and prototyping
+that callee `int` makes the shift vanish and the function unmatchable. Sixteen
+functions in that block turned on exactly this and fell in one probe once the
+prototypes said `u8`.
+
+**One qualifier on that, measured in the same wave, and it matters because it
+turns a blocked function into a free one: `bl f; lsls #24; cmp #0` does NOT
+prove the *callee* is 8 bits wide. A caller that puts an `int`-returning
+result into a `u8`/`bool8` LOCAL before testing it is byte-identical.** One
+probe, two prototypes (`u8 nu8(u32)` and `int nint(u32)`), five call shapes:
+
+| source | codegen after the `bl` |
+|---|---|
+| `if (nint(a))` | `cmp r0, #0` — nothing |
+| `if (nu8(a))` | `lsl #24 ; cmp #0` |
+| `if (nu8(a) != 0)` | byte-identical to the row above |
+| `u8 v = nint(a); if (v)` | **byte-identical to the two rows above** |
+| `if (nu8(a) == 4)` | `lsl #24 ; lsr #24 ; cmp #4` — the `lsrs` comes back |
+
+So read the shift as "eight bits *somewhere on this path*", not as a fact about
+the callee, and note the last row separately: the `lsrs` is dropped only because
+a zero test does not need the value, so **`lsls #24` with a `lsrs #24` behind it
+is the value being kept** (a compare against a non-zero constant, or a forwarded
+return) while the bare `lsls` is a truth test. The practical consequence is the
+useful half: when the callee is already promoted with an `int` return and
+re-typing it would mean editing a file someone else is holding, a `u8` local at
+the call site reaches exactly the same bytes and needs no header change at all.
+
+Two corollaries worth carrying:
+
+- **The callee side is free, so the call site is the *only* evidence.** Changing
+  `sub_0803CA9C`/`CAB8`/`CAD4` from `int` to `u8` left all three byte-identical:
+  their value is `(1 << (id & 7)) & *ldrb_p`, whose `nonzero_bits` is already
+  `<= 0xff`, so gcc drops the return narrowing as a no-op. A promoted accessor
+  matching as `int` is therefore *not* evidence that `int` is right — re-check it
+  the moment a caller shows up.
+- Fixing this may mean editing an already-promoted `src/decomp/` file, since a
+  prototype in `unknown-functions.h` that disagrees with a definition is a
+  `conflicting types` build error rather than a mismatch. Re-run `trymatch` on the
+  retyped definitions; if the value is `ldrb`-derived they will still match.
+
+**The argument side has the exact same property, and it is the sharper half:
+a callee's declared PARAMETER width is visible at its call sites, and it
+overrules the callee's own prologue.** The three carve-outs above are all about
+a return value; this is the mirror image, and it costs a whole load instruction
+rather than a shift. Feeding a `u16` value into a differently-declared
+parameter, one probe, the same call site each time:
+
+| declared parameter | the caller emits |
+|---|---|
+| `int` / `u32` / `u16` | `ldrh r0, [r0, #4]` — no conversion, 2 bytes |
+| `s16` | `movs r1, #4; ldrsh r0, [r0, r1]` — **4 bytes**, the load itself changes |
+
+The conversion never survives as a separate `lsl`/`asr` pair: combine folds
+`(sign_extend (subreg:HI (zero_extend (mem:HI))))` straight back into the load,
+so a narrow *signed* parameter rewrites the caller's `ldrh` into `ldrsh` and a
+narrow *unsigned* one rewrites an `ldrsh` into `ldrh`. There is a size signal
+(`ldrsh` has no immediate-offset form, hence the extra `movs`), so this is free
+to spot.
+
+Read backwards, **a prologue narrowing is not proof of a narrow parameter when
+the narrowed value feeds another call.** `sub_0803B524` opens
+`lsls r0,#0x10; lsrs r4,r0,#0x10` — textbook "`u16` parameter widened for a
+`bl`" by the Proc-wrappers table below — and `u16` is impossible: `src/proc.c`,
+a matching source, passes it an `s16` member and gets `ldrsh`, which only an
+`int`-wide parameter produces. Its neighbour `sub_0803B4DC` opens
+`lsls r0,#0x10; asrs r0,#0x10` and is `int` for the same reason from the other
+direction. In both the shift pair belongs to a **cast at a use inside the
+body**, not to the parameter. Two callers with differently-typed arguments pin
+the declaration between them where one caller cannot; here `sub_08016104` /
+`sub_08016130` (a `u16` out of a script stream) excluded `s16` and proc.c
+excluded `u16`, leaving `int`. Both prototypes had said `s16` since wave 7 and
+the correction is byte-neutral for every file that already matched — verified by
+recompiling `src/proc.c` and `src/title-screen.c` and comparing against
+`build/src/*.o`.
 
 **`ldrh` plus a pool word is a plain mask; `ldrb` plus `mov`/`neg` is a
 bitfield.** The width of the constant tells you nothing. `*p &= ~8` through a
@@ -298,6 +383,34 @@ Same length, same instruction count — **only the pool word order differs.**
 `*((u8 *)g + (a & M))` behaves as the inline form, `*(p + (a & M))` with `p`
 bound as the bound form, and adding a local `int i = a & M;` changes nothing on
 top of binding the base. `sub_0801DF60` turned on exactly this.
+
+**At a CALL, argument setup is grouped by operand class, not by argument
+order: parameter copies first, then every literal-pool `ldr`, then every
+`mov #imm8` — each group internally in argument order.** So an argument register
+written out of numerical sequence is the pool-loaded one, and that is a free
+readout of which argument the source spelled as a symbol or a wide constant.
+One probe, five spellings of the same four-argument call, all with the third
+argument coming straight from the wrapper's own r0:
+
+```c
+g4 (1, 4,      p, hh);    /* add r2,r0,#0 ; ldr r3,=hh    ; mov r0,#1 ; mov r1,#4  */
+g4 (1, 4,      p, NULL);  /* add r2,r0,#0 ; mov r0,#1 ; mov r1,#4 ; mov r3,#0      */
+g4i(1, 4,      p, 0x1234);/* add r2,r0,#0 ; ldr r3,=0x1234; mov r0,#1 ; mov r1,#4  */
+g4 (1, 0x1234, p, hh);    /* add r2,r0,#0 ; ldr r1,=0x1234; ldr r3,=hh ; mov r0,#1 */
+g4i(0x1234, 4, p, 0);     /* add r2,r0,#0 ; ldr r0,=0x1234; mov r1,#4 ; mov r3,#0  */
+```
+
+Two consequences. **A NULL function-pointer argument and a named one are
+separated by *where* r3 is written, not only by the pool word** — second versus
+last, a 4-byte size difference, so it is impossible to misread once you look.
+That is what splits the 41-wrapper family at 0x08071F88–0x08072288 into its
+20-byte and 24-byte halves, and it is the reason the fourth parameter of
+`sub_080722B8` has to be declared `void (*)(void)`: an `int` parameter reaches
+the identical instruction *sequence* (row 3), so only the relocation on the pool
+word tells them apart, and only a function-pointer type produces one.
+**Conversely, the pool `ldr` does NOT distinguish a symbol from a >255 integer
+constant** — rows 1 and 3 are byte-identical apart from that relocation — so do
+not read `ldr rN,=` at a call site as evidence of a symbol on its own.
 
 **Pool word order is expansion order, and a store expands its destination
 address *before* its value.** That is the lever for `gPtr = gArray;` next to
@@ -996,6 +1109,59 @@ operand, and only a statement boundary forces the address to be built first.
 Read backwards: **an index multiply sitting between a pointer global's pool
 `ldr` and its `ldr [rB]` means the original bound the element address to a
 local in a statement of its own.**
+
+**`p[X + C]` and `*(p + X + C)` are NOT the same code, and the difference is a
+whole register.** `a[b]` is `*(a + b)` in the C front end, so the two look
+interchangeable and this file's fold table happily lists a subscript and an
+explicit deref in the same row — that table is about which constants reach the
+*pool*, and it does not cover this. When a pointer global's deref is used
+**twice** in one address expression — once as the base and once to load the
+index — the two spellings differ in which register the deref lands in, at
+identical length and identical instruction order:
+
+```c
+p = g;  *(p + *(u16 *)(p + 0x4184) + 0x143f)   /* ldr r0,=g ; ldr r0,[r0] ; ldr r2,=0x4184
+                                                  ; add r1,r0,r2 ; ldrh r1,[r1] ; add r0,r0,r1
+                                                  ; ldr r1,=0x143f ; add r0,r0,r1  -- deref in r0 */
+
+p = g;   p[*(u16 *)(p + 0x4184) + 0x143f]      /* ldr r0,=g ; ldr r1,[r0] ; ldr r2,=0x4184
+                                                  ; add r0,r1,r2 ; ldrh r0,[r0] ; add r0,r0,r1
+                                                  ; ldr r1,=0x143f ; add r0,r0,r1  -- deref in r1 */
+```
+
+The subscript groups `X + C` as an integer add *inside* the pointer add, and
+writing the constant before the variable (`*(p + C + X)`) does the same thing
+— `fold` reassociates both back to `(p + X) + C`, so all three end up with the
+identical instruction sequence and only the allocation differs. **The deref
+reaches r0 only when the source's leftmost pointer add is `p + <the variable
+term>`, with the constant trailing as its own `+ C`.**
+
+One probe, ten spellings, split 4/6 on exactly that. In r0: `*(p + X + C)`,
+and the same with no local at all. In r1: `p[X + C]`, `g[X + C]`, `(p + C)[X]`,
+`*(p + C + X)`, and binding the halfword, the shifted result or the loaded byte
+to a `u16`/`u32`/`int`/`u8` local first — the usual type-and-binding sweep is
+flat here, which is what makes this worth knowing rather than guessing at.
+`sub_08045848` and its three siblings are the r0 row and the natural subscript
+spelling misses all four.
+
+**Its fifth sibling splits off on a second, independent axis: binding `p + C`
+to its own pointer local moves the constant's add ahead of the `ldrh`.** Same
+44 bytes, same instruction multiset, only the order:
+
+```c
+p = g;  q = p + 0x1432;                  /* ldr r0,[r0] ; ldr r2,=0x418c ; add r1,r0,r2
+        *(q + *(u16 *)(p + 0x418c))         ; ldr r2,=0x1432 ; add r0,r0,r2 ; ldrh r1,[r1]
+                                            ; add r0,r0,r1   -- the constant is added FIRST */
+
+p = g;  *(p + *(u16 *)(p + 0x418c) + 0x1432)   /* ... ldrh r1,[r1] ; add r0,r0,r1
+                                                  ; ldr r1,=0x1432 ; add r0,r0,r1 */
+```
+
+`sub_080458F8` is the first row and its four siblings are the second. Read
+backwards: **a pointer global's constant offset added before the load that
+produces the index means the source bound the biased base to a local**; added
+after it, the source wrote one expression. There is no size signal on either
+axis, so both have to be read off the target before drafting.
 
 For an **array global** `extern struct T g[];` there is no deref to schedule,
 and the rule is a real constraint rather than a choice: under `-fforce-addr`,
@@ -2756,6 +2922,25 @@ problem — check, and if the check is negative, record that it was.
   is a leftover, not a regression. Run **`python tools/sync_work.py`** (all) or
   `python tools/sync_work.py <fn>` (one) to refresh the drafts from
   `src/decomp/` before reading anything into a failure there.
+- **When a batch is a run of wrappers over consecutive ROM symbols, dump those
+  symbols out of `baserom.gba` — the data names the family for you and costs one
+  Python call.** The `-fforce-addr` section says to dump the words before
+  modelling a `.LC` block; the general form is more useful than that one case.
+  Two things fall out that the assembly alone cannot give you. **The stride**:
+  address deltas that are constant across the run are a table, and where the run
+  ends is visible as the first entry whose shape stops matching — that is the
+  element size, pinned before any consumer is matched. **The back-reference**:
+  ROM blobs in this tree embed THUMB function pointers (odd word, `& ~1` lands
+  on a `thumb_func_start`), so grepping the dump for your own batch's addresses
+  says which wrapper drives which record. Wave 11's 0x08004A60–0x08004B6C batch
+  is the worked case — `gUnknown_084873BC + 0x48*n` holds `&sub_08004A60 +
+  0x0C*n | 1` at `+0x10` for exactly `n = 0..4`, which proves the 0x48 stride,
+  caps the table at five entries, and pairs each of the five `sub_08004A30(K)`
+  leaves with the wrapper that starts it. None of that is reachable from the
+  fifteen functions' own assembly, and all of it belongs in the header comment.
+  It does **not** change what you declare: `const u8 []` is still the weakest
+  model that gives the clean pool word, and stays right until something indexes
+  the table.
 - **The ban on local declarations is about *globals*, not about struct types.**
   A struct that only describes a pointer *parameter* — an object no header
   declares — belongs in your `.c`. `c_08012C30.c`, `c_08013D4C.c`,
@@ -2975,6 +3160,27 @@ holds one width up — `strh`/`ldrh` is 0–62 even, so a **halfword** member at
 lines above it folds. `sub_08076770` and `sub_080767A8` write the same `+0x64`
 field and both do it; word members at `+0x54`/`+0x58`/`+0x60` in the same family
 never do.
+
+**Past a certain size a wrapper family is best read as a SIZE HISTOGRAM, and
+the sizes are the shapes.** 0x08071F88–0x08072288 is 41 consecutive forwarders,
+the largest single-shape run found so far, and it collapses to five bodies that
+`awlib`'s sizes name outright:
+
+| size | body |
+|---|---|
+| 12 | `CALLEE(K);` — no parameter at all, the incoming r0 is dead |
+| 16 | `CALLEE(K, parent);` — `adds r1, r0, #0`, parameter becomes arg **2** |
+| 20 | `sub_080722B8(N, K, parent, NULL);` — `movs r3, #0` **last** |
+| 24 | `sub_080722B8(N, K, parent, fn);` — pool `ldr r3` **second** |
+| 24 | *or* the 20-byte body plus a second `bl` — check before assuming |
+
+That last row is the trap and it is worth the one grep it costs: `sub_080721B8`
+is 24 bytes sitting among the 20-byte ones and looks like the pool-word shape,
+but it is `sub_080722B8(2, 8, parent, NULL); sub_08072394();` — two statements,
+no pool word. **Two bodies of equal size in one family is normal; size selects a
+candidate, the instruction stream confirms it.** All 41 matched first try from
+one `compile_probe` of the whole batch, with the six callee prototypes settled
+first — the prototypes were the entire job, the wrappers were free.
 
 **This family is the one place a setter's argument width *is* recoverable, and
 it is free.** The Workflow section states the negative half — a bare
@@ -3590,3 +3796,118 @@ extern u8 *gUnknown_08499590;
 
 `BLEND_EFFECT_ALPHA/BRIGHTEN/DARKEN/NONE` are referenced by macros in
 `hardware.h` but never defined anywhere. Literals 2 and 3 are brighten/darken.
+
+---
+
+## Shape families — what clusters, what does not, and the tool that finds them
+
+`tools/families.py` clusters every function by normalised instruction shape and
+writes `data/families.json`. It exists because batching by shape is the biggest
+single lever on match rate found so far, and every family used that way up to
+wave 11 was found by eye — by scanning for runs of equal size at equal address
+spacing. That method only sees families that are contiguous in memory. **The
+`Proc_Find` existence-predicate family is 29 functions spread from 0x0801C7B4 to
+0x0808AA88; the paragraph above claiming 13 was counting the 13 that happen to be
+adjacent.** (Left as written above, because the 13 it describes are correct and
+the codegen claim it makes is the point; read the count as a floor.)
+
+### The normalisation, and why each choice
+
+It is `fe_signatures.signature()`'s `full` signature with exactly one axis
+flipped. Per instruction: mnemonic, then operands with **immediates → `#`**,
+**local labels → `L`**, **all other symbols → `S`**, and **a branch to a local
+label → its delta in instruction indices**. Literal-pool words are excluded
+entirely (`awlib.instructions()` already drops `.4byte`), and their contents are
+reported separately as what *varies* between members.
+
+**Registers are kept, and that is the one divergence from `fe_signatures`.** The
+two tools answer different questions and the difference is not cosmetic.
+`fe_signatures` compares AW2 against four other games built from different
+sources by a different build, where register allocation is noise and has to go.
+Inside one ROM built once, agbcc's allocation is a deterministic function of the
+source, so **a register difference is a source difference.** Measured on the
+41-member `push {lr}; movs rN,#imm; bl f; pop {rM}; bx rM` shape:
+
+| shape | n | source |
+|---|---|---|
+| `movs r0,#imm` … `pop {r0}` | 34 | `void g(void)  { f(imm); }` |
+| `movs r0,#imm` … `pop {r1}` | 3 | `int  g(void)  { return f(imm); }` |
+| `movs r1,#imm` … `pop {r1}` | 3 | `int  g(int a) { return f(a, imm); }` |
+| `movs r1,#imm` … `pop {r0}` | 1 | `void g(int a) { f(a, imm); }` |
+
+**The register holding the immediate names the argument position, and the `pop`
+register discriminates void from value-returning** (`pop {r0}` overwrites the
+callee's result, so it was discarded). Those are four different C templates, not
+four spellings of one — an agent handed the erased version has to notice the
+split itself, which is exactly the work batching was supposed to remove. The same
+reading applies to `ldr r0,L` vs `ldr r1,L` before a `bl`, and to which register
+an `lsls/lsrs` cast pair operates on.
+
+Cost of keeping them, ROM-wide: **16 members** (2.2%) drop out of any family, and
+13 shapes split — but the shards are 72/6/1, 50/5, 34/3/3/1, 19/1, 9/1 and so on,
+i.e. one dominant template plus a handful of genuinely different ones. Cheap, and
+it buys the guarantee that a family is one body.
+
+**Callee names are erased, and that is load-bearing in the other direction.** The
+41 forwarders at 0x08071F88 call eight different functions and are four
+templates; `push {lr}; bl f; pop {r0}; bx r0` is 50 functions calling 48 distinct
+targets. Keeping callees shatters both into singletons. Same argument for the
+pool: "same shape, different global" is the family you want to find.
+
+A second **fuzzy** tier widens each exact family to shapes within ~2 edits of its
+representative, compared on the register-*erased* sequence. Two constraints were
+found by measurement and both matter:
+
+- **It must be anchored on an exact family, never transitive.** The first cut
+  used union-find over all pairwise links and transitivity destroyed it: A~B and
+  B~C merge even when A and C share nothing, producing a 110-member "family"
+  across 71 shapes and sizes 20 through 48. Anchoring costs recall and buys the
+  property that matters — every member is within two edits of the one function
+  the agent is told to solve first.
+- **Minimum 10 instructions.** At 8, `push/bl/pop/bx` and `push/movs/bl/pop/bx`
+  are one edit apart and the whole 4–8 instruction wrapper population fuses.
+  Short shapes lose nothing: they already cluster exactly, and fuzz only blurs
+  them.
+
+### What clusters well
+
+- **Forwarders and wrappers** (4–8 instructions). The largest populations in the
+  ROM by a wide margin and essentially free once the shape is written once.
+- **Long straight-line functions differing only in globals.** The best find is
+  F022: seven 188-byte, 75-instruction functions at 0x0805CA60–0x0805D2xx that
+  differ in two globals and one compared constant (`cmp r0,#1` vs `#4` vs `#5`).
+  1,316 bytes behind one worked shape. **Size does not predict family-ness in
+  either direction** — a 188-byte function can be a template instance.
+- **Bitfield predicates.** The 5×44-byte family at 0x08045848 is
+  `(gPtr[...])->bits >> 5 == 1` with different table offsets.
+- **Getter/setter one-liners** (`ldr r1,L; movs r0,#; strh r0,[r1]; bx lr`).
+
+### What does not cluster, and must not be made to
+
+- **Size.** Twenty-five clustered functions in the ROM are 44 bytes and they fall
+  into five unrelated families (16, 19, 15 and 19-instruction shapes). Any
+  heuristic that treats equal size as evidence merges them. This is the third
+  validation check below and it is there because size-and-spacing scanning is
+  precisely the method being replaced.
+- **Return stubs.** 83 functions are the single instruction `bx lr`. They cluster
+  perfectly and mean nothing; excluded via `awlib.is_trivial()` because they are
+  handled by the bulk stub sweep, and including them puts a meaningless
+  83-member family at the top of every ranking.
+- **Shapes under 4 instructions**, for the same reason.
+
+### Validation — the tool re-derives all three known families
+
+Run on every invocation; `families.py` exits non-zero if any check fails, because
+clusters that cannot be checked against something already known would get
+believed and batched on blindly.
+
+| check | result |
+|---|---|
+| 41 forwarders at 0x08071F88–0x08072288 → ~4 clusters | **PASS** — 4 clusters of 14/11/8/6 plus one member that joins a larger family elsewhere; 40 of 41 clustered |
+| `Proc_Find` predicate family → 29 members | **PASS** — 29, spanning 0x0801C7B4–0x0808AA88, all 29 already matched |
+| 44-byte bitfield family not merged by size | **PASS** — 4 exact, 5 with the fuzzy tier (the fifth hoists one `ldr` two instructions earlier, same source, different schedule); the other four 44-byte families stay separate |
+
+Current totals: **98 families ≥ 3 members, 698 members, 451 of them still
+unmatched**, plus 20 fuzzy clusters. Read `data/families.json` → `batching_plan`
+for the ranked list; `with_exemplar` entries are cheaper than `cold` ones because
+the shape is already solved in `src/decomp/`.
