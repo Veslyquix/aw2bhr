@@ -1,0 +1,22 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08076F14.
+ * sub_08076F14 @ 0x08076F14
+ */
+
+/* "Is (x, y) inside a radius-16 circle?" -- x*x + y*y against 0xff.
+ * Both parameters carry `lsls #16; asrs #16`, so they are s16 objects and not
+ * casts; an `int` parameter would have no extension at all.
+ * The pool-free if/return pair is the long spelling: `return x*x + y*y <= 255;`
+ * would keep the true block as a fallthrough and never materialise the 0. */
+
+int sub_08076F14(s16 x, s16 y)
+{
+    if (x * x + y * y <= 0xff)
+        return 1;
+
+    return 0;
+}

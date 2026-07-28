@@ -18,6 +18,7 @@ expensive kind of false negative there is. Parsing keeps the two in step.
     from agbenv import compile_c, assemble, run
 """
 
+import json
 import os
 import re
 import shlex
@@ -136,8 +137,33 @@ def makefile_var(name):
     return value.strip()
 
 
-def flags():
-    return {
+_OVERRIDES = None
+
+
+def compiler_overrides():
+    """data/compiler-overrides.json, or {} if it is absent."""
+    global _OVERRIDES
+    if _OVERRIDES is None:
+        path = os.path.join(awlib.REPO, "data", "compiler-overrides.json")
+        try:
+            with open(path, encoding="utf-8") as fh:
+                _OVERRIDES = json.load(fh).get("functions", {})
+        except (IOError, OSError, ValueError):
+            _OVERRIDES = {}
+    return _OVERRIDES
+
+
+def flags(fn=None):
+    """Build flags, with `fn`'s per-function override applied if it has one.
+
+    Parts of the ROM were not built with the default toolchain -- the sound and
+    flash libraries came prebuilt out of the SDK. Passing the function name here
+    is what keeps trymatch.py and compile_probe judging a candidate the way the
+    ROM was actually built. Without it they contradict the Makefile, report an
+    already-solved function as a failure, and every later wave re-attempts it.
+    See data/compiler-overrides.json.
+    """
+    f = {
         "CPPFLAGS": makefile_var("CPPFLAGS"),
         "CFLAGS": makefile_var("CFLAGS"),
         "ASFLAGS": makefile_var("ASFLAGS"),
@@ -146,16 +172,29 @@ def flags():
         "STRIP": makefile_var("STRIP") or "arm-none-eabi-strip",
         "CC1": makefile_var("CC1") or "tools/agbcc/bin/agbcc",
     }
+    ov = compiler_overrides().get(fn) if fn else None
+    if not ov:
+        return f
+    if ov.get("cc1"):
+        # Forward slashes deliberately: this string is handed to a POSIX shell,
+        # and os.path.join would emit backslashes on Windows that bash discards.
+        f["CC1"] = "%s/bin/%s" % (makefile_var("AGBCC_HOME") or "tools/agbcc",
+                                  ov["cc1"])
+    for opt in ov.get("cflags_remove", ()):
+        f["CFLAGS"] = f["CFLAGS"].replace(" " + opt, "")
+    for opt in ov.get("cflags_add", ()):
+        f["CFLAGS"] += " " + opt
+    return f
 
 
-def compile_c(src, out_o, out_s=None, extra_cflags=""):
+def compile_c(src, out_o, out_s=None, extra_cflags="", fn=None):
     """Compile one C file exactly as the Makefile's `$(BUILD_DIR)/%.o: %.c` does.
 
     The `.text/.align` line appended after agbcc and the `.gcc2_compiled.` strip
     are part of that recipe, not incidental -- omitting either changes the
     object and so changes whether a candidate is judged to match.
     """
-    f = flags()
+    f = flags(fn)
     out_s = out_s or (os.path.splitext(out_o)[0] + ".s")
     script = (
         'set -e\n'

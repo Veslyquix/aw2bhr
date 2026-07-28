@@ -98,6 +98,15 @@ ifeq ($(SPLIT),1)
   ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s')
   C_SRCS += $(shell find $(SRC_DIR)/decomp -name '*.c' 2>/dev/null)
   LDS := $(BUILD_NAME).split.lds
+
+  # Parts of the ROM were not built with the default toolchain -- the sound and
+  # flash libraries came out of the SDK prebuilt with their own settings, which
+  # is why CC1_OLD has been defined since the beginning. These are per-object
+  # assignments, so nothing outside the named files is affected. Source of truth
+  # is data/compiler-overrides.json, which tools/agbenv.py reads too so that
+  # trymatch.py and compile_probe agree with this build.
+  #     python tools/gen_overrides_mk.py
+  -include $(BUILD_DIR)/compiler-overrides.mk
 endif
 
 C_GENERATED :=

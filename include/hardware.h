@@ -202,7 +202,14 @@ extern struct DispIo gDispIo;
 // IWRAM shadows of the display registers. Every other unnamed global lives in
 // unknown-globals.h; these are here because they need the types above.
 extern union BgCntBuf gUnknown_03001FE8;
-extern u16 gUnknown_03001FFC;
+// VOLATILE, and it is load-bearing in exactly one place: sub_08078F00 does
+// `gUnknown_03001FFC += 2;` and then tests the global again, and the ROM
+// re-`ldrh`s it (`ldrh r1,[r0]; adds r1,#2; strh r1,[r0]; ldrh r0,[r0]`).
+// Without volatile GCC forwards the stored value and re-narrows it with
+// `lsl #16; lsr #16` instead -- see the store-forwarding rule in
+// docs/agbcc-codegen.md. The other eight users are bare scalar stores of a
+// constant and are byte-identical either way (verified with trymatch).
+extern volatile u16 gUnknown_03001FFC;
 // REG_DISPSTAT's shadow. Declared u8 until wave 6, which was not merely narrow:
 // sub_08012A34 clears bit 4 with `mov #0x11; rsbs`, and a scalar `&= ~0x10`
 // emits a bare `mov #0xef`. The `mov #N; neg` is the bitfield tell, so the
@@ -227,6 +234,20 @@ extern union WinCntBuf gUnknown_030030DC;
 // scalar `(x & 0x3f) | 0x80` and so is not by itself proof of the bitfield;
 // the complement mask 0x3F simply has bit 7 clear, so it does not get the
 // `mov #N; neg` pair. sub_08010FA0 is the independent bitfield evidence.
+//
+// The union is not a convenience: this object is genuinely written BOTH ways,
+// and which one you need is readable off the access width. The 0x0806717C /
+// 08067300 / 08067410 / 08067F5C / 0806A4DC family sets whole target groups
+// with a raw HImode read-modify-write (`ldrh; ldr =0xFFE0; ands; orrs; strh`),
+// and that CANNOT be five 1-bit field writes: a 5-bit field at bit 0 lives
+// inside byte 0, so get_best_mode picks QImode and would have emitted
+// `ldrb`/`strb`, and an all-ones bitfield value drops the AND entirely
+// (store_fixed_bit_field's `all_one`). The same functions then set the single
+// target*_enable_bd bit through `.bits`, which really is QImode. So: `ldrh`
+// with a pool mask means `.raw`, `ldrb` with a movs/neg mask means `.bits`,
+// and a function may use both a line apart. sub_0806A4DC is the all-bitfield
+// end of the family and reads off directly -- one `orr` per field set to 1,
+// one `and` per field cleared, in source order.
 extern union BlendCntBuf gUnknown_030030E0;
 
 // Serial communication. The display registers are reached through gDispIo
@@ -278,6 +299,26 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define REG_BG3HOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG3HOFS))
 #define REG_BG3VOFS (*(vu16 *)(REG_BASE + REG_OFFSET_BG3VOFS))
 
+// Window bounds and window control. gDispIo has no members for these -- the
+// win0_left/top/right/bottom names in the SetWin* macros belong to the #if 0
+// layout -- so sub_08019A0C writes all four registers directly, after enabling
+// win0 through the gDispIo.disp_ct shadow. WININ and WINOUT are adjacent, and
+// agbcc CSEs the second address into `adds rN, #2` exactly as it does for the
+// BG scroll pairs above.
+#define REG_OFFSET_WIN0H   0x040
+#define REG_OFFSET_WIN1H   0x042
+#define REG_OFFSET_WIN0V   0x044
+#define REG_OFFSET_WIN1V   0x046
+#define REG_OFFSET_WININ   0x048
+#define REG_OFFSET_WINOUT  0x04A
+
+#define REG_WIN0H  (*(vu16 *)(REG_BASE + REG_OFFSET_WIN0H))
+#define REG_WIN1H  (*(vu16 *)(REG_BASE + REG_OFFSET_WIN1H))
+#define REG_WIN0V  (*(vu16 *)(REG_BASE + REG_OFFSET_WIN0V))
+#define REG_WIN1V  (*(vu16 *)(REG_BASE + REG_OFFSET_WIN1V))
+#define REG_WININ  (*(vu16 *)(REG_BASE + REG_OFFSET_WININ))
+#define REG_WINOUT (*(vu16 *)(REG_BASE + REG_OFFSET_WINOUT))
+
 // BLDCNT. gDispIo.blend_ct is the RAM shadow; sub_080129B4 writes the register
 // directly with a whole halfword rather than going through it.
 // sub_0801298C writes all three in one go (0x8f, 0, 8).
@@ -298,6 +339,51 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define REG_DMA0DAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA0DAD))
 #define REG_DMA0CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_DMA0CNT_L))
 #define REG_DMA0CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_DMA0CNT_H))
+
+// Channels 1 and 2, the m4a PCM DMAs. sub_08070AF8 (SoundVSyncOn) re-arms both
+// control halfwords with DMA_ENABLE | DMA_START_SPECIAL | DMA_32BIT |
+// DMA_REPEAT and sub_08070A7C (SoundVSyncOff) disarms them. Note agbcc reaches
+// DMA2CNT_H as `adds r0, #0xc` off the DMA1CNT_H pool word rather than emitting
+// a second one, exactly as it does for the BG scroll pair above -- so the two
+// named registers are the right spelling and a `vu16 *` cursor is not needed.
+#define REG_OFFSET_DMA1SAD   0x0BC
+#define REG_OFFSET_DMA1DAD   0x0C0
+#define REG_OFFSET_DMA1CNT   0x0C4
+#define REG_OFFSET_DMA1CNT_L 0x0C4
+#define REG_OFFSET_DMA1CNT_H 0x0C6
+#define REG_OFFSET_DMA2SAD   0x0C8
+#define REG_OFFSET_DMA2DAD   0x0CC
+#define REG_OFFSET_DMA2CNT   0x0D0
+#define REG_OFFSET_DMA2CNT_L 0x0D0
+#define REG_OFFSET_DMA2CNT_H 0x0D2
+
+#define REG_DMA1SAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA1SAD))
+#define REG_DMA1DAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA1DAD))
+#define REG_DMA1CNT   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA1CNT))
+#define REG_DMA1CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_DMA1CNT_L))
+#define REG_DMA1CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_DMA1CNT_H))
+#define REG_DMA2SAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA2SAD))
+#define REG_DMA2DAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA2DAD))
+#define REG_DMA2CNT   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA2CNT))
+#define REG_DMA2CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_DMA2CNT_L))
+#define REG_DMA2CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_DMA2CNT_H))
+
+#define DMA_DEST_INC    0x0000
+#define DMA_DEST_DEC    0x0020
+#define DMA_DEST_FIXED  0x0040
+#define DMA_DEST_RELOAD 0x0060
+#define DMA_SRC_INC     0x0000
+#define DMA_SRC_DEC     0x0080
+#define DMA_SRC_FIXED   0x0100
+#define DMA_REPEAT      0x0200
+#define DMA_16BIT       0x0000
+#define DMA_32BIT       0x0400
+#define DMA_START_NOW   0x0000
+#define DMA_START_VBLANK 0x1000
+#define DMA_START_HBLANK 0x2000
+#define DMA_START_SPECIAL 0x3000
+#define DMA_INTR_ENABLE 0x4000
+#define DMA_ENABLE      0x8000
 
 // Channel 3, the general-purpose one. sub_080638A8 clears one 4bpp tile with
 // it (fixed source, 16 halfwords) and then reads DMA3CNT back into a register

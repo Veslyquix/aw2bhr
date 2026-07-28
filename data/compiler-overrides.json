@@ -1,0 +1,50 @@
+{
+  "_comment": [
+    "Functions the original build did NOT compile with the default toolchain.",
+    "",
+    "tools/agbcc/bin/ holds two compilers. The Makefile defined CC1_OLD for",
+    "old_agbcc from the start and never referenced it; wave 10 found out why it",
+    "is there. The sound and flash libraries came out of the SDK prebuilt with",
+    "their own settings and were dropped into the game's build, which is the",
+    "same layout every other GBA tree has.",
+    "",
+    "This file is the single source of truth for that. tools/agbenv.py applies",
+    "it so trymatch.py and compile_probe judge a candidate the way the ROM was",
+    "actually built, and tools/gen_overrides_mk.py turns it into target-specific",
+    "make variables. Both must agree: an override known only to the build makes",
+    "every later wave re-attempt an already-solved function and conclude it",
+    "cannot be matched.",
+    "",
+    "An entry needs the same standard of evidence as data/asm-resident.json --",
+    "a byte-for-byte match under the named configuration, and a note on what the",
+    "default configuration does differently. 'It matched when I changed a flag'",
+    "with no mechanism is how a real bug gets papered over.",
+    "",
+    "Blast radius, measured by recompiling all 520 promoted files both ways:",
+    "old_agbcc changes 100 of them, dropping -fforce-addr changes 17. Neither",
+    "is a candidate for a global change. Per-file it costs nothing -- no",
+    "promoted file between 0x0806F710 and 0x080745C0 differs under old_agbcc,",
+    "and none above 0x08063A3C differs without -fforce-addr.",
+    "",
+    "CONSTRAINT: an overridden function must sit in a .c file of its own. The",
+    "build applies flags per object, so a shared file would silently recompile",
+    "its neighbours with the wrong toolchain. tools/gen_overrides_mk.py fails",
+    "loudly rather than emitting a rule that would do that."
+  ],
+  "functions": {
+    "sub_080713F8": {
+      "cc1": "old_agbcc",
+      "cflags_remove": ["-fprologue-bugfix"],
+      "reason": "m4a MPlayTempoControl. old_agbcc keeps a member re-read live instead of coalescing it with the value just stored there, and substitutes the stored register rather than emitting a reload: `mplayInfo->tempoU = tempo; ... mplayInfo->tempoD * mplayInfo->tempoU` emits a second ldrh under agbcc and reuses the register under old_agbcc. That extra live value is what forces the `adds r0, r1, #0` copy, the r4 allocation and the `push {r4, lr}` frame -- all three of which the default build was missing at once. Parked at 32 of 40 bytes for two waves against the source axis, which was never the axis. old_agbcc rejects -fprologue-bugfix outright."
+    },
+    "sub_08071564": {
+      "cc1": "old_agbcc",
+      "cflags_remove": ["-fprologue-bugfix"],
+      "reason": "m4a MP_clear_modM, the compiled twin of the hand-written sub_08070300. Under agbcc a two-armed if/else assigning one object collapses to 'store the else value, conditionally overwrite' -- one arm, no unconditional b, one instruction shorter. old_agbcc does not do that rewrite: both arms and the b survive, the shared operand is loaded after the merge, and the branchless arm's constant stays as a second, dead movs. That one rewrite was the entire 4-byte deficit, after eighteen source spellings had been probed against it."
+    },
+    "sub_0808AD6C": {
+      "cflags_remove": ["-fforce-addr"],
+      "reason": "SetReadFlash1 -- the flash library, not the game. Relocates a 4-byte THUMB routine into RAM and publishes it through gUnknown_03000F6C with the THUMB bit set. -fforce-addr is what made agbcc keep the sub_0808AD68 pool word in a register across the eors that clobbers it; without the flag it rematerialises, which is the double load the ROM has. Either compiler works. Parked at 85.7% across two waves and a permuter run, all of it spent on the source."
+    }
+  }
+}

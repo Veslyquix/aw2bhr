@@ -268,7 +268,7 @@ def check(name, want_diff=False, keep_going=False):
 
     # Candidate.
     cand_o = "work/%s/%s.o" % (fn, fn)
-    rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o)
+    rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o, fn=fn)
     if rc != 0:
         print("COMPILE FAILED")
         msg = (se or so).strip().splitlines()
