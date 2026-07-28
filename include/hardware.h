@@ -192,6 +192,34 @@ extern union BgCntBuf gUnknown_030030B4;
 extern union WinCntBuf gUnknown_030030DC;
 extern union BlendCntBuf gUnknown_030030E0;
 
+// Serial communication. The display registers are reached through gDispIo
+// rather than directly, but the link hardware has no shadow -- sub_08062FB8
+// writes it with bare casts, and every other link function will too. Adding a
+// register here is a one-liner; hand-rolling the cast a second time is how two
+// spellings of the same address end up in the tree.
+#define REG_BASE 0x04000000
+
+#define REG_OFFSET_SIOMULTI0 0x120
+#define REG_OFFSET_SIOMULTI1 0x122
+#define REG_OFFSET_SIOMULTI2 0x124
+#define REG_OFFSET_SIOMULTI3 0x126
+#define REG_OFFSET_SIOCNT    0x128
+#define REG_OFFSET_SIODATA8  0x12A
+#define REG_OFFSET_RCNT      0x134
+
+#define REG_SIOMULTI0 (*(vu16 *)(REG_BASE + REG_OFFSET_SIOMULTI0))
+#define REG_SIOMULTI1 (*(vu16 *)(REG_BASE + REG_OFFSET_SIOMULTI1))
+#define REG_SIOMULTI2 (*(vu16 *)(REG_BASE + REG_OFFSET_SIOMULTI2))
+#define REG_SIOMULTI3 (*(vu16 *)(REG_BASE + REG_OFFSET_SIOMULTI3))
+#define REG_SIOCNT    (*(vu16 *)(REG_BASE + REG_OFFSET_SIOCNT))
+#define REG_SIODATA8  (*(vu16 *)(REG_BASE + REG_OFFSET_SIODATA8))
+#define REG_RCNT      (*(vu16 *)(REG_BASE + REG_OFFSET_RCNT))
+
+// SIOMULTI0 and SIODATA32's low half are the same address, as are SIODATA8 and
+// SIOMLT_SEND. Which name is right depends on the mode SIOCNT selects.
+#define REG_SIODATA32 (*(vu32 *)(REG_BASE + REG_OFFSET_SIOMULTI0))
+#define REG_SIOMLT_SEND REG_SIODATA8
+
 struct KeySt
 {
     /* 00 */ u8 repeat_delay; // initial delay before generating auto-repeat presses

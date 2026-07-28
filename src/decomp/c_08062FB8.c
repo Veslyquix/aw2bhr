@@ -7,6 +7,8 @@
  * sub_08062FB8 @ 0x08062FB8
  */
 
+#include "hardware.h"
+
 struct Unk08062FB8
 {
     /* 0x00 */ u8 filler_00[0x16];
@@ -30,7 +32,7 @@ void sub_08062FB8(struct Unk08062FB8 *p)
     p->unk48 = 0;
     p->unk16 = 0;
 
-    *(vu16 *)0x04000134 = 0;      /* REG_RCNT     */
-    *(vu16 *)0x04000128 = 0x2003; /* REG_SIOCNT   */
-    *(vu16 *)0x0400012A = 0;      /* REG_SIODATA8 */
+    REG_RCNT = 0;
+    REG_SIOCNT = 0x2003;
+    REG_SIODATA8 = 0;
 }
