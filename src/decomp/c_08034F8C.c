@@ -9,6 +9,6 @@
 
 void sub_08034F8C(void)
 {
-    if (gUnknown_030030F0 != 0)
-        gUnknown_030030F0--;
+    if (gUnknown_030030F0.unk00 != 0)
+        gUnknown_030030F0.unk00--;
 }

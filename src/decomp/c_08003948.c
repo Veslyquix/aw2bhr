@@ -9,5 +9,5 @@
 
 void sub_08003948(void)
 {
-    *gUnknown_0200B0B0 &= ~8;
+    gUnknown_0200B0B0->unk00 &= ~8;
 }

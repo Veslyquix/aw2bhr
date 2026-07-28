@@ -79,6 +79,37 @@ struct Unk0200E438 /* 0x4c */
     /* 0x48 */ u32 *unk48;
 };
 
+/* 0xe0 bytes, per the map (gUnknown_0200C500 is the next symbol) -- not the
+ * u32[2] it was first declared as. Only the first two words are the save/restore
+ * pair shared with gUnknown_0200C500, which really is 8 bytes; the rest of the
+ * object is unrelated. unk20 is indexed by `a % 24` (sub_08017860 via __modsi3),
+ * which is what fixes its extent at 0x18.
+ */
+struct Unk0200C420 /* 0xe0 */
+{
+    /* 0x00 */ u32 unk00;
+    /* 0x04 */ u32 unk04;
+    /* 0x08 */ u8 filler_08[0x18];
+    /* 0x20 */ u8 unk20[0x18];
+    /* 0x38 */ u8 filler_38[0xa8];
+};
+
+/* Reached as a struct, not as the u16 array it was first declared as: there is
+ * a `strb` at +6, which no u16 element addresses. The distinction is not
+ * cosmetic -- sub_08003934's `|= 8` at +0 only matches through an aggregate
+ * member lvalue (see the `orr` operand rule in docs/agbcc-codegen.md), so a
+ * scalar spelling of this global cannot express it at all.
+ */
+struct Unk0200B0B0 /* >= 0x4e */
+{
+    /* 0x00 */ u16 unk00; /* flags; bit 3 set by sub_08003934, cleared by sub_08003948 */
+    /* 0x02 */ u16 unk02;
+    /* 0x04 */ u16 unk04;
+    /* 0x06 */ u8 unk06;
+    /* 0x07 */ u8 filler_07[0x45];
+    /* 0x4c */ u16 unk4c;
+};
+
 struct Unk0200F720 /* 0x10 */
 {
     /* 0x00 */ u8 filler_00[0x06];
@@ -143,9 +174,11 @@ struct Unk02029A10Group /* 0xb4 */
 struct Unk03001470 /* 0x60 */
 {
     /* 0x00 */ u32 unk00;
-    /* 0x04 */ u8 filler_04[0x04];
+    /* 0x04 */ const void *unk04;
     /* 0x08 */ u32 unk08;
-    /* 0x0c */ u8 filler_0c[0x1a];
+    /* 0x0c */ u8 filler_0c[0x04];
+    /* 0x10 */ u16 unk10;
+    /* 0x12 */ u8 filler_12[0x14];
     /* 0x26 */ u16 unk26;
     /* 0x28 */ u8 filler_28[0x10];
     /* 0x38 */ u16 unk38;
@@ -166,6 +199,24 @@ struct Unk03002B80 /* 0x35a */
     /* 0x000 */ u8 unk00;
     /* 0x001 */ u8 filler_01[0x357];
     /* 0x358 */ u16 unk358;
+};
+
+/* Three byte-sized flags reached off one symbol. Not three separate globals:
+ * every access goes through one pool word for 0x030030F0 plus a displacement,
+ * so the original had a single aggregate here.
+ *   unk00  a countdown -- sub_08034F7C bumps it, sub_08034F8C decrements it
+ *          with a floor at zero, sub_08034FA4 clears it. SIGNED: sub_08034F8C
+ *          reads it with `ldrsb` and sub_08034F6C returns it sign-extended.
+ *   unk01  set/cleared by sub_08034F48 / sub_08034F54, read by sub_08034F60
+ *   unk02  set/cleared by sub_0803BD54 / sub_0803BD60, read by sub_0803BD6C
+ * unk01 and unk02 are only ever read zero-extended, so u8 is the weakest type
+ * that fits; s8 fits equally well if a sign-extending read ever turns up.
+ */
+struct Unk030030F0 /* 0x03 */
+{
+    /* 0x00 */ s8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u8 unk02;
 };
 
 struct Unk03003130 /* 0x12 */
@@ -193,7 +244,9 @@ union Unk802C57CBuf
 
 struct Unk03003FC0 /* 0x47 */
 {
-    /* 0x00 */ u8 filler_00[0x43];
+    /* 0x00 */ u8 filler_00[0x02];
+    /* 0x02 */ u8 unk02;
+    /* 0x03 */ u8 filler_03[0x40];
     /* 0x43 */ u8 unk43;
     /* 0x44 */ u8 unk44;
     /* 0x45 */ u8 unk45;
@@ -204,6 +257,30 @@ struct Unk030040D8
 {
     /* 0x00 */ u8 filler_00[0x05];
     /* 0x05 */ u8 unk05;
+};
+
+/* 0x02028360 -- 8-byte entries. sub_0803F5C8 returns &g[i], sub_0803F5D4
+ * recovers the index as a u8 with (p - g), so the stride is load-bearing.
+ * unk02 carries a bitfield cleared with ~0x03C0 by sub_0803DE68.
+ * gUnknown_020283E0 is a second object of the same shape.
+ */
+struct Unk02028360 /* 0x08 */
+{
+    /* 0x00 */ u16 unk00;
+    /* 0x02 */ u16 unk02;
+    /* 0x04 */ u16 unk04;
+    /* 0x06 */ u16 unk06;
+};
+
+/* 0x03003338 points at ROM (set from gUnknown_0849FE74[0] by sub_0803486C).
+ * Stride 8, four u16 written together by sub_080413B4.
+ */
+struct Unk03003338 /* 0x08 */
+{
+    /* 0x00 */ u16 unk00;
+    /* 0x02 */ u16 unk02;
+    /* 0x04 */ u16 unk04;
+    /* 0x06 */ u16 unk06;
 };
 
 struct Unk030044E0 /* 0x5e */
@@ -313,6 +390,24 @@ struct Unk08580934
     /* 0x74 */ struct Unk08580934_Sub *unk74[1];
 };
 
+/* 0x085C77A0 -- ROM table, stride 0x5c, at least 0xc0 entries (the bound
+ * `cmp r1,#0xbf; bhi` in sub_080206B0). The symbol address is added directly,
+ * so this is the array itself and not a pointer to it.
+ *   unk28    bit 0 tested by sub_080587FC
+ *   unk2c    u32 compared against a caller's value (sub_080206B0 scans it)
+ *   unk3c[]  4 bytes, 0xff = empty (sub_0803BD14 counts the leading non-0xff)
+ */
+struct Unk085C77A0 /* 0x5c */
+{
+    /* 0x00 */ u8 filler_00[0x28];
+    /* 0x28 */ u8 unk28;
+    /* 0x29 */ u8 filler_29[0x03];
+    /* 0x2c */ u32 unk2c;
+    /* 0x30 */ u8 filler_30[0x0c];
+    /* 0x3c */ u8 unk3c[4];
+    /* 0x40 */ u8 filler_40[0x1c];
+};
+
 struct Unk085D5ABC /* 0x5c */
 {
     /* 0x00 */ u8 filler_00[0x1e];
@@ -322,8 +417,8 @@ struct Unk085D5ABC /* 0x5c */
 
 /* -------------------------------------------------------------- EWRAM -- */
 
-extern u16 *gUnknown_0200B0B0;
-extern u32 gUnknown_0200C420[2];
+extern struct Unk0200B0B0 *gUnknown_0200B0B0;
+extern struct Unk0200C420 gUnknown_0200C420;
 extern u32 gUnknown_0200C500[2];
 extern struct UnkC528 gUnknown_0200C528[];
 extern struct SpriteEntry gUnknown_0200D510[];
@@ -332,6 +427,7 @@ extern struct Unk0200F720 gUnknown_0200F720[];
 extern struct Unk0200F920 gUnknown_0200F920[];
 extern struct Unk02028030 gUnknown_02028030;
 extern struct Unk020280C0 gUnknown_020280C0[];
+extern struct Unk02028360 gUnknown_02028360[];
 extern u8 gUnknown_02028E40;
 extern u8 gUnknown_02028E41[];
 extern struct Unk02029A10Group gUnknown_02029A10[];
@@ -339,15 +435,19 @@ extern struct Unk02029A10Group gUnknown_02029A10[];
 /* -------------------------------------------------------------- IWRAM -- */
 
 extern void *gUnknown_03000000[];
+extern u8 gUnknown_03000650[];
 extern u16 gUnknown_03001400;
+extern u16 gUnknown_03001404;
 extern u16 gUnknown_03001418;
 extern struct Unk03001470 gUnknown_03001470[];
 extern s16 gUnknown_03001FBC;
 extern u32 gUnknown_03001FD4;
+extern u32 gUnknown_03001FE0;
 extern u16 gUnknown_03001FF8;
 extern u16 gUnknown_03002000;
 extern u16 gUnknown_0300200C;
 extern struct Unk03002040 gUnknown_03002040;
+extern u8 gUnknown_030020B4;
 extern u8 gUnknown_030020B8;
 extern u8 gUnknown_030024E4;
 extern u16 gUnknown_0300251C;
@@ -364,37 +464,70 @@ extern u8 gUnknown_03002EFC;
 extern u16 gUnknown_03002F00;
 extern u16 gUnknown_03002F18;
 extern void *gUnknown_03002FA0[];
+/* 0x40 bytes = 16 entries. The IRQ handler table: crt0.s indexes it by the
+ * interrupt's word offset and `bx`es to the entry; sub_0801BAE0 fills entries
+ * 0..14 with sub_0801BAB8. sub_0801BB00(index, handler) is the setter. */
+extern void *gUnknown_03002FE0[];
 extern u16 gUnknown_030030A0;
 extern u16 gUnknown_030030C4;
 extern volatile u16 gUnknown_030030E8;
-extern s8 gUnknown_030030F0;
+extern struct Unk030030F0 gUnknown_030030F0;
 extern union Unk802C57CBuf gUnknown_03003100;
 extern struct Unk03003130 gUnknown_03003130;
 extern u16 gUnknown_030032C0;
 extern struct Unk802C57C gUnknown_030032C4;
+extern u16 gUnknown_030032D8;
+extern struct Unk03003338 *gUnknown_03003338;
 extern struct Unk802C57C gUnknown_030033E0;
 extern struct Unk802C57C gUnknown_030033E4;
 extern u8 gUnknown_030033F4[];
 extern union Unk802C57CBuf gUnknown_03003F24;
+/* At least 7 bytes: sub_0803BBD4 clears [0..6] through a variable index, so
+ * this really is an array and not a struct. Elements are SIGNED --
+ * sub_0803BB44/BB5C/BB74 and sub_0803B8E0/B904 all read one with
+ * `ldrb; lsl #24; asr #24`. The getters at 0803BC7C/BC88/BC94 return the same
+ * bytes zero-extended, i.e. as u8.
+ */
+extern s8 gUnknown_03003F30[];
+extern int gUnknown_03003F40;
+extern void *gUnknown_03003F68;
 extern struct Unk03003FC0 gUnknown_03003FC0;
 extern u16 gUnknown_03004080;
 extern struct Unk802C57C gUnknown_03004090;
 extern struct Unk802C57C gUnknown_030040A4;
+/* Two callback slots installed by sub_0803662C. sub_080366F4 calls
+ * gUnknown_030040D0 with no arguments after a NULL test.
+ */
+extern void (*gUnknown_030040D0)(void);
 extern struct Unk030040D8 *gUnknown_030040D8;
+extern void (*gUnknown_030040EC)(void);
 extern struct Unk802C57C gUnknown_030044A4;
 extern struct Unk030044E0 *gUnknown_030044E0;
 extern u16 gUnknown_03004518;
 extern u16 gUnknown_03004538;
 extern u16 gUnknown_030045D4;
 extern u16 gUnknown_03004780;
+/* Write cursor into the gUnknown_03005948/58 byte arrays, post-incremented
+ * per record by sub_08078608 and its siblings.
+ */
+extern u32 gUnknown_03005944;
+/* Five words, cleared/filled as a unit by sub_08078740 and sub_08078758. */
+extern u32 gUnknown_030059C0[];
 
 /* ---------------------------------------------------------------- ROM -- */
 
 extern struct Unk08090CD8 *const gUnknown_08090CD8;
 extern const s16 gUnknown_08090EAC[];
+extern const struct ProcCmd gUnknown_086140D4[];
+extern u8 gUnknown_0810BE60[];
 extern u8 gUnknown_0810E6E0[];
+extern u8 gUnknown_0810E820[];
 extern const u8 gUnknown_08106A64[][32];
 extern const u8 gUnknown_08108264[][32];
+/* Compressed blobs, 0x2f8 and 0x37c bytes. Non-const because both are only
+ * ever handed to Decompress(u8 *, void *), whose prototype takes u8 *. */
+extern u8 gUnknown_08126244[];
+extern u8 gUnknown_0812653C[];
 extern u16 *gUnknown_08499578;
 extern u16 *gUnknown_0849957C;
 extern u16 *gUnknown_08499580;
@@ -409,6 +542,8 @@ extern const struct Unk0849CD88 gUnknown_0849CD88[];
 extern const struct ProcCmd gUnknown_0849FB44[];
 extern u32 *gUnknown_08555450[];
 extern struct Unk08580934 *gUnknown_08580934;
+extern const struct Unk085C77A0 gUnknown_085C77A0[];
+extern const s16 gUnknown_08580E64[];
 extern const struct Unk085D5ABC gUnknown_085D5ABC[];
 
 #endif // UNKNOWN_GLOBALS_H

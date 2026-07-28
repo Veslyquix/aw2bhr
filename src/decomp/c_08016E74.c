@@ -9,6 +9,6 @@
 
 void sub_08016E74(void)
 {
-    gUnknown_0200C500[0] = gUnknown_0200C420[0];
-    gUnknown_0200C500[1] = gUnknown_0200C420[1];
+    gUnknown_0200C500[0] = gUnknown_0200C420.unk00;
+    gUnknown_0200C500[1] = gUnknown_0200C420.unk04;
 }

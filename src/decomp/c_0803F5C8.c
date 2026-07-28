@@ -3,12 +3,11 @@
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08016E8C.
- * sub_08016E8C @ 0x08016E8C
+ * contiguous block at 0x0803F5C8.
+ * sub_0803F5C8 @ 0x0803F5C8
  */
 
-void sub_08016E8C(void)
+struct Unk02028360 *sub_0803F5C8(int index)
 {
-    gUnknown_0200C420.unk00 = gUnknown_0200C500[0];
-    gUnknown_0200C420.unk04 = gUnknown_0200C500[1];
+    return &gUnknown_02028360[index];
 }
