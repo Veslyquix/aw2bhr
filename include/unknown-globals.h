@@ -38,18 +38,18 @@ struct UnkVec
  * destination address of a store in sub_08017B8C/sub_08017BB0, which cast it;
  * unk0c is the value written there.
  */
-struct UnkC528Node /* 0x10 */
+struct Unk0200C528Node /* 0x10 */
 {
     /* 0x00 */ u8 filler_00[4];
-    /* 0x04 */ struct UnkC528Node *unk04;
+    /* 0x04 */ struct Unk0200C528Node *unk04;
     /* 0x08 */ u8 filler_08[4];
     /* 0x0c */ u32 unk0c;
 };
 
-struct UnkC528 /* 0x18 */
+struct Unk0200C528 /* 0x18 */
 {
-    /* 0x00 */ struct UnkC528Node *unk00;
-    /* 0x04 */ struct UnkC528Node *unk04;
+    /* 0x00 */ struct Unk0200C528Node *unk00;
+    /* 0x04 */ struct Unk0200C528Node *unk04;
     /* 0x08 */ u8 filler_08[0x04];
     /* 0x0c */ u16 unk0c;
     /* 0x0e */ u8 filler_0e[0x0a];
@@ -624,7 +624,7 @@ extern struct Unk0200B0B0 *gUnknown_0200B0B0;
 extern s8 gUnknown_0200B5F4[0x20];
 extern struct Unk0200C420 gUnknown_0200C420;
 extern u32 gUnknown_0200C500[2];
-extern struct UnkC528 gUnknown_0200C528[];
+extern struct Unk0200C528 gUnknown_0200C528[];
 extern struct SpriteEntry gUnknown_0200D510[];
 extern struct Unk0200E438 gUnknown_0200E438[];
 extern struct Unk0200F720 gUnknown_0200F720[];

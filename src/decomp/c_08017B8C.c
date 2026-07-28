@@ -9,7 +9,7 @@
 
 bool8 sub_08017B8C(s16 a)
 {
-    struct UnkC528Node *p = gUnknown_0200C528[a].unk04;
+    struct Unk0200C528Node *p = gUnknown_0200C528[a].unk04;
 
     *(u16 *)p->unk04 = p->unk0c;
     gUnknown_0200C528[a].unk04 = p + 1;
@@ -18,7 +18,7 @@ bool8 sub_08017B8C(s16 a)
 
 bool8 sub_08017BB0(s16 a)
 {
-    struct UnkC528Node *p = gUnknown_0200C528[a].unk04;
+    struct Unk0200C528Node *p = gUnknown_0200C528[a].unk04;
 
     *(u32 *)p->unk04 = p->unk0c;
     gUnknown_0200C528[a].unk04 = p + 1;
