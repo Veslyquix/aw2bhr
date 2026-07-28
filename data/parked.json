@@ -1,0 +1,34 @@
+{
+  "_comment": [
+    "Functions that ARE compiler output and should match, but have not yet.",
+    "They are held out of the work queue so waves stop rediscovering them,",
+    "and they are deliberately NOT counted as progress anywhere: a parked",
+    "function is still assembly, the ROM is still built from its asm/ unit,",
+    "and the C in work/<fn>/ does not go into src/decomp/.",
+    "",
+    "This is a different claim from data/asm-resident.json. That file says",
+    "'no C will ever match this, because a compiler did not write it'.",
+    "This file says 'C should match this and ours does not yet'. Do not put",
+    "an entry here in asm-resident.json to get it out of the queue -- that",
+    "file is the evidence base for what hand-written assembly looks like,",
+    "and a wrong entry poisons every later judgement made from it.",
+    "",
+    "An entry needs three things in its reason field: the best percentage",
+    "reached, the EXACT remaining difference, and the axes already ruled out.",
+    "Without the ruled-out list the next wave repeats the same attempts --",
+    "which is the specific failure this file exists to prevent.",
+    "",
+    "Before parking anything, check the toolchain axis. The ROM was built",
+    "with two compilers and more than one flag set, and three functions were",
+    "parked as source-exhausted across two waves and permuter runs when the",
+    "source was never the axis. See data/compiler-overrides.json and the",
+    "'Per-file compiler and flags' section of docs/agbcc-codegen.md.",
+    "",
+    "Unparking is the goal. Re-run `python tools/trymatch.py <fn>` against a",
+    "parked entry whenever a new codegen rule lands; the draft is kept at",
+    "work/<fn>/<fn>.c and best.c holds the closest attempt."
+  ],
+  "functions": {
+    "sub_0801A6C0": "98.4% -- 64 bytes, size-exact, ONE byte differs at +0x2a. The original stores `strh r2, [r1, #0]`; every candidate produces `strh r3, [r1, #0]`. Both registers hold 0 at that point (r2 was just zeroed and stored to [r1, #4], r3 likewise), so this is a pure register-allocation tie-break with no source-level lever on it -- the instruction selection, the order and every other byte are already correct. Ruled out: the source axis, exhaustively, across two waves plus decomp-permuter runs; and the toolchain axis -- old_agbcc and dropping -fforce-addr were both tried after the wave-10 two-compiler finding and neither moves this byte. Not every allocation near-miss is a flag problem. Worth re-testing whenever a register-allocation rule lands in docs/agbcc-codegen.md."
+  }
+}

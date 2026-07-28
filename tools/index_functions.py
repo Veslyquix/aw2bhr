@@ -35,12 +35,24 @@ ANON_RE = re.compile(r'^sub_[0-9A-Fa-f]{8}$')
 # for why these are called out rather than left in the queue.
 ASM_RESIDENT_FILE = os.path.join(awlib.DATA_DIR, "asm-resident.json")
 
+# Compiler output we have not matched yet -- a different claim from the above,
+# and kept in a separate file so the two are never confused. See its comment.
+PARKED_FILE = os.path.join(awlib.DATA_DIR, "parked.json")
+
+
+def _named_reasons(path):
+    if not os.path.isfile(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh).get("functions", {})
+
 
 def asm_resident():
-    if not os.path.isfile(ASM_RESIDENT_FILE):
-        return {}
-    with open(ASM_RESIDENT_FILE, encoding="utf-8") as fh:
-        return json.load(fh).get("functions", {})
+    return _named_reasons(ASM_RESIDENT_FILE)
+
+
+def parked():
+    return _named_reasons(PARKED_FILE)
 
 
 def decompiled_symbols():
@@ -75,6 +87,7 @@ def build():
     files = awlib.load_all()
     done = decompiled_symbols()
     resident = asm_resident()
+    held = parked()
     records = []
 
     for af in files:
@@ -94,10 +107,16 @@ def build():
                 # queue keeps handing out functions that are already in the ROM.
                 # asm-resident is a third state: not outstanding and never
                 # will be, because the assembly is not compiler output.
+                # parked is a fourth: compiler output we have not matched yet,
+                # held out of the queue so waves stop rediscovering it. It is
+                # NOT progress -- the ROM still builds this from asm/ -- so it
+                # must stay out of every "done" tally.
                 "status": ("matched" if fn.name in done
                            else "asm-resident" if fn.name in resident
+                           else "parked" if fn.name in held
                            else "asm"),
                 "asm_resident_reason": resident.get(fn.name),
+                "parked_reason": held.get(fn.name),
                 "named": not anon,
                 "kind": "bios" if fn.name in BIOS_SYSCALLS else "game",
                 "trivial": awlib.is_trivial(fn),
