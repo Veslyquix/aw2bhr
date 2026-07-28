@@ -7,7 +7,13 @@
  * sub_08042E18 @ 0x08042E18
  */
 
-u8 sub_08042E18(int a)
+/* `int`, not the `u8` this was promoted with. Its own bytes cannot tell --
+ * it is a leaf ending in `bx lr` and `ldrb` zero-extends either way -- but
+ * sub_08042DFC forwards the result straight out with no `lsls #24; lsrs #24`,
+ * and a u8-returning callee makes the caller re-narrow. The call site is the
+ * only evidence there is, and it says 32 bits.
+ */
+int sub_08042E18(int a)
 {
     return gUnknown_085D3DD0[a].unk16;
 }

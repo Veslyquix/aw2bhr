@@ -242,8 +242,13 @@ extern union BlendCntBuf gUnknown_030030E0;
 
 // BLDCNT. gDispIo.blend_ct is the RAM shadow; sub_080129B4 writes the register
 // directly with a whole halfword rather than going through it.
-#define REG_OFFSET_BLDCNT 0x050
-#define REG_BLDCNT (*(vu16 *)(REG_BASE + REG_OFFSET_BLDCNT))
+// sub_0801298C writes all three in one go (0x8f, 0, 8).
+#define REG_OFFSET_BLDCNT   0x050
+#define REG_OFFSET_BLDALPHA 0x052
+#define REG_OFFSET_BLDY     0x054
+#define REG_BLDCNT   (*(vu16 *)(REG_BASE + REG_OFFSET_BLDCNT))
+#define REG_BLDALPHA (*(vu16 *)(REG_BASE + REG_OFFSET_BLDALPHA))
+#define REG_BLDY     (*(vu16 *)(REG_BASE + REG_OFFSET_BLDY))
 
 // DMA. sub_080111BC disarms channel 0 by zeroing its control halfword.
 #define REG_OFFSET_DMA0SAD   0x0B0
@@ -255,6 +260,27 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define REG_DMA0DAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA0DAD))
 #define REG_DMA0CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_DMA0CNT_L))
 #define REG_DMA0CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_DMA0CNT_H))
+
+// Channel 3, the general-purpose one. sub_080638A8 clears one 4bpp tile with
+// it (fixed source, 16 halfwords) and then reads DMA3CNT back into a register
+// nothing uses -- the usual post-trigger dummy read, which needs the volatile.
+//
+// It reaches the three words through a `vu32 *` cursor rather than by naming
+// the registers individually, and that is not cosmetic: one base plus
+// displacements 0/4/8 is what the ROM has, whereas three separate lvalues
+// emit `add r1, r1, #4` between each store even though the addresses are
+// compile-time constants. Probed both ways in one call.
+#define REG_OFFSET_DMA3SAD   0x0D4
+#define REG_OFFSET_DMA3DAD   0x0D8
+#define REG_OFFSET_DMA3CNT   0x0DC
+#define REG_OFFSET_DMA3CNT_L 0x0DC
+#define REG_OFFSET_DMA3CNT_H 0x0DE
+
+#define REG_DMA3SAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA3SAD))
+#define REG_DMA3DAD   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA3DAD))
+#define REG_DMA3CNT   (*(vu32 *)(REG_BASE + REG_OFFSET_DMA3CNT))
+#define REG_DMA3CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_DMA3CNT_L))
+#define REG_DMA3CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_DMA3CNT_H))
 
 // Timers. sub_0802ECEC arms timer 3 with a reload of -n and 0xc3
 // (enable | irq | 1024-cycle prescaler).
@@ -304,6 +330,23 @@ extern union BlendCntBuf gUnknown_030030E0;
 // SIOMLT_SEND. Which name is right depends on the mode SIOCNT selects.
 #define REG_SIODATA32 (*(vu32 *)(REG_BASE + REG_OFFSET_SIOMULTI0))
 #define REG_SIOMLT_SEND REG_SIODATA8
+
+#define REG_OFFSET_IE  0x200
+#define REG_OFFSET_IF  0x202
+#define REG_OFFSET_IME 0x208
+
+#define REG_IE  (*(vu16 *)(REG_BASE + REG_OFFSET_IE))
+#define REG_IF  (*(vu16 *)(REG_BASE + REG_OFFSET_IF))
+#define REG_IME (*(vu16 *)(REG_BASE + REG_OFFSET_IME))
+
+#define INTR_FLAG_VBLANK  0x0001
+#define INTR_FLAG_HBLANK  0x0002
+#define INTR_FLAG_VCOUNT  0x0004
+#define INTR_FLAG_TIMER0  0x0008
+#define INTR_FLAG_TIMER1  0x0010
+#define INTR_FLAG_TIMER2  0x0020
+#define INTR_FLAG_TIMER3  0x0040
+#define INTR_FLAG_SERIAL  0x0080
 
 struct KeySt
 {

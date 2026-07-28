@@ -1,0 +1,36 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08026F9C.
+ * sub_08026F9C @ 0x08026F9C, sub_08026FD0 @ 0x08026FD0
+ */
+
+/* `>> 6` on an s16, then element [n + 1]: agbcc folds the +1 element (0x3c)
+ * into the member offset (0x2a) and emits a single `adds r2, #0x66`.
+ */
+bool8 sub_08026F9C(s16 a, s16 b)
+{
+    if (gUnknown_08499598[(a >> 6) + 1].unk2a == gUnknown_08499598[(b >> 6) + 1].unk2a)
+        return TRUE;
+
+    return FALSE;
+}
+
+/* Two separate `if`s, not `&&`: the shared `return FALSE` block has to sit
+ * directly after the second compare with the TRUE block behind the pool, and
+ * `if (t != 0 && ...)` inverts that second branch instead.
+ */
+bool8 sub_08026FD0(u16 a, u8 b)
+{
+    u32 t = b >> 5;
+
+    if (t == 0)
+        return FALSE;
+
+    if (gUnknown_08499598[((s16)a >> 6) + 1].unk2a == gUnknown_08499598[t].unk2a)
+        return TRUE;
+
+    return FALSE;
+}

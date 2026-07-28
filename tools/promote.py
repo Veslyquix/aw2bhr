@@ -73,36 +73,122 @@ def split_source(name, text):
     pat = re.compile(r'^\S.*\b%s\s*\(' % re.escape(name))
     for i, ln in enumerate(lines):
         if pat.match(ln):
-            return lines[:i], lines[i:]
+            j = doc_comment_start(lines, i)
+            return lines[:j], lines[j:]
     return None, None
+
+
+def doc_comment_start(lines, i):
+    """Where the comment block documenting the definition at `lines[i]` begins.
+
+    A comment written directly above a function is that function's
+    documentation and has to travel with it into the body. Cutting at the
+    definition line alone strands it in the declaration section, where it comes
+    out above whichever declaration happens to merge first -- so `c_08063F98.c`
+    ended up explaining how to copy a matrix directly above the function that
+    loads the identity.
+    """
+    j = i
+    while j > 0 and not lines[j - 1].strip():
+        j -= 1
+    if j == 0 or not lines[j - 1].strip().endswith("*/"):
+        return i
+    k = j - 1
+    while k >= 0 and "/*" not in lines[k]:
+        k -= 1
+    return k if k >= 0 else i
+
+
+def strip_comments(ln, in_comment):
+    """(code with comments blanked out, whether a block comment is still open).
+
+    Only the returned code is inspected for braces and terminators; the original
+    line is what gets emitted. Every test below has to run on comment-free text,
+    because comment prose is arbitrary and routinely contains `;`, `{` and `}`.
+    """
+    out, i, n = [], 0, len(ln)
+    while i < n:
+        if in_comment:
+            end = ln.find("*/", i)
+            if end < 0:
+                break
+            i, in_comment = end + 2, False
+            continue
+        start = ln.find("/*", i)
+        line_c = ln.find("//", i)
+        if line_c >= 0 and (start < 0 or line_c < start):
+            out.append(ln[i:line_c])
+            break
+        if start < 0:
+            out.append(ln[i:])
+            break
+        out.append(ln[i:start])
+        i, in_comment = start + 2, True
+    return "".join(out), in_comment
 
 
 def decl_chunks(lines):
     """Split a declaration section into whole declarations.
 
-    A chunk is one brace-balanced construct: a `struct X { ... };` block or a
-    single `extern ...;` line. De-duplicating at line level instead silently
-    destroys source -- two different structs both contain a line `{` and a line
-    `};`, so dropping the repeats leaves the second one without its braces.
+    A chunk is one brace-balanced construct: a `struct X { ... };` block, a
+    single `extern ...;` line, or one preprocessor directive -- together with any
+    comment block sitting directly above it, which is the documentation for that
+    declaration and has to travel with it. De-duplicating at line level instead
+    silently destroys source -- two different structs both contain a line `{` and
+    a line `};`, so dropping the repeats leaves the second one without its braces.
+
+    Comment state is tracked explicitly rather than sniffed from the leading
+    characters of each line. Two bugs came from not doing that, and they
+    compounded: a comment whose prose ended in `;` closed the chunk mid-comment,
+    and the continuation lines that followed were then discarded as stray
+    comments because nothing was accumulated any more. `c_0806978C.c` was
+    promoted with an unterminated comment swallowing the struct beneath it, and
+    the agent's C was fine -- the draft in work/ compiled and matched. A
+    directive was never a terminator either, so `#include "proc.h"` could not
+    close its own chunk and glued itself onto the next declaration.
     """
     chunks, cur, depth = [], [], 0
+    in_comment = False
     for ln in lines:
-        s = ln.strip()
-        if not s and not cur:
-            continue
-        if s == INCLUDE_LINE.strip():
-            continue
-        if s.startswith("/*") or s.startswith("*") or s.startswith("//"):
-            if not cur:
-                continue                      # stray comment between decls
+        raw = ln.strip()
+        code, next_in_comment = strip_comments(ln, in_comment)
+        s = code.strip()
+        if not cur and not in_comment:
+            if not raw or raw == INCLUDE_LINE.strip():
+                continue
         cur.append(ln)
-        depth += ln.count("{") - ln.count("}")
+        depth += code.count("{") - code.count("}")
+        was_open, in_comment = in_comment, next_in_comment
+        if in_comment:
+            continue
+        if s.startswith("#") and depth <= 0:
+            chunks.append("".join(cur))        # a directive is complete on its line
+            cur, depth = [], 0
+            continue
+        if not s and (was_open or raw.startswith("/*")):
+            continue                          # comment block; the decl follows
         if depth <= 0 and (s.endswith(";") or s.endswith("}")):
             chunks.append("".join(cur))
             cur, depth = [], 0
     if cur:
         chunks.append("".join(cur))
     return chunks
+
+
+def chunk_key(chunk):
+    """Identity of a declaration, ignoring its comments and whitespace.
+
+    Two agents will document the same struct differently, and if the comment is
+    part of the key those collapse to two definitions of one type -- which is a
+    hard `redefinition of struct X` at compile time, not a cosmetic problem. The
+    text kept is still the first occurrence's, comment included.
+    """
+    code, in_comment = [], False
+    for ln in chunk.splitlines(keepends=True):
+        part, in_comment = strip_comments(ln, in_comment)
+        code.append(part)
+    key = " ".join("".join(code).split())
+    return key or " ".join(chunk.split())     # comment-only chunk: compare as-is
 
 
 def merge(run, index):
@@ -117,7 +203,7 @@ def merge(run, index):
             return None, "could not locate the definition of %s in %s" % (
                 name, os.path.relpath(path, awlib.REPO))
         for chunk in decl_chunks(head):
-            key = " ".join(chunk.split())     # whitespace-insensitive identity
+            key = chunk_key(chunk)
             if key not in seen:
                 seen.add(key)
                 decls.append(chunk)
