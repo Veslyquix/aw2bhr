@@ -39,20 +39,33 @@ struct IO_ALIGNED(2) DispStat
     /* bit  8 */ u16 vcount_compare : 8;
 };
 
-// The bitfield container is u32, not u16, because the IWRAM shadow copies
-// (gUnknown_03002B6C and friends) are read with `ldr` in the ROM -- see
-// sub_08013C00. A u16 container makes agbcc emit `ldrh` and the match breaks.
-// The register itself is still 16-bit; only the shadow is word-accessed.
+// Container is u16, matching the 16-bit register and the 2-byte IWRAM shadow,
+// so sizeof(union BgCntBuf) is 2 rather than 4.
+//
+// This was u32 for several waves, on the reasoning that the shadows
+// (gUnknown_03002B6C and friends) are read with `ldr` in the ROM and that
+// "a u16 container makes agbcc emit ldrh and the match breaks". Both halves
+// of that were wrong. A controlled probe in wave 7 showed the bitfield
+// container never affects the emitted instruction: u8, u16 and u32 containers
+// give byte-identical code for the same field position -- ldrb inside a byte,
+// ldrh across a byte boundary, and `ldr` plus a shift pair for every pure
+// read, whatever the container. So the `ldr` observation discriminated
+// nothing. Narrowing it back to u16 and rebuilding reproduces the ROM exactly,
+// on both the split and the asm build, which is the direct disproof.
+//
+// Container width does still set layout and sizeof -- it just cannot be
+// inferred from the access instruction. If a bitfield struct near-misses on
+// the load width, changing the container will not fix it.
 struct IO_ALIGNED(2) BgCnt
 {
-    /* bit  0 */ u32 priority : 2;
-    /* bit  2 */ u32 chr_block : 2;
-    /* bit  4 */ u32 : 2;
-    /* bit  6 */ u32 mosaic : 1;
-    /* bit  7 */ u32 color_depth : 1;
-    /* bit  8 */ u32 tm_block : 5;
-    /* bit 13 */ u32 wrap : 1;
-    /* bit 14 */ u32 size : 2;
+    /* bit  0 */ u16 priority : 2;
+    /* bit  2 */ u16 chr_block : 2;
+    /* bit  4 */ u16 : 2;
+    /* bit  6 */ u16 mosaic : 1;
+    /* bit  7 */ u16 color_depth : 1;
+    /* bit  8 */ u16 tm_block : 5;
+    /* bit 13 */ u16 wrap : 1;
+    /* bit 14 */ u16 size : 2;
 };
 
 struct IO_ALIGNED(4) WinCnt
