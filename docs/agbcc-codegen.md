@@ -150,6 +150,9 @@ and is, as far as anyone has found, the first float in the tree.
 Note both of these qualify "the stub's return type carries no information" and
 "a function's return type is not recoverable here". Those hold for the integer
 widths. A pool-loaded constant *forces* `float`, and nothing else reaches it.
+The **second** carve-out is the epilogue: for any function that pushes `lr`,
+`pop {r0}` means `void` and `pop {r1}` means it returns a value, so the
+unrecoverable claim survives only for leaf functions ending in a bare `bx lr`.
 
 **`ldrh` plus a pool word is a plain mask; `ldrb` plus `mov`/`neg` is a
 bitfield.** The width of the constant tells you nothing. `*p &= ~8` through a
