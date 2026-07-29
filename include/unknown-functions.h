@@ -1312,6 +1312,13 @@ void sub_0801A444(s16, s16, s16, s16);
 void sub_0801F114(void);
 void sub_0801F150(int, void *, u16, u8);
 void sub_0801F234(int);
+/* Five arguments, all `int`: the prologue copies r0-r3 with bare
+ * `adds rN, rM, #0` / `mov r8, r2` and narrows none of them, and the fifth
+ * arrives at [sp, #0x1c] after a 24-byte push. `pop {r0}; bx r0` -> void.
+ * It is a PutSpriteExt front end -- arguments 2 and 3 are the x|flags and
+ * y|flags words, and 1 and 5 are looked up in gUnknown_0848B780 /
+ * gUnknown_0848BAE4 to pick the OBJ data. */
+void sub_0801F34C(int, int, int, int, int);
 u8 *sub_0801F49C(void);
 void sub_0802D5A0(void *, int, int);
 void sub_0802D5CC(int, int);
@@ -1496,6 +1503,17 @@ void sub_080673B0(u32, u32, ProcPtr);
  * on a declared-narrow parameter. sub_0804C400 takes the same u16 unit index
  * everything else in that family does. */
 s8 sub_08015410(void *, u8, void *, void *, u8);
+/* OPEN, and it does not matter to any caller yet: sub_0804C400's prologue is
+ * `adds r4,r0,#0; lsls r4,#0x10; lsrs r4,#0x10`, which is copy-THEN-narrow,
+ * and the rule in docs/agbcc-codegen.md reads that as an `int` parameter with
+ * a cast at a use rather than a declared-narrow one. The register pressure
+ * does not explain the copy -- sub_08053670 also has to keep its narrowed
+ * argument across two calls and gets `lsls r0,r0,#0x10; lsrs r5,r0,#0x10`
+ * with no copy at all. Left as u16 because that is what its whole family
+ * takes and because it is byte-neutral for the three wrappers that only
+ * forward to it (sub_0804C488, sub_0804C498 in work/, whose own parameter is
+ * narrowed by PROMOTE_MODE either way). Settle it when sub_0804C400 itself is
+ * matched, not before. */
 void sub_0804C400(u16);
 
 /* The 0x0806E000 screen's helpers, all named only by sub_0806EB5C. The five
@@ -1925,5 +1943,133 @@ int sub_08042C9C(u16, u8);
  * it from a caller that uses the value. */
 bool8 sub_0803CCB8(int, u8 *);
 int sub_0803CDBC(int, int, int);
+
+/* ---- wave 16 (A): callees of families F067-F072, F075, F077 ----
+ *
+ * Every `void f(void)` below is read the same way and the readout is cheap:
+ * the function writes its first argument register before reading it (usually
+ * `ldr rN,=gSym` as instruction 2), so it takes nothing, and it ends
+ * `pop {r0}; bx r0`, which docs/agbcc-codegen.md fixes as void. None of them
+ * is called with a live r0 anywhere in the ROM.
+ *
+ * The six that already have a definition in src/decomp/ are declared here for
+ * the first time -- they were only ever named in comments. Each declaration
+ * was copied from the promoted definition, not re-derived:
+ * sub_0801E0C8 (c_0801E0C8.c), sub_0801EFD8 (c_0801EFD8.c), sub_08015550 and
+ * sub_0801555C (c_08015544.c), sub_0802A538 (c_0802A508.c), sub_0802A7B0
+ * (c_0802A7B0.c), sub_0802C57C and sub_0802C594 (c_0802C57C.c). */
+void sub_0801E0C8(int, int);
+void sub_0801EFD8(void);
+void sub_08015550(void);
+void sub_0801555C(void);
+void sub_0802A538(void);
+void sub_0802A7B0(void);
+void sub_0802C57C(void);
+void sub_0802C594(void);
+
+/* F069 members, matched in wave 16 and called from F070/F071: sub_0801F050
+ * takes sub_0801E0F0 as its else-arm and sub_0801F0C8 takes sub_0801EFA8 as
+ * its whole body. Both are `push {lr} ... pop {r0}; bx r0`. */
+void sub_0801E0F0(void);
+void sub_0801EFA8(void);
+
+void sub_0801BBC4(void);
+void sub_0801BC08(void);
+void sub_0801BCA8(void);
+void sub_0801EFF4(void);
+void sub_080219AC(void);
+void sub_080245D4(void);
+void sub_08026D68(void);
+void sub_080424FC(void);
+void sub_08061F34(void);
+void sub_08062038(void);
+void sub_0807F238(void);
+
+/* Both parameters are eight bits wide *somewhere*: the prologue is
+ * `lsls r0,#0x18; lsrs r0,#0x18` / `lsls r1,#0x18; lsrs r6,r1,#0x18` with no
+ * `adds rN, r0, #0` copy in front of either, which per the F059 note above is
+ * a cast at a use just as readily as a narrow parameter -- and the two are
+ * byte-identical here because F068's three call sites all pass literals
+ * (`movs r0,#K`). `int` is the weaker fit and is what is declared; a caller
+ * passing a variable would settle it, and there is none. `pop {r0}` = void. */
+void sub_08019940(int, int);
+
+/* Takes no argument and RETURNS one (`pop {r1}; bx r1`). Arity is not guessed
+ * from F075's call sites -- all three save r0 into r4 before the call, so r0 is
+ * live there for the *later* Proc_Start* argument and a pass-through would look
+ * identical. The readout is on the callee side: sub_080413E8's first act is
+ * `bl sub_0804138C`, and sub_0804138C is four instructions that only store 0
+ * to gUnknown_030040A8, reading no argument register either. So nothing in the
+ * chain consumes r0. Every caller in the ROM discards the result, so `int` is
+ * the weakest fit for the return rather than a measurement. */
+int sub_080413E8(void);
+
+/* The structural twin of sub_0801537C above, and NOT interchangeable with it:
+ * sub_0801537C scans gUnknown_03001470[] for the slot whose `.unk00` equals the
+ * argument, while this one compares the argument against the slot's own ADDRESS
+ * (`lsls;adds;lsls #5; adds r0,r0,r2; cmp r0,r1`) -- so its parameter is a
+ * pointer to the slot, and `struct Unk03001470 *` is what the tree already
+ * calls that (sub_080152EC returns it). Both then call the same teardown and
+ * return the index as `lsls #0x18; asrs #0x18`, or -1. Declared `int` for the
+ * same reason sub_0801537C is: no caller in the ROM narrows the result, so the
+ * width is undecidable and `int` is the only spelling that is valid C for a
+ * function whose value is a plain forwarded index. */
+int sub_080153B8(struct Unk03001470 *);
+
+/* ---- wave 16 (B) ----
+ * DEFINED (matched) in src/decomp/c_0803BB44.c, which is where the argument
+ * for the u8 return lives; these declarations only exist so the F081 wrappers
+ * in the sibling translation unit see it. The two derivations are independent
+ * and agree: that file read the width off sub_0803BB14's `lsls #0x18;
+ * lsrs #0x18`, and wave 16 read it off sub_0803BAFC's and sub_0803BB2C's. */
+u8 sub_0803BB44(void);
+u8 sub_0803BB5C(void);
+u8 sub_0803BB74(void);
+
+/* sub_080324C4 is the 452-byte screen setup behind sub_08032688; the prologue
+ * is `mov r8,r0; adds r6,r1,#0; lsls r2,#0x18; lsrs r7,r2,#0x18`, so arguments
+ * one and two arrive unnarrowed and three is `u8`. Argument two is compared
+ * against -1 and is therefore signed, and the `pop {r0}; bx r0` epilogue
+ * clobbers r0, which makes it void.
+ *
+ * sub_08029AF8 is the same shape one level down: `adds r5,r0,#0` and then
+ * `ldrb r1,[r5]` types argument one as a pointer (`void *` is the weakest
+ * spelling that its two wrappers can pass), `lsls r1,#0x10; lsrs r7,r1,#0x10`
+ * types argument two `u16` and `lsls r2,#0x18; lsrs r2,r2,#0x18` types three
+ * `u8`. It DOES return a value -- the epilogue is `mov r0,r8; ...; pop {r1};
+ * bx r1` and r8 is an accumulator started at 0 -- but both callers discard it,
+ * so `int` is a weakest fit rather than a measurement.
+ *
+ * sub_08053670 narrows its only argument `lsls #0x10; lsrs r5,r0,#0x10` and
+ * ends `pop {r0}; bx r0`, so it is `void(u16)` -- the same unit index
+ * sub_0804C400 takes. */
+void sub_080324C4(int, int, u8);
+int sub_08029AF8(void *, u16, u8);
+void sub_08053670(u16);
+
+/* The three callees of sub_08043418.
+ *
+ * sub_08042424 is the c_08001158.c map-cell idiom again, on the +0x1432
+ * terrain plane rather than the +0x12 one: `lsls r1,#0x10; asrs r1,#0xf` is
+ * an s16 column scaled by 2 for rowOffset[] and `lsls r0,#0x10; asrs r0,#0x10`
+ * an s16 row, so both parameters are s16 and sub_08043418 casts to them at the
+ * call. The return is u8 -- sub_08043418 truth-tests the result with a BARE
+ * `lsls #0x18`, which is what agbcc emits for a u8-returning callee whose
+ * value is only tested.
+ *
+ * sub_08043574 is nine instructions with no frame: it adds 1, 2 or 3 to its
+ * third argument according to `x > 0xcf` and `y > 0x7f` and returns it. All
+ * three comparisons are signed (`ble`), so all three parameters are `int`, and
+ * `adds r0,r2,#0; bx lr` returns the third.
+ *
+ * sub_0801C7DC takes SEVEN arguments -- it pushes five registers and one word,
+ * then reads [sp,#0x18], [sp,#0x1c] and [sp,#0x20]. Argument one is the table
+ * (`ldrh [r0]`, `ldrh [r0,#2]`), two is a halfword index into it, three is a
+ * count it feeds to DivRem, and four/five/six/seven are forwarded to
+ * PutSpriteExt as (r1, r2, stack, r0) respectively -- i.e. x, y, an OAM word
+ * and a layer. It returns a value that all three callers discard. */
+u8 sub_08042424(s16, s16);
+int sub_08043574(int, int, int);
+int sub_0801C7DC(const u16 *, int, int, int, int, int, int);
 
 #endif // UNKNOWN_FUNCS_H

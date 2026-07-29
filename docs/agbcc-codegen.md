@@ -570,6 +570,26 @@ word tells them apart, and only a function-pointer type produces one.
 constant** — rows 1 and 3 are byte-identical apart from that relocation — so do
 not read `ldr rN,=` at a call site as evidence of a symbol on its own.
 
+**"Parameter copies first" is a register conflict, not a grouping rule, and
+wave 16 found where the difference shows.** Every row of the probe above has the
+copy's source still sitting in `r0`, which is also where argument 0's pool `ldr`
+is about to land — so the copy *has* to go first and the ordering is forced.
+Move the same value into a callee-saved register (any call in between does it)
+and the conflict disappears; the setup then comes out in plain argument-number
+order, pool `ldr` for r0 ahead of the copy into r1:
+
+```c
+void a(ProcPtr p){ f();  g(gSym, p); }   /* ldr r0,=gSym ; add r1,r4,#0  <- pool FIRST */
+void b(ProcPtr p){       g(gSym, p); }   /* add r1,r0,#0 ; ldr r0,=gSym  <- copy FIRST */
+```
+
+Family F075 (`sub_0802C4B8` and siblings) is the first row and is unmatchable if
+you read the rule as unconditional. The same holds for a narrowing rather than a
+copy: `f(); h((u16)p, 0x1234)` gives `lsl;lsr;ldr r1,=0x1234; add r0,r4,#0`. So
+the readout "an argument register written out of numerical sequence is the
+pool-loaded one" is only valid when the copied value is still live in an
+argument register at the call — check that first.
+
 **Pool word order is expansion order, and a store expands its destination
 address *before* its value.** That is the lever for `gPtr = gArray;` next to
 stores into `gArray`, where the direct spelling cannot produce the ROM's shape
@@ -1329,6 +1349,35 @@ flips the `muls` destination as a side effect. Binding either the base or the
 element collapses them into one base plus displacements, and the `muls` tie then
 resolves itself with no separate massaging.
 
+**Repeat *one* member of an array global's element instead of two, and there are
+three outcomes, not two — and the honest repeated spelling is the one that wins,
+which inverts the "bind `p + C` to a local" advice two paragraphs up.** Same
+function, same 44 bytes, wave 16's F067 (`sub_08015E80`, read-modify-write of
+`gUnknown_03001470[i].unk04` where the member is a pointer):
+
+```c
+g[i].m used twice        /* ldr r1,=g ; lsl/add/lsl (i*0x60) ; add r1,r1,#0x4
+                            ; add r4,r4,r1     -- CLEAN pool word, run-time +C */
+
+T **p = &g[i].m;         /* lsl/add/lsl ; ldr r0,.L ; add r4,r4,r0
+                            .word g+0x4        -- +C SINKS INTO THE RELOCATION */
+
+struct S *p = &g[i];     /* ldr r1,=g ; lsl/add/lsl ; add r4,r4,r1
+                            ; ldr r0,[r4,#0x4] -- displacement form */
+```
+
+The mechanism is that CSE has to materialise `&g[i].m` as a *value* either way,
+and what decides where the `+ C` goes is whether the constant is still visible
+to the address-constant folder at expand time. Naming the member twice hides it
+behind the common subexpression, so it becomes a run-time `adds`; binding the
+member's address hands it to the folder as `symbol + 4`, which is a legal
+relocation addend and is taken. Read backwards: **`ldr rB,=gSym` followed by
+`adds rB,#C` and only then the index add means the source repeated
+`gSym[i].member` in two statements** — a pool word carrying `+C` in the
+relocation means it bound the member's address, and a `[rB,#C]` displacement
+means it bound the element. All three spellings probed; only the first is the
+ROM's, and all three of F067's members are it.
+
 **Where the base add lands in `base + i*A + j*B`.** Every spelling produces the
 same instructions; only the position of the base `ldr` and the base `add` moves,
 and it follows the left-to-right association of the source (`x + y + z` is
@@ -1942,6 +1991,30 @@ an `s16` one). Probed and byte-identical there, so none of them is evidence:
 before the compare. The explicit `if (…) return TRUE; return FALSE;` spelling is
 *not* — it emits the branching four-block form from the table above and is four
 bytes longer.
+
+**"Branching" in that table does NOT mean "both arms and an unconditional
+`b`".** Two waves have now misread it that way, so state it positively: a
+*returned* comparison — `==` included — goes through `do_store_flag`, which
+presets the false value in a scratch register and conditionally overwrites it.
+There is no unconditional branch and the result arrives via `add r0, r1, #0`:
+
+```
+bl f ; mov r1,#0 ; lsl r0,#0x18 ; lsr r0,#0x18 ; cmp r0,#2
+bne .L ; mov r1,#1 ; .L: add r0, r1, #0        <- return f() == 2;   (20 B)
+
+bl f ; lsl r0,#0x18 ; lsr r0,#0x18 ; cmp r0,#2 ; beq .L1
+mov r0,#0 ; b .L2 ; .L1: mov r0,#1 ; .L2:      <- if (…) return 1;
+                                                  else return 0;    (24 B)
+```
+
+**So `movs rD,#0`/`movs rD,#1` split across an unconditional `b` is the
+if/else, and it is the one spelling `return <cmp>;` cannot produce.** Read the
+`b` as the discriminator, not the `beq`. Wave 16's F081 (`sub_0803BAFC`,
+`sub_0803BB14`, `sub_0803BB2C`) is the 24-byte form, and `src/decomp/
+c_0803BB44.c` had already recorded the same 4-byte gap from the callee side —
+the two shapes differ by exactly the presets that the branch-free rewrite
+saves. The `beq`-to-the-`1`-arm polarity falls out of writing the `1` in the
+`then`: gcc lays the else arm down first.
 
 **A `while` loop that opens with a bare `b` to the bottom test, rather than a
 duplicated entry guard, had a SIDE EFFECT in its condition.** GCC rotates a
@@ -5571,6 +5644,199 @@ correctly — the *address range* in the section head is what is incomplete.
 `gUnknown_0816D9E0`, already recorded elsewhere in this file as a known pool, is
 the tail of the second block. **Run the fan-in + run-density screen rather than
 the address range; the ranges are a sample, not a list.**
+
+### The `.LC` screen is PREDICTIVE, not just explanatory (wave 16, C)
+
+Waves 14 and 15 built the `.LC`-word metric from seven functions that were all
+selected *after* the fact. Wave 16's C batch is the first test of it as a
+**filter**: four functions, 1,832 bytes, picked by `tools/lc_screen.py` in
+advance purely because they score zero `.LC` words and have
+`backward_branches == 0`. Nothing else about them was matched up — they span
+three subsystems and two `asm/` units.
+
+| | bytes | `.LC` | rounds | new layouts | new symbols | outcome |
+|---|---|---|---|---|---|---|
+| `sub_08080324` | 372 | 0 | **1, no probe** | 1 local proc struct | 0 | **matched** |
+| `sub_080895E4` | 484 | 0 | **1, no probe** | 1 local proc struct | 1 global, 1 proto | **matched** |
+| `sub_0802B91C` | 480 | 0 | ~8 + 3 probe files + 300 s permuter | 0 | 0 | **matched** |
+| `sub_0808B91C` | 496 | 0 | 3 + 1 probe + permuter | 0 | 0 | see soft-float below |
+
+**Two 372–484 byte functions matched on the first `trymatch` with no probe round
+at all.** Before this wave the only first-try matches at that size were family
+members inheriting a worked-out exemplar; these had none. The screen is worth
+running as a filter and the remaining 74-function `.LC`-free straight-line pool
+is worth draining.
+
+**But the batch also refutes "zero `.LC` means cheap".** `sub_0802B91C` scored
+zero and still cost roughly eight times the other two, and none of the standing
+metrics explains it: it is not the biggest, it needed zero new struct layouts,
+zero new globals and zero new prototypes — the two first-try matches each needed
+*more* new type vocabulary than it did. So the honest form of the finding is
+**one-sided**: a nonzero `.LC` count predicts expense, and a zero count predicts
+nothing except the absence of that particular cost.
+
+#### What made the expensive one expensive: argument-position evaluation order
+
+All three of `sub_0802B91C`'s levers are the same shape, and each alone was the
+whole difference between a near-miss and a match. Each is about **where a value
+gets materialised relative to a call or a branch**, and all three live inside a
+*call argument list*:
+
+1. A `?:` in argument 3 of a 4-argument call, where the ROM evaluates the whole
+   conditional — branch, index, `ldr` — *before* arguments 1, 2 and 4. Writing
+   it as an `if`/`else` assigning a `void *` local instead moved the candidate
+   from 27.5% to 93.3% in one edit, and as a side effect stopped
+   `(a4 - 1) * 4` reassociating into `a4 * 4 - 4` with the multiply hoisted
+   above the branch.
+2. A sum of three terms with a constant in the *inner* position —
+   `a8 * 4 + ((a4 & 1) + 0x1dc)`. `split_tree()` pulls an `INTEGER_CST` out of
+   either operand of a `PLUS_EXPR`, so `fold` flattens it to
+   `(a8 * 4 + 0x1dc) + (a4 & 1)`. Two locals are needed, not one: binding the
+   a4 term alone keeps the ROM's grouping but emits it *before* `a8 * 4`, and
+   the ROM has the multiply first.
+3. An argument whose expression contains two `bl`s
+   (`sub_08026198() + (0x78 - sub_080261A0()) * 0x20`). Binding it to a `dst`
+   local is what puts the *other* arguments' arithmetic after those calls;
+   without it the index statements are emitted ahead of them and have to
+   survive the calls in callee-saved registers.
+
+**The proposed screen, and it is one batch of evidence so treat it as a
+proposal: count the call arguments whose expression contains a nested call, a
+branch, or a three-or-more-term sum with a constant in a non-outermost
+position.** `sub_0802B91C` has five. The two first-try matches have **zero** —
+every one of their arguments is a constant, a single member read, or two-term
+integer arithmetic on one variable — and `sub_080895E4` has twenty-odd computed
+arguments and still scores zero on this, which is the point: it is not argument
+*complexity*, it is argument *evaluation order*. This is visible in the target's
+own listing before any C is written: look for a `bl` inside another call's
+argument setup, and for a branch between a call's first and last argument.
+
+**Corollary, and it cost this batch a whole round.** A parameter-width sweep run
+against a candidate that still has a structural error will give you the wrong
+answer with total confidence. `s16 a1, a2` measured **+12 bytes** against `u16`
+plus `(s16)` casts while the tail was still wrong, and was **the thing that
+matched** once the tail was fixed. Sweep widths only after the instruction
+stream is otherwise aligned.
+
+---
+
+## Soft float — libgcc, and the constants that reach it (wave 16, C)
+
+`sub_0808B91C` is a `cosf`: range-reduce by whole multiples of pi, then a Taylor
+series in `r*r` out to the `r^16` term, then negate on odd quotient. It is the
+first soft-float function anyone has taken in this tree, and everything below
+was read off it or probed against it. The GBA has no FPU, so every arithmetic
+step is a `bl` into libgcc: `__addsf3`/`__adddf3`, `__mulsf3`/`__muldf3`,
+`__subdf3`, `__divdf3`, `__negsf2`, the `__ges`/`__gedf2` comparisons and the
+`__extendsfdf2`/`__truncdfsf2`/`__fixdfsi`/`__floatsidf` conversions.
+
+**A double in registers is stored HIGH WORD FIRST, and reading it the other way
+gives a nonsense constant.** agbcc inherits ARM's FPA layout
+(`FLOAT_WORDS_BIG_ENDIAN`), so for a call taking a double in `r2:r3`, **`r2` is
+the high word**:
+
+```
+ldr r3, _0808B948 @ =0x54442D18      <- low
+ldr r2, _0808B944 @ =0x400921FB      <- high
+bl __divdf3                          -> 0x400921FB54442D18 = pi
+```
+
+Read little-endian that pair is 0x54442D18400921FB, about 9e97, which is exactly
+the kind of value that makes a reader conclude the function is not compiler
+output. The single-word check is `=0x3FF00000` / `=0x00000000` for `1.0` and
+`=0x3FE00000` / `=0x00000000` for `0.5`, both of which appear in this function
+and pin the order with no arithmetic.
+
+**agbcc does NOT promote float arithmetic to double. Every `__*df3` in this
+function comes from an unsuffixed decimal constant, and the ROM proves it with
+its own control.** One function contains both:
+
+```c
+u * 0.5f                  /* -> bl __mulsf3, pool word 0x3F000000       */
+u * 4.779477332387e-14    /* -> bl __extendsfdf2 ; bl __muldf3          */
+x >= 0                    /* -> bl __gesf2, NOT __gedf2                 */
+```
+
+An unsuffixed decimal literal is `double` in C89, so the usual arithmetic
+conversions widen the float operand and every intermediate stays double until
+something forces it back. An *integer* constant does not — `x >= 0` converts the
+`0` to `float`, so the comparison is single-precision. **So a `bl
+__extendsfdf2` immediately before an arithmetic libcall is a missing `f` suffix
+in your source, not a compiler quirk**, and the fix is at the constant, never at
+the variable. Seven `__extendsfdf2` calls on the same float local in a row —
+five of them spilled to `[sp, #0]` … `[sp, #0x20]` — is what one variable used
+seven times in double context looks like; it is not seven different values.
+
+**`t - C` with `C` a constant emits `__subdf3`, not `__adddf3` with `-C`.** An
+alternating series therefore has to be written with explicit negative literals
+and `+` to reach the ROM's negative pool words:
+
+```c
+u * C7 - 1.147074559773e-11    /* bl __subdf3, pool 0x3DA93974A8C07D48 */
+u * C7 + -1.147074559773e-11   /* bl __adddf3, pool 0xBDA93974A8C07D48  == ROM */
+```
+
+gcc 2.x's `fold` only rewrites `A - B` as `A + (-B)` for integers, and the same
+function's `1.0 - u * 0.5f` (non-constant right operand) stays a `__subdf3` in
+both spellings, which is the control.
+
+**The constants are hand-typed decimals, not computed reciprocals, and the
+difference is visible in the pool.** The seven series coefficients are
+1/4! … 1/16! written to **thirteen** significant digits:
+
+```
+0x3FA5555555555736 = 0.04166666666667      (1/24  would be 0x3FA5555555555555)
+0xBF56C16C16C16E17 = -0.001388888888889    (1/720 would be 0xBF56C16C16C16C17)
+0x3EFA01A01A01A336 = 2.480158730159e-5     0xBE927E4FB778A265 = -2.755731922399e-7
+0x3E21EED8EFF8DA63 = 2.087675698787e-9     0xBDA93974A8C07D48 = -1.147074559773e-11
+0x3D2AE7F3E733B5BD = 4.779477332387e-14
+```
+
+So `1.0 / 24.0` does **not** reach 0x3FA5555555555736 — write the literal.
+Conversely pi needs sixteen digits: `3.141592653589793` gives
+0x400921FB54442D18 and `3.14159265358979` gives 0x400921FB54442D11, seven ULP
+out. **A pool word that is close to a familiar constant but not equal to it is a
+decimal literal with a digit count you have to recover; take the shortest
+decimal that round-trips.**
+
+Practical note: `tools/lc_screen.py` correctly reports `refs=[]` for a function
+like this. Raw double constants are pool words with no relocation, so they are
+invisible to every `data_refs`-based screen — do not read an empty ref list on a
+496-byte function as "nothing to model".
+
+### A zero-trip `do { } while (0)` re-orders REGISTER ALLOCATION, and it is a lever
+
+Found by decomp-permuter on `sub_0808B91C` and then isolated: wrapping two
+statements in `do { … } while (0)` — which emits no instruction of its own —
+moved that function from 97.6% (twelve differing bytes) to 99.4% (three).
+
+The mechanism is `global.c`'s `allocno_compare`, which divides an allocno's
+reference count by its live length and **weights each reference by loop
+depth**. A zero-trip loop is still a loop as far as `loop_depth` is concerned,
+so every pseudo referenced inside one is promoted above every pseudo outside
+it, and the promoted ones get first pick of the hard registers.
+
+Concretely: `x` (referenced six times, long live range) was losing r4 to the
+`x / pi` double quotient (referenced twice, but DImode, and `allocno_compare`
+multiplies priority by the allocno's *size*), so `x` landed in r6 and the
+quotient in r4:r5 where the ROM has the opposite. Putting `x`'s last two
+statements in the wrapper reversed it exactly.
+
+**Read this as a diagnostic first and a source claim second.** It says "the ROM
+gives this value a higher allocation priority than your spelling does", which is
+real information; it does not say the original contained a literal
+`do`/`while`. In a math routine the plausible origin is a macro. Reach for it
+when a candidate is instruction-for-instruction correct and the only diff is
+which of two long-lived values got the lower-numbered callee-saved register —
+that is the signature, and no amount of rebinding, reordering declarations or
+re-associating expressions touches it.
+
+**The matching negative, worth as much:** it does *not* help a pseudo that is
+losing a call-clobbered register to a call-saved one. `sub_0808B91C`'s last
+three bytes are `v` allocated r1 where the ROM has r4, and wrapping the tail,
+the assignment, or the return in their own `do`/`while` moves none of them —
+because `REG_ALLOC_ORDER` offers r0-r3 first to any allocno with
+`calls_crossed == 0`, and that test is prior to priority, not part of it.
 
 ---
 
