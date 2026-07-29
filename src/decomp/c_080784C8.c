@@ -1,0 +1,20 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080784C8.
+ * sub_080784C8 @ 0x080784C8
+ */
+
+#include "proc.h"
+
+/* Family F032, and byte-identical to sub_08039914 -- same nullary bool8
+ * predicate, same break. See the note there on why sub_08019850 takes no
+ * argument despite the untouched r0. */
+
+void sub_080784C8(ProcPtr proc)
+{
+    if (sub_08019850() == 0)
+        Proc_Break(proc);
+}

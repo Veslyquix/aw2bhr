@@ -8,14 +8,24 @@
  */
 
 #include "proc.h"
+/* The first argument is a POINTER into ROM, not the `s32` this was promoted
+ * with, and sub_08078358 is decisive rather than merely suggestive: it walks
+ * four 4-byte records based at gUnknown_08615974 and calls
+ * `sub_08074AAC(&record[i][2], parent)` -- an INTERIOR address formed as
+ * `gUnknown_08615974 + 2 + i*4`, which no integer parameter would be spelled
+ * as. The other three callers agree: sub_0807831C passes a word loaded out of
+ * gUnknown_0861500C, and sub_08078440 / sub_08078454 pass gUnknown_08615984 and
+ * gUnknown_08615988 by name. Everything so passed is a 0xFF-terminated u8 id
+ * list (checked against baserom.gba), hence `const u8 *`.
+ * Byte-neutral -- the value is only `str`-ed -- and re-verified with trymatch. */
 struct Unk8074AAC
 {
     /* 0x00 */ u8 filler_00[0x2c];
-    /* 0x2c */ s32 unk_2c;
+    /* 0x2c */ const u8 *unk_2c;
     /* 0x30 */ s32 unk_30;
 };
 
-void sub_08074AAC(s32 arg, ProcPtr parent)
+void sub_08074AAC(const u8 *arg, ProcPtr parent)
 {
     struct Unk8074AAC * proc;
 

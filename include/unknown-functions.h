@@ -1248,6 +1248,38 @@ int sub_08001A04(int, int, int);
 int sub_0800AFCC(int, int);
 int sub_0800B1FC(int, int);
 
+/* ---- wave 14 (C) ----
+ * Four more cell predicates on the same (x, y) key, all read off their own
+ * prologues rather than guessed from a call site: each opens with a bare
+ * `adds rN, r0, #0` / `adds rN, r1, #0` pair and no narrowing, so both
+ * parameters are `int`, and each ends `pop {r1}; bx r1`, so all four return a
+ * value. `int` on the return for all four: sub_0800A3D4 and sub_0800BF78 test
+ * every one of them with a bare `cmp r0, #0` and no `lsls #0x18`, and
+ * sub_0800A798 returns -1 on its first path (`movs r0,#1; rsbs r0,r0,#0`), so
+ * it is signed. sub_080094EC is already defined as int(int, int) in
+ * src/decomp/c_080094EC.c and was only missing a prototype; sub_08009B84's
+ * result is forwarded into sub_08001158's third parameter, which is int. */
+int sub_080094EC(int, int);
+int sub_08009B38(int, int);
+int sub_08009B84(int, int);
+int sub_0800A798(int, int);
+
+/* Three more on the same key, from sub_0800BF78. Same `adds rN, r0, #0` entry
+ * reading for the parameters. The epilogues split: sub_0800BC98 ends
+ * `pop {r4}; pop {r1}; bx r1` and its one call site tests the result with a
+ * bare `cmp r0, #0`, so `int`; sub_0800C124 and sub_0800C22C both end
+ * `pop {r0}; bx r0`, so both are void. */
+int sub_0800BC98(int, int);
+void sub_0800C124(int, int);
+void sub_0800C22C(int, int);
+
+/* Two more, from sub_0800977C. Same entry reading, and both end `pop {r1}`, so
+ * both return a value; sub_08009720's result is only ever `cmp r0, #0`'d, and
+ * sub_08009BF4's is fed to the branchless `rsbs; orrs; lsrs #0x1f` form of
+ * `!= 0`, which is a plain int operand here (no `lsls #0x18` in front of it). */
+int sub_08009720(int, int);
+int sub_08009BF4(int, int);
+
 /* ---- wave 13 (A8), second block ----
  * The sub_08065990 / sub_0806D944 screen-setup callees. Every parameter list
  * below is the entry-narrowing readout of the callee, not a guess from the
@@ -1554,5 +1586,123 @@ void sub_080763C0(void);
  * `1` above it at [sp, #4]. `struct UnkVec` and `struct OamData` are the same
  * eight bytes; the caller fills the OAM view and hands over the vector view. */
 void sub_0801C01C(u16, u16, void *, struct UnkVec, int);
+
+/* Both take ONE parameter that their own bodies never read -- a dead leading
+ * parameter, which is invisible in the body and only readable at the callers.
+ * Both callers set r0 up: sub_08043DAC does `ldrb r0,[r0,#0x1d]` and
+ * sub_08080EE4 / sub_08080EF8 do `ldr r0,=gUnknown_03005970; ldr r0,[r0]`.
+ * Neither load could survive -O2 if the value were unused at the call, so the
+ * parameter is real however dead it is inside.
+ *
+ * `int` and not a narrow type: sub_08080EE4 passes the whole word out of
+ * gUnknown_03005970 with no `lsl #24; lsr #24` in front of the `bl`, which a
+ * u8 parameter would have forced. Both are void (`pop {r0}; bx r0`). */
+void sub_08043DF4(int);
+void sub_08043E18(int);
+
+/* Its two callers -- sub_08041E94 and sub_080424FC -- both pass exactly
+ * `gUnknown_030040D8`, i.e. the dereferenced pointer global, so the parameter
+ * is that struct pointer rather than the `int` a bare `adds r4, r0, #0` would
+ * otherwise suggest.
+ *
+ * The `u8` return is read off the body's own `lsls #0x18; lsrs #0x18` in front
+ * of `pop {r1}`, and is NOT firm: both call sites discard the result, so per
+ * the forwarding rule in docs/agbcc-codegen.md nothing here proves the width --
+ * the shift is equally the re-narrowing of sub_08074484's own u8 return. Revisit
+ * when a caller keeps the value. */
+u8 sub_080743E8(struct Unk030040D8 *);
+
+/* A three-way range dispatch on the first argument: 0x60..0x9f goes to
+ * sub_0803C9D4, 0x20..0x5f to sub_0803CA00, 0x00..0x1f to sub_0803CB40, and
+ * anything else falls out doing nothing. `pop {r0}; bx r0`, so void.
+ *
+ * The second parameter is at least 16 bits: sub_08038690 passes its own
+ * incoming r0 straight through with no narrowing, and sub_0803CBA0 itself
+ * narrows it with `lsls #0x18; lsrs #0x18` at each of the two uses that forward
+ * it -- a cast at a use, not PROMOTE_MODE, so the two inner callees take `u8`
+ * and this one does not.
+ * The first parameter is `int` on the same evidence from sub_08038690 (a bare
+ * `movs r0, #0x60`), but it is the weaker half: sub_080190EC reaches it with
+ * `movs r1,#8; ldrsh r0,[r0,r1]`, which an `s16` parameter would also produce,
+ * and no call site yet separates the two. */
+void sub_0803CBA0(int, int);
+
+/* Four already-promoted definitions that had no prototype, so every new caller
+ * hit `implicit declaration` under -Werror. These agree with
+ * src/decomp/c_08019260.c, c_08019850.c, c_0804018C.c and c_08074AAC.c by
+ * construction; see those files for the evidence behind each type. */
+bool8 sub_08019260(void);
+bool8 sub_08019850(void);
+void sub_0804018C(void *);
+void sub_08074AAC(const u8 *, ProcPtr);
+
+/* ---- wave 14 (B): callees of families F011, F024, F025 and F045 ---- */
+
+/* The nine FIRST callees of family F011 (`bl f; ldr r0,=g; movs r1,#N; bl h`).
+ * All nullary: r0 is written before it is read in every one of them --
+ * sub_08038D7C, sub_08016ED8 and sub_08044BB0 open with a pool `ldr`,
+ * sub_080745C0 with a pool `ldr` and a `movs`, and sub_08037F18 is a bare
+ * `bx lr` with no body at all. Every one that pushes lr pops into r0, so void;
+ * sub_080745C0 is a leaf ending in a bare `bx lr`, where the return type is
+ * not recoverable and `void` is the byte-neutral choice (its only caller,
+ * sub_08078124, discards). sub_0801A168, sub_080116E8 and sub_08023348 are
+ * already declared above and are the same reading. */
+void sub_08016ED8(void);
+void sub_08037F18(void);
+void sub_08038D7C(void);
+void sub_08044BB0(void);
+void sub_080745C0(void);
+
+/* Registered through sub_0801F024((void *)sub_08039188, 2) by sub_08039264 --
+ * the third member of the callback set the sub_0801F024 comment above
+ * describes, and the same reading applies: it is a void(void) body that
+ * ignores whatever sub_0801F024 hands it, so the `(void *)` cast at the call
+ * site is the honest spelling and not a workaround. */
+void sub_08039188(void);
+
+/* Walks the byte-stream script in r0 until it sees a 1, calling
+ * sub_0801B7C0(cursor, arg) on each opcode and advancing by
+ * sub_0808B6B0(cursor) + 1. `pop {r4, r5}; pop {r0}`, so void. The first
+ * parameter is genuinely `const u8 *` and not the opaque `const void *` its
+ * F011 siblings use -- this one dereferences it (`ldrb r0, [r4]`). The second
+ * is `int`: `adds r5, r1, #0` with no shift pair in the prologue, and its only
+ * call site (sub_0801B750) passes a `movs`-sized 0, which is byte-identical
+ * for every integer type. */
+void sub_0801B8A8(const u8 *, int);
+
+/* Family F024's callee. A four-instruction leaf: `str r1,[r0,#4]` then zeroes
+ * +0x08 (word) and +0x10 (halfword), then `bx lr`. Leaf with a bare `bx lr`, so
+ * the return type is not recoverable -- all six call sites discard, and r0 is
+ * still the incoming pointer at exit, so `void` is byte-neutral.
+ *
+ * The first parameter is `struct Unk03001470 *`, NOT the `void *` a wave-14
+ * agent inferred as "the weakest model that fits". The weakest-model rule is
+ * the right default for a type nobody else has named, but this one is already
+ * named: src/decomp/c_08063A30.c is promoted and matching with that struct,
+ * writing ->unk04, ->unk08 and ->unk10, and struct Unk03001470 is defined in
+ * unknown-globals.h with exactly those fields. A declaration that disagrees
+ * with a promoted definition is a build break, not a weaker claim -- it is
+ * what broke the first SPLIT=1 build of wave 14, and per-function trymatch
+ * cannot see it because it compiles one unit. The F024 wrappers keep their
+ * `void *` parameters and convert implicitly at the call, so nothing is lost
+ * by agreeing with the definition. */
+void sub_08063A30(struct Unk03001470 *, const void *);
+
+/* Family F025's third callee. Its parameter is an INT and not a pointer:
+ * `adds r5, r0, #0` then `adds r6, r5, (&gUnknown_02027F74 + 4)` uses it as an
+ * offset, and it stores the same value at +0x54 of the proc it finds with
+ * Proc_Find(gUnknown_08616D94) -- which is exactly the field sub_0808789C
+ * reads back out. `pop {r0}`, so void. */
+void sub_08087B74(int);
+
+/* Family F045's three second callees, all nullary and all void (`pop {r0}`):
+ * sub_0802D4A0 is `bl sub_0801A664; bl sub_08034F7C` and the other two are
+ * `ldr r0,=<0849A5xx>; bl sub_080193B0`. Because none of them reads r0 before
+ * writing it, the `bl sub_0801A168; bl <this>` pair in every F045 member is
+ * two statements and a nest is not expressible -- see the wrapper section of
+ * docs/agbcc-codegen.md. */
+void sub_0802C144(void);
+void sub_0802C1B0(void);
+void sub_0802D4A0(void);
 
 #endif // UNKNOWN_FUNCS_H

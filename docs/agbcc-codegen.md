@@ -268,6 +268,46 @@ Two corollaries worth carrying:
   `conflicting types` build error rather than a mismatch. Re-run `trymatch` on the
   retyped definitions; if the value is `ldrb`-derived they will still match.
 
+**So settle a return width by COUNTING every call site in `asm/`, not by reading
+one — and it is a one-line grep (wave 14).** The section above proves that a
+single `bl f; lsls #24; cmp #0` does not pin `f` at eight bits, because a `u8`
+local at that one call site is byte-identical. The way out is population, and it
+is free:
+
+```
+grep -rn -A2 "bl sub_XXXXXXXX$" asm/
+```
+
+`sub_08019260` was promoted `int` and every one of its **twenty** call sites
+narrows to eight bits. Twenty independent authors each choosing a `bool8` local
+is not a hypothesis; the callee is `bool8`. Two things make this cheap and
+sharp:
+
+- **Look for the `lsrs`, not just the `lsls`.** Two of the twenty are
+  `lsls #0x18; lsrs r4, #0x18` — the value is KEPT, not truth-tested, which is
+  the "compare against a non-zero constant or forward the result" row of the
+  table above and does not have the `u8`-local explanation. One such site
+  upgrades the whole population from suggestive to decisive.
+- **Unanimity is the signal; a single dissenting bare `cmp r0, #0` refutes it**
+  and sends you back to a local at the narrowing sites, which needs no header
+  change at all.
+
+The retype itself was byte-neutral in the definition (the body returns literal
+0/1, so `nonzero_bits <= 1` and gcc drops the narrowing) and no caller was
+promoted yet, so it cost one `trymatch`. Check that second part before
+retyping — a promoted caller that already spells the narrowing with a local
+would double-narrow.
+
+**Corollary that cost wave 14 a probe round: a function can be PROMOTED and
+still have no prototype.** `src/decomp/c_08019260.c`, `c_08019850.c`,
+`c_0804018C.c` and `c_08074AAC.c` were all matched and none of the four was
+declared in `include/unknown-functions.h`, because nothing had called them
+across a file boundary yet. The next caller gets
+`warning: implicit declaration of function` — fatal under `-Werror`, and it
+reads like a missing function rather than a missing line. `grep -rn "^[a-z].*
+sub_XXXXXXXX(" src/decomp/` before assuming a callee is unknown, and when you
+add the prototype, copy the definition's types rather than re-deriving them.
+
 **The argument side has the exact same property, and it is the sharper half:
 a callee's declared PARAMETER width is visible at its call sites, and it
 overrules the callee's own prologue.** The three carve-outs above are all about
@@ -3348,6 +3388,95 @@ Three consequences worth carrying:
   elsewhere in this file is the same fact seen from the data side: a single word
   needs only a merge, and pairs need the extra liveness a loop provides.
 
+### `c_local` generalises: write out by hand the CSE the original got free (wave 14, C)
+
+**A `.LC` word is not one decision, it is one decision PER READ SITE, and the
+right spelling differs between sites of the same function.** A2's `c_local` and
+A4's "if the ROM caches the middle value, `c_local` is wrong" read as a
+per-function choice between three spellings. On four functions in the
+0x08009000–0x0800C000 map cluster it is per-site, and getting it right is
+mechanical once you look at the ROM the right way. Three matched byte-exact
+*and* relocation-exact this way (`sub_0800AA30` 416 B, `sub_0800A3D4` 436 B,
+`sub_0800BF78` 428 B).
+
+The vocabulary, for `extern u8 **const gLC;` (the pool word) over a pointer
+global `g` (here `u8 *gUnknown_08499590`), with `pp = &gLC` bound to a local:
+
+| ROM at the read site | write |
+|---|---|
+| `mov rL, rPP ; ldr r0,[rL] ; ldr r0,[r0] ; ldrh` — both levels re-derived | `**pp` |
+| `mov rL, rQ ; ldr r0,[rL] ; ldrh` — one level, middle held in a **callee-saved** register across calls | bind it: `q = *pp;` … `*q` |
+| the middle value in a register *and* reused after a `bl` | same — `**pp` cannot do it, because a `const` global reached through a local pointer is not `RTX_UNCHANGING_P` |
+
+**Count the `ldr`s at each site before writing anything; that count IS the
+spelling.** `sub_0800BF78` needs all three inside one function: `q` bound at the
+top (in `sb`) for the tile fetch and exactly one later read, `s = *pp` rebound
+after each of two `if` merges (r7, each binding then serving three reads across
+intervening calls), and plain `**pp` at exactly one site where the ROM
+re-derives. Getting any one of them wrong is 8–44 bytes.
+
+**The honest spelling is the oracle, and it costs one iteration.** On all four,
+naming `gUnknown_08499590` directly gave *every byte* — one of them on the first
+try, with `bytes: match, but relocations differ` as the entire verdict. Do that
+first: it separates "my semantics are wrong" from "my pool spelling is wrong",
+and the byte-exact honest draft is then a fixed target the `c_local` conversion
+can be diffed against instead of the ROM. Going straight to `pp` inverts the
+work — every semantic error and every CSE error arrives in the same diff.
+
+**Where `pp = &gLC` is assigned is load-bearing, and the tell is where the ROM
+copies the pool register into its callee-saved home.** agbcc emits setup in
+source-statement order, so `mov sb, r1` sitting several instructions *after* the
+pool load means the assignment is not the first statement of that region:
+
+```
+ldr r1,=gLC ; ldr r0,[r1] ; mov r8,r0 ; ldr r0,[r0] ; ldrh r0,[r0] ; subs r0,#1
+mov sb, r1                       <- pp's copy, AFTER the bound is computed
+cmp r4, r0
+```
+
+Two spellings reach that and nothing else tried does: read the word by name
+first (`q = gLC;`, which also gives you the middle-level local), give the bound
+its own statement (`lim = *(u16 *)*q - 1;`), and only then `pp = &gLC;`. In
+`sub_0800AA30` that `lim` local is worth 4 bytes in each of two switch arms and
+has no other effect; in `sub_0800BF78` the same reading puts `pp`'s assignment
+after a `bl`, three statements below the pool load. **Reading the word by name
+in the same function that takes its address does NOT re-trigger force-addr** —
+that is the `b_inplace` hazard the sections above warn about, and it does not
+fire when the only by-name read is a single one feeding a local.
+
+**One `pp` per function, assigned per region — not one local per region.**
+Per-region locals give different arms different hard registers, and two arms
+that share a tail in the ROM then fail to cross-jump: `sub_0800AA30`'s cases 2
+and 4 share two blocks, which needs both arms holding `pp` in `sb`. Declaring
+`pp` once at function scope and assigning it separately in each arm gives one
+pseudo, one register, and the ROM's four pool words. Getting this wrong is
+**-44 bytes** and presents as the candidate being mysteriously *short*.
+
+### The branchless `!= 0` also fires on a narrowing at the ASSIGNMENT (wave 14, C)
+
+The "returned `!=`" table above lists the triggers for
+`(t | -t) >> 31` as a non-zero compare constant or a narrowing conversion **on
+the operand**. There is a third, it is not on that list, and it is the one that
+appears in ordinary code: **a narrow assignment TARGET.** One probe, six
+spellings, one `int`-returning callee:
+
+| source | shape |
+|---|---|
+| `int ok; ok = f() != 0;` | branching — `cmp #0; beq; mov #1` |
+| `int ok; ok = !!f();` / `ok = f() ? 1 : 0;` | branching, byte-identical |
+| **`u8 ok; ok = f() != 0;`** | **branchless, and with NO shift pair in front** |
+| `int ok; ok = (u8)f() != 0;` | branchless, **plus** `lsl #0x18; lsr #0x18` |
+| `int ok; ok = f() != -1;` | branchless, via `mvn` |
+
+The third and fourth rows are the ones to tell apart, because both are
+"branchless `!= 0`" and they differ by 4 bytes: a cast on the *operand* keeps
+the truncation as real instructions, while a narrow *destination* just picks
+`do_store_flag`'s QImode path and emits nothing extra. **Read
+`rsbs; orrs; lsrs #0x1f` with no shift pair in front as a `u8`/`bool8` local
+being assigned, not as a cast and not as a narrow-returning callee.**
+`sub_0800977C` turns on exactly this, and `int ok` there is 4 bytes long and
+also branches.
+
 ---
 
 ## Per-file compiler and flags
@@ -5051,6 +5180,73 @@ which of the two you have: identical byte count means look at the relocation,
 a byte-count difference means the level of indirection is wrong and no
 relocation machinery will help.
 
+### REFUTED: "new aggregate types predict cost" does not discriminate (wave 14, C)
+
+Wave 13's headline finding — three agents converging on *new aggregate types,
+not size and not new symbols, predict cost* — was handed to wave 14 as the basis
+for target selection, with the instruction to "sort by distinct new struct
+layouts". It was tested with a batch designed to be a controlled experiment for
+it: four map/tile functions of 412–436 bytes, all `backward_branches == 0`, all
+in `code.s`, all reaching the same global family. **The prediction that they
+would need one new layout between them rather than four was correct. The claim
+that this predicts cost is not — it is true and vacuous.**
+
+| | bytes | callees | new layouts | iterations | outcome |
+|---|---|---|---|---|---|
+| `sub_0800AA30` | 416 | 1 | **0** | 7 | matched |
+| `sub_0800A3D4` | 436 | 6 | **0** | 3 + one 4-way sweep | matched |
+| `sub_0800BF78` | 428 | 8 | **0** | 3 | matched |
+| `sub_0800977C` | 412 | 2 | **0** | 14 + a 300 s permuter run | **parked** |
+
+All four needed **zero** new struct layouts and zero new aggregates of any kind:
+the whole batch is the `u8 *gUnknown_08499590` screen-descriptor idiom that
+`c_08001158.c` and `c_08008B70.c` already establish (`u16` width at +0, `u16`
+height at +2, `u16` tiles at +0xA22, `u8` terrain at +0x1432, `u16` rowOffset[]
+at +0x417A), plus one `unk20` that `struct Unk0200B0B0` already had. Thirteen
+new *symbols* were declared — four pool words and nine prototypes — every one a
+scalar or a pointer. On the wave-13 metric all four score identically, and their
+costs range from three iterations to not closable.
+
+**The half that survives is the negative half, and it is worth keeping:** cost
+did not track byte count (the cheapest and the parked one are the two smallest,
+and the largest was the second cheapest) and did not track callee count (the
+8-callee function was the cheapest of the four, the 2-callee one is parked).
+Both of those are real and both are the opposite of the intuitive ordering.
+
+**The acceptance test passed on its own terms and the conclusion still does not
+follow.** Functions 2 and 3 each cost materially fewer iterations than function
+1 (3 against 7) at the same size, exactly as predicted. But the discount was not
+"no new layouts" — it was the **family effect**: function 1 spent four of its
+seven iterations working out the `.LC` read-site vocabulary above, and functions
+2 and 3 inherited it and were then read straight off the ROM's `ldr` counts.
+That is the wave-13 "prefer targets that share a vocabulary with each other"
+corollary, and it is doing all the work the layout metric was being credited
+with.
+
+**What actually discriminated, on this batch: the number of distinct CSE regions
+around the `.LC` word** — i.e. how many *different* read-site spellings the
+function needs, which is one query against the listing and is visible before
+drafting. `sub_0800A3D4` needs one (`**pp` everywhere); `sub_0800BF78` needs
+three but they are individually readable; `sub_0800977C` needs a shape no source
+spelling produces, and is parked at 412 of 412 bytes for it. **Sort by that, not
+by struct layouts** — and note it only matters at all for functions the `.LC`
+screen flags, which is where this batch lived and is a large fraction of
+`code.s`.
+
+**One selection-level warning this batch is evidence for.** The batch was chosen
+because its four members "share a global family" — `gUnknown_0808D854`,
+`gUnknown_0808D83C`, `gUnknown_0808D86C`, `gUnknown_0808D81C`, all
+pointer-to-pointer and all dereferenced twice. They are not globals: they are
+four slots of the same `-fforce-addr` pool block, all holding `0x08499590`, and
+the screen at the top of this chapter flags every one of them. Under the
+standing wave-13 reading that made the whole batch an automatic park. It was
+right to attack them anyway — three of four closed — but the reason is A2's
+`c_local`, not anything about the family, and a batch selected on "shared
+globals" from `data/functions.json` will keep selecting pool slots, because
+`asm/` symbolises them exactly like globals. **Resolve `data_refs` in the
+0x0808C000–0x08091000 range against the ROM before calling two functions
+related.**
+
 ---
 
 ## Workflow
@@ -5068,6 +5264,24 @@ relocation machinery will help.
   `relocs: name different symbols that resolve to the same address`. If you see
   that line, you have a match — stop working. Do not "fix" it; the obvious fix
   (`&gUnknown_03000040` on a symbol declared as a scalar) compiled to 52 bytes.
+- **The OTHER pool-word relocation case is a REAL mismatch, and the bullet
+  above will talk you out of fixing it (wave 14).** That one is two symbols
+  resolving to one address. This one is a relocation against *no* relocation:
+  where the ROM's pool word is a bare constant, the splitter invents an lds
+  symbol at that address, so `asm/` assembles to `.word 0` plus
+  `R_ARM_ABS32 gUnknown_XXXXXXXX` while the honest C — a literal, e.g.
+  `((void (*)(void *))0x0300619D)(dst)` — emits `.word 0x0300619d` with no
+  relocation at all. Identical after linking, identical instruction stream,
+  and `trymatch` scores it **81.2%** on a 16-byte function with
+  `first difference at +0xc`. It does *not* print the
+  `different symbols that resolve to the same address` line, because that check
+  compares two relocations and here there is only one. The fix is to spell the
+  pool word as `&gUnknown_XXXXXXXX` and declare the symbol in
+  `unknown-globals.h` with a comment saying it is not an object — `sub_0801B6EC`
+  and `sub_0801B6FC` are the worked cases. **Read this as a spelling forced by
+  the split, not as a discovery about the original source**, and say so in the
+  header: a bogus `extern u8` at an odd IWRAM address is exactly the kind of
+  byte-neutral wrong type the brief warns has no oracle.
 - **`compile_probe` is free.** Compile candidate C and read the assembly without
   spending an attempt. One agent matched four functions in one `try_match` each
   by probing locally first. Explore with `compile_probe`, spend `try_match` on
@@ -5178,6 +5392,17 @@ relocation machinery will help.
   The display registers are the exception: they are reached through the
   `gDispIo` RAM shadow, not a `REG_DISPCNT`.
 - **`global.h` does not include `hardware.h`.** Include it yourself.
+- **It does not include `proc.h` either, and that one is easy to miss because
+  the failure does not name it (wave 14).** `Proc_Start` degrades to
+  `implicit declaration` and `PROC_TREE_3` to `undeclared identifier`, which
+  read like missing prototypes; but `PROC_HEADER` inside a struct fails as
+  `no semicolon at end of struct or union` followed by
+  `syntax error before '}'` and then `dereferencing pointer to incomplete type`
+  at the use — three errors, none of which mentions proc.h, on a struct that is
+  fine. Ten of one wave-14 batch's files hit this. `src/decomp/c_08011550.c` is
+  the convention: `#include "global.h"` then `#include "proc.h"`. Note a
+  `compile_probe` that includes proc.h for one function will hide it from the
+  whole rest of the batch, which is how it survived to the `trymatch` step.
 - **Never write an `extern` in your `.c` file** — see "Where the globals live"
   above for the three cases (present and right, present and wrong, absent).
   Adding a local declaration either shadows the shared type or conflicts with
@@ -5495,6 +5720,30 @@ not expressible in C at all and the answer is two statements, for free. All 19
 members of family F005 (16-byte `push {lr}; bl; bl; pop {r0}; bx r0`,
 0x0800484C–0x08085298) are the nullary case and all 19 matched first try on it.
 
+**The "save the proc, call something, maybe break" family is the same trap one
+level up, and it reads even more convincingly as an argument pass (wave 14).**
+Family F032 is `push {r4,lr}; adds r4,r0,#0; bl P; lsls r0,#0x18; cmp r0,#0;
+bne; adds r0,r4,#0; bl Proc_Break`. The `bl P` with r0 still holding the
+incoming proc looks exactly like `if (!P(proc)) Proc_Break(proc)` — and all six
+members are `if (P() == 0) Proc_Break(proc)`, with **P taking no argument at
+all**. `sub_08019850`, `sub_08019260` and `sub_080116A0` are each `f(void)` in
+their own promoted sources. The `adds r4, r0, #0` is not "save it because we
+pass it", it is "save it because the call clobbers r0"; the incoming r0 is
+simply dead across the `bl`. Same discriminator as the row above — read the
+callee's prologue — and it is worth stating separately because here there IS a
+later use of the saved value, which makes the pass-through reading look
+corroborated when it is not. Exemplar: `sub_08072288` in
+`src/decomp/c_08071F88.c`.
+
+**A one-instruction relative to that, from family F054: in `gFlag = K;
+CALLEE(...)`, the store's address lands in r0 and its value in r1, which is
+backwards from every other setter family and means nothing.** F008 and F017
+write `ldr r1,=g; movs r0,#N; str r0,[r1]`; F054's members write
+`ldr r0,=g; movs r1,#N; strb r1,[r0]` from the identical source shape, because
+the `bl` two instructions later needs r0 and the allocator puts the address
+there first. Read a swapped address/value pair before a call as register
+allocation, not as a different expression.
+
 **One family, several unrelated callee systems — so the wrapper's shape names
 nothing, and neither does the script's address.** The 16-byte
 `push {lr}; ldr r0,=g; bl f; pop {r0}; bx r0` family (F000 in
@@ -5515,6 +5764,26 @@ The practical consequence is that the work in such a family is entirely in the
 header: settle each callee's prototype and each global's type from *its own*
 call sites, and every member is then one line. All 29 matched from a single
 pass with zero `try_match` attempts spent exploring.
+
+**F011 is the sharper case, and it shows that `varies` in `data/families.json`
+already contains the whole answer before you open `asm/` (wave 14).** Its nine
+members share `bl f; ldr r0,=g; movs r1,#N; bl h` and agree on *nothing else*:
+nine distinct first callees, nine distinct pool words, and five distinct second
+callees. Four of the nine end in `Proc_Start(script, PROC_TREE_3)` and are
+proc starters; three are `gUnknown_03001470` installers; one
+(`sub_0801B750`) drives a byte-script interpreter; and one (`sub_08039264`) has
+a **function** address in its pool word and is the wave-12 `sub_0801F024`
+callback-registration body with a leading `bl`. A wave-14 brief described the
+family as "two sequential calls, second takes a ROM table", which is true of
+three members out of nine — while the `varies` block named all five callees and
+all nine pool words correctly, for free. **Read `varies` first and let it, not
+the prose, tell you how wide the family is**; where prose and `varies` disagree,
+`varies` has been right both times it has come up.
+
+The same entry is also what flags the members that need a *different* shape of
+thought: F024's `varies` shows `bl S` taking two values, `sub_08063A30` on four
+members and `_call_via_r1` on two, which is the whole warning that two of the
+six are indirect calls rather than direct ones.
 
 ---
 
@@ -5561,6 +5830,33 @@ not evidence. The tells:
   `.align 2, 0` — with zero callers, immediately before a 4-byte-aligned
   `thumb_func_start`. `sub_0802C62A` is padding between `sub_0802C604` and
   `sub_0802C62C`. Not a function, not asm the game runs, nothing to match.
+
+**`bl _call_via_rN` is ORDINARY COMPILER OUTPUT — it is not a veneer and it is
+not a reason to park anything (wave 14).** It reads like the interworking-veneer
+tell three bullets up and it is the opposite of one. The GBA is ARMv4T and has
+no `blx rN`, so agbcc compiles *every* indirect call in THUMB as a `bl` to a
+libgcc trampoline that is one `bx rN`; `lr` is set by the `bl`, so the callee
+returns straight past it to the original caller. There are 40 of these in this
+tree across `_call_via_r0` through `_call_via_sl`. Two of them,
+`sub_0801B6EC` and `sub_0801B6FC`, matched first try in wave 14.
+
+Two things fall out of it that are free evidence:
+
+- **The register index counts the arguments.** gcc puts the pointer in the
+  first free scratch register, so `_call_via_r0` is a nullary indirect call,
+  `_call_via_r1` a one-argument one, `_call_via_r2` two, and so on. This is a
+  hard readout, unlike most arity guesses in a wrapper, and it is worth more
+  than the call sites: it told wave 14 that `sub_0801B6EC(void *)` had a
+  parameter before either caller was read.
+- **A pool word at an ODD address in RAM is the function pointer's VALUE, not a
+  variable's address.** Do not let the splitter's name mislead you here. When
+  the pool word is a bare constant, `tools/gen_lds.py` invents a symbol at that
+  exact address and `asm/` then prints `=gUnknown_0300619D` as though an object
+  lived there. Check `aw2bhr.map`: for both wave-14 cases the range is `*fill*`,
+  i.e. nothing is allocated, and the pointee is code copied into IWRAM at run
+  time. The honest source is a constant or a macro — but see the relocation
+  note in the Workflow section, because the honest spelling is not the one that
+  matches.
 
 The 0x0806F734–0x080718E4 block is the m4a/MP2K sound driver. `sub_0806F744`
 loads `gUnknown_03007FF0` and compares `[r0]` against `0x68736D53` — that is the
@@ -6207,6 +6503,19 @@ found by measurement and both matter:
   for a distinguishing constant — write one body and instantiate it twice. Read
   `varies` before reading the assembly of the second member; it is the cheapest
   diff in the tree and it answers "what do I actually have to change" outright.
+
+**Read `varies` as COMPLETE in both directions, and it makes a whole class of
+predictions free to check (wave 14).** The list is normally used forwards — "so
+these are the things I have to derive". The backwards reading is worth as much:
+an instruction index that is *absent* from `varies` is byte-identical in every
+member, **including the already-matched ones**, so it is already answered by the
+exemplar and needs no derivation at all. Wave 14 was told that its two F038
+targets differed from their matched siblings in "using `ldrsh` where several
+exemplars use plain loads"; `ldrsh r0,[r0,r1]` is not in F038's `varies`, so all
+five members share it and there was nothing to work out. F038's `varies` has
+exactly two entries — the byte offset and one return constant — and that was the
+entire job for a 56-byte function. Ten seconds of reading the family record
+refutes a wrong prediction about the assembly before you open the assembly.
 
 ### What does not cluster, and must not be made to
 
