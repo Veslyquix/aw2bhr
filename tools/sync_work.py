@@ -53,10 +53,29 @@ def split_unit(text, fns):
     than being stranded on the previous function.
     """
     lines = text.splitlines(keepends=True)
+
+    # Which lines are code. `^\S.*<fn>\s*\(` on its own also matches the FIRST
+    # line of a block comment, because that line starts with `/`, and a doc
+    # comment routinely names the function the one below it calls. In
+    # c_0803B3C8.c the comment above sub_0803B3C8 opens
+    # "/* `sub_0803B3D4(8)`: ..." and hijacked sub_0803B3D4's boundary, which
+    # collapsed one draft to nothing and put two functions in the other -- and
+    # `trymatch` then reports both as +12 bytes, i.e. exactly the false
+    # regression this tool exists to prevent. Continuation lines were already
+    # safe (they start with a space), so only the opener needed excluding; the
+    # flag is tracked properly anyway because a `*/`-then-code line is legal.
+    code = []
+    in_comment = False
+    for ln in lines:
+        s = ln.lstrip()
+        code.append(not in_comment and not s.startswith(("/*", "//", "*")))
+        _, in_comment = promote.strip_comments(ln, in_comment)
+
     starts = {}
     for fn in fns:
         pat = re.compile(r'^\S.*\b%s\s*\(' % re.escape(fn))
-        hit = next((i for i, ln in enumerate(lines) if pat.match(ln)), None)
+        hit = next((i for i, ln in enumerate(lines)
+                    if code[i] and pat.match(ln)), None)
         if hit is None:
             return None, None
         starts[fn] = promote.doc_comment_start(lines, hit)

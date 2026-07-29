@@ -2072,4 +2072,84 @@ u8 sub_08042424(s16, s16);
 int sub_08043574(int, int, int);
 int sub_0801C7DC(const u16 *, int, int, int, int, int, int);
 
+/* ---- wave 17 (B) ----
+ * The position half of the ~40 sprite setters between 0x0804B180 and
+ * 0x08053614: it takes a side (gUnknown_0300453C), a proc id
+ * (gUnknown_03001FBC) and an (x, y) in world coordinates, subtracts the scroll
+ * origin pair out of gUnknown_084C3F70/gUnknown_084C3F78 and forwards to
+ * sub_080155C0. All four parameters are narrowed `lsls #0x10; lsrs #0x10` at
+ * entry, which is only PROMOTE_MODE and does not settle signedness; the
+ * signedness comes from the USES -- arguments two, three and four are each
+ * re-extended `lsls #0x10; asrs #0x10` before they are used, so those three
+ * are signed, while argument one is only ever an index (`lsls #2`, `lsls #4`)
+ * and is unsigned. Callers agree: sub_08051DE0 and its two siblings pass
+ * gUnknown_0300453C bare but sign-extend the two u16 position sums, which is
+ * the `u16 -> s16` conversion and is four instructions of real code.
+ * `pop {r0}; bx r0` makes it void. */
+void sub_08050528(u16, s16, s16, s16);
+
+/* The two emitters family F092 drives, and the routine it calls when the
+ * counter runs out. All three take their argument (if any) in r0 and all three
+ * end `pop {r0}; bx r0`, so all three are void.
+ *
+ * sub_080645AC and sub_08064E5C both open `adds rN, r0, #0` and then read
+ * +0x28 / +0x2a / +0x1c through it -- the struct Unk08580934_Obj offsets --
+ * so the parameter is that type rather than a bare `void *`. sub_080645AC also
+ * calls through +0x4c (`ldr r1,[r4,#0x4c]; bl _call_via_r1`), which is past
+ * the modelled extent; the field is deliberately NOT added, because a
+ * one-instruction indirect call is not enough to type it.
+ *
+ * sub_08030178 reads no argument register before writing it -- it opens
+ * `ldr r5,=gUnknown_08090CAC; ldr r6,[r5]` -- so it is nullary. */
+void sub_080645AC(struct Unk08580934_Obj *);
+void sub_08064E5C(struct Unk08580934_Obj *);
+void sub_08030178(void);
+
+/* The "this slot has arrived" handler sub_08050958 calls when a moving unit
+ * crosses its bound. All three parameters are narrowed `lsls #0x10; lsrs #0x10`
+ * at entry, and the signedness comes from the uses: one and two are only ever
+ * array indices (`muls` by 0xb4, `lsls #3`) into gUnknown_02029A10, so u16,
+ * while three is re-extended `lsls #0x10; asrs #0x10` and tested against -1
+ * before going to sub_080153F0 -- the proc-id pattern, hence s16. The caller
+ * agrees: it passes two u16 locals bare and gUnknown_03001FBC via `ldrsh` with
+ * no conversion on any of the three. `pop {r0}; bx r0` makes it void. */
+void sub_08050AEC(u16, u16, s16);
+
+/* The rest of sub_08051F4C's callees. All six end `pop {r0}; bx r0`.
+ *
+ * sub_080504A8 narrows both arguments `lsls #0x10; lsrs #0x10` with no copy in
+ * front, which is a declared-narrow pair; sub_08051D74 is the same shape.
+ *
+ * sub_08016824 and sub_08016944 are `adds rN, r0, #0` and THEN the narrowing,
+ * which docs/agbcc-codegen.md reads as an `int` parameter with a cast at a
+ * use rather than a declared-narrow one. Byte-neutral at sub_08051F4C's call
+ * sites either way (the argument arrives via `ldrsh`, so neither `int` nor
+ * `s16` needs a conversion), so this follows the rule rather than measuring.
+ *
+ * sub_080157A4 and sub_080157F4 are a pair -- the same eight instructions
+ * writing gUnknown_0200E438[...].unk3c and .unk3e. Argument one narrows
+ * `lsls #0x10; asrs #0x10` with no copy, so s16. Argument two is a bare `strh`
+ * setter and therefore cannot be distinguished from int/u32/u16 BY THE
+ * CALLEE -- the CALLER settles it: sub_08051BEC and sub_08051F4C sign-extend a
+ * u16 table value before passing it, which is the `u16 -> s16` conversion and
+ * is two instructions of real code that no other declaration produces. Both
+ * are already PROMOTED (src/decomp/c_080157A4.c, c_080157F4.c) and both were
+ * declared `u16 b` there; those two definitions were retyped to agree and
+ * re-verified, which is the "the prototype is the suspect" case the brief
+ * describes. */
+void sub_080504A8(u16, u16);
+void sub_08051D74(u16, u16);
+void sub_08016824(int);
+void sub_08016944(int);
+void sub_080157A4(s16, s16);
+void sub_080157F4(s16, s16);
+/* sub_08015504 sets OamData.vFlip on the slot's stashed attributes: it fetches
+ * them with sub_0801566C, masks `~0x21` and ORs `(flag & 1) << 5`, then hands
+ * them back. Both parameters are copy-THEN-narrow (`adds r5,r0,#0; ...;
+ * lsls #0x10; asrs #0x10` and `adds r4,r1,#0; lsls #0x18; lsrs #0x18`), which
+ * docs/agbcc-codegen.md reads as `int` with a cast at the use. Byte-neutral at
+ * sub_08051BEC's only call site, where the first argument arrives via `ldrsh`
+ * and the second is the literal 1. */
+void sub_08015504(int, int);
+
 #endif // UNKNOWN_FUNCS_H

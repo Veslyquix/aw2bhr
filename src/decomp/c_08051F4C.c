@@ -1,0 +1,90 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08051F4C.
+ * sub_08051F4C @ 0x08051F4C
+ */
+
+/* MATCHED. Not part of the sub_08051DE0 cluster -- a fresh function in the
+ * same neighbourhood that reuses its type vocabulary. It installs a unit's
+ * sprite for one side/slot pair: reset the two per-side scratch words, publish
+ * the side and slot into gUnknown_0300453C / gUnknown_0300451C, allocate the
+ * sprite through sub_08015410 and stash its id, then set five of its
+ * attributes and decide which follow-up runs.
+ *
+ * Three spellings had to be found:
+ *
+ *  - The FIFTH argument of sub_08015410 is its own statement (`f`). Inline, the
+ *    whole `gUnknown_08552178[a][b] * 7 + 6` expression is evaluated after the
+ *    other four arguments and needs an extra `ip` shuffle; the ROM computes it
+ *    before the two pool words and only narrows it to u8 at the call, which is
+ *    what a plain local produces. `int f`, not `u16` -- a u8-narrowing local
+ *    would move the `lsls #0x18; lsrs #0x18` up to the assignment.
+ *
+ *  - `row` is load-bearing. `gUnknown_085D6A48[w][2]` folds the constant 4
+ *    into the symbol's address (`adds r2,#4`) where the ROM wants it in the
+ *    `ldrh` immediate; binding the row to a `u16 *` and subscripting that
+ *    gives `ldrh [r0,#4]`. Same rule as the struct-vs-array choice on
+ *    gUnknown_08552D80 in sub_08051DE0, reached from the other direction --
+ *    here the shared declaration is an array and the local supplies the
+ *    aggregate.
+ *
+ *  - `c` and `d` are real variables, not a spelling artefact. The parameters
+ *    live in r7/sb for the body and the copies live in [sp,#4]/sl purely so
+ *    the LAST sub_08051D74 call can use them; `sub_08051D74(a, b)` there
+ *    coalesces the copies away and loses two instructions. Same
+ *    two-variables-two-registers rule as sub_0800C124 in
+ *    docs/agbcc-codegen.md.
+ *
+ * `entries[b].unk00 = 1` is measured, and its sibling sub_08051BEC needs
+ * `= unk01` for the identical-looking statement -- see the note there. */
+void sub_08051F4C(u16 a, u16 b)
+{
+    u16 c;
+    u16 d;
+    u16 e;
+    int f;
+    u16 *row;
+
+    c = a;
+    d = b;
+
+    gUnknown_02028E5C[a][0] = 1;
+    *gUnknown_084C3F78[a] = 0;
+    gUnknown_0300453C = a;
+    gUnknown_0300451C = b;
+
+    f = gUnknown_08552178[a][b] * 7 + 6;
+
+    gUnknown_02029808[a].unk24[b] = sub_08015410(gUnknown_085536BC, 1,
+        gUnknown_02029808[a].unk44[gUnknown_02029808[a].unk2e],
+        gUnknown_02029808[a].unk58[gUnknown_02029808[a].unk2e],
+        f);
+
+    sub_080504A8(a, 0x10);
+
+    e = gUnknown_08553B14[a];
+
+    sub_08016824(gUnknown_02029808[a].unk24[b]);
+    sub_08016944(gUnknown_02029808[a].unk24[b]);
+    sub_080157A4(gUnknown_02029808[a].unk24[b], e);
+    sub_080157F4(gUnknown_02029808[a].unk24[b], 0x100);
+
+    row = gUnknown_085D6A48[gUnknown_03004580[a][1]];
+
+    if (row[2] == 1)
+    {
+        if (b == gUnknown_08552148[a] && gUnknown_03004580[a][6] == 0)
+            sub_08051D74(a, b);
+    }
+    else if (gUnknown_02029A10[a].entries[b].unk01 == 1)
+    {
+        gUnknown_02029A10[a].entries[b].unk00 = 1;
+    }
+    else if (gUnknown_02029A10[a].entries[b].unk01 == 0)
+    {
+        sub_08051D74(c, d);
+    }
+}
