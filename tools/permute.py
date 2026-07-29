@@ -286,33 +286,44 @@ def verify(rec, pdir, keep_all):
         return 1
 
     print("\n%d candidate(s) to check against trymatch:" % len(cands))
-    for score, src in cands:
-        rel = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
-        cand = awlib.read_lines(src)
-        print("\n  permuter score %d  (%s)" % (score, rel))
 
-        # Try the tidy form first. If the graft is wrong in any way the raw
-        # output still holds the real result, so a failure here costs one
-        # compile rather than the candidate.
-        forms = []
-        grafted = splice(orig, cand, name)
-        if grafted is not None:
-            forms.append(("spliced onto the original preamble", grafted))
-        forms.append(("raw permuter output (headers expanded)", cand))
+    # The loop below leaves each candidate in csrc while trymatch judges it, so
+    # ANY abnormal exit -- timeout, Ctrl-C, an exception out of trymatch --
+    # strands the last form written there. That form is usually the
+    # header-expanded permuter output, which compiles cleanly and would be
+    # promoted silently as if it were the draft. Restore unless we matched.
+    matched = False
+    try:
+        for score, src in cands:
+            rel = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
+            cand = awlib.read_lines(src)
+            print("\n  permuter score %d  (%s)" % (score, rel))
 
-        for label, lines in forms:
-            awlib.write_text(csrc, "".join(lines))
-            print("  checking: %s" % label)
-            rc = trymatch.check(name)
-            if rc == 0:
-                print("\nMATCH from the permuter -- %s is written to %s"
-                      % (label, os.path.relpath(csrc, awlib.REPO)))
-                if lines is cand:
-                    print("      this is the header-expanded form; reduce it to")
-                    print("      an include plus externs before promoting.")
-                return 0
+            # Try the tidy form first. If the graft is wrong in any way the raw
+            # output still holds the real result, so a failure here costs one
+            # compile rather than the candidate.
+            forms = []
+            grafted = splice(orig, cand, name)
+            if grafted is not None:
+                forms.append(("spliced onto the original preamble", grafted))
+            forms.append(("raw permuter output (headers expanded)", cand))
 
-    awlib.write_text(csrc, "".join(orig))
+            for label, lines in forms:
+                awlib.write_text(csrc, "".join(lines))
+                print("  checking: %s" % label)
+                rc = trymatch.check(name)
+                if rc == 0:
+                    matched = True
+                    print("\nMATCH from the permuter -- %s is written to %s"
+                          % (label, os.path.relpath(csrc, awlib.REPO)))
+                    if lines is cand:
+                        print("      this is the header-expanded form; reduce it to")
+                        print("      an include plus externs before promoting.")
+                    return 0
+    finally:
+        if not matched:
+            awlib.write_text(csrc, "".join(orig))
+
     print("\nno candidate matched at the byte level; %s restored unchanged."
           % os.path.relpath(csrc, awlib.REPO))
     if not keep_all:
