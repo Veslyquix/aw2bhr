@@ -94,11 +94,32 @@ DATA_SRCS := $(shell find data -name '*.s')
 # Regenerate the inputs first:
 #     python tools/split_asm.py && python tools/gen_lds.py
 FUNC_DIR := $(BUILD_DIR)/functions
+RODATA_DIR := $(BUILD_DIR)/rodata
 ifeq ($(SPLIT),1)
   FUNC_SRCS := $(shell find $(FUNC_DIR) -name '*.s')
   ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s')
   C_SRCS += $(shell find $(SRC_DIR)/decomp -name '*.c' 2>/dev/null)
   LDS := $(BUILD_NAME).split.lds
+
+  # data/rodata.s holds agbcc's -fforce-addr pool words as incbin'd ROM bytes.
+  # A promoted unit whose C names the global directly EMITS its own copy of the
+  # word it owns, so the blob must stop supplying those bytes or they would be
+  # in the ROM twice. tools/split_rodata.py carves them out into generated
+  # pieces under build/rodata, reading data/rodata.s and never modifying it --
+  # the same read-only treatment split_asm.py gives asm/. With nothing carved
+  # out the single generated piece is TEXTUALLY IDENTICAL to data/rodata.s, so
+  # this substitution is a no-op until a unit claims a word.
+  RODATA_SRCS := $(shell find $(RODATA_DIR) -name '*.s' 2>/dev/null)
+  ifeq ($(strip $(RODATA_SRCS)),)
+    $(error build/rodata is empty -- run `$(PYTHON) tools/split_rodata.py` first. \
+            Without it the link would silently drop megabytes of ROM data)
+  endif
+  # SPLIT_BLOBS is written by split_rodata.py and names exactly the blobs its
+  # generated pieces replace. Included rather than hardcoded so the two cannot
+  # drift: a blob left in DATA_SRCS is linked twice, and one wrongly removed
+  # vanishes from the ROM.
+  include $(RODATA_DIR)/blobs.mk
+  DATA_SRCS := $(filter-out $(SPLIT_BLOBS),$(DATA_SRCS))
 
   # Parts of the ROM were not built with the default toolchain -- the sound and
   # flash libraries came out of the SDK prebuilt with their own settings, which
@@ -147,6 +168,7 @@ DATA_OBJS := $(DATA_SRCS:%.s=$(BUILD_DIR)/%.o)
 # Unit objects sit beside their sources, already under $(BUILD_DIR), so they
 # take the %.s -> %.o rule below rather than the $(BUILD_DIR)/%.o one.
 ASM_OBJS += $(FUNC_SRCS:%.s=%.o)
+ASM_OBJS += $(RODATA_SRCS:%.s=%.o)
 
 ALL_OBJS := $(C_OBJS) $(ASM_OBJS) $(DATA_OBJS)
 ALL_DEPS := $(ALL_OBJS:%.o=%.d)
@@ -203,6 +225,12 @@ $(BUILD_DIR)/%.o: %.s
 # this cannot go through the rule above. Silent: 4,505 echo lines is noise.
 $(FUNC_DIR)/%.o: $(FUNC_DIR)/%.s
 	@$(AS) $(ASFLAGS) $< -o $@ --MD $(FUNC_DIR)/$*.d
+
+# Generated rodata piece (SPLIT=1). Same reason as the rule above: source and
+# object share a directory, so the $(BUILD_DIR)/%.o rule would nest it.
+$(RODATA_DIR)/%.o: $(RODATA_DIR)/%.s
+	@echo "[ AS]	$<"
+	@$(AS) $(ASFLAGS) $< -o $@ --MD $(RODATA_DIR)/$*.d
 
 ifneq (clean,$(MAKECMDGOALS))
   -include $(ALL_DEPS)

@@ -21,15 +21,19 @@ bool8 sub_08026F9C(s16 a, s16 b)
 /* Two separate `if`s, not `&&`: the shared `return FALSE` block has to sit
  * directly after the second compare with the TRUE block behind the pool, and
  * `if (t != 0 && ...)` inverts that second branch instead.
+ *
+ * `a` is s16 and not u16 (corrected in wave 18): the body is byte-identical
+ * either way, but three call sites load the argument with `ldrsh`, which a u16
+ * parameter cannot produce. See include/unknown-functions.h.
  */
-bool8 sub_08026FD0(u16 a, u8 b)
+bool8 sub_08026FD0(s16 a, u8 b)
 {
     u32 t = b >> 5;
 
     if (t == 0)
         return FALSE;
 
-    if (gUnknown_08499598[((s16)a >> 6) + 1].unk2a == gUnknown_08499598[t].unk2a)
+    if (gUnknown_08499598[(a >> 6) + 1].unk2a == gUnknown_08499598[t].unk2a)
         return TRUE;
 
     return FALSE;

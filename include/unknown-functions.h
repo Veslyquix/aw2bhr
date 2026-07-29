@@ -938,6 +938,17 @@ void sub_08078758(void);
 void sub_0801566C(s16, struct UnkVec *);
 void sub_08015608(s16, struct UnkVec);
 void sub_08015928(s16, u32);
+/* `return sub_0801DA54(gUnknown_03001470[a].unk26);` -- a lookup keyed on the
+ * same slot index everything else in this family uses. The PARAMETER is a free
+ * choice at every call site found so far: sub_0804E7A8 and sub_0804FCA4 pass
+ * gUnknown_03001FBC, which is a declared `s16` global and therefore loads with
+ * `ldrsh` whichever way the parameter is declared. The RETURN is `int` on the
+ * caller's evidence rather than the callee's: both callers put the result in a
+ * `u16` local and get `lsls #0x10; lsrs #0x10`, which an `s16`-declared return
+ * would have made `asrs`. The `lsls #0x10; asrs #0x10` in sub_080156C4's own
+ * tail belongs to sub_0801DA54's declared return width, not to this one --
+ * see the "missing return keyword" carve-out in docs/agbcc-codegen.md. */
+int sub_080156C4(s16);
 /* Continuation callbacks handed to sub_08015928 as a bare pool word by
  * sub_0804D928 and sub_0804E3B4. Only the symbol's address is used, so the
  * signature is not recoverable from the call site; both are themselves members
@@ -1202,8 +1213,60 @@ void sub_080359A4(ProcPtr);
  * PROMOTE_MODE. sub_080255F4 returns a BYTE -- the caller tests it with
  * `lsls r0, #0x18`. */
 void sub_080358C4(int, int);
-u8 sub_080255F4(int, int, int);
+/* CORRECTED in wave 18 (W18-C): sub_080255F4 is
+ * `u8 (struct Unk08499594 *, s16, s16)`, not `(int, int, int)`.
+ *   - Parameter 0 is a POINTER, not an int: the body NULL-tests it
+ *     (`cmp r3,#0`), reads `[r3,#1]`, and takes `r3 - gUnknown_08499594` as an
+ *     exact pointer difference by 12 (the *0xAAAAAAAB;asr#2 magic). Its caller
+ *     sub_0802571C passes `&gUnknown_08499594[id]`.
+ *   - Parameters 1 and 2 are 16 bits: the prologue carries `lsls #0x10;
+ *     lsrs #0x10` on BOTH, which is PROMOTE_MODE and which an `int` parameter
+ *     never produces. They are SIGNED because each is re-narrowed with
+ *     `lsls #0x10; asrs #0x10` at its use.
+ * The wave-15 comment above inferred `int` from sub_080359A4 passing
+ * `(v + 8) / 16` with no narrowing, on the grounds that "a u16 parameter would
+ * have put `lsls #0x10; lsrs #0x10` in front of every one". That is true of
+ * u16 and NOT of s16: the argument there is `ldrsh` + 8 + `asrs #4`, which
+ * gcc's num_sign_bit_copies puts at 20 sign bits, so the s16 conversion is
+ * provably a no-op and combine deletes it. The other caller passes two `ldrb`s,
+ * which is a no-op for the same reason. Neither call site was ever evidence
+ * against s16 -- READ AN ABSENT NARROWING AS PROOF ONLY WHEN THE VALUE'S RANGE
+ * DOES NOT ALREADY FIT. Neither caller is promoted. */
+u8 sub_080255F4(struct Unk08499594 *, s16, s16);
 int sub_0801C254(struct Unk0801C210 *, int, int);
+
+/* ---- wave 18 (W18-C): the 0x080255F4 / 0x080257C0 neighbour-scan pair ----
+ * All four return a byte -- every call site tests the result with a bare
+ * `lsls r0, #0x18; cmp r0, #0` and sub_08025744 re-narrows sub_08026F5C's
+ * result before returning it. sub_08025598 and sub_08025744 have the SAME
+ * body shape (both open `lsls #0x10; asrs #0x10` on r0 and `lsls #0x10;
+ * asrs #0xf` on r1, the latter being the `y * 2` row index folded into the
+ * sign extension) and they still take DIFFERENT parameter widths. Each width
+ * was read off the matched caller, which is the only place it is visible:
+ *
+ *   sub_08025598(s16, s16) -- sub_080255F4 narrows `x - 1` / `y - 1` with
+ *     `lsls #0x10; asrs #0x10` in front of the call and leaves the bare
+ *     `x` / `y` alone. That asymmetry IS the s16 conversion: its operands come
+ *     from `(s16)` parameters, so num_sign_bit_copies proves the bare values
+ *     already fit and drops those two, and does not for the +-1 forms.
+ *
+ *   sub_08025744(int, int) -- sub_080257C0's four arguments are all
+ *     `ldrb`-derived, so an s16 conversion would be elided at ALL FOUR sites
+ *     and the usual narrowing readout is blind here. The width still shows,
+ *     as an ORDERING difference: with `int` the two calls whose second
+ *     argument carries the arithmetic emit `subs r1, r5, #1; adds r0, r4, #0`,
+ *     which is the ROM; with `s16` they come out in argument-number order.
+ *     sub_08025744's other caller sub_08020DBC has the same tail and the same
+ *     order. WHERE A NARROWING WOULD BE ELIDED, ARGUMENT-SETUP ORDER IS STILL
+ *     A READOUT.
+ *
+ * sub_08026F5C takes s16 for the same reason its sibling sub_08026FD0 does:
+ * the body is `(s16)a >> 6` (`lsls #0x10; asrs #0x16`) and sub_080257C0
+ * narrows a pointer difference to s16 to pass it. */
+bool8 sub_08026F5C(s16);
+u8 sub_08025598(s16, s16);
+u8 sub_08025744(int, int);
+u8 sub_080257C0(u16);
 
 /* ---- wave 13 (A2): sub_08040640's callees ----
  * sub_08026100 takes three word-wide arguments (`adds r4, r0, #0;
@@ -1515,6 +1578,20 @@ s8 sub_08015410(void *, u8, void *, void *, u8);
  * narrowed by PROMOTE_MODE either way). Settle it when sub_0804C400 itself is
  * matched, not before. */
 void sub_0804C400(u16);
+/* Two more of the same family, both called by sub_0804E7A8 / sub_0804FCA4 with
+ * (side, slot) out of gUnknown_03001470[gUnknown_03001FBC].unk30 / .unk34.
+ *   sub_08056E9C is PROMOTED in src/decomp/c_08056E9C.c as (u16, u16) and had
+ * no prototype, which is the "promoted and still undeclared" trap in
+ * docs/agbcc-codegen.md -- the types here are copied from the definition, not
+ * re-derived.
+ *   sub_0804BDD8's third parameter is `s16`: its prologue zero-extends r2 AND
+ * sign-extends the same value (`lsls #0x10; lsrs r0,#0x10 ... asrs r2,#0x10`),
+ * which is PROMOTE_MODE plus a signed use, and both callers pass the s16
+ * gUnknown_03001FBC. The return is `int` on the same caller-side evidence as
+ * sub_080156C4 above: both callers narrow it with `lsls #0x10; lsrs #0x10`
+ * into a u16 local. */
+void sub_08056E9C(u16, u16);
+int sub_0804BDD8(u16, u16, s16);
 
 /* The 0x0806E000 screen's helpers, all named only by sub_0806EB5C. The five
  * that end `pop {rN}; bx rN` after a bare `bl Proc_Start` pass their own last
@@ -1900,8 +1977,20 @@ u16 sub_08043070(int, int, int, int, int);
 int sub_08042D50(int, int);
 
 /* Also already PROMOTED (src/decomp/c_08026F9C.c, src/decomp/c_080225CC.c) and
- * still undeclared; signatures copied verbatim from the definitions. */
-bool8 sub_08026FD0(u16, u8);
+ * still undeclared; signatures copied verbatim from the definitions.
+ *
+ * CORRECTED in wave 18 (W18-C): sub_08026FD0's first parameter is `s16`, not
+ * `u16`. The definition is byte-neutral either way -- `u16 a` with `(s16)a` in
+ * the body and `s16 a` with a bare `a` are the same bytes, which is why this
+ * stayed wrong -- but the CALL SITES are not. Three of the eleven load that
+ * argument sign-extended: sub_08061B4C and sub_08062AE4 both do
+ * `movs r1,#0; ldrsh r0,[r0,r1]` on gUnknown_03003F2C (declared `u16`!), and
+ * sub_080257C0 does the same on gUnknown_084995FE. A `u16` parameter folds the
+ * truncation into the load and emits a 2-byte `ldrh`; only a narrow SIGNED
+ * parameter rewrites it to the 4-byte register-offset `ldrsh`. No caller was
+ * promoted when this was corrected, so the edit cost one trymatch on
+ * c_08026F9C.c. */
+bool8 sub_08026FD0(s16, u8);
 void sub_080225CC(u16, u16);
 
 /* sub_08022618 tests the result with a bare `lsls r0, #0x18; cmp r0, #0`, so
@@ -2087,6 +2176,16 @@ int sub_0801C7DC(const u16 *, int, int, int, int, int, int);
  * the `u16 -> s16` conversion and is four instructions of real code.
  * `pop {r0}; bx r0` makes it void. */
 void sub_08050528(u16, s16, s16, s16);
+
+/* wave 18 (W18-C): sub_08052CA4's extra callee. Two u16 parameters -- the
+ * prologue is `lsls #0x10; lsrs #0x10` on both, PROMOTE_MODE, and it stores
+ * them straight back into gUnknown_0300453C / gUnknown_0300451C, which are
+ * both u16. The THIRD parameter is DEAD: r2 is never read anywhere in the
+ * body, and all three call sites (sub_08052650, sub_08052AF4, sub_08052CA4)
+ * emit `movs r2, #0` immediately before the `bl`, which is deliberate argument
+ * setup and not a leftover -- so the arity is three even though the body
+ * cannot see it. Void: `pop {r4, r5, r6}; pop {r0}`. */
+void sub_08052E04(u16, u16, int);
 
 /* The two emitters family F092 drives, and the routine it calls when the
  * counter runs out. All three take their argument (if any) in r0 and all three

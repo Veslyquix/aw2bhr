@@ -33,6 +33,13 @@ OUT_LDS = os.path.join(awlib.REPO, "aw2bhr.split.lds")
 # e.g. "\t\tasm/code-0801D390.o(.text);"
 ASM_OBJ_RE = re.compile(r'^(\s*)asm/([\w.-]+)\.o\(\.text\);\s*$')
 
+# e.g. "\t\t. = ALIGN(4); data/rodata.o(.rodata)" -- a ROM data blob that may
+# hold -fforce-addr pool words now emitted by promoted C; see
+# tools/split_rodata.py. Only the blobs that tool splits are expanded, so the
+# other data/*.o lines pass through untouched.
+BLOB_RE = re.compile(r'^(\s*)\. = ALIGN\(4\); data/([\w.-]+)\.o\((\.\w+)\)\s*$')
+RODATA_MANIFEST = os.path.join(awlib.REPO, "build", "rodata", "units.json")
+
 # Objects live beside their generated sources under build/functions/, and the
 # link step runs from BUILD_DIR, so paths are relative to that.
 OBJ_PREFIX = "functions"
@@ -58,15 +65,53 @@ def load_units():
     return by_src
 
 
+def load_blob_manifest():
+    """{"<blob>.s": {"sect": ..., "seq": [...]}} or None to leave lines verbatim.
+
+    Returned whenever build/rodata exists, even with nothing carved out, and
+    that is not an optimisation -- it is REQUIRED. **GNU ld auto-loads an
+    object named without a wildcard in an input-section spec**, so leaving
+    `data/rodata.o(.rodata)` in the script pulls that object into the link even
+    though the Makefile never puts it on the command line, and every symbol in
+    it collides with the generated piece. Verified directly: a script naming a
+    nonexistent `nosuch.o(.text)` fails with `cannot find nosuch.o`.
+
+    With no carve-outs the single generated piece is textually identical to
+    data/rodata.s, so the ROM is unchanged either way.
+    """
+    if not os.path.exists(RODATA_MANIFEST):
+        return None
+    with open(RODATA_MANIFEST, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 def generate():
     by_src = load_units()
     if by_src is None:
         return None, 0
+    blobs = load_blob_manifest() or {}
 
     out = []
     expanded = 0
     seen = set()
     for line in awlib.read_lines(SRC_LDS):
+        m = BLOB_RE.match(line)
+        if m and m.group(2) + ".s" in blobs:
+            indent, blob = m.group(1), m.group(2) + ".s"
+            seq = blobs[blob]["seq"]
+            out.append("%s/* data/%s -- %d piece(s), %d pool word(s) now "
+                       "emitted by promoted C */\n"
+                       % (indent, blob,
+                          sum(1 for e in seq if e["kind"] == "asm"),
+                          sum(1 for e in seq if e["kind"] == "c")))
+            for e in seq:
+                # A promoted unit's pool word is in .rodata whichever blob it
+                # was carved out of, because that is the section agbcc emits it
+                # into; the surviving blob pieces keep the blob's own section.
+                sect = ".rodata" if e["kind"] == "c" else blobs[blob]["sect"]
+                out.append("%s. = ALIGN(4); %s(%s)  /* %s */\n"
+                           % (indent, e["obj"], sect, e["addr_hex"]))
+            continue
         m = ASM_OBJ_RE.match(line)
         if not m:
             out.append(line)

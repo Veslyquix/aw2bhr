@@ -1,0 +1,94 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080257C0.
+ * sub_080257C0 @ 0x080257C0
+ */
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080257C0.
+ * sub_080257C0 @ 0x080257C0
+ */
+
+#include "hardware.h"
+
+/* The unit-id form of sub_080255F4's "is this unit boxed in?" test, and NOT a
+ * sibling of it -- the callee sets are disjoint and only the four-neighbour
+ * tail is shared (family F061's shape, see src/decomp/c_0800B5C0.c, with a u16
+ * accumulator).
+ *
+ * Three things here are not free, and all three are register-allocation facts
+ * rather than semantics:
+ *
+ * 1. `x` and `y` are `s16` LOCALS, not `int`. Both spellings emit the identical
+ *    `ldrb` pair and the identical signed `cmp; ble`, because the values are
+ *    provably 0..255 either way. The difference is that the s16 spelling puts
+ *    `x` in r8 and shuffles it into r4 at the first use, which is what the ROM
+ *    does; with `int` the pair lands in r5/r4 and no high register is pushed.
+ *
+ * 2. sub_08025744's parameters are `int`. This function is the only evidence
+ *    for that width and it is an ORDERING readout, not a narrowing one: every
+ *    argument here is `ldrb`-derived so an s16 conversion would be elided and
+ *    invisible. With `int` parameters the ROM's `subs r1, r5, #1; adds r0, r4,
+ *    #0` order falls out on the two calls whose SECOND argument carries the
+ *    arithmetic; with `s16` the two come out in argument-number order instead.
+ *
+ * 3. The whole map lookup is sequenced INSIDE the second argument with commas.
+ *    The ROM evaluates sub_08026FD0's first argument -- including the `ldrsh`,
+ *    not just its address -- before the map base is even loaded, and no
+ *    statement form reaches that: written as statements ahead of the call the
+ *    map goes first, and binding the first argument to a local of any width
+ *    leaves the address in ip and lets CSE sink the `ldrsh` down to the call
+ *    (the load has one use and nothing writes memory in between). The commas
+ *    are almost certainly a macro in the original; what matters is that they
+ *    are the only spelling found that emits the LOAD where the ROM has it. The
+ *    map itself still needs its own locals -- see src/decomp/c_0800F564.c for
+ *    why `rows` and `t` cannot be folded away. */
+u8 sub_080257C0(u16 id)
+{
+    struct Unk08499594 *unit = &gUnknown_08499594[id];
+    u16 total = 0;
+    s16 x = unit->unk02;
+    s16 y = unit->unk03;
+    u8 *p;
+    u8 *rows;
+    u8 *cells;
+    int t;
+    int idx;
+
+    if (unit == NULL)
+        return 1;
+
+    if (!(unit->unk01 & 0x20))
+        return 1;
+
+    if (sub_08026F5C(unit - gUnknown_08499594))
+        return 1;
+
+    if (sub_08026FD0(gUnknown_084995FE[gUnknown_030033EC],
+                     (p = gUnknown_08499590, t = y * 2, rows = p + 0x417A,
+                      idx = *(u16 *)(rows + t) + x, cells = p + 0x1432,
+                      *(cells + idx))))
+        return 1;
+
+    if (x > 0)
+        total = sub_08025744(x - 1, y);
+
+    if (y > 0)
+        total += sub_08025744(x, y - 1);
+
+    if (x < *(u16 *)gUnknown_08499590 - 1)
+        total += sub_08025744(x + 1, y);
+
+    if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+        total += sub_08025744(x, y + 1);
+
+    if (total != 0)
+        return 1;
+
+    return 0;
+}

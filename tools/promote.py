@@ -53,13 +53,31 @@ def load_promoted():
         return json.load(fh)
 
 
+# name -> pool words its match depends on, filled by verify().
+POOL_WORDS = {}
+
+
 def verify(name):
-    """True only if trymatch currently reports a byte-for-byte match."""
+    """True only if trymatch currently reports a byte-for-byte match.
+
+    Also returns any `-fforce-addr` pool words the match DEPENDS ON being
+    placed. trymatch prints them because a promotion that omits them either
+    drops the word or shifts every address after it -- and that failure would
+    surface in the split build, not here, with the function already moved.
+    Parsing them out means the caller cannot forget.
+    """
     proc = subprocess.run(
         [sys.executable, os.path.join(awlib.REPO, "tools", "trymatch.py"), name],
         cwd=awlib.REPO, capture_output=True, text=True, timeout=600,
         stdin=subprocess.DEVNULL)
-    return proc.returncode == 0, proc.stdout.strip().splitlines()[-1:]
+    words = []
+    for ln in proc.stdout.splitlines():
+        m = re.search(r'"rodata": \[(.+?)\]', ln)
+        if m:
+            words = re.findall(r'0x[0-9A-Fa-f]{8}', m.group(1))
+    if words:
+        POOL_WORDS[name] = words
+    return proc.returncode == 0, proc.stdout.strip().splitlines()[-1:], words
 
 
 def split_source(name, text):
@@ -247,7 +265,7 @@ def all_matched(index):
             continue          # checking a promoted function again is just noise
         if not os.path.exists(os.path.join(WORK, name, name + ".c")):
             continue
-        ok, _ = verify(name)
+        ok, _, _ = verify(name)
         print("  %-22s %s" % (name, "match" if ok else "does not match, skipped"))
         if ok:
             out.append(name)
@@ -279,6 +297,14 @@ def promote(names, index):
             "functions": run,
             "size": sum(index[n]["size"] for n in run),
         }
+        # Pool words this unit now emits itself. tools/split_rodata.py carves
+        # them out of data/rodata.s or data/data.s so the C's copy is the only
+        # one; without this the bytes would be in the ROM twice.
+        words = sorted({w for n in run for w in POOL_WORDS.get(n, [])},
+                       key=lambda w: int(w, 16))
+        if words:
+            entry["rodata"] = words
+            print("      .rodata pool word(s): %s" % ", ".join(words))
         existing.append(entry)
         added.append(entry)
         print("  %s  <-  %s (%d bytes)"
@@ -317,7 +343,7 @@ def main():
             if n not in index:
                 print("error: %s is not in the index" % n)
                 return 1
-            ok, tail = verify(n)
+            ok, tail, _ = verify(n)
             if not ok:
                 print("refusing to promote %s -- it does not match" % n)
                 for ln in tail:

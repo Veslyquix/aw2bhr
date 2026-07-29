@@ -19,6 +19,7 @@ Exit status is 0 only on a match, so this can gate a loop.
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -127,7 +128,96 @@ def symbol_addresses():
 symbol_addresses.cache = None
 
 
-def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
+def sym_addr(name, syms):
+    """Address of `name`, from the last ELF or from the name itself.
+
+    `gen_lds.py` and the data blobs invent a `gUnknown_<addr>` symbol at exactly
+    that address, so the name carries the answer. The fallback is not cosmetic:
+    once a pool word is CARVED OUT of a data blob and emitted by promoted C
+    instead (tools/split_rodata.py), the `gUnknown_<addr>` label goes with it and
+    the symbol is absent from the split build's ELF entirely -- so a target
+    relocation naming it could not be resolved at all, and every function in the
+    class would silently fall back to "relocations differ".
+    """
+    if name in syms:
+        return syms[name]
+    m = re.fullmatch(r"gUnknown_(0[0-9A-F]{7})", name)
+    return int(m.group(1), 16) if m else None
+
+
+def section_relocs(obj_rel, section):
+    """(offset, type, symbol) for relocations in one named section."""
+    prefix = agbenv.makefile_var("PREFIX") or "arm-none-eabi-"
+    rc, so, _ = agbenv.run('%sobjdump -r "%s"' % (prefix, obj_rel))
+    if rc != 0:
+        return []
+    out, inside = [], False
+    for ln in so.splitlines():
+        s = ln.strip()
+        if s.startswith("RELOCATION RECORDS FOR"):
+            inside = "[%s]" % section in s
+            continue
+        if not inside or not s or s.startswith("OFFSET"):
+            continue
+        parts = s.split()
+        if len(parts) >= 3:
+            try:
+                out.append((int(parts[0], 16), parts[1], parts[2]))
+            except ValueError:
+                pass
+    return out
+
+
+def pool_word_equivalent(cand_o, rodata_off, rom_addr):
+    """True if the candidate's own `.rodata` word will hold the ROM's bytes.
+
+    A draft that names a global directly the way the original source did makes
+    agbcc park the address in THIS unit's `.rodata` (a `-fforce-addr` pool word),
+    so its `.text` pool load relocates against the local section symbol while the
+    original relocates against the `gUnknown_<addr>` that data/rodata.s or
+    data/data.s supplies. Both link to the same byte once the build places the
+    word at that address, which tools/split_rodata.py now does.
+
+    The check is the substantive one rather than a name comparison: resolve what
+    the candidate's `.rodata` word will contain, and require it to equal the word
+    the ROM actually has at the address the original's code loads. If those agree
+    then promoting with a `rodata` entry naming `rom_addr` reproduces the ROM.
+    """
+    rom_path = os.path.join(awlib.REPO, "baserom.gba")
+    if not os.path.exists(rom_path) or not (0x08000000 <= rom_addr < 0x0A000000):
+        return False
+    rel = {o: (t, s) for o, t, s in section_relocs(cand_o, ".rodata")}
+    if rodata_off not in rel:
+        return False
+    typ, sym = rel[rodata_off]
+    if typ != "R_ARM_ABS32":
+        return False
+    name, extra = _split_sym(sym)
+    base = sym_addr(name, symbol_addresses())
+    if base is None:
+        return False
+    prefix = agbenv.makefile_var("PREFIX") or "arm-none-eabi-"
+    out_rel = "build/probe/_cand_rodata.bin"
+    os.makedirs(os.path.join(awlib.REPO, "build", "probe"), exist_ok=True)
+    rc, _, _ = agbenv.run('%sobjcopy -O binary --only-section=.rodata "%s" "%s"'
+                          % (prefix, cand_o, out_rel))
+    if rc != 0:
+        return False
+    data = open(os.path.join(awlib.REPO, out_rel.replace("/", os.sep)), "rb").read()
+    if rodata_off + 4 > len(data):
+        return False
+    value = base + extra + int.from_bytes(
+        data[rodata_off:rodata_off + 4], "little")
+    with open(rom_path, "rb") as fh:
+        fh.seek(rom_addr - 0x08000000)
+        rom_word = int.from_bytes(fh.read(4), "little")
+    return value == rom_word
+
+
+pool_word_equivalent.needed = []
+
+
+def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o=None):
     """True if the two sides differ only in which symbol names the same address.
 
     asm/ is disassembled output, so a pool word holding an address gets
@@ -174,13 +264,33 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
             continue
         t_name, t_extra = _split_sym(t_sym)
         c_name, c_extra = _split_sym(c_sym)
-        if t_name not in syms or c_name not in syms:
-            return False
         if t_off + 4 > len(tgt_fn):
             return False
-        t_addr = syms[t_name] + t_extra + int.from_bytes(
+        t_base = sym_addr(t_name, syms)
+        if t_base is None:
+            return False
+        t_addr = t_base + t_extra + int.from_bytes(
             tgt_fn[t_off:t_off + 4], "little")
-        c_addr = syms[c_name] + c_extra + int.from_bytes(
+
+        # The candidate parked the address in its OWN .rodata -- a -fforce-addr
+        # pool word, which is what the original source's spelling produces. The
+        # section symbol has no address of its own, so resolve the word's
+        # contents against the ROM instead. Requires the build to place that
+        # .rodata at t_addr, which is a `rodata` entry in data/promoted.json;
+        # see tools/split_rodata.py.
+        if c_name == ".rodata" and cand_o is not None:
+            rodata_off = c_extra + int.from_bytes(
+                cand_fn[c_off:c_off + 4], "little")
+            if not pool_word_equivalent(cand_o, rodata_off, t_addr):
+                return False
+            pool_word_equivalent.needed.append((t_addr, rodata_off))
+            sites.append(t_off)
+            continue
+
+        c_base = sym_addr(c_name, syms)
+        if c_base is None:
+            return False
+        c_addr = c_base + c_extra + int.from_bytes(
             cand_fn[c_off:c_off + 4], "little")
         if t_addr != c_addr:
             return False
@@ -313,13 +423,14 @@ def check(name, want_diff=False, keep_going=False):
         print("  size:  match (%d bytes)" % size)
 
     same = tgt_fn == cand_fn and len(cand) == size
+    pool_word_equivalent.needed = []
     t_rel = relocations(unit_o, offset, offset + size)
     c_rel = relocations(cand_o, 0, size)
     equivalent = False
 
     if same:
         if t_rel is not None and c_rel is not None and t_rel != c_rel:
-            if reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
+            if reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o):
                 equivalent = True
             else:
                 same = False
@@ -329,7 +440,7 @@ def check(name, want_diff=False, keep_going=False):
                         print("    %s +0x%03x %-18s %s" % (side, r[0], r[1], r[2]))
         else:
             print("  relocs: match")
-    elif len(cand) == size and reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
+    elif len(cand) == size and reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o):
         same = equivalent = True
 
     if same:
@@ -340,6 +451,18 @@ def check(name, want_diff=False, keep_going=False):
                 if t_sym != c_sym:
                     print("    +0x%03x  original %s  candidate %s"
                           % (t_off, t_sym, c_sym))
+        # A match resting on a `-fforce-addr` pool word is conditional on the
+        # build PLACING that word, and the verdict must say so: promoting
+        # without the `rodata` entry drops the word or shifts every address
+        # after it, and the failure would land in the build rather than here.
+        if pool_word_equivalent.needed:
+            words = sorted({a for a, _ in pool_word_equivalent.needed})
+            print("  NOTE: this match needs its .rodata pool word(s) PLACED.")
+            print("        Add to this function's data/promoted.json entry:")
+            print('          "rodata": [%s]'
+                  % ", ".join('"0x%08X"' % a for a in words))
+            print("        then re-run tools/split_rodata.py and "
+                  "tools/gen_lds.py before building.")
             print("\nMATCH -- links to identical bytes. The pool word is the"
                   " same address\n  spelled against a different symbol, which"
                   " is a disassembly artefact,\n  not a difference in the ROM.")

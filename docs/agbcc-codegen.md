@@ -3260,10 +3260,70 @@ instruction-for-instruction *and* emits its own `.LC` word (unusable), while the
 other respect and folds the +0x30/+0x34 offsets into the displacement. There is
 no third spelling. **Park it.**
 
+> **CORRECTION (wave 18): there IS a third spelling, and the hoist is not an
+> array-global property — it is an AGGREGATE-MEMBER property.** Wrap the array
+> in a struct and point at *that*:
+>
+> ```c
+> struct Unk08136090 { struct Unk03001470 unk00[30]; };
+> extern struct Unk08136090 *const gUnknown_08136090;   /* the .LC word */
+> q = gUnknown_08136090;  c = q->unk00[a].unk30;  e = q->unk00[a].unk34;
+> ```
+>
+> `p->arr[i].m` is the `gStruct.unk20[i]` row of the fold table — an aggregate
+> member reached through a pointer — and it emits `adds rB,#0x30; adds rB,rI,rB`
+> exactly as the array global does, while `p[i].m` on a `struct T *const` folds
+> the offset into the load's displacement. Six spellings were probed side by
+> side against `sub_0804E8F0` and only this one hoists. So the decision rule
+> below is wrong as stated: **a hoisted `g[i].member` does not by itself rule
+> the workaround out.**
+>
+> It still does not close this function, for a *different* reason that is worth
+> more than the fix: the workaround stalls at **304 of 308, size exact, 98.7%**,
+> and all four bytes are the same commutative operand slot. The ROM emits
+> `adds rD, rIndex, rBase` and every pointer-based spelling emits
+> `adds rD, rBase, rIndex`, because **`fold` canonicalises a PLUS with a
+> CONSTANT operand so the constant goes second — and `&gArray + 0x30` is a
+> constant, while a runtime pointer base has nothing to move.** Probed and all
+> four behave the same way: `(a + q->unk00)->m`, `(&q->unk00[a])->m`,
+> `*(u32 *)(a*0x60 + ((u8 *)q + 0x30))`, `*(u32 *)((u8 *)q + a*0x60 + 0x30)` —
+> every one gets the index-first order *and* folds the constant into the load
+> displacement, so the hoist and the operand order cannot be had separately.
+> `old_agbcc` and `-fno-force-addr` were both measured and neither helps.
+>
+> **Read it as a new decision rule.** For a `.LC`-routed `g[i].member`: reach for
+> the wrapper struct, and expect to land within a few bytes; whether you close it
+> depends on whether the ROM's address adds are index-first (an address-constant
+> base, unreachable) or base-first (reachable). That is one look at the listing
+> before drafting.
+>
+> **Second data point, and it makes the add-order test NECESSARY BUT NOT
+> SUFFICIENT (wave 18, W18-B).** `sub_080081E0` / `sub_080083E0` / `sub_0800977C`
+> were scanned mechanically, every register-register `adds` in each whole
+> function classified by how its operands were defined: **32 of 32 base-first in
+> each twin, 22 of 22 in `sub_0800977C`, zero index-first** (the remainder are
+> runtime+runtime and carry no signal). So the pre-check says "reachable" — and
+> all three are still open, at 75.2% and 38.6%, on register allocation. The
+> add-order read is a genuine *veto*: index-first does rule the workaround out.
+> It is not a green light. **Do not read base-first as "drafting toward a
+> match".**
+>
+> Note also what these three are NOT: the wrapper-struct spelling has nothing to
+> attach to here. `gUnknown_08499590` is a `u8 *` **pointer** global, so `**pp`
+> yields a runtime pointer and every read is plain arithmetic on it
+> (`p + 0x417A + t`) — there is no aggregate, no `g[i].member`, and no member
+> offset to hoist. That is also *why* they are uniformly base-first, which is the
+> corroboration the rule predicts: a runtime pointer base has nothing to move.
+> And their relocation is already correct — `objdump -r` on the c_local draft
+> shows the single `.text` relocation `R_ARM_ABS32 gUnknown_0808D7F8`, not
+> `.rodata`. **When the workaround already carries the ROM's relocation and is
+> size-exact, the relocation is not the remaining fight; allocation is.**
+
 Read the two together as a decision rule: the workaround is byte-reachable when
 the `.LC`-routed symbol is used for pointer arithmetic or `->` (as in
-`sub_0806DDF4`, `sub_08066D30`, the `gUnknown_08090CD8` users), and is not when
-the ROM shows a hoisted `g[i].member`.
+`sub_0806DDF4`, `sub_08066D30`, the `gUnknown_08090CD8` users), and — subject to
+the wave-18 correction above — is harder when the ROM shows a hoisted
+`g[i].member`.
 
 **Do not remove the flag globally.** It is tempting: `sub_080308B4` matches
 exactly under `-fno-force-addr`, and so does `sub_0808AD6C`. But the ROM builds
@@ -5956,6 +6016,142 @@ round.**
   "deliberately leaves multi-function drafts alone" is out of date, it splits
   them now.
 
+### Two functions, one expression, two spellings — the 328–364 band (wave 18, A)
+
+`sub_0804E7A8` and `sub_0804FCA4` are near-twins in the 0x0804Exxx animation
+family (328 and 364 bytes, `.LC`-free, `backward_branches == 0`). Both came out
+**size exact** and both are parked on register allocation, but the useful result
+is what had to differ between them, because the instinct is to normalise
+siblings onto one spelling and that is wrong twice over here.
+
+**`&gArray[i].member[j]` CSEd across several accesses wants the EXPLICIT
+BYTE-OFFSET SUM; used once it wants the plain subscript.** Same expression,
+same two functions' worth of context, opposite answers:
+
+```c
+/* used ONCE, in a comparison (sub_0804E8F0) -- plain subscript is exact       */
+a == gUnknown_02029A10[c].entries[e].unk18
+
+/* CSEd across FOUR member accesses (sub_0804E7A8) -- the subscript folds the  */
+/* base into the `e` term and computes c*180 first; the ROM computes e*36      */
+/* first and adds the base LAST                                               */
+entry = (struct Unk02029A10 *)(e * sizeof(struct Unk02029A10)
+                               + c * sizeof(struct Unk02029A10Group)
+                               + (u8 *)gUnknown_02029A10);
+```
+
+That is the third row of the "where the base add lands in `base + i*A + j*B`"
+table, and this is the first case found where *whether the address is reused*
+is what selects the row. Count the accesses before choosing the spelling.
+
+**A ROM table read ONCE sinks its constant offset into the pool word's
+relocation; read TWICE with different constants it shares one pool word and
+adds each constant at run time — so two functions over the same table get two
+different SYMBOLS, and both are right. The way to serve both from one
+declaration is a STRUCT whose member is the inner array, and finding that was
+worth a match.** `sub_0804E7A8` reads the 24-byte-row
+sound table at `+0xc` only, so its pool word is `gUnknown_085D6C94` (=
+`0x085D6C88 + 0xc`) with no runtime add; `sub_0804FCA4` reads it at `+0xc` and
+`+0x10`, so its pool word is `gUnknown_085D6C88` and each site does its own
+`adds rB, #0xc` / `adds rB, #0x10`. `gUnknown_0855239C` / `gUnknown_085523A4`
+already had this shape and it was read as an oddity; it is the rule.
+
+Declared flat — `extern s16 g[][6][2]` at the *biased* address — the
+single-reference function is happy and the two-reference one cannot be written
+at all, because its two constants would each fold into their own relocation.
+Declared as
+
+```c
+struct Unk085D6C88 { u8 filler_00[0xc]; s16 unk0c[2][2]; u8 filler_14[4]; };
+extern struct Unk085D6C88 gUnknown_085D6C88[];
+```
+
+both work: `g[B].unk0c[j][i]` puts the member offset on the base as a run-time
+`adds rB, #0xc`, which is what the two-reference function has, and in the
+one-reference function the same expression sinks `+0xc` into the relocation as
+an addend against the base symbol — which `reloc_equivalent` resolves to the
+ROM's own separate symbol. **`sub_0804FCA4` went from 38.5% to a MATCH on this
+one declaration, and its sibling `sub_0804E7A8` from 90.2% to 94.2%.** Read
+backwards: *a run-time `adds rB, #C` between an array global's pool `ldr` and
+its index add is a struct member, and the flat view of the same bytes cannot
+produce it.*
+
+**The method mattered more than the rule, and it is the transferable part: both
+functions were stuck on what looked like independent register-allocation
+residuals, and both were solved by diffing the two ROMs AGAINST EACH OTHER
+rather than each against its own candidate.** The comparison is cheap — dump
+both instruction streams normalised and `difflib` them — and what it shows is
+the *shared* skeleton with the per-function registers laid side by side. Here
+it read out that both ROMs put the same value in r6 with a high-register copy,
+that the two differed only in which of two values took r5, and therefore that
+the residual was one shared decision rather than two allocation accidents. Two
+size-exact near-misses that pair on `shape_map` are worth this before any
+further per-function spelling sweep.
+
+**Why it works is worth stating, because it also says when to reach for it: two
+near-misses that pair on shape share a CAUSE, not a residual.** The prediction
+going in was a register decision and what came out was a type decision, and
+that is the method succeeding rather than failing — the diff does not tell you
+what the shared thing is, only that there is one.
+
+### SUSPECT THE TYPE BEFORE THE ALLOCATION — and a lever that helps is not evidence
+
+**This is the generalisation, and it is worth more than the table rule above.**
+Both of those functions presented as register-allocation problems: size exact,
+right instructions, wrong registers, and every documented allocation lever
+either flat or marginal. The cause was an *aggregate type* — a ROM table
+declared flat where it needed a struct with the inner array as a member — and
+one declaration took a function from 38.5% to a match.
+
+**The trap is sharper than "we guessed wrong", and it is what cost the round:
+a spelling that IMPROVES the diff is not evidence that it addresses the
+cause.** A `do { … } while (0)` wrapper in that draft was worth a whole
+callee-saved register and looked like a textbook instance of the
+allocation-priority lever this file documents — right up until the type was
+fixed, at which point it became a 60-byte regression and was deleted from the
+matching source. It had been *paying for the wrong aggregate type* somewhere
+else in the function.
+
+That is the same family as wave 16's inverted width sweep ("a measurement taken
+in the wrong context is not weak evidence, it is inverted evidence"), and it
+generalises past parameter widths to every axis: **a lever measured against a
+candidate that still has a type error can be right about the bytes and wrong
+about the reason, and it will keep looking right for as many rounds as you
+spend on the wrong axis.** Practical order:
+
+1. Settle every aggregate the function reaches — especially any ROM table
+   reached at a constant offset, where flat-versus-struct is invisible in the
+   instruction stream and decides the pool word, the constant's position and
+   the whole register file at once.
+2. Only then sweep bindings, scopes and `do`/`while(0)`.
+3. When a lever helps, re-test it after the next type change. If it stops
+   helping, it was never the lever.
+
+**A subscript expands its base FIRST and an explicit byte sum expands it LAST,
+and on a register-tight function that is a whole `mov ip, rN`.** The 3-D
+subscript `g[B][A-1][b&1]` gets the index arithmetic exactly right — each term
+pre-scaled, in the ROM's order — and then has to keep the base alive across all
+of it. Writing the same address as `*(s16 *)((u8 *)g + k)` with `k` a
+**block-scoped** `int` holding the byte sum loads the pool word last, which is
+what the ROM does. Two further measurements go with it: declaring `k` at
+function scope costs three callee-saved registers (the wave-13 block-scoped-temp
+rule, second instance), and folding the sum into the deref without the local
+lets `fold` reassociate the base into the largest term and lose the ROM's add
+order.
+
+**`do { … } while (0)` round one read-modify-write was worth one callee-saved
+register here too**, with no instruction of its own — `e` moved from r6 to the
+ROM's r7. That is now three independent functions on which this lever has paid
+(`sub_0806DDF4`, `sub_0808B91C`, `sub_0804E7A8`), so treat it as a first-class
+allocation knob rather than a curiosity.
+
+**Where the STACK SLOTS come out is decided by declaration order, and it is
+free to check.** `sub_0804FCA4` spills three values and the ROM's order is
+`[sp] = w`, `[sp,#4] = p1`, `[sp,#8] = p2` — reached only by declaring `u16 w;`
+*ahead of* the two pointers, even though `w` is assigned last. Registers are
+famously not decided by declaration order (eight orders were probed here and
+none moved a register); slots are.
+
 ---
 
 ## Soft float — libgcc, and the constants that reach it (wave 16, C)
@@ -6780,6 +6976,116 @@ Cheap pre-filter when scoping a batch:
 grep -n "arm_func_start\|non_word_aligned_thumb_func_start" asm/<file>.s
 ```
 
+### Two more tells, one of them decisive; and one that looked decisive and is not (wave 18, W18-C)
+
+**`mov ip, lr` … `bx ip` is hand-written, and it is decisive on its own.** agbcc
+returns from a THUMB function that makes a call by pushing `lr` and popping it
+into a **low** register: `push {lr}` … `pop {r0}; bx r0`. It never parks the
+return address in `ip`, and it never returns through a high register. Two
+independent controls:
+
+- **Population.** Across the 959 promoted units in `build/src/decomp/`, `ip` is
+  written exactly ten times and every one is `mov ip, rLOW` holding a *value*
+  when the allocator has run out of low registers (`c_08024ABC.s`,
+  `c_08036F68.s`, `c_0804D290.s`, `c_080876B4.s`, …); each is read back with
+  `mov rLOW, ip`. There is no `mov ip, lr` and no `bx ip` anywhere in agbcc's
+  output.
+- **Probe.** A leaf that forwards one call, a `void` forwarder, a
+  self-recursive function, and a body carrying ten simultaneously live values
+  (which spills into r8/r9/sl *and* the stack) all emit `push {lr}` …
+  `pop {rN}; bx rN`. The epilogue shape is not a pressure effect.
+
+In `asm/` there are exactly **15** `mov ip, lr` and exactly **15** `bx ip`, they
+pair 1:1, and all 15 are m4a track-command handlers. The idiom is what it looks
+like: a routine that has to `bl` a helper but does not want a stack frame parks
+`lr` in `ip` and returns through it — legal only because the *callee* is also
+hand-written and known not to touch `ip`, which is a contract no compiler can
+assume.
+
+**THUMB `tst` is a second, weaker-but-free tell.** agbcc has no `tst` for
+THUMB: eight spellings of "AND two values, test, discard the result"
+(`a & b`, `(a & b) != 0`, `!(a & b)`, a `u8` pair, against a global, in a loop
+condition, and as a returned `?:`) all emit `and` + `cmp #0`, and `tst` appears
+**zero** times in the 959 promoted units. In `asm/` it appears 37 times: 6 in
+ARM functions, and every one of the remaining 31 inside the m4a span
+(`sub_0806F856`, `sub_0806FB84`, `sub_0806FDE4`, `sub_0807004C`,
+`sub_080700C0`, `sub_080702C0`). Corroborating, not decisive on its own —
+it is a mnemonic-level claim about one compiler build.
+
+**`bl` to a mid-function local label is NOT a tell. 15 of the 19 sites in this
+tree are ordinary compiler output, and a wave-18 brief had it the other way
+round.** Resolve the target against the function index before reading anything
+into it; there are three distinct causes and only the third means anything:
+
+| cause | how to recognise it | sites |
+|---|---|---|
+| **agbcc's long branch.** THUMB `b` reaches ±2 KB; `bl` reaches ±4 MB. A `goto`/loop-exit past 2 KB becomes `bl`, which is safe because `lr` is already on the stack. | target is in the **same** function unit, at a delta **> 0x800** | 11 — `sub_0800CFDC` (+0x18DE ×4), `sub_0800FD44` (+0x8B6 ×2, +0x8AC), `sub_0807CE5C` (+0x834 ×3, +0x848) |
+| **A split artefact.** The label *is* a real function entry; the splitter merged it into the unit above because nothing named it. | target is a different unit, but the bytes before it are a literal pool or `.align` padding, and the "owning" unit's own entry is never called | 4 — `_08079B38` ×3 and `_08036B48` |
+| **A genuine second entry point.** | target is a different unit, inside real code, at a small delta, and the caller keeps executing afterwards | 4 — `bl _0806FBEE` from `sub_0806FBD4` ×1 and `sub_0806FCC8` ×3 |
+
+The middle row is worth its own note because it produces a "function" that can
+never be matched and is not hand-written either. `sub_08079B04` is two bytes of
+`b _08079B38` sitting in front of the *previous* function's 13-word literal
+pool; the real function starts at `_08079B38`, nothing ever calls 0x08079B04,
+and the three `bl _08079B38` sites are ordinary calls. `sub_08036B34`'s unit
+likewise carries a separate two-byte `_08036B48: b _08036B48` hang routine after
+its pool, which `AgbMain` calls twice. **Before concluding anything from a `bl`
+to a label, check whether the label is preceded by `.4byte` words.**
+
+### What the 0x0806FBD4–0x0806FD97 block is, and where it ends
+
+Verdict: **hand-written**, and 0x0806FBD4–0x0806FD97 is 100 % of it — every one
+of the 19 units in that range either carries `mov ip, lr` … `bx ip` or was
+already in `data/asm-resident.json`. It is not a clean contiguous block overall,
+though: two more handlers of the same shape sit at `sub_08070328` and
+`sub_0807033C`, with five ordinary-looking compiled units (`sub_0806FD98`
+m4aSoundVSync, `sub_0806FDE4` MPlayMain, `sub_0807004C`, `sub_080700C0`,
+`sub_080702C0`) in between. That is the m4a.c / m4a_asm.s interleave this
+chapter already describes, seen at instruction granularity.
+
+**The mechanism, which is what makes it a block rather than 17 coincidences.**
+`sub_0806FC08` is the shared command-byte reader: two bytes of
+`ldr r2, [r1, #0x40]` falling into `sub_0806FC0A`, which advances `cmdPtr`,
+does `ldrb r3, [r2]` and then `b _0806FBEE` — so it takes the MusicPlayerTrack
+in **r1**, returns the byte in **r3**, and its "return" is actually
+`sub_0806FBEC`'s `bx lr` two bytes into *that* function. `_0806FBEE` is inside
+`sub_0806FBEC`, not inside `sub_0806FC08`. Every handler in the run is then the
+same four lines:
+
+```
+mov ip, lr            @ no frame
+bl sub_0806FC08       @ next command byte -> r3, track in r1
+strb r3, [r1, #N]     @ one MusicPlayerTrack field
+ldrb r3, [r1] ; orrs r3, #M ; strb r3, [r1]    @ set the dirty bits
+bx ip
+```
+
+**A hand-written dispatch table and a compiler-generated one differ in a
+nameable way: the compiled one has ONE frame.** A `switch` compiles to a single
+function with one prologue, one epilogue and a `.word` table or a compare chain,
+and every arm shares them. Here there are N separately addressed, frameless
+routines, each with its own entry and its own `bx ip`, agreeing on an argument
+register (r1) and a return register (r3) that no C prototype can express, and
+reached from the ply table by address. That is a table of hand-written
+subroutines, not a compiled `switch`.
+
+**How much this implicates.** Less than the `bl` evidence suggested and more
+than the brief's six: the `bl`-to-local-label sites implicate only **two** new
+functions (both of which also carry `mov ip, lr`), while `mov ip, lr` implicates
+**15**, none previously recorded. With `sub_0806FC64` (which branches into
+`sub_0806FC08`'s unit with `b _0806FC16` and consumes its r3 return),
+`sub_0806FB6C` (clobbers r4 with no `push` anywhere, saving it in `ip`) and
+`sub_0806FB84` (an 80-byte unit holding *two* complete frames), that is **18**
+new entries in `data/asm-resident.json`.
+
+Deliberately **not** added, and worth stating so nobody re-derives it:
+`sub_0806FDE4` (MPlayMain), `sub_080700C0` (ply_note), `sub_080702C0`
+(ply_endtie) and `sub_0807004C` (TrackStop) all carry the `tst` tell and all
+call `sub_08070090` (ChnVolSetAsm), which takes both operands in r4/r5 — but
+`tst` alone is a mnemonic claim, and a caller setting up r4/r5 was not verified
+instruction by instruction here. They are the obvious next batch for anyone
+extending this list, and they should be entered on their own evidence.
+
 ---
 
 ## Formerly blocked functions -- all six are now matched
@@ -7437,6 +7743,68 @@ unmatched**, plus 20 fuzzy clusters. Read `data/families.json` → `batching_pla
 for the ranked list; `with_exemplar` entries are cheaper than `cold` ones because
 the shape is already solved in `src/decomp/`.
 
+### `shape_map.py` at 0.610: a TAIL-ONLY pair is still worth batching, for a reason the score does not express (wave 18, W18-C)
+
+Wave 18 predicted that `sub_080255F4` / `sub_080257C0` at 0.610 was below the
+useful threshold, on the correct observation that their callee sets are disjoint
+and the whole score comes from a shared four-neighbour tail. Both halves of that
+observation held. The conclusion did not, and the reason generalises:
+
+- The **shared idiom was worth solving once.** The tail is family F061's shape
+  (see `src/decomp/c_0800B5C0.c`) with a `u16` accumulator, and the two
+  functions differ only in the callee. Written once, instantiated twice.
+- **The pair was the only evidence for a parameter width.** `sub_08025744` and
+  `sub_08025598` have byte-identical body shapes and take *different* parameter
+  widths — `int` and `s16` respectively. Neither is visible from its own body,
+  and neither is visible from one caller: `sub_080255F4` reads `s16` off the
+  narrowings it does and does not emit, while `sub_080257C0` is blind because
+  all four of its arguments are `ldrb`-derived so an `s16` conversion would be
+  elided at every site. `sub_080257C0`'s width had to be read from
+  ARGUMENT-SETUP ORDER instead (see below). Batching them together is what put
+  the two readouts side by side.
+
+So a low `shape_map` score on a **tail-only** overlap means "these are two
+functions, not one instantiated twice" — not "do not batch them". The cost model
+that follows is: budget them as two independent functions, and expect the
+overlap to pay in the header rather than in the second function's draft.
+
+**Four more data points at 0.42–0.53, and they say the ratio is a poor cost
+metric even when it is telling the truth about shape (wave 18, W18-C).** All
+four matched; the batch was `sub_08066470` (0.423 against `sub_08027CC8`),
+`sub_08052154` / `sub_08052CA4` (0.530) and `sub_08050B70` (0.541).
+
+- **The shape claim held.** Unlike the 0.610 pair, these were real:
+  `sub_08052154` and `sub_08052CA4` have identical global sets, an identical
+  prologue and differ in three nameable places, and `sub_08050B70` shares the
+  same skeleton with a different tail. So a low ratio does not mean a false
+  family — 0.610 was misleading for a reason (tail-only overlap) that the
+  number itself does not express, and reading the *callee sets* is what
+  separates the two cases in ten seconds.
+- **The ratio ordered the cost exactly backwards.** `sub_08066470`, the LOWEST
+  score in the batch at 0.423, was the cheapest function in two waves — one
+  probe, one `try_match` — while `sub_08050B70` at 0.541 was the most
+  expensive, and every one of its probes went on a single novel tail.
+
+What predicted cost was **whether a matched exemplar covered the whole
+function**, not similarity to anything. `src/decomp/c_08051DE0.c` covers
+`sub_08052154`/`sub_08052CA4` end to end (one probe each); it covers
+`sub_08050B70`'s first two thirds and stops at the dispatch tail (four probes);
+and `sub_08066470` scored lowest precisely because its tail differs, while the
+part that *was* covered — by `c_0806E240.c` and two functions matched an hour
+earlier — was the whole expensive middle. **Rank a shape batch by exemplar
+COVERAGE, and use the ratio only to find the candidates.**
+
+**And the sharper rule that fell out of it: where a narrowing would be elided,
+argument-setup ORDER is still a readout.** agbcc evaluates a call's arguments
+before it loads them into r0..r3, so an argument that needs *any* computation is
+emitted ahead of an argument that is a plain register copy — whatever their
+positions. On `f(x, y - 1)` with an `int` callee that gives
+`subs r1, r5, #1; adds r0, r4, #0`; declare the callee `s16` and the two come
+out in argument-number order instead, because the (later-deleted) conversion
+changes which argument the front end treats as trivial. That 2-instruction swap
+is the entire difference between `int` and `s16` on a call whose values are
+provably in range, and it is invisible to the usual narrowing readout.
+
 ---
 
 ## The column-offset fold is a TYPE discriminator: struct row vs array row (wave 17, W17-A)
@@ -7709,3 +8077,280 @@ The general form is worth stating, because it is the opposite of the usual
 instinct to reuse a variable: **binding locals are punctuation, not storage.**
 Give each statement its own, and let the register allocator see the short live
 ranges the original had.
+
+## The `.LC` pool block is one unit's, and its slot order IS function order (wave 18, W18-B)
+
+**`0x0808D6DC .. 0x0808D8A8` is a single translation unit's `-fforce-addr`
+address-constant pool, 116 slots, and the map from slot to owning function is
+1:1 and STRICTLY MONOTONIC in function address.** Measured over every
+`gUnknown_0808Dxxx` reference in `asm/`: 103 of the 116 slots are referenced,
+**no slot is referenced by two functions, and there are zero inversions** across
+the whole run from `sub_08000694` to `sub_08010DD4`.
+
+```
+0808D6DC sub_08000694     0808D7F8 sub_080081E0     0808D854 sub_0800AA30
+0808D6E0 sub_0800081C     0808D7FC sub_080083E0     0808D858 sub_0800ABD0
+0808D6E4 sub_0800081C     0808D800 sub_080085E0     ...
+0808D6E8 sub_0800081C     0808D81C sub_0800977C     0808D8A8 sub_08010DD4
+```
+
+Three things follow, and the third is the useful one:
+
+- **A function with N distinct force-addr'd symbols owns N CONSECUTIVE slots.**
+  `sub_08000E48` and `sub_0800CB30` own five each, `sub_0800081C` three.
+- **`0x0808D8AC` is referenced by THREE functions** (`sub_08000CCC`,
+  `sub_08002E3C`, `sub_08002E5C`), so it is a real global and marks the block's
+  end. Shared ownership is the boundary test: a `.LC` word is never shared.
+- **It is PREDICTIVE, not just explanatory.** For any unmatched function in
+  `code.s` you can read off which pool word it owns by interpolating between its
+  address-order neighbours, before writing a line of C — and if the neighbours
+  bracket it with no free slot, it has none. Previous waves derived each
+  function's word one at a time by grepping its own disassembly; that is
+  unnecessary.
+
+Note this corrects a size claim elsewhere in this file. The often-quoted "run of
+THIRTY consecutive slots that all hold 0x08499590" is a *sub-run* of this block
+— the stretch whose functions all touch the map descriptor — not the block.
+
+## The c_local workaround has ONE remaining wall: the binding wins a register the ROM gives away (wave 18, W18-B)
+
+**Superseded for these three, but keep reading — the rule still holds where the
+honest spelling is NOT byte-exact.** `sub_080081E0`, `sub_080083E0` and
+`sub_0800977C` are now MATCHED and promoted, from the honest spelling, because
+the split can place a `.rodata` pool word (see the wave-18 section at the end of
+this file). They were never a codegen problem. What follows is still the correct
+description of the workaround's wall for any function that needs it.
+
+Three functions stalled on the same fact, and stating it as one fact is worth
+more than any of the three: **in every `c_local` spelling the explicitly bound
+middle-level pointer OUTRANKS the ordinary local it competes with, and in the
+ROM it always loses.**
+
+| function | ROM | every c_local draft |
+|---|---|---|
+| `sub_080081E0` / `sub_080083E0` | `x + 1` in the low register, binding in r8 / r7 | binding low, `x + 1` pushed out |
+| `sub_0800977C` | `ok` in r7, binding in r8 | `ok` in r8, binding in r6 |
+
+The reason it is structural: in the original source there is no binding local at
+all — the middle value is a temp **CSE invents**, and a CSE temp is created after
+every source-level pseudo, so it loses every allocation tie. A declared local
+cannot be created that late. This is why the honest spelling reaches 100% on all
+three and the workaround does not.
+
+**The one lever that moves it is the ASSIGNMENT's position, and nothing else.**
+Hoisting `q = *pp` to the top of its block lengthens the binding's live range,
+drops its priority, and inverts the pair — on `sub_080081E0` that is
+508 B / 22.1% → 512 B / 75.2%. It buys the registers at the price of emitting the
+binding's two instructions where the ROM does not have them.
+
+### Byte-neutral, so stop spending probes on them
+
+Measured on `sub_080081E0` (and the `q` set again on `sub_0800977C`), all
+producing **bit-identical** output:
+
+- **declaration ORDER of the binding locals** — first, last, interleaved;
+- **declaration SCOPE** — function scope vs block-scoped inside the region that
+  uses it. This one is worth knowing because it looks like it should reproduce a
+  CSE temp's late creation, and it does not;
+- on `sub_0800977C`, **the binding's reference count and its existence**: bound
+  by name, bound through `*pp`, reduced to one use, and removed altogether all
+  give the same bytes.
+
+So when a `c_local` draft is size-exact with the binding in the wrong register,
+the fix is not a spelling — only the assignment's position and the surrounding
+live ranges matter.
+
+### `volatile` reproduces the ROM's re-derivation and still loses
+
+`sub_0800977C` re-derives `**pp` twice inside a **call-free** region, which no
+ordinary load survives — CSE shares it. `volatile` on the pool word is the only
+construct that forces the re-derivation, and it was measured in three placements:
+whole chain **+12**, inner pointer as well **+12**, and a second
+volatile-qualified pointer used *only* at the four counting-region reads **+20**.
+It buys the re-derivation and destroys the caching the ROM keeps everywhere else.
+**A `.LC` word behaves like neither a normal nor a volatile object**, because
+force-addr re-expands the address *after* CSE has run, and no C qualifier is
+scheduled at that point.
+
+### The honest draft is the deliverable when the workaround stalls
+
+All three functions above have a draft that is **100% byte-exact** with the pool
+symbol named directly, differing only in the relocation. Keep that as
+`work/<fn>/<fn>.c` and the workaround as `_clocal_nearmiss.c`, not the other way
+round: the honest one is almost certainly the original source, and it is what a
+later split that can place `.rodata` will need.
+
+**Corollary worth carrying: the toolchain axis cannot be the cause when the
+honest draft is byte-exact.** `data/parked.json` tells you to check the compiler
+and flags before parking; a byte-exact honest draft has already proved both, so
+skip it and do not spend the probes.
+
+---
+
+## An indirect call's target is SUNK unless you bind it (wave 18, W18-C)
+
+`bl _call_via_rN` is ordinary compiler output — that is already recorded above.
+What is new is that the `ldr` of the function pointer has a *position*, and the
+position is a source readout:
+
+```c
+tbl[i](a, b);            /* ... ldr r2,=tbl ; add ; mov r3,r8 ; ldrh r1,[r3]
+                            ; ldr r2,[r2] ; bl _call_via_r2   -- load LAST  */
+fn = tbl[i]; fn(a, b);   /* ... ldr r2,=tbl ; add ; ldr r2,[r1] ; mov r3,r8
+                            ; ldrh r1,[r3] ; bl _call_via_r2   -- load FIRST */
+```
+
+Written directly, agbcc computes the callee's *address* where the expression
+sits and then sinks the load itself past the argument setup, because the loaded
+value has one use and nothing writes memory in between. Binding it to a local
+pins the load to its own statement. Same instructions, same length, so this
+presents as two instructions having swapped places with nothing in the
+expression to blame. `sub_08050B70` needs the bound form.
+
+**And the bound form collides with the `row` binding, which is the part worth
+carrying.** `sub_08050B70`'s dispatch is
+`tbl[gUnknown_085D6A48[gUnknown_03004580[c][1]][2]](c, d)`, and it needs *both*
+of these at once:
+
+- `row` bound to a `u16 *`, or the `[2]` hoists onto the base as `adds rB, #4`
+  instead of folding into the `ldrh` displacement (the rule
+  `src/decomp/c_08051F4C.c` records);
+- the whole dispatch kept as ONE expression, or `gUnknown_085D6A48`'s pool word
+  is created before `gUnknown_085535B0`'s. Address pseudos are created in source
+  order and a nested subscript expands outermost-first, so splitting `row` into
+  its own statement reverses the pool.
+
+Those two are contradictory as written, and the comma operator resolves them —
+the same lever `src/decomp/c_0804D290.c` uses for a different reason:
+
+```c
+fn = tbl[(row = gUnknown_085D6A48[gUnknown_03004580[c][1]], row[2])];
+fn(c, d);
+```
+
+**The general form: when a binding is needed for its addressing mode but a
+statement boundary would reorder the pool, put the assignment inside the
+subscript.** Read backwards, a pool word that is out of source order is telling
+you a binding was made at a point no statement boundary can reach.
+
+### Argument order in an indirect call is still the direct-call rule
+
+`_call_via_rN`'s register index is the arity (recorded above), and the arguments
+themselves follow the ordinary rule: an argument needing computation is emitted
+ahead of one that is a plain register copy, whatever their positions. Both of
+`sub_08050B70`'s are plain loads of u16 globals, so nothing moves — but do not
+read the trampoline as changing the convention. It does not.
+
+## The split CAN place a `.rodata` pool word — the wall is gone (wave 18, W18-B)
+
+Twelve parked functions, 3,368 bytes, were held by one thing: a byte-exact draft
+that names the global directly emits a `-fforce-addr` pool word into its own
+`.rodata`, and that word had nowhere to live. **It has somewhere to live now.**
+**All twelve were unparked** — `sub_080081E0`, `sub_080083E0`, `sub_0800977C`,
+`sub_0804E8F0`, `sub_0804FE10` and the seven-member `sub_0805CA60` group,
+**3,368 bytes** — every one from the draft that names the global directly, with
+`make SPLIT=1 compare` and `make compare` both reproducing
+`14dd0b22c894865867aff89e8116b2dffae25605`. Five of them were at 0 differing
+bytes; the `sub_0805CA60` group's one differing byte was never a codegen diff at
+all, only the inline addend of the second pool word (`.rodata+4` against the
+original's `gUnknown_0816D9E4+0`), which resolves to the identical address once
+the word is placed.
+
+### The mechanism, in one paragraph
+
+The pool words arrive twice: once as the compiling unit's output, and once as
+incbin'd ROM bytes in `data/rodata.s` or `data/data.s`. `tools/split_rodata.py`
+splits those blobs **per symbol** into generated pieces under `build/rodata/`,
+reading `data/` and never modifying it — the same read-only treatment
+`split_asm.py` gives `asm/`. `gen_lds.py` then interleaves a promoted unit's own
+`.rodata` between the pieces, at the address the original build used:
+
+```
+. = ALIGN(4); rodata/rodata-0808D6DC.o(.rodata)   /* blob, 0x0808D6DC.. */
+. = ALIGN(4); src/decomp/c_080081E0.o(.rodata)    /* 0x0808D7F8, the C's word */
+. = ALIGN(4); src/decomp/c_080083E0.o(.rodata)    /* 0x0808D7FC */
+. = ALIGN(4); rodata/rodata-0808D800.o(.rodata)   /* blob resumes */
+```
+
+A unit declares the words it owns with a `rodata` list in `data/promoted.json`.
+Both blobs are flat runs of `.global`/label/`.incbin` triples, one per symbol,
+fully contiguous — which is what makes a per-symbol split exact, and every pool
+word in the tree is a 4-byte chunk boundary in one of them.
+
+### Four things that will bite whoever extends this
+
+- **GNU ld AUTO-LOADS an object named without a wildcard in an input-section
+  spec.** Leaving `data/rodata.o(.rodata)` in the split script pulls that object
+  into the link *even though the Makefile never passes it on the command line*,
+  and it collides with every symbol in the generated piece. This cost the first
+  attempt; a script naming a nonexistent `nosuch.o(.text)` fails with
+  `cannot find nosuch.o`, which is the one-line proof. **The split script must
+  always point at the pieces, not only when something is carved out.**
+- **A unit with N force-addr'd symbols owns N CONSECUTIVE words and its object
+  must be placed ONCE covering the whole run**, because agbcc emits them as a
+  single `.rodata` section. Placing it per word emits the section once per word
+  and overruns the next piece. The splitter refuses a non-consecutive claim.
+- **Which blob a word lives in does not change its section.** A promoted unit's
+  word is `.rodata` even when carved out of `data/data.s`'s `.data`; the pieces
+  keep the blob's own section. It is all one output section, so ld does not care.
+- **The Makefile must drop exactly the blobs the pieces replace.** Too few and
+  the blob is linked twice; too many and megabytes vanish from the ROM with only
+  a SHA mismatch to show for it. `split_rodata.py` writes `build/rodata/blobs.mk`
+  with `SPLIT_BLOBS` and the Makefile includes it, so the two cannot drift.
+
+### The consequence for how you keep drafts
+
+**When the honest spelling is byte-exact and only its relocation differs, that
+draft is the deliverable — not the `c_local` workaround.** `sub_080081E0`,
+`sub_080083E0` and `sub_0800977C` sat parked for several waves while agents
+ground on the workaround's register allocation (75.2%, 75.2%, 38.6%) and the
+honest draft had been 100% the whole time. The workaround exists to reach the
+ROM's *relocation*; that is now the linker's job. Reach for it only when the
+honest spelling is not byte-exact.
+
+### Do NOT relax `trymatch` without the placement
+
+`trymatch`'s `reloc_equivalent` can be taught to resolve a candidate's own
+`.rodata` and compare the value against `baserom.gba`, which would flip these
+functions green. **On its own that manufactures unbuildable promotions.**
+`trymatch` judges one unit; the split build links all of them, and a promoted
+unit whose `.rodata` the linker script does not place either loses the word or
+shifts every address after it. Since `promote.py` acts on `trymatch`'s verdict,
+the failure arrives in the build with functions already moved. **Placement
+first, verifier second** — the order this work was done in, and the reason the
+builds stayed green throughout.
+
+### The verifier, added second and only because placement works
+
+`trymatch` now blesses these drafts, and the check is semantic rather than a name
+comparison: resolve what the candidate's `.rodata` word *will contain* and
+require it to equal the word the ROM actually has at the address the original's
+code loads. If those agree, promoting with a `rodata` entry reproduces the ROM.
+Measured behaviour after the change — it discriminates, it is not a rubber stamp:
+
+| set | before | after |
+|---|---|---|
+| the twelve placed functions | exit 1 | **exit 0** |
+| the eight still-parked (`sub_0801A6C0`, `sub_08022618`, …) | exit 1 | exit 1 |
+| a sample of already-matched (`sub_0800AA30`, `sub_08001158`, …) | exit 0 | exit 0 |
+
+Two guards make the ordering enforceable rather than a convention. **`trymatch`
+prints the exact `rodata` declaration the match depends on**, and **`promote.py`
+parses it and records it automatically**, so a promotion cannot silently omit the
+placement. `split_rodata.py` then refuses any claimed address that is not a
+4-byte chunk boundary, or whose ROM word is not address-shaped.
+
+**One trap inside the verifier itself, worth knowing because it hid the whole
+thing for a while.** `symbol_addresses()` reads the last-built ELF — and once a
+pool word is carved out, its `gUnknown_<addr>` label goes with it, so the symbol
+is **absent from the split build's ELF entirely**. The original's relocation
+names that symbol, so nothing could be resolved and every function in the class
+fell back to "relocations differ" no matter how correct it was. The fix is that
+these symbols are *invented at their own address*, so the name carries the
+answer: fall back to parsing `gUnknown_0XXXXXXX` when `nm` does not have it.
+
+The same fact is a real constraint on what you may carve: **a word can only be
+carved out if nothing still in the build references that symbol by name.** A
+function still using the `c_local` workaround does reference it, so its word must
+stay in the blob until that function is re-done with the honest spelling. This
+fails loudly at link time (undefined symbol), not silently.
