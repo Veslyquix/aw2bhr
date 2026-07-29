@@ -918,6 +918,14 @@ int sub_08078608(int);
 int sub_08078658(int);
 int sub_080786A4(int);
 int sub_080786F0(int);
+/* sub_08078740 is sub_08078758's twin: it walks the same five words of
+ * gUnknown_030059C0 backwards storing 0 (`ldr r1,=g; movs r2,#0; adds r0,r1,#0;
+ * adds r0,#0x10;` loop `str r2,[r0]; subs r0,#4; cmp r0,r1; bge`), takes
+ * nothing and ends `bx lr`. It is DEFINED and matching in
+ * src/decomp/c_08078740.c and was simply never declared -- the wave-14
+ * "promoted but no prototype" trap. Its nullary-ness is what makes the third
+ * `bl` of family F035 a statement of its own rather than a nest. */
+void sub_08078740(void);
 void sub_08078758(void);
 
 /* The three gUnknown_0200E438 accessors that the ~40 sprite-attribute setters
@@ -1704,5 +1712,218 @@ void sub_08087B74(int);
 void sub_0802C144(void);
 void sub_0802C1B0(void);
 void sub_0802D4A0(void);
+
+/* ------------------------------------------------------------------------
+ * Wave 15, agent A -- the callees of families F035, F055, F056, F058, F062
+ * and F066. Six cold families, twenty members, all 12-20 bytes; the work was
+ * entirely here, in the prototypes, and the twenty bodies were one line each.
+ * ------------------------------------------------------------------------ */
+
+/* Three of these are PROMOTED AND MATCHED already and were simply never
+ * declared -- the wave-14 "promoted but no prototype" trap, which reads like a
+ * missing function rather than a missing line. Copied from the definitions,
+ * not re-derived:
+ *   src/decomp/c_08013AD4.c   void sub_08013AD4(u8 a1)      -- `g |= 1 << a1`
+ *   src/decomp/c_08011218.c   void sub_08011218(void)       -- Proc_EndEach
+ *   src/decomp/c_08034308.c   void sub_08034308(ProcPtr parent)
+ * and sub_0806CC00 is defined in src/title-screen.c, which is upstream's own
+ * matching source and must not be edited; `s32` is copied from there. */
+void sub_08013AD4(u8);
+void sub_08011218(void);
+void sub_08034308(ProcPtr);
+void sub_0806CC00(s32);
+
+/* Nullary and void, both by the `pop {r0}` epilogue rule and by every call
+ * site. sub_0802465C has five callers and sub_0803BCA0 two; not one of them
+ * writes r0 before the `bl` or reads it after, so neither takes an argument
+ * and neither result is used. This is what makes the `bl`-runs in F035 and
+ * F056 sequences of statements rather than nests -- a nest is not expressible
+ * when the second callee has no parameter. */
+void sub_0802465C(void);
+void sub_0803BCA0(void);
+
+/* `s16`, and this is the discriminator the F066 family turns on.
+ *
+ * sub_0803B48C's own prologue is `lsls r0,#0x10; lsrs r1,r0,#0x10` -- a
+ * PROMOTE_MODE zero-extension, which per docs/agbcc-codegen.md is identical
+ * for `s16` and `u16` and therefore proves only "narrow". The sign comes from
+ * the CALLERS, and all five agree on signed:
+ *   0x08035F0E  adds r0,r0,r4; adds r0,r0,r5; lsls #0x10; asrs #0x10; bl
+ *   0x08035F5x  movs r1,#0x1a; ldrsh r0,[r2,r1]; bl        (twice)
+ *   0x0803Cxxx  movs r1,#0x1e; ldrsh r0,[r0,r1]; bl        (twice)
+ *   sub_0803B4DC itself: lsls #0x10; asrs #0x10; bl
+ * The first is decisive: a sum of three ints sign-narrowed at the call. With
+ * an `int` parameter that site needs an explicit `(s16)` cast and so does
+ * sub_0803B4DC's body; with `s16` every one of the five is cast-free.
+ *
+ * This REFINES the sub_0803B4DC comment higher up this file, which reads its
+ * `lsl #16; asr #16` as "a conversion at the USE site inside the body". True,
+ * but the conversion is IMPLICIT -- forced by this parameter -- so there is no
+ * cast in sub_0803B4DC's source. Nothing in src/decomp/ calls sub_0803B48C, so
+ * this declaration costs nothing today. */
+void sub_0803B48C(s16);
+
+/* `int`, from the other direction: sub_0801D84C's prologue is a bare
+ * `adds r4,r0,#0` and the value goes straight into `muls r0,r7,r0` (r7 = 0x4c)
+ * with no shift pair anywhere, so it is at least 32 bits wide; and its caller
+ * at 0x0801D840 passes a bare `adds r0,r3,#0` with no conversion.
+ *
+ * Consequence for sub_08015568, and it is worth stating because it is NOT
+ * decidable: the `lsls #0x10; asrs #0x10` in sub_08015568 cannot be an
+ * implicit conversion the way sub_0803B4DC's is, so it is either an explicit
+ * `(s16)` cast on an `int` parameter or an `s16` parameter with no cast.
+ * Probed side by side and the two are BYTE-IDENTICAL (as are `int`-param-plus-
+ * cast against an `s16` callee, and `s16` param against an `s16` callee); only
+ * a `u16` parameter differs, giving `lsr` where the ROM has `asr`. The `int`
+ * spelling is declared below as the weaker contract -- a future caller passing
+ * an int then needs no conversion -- but the evidence does not separate them
+ * and sub_08015568's single caller (`movs r1,#0x26; ldrsh r0,[r4,r1]`, an s16
+ * object) is equally consistent with both. Byte-neutral, so no oracle. */
+void sub_0801D84C(int);
+void sub_08015568(int);
+void sub_08072BBC(int);
+
+/* Family F058's callee, and the family is three calls to it with 0, 1 and 2.
+ * The parameter is `int`, not the `u8` its body suggests: the prologue is
+ * `adds r4,r0,#0` THEN `lsls r0,r4,#0x18; lsrs r0,r0,#0x18` -- copy-then-narrow,
+ * which per docs/agbcc-codegen.md is a cast at a use (it feeds
+ * sub_0803CCB8(a, gUnknown_0200B204)) and not a narrow parameter; the saved r4
+ * is switched on unnarrowed as 0/1/2 immediately afterwards.
+ *
+ * It RETURNS a value and that is decisive rather than inferred: all three F058
+ * members end `pop {r1}; bx r1`, the value-returning epilogue, so they are
+ * non-void; and a narrow return type here would put `lsl; lsr` after the `bl`
+ * in each of them, because agbcc re-narrows on the CALLEE's declaration. There
+ * is none, so `int`. (The value itself is r3, which is 0 on every path.) */
+int sub_08005474(int);
+
+/* Family F055's two same-callee members call one of these twice, with 0 then
+ * 1. Both are `u16` parameters: each opens `lsls r0,#0x10; lsrs r4,r0,#0x10`
+ * and the saved r4 is then used WITHOUT a second shift pair -- as an index
+ * (`lsls r0,r4,#2`), a compare against an `ldrh`, and `strh r4,[r0]`. Per the
+ * PROMOTE_MODE rule the entry pair alone cannot separate `s16` from `u16`; the
+ * absence of any `asr` at the uses is what picks unsigned.
+ * sub_0804FF44's third caller corroborates rather than contradicts: 0x0804C0FC
+ * passes `adds r0,r7,#0` with no narrowing, but r7 is itself
+ * `lsls r0,#0x10; lsrs r7,r0,#0x10` from that function's own prologue, so gcc
+ * already knows the value fits and drops the conversion.
+ * Byte-neutral at every F055 call site regardless -- all six pass a literal. */
+void sub_0804B3E0(u16);
+void sub_0804FF44(u16);
+
+/* Family F062's second pair. sub_0808606C and sub_08086688 both open
+ * `adds r4,r0,#0` and dereference it at +0x30/+0x4c/+0x5c and +0x48..+0x6a, so
+ * each takes the object in r0; `ProcPtr` (= `void *`) is the weakest model and
+ * nothing has named the struct yet. Both `pop {r0}`, so both void.
+ * sub_08087C14's parameter is an INT and not a pointer, on exactly the
+ * evidence that fixed its sibling sub_08087B74 above: it is added to
+ * &gUnknown_02027F78 as an offset, and the caller at 0x080879xx reads it back
+ * out of +0x54 of a proc -- the field sub_08087B74 stores it into. */
+void sub_0808606C(ProcPtr);
+void sub_08086688(ProcPtr);
+void sub_08087C14(int);
+
+/* ---- wave 15 (B): callees of families F046, F049, F057, F060, F061, F063 ----
+ *
+ * Four of these six are already PROMOTED and had no prototype, which under
+ * -Werror reads as a missing function rather than a missing line; the
+ * signatures are copied verbatim from the definitions rather than re-derived:
+ *   src/decomp/c_080432E0.c  int   sub_080432E0(int)
+ *   src/decomp/c_0800B4F0.c  int   sub_0800B4F0(int, int)
+ *   src/decomp/c_0802C62C.c  bool8 sub_0802C62C(void)
+ *   src/decomp/c_0802C660.c  bool8 sub_0802C660(void)
+ * The two bool8s are corroborated by their only call sites, the four members
+ * of family F046: sub_0802C62C's result carries `lsls #0x18; lsrs #0x18`
+ * before `cmp #1` (value kept, so eight bits wide) and sub_0802C660's a bare
+ * `lsls #0x18` before `cmp #0` (truth test). An `int` return would emit
+ * neither. */
+int sub_080432E0(int);
+int sub_0800B4F0(int, int);
+bool8 sub_0802C62C(void);
+bool8 sub_0802C660(void);
+
+/* Family F061's three callees are one shape -- (x, y) cell predicates on the
+ * gUnknown_08499590 screen, the same key sub_080015E4 and sub_0800B4F0 use --
+ * and sub_0800977C is the only one that was still undeclared. Both parameters
+ * arrive as a bare `adds rN, r0, #0` / `adds rN, r1, #0` with no narrowing, so
+ * `int` on both, and it ends `pop {r1}; bx r1`. The return is `int` and not
+ * bool8: all four F061 call sites feed the result straight into `lsls r0, #3`
+ * / `#2` / `#1` or a bare `orrs`, with no `lsls #0x18; lsrs #0x18` in front of
+ * it -- and agbcc re-narrows a narrow-returning callee at every call site. */
+int sub_0800977C(int, int);
+
+/* The CpuFastSet half of the pair sub_08011C68 heads (see that comment).
+ * Identical reading: r0 and r1 are passed through to CpuFastSet untouched, so
+ * `const void *` and `void *`; r2 is a byte count the body narrows itself
+ * (`lsls r2,#0x10; lsrs r2,#0x12`, i.e. (u16)n / 4), so it is NOT a narrow
+ * parameter; `pop {r0}`, so void. Where sub_08011C68 picks CpuSet or
+ * CpuFastSet on `n & 0x1f`, this one is unconditional. */
+void sub_08011C90(const void *, void *, int);
+
+/* ---- wave 15 (C): callees of the four gUnknown_08499590 screen readers ----
+ *
+ * sub_080433F8 is already PROMOTED (src/decomp/c_080433F8.c) and had no
+ * prototype; the signature is copied verbatim from the definition.
+ *
+ * sub_08043070 returns u16, and that is a READOUT rather than a guess: all
+ * four of sub_08024ABC's call sites narrow the result with `lsls #0x10;
+ * lsrs #0x10` before storing it, and the two locals it feeds are compared
+ * with `bhi` -- an UNSIGNED compare, so the locals themselves are `u32` and
+ * cannot be the source of the narrowing. agbcc re-narrows a narrow-returning
+ * callee at every call site, which is exactly what is there. Its five
+ * arguments arrive as two `ldrb`s off gUnknown_08499598[army], two more
+ * `ldrb`s (or the literal 0x19), and one stack word; nothing narrows on the
+ * caller side, so `int` throughout.
+ *
+ * sub_08042D50's result is compared `cmp r5, r0; bgt` -- signed -- so `int`,
+ * and neither argument is narrowed at any of its two call sites. */
+int sub_080433F8(int, int, int);
+u16 sub_08043070(int, int, int, int, int);
+int sub_08042D50(int, int);
+
+/* Also already PROMOTED (src/decomp/c_08026F9C.c, src/decomp/c_080225CC.c) and
+ * still undeclared; signatures copied verbatim from the definitions. */
+bool8 sub_08026FD0(u16, u8);
+void sub_080225CC(u16, u16);
+
+/* sub_08022618 tests the result with a bare `lsls r0, #0x18; cmp r0, #0`, so
+ * bool8; its argument is `(u16)id` where id is an s16 local, and the pair
+ * `lsls #0x10; lsrs #0x10` in front of the call is that conversion, not a
+ * re-narrowing -- a plain `int` parameter would leave the sign-extension
+ * (`lsls; asrs`) that the same value's OTHER use, as an array index, does
+ * carry. So the parameter is 16 bits wide and unsigned. */
+bool8 sub_0802571C(u16);
+
+/* Three more already-promoted, still-undeclared callees of sub_08042998,
+ * copied verbatim from src/decomp/c_08025B28.c and src/decomp/c_080424BC.c;
+ * sub_08042C9C is the one that is genuinely new. Its result is multiplied by
+ * an `int` with no narrowing in front, so `int`; its two arguments are
+ * gUnknown_030033EC (u16, passed with a bare `adds r0, r4, #0`) and a `ldrb`,
+ * neither narrowed at the call. */
+void sub_08025B58(u16, u32);
+void sub_08025B80(struct Unk08499594 *, u8);
+void sub_080424E4(void);
+int sub_08042C9C(u16, u8);
+
+/* ---- family F059's two undeclared callees (wave 15, C) ----
+ *
+ * sub_0803CCB8's parameter is `int`, not `u8`: its body opens
+ * `lsls r0,#0x18; lsrs r0,#0x18` with no `adds rN, r0, #0` copy in front, which
+ * is a cast at a use rather than a narrow parameter, and F059's three members
+ * pass it the bare constants 0/1/2. Its SECOND argument is an address that it
+ * forwards untouched to sub_0803CC84 as the destination of a NUL-terminated
+ * byte copy out of gUnknown_020280C0[i].unk02, so `u8 *`. It RETURNS `bool8`:
+ * the body is `movs r0,#1` / `movs r0,#0`, and every F059 call site carries
+ * `lsls r0,#0x18; lsrs r0,#0x18` before `cmp r0,#1` -- value kept, eight bits
+ * wide, which agbcc only emits for a narrow-returning callee.
+ *
+ * sub_0803CDBC's third argument is likewise reached by a shift pair split
+ * around an `+ 0x500000` in its own body, so `int` on all three. Its return is
+ * NOT settled here: it ends `pop {r1}; bx r1` and returns literal 0/1, but all
+ * three F059 callers discard the result, so `int` and `bool8` are
+ * indistinguishable from this side. Declared `int` as the weakest fit -- retype
+ * it from a caller that uses the value. */
+bool8 sub_0803CCB8(int, u8 *);
+int sub_0803CDBC(int, int, int);
 
 #endif // UNKNOWN_FUNCS_H

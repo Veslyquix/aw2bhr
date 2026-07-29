@@ -153,8 +153,25 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel):
     syms = symbol_addresses()
     sites = []
     for (t_off, t_typ, t_sym), (c_off, c_typ, c_sym) in zip(t_rel, c_rel):
-        if t_off != c_off or t_typ != c_typ or t_typ != "R_ARM_ABS32":
+        if t_off != c_off or t_typ != c_typ:
             return False
+        if t_typ != "R_ARM_ABS32":
+            # Only a literal-pool word can carry an addend difference. Anything
+            # else -- in practice a `bl`'s R_ARM_THM_CALL -- has to name the
+            # identical symbol, and its bytes are then compared like any other
+            # non-relocation bytes by the loop below.
+            #
+            # This used to `return False` outright, which made the whole check
+            # unreachable for any function containing a call: the ABS32 pool
+            # words were never examined because the `bl` was rejected first.
+            # sub_08011B34, the case this was written for, is a leaf, so the
+            # hole survived until family F049 in wave 15 hit it -- four
+            # functions reported at 99.1% with one differing byte, all four
+            # instruction-for-instruction identical and linking to the same
+            # ROM.
+            if t_sym != c_sym:
+                return False
+            continue
         t_name, t_extra = _split_sym(t_sym)
         c_name, c_extra = _split_sym(c_sym)
         if t_name not in syms or c_name not in syms:

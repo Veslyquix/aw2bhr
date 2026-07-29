@@ -375,6 +375,43 @@ the same register is one narrow parameter, not a narrowing plus a cast** — the
 proc-wrapper table's `u16` row is only the first pair and does not distinguish
 `u16` from `s16`.
 
+**The mirror of that, at a CALL: `lsls #16; asrs #16` in front of a `bl`
+collapses FOUR different type assignments into one instruction stream, and the
+wrapper cannot separate them (wave 15).** The `ldrh`/`ldrsh` table above is
+about an argument coming out of *memory*, where the load itself changes and the
+signal is 2 bytes wide. For a value already in a register there is no such
+signal — the conversion is the same two shifts no matter which side of the call
+owns it. One probe, a 16-byte forwarder, all four byte-identical:
+
+| source | |
+|---|---|
+| `void f(int a){ g_int((s16)a); }` | cast at the call, wide callee |
+| `void f(s16 a){ g_int(a); }` | **narrow parameter, no cast** |
+| `void f(int a){ g_s16(a); }` | wide parameter, **narrow callee**, no cast |
+| `void f(s16 a){ g_s16(a); }` | narrow on both sides |
+| `void f(u16 a){ g_int(a); }` | the ONE that differs — `lsr`, not `asr` |
+
+So the pair proves exactly one thing: *something* on this path is signed and 16
+bits. Which thing is decided **callee-side and only callee-side**: a callee
+whose own prologue carries `lsls #16; lsrs #16` has a narrow parameter (that is
+PROMOTE_MODE, per the rule above), and a callee that opens with a bare
+`adds rN, r0, #0` straight into word arithmetic does not, which forces the
+conversion back onto the caller as a cast or a narrow parameter — and *those*
+two remain indistinguishable forever. Family F066 has one member of each kind:
+`sub_0803B4DC` forwards to `sub_0803B48C` (prologue narrows ⇒ `s16` parameter
+⇒ the conversion is implicit and the source has no cast), while `sub_08015568`
+forwards to `sub_0801D84C` (no prologue narrowing, and its other caller passes
+a bare `adds r0,r3,#0` ⇒ `int` parameter ⇒ the source must have spelled
+something). **Do not spend an attempt choosing between the last two; declare the
+weaker one and say in the header that it is byte-neutral.**
+
+The sign is worth chasing even so, because it is free from the caller
+population: `sub_0803B48C` has five call sites and every one is signed — a sum
+of three ints put through `lsls #0x10; asrs #0x10`, and four `ldrsh` reads of
+struct members. The `lsls/asrs` site is the decisive one: with an `int`
+parameter that call needs an explicit `(s16)` cast on a three-term sum, which
+nobody writes, and with `s16` all five are cast-free.
+
 **`ldrh` plus a pool word is a plain mask; `ldrb` plus `mov`/`neg` is a
 bitfield.** The width of the constant tells you nothing. `*p &= ~8` through a
 `u16 *` narrows the mask to a 16-bit pool word by itself, so a `0x0000FFF7`-
@@ -388,6 +425,20 @@ too, so `movs #M; ands` is not evidence against a bitfield.** See "Read a
 bitfield's position and width straight off `mov #N; neg`" under Bitfields —
 `sub_08011588`'s `ldrb; movs #0x3f; ands; movs #0x80; orrs; strb` looks exactly
 like a scalar `(x & 0x3f) | 0x80` and is a two-bit field at bit 6.
+
+**On the READ side the two are cleanly separable, and the separator is the
+ACCESS WIDTH rather than how the mask was built (wave 15).** A brief told a
+wave-15 agent that `if (gU16 & 0x200)` and a one-bit field test were
+byte-identical and could not be discriminated. They are not: `get_best_mode`
+picks the narrowest mode containing the field, so bit 9 of a `u16` lives in
+byte 1 and a bitfield read of it is `ldrb [p,#1]` plus a double shift. Family
+F057 does `ldrh [p]; movs r0,#0x80; lsls r0,#2; ands r0,r1; cmp r0,#0` — it
+reads the **whole halfword** and ANDs a constant materialised by shift, which
+no single-byte-resident field can produce. So **a load wider than the field's
+own byte is positive evidence of a plain mask**, and `movs #imm8; lsls #n`
+building the constant is just how THUMB materialises 0x200 — it is not a pool
+word and carries no signal of its own. The `mov #N; neg` tell above is the
+store-side twin and stays store-side.
 
 **Two `ands` with two pool-sized masks in a row is TWO source statements, and
 the constants will never fold.** On THUMB a mask that does not fit `movs #imm8`
@@ -2814,6 +2865,22 @@ a `push {r4, lr}`; the plain `g[a].unk04++` form costs the reload. Both are
 
 This flag is in `CFLAGS` and is the least obvious thing in the build.
 
+**Its cheapest symptom is a DEAD pool load, and it is free: do not try to
+explain it, and do not read it as a missing statement (wave 15).** Where a
+nested member's constant offset ends up folded into the pool word, force-addr's
+own `ldr rN, =gSym` for the base survives into the output with nothing reading
+it. Family F049 opens `ldr r7, =gUnknown_085D3DD0` and then overwrites r7 four
+instructions later without ever using it, while every real access goes through
+a second word `gUnknown_085D3DD0 + 0x5c` (which `asm/` symbolises as
+`gUnknown_085D3E2C`, a distinct name at that address — see the false-mismatch
+bullet in Workflow). Both fall straight out of the plain
+`g[a].sub[b].arr[i]` spelling with no locals and no tricks. **Tell: a pool word
+loaded into a callee-saved register at the top of a function that nothing
+reads, next to a second pool word for the same symbol carrying an addend.** A
+draft that lacks the dead `ldr` is missing a whole *reference*, not a
+statement — the useful question is which sub-object the address arithmetic
+starts from, not what the register was for.
+
 **It routes a symbol's address through `.rodata` when the global is used both
 before and after a loop.** GCC emits `.LC0: .word gSym`, puts `.word .LC0` in
 the function's pool, and every access gains an extra `ldr`, growing the function
@@ -5233,6 +5300,13 @@ by struct layouts** — and note it only matters at all for functions the `.LC`
 screen flags, which is where this batch lived and is a large fraction of
 `code.s`.
 
+> **Wave 15 (C) CONFIRMS the replacement metric, on a batch that was selected
+> to be a control for it and turned out to be a much sharper test than either
+> wave intended.** See "The `.LC` count is the whole cost curve" below: four
+> functions, `.LC` word counts 0/1/2/2, outcomes matched / +8 / −8 / −28, in
+> that order. Nothing else in the batch ordered that way. Read the paragraph
+> above as established rather than as a one-batch proposal.
+
 **One selection-level warning this batch is evidence for.** The batch was chosen
 because its four members "share a global family" — `gUnknown_0808D854`,
 `gUnknown_0808D83C`, `gUnknown_0808D86C`, `gUnknown_0808D81C`, all
@@ -5246,6 +5320,257 @@ globals" from `data/functions.json` will keep selecting pool slots, because
 `asm/` symbolises them exactly like globals. **Resolve `data_refs` in the
 0x0808C000–0x08091000 range against the ROM before calling two functions
 related.**
+
+### The `.LC` count is the whole cost curve, measured (wave 15, C)
+
+Wave 14 proposed "the number of distinct `.LC` read-site spellings" as the
+replacement for the refuted layout metric and flagged it as thin — one batch,
+four functions that all scored the same. Wave 15's C batch was handed over as a
+control for it, on the stated premise that **none of its four functions goes
+through a `.LC` pool word, so the metric scores all four at zero**. That premise
+is false: three of the four do, and one of them (`sub_08022618`) is already a
+worked example in the `-fforce-addr` chapter of this file, with its pool block
+dumped and its density computed. Ten seconds of `data_refs` against the
+0x0808C000-0x08091000 screen would have caught it before the batch was written.
+
+Because the premise was wrong the batch is not a control, it is the sharpest
+test the metric has had — the four functions span 0, 1, 2 and 2 pool words while
+holding everything else fixed, and the cost is monotone in that number and in
+nothing else:
+
+| | bytes | `.LC` words | distinct `.LC` spellings | new symbols | new layouts | rounds | outcome |
+|---|---|---|---|---|---|---|---|
+| `sub_08024ABC` | 412 | **0** | 0 | 3 protos | 0 shared, 2 local | 3 + permuter | **matched** |
+| `sub_08058A2C` | 392 | **1** | 1 | 1 global, 2 protos | 0 | 6 + permuter | parked, **+8** |
+| `sub_08022618` | 400 | **2** | 2 | 2 globals, 2 protos | 0 | 5 | parked, **−8** |
+| `sub_08042998` | 472 | **2** | **3** | 3 globals, 4 protos | 0 | 4 | parked, **−28** |
+| F059 x3 | 124 ea | **0** | 0 | 1 global, 2 protos | 0 | **1, no probe** | **all matched** |
+
+Every other candidate ordering is wrong on this batch, and two of them are
+exactly backwards: byte count (the biggest is the worst but the smallest is the
+second worst), new symbols (the only match declared the fewest globals — none —
+and is also the only one that needed a new aggregate), callee count, and
+`difficulty` from the index (35.7 / 46.7 / 32.1 / 35.5 against the outcome
+order). **Sort a large-band target list by `.LC` word count, and treat a
+function needing three different spellings of one word as a different class from
+one needing one.**
+
+The negative half of the wave-13/14 findings survives untouched and is now three
+batches deep: cost tracks neither size nor callee count.
+
+The screen that produces this column is the fan-in + run-density one already in
+this file, and on this batch it separates cleanly with nothing in between —
+`(symbol, value, fan-in, density)` for every `gUnknown_08xxxxxx` data ref:
+
+```
+sub_08024ABC  08499594 0x2022684 167 0 | 08499598 0x2023284 217 0 | 085D5ABC 0x8d208bd 100 0
+sub_08058A2C  0816D948 0x30013b0   1 13 | 08499590 ... 327 0 | 085D5ABC ... 100 0
+sub_08022618  080909A8 0x8499580   1  8 | 080909AC 0x85d5abc 1 8 | 08499590 ... 327 0 | ...
+sub_08042998  08091364 0x30040d8   1 17 | 08091368 0x85d5abc 1 17 | 08499590 ... 327 0 | ...
+```
+
+Fan-in is 1 or 100+ with nothing between, and density is 8-17 or 0 with nothing
+between. **One query over `data/functions.json` plus a ROM read orders the whole
+batch by outcome before a line of C is written**, and it is what should be run
+against a candidate list rather than after the fact.
+
+Family F059 (`sub_080055B8`, `sub_08005634`, `sub_080056B0`, 124 bytes each) was
+taken from the same wave as the spare item and is the control the batch lacked:
+zero flagged refs, and all three matched on the **first** `try_match` with no
+probe round at all, 372 bytes for three attempts. Its whole content is one
+`if`/`else` where both arms call the same two functions with the same six
+arguments — the ROM keeps both copies because the `0` bound for `[sp, #4]` is
+CSEd with the then-arm's two `strh` zeroes and so lands in `r4` there and `r1`
+in the else-arm, which is enough to defeat cross-jumping.
+
+#### The family effect is "the vocabulary is already written down", and it is small
+
+Wave 14's stronger claim was that function 1 pays for the shared vocabulary and
+functions 2 and 3 inherit it. This batch is the clean version of that
+experiment, because the vocabulary — the `u8 *gUnknown_08499590` screen
+descriptor, `struct Unk08499594`, `struct Unk085D5ABC`, `struct Unk08499598` —
+was **already in `include/unknown-globals.h` before the batch started**, some of
+it derived from `sub_08042998` itself in an earlier wave.
+
+**The first function attempted was the cheapest, not the dearest, and it is the
+only one that matched.** So the wave-14 discount is not a first-mover cost that
+someone has to pay; it is the absence of a cost when the types are already
+recorded. Concretely, the whole type-vocabulary bill for four functions and
+1,676 bytes was about fifteen minutes of header edits: **zero new struct
+layouts**, six fields split out of existing `filler_` runs (`Unk08499594`
+unk02/unk03/unk07/unk08, `Unk085D5ABC` unk0b, `Unk03003FC0` unk0d), and five new
+globals, every one of them a pool word rather than a real global. None of that
+predicted or explained a single one of the three near-misses.
+
+**The actionable form of the claim: prefer targets whose types are already in
+the header, and expect that to buy setup time, not iterations.** It is not a
+reason to batch by shared globals — and `data/functions.json`'s `data_refs`
+cannot tell a shared global from a shared pool word, which is how this batch
+came to be described as `.LC`-free in the first place.
+
+### Two uses of a `pp = &<pool word>` local is not enough to keep it live
+
+A boundary on wave-13 A2's `c_local` that no wave has recorded, and it is worth
+2–6 bytes every time it bites. `&gUnknown_0816D948` is an address constant, so
+CSE will **const-propagate it into its uses** and the pool word gets emitted
+again at each one; the `mov sl, r1` that the ROM uses to carry it never appears.
+Measured on two functions in one batch, same idiom, same header shape:
+
+- `sub_08022618` — `pp` read at **four** sites: kept in `sl`, one pool word,
+  exactly as the ROM has it, first try.
+- `sub_08058A2C` — `pp` read at **two** sites: const-propagated, two pool words,
+  no `mov sl`. Five spellings were tried and none moved it — `pp` assigned
+  before vs after the first read, `**pp` at both sites vs a by-name read plus
+  `pp = &gLC`, a third artificial use, and naming the word twice with no `pp` at
+  all. A 300 s permuter run did not move it either.
+
+So the wave-14 read-site vocabulary is right about *which* spelling each site
+wants and silent about whether the local survives at all. **Count the sites
+before choosing the target**: one or two `.LC` reads is a worse prospect than
+four, which is the opposite of the intuitive ordering and the opposite of what
+the `.LC`-count metric above says about the *number of words*. The two are not
+in conflict — more words is worse, more reads of one word is better.
+
+### `u16 v` and `int v` with an explicit `(u16)` cast are DIFFERENT CODE
+
+Worth 16 of `sub_08022618`'s 24 missing bytes, and the largest source-level lever
+found in this batch.
+
+A `u16` local is a PROMOTE_MODE'd SImode pseudo, so reading it as an `int` costs
+nothing and combine is then free to fold the definition's arithmetic into the
+use's. An `int` local with an explicit `(u16)` cast at the use expands to a real
+`lsl #16; lsr #16` pair, and combine leaves it alone:
+
+```c
+u16 ax;  ax = ((x - cx) & 0xF) * 2;   tile = base + ax;
+                    /* lsls rN, rCELL, #2   -- one shift, the *2 and the
+                     * pointer scaling folded together, and the definition
+                     * CSEd at its PRE-shift value                     */
+int ax;  ax = ((x - cx) & 0xF) * 2;   tile = base + (u16)ax;
+                    /* lsls rN, rAX, #0x10  (once, CSEd across the uses)
+                     * lsrs rM, rN, #0xf    (at every use) -- the ROM   */
+```
+
+Read backwards: **`lsls #0x10` on a value that is provably 16-bit clean, with the
+matching `lsr` at the use rather than beside it, is positive evidence for an
+`int` local plus a cast and against a `u16` local.**
+
+**A straight-line probe cannot tell the two apart — both fold there.** Four
+spellings were probed in one call (`u16` local, `int` + cast, two-assignment,
+byte-pointer cast) and all four collapsed to the same two shifts; the difference
+only appears once the uses sit behind branches, because folding the definition
+into a use is a per-basic-block combine substitution. This is the first case in
+this file where a probe reproduced the *wrong* answer confidently, so: **when the
+question is about a narrowing, the probe has to carry the target's control flow,
+not just its expression.**
+
+Two things ruled out on the same question, both cheap and both negative:
+
+- **`old_agbcc` is not the axis.** All three of this batch's near-misses compile
+  to byte-identical *sizes* under `old_agbcc` with `-fprologue-bugfix` removed
+  (444, 392, 400). Test it without touching `data/compiler-overrides.json` by
+  monkeypatching `agbenv._OVERRIDES` from a throwaway script — that file is read
+  by every concurrent agent and a stray entry left in it is worse than the
+  answer is worth.
+- **A dead parameter overwritten on entry does not defeat `nonzero_bits`.** The
+  theory was that a pseudo live at function entry gets `reg_nonzero_bits` set to
+  all-ones and so keeps its extensions. Declaring `ax`/`by` as extra parameters
+  and assigning over them produced *byte-identical* output: flow deletes the dead
+  incoming copy and the promotion survives it.
+
+### `(t + 1) + f()` does not survive `fold`; it needs two statements
+
+Two of this batch's four turn on it, so it is not a one-off. `n = t + 1 + d;` —
+with `d` already a plain local, so no evaluation-order question — folds to
+`t + (d + 1)` and emits
+
+```
+bl Div ; add r0, r0, #1 ; add rN, r4, r0        /* what the source says */
+bl Div ; adds r1, r4, #1 ; adds r0, r1, r0      /* what the ROM has     */
+```
+
+Parenthesising does not help (`t + 1 + d` already parses that way). Splitting it
+does: `t2 = t + 1; n = t2 + d;` gives the ROM's shape. Use a **second local**
+rather than reassigning `n` — `n = t + 1; n = n + d;` gets the instructions right
+but costs an extra `adds r0, rN, #0`, because the two assignments tie `n` to the
+first one's register.
+
+### Three more one-line levers from this batch
+
+**`v *= a; v *= 100;` and `v = v * a * 100;` differ by two `mov`s.** THUMB `MUL`
+is destination-tied; the compound form ties both products to `v`'s register,
+while the single expression allocates a fresh pseudo for the intermediate and
+reload copies in and out. Same for a subtraction of two products:
+`def = def * (v >> 4); atk = atk * 6; res = def - atk;` puts each product in its
+own operand's register (`muls r3, r0` / `lsls r7, r0, #1`), where
+`res = (v >> 4) * def - atk * 6;` does not.
+
+**`s16` and `u16` are not interchangeable for a local that is only ever compared
+against zero.** `sub_08024ABC`'s `v2` is assigned from an `int`-returning callee
+and tested `!= 0`; both spellings truncate with `lsl #16; lsr #16`, and only the
+signed one leaves `r0` holding the pre-shift value for the `cmp r0, #0` that
+follows. Four bytes, and no oracle other than the diff — this is the
+"byte-neutral wrong type has no oracle" hazard in a form where it is *not*
+byte-neutral. `decomp-permuter` found it from a candidate that was otherwise
+99.0%; it is exactly the class the permuter is good at, and it is why the 300 s
+run is worth spending even on a diff that looks like pure allocation.
+
+**Spelling a member inline rather than binding it to a local moves the pool load
+ahead of it.** `sub_08024ABC`'s last four bytes: with `u = a->unk00;` as its own
+statement the two loads come out in source order, and with `a->unk00` written
+inline inside the expression that also names `gUnknown_08499594`, agbcc
+materialises `ldr r0, =gUnknown_08499594` *first* and the member load second.
+Every later use CSEs back to that one load, so the inline spelling costs nothing.
+This is the mirror image of the "bind the subexpression to a local" instinct and
+of the `lim` local in `sub_0800AA30`.
+
+### agbcc's pointer-difference division shifts AFTER the multiply
+
+gcc 2.x's `expand_divmod` implements `EXACT_DIV_EXPR` as **multiply by
+`invert_mod2n(d >> post_shift)`, then shift right by `post_shift`**. Later gccs
+pre-shift, which is why the emitted code does not look like a division at all and
+why a reciprocal ladder in this tree has to be read right-to-left:
+
+```
+lsls r0,r1,#2 ; adds r0,r0,r1 ; lsls r1,r0,#4    ; adds r0,r0,r1
+lsls r1,r0,#8 ; adds r0,r0,r1 ; lsls r1,r0,#0x10 ; adds r0,r0,r1
+rsbs r0,r0,#0 ; asrs r0,r0,#8 ; adds r0,#1
+```
+
+The ladder builds `x * 0x55555555` and `rsbs` negates it, so the multiplier is
+`0xAAAAAAAB` — `synth_mult`'s negate strategy, and `0xAAAAAAAB` is the inverse of
+3 and of nothing else. `asrs #8` is therefore `post_shift = 8`, so
+`d = 3 << 8 = 0x300`: **a pointer difference over a 768-byte stride**, which in
+`sub_08024ABC` is 64 `struct Unk08499594` records — one army's worth of unit
+slots — and the `+ 1` after it makes the result a 1-based army index into
+`gUnknown_08499598`. Write it as the pointer subtraction it is, with a
+`struct { struct Unk08499594 unk00[64]; }` in the `.c` purely for its size.
+
+**Do not take the stride from a nearby multiply.** This function has
+`movs r0, #0x5c; muls r0, r3, r0` two instructions later and it is unrelated — it
+indexes `gUnknown_085D5ABC` by a byte the ladder's own result was loaded from.
+`0x5C` is not invertible against `0xAAAAAAAB`, and reading the ladder is the only
+way to get the stride.
+
+### A second `-fforce-addr` pool block in code-0801D390.s
+
+The chapter above lists two blocks, `code.s` at 0x0808D6DC-0x0808D89x and
+`code-0801D390.s` at 0x0809092C-0x08090C2x. There are at least two more, both in
+that second unit and both far outside the quoted range:
+
+```
+0x08091350-0x0809138C   0x03003FC0, 0x030040D8 x4, 0x03003100, 0x085D5ABC,
+                        0x08499598 x2, 0x084A077C, 0x020288A0 x2, ...
+0x0816D938-0x0816D9BC   0x08499590 x9, 0x030040D8 x6, 0x03003F2C x4,
+                        0x03004784 x2, 0x030013B0, 0x03003338, 0x030033EC
+```
+
+Both are bracketed by ordinary data (0x04F504F8 above the second, 0x01010100
+below it) and every word in them is fan-in 1, so the density screen flags them
+correctly — the *address range* in the section head is what is incomplete.
+`gUnknown_0816D9E0`, already recorded elsewhere in this file as a known pool, is
+the tail of the second block. **Run the fan-in + run-density screen rather than
+the address range; the ranges are a sample, not a list.**
 
 ---
 
@@ -5264,6 +5589,22 @@ related.**
   `relocs: name different symbols that resolve to the same address`. If you see
   that line, you have a match — stop working. Do not "fix" it; the obvious fix
   (`&gUnknown_03000040` on a symbol declared as a scalar) compiled to 52 bytes.
+- **That check was UNREACHABLE for any function containing a `bl`, and it stayed
+  that way for three waves (wave 15).** `reloc_equivalent` walked the two
+  relocation lists in parallel and bailed on the first entry that was not
+  `R_ARM_ABS32` — so a `bl`'s `R_ARM_THM_CALL`, which comes first because it is
+  at a lower offset than the literal pool, rejected the whole comparison before
+  any pool word was examined. `sub_08011B34`, the case the check was written
+  for, is a leaf, which is why nobody noticed. Family F049 (four 112-byte
+  functions with one `bl`) reported **99.1%, one differing byte, first
+  difference at the pool word** — the exact profile of a real near-miss — and
+  all four were instruction-for-instruction identical and linked to the same
+  ROM. Fixed in `tools/trymatch.py`: a non-ABS32 relocation must now name the
+  identical symbol and is skipped, rather than aborting the check, and its
+  bytes are still compared like any others. **Read the symptom, not the
+  percentage: a diff whose only entry is a `.word` plus its relocation line,
+  with every instruction matching, is this — check the two symbols' addresses
+  by hand before believing the score.**
 - **The OTHER pool-word relocation case is a REAL mismatch, and the bullet
   above will talk you out of fixing it (wave 14).** That one is two symbols
   resolving to one address. This one is a relocation against *no* relocation:
@@ -5520,6 +5861,28 @@ related.**
   positive evidence that the original's declaration was not `const`**, and it is
   visible before you spend an attempt.
 
+  **"In a loop" is too narrow — the same tell fires across a plain `bl`, and
+  there it costs two bytes rather than a permutation (wave 15).** A `const`
+  global's MEM carries `RTX_UNCHANGING_P`, so CSE keeps it valid across a call;
+  an unqualified one is killed by the call and reloaded. Family F049 reads
+  `gUnknown_085D5ABC[c].unk18` on either side of `bl sub_080432E0` and the ROM
+  keeps the element **address** in r6 and re-`ldrb`s through it. One body, two
+  declarations of the same 0x5c layout, one probe:
+
+  ```
+  const : add r3,r3,r4 ; ldrb r6,[r3,#0x18] ; ... ; cmp r6,#0      <- value CSEd
+  plain : add r6,r3,r4 ; ldrb r3,[r6,#0x18] ; ... ; ldrb r0,[r6,#0x18] ; cmp r0,#0
+  ```
+
+  The second is the ROM. So **two reads of one global straddling a `bl`, with
+  the address rather than the value held live, means the declaration is not
+  `const`** — and the const form is *shorter*, so this presents as your
+  candidate being two bytes under, not over. `gUnknown_085D5ABC` had been
+  `const` in `unknown-globals.h` since wave 6 and is now plain; the change is
+  byte-neutral for all four already-promoted users, each of which reads it once
+  (re-verified with `trymatch`, plus a 76-function sweep over every promoted
+  function touching the structs edited in that wave).
+
 ---
 
 ## Proc wrappers — a free family, and the one trap in it
@@ -5734,6 +6097,27 @@ callee's prologue — and it is worth stating separately because here there IS a
 later use of the saved value, which makes the pass-through reading look
 corroborated when it is not. Exemplar: `sub_08072288` in
 `src/decomp/c_08071F88.c`.
+
+**Family F062 is the unconditional twin of F032, and its three members split
+THREE ways on that same question — which is the strongest case yet for "check
+every member" (wave 15).** The shape is `push {r4,lr}; adds r4,r0,#0; bl A;
+adds r0,r4,#0; bl B; pop {r4}; pop {r0}; bx r0`, 20 bytes, with no
+`lsls/cmp/bne` — so B is unconditional and A's result, if it has one, is
+discarded. Only the two callees vary. Reading callee A's prologue in each:
+
+| member | callee A | what the `adds r4, r0, #0` means |
+|---|---|---|
+| `sub_0801153C` | `sub_08011218` — **nullary** (`Proc_EndEach(g)`) | save across a clobber; the F032 trap |
+| `sub_08086058` | `sub_0808606C` — takes the proc (`+0x30`, `+0x4e`, `+0x5c`) | a real argument pass |
+| `sub_08087B60` | `sub_08087B74` — takes an **`int`**, not a pointer | the saved value is an offset, not an object |
+
+Three members, three different answers, from an instruction stream that is
+byte-identical apart from the two `bl` targets. The third row is the one that
+would not have been guessed: `sub_08087B74` and `sub_08087C14` both add the
+value to a global's address (`&gUnknown_02027F74 + 4`, `&gUnknown_02027F78`),
+so the natural `ProcPtr proc` reading is wrong even though the frame looks
+exactly like the other two. All three matched first try once the callees were
+read; none of them was readable from the wrapper.
 
 **A one-instruction relative to that, from family F054: in `gFlag = K;
 CALLEE(...)`, the store's address lands in r0 and its value in r1, which is

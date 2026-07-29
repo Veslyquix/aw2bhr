@@ -36,8 +36,8 @@
  "counts": {
   "families": 98,
   "members": 698,
-  "unmatched_members": 97,
-  "entirely_unmatched_families": 33,
+  "unmatched_members": 54,
+  "entirely_unmatched_families": 20,
   "fuzzy_clusters": 20
  },
  "batching_plan": {
@@ -73,33 +73,6 @@
     ]
    },
    {
-    "id": "F035",
-    "n_members": 5,
-    "n_unmatched": 5,
-    "n_insns": 7,
-    "sizes": [
-     20
-    ],
-    "representative": "sub_0803A42C",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x0803A42C",
-     "0x08078834"
-    ],
-    "varies": [
-     "bl S",
-     "bl S",
-     "bl S"
-    ],
-    "members": [
-     "sub_0803A42C",
-     "sub_08078790",
-     "sub_080787A4",
-     "sub_080787EC",
-     "sub_08078834"
-    ]
-   },
-   {
     "id": "F039",
     "n_members": 5,
     "n_unmatched": 0,
@@ -125,215 +98,139 @@
     ]
    },
    {
-    "id": "F046",
-    "n_members": 4,
-    "n_unmatched": 4,
-    "n_insns": 19,
-    "sizes": [
-     48
-    ],
-    "representative": "sub_0802C6CC",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x0802C6CC",
-     "0x0802C75C"
-    ],
-    "varies": [
-     "cmp r0,#"
-    ],
-    "members": [
-     "sub_0802C6CC",
-     "sub_0802C6FC",
-     "sub_0802C72C",
-     "sub_0802C75C"
-    ]
-   },
-   {
-    "id": "F049",
-    "n_members": 4,
-    "n_unmatched": 4,
-    "n_insns": 47,
-    "sizes": [
-     112
-    ],
-    "representative": "sub_080430B0",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x080430B0",
-     "0x08043200"
-    ],
-    "varies": [
-     "movs r2,#",
-     "movs r2,#",
-     "movs r1,#"
-    ],
-    "members": [
-     "sub_080430B0",
-     "sub_08043120",
-     "sub_08043190",
-     "sub_08043200"
-    ]
-   },
-   {
-    "id": "F055",
+    "id": "F067",
     "n_members": 3,
     "n_unmatched": 3,
-    "n_insns": 7,
+    "n_insns": 19,
     "sizes": [
-     20
+     44
     ],
-    "representative": "sub_08004824",
+    "representative": "sub_08015E80",
     "exemplar_src": null,
     "addr_span": [
-     "0x08004824",
-     "0x0804C0E8"
+     "0x08015E80",
+     "0x08015F3C"
     ],
     "varies": [
-     "movs r0,#",
-     "bl S",
      "bl S"
     ],
     "members": [
-     "sub_08004824",
-     "sub_0804B3CC",
-     "sub_0804C0E8"
+     "sub_08015E80",
+     "sub_08015F10",
+     "sub_08015F3C"
     ]
    },
    {
-    "id": "F056",
+    "id": "F068",
     "n_members": 3,
     "n_unmatched": 3,
     "n_insns": 6,
     "sizes": [
      16
     ],
-    "representative": "sub_0800483C",
+    "representative": "sub_080199A4",
     "exemplar_src": null,
     "addr_span": [
-     "0x0800483C",
-     "0x0806C78C"
+     "0x080199A4",
+     "0x0803CE9C"
     ],
     "varies": [
-     "bl S",
      "movs r0,#",
+     "movs r1,#",
      "bl S"
     ],
     "members": [
-     "sub_0800483C",
-     "sub_0803B890",
-     "sub_0806C78C"
+     "sub_080199A4",
+     "sub_080199B4",
+     "sub_0803CE9C"
     ]
    },
    {
-    "id": "F057",
+    "id": "F069",
     "n_members": 3,
     "n_unmatched": 3,
-    "n_insns": 26,
+    "n_insns": 9,
     "sizes": [
-     64
+     24
     ],
-    "representative": "sub_08004EDC",
+    "representative": "sub_0801E0F0",
     "exemplar_src": null,
     "addr_span": [
-     "0x08004EDC",
-     "0x08004F5C"
-    ],
-    "varies": [
-     "lsls r0,r0,#",
-     "movs r0,#"
-    ],
-    "members": [
-     "sub_08004EDC",
-     "sub_08004F1C",
-     "sub_08004F5C"
-    ]
-   },
-   {
-    "id": "F058",
-    "n_members": 3,
-    "n_unmatched": 3,
-    "n_insns": 5,
-    "sizes": [
-     12
-    ],
-    "representative": "sub_0800553C",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x0800553C",
-     "0x08005554"
-    ],
-    "varies": [
-     "movs r0,#"
-    ],
-    "members": [
-     "sub_0800553C",
-     "sub_08005548",
-     "sub_08005554"
-    ]
-   },
-   {
-    "id": "F059",
-    "n_members": 3,
-    "n_unmatched": 3,
-    "n_insns": 45,
-    "sizes": [
-     124
-    ],
-    "representative": "sub_080055B8",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x080055B8",
-     "0x080056B0"
+     "0x0801E0F0",
+     "0x0801EFA8"
     ],
     "varies": [
      "movs r0,#",
-     "movs r2,#"
+     "movs r1,#",
+     "ldr r1,L",
+     "movs r0,#"
     ],
     "members": [
-     "sub_080055B8",
-     "sub_08005634",
-     "sub_080056B0"
+     "sub_0801E0F0",
+     "sub_0801EF90",
+     "sub_0801EFA8"
     ]
    },
    {
-    "id": "F060",
+    "id": "F070",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 10,
+    "sizes": [
+     28
+    ],
+    "representative": "sub_0801F050",
+    "exemplar_src": null,
+    "addr_span": [
+     "0x0801F050",
+     "0x0801F0E0"
+    ],
+    "varies": [
+     "bl S",
+     "bl S"
+    ],
+    "members": [
+     "sub_0801F050",
+     "sub_0801F0AC",
+     "sub_0801F0E0"
+    ]
+   },
+   {
+    "id": "F071",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 8,
+    "sizes": [
+     24
+    ],
+    "representative": "sub_0801F06C",
+    "exemplar_src": null,
+    "addr_span": [
+     "0x0801F06C",
+     "0x0801F0FC"
+    ],
+    "varies": [
+     "bl S"
+    ],
+    "members": [
+     "sub_0801F06C",
+     "sub_0801F0C8",
+     "sub_0801F0FC"
+    ]
+   },
+   {
+    "id": "F072",
     "n_members": 3,
     "n_unmatched": 3,
     "n_insns": 7,
     "sizes": [
      24
     ],
-    "representative": "sub_080059E4",
+    "representative": "sub_080215B8",
     "exemplar_src": null,
     "addr_span": [
-     "0x080059E4",
-     "0x0803BCB8"
-    ],
-    "varies": [
-     "ldr r0,L",
-     "ldr r1,L",
-     "movs r2,#",
-     "bl S"
-    ],
-    "members": [
-     "sub_080059E4",
-     "sub_0803BCA0",
-     "sub_0803BCB8"
-    ]
-   },
-   {
-    "id": "F061",
-    "n_members": 3,
-    "n_unmatched": 3,
-    "n_insns": 40,
-    "sizes": [
-     92
-    ],
-    "representative": "sub_08008CB8",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x08008CB8",
-     "0x0800B5C0"
+     "0x080215B8",
+     "0x08078AF0"
     ],
     "varies": [
      "bl S",
@@ -342,83 +239,176 @@
      "bl S"
     ],
     "members": [
-     "sub_08008CB8",
-     "sub_08008D14",
-     "sub_0800B5C0"
+     "sub_080215B8",
+     "sub_0804096C",
+     "sub_08078AF0"
     ]
    },
    {
-    "id": "F062",
+    "id": "F075",
     "n_members": 3,
     "n_unmatched": 3,
-    "n_insns": 8,
-    "sizes": [
-     20
-    ],
-    "representative": "sub_0801153C",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x0801153C",
-     "0x08087B60"
-    ],
-    "varies": [
-     "bl S",
-     "bl S"
-    ],
-    "members": [
-     "sub_0801153C",
-     "sub_08086058",
-     "sub_08087B60"
-    ]
-   },
-   {
-    "id": "F063",
-    "n_members": 3,
-    "n_unmatched": 3,
-    "n_insns": 8,
+    "n_insns": 9,
     "sizes": [
      28
     ],
-    "representative": "sub_080116E8",
+    "representative": "sub_0802C4B8",
     "exemplar_src": null,
     "addr_span": [
-     "0x080116E8",
-     "0x0803A174"
+     "0x0802C4B8",
+     "0x0807C978"
     ],
     "varies": [
+     "bl S",
      "ldr r0,L",
-     "ldr r1,L",
-     "movs r2,#",
-     "lsls r2,r2,#",
      "bl S"
     ],
     "members": [
-     "sub_080116E8",
-     "sub_0801EFD8",
-     "sub_0803A174"
+     "sub_0802C4B8",
+     "sub_0802C4D4",
+     "sub_0807C978"
     ]
    },
    {
-    "id": "F066",
+    "id": "F077",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 7,
+    "sizes": [
+     20
+    ],
+    "representative": "sub_0802E2BC",
+    "exemplar_src": null,
+    "addr_span": [
+     "0x0802E2BC",
+     "0x08034CA4"
+    ],
+    "varies": [
+     "bl S",
+     "ldr r1,L",
+     "movs r0,#"
+    ],
+    "members": [
+     "sub_0802E2BC",
+     "sub_08034C90",
+     "sub_08034CA4"
+    ]
+   },
+   {
+    "id": "F079",
     "n_members": 3,
     "n_unmatched": 3,
     "n_insns": 6,
     "sizes": [
      16
     ],
-    "representative": "sub_08015568",
+    "representative": "sub_08032688",
     "exemplar_src": null,
     "addr_span": [
-     "0x08015568",
-     "0x08072BBC"
+     "0x08032688",
+     "0x080444FC"
+    ],
+    "varies": [
+     "movs r1,#",
+     "bl S"
+    ],
+    "members": [
+     "sub_08032688",
+     "sub_080444EC",
+     "sub_080444FC"
+    ]
+   },
+   {
+    "id": "F081",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 11,
+    "sizes": [
+     24
+    ],
+    "representative": "sub_0803BAFC",
+    "exemplar_src": null,
+    "addr_span": [
+     "0x0803BAFC",
+     "0x0803BB2C"
     ],
     "varies": [
      "bl S"
     ],
     "members": [
-     "sub_08015568",
-     "sub_0803B4DC",
-     "sub_08072BBC"
+     "sub_0803BAFC",
+     "sub_0803BB14",
+     "sub_0803BB2C"
+    ]
+   },
+   {
+    "id": "F083",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 8,
+    "sizes": [
+     24
+    ],
+    "representative": "sub_0803BDF8",
+    "exemplar_src": null,
+    "addr_span": [
+     "0x0803BDF8",
+     "0x0803BE28"
+    ],
+    "varies": [
+     "movs r0,#"
+    ],
+    "members": [
+     "sub_0803BDF8",
+     "sub_0803BE10",
+     "sub_0803BE28"
+    ]
+   },
+   {
+    "id": "F086",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 6,
+    "sizes": [
+     16
+    ],
+    "representative": "sub_0804C488",
+    "exemplar_src": null,
+    "addr_span": [
+     "0x0804C488",
+     "0x08053660"
+    ],
+    "varies": [
+     "bl S"
+    ],
+    "members": [
+     "sub_0804C488",
+     "sub_0804C498",
+     "sub_08053660"
+    ]
+   },
+   {
+    "id": "F087",
+    "n_members": 3,
+    "n_unmatched": 3,
+    "n_insns": 20,
+    "sizes": [
+     52
+    ],
+    "representative": "sub_0804D25C",
+    "exemplar_src": null,
+    "addr_span": [
+     "0x0804D25C",
+     "0x0804E100"
+    ],
+    "varies": [
+     "lsls r2,r2,#",
+     "lsls r2,r2,#"
+    ],
+    "members": [
+     "sub_0804D25C",
+     "sub_0804D6C8",
+     "sub_0804E100"
     ]
    }
   ],
@@ -6338,15 +6328,15 @@
   {
    "id": "F035",
    "n_members": 5,
-   "n_unmatched": 5,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 5,
    "n_insns": 7,
    "sizes": [
     20
    ],
    "representative": "sub_0803A42C",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0803A42C.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -6400,35 +6390,35 @@
      "addr": "0x0803A42C",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078790",
      "addr": "0x08078790",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080787A4",
      "addr": "0x080787A4",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080787EC",
      "addr": "0x080787EC",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08078834",
      "addr": "0x08078834",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -7242,15 +7232,15 @@
   {
    "id": "F046",
    "n_members": 4,
-   "n_unmatched": 4,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 4,
    "n_insns": 19,
    "sizes": [
     48
    ],
    "representative": "sub_0802C6CC",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0802C6CC.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -7291,28 +7281,28 @@
      "addr": "0x0802C6CC",
      "size": 48,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802C6FC",
      "addr": "0x0802C6FC",
      "size": 48,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802C72C",
      "addr": "0x0802C72C",
      "size": 48,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0802C75C",
      "addr": "0x0802C75C",
      "size": 48,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -7469,15 +7459,15 @@
   {
    "id": "F049",
    "n_members": 4,
-   "n_unmatched": 4,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 4,
    "n_insns": 47,
    "sizes": [
     112
    ],
    "representative": "sub_080430B0",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_080430B0.c",
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "ldr r7,L",
@@ -7568,28 +7558,28 @@
      "addr": "0x080430B0",
      "size": 112,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08043120",
      "addr": "0x08043120",
      "size": 112,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08043190",
      "addr": "0x08043190",
      "size": 112,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08043200",
      "addr": "0x08043200",
      "size": 112,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -7990,15 +7980,15 @@
   {
    "id": "F055",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 7,
    "sizes": [
     20
    ],
    "representative": "sub_08004824",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08004824.c",
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -8046,36 +8036,36 @@
      "addr": "0x08004824",
      "size": 20,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0804B3CC",
      "addr": "0x0804B3CC",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0804C0E8",
      "addr": "0x0804C0E8",
      "size": 20,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F056",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 6,
    "sizes": [
     16
    ],
    "representative": "sub_0800483C",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0800483C.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -8122,36 +8112,36 @@
      "addr": "0x0800483C",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B890",
      "addr": "0x0803B890",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0806C78C",
      "addr": "0x0806C78C",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F057",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 26,
    "sizes": [
     64
    ],
    "representative": "sub_08004EDC",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08004EDC.c",
    "shape": [
     "push {r4,lr}",
     "lsls r2,r2,#",
@@ -8208,36 +8198,36 @@
      "addr": "0x08004EDC",
      "size": 64,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08004F1C",
      "addr": "0x08004F1C",
      "size": 64,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08004F5C",
      "addr": "0x08004F5C",
      "size": 64,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F058",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 5,
    "sizes": [
     12
    ],
    "representative": "sub_0800553C",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0800553C.c",
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -8263,36 +8253,36 @@
      "addr": "0x0800553C",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08005548",
      "addr": "0x08005548",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08005554",
      "addr": "0x08005554",
      "size": 12,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F059",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 45,
    "sizes": [
     124
    ],
    "representative": "sub_080055B8",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_080055B8.c",
    "shape": [
     "push {r4,lr}",
     "sub sp,#",
@@ -8368,36 +8358,36 @@
      "addr": "0x080055B8",
      "size": 124,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08005634",
      "addr": "0x08005634",
      "size": 124,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_080056B0",
      "addr": "0x080056B0",
      "size": 124,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F060",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 7,
    "sizes": [
     24
    ],
    "representative": "sub_080059E4",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_080059E4.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -8455,36 +8445,36 @@
      "addr": "0x080059E4",
      "size": 24,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803BCA0",
      "addr": "0x0803BCA0",
      "size": 24,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803BCB8",
      "addr": "0x0803BCB8",
      "size": 24,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F061",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 40,
    "sizes": [
     92
    ],
    "representative": "sub_08008CB8",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08008CB8.c",
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "adds r5,r0,#",
@@ -8575,36 +8565,36 @@
      "addr": "0x08008CB8",
      "size": 92,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08008D14",
      "addr": "0x08008D14",
      "size": 92,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0800B5C0",
      "addr": "0x0800B5C0",
      "size": 92,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F062",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 8,
    "sizes": [
     20
    ],
    "representative": "sub_0801153C",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0801153C.c",
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -8643,36 +8633,36 @@
      "addr": "0x0801153C",
      "size": 20,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08086058",
      "addr": "0x08086058",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08087B60",
      "addr": "0x08087B60",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
   {
    "id": "F063",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 8,
    "sizes": [
     28
    ],
    "representative": "sub_080116E8",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_080116E8.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -8741,21 +8731,21 @@
      "addr": "0x080116E8",
      "size": 28,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0801EFD8",
      "addr": "0x0801EFD8",
      "size": 28,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803A174",
      "addr": "0x0803A174",
      "size": 28,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
@@ -8882,15 +8872,15 @@
   {
    "id": "F066",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 6,
    "sizes": [
     16
    ],
    "representative": "sub_08015568",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_08015568.c",
    "shape": [
     "push {lr}",
     "lsls r0,r0,#",
@@ -8917,21 +8907,21 @@
      "addr": "0x08015568",
      "size": 16,
      "src": "code.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0803B4DC",
      "addr": "0x0803B4DC",
      "size": 16,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_08072BBC",
      "addr": "0x08072BBC",
      "size": 16,
      "src": "code-0806CFC8.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },
