@@ -450,7 +450,17 @@ struct Unk02029BA8 /* 0x20 */
  */
 struct Unk0202FDFC /* >= 0x3e */
 {
-    /* 0x00 */ u8 filler_00[0x10];
+    /* 0x00 */ s16 unk00;      /* wave 19: a CAMERA ORIGIN pair. sub_080748A0
+                                * subtracts them from a proc's own s16 +0x2c and
+                                * +0x2e to get the two PutSprite coordinates, so
+                                * they are the scroll offset of the view this
+                                * struct describes. Both `ldrsh` off a zero index
+                                * register, which is what pins them as SIGNED
+                                * halfwords at 0 and 2 rather than part of a
+                                * wider field -- an unsigned pair would have been
+                                * `ldrh [.,#0]` / `ldrh [.,#2]` with no index. */
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ u8 filler_04[0x0c];
     /* 0x10 */ u8 unk10;
     /* 0x11 */ u8 filler_11[0x01];
     /* 0x12 */ u8 unk12[0x2a];
@@ -837,7 +847,17 @@ struct Unk08090CD8
  */
 struct Unk08499594 /* 0x0c */
 {
-    /* 0x00 */ u8 unk00;
+    /* 0x00 */ u8 unk00;      /* the unit-type id, and it is UNSIGNED on its own
+                               * evidence rather than only by the
+                               * gUnknown_085D5ABC[unk00] subscript: sub_0805CC88
+                               * filters on `(u8)(unk00 - 0x10) <= 1`
+                               * (`subs #0x10; lsls #0x18; lsrs #0x18; cmp #1;
+                               * bhi`) -- a u8 truncation of the difference and
+                               * an unsigned compare, which is how a two-value
+                               * id range is spelled with one branch. 0 is the
+                               * "empty slot" sentinel every builder tests
+                               * first, so the ids 0x10 and 0x11 are a pair of
+                               * adjacent types. */
     /* 0x01 */ u8 unk01;      /* a flag byte; the 0x0805Cxxx list builders skip
                                * an entry whose bit 0 is set (`ldrb [.,#1];
                                * movs #1; ands`). Plain mask, not a bitfield --
@@ -1359,10 +1379,14 @@ struct Unk085D5ABC /* 0x5c */
                           * are u8-context (a subscript and a `cmp #0`), so a
                           * signed object would be byte-identical here. */
     /* 0x19 */ u8 filler_19[0x02];
-    /* 0x1b */ u8 unk1b; /* a small class tag, 1..5: the 0x0805Cxxx list
+    /* 0x1b */ u8 unk1b; /* a small class tag, 1..6: the 0x0805Cxxx list
                           * builders each keep the units whose type's unk1b
                           * equals one fixed constant (`ldrb [.,#0x1b];
-                          * cmp #N`). */
+                          * cmp #N`). Wave 19 closed the last three builders
+                          * and widens the observed range from 1..5 to 1..6 --
+                          * the twelve that use this test span
+                          * {1,1,2,2,2,3,4,4,5,6}, so 6 is real and the range
+                          * is still a floor, not an extent. */
     /* 0x1c */ u8 filler_1c[0x02];
     /* 0x1e */ u8 unk1e[2][0x1a];
     /* 0x52 */ u8 filler_52[0x0a];
@@ -3328,7 +3352,7 @@ extern s16 gUnknown_085D6C94[][6][2];
  * sub_08039544, which copies bytes until the first zero. Left non-const because
  * sub_08039544 is not prototyped yet and takes it as a plain u8 *. */
 /* NOT GLOBALS -- 0x0816D9E0-0x0816DA37 is agbcc's own .rodata address-constant
- * pool, thirteen consecutive PAIRS, one pair per list-builder function at
+ * pool, ELEVEN consecutive PAIRS, one pair per LOOPING list-builder function at
  * 0x0805CA60-0x0805D1F0, in address order. Every even slot holds 0x030046B0
  * and every odd slot 0x030045F0, i.e. &gUnknown_030046B0 and
  * gUnknown_030045F0 -- checked against the ROM image. Do NOT declare these as
@@ -3337,7 +3361,29 @@ extern s16 gUnknown_085D6C94[][6][2];
  * and -fforce-addr synthesised the pair because the address is live across the
  * builder's loop. See "The .rodata address-constant reroute" in
  * docs/agbcc-codegen.md; sub_0805CDF0/sub_0805CE20, the two builders with no
- * loop, have no pair, which is what pins the rule. */
+ * loop, have no pair, which is what pins the rule.
+ *   Wave 19 closed the last four builders (sub_0805CB1C, sub_0805CC88,
+ * sub_0805CF0C, sub_0805D1F0) and re-measured the whole block. Two corrections
+ * to what this note said before, both from the ROM rather than from inference:
+ *   - It is ELEVEN pairs, not thirteen. 0x0816DA38-0x0816D9E0 = 0x58 = 22 words,
+ *     and there are thirteen builders of which two do not loop. The old
+ *     "thirteen pairs" contradicted this note's own last sentence.
+ *   - The pair-to-function mapping was confirmed rather than assumed, by
+ *     grepping each builder's body for its own pool symbols. It is strict
+ *     address order with the two loopless builders SKIPPED and no hole left
+ *     behind: CA60 D9E0, CB1C D9E8, CBCC D9F0, CC88 D9F8, CD34 DA00,
+ *     (CDF0 and CE20 none), CE50 DA08, CF0C DA10, CFBC DA18, D078 DA20,
+ *     D134 DA28, D1F0 DA30. That is the "slot order IS function order" rule in
+ *     docs/agbcc-codegen.md holding across an absent entry, which is the case
+ *     that rule had not been tested on.
+ * All 22 words re-dereferenced against baserom.gba: 0x030046B0 then 0x030045F0,
+ * eleven times, no exception. All thirteen builders are now matched, so the
+ * block is fully accounted for and nothing in it is a global. Note that
+ * data/families.json's F089 `varies` lists six DIFFERENT pool symbols for three
+ * functions reading two globals; that entry is correct about the .text
+ * literal-pool contents and misleading about the source, and it is the worked
+ * instance of the "several pool words in a run can hold the SAME address"
+ * rule. */
 /* 0x0816E164 is another slot of the same block and holds the same value,
  * 0x08580934 -- checked against the ROM image, not inferred. sub_08066D30 is
  * sub_0806DDF4's twin over it, down to the loop bound and the +0x46 flag, so
@@ -4430,6 +4476,50 @@ extern u8 gUnknown_085826E0[];
 extern u8 gUnknown_08582C7C[];
 extern struct Unk08582764 gUnknown_08582764[];
 
+/* The four saved-state words sub_0806ED7C copies into its proc, and the script
+ * it starts afterwards. 0806ED7C is the resume twin of 0806EB5C: where EB5C
+ * hard-codes `proc->unk30 = 1` and clears the halfword at 0202F2D8, ED7C loads
+ * the same four proc fields out of this run of globals, which sit two bytes
+ * apart in address order and match the fields' widths exactly:
+ *
+ *   0202F2CC  ldr  -> proc->unk2c   also the guard for the trailing Proc_Start
+ *   0202F2D0  ldr  -> proc->unk30   and sub_0806F000's first argument
+ *   0202F2D4  ldrh -> proc->unk34
+ *   0202F2D6  ldrh -> proc->unk36
+ *
+ * Widths come from the load instruction and are corroborated by the proc
+ * fields they feed, which sub_0806E5CC (u16 first parameter) reads back. The
+ * two word ones are `u32` rather than a pointer type on the weakest-type rule:
+ * 0202F2CC is only ever compared against zero and 0202F2D0 is only masked with
+ * 1 and stored, so nothing dereferences either. 0202F2D8, declared above, is
+ * the neighbouring halfword EB5C zeroes and ED7C leaves alone -- so this run is
+ * 0202F2CC..0202F2D9 and nothing yet reaches 0202F2D2 or 0202F2DA. */
+/* sub_0806C52C's two parallel graphics sets -- one per arm of a single
+ * `if (sub_0803866C())`. The two arms are the same five calls with five
+ * different symbols each, which is what fixes the types: the 081A2xxx/081A3Dxx
+ * pair in each arm goes to ApplyPaletteExt so `u16 []`, the other three go to
+ * Decompress(u8 *, void *) so `u8 []`, and none can be `const` because neither
+ * prototype takes one (the -Werror reason recorded on the 0817Dxxxx group).
+ * Sizes are unknown -- only the bare symbol is ever passed. The first
+ * ApplyPaletteExt in each arm is (0, 0x200), i.e. ApplyPalettes(src, 0, 16), so
+ * those two are at least 16 palettes; the second is ApplyPalette(src, 16). */
+extern u16 gUnknown_081A21B4[];
+extern u16 gUnknown_081A3D64[];
+extern u8 gUnknown_0819C454[];
+extern u8 gUnknown_081A1C50[];
+extern u8 gUnknown_081A31C4[];
+extern u16 gUnknown_0819C254[];
+extern u16 gUnknown_081A3D44[];
+extern u8 gUnknown_08195318[];
+extern u8 gUnknown_0819BCF0[];
+extern u8 gUnknown_081A2A04[];
+
+extern u32 gUnknown_0202F2CC;
+extern u32 gUnknown_0202F2D0;
+extern u16 gUnknown_0202F2D4;
+extern u16 gUnknown_0202F2D6;
+extern const struct ProcCmd gUnknown_08582C5C[];
+
 /* sub_0806BB08's screen blobs (parked near-miss, 94.2% at exact size, so the
  * types below are as good as the ones above it -- only one CSE decision on the
  * constant 0 separates that candidate from the ROM). 081951F4/08195214 are
@@ -4515,10 +4605,24 @@ extern u8 *gUnknown_03004784;
 /* Three more agbcc `.LC` constant-pool words, NOT globals -- same species as
  * gUnknown_08090D88 above, found in the 0x08136050-0x081360E0 block. They hold
  * &gUnknown_03001FBC, &gUnknown_0300451C and &gUnknown_0300453C respectively.
- * Use them the way gUnknown_08090D88 is used: bind `&gUnknown_081360Ax` to a
- * local and read `**local`. Spelling the underlying global directly compiles to
- * the right BYTES but the wrong relocation, because agbcc then builds its own
- * unplaceable pool word. sub_0804F18C is the worked case. */
+ *
+ * CORRECTION (wave 19, W19-B). This entry used to say "use them the way
+ * gUnknown_08090D88 is used: bind `&gUnknown_081360Ax` to a local and read
+ * `**local`. Spelling the underlying global directly compiles to the right
+ * BYTES but the wrong relocation, because agbcc then builds its own unplaceable
+ * pool word." Both halves are now wrong. The word is placeable since wave 18
+ * (tools/split_rodata.py), and naming the globals directly DOES make agbcc emit
+ * all three words, in the ROM's own slot order -- but only once the function's
+ * two-bit guard is spelled so that it does not fold into one test. With the
+ * `&&` spelling agbcc emits no `.rodata` at all and the reroute is invisible;
+ * with the nested-`if` spelling the three words appear. So the reachability of
+ * a `.LC` word is decided by the CANDIDATE's control flow, not by whether the
+ * object behind it is a scalar -- see docs/agbcc-codegen.md. sub_0804F18C is
+ * still the worked case and is still open, but on register allocation now, and
+ * its `c_local` draft is kept only as _clocal_nearmiss.c.
+ *
+ * These three declarations are therefore unused by any draft and are kept only
+ * as documentation of what lives at those addresses. */
 extern s16 *const gUnknown_081360A0;
 extern u16 *const gUnknown_081360A4;
 extern u16 *const gUnknown_081360A8;
@@ -4532,6 +4636,14 @@ extern u16 *const gUnknown_081360A8;
  * and nothing distinguishes them here. Was `extern u16 gUnknown_0300454C;`;
  * no promoted file names it, so nothing needed re-verifying. */
 extern u16 gUnknown_0300454C[];
+/* A ROM halfword per side, indexed [gUnknown_0300453C]. Two readers,
+ * sub_0804F658 and sub_0804E584, and both do nothing but pass it as
+ * sub_0804BCB8's third argument. `u16 []` rather than `s16 []`: the `ldrsh` at
+ * both sites is the conversion to that parameter's narrow SIGNED type, not the
+ * object's own width -- combine folds sign_extend(truncate(zero_extend(mem:HI)))
+ * into one sign-extending load, so `ldrsh` says nothing about the table here.
+ * Extent unproved; only [gUnknown_0300453C] is ever reached. */
+extern u16 gUnknown_0855214C[];
 /* ROM u16 pairs indexed [gUnknown_0300453C][gUnknown_0300450C] -- `i * 4 + j * 2`
  * off the symbol, the same [2]-wide row shape as gUnknown_0855239C. The value is
  * an x offset: sub_0804F18C sign-extends it and adds it to a sprite x. */
@@ -4562,5 +4674,62 @@ extern u8 gUnknown_08499C2C[];
 extern u8 gUnknown_08499C40[];
 extern u8 gUnknown_08499C54[];
 extern u8 gUnknown_08499C68[];
+
+/* The 0x08083 sprite-builder triple (sub_080831FC, sub_08083484, sub_08083738)
+ * and their caller sub_080829B0 all key off this SIX-byte table, and the extent
+ * is proved rather than guessed: the ROM bytes are 00 05 02 04 03 01, a
+ * permutation of 0..5, and every reader indexes it with `DivRem(x, 6)`, so a
+ * seventh element could never be reached. What sits at +6 is a DIFFERENT table
+ * -- six s16 y-offsets (-0x80, -0x28, -0x08, 0x10, -0x08, -0x28), which
+ * sub_080829B0 names separately as gUnknown_08616972 -- so the boundary is a
+ * type change, not an inference from the index.
+ *   Left non-const: the three builders each read it four or five times with a
+ * `bl DivRem` between every pair of reads and the ROM re-`ldrb`s every time,
+ * which by the const-across-a-call tell in docs/agbcc-codegen.md is what an
+ * unqualified declaration produces. The reads have different indices in
+ * principle, so this is corroborating rather than decisive -- flagged. */
+extern u8 gUnknown_0861696C[6];
+/* Two OAM sprite blobs, both typed only by the `u16 *` fourth parameter of
+ * PutSprite / PutSpriteExt, the same model as gUnknown_0849B6C8 and
+ * gUnknown_08499E10. Each is an OBJ count followed by that many (y, x, tile)
+ * triples: gUnknown_08615C04 begins 0x0002 and gUnknown_0848B6CE begins 0x0001,
+ * which is why the count is not part of the type. Neither is const -- those
+ * parameters are not. */
+extern u16 gUnknown_08615C04[];
+extern u16 gUnknown_0848B6CE[];
+/* Same OAM-blob model again, and the same single piece of evidence: it reaches
+ * nothing but PutSpriteExt's `u16 *` fourth parameter (sub_0807567C and one
+ * neighbour, fanin 2). ROM begins 0x0001 followed by one (y, x, tile) triple. */
+extern u16 gUnknown_086143D8[];
+/* Another of the same OAM blobs, fanin 13, at the head of the 0x0848B6xx run
+ * that gUnknown_0848B6CE also belongs to: ROM is 0x0001 plus one triple, i.e.
+ * 8 bytes, and a second blob starts at +8. Only ever a PutSpriteExt `u16 *`. */
+extern u16 gUnknown_0848B6A0[];
+/* A TWELVE-byte u8 table, {2,3,4,5,2,3,4,5,2,3,4,5}, read as
+ * `gUnknown_08615E40[proc->unk52]` with a plain `ldrb` by sub_08079EA4 and used
+ * as `(entry + 4) << 12` in a PutSpriteExt OAM word -- so the entries are OBJ
+ * palette or tile-bank indices, and the repeat of period 4 is what the caller's
+ * +0x52 counter cycles through. The extent is proved by a type change rather
+ * than by the index: +0x0c starts a run of address-shaped words
+ * (0x081D9484, 0x081DA8D0, 0x081DBEC8), which cannot be part of a byte table.
+ *   NOTE for tools/lc_screen.py: this symbol is reported as a `.LC` pool word
+ * (fanin 1, density 4) and it is NOT one. The use is a direct base-plus-index
+ * `ldrb`, not the double indirection a rerouted address constant produces, and
+ * the ROM bytes are 02 03 04 05..., not an address. Dereference before
+ * believing the classification -- the screen splits on fan-in and position in
+ * a .rodata run, and a genuine low-fan-in ROM table inside such a run looks
+ * identical to it. */
+extern u8 gUnknown_08615E40[12];
+/* Two more OAM blobs, this pair on PutSprite's `u16 *` rather than
+ * PutSpriteExt's, drawn one after the other by sub_080748A0 through two
+ * different OBJ affine slots. Each is 0x0001 plus one (y, x, tile) triple, i.e.
+ * exactly 8 bytes, which the 8-byte gap between the two addresses confirms.
+ *   NOTE for tools/lc_screen.py: BOTH are reported as `.LC` pool words and
+ * neither is one -- same misclassification as gUnknown_08615E40 above, and the
+ * spacing should have been the giveaway, since a -fforce-addr pool pair is 4
+ * bytes apart and these are 8. Three of the four `.LC` words the screen
+ * attributed to this batch were ordinary ROM tables. */
+extern u16 gUnknown_081CC4C4[];
+extern u16 gUnknown_081CC4CC[];
 
 #endif // UNKNOWN_GLOBALS_H

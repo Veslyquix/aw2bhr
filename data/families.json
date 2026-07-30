@@ -36,8 +36,8 @@
  "counts": {
   "families": 98,
   "members": 698,
-  "unmatched_members": 3,
-  "entirely_unmatched_families": 4,
+  "unmatched_members": 0,
+  "entirely_unmatched_families": 3,
   "fuzzy_clusters": 20
  },
  "batching_plan": {
@@ -65,32 +65,6 @@
      "sub_08071890",
      "sub_080718BC",
      "sub_080718D0"
-    ]
-   },
-   {
-    "id": "F089",
-    "n_members": 3,
-    "n_unmatched": 3,
-    "n_insns": 72,
-    "sizes": [
-     176
-    ],
-    "representative": "sub_0805CB1C",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x0805CB1C",
-     "0x0805D1F0"
-    ],
-    "varies": [
-     "ldr r2,L",
-     "ldr r1,L",
-     "cmp r0,#",
-     "ldr r0,L"
-    ],
-    "members": [
-     "sub_0805CB1C",
-     "sub_0805CF0C",
-     "sub_0805D1F0"
     ]
    },
    {
@@ -10302,15 +10276,15 @@
   {
    "id": "F089",
    "n_members": 3,
-   "n_unmatched": 3,
-   "n_matched": 0,
+   "n_unmatched": 0,
+   "n_matched": 3,
    "n_insns": 72,
    "sizes": [
     176
    ],
    "representative": "sub_0805CB1C",
-   "exemplar_is_matched": false,
-   "exemplar_src": null,
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0805CB1C.c",
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "mov r7,sb",
@@ -10433,21 +10407,21 @@
      "addr": "0x0805CB1C",
      "size": 176,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0805CF0C",
      "addr": "0x0805CF0C",
      "size": 176,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     },
     {
      "name": "sub_0805D1F0",
      "addr": "0x0805D1F0",
      "size": 176,
      "src": "code-0801D390.s",
-     "status": "asm"
+     "status": "matched"
     }
    ]
   },

@@ -376,6 +376,40 @@ u8 sub_0803CAF0(u32);
  * without touching r0, so the width is unconstrained; `u32` matches the rest of
  * the family. The `u8` return is pinned by the same `lsls #24` evidence. */
 u8 sub_0803CA70(u32);
+/* Three one-line readers of gUnknown_03003F30's bytes +1, +3 and +5, already
+ * promoted as `u8` in src/decomp/c_0803BC7C.c and declared here for the first
+ * time in wave 19 because the 0x08083 sprite builders need them. The `u8` is
+ * corroborated on the CALLER side by the same evidence as the family above:
+ * sub_080831FC / sub_08083484 / sub_08083738 each narrow the result with a bare
+ * `lsls r0, r0, #0x18` before `cmp r0, #0`, which an `int` return would not
+ * emit. Declared to match the promoted definitions, not against them. */
+/* Two more of the 0x08079xxx proc helpers, both void and both taking TWO
+ * arguments with the FIRST unused in the body: sub_080795A8 opens
+ * `adds r4, r1, #0` and then writes r0 before reading it, so the proc pointer
+ * its caller leaves sitting in r0 costs nothing and is not evidence of arity --
+ * the `movs r1, #0` is. sub_08079EA4 is the caller for both.
+ *
+ * sub_08079B38 IS NOT A REAL SYMBOL YET, and nothing may be promoted against it
+ * until it is. 0x08079B38 is a genuine function entry that tools/split_asm.py
+ * merged into sub_08079B04 -- see "bl to a mid-function local label is NOT a
+ * tell" in docs/agbcc-codegen.md -- so `asm/` defines it only as the LOCAL label
+ * `_08079B38` and no global symbol exists at that address in either build. A C
+ * caller therefore cannot link against it. Declared here so the blocker is
+ * recorded next to the thing that trips over it; see data/parked.json for
+ * sub_08079EA4. */
+/* sub_08072B54 copies BOTH arguments to callee-saved registers and then narrows
+ * the first with `lsls #16; asrs #16` before handing it to sub_0803B4DC -- which
+ * is copy-then-narrow, i.e. an `int` parameter with a cast at a use, not an s16
+ * parameter. The second is forwarded unnarrowed. sub_08075AC4 likewise takes two
+ * word arguments; its only caller passes an `ldrsh` member and a literal, which
+ * constrains neither width, so both stay `int`. */
+void sub_08072B54(int, int);
+void sub_08075AC4(int, int);
+void sub_080795A8(ProcPtr, int);
+void sub_08079B38(ProcPtr, int);
+u8 sub_0803BC7C(void);
+u8 sub_0803BC88(void);
+u8 sub_0803BC94(void);
 int sub_08044374(int);
 
 bool8 sub_0803B18C(void);
@@ -529,6 +563,7 @@ void sub_0805DCD4(void);
 void sub_0805DFB8(void);
 void sub_0805DFE8(void);
 void sub_0805DFF4(void);
+void sub_0805E160(void);
 
 /* Sorts the gUnknown_030045F0 id list the 0x0805Cxxx builders have just filled.
  * Its argument arrives in r0, is spilled whole with `str r0,[sp]` and only ever
@@ -1110,7 +1145,18 @@ void sub_0803BD60(void);
  * `gUnknown_08555450[a2][a1]`, a u32 its callers use as the base of an array
  * of halfword pairs. */
 void sub_080155C0(s16, s16, s16);
-void sub_0804BCB8(u16, u16, u16, u16);
+/* All four parameters are narrow -- the prologue is four `lsls #0x10; lsrs
+ * #0x10` pairs in argument order -- but PROMOTE_MODE zero-extends every
+ * sub-word parameter regardless of signedness, so the prologue cannot separate
+ * u16 from s16 and the CALLERS have to. Argument 3 is SIGNED, from two of them:
+ * sub_0804F658 and sub_0804E584 both pass gUnknown_0855214C[side] and both emit
+ * `movs rN, #0; ldrsh rD, [rB, rN]` -- a u16 parameter rewrites an `ldrsh` into
+ * an `ldrh` and needs no zero register, so the register-offset form is only
+ * reachable with a narrow signed parameter. The other three have no informative
+ * call site yet (sub_0804D290, sub_0804DCA8 and sub_0804F18C all pass literals
+ * for 3 and 4), so they stay u16 as the weaker choice. Retyping 3 is
+ * byte-neutral for the two promoted callers, which pass a literal 0. */
+void sub_0804BCB8(u16, u16, s16, u16);
 u32 sub_08057D44(int, int);
 /* Two more sub_08015928 continuations, in exactly the position sub_0804DA40 and
  * sub_0804E4CC occupy above: sub_0804C6DC and its twin sub_0804CC38 hand each
@@ -1488,7 +1534,21 @@ void sub_08011A20(u16, u16, int);
  * caller's second argument (the gUnknown_08580FCC entry noted in
  * unknown-globals.h) and its first argument is a literal 0 at the one call
  * site. sub_080718F8's first argument is a byte cursor into the
- * gUnknown_08499584 buffer, its second a ROM blob and its third a literal 0. */
+ * gUnknown_08499584 buffer, its second a ROM blob and its third a literal 0.
+ *
+ * NOTE, so nobody tries to "fix" this: sub_080718F8 is not a function. It is a
+ * linker THUMB->ARM interworking veneer for the ARM routine sub_0800043C -- see
+ * data/asm-resident.json, which records both halves. The original source called
+ * sub_0800043C and the linker synthesised the veneer; we cannot, because the
+ * split already owns the veneer's four bytes as its own unit, so C has to name
+ * the veneer and let the `bl` land there. This is a spelling forced by the
+ * split, exactly like the `&gUnknown_XXXXXXXX` pool-word case in
+ * docs/agbcc-codegen.md, and it is NOT a claim about the original. Four matched
+ * drafts now rely on it -- sub_08068AC4 (promoted) plus sub_0806BB08,
+ * sub_0806EB5C and sub_0806ED7C -- so if sub_0800043C is ever promoted, every
+ * one of them has to be re-pointed at it and re-verified. The declared
+ * types describe sub_0800043C's parameters, since the veneer has none of its
+ * own. */
 void sub_0806775C(int, ProcPtr);
 void sub_080718F8(void *, u8 *, int);
 
@@ -2250,5 +2310,21 @@ void sub_080157F4(s16, s16);
  * sub_08051BEC's only call site, where the first argument arrives via `ldrsh`
  * and the second is the literal 1. */
 void sub_08015504(int, int);
+
+/* sub_0803B3C8 has been PROMOTED (src/decomp/c_0803B3C8.c) since wave 9 and was
+ * never declared here, because nothing had called it across a file boundary
+ * yet. sub_0806C52C is the first, and the failure reads as a missing function
+ * rather than a missing line -- see the wave-14 note in
+ * docs/agbcc-codegen.md. Types copied from the definition, not re-derived. */
+void sub_0803B3C8(void);
+
+/* Returns 1 when gUnknown_03003FC0's byte 1 is 1 and sub_0803CBD8(0x60) is
+ * non-zero, else 0. `int`, and this one is settled by population rather than by
+ * the body: 20 call sites across asm/ and not one narrows the result -- 18 are
+ * a bare `cmp r0, #0` (or a copy then a compare) and TWO use it directly as a
+ * scaled index (`lsls r0, r0, #2` before an `ldr`), which is the value being
+ * KEPT at full width and is the decisive half of that census. A `u8`/`bool8`
+ * return would have put `lsls r0, #0x18` after every one of the 20 `bl`s. */
+int sub_0803866C(void);
 
 #endif // UNKNOWN_FUNCS_H

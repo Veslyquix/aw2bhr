@@ -244,9 +244,19 @@ extern volatile u32 gUnknown_03003020[4];
 extern union BgCntBuf gUnknown_03002B6C;
 // Both WinCnt shadows are written at BYTE 0, i.e. through the win0_* group:
 // sub_08011300 clears win0_enable_bg0..obj on 030030A4 and sets
-// win0_enable_bg0..blend on 030030DC in the same breath. Nothing yet reaches
-// bytes 1-3 of either, so which hardware register each shadow feeds (WININ vs
-// WINOUT) is still unproved -- only the offsets are.
+// win0_enable_bg0..blend on 030030DC in the same breath.
+//
+// BYTE 1 -- the win1_* group -- is now reached too, and by both shadows in one
+// function: sub_0806ED7C (wave 19) clears win1_enable_bg0/bg1 and sets
+// bg2/bg3/obj on 030030A4, writes the win0_* group of 030030DC in between, and
+// then sets win1_enable_blend on each. Two things fall out. The offsets and the
+// 1-bit field widths are confirmed at byte 1 for the first time; the six masks
+// read straight off the `mov #N; neg` / `orr` pattern in source order, and the
+// A4 store SINKS past the DC store because its byte-1 group is written on both
+// sides of the DC group and agbcc merges the two writes into one
+// read-modify-write. Which hardware register each shadow feeds (WININ vs
+// WINOUT) is STILL unproved -- nothing reaches bytes 2-3 of either, and no
+// function has been matched that pushes either shadow to hardware.
 extern union WinCntBuf gUnknown_030030A4;
 extern union BgCntBuf gUnknown_030030B4;
 /* The BG3 shadow -- see the note left in its place in unknown-globals.h. */
