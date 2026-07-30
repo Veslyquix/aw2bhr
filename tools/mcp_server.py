@@ -191,12 +191,18 @@ def list_functions(
 
 
 @mcp.tool()
-def get_function(name_or_addr: str, include_asm: bool = True) -> dict:
-    """Full detail for one function: metadata, assembly, callers/callees, globals.
+def get_function(name_or_addr: str, include_asm: bool = False) -> dict:
+    """Detail for one function: metadata, callers/callees, globals -- and the
+    assembly only on request.
 
-    This is the primary tool for a matching attempt -- it returns everything
-    needed to draft C for the function in a single call. Accepts a name
-    ('sub_0801D390') or an address ('0x0801D390').
+    Accepts a name ('sub_0801D390') or an address ('0x0801D390').
+
+    include_asm defaults to FALSE (changed in wave 20): the common first use is
+    a batch survey, and an assembly listing delivered during a survey sits in
+    the agent's context for its whole lifetime and is then delivered AGAIN by
+    start_function's target_asm when the matching attempt begins. Pass
+    include_asm=True only when this call IS the read for the matching attempt
+    and start_function will not be used.
     """
     rec = _resolve(name_or_addr)
     if rec is None:
