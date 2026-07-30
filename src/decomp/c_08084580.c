@@ -1,0 +1,88 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08084580.
+ * sub_08084580 @ 0x08084580, sub_080845A8 @ 0x080845A8, sub_080845C4 @ 0x080845C4, sub_080845E8 @ 0x080845E8, sub_08084600 @ 0x08084600
+ */
+
+#include "proc.h"
+/* Picks one of eight animation frames for the actor and hands it to
+ * sub_08014668, bracketed by sub_08013C00 / sub_08013AEC. The selector starts as
+ * the phase DivRem(unk52, 6) and is then overridden to 6 or 7 by two independent
+ * state tests, each of which re-reads unk52 -- the third read recomputes the
+ * member ADDRESS (`adds r0, r6, #0; adds r0, #0x52`) where the first two share
+ * it in r4, because it sits after a control-flow merge, which is where CSE's
+ * address equivalence stops. That is automatic; nothing in the source asks for
+ * it.
+ */
+
+struct Unk8084600
+{
+    /* 00 */ STRUCT_PAD(0x00, 0x52);
+    /* 52 */ u16 unk52;
+    /* 54 */ STRUCT_PAD(0x54, 0x66);
+    /* 66 */ s16 unk66;
+};
+
+/* The first call is genuinely peeled out of the loop: the loop counter starts
+ * at 0x10 and the index 0 case has to happen too, so the source runs
+ * sub_08071B0C(0, ...) before the `for (i = 0x10; i <= 0x1d; i++)` rather
+ * than special-casing inside it. Matched off the first probe. */
+
+void sub_08084580(ProcPtr proc)
+{
+    int i;
+
+    sub_08071B0C(0, 0x10, proc);
+
+    for (i = 0x10; i <= 0x1d; i++)
+        sub_08071B0C(i, 0x10, proc);
+}
+
+/* gUnknown_08616AC0 is an array of two-pointer records; see the evidence
+ * comment on it in include/unknown-globals.h. This one takes member 0. */
+
+void sub_080845A8(int i)
+{
+    Decompress(gUnknown_08616AC0[i][0], (void *)0x06013300);
+}
+
+/* Member 1 of the same two-pointer record sub_080845A8 reads member 0 of, and
+ * the destination is per-index: 1 KB of VRAM each, so entry i lands at
+ * 0x06013B00 + i * 0x400. The `adds r0, #4` on the pool word rather than a
+ * displacement in the `ldr` is what the record type buys -- a flat pointer
+ * array indexed `i * 2 + 1` reassociates and is three instructions longer. */
+
+void sub_080845C4(int i)
+{
+    Decompress(gUnknown_08616AC0[i][1], (void *)(0x06013B00 + (i << 0xa)));
+}
+
+void sub_080845E8(void)
+{
+    Decompress(gUnknown_0823D980, (void *)0x06015300);
+}
+
+void sub_08084600(struct Unk8084600 *p)
+{
+    int i;
+
+    sub_08013C00();
+
+    i = DivRem(p->unk52, 6);
+
+    if (sub_0803CBD8(0x28) != 0 && DivRem(p->unk52 + 2, 6) == 2)
+        i = 6;
+
+    if (sub_0803CBD8(0x20) != 0 && DivRem(p->unk52 + 2, 6) == 0)
+        i = 7;
+
+    if (gUnknown_0300591C[1] == 0)
+        sub_08014668(0, 0x12, gUnknown_08499578, gUnknown_08616FA4[i], 0x8000, 0x40);
+    else
+        sub_08014668(0, 0x12, gUnknown_08499578, gUnknown_08616FB4[i * 2 + DivRem(p->unk66, 2)], 0x8000, 0x40);
+
+    sub_08013AEC();
+}

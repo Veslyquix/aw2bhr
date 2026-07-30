@@ -8996,3 +8996,1827 @@ Practical form for wave 20: **batch on `|shared callees| >= ~20 && J >= 0.9` if
 you want functions that fall out by transcription; batch on J = 1.0 with a small
 set only when you are willing to pay one function's exploration for two
 functions' worth of result.** Do not read the two cases as the same bet.
+
+---
+
+## PRE-COMMITTED probe of the |shared|-callee middle: `sub_08083A44` (wave 20, W20-A)
+
+Wave 19 left the `|shared callees|` floor with exactly two calibration points and
+nothing between them:
+
+| pair | J | \|shared\| | outcome |
+|---|---|---|---|
+| `sub_0806EB5C` / `sub_0806ED7C` | 1.000 | 26 | 1 attempt, 644 B, transcribed |
+| `sub_0804F18C` / `sub_0804F658` | 1.000 | 5 | 4 attempts, neither closed |
+
+`sub_08083A44` sits at **|shared| = 10, J = 1.000** against *three* already-matched
+exemplars (`sub_080831FC`, `sub_08083484`, `sub_08083738` — identical callee sets,
+`extra = []`, `missing = []`). It is the cleanest probe of the middle available.
+
+**Written before reading one instruction of `sub_08083A44`.** Inputs allowed:
+`data/functions.json` only — 1,180 bytes, `backward_branches: 5`, callees
+`Div, DivRem, Interpolate, PutSprite, PutSpriteExt, SetObjAffine, sub_0803BC7C,
+sub_0803BC88, sub_0803BC94, sub_0803CBD8`, data refs = the exemplars' set
+(`gSinLut`, `gUnknown_03005968`, `gUnknown_0848B6CE`) PLUS the 0x08082 block's
+table group (`gUnknown_08615C76`, `gUnknown_08615C84`, `gUnknown_0861696C`,
+`gUnknown_08616972`, `gUnknown_08616980`) and ONE pool word, `gUnknown_081D93D4`,
+where each exemplar has two.
+
+**Unit, fixed in advance:** invocations of `python tools/trymatch.py sub_08083A44`
+from first draft to exit 0, counting every invocation. Same unit as the exemplar
+triple, which cost 1 / 6 / 1.
+
+### Prediction: 4 attempts. Bet: TRANSCRIPTION, not shared-residual.
+
+The two wave-19 cases are not two points on one scale — they are two different
+bets, and the discriminator is **whether the exemplar closed**, not the set size:
+
+- The 26-callee case was a transcription bet and it paid because EB5C was
+  *matched*, so there was a finished body to copy.
+- The 5-callee case was a shared-residual bet: F18C never closed, so what F658
+  inherited was a *failure mode*. Every probe was spent twice because neither
+  probe was a success.
+
+All three of `sub_08083A44`'s exemplars are matched and promoted in
+`src/decomp/c_080831FC.c`. There is no residual to inherit. So the only live
+question is **how much of the 1,180 bytes the exemplars cover**, and I predict:
+the four-way phase chain and the affine tail transcribe for free (they are already
+written three times, and wave 19 spent six of its eight runs on ONE expression
+inside them, which is now a recorded rule), while the `backward_branches: 5` loop
+and the five extra table globals are new material the exemplars say nothing about.
+
+That is roughly 600 transcribed bytes and 600 derived bytes. Per the doc's own
+band table the derived half sits in the 512–768 B class, and a loop is *one
+coupled decision* rather than many independent ones — it fails as a whole and
+gives a diff that does not point at itself.
+
+**Predicted: 4.** Not 1 (the loop is not in any exemplar), not 6+ (the expensive
+part of the exemplar family is already solved in writing).
+
+**Three falsifiable side-bets:**
+
+1. **The `|shared|` floor is not the real variable.** If this comes in at 1–2,
+   `|shared| = 10` did not "earn" it — a matched exemplar did, and the rule should
+   be restated as *exemplar STATUS, not overlap size*.
+2. **The single pool word is not a cost.** `gUnknown_081D93D4` should resolve from
+   the honest spelling exactly as the exemplars' six did (wave 18 placement), and
+   contribute zero attempts.
+3. **The residual, if any, lands in the LOOP and not in the transcribed tail.** If
+   an attempt is spent on the affine tail or on a `DivRem` phase expression, the
+   transcription discount is weaker than this section claims.
+
+Actuals are appended below, unedited, including the case where I am wrong.
+
+---
+
+## PRE-COMMITTED: what does SIZE alone cost, with NO globals? `sub_08083EE0` (wave 20, W20-B)
+
+Written before reading past the first 400 lines of the target and before any
+`compile_probe` on it.
+
+**First, a correction to how the band numbers get quoted.** My assignment cited
+them as "258 attempts-per-closed at 280-368B, 278 at 384-512B, 438 and 574 at
+512-768B, 811 above 768B". Those are **bytes per attempt**, not attempts, and the
+direction is the opposite of what "attempts-per-closed" implies: a *higher*
+number means a *cheaper* function. The tables at "The 384-512 band, measured" and
+"The 768-byte-and-up band" are the source. Anyone re-reading this section should
+take the claim as *large functions cost fewer attempts per byte*, not more.
+
+### Why this target is the clean test
+
+Every band measurement so far came from functions that also carried globals, pool
+words and undeclared callees, and the doc's own causal claim (twice, at 384-512
+and at 768+) is that **new type vocabulary, not size, is the entire cost**. Those
+two variables have never been separated, because big functions in this tree
+happen to carry lots of symbols. `sub_08083EE0` separates them:
+
+- 1,636 bytes, which is 2x the top of the highest measured band;
+- `data_refs: []` -- **zero** globals, so zero new global vocabulary;
+- three callees (`DivRem`, `Interpolate`, `sub_0801F34C`), all already declared
+  with settled prototypes, so zero new callee vocabulary;
+- `backward_branches == 0`, so the doc's necessary-but-not-sufficient screen is
+  satisfied and the "N independent decisions" model applies;
+- one struct type, on a single pointer parameter parked in r7, with a candidate
+  exemplar already promoted in the same block (`src/decomp/c_080831FC.c`).
+
+So the only new vocabulary it can possibly force is **one struct layout**, and
+even that may already exist.
+
+### The prediction
+
+**2 `try_match` attempts for `sub_08083EE0` alone**, excluding the six small
+wrappers in the same batch, which are reported separately and are not allowed to
+dilute the number.
+
+Reasoning, and the part that makes this a weaker test than it looks:
+
+1. Extrapolating the size curve: 811 bytes/attempt at 768+, applied to 1,636
+   bytes, predicts **2.0 attempts**.
+2. Applying the vocabulary model instead: 0-2 new types is "one attempt, every
+   time" per the 768+ table, predicting **1 attempt**.
+3. **The two models are one attempt apart, so the count alone cannot separate
+   them.** Pre-committing to that is the honest move -- an agent who predicts 2,
+   measures 2 and declares the size step confirmed has learned nothing. What
+   discriminates is the *shape* of the residual, so I am pre-committing to that
+   too (below), and the count is only the falsification test.
+
+What I expect to actually cost something, none of which is size:
+
+- The address-CSE chain. `adds r0,#0x64` -> `adds r0,#4` (+0x68) -> `subs r0,#0x1c`
+  (+0x4c), parked in `sl`, `[sp,#4]` and `r8`. This is ONE coupled decision that
+  sets source-statement order for the whole body; read wrong, every `ldrsh` is
+  misplaced and the diff will not localise.
+- `sub sp, #8` plus `str rN, [sp]` before each `Interpolate`: the fifth argument
+  is stacked, so the frame is decided by the callee's arity and not by a local.
+- The struct: +0x4e, +0x64, +0x68, +0x4c, +0x66, +0x58 and the write targets
+  +0x2c/+0x30/+0x3c/+0x40. The exemplar pins +0x34/+0x4c/+0x4e/+0x52/+0x60, which
+  overlaps on **+0x4c and +0x4e only**. That is a hypothesis, not a fact, and a
+  byte-neutral wrong type has no oracle -- so I am not counting the exemplar as a
+  vocabulary discount.
+- The bulk is four near-identical `DivRem`/`Interpolate` blocks. **Most of the
+  1,636 bytes is repetition, not distinct decisions**, which is exactly why I
+  expect size to be nearly free here.
+
+### Falsification, stated in advance
+
+- **>= 4 attempts** (i.e. < 410 bytes/attempt, worse than the *512-768* band's
+  438 despite being 3x the size) falsifies "the step is about size" for a
+  globals-free function, and says the earlier bands were measuring the globals
+  and pool words their functions happened to carry.
+- **1-2 attempts** is consistent with the step, but per point 3 above it does
+  **not** confirm size as the cause -- it is equally the vocabulary model's
+  prediction. In that case the tie is broken by the residual: if the attempts I
+  do spend are lost on the **struct layout and the address chain** rather than on
+  anything that scales with byte count, then size was free and the step was never
+  about size.
+- "I could not close it" is a result too, and will be reported with the exact
+  remaining diff and the axes ruled out.
+
+Actuals are appended below, unedited.
+
+### ACTUALS for `sub_08083EE0` (wave 20, W20-B)
+
+**1 `try_match` attempt. 1,636 bytes per attempt.** Predicted 2; the size
+extrapolation said 2.0 and the vocabulary model said 1, and the vocabulary model
+won. Full accounting, and nothing here is padded with the six wrappers in the
+same batch, which are reported separately below:
+
+| | `sub_08083EE0` |
+|---|---|
+| bytes | 1,636 |
+| `try_match` attempts | **1** (match) |
+| probe rounds | 4 |
+| new globals declared | 0 |
+| new callee prototypes | 0 |
+| new struct types | 1 |
+
+The four probe rounds were: one full-function draft; two controlled sweeps of a
+single expression (10 and 11 spellings) for the one residual it had; one
+confirming full-function probe that came back **instruction-for-instruction
+identical, 814 of 814**, before the verdict was spent.
+
+### The answer to the question: the size step is REAL, and it was never about size
+
+**At 1,636 bytes with zero `data_refs`, zero new callee prototypes and one new
+struct, the function cost one attempt.** That is 1,636 bytes per attempt against
+the 768+ band's 811 and the 280-368 band's 258 -- it does not merely sit on the
+cheap side of the step, it is twice as cheap as the cheapest band ever measured.
+So **"large functions are dearer" is refuted a third time**, and the step in the
+band table is not an artefact of the globals those functions carried.
+
+But the honest reading is stronger and more useful than "the step is real":
+
+**Size did not participate in the cost at all, in either direction.** Of the
+1,636 bytes, roughly 1,300 are four near-identical `DivRem`/`Interpolate` blocks
+and their kind-4/kind-1 twins. Transcribing them cost nothing per byte, because
+each is an independent statement whose diff points at itself -- the doc's "N
+independent decisions" claim, at 4x the size it was made at. **The whole cost of
+the function was ONE expression**, and that expression appears at six sites, four
+of them inside the repeated bulk. Had the function been 200 bytes and contained
+that expression once, it would have cost the same one attempt.
+
+So the band table's rising bytes-per-attempt is real but it is measuring the
+wrong variable. What actually happened across all those bands is that **cost is
+roughly constant per DISTINCT EXPRESSION SHAPE, and large functions have a lower
+distinct-shape-per-byte ratio because they repeat themselves.** Bytes per attempt
+rises with size for the same reason lines-of-code per bug does. That subsumes the
+"new type vocabulary" claim at 384-512 and 768+ rather than contradicting it: a
+new struct or a new global IS a distinct shape you have to derive, and the four
+one-attempt matches in the 384-512 table had none.
+
+**The practical rule this replaces the band table with:** do not screen on size
+in either direction, and do not screen on `data_refs` count. Screen on **how many
+distinct expression shapes the listing contains**, which for a straight-line
+function is cheap to eyeball -- read the `bl` sequence and count how many times a
+*different* one appears, not how many times any appears. `sub_08083EE0` has
+roughly eight distinct shapes in 814 instructions and that, not 1,636, is its
+size.
+
+Two caveats, so this is not over-read:
+
+- **n = 1.** It is one function, and the strongest single datapoint in the table,
+  but the band figures behind it are 4-6 functions each.
+- The prediction and the outcome were one attempt apart, exactly as
+  pre-registered, so **the count alone did not discriminate the two models** --
+  the tie was broken by the residual's shape, which was pre-committed above and
+  came out on the "not size" side: the one thing that cost anything was an
+  expression-association rule, which has no size dependence whatsoever.
+
+### The rule that WAS the whole difference: fold moves an additive literal onto the OTHER operand
+
+This is the residual, and it is a general one-token rule that belongs next to
+`* 0x100` vs `<< 8`.
+
+When an additive expression has three parts -- two variable terms and a literal --
+`fold`'s `associate` (via `split_tree`) rewrites it so the literal ends up
+attached to **the operand it was NOT written next to**:
+
+```c
+/* ROM shape: lsls r4,r4,#4 ; subs r0,#0x54 ; subs r4,r4,r0   */
+a * 16 + 0x54 - b       /* -> a * 16 - (b - 0x54)  <- fold's canonical form */
+
+/* NOT the ROM: lsls r4,r4,#4 ; adds r4,#0x54 ; subs r4,r4,r0 */
+a * 16 - (b - 0x54)     /* -> (a * 16 + 0x54) - b */
+```
+
+Identical length, identical register assignment, pure opcode-and-operand diff, so
+there is nothing in the expression to blame. The same holds for `PLUS`:
+`a * 16 + 0x3C + b` emits `adds r0, #0x3c` on `b`, while
+`a * 16 + (b + 0x3C)` emits `adds r4, #0x3c` on the shift.
+
+**Read backwards, this is a source-order readout and a good one:** the constant
+lands in the ROM on the operand the source did NOT write it beside. So
+`subs r0, #0x54` applied to the second operand means the source wrote
+`<first> + 0x54 - <second>`. Every additive triple in a listing carries this
+signal for free.
+
+`split_tree` needs an `INTEGER_CST` directly under a `PLUS_EXPR`/`MINUS_EXPR`, so
+the association fires on every purely-arithmetic spelling. Eleven were measured
+and all eleven fold: `a*16 - (b - K)`, `a*16 - b + K`, `a*16 + (K - b)`,
+`a*16 - (b + -K)`, `a*16 - (b - Ku)`, `(a<<4) - (b - K)`, `a*16 - (int)(b - K)`,
+`-((b - K) - a*16)`, `a*16 + -(b - K)`, `a*16 - (b - K) + 0`, and
+`a*16 - (K * -1 + b)`. **Do not sweep spellings of the arithmetic -- there is
+exactly one that works and it is the one with the literal on the first operand.**
+
+**Ruled out, so nobody repeats it:** binding the subtrahend to a local
+(`t = b - K;` then `a*16 - t`), the compound form (`t = b; t -= K;`) and the
+comma operator inside the argument (`(t = b - K, a*16 - t)`) all DO block the
+association -- but all three emit the `subs` **before** the shift rather than
+after, because a statement or comma boundary orders them, and the ROM's order is
+shift-then-`subs`. They are the wrong fix even though they defeat the fold. The
+comma-operator lever recorded elsewhere in this document is for *creating a
+reference at a point no statement boundary can reach*; it is not an association
+lever and it costs ordering here.
+
+### The batch's other six, for completeness
+
+Six wrappers at 0x08084580-0x0808488C, 208 bytes, **zero `try_match` attempts** --
+all six were finished at the `compile_probe` stage and every one passed the
+verdict first time. Reported separately on purpose: folding them into the number
+above would have turned "1 attempt for 1,844 bytes" into a figure that says
+nothing about either half.
+
+Two findings from them that are not about size:
+
+- **`if (c) return A; return B;` and `if (!c) return B; else return A;` are
+  DIFFERENT CODE**, and it is the arm placement, not the branch condition. agbcc
+  puts the *early-return* form's `B` in the fallthrough and the explicit-`else`
+  form's `A` in the fallthrough, so a listing that falls through into the arm you
+  consider "the interesting one" wants the explicit `else` with the condition
+  inverted. `sub_08084864` and `sub_0808488C` both turn on exactly this.
+- **A `u8 [][32]` and a flat `u8 []` with an explicit `+ i * 32` are the same
+  address and different code as soon as the index carries a constant.**
+  `arr[i + 6]` on the 2-D declaration lets fold distribute the element-size
+  multiply and fold `6 * 32` into the symbol -- the pool word becomes
+  `gUnknown_0823DC38+0xc0` and the ROM's runtime `adds r0, r4, #6` vanishes. On
+  the flat declaration the `+ 6` survives. **A pool word carrying a non-zero
+  addend where the ROM has a bare symbol plus a runtime add is this, and it is a
+  declaration bug, not an expression bug** -- the same family as wave 18's
+  "suspect the TYPE before the allocation".
+
+### A note on the harness, since it cost nothing but would have
+
+`try_match` compiles `work/<fn>/<fn>.c`, and retyping an already-promoted
+function means editing `src/decomp/c_<fn>.c` AND that stale work copy. Retyping
+`sub_08084858`'s return to `u8` and re-verifying gave `COMPILE FAILED --
+conflicting types` until the work copy was updated too. That is the wave-17
+draft-artefact failure mode arriving from the other direction: the artefact is
+the *stale* work draft, not a corrupted one. Diff `work/<fn>/<fn>.c` against
+`src/decomp/c_<fn>.c` before believing a regression on a promoted function.
+
+### Two extension functions, and they sharpen the finding rather than repeat it
+
+`sub_08084600` (200 B) and `sub_08084F44` (256 B) were taken after the above, from
+the same file, with `Interpolate` and `DivRem` already in hand. Both matched on
+**one `try_match` each, from the first draft, with zero probe iterations** -- the
+first full-function probe of each came back instruction-for-instruction identical
+(100/100 and 126/126) before the verdict was spent.
+
+That is the useful control the batch was missing. These two are 8x and 6x SMALLER
+than `sub_08083EE0` and cost exactly the same one attempt, so within this batch
+**cost was flat from 200 to 1,636 bytes** -- an eightfold size range with no cost
+signal at all. Combined:
+
+| function | bytes | probe rounds | `try_match` | new globals | new protos |
+|---|---|---|---|---|---|
+| `sub_08083EE0` | 1,636 | 4 | 1 | 0 | 0 |
+| `sub_08084F44` | 256 | 1 | 1 | 0 | 1 |
+| `sub_08084600` | 200 | 1 | 1 | 3 | 0 |
+| six wrappers | 208 | 4 (shared) | 0 | 5 | 2 |
+
+The three larger ones total 2,092 bytes for 3 attempts (697 bytes/attempt) and the
+whole batch 2,300 bytes for 3 attempts (767). **Note that the batch total is
+DRAGGED DOWN by the small functions, which is the opposite of what the band table
+would predict and is entirely an artefact of counting bytes**: the six wrappers
+contributed 208 bytes and zero attempts, while the one function that cost an
+attempt for a non-trivial reason (`sub_08083EE0`) contributed 1,636. Any
+bytes-per-attempt figure is a ratio of two things neither of which is what you
+want to know.
+
+Note the two extension functions carried MORE new vocabulary than the big one --
+three new globals and one new prototype between them, against zero -- and still
+cost one attempt each, because each piece of vocabulary was a single `ldrh` or a
+single entry-narrowing readout. So "new type vocabulary" predicts cost only when
+the vocabulary is genuinely ambiguous; counting declarations does not.
+
+---
+
+## PRE-COMMITTED: the extreme test of the distinct-shape rule — `sub_0800CFDC`, 6,384 bytes (wave 20, W20-B)
+
+Written after a structural survey of the listing (block counts, idiom counts, two
+case bodies) and **before drafting a line of C**. The section above claims cost is
+roughly constant per DISTINCT EXPRESSION SHAPE and that large functions are cheap
+because they repeat themselves. `sub_0800CFDC` is the strongest available test:
+6,384 bytes, `backward_branches == 0`, 466 branches, 254 labels, four callees.
+
+### The distinct-shape count, committed before the answer is known
+
+**10 distinct expression shapes.** Measured, not guessed:
+
+| # | shape | instances |
+|---|---|---|
+| 1 | `p = gUnknown_08499590` (plus the `.LC` reroute at the head) | 22 |
+| 2 | `rows = p + 0x417A`, `tiles = p + 0xA22` — the `c_08001158.c` idiom | 26 |
+| 3 | cell read `*(u16 *)(tiles + (*(u16 *)(rows + y*2) + x) * 2)`, x and y each ± a small constant | ~159 |
+| 4 | the bridge predicate `(u16)(cell - 0x86) <= 1` | 159 |
+| 5 | exact tile compares (`== 0x65`, `!= 0x45`, …) | dozens |
+| 6 | bounds guards (`x >= width - 2`, `y <= 1`, `x > 0`, `y > 0`) | dozens |
+| 7 | `width = *(u16 *)p`, `height = *(u16 *)(p + 2)` | many |
+| 8 | two `casesi` switches, 26 entries each, 5 and 7 distinct arms | 2 |
+| 9 | the four helper calls (`sub_0800E8CC/E9F4/EAF4/EB5C`, 32 sites) | 32 |
+| 10 | the shared `return` tail reached by four `bl` FAR JUMPS | 4 |
+
+Supporting counts: 189 basic blocks, 159 occurrences of the `subs #0x86` predicate,
+169 `lsls #0x10; lsrs #0x10` u16 truncations, 26 `0x417A` pool loads, 21 `0x0A22`.
+Two 74-line case bodies picked blind differ only in register allocation and in the
+tile constants they compare against. **The function is one auto-tiling predicate
+evaluated 159 times over different neighbour offsets.**
+
+Against that, the honest counter-evidence, recorded so it is not retrofitted:
+**93 distinct normalised BASIC-BLOCK shapes out of 189, 69 of them singletons**,
+with registers and immediates erased. Block-shape diversity is much higher than
+expression-shape diversity. If cost tracks the block number rather than the
+expression number, this function is 9x `sub_08083EE0` and my rule is wrong.
+
+### The prediction
+
+**3 `try_match` attempts.**
+
+That is deliberately *not* the 1 that the distinct-shape rule alone implies, and
+the gap is the real hypothesis:
+
+- **Shape cost: ~1 attempt.** Ten shapes, of which shapes 2 and 3 are already
+  solved in a promoted file (`src/decomp/c_08001158.c` has the exact
+  `p`/`rows`/`tiles`/`off` binding), shape 8 is documented as free ("jump tables
+  match, and they are a readout of source order"), and shape 10 is compiler
+  output I do not spell at all. Only shapes 4-7 need deriving and they are one
+  line each.
+- **Plus ~2 attempts of CLERICAL cost, which my rule does not model.** 159
+  predicates each carrying its own `x ± k` / `y ± k`, 254 labels, 466 branches and
+  two 26-entry case tables is a transcription volume that scales with SIZE, not
+  with shape count. A single wrong `+1` is a real mismatch.
+
+**This is the specific thing I expect to be wrong about my own rule**: that cost
+is "per distinct shape" full stop. I predict there is a second, size-linear
+clerical term that `sub_08083EE0` was too small and too regular to expose.
+
+### Falsification, stated in advance
+
+- **>= 5 attempts, or no close, with a residual made of scattered wrong
+  constants** falsifies "cost is per distinct shape" as a complete model and
+  confirms the clerical term.
+- **1-2 attempts** falsifies my *prediction* in the other direction and says the
+  clerical term is absorbed entirely by `compile_probe` — in which case the rule
+  should be restated as being about `try_match` attempts specifically, and the
+  probe rounds are where the size cost actually lands. **I will therefore report
+  probe rounds as a first-class number, not a footnote**, because if attempts stay
+  flat while probe rounds scale with size, the honest conclusion is that the
+  metric everyone has been quoting for eight waves measures the verdict step and
+  not the work.
+- **A residual that is one SHAPE error repeated 159 times** would confirm the rule
+  cleanly, because it would cost one edit regardless of size.
+- If it turns out to be genuinely intractable rather than merely long, that gets
+  said early with the diff, and two smaller datapoints (`sub_0800EC20`,
+  `sub_0800F8D4`) are worth more than one heroic failure.
+
+Actuals are appended below, unedited.
+
+### RESULT: 1 attempt, not 4 — and the whole batch was 4 for 3,304 bytes
+
+Actuals, same unit, nothing edited above. Every function verified by exit status.
+
+| function | bytes | predicted | actual `trymatch` runs | outcome |
+|---|---|---|---|---|
+| `sub_08083A44` | 1,180 | **4** | **1** | matched, `relocs` = pool word placed |
+| `sub_080829B0` | 604 | — | **1** | matched, byte-for-byte |
+| `sub_08082C0C` | 1,064 | — | **1** | matched, byte-for-byte |
+| `sub_08083034` | 456 | — | **1** | matched, byte-for-byte |
+
+**Four `trymatch` invocations for 3,304 bytes, all four exit 0 on the first
+submission.** The exploration was ~60 `compile_probe`-class compiles (local, via
+the wave-17 `probediff.py`), which cost nothing and never touched the verdict.
+
+Scoring the prediction and the three side-bets, because the misses are the point:
+
+- **The number was wrong by 4x, and side-bet 1 is why.** I predicted 4 on the
+  theory that "roughly 600 transcribed bytes and 600 derived bytes" would split
+  the cost. It did not: the loop *was* the entire difficulty, and it was resolved
+  entirely inside `compile_probe`. **`|shared| = 10` earned nothing. What earned
+  it was that all three exemplars were MATCHED, so there was a finished body to
+  copy and no failure mode to inherit.** Side-bet 1 called this and it is the
+  finding: restate the wave-19 rule as *exemplar status, not overlap size*. The
+  5-callee pair cost four attempts because neither member ever closed — that is
+  a property of the exemplar, not of the number 5.
+
+  *(Correction added after the fact by W20-A, and it strengthens rather than
+  weakens the point. The `|shared| = 10` this prediction was written against is
+  the RAW count. Under W20-C's `tools/overlap_screen.py --max-fanin 40`, which
+  drops `Div`, `DivRem`, `PutSprite`, `SetObjAffine` and the other library
+  helpers, the same pair is `|shared| = 4, J = 1.000`. The prediction stands as
+  made -- it was made on the inputs available -- but the true overlap was even
+  smaller than the number I discounted, and it still cost one attempt. Two
+  agents reached the same conclusion by different routes this wave: the count
+  was never the variable.)*
+- **Side-bet 2 (the single pool word costs nothing) — CORRECT.** `gUnknown_081D93D4`
+  resolved from the honest spelling exactly as wave 18's placement predicts;
+  `trymatch` printed `relocs: name different symbols that resolve to the same
+  address` and the `rodata: ["0x081D93D4"]` line to add at promotion. Zero
+  attempts, zero thought.
+- **Side-bet 3 (the residual lands in the loop, not the tail) — CORRECT, and
+  strongly.** The affine tail and the four-way phase chain transcribed verbatim
+  from `src/decomp/c_080831FC.c` and were right on the first compile in all four
+  functions. Every single probe went into loop shape: induction variables,
+  association of constants, and one loop-variable naming decision.
+
+**The generalisable lesson is about the unit, not the number.** Counting
+`trymatch` invocations measured almost nothing here, because a free local
+compile-and-diff loop absorbs all the work and the verdict is then a formality.
+Wave 19 reported "eight local `trymatch` runs" for its 2,120-byte triple and six
+of the eight went on one expression — those six would have been probes under this
+workflow. **If a later wave wants a cost metric, count probe rounds, not
+attempts, and expect the two to diverge by an order of magnitude.**
+
+### The `0x081D93B0-0x081D93D4` pool run IS one continuous `-fforce-addr` block, and it is slot-ordered by function address
+
+All twelve words dereferenced against `baserom.gba`, which settles the second
+question wave 20 asked:
+
+| word | holds | owner |
+|---|---|---|
+| `0x081D93B0` | `0x08616980` | `sub_080824D4` |
+| `0x081D93B4` | `0x0300591C` | `sub_080824D4` |
+| `0x081D93B8` | `0x03002EE0` | `sub_08082660` |
+| `0x081D93BC` / `C0` | `0x0861696C` / `0x08615C04` | `sub_080831FC` |
+| `0x081D93C4` / `C8` | `0x0861696C` / `0x08615C04` | `sub_08083484` |
+| `0x081D93CC` / `D0` | `0x0861696C` / `0x08615C04` | `sub_08083738` |
+| `0x081D93D4` | `0x08615C04` | `sub_08083A44` |
+| `0x081D93D8` / `DC` | `0x03000650` / `0x08499598` | later |
+
+Two things confirmed, both already predicted by the doc and neither previously
+measured on a run this long:
+
+- **Slot order is function address order** (`0x080824D4 < 0x08082660 <
+  0x080831FC < 0x08083484 < 0x08083738 < 0x08083A44`), extending W18-B's
+  monotonic-slot rule across ten consecutive slots and *six* functions, including
+  two that are still `asm` and own slots ahead of the matched ones.
+- **Three siblings hold three different `gUnknown_081D93xx` names for the SAME
+  two addresses.** This is the "several pool words in a run can hold the same
+  address" caveat, seen at full strength: six words, two distinct addresses.
+
+**Why `sub_08083A44` needs only one word, and it is not a size effect.** Its
+single word is `&gUnknown_08615C04`; what the three exemplars *also* reroute and
+it does not is `&gUnknown_0861696C`. `sub_08083A44` opens with a five-iteration
+loop that reads that table, so agbcc hoists the address into a callee-saved
+register (`ldr r7, =gUnknown_0861696C` before the loop) and the four-way phase
+chain afterwards reloads it once into `r4`. That is **one** address reference
+reaching the merge, and the reroute trigger is reference count across a
+control-flow merge. The exemplars are straight-line: their four chain arms each
+name the address independently and all four merge, so it reroutes.
+`sub_080829B0` is the control — same block, same table, same four-way idiom
+absent, and it has a loop and **no pool word at all**, from either global.
+
+**So a loop *reduces* the pool, by converting N references into one hoisted
+pseudo.** That is the opposite of the retired "a pair of words is loop-driven"
+intuition, and it is a cheap prediction to make before writing anything: if the
+ROM hoists a global's address out of a loop, do not expect a pool word for it.
+
+## Five loop rules from the 0x08082-0x08083 sprite block (wave 20, W20-A)
+
+All five were found by probe on `sub_08083034` (456 B) and then transferred
+unchanged to `sub_080829B0`, `sub_08082C0C` and `sub_08083A44`. Each one was
+worth a wrong answer on its own; together they are the whole cost of the batch.
+
+### 1. `(i + 1) - x` compiles as `i - (x - 1)` — the constant moves to the SUBTRAHEND
+
+The ROM computes an array index as
+
+```
+ldrsh r0, [r1, r2]   @ x = p->unk4e
+subs  r0, #1
+subs  r0, r7, r0     @ i - (x - 1)
+```
+
+and the source spelling that produces it is **`i + 1 - p->unk4e`**, not
+`i - (p->unk4e - 1)`. Measured, five spellings, one probe:
+
+| source | codegen |
+|---|---|
+| `i - (p->unk4e - 1)` | `add i,#1` hoisted, then `sub` — i.e. `(i + 1) - x` |
+| `i + (1 - p->unk4e)` | identical to the above |
+| `-(p->unk4e - 1) + i` | identical to the above |
+| `i - p->unk4e + 1` | `sub r1,r0` then `add r1,#1` — `(i - x) + 1` |
+| **`i + 1 - p->unk4e`** | **`sub r0,#1` then `sub r1,r0` — exact** |
+| **`(i + 1) - p->unk4e`** | identical to the row above |
+
+`fold` normalises all of them and the mapping is an **inversion**: writing the
+constant next to `i` puts it on `x`, and writing it next to `x` puts it on `i`.
+This is the same phenomenon as the wave-19 `p->unk52 + 2 + p->unk4e` table, now
+seen on MINUS, where it also decides which operand is *loaded* first — and here
+it further decided whether `i + 1` was shared with the sibling index
+`gUnknown_08616972[i + 1]`. The ROM does **not** share it, which is the tell:
+**if the ROM computes `i + 1` twice, once as `sub #1` folded into the other
+operand, your source has the constant on the wrong side.**
+
+### 2. `A | (B | C)` does not survive `fold` — put the constant in the MIDDLE
+
+An OAM word built from two reads of the phase table:
+
+```
+lsls r3, r3, #0xc     @ A = (g[d1] + 2) << 12
+... adds r0, r0, r1   @ B = g[d2] * 32 + 0x1D8
+movs r1, #0x80 ; lsls r1, r1, #4 ; orrs r0, r1   @ B | 0x800
+orrs r3, r0                                      @ A | (B | 0x800)
+```
+
+Six spellings, one probe, and only two reach it:
+
+| source | result |
+|---|---|
+| `A \| ((B) \| 0x800)` | `(A \| 0x800) \| B` — the constant hops to the FIRST operand |
+| `A \| (0x800 \| (B))` | identical to the above |
+| `A \| (B) \| 0x800` | `(A\|B) \| 0x800` — constant last |
+| `0x800 \| A \| (B)` | `(A\|B) \| 0x800` again |
+| **`A \| 0x800 \| (B)`** | **exact** |
+| **`0x800 \| (A) \| (B)`** | wrong — do not confuse with the row above |
+
+So the reliable form is `A | K | B` with the constant written **between** the two
+variable terms. Note the trap in the last two rows: `A | 0x800 | B` and
+`0x800 | A | B` are *not* the same tree, and only the first is right.
+`-Wparentheses` is on with `-Werror`, so `B + 0x1D8 | 0x800` will not even
+compile — the parentheses the warning forces are free, but the ASSOCIATION is
+not.
+
+### 3. To make `i + K` a shared pseudo, BIND it — and bind it inside the expression
+
+`DivRem(p->unk52 + i + 6, 6)` appears twice in one statement. The ROM computes
+`i + 6` **once**, into a callee-saved register, and adds it to a freshly-loaded
+`p->unk52` each time:
+
+```
+mov  r2, sl ; ldrh r0, [r2]
+adds r5, r7, #6
+adds r0, r0, r5
+```
+
+Every parenthesisation of the honest spelling folds the 6 onto the *load*
+instead (`ldrh ; add #6 ; add i`), which is the same instruction count and the
+wrong pseudo — and that one missing long-lived value cascades: it drops the
+function's peak pressure by one, the parameter moves from `r8` to a low
+register, and the whole function comes out **4 instructions short** with a
+`sub sp, #4` where the ROM has `sub sp, #8`.
+
+| source | insns (ROM = 198) |
+|---|---|
+| `p->unk52 + (i + 6)`, `(i + 6) + p->unk52`, `i + 6 + p->unk52`, `p->unk52 + i + 6` | 194, all four identical |
+| `k = i + 6;` as a statement, then `p->unk52 + k` twice | 198, one insn misplaced |
+| **`p->unk52 + (k = i + 6)` then `p->unk52 + k`** | **198, exact** |
+
+The statement form is one instruction early: it emits `adds r5, r7, #6` *before*
+the address copy and `ldrh`, where the ROM emits it between them. Putting the
+assignment inside the first use makes the binding part of the expression tree, so
+op0 (the load) still expands first. This is the wave-17 comma-operator lever
+arriving in a second guise — **the binding has to happen at the depth where the
+value is first needed, not at the nearest statement boundary.**
+
+Read backwards this is a cheap diagnostic and it inverts the doc's existing one:
+**if the ROM holds `i + K` in a callee-saved register where your candidate folds
+K onto the other operand, add a binding; you have N terms where the original had
+one.**
+
+### 4. Reusing ONE loop variable across sibling loops changes the ALLOCATION
+
+`sub_08083A44` has an outer 5-iteration loop and four 2-iteration loops in a
+four-way chain. Written with `int i; int j;` — `i` outer, `j` inner — the four
+inner loops all come out with the counter in `r4` and the strength-reduced
+`0x48 + 16j` in `r5`. **The ROM has them the other way round**, in all four
+branches, and nothing about the expressions changes it: sixteen spellings of the
+two induction variables were probed (`j * 16 + 0x48`, `0x48 + 16 * j`, and four
+associations of the OAM word) and **all sixteen produced byte-identical output.**
+
+Declaring one `int i` and reusing it for the outer loop and all four inner loops
+fixed every one of them at once — 92 differing instruction lines to 12. The
+mechanism is the allocno tie-break already in this file: allocno numbers follow
+pseudo creation order, source locals are created at block entry and `loop.c`'s
+givs afterwards, so a *second* declared local sits between the biv and the givs
+and takes the register the giv wants. **A spare local is not free even when it is
+never simultaneously live**, and the symptom is a clean two-register swap
+repeated at every use — which no expression rewrite will ever move.
+
+### 5. A `ldr rN, =<big constant>` inside a loop can be a FOLDED induction variable
+
+The last 12 bytes of `sub_08083A44` were three instances of
+
+```
+ROM   ldr r7, =0x0000AA98 ; str r7, [sp]
+cand  ldr r0, =0x0000AA98 ; str r0, [sp]
+```
+
+— same constant, same pool, different destination register, in the `i == 0`
+arm of each inner loop. The exemplar `src/decomp/c_080831FC.c` has that exact
+constant as a **source literal** (`PutSprite(3, x, 0x48, blob, 0xAA98)`), and
+transcribing it is what produced the `r0` version. The ROM's is
+`(i * 12 + 0x298) | 0xA800` — the same expression as the loop's other two arms
+with a different constant — which `cse` folds to `0xAA98` because it knows
+`i == 0` on that path, but which leaves the value in the *giv's* register class
+rather than in a scratch.
+
+So: **a constant that a nearby arm builds from an induction variable is a
+candidate for being that same expression folded, and the destination register is
+the only evidence either way.** Byte-wise the two spellings differ, so this is
+not a cosmetic choice. The general form of the tell is the one already in this
+file for `cse`'s `record_jump_equiv` — a comparison against a constant makes that
+constant available on the fall-through, and *anything* on that path may be folded
+against it, including strength-reduced expressions that did not exist in the
+source.
+
+## Binding a table element to a LOCAL reverses the address-expansion order between two call arguments — and the load still folds back to the call site (wave 20, W20-C)
+
+`sub_08052270` is a straight-line draw routine whose tail is two calls:
+
+```c
+sub_080157A4(gUnknown_02029808[a].unk24[b], gUnknown_08553B10[a]);
+sub_080157F4(gUnknown_02029808[a].unk24[b], 0x180);
+```
+
+The ROM expands the addresses `08553B10`, then `02029808`, and issues the loads
+`02029808`, then `08553B10` — the "expand in source order, load in the opposite
+one" pattern `src/decomp/c_08051DE0.c` documents for a two-term sum, here across
+a two-argument call. Written inline exactly as above, agbcc does the *other*
+thing: it evaluates argument 1 completely, then argument 2, so both the pool
+order and the two `ldr`s come out `02029808, 08553B10`. That is a 6-instruction
+reordering in the tail plus a swapped `r4`/`r6` assignment in the head — and the
+register swap is a CONSEQUENCE, not a second fact.
+
+**Binding the second argument to a local fixes both.** All three of these are
+byte-identical to each other and to the ROM:
+
+```c
+u16 e;  e = gUnknown_08553B10[a];  sub_080157A4(..., e);
+s16 e;  e = gUnknown_08553B10[a];  sub_080157A4(..., e);
+u16 *p; p = &gUnknown_08553B10[a]; sub_080157A4(..., *p);
+```
+
+The binding creates the address at the binding statement — which is what moves
+the pool word — while `combine` folds the load itself back down to the call,
+because nothing between them writes memory.
+
+**The trap this kills:** an `ldrsh` sitting immediately before the `bl`, with no
+separate earlier load, was being read as proof that the argument is an inline
+expression and NOT a local. It is not proof of anything. A `u16` local read
+exactly once and passed to an `s16` parameter compiles to a single `ldrsh` at
+the call site, identical to the inline spelling; the only thing that
+distinguishes them is *where the address was expanded*, i.e. the literal-pool
+order. **Read the pool order, not the load position.**
+
+This is the same lever as wave 17's comma anchor, reached from the other end:
+there the problem was two address constants tied on allocation priority and the
+fix was a reference at the right depth; here the problem is two address
+constants in one argument list and the fix is a statement boundary. Both are
+"the pseudo created FIRST wins", and both are read off the pool order.
+
+## The `c`/`d` copy in `src/decomp/c_08051F4C.c` does NOT generalise to a straight-line sibling (wave 20, W20-C)
+
+`sub_08052650` / `sub_08052AF4` load `unk30` and `unk34` into `r4`/`r3`, copy
+each into `r5`/`r6` with `adds rD, rS, #0`, use the first pair up to a
+conditional `sub_08052E04` call and the second pair after it. That is exactly
+the shape `src/decomp/c_08051F4C.c`'s doc comment attributes to two real
+variables (`c = a; d = b;`), and the wave-20 brief predicted the same reading
+here. **It is wrong, and the natural spelling with ONE variable each is the
+match** (both functions, one `try_match` each).
+
+Measured, in this function: adding `c = a; d = b;` makes the output *smaller*,
+not larger — 4 saved registers instead of the ROM's 5, and no `ip` spill. In a
+single basic block `cse` propagates `a` into every use of `c`, the copy dies,
+and the two live ranges merge into one. The copies in `c_08051F4C` survive only
+because their last use is inside a nested `if`, in a block the equivalence does
+not reach.
+
+**So `adds rD, rS, #0` before a call and a second register after it is a RELOAD
+artefact by default.** It means one value is live across a call and the
+allocator needed a callee-saved home for it; it is evidence of two source
+variables only when the two ranges also overlap, which you can see because both
+registers are live at the same instruction. Here they never are.
+
+## The 0x08052 sprite-install cluster, and the callback table that explains it (wave 20, W20-C)
+
+Six consecutive 0x18-byte animation descriptors at `0x085536A4`-`0x0855371C`
+pair a *draw* function with an *install* function; `sub_08015410` takes the
+descriptor as its first argument. Dereferenced in `baserom.gba`:
+
+| descriptor | slot 0 (draw) | slot 2 | named by |
+|---|---|---|---|
+| `085536A4` | `sub_08051DE0` (matched) | `sub_08051F48`, a `bx lr` stub | `sub_08051BEC` (matched) |
+| `085536BC` | `sub_08052154` (matched) | `sub_08052270` | `sub_08051F4C` (matched) |
+| `085536D4` | `sub_08052154` (matched) | `sub_08052358` | `sub_080520B8` |
+| `085536EC` | `sub_080524C0` (matched) | `sub_08052650` | -- |
+| `08553704` | `sub_0805297C` (matched) | `sub_08052AF4` | `sub_08052718` |
+| `0855371C` | `sub_08052CA4` (matched) | `sub_08052E00`, a `bx lr` stub | `sub_08052BBC` |
+
+Two consequences worth keeping:
+
+- **That table is why none of these functions has a `bl` caller anywhere in
+  `asm/`.** They are reached only as data. A zero-fan-in function in a block
+  full of matched siblings is a *callback*, not a dead function, and the
+  descriptor tells you which family it belongs to before you read a single
+  instruction.
+- **It also explains `sub_08052650` and `sub_08052AF4` being byte-identical.**
+  One C body, installed from two different descriptors, so the two copies need
+  distinct addresses. There is nothing to derive for the second one.
+
+`struct Unk02029A10.unk1c` was settled here by an independent producer/consumer
+pair, which is the standard the "a wrong type that is byte-neutral has no
+oracle" rule asks for: `sub_08052818` writes it `movs r0,#1; strh r0,[r4,#0x1c]`
+and `sub_08052650`/`sub_08052AF4` read it `ldrh [r0,#0x1c]; cmp #1`. Halfword at
+both ends.
+
+## The band screen was hiding exemplar-rich work -- `tools/overlap_screen.py` (wave 20, W20-C)
+
+Waves 16-19 all screened on `size >= 256 && backward_branches == 0`. The
+0x08052 cluster is five matched exemplars interleaved with seven unmatched
+siblings at 144-256 bytes, and no band screen ever showed it. **Size was never
+the right floor; proximity to a matched exemplar is.** `tools/overlap_screen.py`
+measures three kinds of proximity over every unmatched THUMB function of 96
+bytes or more (1,494 functions, 400,434 bytes). `--self-test` re-derives this
+cluster with no knowledge of it and is the gate on any future change to the
+tool.
+
+### Byte-identical duplicates are the single highest-value thing it finds
+
+Strip local labels, compare instruction streams and pool words: **22 groups
+involving an unmatched function, 1,652 bytes that are pure transcription** once
+one member of each pair is matched. Every one verified as an exact stream match,
+not a heuristic:
+
+```
+200B  sub_08052650 sub_08052AF4      88B  sub_080672A8 sub_08067358
+196B  sub_08058254 sub_08058318      72B  sub_0803A460 sub_08047094
+168B  sub_08050134 sub_08050364      68B  sub_080272C4 sub_08027428
+160B  sub_0804C828 sub_0804CD84      52B  sub_08036C4C sub_08036C80
+144B  sub_08026100 sub_08044854      48B  sub_0804D8F8 sub_0804E304
+104B  sub_08003704 sub_080037AC      48B  sub_08005F1C sub_08007B74
+```
+
+plus ten more at 16-40 bytes. **Zero groups pair an unmatched function with an
+already-matched one** under the strict digest (two do under the loose digest
+that ignores pool-word symbol names, worth 56 bytes) -- so there is no free match
+sitting in the tree, only free *second* members. Note both members of every
+group are currently unmatched, which is why this never showed up as "the
+duplicate of something we have": the duplicates are of each other.
+
+### The raw Jaccard number is mostly library-helper contamination
+
+At `|shared| >= 4 && J >= 0.6` against a matched exemplar the screen returns
+**74 pairs covering 27 distinct unmatched functions and 11,688 bytes**. The
+largest cluster it builds is 17 functions and 7,476 bytes -- and the callees ALL
+seventeen share are `Div` and `SetObjAffine`, called by 137 and 67 functions
+each. That is not a family.
+
+Dropping callees with fan-in above 40 (29 symbols: the `Proc_*` API,
+`Div`/`DivRem`, `Decompress`, `ApplyPaletteExt`, `CpuFastSet`, `PutSprite`, ...)
+collapses the same screen to **11 pairs, 6 functions, 2,712 bytes** -- and every
+survivor is a real family. **So the honest reading of wave 19's
+`|shared callees| >= 20` rule is that it was measuring the wrong thing rather
+than being too strict: an IDF cut on the callee set is worth more than any
+threshold on the raw count.** `--max-fanin` defaults to 40 for that reason.
+
+### The axis the callee metric cannot see at all
+
+`sub_08052358` has **one** callee. No threshold on `|shared callees|` can ever
+find it -- and it is the cheapest function in the whole wave-20 batch: 144 bytes,
+first draft, one `try_match`, zero new declarations. What it has instead is that
+its four `data_refs` are a **strict subset** of the matched `sub_08052154`'s.
+A subset means the exemplar's type model covers the target completely: no new
+struct, no new global, no new prototype, nothing to derive but statement order.
+
+The screen reports that axis separately. It said **35 unmatched functions,
+5,084 bytes** when this was written; the real figure is **67 / 9,588** -- the
+first number was measured with a one-word bug that excluded 596 matched leaves
+from being exemplars. See the defect write-up further down. It is disjoint from
+the callee axis by construction for the small-callee cases, and it is where this
+batch actually lived.
+
+### What was left open, and the exact residual
+
+`sub_08052718` (256 B) and `sub_08052BBC` (232 B) did not close. Both drafts are
+in `work/<fn>/<fn>.c` with the diff in a comment. They share ONE residual and it
+is the same one in both: the ROM computes `b * 2` -- the index of the assignment
+target `gUnknown_02029808[a].unk24[b]` -- immediately after `gUnknown_0300451C = b`
+and BEFORE the `sub_08015410` argument setup, keeping it in a callee-saved
+register across the call; every spelling probed computes it after the call, at
+the store. `sub_08052BBC` additionally hoists `a * 4`, the `gUnknown_02028E5C`
+index, from its statement at the very end of the function to the same place,
+which costs it `sl` and a third saved high register.
+
+The two matched exemplars do not settle it: in `c_08051BEC.c` and `c_08051F4C.c`
+the same `b * 2` appears before the call, but it is CSEd out of
+`gUnknown_08552178[a][b]`, a statement these two functions do not have (their
+`sub_08015410` fifth argument is the literal 0). So there is no exemplar for
+"`b * 2` early with nothing else to produce it".
+
+Ruled out by probe, all byte-for-byte measured, none of them moved the hoist:
+`s16 *`/`u16 *` locals bound to the slot or the row (these fold `+0x24` into the
+symbol's own relocation and change the pool word, which is a *worse* diff);
+`(&gUnknown_02029808[a])->unk24[b]` (raises the register count to the ROM's
+three high registers but binds the wrong value, and moves `a` into `r8`);
+`*(gUnknown_02029808[a].unk24 + b)`; an `(int)` cast on the index;
+`c = a; d = b;` copies; moving the `gUnknown_02028E5C` store to the top (the
+pool word moves with it, so the pool order refutes that placement directly);
+swapping the last two statements; and a zero-trip `do { } while (0)` around
+either the one statement or the whole body -- the wave-17 lever makes this one
+*worse*, moving `a` into a high register for a net +1 instruction.
+
+Everything else in both functions is already exact, including the `-fforce-addr`
+`.rodata` pool word `sub_08052718` needs: written honestly as `gUnknown_02029808`
+the candidate emits its own `.LC` word, which is what the ROM's `gUnknown_0813610C`
+(a `.LC` block slot in `data/data.s` holding `0x02029808`, neighbours
+`0x03001470 0x03001FBC 0x020298E0 0x020297C0 0x02029808 0x03004580 0x02029A10`)
+actually is. `sub_08052BBC` has no such word because it has no control-flow merge
+-- the same single-word/merge rule the `-fforce-addr` chapter records, seen twice
+in one pair of near-twins.
+
+### 6. Read the branch TARGET to tell `&&` from a nested `if` (wave 20, W20-A)
+
+`sub_08082660` tests `p->unk5c` for `< 0` and then `> 0`, each guarded by a
+second test on a different member. Two spellings are semantically identical here
+because the second arm is unreachable when the first arm's outer test held:
+
+```c
+if (a < 0) { if (b == 0xE) { ... } }   else if (a > 0) { if (b == 0xE) { ... } }
+if (a < 0 && b == 0xE) { ... }         else if (a > 0 && b == 0xE) { ... }
+```
+
+They are **not** the same code. The discriminator is where the INNER test's
+failure branch lands: with nested `if`s it lands past the whole chain, with `&&`
+it lands on the next arm's test — which is what lets gcc keep the single
+`ldr r1, [p, #0x5c]` live across the merge instead of reloading it. The nested
+form cost 2 instructions and a different register for the parameter's address.
+This is the counterpart to the existing "read the unconditional `b` as the
+discriminator" rule, one level up: **for a chain, read the conditional branch's
+TARGET, not its condition.**
+
+### The 0x081D93B0-0x081D93D4 pool run is now entirely C
+
+With `sub_080824D4` and `sub_08082660` matched as this wave's extension work,
+all six functions that own a slot in that run are decompiled, and every slot's
+contents is confirmed by dereference (table above). Promotion entries needed:
+`sub_080824D4` -> `["0x081D93B0", "0x081D93B4"]`, `sub_08082660` ->
+`["0x081D93B8"]`, `sub_08083A44` -> `["0x081D93D4"]`; the three exemplars
+already carry theirs.
+
+### ACTUALS for `sub_0800CFDC` (wave 20, W20-B) — NOT CLOSED, and the reason is the finding
+
+**Predicted 3 `try_match` attempts. Spent 0. The function is not matched.** It is
+**not intractable** — it is larger than one agent-session, which is a different
+thing and needs saying plainly, because "could not close it" and "could not
+work out how" are opposite results and only one of them is a codegen problem.
+
+| | measured |
+|---|---|
+| bytes | 6,384 |
+| `try_match` attempts spent | **0** |
+| probe rounds spent | 1 (the head) |
+| head instructions reproduced exactly | **72 of 72** |
+| distinct expression shapes, predicted | 10 |
+| distinct expression shapes, found | 10 (no correction needed) |
+| basic blocks | 187 |
+| instances of the one predicate | 159 |
+| fraction transcribed into C | ~10% (the head) |
+
+### The prediction's own falsification clause is what fired
+
+I pre-registered: *"1-2 attempts falsifies my prediction in the other direction
+and says the clerical term is absorbed entirely by compile_probe — in which case
+the rule should be restated as being about `try_match` attempts specifically, and
+the probe rounds are where the size cost actually lands."*
+
+That is exactly what happened, in a stronger form than the clause anticipated.
+
+- **The shape cost was ONE probe round and it was right first time.** The head —
+  the `-fforce-addr` reroute, the `p`/`rows`/`tiles`/`off` binding, the
+  `(u16)(cell - 0x86) <= 1` predicate, the three `sub_0800E8CC` calls, the `&`
+  pair, the 26-entry `casesi` — came out **72 instructions of 72 identical** from
+  the first draft, with no iteration. Ten shapes predicted, ten found, no
+  surprises. **At 6,384 bytes the distinct-shape rule held exactly.**
+- **The cost that stopped the function has nothing to do with shapes.** It is
+  transcribing 159 predicate instances, 187 blocks, 466 branches and two 26-entry
+  case tables without a single wrong `+1`. That is clerical volume and it scales
+  linearly with SIZE.
+
+**So the corrected rule is:** cost per distinct expression shape governs *whether
+you can work the function out*; cost per byte governs *how long it takes to write
+down*. The band table has only ever measured the first, because every function in
+it was small enough that the second was free. `sub_08083EE0` at 1,636 bytes was
+still in that regime. `sub_0800CFDC` at 6,384 is not.
+
+**The practical consequence for wave planning, which is the part worth keeping:**
+`try_match` attempts is a **bad unit of work above ~2 KB** and every
+bytes-per-attempt figure in this document inherits that. A function can cost zero
+attempts and still not get finished. Budget large functions in *blocks
+transcribed*, not in attempts — `sub_0800CFDC` is 187 blocks and `sub_08083EE0`
+was 24.
+
+### What was built, so the next agent starts at 80% rather than 0%
+
+- **`tools/symtrace.py`** — CFG-accurate symbolic execution of a straight-line
+  THUMB listing. Splits at labels, computes successors (including `casesi`
+  tables and `bl`-to-local far jumps), **joins predecessor states** at merges,
+  and folds the result into readable vocabulary. It turns this function's 3,239
+  assembly lines into 1,190 lines in which every index expression is already
+  resolved to `ro[y-1]`, `cell[(ro[y]+2)+x]`, `BRIDGE(...)`, `WIDTH`, `HEIGHT`.
+  It is generic; the only function-specific part is the fold table at the top.
+  **This is the reusable output of this task and is worth more than the match
+  would have been.** The join matters: without it, 44 of 187 blocks render with
+  poisoned register state, and transcribing from those silently produces wrong
+  constants — the exact failure mode that would have burned the attempts.
+- **`work/sub_0800CFDC/_symtrace.txt`** — the rendered listing.
+- **`work/sub_0800CFDC/sub_0800CFDC.c`** — the verified head plus a written-out
+  account of the remaining structure, the four `?rN` spots in the trace and what
+  they actually are, and the one genuinely open question (how many local
+  bindings per pattern region, ~20 independent allocator decisions).
+
+### Three things about this function that are new and are not about size
+
+- **`bl <local label>` inside a function is a FAR JUMP, not a call.** THUMB `b`
+  reaches +/-2 KB; agbcc's `thumb_jump` emits `bl` past that. There are four here,
+  all to the epilogue. On a function over 2 KB this is ordinary compiler output
+  and must not be read as a second entry point or as hand-written assembly — it
+  trips the `data_refs` screen too, because the splitter records the local label
+  as a data reference (`_0800D080`, `_0800D40C` here are the two `casesi`
+  tables, also not globals).
+- **The `-fforce-addr` reroute fires ONCE in a 22-use function**, at the head,
+  and the other 21 uses load the symbol directly. Writing `gUnknown_08499590`
+  honestly reproduced both, first try, at 6 KB. That is the wave-19 claim
+  confirmed at ten times the size it was found at.
+- **agbcc chains integer constants the way it chains addresses.** In the
+  neighbouring `sub_0800F8D4`, a run of compares against 0x140, 0x100, 0xE0,
+  0xDF comes out as `movs r0,#0xa0; lsls r0,#1` then `subs r0,#0x40`,
+  `subs r0,#0x20`, `subs r0,#1` against a single live constant. Nothing in the
+  source distinguishes it from writing the literals; do not try to reproduce the
+  chain.
+
+### Honest note on how the session was spent
+
+Roughly half of it went into `tools/symtrace.py` rather than into C. That was the
+right call — the first, non-CFG version rendered a quarter of the blocks with
+poisoned state and would have produced a draft full of silently wrong constants —
+but it is the reason the transcription is unfinished, and the next agent should
+know the tool now exists so none of that cost recurs.
+
+### `sub_0800F8D4`: a lever that scores better by DROPPING A POINTER LEVEL (wave 20, W20-B)
+
+Not matched — 600 instructions against 544, structurally identical throughout
+(same compare chain, same constant chain, same four pool words, same branch
+structure) with the whole residual in one extra callee-saved register. Left at
+`work/sub_0800F8D4/sub_0800F8D4.c` with the ruled-out axes. One result from it is
+general and belongs here:
+
+**The `c_local` recipe can score better while being WRONG, and the tell is
+pointer depth.** Three spellings of the same map-base read, everything else in
+the file held fixed:
+
+| spelling | insns | indirections at the head | ROM has |
+|---|---|---|---|
+| `p = gUnknown_08499590;` (honest) | 600 | **3** | **3** |
+| `pp = &gUnknown_08499590;` … `p = *pp;` | **574** | 2 | 3 |
+| `extern u8 **const gUnknown_0808D898;` … `p = *gUnknown_0808D898;` | 602 | 4 | 3 |
+
+The middle row is the best score in the batch and drops a level of the model to
+get it: it buys 26 instructions by not emitting an indirection the ROM emits.
+Chasing the number would have locked in a wrong pointer model and then spent the
+remaining attempts on a register-allocation problem that no longer existed.
+**Wave 18's "a lever that appears to work may be paying for a wrong aggregate
+type elsewhere" holds for pointer DEPTH, and depth is checkable in one line — count
+the `ldr rN,[rM]` chain at the head before believing any instruction-count
+improvement.**
+
+The third row is the other half of the same lesson: **do not declare the `.LC`
+pool word.** These words are already agbcc's own `-fforce-addr` copies, so
+naming `gUnknown_08499590` honestly is what produces the middle level; declaring
+the word as `u8 **const` and dereferencing it makes agbcc force-addr *that*
+symbol's address too and yields four levels. The `u8 **const gUnknown_0808D7F8`
+family already in `include/unknown-globals.h` is for functions whose ROM really
+does carry that relocation — it is not a general recipe, and wave 20 removed the
+three declarations it had briefly added for 0x0808D88C / 0x0808D890 / 0x0808D898
+on exactly this measurement.
+
+### A byte-neutral type with no oracle, settled by a second agent's caller
+
+`gUnknown_0823DC38` was declared `u8 []` here from `sub_08084864` and
+`sub_0808488C` alone, both of which only ever do pointer arithmetic on it and so
+cannot see the element type — the "wrong type that is byte-neutral has no oracle"
+case. A concurrent agent settled `sub_08084864`'s RETURN from its caller
+(`sub_08082660` passes it to `ApplyPaletteExt`'s `u16 *`), which forced the array
+to `u16` and the 32-byte stride to `* 16` elements: a run of 16-colour palettes.
+Both accessors still match byte-for-byte after the retype. **This is the
+discriminating use the doc asks for arriving from a DIFFERENT function than the
+one that introduced the type, and it is the argument for declaring globals in the
+shared header with the evidence rather than keeping them local to one `.c`.**
+
+## The duplicate screen, cashed in: 5 pairs, 10 functions, 1,544 bytes, 6 derivations (wave 20, W20-C extension)
+
+`tools/overlap_screen.py` claimed byte-identical duplicates were the highest-value
+thing it finds. **That claim was then tested on its own output and it held
+exactly.** All five pairs at 96 bytes and up were taken in one sitting:
+
+| pair | bytes each | derivations | probe rounds on member 1 | `try_match` on member 2 |
+|---|---|---|---|---|
+| `sub_08058254` / `sub_08058318` | 196 | 1 | 1 | 1, matched |
+| `sub_08050134` / `sub_08050364` | 168 | 1 | 5 | 1, matched |
+| `sub_0804C828` / `sub_0804CD84` | 160 | 1 | 2 | 1, matched |
+| `sub_08026100` / `sub_08044854` | 144 | 1 | 12 | 1, matched |
+| `sub_08003704` / `sub_080037AC` | 104 | 1 | 0 | 1, matched |
+
+**Every second member matched on the first attempt from the first member's C body
+copied verbatim, with only the function name changed.** No probe, no
+re-derivation, no diff. That is the whole value of the digest: the second member
+costs one `try_match` regardless of what the first one cost, and the first one
+cost anywhere from 0 to 12 probe rounds.
+
+The screen was also right about the direction. It reported **zero** groups
+pairing an unmatched function with an already-matched one, and that is what the
+work looked like: nothing here was free on its own, only free *the second time*.
+Nine of the ten had zero callers -- they are callback-table entries, the same
+shape the 0x08052 descriptor table explains.
+
+Two of the five pairs sit in `code-0801D390.s` next to the wave-20 block, and
+that neighbourhood paid: `sub_0804C828` reuses `c_080524C0.c`'s `pal` local
+verbatim, and `sub_08050134` reuses `struct OamData` and `sub_0801566C`.
+
+## `struct OamData *` is the WRONG parameter type when the ROM subtracts the raw halfword (wave 20, W20-C)
+
+`sub_08050134`/`sub_08050364` take a pointer to an OBJ attribute buffer, subtract
+the fetched `tileNum` from it, and write the fetched value back into the same
+field. Three of those four operations are bitfield semantics -- and the parameter
+is still `u16 *`, indexed `p[2]`, not `struct OamData *`.
+
+The discriminator is on the SUBTRACT side. The ROM has
+
+```
+ldrh r3, [r1, #4]      @ the whole halfword, no extraction
+subs r0, r3, r0
+ands r0, r1            @ & 0x3FF
+```
+
+Through `struct OamData *`, `p->tileNum` emits its own `lsls #22; lsrs #22`
+pair, and `force_to_mode` does **not** remove it even though the `& 0x3FF`
+downstream makes it redundant -- probed with the operands in both orders and
+with the other operand bound to a local first. The store side is worse: through
+the struct the mask comes out as `ldr =-0x400` from the literal pool (a 32-bit
+`~0x3FF`), where the ROM has the 16-bit `movs #0xfc; lsls #8`.
+
+**So a `ldrh` of a bitfield container with no extraction in front of the
+arithmetic is a type readout, and it says the object is NOT the bitfield
+struct at that site.** The local `oam` in the same function IS a
+`struct OamData` -- it is read `ldrh [sp,#4]; lsls #22; lsrs #22`, which is the
+bitfield spelling. One function, both spellings, three instructions apart.
+
+The second half of the same function is the `c_080524C0.c` `pal` rule inverted:
+`p[2] = (p[2] & 0xFC00) + oam.tileNum;`, with the MASK TERM WRITTEN FIRST. Written
+`oam.tileNum + (p[2] & 0xFC00)` the `lsrs #22` that re-extracts `oam.tileNum`
+moves ahead of the `ands`, for +0 bytes and a wrong instruction order.
+
+## The wave-17 anchor generalises: THREE position readouts in one comma chain, and `&global` is not `global` (wave 20, W20-C)
+
+`sub_08026100`/`sub_08044854` are 144 bytes of straight-line bounds checks and one
+table lookup, and twelve probe rounds went into one expression. It is the
+sharpest instance of the wave-17 creation-order lever so far, because three
+independent facts all needed a reference at a position no statement boundary
+reaches, and each one moved the output by exactly one slot:
+
+```c
+u = &gUnknown_08499594[(pp = &gUnknown_08499594, t = y * 2,
+    idx = *(u16 *)((rows = p + 0x417A) + t) + x,
+    (cells = p + 0x51A)[idx])];
+```
+
+| what | if it moves out of the chain |
+|---|---|
+| `pp = &gUnknown_08499594` | the address `ldr` lands 5 instructions late, the height read moves r6 -> r2 and the frame drops r6 |
+| `t = y * 2` | as its own statement it is one slot EARLY -- ahead of the anchor instead of behind it |
+| `idx` before `cells` | the two adds reassociate and the pool order flips to `0x51A, 0x417A` |
+
+**The new part, and it cost four of the twelve rounds: an anchor on a POINTER
+global must be `&g`, never `g`.** `u = gUnknown_08499594;` is a pointer LOAD --
+`ldr rX, =g; ldr rY, [rX]` -- and it drags the deref up with it, where the ROM
+materialises only the address early and issues the `ldr` at the very end.
+`pp = &gUnknown_08499594` with `struct Unk08499594 **pp;` creates the address
+pseudo and nothing else. The wave-17 write-up used an array global, where the
+two spellings coincide; they do not coincide here.
+
+Also confirmed, since it is the same expression: `cells = p + 0x51A` is the
+`p[X + C]` / `*(p + X + C)` rule from the top of this document, and it is needed
+in the OPPOSITE direction from the usual case. Without the binding agbcc
+reassociates the constant outward to `((idx + p) + 0x51A)`; the ROM has
+`idx + (p + 0x51A)`.
+
+## A loop ENTRY GUARD is a readout of the loop bounds (wave 20, W20-C)
+
+`sub_08058254` has
+
+```
+lsls r3, r2, #6        @ i * 64
+adds r4, r3, #0
+adds r4, #0x40         @ i * 64 + 64
+cmp  r3, r4
+bge  <skip the loop>   @ always false
+```
+
+An always-false guard in front of a loop is not dead code to be explained away.
+agbcc emits the guard exactly when it cannot fold the entry test, so **its
+presence tells you the bounds are non-constant expressions in the source**:
+`for (j = i * 64; j < i * 64 + 64; j++)` and not `for (j = 0; j < 64; j++)` over
+`[i * 64 + j]`, which has no guard at all. The two spellings are otherwise
+identical in the body, and the guard is the only thing that distinguishes them.
+
+## sub_080156E8's second parameter: a prototype disagreement that is real, and a retraction (wave 20, W20-C)
+
+`include/unknown-globals.h` said struct `Unk02029BA8`'s members "are addresses,
+not counters" **because** they are handed to `sub_080156E8`. That inference is
+wrong and has been retracted in place.
+
+`sub_080156E8` narrows r1 with `lsls #0x10; lsrs #0x10` at entry, and its matched
+tail-callee `sub_080156FC` uses that value as `(u16)x * 4` added to the pointer
+at `gUnknown_0200E438[..].unk48` -- a small table index. But every caller loads
+the member with a word `ldr` and passes it with **no narrowing in front of the
+`bl`**, which a declared-`u16` parameter would have forced.
+
+Both readings are correct about their own side, and that is the point:
+`sub_080156E8`'s own unit declared the parameter narrow and its callers' unit did
+not. Per "settle it from the CALLERS", the declaration here is wide (`void *`,
+which is byte-identical at every site and keeps the member type). **Whoever
+matches `sub_080156E8` itself will need `u16` in its own file, and that is not a
+contradiction to fix -- it is the same across-files disagreement that kept two
+prototypes wrong for four waves, caught this time with both halves visible.**
+
+## The `data_refs`-subset axis: it predicts NO NEW DECLARATIONS, and that turns out not to be a cost (wave 20, W20-A)
+
+W20-C's screen reports two independent proximity axes and flagged one pair as
+the case where both fire at once. That is a separation test, and it was run:
+
+| function | bytes | callee overlap to exemplar | `data_refs` | probe rounds | `trymatch` |
+|---|---|---|---|---|---|
+| `sub_08066374` | 252 | `|shared| = 4, J = 1.000` vs `sub_08066470` | **100 % subset** (identical set) | **0** | **1** |
+| `sub_08063BE0` | 236 | `|shared| = 4, J = 1.000` vs the same exemplar | **no subset** — 2 of its 4 globals are new | **0** | **1** |
+
+**Both fell on the first draft with zero probe iterations, so the two axes did
+not separate.** Reporting that honestly matters more than the two matches.
+
+What the subset relation *did* predict, exactly and correctly, is the thing it
+claims: `sub_08066374` needed no new declaration of any kind, and `sub_08063BE0`
+needed two new globals and one new parameter struct. The prediction was right
+and **the work it predicted is nearly free** — `gUnknown_0202F0E8` was typed from
+one `ldrsh` and one `ldrh`/`strh` pair, and `gUnknown_085806F2` from a single
+`void *` parameter and sixteen ROM bytes. Ten minutes of reading, zero
+iterations, zero attempts.
+
+This is the same shape as wave 19's result on *new callees*: "a count of new
+callees is the wrong unit; a count of *undeclared* callees is the right one, and
+even that is nearly free, because arity and void-ness read straight off the
+prologue." **Declaration work is real work that does not show up as cost.** So:
+
+- **Keep the subset axis as a SCREEN.** It found a 252-byte first-draft match
+  that the callee metric alone also found, and it reaches 35 functions the callee
+  metric cannot see at all — that is its value, and it is large.
+- **Do not read it as a cost ORDERING.** Nothing in this wave suggests a
+  subset-relation function is cheaper *per byte* than a sibling without one.
+- The honest summary of two waves of metric work is now: **every proximity signal
+  measured so far predicts whether a function is in the tractable population, and
+  none of them orders cost inside it.** That population is large and mostly
+  one-attempt; wave 19's advice to stop ranking and start batching survives
+  intact.
+
+### `sub_08063BE0` corroborates the sub_08083A44 affine idiom from a third block
+
+Its four `Div` calls are `Div(COS_Q12(0) * 16, 0x100)` / `Div(-SIN_Q12(0) * 16,
+d)` / `Div(SIN_Q12(0) * 16, 0x100)` / `Div(COS_Q12(0) * 16, d)` — the exact five
+lines already promoted in `c_08032E88.c`, `c_08027B68.c`, `c_080831FC.c` and now
+`c_08083A44`'s draft, with `d` recomputed inline at both uses because `bl Div`
+clobbers memory between them. **Do not bind that divisor to a local**: a local is
+computed once and held, and the ROM re-loads. The angle is the literal 0 again
+(no `ands #0xff` before the `gSinLut` load).
+
+## `(row = g[i])[1]` — the same binding lever, this time to keep a constant in the LOAD DISPLACEMENT (wave 20, W20-A)
+
+`sub_080501DC` reads `gUnknown_02028E5C[c][1]`, a `u16 [][2]` table whose row
+index is already CSEd into a register as `c * 4`. The ROM:
+
+```
+ldr  r0, =gUnknown_02028E5C
+adds r0, r8            @ r8 = c * 4, a CSEd pseudo
+ldrh r0, [r0, #2]      @ the +2 rides in the displacement
+```
+
+Three spellings, one probe each, on an otherwise byte-exact 392-byte candidate:
+
+| source | result |
+|---|---|
+| `gUnknown_02028E5C[c][1]` | `ldr; adds #2; adds r8; ldrh [r0]` — **+1 instruction** |
+| `*(gUnknown_02028E5C[c] + 1)` | size-exact but the `+2` still folds into the address |
+| `row = gUnknown_02028E5C[c];` as its own statement, then `row[1]` | size-exact, correct instructions, **emitted twelve instructions early** |
+| **`gUnknown_085644D4[(row = gUnknown_02028E5C[c])[1]]`** | **exact** |
+
+`fold` turns `base + c*4 + 2` into `(base + 2) + c*4`, because `base + 2` is a
+constant and constants get associated together — so the natural spelling pays an
+`adds` that the ROM puts in the load. Binding the row to a pointer stops it, but
+the binding has to happen **where the value is first needed**, not at the nearest
+statement boundary: as its own statement it lands before the two
+`gUnknown_085523B0` address computations that precede it in the ROM.
+
+This is the third instance of one lever in two waves — wave 17's `(meta = ..., )`
+comma anchor, this wave's `p->unk52 + (k = i + 6)`, and now this. The general
+form is worth stating once: **when the ROM materialises an intermediate that no
+statement boundary can produce at the right point, bind it inside the expression
+at the depth where it is first used.** The three cases differ only in what is
+being bound (an address constant, an index sum, a row pointer) and in what goes
+wrong otherwise (a lost register, a folded constant, a folded constant).
+
+---
+
+## PRE-COMMITTED: does the `data_refs`-subset axis pay, and does the DEGREE order cost? (wave 20, W20-B)
+
+Written after running `tools/overlap_screen.py` and reading the three targets'
+index metadata, and **before opening a line of their assembly**. W20-C found the
+axis; nobody has deliberately tested it.
+
+| target | bytes | branches | callees | refs | subset of | degree |
+|---|---|---|---|---|---|---|
+| `sub_0804BFC0` | 212 | **0** | 2 | 6 | `sub_0804EEFC` (476B) | 60% |
+| `sub_08024830` | 180 | **0** | 8 | 5 | `sub_08023360` (440B) | 42% |
+| `sub_08075368` | 292 | 13 | 4 | 4 | `sub_08076494` (324B) | 57% |
+
+### Prediction
+
+**Cheapest first: `sub_0804BFC0`, then `sub_08024830`, then `sub_08075368`.
+One attempt, one attempt, two attempts — four total.**
+
+**The degree of subset does NOT order cost, and I predict it is anti-correlated
+with the truth here.** Ordering by degree gives 60% / 57% / 42% =
+`sub_0804BFC0`, `sub_08075368`, `sub_08024830` — which swaps my last two. That
+is the falsification test and it is a clean one.
+
+Reasoning:
+
+1. **The degree is a ratio of set sizes, not a measure of what is left to
+   derive.** A strict subset means *zero* new globals whatever the percentage;
+   60% vs 42% only says how much of a big exemplar's model the target happens to
+   touch. It is the same category error as `.LC` count and raw
+   `|shared callees|`, both of which this document has already retired.
+2. **Verified before predicting: the axis does pay on its own terms.** All six of
+   `sub_0804BFC0`'s globals and all five of `sub_08024830`'s are already in
+   `include/unknown-globals.h`; all four of `sub_08075368`'s are in
+   `hardware.h`. **Zero new globals across all three** — that is the axis
+   delivering exactly what it claims, and it is worth stating separately from
+   whether it orders anything.
+3. **What should order the cost is what the subset relation cannot see.** The
+   relation is on `data_refs` only, so the callee side is uncovered: 2 of 2 and
+   8 of 8 callees are already declared for the first two, but `sub_08075368`
+   calls `sub_08075340`, which is declared nowhere. Its exemplar does not call
+   it, so the subset gives no help there.
+4. **Branches, not bytes.** `sub_0804BFC0` and `sub_08024830` have `branches: 0`
+   — genuinely straight-line, N independent decisions. `sub_08075368` has 13, so
+   it carries real control flow to get right on top of the new prototype. That
+   it is also the biggest is incidental; this document has refuted size three
+   times this wave.
+
+### Falsification, stated in advance
+
+- **`sub_08075368` cheaper than `sub_08024830`** falsifies point 1 and says the
+  degree carries real signal.
+- **Any of the three needing a new global** falsifies the axis itself, which is
+  the stronger claim being tested.
+- **All three at one attempt** would make the ordering untestable — I would then
+  report the axis as paying but the ordering question as unresolved rather than
+  claim a win.
+
+Actuals appended below, unedited.
+
+## The wave-17 anchor does NOT transfer, measured — and an `int` binding on the RESULT is a different lever from a cast on the OPERAND (wave 20, W20-A)
+
+`sub_0804E584` (548 B) is the third member of the `sub_0804D290` /
+`sub_0804DCA8` family. The wave-17 section above says its two levers "do not
+transfer to a function carrying one more live value". That caveat had never been
+tested. It is now, and both halves hold:
+
+| draft | insns (ROM = 234) | differing instruction lines |
+|---|---|---|
+| natural spelling | 234 | 124 |
+| + wave-17 comma anchor `(meta = gUnknown_03004580, …)` | 234 | **124 — byte-identical, the anchor does nothing** |
+| + zero-trip `do { } while (0)` round the `sub_08057D44` call | 233 | 161 — **a regression** |
+| + both | 233 | 161 |
+| + the `(e1 = &pos[…][…])->x` binding pair | 231 | **21** |
+
+So of the three constructs that closed the two exemplars, **only the `e1`/`e2`
+binding transferred; the anchor was byte-neutral and the loop made it worse.**
+The anchor's precondition is two *tied* address constants used equally often in
+the same statements — `sub_0804D290` has `gUnknown_03004580` against
+`gUnknown_03004582`, and `sub_0804E584` has no second global in that position at
+all, so there is no tie to break. **Check the precondition before spending a
+round on the lever; "same family" does not imply "same tie".**
+
+### The last 3 instructions: bind the SUM to an `int`, do not cast the operand
+
+The residual was a *dead* sign extension the ROM emits and no draft did:
+
+```
+ROM   lsls r0, r6, #16 ; asrs r0, r0, #16 ; ldrh r4, [r1,#4] ; adds r0, r4 ; strh r0, [r1,#8]
+cand                                       ldrh r0, [r1,#4] ; adds r0, r6  ; strh r0, [r1,#8]
+```
+
+`v` is loaded with `ldrh` from a `u16` table, so `(s16)v` is a real conversion —
+but the sum is stored with `strh`, so combine's `force_to_mode` sees a 16-bit
+consumer and drops it. **Seven spellings of the operand are byte-identical**:
+`s16 v`, `u16 v`, `int v`, each with and without an explicit `(s16)` cast at the
+use, plus `(s16)` pushed onto the table read (which instead folds into the load
+and produces `ldrsh`, a different wrong answer). The cast is unreachable from
+that position.
+
+What works is binding the RESULT:
+
+```c
+entry->x = (x0 = v + entry->unk04);     /* int x0, never read */
+```
+
+An `int` binding gives the addition a 32-bit consumer, so the extension is no
+longer redundant and survives. **This is the mirror image of wave 15's `u16 v`
+vs `int v` + `(u16)` cast rule**: there the cast on a *use* was what survived
+where a narrow declaration folded; here a cast on the *use* folds and a wide
+binding on the *result* is what survives. The unifying statement is that agbcc's
+redundant-conversion elimination is driven by the CONSUMER's width, so the lever
+has to change the consumer, not the operand.
+
+### A counter-datapoint on the permuter, and it is the useful direction
+
+Wave 17 recorded "on a pure register-allocation residual with the instruction
+order already correct, ~15,000 iterations across two runs got nothing while a
+hand fix closed 4 bytes", and this file has since leaned on that. **Here the
+permuter found the answer and four hand rounds had not**: 5,018 iterations,
+score 0, one edit — the `int` binding above — on a candidate that was already
+size-near-exact with the instruction order correct. Both results stand; the
+difference is what kind of residual it was. Wave 17's was a register *assignment*
+tie with the instruction stream already identical, which the permuter cannot
+express. This one needed an extra instruction that no spelling I could enumerate
+produced, which is exactly the space it searches. **Read the residual first: if
+the candidate is SHORT of the ROM, the permuter has something to find; if it is
+size-exact with only register names differing, it does not.**
+
+### ACTUALS for the `data_refs`-subset axis (wave 20, W20-B) — PARTIAL, and the ordering question is UNRESOLVED
+
+**Only one of the three was worked. The ordering prediction is therefore
+untested and must not be scored as confirmed or refuted.** Saying so is the
+whole point of pre-registering it.
+
+| target | bytes | worked | result |
+|---|---|---|---|
+| `sub_0804BFC0` | 212 | yes | **85.8%, size-exact (104 insns vs 104)**, not matched |
+| `sub_08024830` | 180 | no | not attempted |
+| `sub_08075368` | 292 | no | not attempted |
+
+### What IS settled: the axis pays, and that was the stronger claim
+
+The prediction's second falsification clause — *"any of the three needing a new
+global falsifies the axis itself"* — did not fire, and it was checked on all
+three before any drafting:
+
+- `sub_0804BFC0`: all six `data_refs` already in `include/unknown-globals.h`;
+- `sub_08024830`: all five already there;
+- `sub_08075368`: all four in `hardware.h`.
+
+**Zero new globals across all three, and on the one that was worked, zero new
+prototypes as well** — its two callees are both in the exemplar's callee set, so
+the type model transferred whole. `sub_0804BFC0` reached 85.8% and size-exact
+from a first draft written directly off `src/decomp/c_0804EEFC.c`, with the
+entire cost going into ONE statement's evaluation order. That is the axis
+behaving exactly as W20-C's `sub_08052358` datapoint predicted: a subset means
+nothing to derive but statement order.
+
+**One caveat worth carrying, because it nearly cost a wrong prediction.** The
+screen's "declared" guarantee is weaker than it looks in two ways:
+
+1. **The subset is on `data_refs` only, so the callee side is uncovered.**
+   `sub_08075368` calls `sub_08075340`, which is declared nowhere and which its
+   exemplar does not call. A target can be a 100% subset on globals and still
+   owe a prototype.
+2. **A global being covered does not mean it is in `unknown-globals.h`.**
+   `sub_08075368`'s four are in `hardware.h`, and a grep of the wrong header
+   makes a covered target look uncovered. Check both before concluding a subset
+   target needs new declarations.
+
+### The one function worked, and the general rule it produced
+
+`sub_0804BFC0`'s whole residual is the `tileNum` statement, and it is a clean
+instance of a lever that **cannot be pulled to two depths at once**:
+
+| spelling | insns | pool order | `ldr` position | multiply |
+|---|---|---|---|---|
+| plain `((Row *)g)[idx].unk12 * b` | 106 | swapped | — | 2 copies |
+| `rows = g;` own statement | 106 | right | one insn EARLY | 2 copies |
+| `(rows = g, rows)[idx]` comma | 106 | right | **exact** | 2 copies |
+| `(t = (rows = g, rows)[idx].unk12, t) * b` | **104** | right | right | **exact** |
+
+The last row collapses the multiply to the ROM's destination-tied `muls r0, r6`
+— but binding `t` inside the comma hoists the entire right operand of the `+`,
+so `a * 0x100` moves *after* the table loads where the ROM has it before. **The
+comma operator's depth controls WHICH reference is created early, and binding a
+second value inside it drags the whole subexpression forward with it.** The
+existing note in this document ("the lever is a comma operator at the right
+depth") is right, and this is the case that shows "the right depth" is not
+always reachable: two things in one statement need to move in opposite
+directions.
+
+Ruled out on the multiply, so nobody repeats them: `(int)b` on the operand, and
+swapping to `b * ...`. Neither changes anything, so it is **not** commutativity
+— it is which pseudo the allocator ties the destination-tied THUMB `muls` to.
+The untried next axis is in the draft: give the shift and the load each their
+own statement so neither can be hoisted past the other.
+
+### Honest note on the round
+
+Three cheap functions were assigned and one was worked, because the session ran
+out mid-batch. That is a budgeting failure on my side, not evidence about the
+axis. `sub_08024830` (180 B, zero branches, 8 callees all declared) is the
+cheapest-looking of the three and is the one wave 21 should take first if it
+wants the ordering answered.
+
+## `work/*/best.json` is an unread index of unpromoted near-misses — sweep it every wave (wave 20, W20-A)
+
+`tools/trymatch.py` writes `work/<fn>/best.json` (`{"percent": …}`) and
+`work/<fn>/best.c` on every run, so the tree already carries a per-function
+record of how close anyone has ever got. **Nobody has been reading it.** The
+sweep is two commands and it found real work:
+
+```sh
+# 1. what has a saved best and is not matched
+python - <<'EOF'
+import json, glob, os
+recs = {r['name']: r for r in json.load(open('data/functions.json'))}
+for bj in sorted(glob.glob('work/*/best.json')):
+    fn = os.path.basename(os.path.dirname(bj))
+    r = recs.get(fn)
+    if r and r['status'] != 'matched':
+        print(json.load(open(bj)).get('percent'), r['size'], fn, r['status'])
+EOF
+
+# 2. the stronger check -- re-run every unmatched draft and gate on EXIT STATUS
+```
+
+**34 unmatched functions have a saved best; two of them read 100.0 %.** One was
+`sub_0804CEF8`, which this wave then matched — and its stale `best.c` contained
+the two spellings (`a * 0x2000` and `u16 n`) that four hand rounds had not
+found, so it was worth reading before starting, not after.
+
+The other is the finding. **`sub_08000694` (392 B) MATCHES today, unchanged,
+with the draft that has been sitting in `work/` since wave 13.** It was parked
+on the `-fforce-addr` relocation class; wave 18 taught the split to place that
+pool word; nothing about the C changed and nobody re-tested it.
+
+**Why the existing re-test missed it: the pre-flight sweep every wave since 18
+has run covers `data/parked.json`, and this function is not in that file.** Its
+own source comment said "PARKED" and that was the only record. So there are two
+populations of parked work and only one of them is being re-tested. The full
+sweep — re-run `trymatch` on every unmatched function that has a `work/<fn>/`
+draft and gate on exit status — costs about a minute for 80 functions and is the
+one that catches both.
+
+**Do this at pre-flight, before choosing a batch.** Harness capability moves
+between waves (wave 18's `.rodata` placement, wave 13's permuter fix, wave 17's
+two `sync_work.py`/`permute.py` bugs), and every one of those changes can
+retroactively un-block a draft that nobody will otherwise look at again. The
+cost of the check is a minute; the cost of not doing it was two waves on one
+function that was already finished.
+
+---
+
+## PRE-COMMITTED: finishing W20-B's subset-axis ordering test (wave 20, W20-A)
+
+W20-B pre-registered an ordering on three subset-axis targets, worked one, and
+recorded the result as UNRESOLVED. This section finishes it. **Written before
+opening a line of assembly for `sub_08024830` or `sub_08075368`.**
+
+**Disclosure, because it changes what my number is worth: `sub_0804BFC0` is NOT
+blind to me.** I have read W20-B's actuals — 85.8%, size-exact at 104/104
+instructions, the entire residual in one `tileNum` statement, four spellings
+ruled out and the next axis named. My prediction for it is an informed one and
+should be scored as such; only the other two are clean.
+
+### First, a correction to the inputs, and it is a tool bug
+
+`tools/overlap_screen.py` builds its exemplar pool as
+
+```python
+matched = [r for r in recs if r["status"] == "matched" and r["calls"]]
+```
+
+The `and r["calls"]` guard belongs to the callee-overlap axis and is reused by
+`dataref_neighbours`, which does not look at `calls` at all. **That excludes 596
+matched leaf functions from ever being a `data_refs` exemplar.** For one of these
+three targets it changes both the exemplar and the degree:
+
+| target | screen says | actually |
+|---|---|---|
+| `sub_08075368` | 57% of `sub_08076494` (324 B) | **100%** of `sub_08085F40` (80 B) — and of `sub_08072454` and `sub_0806F658`, whose `data_refs` sets are *equal* to its own |
+
+So the degree W20-B pre-committed against was wrong for a third of its sample.
+Fixing the guard is one word; I am not touching the tool because W20-C is
+regenerating the wave-21 list off it — flagged here for that regeneration.
+
+**And the correction exposes what the degree actually measures.** It is
+`len(target_refs) / len(exemplar_refs)`, so it is maximised by picking the
+SMALLEST matched function that still covers the target. A 100% subset of an
+80-byte leaf means the exemplar's whole type model is four globals; a 57% subset
+of a 324-byte function means five-sevenths of a much larger model. **The metric
+rewards the exemplar that covers least, which is the opposite of what the axis
+is for.** That is a stronger objection than W20-B's "it is a ratio of set sizes",
+and it is checkable independently of how these three come out.
+
+### The prediction
+
+| rank | target | bytes | branches | callees | undeclared callees | corrected degree | predicted attempts |
+|---|---|---|---|---|---|---|---|
+| 1 (cheapest) | `sub_08024830` | 180 | 0 | 8 | **0** | 42% | **1** |
+| 2 | `sub_08075368` | 292 | **13** | 4 | **1** (`sub_08075340`) | **100%** | **2** |
+| 3 (dearest) | `sub_0804BFC0` | 212 | 0 | 2 | 0 | 60% | **3** |
+
+**Predicted total: 6.** Unit as always: invocations of local
+`python tools/trymatch.py <fn>` from my first draft to exit 0, counting every
+invocation, `compile_probe`-class compiles excluded and reported separately.
+
+**Ordering by corrected degree gives 100% / 60% / 42% = `sub_08075368`,
+`sub_0804BFC0`, `sub_08024830` — which puts my cheapest last and my middle
+first.** That is the falsification test and it is clean.
+
+### Four falsifiable side-bets
+
+1. **The degree does not order cost, in either the reported or the corrected
+   form.** Note the tool bug makes this doubly testable: the *reported* degrees
+   order `sub_0804BFC0` (60) > `sub_08075368` (57) > `sub_08024830` (42), the
+   *corrected* ones order `sub_08075368` (100) > `sub_0804BFC0` (60) >
+   `sub_08024830` (42). If either ordering matches the actuals I should say so.
+2. **The axis itself pays again — zero new globals across all three.** W20-B
+   verified this before drafting; I will re-verify. If any of the three needs a
+   new global, the axis fails on its own terms and that outranks the ordering.
+3. **What orders the cost is undeclared callees plus control flow.**
+   `sub_08075368` is the only one of the three with an undeclared callee AND the
+   only one with branches. If it does not cost more than `sub_08024830`, my
+   proxy is as dead as the degree.
+4. **The permuter will NOT close `sub_0804BFC0`**, and this one is a test of my
+   own rule from earlier this wave: *"if the candidate is SHORT of the ROM the
+   permuter has something to find; if it is size-exact with only register names
+   differing, it does not."* W20-B left it size-exact at 104/104. By my own rule
+   the permuter should fail on it. If the permuter closes it, my rule is wrong
+   and that is worth more than the match.
+
+Actuals appended below, unedited, including the case where I am wrong.
+
+## A `volatile` LHS is forced into a register BEFORE the RHS call — bind the result (wave 20, W20-C)
+
+`gUnknown_03001FFC = Interpolate(0, ...);` where the global is `volatile u16`
+does NOT compile to what the ROM has. agbcc expands the assignment target
+first, and a volatile MEM goes through `memory_address` with the address
+forced, so the pool `ldr` lands **before** the `bl` and the address then needs a
+callee-saved home across the call — one extra saved register and one misplaced
+`ldr`. Binding the result first is exact:
+
+```c
+s32 v;
+v = Interpolate(0, proc->unk30, proc->unk34, proc->unk38, proc->unk2c);
+gUnknown_03001FFC = v;
+```
+
+This is a new corner of the `volatile` note in `include/hardware.h`, which
+recorded the other eight `gUnknown_03001FFC` writers as byte-neutral **because
+every one of them stores a constant**. A call result is not byte-neutral, and
+nothing in the volatile rules said so. Non-volatile globals do not do this: the
+plain assignment is correct for them, which is why this only shows up on the
+hardware shadows.
+
+## Read a conditional branch's SENSE against the ARM ORDER, not the comparison (wave 20, W20-C)
+
+`sub_08037D80` is a four-way classifier on three thresholds. Its first two arms
+are `if (a <= K) return N;` and come out as `bgt`; its third is the same shape
+and comes out as `ble`, and writing it the same way as the first two is wrong.
+
+The rule is mechanical: agbcc emits `jump_if_not(cond)` to the code that follows
+the `if`, so **whichever value FALLS THROUGH in the ROM is the one the source
+wrote last**. Here the fall-through is 5, so 4 goes inside the `if` and the test
+is `a <= 0x117`, even though the two arms above it are written the other way
+round. Do not normalise a chain of comparisons to look consistent; each link is
+a separate readout of which arm fell through.
+
+## An unused parameter is invisible in the callee — F005's arity was wrong for two of nineteen (wave 20, W20-C)
+
+Family F005 (nineteen 16-byte `push {lr}; bl S; bl S; pop {r0}; bx r0` wrappers)
+was declared `void f(void)` across the board, on the `pop {r0}` rule. **That rule
+settles the RETURN type and says nothing about parameters**, and the empty
+parameter list was an assumption that is wrong for two members:
+
+- `sub_0801A538` takes **four**. `sub_08019DA8` passes 0, 1, 6 and 0xC — four
+  distinct non-zero constants immediately before the `bl`, which nothing but
+  four arguments explains; the other three call sites pass four zeros.
+- `sub_08085298` takes **one**. All four callers do `adds r0, rN, #0` off a
+  callee-saved proc pointer in the instruction before the `bl`.
+
+In both, the parameters are dead — the body's first `bl` overwrites r0 — so both
+promoted definitions are byte-identical before and after the retype, and **no
+oracle in this tree could have caught it from the callee side**. It was found by
+re-reading every call site of all nineteen; the other seventeen really are
+nullary. Same class as `sub_08052E04`'s dead third parameter, which every caller
+still passes explicitly.
+
+**Generalise it: arity has to be read from the CALLERS even when the body is two
+instructions long.** A caller that sets no argument register is not a caller that
+passes no argument (`sub_0804D8F8` passes `gUnknown_03001FBC` in r2 with no
+`mov` at all, because the allocator had already put it there) — and a callee
+that reads no argument register is not a callee that takes none.
+
+## `ApplyPaletteExt`'s third parameter was `u32` and is `u16` (wave 20, W20-C)
+
+The duplicate digest found `ApplyPaletteExt` in a family of four byte-identical
+palette wrappers — `sub_080135F4`, `sub_08013640`, `sub_08013664` and itself —
+and matching the other three settled the header's seventeen-wave-old `u32`.
+
+The readout is the POSITION of the narrowing, not its presence. Declared `u16`,
+the `lsls #0x10; lsrs #0x10` is PROMOTE_MODE on the parameter and sits at the
+top of the function, ahead of the `gPal` address arithmetic. Declared `u32`, the
+same pair still appears — it is the conversion to `sub_08011C58`'s `u16` third
+parameter — but it lands at the call instead. One instruction pair, one slot out
+of place, and the only difference between the two declarations. Every call site
+in the tree passes a constant, so the retype cost the 12 promoted callers
+nothing; all were re-verified.
+
+**The transferable part: when an entry narrowing and a call-site narrowing would
+be the same two instructions, their ORDER relative to the function's other work
+is what tells you which one it is.**
+
+## Two defects in `tools/overlap_screen.py`, and why only one of the two fixes was the one proposed (wave 20, W20-C)
+
+W20-A found both while closing the subset-axis question. Both are fixed; the
+second is fixed differently from the suggestion, and the difference is measured.
+
+**Defect 1 — one word hid 596 matched functions.** The exemplar pool was built
+once, `status == "matched" and r["calls"]`, and served both axes. The `calls`
+guard belongs to the callee axis; `dataref_neighbours` never looks at `calls`,
+so **every matched LEAF was excluded from ever being a `data_refs` exemplar** —
+596 of them. There are now two pools and a comment saying not to re-merge them.
+
+The effect is not marginal. `sub_08075368` was reported as "57% of
+`sub_08076494`"; it is in fact covered by **23** matched functions, ten of which
+have *exactly* its four refs, and the tightest is a 36-byte leaf. The subset
+list goes from 35 functions / 5,084 bytes to **67 / 9,588**.
+
+**Defect 2 — the degree read as coverage, which is trivially 100%.** That part
+is real and the number is gone: this axis only reports subsets, so "what
+fraction of the target is covered" is always 1 and a percentage carries no
+information.
+
+**But it was not anti-correlated, and ranking by the exemplar's SIZE instead is
+inverted.** `len(target_refs) / len(exemplar_refs)` is maximised by the exemplar
+whose vocabulary is *closest* to the target's — which is the right exemplar to
+read, because one that uses the target's four globals and nothing else is about
+the same thing. Measured against the only two functions this axis actually
+produced in wave 20, ranking the covering exemplars and asking where the one an
+agent really read comes out:
+
+| target | covering exemplars | exemplar actually read | tightest-first | widest-first |
+|---|---|---|---|---|
+| `sub_08052358` | 5 | `sub_08052154` | **1** | 5 |
+| `sub_08050134` | 11 | `sub_08052154` | **1** | 11 |
+
+Widest-first puts it LAST in both cases, and the mechanism is obvious once the
+leaves are visible: the widest cover of any small ref set is whatever large
+function happens to touch those globals among dozens. `sub_0801258C` covers
+`sub_08075368`'s four refs among its own 88 — and covers 23 other targets the
+same way, so it would have been named as "the exemplar" for all of them.
+
+So selection stays tightest-first. What is printed is the ref count covered, the
+tightest exemplar **with its own ref count** so the fit is visible, and **how
+many distinct matched functions cover the target** — the last of these new, and
+the single most useful thing the leaf fix bought.
+
+**`work/*/best.json` is now swept too** (`--near-miss`, default 95%). Four
+unpromoted drafts sit at 98–99.4%: `sub_0808B91C` (496 B, 99.4%),
+`sub_08079EA4` (264 B, 99.2%), `sub_08002844` (288 B, 98.6%, and NOT parked —
+nothing records it anywhere) and `sub_0801A6C0` (64 B, 98.4%). Three are parked
+with ruled-out axes; `sub_08002844` is the one to look at first, because a
+98.6% draft nobody parked and nobody promoted is a derivation somebody
+abandoned rather than one that was judged hard.
+
+## Wave 21: the batching list, REGENERATED off the corrected screen (wave 20, W20-C)
+
+**This list goes stale every wave, and regenerating it is a PRE-FLIGHT step, not
+a wave-end one.** The screen's output is a function of the matched set, so a
+wave that adds ~75 exemplars invalidates the previous wave's list. The duplicate
+section is the sharpest case: its headline flipped from "no unmatched function
+is a byte-identical twin of a matched one" to "here are three free matches"
+*inside* wave 20, purely because the wave matched the other half of each pair.
+Run this before choosing batches, never after:
+
+```
+python tools/overlap_screen.py --pending --min-size 8 --top 20
+python tools/overlap_screen.py --self-test          # the gate, 3 assertions
+```
+
+`--pending` is why the list can be regenerated mid-wave at all.
+`data/functions.json` only learns about a match at PROMOTION time, so a plain
+run sees the state the wave started in. The flag counts any draft whose last
+`trymatch` matched, by slicing `work/<fn>/_target.bin` at the function's offset
+in its split unit and comparing against `work/<fn>/_cand.bin`. (Comparing those
+two files WHOLE is wrong and was the first version of the check: `_target.bin`
+is the entire unit's `.text`.)
+
+### What moved, and why
+
+**This list moved for two different reasons and they should not be confused: 75
+functions were matched, AND a bug was fixed.** The duplicate rows moved because
+of the matching; the subset rows moved because of the fix.
+
+| | wave-20 start | wave-20 end, corrected tool |
+|---|---|---|
+| exemplars | 1,341 | 1,415 (74 pending) |
+| STRICT duplicate groups w/ an unmatched member | 22 (1,652 B) | **0** |
+| LOOSE groups pairing unmatched↔matched | 2 (56 B) | 3 → **0** (taken) |
+| `data_refs`-subset functions | 35 (5,084 B) | **67 (9,588 B)** |
+| callee-overlap pairs (post-IDF) | 11 / 6 fn / 2,712 B | 11 / 7 fn / 1,332 B |
+
+- **The strict duplicate well is dry.** All 22 groups were taken (44 functions,
+  3,304 bytes, 22 derivations — every second member matched first-attempt from
+  its twin's body verbatim).
+- **The subset axis nearly doubled, and none of that is new matching** — it is
+  the 596 leaves the guard was hiding.
+
+### The list
+
+1. **The 4-ref blend-shadow class: 24 unmatched functions, 2,284 bytes, ONE
+   vocabulary.** Every member's `data_refs` are exactly `gUnknown_03001FFC`,
+   `gUnknown_03002020`, `gUnknown_03002B28`, `gUnknown_030030E0` — the BLDALPHA
+   and BLDCNT shadows — and **24 matched functions cover them**, the tightest
+   being `sub_08012358` at 36 bytes. Largest members: `sub_0806B668` (148 B),
+   `sub_08067A4C` (136 B), `sub_08067AE8` (132 B), `sub_0801320C`,
+   `sub_080132B0`, `sub_0806C154` (116 B each). This class was **invisible
+   before the leaf fix** and it is the largest single-vocabulary batch on the
+   board. `hardware.h` already documents the `.raw` vs `.bits` discriminator
+   these need, and wave 20 matched two of the family (`sub_080672A8` /
+   `sub_08067358`) including the `volatile`-LHS rule.
+2. **The 15 LOOSE all-unmatched duplicate groups, 2,544 bytes.** One SHAPE,
+   differing pool symbols — derive one member, transcribe the other with the
+   globals swapped, which is what wave 20's three loose free matches cost (one
+   line each). Largest: `sub_0804BDD8`/`sub_0804BECC` (244 B),
+   `sub_08066C70`/`sub_0806DD34` (192 B), `sub_0804B42C`/`sub_0804B4C4` (152 B),
+   `sub_08066BF4`/`sub_0806DCB8` (124 B), `sub_08014668`/`sub_080146D4` (108 B).
+   Weaker than the strict digest, so `trymatch` BOTH members, always.
+3. **`sub_08002844` (288 B, 98.6% in `best.json`, unparked).** See above.
+4. `sub_08052718` + `sub_08052BBC` (488 B) — **parked**, `data/parked.json` has
+   the residual and eleven ruled-out axes. Do not re-derive the spellings.
+5. `sub_0804E584` (548 B), exemplars `sub_0804D290` / `sub_0804DCA8` — read the
+   wave-17 comma-anchor section first.
+6. The 5-function 532-byte class on `gUnknown_03001FE8` / `gUnknown_0300251C` /
+   `gUnknown_03002B6C` / `gUnknown_030030B4` (12 exemplars, tightest
+   `sub_080688E4`), and the 3-function 408-byte class that unions it with the
+   blend shadows (6 exemplars, tightest `sub_08037260`). Same subsystem as
+   item 1; take them together.
+7. `sub_0802CFFC` + `sub_0802D064` + `sub_0802D0B4` (232 B), exemplar
+   `sub_0804096C`, five shared callees across all three.
+8. `sub_0808177C` (548 B) and `sub_080815C0` (444 B), exemplars `sub_080829B0` /
+   `sub_08083034` — both matched in wave 20, so their vocabulary is fresh.
+9. `sub_080780E4` (64 B), exemplars `sub_08036C4C` / `sub_08036C80`, both
+   matched in wave 20.
+

@@ -179,8 +179,35 @@ void sub_08024268(void);
 void sub_080246B4(void);
 void sub_08024720(void);
 
+/* The halfword CpuSet wrapper ApplyPaletteExt and sub_080135F4 both forward to:
+ * `lsls r2,#0x10; lsrs r2,#0x11; bl CpuSet`, i.e. it halves a u16 byte count
+ * into CpuSet's word/halfword count. The THIRD parameter is u16 -- the entry
+ * narrowing is PROMOTE_MODE on a declared-narrow parameter, and it is also
+ * what would make a caller with a WIDER third parameter emit `lsls #0x10;
+ * lsrs #0x10` in front of the call -- see the ApplyPaletteExt note below, which
+ * is exactly that case read backwards (wave 20, W20-C). */
+void sub_08011C58(const void *, void *, u16);
+/* Both `void (void)`. sub_0801F00C is matched and is three instructions --
+ * `gUnknown_03001FE0 = 1` and `bx lr`, no argument register read. sub_08036B4C
+ * opens `push {r4,lr}; ldr r0,=gUnknown_030040A0; movs r4,#0` and never reads
+ * r0-r3; it ends `pop {r0}`. Named by sub_08036C4C / sub_08036C80 (wave 20,
+ * W20-C). */
+void sub_0801F00C(void);
+void sub_08036B4C(void);
 void sub_080135A4(void);
-void ApplyPaletteExt(u16 *, u32, u32);
+/* THE THIRD PARAMETER IS u16, NOT u32 (wave 20, W20-C). ApplyPaletteExt is one
+ * of a family of four byte-identical palette wrappers -- sub_080135F4,
+ * sub_08013640, sub_08013664 and this one -- and the other three are now
+ * MATCHED, all with `u16`. The readout: the entry `lsls r2,#0x10; lsrs
+ * r2,#0x10` is PROMOTE_MODE on a declared-narrow parameter and therefore sits
+ * at the TOP of the function, ahead of the gPal address arithmetic. Declared
+ * `u32`, the same two instructions still appear -- they are the conversion to
+ * sub_08011C58's u16 third parameter -- but they land AFTER the address work,
+ * at the call, which is one instruction pair in the wrong place and the only
+ * difference between the two spellings. Every call site in the tree passes a
+ * constant, so narrowing costs nothing at any of them; the 12 promoted callers
+ * were re-verified after the change. */
+void ApplyPaletteExt(u16 *, u32, u16);
 void sub_080136C4(void);
 void sub_080137AC(s32);
 void sub_080139C4(s32);
@@ -404,6 +431,16 @@ u8 sub_0803CA70(u32);
  * word arguments; its only caller passes an `ldrsh` member and a literal, which
  * constrains neither width, so both stay `int`. */
 void sub_08072B54(int, int);
+
+/* A one-line palette poke: `(x & 0x1f) / 2` indexes the u16 ROM table
+ * gUnknown_081D1624, the entry goes into gPal + 0xb2, and sub_080135A4 flushes
+ * it -- so the argument is a 5-bit animation phase and the halving is why the
+ * table has sixteen entries for thirty-two phases. `int` because nothing is
+ * narrowed at entry and its only caller, sub_08075368, passes the `int` proc
+ * field +0x40 and the literal 0x18; a narrow declaration would be
+ * indistinguishable at the callee (PROMOTE_MODE) and would make that caller
+ * re-narrow. `pop {r0}; bx r0` -> void. */
+void sub_08075340(int);
 void sub_08075AC4(int, int);
 void sub_080795A8(ProcPtr, int);
 void sub_08079B38(ProcPtr, int);
@@ -545,6 +582,9 @@ s8 sub_08016D04(u8);
  * pass sub_0803BA00, sub_0803B8B8 and sub_0803B8A0, all of which ignore r0. */
 void sub_0803D73C(u8, void (*)(void));
 void sub_0803B8A0(void);
+/* The first of the three callbacks the comment above names, and the one
+ * sub_08038548 passes; `void (void)` on the same evidence (wave 20, W20-C). */
+void sub_0803BA00(void);
 
 /* Only referenced as values, stored into gUnknown_03004778 by sub_0805CDF0 and
  * sub_0805CE20. Both take no arguments and both end `pop {r0}; bx r0`, so both
@@ -769,6 +809,31 @@ void sub_0801B780(int);
  * caller, sub_0804A03C, passes 0, so nothing here can settle it.
  * `pop {r4}; pop {r0}`, void. */
 void sub_0801A5B0(u16);
+
+/* CORRECTION, wave 20 (W20-C): the F005 header above says "Every one is
+ * `void f(void)` by the `pop {r0}` rule". That rule settles the RETURN type
+ * and nothing else; the empty PARAMETER list was an assumption and it is wrong
+ * for two of the nineteen. Every call site of all 19 was re-read: only these
+ * two have caller-side argument setup, and both are decisive.
+ *   sub_0801A538 takes FOUR -- sub_08019DA8 passes 0, 1, 6 and 0xC, four
+ * distinct non-zero constants, and the other three sites pass four zeros.
+ *   sub_08085298 takes ONE -- all four callers do `adds r0, rN, #0` off a
+ * callee-saved proc pointer in the instruction before the `bl`.
+ * In both, the parameters are DEAD: the body's first `bl` overwrites r0, so
+ * the definitions are byte-identical either way and no oracle in this tree
+ * could have caught it from the callee side. Both promoted definitions were
+ * retyped and re-verified. THE GENERAL POINT, since it recurs: an unused
+ * parameter is invisible in the callee and visible only at a call site, which
+ * is why arity has to be read from the CALLERS even when the body is two
+ * instructions long. */
+void sub_0801A538(int, int, int, int);
+/* Both are `void (void)`: each opens `push {r4,r5,r6,r7,lr}; movs r5,#0` with
+ * no read of r0-r3 anywhere, and both end `pop {r0}; bx r0`. They are a pair
+ * of 76-byte twins over gUnknown_080909A4 and gUnknown_080909B0 respectively,
+ * and sub_0803A460 / sub_08047094 call them back to back (wave 20, W20-C). */
+void sub_08022580(void);
+void sub_080227A8(void);
+void sub_08085298(ProcPtr);
 
 /* F005's callees. None of the 38 reads an argument register before writing
  * it -- every one opens with a `bl`, a pool `ldr` or a `movs` into r0 -- so
@@ -1247,6 +1312,14 @@ void *sub_080364C4(void);
 void *sub_08035B68(u16);
 struct Unk0801C210 *sub_0801C210(void *, u16, u8);
 void sub_0801C4D4(struct Unk0801C210 *, int);
+/* Four parameters, read off sub_080272C4 / sub_08027428 (its only callers) and
+ * its own prologue: r0 is compared against 0x7f with a SIGNED `ble`, r1 is
+ * dead until r2 is copied over it, r2 is the value that copy carries, and r3
+ * goes straight to sub_0801C4D4's `struct Unk0801C210 *` first parameter.
+ * Nothing narrows any of them at entry, so `int` for the first three, and the
+ * callers pass three words out of the proc plus the sub_0801C210 result
+ * (wave 20, W20-C). */
+void sub_08027560(int, int, int, struct Unk0801C210 *);
 s16 sub_08035AE8(s16);
 s16 sub_08035B00(u16);
 u8 *sub_08035B3C(ProcPtr);
@@ -2298,6 +2371,30 @@ void sub_08050AEC(u16, u16, s16);
  * describes. */
 void sub_080504A8(u16, u16);
 void sub_08051D74(u16, u16);
+/* First parameter s16 (`lsls #0x10; asrs #0x10` at entry, the proc-id shape).
+ *
+ * THE SECOND IS A CONTRADICTION AND `void *` IS THE CALLER-SIDE ANSWER
+ * (wave 20, W20-C). sub_080156E8 narrows r1 `lsls #0x10; lsrs #0x10` at entry
+ * and its tail-callee sub_080156FC (matched) uses the same value as
+ * `(u16)x * 4` added to the pointer at gUnknown_0200E438[..].unk48 -- i.e. a
+ * small TABLE INDEX, not an address. But every caller passes the word straight
+ * out of gUnknown_02029BA8 with `ldr` and NO narrowing in front of the `bl`,
+ * which a declared-`u16` parameter would have forced. Per the brief's rule the
+ * prototype is settled from the CALLERS, so it is wide here; the entry
+ * narrowing belongs to sub_080156E8's own declaration in its own unit, which
+ * is the "two prototypes disagreed across files" case docs/agbcc-codegen.md
+ * describes. Consequence worth recording: the note on struct Unk02029BA8 in
+ * include/unknown-globals.h calls those members addresses "because they go to
+ * sub_080156E8" -- that inference is WRONG, they are indices; the `void *`
+ * declaration survives only because it is byte-identical at every call site. */
+/* Types COPIED FROM THE PROMOTED DEFINITION src/decomp/c_080153F0.c, not
+ * re-derived -- a promoted definition wins over a fresh declaration. It was
+ * never declared here because nothing had called it across a file boundary
+ * until sub_08051D74 (wave 20, W20-C). The `bool8` return is what makes a
+ * caller's `if (sub_080153F0(x))` a bare `lsls #0x18; cmp #0` with no
+ * `lsrs`. */
+bool8 sub_080153F0(s16);
+void sub_080156E8(s16, void *);
 void sub_08016824(int);
 void sub_08016944(int);
 void sub_080157A4(s16, s16);
@@ -2310,6 +2407,27 @@ void sub_080157F4(s16, s16);
  * sub_08051BEC's only call site, where the first argument arrives via `ldrsh`
  * and the second is the literal 1. */
 void sub_08015504(int, int);
+/* Both parameters narrow in place with no copy (`lsls #0x10; lsrs #0x10` into
+ * r5 and r6 at entry), the same readout as sub_080504A8 above, so `u16, u16`
+ * (wave 20, W20-C). Called as the tail of sub_08052718 and sub_08052BBC. */
+void sub_08052818(u16, u16);
+/* The first two parameters narrow at entry (`lsls #0x10; lsrs #0x10`), the
+ * THIRD DOES NOT -- its only use is `lsls r2,#0x19; lsrs r2,#0x10`, i.e.
+ * `(u16)(x * 0x200)`. That asymmetry is the readout: agbcc did NOT fold the
+ * entry narrowing of r0 into r0's own first use (`lsls r4,r0,#4`), so a
+ * missing pair on r2 means r2 is not a narrow parameter (wave 20, W20-C).
+ * All three call sites -- sub_08050134, sub_08050364 and the pass-through
+ * wrapper sub_0805040C -- are byte-identical with `u16` here, so this is the
+ * weakest type that fits rather than a proof. */
+void sub_08050424(u16, u16, int);
+/* Third parameter is `int`: it arrives as `adds r4, r2, #0` and is narrowed
+ * `lsls #0x10; asrs #0x10` only at the use, which is docs/agbcc-codegen.md's
+ * copy-then-narrow readout. The first two narrow in place, so they are u16.
+ * Void -- it tail-calls sub_080155C0 and no caller reads r0. Nine call sites;
+ * sub_0804C828 / sub_0804CD84 pass gUnknown_03001FBC as the third argument
+ * with NO `mov r2` at the call, because the allocator had already loaded it
+ * there (wave 20, W20-C). */
+void sub_0804DC5C(u16, u16, int);
 
 /* sub_0803B3C8 has been PROMOTED (src/decomp/c_0803B3C8.c) since wave 9 and was
  * never declared here, because nothing had called it across a file boundary
@@ -2326,5 +2444,71 @@ void sub_0803B3C8(void);
  * KEPT at full width and is the decisive half of that census. A `u8`/`bool8`
  * return would have put `lsls r0, #0x18` after every one of the 20 `bl`s. */
 int sub_0803866C(void);
+
+/* ---- wave 20 (W20-B) ----
+ * A Proc_Start front end: it forwards (r0, r1) unchanged and passes r2 through
+ * as sub_08071B28's fourth argument, which sub_08071B28 hands to Proc_Start as
+ * the PARENT (`adds r1, r3, #0` ... `bl Proc_Start`) -- hence ProcPtr rather
+ * than a bare pointer. Nothing is narrowed at entry in either function, so the
+ * first two are `int`. `pop {r4,r5}; pop {r0}` -> void. */
+void sub_08071B0C(int, int, ProcPtr);
+
+/* DEFINED in src/decomp/c_08084858.c (matched since wave 19); this publishes
+ * it and RETYPES the return from `int` to `u8`. The body cannot tell the two
+ * apart -- `ldrb r0,[r0]; bx lr` either way -- but two callers can, and both
+ * were still asm when the definition was promoted: sub_08084864 and
+ * sub_0808488C each follow the `bl` with a bare `lsls r0, r0, #0x18` before
+ * the `cmp`, which is the narrow-return re-narrowing agbcc emits at every call
+ * site, in its truth-test form. An `int` return emits no shift at all.
+ * gUnknown_03000650 is `u8 []`, so `u8` is also the weakest type that fits.
+ *   MEASURED CAVEAT, so nobody re-derives it: `int` plus an explicit `(u8)`
+ * cast at each call site is BYTE-IDENTICAL here (the cast's `lsr` is dead in a
+ * comparison against 0 and combine drops it), so the call sites do not
+ * discriminate the two models -- they only rule out an uncast `int`. `u8` is
+ * chosen because it needs no cast anywhere. sub_08080FE0 and sub_08084700, the
+ * other two callers, are still asm and were not consulted. */
+u8 sub_08084858(int);
+
+/* Five arguments, typed from the callee's own entry narrowing and not from a
+ * call site. r0 and r1 are masked with 0xFFFFFE00 / 0xFFFFFF00 and truncated to
+ * u16 -- a 9-bit x and an 8-bit y, the same OAM coordinate pair sub_0801F34C
+ * takes -- and r2/r3 pass through to `ip`/`r8` untouched, so all four are word
+ * wide. The FIFTH arrives at [sp, #0x1c] and is narrowed on arrival
+ * (`lsls r2, r2, #0x18`) before a bare `cmp r2, #0`, which is a sub-word
+ * parameter used as a truth test. Both call sites in sub_08084F44 pass the
+ * literal 1, so they do not discriminate `u8` from `int` and this is settled on
+ * the callee side alone. */
+void sub_08043C28(int, int, int, int, u8);
+
+/* A Decompress front end: `lsls r0, r0, #3` indexes an 8-byte-stride table at
+ * gUnknown_08616AC0 and the word it loads is Decompress's source. The scale is
+ * the whole type argument -- an index used as `x * 8`, nothing narrowed at
+ * entry, so `int`. `pop {r0}; bx r0` with r0 holding Decompress's return, which
+ * no caller reads: sub_08082660 discards it, so `void`. */
+void sub_080845A8(int);
+
+/* Returns a PALETTE pointer, not a value: both arms end in an address --
+ * `&gUnknown_0823DC38[x * 16]` when sub_08084858 says 0, and the fixed
+ * gUnknown_0812596C otherwise -- and sub_08082660's only use hands the result
+ * straight to ApplyPaletteExt's `u16 *` first parameter with no arithmetic.
+ * The `lsls r0, r4, #5` is a BYTE offset, i.e. 32 bytes = 16 u16 = one 16-colour
+ * palette, which is what fixes the element type. The argument is unnarrowed at
+ * entry and is forwarded to sub_08084858(int), so `int`. */
+u16 *sub_08084864(int);
+
+/* The four helpers sub_0800CFDC drives, all of them (column, row) queries or
+ * writes on the gUnknown_08499590 map descriptor. Every one opens with bare
+ * `adds rN, r0, #0` / `adds rM, r1, #0` and narrows neither, so both parameters
+ * are `int`; sub_0800CFDC passes `x - 1`, `x + 1`, `y + 1` and `y - 1` into them,
+ * which an s16 pair would have re-narrowed at each of the 32 call sites.
+ *   sub_0800E8CC and sub_0800E9F4 return through `adds r0, r6, #0` and their
+ * results are used at full width -- sub_0800CFDC ANDs two of them together and
+ * switches on the result over the range 6..31, and compares the other against 1
+ * and 2 with no `lsls` in between -- so both are `int`. The other two end
+ * `pop {r0}; bx r0`, i.e. void. */
+int sub_0800E8CC(int, int);
+int sub_0800E9F4(int, int);
+void sub_0800EAF4(int, int);
+void sub_0800EB5C(int, int);
 
 #endif // UNKNOWN_FUNCS_H
