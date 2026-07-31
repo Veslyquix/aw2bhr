@@ -1,290 +1,306 @@
 {
- "_comment": [
-  "Functions that ARE compiler output and should match, but have not yet.",
-  "They are held out of the work queue so waves stop rediscovering them,",
-  "and they are deliberately NOT counted as progress anywhere: a parked",
-  "function is still assembly, the ROM is still built from its asm/ unit,",
-  "and the C in work/<fn>/ does not go into src/decomp/.",
-  "",
-  "This is a different claim from data/asm-resident.json. That file says",
-  "'no C will ever match this, because a compiler did not write it'.",
-  "This file says 'C should match this and ours does not yet'. Do not put",
-  "an entry here in asm-resident.json to get it out of the queue -- that",
-  "file is the evidence base for what hand-written assembly looks like,",
-  "and a wrong entry poisons every later judgement made from it.",
-  "",
-  "An entry needs three things: the best percentage reached, the EXACT",
-  "remaining difference, and the axes already ruled out. Without the",
-  "ruled-out list the next wave repeats the same attempts -- which is the",
-  "specific failure this file exists to prevent.",
-  "",
-  "TWO SHAPES ARE ACCEPTED and both are read as opaque by index_functions.",
-  "Older entries are a single prose string. PREFER THE OBJECT FORM for new",
-  "entries -- sub_0804FA2C is the worked example -- because it makes the",
-  "ruled-out list a real list instead of a sentence buried in prose:",
-  "  bytes, best, remaining_diff, why_it_is_close,",
-  "  axes_ruled_out[], settled_by_this_attempt[], reason",
-  "`settled_by_this_attempt` is the one that pays: it names derivations the",
-  "attempt PROVED, so an unpark does not re-litigate them.",
-  "",
-  "Before parking anything, check the toolchain axis. The ROM was built",
-  "with two compilers and more than one flag set, and three functions were",
-  "parked as source-exhausted across two waves and permuter runs when the",
-  "source was never the axis. See data/compiler-overrides.json and the",
-  "'Per-file compiler and flags' section of docs/agbcc-codegen.md.",
-  "",
-  "Unparking is the goal. Re-run `python tools/trymatch.py <fn>` against a",
-  "parked entry whenever a new codegen rule lands; the draft is kept at",
-  "work/<fn>/<fn>.c and best.c holds the closest attempt.",
-  "",
-  "THE .rodata WALL IS GONE (wave 18, W18-B). Twelve entries here used to say",
-  "'re-test when the split can express a .rodata word'. It can now. agbcc parks",
-  "a -fforce-addr address constant in the compiling unit's own .rodata, and in",
-  "this repo those same bytes also arrive as incbin'd ROM data in data/rodata.s",
-  "or data/data.s -- so a byte-exact honest draft could not be promoted, because",
-  "its word had nowhere to live and the blob was still supplying it.",
-  "tools/split_rodata.py now splits those blobs per symbol into generated pieces",
-  "under build/rodata (reading data/, never modifying it, exactly as",
-  "split_asm.py treats asm/), and gen_lds.py interleaves a promoted unit's own",
-  ".rodata between the pieces at the address the original build used. Declare",
-  "the words a unit owns with a `rodata` list in data/promoted.json.",
-  "ALL TWELVE were unparked this way -- sub_080081E0, sub_080083E0,",
-  "sub_0800977C, sub_0804E8F0, sub_0804FE10 and the seven-member sub_0805CA60",
-  "group, 3,368 bytes -- every one from a draft that names the global DIRECTLY,",
-  "with both builds reproducing the SHA1. See docs/agbcc-codegen.md.",
-  "",
-  "COROLLARY, and it matters for what you keep in work/: when the honest",
-  "spelling is byte-exact and only its relocation differs, THAT draft is the",
-  "deliverable and the c_local workaround is not. Keep the honest one as",
-  "work/<fn>/<fn>.c. Three functions were held parked for several waves by",
-  "grinding on the workaround's register allocation when the honest draft had",
-  "been byte-exact the whole time.",
-  "",
-  "DO NOT relax trymatch's reloc_equivalent to bless a .rodata word without",
-  "checking the placement exists. trymatch judges one unit; the split build",
-  "links all of them. A promoted unit whose .rodata the linker script does not",
-  "place either loses the word or shifts every address after it, and because",
-  "promote.py acts on trymatch's verdict the failure lands in the build with",
-  "functions already moved. Placement first, verifier second."
- ],
- "functions": {
-  "sub_0801A6C0": "98.4% -- 64 bytes, size-exact, ONE byte differs at +0x2a. The original stores `strh r2, [r1, #0]`; every candidate produces `strh r3, [r1, #0]`. Both registers hold 0 at that point (r2 was just zeroed and stored to [r1, #4], r3 likewise), so this is a pure register-allocation tie-break with no source-level lever on it -- the instruction selection, the order and every other byte are already correct. Ruled out: the source axis, exhaustively, across two waves plus decomp-permuter runs; and the toolchain axis -- old_agbcc and dropping -fforce-addr were both tried after the wave-10 two-compiler finding and neither moves this byte. Not every allocation near-miss is a flag problem. Worth re-testing whenever a register-allocation rule lands in docs/agbcc-codegen.md.",
-  "sub_08022618": "392 of 400 bytes, 8 SHORT (wave 15, C). Straight-line, 2 `.LC` pool words (gUnknown_080909A8 -> &gUnknown_08499580, gUnknown_080909AC -> &gUnknown_085D5ABC), both spelled with A2's `pp = &<word>` and both relocation-correct; `pp` stays in sl as the ROM has it. Every statement, the || chain, the four 2x2 tile stores and the two Div clamps are identified. The remaining 8 bytes are zero-extensions agbcc elides and the ROM keeps: `id`'s store truncation (`ldrb; lsls #0x10; lsrs #0x10`) is folded away by combine's nonzero_bits. The SAME effect on `ax`/`by` was worth 16 bytes and IS fixed, by spelling them `int` with an explicit `(u16)` cast at each use instead of `u16` locals -- see docs/agbcc-codegen.md. `int id` with `(u16)`/`(s16)` casts fixes id's 4 bytes and re-breaks ax/by, so the two want different spellings of one idea. Ruled out: old_agbcc (identical size); ax/by as dead entry parameters (identical output); 300 s of decomp-permuter from this draft (best 31.0%, no size improvement). Draft in work/sub_08022618/sub_08022618.c.",
-  "sub_08042998": "444 of 472 bytes, 28 SHORT (wave 15, C). Straight-line, 2 `.LC` pool words (gUnknown_08091364 -> &gUnknown_030040D8, gUnknown_08091368 -> &gUnknown_085D5ABC) needing THREE different read-site spellings in one function (`**pp`, `w = *pp` then `*w`, `(*pp2)[i]`). Semantics complete: the bitfield model is struct Unk08499594's, which was derived from this function in an earlier wave. 12 of the 28 bytes are one thing -- the ROM emits both arms of the unk04_7 clamp in full, with two `.word 0xFFFFF87F` pool words, because its `cap` arm RE-LOADS `ldrb r0, [r0, #0xb]` rather than reusing the compare's value; agbcc CSEs that reload whether the field is read inline or through a local, so the two arms converge on the same registers and cross-jumping merges them. 4 more: gUnknown_08091368's `pp2` is const-propagated (two uses is under the threshold) so the second high register is never pushed. Ruled out: old_agbcc (identical size). Draft in work/sub_08042998/sub_08042998.c.",
-  "sub_08058A2C": "400 of 392 bytes, 8 LONG (wave 15, C). Straight-line, 1 `.LC` pool word (gUnknown_0816D948 -> &gUnknown_030013B0, in the previously undocumented 0x0816D938-0x0816D9BC pool block). Semantics and the whole tail are exact. The 8 bytes are three separate allocation facts: (a) +2, `pp` is const-propagated at its second use so the pool word is emitted twice and `mov sl, r1` never appears -- TWO USES OF A `pp = &<word>` LOCAL IS NOT ENOUGH to keep it live, which is a boundary on wave-13 A2's `c_local` that was not previously recorded (sub_08022618 keeps the same idiom on four uses); (b) +4, the 0x417A pool constant lands in r8 instead of r4 and pays a `mov` at each of its two uses, downstream of (a); (c) +2, the `n` local is allocated to r1 and copied into r0 for __divsi3. Ruled out: old_agbcc (identical size); 300 s of decomp-permuter (best 75.8%, still +8); five spellings of the pool-word access. Draft in work/sub_08058A2C/sub_08058A2C.c.",
-  "sub_0808B91C": "99.4% -- 496 bytes, size-exact, THREE bytes differ and they are one register-allocation choice: `v` (the final float result) is allocated r1 and the ROM allocates it r4, so `adds r4, r0, #0` and its two `adds r0, r4, #0` readers come out on r1. Every other instruction, every pool word and every relocation match. gcc's REG_ALLOC_ORDER offers the call-clobbered registers first and `v` crosses no call, so r1 is taken before r4 is considered; making `v` cross a call (`v = -v;` instead of `return -v;`) reshapes the tail and drops the whole function to 75.2%.\n\nThis is the tree's FIRST soft-float function, a cosf: range-reduce by whole pi, cosine Taylor series in r*r to the r^16 term, negate on odd n. Everything it established is in the 'Soft float' chapter of docs/agbcc-codegen.md and matters more than the three bytes -- double word order in registers is HIGH FIRST (FPA layout, so `ldr r2,=0x400921FB; ldr r3,=0x54442D18` is pi and not 9e97), every __*df3 comes from an UNSUFFIXED decimal constant promoting a float operand rather than from double source, `t - C` emits __subdf3 so an alternating series needs explicit negative literals with `+`, and the coefficients are 13-significant-digit hand-typed decimals that 1.0/24.0 does not reach.\n\nRuled out. TOOLCHAIN: default, old_agbcc without -fprologue-bugfix, no -fforce-addr, and both together all produce the IDENTICAL 99.4% and the same three bytes (tested by monkeypatching agbenv._OVERRIDES, leaving data/compiler-overrides.json alone). SOURCE: two 300 s decomp-permuter runs plus hand sweeps over the return form (`v = -v`, `?:`, explicit else, `n % 2`, `0.0f - v`, `n & 1` hoisted to a local), local declaration order, binding the quotient to a `double`, wrapping the tail and the return in their own do/while, and reusing the parameter for the square as well as the reduced value (+12 bytes: one long live range where the ROM has two that share r4).\n\nNOTE on the draft: work/sub_0808B91C/sub_0808B91C.c carries a `do { } while (0)` around the two range-reduction statements. It is a diagnostic, not a claim about the source. Without it the file scores 97.6% with twelve differing bytes -- `x` lands in r6 and the x/pi quotient takes r4:r5 where the ROM has x in r4 and the quotient in r5:r6. The wrapper flips that because gcc weights allocno priority by LOOP DEPTH, so a zero-trip loop promotes everything inside it above everything outside; the original was more likely written through a macro. A cleaner way to raise x's priority would close nine of the twelve bytes and is the thing to look for first on any re-attempt.",
-  "sub_0804FA2C": {
-   "bytes": 632,
-   "best": "636 bytes (+4), 46.2% identical",
-   "remaining_diff": "&gUnknown_03004580 is materialised early and register-allocated, but into sl and ONE INSTRUCTION BEFORE `ldr r5, =gUnknown_085D6A48`, where the ROM has it in r8 one instruction AFTER -- so the last two literal-pool words are swapped and the tile multiply pays two extra copies (`adds r3,r1,#0; muls r3,r0; adds r0,r3,#0` against the ROM's bare `muls r0, r1`). The multiply is downstream of the allocation, not independent: both operand orders and a temporary for the table read give byte-identical output.",
-   "why_it_is_close": "This is the same failure mode that sub_0804D290 and sub_0804DCA8 had, and both of those are now MATCHED. Of two address constants used the same number of times in the same statements, agbcc gives the callee-saved register to whichever pseudo is created first and emits that one's ldr at the head of the statement; the fix on the twins was a comma operator inside the other argument's index, moving the reference one slot later. Here the identical comma costs &gUnknown_0300453C its r6 and is a net loss, because FA2C carries one more simultaneously live value than the twins do. See 'Of two address constants, the pseudo created FIRST wins the register' in docs/agbcc-codegen.md.",
-   "axes_ruled_out": [
-    "old_agbcc -- 624 bytes on the twins, worse here too",
-    "-fno-force-addr -- BIT-IDENTICAL output, so these `ldr rN, =sym` are ordinary address loads and not -fforce-addr artefacts",
-    "lc_screen reports 0 pool words, so this failure mode is invisible to it",
-    "do { } while (0) round the tileNum statement, the sub_08057D44 statement, the sub_08015928 statement, or the four entry writes -- +8 to +20",
-    "the comma anchor in either the tileNum or the sub_08057D44 statement -- same +4 size, worse bytes",
-    "anchoring through pos, row, an int, or a register-qualified local -- all bit-identical, so the anchor's variable is irrelevant and only its position matters",
-    "a u16 (*)[8] pointer local for the gUnknown_03004580 reads -- collapses the base-plus-constant form the ROM CSEs into an ldrh displacement",
-    "two decomp-permuter runs of 300 s+ (3000 and 12000 iterations) -- best edits were noise (`new_var = 5` used as an array index) and both scored worse than the hand fix"
-   ],
-   "settled_by_this_attempt": [
-    "gUnknown_085D6A48's rows are STRUCTS, not u16[12] -- the ROM keeps column 9 in the ldrh displacement, which an array row cannot emit (4 bytes)",
-    "(rN = pos[k])[i*5+j] and not pos[k][i*5+j] -- the ROM builds the row address first (12 bytes)",
-    "ONE binding local PER STATEMENT: a single `row` reused across four statements is one pseudo spanning all of them and takes a low callee-saved register the ROM spends on the constant 180 (4 bytes)",
-    "* 0x100 and not << 8 (4 bytes)"
-   ],
-   "reason": "Register allocation, not source semantics. The instruction stream, the type model and every read form are settled and recorded in the draft's header; what remains is one address constant landing one slot early in a function that is one live value tighter than its two matched twins. Worth a wave-18 look precisely because the twins closed on the same axis."
-  },
-  "sub_0804E7A8": {
-   "bytes": 328,
-   "best": "94.2% -- 328 of 328, SIZE EXACT",
-   "remaining_diff": "Three byte positions, and one of them is not a difference: the pool word relocates against `gUnknown_085D6C88 + 0xc` where the ROM uses `gUnknown_085D6C94 + 0` -- the same address, which reloc_equivalent would bless once the instruction stream is clean. The real residual is that the ROM emits `lsls rN,#16` beside EACH of the two tail subtractions and defers BOTH `asrs` past the gUnknown_03001FBC load, splitting each s16 conversion around the first argument's setup.",
-   "why_it_is_close": "Its sibling sub_0804FCA4 MATCHES from the same shape and the same four spelling decisions; the two were solved by diffing them against EACH OTHER rather than against the ROM, which is what found the sound table's declaration. Everything except the two shift placements is the ROM's.",
-   "axes_ruled_out": [
-    "s16 / u16 / int / short locals for the two computed arguments, `(s16)` casts at the call, inline arguments, reversed assignment order, separate declarations, an `idx` local for the first argument, and do/while(0) round each assignment, both assignments and the call.",
-    "Eight declaration orders and int/u16 for c, e, t, w.",
-    "Reaching the sound table as the flat `s16 [][6][2]` view its own pool word suggests: 136 bytes worse (52.7%). The struct-member spelling is required.",
-    "do/while(0) round the p1/p2 pair and round the `entry->x +=` statement."
-   ],
-   "settled_by_this_attempt": [
-    "The 0x085D6C88 sound table is a STRUCT array reached as `g[B].unk0c[j][i]`, NOT the flat 3-D view. That single declaration is worth 40 points here and the whole match on sub_0804FCA4.",
-    "`&gUnknown_02029A10[c].entries[e]` CSEd across four member accesses needs the explicit byte-offset sum; used once (sub_0804E8F0) it needs the plain subscript.",
-    "`row = gUnknown_02028E5C[c]` must be bound INSIDE the subscript that uses it: as its own statement the two pool words come out in the wrong order (5 bytes), inline it loses the `[rB,#2]` displacement (44 bytes)."
-   ],
-   "reason": "instruction placement"
-  },
-  "sub_0807166C": {
-   "bytes": 344,
-   "best": "81.4% -- 344 of 344, SIZE EXACT",
-   "remaining_diff": "The eleven-instruction prologue only; all eighteen case bodies and the jump table are byte-identical. The ROM has a->r4, b->r6, op->r5 and keeps the ORIGINAL cursor live, reading the second and third bytes as `[cur,#1]` and `[cur+1,#1]` and loading a->unk18 BEFORE the offset byte (`off + base`); the draft has a->r5, b->r4, op->r6, advances the cursor in place and adds `base + off`.",
-   "why_it_is_close": "It is one opcode of a bytecode interpreter: three bytes off b->unk40, then a switch of six read-modify-writes and twelve comparisons whose twenty-four written-out arms cross-jump into the ROM's two shared tails.",
-   "axes_ruled_out": [
-    "Eight declaration orders; int/u8/u32 for `op` and `v`.",
-    "`*b->unk40++` three times, an explicit `cur` local with three separate `b->unk40 = cur + n;` stores, `*cur++` with the write-back after each, and binding the offset byte to its own `int d` (21 bytes worse -- the offset must stay inside the address expression).",
-    "Both operand orders of `off + a->unk18`."
-   ],
-   "settled_by_this_attempt": [
-    "`v` is a 32-BIT local, not `u8`: `u8` costs 15 bytes and `int` 4, while `u32` makes all eighteen case bodies byte-identical.",
-    "gUnknown_03005744 is a two-argument function pointer (from `_call_via_r2`) taking this function's own two context pointers.",
-    "The opcode map: 0-2 store/add/subtract an immediate, 3-5 the same through `a->unk18[operand]`, 6-11 compare against the immediate and 12-17 against `a->unk18[operand]`, in the order ==, !=, >, >=, <=, <."
-   ],
-   "reason": "register allocation"
-  },
-  "sub_08079EA4": {
-   "bytes": 264,
-   "best": "size-exact (264 bytes), 99.2% identical, exactly 2 bytes differ",
-   "remaining_diff": "The two bytes are the immediate field of ONE `bl` at +0x16, and nothing else in the function differs -- every other instruction, register and constant matches, and the only other diff lines are branch/reloc ADDRESSES that differ because the candidate sits at offset 0 while the original sits at +0x766 inside its unit. The original's instruction is `bl 3ec <_08079B38>`, an intra-file branch to a LOCAL label with the offset already assembled in and NO relocation. Any C caller necessarily emits `bl 0` plus an `R_ARM_THM_CALL` against an external name, so the bytes cannot agree. This is NOT a codegen difference and there is no source spelling that fixes it.",
-   "why_it_is_close": "0x08079B38 is a genuine function entry that tools/split_asm.py merged into sub_08079B04, which is two bytes of `b _08079B38` sitting in front of the PREVIOUS function's 13-word literal pool and has zero callers. docs/agbcc-codegen.md already classifies this exact site under 'bl to a mid-function local label is NOT a tell' (the split-artefact row, `_08079B38` x3). The consequence for CALLERS had not been noticed: because `asm/` names the entry only as the local label `_08079B38` and no global symbol exists at 0x08079B38 in either build, a promoted C caller has nothing to link against. sub_08079EA4 is the first caller of such an entry that anyone has tried to match -- the only other site is `_08036B48`, whose two callers are both inside AgbMain, which is still assembly.",
-   "axes_ruled_out": [
-    "the source axis for everything except the call -- the draft is instruction-for-instruction the ROM, so there is nothing left to derive",
-    "naming the callee `_08079B38` in C -- this WOULD make trymatch report a match, because both relocations would then name the identical symbol. It is a FALSE match and must not be used: `_08079B38` is a local (non-global) label in asm/code-0806CFC8.s, so the promoted unit would fail to link. This is exactly the class of error the brief warns trymatch cannot see, and it is the tempting wrong fix here.",
-    "an lds symbol (`sub_08079B38 = 0x08079B38;` from gen_lds.py) -- would make the split build LINK correctly and produce identical ROM bytes, but trymatch still rejects it: reloc_equivalent resolves ABS32 through the symbol table and requires a non-ABS32 relocation to name the IDENTICAL symbol, so `_08079B38` vs `sub_08079B38` is a mismatch regardless of both resolving to one address.",
-    "a function-pointer cast to the literal address -- emits a pool word and `bl _call_via_rN`, not a `bl`, so it is a different instruction stream"
-   ],
-   "settled_by_this_attempt": [
-    "the whole function's source is settled; the draft in work/sub_08079EA4/ is the deliverable the moment the symbol exists",
-    "the affine denominator is `proc->unk34 == 0x200 ? 2 : 0x200 - proc->unk34` and NOT the `d != 0 ? d : 2` form the promoted c_08027B68.c uses. Both are the same predicate; they are different code. The ROM presets `movs r1, #2` and conditionally overwrites it with `subs r1, r4, r2`, so the arm that gcc computes UNCONDITIONALLY is the `2`, which means `2` must be the TRUE arm in the source. The `!= 0` spelling put `0x200 - x` first and cost +4 bytes across the four call sites (two extra `adds r0, r2, #0` shuffles), scoring 28.8%. This is the general rule: in `c ? A : B` compiled to one branch, A is the arm emitted unconditionally -- read the presetting `movs` to recover which arm the source wrote first.",
-    "sub_080795A8 and sub_08079B38 both take TWO arguments with the first unused in the body; the proc pointer left sitting in r0 costs no instruction and is not evidence of arity, the `movs r1, #0` is",
-    "gUnknown_08615E40 is a real 12-byte u8 ROM table read `base + index; ldrb`, NOT a .LC pool word -- tools/lc_screen.py misclassifies it (fanin 1, density 4). Dereferenced against baserom.gba: 02 03 04 05 x3, with address-shaped words starting at +0x0c.",
-    "proc offsets: +0x30 int, +0x34 int, +0x40 int, +0x4c u16, +0x52 u16"
-   ],
-   "reason": "TOOLING, not decompilation, and the fix is one line in the right place: tools/split_asm.py should treat a label that is the target of a `bl` from outside its own unit as a function boundary (there are 4 such sites, all listed in docs/agbcc-codegen.md), or failing that gen_lds.py should emit an absolute symbol at 0x08079B38 AND trymatch's reloc_equivalent should resolve R_ARM_THM_CALL through the symbol table the way it already does for R_ARM_ABS32. Either change unparks this immediately with no change to the draft. Deliberately NOT put in asm-resident.json: this is ordinary compiler output and the C is already right."
-  },
-  "sub_0804F18C": {
-   "bytes": 572,
-   "best": "34.4% -- 552 of 572, 20 bytes SHORT (wave 19, W19-B)",
-   "remaining_diff": "Register allocation only; the instruction stream and all the address arithmetic match. The ROM parks the 0xb4 gUnknown_02029A10 group stride in r8 and pays `mov rN, r8` at each of its five `muls` uses, and gives `pos` (the sub_08057D44 result) the low callee-saved r7. The draft does the opposite: the stride takes r6 and is used directly, and `pos` is pushed out to `ip`. That is why the candidate is SHORTER than the original rather than longer -- the ROM's extra bytes are the copies its own allocation costs it. Secondary, and downstream of the same choice: the ROM shares ONE `lsls #16; asrs #16` of `v` between the two uses and the draft emits it only at the second, because with one reference combine substitutes it into the first `strh`.",
-   "why_it_is_close": "Everything except the allocation is settled and verified. The three `.LC` pool words are REPRODUCED by the honest spelling -- agbcc emits &gUnknown_03001FBC, &gUnknown_0300451C and &gUnknown_0300453C into this unit's .rodata in the ROM's own slot order for 0x081360A0/A4/A8, and the text pool relocates R_ARM_ABS32 .rodata at three offsets, which is the placeable shape the twelve wave-18 unparks used. This is the same residual, in the same direction, as its matched twins sub_0804D290 / sub_0804DCA8 had before the zero-trip loop and the comma anchor closed them, and the same as parked sub_0804FA2C.",
-   "axes_ruled_out": [
-    "The wave-13 `c_local` spelling (`&gUnknown_081360Ax` bound to a local, read `**local`) -- +28 bytes at 26.8%, kept as work/sub_0804F18C/_clocal_nearmiss.c. Worse on every axis than the honest draft and no longer needed for the relocations.",
-    "c_local with the MIDDLE level bound explicitly (`ppA = &LC; a = *ppA;` then `*a`), which is wave-13 finding (1) and is what the ROM's text literally shows -- 548 bytes (-24) at 10.8%: each `pp` has only two uses, agbcc const-propagates it at the second, and the high-register copy never appears. Two uses of a `pp = &<pool word>` local is not enough to keep it live, as sub_08058A2C already records.",
-    "`do { } while (0)` round the sub_08057D44 statement -- the lever that closed sub_0804D290. 548 bytes (-24), 35.5%: it moves the wrong way here, because D290 needed it together with two camera-origin pointer locals this function does not have.",
-    "`s16 v` versus `int v` with `(s16)v` at each use -- byte-identical, so the shared sign extension is not reachable by either.",
-    "`u16 (*t)[5][2]` with `t[side][slot][0]` versus `struct UnkPosPair *` with the flat `(e1 = &pos[side * 5 + slot])->x`. The flat form is correct and is what the draft carries: it reproduces the ROM's `lsls #2; adds; adds; lsls #2` single scaling exactly, where the 2-D form scales the two indices separately. F658 is the opposite way round -- its ROM really is 2-D with a 40-byte row.",
-    "TOOLCHAIN, all measured on the honest draft: old_agbcc, -fforce-mem, -fno-gcse and -fno-force-addr all leave it unchanged and none of them alters whether the .rodata words are emitted."
-   ],
-   "settled_by_this_attempt": [
-    "The honest spelling REACHES this function's three `.LC` words, which the header comment on gUnknown_081360A0 and the wave-13 scalar/array triage both said it could not. What decides it is the candidate's CFG: with the two-bit guard spelled `if (a.bit0 && !a.bit6)` the tests fold to `(x & 0x41) == 1`, a basic block disappears, and agbcc emits NO .rodata at all. See docs/agbcc-codegen.md.",
-    "The guard is `t = *(u8 *)&gUnknown_03004504; if (t & 1) { if (!(t & 0x40)) ... }` -- six spellings probed and only this one gives the ROM's two separate mask tests with no QImode truncation on the second. sub_0804BCB8's own body has the identical shape over the same two bits.",
-    "gUnknown_0300454C[0] takes OamData.priority read straight back out of the field it was just assigned (`lsls #0x1c; lsrs #0x1e` on the stored byte), not a second literal 2.",
-    "The four gUnknown_03001470 writes are unk28 = gUnknown_0300451C * 8, unk2c = 0, unk30 = gUnknown_0300453C, unk34 = gUnknown_0300451C -- the same run its sibling F658 has minus the unk2c store."
-   ],
-   "reason": "register allocation"
-  },
-  "sub_0804F658": {
-   "bytes": 612,
-   "best": "31.4% -- 604 of 612, 8 bytes SHORT (wave 19, W19-B)",
-   "remaining_diff": "The same allocation residual as sub_0804F18C and in the same direction: the ROM keeps the 0xb4 group stride and the sub_08057D44 result in registers whose uses cost it copies the draft does not pay, so the candidate comes out short. The prologue, the four proc-field writes, the OamData bitfield run, both sub_08057D44 arguments, the two-bit guard and the whole 2-D position lookup are byte-identical to the original.",
-   "why_it_is_close": "It was produced from sub_0804F18C's finished draft by five substitutions and reproduced that function's residual CLASS on the first trymatch, which is the banked-discount behaviour sub_0804DCA8 showed against sub_0804D290. Its three `.LC` words are reproduced by the honest spelling in the ROM's slot order for 0x081360B8/BC/C0.",
-   "axes_ruled_out": [
-    "`do { } while (0)` round the sub_08057D44 statement -- 600 bytes at 17.2%, a large regression, so the D290 lever does not transfer to this member either.",
-    "`s16 v` versus `int v` with `(s16)v` at the one use -- byte-identical.",
-    "Everything ruled out for sub_0804F18C applies here unchanged; the two share the shape and, so far, the residual."
-   ],
-   "settled_by_this_attempt": [
-    "The wave-13 scalar/array triage does not hold as a decision rule. This function's third `.LC` word (0x081360C0) holds &gUnknown_03004580, an ARRAY -- the row that triage parks outright -- and the honest spelling emits it correctly along with the other two. What the triage measured was which spelling reproduces the indirection, and since wave 18 the answer is the honest one.",
-    "sub_0804BCB8's THIRD parameter is s16, not u16. This function and sub_0804E584 both pass gUnknown_0855214C[side] and both emit `movs rN, #0; ldrsh rD, [rB, rN]`, which a u16 parameter cannot produce -- it rewrites an ldrsh into an ldrh and needs no zero register. Retyped in include/unknown-functions.h; byte-neutral for the two promoted callers, which pass a literal 0 (re-verified).",
-    "gUnknown_0855214C is a per-side ROM halfword, `u16 []`. The `ldrsh` at both readers is the conversion to that s16 parameter and says nothing about the object.",
-    "The position record is indexed TWO-dimensionally here -- `pos[gUnknown_03004580[side][5]][side * 5 + slot]` with a 40-byte row and the row bound inside the subscript -- where the otherwise identical sub_0804F18C uses the flat one-dimensional index. The struct Unk02029A10.unk04 comment already recorded this split for sub_0804FA2C; F658 is a third instance, so the flat/2-D choice is per function and must be read off the scaling."
-   ],
-   "reason": "register allocation"
-  },
-  "sub_08052718": {
-   "bytes": 256,
-   "best": "244 bytes (-12), 8.2% identical",
-   "remaining_diff": "ONE hoist, and it is sub_08052BBC's hoist (a) verbatim: the ROM computes `b * 2`, the index of the store target gUnknown_02029808[a].unk24[b], immediately after `gUnknown_0300451C = b` and before the sub_08015410 argument setup, holding it across the call; the draft emits it after the call at the store. That one live range is the whole difference: the ROM puts `b` in sb and saves two high registers where the draft keeps `b` in r6 and saves one. There is no gUnknown_02028E5C here, so unlike sub_08052BBC this function has only the one hoist to explain and is the CHEAPER OF THE TWO to finish.",
-   "why_it_is_close": "The head and the entire tail line up instruction for instruction, including the two-armed `if` on `gUnknown_03004580[a ^ 1][1] == 0x14` selecting 0x23 against 0x10 (the `eors`, the `lsls #4` row scaling, the `adds r1,#2` column bias, the `bne` and the unconditional `b` all reproduce), and including the `-fforce-addr` .rodata pool word.",
-   "axes_ruled_out": [
-    "`s16 *` / `u16 *` local bound to &gUnknown_02029808[a].unk24[b] or to gUnknown_02029808[a].unk24 -- both fold +0x24 into the symbol's own relocation, so the literal-pool word becomes `gUnknown_02029808+0x24` where the ROM has the bare symbol plus `adds rN,#0x24` on the base. A strictly WORSE diff, and it rules out every pointer-binding spelling of the store target at once",
-    "`(&gUnknown_02029808[a])->unk24[b]` as the store target -- this DOES reach the ROM's register pressure (three saved high registers, the correct `push {r4,r5,r6}`) but it binds &gUnknown_02029808[a], not the index, and it moves `a` into r8. Closest wrong answer found; do not mistake the matching prologue for progress",
-    "`*(gUnknown_02029808[a].unk24 + b)` and `unk24[(int)b]` -- bit-identical to the plain subscript",
-    "`c = a; d = b;` copies in the c_08051F4C style -- erased by cse in a straight-line block, see the wave-20 sub_08052650 section in docs/agbcc-codegen.md",
-    "a zero-trip `do { } while (0)` round the sub_08015410 statement, round the four sub_08016824..sub_080157F4 calls, and round the whole body -- the wave-17 lever makes THIS function worse, +1 instruction and `a` forced into a high register. Do not re-run it here",
-    "`e` as u16 / s16 / a `u16 *` bound to &gUnknown_08553B10[a] -- all three byte-identical, and all three already correct; the sub_08052270 lever does not apply because the two-argument ordering in this function is already right"
-   ],
-   "settled_by_this_attempt": [
-    "gUnknown_0813610C IS NOT A GLOBAL. It is a `.LC` address-constant slot in data/data.s holding 0x02029808, with 0x03001470 0x03001FBC 0x020298E0 0x020297C0 0x02029808 0x03004580 0x02029A10 as its neighbours -- a -fforce-addr block by the test in docs/agbcc-codegen.md. Naming gUnknown_02029808 DIRECTLY (the honest spelling) makes agbcc emit its own .LC word and reproduces the ROM's double indirection, `ldr r4,[r1]` then `mov r4,r8; ldr r1,[r4]`. This part needs nothing further and the c_local workaround must not be reached for -- do not spend an attempt here",
-    "WHY sub_08052718 has that pool word and its near-twin sub_08052BBC does not, on the same global and the same statements: only this one has a control-flow MERGE. That is the existing -fforce-addr rule seen twice in one pair of near-twins, i.e. independent corroboration for it",
-    "`e = gUnknown_08553B14[a]`, the 08553B14 half of the pair include/unknown-globals.h records (sub_08052BBC and sub_08051BEC use 08553B10)",
-    "`a ^ 1` and not a second variable -- the ROM has `movs r2,#1; adds r0,r7,#0; eors r0,r2`",
-    "0x100 as `movs #0x80; lsls #1`, against sub_08052BBC's 0x180",
-    "gUnknown_08553704 is an animation descriptor of the gUnknown_085536A4 family; its draw slot is the matched sub_0805297C and its slot 2 is sub_08052AF4, which wave 20 matched"
-   ],
-   "reason": "Register allocation, not source semantics, and the SAME residual as sub_08052BBC. Park them together and unpark them together: six spellings were probed against this one and the same six against its twin, in both directions, with every edit transferring one-for-one. Draft at work/sub_08052718/sub_08052718.c."
-  },
-  "sub_08052BBC": {
-   "bytes": 232,
-   "best": "224 bytes (-8), 12.1% identical from the honest draft; 69.8% from a permuter edit that is NOT the source (see below)",
-   "remaining_diff": "TWO hoists, one fact each, 5 instructions total. (a) The ROM computes `b * 2` -- the index of the store target gUnknown_02029808[a].unk24[b] -- immediately after `gUnknown_0300451C = b` and BEFORE the sub_08015410 argument setup (`mov r2,sb; lsls r5,r2,#1`), holding it in a callee-saved register across the call; every spelling probed emits it after the call, at the store. (b) The ROM also hoists `a * 4`, the gUnknown_02028E5C index whose statement is the LAST in the function, to the same point and parks it in sl (`lsls r0,r6,#2; mov sl,r0` ... `ldr r0,=gUnknown_02028E5C; add sl,r0; mov r2,sl; strh r0,[r2]`). That third long-lived value is why the ROM pushes {r4,r5,r6} where the draft pushes {r5,r6}. Everything else -- every statement, the pool order, the s8 narrowing, the 0x180 as `movs #0xc0; lsls #1`, the literal-0 fifth argument -- is exact.",
-   "why_it_is_close": "The instruction stream and the whole type model are settled; this is register allocation plus one instruction position, the same class as sub_0804FA2C. The literal-pool order (0300453C, 0300451C, 0855371C, 02029808, 08553B10, 02028E5C) matches the draft exactly, and since pool order is a direct readout of source order it independently CONFIRMS the statement order, including that the gUnknown_02028E5C store belongs at the very end -- which is what makes the `a * 4` hoist a puzzle rather than a transcription error. THE TWO MATCHED EXEMPLARS CANNOT SETTLE IT: src/decomp/c_08051BEC.c and c_08051F4C.c have `b * 2` before the call too, but CSEd out of `gUnknown_08552178[a][b] * 7 + 6`, the fifth-argument statement -- and sub_08052BBC's fifth argument is the literal 0, so that statement does not exist here. There is no exemplar anywhere for `b * 2` early with nothing else to produce it, which is why the family transfer that closed the other five functions in this batch stops at these two.",
-   "axes_ruled_out": [
-    "`s16 *` / `u16 *` local bound to &gUnknown_02029808[a].unk24[b] or to gUnknown_02029808[a].unk24 -- both fold +0x24 into the symbol's own relocation, so the literal-pool word becomes `gUnknown_02029808+0x24` where the ROM has the bare symbol plus `adds rN,#0x24` on the base. A strictly WORSE diff, and it rules out every pointer-binding spelling of the store target at once",
-    "`(&gUnknown_02029808[a])->unk24[b]` as the store target -- this DOES reach the ROM's register pressure (three saved high registers, the correct `push {r4,r5,r6}`) but it binds &gUnknown_02029808[a], not the index, and it moves `a` into r8. Closest wrong answer found; do not mistake the matching prologue for progress",
-    "`*(gUnknown_02029808[a].unk24 + b)` and `unk24[(int)b]` -- bit-identical to the plain subscript",
-    "`c = a; d = b;` copies in the c_08051F4C style -- erased by cse in a straight-line block, see the wave-20 sub_08052650 section in docs/agbcc-codegen.md",
-    "a zero-trip `do { } while (0)` round the sub_08015410 statement, round the four sub_08016824..sub_080157F4 calls, and round the whole body -- the wave-17 lever makes THIS function worse, +1 instruction and `a` forced into a high register. Do not re-run it here",
-    "`e` as u16 / s16 / a `u16 *` bound to &gUnknown_08553B10[a] -- all three byte-identical, and all three already correct; the sub_08052270 lever does not apply because the two-argument ordering in this function is already right",
-    "moving `gUnknown_02028E5C[a][0] = 1;` to the top of the function -- REFUTED BY THE POOL ORDER, not by size: its pool word moves to slot 3 and the ROM's is slot 6",
-    "moving the gUnknown_02028E5C store after sub_08052818 -- no change",
-    "`u16 *p; p = gUnknown_02028E5C[a];` bound early, dereferenced at the end -- puts the SYMBOL's `ldr` at the top as well, where the ROM loads it at the store; the ROM keeps only the INDEX live, which no pointer binding expresses",
-    "`gUnknown_02029808[a].unk24[gUnknown_0300451C = b]` (the store folded into the index) -- moves gUnknown_0300451C's pool word to slot 4",
-    "420 s of decomp-permuter, best 69.8% kept at work/sub_08052BBC/best.c. ITS WIN IS THE USEFUL PART AND IS NOT A SOURCE CANDIDATE: binding the three `1` constants to one `char` local plus a do/while(0) round the four calls reproduces the ROM's REGISTER ASSIGNMENT exactly (r5 = slot address, r4 = e, a third saved high register in use) with the WRONG VALUE in sl. So the allocation shape is reachable from source; what is missing is only the construct that makes `a * 4` the thing living there"
-   ],
-   "settled_by_this_attempt": [
-    "gUnknown_0855371C is an animation descriptor of the gUnknown_085536A4 family (`u8 []`, address only); the six-record run 085536A4-0855371C is tabulated in include/unknown-globals.h and it is what gives every function in this cluster its zero-fan-in",
-    "sub_08052818(u16, u16) -- both parameters narrow in place with no copy, the sub_080504A8 readout",
-    "struct Unk02029A10.unk1c is a u16 flag, from an independent producer/consumer pair (sub_08052818 writes 1, sub_08052650 tests == 1)",
-    "the fifth argument of sub_08015410 is the literal 0 here, not this family's `gUnknown_08552178[a][b] * 7 + 6` -- which is exactly why the exemplars do not transfer",
-    "`e = gUnknown_08553B10[a]` is a LOCAL, and the `ldrsh` sitting immediately before the `bl` does not argue against one: combine folds the load down to the call site. See the wave-20 sub_08052270 section"
-   ],
-   "reason": "Register allocation and one instruction position, not source semantics. Nine spellings probed byte-for-byte plus a permuter run; the draft at work/sub_08052BBC/sub_08052BBC.c carries the whole list in its header. Take this one WITH sub_08052718 -- they are near-twins and they share hoist (a), so whatever produces it produces both."
-  },
-  "sub_0800CFDC": {
-   "bytes": 6384,
-   "best": "0.0% -- NOTHING WAS SUBMITTED. 0 try_match attempts spent. The head (first 72 instructions) was verified EXACT with compile_probe; the remaining ~90% is untranscribed, so the draft in work/ is deliberately #if 0'd and scores zero. Do not read 0.0% as a near-miss in the usual sense -- it is an absence, not a failure.",
-   "park_kind": "VOLUME, NOT CODEGEN -- read this field before anything else",
-   "remaining_diff": "There is no remaining diff, because there is no complete candidate. What remains is TRANSCRIPTION: ~20 further pattern tests after the two switch statements, each of the form (bounds guards on x/y against WIDTH/HEIGHT) + (a run of the cell predicate at neighbour offsets) + (one call to sub_0800EAF4 or sub_0800EB5C). 159 predicate instances, 187 basic blocks, 466 branches, 254 labels.",
-   "why_it_is_close": "Every DERIVATION is done and none of it needs redoing. The function is one idiom -- src/decomp/c_08001158.c's map-descriptor access (p = gUnknown_08499590; t = y*2; rows = p+0x417A; off = (*(u16*)(rows+t)+x)*2; tiles = p+0xA22) -- evaluated 159 times over neighbour offsets, with the predicate (u16)(cell - 0x86) <= 1 and a handful of exact tile compares. Ten distinct expression shapes were predicted from the listing before drafting and exactly ten were found. The head reproduced 72 of 72 instructions from the FIRST draft, including the -fforce-addr reroute, which comes free from naming gUnknown_08499590 honestly. The whole function is readable in work/sub_0800CFDC/_symtrace.txt, produced by tools/symtrace.py, which renders the 3,239-line listing as 1,190 lines with every index expression already resolved to ro[y-1] / cell[(ro[y]+2)+x] / BRIDGE(...) / WIDTH / HEIGHT. A fresh agent resumes at roughly 80%.",
-   "axes_ruled_out": [
-    "NOT APPLICABLE IN THE USUAL SENSE, and this is the entry's whole point: no codegen axis was ruled out because no codegen axis was ever the obstacle. Nothing was tried and rejected. Do not read the short list below as an exhausted search.",
-    "The two casesi jump tables assemble byte-for-byte and need no work -- confirmed by the doc's existing 'jump tables match' result; case bodies are in SOURCE order, which for switch 1 is 28..31, then 7/23, then 12/13, then 6/22, then default.",
-    "The -fforce-addr head reroute is settled: the honest `gUnknown_08499590` spelling produces the ROM's three-level `ldr rN,=<word>; ldr r0,[rN]; ldr r1,[r0]`. Do NOT declare the pool word 0x0808D88C as `u8 **const` -- measured on the neighbouring sub_0800F8D4, that adds a fourth level.",
-    "The four `bl _0800E8BA` are agbcc FAR JUMPS to the epilogue, not calls and not a second entry point -- THUMB `b` reaches only +/-2KB and this function is 6KB. Likewise `_0800D080` and `_0800D40C` appear in data_refs and are the two jump tables, not globals."
-   ],
-   "settled_by_this_attempt": [
-    "The parameter pair is (int x, int y) -- a map column and row.",
-    "All four callees are declared and typed from their own entry narrowing, now in include/unknown-functions.h: int sub_0800E8CC(int,int), int sub_0800E9F4(int,int), void sub_0800EAF4(int,int), void sub_0800EB5C(int,int).",
-    "Top-level control flow: guard on the centre cell; drew = 0; a = x>0 ? sub_0800E8CC(x-1,y) : 0; b = sub_0800E8CC(x,y); c = x < width-1 ? sub_0800E8CC(x+1,y) : 0; a &= b; b &= c; switch(a); if (drew && a == b) return; switch(b); then the ~20 pattern tests.",
-    "`drew` (r10) is a REAL variable, not a jump-threading artefact -- it is read nine more times further down, which is why only one switch arm materialises the assignment.",
-    "The four `?rN` spots in _symtrace.txt are not unknowns: `?r8` is always y*2 (set at _0800D3E4), so H[(ROWS)+?r8] reads ro[y]; `?r0` at _0800D2BC / _0800D8B8 / _0800DDAE / _0800E10A / _0800E4B8 is a cross-jumped tail whose two predecessors pass x and x-1, so the SOURCE has two separate calls there.",
-    "tools/symtrace.py itself, and specifically its predecessor-state JOIN: without the join 44 of 187 blocks render with poisoned register state and transcribing from them silently produces wrong constants."
-   ],
-   "open_question": "The one thing genuinely undecided: how many local bindings the original used per pattern region. The ROM reloads `=gUnknown_08499590` 21 times, once per region, so the binding is per-region rather than once for the function -- but whether each region binds p/rows/tiles as three locals (the c_08001158.c shape) or fewer is ~20 independent register-allocation decisions, and that is where any attempts would go.",
-   "budget_unit": "Budget this in BLOCKS TRANSCRIBED, not in try_match attempts. Attempts is the wrong unit above ~2KB -- this function cost zero attempts and still did not finish. It is 187 blocks; sub_08083EE0, which closed in one attempt, was 24. A fresh agent starting from _symtrace.txt should expect the cost to be reading and writing, with attempts spent only on the per-region binding question above.",
-   "reason": "Volume, not codegen. It is the largest straight-line function left in the tree at 6,384 bytes -- 8.5% of the remaining straight-line band in one function -- and it is larger than a single agent-session, which is a different claim from being hard. Nothing about the C or the compiler blocks it: zero backward branches, four already-typed callees, one idiom, ten expression shapes, head verified exact. It is parked so waves stop rediscovering the derivation, NOT because the search space is exhausted. See docs/agbcc-codegen.md, 'ACTUALS for sub_0800CFDC', for the measurement this produced: shape count governs whether you can work a function out, byte count governs how long it takes to write down."
-  },
-  "sub_0800F8D4": {
-   "bytes": 1136,
-   "best": "11.3% identical, 1276 bytes against 1136 (+140). Two rounds: 6.2% then 11.3%.",
-   "park_kind": "ORDINARY NEAR-MISS -- a real candidate exists and the axes below were actually probed. This is NOT the volume park sub_0800CFDC is.",
-   "remaining_diff": "The candidate needs SIX callee-saved registers where the ROM needs five: `mov r7,sl; mov r6,sb; push {r6,r7}` against the ROM's `mov r7,r8; push {r7}`, and the extra spill/reload is the whole +140 bytes. The ROM keeps exactly three things live across the body -- `ip` = the address of this unit's -fforce-addr pool word, r5 = x, r4 = y. Instruction streams otherwise line up: same compare chains, same constant chain, same four pool words, same branch structure.",
-   "why_it_is_close": "Zero callees and one data ref, so nothing in it depends on an unsettled prototype or global. The control-flow skeleton is fully derived: a 14-term dispatch on the centre cell, then six branches (322|354, 323|355, 353, 321, 352, 320), each two bounds guards plus two 7-term neighbour chains. The cell access is src/decomp/c_08001158.c's idiom. What moved the score from 6.2% to 11.3% was TWO things and both are recorded in the draft: fixing a transcription error in branch 322|354's second chain (`289, 288`, not `259, 258`) and splitting the value types (`u16` for the neighbour cell, `int` for the centre one).",
-   "axes_ruled_out": [
-    "function-scope p/rows/tiles/t/off shared by all 13 accesses -- 608 instructions against the ROM's 544, worse than block-scoping",
-    "the same five bound in a BLOCK per access -- 600, and what the draft carries",
-    "`n` block-scoped per branch rather than function-scope -- byte-neutral, so `n` is NOT the extra live value",
-    "c_local `pp = &gUnknown_08499590` with `*pp` at each access -- 574 instructions, the BEST count seen and WRONG: it emits two indirections where the ROM has three, i.e. it buys 26 instructions by dropping a level of the pointer model",
-    "declaring the pool word as `u8 **const gUnknown_0808D898` and dereferencing it -- 602 and FOUR indirections, because agbcc force-addrs the declared symbol's address on top. Do not declare the pool word; the honest `gUnknown_08499590` supplies the ROM's middle level",
-    "`u16 v` for the centre cell -- 9.7%, worse than `int v` at 11.3%",
-    "the guard spelling is NOT an open axis: the ROM's `subs r0,r5,#1; cmp r0,#0; bge` is literally the draft's `if (x - 1 < 0)`"
-   ],
-   "settled_by_this_attempt": [
-    "`u16` neighbour value and `int` centre value, and the tell is in the listing: the neighbour range test carries `lsls #16; lsrs #16` and the centre one does not, so they are different types rather than one",
-    "the ROM chains ONE live constant through the whole tail (0x143, +0x1d -> 352, +1 -> 353, +2 -> 355, -0x40 -> 291, -0x20 -> 259, -1 -> 258) and branch tails jump INTO that chain after an adjusting adds/subs -- so a chain's constants cannot be read off its own immediates, which is how a wrong transcription survived a round",
-    "A CROSS-JUMPED TAIL IS NOT EVIDENCE THE CONSTANTS ARE RIGHT: the wrong `259, 258` scored BETTER (600 insns) than the correct `289, 288` (607) precisely because 259/258 are the shared tail's constants and merged where the correct code cannot"
-   ],
-   "reason": "Register allocation, not source semantics. One live value too many in a function whose instruction stream is otherwise derived. The next axis, untried, is the thirteen access blocks' row index: the draft computes `t = (y +/- 1) * 2` inside each block while the ROM hoists `lsls r2, r4, #1` for the centre row and derives neighbours from the shifted value in some branches -- bind the row index rather than the byte offset."
+  "_comment": [
+    "Functions that ARE compiler output and should match, but have not yet.",
+    "They are held out of the work queue so waves stop rediscovering them,",
+    "and they are deliberately NOT counted as progress anywhere: a parked",
+    "function is still assembly, the ROM is still built from its asm/ unit,",
+    "and the C in work/<fn>/ does not go into src/decomp/.",
+    "",
+    "This is a different claim from data/asm-resident.json. That file says",
+    "'no C will ever match this, because a compiler did not write it'.",
+    "This file says 'C should match this and ours does not yet'. Do not put",
+    "an entry here in asm-resident.json to get it out of the queue -- that",
+    "file is the evidence base for what hand-written assembly looks like,",
+    "and a wrong entry poisons every later judgement made from it.",
+    "",
+    "An entry needs three things: the best percentage reached, the EXACT",
+    "remaining difference, and the axes already ruled out. Without the",
+    "ruled-out list the next wave repeats the same attempts -- which is the",
+    "specific failure this file exists to prevent.",
+    "",
+    "TWO SHAPES ARE ACCEPTED and both are read as opaque by index_functions.",
+    "Older entries are a single prose string. PREFER THE OBJECT FORM for new",
+    "entries -- sub_0804FA2C is the worked example -- because it makes the",
+    "ruled-out list a real list instead of a sentence buried in prose:",
+    "  bytes, best, remaining_diff, why_it_is_close,",
+    "  axes_ruled_out[], settled_by_this_attempt[], reason",
+    "`settled_by_this_attempt` is the one that pays: it names derivations the",
+    "attempt PROVED, so an unpark does not re-litigate them.",
+    "",
+    "Before parking anything, check the toolchain axis. The ROM was built",
+    "with two compilers and more than one flag set, and three functions were",
+    "parked as source-exhausted across two waves and permuter runs when the",
+    "source was never the axis. See data/compiler-overrides.json and the",
+    "'Per-file compiler and flags' section of docs/agbcc-codegen.md.",
+    "",
+    "Unparking is the goal. Re-run `python tools/trymatch.py <fn>` against a",
+    "parked entry whenever a new codegen rule lands; the draft is kept at",
+    "work/<fn>/<fn>.c and best.c holds the closest attempt.",
+    "",
+    "THE .rodata WALL IS GONE (wave 18, W18-B). Twelve entries here used to say",
+    "'re-test when the split can express a .rodata word'. It can now. agbcc parks",
+    "a -fforce-addr address constant in the compiling unit's own .rodata, and in",
+    "this repo those same bytes also arrive as incbin'd ROM data in data/rodata.s",
+    "or data/data.s -- so a byte-exact honest draft could not be promoted, because",
+    "its word had nowhere to live and the blob was still supplying it.",
+    "tools/split_rodata.py now splits those blobs per symbol into generated pieces",
+    "under build/rodata (reading data/, never modifying it, exactly as",
+    "split_asm.py treats asm/), and gen_lds.py interleaves a promoted unit's own",
+    ".rodata between the pieces at the address the original build used. Declare",
+    "the words a unit owns with a `rodata` list in data/promoted.json.",
+    "ALL TWELVE were unparked this way -- sub_080081E0, sub_080083E0,",
+    "sub_0800977C, sub_0804E8F0, sub_0804FE10 and the seven-member sub_0805CA60",
+    "group, 3,368 bytes -- every one from a draft that names the global DIRECTLY,",
+    "with both builds reproducing the SHA1. See docs/agbcc-codegen.md.",
+    "",
+    "COROLLARY, and it matters for what you keep in work/: when the honest",
+    "spelling is byte-exact and only its relocation differs, THAT draft is the",
+    "deliverable and the c_local workaround is not. Keep the honest one as",
+    "work/<fn>/<fn>.c. Three functions were held parked for several waves by",
+    "grinding on the workaround's register allocation when the honest draft had",
+    "been byte-exact the whole time.",
+    "",
+    "DO NOT relax trymatch's reloc_equivalent to bless a .rodata word without",
+    "checking the placement exists. trymatch judges one unit; the split build",
+    "links all of them. A promoted unit whose .rodata the linker script does not",
+    "place either loses the word or shifts every address after it, and because",
+    "promote.py acts on trymatch's verdict the failure lands in the build with",
+    "functions already moved. Placement first, verifier second."
+  ],
+  "functions": {
+    "sub_0801A6C0": "98.4% -- 64 bytes, size-exact, ONE byte differs at +0x2a. The original stores `strh r2, [r1, #0]`; every candidate produces `strh r3, [r1, #0]`. Both registers hold 0 at that point (r2 was just zeroed and stored to [r1, #4], r3 likewise), so this is a pure register-allocation tie-break with no source-level lever on it -- the instruction selection, the order and every other byte are already correct. Ruled out: the source axis, exhaustively, across two waves plus decomp-permuter runs; and the toolchain axis -- old_agbcc and dropping -fforce-addr were both tried after the wave-10 two-compiler finding and neither moves this byte. Not every allocation near-miss is a flag problem. Worth re-testing whenever a register-allocation rule lands in docs/agbcc-codegen.md.",
+    "sub_08022618": "392 of 400 bytes, 8 SHORT (wave 15, C). Straight-line, 2 `.LC` pool words (gUnknown_080909A8 -> &gUnknown_08499580, gUnknown_080909AC -> &gUnknown_085D5ABC), both spelled with A2's `pp = &<word>` and both relocation-correct; `pp` stays in sl as the ROM has it. Every statement, the || chain, the four 2x2 tile stores and the two Div clamps are identified. The remaining 8 bytes are zero-extensions agbcc elides and the ROM keeps: `id`'s store truncation (`ldrb; lsls #0x10; lsrs #0x10`) is folded away by combine's nonzero_bits. The SAME effect on `ax`/`by` was worth 16 bytes and IS fixed, by spelling them `int` with an explicit `(u16)` cast at each use instead of `u16` locals -- see docs/agbcc-codegen.md. `int id` with `(u16)`/`(s16)` casts fixes id's 4 bytes and re-breaks ax/by, so the two want different spellings of one idea. Ruled out: old_agbcc (identical size); ax/by as dead entry parameters (identical output); 300 s of decomp-permuter from this draft (best 31.0%, no size improvement). Draft in work/sub_08022618/sub_08022618.c.",
+    "sub_08042998": "444 of 472 bytes, 28 SHORT (wave 15, C). Straight-line, 2 `.LC` pool words (gUnknown_08091364 -> &gUnknown_030040D8, gUnknown_08091368 -> &gUnknown_085D5ABC) needing THREE different read-site spellings in one function (`**pp`, `w = *pp` then `*w`, `(*pp2)[i]`). Semantics complete: the bitfield model is struct Unk08499594's, which was derived from this function in an earlier wave. 12 of the 28 bytes are one thing -- the ROM emits both arms of the unk04_7 clamp in full, with two `.word 0xFFFFF87F` pool words, because its `cap` arm RE-LOADS `ldrb r0, [r0, #0xb]` rather than reusing the compare's value; agbcc CSEs that reload whether the field is read inline or through a local, so the two arms converge on the same registers and cross-jumping merges them. 4 more: gUnknown_08091368's `pp2` is const-propagated (two uses is under the threshold) so the second high register is never pushed. Ruled out: old_agbcc (identical size). Draft in work/sub_08042998/sub_08042998.c.",
+    "sub_08058A2C": "400 of 392 bytes, 8 LONG (wave 15, C). Straight-line, 1 `.LC` pool word (gUnknown_0816D948 -> &gUnknown_030013B0, in the previously undocumented 0x0816D938-0x0816D9BC pool block). Semantics and the whole tail are exact. The 8 bytes are three separate allocation facts: (a) +2, `pp` is const-propagated at its second use so the pool word is emitted twice and `mov sl, r1` never appears -- TWO USES OF A `pp = &<word>` LOCAL IS NOT ENOUGH to keep it live, which is a boundary on wave-13 A2's `c_local` that was not previously recorded (sub_08022618 keeps the same idiom on four uses); (b) +4, the 0x417A pool constant lands in r8 instead of r4 and pays a `mov` at each of its two uses, downstream of (a); (c) +2, the `n` local is allocated to r1 and copied into r0 for __divsi3. Ruled out: old_agbcc (identical size); 300 s of decomp-permuter (best 75.8%, still +8); five spellings of the pool-word access. Draft in work/sub_08058A2C/sub_08058A2C.c.",
+    "sub_0808B91C": "99.4% -- 496 bytes, size-exact, THREE bytes differ and they are one register-allocation choice: `v` (the final float result) is allocated r1 and the ROM allocates it r4, so `adds r4, r0, #0` and its two `adds r0, r4, #0` readers come out on r1. Every other instruction, every pool word and every relocation match. gcc's REG_ALLOC_ORDER offers the call-clobbered registers first and `v` crosses no call, so r1 is taken before r4 is considered; making `v` cross a call (`v = -v;` instead of `return -v;`) reshapes the tail and drops the whole function to 75.2%.\n\nThis is the tree's FIRST soft-float function, a cosf: range-reduce by whole pi, cosine Taylor series in r*r to the r^16 term, negate on odd n. Everything it established is in the 'Soft float' chapter of docs/agbcc-codegen.md and matters more than the three bytes -- double word order in registers is HIGH FIRST (FPA layout, so `ldr r2,=0x400921FB; ldr r3,=0x54442D18` is pi and not 9e97), every __*df3 comes from an UNSUFFIXED decimal constant promoting a float operand rather than from double source, `t - C` emits __subdf3 so an alternating series needs explicit negative literals with `+`, and the coefficients are 13-significant-digit hand-typed decimals that 1.0/24.0 does not reach.\n\nRuled out. TOOLCHAIN: default, old_agbcc without -fprologue-bugfix, no -fforce-addr, and both together all produce the IDENTICAL 99.4% and the same three bytes (tested by monkeypatching agbenv._OVERRIDES, leaving data/compiler-overrides.json alone). SOURCE: two 300 s decomp-permuter runs plus hand sweeps over the return form (`v = -v`, `?:`, explicit else, `n % 2`, `0.0f - v`, `n & 1` hoisted to a local), local declaration order, binding the quotient to a `double`, wrapping the tail and the return in their own do/while, and reusing the parameter for the square as well as the reduced value (+12 bytes: one long live range where the ROM has two that share r4).\n\nNOTE on the draft: work/sub_0808B91C/sub_0808B91C.c carries a `do { } while (0)` around the two range-reduction statements. It is a diagnostic, not a claim about the source. Without it the file scores 97.6% with twelve differing bytes -- `x` lands in r6 and the x/pi quotient takes r4:r5 where the ROM has x in r4 and the quotient in r5:r6. The wrapper flips that because gcc weights allocno priority by LOOP DEPTH, so a zero-trip loop promotes everything inside it above everything outside; the original was more likely written through a macro. A cleaner way to raise x's priority would close nine of the twelve bytes and is the thing to look for first on any re-attempt.",
+    "sub_0804FA2C": {
+      "bytes": 632,
+      "best": "636 bytes (+4), 46.2% identical",
+      "remaining_diff": "&gUnknown_03004580 is materialised early and register-allocated, but into sl and ONE INSTRUCTION BEFORE `ldr r5, =gUnknown_085D6A48`, where the ROM has it in r8 one instruction AFTER -- so the last two literal-pool words are swapped and the tile multiply pays two extra copies (`adds r3,r1,#0; muls r3,r0; adds r0,r3,#0` against the ROM's bare `muls r0, r1`). The multiply is downstream of the allocation, not independent: both operand orders and a temporary for the table read give byte-identical output.",
+      "why_it_is_close": "This is the same failure mode that sub_0804D290 and sub_0804DCA8 had, and both of those are now MATCHED. Of two address constants used the same number of times in the same statements, agbcc gives the callee-saved register to whichever pseudo is created first and emits that one's ldr at the head of the statement; the fix on the twins was a comma operator inside the other argument's index, moving the reference one slot later. Here the identical comma costs &gUnknown_0300453C its r6 and is a net loss, because FA2C carries one more simultaneously live value than the twins do. See 'Of two address constants, the pseudo created FIRST wins the register' in docs/agbcc-codegen.md.",
+      "axes_ruled_out": [
+        "old_agbcc -- 624 bytes on the twins, worse here too",
+        "-fno-force-addr -- BIT-IDENTICAL output, so these `ldr rN, =sym` are ordinary address loads and not -fforce-addr artefacts",
+        "lc_screen reports 0 pool words, so this failure mode is invisible to it",
+        "do { } while (0) round the tileNum statement, the sub_08057D44 statement, the sub_08015928 statement, or the four entry writes -- +8 to +20",
+        "the comma anchor in either the tileNum or the sub_08057D44 statement -- same +4 size, worse bytes",
+        "anchoring through pos, row, an int, or a register-qualified local -- all bit-identical, so the anchor's variable is irrelevant and only its position matters",
+        "a u16 (*)[8] pointer local for the gUnknown_03004580 reads -- collapses the base-plus-constant form the ROM CSEs into an ldrh displacement",
+        "two decomp-permuter runs of 300 s+ (3000 and 12000 iterations) -- best edits were noise (`new_var = 5` used as an array index) and both scored worse than the hand fix"
+      ],
+      "settled_by_this_attempt": [
+        "gUnknown_085D6A48's rows are STRUCTS, not u16[12] -- the ROM keeps column 9 in the ldrh displacement, which an array row cannot emit (4 bytes)",
+        "(rN = pos[k])[i*5+j] and not pos[k][i*5+j] -- the ROM builds the row address first (12 bytes)",
+        "ONE binding local PER STATEMENT: a single `row` reused across four statements is one pseudo spanning all of them and takes a low callee-saved register the ROM spends on the constant 180 (4 bytes)",
+        "* 0x100 and not << 8 (4 bytes)"
+      ],
+      "reason": "Register allocation, not source semantics. The instruction stream, the type model and every read form are settled and recorded in the draft's header; what remains is one address constant landing one slot early in a function that is one live value tighter than its two matched twins. Worth a wave-18 look precisely because the twins closed on the same axis."
+    },
+    "sub_0804E7A8": {
+      "bytes": 328,
+      "best": "94.2% -- 328 of 328, SIZE EXACT",
+      "remaining_diff": "Three byte positions, and one of them is not a difference: the pool word relocates against `gUnknown_085D6C88 + 0xc` where the ROM uses `gUnknown_085D6C94 + 0` -- the same address, which reloc_equivalent would bless once the instruction stream is clean. The real residual is that the ROM emits `lsls rN,#16` beside EACH of the two tail subtractions and defers BOTH `asrs` past the gUnknown_03001FBC load, splitting each s16 conversion around the first argument's setup.",
+      "why_it_is_close": "Its sibling sub_0804FCA4 MATCHES from the same shape and the same four spelling decisions; the two were solved by diffing them against EACH OTHER rather than against the ROM, which is what found the sound table's declaration. Everything except the two shift placements is the ROM's.",
+      "axes_ruled_out": [
+        "s16 / u16 / int / short locals for the two computed arguments, `(s16)` casts at the call, inline arguments, reversed assignment order, separate declarations, an `idx` local for the first argument, and do/while(0) round each assignment, both assignments and the call.",
+        "Eight declaration orders and int/u16 for c, e, t, w.",
+        "Reaching the sound table as the flat `s16 [][6][2]` view its own pool word suggests: 136 bytes worse (52.7%). The struct-member spelling is required.",
+        "do/while(0) round the p1/p2 pair and round the `entry->x +=` statement."
+      ],
+      "settled_by_this_attempt": [
+        "The 0x085D6C88 sound table is a STRUCT array reached as `g[B].unk0c[j][i]`, NOT the flat 3-D view. That single declaration is worth 40 points here and the whole match on sub_0804FCA4.",
+        "`&gUnknown_02029A10[c].entries[e]` CSEd across four member accesses needs the explicit byte-offset sum; used once (sub_0804E8F0) it needs the plain subscript.",
+        "`row = gUnknown_02028E5C[c]` must be bound INSIDE the subscript that uses it: as its own statement the two pool words come out in the wrong order (5 bytes), inline it loses the `[rB,#2]` displacement (44 bytes)."
+      ],
+      "reason": "instruction placement"
+    },
+    "sub_0807166C": {
+      "bytes": 344,
+      "best": "81.4% -- 344 of 344, SIZE EXACT",
+      "remaining_diff": "The eleven-instruction prologue only; all eighteen case bodies and the jump table are byte-identical. The ROM has a->r4, b->r6, op->r5 and keeps the ORIGINAL cursor live, reading the second and third bytes as `[cur,#1]` and `[cur+1,#1]` and loading a->unk18 BEFORE the offset byte (`off + base`); the draft has a->r5, b->r4, op->r6, advances the cursor in place and adds `base + off`.",
+      "why_it_is_close": "It is one opcode of a bytecode interpreter: three bytes off b->unk40, then a switch of six read-modify-writes and twelve comparisons whose twenty-four written-out arms cross-jump into the ROM's two shared tails.",
+      "axes_ruled_out": [
+        "Eight declaration orders; int/u8/u32 for `op` and `v`.",
+        "`*b->unk40++` three times, an explicit `cur` local with three separate `b->unk40 = cur + n;` stores, `*cur++` with the write-back after each, and binding the offset byte to its own `int d` (21 bytes worse -- the offset must stay inside the address expression).",
+        "Both operand orders of `off + a->unk18`."
+      ],
+      "settled_by_this_attempt": [
+        "`v` is a 32-BIT local, not `u8`: `u8` costs 15 bytes and `int` 4, while `u32` makes all eighteen case bodies byte-identical.",
+        "gUnknown_03005744 is a two-argument function pointer (from `_call_via_r2`) taking this function's own two context pointers.",
+        "The opcode map: 0-2 store/add/subtract an immediate, 3-5 the same through `a->unk18[operand]`, 6-11 compare against the immediate and 12-17 against `a->unk18[operand]`, in the order ==, !=, >, >=, <=, <."
+      ],
+      "reason": "register allocation"
+    },
+    "sub_08079EA4": {
+      "bytes": 264,
+      "best": "size-exact (264 bytes), 99.2% identical, exactly 2 bytes differ",
+      "remaining_diff": "The two bytes are the immediate field of ONE `bl` at +0x16, and nothing else in the function differs -- every other instruction, register and constant matches, and the only other diff lines are branch/reloc ADDRESSES that differ because the candidate sits at offset 0 while the original sits at +0x766 inside its unit. The original's instruction is `bl 3ec <_08079B38>`, an intra-file branch to a LOCAL label with the offset already assembled in and NO relocation. Any C caller necessarily emits `bl 0` plus an `R_ARM_THM_CALL` against an external name, so the bytes cannot agree. This is NOT a codegen difference and there is no source spelling that fixes it.",
+      "why_it_is_close": "0x08079B38 is a genuine function entry that tools/split_asm.py merged into sub_08079B04, which is two bytes of `b _08079B38` sitting in front of the PREVIOUS function's 13-word literal pool and has zero callers. docs/agbcc-codegen.md already classifies this exact site under 'bl to a mid-function local label is NOT a tell' (the split-artefact row, `_08079B38` x3). The consequence for CALLERS had not been noticed: because `asm/` names the entry only as the local label `_08079B38` and no global symbol exists at 0x08079B38 in either build, a promoted C caller has nothing to link against. sub_08079EA4 is the first caller of such an entry that anyone has tried to match -- the only other site is `_08036B48`, whose two callers are both inside AgbMain, which is still assembly.",
+      "axes_ruled_out": [
+        "the source axis for everything except the call -- the draft is instruction-for-instruction the ROM, so there is nothing left to derive",
+        "naming the callee `_08079B38` in C -- this WOULD make trymatch report a match, because both relocations would then name the identical symbol. It is a FALSE match and must not be used: `_08079B38` is a local (non-global) label in asm/code-0806CFC8.s, so the promoted unit would fail to link. This is exactly the class of error the brief warns trymatch cannot see, and it is the tempting wrong fix here.",
+        "an lds symbol (`sub_08079B38 = 0x08079B38;` from gen_lds.py) -- would make the split build LINK correctly and produce identical ROM bytes, but trymatch still rejects it: reloc_equivalent resolves ABS32 through the symbol table and requires a non-ABS32 relocation to name the IDENTICAL symbol, so `_08079B38` vs `sub_08079B38` is a mismatch regardless of both resolving to one address.",
+        "a function-pointer cast to the literal address -- emits a pool word and `bl _call_via_rN`, not a `bl`, so it is a different instruction stream"
+      ],
+      "settled_by_this_attempt": [
+        "the whole function's source is settled; the draft in work/sub_08079EA4/ is the deliverable the moment the symbol exists",
+        "the affine denominator is `proc->unk34 == 0x200 ? 2 : 0x200 - proc->unk34` and NOT the `d != 0 ? d : 2` form the promoted c_08027B68.c uses. Both are the same predicate; they are different code. The ROM presets `movs r1, #2` and conditionally overwrites it with `subs r1, r4, r2`, so the arm that gcc computes UNCONDITIONALLY is the `2`, which means `2` must be the TRUE arm in the source. The `!= 0` spelling put `0x200 - x` first and cost +4 bytes across the four call sites (two extra `adds r0, r2, #0` shuffles), scoring 28.8%. This is the general rule: in `c ? A : B` compiled to one branch, A is the arm emitted unconditionally -- read the presetting `movs` to recover which arm the source wrote first.",
+        "sub_080795A8 and sub_08079B38 both take TWO arguments with the first unused in the body; the proc pointer left sitting in r0 costs no instruction and is not evidence of arity, the `movs r1, #0` is",
+        "gUnknown_08615E40 is a real 12-byte u8 ROM table read `base + index; ldrb`, NOT a .LC pool word -- tools/lc_screen.py misclassifies it (fanin 1, density 4). Dereferenced against baserom.gba: 02 03 04 05 x3, with address-shaped words starting at +0x0c.",
+        "proc offsets: +0x30 int, +0x34 int, +0x40 int, +0x4c u16, +0x52 u16"
+      ],
+      "reason": "TOOLING, not decompilation, and the fix is one line in the right place: tools/split_asm.py should treat a label that is the target of a `bl` from outside its own unit as a function boundary (there are 4 such sites, all listed in docs/agbcc-codegen.md), or failing that gen_lds.py should emit an absolute symbol at 0x08079B38 AND trymatch's reloc_equivalent should resolve R_ARM_THM_CALL through the symbol table the way it already does for R_ARM_ABS32. Either change unparks this immediately with no change to the draft. Deliberately NOT put in asm-resident.json: this is ordinary compiler output and the C is already right."
+    },
+    "sub_0804F18C": {
+      "bytes": 572,
+      "best": "34.4% -- 552 of 572, 20 bytes SHORT (wave 19, W19-B)",
+      "remaining_diff": "Register allocation only; the instruction stream and all the address arithmetic match. The ROM parks the 0xb4 gUnknown_02029A10 group stride in r8 and pays `mov rN, r8` at each of its five `muls` uses, and gives `pos` (the sub_08057D44 result) the low callee-saved r7. The draft does the opposite: the stride takes r6 and is used directly, and `pos` is pushed out to `ip`. That is why the candidate is SHORTER than the original rather than longer -- the ROM's extra bytes are the copies its own allocation costs it. Secondary, and downstream of the same choice: the ROM shares ONE `lsls #16; asrs #16` of `v` between the two uses and the draft emits it only at the second, because with one reference combine substitutes it into the first `strh`.",
+      "why_it_is_close": "Everything except the allocation is settled and verified. The three `.LC` pool words are REPRODUCED by the honest spelling -- agbcc emits &gUnknown_03001FBC, &gUnknown_0300451C and &gUnknown_0300453C into this unit's .rodata in the ROM's own slot order for 0x081360A0/A4/A8, and the text pool relocates R_ARM_ABS32 .rodata at three offsets, which is the placeable shape the twelve wave-18 unparks used. This is the same residual, in the same direction, as its matched twins sub_0804D290 / sub_0804DCA8 had before the zero-trip loop and the comma anchor closed them, and the same as parked sub_0804FA2C.",
+      "axes_ruled_out": [
+        "The wave-13 `c_local` spelling (`&gUnknown_081360Ax` bound to a local, read `**local`) -- +28 bytes at 26.8%, kept as work/sub_0804F18C/_clocal_nearmiss.c. Worse on every axis than the honest draft and no longer needed for the relocations.",
+        "c_local with the MIDDLE level bound explicitly (`ppA = &LC; a = *ppA;` then `*a`), which is wave-13 finding (1) and is what the ROM's text literally shows -- 548 bytes (-24) at 10.8%: each `pp` has only two uses, agbcc const-propagates it at the second, and the high-register copy never appears. Two uses of a `pp = &<pool word>` local is not enough to keep it live, as sub_08058A2C already records.",
+        "`do { } while (0)` round the sub_08057D44 statement -- the lever that closed sub_0804D290. 548 bytes (-24), 35.5%: it moves the wrong way here, because D290 needed it together with two camera-origin pointer locals this function does not have.",
+        "`s16 v` versus `int v` with `(s16)v` at each use -- byte-identical, so the shared sign extension is not reachable by either.",
+        "`u16 (*t)[5][2]` with `t[side][slot][0]` versus `struct UnkPosPair *` with the flat `(e1 = &pos[side * 5 + slot])->x`. The flat form is correct and is what the draft carries: it reproduces the ROM's `lsls #2; adds; adds; lsls #2` single scaling exactly, where the 2-D form scales the two indices separately. F658 is the opposite way round -- its ROM really is 2-D with a 40-byte row.",
+        "TOOLCHAIN, all measured on the honest draft: old_agbcc, -fforce-mem, -fno-gcse and -fno-force-addr all leave it unchanged and none of them alters whether the .rodata words are emitted."
+      ],
+      "settled_by_this_attempt": [
+        "The honest spelling REACHES this function's three `.LC` words, which the header comment on gUnknown_081360A0 and the wave-13 scalar/array triage both said it could not. What decides it is the candidate's CFG: with the two-bit guard spelled `if (a.bit0 && !a.bit6)` the tests fold to `(x & 0x41) == 1`, a basic block disappears, and agbcc emits NO .rodata at all. See docs/agbcc-codegen.md.",
+        "The guard is `t = *(u8 *)&gUnknown_03004504; if (t & 1) { if (!(t & 0x40)) ... }` -- six spellings probed and only this one gives the ROM's two separate mask tests with no QImode truncation on the second. sub_0804BCB8's own body has the identical shape over the same two bits.",
+        "gUnknown_0300454C[0] takes OamData.priority read straight back out of the field it was just assigned (`lsls #0x1c; lsrs #0x1e` on the stored byte), not a second literal 2.",
+        "The four gUnknown_03001470 writes are unk28 = gUnknown_0300451C * 8, unk2c = 0, unk30 = gUnknown_0300453C, unk34 = gUnknown_0300451C -- the same run its sibling F658 has minus the unk2c store."
+      ],
+      "reason": "register allocation"
+    },
+    "sub_0804F658": {
+      "bytes": 612,
+      "best": "31.4% -- 604 of 612, 8 bytes SHORT (wave 19, W19-B)",
+      "remaining_diff": "The same allocation residual as sub_0804F18C and in the same direction: the ROM keeps the 0xb4 group stride and the sub_08057D44 result in registers whose uses cost it copies the draft does not pay, so the candidate comes out short. The prologue, the four proc-field writes, the OamData bitfield run, both sub_08057D44 arguments, the two-bit guard and the whole 2-D position lookup are byte-identical to the original.",
+      "why_it_is_close": "It was produced from sub_0804F18C's finished draft by five substitutions and reproduced that function's residual CLASS on the first trymatch, which is the banked-discount behaviour sub_0804DCA8 showed against sub_0804D290. Its three `.LC` words are reproduced by the honest spelling in the ROM's slot order for 0x081360B8/BC/C0.",
+      "axes_ruled_out": [
+        "`do { } while (0)` round the sub_08057D44 statement -- 600 bytes at 17.2%, a large regression, so the D290 lever does not transfer to this member either.",
+        "`s16 v` versus `int v` with `(s16)v` at the one use -- byte-identical.",
+        "Everything ruled out for sub_0804F18C applies here unchanged; the two share the shape and, so far, the residual."
+      ],
+      "settled_by_this_attempt": [
+        "The wave-13 scalar/array triage does not hold as a decision rule. This function's third `.LC` word (0x081360C0) holds &gUnknown_03004580, an ARRAY -- the row that triage parks outright -- and the honest spelling emits it correctly along with the other two. What the triage measured was which spelling reproduces the indirection, and since wave 18 the answer is the honest one.",
+        "sub_0804BCB8's THIRD parameter is s16, not u16. This function and sub_0804E584 both pass gUnknown_0855214C[side] and both emit `movs rN, #0; ldrsh rD, [rB, rN]`, which a u16 parameter cannot produce -- it rewrites an ldrsh into an ldrh and needs no zero register. Retyped in include/unknown-functions.h; byte-neutral for the two promoted callers, which pass a literal 0 (re-verified).",
+        "gUnknown_0855214C is a per-side ROM halfword, `u16 []`. The `ldrsh` at both readers is the conversion to that s16 parameter and says nothing about the object.",
+        "The position record is indexed TWO-dimensionally here -- `pos[gUnknown_03004580[side][5]][side * 5 + slot]` with a 40-byte row and the row bound inside the subscript -- where the otherwise identical sub_0804F18C uses the flat one-dimensional index. The struct Unk02029A10.unk04 comment already recorded this split for sub_0804FA2C; F658 is a third instance, so the flat/2-D choice is per function and must be read off the scaling."
+      ],
+      "reason": "register allocation"
+    },
+    "sub_08052718": {
+      "bytes": 256,
+      "best": "244 bytes (-12), 8.2% identical",
+      "remaining_diff": "ONE hoist, and it is sub_08052BBC's hoist (a) verbatim: the ROM computes `b * 2`, the index of the store target gUnknown_02029808[a].unk24[b], immediately after `gUnknown_0300451C = b` and before the sub_08015410 argument setup, holding it across the call; the draft emits it after the call at the store. That one live range is the whole difference: the ROM puts `b` in sb and saves two high registers where the draft keeps `b` in r6 and saves one. There is no gUnknown_02028E5C here, so unlike sub_08052BBC this function has only the one hoist to explain and is the CHEAPER OF THE TWO to finish.",
+      "why_it_is_close": "The head and the entire tail line up instruction for instruction, including the two-armed `if` on `gUnknown_03004580[a ^ 1][1] == 0x14` selecting 0x23 against 0x10 (the `eors`, the `lsls #4` row scaling, the `adds r1,#2` column bias, the `bne` and the unconditional `b` all reproduce), and including the `-fforce-addr` .rodata pool word.",
+      "axes_ruled_out": [
+        "`s16 *` / `u16 *` local bound to &gUnknown_02029808[a].unk24[b] or to gUnknown_02029808[a].unk24 -- both fold +0x24 into the symbol's own relocation, so the literal-pool word becomes `gUnknown_02029808+0x24` where the ROM has the bare symbol plus `adds rN,#0x24` on the base. A strictly WORSE diff, and it rules out every pointer-binding spelling of the store target at once",
+        "`(&gUnknown_02029808[a])->unk24[b]` as the store target -- this DOES reach the ROM's register pressure (three saved high registers, the correct `push {r4,r5,r6}`) but it binds &gUnknown_02029808[a], not the index, and it moves `a` into r8. Closest wrong answer found; do not mistake the matching prologue for progress",
+        "`*(gUnknown_02029808[a].unk24 + b)` and `unk24[(int)b]` -- bit-identical to the plain subscript",
+        "`c = a; d = b;` copies in the c_08051F4C style -- erased by cse in a straight-line block, see the wave-20 sub_08052650 section in docs/agbcc-codegen.md",
+        "a zero-trip `do { } while (0)` round the sub_08015410 statement, round the four sub_08016824..sub_080157F4 calls, and round the whole body -- the wave-17 lever makes THIS function worse, +1 instruction and `a` forced into a high register. Do not re-run it here",
+        "`e` as u16 / s16 / a `u16 *` bound to &gUnknown_08553B10[a] -- all three byte-identical, and all three already correct; the sub_08052270 lever does not apply because the two-argument ordering in this function is already right"
+      ],
+      "settled_by_this_attempt": [
+        "gUnknown_0813610C IS NOT A GLOBAL. It is a `.LC` address-constant slot in data/data.s holding 0x02029808, with 0x03001470 0x03001FBC 0x020298E0 0x020297C0 0x02029808 0x03004580 0x02029A10 as its neighbours -- a -fforce-addr block by the test in docs/agbcc-codegen.md. Naming gUnknown_02029808 DIRECTLY (the honest spelling) makes agbcc emit its own .LC word and reproduces the ROM's double indirection, `ldr r4,[r1]` then `mov r4,r8; ldr r1,[r4]`. This part needs nothing further and the c_local workaround must not be reached for -- do not spend an attempt here",
+        "WHY sub_08052718 has that pool word and its near-twin sub_08052BBC does not, on the same global and the same statements: only this one has a control-flow MERGE. That is the existing -fforce-addr rule seen twice in one pair of near-twins, i.e. independent corroboration for it",
+        "`e = gUnknown_08553B14[a]`, the 08553B14 half of the pair include/unknown-globals.h records (sub_08052BBC and sub_08051BEC use 08553B10)",
+        "`a ^ 1` and not a second variable -- the ROM has `movs r2,#1; adds r0,r7,#0; eors r0,r2`",
+        "0x100 as `movs #0x80; lsls #1`, against sub_08052BBC's 0x180",
+        "gUnknown_08553704 is an animation descriptor of the gUnknown_085536A4 family; its draw slot is the matched sub_0805297C and its slot 2 is sub_08052AF4, which wave 20 matched"
+      ],
+      "reason": "Register allocation, not source semantics, and the SAME residual as sub_08052BBC. Park them together and unpark them together: six spellings were probed against this one and the same six against its twin, in both directions, with every edit transferring one-for-one. Draft at work/sub_08052718/sub_08052718.c."
+    },
+    "sub_08052BBC": {
+      "bytes": 232,
+      "best": "224 bytes (-8), 12.1% identical from the honest draft; 69.8% from a permuter edit that is NOT the source (see below)",
+      "remaining_diff": "TWO hoists, one fact each, 5 instructions total. (a) The ROM computes `b * 2` -- the index of the store target gUnknown_02029808[a].unk24[b] -- immediately after `gUnknown_0300451C = b` and BEFORE the sub_08015410 argument setup (`mov r2,sb; lsls r5,r2,#1`), holding it in a callee-saved register across the call; every spelling probed emits it after the call, at the store. (b) The ROM also hoists `a * 4`, the gUnknown_02028E5C index whose statement is the LAST in the function, to the same point and parks it in sl (`lsls r0,r6,#2; mov sl,r0` ... `ldr r0,=gUnknown_02028E5C; add sl,r0; mov r2,sl; strh r0,[r2]`). That third long-lived value is why the ROM pushes {r4,r5,r6} where the draft pushes {r5,r6}. Everything else -- every statement, the pool order, the s8 narrowing, the 0x180 as `movs #0xc0; lsls #1`, the literal-0 fifth argument -- is exact.",
+      "why_it_is_close": "The instruction stream and the whole type model are settled; this is register allocation plus one instruction position, the same class as sub_0804FA2C. The literal-pool order (0300453C, 0300451C, 0855371C, 02029808, 08553B10, 02028E5C) matches the draft exactly, and since pool order is a direct readout of source order it independently CONFIRMS the statement order, including that the gUnknown_02028E5C store belongs at the very end -- which is what makes the `a * 4` hoist a puzzle rather than a transcription error. THE TWO MATCHED EXEMPLARS CANNOT SETTLE IT: src/decomp/c_08051BEC.c and c_08051F4C.c have `b * 2` before the call too, but CSEd out of `gUnknown_08552178[a][b] * 7 + 6`, the fifth-argument statement -- and sub_08052BBC's fifth argument is the literal 0, so that statement does not exist here. There is no exemplar anywhere for `b * 2` early with nothing else to produce it, which is why the family transfer that closed the other five functions in this batch stops at these two.",
+      "axes_ruled_out": [
+        "`s16 *` / `u16 *` local bound to &gUnknown_02029808[a].unk24[b] or to gUnknown_02029808[a].unk24 -- both fold +0x24 into the symbol's own relocation, so the literal-pool word becomes `gUnknown_02029808+0x24` where the ROM has the bare symbol plus `adds rN,#0x24` on the base. A strictly WORSE diff, and it rules out every pointer-binding spelling of the store target at once",
+        "`(&gUnknown_02029808[a])->unk24[b]` as the store target -- this DOES reach the ROM's register pressure (three saved high registers, the correct `push {r4,r5,r6}`) but it binds &gUnknown_02029808[a], not the index, and it moves `a` into r8. Closest wrong answer found; do not mistake the matching prologue for progress",
+        "`*(gUnknown_02029808[a].unk24 + b)` and `unk24[(int)b]` -- bit-identical to the plain subscript",
+        "`c = a; d = b;` copies in the c_08051F4C style -- erased by cse in a straight-line block, see the wave-20 sub_08052650 section in docs/agbcc-codegen.md",
+        "a zero-trip `do { } while (0)` round the sub_08015410 statement, round the four sub_08016824..sub_080157F4 calls, and round the whole body -- the wave-17 lever makes THIS function worse, +1 instruction and `a` forced into a high register. Do not re-run it here",
+        "`e` as u16 / s16 / a `u16 *` bound to &gUnknown_08553B10[a] -- all three byte-identical, and all three already correct; the sub_08052270 lever does not apply because the two-argument ordering in this function is already right",
+        "moving `gUnknown_02028E5C[a][0] = 1;` to the top of the function -- REFUTED BY THE POOL ORDER, not by size: its pool word moves to slot 3 and the ROM's is slot 6",
+        "moving the gUnknown_02028E5C store after sub_08052818 -- no change",
+        "`u16 *p; p = gUnknown_02028E5C[a];` bound early, dereferenced at the end -- puts the SYMBOL's `ldr` at the top as well, where the ROM loads it at the store; the ROM keeps only the INDEX live, which no pointer binding expresses",
+        "`gUnknown_02029808[a].unk24[gUnknown_0300451C = b]` (the store folded into the index) -- moves gUnknown_0300451C's pool word to slot 4",
+        "420 s of decomp-permuter, best 69.8% kept at work/sub_08052BBC/best.c. ITS WIN IS THE USEFUL PART AND IS NOT A SOURCE CANDIDATE: binding the three `1` constants to one `char` local plus a do/while(0) round the four calls reproduces the ROM's REGISTER ASSIGNMENT exactly (r5 = slot address, r4 = e, a third saved high register in use) with the WRONG VALUE in sl. So the allocation shape is reachable from source; what is missing is only the construct that makes `a * 4` the thing living there"
+      ],
+      "settled_by_this_attempt": [
+        "gUnknown_0855371C is an animation descriptor of the gUnknown_085536A4 family (`u8 []`, address only); the six-record run 085536A4-0855371C is tabulated in include/unknown-globals.h and it is what gives every function in this cluster its zero-fan-in",
+        "sub_08052818(u16, u16) -- both parameters narrow in place with no copy, the sub_080504A8 readout",
+        "struct Unk02029A10.unk1c is a u16 flag, from an independent producer/consumer pair (sub_08052818 writes 1, sub_08052650 tests == 1)",
+        "the fifth argument of sub_08015410 is the literal 0 here, not this family's `gUnknown_08552178[a][b] * 7 + 6` -- which is exactly why the exemplars do not transfer",
+        "`e = gUnknown_08553B10[a]` is a LOCAL, and the `ldrsh` sitting immediately before the `bl` does not argue against one: combine folds the load down to the call site. See the wave-20 sub_08052270 section"
+      ],
+      "reason": "Register allocation and one instruction position, not source semantics. Nine spellings probed byte-for-byte plus a permuter run; the draft at work/sub_08052BBC/sub_08052BBC.c carries the whole list in its header. Take this one WITH sub_08052718 -- they are near-twins and they share hoist (a), so whatever produces it produces both."
+    },
+    "sub_0800CFDC": {
+      "bytes": 6384,
+      "best": "0.0% -- NOTHING WAS SUBMITTED. 0 try_match attempts spent. The head (first 72 instructions) was verified EXACT with compile_probe; the remaining ~90% is untranscribed, so the draft in work/ is deliberately #if 0'd and scores zero. Do not read 0.0% as a near-miss in the usual sense -- it is an absence, not a failure.",
+      "park_kind": "VOLUME, NOT CODEGEN -- read this field before anything else",
+      "remaining_diff": "There is no remaining diff, because there is no complete candidate. What remains is TRANSCRIPTION: ~20 further pattern tests after the two switch statements, each of the form (bounds guards on x/y against WIDTH/HEIGHT) + (a run of the cell predicate at neighbour offsets) + (one call to sub_0800EAF4 or sub_0800EB5C). 159 predicate instances, 187 basic blocks, 466 branches, 254 labels.",
+      "why_it_is_close": "Every DERIVATION is done and none of it needs redoing. The function is one idiom -- src/decomp/c_08001158.c's map-descriptor access (p = gUnknown_08499590; t = y*2; rows = p+0x417A; off = (*(u16*)(rows+t)+x)*2; tiles = p+0xA22) -- evaluated 159 times over neighbour offsets, with the predicate (u16)(cell - 0x86) <= 1 and a handful of exact tile compares. Ten distinct expression shapes were predicted from the listing before drafting and exactly ten were found. The head reproduced 72 of 72 instructions from the FIRST draft, including the -fforce-addr reroute, which comes free from naming gUnknown_08499590 honestly. The whole function is readable in work/sub_0800CFDC/_symtrace.txt, produced by tools/symtrace.py, which renders the 3,239-line listing as 1,190 lines with every index expression already resolved to ro[y-1] / cell[(ro[y]+2)+x] / BRIDGE(...) / WIDTH / HEIGHT. A fresh agent resumes at roughly 80%.",
+      "axes_ruled_out": [
+        "NOT APPLICABLE IN THE USUAL SENSE, and this is the entry's whole point: no codegen axis was ruled out because no codegen axis was ever the obstacle. Nothing was tried and rejected. Do not read the short list below as an exhausted search.",
+        "The two casesi jump tables assemble byte-for-byte and need no work -- confirmed by the doc's existing 'jump tables match' result; case bodies are in SOURCE order, which for switch 1 is 28..31, then 7/23, then 12/13, then 6/22, then default.",
+        "The -fforce-addr head reroute is settled: the honest `gUnknown_08499590` spelling produces the ROM's three-level `ldr rN,=<word>; ldr r0,[rN]; ldr r1,[r0]`. Do NOT declare the pool word 0x0808D88C as `u8 **const` -- measured on the neighbouring sub_0800F8D4, that adds a fourth level.",
+        "The four `bl _0800E8BA` are agbcc FAR JUMPS to the epilogue, not calls and not a second entry point -- THUMB `b` reaches only +/-2KB and this function is 6KB. Likewise `_0800D080` and `_0800D40C` appear in data_refs and are the two jump tables, not globals."
+      ],
+      "settled_by_this_attempt": [
+        "The parameter pair is (int x, int y) -- a map column and row.",
+        "All four callees are declared and typed from their own entry narrowing, now in include/unknown-functions.h: int sub_0800E8CC(int,int), int sub_0800E9F4(int,int), void sub_0800EAF4(int,int), void sub_0800EB5C(int,int).",
+        "Top-level control flow: guard on the centre cell; drew = 0; a = x>0 ? sub_0800E8CC(x-1,y) : 0; b = sub_0800E8CC(x,y); c = x < width-1 ? sub_0800E8CC(x+1,y) : 0; a &= b; b &= c; switch(a); if (drew && a == b) return; switch(b); then the ~20 pattern tests.",
+        "`drew` (r10) is a REAL variable, not a jump-threading artefact -- it is read nine more times further down, which is why only one switch arm materialises the assignment.",
+        "The four `?rN` spots in _symtrace.txt are not unknowns: `?r8` is always y*2 (set at _0800D3E4), so H[(ROWS)+?r8] reads ro[y]; `?r0` at _0800D2BC / _0800D8B8 / _0800DDAE / _0800E10A / _0800E4B8 is a cross-jumped tail whose two predecessors pass x and x-1, so the SOURCE has two separate calls there.",
+        "tools/symtrace.py itself, and specifically its predecessor-state JOIN: without the join 44 of 187 blocks render with poisoned register state and transcribing from them silently produces wrong constants."
+      ],
+      "open_question": "The one thing genuinely undecided: how many local bindings the original used per pattern region. The ROM reloads `=gUnknown_08499590` 21 times, once per region, so the binding is per-region rather than once for the function -- but whether each region binds p/rows/tiles as three locals (the c_08001158.c shape) or fewer is ~20 independent register-allocation decisions, and that is where any attempts would go.",
+      "budget_unit": "Budget this in BLOCKS TRANSCRIBED, not in try_match attempts. Attempts is the wrong unit above ~2KB -- this function cost zero attempts and still did not finish. It is 187 blocks; sub_08083EE0, which closed in one attempt, was 24. A fresh agent starting from _symtrace.txt should expect the cost to be reading and writing, with attempts spent only on the per-region binding question above.",
+      "reason": "Volume, not codegen. It is the largest straight-line function left in the tree at 6,384 bytes -- 8.5% of the remaining straight-line band in one function -- and it is larger than a single agent-session, which is a different claim from being hard. Nothing about the C or the compiler blocks it: zero backward branches, four already-typed callees, one idiom, ten expression shapes, head verified exact. It is parked so waves stop rediscovering the derivation, NOT because the search space is exhausted. See docs/agbcc-codegen.md, 'ACTUALS for sub_0800CFDC', for the measurement this produced: shape count governs whether you can work a function out, byte count governs how long it takes to write down."
+    },
+    "sub_0800F8D4": {
+      "bytes": 1136,
+      "best": "11.3% identical, 1276 bytes against 1136 (+140). Two rounds: 6.2% then 11.3%.",
+      "park_kind": "ORDINARY NEAR-MISS -- a real candidate exists and the axes below were actually probed. This is NOT the volume park sub_0800CFDC is.",
+      "remaining_diff": "The candidate needs SIX callee-saved registers where the ROM needs five: `mov r7,sl; mov r6,sb; push {r6,r7}` against the ROM's `mov r7,r8; push {r7}`, and the extra spill/reload is the whole +140 bytes. The ROM keeps exactly three things live across the body -- `ip` = the address of this unit's -fforce-addr pool word, r5 = x, r4 = y. Instruction streams otherwise line up: same compare chains, same constant chain, same four pool words, same branch structure.",
+      "why_it_is_close": "Zero callees and one data ref, so nothing in it depends on an unsettled prototype or global. The control-flow skeleton is fully derived: a 14-term dispatch on the centre cell, then six branches (322|354, 323|355, 353, 321, 352, 320), each two bounds guards plus two 7-term neighbour chains. The cell access is src/decomp/c_08001158.c's idiom. What moved the score from 6.2% to 11.3% was TWO things and both are recorded in the draft: fixing a transcription error in branch 322|354's second chain (`289, 288`, not `259, 258`) and splitting the value types (`u16` for the neighbour cell, `int` for the centre one).",
+      "axes_ruled_out": [
+        "function-scope p/rows/tiles/t/off shared by all 13 accesses -- 608 instructions against the ROM's 544, worse than block-scoping",
+        "the same five bound in a BLOCK per access -- 600, and what the draft carries",
+        "`n` block-scoped per branch rather than function-scope -- byte-neutral, so `n` is NOT the extra live value",
+        "c_local `pp = &gUnknown_08499590` with `*pp` at each access -- 574 instructions, the BEST count seen and WRONG: it emits two indirections where the ROM has three, i.e. it buys 26 instructions by dropping a level of the pointer model",
+        "declaring the pool word as `u8 **const gUnknown_0808D898` and dereferencing it -- 602 and FOUR indirections, because agbcc force-addrs the declared symbol's address on top. Do not declare the pool word; the honest `gUnknown_08499590` supplies the ROM's middle level",
+        "`u16 v` for the centre cell -- 9.7%, worse than `int v` at 11.3%",
+        "the guard spelling is NOT an open axis: the ROM's `subs r0,r5,#1; cmp r0,#0; bge` is literally the draft's `if (x - 1 < 0)`"
+      ],
+      "settled_by_this_attempt": [
+        "`u16` neighbour value and `int` centre value, and the tell is in the listing: the neighbour range test carries `lsls #16; lsrs #16` and the centre one does not, so they are different types rather than one",
+        "the ROM chains ONE live constant through the whole tail (0x143, +0x1d -> 352, +1 -> 353, +2 -> 355, -0x40 -> 291, -0x20 -> 259, -1 -> 258) and branch tails jump INTO that chain after an adjusting adds/subs -- so a chain's constants cannot be read off its own immediates, which is how a wrong transcription survived a round",
+        "A CROSS-JUMPED TAIL IS NOT EVIDENCE THE CONSTANTS ARE RIGHT: the wrong `259, 258` scored BETTER (600 insns) than the correct `289, 288` (607) precisely because 259/258 are the shared tail's constants and merged where the correct code cannot"
+      ],
+      "reason": "Register allocation, not source semantics. One live value too many in a function whose instruction stream is otherwise derived. The next axis, untried, is the thirteen access blocks' row index: the draft computes `t = (y +/- 1) * 2` inside each block while the ROM hoists `lsls r2, r4, #1` for the centre row and derives neighbours from the shifted value in some branches -- bind the row index rather than the byte offset."
+    },
+    "sub_080815C0": {
+      "bytes": 444,
+      "best": "97.3% -- 432 of 444 bytes, size-exact, 12 differ, first at +0x73",
+      "remaining_diff": "PURE REGISTER-ALLOCATION SWAP, r5 <-> r6, and nothing else. Every instruction, operand, offset, literal-pool word and relocation is correct. The ROM holds the long-lived `(5 - i) * 2` table-index pseudo (live from the Interpolate call through the trailing gUnknown_08616980 lookup) in r6, and the short-lived `k = i - 4` OAM-colour pseudo (dead within the two-DivRem block) in r5. The candidate assigns them the other way round. Affected sites: `movs r6,#5 / subs r6,r6,r7 / lsls r6,r6,#1`, `adds r0,r6,r4`, `subs r5,r7,#4`, the two `subs r0,r0,r5`, `adds r6,r6,r0` and `ldrsh r2,[r6,r4]`.",
+      "why_it_is_close": "Size-exact at 444 bytes with the whole loop, both branch arms, the || chain, all four Div/DivRem clamps and the PutSprite argument assembly identified and byte-correct. This is 97.3% with zero outstanding source-level questions.",
+      "axes_ruled_out": [
+        "Declaration order -- swapping `int i, k;` has no effect; named-var regnos are not the lever.",
+        "Explicit binding of the index -- giving `(j = 5 - i)` its own variable instead of relying on implicit CSE is byte-identical to the unbound form.",
+        "Hoisting `k = i - 4;` out of the DivRem argument into its own statement -- moves the instruction's POSITION earlier, breaking the position match as well, and STILL leaves k in r6."
+      ],
+      "settled_by_this_attempt": [
+        "The entire source shape is PROVED: struct Unk80815C0 layout (unk2c/unk48/unk4c/unk52), the `proc->unk4c <= 0x2d` guard, the `for (i = 0; i <= 4; i++)` bound, the Div(unk48,9) >= i && < i+1 split against the >= i+1 arm, the shared `5 - i` index into gUnknown_08616972 / gUnknown_08616980, the `((tbl[...] + 2) << 12) | 0x800 | (tbl[...] * 32 + 0x1D8)` PutSprite word, the unk4c <= 0x2c increment/Proc_Break tail and the sub_08084700 call. An unpark must not re-derive any of it.",
+        "Same failure class as sub_0801A6C0: an allocation tie-break with no demonstrated source-level lever."
+      ],
+      "reason": "Wave 22 (W22-S3, Sonnet A/B arm). Not source-exhausted in the usual sense -- the source is settled and only the allocator disagrees. Next attempt: shift register pressure with an unrelated live value nearby, or check the toolchain axis per data/compiler-overrides.json before spending source iterations. Do NOT re-run the three ruled-out variants above."
+    }
   }
- }
 }

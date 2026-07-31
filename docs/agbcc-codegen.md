@@ -5344,6 +5344,29 @@ AND masks are then CSE-chained, so `~4`, `~8`, `~0x10` come out as
 fields back off the masks in the order they apply; the arithmetic between the
 constants is not in the source.
 
+**The PUSH LIST of such a function reads out how many of its bitfield constants
+coincide across a call, and it is a free cross-check on the field values you
+read off the masks.** `sub_08024378` / `sub_08024500` / `sub_080245D4` (wave 22)
+are one shape: four `.bits.priority` writes, `bl sub_08012358`, then the
+`gUnknown_030030E0` BLDCNT groups, then the two BLDALPHA coefficients and
+`bl sub_0801237C`. The BLDCNT byte-0 store ends `orrs r0, rN` on a callee-saved
+register rather than a fresh `movs`, because the `target1_enable_*` bit it sets
+has the same numeric value as one of the priorities written *before* the call,
+and CSE keeps that pseudo live across it. So the count of callee-saved registers
+is the count of such coincidences: `sub_08024378` sets `target1_enable_bg0` (1)
+and `target2_enable_bg1` (2) against priorities 1 and 2, needs both pseudos
+live, and pushes `{r4, r5}`; the other two coincide on one value each and push
+`{r4}` only. Read backwards, an extra callee-saved register in a function of
+this shape with no extra live *values* means one more bitfield constant equal to
+an earlier one — not a spill and not an allocation defect to chase.
+
+Note also that the brief for that wave predicted these would turn on the
+`.raw` / `*(u16 *)&` choice and they did not: every write in all three is
+`ldrb` + a `movs`/`rsbs` mask, i.e. `.bits` throughout, with no `ldrh` + pool
+mask anywhere. The access-width discriminator recorded on `gUnknown_030030E0`
+in `hardware.h` settled it before any C was written, and all three matched on
+the first `try_match` with zero exploration spent on lvalue spelling.
+
 #### Two new `volatile` tells, both cheap and both proved by probe
 
 **1. `volatile` on the LOW operand of `lo | (hi << 16)` flips which register the
@@ -11040,8 +11063,26 @@ functions and W21-B's independent probe of `sub_08071DB4`:
   Applies to `sub_0806C7B4`, `sub_0806AFF0`, `sub_08071DB4`.
 - **No zero in flight ⇒ `.raw` is byte-exact.** `sub_0806C700` stores `0x10`
   and `8` and nothing else, so there is no constant to capture, and the union
-  spelling compiles identically. It is the control case, and it is the only one
-  of the four.
+  spelling compiles identically. It was the only control case of the four;
+  **wave 22 added a second, `sub_0807F238`**, which stores `8` to both
+  coefficients and reaches BLDY through a volatile self-store rather than a
+  `= 0`, so again no zero exists anywhere in the function. `.raw` matched it
+  first attempt and a probe of the cast emits the same bytes. Two independent
+  control cases now, and both are "the function never spells a literal zero".
+- **CORRECTION (wave 22, W22-O1): the zero does not have to be LIVE across the
+  insert — it only has to EXIST in a preceding scalar store.** `sub_0808A8C0`
+  stores `gUnknown_03001FFC = 0`, and that zero is dead by the time the first
+  masked insert runs: the ROM re-materialises `movs r1, #0` at the end of the
+  function for its last store rather than keeping the first one around. `.raw`
+  still breaks it — probed, and it comes back as `push {r4, r5, r6, lr}` plus a
+  stray `mov r5, #0` hoisted into the middle of the insert, where the ROM has
+  `push {r4, r5, lr}`. The cast is byte-exact. So the mechanism is that `.raw`
+  gives CSE a HImode expression it can equate with the stored constant and
+  invents the pseudo *itself*, extending a live range the original source never
+  had; the section's phrase "live across the write" describes the symptom of the
+  three earlier cases, not the trigger. **Screen for "does any preceding
+  statement store a literal 0 to a volatile scalar", not for "is a zero needed
+  afterwards".**
 - Merging is a **consequence, not the cause**. Two adjacent group writes fold
   into one `strh` by store forwarding whether or not a zero is live; two
   separated by a `.bits` write do not fold, and `sub_0806C7B4` still needs the
@@ -11059,6 +11100,13 @@ constant traffic.
   two of these. It is only spellable because the global is `volatile`; without
   the qualifier the whole statement is deleted and the bare `ldrh`/`strh` pair
   disappears. If you cannot produce that pair, the qualifier is why.
+- **The `u16 v` chaining in `c_08037260.c` (`gUnknown_03002020 = v = 0;
+  gUnknown_03002B28 = v;`) is cosmetic and should not be copied as an idiom.**
+  Wave 22 probed it directly on `sub_0807F238`: two plain `= 8` stores and the
+  `v = 8` chain emit the same single `mov r1, #8` feeding both `strh`s, byte for
+  byte. A repeated small constant is CSEd across volatile stores without help,
+  so a shared `movs` in the ROM is **not** evidence of a chained assignment in
+  the source and buys you nothing to reproduce it.
 
 ## `u.raw` and `*(u16 *)&u` are NOT interchangeable — and a probe says they are (wave 21, W21-B)
 
@@ -11277,3 +11325,98 @@ the length of the link, so the same failure can appear for a few minutes with
 the toolchain perfectly well installed.** If a `.rodata` near-miss shows up
 where the instruction diff is nothing but label names, check the symbol table
 before touching the C.
+
+## Cross-jumping stops at the first LABEL, so a merge point that lands on a `bl` means the tail was written ONCE (wave 22, W22-O3)
+
+`src/decomp/c_080824D4.c` records that sub_080829B0's two `Interpolate` arms are
+"cross-jumped by gcc into one `bl` and one shared affine tail", and calls that
+"the compiler, not the source" -- i.e. that the honest two-arm spelling
+
+```c
+if (t <= 1) { p->unk38 = Interpolate(..); SetObjAffine(..); }
+else if (t <= 5) { p->unk38 = Interpolate(..); SetObjAffine(..); }
+```
+
+reproduces a single `bl`. **That is true for sub_080829B0 and it is NOT a
+general rule**, which cost a probe round on `sub_0808177C` (0x0808177C, 548 B,
+matched wave 22). The ROM there has the identical head shape -- one
+`bl Interpolate` that the first arm branches to, one affine tail -- and the
+two-arm spelling emitted BOTH affine tails in full: two `gSinLut` pool words and
+about 90 bytes of duplicated `Div` chain. Same shape in the ROM, opposite
+spelling in the source.
+
+**The discriminator is whether the shared tail contains a LABEL.** gcc 2.9's
+cross-jump walks backwards from a `jump_insn` and from `prev_active_insn` of its
+label, matching insn by insn, and it stops at the first `CODE_LABEL` on either
+side. `SetObjAffine(0, Div(a, 0x100), Div(b, p->unk38 != 0 ? p->unk38 : 2), ...)`
+expands to `cmp r1, #0 ; bne .Lx ; movs r1, #2 ; .Lx:` -- twice. So the backward
+walk dies at `.Lx` after ten insns and the merge, if it happens at all, lands
+in the MIDDLE of the affine tail, never before it. sub_080829B0 gets away with
+it because its three arms give the first two arms a `b` each to the same label
+and the useful part of its merge is elsewhere; a two-arm `if`/`else` has only
+one jump and its tail cannot be reached backwards past the ternary.
+
+- **Merge point ON a call insn, with conditional branches after it: the tail is
+  ONE source statement.** Write the shared call outside the `if`/`else` and let
+  only the argument setup differ per arm. The merge is then the two-insn cross
+  jump of `bl Interpolate ; str r0, [p, #0x38]`, which contains no label and
+  merges cleanly. That spelling matched `sub_0808177C` byte-for-byte on the
+  first `try_match`.
+- **Merge point after the whole tail, with the tail label-free: cross-jump did
+  it**, and the arms can be written honestly.
+- Read it as a cheap diagnostic on the ROM before drafting: find the label the
+  first arm branches to and ask what sits between it and the join. If that span
+  contains a `bne`/`beq` of its own, no amount of duplicated source will collapse
+  into it.
+
+The same reasoning explains why the affine tail here is emitted once even though
+`Div(COS_Q12(0) * 16, 0x100)` also appears in both of sub_080829B0's arms: it is
+not CSE, it is a single source statement in the first place.
+
+## An r5/r6 swap between two ALREADY-PINNED pseudos resisted every source lever tried (wave 22, W22-S3, open)
+
+`sub_080815C0` (444 B, digit-strip render, close cousin of the
+`c_080824D4.c` block: same `Interpolate`/`Div`/`DivRem`/`gUnknown_08616972`
+family, a `k`-binding identical in shape to that file's documented
+`p->unk52 + (k = i + 6)` idiom) closed to 97.3% (12/444 bytes, first diff at
+`+0x73`) with the instruction stream, order, and literal-pool layout all
+byte-exact. The only remaining defect: **two callee-saved pseudos, both of
+which the compiler DOES pin to a register in both candidate and ROM, are
+pinned to the OPPOSITE register from each other.** The ROM puts the
+long-lived `(5 - i) * 2` table-index pseudo (alive from the `Interpolate`
+call through a reuse at the trailing `gUnknown_08616980` lookup) in `r6` and
+the short-lived `(k = i - 4)` OAM-color pseudo (dies inside the two-`DivRem`
+block) in `r5`; every candidate tried put the long-lived one in `r5` and the
+short-lived one in `r6`.
+
+This is a DIFFERENT phenomenon from "Of two address constants, the pseudo
+created FIRST wins the register" above: that rule is winner-takes-a-register
+vs loser-gets-rematerialised-from-the-pool, reachable by a comma-operator
+anchor. Here BOTH pseudos already win a register in every candidate — the
+open question is only which SPECIFIC callee-saved register each gets, and no
+lever that changes *source* shape moved it:
+
+- Swapping `int i, k;` declaration order: no effect (named-variable regnos
+  are not read off declaration order here, or if they are, it is not what
+  decides this).
+- Giving the index its own explicit `(j = 5 - i)` binding instead of relying
+  on the ordinary array-subscript CSE: byte-identical output to the unbound
+  form. Confirms `(a = expr)` binding and implicit CSE reach the same RTL for
+  a value that's read twice, but neither affects register choice.
+- Hoisting `k = i - 4;` out of the `DivRem` argument into its own statement
+  immediately after the `Interpolate` store (textually earlier, and earlier
+  than the ROM's actual instruction position): moved the *instruction*
+  earlier — regressing the position match — and STILL produced `k` in `r6`.
+  Register choice survived a source-order change that did move the
+  instruction, which is the strongest evidence this is not a source-order
+  effect at all.
+
+Every variant assigns `r5` to whichever pseudo has the LONGER live range and
+`r6` to the shorter one, consistently, regardless of which statement defines
+which. The ROM does the opposite. This smells like an IRA/local-alloc
+priority or spill-cost tie-break (`allocno_compare`'s cost term, not its
+allocno-number tie-break) that is not reachable from any C-source lever tried
+so far — possibly a different `n_refs`/`live_length` ratio the real source
+produces that these five candidates do not. Do not re-try the three variants
+above. Draft is in `work/sub_080815C0/sub_080815C0.c`, parked with `best.c`
+saved by `try_match` at 97.3%.

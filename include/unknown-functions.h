@@ -1795,6 +1795,10 @@ void sub_08073FF4(int, const void *, ProcPtr);
  * value that is stored with `strh` into a u16 global and used in `int`
  * arithmetic first, so `int`. sub_08086BF8/sub_08086CE0 take the same three
  * arguments in the same order at both call sites. */
+/* sub_0806B9CC immediately precedes sub_0806BA6C and shares its shape: four
+ * byte parameters stored via bare `strb rN,[..]` with no prologue narrowing
+ * at all, so int is the weakest type that fits (wave 22, src/decomp/c_0806B9CC.c). */
+void sub_0806B9CC(int, int, int, int);
 void sub_0806BA6C(int, int, int, int);
 void *sub_0808B6E8(void *, const void *, int);
 void sub_08086EB0(int);

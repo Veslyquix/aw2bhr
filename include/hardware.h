@@ -257,6 +257,15 @@ extern union BgCntBuf gUnknown_03002B6C;
 // read-modify-write. Which hardware register each shadow feeds (WININ vs
 // WINOUT) is STILL unproved -- nothing reaches bytes 2-3 of either, and no
 // function has been matched that pushes either shadow to hardware.
+//
+// BIT 5 OF BOTH BYTES -- win0_enable_blend and win1_enable_blend -- is now
+// confirmed on 030030DC as well, and as a CLEAR rather than a set, which is the
+// discriminating half: sub_0807F238 (wave 22) ends with `ldrb [r1]; movs #0x21;
+// rsbs; ands; strb [r1]` immediately followed by the same pair at [r1, #1].
+// A scalar `&= ~0x20` would emit a bare `mov #0xdf`; the `mov #N; neg` is the
+// bitfield tell, and it lands at bit 5 of each byte independently. Together
+// with sub_0807F2FC, which SETS win0_enable_blend on both shadows, bit 5 is now
+// exercised in both directions on 030030DC.
 extern union WinCntBuf gUnknown_030030A4;
 extern union BgCntBuf gUnknown_030030B4;
 /* The BG3 shadow -- see the note left in its place in unknown-globals.h. */
@@ -282,6 +291,16 @@ extern union WinCntBuf gUnknown_030030DC;
 // and a function may use both a line apart. sub_0806A4DC is the all-bitfield
 // end of the family and reads off directly -- one `orr` per field set to 1,
 // one `and` per field cleared, in source order.
+//
+// `effect` is now seen at all three non-zero values: 1 (`movs #0x3f; ands;
+// movs #0x40; orrs` -- sub_0807F238 and sub_0808A8C0, wave 22), 2 (0x80,
+// sub_0807F2FC) and 3 (0xc0 with no AND, all_one -- sub_08071DB4).
+//
+// The target2 group's TOP bit is confirmed too: sub_0808A8C0 inserts
+// `movs #0x80; lsls #5` = 0x1000 under the 0xE0FF mask, which is bit 12 =
+// target2_enable_obj, the highest bit the 5-bit group covers. Nothing has yet
+// reached target1_enable_obj (bit 4) as a single-bit write, so bit 4's position
+// still rests on the group masks alone.
 extern union BlendCntBuf gUnknown_030030E0;
 
 // Serial communication. The display registers are reached through gDispIo
