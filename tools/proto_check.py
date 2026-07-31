@@ -1,5 +1,24 @@
 #!/usr/bin/env python3
-"""Cross-check header prototypes against promoted definitions.
+"""Integration checks -- the failures that ONLY appear when everything links.
+
+`trymatch` is a per-function oracle and the split build is a whole-program one.
+Everything in this file lives in the gap between them: a wave can verify every
+function individually, promote all of them, and still fail to build. Wave 24
+verified 109 functions and then spent FOUR build cycles here.
+
+Two checks, both static, both seconds against a ten-minute build:
+
+  prototypes  a header declaration that disagrees with an already-promoted
+              definition. Passes every trymatch; fails the split build with
+              `conflicting types`.
+  types       the same struct/union defined twice in one promoted file.
+              promote.py concatenates per-function drafts without deduplicating
+              their type definitions, and the copies need not even be identical
+              -- c_08078250.c had two `struct Unk807831C`, one naming the field
+              at 0x54 and one leaving it in filler. Same layout, so every
+              per-function check passed.
+
+Run it BEFORE `make SPLIT=1 compare`; promote.py now runs it for you.
 
 `trymatch` compiles ONE unit, so a header declaration that disagrees with an
 already-promoted definition passes every per-function check in a wave and then
@@ -124,6 +143,32 @@ def norm(sig):
     return ','.join(parts)
 
 
+def duplicate_types():
+    """[(file, {name: count})] for promoted files defining a type twice.
+
+    Comments are stripped first, and a SINGLE regex does the matching: `\\s*`
+    spans newlines, so one pattern covers both `struct Foo {` and `struct Foo`
+    with the brace on the next line. Using two patterns double-counts every
+    struct written in the second style -- the first draft of this check did
+    exactly that and reported 218 files, all false.
+    """
+    out = []
+    for f in sorted(glob.glob('src/decomp/*.c')):
+        with open(f, encoding='utf-8', errors='ignore') as fh:
+            text = fh.read()
+        text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+        names = re.findall(
+            r'^\s*(?:typedef\s+)?(?:struct|union)\s+([A-Za-z_]\w*)\s*\{',
+            text, re.M)
+        seen = {}
+        for n in names:
+            seen[n] = seen.get(n, 0) + 1
+        dup = {n: k for n, k in seen.items() if k > 1}
+        if dup:
+            out.append((f, dup))
+    return out
+
+
 def main(argv):
     scan_all = '--all' in argv
     protos = collect_prototypes(scan_all)
@@ -146,7 +191,17 @@ def main(argv):
 
     print('checked %d prototype(s) against %d definition(s) -- %d mismatch(es)'
           % (len(protos), len(defs), bad))
-    return 1 if bad else 0
+
+    dups = duplicate_types()
+    for f, d in dups:
+        print('DUPLICATE TYPE %s: %s' % (f, d))
+        print('   promote.py merged two drafts that each defined it. Keep the '
+              'MORE REFINED copy (the one that names more fields) and delete '
+              'the other, then re-verify every function in the unit.')
+    print('scanned %d promoted file(s) for duplicate types -- %d file(s) affected'
+          % (len(glob.glob('src/decomp/*.c')), len(dups)))
+
+    return 1 if (bad or dups) else 0
 
 
 if __name__ == '__main__':

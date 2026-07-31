@@ -315,11 +315,34 @@ def promote(names, index):
 
     n_fn = sum(len(e["functions"]) for e in added)
     print("\npromoted %d function(s) into %d file(s)" % (n_fn, len(added)))
+    # INTEGRATION CHECKS, run here rather than merely suggested. Both failures
+    # below pass every per-function `trymatch` and only surface when the split
+    # build links everything, so the moment just after promotion is the last
+    # point where they are cheap. Wave 24 promoted 109 verified functions and
+    # then spent four build cycles on exactly these two. Naming a tool in a
+    # hint is not enough -- split_rodata.py was named here and skipped anyway.
+    print("\nintegration checks (tools/proto_check.py):")
+    try:
+        import proto_check
+        rc = proto_check.main([])
+    except Exception as exc:                       # never block a promotion
+        print("  could not run proto_check.py: %s" % exc)
+        rc = 0
+    if rc:
+        print("\n  *** FIX THESE BEFORE BUILDING. ***")
+        print("  A prototype/definition conflict or a duplicated type in a")
+        print("  merged unit will fail `make SPLIT=1 compare` and the error")
+        print("  points at the file that INCLUDES the problem, not the one")
+        print("  that caused it.")
+
     print("\nnow rebuild and prove the ROM is unchanged:")
     print("  python tools/split_asm.py && python tools/split_rodata.py && "
           "python tools/gen_lds.py")
     print("  make SPLIT=1 compare   # then rm -f aw2bhr.gba aw2bhr.elf, then:")
     print("  make compare           # both must print 'aw2bhr.gba: OK'")
+    print("  READ EACH BUILD'S STATUS SEPARATELY. `make ... | tail` makes $?")
+    print("  tail's, so a FAILED split build followed by a passing assembly")
+    print("  build displays as a green 'aw2bhr.gba: OK'. Use set -o pipefail.")
     # split_rodata.py was missing from this hint for three waves. Omitting it
     # links a ROM whose every differing word is a pool reference pointing at
     # 0x08800000+N -- the end of the image -- because the carved .rodata pieces

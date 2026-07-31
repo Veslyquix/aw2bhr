@@ -36,6 +36,7 @@ not finding the ones we do not.
 """
 
 import argparse
+import bisect
 import collections
 import hashlib
 import json
@@ -415,6 +416,26 @@ def report(args):
           "(%d bytes)"
           % (len(recs), sum(1 for r in recs if r["status"] == "matched"),
              len(targets), args.min_size, sum(t["size"] for t in targets)))
+
+    # WHAT THE FLOOR HID. Every axis below reports on `targets`, so a `--min-size`
+    # that excludes most of the corpus makes "0 pairs" read as "this axis is
+    # exhausted" when it means "this axis was not asked". Wave 20 established
+    # that exemplar proximity is the floor and SIZE IS NOT, and the flag
+    # outlived the lesson: wave 24 found the default of 96 hiding 2,986
+    # unmatched functions, and dropping it to 24 resurfaced duplicate pairs
+    # immediately -- including one wave 21 had backed out and left free.
+    below = [r for r in recs
+             if r["status"] in ok_status and r["mode"] == "THUMB"
+             and not r["trivial"] and r["size"] < args.min_size]
+    if below:
+        print("EXCLUDED BY --min-size %d: %d unmatched non-trivial THUMB "
+              "functions, %d bytes." % (args.min_size, len(below),
+                                        sum(r["size"] for r in below)))
+        print("  A dry result below is a statement about THIS FLOOR, not about "
+              "the corpus.")
+        if args.min_size > 24:
+            print("  Re-run with --min-size 24 before concluding an axis is "
+                  "exhausted.")
     if pending:
         print("pending (matched by trymatch, not yet promoted): %d counted as "
               "exemplars" % len(pending))
@@ -554,13 +575,119 @@ def report(args):
             best = covered[name]
             print("           %-14s %4dB  |shared|=%d J=%.3f  vs %s"
                   % (name, t["size"], best[1], best[2], best[3]))
-    return pairs, covered, strict, loose, targets
+
+    # Runs LAST on purpose. Every axis above is shape-based and they go dry
+    # together; when they do, this is the one that still has work in it, and it
+    # should be the last thing on screen when you sit down to write the brief.
+    block_offered = []
+    if not args.no_blocks:
+        _, block_offered = blocks(recs, args)
+
+    return pairs, covered, strict, loose, targets, block_offered
+
+
+def blocks(recs, args):
+    """Rank 4KB address blocks by how cheap they are to batch.
+
+    THIS IS THE AXIS THAT CARRIED WAVE 24 (109 functions from 39 assigned) and
+    it is not a shape metric at all. Every shape-based screen above was dry
+    that wave -- families 0 with_exemplar, callee overlap 0 pairs, duplicates 0
+    usable groups, data_refs subset down to 3 -- and the work was still there.
+
+    The insight is that a block's cost is its VOCABULARY, not its shapes. Ten
+    small functions from one already-half-promoted block reuse the same globals,
+    the same struct layouts and the same callee prototypes; the promoted
+    siblings have already written all of that down. The shapes are unrelated and
+    that does not matter. Wave 24's W24-C matched its assigned 13 in two
+    compile_probe rounds and 13 first-attempt try_match calls.
+
+    Two limits, both measured, both worth stating in the brief:
+      - It is only cheap where the block is ALREADY half promoted. A cold block
+        has no vocabulary to inherit and behaves nothing like this.
+      - These are small functions. Wave 24's 109 are ~4,500 bytes; wave 23's 17
+        were 3,344. Function count and byte count diverged long ago.
+
+    AND DO NOT BATCH ON A (size, calls, refs) SIGNATURE. It looks like it finds
+    25-member families. Wave 24 checked three members of one and got a rounding
+    divide, a byte-store wrapper and a stack-args forwarder -- the same
+    false-positive mode wave 21 recorded for duplicate signatures. Group by
+    LOCALITY and tell the agent the shapes are unrelated.
+    """
+    promoted_units = set()
+    try:
+        with open(os.path.join(awlib.DATA_DIR, "promoted.json"),
+                  encoding="utf-8") as fh:
+            for u in json.load(fh):
+                m = re.search(r'c_([0-9A-Fa-f]{8})\.c', u["file"])
+                if m:
+                    promoted_units.add(int(m.group(1), 16))
+    except (OSError, ValueError):
+        pass
+
+    named = [r for r in recs if r["name"].startswith("sub_")]
+    addr = {r["name"]: int(r["name"][4:], 16) for r in named}
+    matched_addrs = sorted(addr[r["name"]] for r in named
+                           if r["status"] == "matched")
+
+    pool = [r for r in named
+            if r["status"] == "asm" and r["mode"] == "THUMB"
+            and args.block_min <= r["size"] <= args.block_max
+            and r["backward_branches"] == 0 and not r["trivial"]]
+
+    by_block = collections.defaultdict(list)
+    for r in pool:
+        by_block[addr[r["name"]] >> 12].append(r)
+
+    rows = []
+    for blk, fns in by_block.items():
+        n_matched = sum(1 for a in matched_addrs if a >> 12 == blk)
+        n_units = sum(1 for a in promoted_units if a >> 12 == blk)
+        if n_matched < args.block_min_matched:
+            continue
+        rows.append((len(fns), n_matched, n_units, blk, fns))
+    rows.sort(key=lambda x: (-x[0], -x[1]))
+
+    print("\n== ADDRESS-LOCALITY BLOCKS (%d-%dB, straight-line, non-trivial, "
+          ">= %d matched in block) ==" % (args.block_min, args.block_max,
+                                          args.block_min_matched))
+    print("blocks: %d   candidate functions: %d   bytes: %d"
+          % (len(rows), sum(r[0] for r in rows),
+             sum(f["size"] for r in rows for f in r[4])))
+    print("  Cost is the block's VOCABULARY, not its shapes -- see blocks().")
+    print("  Give ONE block per agent and name each target's nearest matched")
+    print("  neighbour as its exemplar. Tell the agent the shapes are NOT")
+    print("  variations of each other.")
+
+    offered = []          # [(record, nearest_matched_addr, exemplar_path)]
+    for n, n_matched, n_units, blk, fns in rows[:args.top_blocks]:
+        print("\n  block 0x%05X000  %2d candidates, %4d bytes  "
+              "(%d matched, %d promoted units in block)"
+              % (blk, n, sum(f["size"] for f in fns), n_matched, n_units))
+        for r in sorted(fns, key=lambda x: addr[x["name"]])[:args.per_block]:
+            a = addr[r["name"]]
+            i = bisect.bisect_left(matched_addrs, a)
+            near = min((matched_addrs[j] for j in (i - 1, i)
+                        if 0 <= j < len(matched_addrs)),
+                       key=lambda x: abs(x - a), default=None)
+            if near is None:
+                continue
+            # The exemplar is the promoted UNIT that contains the nearest
+            # matched neighbour, i.e. the greatest unit address <= it. That is
+            # a guess about unit boundaries rather than a lookup, which is why
+            # --self-test checks every path it prints actually exists.
+            ex = [u for u in promoted_units if u <= near]
+            exf = "src/decomp/c_%08X.c" % max(ex) if ex else None
+            offered.append((r, near, exf))
+            print("    %-16s %3dB calls=%-2d refs=%-2d  nearest sub_%08X  %s"
+                  % (r["name"], r["size"], len(r["calls"]),
+                     len(r["data_refs"]), near, exf or "?"))
+    return rows, offered
 
 
 def self_test(args):
     """The wave-20 acceptance test -- the screen must rediscover a cluster we
     already know is real, with no knowledge of it."""
-    pairs, covered, strict, loose, targets = report(args)
+    pairs, covered, strict, loose, targets, block_offered = report(args)
     ok = True
 
     dup = [g for g in list(strict.values()) + list(loose.values())
@@ -577,6 +704,28 @@ def self_test(args):
               % (t, "/".join(sorted(want)),
                  "PASS (%s)" % ", ".join(sorted(hit)) if hit else "FAIL"))
         ok &= bool(hit)
+
+    # The block screen's acceptance test. It has no "known real cluster" to
+    # rediscover the way the axes above do, so it is checked on the two things
+    # that would actually make it lie to a brief: offering a function that is
+    # not available, and naming an exemplar file that does not exist. The
+    # second is the realistic bug -- the exemplar is resolved as "the greatest
+    # promoted unit address <= the nearest matched neighbour", which is a
+    # guess about unit boundaries, not a lookup.
+    bad_status = [r["name"] for r, _, _ in block_offered
+                  if r["status"] != "asm"]
+    print("\n[self-test] block screen offers only unmatched targets: %s"
+          % ("PASS (%d offered)" % len(block_offered) if not bad_status
+             else "FAIL (%s)" % ", ".join(bad_status[:4])))
+    ok &= not bad_status and bool(block_offered)
+
+    missing = [p for _, _, p in block_offered
+               if not p or not os.path.isfile(os.path.join(awlib.REPO, p))]
+    print("[self-test] every named exemplar file exists: %s"
+          % ("PASS" if not missing
+             else "FAIL (%d bad: %s)"
+                  % (len(missing), ", ".join(sorted(set(map(str, missing)))[:3]))))
+    ok &= not missing
 
     print("[self-test] %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
@@ -599,6 +748,22 @@ def main():
                         "not promoted yet -- use this DURING a wave, because "
                         "data/functions.json does not learn about a match "
                         "until promotion")
+    p.add_argument("--block-min", type=int, default=12,
+                   help="smallest function the address-locality screen offers")
+    p.add_argument("--block-max", type=int, default=72,
+                   help="largest function the address-locality screen offers; "
+                        "above this the per-function work stops being one or "
+                        "two statements and the block's shared vocabulary "
+                        "stops being the dominant cost")
+    p.add_argument("--block-min-matched", type=int, default=20,
+                   help="skip blocks with fewer matched functions than this -- "
+                        "the axis is only cheap where the vocabulary is ALREADY "
+                        "written down, and a cold block behaves nothing like it")
+    p.add_argument("--top-blocks", type=int, default=6)
+    p.add_argument("--per-block", type=int, default=14,
+                   help="targets listed per block; ~13 is one agent's batch")
+    p.add_argument("--no-blocks", action="store_true",
+                   help="skip the address-locality screen")
     p.add_argument("--self-test", action="store_true")
     p.add_argument("--include-parked", action="store_true",
                    help="also screen parked functions as targets; implied by "
