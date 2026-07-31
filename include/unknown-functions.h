@@ -1520,6 +1520,27 @@ void sub_0800C22C(int, int);
 int sub_08009720(int, int);
 int sub_08009BF4(int, int);
 
+/* ---- wave 23 (W23-C) ----
+ * sub_0801A368 draws a box into one of the four 0x800-byte tilemap buffers
+ * (gUnknown_08499578/7C/80/84, `u16 *` per src/decomp/c_08023360.c): one call
+ * for the top row, `height - 2` calls for the middle rows and one for the
+ * bottom, each 32 entries apart, then it marks whichever of the four buffers
+ * it wrote with sub_08013AD4(0..3).
+ *
+ * The three helpers' parameter widths are read from the CALL SITE, not from
+ * their own prologues: sub_0801A368 holds its own third argument as a bare
+ * `int` (nothing masks r2 at entry, and it is spilled whole to [sp,#4]) and
+ * re-narrows it with `lsls #0x10; asrs #0x10` before all three calls, and
+ * narrows a `u16` local the same SIGNED way for sub_0801A240's fourth. A
+ * sign-extending narrow at a call site is what a declared `s16` parameter
+ * produces -- but an explicit `(s16)` cast against an `int` parameter is
+ * byte-identical, so the WIDTH is proved and the declaration is not. Re-read
+ * it off the callee prologues when one of the three is matched. */
+void sub_0801A1D8(u16 *, int, s16, int);
+void sub_0801A240(u16 *, int, s16, s16, int);
+void sub_0801A2E4(u16 *, int, s16, int);
+void sub_0801A368(int, int, int, int, u16 *, int);
+
 /* ---- wave 13 (A8), second block ----
  * The sub_08065990 / sub_0806D944 screen-setup callees. Every parameter list
  * below is the entry-narrowing readout of the callee, not a guess from the
@@ -2213,6 +2234,19 @@ void sub_08025B80(struct Unk08499594 *, u8);
 void sub_080424E4(void);
 int sub_08042C9C(u16, u8);
 
+/* Promoted but never declared -- the wave-14 "promoted but no prototype" trap
+ * again. src/decomp/c_080616F0.c defines it `void sub_080616F0(void)` and that
+ * definition wins; this only publishes it (wave 23, A -- needed by
+ * sub_0807898C). */
+void sub_080616F0(void);
+
+/* ...and sub_08042998 itself, which those three serve and which was never
+ * declared either (wave 23, A -- needed by sub_0802D0F4). Nullary: its
+ * prologue writes r0-r3 before reading any of them (`ldr r4, =gUnknown_08499594`
+ * onwards). Void: it ends `pop {r0}; bx r0`, so r0 carries the return address
+ * and cannot carry a value, and sub_0802D0F4's `bl` discards it. */
+void sub_08042998(void);
+
 /* ---- family F059's two undeclared callees (wave 15, C) ----
  *
  * sub_0803CCB8's parameter is `int`, not `u8`: its body opens
@@ -2520,6 +2554,14 @@ int sub_0803866C(void);
  * than a bare pointer. Nothing is narrowed at entry in either function, so the
  * first two are `int`. `pop {r4,r5}; pop {r0}` -> void. */
 void sub_08071B0C(int, int, ProcPtr);
+
+/* ---- wave 23 (W23-B) ----
+ * The same front end onto the same callee with a different script, and typed
+ * by exact analogy: `sub_08071B28(&gUnknown_08613F54, a1, a2, a3)` with a3
+ * landing in r3, which sub_08071B28 forwards to Proc_Start as the parent.
+ * Bare prologue (`adds r4,r0,#0; adds r5,r1,#0; adds r3,r2,#0`) -> the first
+ * two are wide. `pop {r4,r5}; pop {r0}` -> void. */
+void sub_08071AF0(int, int, ProcPtr);
 
 /* DEFINED in src/decomp/c_08084858.c (matched since wave 19); this publishes
  * it and RETYPES the return from `int` to `u8`. The body cannot tell the two

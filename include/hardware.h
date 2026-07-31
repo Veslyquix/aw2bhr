@@ -56,6 +56,12 @@ struct IO_ALIGNED(2) DispStat
 // Container width does still set layout and sizeof -- it just cannot be
 // inferred from the access instruction. If a bitfield struct near-misses on
 // the load width, changing the container will not fix it.
+//
+// `size` is confirmed at BYTE 1 as a 2-bit field for the first time (wave 23):
+// sub_08032AFC and sub_08080254 both clear it on gUnknown_03002B6C and
+// gUnknown_030030B4 with `ldrb r0,[r,#1]; mov r1,#0x3f; and; strb r0,[r,#1]` --
+// a byte-wide read-modify-write masking exactly bits 6-7 of byte 1, which is
+// bits 14-15 of the halfword. Nothing yet reaches `wrap` at bit 13.
 struct IO_ALIGNED(2) BgCnt
 {
     /* bit  0 */ u16 priority : 2;
@@ -266,6 +272,20 @@ extern union BgCntBuf gUnknown_03002B6C;
 // bitfield tell, and it lands at bit 5 of each byte independently. Together
 // with sub_0807F2FC, which SETS win0_enable_blend on both shadows, bit 5 is now
 // exercised in both directions on 030030DC.
+// WAVE 23: byte 1 of gUnknown_030030A4 is confirmed a second time, and this
+// time all five window-enable bits are exercised in one statement run --
+// sub_0808A47C SETS win1_enable_bg0 and CLEARS bg1/bg2/bg3/obj with the
+// `mov #3; neg; sub #2; sub #4; sub #8` mask chain, which is the bitfield tell
+// at bits 1-4 of byte 1 independently of any group mask. Bit 5 of byte 1 of
+// gUnknown_030030DC (win1_enable_blend) is now seen SET as well as cleared
+// (sub_08078F60, sub_0807F378), so both bytes of DC are exercised in both
+// directions.
+//
+// gUnknown_030030DC also takes a whole-halfword CLEAR for the first time --
+// sub_08003A80 does `strh` of 0 before rebuilding the win0_* group -- so the
+// union is load-bearing on this shadow too, not only on 030030E0. Which
+// hardware register each shadow feeds is STILL unproved; nothing reaches
+// bytes 2-3 of either.
 extern union WinCntBuf gUnknown_030030A4;
 extern union BgCntBuf gUnknown_030030B4;
 /* The BG3 shadow -- see the note left in its place in unknown-globals.h. */
@@ -298,9 +318,27 @@ extern union WinCntBuf gUnknown_030030DC;
 //
 // The target2 group's TOP bit is confirmed too: sub_0808A8C0 inserts
 // `movs #0x80; lsls #5` = 0x1000 under the 0xE0FF mask, which is bit 12 =
-// target2_enable_obj, the highest bit the 5-bit group covers. Nothing has yet
-// reached target1_enable_obj (bit 4) as a single-bit write, so bit 4's position
-// still rests on the group masks alone.
+// target2_enable_obj, the highest bit the 5-bit group covers.
+//
+// WAVE 23 reaches both `_obj` bits as SINGLE-BIT writes for the first time,
+// which is what the note here previously said was missing. sub_080039E4 and
+// sub_08003A80 set target1_enable_obj with a bare `orr #0x10` on byte 0 -- not
+// discriminating on its own, since a scalar `|= 0x10` is the same bytes -- but
+// sub_080039E4 also CLEARS target2_enable_obj at byte 1 as the last link of a
+// `mov #3; neg; sub #2; sub #4; sub #8` chain ending in 0xEF. A scalar
+// `&= ~0x10` emits a bare `mov #0xef`; arriving at 0xEF by subtraction from a
+// negated constant is the bitfield tell, so bit 4 of each byte no longer rests
+// on the group masks alone.
+//
+// `effect` is now seen at 3 in this family too (sub_080039E4, sub_08003A80),
+// as the all-ones `orr #0xc0` with no AND.
+//
+// SPELLING: five of the six wave-23 members write this symbol, and both the
+// `.raw` and the `*(u16 *)&` view appear among them -- sub_0808A47C needs the
+// cast (`.raw` is +8 bytes) while sub_08078F60 and sub_0807F378 match with
+// either. Do not "normalise" one into the other across files; see the wave-23
+// section of docs/agbcc-codegen.md for why the choice is not predictable from
+// the source.
 extern union BlendCntBuf gUnknown_030030E0;
 
 // Serial communication. The display registers are reached through gDispIo

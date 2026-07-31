@@ -3888,6 +3888,35 @@ is otherwise exact and the only diff is a preheader permutation, spend one probe
 on a controlled test — take the *feature you suspect* and add it to a spelling
 that already gets the preheader right — rather than a dozen on rephrasing.
 
+**A hoisted loop invariant tells you whether the SOURCE bound it to a local, and
+the discriminator is its position relative to the LOOP COUNTER'S INIT (wave 23,
+A).** Both spellings — the expression written inline in the loop and the same
+expression assigned to a local before the loop — produce one evaluation outside
+the loop, so the hoist itself proves nothing. But they land in different regions:
+a source-level binding is an ordinary entry-block statement and is emitted in
+source order, i.e. *before* the `for`-init, while a LICM hoist is appended to the
+preheader, i.e. *after* it. Read the `movs rN, #0` that zeroes the loop counter
+and see which side of it the invariant sits on.
+
+`sub_0805848C` is the control case. The ROM reads
+
+```
+movs r7, #0          @ count = 0
+movs r5, #0          @ i = 0          <-- for-init, entry block
+ldr  r0, =gUnknown_030033EC           <-- LICM hoist, preheader
+...
+mov  sb, r0
+```
+
+so the army mask is written inline in the loop condition. Binding it to a local
+first is not byte-neutral and not merely a reordering: the `movs r5, #0` sinks
+below the hoisted block **and** `gUnknown_08499594`'s address is promoted into a
+callee-saved register that the ROM re-loads from the pool inside the loop, so the
+allocation diverges too. This is the same "binding locals are punctuation" family
+as the wave-17 result, read at the loop level rather than the statement level,
+and it is a *positive* readout — the inline spelling is falsifiable in one probe
+rather than being the thing you fall back to.
+
 **The high-register prologue is a register-pressure readout and nothing more.**
 `mov r7, sb; mov r6, r8; push {r6, r7}` says the function needs eight or more
 simultaneously live values, so expect a genuine loop with several carried
@@ -11110,6 +11139,15 @@ constant traffic.
 
 ## `u.raw` and `*(u16 *)&u` are NOT interchangeable — and a probe says they are (wave 21, W21-B)
 
+**PARTLY REFUTED in wave 23 — read the wave-23 section at the end of this file
+before using anything below.** The headline (the two spellings are two
+candidates, not one spelling with two names) survives and is confirmed. The
+*discriminator* proposed at the end of this section — "whether a live CSE-able
+zero exists" — does not work: wave 23 pre-committed predictions on six functions
+of one family and the rule got two of three testable calls backwards, in
+opposite directions. Treat the spelling as something to compile both ways, never
+as something to reason about.
+
 The wave-15 blind spot has a second instance, and this one is not about type
 width. For a `union BgCntBuf`/`BlendCntBuf` object, the raw-halfword view can be
 written two ways:
@@ -11420,3 +11458,158 @@ so far — possibly a different `n_refs`/`live_length` ratio the real source
 produces that these five candidates do not. Do not re-try the three variants
 above. Draft is in `work/sub_080815C0/sub_080815C0.c`, parked with `best.c`
 saved by `try_match` at 97.3%.
+
+## PRE-COMMITTED: does "a live CSE-able zero" predict the blend-shadow spelling? Six functions (wave 23, W23-B)
+
+The wave-21 section above (`u.raw` and `*(u16 *)&u` are NOT interchangeable)
+left a rule with a sample of three. This batch is six functions of one shape --
+display/blend shadow-register setup runs -- which is the largest controlled
+sample the rule has had. **Predictions below were written into this file before
+any of the six was compiled.** Outcomes follow in the section after.
+
+The rule under test, as wave 21 left it: *the two spellings of a union
+raw-halfword write diverge iff a live, CSE-able zero exists in the function at
+the point of the blend write; with no live zero they are byte-identical.*
+
+Raw-view write sites read off `asm/`, and the zero state at each:
+
+| function | raw-view write in the ROM | zero live at that point? | PREDICTION |
+| --- | --- | --- | --- |
+| `sub_080039E4` | none -- every 030030E0 access is `ldrb`/`strb` | yes (`movs r2,#0` for `gUnknown_03001FFC = 0`, live to `gUnknown_03002B4C`) | **N/A** -- no raw write to spell. If the rule mattered here the function would still have to be all-`.bits`; a raw write is not optional-but-equivalent, it is simply absent. |
+| `sub_08003A80` | one, and it is a PLAIN `= 0` (`strh r4,[r2]` into 030030DC), not a masked insert | yes -- r4 is the shared zero already materialised for `gUnknown_03001FFC = 0` | **DIVERGE.** And `.raw` is predicted to be the winner, because the ROM *does* reuse the shared zero for the `strh`, which is the behaviour wave 21 attributes to `.raw`. |
+| `sub_08048E0C` | none | no zero anywhere in the function | **N/A** |
+| `sub_0807F378` | `(raw & 0xFFE0) \| 0x1F` | no -- the only zeros are inside the `sub_08071AF0` loop and are dead after it (r4 exits at 16) | **IDENTICAL**, `.raw` matches |
+| `sub_0808A47C` | two: `(raw & 0xFFE0) \| 0x02` and `(raw & 0xE0FF) \| 0xA00` | no -- the preceding stores are `= 8`, `= 8` and a volatile self-store; the first `movs r0,#0` is 20 instructions later | **IDENTICAL**, `.raw` matches |
+| `sub_08078F60` | two: `raw & 0xFFE0` (insert value 0, no `orr` at all) and `(raw & 0xE0FF) \| 0x800` | **yes** -- `gUnknown_03002020 = 0;` is the immediately preceding statement, exactly the `sub_08071DB4` shape | **DIVERGE**, and the CAST is predicted to match |
+
+`sub_08078F60` is the sharp one: its exemplar `c_0807F238` is the same statement
+run with the same globals and matches on `.raw`, and the *only* difference is
+that `gUnknown_03002020` is stored `0` here and `8` there. If the rule is real,
+one changed constant flips the required spelling. If `.raw` matches here too,
+the rule is wrong and the discriminator is something else.
+
+### OUTCOME: the live-zero rule is REFUTED. It got two of three testable calls backwards.
+
+All six matched. Result against the predictions committed above:
+
+| function | prediction | outcome | rule |
+| --- | --- | --- | --- |
+| `sub_080039E4` | N/A, no raw write | matched first try, all-`.bits` | n/a |
+| `sub_08003A80` | DIVERGE (live zero, `.raw` wins) | **WRONG** -- probed both spellings, **byte-identical**. The 4 bytes came from somewhere else entirely (below). | fails |
+| `sub_08048E0C` | N/A, no raw write | matched first try | n/a |
+| `sub_0807F378` | IDENTICAL (no live zero) | **RIGHT** -- probed both, byte-identical | holds |
+| `sub_0808A47C` | IDENTICAL (no live zero) | **WRONG** -- `.raw` is 336 bytes against 328; only the cast matches | fails |
+| `sub_08078F60` | DIVERGE, cast wins (live zero, the exact `sub_08071DB4` shape) | **WRONG** -- probed both, byte-identical; `.raw` matched on the first attempt | fails |
+
+Three testable functions, one right, and the two wrong ones are wrong in
+*opposite* directions. The presence of a zero is neither necessary nor
+sufficient:
+
+- `sub_08078F60` has `gUnknown_03002020 = 0;` as the statement immediately
+  before the raw insert -- textbook wave-21 divergence shape -- and does not
+  diverge. It is the same statement run as the matched `c_0807F238.c` with only
+  the coefficient constants changed (0/0x10 instead of 8/8), which is as close
+  to a single-variable experiment as this codebase offers.
+- `sub_0808A47C` has no zero anywhere near the write and diverges by 8 bytes.
+
+**What the one real divergence actually looks like.** In `sub_0808A47C` the
+`.raw` spelling makes cse hoist the `0` belonging to `gUnknown_03002B68 = 0;` --
+a statement *twenty instructions after* the blend writes -- backwards into the
+middle of the `| 0xA00` insert, where it becomes a long-lived pseudo and claims
+a third high register. The prologue grows from `push {r5,r6}` to
+`push {r4,r5,r6}` of saved high regs and everything below shifts: +8 bytes. The
+cast keeps that zero local to its own `strb`. So the mechanism wave 21 described
+is real -- `.raw` lets constants be CSEd across the write and the cast breaks
+those equivalences -- but *which* constant, and whether the equivalence costs
+anything, is decided by the allocator, and a source-level zero-spotting test
+cannot see it. Note also that the CSE ran **backwards** here; wave 21 only ever
+saw it pull from a preceding statement.
+
+**The honest rule, and it is a procedure rather than a predicate:**
+
+> On a union raw-view write, `.raw` and `*(u16 *)&u` are two candidates. They
+> are byte-identical in most functions -- 3 of the 4 measured here, and
+> `sub_0807F2FC` in wave 21. When they differ it is because `.raw` permitted a
+> constant somewhere else in the function to be CSEd into a pseudo that wins a
+> callee-saved register the ROM does not spend. **Nothing readable off the
+> source predicts which functions those are. Compile both; it costs one
+> `compile_probe`.**
+
+What would actually settle it is a `.raw`-vs-cast sweep over every already
+matched function containing a raw-view write, scoring divergence against
+allocator state (number of callee-saved and high registers already claimed at
+the write) rather than against source features. That is a tooling job, not a
+per-function one, and it is the thing to build before anyone writes a third
+version of this rule.
+
+**A second, unrelated 4 bytes that the blend rule would have taken the blame
+for.** `sub_08003A80` sat at 232 bytes against 236 -- *short*, with the
+instruction stream otherwise aligned -- and the raw-view spelling had nothing to
+do with it. The ROM keeps one zero pseudo in r4 spanning
+`gUnknown_03001FFC`, `gUnknown_03002B28` and the `gUnknown_030030DC` halfword
+clear. Written as three separate `0` literals, the third zero is rematerialised,
+and the freed register goes to the constant `2`, which the ROM instead
+rematerialises at each of its three uses. Binding the zero once --
+`gUnknown_03001FFC = v = 0; ... gUnknown_03002B28 = v; ... gUnknown_030030DC.raw
+= v;`, the `c_08037260.c` idiom -- closes it exactly. **A candidate that is
+SHORT by a few bytes on a straight-line function is usually one binding local
+too few, not one statement too few**, and on a function containing a blend write
+that diagnosis is easy to miss because the spelling question is sitting right
+there looking guilty.
+
+## `mov rTMP,#K; lsl rDST,rTMP,#N` with a NON-MINIMAL shift is not a constant — it is a named constant local (wave 23, W23-C)
+
+This is the whole remaining difference on `sub_08002844`, which sat at 98.6%
+(size-exact, 4 bytes differing at +0xf4) for a wave. It is a source-level
+readout and it is cheap to check.
+
+**agbcc synthesises an `imm8 << n` constant with the SMALLEST `n` that fits,
+into the destination register itself.** Six sites in this one function agree:
+`0x100 = 0x80<<1`, `0x400 = 0x80<<3`, `0x1000 = 0x80<<5`, `0x2C0 = 0xB0<<2`,
+`0x3C0 = 0xF0<<2`, `0xE000 = 0xE0<<8`. In every case the shift is the minimum
+`i` for which all set bits lie in `[i, i+7]`, and the `mov` writes the same
+register the `lsl` writes — the split runs after reload, so the temp *is* the
+destination.
+
+So a pair like
+
+```
+    movs r0, #6
+    lsls r3, r0, #0xc        @ 0x6000, but the synthesis form is r3,#0xC0 / lsl #7
+```
+
+is **not** a constant at all. Two independent tells, either one sufficient:
+
+- the shift is not the minimal one for that value, and
+- the `mov` writes a *different* register from the `lsl`.
+
+It is a real `ashift` insn whose operand is a **single-assignment constant
+local whose definition is in a different basic block from its use**:
+
+- combine never sees the two insns together, so it never folds them into a
+  constant (that is what makes the non-minimal shift survive);
+- local-alloc gives the pseudo `reg_equiv_constant` rather than a hard
+  register, so nothing is emitted at the definition — the local is free;
+- reload rematerialises the constant into a scratch immediately before the
+  use, which is why it lands in the first free low register (`r0` here) and
+  why the two instructions end up adjacent in the *use's* block.
+
+On `sub_08002844` the fix was one declaration. `a4 != 0x19 ? 0x6000 : 0xE000`
+gives the synthesised form and misses; `pal = 6;` plus
+`a4 != 0x19 ? pal << 12 : 0xE000` is byte-exact, and the `0xE000` arm keeps its
+synthesised `0xE0<<8` because it really is a folded constant. The value here is
+an OBJ palette number in attr2 bits 12-15, which is why the original had a name
+for it and not a folded word.
+
+**Placement inside the source barely matters; the def/use block split and the
+single def are the whole mechanism.** `pal = 6;` at the top of the function and
+`pal = 6;` inside the first `if` arm were probed and are byte-identical. Two
+defs (`pal = 6;` in one arm, `pal = 14;` in the other) would NOT work: the
+pseudo then needs a real register, the constant is not equivalent, and you get
+a `mov` in each arm plus one shift after the merge.
+
+Read backwards, this is a free readout of the original source: the immediate
+`K` is the local's value and `N` the shift applied at the use. Do not write
+`K << N` folded, and do not reach for the permuter — the permuter had already
+been run on this function and got nothing, because the residual was never an
+allocation problem.
