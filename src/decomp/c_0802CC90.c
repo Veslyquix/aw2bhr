@@ -1,0 +1,57 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802CC90.
+ * sub_0802CC90 @ 0x0802CC90, sub_0802CCCC @ 0x0802CCCC
+ */
+
+/* Four guards, all of which must pass before this reports FALSE.
+ *
+ * Written as an `if (...) return TRUE;` chain and NOT as one negated
+ * disjunction: here the merged THEN block (`movs r0, #1`) sits AFTER the pool
+ * and the fallthrough `movs r0, #0` before it, which is the chain's layout.
+ * Its neighbour sub_0802CCCC is the same predicate with the tests reordered and
+ * comes out the other way round, so the two spellings are distinguishable and
+ * this block contains one of each.
+ *
+ * gUnknown_030040D8->unk00 is the byte at offset 0, newly named: sub_080421D0
+ * and sub_0804223C read the same byte off the same pointer to index
+ * gUnknown_085D5ABC by 0x5c, so it is a record selector rather than a flag.
+ */
+
+bool8 sub_0802CC90(void)
+{
+    if (gUnknown_030040D8->unk00 != 0x18)
+        return TRUE;
+
+    if (gUnknown_030040D8->unk01 & 0x20)
+        return TRUE;
+
+    if (!sub_0802C8F8())
+        return TRUE;
+
+    if (!sub_0802CBA0())
+        return TRUE;
+
+    return FALSE;
+}
+
+/* sub_0802CC90's three-test twin, and the spelling is the OTHER one.
+ *
+ * `if (A && B && C) return FALSE; return TRUE;` is semantically identical and
+ * does NOT match: agbcc lays the THEN arm out inline and sends the
+ * short-circuit exits to the end, putting `movs #0` before the pool. The ROM
+ * has `movs #1` before the pool and `movs #0` after, i.e. the short-circuit
+ * exits land on the fallthrough -- which is the De Morgan form below. The last
+ * operand is the one that inverts, exactly as in sub_0802C550's `||`.
+ */
+
+bool8 sub_0802CCCC(void)
+{
+    if (!sub_0802C8F8() || !sub_0802CBA0() || !(gUnknown_030040D8->unk01 & 0x20))
+        return TRUE;
+
+    return FALSE;
+}

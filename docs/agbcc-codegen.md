@@ -10885,6 +10885,14 @@ of the matching; the subset rows moved because of the fix.
 
 ## A BARE PROLOGUE is positive evidence for a WIDE parameter (wave 21, W21-B)
 
+> **Wave 24 (W24-B) extends this, and only on the side this section does not
+> cover.** The rule below reads an UNMASKED prologue and is unchanged — it
+> widened `sub_0803B5A4` from `s16` to `int` in wave 24. What wave 24 added is a
+> third reading of a prologue that IS masked, where the caller and the callee
+> disagree decisively: see "An OLD-STYLE definition gives a narrow parameter to
+> the callee and a wide one to every caller" at the end of this file. The
+> discriminator there is which register the SECOND shift pair reads.
+
 `PROMOTE_MODE`'s `lsl #16; lsr #16` on a sub-word parameter is emitted in the
 **prologue**, unconditionally, and it is **not** deleted when the extension is
 dead. That inverts the natural reading of a prologue, and it is the cheapest
@@ -11613,3 +11621,334 @@ Read backwards, this is a free readout of the original source: the immediate
 `K << N` folded, and do not reach for the permuter — the permuter had already
 been run on this function and got nothing, because the residual was never an
 allocation problem.
+
+## A function whose size is 2 mod 4 CANNOT report `matched`, and that is bookkeeping, not codegen (wave 24, W24-A)
+
+`sub_0802C604` is the first function in the tree to hit this, and it cost a
+wave-time detour, so it is written down here rather than parked as a
+decompilation failure.
+
+The function is 38 bytes: `0x0802C604` through `0x0802C629`. `trymatch`
+reported `+2` with **`bytes: 0 of 38 differ (100.0% identical)`** and
+`relocs: match`, and the whole of the extra was a trailing `.short 0x0000`.
+
+That tail is not the candidate's. THUMB code ending at a 2-mod-4 offset leaves
+`.text` two bytes short of the section's four-byte alignment, and `trymatch`
+reads the section with `objcopy -O binary --only-section=.text`, so the
+alignment tail is inside the window it compares. **Nothing writable in C moves
+it** — it is an assembler property of a section whose contents are 2 mod 4.
+
+The ROM has those two bytes too, and it spends them the same way. The splitter
+gave them their own symbol:
+
+    data/asm-resident.json: "sub_0802C62A": "Not code at all -- inter-function
+    alignment padding ... the 0x0000 the assembler emits for `.align 2, 0`
+    ahead of the 4-aligned sub_0802C62C."
+
+`baserom.gba` at `0x0802C62A` reads `00 00`, which is exactly what the
+candidate's tail contains. So the candidate reproduces `0x0802C604`
+through `0x0802C62B` — **all forty bytes, byte for byte**. The disagreement is
+entirely that `data/functions.json` carves the function at 38 and accounts the
+pad to a separate 2-byte entry.
+
+How to recognise it, in one check: **the next symbol after your target is a
+2-byte `non_word_aligned_thumb_func_start` with zero callers.** `get_function`
+prints the directive. If that holds and your only residual is a trailing
+`.short 0x0000`, you are done deriving; the residual is the pipeline's.
+
+Two things follow for whoever fixes this.
+
+- **Zero of the 1,482 matched functions have `size % 4 == 2`** (measured over
+  `data/functions.json`, wave 24). This case has never been promoted, so
+  `promote.py` has no code for it — it does not mention alignment at all — and
+  the `.align` stub would still be emitted from `asm/` after the promoted
+  unit, adding two bytes and shifting everything downstream. Promotion has to
+  drop the paired padding stub, not just carve the function.
+- **Do not "fix" this in the C.** There is no shorter or longer spelling to
+  find: the instruction stream is already exact, and any edit that changes the
+  size by two is wrong by two in the other direction.
+
+## A SIGNED compare of two POINTERS is a biv elimination agbcc will not perform for you (wave 24, W24-C)
+
+`sub_08078250` and `sub_08078260` are 16 bytes each and fill four halfwords
+with a descending run (`p[3] = 0x2c` down to `p[0] = 0x29`, and 0x31 down to
+0x2e). The ROM:
+
+```
+    movs r2, #0x2c
+    adds r1, r0, #6
+_loop:
+    strh r2, [r1]
+    subs r2, #1
+    subs r1, #2
+    cmp  r1, r0
+    bge  _loop
+    bx   lr
+```
+
+Two facts are readable off that and they point in opposite directions from the
+obvious source:
+
+- **There is no zero-trip guard**, so the loop body is entered unconditionally.
+- **The exit test compares the walking pointer against the incoming one with a
+  SIGNED `bge`.** agbcc compares pointers UNSIGNED — `p + 3 >= p` on a `u16 *`
+  emits `cmp; bcs` *and* a `bcc` guard ahead of the loop, because it cannot
+  prove the loop runs. A signed compare of two pointer values can only come
+  from a signed comparison in the source.
+
+The reading those two facts invite is `for (i = 3; i >= 0; i--) p[i] = i +
+0x29;` — signed test, statically true at entry, and gcc's induction-variable
+elimination moves the test onto the `&p[i]` giv, keeping `p` live in r0.
+**That spelling does not match.** agbcc 2.9 declines both halves of it:
+
+```
+    mov  r2, #0x3          @ the index survives
+    add  r1, r0, #0x6
+_loop:
+    add  r0, r2, #0        @ i + 0x29 rematerialised, 2 insns per iteration
+    add  r0, r0, #0x29
+    strh r0, [r1]
+    sub  r1, r1, #0x2
+    sub  r2, r2, #0x1
+    cmp  r2, #0            @ test still on the index
+    bge  _loop
+```
+
+20 bytes against the ROM's 16. It creates the address giv but not the value
+giv, and because the index is still live it never eliminates the biv, so the
+test stays on `i` and the base pointer is free to be clobbered. Adding a
+separate `s32 v = 0x2c; ... p[i] = v--;` does not help — that gives agbcc *two*
+bivs and it keeps the index anyway, same 20 bytes.
+
+**What matches is spelling both induction variables out and casting the
+comparison:**
+
+```c
+s32 v = 0x2c;
+u16 *q = p + 3;
+
+do
+{
+    *q = v;
+    v--;
+    q--;
+} while ((s32)q >= (s32)p);
+```
+
+The `do`/`while` supplies the missing guard and the casts supply the `bge`.
+Declaration order is load-bearing on top of that: `v` before `q` puts
+`movs r2, #0x2c` ahead of `adds r1, r0, #6`, which is the ROM's order.
+
+**The general rule: a signed comparison of two pointers in the ROM is a
+positive tell that the original had an INDEXED loop whose index the compiler
+eliminated — and it is a tell you must then reproduce by hand, because agbcc
+will not redo the elimination from the indexed spelling.** Do not read the
+`bge` as evidence about the pointer type. The same shape appeared twice in one
+address block, so it is likely to recur in small fill loops.
+
+## An OLD-STYLE definition gives a narrow parameter to the callee and a wide one to every caller (wave 24, W24-B)
+
+`sub_0803B524` is the first function in the tree whose callee-side and
+caller-side width evidence are **both** decisive and point at **different
+types**. It is not a wrong prototype. The two readings are both correct, and
+C89's old-style definition is what reconciles them.
+
+**The callee says narrow and SIGNED.** The ROM opens
+
+```
+push {r4, r5, r6, lr}
+lsls r0, r0, #0x10
+lsrs r4, r0, #0x10        @ (1) zero-extend into the parameter's home
+ldrh r1, [r6]
+lsls r5, r4, #0x10        @ (2) and now shift r4 -- NOT r0
+asrs r0, r5, #0x10        @     ... to sign-extend for the compare
+...
+lsrs r0, r5, #0x10        @ (3) and again, to zero-extend for a u16 callee
+```
+
+The load-bearing detail is that **(2) shifts `r4`, the result of (1), rather
+than reusing the `r0 << 16` that (1) already computed** — even though the two
+values are equal. That is the fingerprint of `PROMOTE_MODE` on a declared
+narrow parameter: the promoted pseudo *is* the parameter's home, so `combine`
+cannot fold a later cast back onto the raw incoming register. It also costs a
+third callee-saved register, because `r5` (the shared `<< 16`) has to stay live
+across the intervening `bl`.
+
+Four wide-parameter spellings were probed and **every one folds (1) and (2)
+into a single chain**, coming out one or two instructions short:
+
+| spelling | entry |
+| --- | --- |
+| `int a;` + `u16 v = a;` then `(s16)v` | `lsl r0,#16` once, `lsr r4`/`asr r0` both from it |
+| `int a;` + bare `(s16)a` at the compare | `add r4, r0, #0` — no truncation at all |
+| `int a; a = (u16)a;` | `add r4,r0,#0; lsl r0,r4,#16; lsr r4,r0,#16` — one instruction long |
+| `u16 a;` (narrow but UNSIGNED) | folds to a single chain, same as the wide ones |
+
+Only a narrow **signed** parameter produces the two-chain shape. `u16` does
+not: for an unsigned parameter the promoted value already *is* the canonical
+one, so there is nothing to re-derive.
+
+**The caller says NOT narrow, and by an already-matched function.**
+`src/decomp/c_08016104.c` hands `sub_0803B524` a `u16` read out of a script
+stream, and the ROM loads it `ldrh r0, [r0, #4]`. Probed: an `s16` *prototype*
+turns that into `movs r1,#4; ldrsh r0,[r0,r1]` and breaks a match that already
+holds. There is no expression you can hand an `s16` parameter that yields
+`ldrh` — the conversion to a signed narrow type always sign-extends, and agbcc
+always folds that into the load.
+
+**The resolution is C89 6.7.1.** An old-style definition is compatible with a
+prototype when the declared parameter type *promotes to* the prototype's:
+
+```c
+/* include/unknown-functions.h -- unchanged, every caller still sees int */
+void sub_0803B524(int);
+
+/* src/decomp/c_0803B524.c */
+void sub_0803B524(a)
+    s16 a;
+{
+    ...
+}
+```
+
+`s16` promotes to `int`, so this is **one declaration, not a disagreement**; it
+compiles clean under `-Werror`, callers emit the wide-argument code, and the
+callee emits the narrow-parameter code. Byte-exact, 56/56.
+
+### How to use this
+
+- **It is a last resort, not a default.** Reach for it only when the callee's
+  entry shape is the two-chain `lsl;lsr` → *shift the result again* form AND a
+  matched caller rules the narrow type out. Both halves must be decisive; one
+  alone means you have an ordinary width question.
+- **The diagnostic is cheap and specific.** Ask one question of the assembly:
+  *does the second shift pair read the register the first pair WROTE, or the
+  register it READ?* Reading the written one (`lsls r5, r4, #0x10` after
+  `lsrs r4, r0, #0x10`) is the narrow-parameter tell. Reading the original
+  (`lsl r0,#16` then both `lsr` and `asr` off `r0`) is a wide parameter with a
+  cast, and no local, reassignment or extra local will change that.
+- **It refines the wave-21 bare-prologue rule rather than contradicting it.**
+  That rule reads a prologue with NO masking as a wide parameter and still
+  holds — `sub_0803B5A4`, four functions along in the same block, was declared
+  `s16` from wave 7 and its bare `adds r4, r0, #0` proves `int`; the `s16`
+  spelling there compiles to a *different* function (it folds the entry
+  extension and a `<< 4` into `asrs r4, r4, #0xc`). What is new is the case
+  where masking IS present: that used to be read as "narrow parameter or a cast
+  at a use, and the caller decides". There is now a third answer, and the
+  register the second shift reads is what separates it from the other two.
+- **The two prototypes it explains were both edited in the same wave and in
+  opposite directions.** `sub_0803B5A4` was widened `s16` → `int`;
+  `sub_0803B524` was left `int` and its *definition* narrowed. Reading either
+  one's evidence onto the other gets both wrong.
+
+### Where the sign lives when there is no cast anywhere
+
+With the old-style `s16` the body needs no casts at all — `gUnknown_030005CA
+!= a`, `sub_08070478(a)`, `gUnknown_030005C8 = a` — and every shift in the ROM
+falls out of the declared types. That is worth noticing in its own right: **a
+function whose ROM is dense with shift pairs but whose source has no casts is
+what a correctly-typed narrow parameter looks like.** A draft that needs a cast
+at every use to reproduce those shifts is usually reproducing the symptom.
+
+## Which of the two `return` blocks lands before the pool: the THEN arm always goes LAST (wave 24, W24-A)
+
+A predicate that materialises both 0 and 1 has two possible layouts, and they
+differ by the polarity of one branch — so getting it backwards is a one- or
+two-byte miss that reads like a logic error and is not one. Six functions in
+the 0x0802C block turned on this, three of them landing on each side, so it is
+directly measured rather than inferred.
+
+**The rule is mechanical: the `if`'s THEN arm is emitted AFTER the fallthrough
+return, and the literal pool goes between them.** Nothing else matters — not
+the return type, not how many tests there are, not whether the tests are calls
+or loads.
+
+Read it backwards off the ROM. Whichever of `movs r0,#0` / `movs r0,#1` sits
+*after* the pool is the THEN arm; the other one is the final `return`.
+
+    movs r0,#1 / pool / movs r0,#0   ->  if (...) return FALSE;  return TRUE;
+    movs r0,#0 / pool / movs r0,#1   ->  if (...) return TRUE;   return FALSE;
+
+Worked examples, all matched:
+
+- `sub_0802C684`, `sub_0802C820`, `sub_0802C848`, `sub_0802CBA0` — `movs #1`
+  first, so `if (cond) return FALSE; return TRUE;`. Writing the intuitive
+  `if (cond) return TRUE; return FALSE;` puts the blocks the other way round.
+  `src/decomp/c_0802C5F0.c` is the already-promoted precedent.
+- `sub_0802C69C`, `sub_0802C9A4`, `sub_0802CC90` — `movs #0` first, so the
+  `if (...) return TRUE;` chain that family F046 uses.
+
+**The corollary is the useful half, and it is what `&&` gets wrong.** For a
+multi-test predicate the short-circuit exits all land on ONE block and the last
+test inverts. Writing `if (A && B && C) return FALSE; return TRUE;` lays the
+THEN arm out inline and sends the exits to the end, giving `movs #0` before the
+pool. The De Morgan twin `if (!A || !B || !C) return TRUE; return FALSE;` is
+semantically identical and gives `movs #1` before the pool. **They are
+different code and the ROM picks one.** `sub_0802CCCC`, `sub_0802CBC8` and
+`sub_0802CC04` needed the `||` form; `sub_0802CC90`, the same predicate with
+its tests reordered, needed the chain. Both spellings exist in this one block.
+
+Two further notes from the same batch:
+
+- `return A || B;` is a THIRD thing, not a synonym for either: it goes through
+  `do_store_flag`, which presets a result register and costs a `push {r4}`.
+  `sub_0802C550` has no such push, and wanted `if (A || B) return TRUE;`.
+- A `switch` is the only way to get a compare against a range bound that `fold`
+  would otherwise canonicalise away. `sub_0802C604`'s `cmp r0,#1; blt` cannot
+  come from `v >= 1` or `v < 1` — agbcc rewrites both as compares against 0 —
+  but three contiguous `case` labels sharing one body emit the case node's own
+  low and high bounds directly, as `cmp #3; bgt default` then `cmp #1; blt
+  default`. Reach for a switch whenever a range check compares against the
+  literal bounds rather than against `bound - 1`.
+
+## Which arm FALLS THROUGH is decided by the source condition's sense, and it is readable (wave 24, W24-C)
+
+The existing rule above says `movs rD,#0` / `movs rD,#1` split across an
+unconditional `b` is `if (...) return 1; else return 0;` and not a returned
+comparison. True, but it does not say WHICH constant goes where, and that is a
+second bit of information the ROM hands you for free.
+
+`sub_080788A0`, `sub_080788D8` and `sub_08078918` are one source at three
+offsets. The ROM:
+
+```
+    cmn  r2, r1          @ flags for r2 + r1
+    bne  _080788D0
+    movs r0, #1          @ FALLTHROUGH arm
+    b    _080788D2
+    .align 2, 0
+_080788CC: .4byte gUnknown_0202FDFC
+_080788D0:
+    movs r0, #0          @ OUT-OF-LINE arm, after the literal pool
+_080788D2:
+```
+
+The natural reading of the semantics — "return 1 when the three flags are all
+clear" — is `if (sum == 0) return 1; return 0;`. **That does not match.** agbcc
+emits the branch for the NEGATION of the source condition and lets the `if`
+body fall through, so `== 0` produces `beq` *to the 1* with `return 0` falling
+through: the same instructions with the two constants in the opposite blocks,
+and the literal pool between them, so it is not even a size difference. It is
+a 4-byte-wide wrong answer that a size check will not catch.
+
+What matches is the inverted spelling, which is also the one with the early
+return:
+
+```c
+if (sum != 0)
+    return 0;
+
+return 1;
+```
+
+**Read it off the ROM directly: the conditional branch's condition is the
+NEGATION of the source `if`, and the constant it jumps AWAY to is the one in
+the source's `if` body.** Here `bne` away to `movs #0` means the source tested
+`!= 0` and returned 0 in the body. This is the same "read the branch against
+the ARM order" family as the wave-20 note, applied to block placement rather
+than to the comparison.
+
+It generalises past predicates: any `if` whose body the ROM places out of line
+past the literal pool was written with the condition in that sense. Getting it
+backwards costs nothing in size, so a candidate that is size-exact and still
+mismatching at the first `movs` is almost always this.

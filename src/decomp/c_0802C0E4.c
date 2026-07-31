@@ -1,0 +1,63 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802C0E4.
+ * sub_0802C0E4 @ 0x0802C0E4, sub_0802C0E8 @ 0x0802C0E8, sub_0802C118 @ 0x0802C118
+ */
+
+/* An empty function. `bx lr` with no `push` at all is agbcc's leaf epilogue for
+ * a body that does nothing, and the two bytes after it are the `.align 2, 0`
+ * ahead of the 4-aligned sub_0802C0E8 -- here the splitter counted that pad as
+ * part of this function rather than giving it its own symbol, which is the
+ * opposite of what it did to sub_0802C604's pad at 0x0802C62A.
+ */
+
+void sub_0802C0E4(void)
+{
+}
+
+/* A three-way dispatch on the mode selector gUnknown_03003FC0.unk01 -- the
+ * same 1/2/3 the three sub_0803Bxxx starters write into it. The
+ * `cmp #2; beq / cmp #2; bgt / cmp #1; beq` tree with the literal pool sitting
+ * INSIDE it is agbcc's balanced switch over three case values, not an if-chain,
+ * and cases 1 and 2 share a block: case 1 falls through into case 2's
+ * sub_0803B828(). Case 3 is a separate block calling the same function, so the
+ * source lists it separately rather than folding it into case 2.
+ *
+ * The parameter is never read -- the body opens by loading gUnknown_03003FC0
+ * straight over r0 -- so its width is settled entirely at the only call site,
+ * sub_0802C118, which hands it the u16 global gUnknown_030033EC with a bare
+ * `ldrb`. A byte load out of a halfword global is what a u8 parameter costs;
+ * an `int` parameter would have emitted `ldrh`. `pop {r0}; bx r0`, so void.
+ */
+
+void sub_0802C0E8(u8 a)
+{
+    switch (gUnknown_03003FC0.unk01)
+    {
+    case 1:
+        sub_08016ED8();
+        /* fallthrough */
+    case 2:
+        sub_0803B828();
+        break;
+
+    case 3:
+        sub_0803B828();
+        break;
+    }
+}
+
+/* Two bare statements. sub_0802C0E8 discards its argument, so the `ldrb` of
+ * the u16 gUnknown_030033EC is the only evidence for that parameter's width --
+ * see the note on sub_0802C0E8 in include/unknown-functions.h.
+ * `pop {r0}; bx r0`, so void.
+ */
+
+void sub_0802C118(void)
+{
+    sub_080366A4();
+    sub_0802C0E8(gUnknown_030033EC);
+}

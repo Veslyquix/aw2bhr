@@ -45,6 +45,32 @@ PROMOTED = os.path.join(awlib.DATA_DIR, "promoted.json")
 BANNER = re.compile(r'/\* Promoted from assembly;.*?\*/\n+', re.S)
 
 
+def _is_definition(lines, i):
+    """Does the declarator starting at line `i` open a DEFINITION?
+
+    Wave 24: matching `^\\S.*\\b<fn>\\s*\\(` on the first code line is not
+    enough, because a promoted multi-function file routinely FORWARD-DECLARES
+    its own functions above the definitions. In c_080824D4.c the prototype
+    `void sub_08082660(struct Unk8082660 *);` sits at line 58 and the
+    definition at line 231, so the boundary landed on the prototype and the
+    draft came out as the doc comment plus a struct with NO BODY -- which
+    `trymatch` then reports as `candidate is 0 bytes, original is 848`, i.e. a
+    catastrophic-looking regression on a function that is perfectly fine. This
+    is the same class as the comment-opener bug above and the third instance of
+    it; the discriminator is what TERMINATES the declarator, so read forward to
+    the first `{` or `;` rather than trusting the opening line's shape.
+    """
+    in_comment = False
+    for ln in lines[i:i + 40]:
+        codetext, in_comment = promote.strip_comments(ln, in_comment)
+        for ch in codetext:
+            if ch == "{":
+                return True
+            if ch == ";":
+                return False
+    return False
+
+
 def split_unit(text, fns):
     """(shared declarations, {fn: body}) for one promoted file.
 
@@ -75,7 +101,8 @@ def split_unit(text, fns):
     for fn in fns:
         pat = re.compile(r'^\S.*\b%s\s*\(' % re.escape(fn))
         hit = next((i for i, ln in enumerate(lines)
-                    if code[i] and pat.match(ln)), None)
+                    if code[i] and pat.match(ln) and _is_definition(lines, i)),
+                   None)
         if hit is None:
             return None, None
         starts[fn] = promote.doc_comment_start(lines, hit)
