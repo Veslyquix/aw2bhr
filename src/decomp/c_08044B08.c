@@ -3,18 +3,11 @@
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0808B6B0.
- * sub_0808B6B0 @ 0x0808B6B0
+ * contiguous block at 0x08044B08.
+ * sub_08044B08 @ 0x08044B08
  */
 
-u32 sub_0808B6B0(const char *s)
+void sub_08044B08(u8 a1, u8 a2, u8 a3)
 {
-    int n;
-
-    n = 0;
-
-    while (*s++ != 0)
-        n++;
-
-    return n;
+    sub_08039ACC(a1, a2, 0x51CA, a3);
 }

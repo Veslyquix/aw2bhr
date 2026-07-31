@@ -14,7 +14,7 @@
  * sub_0804415C @ 0x0804415C
  */
 
-int sub_0804415C(int a1)
+u8 sub_0804415C(int a1)
 {
     return gUnknown_08499598[a1].unk1e != 0;
 }

@@ -3,18 +3,14 @@
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0808B6B0.
- * sub_0808B6B0 @ 0x0808B6B0
+ * contiguous block at 0x0804483C.
+ * sub_0804483C @ 0x0804483C
  */
 
-u32 sub_0808B6B0(const char *s)
+#include "proc.h"
+
+void sub_0804483C(ProcPtr parent)
 {
-    int n;
-
-    n = 0;
-
-    while (*s++ != 0)
-        n++;
-
-    return n;
+    sub_0803B4DC(502);
+    sub_080443C4(parent);
 }

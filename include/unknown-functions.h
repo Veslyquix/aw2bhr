@@ -82,6 +82,9 @@ void sub_08001148(u16 *, int, int);
  * sub_080344B4 hard-codes to 8. Verified at sub_0802CFFC, which calls both. */
 void sub_08034534(int, u8, int, int);
 void sub_080344B4(u8, int, int);
+/* Definition promoted in src/decomp/c_080308B4.c; its body copies src[0..19]
+ * into the 0x08090CD8 ring, so the block is 20 bytes. */
+void sub_080308B4(u8 *);
 
 void sub_08012358(void);
 /* Unprototyped: only ever called, never with a settled signature. r0 selects
@@ -272,8 +275,17 @@ void sub_080139C4(s32);
  * same readout that types sub_08015BD0 and sub_0801537C. This half is
  * byte-neutral for every caller in the tree, because all of them (proc.c and
  * the six wrappers alike) discard the result and a discarded return emits no
- * narrowing; fix it with the parameter rather than on its own. */
-void sub_080152C0(s32, u8);
+ * narrowing.
+ *
+ * FIXED IN WAVE 25, and the note above was wrong about needing to wait for the
+ * parameter. `s32` is not a problem to solve: every one of the eight call
+ * sites already passes a pointer through an explicit `(s32)` cast, which is
+ * byte-neutral, and the body casts it back with `(const void *)`. So the
+ * return type was the only thing blocking sub_080152C0, and it can be fixed
+ * ALONE. Verified by reading all eight call sites -- seven in src/decomp plus
+ * src/proc.c:1079 -- every one a bare expression statement discarding the
+ * result. src/proc.c is NOT edited by this change; only this line moves. */
+s8 sub_080152C0(s32, u8);
 /* Allocates a gUnknown_03001470 slot and returns &gUnknown_03001470[i], or NULL
  * when sub_08015BD0 reports -1. Second parameter is `u8`: the prologue is
  * `lsls r1,#0x18; lsrs r1,#0x18`, which the table in docs/agbcc-codegen.md
@@ -1214,6 +1226,92 @@ void sub_08078758(void);
 void sub_0801566C(s16, struct UnkVec *);
 void sub_08015608(s16, struct UnkVec);
 void sub_08015928(s16, u32);
+/* ---- wave 25 (W25-C): the 0x08015 slot-accessor callees. None of these ten
+ * had ever been declared, and three of them are the "PROMOTED BUT NEVER
+ * DECLARED" trap -- sub_0801D96C, sub_0801DA44 and sub_0801DA54 are already
+ * matched in src/decomp/c_0801D96C.c, c_0801DA44.c and c_0801DA54.c, so their
+ * types below are COPIED FROM THOSE DEFINITIONS and were not re-derived.
+ *
+ * THE COPIED TYPES REFUTE THE sub_080156C4 NOTE DIRECTLY BELOW. That note
+ * argues the `lsls #0x10; asrs #0x10` in sub_080156C4's tail is agbcc
+ * re-narrowing an s16-returning sub_0801DA54; sub_0801DA54's promoted
+ * definition returns `u32`, so no re-narrowing happens and the shift pair is
+ * sub_080156C4's own `return (s16)...` cast under an `int` return type. Same
+ * for sub_080156A0/sub_0801DA44. The declaration below is unchanged and still
+ * right -- only the reason for it was wrong. Wave 25.
+ *
+ * The seven genuinely new ones, each read off the callee's own body:
+ *   sub_080151B0  the slot initialiser. r0 is stored to BOTH .unk00 and .unk04
+ *     (`const void *`), r1 narrows IN PLACE (`lsls #0x18; lsrs #0x18`, no copy)
+ *     so it is a declared `u8`, r2 is a bare `strb` into .unk14 (u8). Ends
+ *     `pop {r0}; bx r0`, so void.
+ *   sub_08015A30  runs the slot's script through gUnknown_0848A160; r0 narrows
+ *     in place to u8 and it ends `pop {r0}`, so void.
+ *   sub_08015224  sub_0801527C's twin -- same save/restore of gUnknown_03001FBC
+ *     around sub_080151B0/sub_08015A30, but it stores 0 to .unk12 where
+ *     sub_0801527C stores 4, and narrows its index u16 rather than u8. Returns
+ *     `adds r0,r5,#0` off an `asrs #0x18`, so s8.
+ *   sub_08015438  parameters 3 and 4 are declared HERE AS ITS CALLER ALREADY
+ *     DECLARES THEM (`void *`), deliberately not re-derived: inside
+ *     sub_08015438 parameter 4's only use is `lsls #0x10; asrs #0x10`, i.e. a
+ *     small SIGNED INTEGER and almost certainly not a pointer. Left alone
+ *     because sub_08015410 is its only promoted caller, forwards both unchanged
+ *     and is byte-identical either way. Settle it when sub_08015438 is matched.
+ *   sub_0801D778 / sub_0801D804  ARITY IS READ OFF THE CALLEE, NOT THE WRAPPER:
+ *     D778 forwards r0-r3 and supplies a fifth 0 to sub_0801D6E8, so four
+ *     parameters; D804 writes r3 itself before calling sub_0801D78C, so three.
+ *     `int` returns: neither narrows its own result, and the SINGLE
+ *     `lsls #0x18; asrs #0x18` at sub_08015578's merge point is that function's
+ *     own s8 return -- an s8 return here would have put one after EACH `bl`.
+ *   sub_0801D9E4  THREE parameters, and this is the pass-through-wrapper trap
+ *     in its pure form: its only caller sub_080155E8 touches r0 alone, so the
+ *     arity is completely invisible there. The body `strh`s into [r1] and [r2]
+ *     after an `asrs #8`, so both are `s16 *` out-parameters. */
+void sub_080151B0(const void *, u8, u8);
+void sub_08015A30(u8);
+s8 sub_08015224(const void *, s16, u8);
+s8 sub_08015438(void *, int, void *, void *, int);
+int sub_0801D778(int, int, int, int);
+int sub_0801D804(int, int, int);
+void sub_0801D96C(int, s16, s16);
+void sub_0801D9E4(int, s16 *, s16 *);
+u32 sub_0801DA44(int);
+u32 sub_0801DA54(int);
+/* The six 0x08015 block members matched in wave 25 that had no prototype.
+ *   sub_0801527C  sub_08015224's twin and sub_080152EC's worker: same
+ *     save/restore of gUnknown_03001FBC around sub_080151B0/sub_08015A30,
+ *     storing 4 rather than 0 to the slot's .unk12. Returns its own second
+ *     argument re-narrowed `lsls #0x18; asrs #0x18`, so s8 out of a u8
+ *     parameter -- the sign change is real code and not a spelling.
+ *   sub_08015578  dispatches on `a != 0xff` between sub_0801D778 (four
+ *     arguments, `a` included) and sub_0801D804 (three, `a` dropped). s8
+ *     return; parameters 2 and 3 are forwarded untouched to both callees and
+ *     are therefore invisible here -- `int` is the weakest fit, not a proof.
+ *   sub_080155A0  `return sub_08015578(0xff, a, b, c);`, i.e. the "no first
+ *     argument" entry point to the same dispatcher.
+ *   sub_080155E8  a THREE-argument forwarder whose last two arguments are
+ *     invisible in its own body; see the sub_0801D9E4 note above.
+ *   sub_080156A0  sub_080156C4's exact twin on sub_0801DA44 instead of
+ *     sub_0801DA54, `int` return for the same reason.
+ *   sub_08015CE4  `sub_08015328(a); return 0;` -- the `movs r0,#0` before the
+ *     epilogue is what makes it non-void. Nothing constrains the return type
+ *     further; its single caller discards it. */
+s8 sub_0801527C(const void *, u8, u8);
+s8 sub_08015578(s16, int, int, u8);
+s8 sub_080155A0(int, int, u8);
+void sub_080155E8(s16, s16 *, s16 *);
+int sub_080156A0(s16);
+int sub_08015CE4(u8);
+/* Two more from the wave-25 extension.
+ *   sub_08015158  counts the slots whose .unk00 is 0 -- the same 30-slot scan
+ *     sub_08015184 clears and sub_08015BD0 searches. A leaf with no `push`;
+ *     the u8 accumulator comes back already zero-extended, so nothing
+ *     constrains the return width and `int` is the weakest fit.
+ *   sub_08015CF4  one step of a slot's command list, advancing the .unk04
+ *     cursor by 8 and always returning 1. The 8-byte record type is local to
+ *     src/decomp/c_08015CF4.c because it only ever describes that cursor. */
+int sub_08015158(void);
+int sub_08015CF4(u8);
 /* `return sub_0801DA54(gUnknown_03001470[a].unk26);` -- a lookup keyed on the
  * same slot index everything else in this family uses. The PARAMETER is a free
  * choice at every call site found so far: sub_0804E7A8 and sub_0804FCA4 pass
@@ -1444,6 +1542,63 @@ void sub_08038C98(void);
  * with no argument setup. */
 void sub_0802DC2C(void);
 void sub_08034350(void);
+
+/* ---- wave 25: the 0x08034xxx block's own callees ----
+ * The void(void) group first: every one of these is reached by a bare `bl`
+ * with no argument setup and its callers discard r0.
+ */
+void sub_0802150C(void);
+void sub_08021598(void);
+void sub_080215B8(void);
+void sub_080215D0(void);
+void sub_0802FA64(void);
+void sub_0805FD64(void);
+void sub_08034394(void);
+void sub_080343D8(void);
+void sub_08034598(void);
+void sub_08034780(void);
+void sub_08034838(void);
+/* sub_08034890 loads gUnknown_03003FC0.unk02 with `ldrb` and passes it with no
+ * further narrowing, which is byte-identical for `int` and `u8`, so `int` is
+ * the weakest model. */
+void sub_0802163C(int);
+/* sub_08034290 and sub_080342BC both pass a `movs`-sized 0. */
+void sub_080638D0(int);
+/* Definitions promoted in src/decomp/c_08034380.c and c_08034400.c -- these
+ * declarations must agree with those. */
+int sub_08034380(u8 *);
+void sub_08034400(u8 *, u8 *);
+/* Returns s16: sub_08034394 re-narrows the result with `lsls #0x10; asrs #0x10`
+ * before comparing it against -1. The first parameter is `void *` and not a
+ * struct pointer -- sub_08031790 and sub_08033678 pass gUnknown_03004400 where
+ * sub_08034394 passes &gUnknown_030046C0, so no one struct type covers it. The
+ * second is a predicate run over the object; sub_08034394 passes
+ * sub_08034380 and the other two call sites pass a `movs`-sized 0. */
+s16 sub_080309AC(void *, int (*)(u8 *));
+/* A text-width helper: sub_08034A44 turns the result into the centred x of a
+ * 240-pixel line, `(0xf0 - len * 8) / 2`, and the `/ 2` is a bare `lsrs #1`, so
+ * the value is UNSIGNED -- a signed halving would have been the
+ * `lsr #31; add; asr #1` triple. */
+u32 sub_0808B6B0(const char *);
+/* More void(void) callees of the 0x08034xxx block, all reached by a bare `bl`
+ * with the result discarded. */
+void sub_08028CF4(void);
+void sub_08037F80(void);
+void sub_080742FC(void);
+void sub_0802817C(void);
+void sub_08074460(void);
+/* sub_08034DB0 tests the result with a BARE `lsls #0x18` -- flags only, no
+ * `lsrs` -- which is the truth-test shape of a byte-wide return. */
+bool8 sub_0803B628(void);
+/* sub_08034DCC reaches it as `ldr r0, =gUnknown_030033EC; ldrb r0, [r0]`. That
+ * global is a u16, so the `ldrb` is a truncation folded into the load, which is
+ * what a `u8` parameter costs and an `int` one would not. */
+void sub_08043DAC(u8);
+/* Centred x for `s` on a 240-pixel line. Returns `int`: its one caller narrows
+ * the result with `lsls #0x10; lsrs #0x10`, which is also exactly what passing
+ * an int to sub_080119A0's `u16` first parameter costs, so the shift pair is
+ * not evidence of a narrow return. */
+int sub_08034A44(const char *);
 void sub_08034938(void);
 void sub_080349E4(void);
 void sub_08034AF8(void);
@@ -2226,6 +2381,69 @@ void sub_0801D84C(int);
 void sub_08015568(int);
 void sub_08072BBC(int);
 
+/* The 0x08044 per-army funds block (wave 25). Every one of these takes the
+ * army slot index that subscripts gUnknown_08499598, passed and compared as a
+ * bare `int` at every call site in the block -- no prologue masking anywhere,
+ * which per the PROMOTE_MODE rule is positive evidence for a wide parameter.
+ *
+ * sub_08044094 and sub_08044354 are copied verbatim from the already-promoted
+ * definitions in src/decomp/c_08044094.c and c_08044354.c, which had no
+ * prototype; the definitions win, so these must agree with them and not be
+ * re-derived.
+ *
+ * sub_0804415C returns a NARROW value: sub_0804423C, sub_08044280 and
+ * sub_080442AC each follow the `bl` with a bare `lsls #0x18; cmp #0`, which is
+ * a truth test on eight bits and which an `int` return would not emit. Its
+ * signedness is not settled -- no caller keeps the value.
+ *
+ * sub_080441D4 and sub_08044208 return `int` and are compared SIGNED against
+ * sub_08044094's result (`cmp r4,r0; bge` in all three predicates), which is
+ * what forces that result into an `int` local at each of those call sites --
+ * `u32 < int` would have given `bcc`.
+ *
+ * sub_08044080's and sub_08039634's return values are discarded by their only
+ * callers here, both of which are themselves void (`pop {r0}; bx r0`), so
+ * `void` is unproved for both -- it is the spelling the source most likely had,
+ * and it is byte-neutral at these two sites either way. */
+u32 sub_08044094(int);
+int sub_0804419C(int);
+int sub_080441D4(int);
+int sub_08044208(int);
+u8 sub_0804423C(int);
+void sub_08044354(int);
+u8 sub_0804415C(int);
+/* `u32` second parameter, not `int`: src/decomp/c_08044080.c has defined it
+ * that way since it was promoted, and a promoted definition wins over a
+ * weakest-model guess. Caught by tools/proto_check.py before the build --
+ * trymatch compiles ONE unit, so this passes every per-function check and
+ * fails `make SPLIT=1 compare` with `conflicting types` (wave 25). */
+void sub_08044080(int, u32);
+void sub_080440A8(int, int);
+void sub_0804438C(int, int);
+void sub_08039634(int, int);
+void sub_08044560(void);
+/* sub_08039ACC's first three parameters are `u16` and its fourth is wide, read
+ * straight off its own prologue: r0, r1 and r2 each get `lsls #0x10; lsrs
+ * #0x10` into a callee-saved register, while r3 goes to `adds r6,r3,#0` with no
+ * masking at all and is then tested `cmp r6,#0`. Its single caller
+ * sub_08044B08 narrows all three of ITS arguments by 24 instead, which is that
+ * function's own `u8` parameters under PROMOTE_MODE and not a conversion for
+ * this callee -- a u8 value needs no instruction to reach a u16 parameter. */
+void sub_08039ACC(u16, u16, u16, int);
+/* Copied from the promoted definition in src/decomp/c_080443C4.c, which had no
+ * prototype; sub_080447EC and sub_0804483C both tail-forward their own argument
+ * to it untouched, so neither constrains the type further. */
+void sub_080443C4(ProcPtr);
+void sub_080447EC(ProcPtr);
+void sub_0804483C(ProcPtr);
+void sub_08044B08(u8, u8, u8);
+int sub_08044BA0(int);
+int sub_0804440C(struct Unk030040D8 *);
+int sub_0804443C(struct Unk030040D8 *);
+int sub_08044460(struct Unk030040D8 *);
+int sub_08044488(struct Unk030040D8 *);
+int sub_080444B4(struct Unk030040D8 *);
+
 /* Family F058's callee, and the family is three calls to it with 0, 1 and 2.
  * The parameter is `int`, not the `u8` its body suggests: the prologue is
  * `adds r4,r0,#0` THEN `lsls r0,r4,#0x18; lsrs r0,r0,#0x18` -- copy-then-narrow,
@@ -2728,14 +2946,36 @@ void sub_08016824(int);
 void sub_08016944(int);
 void sub_080157A4(s16, s16);
 void sub_080157F4(s16, s16);
-/* sub_08015504 sets OamData.vFlip on the slot's stashed attributes: it fetches
- * them with sub_0801566C, masks `~0x21` and ORs `(flag & 1) << 5`, then hands
- * them back. Both parameters are copy-THEN-narrow (`adds r5,r0,#0; ...;
- * lsls #0x10; asrs #0x10` and `adds r4,r1,#0; lsls #0x18; lsrs #0x18`), which
- * docs/agbcc-codegen.md reads as `int` with a cast at the use. Byte-neutral at
- * sub_08051BEC's only call site, where the first argument arrives via `ldrsh`
- * and the second is the literal 1. */
-void sub_08015504(int, int);
+/* sub_080154C4 and sub_08015504 are ONE SOURCE AT TWO BIT POSITIONS: each
+ * fetches the slot's stashed OBJ attributes with sub_0801566C into a stack
+ * local, sets a single bit of byte 1, and hands the eight bytes back to
+ * sub_08015608. They differ in exactly two instructions -- `lsls #4` with mask
+ * ~0x10 against `lsls #5` with mask ~0x20 -- which under `struct OamData` are
+ * `mosaic` (bit 12) and `bpp` (bit 13). NOT `vFlip`, which this comment used to
+ * claim: vFlip is bit 29 and lives in byte 3, exactly where the struct's own
+ * note in unknown-globals.h puts the measured hFlip/vFlip pair. The `mov #N;
+ * neg` form of the mask is the bitfield-store tell -- a hand-written
+ * `p[1] = (p[1] & ~0x10) | ((b & 1) << 4)` through a `u8 *` folds the mask to
+ * `mov r0,#0xef` and comes out two bytes short.
+ *
+ * BOTH PARAMETERS ARE DECLARED-NARROW, AND THE `int, int` THIS LINE USED TO
+ * CARRY WAS WRONG (wave 25, W25-C). The reasoning behind it -- copy-then-narrow
+ * (`adds r5,r0,#0; lsls #0x10; asrs #0x10`) means an `int` parameter with a cast
+ * at the use -- does not hold when the parameter's pseudo LIVES ACROSS A CALL.
+ * agbcc then emits assign_parms' incoming-argument copy and the PROMOTE_MODE
+ * extension as two separate insns instead of fusing them, so a declared
+ * `s16`/`u8` parameter produces the copy-then-narrow shape by itself. Measured
+ * with compile_probe on this exact pair: `(s16, u8)` with `o.mosaic = b;` is
+ * byte-exact for both functions; `(int, int)` with a `(u8)` cast sinks the
+ * narrowing PAST the call; `(int, u8)` keeps the narrowing but drops the copy
+ * and is two bytes short. The doc rule is sound only for a parameter that dies
+ * inside its own statement. */
+void sub_080154C4(s16, u8);
+void sub_08015504(s16, u8);
+/* Promoted in src/decomp/c_080156FC.c and never declared -- the "promoted but
+ * no prototype" trap again. Types copied from the definition, not re-derived.
+ * Its only caller is the forwarder sub_080156E8 above. */
+void sub_080156FC(s16, u16);
 /* Both parameters narrow in place with no copy (`lsls #0x10; lsrs #0x10` into
  * r5 and r6 at entry), the same readout as sub_080504A8 above, so `u16, u16`
  * (wave 20, W20-C). Called as the tail of sub_08052718 and sub_08052BBC. */

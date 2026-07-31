@@ -50,8 +50,15 @@ import re
 import subprocess
 import sys
 
-PROTO_RE = r'\b(sub_[0-9A-Fa-f]{8})\s*\(([^)]*)\)\s*;'
-DEF_RE = r'^[A-Za-z_][^;()\n]*?\b(sub_[0-9A-Fa-f]{8})\s*\(([^)]*)\)\s*\{'
+# Group 1 is the RETURN TYPE, 2 the name, 3 the parameter list. Capturing the
+# return type is not optional: wave 25 shipped `u8 sub_0804415C(int);` against a
+# promoted `int sub_0804415C(int a1)` and this tool reported clean, because the
+# parameter lists agree and only the return differs. The same wave's
+# sub_080152C0 fix was also a return type (`void` -> `s8`). A checker that reads
+# half the signature is worse than none -- it is the permanently-green twin of
+# the permanently-red self-test.
+PROTO_RE = r'^\s*([A-Za-z_][\w\s*]*?)\b(sub_[0-9A-Fa-f]{8})\s*\(([^)]*)\)\s*;'
+DEF_RE = r'^([A-Za-z_][\w\s*]*?)\b(sub_[0-9A-Fa-f]{8})\s*\(([^)]*)\)\s*\{'
 
 KEYWORDS = {
     'void', 'int', 'char', 'short', 'long', 'signed', 'unsigned',
@@ -62,7 +69,7 @@ KEYWORDS = {
 
 
 def collect_prototypes(scan_all):
-    """{fn: 'raw param list'} for the prototypes to check."""
+    """{fn: (return type, raw param list)} for the prototypes to check."""
     out = {}
     if scan_all:
         for hf in glob.glob('include/*.h'):
@@ -70,9 +77,10 @@ def collect_prototypes(scan_all):
                 for ln in fh:
                     if ln.lstrip().startswith(('*', '/')):
                         continue
-                    m = re.search(PROTO_RE, ln)
+                    m = re.match(PROTO_RE, ln)
                     if m:
-                        out[m.group(1)] = ' '.join(m.group(2).split())
+                        out[m.group(2)] = (' '.join(m.group(1).split()),
+                                           ' '.join(m.group(3).split()))
         return out
 
     diff = subprocess.run(['git', 'diff', 'include/'],
@@ -83,14 +91,15 @@ def collect_prototypes(scan_all):
         body = ln[1:]
         if body.lstrip().startswith(('*', '/')):
             continue
-        m = re.search(PROTO_RE, body)
+        m = re.match(PROTO_RE, body)
         if m:
-            out[m.group(1)] = ' '.join(m.group(2).split())
+            out[m.group(2)] = (' '.join(m.group(1).split()),
+                               ' '.join(m.group(3).split()))
     return out
 
 
 def collect_definitions():
-    """{fn: (file, 'raw param list')} for every definition we compile."""
+    """{fn: (file, return type, raw param list)} for every definition."""
     out = {}
     for f in glob.glob('src/decomp/*.c') + glob.glob('src/*.c'):
         if not os.path.isfile(f):
@@ -98,8 +107,16 @@ def collect_definitions():
         with open(f, encoding='utf-8', errors='ignore') as fh:
             text = fh.read()
         for m in re.finditer(DEF_RE, text, re.M):
-            out[m.group(1)] = (f, ' '.join(m.group(2).split()))
+            out[m.group(2)] = (f, ' '.join(m.group(1).split()),
+                               ' '.join(m.group(3).split()))
     return out
+
+
+def norm_type(t):
+    """A single type, typedefs resolved. `s32` == `int`, `u8` == unsigned char."""
+    t = re.sub(r'\bstatic\b|\binline\b', '', t)
+    t = re.sub(r'\s*\*\s*', ' *', ' '.join(t.split())).strip()
+    return ' '.join(TYPEDEFS.get(x, x) for x in t.split())
 
 
 # include/gba/types.h. Resolved so `(int, ProcPtr)` and `(s32, ProcPtr)` are
@@ -175,18 +192,21 @@ def main(argv):
     defs = collect_definitions()
 
     bad = 0
-    for fn, decl in sorted(protos.items()):
+    for fn, (dret, decl) in sorted(protos.items()):
         if fn not in defs:
             continue
-        src, defined = defs[fn]
+        src, fret, defined = defs[fn]
         nd, ndef = norm(decl), norm(defined)
-        if nd is None or ndef is None:
-            continue          # C89 unspecified parameter list -- compatible
-        if nd != ndef:
+        params_differ = (nd is not None and ndef is not None and nd != ndef)
+        ret_differ = norm_type(dret) != norm_type(fret)
+        if params_differ or ret_differ:
             bad += 1
-            print('MISMATCH %s' % fn)
-            print('   header:  (%s)   -> [%s]' % (decl, norm(decl)))
-            print('   %s:  (%s)   -> [%s]' % (src, defined, norm(defined)))
+            print('MISMATCH %s (%s)' % (fn, 'return type' if ret_differ
+                                        and not params_differ else
+                                        'parameters' if not ret_differ else
+                                        'return type AND parameters'))
+            print('   header:  %s %s(%s)' % (dret, fn, decl))
+            print('   %s:  %s %s(%s)' % (src, fret, fn, defined))
             print('   the DEFINITION wins -- change the header to agree.')
 
     print('checked %d prototype(s) against %d definition(s) -- %d mismatch(es)'

@@ -23,7 +23,7 @@ void sub_0803B608(struct Unk3B608Proc *proc)
         Proc_Break(proc);
 }
 
-int sub_0803B628(void)
+bool8 sub_0803B628(void)
 {
     return Proc_Find(gUnknown_0849E750) != 0;
 }

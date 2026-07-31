@@ -1,0 +1,45 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08034534.
+ * sub_08034534 @ 0x08034534, sub_08034598 @ 0x08034598
+ */
+
+#include "hardware.h"
+
+/* The full builder of the sub_080308B4 command block: sub_080344B4 is this one
+ * with the id fixed at 8 and the +2..+5 cursor snapshot dropped, and
+ * sub_0803446C is the +2..+5 snapshot on its own. The store order is the
+ * source's -- +0 first, then the two cursor pairs, then +1/+6/+7 -- and it is
+ * not reorderable, which is what fixes this as one statement per line. */
+void sub_08034534(int a, u8 b, int c, int d)
+{
+    struct Unk08499594 *unit = &gUnknown_08499594[b];
+
+    gUnknown_030044B0[0] = a;
+    gUnknown_030044B0[2] = gUnknown_03003100.pos.unk00;
+    gUnknown_030044B0[3] = gUnknown_03003100.pos.unk02;
+    gUnknown_030044B0[4] = gUnknown_03003F24.pos.unk00;
+    gUnknown_030044B0[5] = gUnknown_03003F24.pos.unk02;
+    gUnknown_030044B0[1] = b;
+    gUnknown_030044B0[6] = c;
+    gUnknown_030044B0[7] = d;
+    gUnknown_030044B0[0x12] = unit->unk06_0;
+    sub_08034400(gUnknown_03003110, gUnknown_030044B0 + 0xc);
+    sub_080308B4(gUnknown_030044B0);
+}
+
+/* The shared per-frame tail of sub_08034394 and sub_080343D8. */
+void sub_08034598(void)
+{
+    sub_08023824();
+    sub_08023518();
+    sub_08023908(4);
+
+    if (gpKeySt->held & 2)
+        sub_0802FA64();
+
+    sub_0802776C(3);
+}

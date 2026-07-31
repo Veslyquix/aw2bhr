@@ -11952,3 +11952,436 @@ It generalises past predicates: any `if` whose body the ROM places out of line
 past the literal pool was written with the condition in that sense. Getting it
 backwards costs nothing in size, so a candidate that is size-exact and still
 mismatching at the first `movs` is almost always this.
+
+## The "NEGATION" half of the rule above is WRONG, and its own example refutes it (wave 25, W25-B)
+
+The section above ends with the right operational instruction and opens with a
+sentence that contradicts it. "agbcc emits the branch for the NEGATION of the
+source condition and lets the `if` body fall through" does not describe the
+spelling that matched: the matching spelling is `if (sum != 0) return 0;` and
+the emitted branch is `bne` to `movs #0`. `bne` **is** `!= 0`, not its negation,
+and `movs #0` **is** the `if` body — so the branch carries the source condition
+and jumps TO the body. The second clause ("the constant it jumps AWAY to is the
+one in the source's `if` body") is the one that holds.
+
+Measured directly this wave on `sub_08044280`, both spellings compiled and read
+against the ROM:
+
+```c
+if (funds <  sub_08044208(a1)) return 0; return 1;   /* blt -> the 0 block */
+if (funds >= sub_08044208(a1)) return 1; return 0;   /* bge -> the 1 block */
+```
+
+The first emits `blt` past the pool to `movs r0,#0`, leaving `movs r0,#1` on the
+fall-through. The second emits `bge` past the pool to `movs r0,#1`, leaving
+`movs r0,#0` on the fall-through, and **the second is the ROM** for all three of
+`sub_0804423C`, `sub_08044280` and `sub_080442AC`. In both cases the branch
+condition is the source condition verbatim and the out-of-line block is the `if`
+body.
+
+**Read it back as: the conditional branch is the source `if` condition
+UNCHANGED, and the block it branches to is the `if` body.** Do not negate
+anything. Adding an explicit `else` to the early-return form changes nothing —
+probed both ways on all three functions, byte-identical output.
+
+This is the same wrong-sense trap the section above warns about, so the warning
+stands and only the readout direction is corrected. Wave 25's brief repeated the
+"NEGATION" wording and it cost a probe round.
+
+## Two adjacent equality tests FOLD into a range check — split them into separate `if`s (wave 25, W25-B)
+
+`sub_08044488` and `sub_080444B4` both test one byte against 2 and against 3.
+The ROM spends two compares:
+
+```
+    cmp  r0, #0x2
+    beq  _080444B0
+    cmp  r0, #0x3
+    beq  _080444B0
+```
+
+Every spelling that puts the two tests as the **two direct operands of one
+`&&`/`||`** loses them to `fold_range_test`, which rewrites the pair as a range
+check and emits five instructions instead of four:
+
+```
+    sub  r0, r0, #0x2
+    lsl  r0, r0, #0x18      @ absent when the value is already an int local
+    lsr  r0, r0, #0x18
+    cmp  r0, #0x1
+    bls  _080444B0
+```
+
+Measured: `(t != 2 && t != 3)` folds, `(t == 2 || t == 3)` folds, folding
+happens whether `t` is an `int` local, a `u8` local or the memory reference
+written out twice in full — `operand_equal_p` sees through all three. A
+`switch (t) { case 2: case 3: }` does **not** help either; `emit_case_nodes`
+builds its own range test (`cmp #3; bgt` / `cmp #2; blt`), and a switch is
+separately ruled out here because its dispatch ends in a `b default` that
+survives, the case body sitting between the dispatch and the default label.
+
+What reproduces the ROM is two separate statements:
+
+```c
+if (t == 2) return 1;
+if (t == 3) return 1;
+```
+
+**The fold only fires when both operands of the `&&`/`||` node are themselves
+comparisons**, which is why a longer chain is safe: `sub_0804440C` tests six
+values in one left-associated `&&` chain and keeps all six `beq`s, including the
+adjacent pairs 1/2 and 0xa/0xb, because in `((A && B) && C)` the pair `B && C`
+is never siblings. So the two-term case is the ONLY one that folds, and it is
+the one that looks least like it needs care.
+
+## A redundant `cmp`/`beq` to the FALL-THROUGH label is a `switch` whose `default` shares a case (wave 25, W25-B)
+
+`sub_080440A8` dispatches on its second argument:
+
+```
+    cmp  r1, #1
+    beq  _080440B4      @ the very next instruction
+    cmp  r1, #2
+    beq  _080440BC
+_080440B4:
+```
+
+The first `beq` targets the label it would reach by falling through, so it looks
+like dead code. It is the tell for a `switch` in which `default:` labels the
+same block as a case: `expand_end_case` emits one compare per case value and
+then a jump to `default_label`, and that jump vanishes when the default block is
+next. An `if`/`else if` chain cannot produce it — it would emit one compare.
+
+```c
+switch (a2) {
+default:
+case 1:  v = sub_080441D4(a1); break;
+case 2:  v = sub_08044208(a1); break;
+}
+```
+
+Byte-exact. Cross-jumping two identical `if` arms is an alternative explanation
+that produces the same instructions, so this reads out the *shape* rather than
+proving the keyword — but the switch is the shorter source and the one to try
+first when a compare chain has a compare too many.
+
+## `cmp #K; blt` cannot come from a literal — agbcc folds every constant `<`/`>=` down one (wave 25, W25-B)
+
+`sub_08044BA0` is sixteen bytes and took four attempts, all of them on two
+bytes. The ROM:
+
+```
+    cmp  r0, #14
+    bgt  _08044BAC
+    cmp  r0, #10
+    blt  _08044BAC
+```
+
+**No spelling of a comparison against a literal 10 emits `cmp #10`.** agbcc's
+tree-level `fold` canonicalises constant `<` and `>=` toward `<=` and `>`
+against the constant MINUS ONE, so it always comes out against 9. Measured,
+every one of these:
+
+| source | emitted |
+|---|---|
+| `a1 < 0xa` | `cmp #9; ble` |
+| `a1 >= 0xa` | `cmp #9; bgt` |
+| `a1 <= 0xe && a1 >= 0xa` | `sub #0xa; cmp #4; bls` (the range fold) |
+| `a1 > 0xe \|\| a1 < 0xa` | `sub #0xa; cmp #4; bhi` (same fold, inverted) |
+| `if (a1 <= 0xe) { if (a1 >= 0xa) ... }` | `cmp #9; ble` |
+
+The first compare in the same function, `a1 > 0xe`, is byte-exact untouched —
+`>` is already the canonical direction. That asymmetry is the tell: **if one
+compare in a predicate matches and the neighbouring one is off by one in both
+the constant and the condition, the neighbour's bound was not a literal.**
+
+What matches is binding the bound to a local:
+
+```c
+int lo;
+
+lo = 0xa;
+if (a1 > 0xe)
+    return 0;
+if (a1 < lo)
+    return 0;
+return 1;
+```
+
+This is the **wave-23 named-constant-local rule extended from `mov`/`lsl` to
+`cmp`**, and the mechanism is the same one read from the other end. `fold` runs
+on trees, where `a1 < lo` is variable-vs-variable and there is nothing to
+canonicalise, so the `LT` survives into RTL; local-alloc then gives `lo`
+`reg_equiv_constant` and reload rematerialises the 10 directly into the
+compare's 8-bit immediate. Nothing is emitted at the definition, so the local is
+free.
+
+Binding the UPPER bound as well is byte-identical (probed), so only the bound
+whose direction would have been canonicalised is load-bearing — which also says
+the original source most likely named both and only one is recoverable.
+
+Two things this does NOT need, both checked first because they are the obvious
+suspects at this size: the fall-through direction was already correct (the `1`
+falls through, the `0` is out of line, and the first compare was exact), and the
+parameter is `int` — the ROM's prologue does no masking at all and both branches
+are signed, which under PROMOTE_MODE rules out every sub-word type.
+
+## `check_dbra_loop` reverses a counted loop, it is SIZE-NEUTRAL, and what blocks it is a SURVIVING USE of the index (wave 25, W25-A)
+
+Two functions in the 0x08034 block are size-exact near-misses whose entire
+residual is that agbcc ran the loop counter *backwards*. It is worth writing
+down because the diff looks alarming — a dozen bytes differ — and the cause is
+neither the loop body nor the types.
+
+agbcc's `check_dbra_loop` rewrites
+
+```
+movs r4, #0        adds r4, #1        cmp r4, #3        ble
+```
+
+into
+
+```
+movs r4, #3        subs r4, #1        cmp r4, #0        bge
+```
+
+when the index is dead after strength reduction. **Both forms are the same
+number of instructions and the same number of bytes**, so a candidate whose only
+problem is loop direction reports `size: match` and still fails. Do not go
+looking for a missing statement.
+
+What decides it, measured on `sub_080344F0` across five spellings:
+
+- `for (i = 0; i < 4; i++) g[K + i] = h[J + i];` over a **global array** —
+  reversed. So does `i <= 3`, so does the `do { } while (i <= 3)` form, and so
+  does the explicit `*d++ = *s++;` pointer walk. Rewriting the loop does not
+  move this.
+- The same loop whose destination is `(*p)[K + i]`, `p` a `u8 *const *` — **not
+  reversed**. The reason is not the pointer: it is that agbcc then declines to
+  strength-reduce `blk + i`, emitting `add r1, r2, r3` in the body, which leaves
+  `i` with a live use. A biv with a surviving non-address use is not reversible.
+
+So the two are coupled and you cannot have both halves independently: the
+spellings that give the ROM's strength-reduced body (`adds r1,#1; adds r2,#1`
+with no `add` in the body) also kill the index, and the spelling that keeps the
+index alive stops the strength reduction. `sub_080344F0` is parked on exactly
+that: size match, correct relocation, 13 bytes differing, all of them the
+counter's four instructions and the register renumbering that follows.
+
+`sub_0803442C` is the same family seen from the other side, and it **MATCHED** —
+this section previously said it was parked at 6.2%, which is now wrong, and the
+lever that closed it is the useful half of the finding.
+
+Its ROM *does* have both — an ascending counter AND a strength-reduced
+destination — because a SECOND address expression keeps the index alive on its
+own. Two binding locals do it, and neither is guessable from the source:
+
+- **`j = i * 2;` as its own statement, BETWEEN the two `if`s.** Written as
+  `dst[i*2]` and `dst[i*2+1]`, agbcc merges the two stores into one biv with
+  `#0`/`#1` displacements; the index dies, the loop reverses, 56 bytes against
+  64. Bound separately, `dst[i*2]` reduces to the biv while `dst + j` is
+  recomputed as `lsls r3, r5, #1` plus an `adds` in *both* arms — an unreduced
+  giv, so the index survives. Its position is readable: the ROM's `lsls` sits
+  after the first store, which means the first store cannot be the one using
+  `j`.
+- **ONE local reused for BOTH nibbles, not two.** This is the last instruction,
+  and it is pure register allocation. The ROM computes both nibbles into `r2`
+  (`lsrs r2, r0, #4` and `movs r2, #0xf; ands r2, r0`). The second is forced
+  there — `r0` holds the loaded byte and is the `and`'s other operand — but the
+  shift is not, and with two separate locals agbcc coalesces the shift into
+  `r0`. One local gives one pseudo whose live range spans both halves, so it
+  takes a single hard register and drags the shift to `r2`. Same size either
+  way; one instruction's destination register is the whole difference.
+
+That second point is wave 23's binding-local rule read backwards, and it
+generalises past loops: **when a candidate is byte-identical except for which
+register one instruction targets, look for two locals in your source that were
+one local in the original.** A reused local is not a style choice — it is a
+longer live range, and the allocator can only spill a longer range into the
+register the ROM used.
+
+`sub_080344F0` is the case where no such lever exists: its loop body is a bare
+byte copy with no second use of the index to hang an unreduced giv on. Eleven
+spellings all either reverse the counter or lose the strength reduction. Parked
+with the full list in `data/parked.json` — size match, correct relocation,
+13 bytes differing, all of them the counter's four instructions and the register
+renumbering that follows.
+
+**The rule for the next agent: when a loop candidate is size-exact and the diff
+is entirely the counter, that is `check_dbra_loop`, not your source. Look for
+what keeps the index live in the ROM — it is always a second use of the index
+that agbcc failed to reduce — rather than rewriting the loop.**
+
+## COPY-THEN-NARROW is not proof of an `int` parameter — it is also what a DECLARED-NARROW parameter does when it lives across a call (wave 25, W25-C)
+
+Two rules in this document read a prologue as typing a parameter, and both are
+narrower than they sound:
+
+- "`adds rN, r0, #0` then a narrowing = copy-then-narrow = the parameter is
+  `int`, and the narrowing is a cast at a use."
+- the wave-21 positional refinement above ("a narrowing BEFORE the first side
+  effect of the body is PROMOTE_MODE and types the parameter").
+
+`sub_080154C4` and `sub_08015504` are the counter-example, and they are one
+source at two bit positions so the measurement is doubled. Their prologue is
+
+```
+    adds r5, r0, #0
+    adds r4, r1, #0
+    lsls r4, r4, #0x18
+    lsrs r4, r4, #0x18
+    lsls r5, r5, #0x10
+    asrs r5, r5, #0x10
+```
+
+which the first rule reads as two `int` parameters with `(u8)` and `(s16)`
+casts at their uses. `include/unknown-functions.h` had carried
+`void sub_08015504(int, int)` since wave 20 on exactly that reading. It is
+wrong. Measured with `compile_probe`, three spellings against the ROM:
+
+| source | result |
+| --- | --- |
+| `(s16 a, u8 b)`, `o.mosaic = b;` | **byte-exact, both functions** |
+| `(int a, int b)`, `o.mosaic = (u8)b;` | narrowing sinks PAST the `bl` |
+| `(int a, int b)`, `u8 f = b;` first | narrowing in place, but no `adds r4,r1,#0` — two bytes short |
+
+The mechanism is `assign_parms`. For a declared-narrow parameter agbcc emits
+the incoming-argument copy into the parameter's pseudo and then a separate
+PROMOTE_MODE extension of that pseudo. Those two insns sometimes fuse into a
+bare `lsls rD, rSRC, #n` reading the argument register directly and sometimes
+do not, and **whether they fuse is a register-allocation outcome, not a source
+property** — `sub_08015A30` in this same block has a `u8` parameter live across
+an indirect call and still gets the fused `lsls r0,r0,#0x18; lsrs r5,r0,#0x18`
+with no copy. Surviving a call makes the copy LIKELY, not certain.
+
+The load-bearing half is therefore negative: **copy-then-narrow appears for BOTH
+a wide parameter cast at a use and a narrow parameter, so on its own it types
+nothing.** What does separate them is where the narrowing sits relative to the
+call — the wave-21 positional rule above — and that one still holds.
+
+The corrected readout:
+
+- narrowing **before** the first call, **with** a copy — declared narrow, and
+  the value is live across that call;
+- narrowing **before** the first call, **without** a copy — declared narrow,
+  and the value dies in its own statement;
+- narrowing **after** a call, adjacent to argument setup — wide parameter, cast
+  at the use.
+
+`sub_08015224` in the same block is the same shape a third time and confirms
+it from the signedness side: entry is `lsls #0x10; lsrs #0x10` (ZERO-extending,
+because PROMOTE_MODE zero-extends whatever the signedness) and the parameter is
+`s16`, with the sign appearing only at the array subscript's second pair
+`lsls #0x10; asrs #0x10`. A `u16` parameter there would subscript straight off
+the entry value with no second pair at all — so **the second pair, not the
+prologue, is where a narrow parameter's signedness is legible**, and its
+absence is as informative as its presence.
+
+Retyping `sub_08015504` to `(s16, u8)` is byte-neutral at its one promoted
+caller, `src/decomp/c_08051BEC.c` — re-verified with `trymatch` after the
+header edit.
+
+## A run of stores of ONE constant, with every address computed BEFORE the first store, is a CHAINED ASSIGNMENT (wave 25, W25-C)
+
+`sub_080151B0` writes sixteen members of `gUnknown_03001470[b]`, four of them
+`-1`. Written as four ordinary statements it is size-exact and 60.3% identical
+— `size: match` with 46 bytes differing, which is the shape that normally sends
+an agent looking for a wrong type. It is neither. The ROM is:
+
+```
+    mov r6, ip / adds r6, #0x28 / adds r6, r3, r6     @ &.unk28
+    mov r2, ip / adds r2, #0x2c / adds r2, r3, r2     @ &.unk2c
+    mov r1, ip / adds r1, #0x30 / adds r1, r3, r1     @ &.unk30
+    mov r0, ip / adds r0, #0x34 / adds r3, r3, r0     @ &.unk34
+    movs r0, #1 / rsbs r0, r0, #0
+    str r0, [r3] / str r0, [r1] / str r0, [r2] / str r0, [r6]
+```
+
+**All four addresses are computed first, ASCENDING, and the stores then run
+DESCENDING.** Four separate statements cannot produce that: agbcc computes one
+address, stores, and reuses the register, which is why the separate-statement
+version needs only two callee-saved registers where the ROM's prologue pushes
+three. The chain
+
+```c
+g[b].unk28 = g[b].unk2c = g[b].unk30 = g[b].unk34 = -1;
+```
+
+is byte-exact. The two orders are the chain's own evaluation order — C evaluates
+the lvalues left to right and then assigns right to left — and the extra
+register in the prologue is the direct cost of holding four addresses live at
+once.
+
+Read it backwards as a diagnostic: **a prologue that saves one more
+callee-saved register than your candidate, over a straight-line run of stores
+of a single value, is a chained assignment and not a register-allocation
+subtlety.** It is the same "the ROM holds N things live where you hold one"
+readout as the wave-17 binding-locals rule, but pointing the opposite way —
+here the ROM has FEWER statements than the obvious spelling, not more. Member
+types need not agree across the chain; these four are `u32`, `int`, `u32`,
+`u32`.
+
+## W25-B's corrected branch rule holds outside predicates too, on a pointer return (wave 25, W25-C)
+
+The "conditional branch is the source `if` condition UNCHANGED, and the block it
+branches to is the `if` body" correction two sections up was measured on
+0/1 predicates. `sub_080152EC` is the same fact on a function returning
+`struct Unk03001470 *`, which is worth recording because the guard reads like
+boilerplate and the wrong spelling is size-exact:
+
+```c
+if (i == -1) return NULL;  sub_0801527C(...); return &g[i];   /* beq to the NULL block, pool in the MIDDLE */
+if (i != -1) { sub_0801527C(...); return &g[i]; } return NULL; /* bne to the call, pool at the END -- the ROM */
+```
+
+Both are 60 bytes and both branch to their own `if` body, exactly as the
+corrected rule says. What separates them is only which arm was written as the
+`if`, and the cheapest tell is the LITERAL POOL: an early-return guard written
+first pushes its block past the pool and drags the pool into the middle of the
+function. **If the ROM's pool sits after the epilogue and your candidate's sits
+between the two blocks, invert which arm is the `if` — do not go looking for a
+missing statement.** An `if`/`else` assigning one result local is byte-identical
+to the matching form, so the guard shape is a free choice once the sense is
+right.
+
+## Probing a promoted function's type: change the DRAFT, not `src/decomp/` (wave 25, orchestrator error)
+
+`trymatch` compiles `work/<fn>/<fn>.c`. It does **not** compile
+`src/decomp/c_<addr>.c`. So the obvious way to test "is this promoted
+function's return type really `int`?" -- edit the promoted file, re-run
+`trymatch` -- measures **the stale draft**, not the edit, and reports
+`conflicting types` or a byte difference that has nothing to do with the
+question.
+
+Wave 25 made exactly this mistake on three functions at once and drew the
+wrong conclusion from it: `sub_0804415C`, `sub_0803B628` and `sub_0808B6B0`
+were each declared narrow (`u8`, `bool8`, `u32`) by an agent against promoted
+definitions saying `int`. Narrowing the definitions "broke" all three, so the
+wide returns were recorded as real and the prototypes were corrected to `int`.
+That correction then broke **six** already-verified functions elsewhere in the
+wave, all of them callers.
+
+The correct procedure, and it is one extra command:
+
+```
+edit src/decomp/c_<addr>.c
+python tools/sync_work.py <fn>      # <-- the step that was missing
+python tools/trymatch.py <fn>
+```
+
+With the draft synced, all three narrow types match byte-for-byte. The agents
+were right.
+
+**The finding underneath is the wave-24 rule, and this is the second time it
+has paid: a return type is settled by the CALLERS, not by the callee.** The
+callee's body compiles byte-identically either way -- that is what makes the
+wrong type survive -- while a caller that uses the result in a truth test emits
+a narrowing only when the declared return is narrow. `sub_0804423C` doing
+`if (sub_0804415C(a1))` came out exactly 4 bytes SHORT with an `int` return,
+which is the narrowing the ROM has and the wide declaration cannot produce.
+
+Corollary for anyone reconciling a prototype conflict: **a conflict between a
+header and a promoted definition does not automatically mean the header is
+wrong.** "The definition wins" is the right rule for making the build link, but
+it is a tie-break, not evidence. Probe both spellings properly -- draft synced
+-- before deciding which half to change, and check the callers.

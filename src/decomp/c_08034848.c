@@ -1,0 +1,41 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08034848.
+ * sub_08034848 @ 0x08034848, sub_0803486C @ 0x0803486C, sub_08034890 @ 0x08034890
+ */
+
+/* The 1 written to unk0c, unk02 and unk09 is one CSEd constant that has to
+ * survive two calls, which is why the ROM parks it in r5 behind
+ * `push {r4, r5, lr}` -- plain literals reproduce it. */
+void sub_08034848(void)
+{
+    gUnknown_03003FC0.unk0c = 1;
+    gUnknown_03003FC0.unk01 = 3;
+    gUnknown_03003FC0.unk02 = 1;
+    sub_08034780();
+    sub_08034838();
+    gUnknown_03003FC0.unk09 = 1;
+}
+
+/* TWO statements, not `a = b = v`. The chained form hoists all three pool words
+ * ahead of the loads and comes out with the stores swapped; written as two
+ * statements CSE keeps the loaded word in r1 and the second address load lands
+ * between the two `str`s, which is the ROM's order. */
+void sub_0803486C(void)
+{
+    gUnknown_03003338 = gUnknown_0849FE74[0];
+    gUnknown_03003F20 = gUnknown_03003338;
+    sub_080215D0();
+}
+
+void sub_08034890(void)
+{
+    sub_0802150C();
+    sub_0802163C(gUnknown_03003FC0.unk02);
+    sub_08021598();
+    sub_080215B8();
+    sub_080267AC();
+}
