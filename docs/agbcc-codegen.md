@@ -11024,15 +11024,34 @@ Consolidating what four of these functions turned on, against the note on
 - **`ldrb` with a `movs #N; neg` mask ⇒ `.bits`** — one backdrop bit.
 - A function uses both, a line apart. `sub_0806C7B4` alternates four times.
 
-The `.raw`-vs-scalar-cast choice is a **third** axis on top of that, and it is
-decided by whether a live constant is in flight:
+The `.raw`-vs-scalar-cast choice is a **third** axis on top of that. **The
+discriminator is whether a CSE-able constant is live across the write — NOT
+whether the two group writes merge.** An earlier revision of this section said
+merging was the trigger and listed `sub_0806C7B4` as a case where `.raw` is
+exact; that was wrong, contradicted by the matched draft in
+`src/decomp/c_0806C7B4.c`, which uses the cast. Corrected against all four
+functions and W21-B's independent probe of `sub_08071DB4`:
 
-- Two group writes **separated** by a `.bits` write do not merge, and the union
-  `.raw` spelling is exact (`sub_0806C7B4`, `sub_0806C700`).
-- Two group writes **adjacent** merge into one `strh` via store forwarding, and
-  the union spelling then picks up whatever zero the preceding scalar stores
-  left live and emits a spurious `orr` (`sub_0806AFF0`, `sub_08071DB4`). Use
-  `*(u16 *)&gUnknown_030030E0`.
+- **A live zero in the preceding scalar stores ⇒ the cast is required.**
+  `.raw` materialises that zero into its own pseudo which stays live across the
+  insert, coming back as a dead `orrs r1, r3` or an extra `movs`, and the
+  shuffled allocation costs a callee-saved register. Measured at +4 bytes on
+  `sub_08071DB4` (W21-B) and a wrong `push {r4, r5, r6, lr}` on `sub_0806C7B4`.
+  Applies to `sub_0806C7B4`, `sub_0806AFF0`, `sub_08071DB4`.
+- **No zero in flight ⇒ `.raw` is byte-exact.** `sub_0806C700` stores `0x10`
+  and `8` and nothing else, so there is no constant to capture, and the union
+  spelling compiles identically. It is the control case, and it is the only one
+  of the four.
+- Merging is a **consequence, not the cause**. Two adjacent group writes fold
+  into one `strh` by store forwarding whether or not a zero is live; two
+  separated by a `.bits` write do not fold, and `sub_0806C7B4` still needs the
+  cast. `sub_0807F2FC` matches with either spelling (W21-B), which is the same
+  fact from the other side.
+
+Read this as an instance of the wave-15 rule rather than a new one: an isolated
+probe of the two spellings emits identical code, so **the probe is telling you
+about its own context, not about the spellings.** Decide it in the target's own
+constant traffic.
 - `effect = 3` is an all-ones bitfield value, so `store_fixed_bit_field`'s
   `all_one` drops the AND and only `orr #0xc0` survives — which is why
   `sub_08071DB4` has no `and` there and `sub_0806C7B4` (`effect = 1`) does.
