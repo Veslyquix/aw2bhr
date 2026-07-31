@@ -60,14 +60,32 @@ def _is_definition(lines, i):
     it; the discriminator is what TERMINATES the declarator, so read forward to
     the first `{` or `;` rather than trusting the opening line's shape.
     """
-    in_comment = False
+    in_comment, text = False, []
     for ln in lines[i:i + 40]:
         codetext, in_comment = promote.strip_comments(ln, in_comment)
-        for ch in codetext:
-            if ch == "{":
-                return True
-            if ch == ";":
-                return False
+        text.append(codetext)
+    s = "".join(text)
+
+    # Walk to the declarator's MATCHING close paren. Scanning for the first
+    # `{` or `;` anywhere is wrong: this tree contains K&R definitions --
+    #     void sub_0803B524(a)
+    #     int a;
+    #     {
+    # -- where a `;` legitimately precedes the body, and treating it as a
+    # prototype loses the function. That mistake made c_0803B4EC.c unsplittable
+    # the first time this guard was written.
+    depth = 0
+    for k, ch in enumerate(s):
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth == 0:
+                rest = s[k + 1:].lstrip()
+                # `;` right after the declarator is a prototype. `{` is an
+                # ANSI definition. Anything else is a K&R parameter
+                # declaration list, i.e. still a definition.
+                return not rest.startswith(";")
     return False
 
 

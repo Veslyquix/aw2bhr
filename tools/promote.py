@@ -209,10 +209,43 @@ def chunk_key(chunk):
     return key or " ".join(chunk.split())     # comment-only chunk: compare as-is
 
 
+def defined_types(chunk):
+    """{('struct'|'union'|'enum', name)} this chunk DEFINES, not merely names.
+
+    A forward declaration (`struct Unk80824D4;`) must not count: these files
+    routinely forward-declare every type at the top and define them further
+    down, and both are legal in one translation unit. Only a definition -- a
+    tag followed by a brace body -- can collide.
+
+    ONE regex, deliberately. `\\s*` spans newlines, so a single pattern covers
+    both `struct Foo {` and `struct Foo` with the brace on the next line. Using
+    two patterns double-counts every struct written in the second style; that
+    mistake reported 218 false positives when this check was first prototyped
+    as a standalone scan.
+    """
+    text, in_comment, out = [], False, set()
+    for ln in chunk.splitlines(keepends=True):
+        part, in_comment = strip_comments(ln, in_comment)
+        text.append(part)
+    for kind, tag in re.findall(
+            r'\b(struct|union|enum)\s+([A-Za-z_]\w*)\s*\{', "".join(text)):
+        out.add((kind, tag))
+    return out
+
+
 def merge(run, index):
     """One .c source for a contiguous run of functions."""
     decls, bodies = [], []
     seen = set()
+    # type definition -> (chunk_key, the draft that contributed it). Two drafts
+    # defining the SAME tag with DIFFERENT bodies is not a formatting
+    # difference that chunk_key can normalise away -- it is two agents
+    # disagreeing about a type model, and it is invisible to every
+    # per-function check because both drafts compile alone. Wave 24 shipped
+    # c_08078250.c with two `struct Unk807831C`, one carrying
+    # `filler_00[0x58]` and the other `filler_00[0x54]; void *unk_54`. Same
+    # layout, both drafts byte-exact, split build dead on `redefinition`.
+    types = {}
     for name in run:
         path = os.path.join(WORK, name, name + ".c")
         text = "".join(awlib.read_lines(path))
@@ -222,6 +255,32 @@ def merge(run, index):
                 name, os.path.relpath(path, awlib.REPO))
         for chunk in decl_chunks(head):
             key = chunk_key(chunk)
+            for t in defined_types(chunk):
+                prev_key, prev_name = types.get(t, (key, name))
+                if prev_key != key:
+                    return None, (
+                        "%s %s is defined DIFFERENTLY by two drafts in this "
+                        "unit:\n"
+                        "    work/%s/%s.c\n"
+                        "    work/%s/%s.c\n"
+                        "  This is not a formatting difference -- the bodies "
+                        "disagree, so it is two\n"
+                        "  type models for one tag. Both drafts compile and "
+                        "byte-match ALONE, which is\n"
+                        "  why trymatch cannot see it; merged into one unit it "
+                        "is a hard\n"
+                        "  `redefinition of %s %s`.\n"
+                        "  Reconcile by hand: keep the MORE REFINED body (the "
+                        "one naming more fields),\n"
+                        "  put it in BOTH drafts, re-run trymatch on every "
+                        "function in the unit, then\n"
+                        "  promote again. Do not just delete one copy here -- "
+                        "the drafts are the\n"
+                        "  source of truth and sync_work.py will reintroduce "
+                        "it."
+                        % (t[0], t[1], prev_name, prev_name, name, name,
+                           t[0], t[1]))
+                types.setdefault(t, (key, name))
             if key not in seen:
                 seen.add(key)
                 decls.append(chunk)
