@@ -261,6 +261,38 @@ def dataref_neighbours(targets, matched, min_shared):
        functions cover the target -- the last of these new, exposed by the leaf
        fix, and the one that separates a lucky pairing from a vocabulary that
        is thoroughly worked out.
+
+    THE TIE-BREAK WAS WRONG, AND WAVE 21 (W21-C) MEASURED IT. Ref-count
+    minimality is the right PRIMARY key -- it is the subset guarantee -- but it
+    ties constantly, and the tie was broken by `m["size"]` ASCENDING, i.e. by
+    preferring the smallest covering exemplar. Smallest means "does least",
+    which means "demonstrates fewest of the operations the target performs".
+
+    The controlled case: sub_08012358 (36 B) and sub_08085F40 (80 B) have
+    IDENTICAL data_refs -- {gUnknown_03001FFC, gUnknown_03002020,
+    gUnknown_03002B28, gUnknown_030030E0} -- and both are zero-call leaves, so
+    they tie on every key the screen had except size, and the smallest-first
+    tie-break named sub_08012358 for twelve targets. sub_08012358's entire body
+    is four zero stores. Against the four 96-116 B targets W21-C took on that
+    exact ref set it supplied NOTHING beyond "these globals are declared", and
+    it is worse than uninformative: it writes `gUnknown_030030E0.raw = 0`, and
+    the union `.raw` spelling is precisely the one that FAILS on any target
+    performing a read-modify-write (it drags a live zero into a spurious `orr`
+    and costs a register -- see c_08085F40.c). sub_08085F40, the exemplar the
+    old tie-break ranked second, is the one that carried the whole batch.
+
+    So the tie-break is now PROXIMITY: closest in size, then closest in callee
+    count. On those four targets |dsize| to sub_08085F40 is 16-36 and to
+    sub_08012358 is 60-80, so proximity picks the useful one every time. This
+    does NOT reinstate the widest-first proposal rejected above: the primary key
+    is still minimal ref count, and "nearest" is bounded on both sides where
+    "widest" was not.
+
+    `nearest` is also reported separately -- the best covering exemplar by
+    proximity ALONE, ignoring ref count -- and printed only when it differs from
+    `tightest`. Reporting both is cheap and loses nothing; where they disagree,
+    that disagreement is itself the signal that the tightest cover is a
+    vocabulary match rather than a shape match.
     """
     out = []
     for t in targets:
@@ -270,9 +302,16 @@ def dataref_neighbours(targets, matched, min_shared):
         covering = [m for m in matched if dt <= set(m["data_refs"])]
         if not covering:
             continue
-        tightest = min(covering, key=lambda m: (len(m["data_refs"]),
-                                                m["size"], m["name"]))
-        out.append((t, tightest, len(dt), len(covering)))
+
+        def proximity(m):
+            return (abs(m["size"] - t["size"]),
+                    abs(len(m["calls"]) - len(t["calls"])),
+                    m["name"])
+
+        tightest = min(covering, key=lambda m: (len(m["data_refs"]),)
+                       + proximity(m))
+        nearest = min(covering, key=proximity)
+        out.append((t, tightest, len(dt), len(covering), nearest))
     out.sort(key=lambda p: (-p[3], -p[0]["size"]))
     return out
 
@@ -361,8 +400,15 @@ def report(args):
     # W20-A). Do not re-merge them.
     matched = [r for r in recs if r["status"] == "matched" and r["calls"]]
     matched_all = [r for r in recs if r["status"] == "matched"]
+    # Normal runs batch on `asm` only -- parked functions are deliberately not
+    # handed out again. The self-test must still see them: its two cluster
+    # checks anchor on sub_08052718/sub_08052BBC, which wave 20 PARKED after
+    # writing the test, so from wave 21 on those checks could not pass however
+    # healthy the screen was. A permanently-red acceptance test hides the
+    # regression it exists to catch, so widen the pool for --self-test only.
+    ok_status = ("asm", "parked") if args.include_parked else ("asm",)
     targets = [r for r in recs
-               if r["status"] == "asm" and r["mode"] == "THUMB"
+               if r["status"] in ok_status and r["mode"] == "THUMB"
                and r["size"] >= args.min_size and not r["trivial"]]
 
     print("corpus: %d functions, %d matched, %d unmatched THUMB >= %dB "
@@ -461,16 +507,24 @@ def report(args):
     print("\n== data_refs a strict SUBSET of a matched function's "
           "(>= %d refs) ==" % args.min_shared)
     print("functions: %d   bytes: %d   (the axis |shared callees| cannot see)"
-          % (len(subs), sum(t["size"] for t, _, _, _ in subs)))
+          % (len(subs), sum(t["size"] for t, _, _, _, _ in subs)))
     print("  All coverage here is 100% -- this axis only reports SUBSETS, so a"
           "\n  percentage would carry no information. exemplars=N is how many"
-          "\n  DISTINCT matched functions cover the target; the one named is the"
-          "\n  TIGHTEST, whose own vocabulary is closest to the target's.")
-    for t, m, covers, n in subs[:args.top]:
-        print("    %-14s %4dB  %d refs, exemplars=%-3d tightest %s "
-              "(%d refs, %dB)  [%s]"
-              % (t["name"], t["size"], covers, n, m["name"],
-                 len(m["data_refs"]), m["size"], t["src"]))
+          "\n  DISTINCT matched functions cover the target. `tightest` is the"
+          "\n  smallest covering VOCABULARY, ties broken by proximity in size and"
+          "\n  callee count; `nearest` is the closest covering SHAPE ignoring ref"
+          "\n  count, printed only where the two disagree. READ BOTH -- wave 21"
+          "\n  measured a 36-byte all-zero-stores leaf winning the old"
+          "\n  smallest-first tie-break for twelve targets and teaching nothing.")
+    for t, m, covers, n, near in subs[:args.top]:
+        line = ("    %-14s %4dB  %d refs, exemplars=%-3d tightest %s "
+                "(%d refs, %dB)"
+                % (t["name"], t["size"], covers, n, m["name"],
+                   len(m["data_refs"]), m["size"]))
+        if near["name"] != m["name"]:
+            line += "  nearest %s (%d refs, %dB)" % (
+                near["name"], len(near["data_refs"]), near["size"])
+        print("%s  [%s]" % (line, t["src"]))
 
     nm = near_misses(recs, args.near_miss)
     print("\n== unpromoted near-misses: work/<fn>/best.json >= %.0f%% =="
@@ -546,8 +600,12 @@ def main():
                         "data/functions.json does not learn about a match "
                         "until promotion")
     p.add_argument("--self-test", action="store_true")
+    p.add_argument("--include-parked", action="store_true",
+                   help="also screen parked functions as targets; implied by "
+                        "--self-test, whose anchors are parked")
     args = p.parse_args()
     if args.self_test:
+        args.include_parked = True
         sys.exit(self_test(args))
     report(args)
 

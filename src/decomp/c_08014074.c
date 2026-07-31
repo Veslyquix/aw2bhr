@@ -14,12 +14,9 @@
  * sub_08014074 @ 0x08014074
  */
 
-struct Unk08014074
-{
-    /* 0x00 */ u8 filler_00[0x39];
-    /* 0x39 */ s8 unk39;
-    /* 0x3a */ s8 unk3a;
-};
+/* struct Unk08014074 moved to include/unknown-globals.h in wave 21 (W21-A) --
+ * gUnknown_0200C020 is the instance and sub_080147B4 the other accessor, so
+ * the layout had to become shared. */
 
 void sub_08014074(struct Unk08014074 *s)
 {

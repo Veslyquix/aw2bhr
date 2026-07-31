@@ -316,7 +316,17 @@ def promote(names, index):
     n_fn = sum(len(e["functions"]) for e in added)
     print("\npromoted %d function(s) into %d file(s)" % (n_fn, len(added)))
     print("\nnow rebuild and prove the ROM is unchanged:")
-    print("  python tools/split_asm.py && python tools/gen_lds.py")
+    print("  python tools/split_asm.py && python tools/split_rodata.py && "
+          "python tools/gen_lds.py")
+    print("  make SPLIT=1 compare   # then rm -f aw2bhr.gba aw2bhr.elf, then:")
+    print("  make compare           # both must print 'aw2bhr.gba: OK'")
+    # split_rodata.py was missing from this hint for three waves. Omitting it
+    # links a ROM whose every differing word is a pool reference pointing at
+    # 0x08800000+N -- the end of the image -- because the carved .rodata pieces
+    # never got addresses. Wave 20 bisected that as a bad promotion; wave 21
+    # hit it again. The `rm -f` between the two builds is load-bearing too:
+    # both targets write the same aw2bhr.gba, so `make compare` will otherwise
+    # re-checksum the ROM the SPLIT build produced.
     print("  make SPLIT=1 compare")
     return 0
 

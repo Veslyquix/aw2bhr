@@ -40,13 +40,22 @@ import sys
 
 import awlib
 
-# The two ROM blobs that currently supply agbcc's pool words. Each is a flat
+# The ROM blobs that currently supply agbcc's pool words. Each is a flat
 # run of `.global`/label/`.incbin` triples, one per symbol, fully contiguous --
 # which is what makes a per-symbol split exact. `sect` is the output-section
 # name the linker script places that blob's pieces under; a promoted unit's word
 # is always `.rodata` whichever blob it is carved out of, because that is the
 # section agbcc emits it into.
-SOURCES = [("rodata.s", ".rodata"), ("data.s", ".data")]
+#
+# EXTEND THIS LIST when a promoted unit claims a word from a blob not named
+# here -- data/ holds five blobs and this list is deliberately only the ones
+# that have supplied a word so far. Wave 21 added rodata-0808F098.s for
+# sub_0802CFFC's 0x08090C04 (`&gUnknown_030033E8`, a -fforce-addr constant).
+# Add ONLY a blob that actually supplies a word: `blobs.mk` below emits every
+# entry here as a replaced blob whether it was carved or not, and the failure
+# mode for over-listing is megabytes silently dropped from the image.
+SOURCES = [("rodata.s", ".rodata"), ("data.s", ".data"),
+           ("rodata-0808F098.s", ".rodata")]
 OUT_DIR = os.path.join(awlib.REPO, "build", "rodata")
 MANIFEST = os.path.join(OUT_DIR, "units.json")
 PROMOTED = os.path.join(awlib.DATA_DIR, "promoted.json")
@@ -212,8 +221,12 @@ def main():
     missing = set(carve) - claimed
     if missing:
         raise SystemExit("error: no data blob contains %s -- a promoted unit "
-                         "claims a pool word that is not in rodata.s or data.s"
-                         % ", ".join("0x%08X" % a for a in sorted(missing)))
+                         "claims a pool word that is in none of the blobs this "
+                         "tool scans (%s).\nIf `grep` finds the address under "
+                         "data/, the blob just needs adding to SOURCES; see the "
+                         "note there."
+                         % (", ".join("0x%08X" % a for a in sorted(missing)),
+                            ", ".join(s for s, _ in SOURCES)))
 
     if args.check:
         if not os.path.exists(MANIFEST):

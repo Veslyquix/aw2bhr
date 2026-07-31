@@ -52,6 +52,36 @@ void Decompress(u8 *, void *);
  * which fixes the sign. It ends `pop {r4}; pop {r0}; bx r0`, so it is void. */
 void sub_08000654(void);
 void sub_08004A30(int);
+/* A sixteen-byte halfword fill in the same block, and the whole body is
+ * readable: `cmp r1,#0; ble out; loop: strh r2,[r0]; adds r0,#2; subs r1,#1;
+ * bgt loop`. So r0 is a `u16 *` (the `strh` with a +2 stride), r1 is a SIGNED
+ * count (`ble`/`bgt`, and the zero-trip test is signed), and r2 is the halfword
+ * written. Its one caller, sub_08072A88, passes a VRAM char-block address, 0x10
+ * and 0 -- all three arguments are constants or an address there, so the widths
+ * are byte-neutral at that call site and only the body constrains them.
+ *
+ * And the body rules the third one OUT as `u16`, which this was declared as
+ * for part of wave 21. PROMOTE_MODE emits the `lsl #16; lsr #16` in the
+ * PROLOGUE for a sub-word parameter, unconditionally -- it does NOT get
+ * deleted when the only use is a `strh` that discards the upper half. A `u16`
+ * third parameter compiles this function to 20 bytes; the ROM is 16 and its
+ * prologue is bare. So `int`, and the sign stays undetermined because the one
+ * call site passes 0. Both functions are matched, which pins it. */
+void sub_08001148(u16 *, int, int);
+
+/* Two builders of the same gUnknown_030044B0 command block, both handing it to
+ * sub_080308B4 at the end and both void (`pop {r0}; bx r0`).
+ *
+ * In each, the argument that indexes gUnknown_08499594 is the one narrowed at
+ * entry with `lsls #0x18; lsrs #0x18` -- sub_08034534's second and
+ * sub_080344B4's first -- so those two are `u8` and the rest are `int`. That
+ * pair is the whole type readout: every other parameter reaches memory through
+ * a bare `strb` into the block (+0, +1, +6, +7), which is byte-identical for
+ * `int` and `u8` alike, so `int` is the weakest model that fits. sub_08034534's
+ * first parameter is a command id (sub_0802CFFC passes 2) and is the field
+ * sub_080344B4 hard-codes to 8. Verified at sub_0802CFFC, which calls both. */
+void sub_08034534(int, u8, int, int);
+void sub_080344B4(u8, int, int);
 
 void sub_08012358(void);
 /* Unprototyped: only ever called, never with a settled signature. r0 selects
@@ -679,7 +709,27 @@ void sub_080722B8(int, int, ProcPtr, void (*)(void));
 void sub_080723DC(void);
 void sub_08072454(void);
 void sub_08072394(void);
-void sub_08072C40(u32, u16, u32);
+/* Publishes an x/y scroll pair into one of four BG scroll shadows selected by
+ * the first argument (0..3 -> BG0/BG1/BG2/BG3; anything else is a no-op).
+ *
+ * ALL THREE parameters are 16-bit, not just the second. sub_08072C40's own
+ * prologue is `lsls/lsrs #16` on r0, r1 AND r2 -- PROMOTE_MODE zero-extends
+ * every sub-word parameter at entry, so those three pairs ARE the declaration,
+ * and a `u32` parameter could not produce one. Declared `(u32, u16, u32)` from
+ * wave 12 until wave 21 matched the callee itself; the first and third were
+ * never checked against a body, only against callers that happened to agree.
+ * They agree because every promoted caller passes either a literal or a `u16`
+ * lvalue, so the retype is byte-neutral at all of them (re-verified with
+ * trymatch: c_08068AC4, c_08069EAC, c_0806A054, c_0806BB08, c_0806C52C,
+ * c_0806EB5C, c_08075368) -- which is exactly why the wrong spelling survived
+ * nine waves. The `(u16)` casts some promoted call sites carry on the third
+ * argument were compensating for the wrong declaration; they are now
+ * redundant, and harmless.
+ *
+ * The `bgt` on the selector is taken on the ZERO-EXTENDED value with no
+ * sign-extension inserted, which is what makes the first parameter `u16`
+ * rather than `s16`. */
+void sub_08072C40(u16, u16, u16);
 s32 Interpolate(s32, s32, s32, s32, s32);
 
 s32 Div(s32, s32);
@@ -1805,7 +1855,21 @@ void sub_08073574(int, int, int, int, int, int);
  * argument's type and that is real: sub_08014668 takes a u16 tile value read
  * with `ldrh`, sub_080149C0 takes a `u8 *` read with `ldr` out of
  * gUnknown_08610A38. */
-void sub_08014668(int, int, u16 *, int, int, int);
+/* Wave 21 (W21-A) corrects sub_08014668 on two axes, from the body rather than
+ * from the call sites:
+ *   Arguments 4..6 are `u16`, not `int`. They are narrowed `lsls #0x10;
+ * lsrs #0x10` BEFORE the `gUnknown_03002514 = 0` store, i.e. in the prologue,
+ * which is PROMOTE_MODE on a narrow parameter and not a conversion at the
+ * sub_080147B4 call -- an `int` spelling emits the same three narrowings but
+ * interleaved with the outgoing `str`s, eight instructions later. Byte-neutral
+ * at the three existing call sites (c_08084580.c twice, c_080852A8.c once):
+ * every argument passed is already a u16 `ldrh` or a constant.
+ *   It RETURNS sub_080152EC's result. `pop {r1}; bx r1` where r0 is otherwise
+ * free is the value-returning epilogue -- its byte-identical twin
+ * sub_080146D4 does the same, and the two void functions next to them
+ * (sub_08066BF4, sub_08066C70) pop into r0. Also byte-neutral at the callers,
+ * which all discard it. */
+struct Unk03001470 *sub_08014668(int, int, u16 *, u16, u16, u16);
 void sub_080149C0(int, int, u16 *, u8 *, int, int);
 
 /* Takes the raw, UNCLAMPED Interpolate result from sub_080737EC -- the clamp to
@@ -2510,5 +2574,39 @@ int sub_0800E8CC(int, int);
 int sub_0800E9F4(int, int);
 void sub_0800EAF4(int, int);
 void sub_0800EB5C(int, int);
+
+/* ---- wave 21 (W21-A): the gUnknown_0200C020 pair ----
+ * sub_08014074 is already matched in src/decomp/c_08014074.c and was simply
+ * never declared; its parameter type is that file's, now shared through
+ * unknown-globals.h.
+ *
+ * sub_080147B4 fills the same object, and its narrow parameters are what make
+ * sub_08014668/sub_080146D4 match: EVERY narrowing in those two functions is a
+ * conversion at this call, not a parameter-width tell of their own (the rule
+ * the sub_0802D35C comment above states). Their six parameters all stay `int`
+ * / `u16 *` as already declared.
+ *   Parameters 2 and 3 are `s16` and NOT the u16 sub_080147B4's own prologue
+ * shows -- PROMOTE_MODE zero-extends every narrow parameter at entry
+ * regardless of signedness, so the prologue cannot separate them, and the
+ * callers sign-extend (`lsls #0x10; asrs #0x10`) where 5..7 zero-extend
+ * (`lsrs`). Parameter 4 is stored as a word at +0x28 and never narrowed, and
+ * is `u16 *` only so that sub_08014668's third argument forwards without a
+ * cast. Parameters 5 and 7 are `u16` on the body's own evidence (5 is
+ * zero-extended and scaled `lsrs #0xe` into gUnknown_08610A38[]; 7 is
+ * zero-extended and stored to two halfwords); 6 is only ever `strh`'d, so its
+ * width is a floor and u16 is the weakest spelling that costs the callers
+ * nothing. */
+/* The two blob starters the sub_0802D4xx / sub_0802D5xx duplicate pairs use.
+ * Both take the blob in r0 and neither dereferences it, hence `const void *`.
+ * The narrow arguments are read off each callee's own prologue, which is the
+ * only evidence: sub_08019F2C zero-extends r1, r2, r3 and the one stack word
+ * at [sp, #0xc] (five parameters, the fifth arriving as a word) and forwards
+ * all five to sub_08019F90; sub_0801A104 zero-extends r1, r2, r3 only (four
+ * parameters). u16 rather than s16 is a floor -- PROMOTE_MODE cannot separate
+ * them and no call site narrows in a way that would (wave 21, W21-A). */
+void sub_08019F2C(const void *, u16, u16, u16, u16);
+void sub_0801A104(const void *, u16, u16, u16);
+void sub_08014074(struct Unk08014074 *);
+void sub_080147B4(struct Unk08014074 *, s16, s16, u16 *, u16, u16, u16);
 
 #endif // UNKNOWN_FUNCS_H

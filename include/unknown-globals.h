@@ -1184,7 +1184,15 @@ struct Unk08580934_Obj /* >= 0x3e */
  */
 struct Unk08580934
 {
-    /* 0x00 */ u8 filler_00[0x2d];
+    /* 0x00 */ u8 filler_00[0x2a];
+    /* 0x2a */ u16 unk2a; /* Cleared with `strh 0` by sub_08066BF4 / sub_0806DCB8
+                           * on the frame the unk33 cursor actually moves, in
+                           * the same statement pair that plays sound 0x64 --
+                           * an animation/scroll counter for the menu the
+                           * cursor drives. Width is a floor, not a proof: a
+                           * bare `strh` of 0 cannot separate u16 from s16 or
+                           * from a wider field's low half (wave 21, W21-A). */
+    /* 0x2c */ u8 filler_2c[0x01];
     /* 0x2d */ u8 unk2d;
     /* 0x2e */ u8 filler_2e[0x02];
     /* 0x30 */ u8 unk30; /* A byte flag bracketing a blocking sub-routine:
@@ -1662,6 +1670,23 @@ extern struct Unk0200B3B4 gUnknown_0200B3B4[];
  * indexes 0..0x1f. SIGNED: the ARM routine sub_08000234 reads it with `ldrsb`
  * and adds the value to a palette component. sub_080136C4 clears all 32. */
 extern s8 gUnknown_0200B5F4[0x20];
+/* Hoisted out of src/decomp/c_08014074.c in wave 21 (W21-A) so that
+ * gUnknown_0200C020 and sub_080147B4 can name the same type. The two members
+ * are sub_08014074's only accesses; sub_080147B4 writes +0x20/+0x24/+0x28 as
+ * words, +0x2c/+0x2e/+0x34/+0x36 as halfwords and +0x31..+0x38 as bytes, so
+ * everything below 0x39 is genuinely occupied and the filler is a floor. The
+ * OBJECT is 0x58 bytes (aw2bhr.lds puts the next symbol at 0x0200C078); the
+ * struct is not grown to match because nothing indexes it. */
+struct Unk08014074
+{
+    /* 0x00 */ u8 filler_00[0x39];
+    /* 0x39 */ s8 unk39;
+    /* 0x3a */ s8 unk3a;
+};
+/* The single instance of the above -- sub_08014614, sub_08014668 and
+ * sub_080146D4 each hand `&gUnknown_0200C020` to sub_080147B4 and then to
+ * sub_08014074, and no other code in asm/ names the address. */
+extern struct Unk08014074 gUnknown_0200C020;
 extern struct Unk0200C420 gUnknown_0200C420;
 extern u32 gUnknown_0200C500[2];
 extern struct Unk0200C528 gUnknown_0200C528[];
@@ -2630,6 +2655,16 @@ extern const struct ProcCmd gUnknown_084892C4[];
  * Proc_EndEach. 0x160 bytes, i.e. 44 ProcCmds. */
 extern const struct ProcCmd gUnknown_084893AC[];
 /* A proc script: sub_08014BC0 and sub_08014C74 both hand it to Proc_Start. */
+/* Two more gUnknown_03001470 script blobs of the gUnknown_0849A108 shape --
+ * 8-byte records of (odd THUMB function pointer, u16, u16), NOT the
+ * {opcode, dataImm, dataPtr} of struct ProcCmd, whose blobs put the small
+ * opcode word FIRST (compare 0x086140D4). `const u8 []` on the same reasoning
+ * as gUnknown_0849A108: sub_080152EC takes `const void *` and nothing in the
+ * tree dereferences either symbol. 0x20 and 0xbb8 bytes; sub_08014668 starts
+ * the first and its byte-identical twin sub_080146D4 the second, which is the
+ * only thing that tells the two apart (wave 21, W21-A). */
+extern const u8 gUnknown_08489548[];
+extern const u8 gUnknown_08489568[];
 extern const struct ProcCmd gUnknown_0848A140[];
 /* A proc script: sub_08045F80 hands it to Proc_Start on tree 3. */
 extern const struct ProcCmd gUnknown_0848A150[];
@@ -2908,6 +2943,17 @@ extern const u8 gUnknown_0849A6B0[];
  * indexed or dereferenced it, so `const u8 []` is the weakest model that gives
  * the clean pool word; widen it when sub_080193B0 is matched. */
 extern const u8 gUnknown_0849A8F0[];
+/* Four ROM blobs in the same slot, each named by exactly ONE function in asm/
+ * and each handed straight to sub_08019F2C or sub_0801A104 as a `const void *`
+ * that neither dereferences. `const u8 []` on the gUnknown_0849A0F0 reasoning.
+ * They pair off by caller: sub_0802D458/sub_0802D558 take AAC0/AE28 through
+ * sub_0801A104, sub_0802D4B0/sub_0802D504 take AC60/ABC0 through sub_08019F2C,
+ * and each pair is a byte-identical duplicate whose ONLY difference is which
+ * of the two it names (wave 21, W21-A). */
+extern const u8 gUnknown_0849AAC0[];
+extern const u8 gUnknown_0849ABC0[];
+extern const u8 gUnknown_0849AC60[];
+extern const u8 gUnknown_0849AE28[];
 extern struct Unk0849B018 *gUnknown_0849B018;
 extern struct Unk0849B01C *gUnknown_0849B01C;
 extern struct Unk0849B060 *gUnknown_0849B060;
@@ -4019,6 +4065,24 @@ extern int gUnknown_02023894;
  * is load-bearing -- taking the address into a local pseudo is what stops
  * -fforce-addr from adding a second .rodata level of its own. */
 extern u16 *const gUnknown_08090D88;
+/* 0x08090C04 is another word in that same pool run and is NOT a global either:
+ * the ROM word there is 0x030033E8, i.e. &gUnknown_030033E8, and its immediate
+ * neighbours are &gUnknown_03003FC0 (0x08090C00) and &gUnknown_030033EC
+ * (0x08090BFC / 0x08090C0C). Its one referrer, sub_0802CFFC, reads
+ * gUnknown_030033E8[0] and [1] on both sides of a branch, so the ADDRESS is
+ * live across the merge -- the reference-count-across-a-control-flow-merge
+ * trigger, not loop liveness.
+ *
+ * NO DECLARATION IS NEEDED AND NONE IS ADDED. The paragraph above says the
+ * honest spelling "relocates the pool word against THIS unit's own .rodata,
+ * which the .text-only split cannot place" -- that wall was removed in wave 18
+ * and the sentence is now stale for anything new. Naming gUnknown_030033E8
+ * directly reproduces sub_0802CFFC exactly, including the `adds r2, r0, #0` /
+ * `ldr r2, [r2]` pair that holds the pool word's address across the branch;
+ * trymatch reports `relocs: name different symbols that resolve to the same
+ * address` and asks for "rodata": ["0x08090C04"] in the promoted entry. That is
+ * a match, not a park. The gUnknown_08090D88 declaration is kept only because a
+ * promoted file already uses it -- do not add more of them (wave 21, W21-C). */
 /* A proc script; sub_080345C8 asks sub_08015BD0 whether an instance is live
  * with the usual `!= -1` predicate. */
 extern const struct ProcCmd gUnknown_0849A00C[];
@@ -4297,10 +4361,28 @@ struct Unk020298E0 /* 0x90 */
     /* 0x00 */ u8 filler_00[0x26];
     /* 0x26 */ u16 unk26[5];
     /* 0x30 */ u16 unk30[5];
-    /* 0x3a */ u8 filler_3a[0x56];
+    /* 0x3a */ s16 unk3a[5]; /* A third five-slot halfword array on the same
+                              * [side][slot] index as unk26/unk30 -- a countdown.
+                              * SIGNED on the discriminating half: sub_0804BDD8
+                              * and sub_0804BECC do `ldrh; subs #1; strh; lsls
+                              * #0x10; cmp #0; bgt`, i.e. `--x <= 0` tested on
+                              * the sign of the low half, which a u16 member
+                              * cannot produce (the same readout that signs
+                              * struct Unk08580934_Obj.unk26). The `ldrh` is
+                              * forced by the store-back, not by the type.
+                              * Extent 5 by analogy with unk26/unk30, which is
+                              * what the +0x44 boundary allows (wave 21, W21-A). */
+    /* 0x44 */ u8 filler_44[0x4c];
 };
 extern struct Unk020298E0 gUnknown_020298E0[];
 extern struct Unk02029808 gUnknown_02029808[];
+/* A halfword cell per gUnknown_0300453C side, read `gUnknown_02029BE8[s ^ 1]`
+ * -- the OTHER side's slot -- and tested `!= 0` by sub_0804BDD8/sub_0804BECC
+ * before they clear a per-slot counter. Bare `ldrh` off `index * 2`, nothing
+ * sign-extends, so a plain u16 array; the extent is unknown (aw2bhr.lds puts
+ * the next symbol 4 bytes later, which bounds it at 2 if that symbol is real)
+ * (wave 21, W21-A). */
+extern u16 gUnknown_02029BE8[];
 /* Set to 1 with a bare `strh` by sub_08053BB8 and by nothing else matched. */
 extern u16 gUnknown_030045B0;
 /* Two ROM u16 tables indexed by gUnknown_0300450C (and, for the second, by its
@@ -4308,6 +4390,26 @@ extern u16 gUnknown_030045B0;
  * 085523A8 supplies the palette sub_08053614 pushes into bits 10-11 of an OAM
  * word. Both are read with a bare `ldrh` off `index * 2`, so they are plain u16
  * arrays rather than aggregates -- the same reasoning as gUnknown_085538AE. */
+/* Two ADJACENT byte tables scoring the 5-bit terrain code that
+ * gUnknown_08499590 + 0x1432 holds, read `tbl[cell & 0x1f]` by the twins
+ * sub_0804B42C (0x08551CA0) and sub_0804B4C4 (0x08551CBD).
+ *
+ * The ODD address of the second is real and not a mis-attributed pool word:
+ * 0x08551CA0 + 0x1d == 0x08551CBD and 0x08551CBD + 0x1f == 0x08551CDC, so the
+ * three symbols tile the region exactly, and the two tables are byte-for-byte
+ * the same in ROM apart from element 5 (3 vs 0) -- parallel tables of 29 and
+ * 31 explicit initialisers, not one table read at two offsets. A 32-entry
+ * reading is what the 0x1f mask suggests and it is WRONG: it would make the
+ * two overlap. Values are 0..4, read `ldrb` into an UNSIGNED comparison (the
+ * running best is `bhs`, not `bge`), so the running maximum is `u32` in the
+ * source while the table itself is only ever zero-extended (wave 21, W21-A). */
+extern const u8 gUnknown_08551CA0[];
+extern const u8 gUnknown_08551CBD[];
+/* The four cardinal neighbour offsets as (dx, dy) word pairs -- (1,0), (-1,0),
+ * (0,-1), (0,1) -- walked with `ldr [r1]; ldr [r1,#4]; adds r1,#8` by both
+ * twins above and added to signed cell coordinates. Words and signed: the
+ * elements ARE -1 in ROM. */
+extern const s32 gUnknown_08551CDC[][2];
 extern const u16 gUnknown_08551E7C[];
 extern const u16 gUnknown_085523A8[];
 
@@ -4975,6 +5077,12 @@ extern u8 gUnknown_081169D0[];
  * the element is not otherwise typed here because nothing in this block reads
  * through it. */
 extern u16 gUnknown_0823DC38[];
+/* Two compressed tile blobs, each Decompressed into *gUnknown_08499580 by one
+ * of the duplicate pair sub_080858C0 / sub_08085908. `u8 []` and NOT `const`:
+ * Decompress's first parameter is `u8 *`, the same reason gUnknown_0823D980
+ * above is not const (wave 21, W21-A). */
+extern u8 gUnknown_0823DE38[];
+extern u8 gUnknown_0823DF48[];
 /* The two fixed fallbacks returned by sub_08084864 and sub_0808488C when
  * sub_08084858(i) is non-zero -- same role, same shape, 32 bytes apart, so
  * they are almost certainly two entries of one table that the source names

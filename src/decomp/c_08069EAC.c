@@ -13,11 +13,15 @@
  * frame its own duration counter reaches.
  *
  * unk2c/unk2e/unk30 are `u16` with explicit `(s16)` casts at the four bounds
- * tests, not `s16` members: sub_08072C40's third parameter is u32 and the call
- * sites emit a bare `ldrh`, which an `s16` member could not do -- it would have
- * to sign-extend. The `lsl #16; asr #16` at each test is the cast, applied to
- * the value the `strh` just wrote rather than to a reload, which is why no
- * `ldrsh` appears anywhere.
+ * tests, not `s16` members: the call sites emit a bare `ldrh` into
+ * sub_08072C40, which an `s16` member could not do -- it would have to
+ * sign-extend and then re-narrow. The `lsl #16; asr #16` at each test is the
+ * cast, applied to the value the `strh` just wrote rather than to a reload,
+ * which is why no `ldrsh` appears anywhere. (This argument used to be stated
+ * as "sub_08072C40's third parameter is u32". That was wrong -- wave 21
+ * matched sub_08072C40 itself and all three of its parameters are u16. The
+ * conclusion is unchanged and the file still matches: a bare `ldrh` reaching
+ * a u16 parameter needs no conversion either.)
  *
  * The `movs r5, #0` in the second branch and its absence in the first are one
  * source: `proc->unk38` is loaded for the `if` and the zero it compared against

@@ -101,11 +101,26 @@ def relocations(obj_rel, lo, hi):
     return out
 
 
-def symbol_addresses():
-    """name -> final linked address, read from the last built ELF.
+MAP_SYM = re.compile(r"^\s+0x0*([0-9a-fA-F]{8})\s+([A-Za-z_][A-Za-z0-9_]*)\s*(=\s*\.)?\s*$")
 
-    Only used to resolve relocations, so a stale or missing ELF costs nothing
-    beyond falling back to the plain symbol comparison.
+
+def symbol_addresses():
+    """name -> final linked address, read from the last built ELF or the map.
+
+    Used only to resolve relocations -- but an EMPTY result is not free, and the
+    old docstring claiming it was cost wave 21 a false regression. A `.rodata`
+    pool-word match is confirmed by resolving the candidate's relocation target
+    to an address and comparing it with the ROM word; a symbol whose address is
+    not spelled into its name (`gpKeySt`, and every other upstream-named global)
+    cannot be resolved without this table, so an empty table silently downgrades
+    a MATCH to a 99.2% near-miss that reads exactly like a bad decompilation.
+    Four functions were re-derived against that ghost before the cause was found:
+    `arm-none-eabi-nm` was simply not on PATH in the shell being used, while the
+    MCP server -- which shells out to THIS script -- had it and reported MATCH.
+    The two tools appeared to disagree and are the same code.
+
+    So: fall back to aw2bhr.map when nm yields nothing, and say so on stderr
+    when both come up empty rather than degrading quietly.
     """
     if symbol_addresses.cache is not None:
         return symbol_addresses.cache
@@ -121,6 +136,26 @@ def symbol_addresses():
                         syms[parts[2]] = int(parts[0], 16)
                     except ValueError:
                         pass
+    if not syms:
+        # nm missing, or the ELF mid-rebuild by a concurrent agent. The map
+        # carries the same absolute addresses in plain text.
+        mapfile = os.path.join(awlib.REPO, "aw2bhr.map")
+        try:
+            with open(mapfile, "r", errors="replace") as fh:
+                for ln in fh:
+                    m = MAP_SYM.match(ln.rstrip("\n"))
+                    if m:
+                        syms.setdefault(m.group(2), int(m.group(1), 16))
+        except OSError:
+            pass
+    if not syms:
+        sys.stderr.write(
+            "trymatch: WARNING -- no symbol table (aw2bhr.elf via nm, then\n"
+            "  aw2bhr.map, both empty). Relocations against symbols whose\n"
+            "  address is not in their name cannot be resolved, so a .rodata\n"
+            "  pool word will be reported as a differing byte even when it\n"
+            "  matches. Put the ARM toolchain on PATH, or wait for a\n"
+            "  concurrent build to finish, before believing a near-miss.\n")
     symbol_addresses.cache = syms
     return syms
 

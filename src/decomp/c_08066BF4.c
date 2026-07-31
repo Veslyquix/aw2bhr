@@ -1,0 +1,126 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08066BF4.
+ * sub_08066BF4 @ 0x08066BF4, sub_08066C70 @ 0x08066C70
+ */
+
+#include "hardware.h"
+/* The cursor stepper for the 0x0816E160 menu -- the twin of sub_0806DD34,
+ * which is byte-identical apart from which private .rodata pool word carries
+ * the gpKeySt address (0x0816E160 vs 0x0816E1B4; both ROM words hold
+ * 0x03002EE0).
+ *
+ * unk48 is the cursor, unk4b the entry count and unk49 the previous value,
+ * saved first so the tail can play sound 0x64 on any change. unk47 selects
+ * WRAPPING (non-zero) or CLAMPING (zero) behaviour, and the two halves are
+ * spelled with the `== 0` case FIRST: the ROM branches away on `bne`, which
+ * puts the equality arm inline. */
+struct Unk08066C70
+{
+    /* 0x00 */ u8 filler_00[0x47];
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ u8 unk48;
+    /* 0x49 */ u8 unk49;
+    /* 0x4a */ u8 filler_4a[0x01];
+    /* 0x4b */ u8 unk4b;
+};
+
+/* Steps the seven-entry unk54[] selector at gUnknown_08580934->unk33 with the
+ * gpKeySt->unk02 bitmask, and plays sound 0x64 whenever the index actually
+ * moved. Byte-identical twin of sub_0806DCB8: the two differ only in which
+ * private .rodata address-constant word carries &gUnknown_08580934 and
+ * &gpKeySt (0x0816E158/0x0816E15C vs 0x0816E1AC/0x0816E1B0 -- both pairs hold
+ * 0x08580934 and 0x03002EE0), so the SOURCE is the same and the honest
+ * spelling reproduces both.
+ *
+ * Each half is `if (i == <edge>) { wrap } else { step }` and NOT the
+ * `if (i != <edge>) step; else wrap` that reads more naturally: the ROM
+ * branches away with `bne`, which puts the equality arm inline and the step in
+ * an out-of-line block after the literal pool.
+ *
+ * The wrap is gated on `unk02 == held`, i.e. it only fires when the pressed
+ * mask is exactly the held mask -- no other key down. */
+void sub_08066BF4(void)
+{
+    int i;
+
+    i = gUnknown_08580934->unk33;
+
+    if (gpKeySt->unk02 & 0x20)
+    {
+        if (i == 0)
+        {
+            if (gpKeySt->unk02 == gpKeySt->held)
+                i = 6;
+        }
+        else
+        {
+            i--;
+        }
+    }
+
+    if (gpKeySt->unk02 & 0x10)
+    {
+        if (i == 6)
+        {
+            if (gpKeySt->unk02 == gpKeySt->held)
+                i = 0;
+        }
+        else
+        {
+            i++;
+        }
+    }
+
+    if (i != gUnknown_08580934->unk33)
+    {
+        gUnknown_08580934->unk2a = 0;
+        sub_0803B4DC(0x64);
+    }
+
+    gUnknown_08580934->unk33 = i;
+}
+
+void sub_08066C70(struct Unk08066C70 *p)
+{
+    p->unk49 = p->unk48;
+
+    if (p->unk47 == 0)
+    {
+        if (gpKeySt->unk02 & 0x40)
+        {
+            if (p->unk48 != 0)
+                p->unk48 = p->unk48 - 1;
+        }
+
+        if (gpKeySt->unk02 & 0x80)
+        {
+            if (p->unk48 < p->unk4b - 1)
+                p->unk48 = p->unk48 + 1;
+        }
+    }
+    else
+    {
+        if (gpKeySt->unk02 & 0x40)
+        {
+            if (p->unk48 == 0)
+                p->unk48 = p->unk4b - 1;
+            else
+                p->unk48 = p->unk48 - 1;
+        }
+
+        if (gpKeySt->unk02 & 0x80)
+        {
+            if (p->unk48 == p->unk4b - 1)
+                p->unk48 = 0;
+            else
+                p->unk48 = p->unk48 + 1;
+        }
+    }
+
+    if (p->unk49 != p->unk48)
+        sub_0803B4DC(0x64);
+}

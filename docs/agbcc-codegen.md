@@ -405,6 +405,16 @@ a bare `adds r0,r3,#0` ⇒ `int` parameter ⇒ the source must have spelled
 something). **Do not spend an attempt choosing between the last two; declare the
 weaker one and say in the header that it is byte-neutral.**
 
+**Read the CONTRAPOSITIVE of that sentence too — it is the half everyone
+misses.** "Prologue narrows ⇒ narrow parameter" has a converse that also holds:
+**a BARE prologue is positive evidence for a WIDE parameter**, and it holds even
+when every use of the parameter is a narrow store, because agbcc emits the
+PROMOTE_MODE extension unconditionally and never deletes it as dead. Two
+prototypes in this tree were wrong for nine and for part of one wave because
+only the forward direction was being read. Worked measurements, including the
+20-vs-16-byte one that settles it: *"A BARE PROLOGUE is positive evidence for a
+WIDE parameter"*, near the end of this file.
+
 The sign is worth chasing even so, because it is free from the caller
 population: `sub_0803B48C` has five call sites and every one is signed — a sum
 of three ints put through `lsls #0x10; asrs #0x10`, and four `ldrsh` reads of
@@ -10820,3 +10830,403 @@ of the matching; the subset rows moved because of the fix.
 9. `sub_080780E4` (64 B), exemplars `sub_08036C4C` / `sub_08036C80`, both
    matched in wave 20.
 
+
+## A BARE PROLOGUE is positive evidence for a WIDE parameter (wave 21, W21-B)
+
+`PROMOTE_MODE`'s `lsl #16; lsr #16` on a sub-word parameter is emitted in the
+**prologue**, unconditionally, and it is **not** deleted when the extension is
+dead. That inverts the natural reading of a prologue, and it is the cheapest
+parameter-width oracle in the project because it needs no caller.
+
+Two functions in wave 21 turned on it, in opposite directions.
+
+**`sub_08001148`** — 16 bytes, a halfword fill:
+
+```
+	cmp r1, #0
+	ble _08001156
+_0800114C:
+	strh r2, [r0]
+	adds r0, #2
+	subs r1, #1
+	cmp r1, #0
+	bgt _0800114C
+_08001156:
+	bx lr
+```
+
+r2's only use is a `strh` that throws its upper half away, so "the extension is
+dead, it will be optimised out, therefore `u16` is safe" is the obvious
+inference. It is wrong. `void sub_08001148(u16 *, int, u16)` compiles to **20**
+bytes — the two extra instructions are the prologue pair — and `int` gives 16
+and matches. The declaration was briefly `u16` mid-wave on exactly that
+reasoning; only the body refutes it, because the one caller passes the constant
+0 and is byte-neutral either way.
+
+**`sub_08072C40`** — the same rule read forwards. Its prologue is
+
+```
+	lsls r0, r0, #0x10
+	lsrs r0, r0, #0x10
+	adds r3, r0, #0
+	lsls r1, r1, #0x10
+	lsrs r1, r1, #0x10
+	lsls r2, r2, #0x10
+	lsrs r2, r2, #0x10
+```
+
+three pairs, so **all three** parameters are 16-bit. It had been declared
+`(u32, u16, u32)` since wave 12 and stayed wrong for nine waves, because every
+promoted caller passes either a literal or a `u16` lvalue and so agrees with
+both spellings. The retype to `(u16, u16, u16)` is byte-neutral at all fifteen
+functions in the seven units that call it (re-verified with `trymatch`); the
+`(u16)` casts two promoted call sites carried on the third argument had been
+compensating for the wrong declaration and are now redundant. Two of them were
+written by earlier waves as deliberate findings.
+
+**So:**
+
+- **Sub-word parameter, extension present** → declare it narrow. Which of `s16`
+  and `u16` still needs the *second* shift pair at a use, as before.
+- **Sub-word-looking parameter, prologue BARE** → it is `int`/`u32`, even when
+  every use is a narrow store. This is the half nobody was reading.
+- A prologue pair is *positional*: count the pairs before the first real
+  instruction and they map to r0, r1, r2, r3 in order. A copy such as
+  `adds r3, r0, #0` interleaved between them is the register allocator getting
+  the value out of the way, not an argument boundary.
+- **`trymatch` on the CALLERS cannot find either error.** Agreement between a
+  wrong declaration and callers that happen not to discriminate is exactly what
+  the "prototypes are a contract, not ground truth" rule predicts. The callee's
+  own prologue is the oracle, and it is free to read.
+
+## `overlap_screen.py`'s "tightest exemplar" was decided by a SIZE tie-break, and the tie-break was backwards (wave 21, W21-C)
+
+Batch: seven functions, 808 bytes, all matched (`sub_08072A88`, 164 B, was
+derived here too but matched concurrently by W21-B and is theirs). The batch was
+chosen to be the controlled experiment, because it contains both kinds of
+exemplar relationship at once — and that turned out to be load-bearing in a way
+the assignment did not anticipate: the two groups disagree, and it is their
+disagreement rather than either one alone that fixes the size of the fix.
+
+**The claim under test.** `dataref_neighbours()` ranks the matched functions
+whose `data_refs` cover a target and calls the winner "tightest". The primary
+key is the exemplar's own ref count — fewest wins — and that key is *right*: it
+is the subset guarantee, and it means the exemplar's vocabulary is close to the
+target's rather than incidentally containing it. But it **ties constantly**, and
+the tie was broken by `m["size"]` *ascending*. Smallest wins. Smallest means
+"does least", which means "demonstrates fewest of the operations the target
+performs".
+
+**The measurement.** `sub_08012358` (36 B) and `sub_08085F40` (80 B) have
+**identical** `data_refs` — `{gUnknown_03001FFC, gUnknown_03002020,
+gUnknown_03002B28, gUnknown_030030E0}` — and both are zero-call leaves. They
+therefore tie on *every* key the screen had except size, and smallest-first
+named `sub_08012358` for twelve targets of 96–148 bytes.
+
+`sub_08012358`'s entire body is four zero stores. Against the four targets in
+this batch on that exact ref set — `sub_0806AFF0` (96 B), `sub_0806C700`
+(108 B), `sub_0806C7B4` (112 B), `sub_0806C154` (116 B) — it supplied **nothing
+beyond "these four globals exist and are already declared"**, which
+`include/hardware.h` says by itself.
+
+It is worse than uninformative. It writes `gUnknown_030030E0.raw = 0`, and the
+union `.raw` spelling is **precisely the one that fails** on any target doing a
+read-modify-write: it drags a live zero out of the preceding scalar stores into
+a spurious `orr` and costs a callee-saved register. Three of the four targets
+here need the plain `*(u16 *)&gUnknown_030030E0` cast instead. Following the
+"tightest" exemplar's idiom would have cost every one of them.
+
+**What actually supplied the answers**, one line per function:
+
+| function | what carried it |
+| --- | --- |
+| `sub_0806C7B4` 112 B | `c_08085F40.c` — the scalar-cast rule, written down in its comment |
+| `sub_0806C700` 108 B | same; the union `.raw` is safe here only because nothing is OR-ed |
+| `sub_0806AFF0` 96 B | `c_08085F40.c`; the merged-pair case is the one its comment describes |
+| `sub_0806C154` 116 B | its own assembly + `PutSpriteExt`'s prototype. `sub_08012358` is its **callee**, not its exemplar |
+| `sub_08071DB4` 140 B | `c_08078B08.c` (`sub_08078B74`) for the statement skeleton, `c_08085F40.c` for the cast |
+| `sub_080670F8` 132 B | `c_080688E4.c` for the `(struct Unk8012C30 *)&shadow` cast idiom |
+| `sub_0802CFFC` 104 B | `c_0804096C.c` — four of its five calls in the same order; the callee axis got this one right |
+| `sub_08072A88` 164 B | `c_080688E4.c` for the `union BgCntBuf` model — **matched by W21-B, not by this batch**; see the note on evidence weight below |
+
+`sub_08012358` supplied nothing to any of them. **The hypothesis holds in its narrow form: the size tie-break was inverted.**
+
+**But its stated MECHANISM is refuted, and group 2 is what refutes it.** The
+hypothesis was that "proximity in size and call profile predicts what actually
+transfers". As a *primary* key that is false, and the screen's own output shows
+it. For `sub_080670F8` (132 B):
+
+    tightest  sub_080688E4  (9 refs, 284 B)   <- the exemplar actually read
+    nearest   sub_080122EC  (13 refs, 108 B)  <- what proximity alone picks
+
+The ref-count key gets this right and proximity gets it wrong: a 284-byte
+exemplar with nine refs beat a 108-byte one with thirteen, on a 132-byte
+target. Ranking by proximity would have *broken* group 2 to fix group 1.
+
+So the two keys are not competitors and the defect was never in the primary
+key. **Ref-count minimality is right and stays first; only the tie-break was
+wrong.** Group 1 is where the tie happens (two exemplars, identical ref sets,
+identical call profiles), and it is the only place the tie-break can decide
+anything.
+
+The deeper reason both keys work when they work: what transfers is whether the
+exemplar *exercises* the shared vocabulary the way the target does. Reference
+overlap says the vocabulary matches; it says nothing about the operations. The
+exemplar that carried four of these, `sub_08085F40`, is *also* a small zero-call
+leaf — it beats `sub_08012358` not by being bigger but by performing the same
+read-modify-write. Size and callee count are cheap proxies for that and nothing
+more, which is exactly why they belong in a tie-break and not in the key.
+
+**Evidence weight, stated plainly.** Group 2 was assigned as two functions and
+this batch kept one: `sub_08072A88` was matched concurrently by W21-B. That
+costs the argument nothing *measurable*, because on the axis under test the two
+are the same row — identical `data_refs`, `exemplars=12`, same `tightest`, same
+`nearest`. They are one data point that happened to be assigned twice, not two.
+The group-2 refutation therefore rests on a single screen row, and it is stated
+here as a single row. It is enough to kill "proximity as primary key" because
+one clean counter-example is all that takes; it would NOT be enough to support a
+positive claim about how often the two keys disagree, and no such claim is made.
+
+**The change.** Primary key unchanged — minimal ref count, for the group-2
+reason above. Tie-break is now proximity: closest in size, then in callee count.
+A second column, `nearest`, reports the best covering exemplar by proximity
+*alone* and prints only where the two disagree. **Where they disagree, read the
+tightest one**: that is the group-2 case, and there the disagreement means the
+tightest cover is a vocabulary match while `nearest` is merely a same-size
+stranger. This does **not** reinstate the widest-first proposal wave 20
+rejected: "nearest" is bounded on both sides where "widest" was not, it is
+advisory rather than selective, and ref count still leads.
+
+The scope of the fix is worth being precise about, because it was tempting to
+go further. Group 1 (a tie the tie-break decided wrongly) and group 2 (no tie,
+primary key correct, proximity wrong) point in opposite directions, and only a
+change confined to the tie-break satisfies both. A batch containing just one of
+the two groups would have supported an over-broad fix.
+
+`python tools/overlap_screen.py --self-test` passes before and after. The screen
+now names `sub_08067300` (88 B, 4 refs) for all four of the group-1 targets —
+which `include/hardware.h` **independently** identifies as a member of the raw
+read-modify-write family, arrived at from the assembly with no knowledge of the
+screen. `sub_08012358` no longer wins anywhere.
+
+**Generalisation, stated narrowly.** The failure mode is a ranking function
+whose primary key ties and whose tie-break is a proxy nobody checked. The
+project has now had two of these on the same tool in two waves. When a screen
+reports one name, look at how many candidates tied for it before believing the
+name means anything.
+
+### The blend shadow: three spellings, and which one each access needs
+
+Consolidating what four of these functions turned on, against the note on
+`gUnknown_030030E0` in `include/hardware.h`:
+
+- **`ldrh` with a pool mask ⇒ `.raw`** — a whole 5-bit target group.
+- **`ldrb` with a `movs #N; neg` mask ⇒ `.bits`** — one backdrop bit.
+- A function uses both, a line apart. `sub_0806C7B4` alternates four times.
+
+The `.raw`-vs-scalar-cast choice is a **third** axis on top of that, and it is
+decided by whether a live constant is in flight:
+
+- Two group writes **separated** by a `.bits` write do not merge, and the union
+  `.raw` spelling is exact (`sub_0806C7B4`, `sub_0806C700`).
+- Two group writes **adjacent** merge into one `strh` via store forwarding, and
+  the union spelling then picks up whatever zero the preceding scalar stores
+  left live and emits a spurious `orr` (`sub_0806AFF0`, `sub_08071DB4`). Use
+  `*(u16 *)&gUnknown_030030E0`.
+- `effect = 3` is an all-ones bitfield value, so `store_fixed_bit_field`'s
+  `all_one` drops the AND and only `orr #0xc0` survives — which is why
+  `sub_08071DB4` has no `and` there and `sub_0806C7B4` (`effect = 1`) does.
+- `gUnknown_03001FFC = gUnknown_03001FFC;` is a real self-store and appears in
+  two of these. It is only spellable because the global is `volatile`; without
+  the qualifier the whole statement is deleted and the bare `ldrh`/`strh` pair
+  disappears. If you cannot produce that pair, the qualifier is why.
+
+## `u.raw` and `*(u16 *)&u` are NOT interchangeable — and a probe says they are (wave 21, W21-B)
+
+The wave-15 blind spot has a second instance, and this one is not about type
+width. For a `union BgCntBuf`/`BlendCntBuf` object, the raw-halfword view can be
+written two ways:
+
+```c
+gUnknown_030030E0.raw     = (gUnknown_030030E0.raw     & 0xFFE0) | 0x1F;
+*(u16 *)&gUnknown_030030E0 = (*(u16 *)&gUnknown_030030E0 & 0xFFE0) | 0x1F;
+```
+
+Compiled side by side in an otherwise empty file, these emit **byte-identical**
+assembly — same instructions, same pool words, same order. That measurement is
+worthless. Substituted into a real function, they are different code:
+
+- **`sub_08071DB4`** — the cast matches; `.raw` is **+4 bytes** and 56.4%
+  identical. `.raw` materialises the `0` that the *preceding* statement stores
+  into `gUnknown_03002020` as its own pseudo, which stays live across the insert
+  and comes back as a **dead `orrs r1, r3`**. That shifts every subsequent
+  register and pushes one more word into the literal pool.
+- **`sub_08071CF4`** — same substitution, **size stays exactly 124 bytes** and
+  16 bytes differ. Here the cost is purely allocational: `.raw` parks the 0 in a
+  callee-saved register, so the prologue becomes `push {r4, r5, lr}` where the
+  ROM has `push {r4, lr}`. **A size check cannot see this one at all.**
+- **`sub_0807F2FC`**, two functions along in the same subsystem and on the same
+  symbol, matches with **either** spelling.
+
+So it is not a property of the symbol, the union, or the mask. It is a property
+of what else is live at that statement, which is why the isolated probe --
+where nothing else is live -- cannot see it.
+
+**Practical rule:** on a union raw-view write, treat `.raw` and the cast as two
+candidates to be tried against the target, never as one spelling with two names.
+Both appear in matched promoted code, so neither is "the" convention:
+`c_08012358.c` uses `.raw` for a bare `= 0`, and the masked-insert family here
+needs the cast. Prefer whichever matches and say which in the file.
+
+**And the general form, restated because it has now cost two waves:** *a probe
+showing two spellings are identical is evidence about the probe's context, not
+a general fact.* Wave 15 found it for `u16 v` vs `int v` with casts at each use;
+this is the same failure on lvalue spelling. A probe can confirm a candidate is
+right; it cannot license a substitution.
+
+## The volatile-LHS address load lands before EVERYTHING in its statement — which makes statement membership an ordering lever (wave 21, W21-B)
+
+This both **qualifies** the wave-20 rule *"A `volatile` LHS is forced into a
+register BEFORE the RHS call — bind the result"* and gives it a source-level
+lever. Read the two together.
+
+**The qualification first, because the wave-20 rule is stated too generally.**
+It says the plain `gUnknown_03001FFC = Interpolate(...);` "does NOT compile to
+what the ROM has". That is true of the function W20-C was working and false in
+general. `sub_0801320C` and `sub_080132B0` both MATCH with the plain assignment,
+pool `ldr` ahead of the `bl` and the address parked in a callee-saved register
+across it — the very output wave 20 called wrong:
+
+```
+	ldr r4, _0801327C @ =gUnknown_03001FFC
+	ldr r3, [r5, #0x54]
+	adds r3, #1
+	str r3, [r5, #0x54]
+	...
+	bl Interpolate
+	strh r0, [r4]
+```
+
+So there is nothing to choose on principle. **The ROM tells you which one it
+is, and it is a one-glance readout:**
+
+- pool `ldr` for the destination **before** the `bl` → the source is the plain
+  assignment. Write it directly.
+- pool `ldr` **after** the `bl` → the source bound the result to a local first,
+  which is wave 20's `s32 v; v = f(...); g = v;`.
+
+Both spellings exist in this ROM on the *same global*. Treat the wave-20 form as
+one of two candidates, not as the fix.
+
+**Now the lever.** Because the volatile destination's address is expanded before
+anything else in the statement, **any side effect you put INSIDE that statement
+is ordered after the `ldr`, and the same side effect as a PRECEDING statement is
+ordered before it.** That is a source-level handle on instruction order with no
+size change at all:
+
+```c
+/* ldr lands AFTER the ldr/adds/str -- 8 of 116 bytes wrong */
+proc->unk54++;
+gUnknown_03001FFC = Interpolate(0, 0, 0x10, proc->unk54, proc->unk64);
+
+/* ldr lands BEFORE it -- matches */
+gUnknown_03001FFC = Interpolate(0, 0, 0x10, ++proc->unk54, proc->unk64);
+```
+
+Identical instruction count, identical size, identical registers — **only the
+position of one `ldr` moves.** A size check cannot see it and neither can a
+diff summary that only counts bytes; you have to look at where the pool load
+sits. It cost one attempt on each of two functions in wave 21.
+
+Generalising past the counter case: this works for **any** side effect that can
+be written either as its own statement or as part of the RHS expression — a
+post/pre-increment, an assignment used for its value, a comma operator. It is
+the same class of lever as the wave-17 comma-operator anchor, but it needs no
+comma: the statement boundary is doing the work, and the volatile qualifier is
+what makes the boundary observable in the first place. On a NON-volatile
+destination the address is not force-expanded, so the lever does not exist and
+both spellings give the same code.
+
+## A running maximum's TYPE decides reload-vs-copy, and it is the last two bytes (wave 21, W21-A)
+
+`sub_0804B42C` came in at 98.0% with three bytes wrong and the size exact. The
+whole difference was the two instructions that update a running maximum:
+
+    ROM             ldrb r7, [r0] ; cmp r5, r7 ; bhs .. ; adds r6,r2,#0 ; ldrb r5, [r0]
+    candidate       ldrb r0, [r0] ; cmp r5, r0 ; bcs .. ; adds r6,r2,#0 ; adds r5,r0,#0
+
+for the obvious source
+
+    if (best < tbl[t]) { result = t; best = tbl[t]; }
+
+The ROM reads the table TWICE; the candidate reads it once and copies. Four
+spellings were probed in one call -- `best = tbl[result]` after `result = t`,
+`*(tbl + t)` against `tbl[t]`, and swapping the two assignments -- and all
+three failed identically, because CSE canonicalises the address through the
+register equivalence class and merges them whatever the syntax.
+
+**The lever is not the expression, it is the declared type of the
+accumulator.** `u8 best` reproduces the ROM exactly; `int`, `u32` and `s32` all
+produce the copy. The assignment is then a QImode-to-QImode move whose source
+is a QImode MEM, which agbcc satisfies with a second `ldrb` off the address
+register that is still live, rather than with the SImode value CSE already
+holds. This is the wave-18 "suspect the TYPE before the allocation" rule
+landing on a scalar rather than an aggregate.
+
+**And the compare does not discriminate.** `cmp; bhs` is UNSIGNED, which reads
+like a `u32` accumulator and is why `u32` was tried first. It is not: two
+zero-extended QImode values compare unsigned whatever the C types are, so
+`u8`, `u32` and `int` all emit `bhs` here. The unsigned branch is evidence
+about the operands' MODE, not about either declaration -- do not read it as a
+width tell.
+
+## Where a narrowing sits relative to the FIRST BODY STATEMENT separates PROMOTE_MODE from a cast (wave 21, W21-A)
+
+The existing rule says a prologue narrowing is not a parameter-width tell when
+the narrowed value feeds another call. `sub_08014668` shows the positive half
+of that test, and it is purely positional.
+
+Its three trailing arguments are narrowed `lsls #0x10; lsrs #0x10` and then
+handed straight to `sub_080147B4`. Declared `int`, agbcc emits exactly the same
+three narrowings -- but AFTER the function's first statement (a `strb` to an
+unrelated global) and interleaved with the outgoing `str rN, [sp, #k]` stores.
+Declared `u16`, all three are emitted at entry, before that `strb`, and the
+`str`s are a separate run later. The ROM has them at entry, so the parameters
+are narrow.
+
+So the readout is: **a narrowing BEFORE the first side effect of the body is
+PROMOTE_MODE and types the parameter; a narrowing after it, adjacent to the
+argument setup, is a conversion at the call and types the CALLEE.** Both
+spellings have the same instruction count, so only the position tells them
+apart, and a straight-line probe shows it in one call.
+
+## A "loose duplicate" pair often has literally ONE source, not two (wave 21, W21-A)
+
+`tools/overlap_screen.py`'s LOOSE tier reports pairs whose instruction streams
+match and whose pool symbols differ. Five such pairs were worked in wave 21;
+the differing symbols were resolved against `baserom.gba` before any C was
+written, and **three of the five pairs turned out to reference the same
+globals**:
+
+    0x0816E158 / 0x0816E1AC  -> both 0x08580934      (sub_08066BF4 / sub_0806DCB8)
+    0x0816E15C / 0x0816E1B0  -> both 0x03002EE0      (same pair)
+    0x0816E160 / 0x0816E1B4  -> both 0x03002EE0      (sub_08066C70 / sub_0806DD34)
+    0x0813604C / 0x08136050  -> both 0x020298E0      (sub_0804BDD8 / sub_0804BECC)
+
+Each is a private `-fforce-addr` `.rodata` word, one per (function, symbol)
+pair, so a pair of functions compiled from the same source in two translation
+units shows two different `gUnknown_` names for one global. For those three
+pairs the sibling was not a derivation at all -- the identical C matched, with
+only the function name changed. The remaining two pairs (`gUnknown_08551CA0` /
+`gUnknown_08551CBD` and `gUnknown_08489548` / `gUnknown_08489568`) are genuine
+distinct data, and there the symbols are used as ADDRESSES directly rather than
+through a `ldr rN,[rM]` reroute -- which is the test. **One extra `ldr` level in
+front of the pool word means the symbol is a `.LC` word and the difference is
+probably not real; a direct use means it is.**
+
+`gUnknown_08551CBD` is the counter-example the wave brief flagged: an ODD
+address that IS a real object. 0x08551CA0 + 0x1d == 0x08551CBD and
+0x08551CBD + 0x1f == 0x08551CDC, so the three symbols tile the region exactly
+and the two byte tables are 29 and 31 explicit initialisers. The 5-bit mask on
+their index suggests 32 entries and would make them overlap; the ROM layout
+wins.
