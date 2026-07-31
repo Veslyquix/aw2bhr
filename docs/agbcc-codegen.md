@@ -11230,3 +11230,31 @@ address that IS a real object. 0x08551CA0 + 0x1d == 0x08551CBD and
 and the two byte tables are 29 and 31 explicit initialisers. The 5-bit mask on
 their index suggests 32 entries and would make them overlap; the ROM layout
 wins.
+
+## `tools/trymatch.py` reported a `.rodata` MATCH as a 99.2% near-miss with no toolchain on PATH (wave 21, W21-A)
+
+Four functions matched under `mcp__aw2bhr-decomp__try_match` and then, re-run
+from a shell as `python tools/trymatch.py <fn>`, came back "1 of 124 differ".
+**The two are the same code** -- the MCP tool shells out to this script -- so
+the disagreement was the harness, and it took a while to believe that because a
+1-byte diff at a pool word is exactly what a wrong decompilation looks like.
+
+The mechanism: `symbol_addresses()` builds its table with
+`arm-none-eabi-nm aw2bhr.elf`. Where that binary is not on PATH -- Git Bash on
+this machine, while the MCP server has it -- the table comes back EMPTY, and
+`sym_addr` then falls back to parsing the address out of the symbol's own name.
+That works for every `gUnknown_<addr>` and for nothing else. `gpKeySt` is a
+name upstream chose, so it does not resolve, so `pool_word_equivalent` cannot
+confirm the candidate's `.rodata` word, so a confirmed match is printed as a
+differing byte. Only the four functions reading `gpKeySt` failed; the two
+reading `gUnknown_020298E0` through the identical mechanism passed, which is
+what finally located it.
+
+The old docstring said a missing ELF "costs nothing beyond falling back to the
+plain symbol comparison". It is now fixed to read the addresses out of
+`aw2bhr.map` when nm gives nothing, and to WARN on stderr when both come up
+empty. **A concurrent agent rebuilding truncates `aw2bhr.map` to zero bytes for
+the length of the link, so the same failure can appear for a few minutes with
+the toolchain perfectly well installed.** If a `.rodata` near-miss shows up
+where the instruction diff is nothing but label names, check the symbol table
+before touching the C.
