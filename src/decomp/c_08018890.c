@@ -3,18 +3,14 @@
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08044BA0.
- * sub_08044BA0 @ 0x08044BA0
+ * contiguous block at 0x08018890.
+ * sub_08018890 @ 0x08018890
  */
 
-bool8 sub_08044BA0(int a1)
+bool8 sub_08018890(s16 a)
 {
-    int lo;
-
-    lo = 0xa;
-    if (a1 > 0xe)
-        return 0;
-    if (a1 < lo)
-        return 0;
-    return 1;
+    gUnknown_03002F08.unk00 = 8;
+    sub_0801A57C(gUnknown_030033EC);
+    gUnknown_0200C528[a].unk04++;
+    return TRUE;
 }

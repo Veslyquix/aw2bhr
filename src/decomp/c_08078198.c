@@ -9,17 +9,7 @@
 
 #include "proc.h"
 
-/* "Is any of these four scripts running?" Four `Proc_Find` calls, all
- * evaluated, then four branchless `(x | -x) >> 31` sequences ORed together --
- * the returned-`!=` idiom from docs/agbcc-codegen.md with K = 0.
- *
- * The operator is BITWISE `|`, not `||`. All four calls happen unconditionally
- * and there is not a single branch in the function; `||` would have
- * short-circuited and produced four compare-and-branch pairs instead. The
- * results land in r6, r4, r5, r2 in source order and are folded left to right,
- * which is the other half of the same reading. */
-
-s32 sub_08078198(void)
+bool8 sub_08078198(void)
 {
     return (Proc_Find(gUnknown_086147FC) != NULL)
          | (Proc_Find(gUnknown_0861485C) != NULL)

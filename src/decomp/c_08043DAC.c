@@ -1,0 +1,65 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08043DAC.
+ * sub_08043DAC @ 0x08043DAC, sub_08043DF4 @ 0x08043DF4, sub_08043E18 @ 0x08043E18
+ */
+
+/* Three things here are not free choices.
+ *
+ * `case 0:` sharing the `default:` label is what puts the `cmp #1; ble` low-
+ * bound test into the decision tree.  With only cases 1 and 2 agbcc's
+ * emit_case_nodes takes its "omit the branch to default if it avoids only one
+ * right child" shortcut and emits two bare equality tests -- 4 bytes short.
+ * A third case value is what makes the root's right subtree worth a bound
+ * test, and 0 is the only value that leaves the root at 1 rather than at 2.
+ *
+ * The arm ORDER is source order: default first (it is the fall-through, with
+ * no `b` in front of it), then case 1, then case 2.
+ *
+ * The return type is `int` with no `return` statement anywhere -- see the note
+ * on the declaration.  Declared `void` the epilogue becomes `pop {r0}; bx r0`
+ * instead of `pop {r1}; bx r1`, which is the last 2 bytes.
+ *
+ * The global is subscripted directly rather than bound to a `p` local; the
+ * local spelling schedules the `ldr r1, [r1]` deref after the index arithmetic
+ * instead of before it and swaps r0/r1 throughout.
+ */
+int sub_08043DAC(u8 a)
+{
+    switch (gUnknown_08499598[a].unk1e)
+    {
+    case 0:
+    default:
+        sub_0803B4EC((s16)sub_08043D84(a));
+        break;
+    case 1:
+        sub_08043DF4(gUnknown_08499598[a].unk1d);
+        break;
+    case 2:
+        sub_08043E18(gUnknown_08499598[a].unk1d);
+        break;
+    }
+}
+
+/* The parameter is dead inside the body -- see the note on the declaration.
+ * The bare `lsls r0, r0, #0x18` in front of the test is what retyped
+ * sub_08044BA0's return from `int` to `bool8` (wave 28, W28-B).
+ */
+void sub_08043DF4(int a)
+{
+    if (sub_08044BA0(a))
+        sub_0803B4EC(0x1a3);
+    else
+        sub_0803B4EC(0x1a4);
+}
+
+void sub_08043E18(int a)
+{
+    if (sub_08044BA0(a))
+        sub_0803B4EC(0x199);
+    else
+        sub_0803B4EC(0x19a);
+}
