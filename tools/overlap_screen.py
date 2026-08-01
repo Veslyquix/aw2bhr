@@ -726,7 +726,32 @@ def self_test(args):
     print("\n[self-test] block screen offers only unmatched targets: %s"
           % ("PASS (%d offered)" % len(block_offered) if not bad_status
              else "FAIL (%s)" % ", ".join(bad_status[:4])))
-    ok &= not bad_status and bool(block_offered)
+    ok &= not bad_status
+
+    # An EMPTY block screen is a legitimate state -- wave 27 promoted the last
+    # of the twelve blocks -- but it is also exactly what a broken screen looks
+    # like, so it may not simply pass. Distinguish the two the way the project
+    # distinguishes every other dry axis: drop the floor and see whether the
+    # work reappears. If it does, the screen works and the axis is exhausted AT
+    # THIS THRESHOLD; if nothing appears even at --block-min-matched 1, the
+    # screen itself is suspect.
+    #
+    # This assertion used to be `ok &= ... and bool(block_offered)` while the
+    # label above only tested `bad_status`, so the moment wave 27 emptied the
+    # last block the test printed "PASS (0 offered)" on the very line that was
+    # failing, and only the summary went red. A check whose label disagrees
+    # with its verdict is worse than no check.
+    if not block_offered:
+        probe = argparse.Namespace(**vars(args))
+        probe.block_min_matched = 1
+        deep = blocks(load_index(), probe)[1]
+        print("[self-test] block screen is EMPTY -- lowering the floor to "
+              "--block-min-matched 1 finds %d: %s"
+              % (len(deep),
+                 "PASS (screen works; the axis is exhausted at the default "
+                 "threshold, not broken)" if deep
+                 else "FAIL (nothing at any threshold -- suspect the screen)"))
+        ok &= bool(deep)
 
     missing = [p for _, _, p in block_offered
                if not p or not os.path.isfile(os.path.join(awlib.REPO, p))]
