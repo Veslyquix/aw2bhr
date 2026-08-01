@@ -124,6 +124,52 @@ def main():
     print("(%d at >= 90%%, %d at 70-90%%; re-test anything here by exit code"
           % (len(hot), len([r for r in rows if 70 <= r[0] < 90])))
     print(" before believing it -- a score is not a match)")
+    # Wave 31: the percentage counts REGISTER FIELDS. A THUMB register number
+    # shares its halfword with the opcode, so a candidate whose instruction
+    # stream is exactly right but whose allocation differs scores LOW --
+    # sub_0800C124's structurally exact rebuild measured 89.4% against the
+    # wrong-shaped draft it replaced at 92.4%. This list is therefore not a
+    # ranking of correctness, and a fix that LOWERS the number is a normal
+    # outcome, not a regression to revert.
+    print("(percent counts register fields -- a structurally EXACT candidate")
+    print(" can score below a structurally wrong one. Not a correctness rank.)")
+
+    # 4b. Permuter contamination. tools/permute.py used to strand raw
+    # header-expanded output in work/<fn>/ on abnormal exit; wave 17 fixed the
+    # bug, but the artefacts it already wrote are still in the tree and are
+    # invisible until someone opens one. Wave 31 lost time to two of them.
+    # A blob is ~50KB of expanded headers; a MUTATED draft can be normal-sized
+    # and is only findable by the permuter's injected `new_var`, so check both.
+    sect("permuter-contaminated drafts (wave 17 residue, still present)")
+    blobs, mutated = [], []
+    for p in glob.glob("work/*/*.c"):
+        try:
+            with open(p, encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            continue
+        if len(text) > 40000 and text.count("#") < 5:
+            blobs.append((len(text), p))
+        # Strip comments before looking for the injected symbol. A draft that
+        # was CLEANED of a mutation names `new_var` in the comment explaining
+        # what was removed -- sub_0800C124 does, after wave 31 rebuilt it -- and
+        # flagging that would report the fix as the defect.
+        code = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+        if re.search(r"\bnew_var\d*\b", code):
+            mutated.append(p)
+    for n, p in sorted(blobs, reverse=True):
+        print("  BLOB     %7d B  %s" % (n, p))
+    for p in sorted(mutated):
+        # The dangerous case is the WORK DRAFT being gone, not best.c: promote
+        # reads the draft, and best.c beside a good draft is merely ignorable.
+        fn = os.path.basename(os.path.dirname(p))
+        tag = "DRAFT GONE" if os.path.basename(p) == fn + ".c" else "best.c only"
+        print("  MUTATED  %-12s %s" % (tag, p))
+    print("%d blob(s), %d mutated file(s). `DRAFT GONE` means the readable C is"
+          % (len(blobs), len(mutated)))
+    print("lost and must be rebuilt from the assembly -- do not trust it as a")
+    print("starting point. `best.c only` means the draft beside it is probably")
+    print("fine; ignore the best.c. Nothing here is cleaned up automatically.")
 
     # 5. Parked queue: format, staleness, then the exit-code re-test.
     sect("parked queue re-test (exit code, not message text)")
