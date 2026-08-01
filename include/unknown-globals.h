@@ -176,7 +176,13 @@ struct Unk0200C420 /* 0xe0 */
                            * discards the result. */
     /* 0x04 */ u32 unk04; /* sub_0803BB90 is the predicate `unk04 != 0` */
     /* 0x08 */ u8 unk08; /* sub_08016A14 bumps it while bit 0 is clear */
-    /* 0x09 */ u8 filler_09[0x7];
+    /* 0x09 */ u8 filler_09[0x4];
+    /* 0x0d */ u8 unk0d; /* wave 27, W27-C: sub_0803BBA8 stores the WORD second
+                          * member of the gUnknown_0849EACC dispatch entry here
+                          * with a bare `strb`, so the field is one byte and the
+                          * table entry is not. Nothing reads it yet, so the
+                          * signedness is unsettled. */
+    /* 0x0e */ u8 filler_0e[0x2];
     /* 0x10 */ u16 unk10; /* `ldrh r0, [r4, #0x10]` in sub_0803C52C, twice, and
                            * fed straight to sub_08037DA4, which bands it into
                            * 2..5 at 0xc7 / 0xf9 / 0x117. A monotone counter of
@@ -764,7 +770,8 @@ union Unk802C57CBuf
 
 struct Unk03003FC0 /* 0x47 */
 {
-    /* 0x00 */ u8 filler_00[0x01];
+    /* 0x00 */ u8 unk00; /* wave 27, W27-C: sub_0803BDBC sets it to 1 with a
+                          * bare `strb` on the base register. Width only. */
     /* 0x01 */ u8 unk01; /* a mode selector written immediately before a
                           * Proc_Start on tree 3, once per mode: 1 by
                           * sub_0803BADC, 2 by sub_0803BA00, 3 by
@@ -793,7 +800,12 @@ struct Unk03003FC0 /* 0x47 */
                           * `unk32 == 0 && unk0d == 0`, then reuses the loaded
                           * zero to clear gUnknown_03004074 -- a second mode
                           * flag beside unk32, not part of the filler. */
-    /* 0x0e */ u8 filler_0e[0x1e];
+    /* 0x0e */ u8 filler_0e[0x1a];
+    /* 0x28 */ u32 unk28; /* wave 27, W27-C: sub_0803BD78 arms it with 1000
+                           * (`movs r0,#0xfa; lsls r0,#2`) through a whole-word
+                           * `str` at a displacement `strb` could not reach --
+                           * so a word, not four bytes of filler. Signedness
+                           * unsettled; nothing reads it yet. */
     /* 0x2c */ u8 unk2c; /* sub_08035CF4 returns whether it equals 1 */
     /* 0x2d */ u8 unk2d; /* set to 0/1/2 by sub_08035558/sub_08035538/sub_08035548 */
     /* 0x2e */ u8 unk2e; /* plain `ldrb`, reached through the same
@@ -803,7 +815,13 @@ struct Unk03003FC0 /* 0x47 */
                           * sub_0802CF6C hands it to sub_080344F0 as that
                           * function's only argument, guarded by unk32 -- so it
                           * is the payload of whatever mode unk32 selects. */
-    /* 0x2f */ u8 filler_2f[0x03];
+    /* 0x2f */ u8 unk2f; /* wave 27, W27-C: sub_0803BD78 clears unk2c and then
+                          * unk2e, unk2f, unk30, unk31 through four `adds r0,#1`
+                          * steps on one address register, which is what four
+                          * separate byte fields emit (each displacement is past
+                          * `strb`'s 5-bit range from the struct base). */
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 unk31;
     /* 0x32 */ u8 unk32;
     /* 0x33 */ u8 filler_33[0x05];
     /* 0x38 */ u8 unk38[0x05]; /* A byte array, not a scalar: sub_08018C0C
@@ -5529,5 +5547,241 @@ extern const struct ProcCmd gUnknown_0848A1EC[];
  * spelling reproduces that function exactly, including the `ldr r1, [r1]`
  * reload before the second field -- the pool word's address is what stays live
  * in r1, so each use re-loads the object address from it. Wave 26, W26-C. */
+
+/* ------------------------------------------------------------------ *
+ * Wave 27, W27-B: address-locality block 0x08013                      *
+ * ------------------------------------------------------------------ */
+
+/* The proc script sub_080130DC starts, and the ROM names the proc's own
+ * callback: the words are {0x00000011, 0, 0x00000004, 0x0801311D, 0x0000000E,
+ * 0}, which as ProcCmds is PROC_CMD_END_IF_DUP, then PROC_CMD_ONEND with
+ * dataPtr 0x0801311D (&sub_0801311C with the THUMB bit set), then
+ * PROC_CMD_SLEEP. That is what ties the two together: sub_080130DC stores three
+ * halfwords at +0x64/+0x66/+0x68 of the proc it starts here, and sub_0801311C
+ * is the ONEND handler that reads +0x68 back as an `ldrsh`. */
+extern const struct ProcCmd gUnknown_0848936C[];
+
+/* A word table of proc-script POINTERS, not a script itself: the first three
+ * words are 0x084893DC, 0x084893F0 and 0x08489404, all inside the 0x08489
+ * proc-script run, and the fourth is 0. sub_08013338 indexes it by words and
+ * stores the word whole at +0x4c of the proc it just started, so the elements
+ * are `const struct ProcCmd *` -- the same reasoning as gUnknown_086147FC's
+ * neighbours. */
+extern const struct ProcCmd *gUnknown_0848950C[];
+
+/* The proc script sub_08034CD4 starts on tree 3. ProcCmds: {ONEND, 0,
+ * 0x08034F8D}, {CALL, 0, 0x08034F7D}, {CALL, 0, 0x0803ED55}. */
+extern const struct ProcCmd gUnknown_0849F790[];
+
+/* A byte flag sub_08013580 tests against the literal 1 before re-uploading the
+ * whole gPal shadow to palette RAM -- a "palette is dirty" latch. Plain
+ * `ldrb`, and nothing sign-extends or arithmetically compares it, so `u8`. */
+extern u8 gUnknown_03000048;
+
+/* ------------------------------------------------------------------ *
+ * Wave 27, W27-B: address-locality block 0x0803C                      *
+ * ------------------------------------------------------------------ */
+
+/* A ROM dispatch table of 24-byte rows. The stride is measured, not assumed:
+ * sub_0803C864 indexes it `((a << 1) + a) << 3`. Two members are readable,
+ * and the ROM names the callee outright -- the words of row 0 are
+ * {0x0AEE0014, 0x000003E8, 0x0803C40D, 0x0803CBA1, 0x00000020, 0x084C2F88}
+ * and of row 1 {0x0AEF0014, 0x00001388, 0x0803C435, 0x0803CBA1, 0x00000028,
+ * 0x084C2FB8}. 0x0803CBA1 is &sub_0803CBA0 with the THUMB bit set, and
+ * sub_0803CBA0 is already declared `void (int, int)`, which is exactly how
+ * sub_0803C864 calls through unk0c: `f(row->unk10, 1)`, a two-argument
+ * indirect call (`bl _call_via_r2`, and the register index counts the
+ * arguments). unk10 is 0x20 / 0x28, i.e. the bit ids sub_0803CBA0's third
+ * range accepts.
+ *
+ * unk08 is a second callback (0x0803C40D / 0x0803C435) and unk14 a ROM
+ * pointer (0x084C2F88 / 0x084C2FB8), but nothing matched reads either, so
+ * they stay in the filler rather than being guessed at. */
+struct Unk0849EDB0 /* 0x18 */
+{
+    /* 0x00 */ u8 filler_00[0x0c];
+    /* 0x0c */ void (*unk0c)(int, int);
+    /* 0x10 */ int unk10;
+    /* 0x14 */ u8 filler_14[0x04];
+};
+extern const struct Unk0849EDB0 gUnknown_0849EDB0[];
+
+/* 0x08091140 is NOT a global -- do not declare one. It is agbcc's own
+ * -fforce-addr address-constant pool, the same case as 0x0808E558: the word
+ * there is 0x02000000, i.e. &gUnknown_02000000, and its neighbours are
+ * 0x08499590, 0x030033EC and 0x03003F2C, a run of the ADDRESSES of other
+ * globals. sub_0803CF04 reads it as `ldr r4, =0x08091140; ldr r1, [r4]` and
+ * then RE-LOADS `ldr r1, [r4]` for the second use, which is the two-level
+ * -fforce-addr pattern -- the pool word's address is what stays live, so each
+ * use reloads the object address from it. The honest `gUnknown_02000000`
+ * spelling reproduces both loads. Its sibling sub_0803CF3C names the same
+ * object once and gets the ordinary one-level `ldr r0, =gUnknown_02000000`,
+ * which is the whole difference between the two forms: how many uses. */
+
+/* ------------------------------------------------------------------ *
+ * Wave 27, W27-B: address-locality block 0x08037                      *
+ * ------------------------------------------------------------------ */
+
+/* A gUnknown_03001470 script blob: sub_08037D64 is
+ * `sub_080152EC(gUnknown_0849D53C, 0)->unk1e = a`, the same instruction stream
+ * as sub_08017688 with this pool word in place of gUnknown_0848A1EC.
+ * `const u8 []` for the gUnknown_0849A0F0 reason -- nothing indexes it and
+ * sub_080152EC takes `const void *`.
+ *
+ * NOTE on gUnknown_0848A1EC, which the sub_08017688 comment types
+ * `const struct ProcCmd []`: the ROM does NOT support that, and this blob is
+ * the counter-example. The four words at 0x0849D53C are
+ * {0x080375BD, 0x00020000, 0, 0x00000001} -- word 0 is &sub_080375BC with the
+ * THUMB bit set, i.e. a callback in the FIRST word, where struct ProcCmd would
+ * put {s16 opcode, s16 dataImm}. Read as ProcCmd that is opcode 0x75BD, which
+ * is not in proc.h's enum. gUnknown_0848A1EC's words {0, 0x001E001E,
+ * 0x0803B5E9, 0x00020000} read as ProcCmd give entry 0 = PROC_END, which would
+ * make the script a no-op. Both are 16-byte {callback, flags, ptr, imm}
+ * records of the gUnknown_03001470 subsystem, not proc scripts. The typing is
+ * byte-neutral (both reach a `const void *` parameter), so nothing catches it;
+ * flagged rather than changed, since sub_08017688 is already promoted. */
+extern const u8 gUnknown_0849D53C[];
+
+/* Two proc scripts sub_08037124 hands to Proc_EndEach. Genuine ProcCmds, and
+ * the ROM words prove it here: 0x0855379C is {opcode 0x0E SLEEP, dataImm 1,
+ * dataPtr 0} then {opcode 0x02 CALL, dataImm 0, dataPtr 0x080531D5}. */
+extern const struct ProcCmd gUnknown_0855379C[];
+/* A gUnknown_03001470 blob, NOT a proc script: sub_08037124 hands it to
+ * sub_0801537C(const void *), the stopper half of the start/stop pairing
+ * documented at gUnknown_0849A108. Its words are {0x08053435, 0x00020000,
+ * 0x080534A1, 0x00010000, ...}, i.e. THUMB callbacks in word 0 of each 8-byte
+ * record -- the same non-ProcCmd shape as gUnknown_0849D53C above. `const u8 []`
+ * as the weakest model that gives the clean pool word. */
+extern const u8 gUnknown_08553820[];
+
+/* An LZ77 blob: sub_08037150 is `Decompress(gUnknown_08124478, dst)`, and the
+ * ROM header word 0x00048010 is the LZ77 (type 0x10) marker with an
+ * uncompressed size of 0x480. `u8 []` and non-const because Decompress's first
+ * parameter is a plain `u8 *`. */
+extern u8 gUnknown_08124478[];
+
+/* A small ROM byte table sub_080375A4 indexes with its own u8 parameter and
+ * hands to sub_08037448 -- `adds r0, r0, r1; ldrb r0, [r0]`, so `u8` elements.
+ * The first eight bytes are 00 01 07 02 07 00 00 00; the words that follow at
+ * 0x08090EF8 are agbcc's own -fforce-addr address pool (0x03003F68,
+ * &gUnknown_08499598, ...), which is what bounds the table's size. */
+extern const u8 gUnknown_08090EF0[];
+
+/* A whole-word scratch slot in the 0x08037 palette-cycling code, and it is
+ * already in aw2bhr.lds. sub_08037750 stores its argument here with a plain
+ * `str`; sub_08037790 reads it back with `ldr` and computes
+ * `unk * 0x20 + 0x1c` as a palette byte offset. Word-wide both ways, so `int`
+ * is the weakest fit -- nothing sign-extends or compares it. */
+extern int gUnknown_0300057C;
+
+/* Two palette blobs, and they are CONTIGUOUS: 0x081253F0 + 0x20 = 0x08125410.
+ * sub_08037750 hands 081253F0 to ApplyPaletteExt(u16 *, u32, u16) for 0x20
+ * bytes, so `u16 []` and non-const (ApplyPaletteExt takes a plain pointer).
+ * 08125410 is the cycling table behind it: sub_08037790 adds a BYTE offset of
+ * `(gUnknown_03004008 & 0x3c) >> 1` to it and hands it to sub_0801368C for 2
+ * bytes, i.e. one colour picked by a 16-phase frame counter. `u16 []` for the
+ * same consumer reason; the byte-offset arithmetic is spelled through a
+ * `(u8 *)` cast at the one call site because the ROM shifts by 1, not 2. */
+extern u16 gUnknown_081253F0[];
+extern u16 gUnknown_08125410[];
+
+/* --- the 0x0803B block (wave 27, W27-C) ---------------------------------- */
+/* An 8-byte dispatch table: sub_0803BBA8 indexes it with gUnknown_030033FC
+ * (`lsls #3`), calls the word at +0 through `_call_via_r3` with no arguments,
+ * and `strb`s the word at +4 into gUnknown_0200C420.unk0d. The stride is read
+ * off the shift and is not a guess; the second member being a full word is
+ * read off the `ldr`, and the truncation to a byte happens at the store. */
+struct Unk849EACC
+{
+    /* 0x00 */ void (*unk00)(void);
+    /* 0x04 */ int unk04;
+};
+extern const struct Unk849EACC gUnknown_0849EACC[];
+/* The script sub_0803BA4C starts on tree 3 after setting
+ * gUnknown_03003FC0.unk01 = 1 -- the same shape as the 0849EBBC / 0849EC1C /
+ * 0849ECE0 starters listed above, with 1 as its mode constant. */
+extern const struct ProcCmd gUnknown_0849EB34[];
+
+/* --- the sub_08036B34 / AgbMain unit (wave 27, W27-C) --------------------- */
+/* All four of the RAM cells below are cleared by sub_08036B4C's boot reset and
+ * every write there is a bare 0, which fixes only the WIDTH, never the
+ * signedness. Each carries the weakest type its width allows. */
+/* Whole word (`str`). sub_08000DA8 and sub_08001038 also write it -- the
+ * comment on sub_0801F00C in unknown-functions.h describes sub_08001038 as
+ * "raising" it, so a level/counter rather than a pointer. */
+extern int gUnknown_030040A0;
+/* One byte (`strb`). */
+extern u8 gUnknown_03004094;
+/* Whole word. sub_08022064 reads it back with `ldr` and tests it against a
+ * value, so a word and not a narrower cell. */
+extern int gUnknown_03003330;
+/* Halfword (`strh`); sub_0802BC40 is the other writer. No signed reader. */
+extern u16 gUnknown_030033F0;
+/* Three EWRAM/IWRAM regions AgbMain hands to other subsystems as bare
+ * addresses and never dereferences itself: gUnknown_02003000 is the 0x8000-byte
+ * buffer it passes to sub_08014DA8, and gUnknown_02000000 / gUnknown_03003064
+ * are arguments 3 and 5 of sub_0801A79C. `u8 []` is the weakest spelling that
+ * makes the address available; NOTHING here settles an element type. */
+extern u8 gUnknown_02000000[];
+extern u8 gUnknown_02003000[];
+extern u8 gUnknown_03003064[];
+/* The proc script sub_08036C2C starts on PROC_TREE_3. */
+extern const struct ProcCmd gUnknown_08553754[];
+
+/* ---- wave 27 (W27-A) ---- */
+
+/* The m4a sound driver's XCMD dispatch table. sub_080717C4 (`ply_xcmd` in the
+ * Fire Emblem decomps, on the shared Intelligent Systems engine) fetches one
+ * byte from the track's command cursor, scales it by 4 and `ldr`s a function
+ * pointer out of this table, then calls it through `_call_via_r2` -- so the
+ * entries are `void (*)(mplay, track)` and the index is a plain byte.
+ * `const` because it is ROM and nothing writes it. */
+extern void (*const gUnknown_081BA00C[])(void *, void *);
+
+/* A single RAM function pointer, NOT a table: sub_080717E4 is
+ * `ldr r2,=gUnknown_03005740; ldr r2,[r2]; bl _call_via_r2`, i.e. one load of
+ * the pointer VALUE with no index. Two arguments, off the `_call_via_r2`
+ * register index, and both are this wrapper's own parameters passed through
+ * untouched, so neither is typed by anything here. Already bound at
+ * 0x03005740 by aw2bhr.lds, so this only declares it. */
+extern void (*gUnknown_03005740)(void *, void *);
+
+/* Two 0x20-byte ROM palettes, one 16-colour bank each, and NOT proc scripts --
+ * see the sub_08071B28 note in unknown-functions.h, which is where the
+ * mis-reading was. Each is CpuSet 0x10 halfwords into &gPal[a * 16] by
+ * sub_08071C84 / sub_08071CA4, and handed to sub_08071B28 as the value it
+ * stashes at the fade record's +0x20. `const u16 []` is the weakest model that
+ * fits: 16 colours is what the 0x10-halfword count says, and nothing indexes
+ * either symbol. */
+extern const u16 gUnknown_08613F54[];
+extern const u16 gUnknown_08613F74[];
+
+/* ROM blob handed straight to sub_0801BD00's `void *` third parameter by
+ * sub_08011704, with no arithmetic -- the same slot, and the same reasoning,
+ * as gUnknown_0849957C and the other entries that note names. */
+extern const u8 gUnknown_0848930C[];
+
+/* ROM blob handed to sub_080152EC as its `const void *` first argument by
+ * sub_08012FB8, with the literal 0 second argument -- the same install shape as
+ * gUnknown_0849D41C and the rest of that group. */
+extern const u8 gUnknown_08489354[];
+
+/* Five more halfword IWRAM cells, all of them `strh`-only so far and all of
+ * them addressed by aw2bhr.lds already.
+ *
+ * gUnknown_03000042 sits between the two named neighbours gUnknown_03000040
+ * and gUnknown_03000044, and sub_0801220C copies gUnknown_03000044 into it
+ * with a plain `ldrh`/`strh` pair -- so it is the same width as its source and
+ * a snapshot of it, not a third member of an aggregate (three separate pool
+ * words, the same reading gUnknown_03000044/46 already carry).
+ *
+ * The other four are only ever CLEARED, by that one function, so nothing here
+ * settles their signedness or what they count -- `u16` is the store width and
+ * no more. Flagged rather than claimed. */
+extern u16 gUnknown_03000042;
+extern u16 gUnknown_03001FD0;
+extern u16 gUnknown_030024C8;
+extern u16 gUnknown_03002F04;
+extern u16 gUnknown_030030B0;
 
 #endif // UNKNOWN_GLOBALS_H

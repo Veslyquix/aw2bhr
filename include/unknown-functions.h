@@ -1436,7 +1436,21 @@ void sub_0803CEAC(void);
 void sub_08010FE0(void);
 void sub_08011018(void);
 void sub_080116E8(void);
-void sub_08011C68(const void *, void *, int);
+/* THIRD PARAMETER RETYPED int -> u16 in wave 27, when the definition was
+ * promoted. It is not a byte-neutral choice and the probe blind-spot warning
+ * does NOT apply here -- `int` plus a `(u16)` cast at each use is a visibly
+ * different function. With u16, PROMOTE_MODE's `lsls r2,#0x10` is emitted once
+ * and every use folds its `lsrs #0x10` away: the `& 0x1f` test happens in the
+ * shifted domain against 0x1f0000 (`movs #0xf8; lsls #0xd`), and `/2` and `/4`
+ * come out as a bare `lsrs #0x11` / `#0x12`. With `int` the mask is a plain
+ * imm8 AND that clobbers r1, which costs the dst pointer a spill into r4 and
+ * turns `push {lr}` into `push {r4, lr}` -- 8 bytes and a different prologue.
+ * sub_08011C90 follows its sibling; its own body is byte-identical either way.
+ * Re-verified afterwards: the matched caller src/decomp/c_08023360.c, whose
+ * `((u16)sub_080261A0() & 0x3ff) * 0x20` argument is the only non-constant one
+ * in the ROM, still matches -- shorten_binary_op keeps that multiply in HImode
+ * so the narrowing conversion is free. */
+void sub_08011C68(const void *, void *, u16);
 void sub_080128D0(void);
 void sub_0801A57C(u16);
 void sub_08022A34(void);
@@ -2664,7 +2678,7 @@ int sub_0800977C(int, int);
  * (`lsls r2,#0x10; lsrs r2,#0x12`, i.e. (u16)n / 4), so it is NOT a narrow
  * parameter; `pop {r0}`, so void. Where sub_08011C68 picks CpuSet or
  * CpuFastSet on `n & 0x1f`, this one is unconditional. */
-void sub_08011C90(const void *, void *, int);
+void sub_08011C90(const void *, void *, u16);
 
 /* ---- wave 15 (C): callees of the four gUnknown_08499590 screen readers ----
  *
@@ -3499,5 +3513,275 @@ void sub_0801F2AC(int, u16 *);
 void sub_08004C10(void);
 void sub_08004C5C(void);
 int sub_08004E44(void);
+
+/* ------------------------------------------------------------------ *
+ * Wave 27, W27-B: the 0x0803C block                                   *
+ * ------------------------------------------------------------------ */
+
+/* The two upper ranges of sub_0803CBA0's three-way bit-id dispatch, the same
+ * family as the promoted sub_0803C8F0. The second parameter arrives
+ * `lsls #0x18; lsrs #0x18` at both call sites, so `u8`; the first is the
+ * biased id (`id - 0x60`, `id - 0x20`) with no narrowing on it at all, so
+ * `u32` to agree with sub_0803C8F0 and sub_0803CA70. */
+void sub_0803C9D4(u32, u8);
+void sub_0803CA00(u32, u8);
+
+/* The bottom range of that same dispatch, matched in wave 27. Neither
+ * parameter is narrowed -- sub_0803CBA0 forwards both registers untouched,
+ * which is what separates it from the two above. The bit index is used BOTH as
+ * `id >> 3` (arithmetic `asrs`, so signed) and as the shift count of
+ * `1 << id`, un-masked, exactly as in the promoted reader sub_0803CB74. */
+void sub_0803CB40(int, int);
+
+/* Matched in wave 27. `u8` return: sub_0803CC64 re-narrows the result
+ * `lsls #0x18; lsrs #0x18` before comparing it against the 0xff empty-slot
+ * sentinel, and agbcc only emits that for a narrow-returning callee. The
+ * parameter is `u16` from the `lsls #0x10; lsrs #0x10` the caller applies to
+ * its own parameter before the `bl`. */
+u8 sub_0802490C(u16);
+
+/* The promoted string copier in src/decomp/c_0803CC84.c, declared here so
+ * sub_0803CCB8 can call it. */
+void sub_0803CC84(u8 *, const u8 *);
+
+/* sub_0803CF04's two callees. sub_0801AC58's first parameter is `u8` -- the
+ * caller computes `a + 5` and then narrows `lsls #0x18; lsrs #0x18` before the
+ * `bl`, which is the callee's width showing through. sub_0803D2F8's first is
+ * sub_0803CF04's own second parameter forwarded with nothing done to it. Both
+ * second parameters are &gUnknown_02000000. */
+void sub_0801AC58(u8, u8 *);
+void sub_0803D2F8(int, u8 *);
+void sub_0803D238(u8 *);
+
+/* Matched in wave 27. The first parameter is `u8` (`lsls #0x18; lsrs #0x18`
+ * in the prologue, in place on r0); the second is never touched -- it is
+ * forwarded straight to sub_0803D2F8 -- and sub_0803CF3C is a pass-through
+ * wrapper for the pair, so its arity is read off THIS prologue, which does
+ * read r1. */
+void sub_0803CF04(u8, int);
+
+/* ------------------------------------------------------------------ *
+ * Wave 27, W27-B: callees of the 0x08037 block that had no prototype  *
+ * ------------------------------------------------------------------ */
+
+/* Nullary and result-discarding, all read off their own call sites in
+ * sub_08037124 / sub_08037750 / sub_08037E64: the call is a bare `bl` with no
+ * argument register set up before it and nothing reads r0 after it, and each
+ * caller's own epilogue is the void `pop {r0}; bx r0`. */
+void sub_080169E8(void);
+void sub_08036B34(void);
+void sub_0803D6B8(void);
+void sub_08037DC8(void);
+
+/* sub_080375A4 is `sub_08037448(gUnknown_08090EF0[a])` -- the argument arrives
+ * already zero-extended by the `ldrb` of the table read, so nothing in the
+ * caller fixes the width and `int` is the weakest fit. The result is
+ * discarded (sub_080375A4 ends `pop {r0}; bx r0`). */
+void sub_08037448(int);
+
+/* Matched in wave 27. `u8` and not `int`: the `lsls #0x18; lsrs #0x18` is in
+ * the prologue operating on r0 IN PLACE, which is PROMOTE_MODE narrowing a
+ * sub-word parameter, not a cast at a use (that would copy first). Its one
+ * caller sub_08037E64 passes gUnknown_03003FC0.unk01, itself a `u8`. */
+void sub_080375A4(u8);
+
+/* The three arms of sub_080375D4's `switch (p->unk1e++ & 0x3f)`, each called as
+ * `f(p->unk18)`. struct Unk03001470's unk18 is already `int`, so these agree
+ * with it; the results are discarded. */
+void sub_0801B6EC(void *);
+void sub_0801B6FC(void *);
+void sub_08037A78(int);
+
+/* The two halves of sub_08037638. sub_08037610 stashes its argument at
+ * +0x18 of a fresh gUnknown_03001470 slot (see that struct's unk18 note), and
+ * sub_08037638 hands it `a + ((c & 0x3ff) << 5)`. sub_0803768C then takes
+ * sub_08037638's four arguments unchanged and untouched -- no narrowing on
+ * either side, so all four are word-wide. */
+void sub_08037610(int);
+void sub_0803768C(int, int, int, int);
+
+/* Same shape as ApplyPaletteExt, and sub_08037790 is its only readable call
+ * site: a palette source, a byte offset and a byte count. The offset is
+ * `gUnknown_0300057C * 0x20 + 0x1c` narrowed `lsls #0x10; lsrs #0x10` at the
+ * call, which is where the `u16` comes from -- an `int` parameter would leave
+ * the shift pair out. The count is the literal 2. */
+void sub_0801368C(u16 *, u16, u16);
+
+/* sub_08037FB4 is `sub_08049F08(1, parent)`. gUnknown_0849F4B4's note already
+ * records that sub_08049F08 Proc_StartBlocking's a script and forwards its own
+ * parent, which is what fixes the second parameter; the first is the literal 1
+ * selecting among scripts. The result is discarded. */
+void sub_08049F08(int, ProcPtr);
+
+/* --- the 0x08044 block (wave 27, W27-C) ---------------------------------- */
+
+/* Returns a byte: sub_080448E4 re-narrows the result with `lsls #0x18;
+ * lsrs #0x18` before storing it, which agbcc only emits for a narrow-returning
+ * callee. Declared without a prototype -- the two arguments it is passed there
+ * are gUnknown_030033EC (u16) and the literal 1, and neither settles a
+ * declared parameter type. */
+u8 sub_0805C290();
+
+/* The sub_08029088 twin: sub_08044968 passes it the same pair of
+ * gUnknown_08499594 bytes, in the same registers, with no narrowing in
+ * between -- so the same (s16, s16) that sub_08029088 already carries. */
+void sub_0806AA80(s16, s16);
+
+/* --- the 0x0803B block (wave 27, W27-C) ---------------------------------- */
+
+/* Already DEFINED in src/decomp with these exact signatures; they simply had
+ * no declaration because nothing outside their own file called them until
+ * this block. Copied from the definitions, not invented:
+ *   src/decomp/c_08016E74.c, c_08017688.c, c_08034334.c, c_08038690.c,
+ *   c_0803B83C.c, c_0803B8C4.c, c_080846F4.c. */
+void sub_08016E74(void);
+void sub_08017688(u16);
+void sub_08034334(void);
+void sub_08034338(void);
+void sub_08038690(int);
+void sub_0803B83C(void);
+void sub_0803B8C4(void);
+u8 sub_080846F4(void);
+
+/* sub_0803BA1C takes nothing and returns nothing anybody reads: sub_0803BA4C
+ * calls it first with no argument register set up and discards r0. */
+void sub_0803BA1C(void);
+
+/* Three function addresses, in r0/r1/r2, all pool words -- sub_0803B874 is
+ * nothing but the call. Declared WITHOUT a prototype: the three are
+ * sub_08034334, sub_08034338 and sub_0803B83C, all `void (void)`, but that is
+ * what this ONE call site passes and not evidence about the parameter types. */
+void sub_08012FB8();
+
+/* --- the sub_08036B34 / AgbMain unit (wave 27, W27-C) --------------------- */
+
+/* sub_08036B48 IS A FUNCTION and the index does not know it. The index gives
+ * sub_08036B34 a size of 24, but its body plus its one pool word only reach
+ * 0x08036B48; the remaining four bytes are `b .` and two of alignment padding.
+ * AgbMain reaches them with `bl _08036B48` -- a CALL, not a branch -- so this
+ * is a separate two-byte `for (;;) ;` function that got folded into its
+ * neighbour's extent because it has no symbol. It is defined in the unit's own
+ * source, immediately after sub_08036B34, which is what puts it at that
+ * address. */
+void sub_08036B48(void);
+
+/* Plain `void (void)` leaves of the boot/reset unit; each is called with no
+ * argument set up and its result discarded. */
+void sub_0801F018(void);
+void sub_08036A50(void);
+void sub_08036AB8(void);
+void sub_08036B28(void);
+void sub_08036B34(void);
+void sub_08036C08(void);
+void sub_08036C4C(void);
+void sub_08036E18(void);
+void sub_08036E54(void);
+void sub_0801BABC(void);
+void sub_080128C4(void);
+void sub_0801B6BC(void);
+void sub_0803486C(void);
+void sub_08034848(void);
+void sub_0801BCE0(void);
+void sub_08015544(void);
+void sub_08011C18(void);
+void sub_08011A84(void);
+void sub_080191B0(void);
+void sub_08015184(void);
+void sub_08010F94(void);
+void sub_08013434(void);
+void sub_0801F4A4(void);
+void sub_0801295C(void);
+void sub_0803B688(void);
+
+/* sub_08080F90 takes one argument; AgbMain's chain passes the literal 0. */
+void sub_08080F90(void);
+
+/* Returns a value AgbMain compares against -1, so at least `int` wide and
+ * SIGNED at the comparison. Declared WITHOUT a prototype because the two
+ * arguments AgbMain passes (a buffer address and 0x8000) do not settle their
+ * declared types and a wrong prototype would be a claim, not a contract. */
+int sub_08014DA8();
+
+/* Declared without prototypes for the same reason -- the argument shapes are
+ * read off AgbMain's call sites only:
+ *   sub_0801A79C  five arguments, the fifth on the stack (two function
+ *                 addresses, a buffer, the literal 2, a second buffer).
+ *   sub_080129D4  one wide argument (the literal 0x0A6B99CD).
+ *   sub_0801BB00  (index, handler) -- see gUnknown_030040D0's note above.
+ *   sub_08016B2C / sub_08016A54  taken only as addresses, never called here. */
+void sub_0801A79C();
+void sub_080129D4();
+void sub_0801BB00();
+void sub_08016B2C();
+void sub_08016A54();
+void sub_080366F4(void);
+
+/* The BIOS-style reset entry at 0x0808AAD4, already named in the assembly.
+ * sub_08036CB4 passes 0xFE, which is a RegisterRamReset-shaped flag word, so
+ * it takes an argument; the width is not settled beyond "fits in r0". */
+void SoftReset(int);
+
+/* ---- wave 27 (W27-A) ---- */
+
+/* The BIOS block-copy SWI. Undeclared until this wave even though the
+ * sub_08011C58 note far above was already written against it -- nothing that
+ * CALLS it had been promoted. Signature copied from CpuFastSet, which the same
+ * BIOS group declares, rather than re-derived. */
+void CpuSet(const void *, void *, u32);
+
+/* sub_08071AF0 / sub_08071B0C's shared worker, read off its own body:
+ *     sub_08071B28(pal, index, b, parent)
+ * Proc_Starts gUnknown_08613E54 under `parent`, takes the 0x30-byte
+ * gUnknown_0202F2DC record at `index`, CpuSets 0x10 halfwords of
+ * &gPal[index * 16] INTO that record -- a backup, not a load -- then stores
+ * &gPal[index * 16] at the record's +0x24 and `pal`, its own FIRST argument, at
+ * +0x20.
+ *
+ * THIS REFUTES the wave-20 note on sub_08071B0C above, which read that first
+ * argument as the proc script. The script is gUnknown_08613E54 and it is
+ * hard-coded in sub_08071B28's own literal pool; the first argument is ROM
+ * PALETTE DATA. The confirming reader is wave 27's sub_08071C84 /
+ * sub_08071CA4, which CpuSet the very same two symbols the other way -- out of
+ * ROM and into &gPal[a * 16] -- which no proc script would survive. The two
+ * front-ends' `(int, int, ProcPtr)` signatures are untouched by this and stay
+ * as they are: neither of them ever sees the palette, they only load its
+ * address into r0 on the way past.
+ *
+ * Returns the record (`adds r0, r4, #0` at the end). Both front-ends discard it
+ * with `pop {r0}`, so nothing here pins the pointee and `void *` is the
+ * weakest type that fits. */
+void *sub_08071B28(const void *pal, int index, int b, ProcPtr parent);
+
+/* The setter gUnknown_03002FA0's note in unknown-globals.h already names:
+ * sub_0801BB00(slot, handler). The second parameter is an opaque `void *` on
+ * the same evidence as sub_08011AAC's -- sub_08012A54 hands it that function's
+ * own untyped pass-through parameter and does nothing else with it, so no data
+ * type could describe it. */
+void sub_0801BB00(int, void *);
+
+/* All `void (void)`, all called as bare statements with no argument register
+ * read. sub_08010FA0, sub_08012A24, sub_080122EC and sub_08013324 are the
+ * display-shadow resets promoted in src/decomp; sub_0803DDF4 is still asm and
+ * its prologue reads no parameter. */
+void sub_08010FA0(void);
+void sub_08012A24(void);
+/* Types copied from the definition in src/decomp/c_0801224C.c, not re-derived.
+ * sub_0801220C is its first cross-file caller and passes two literals, which is
+ * byte-identical at any width and so adds no evidence either way. */
+void sub_0801224C(u16, u16);
+void sub_080122EC(void);
+void sub_08013324(void);
+void sub_0803DDF4(void);
+
+/* The two window/blend openers promoted in src/decomp/c_08071CF4.c and
+ * c_08071DB4.c. Each takes the proc it seeds, and wave 27's sub_08071E80 /
+ * sub_08071EB8 are the first cross-file callers either has ever had -- they
+ * forward their own r0 untouched. The tags are FORWARD-DECLARED and left
+ * incomplete on purpose: the two definitions complete them privately in their
+ * own translation units, and a pass-through caller never needs the layout. */
+struct Unk08071CF4;
+struct Unk08071DB4;
+void sub_08071CF4(struct Unk08071CF4 *);
+void sub_08071DB4(struct Unk08071DB4 *);
 
 #endif // UNKNOWN_FUNCS_H

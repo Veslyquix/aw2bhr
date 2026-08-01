@@ -1,0 +1,15 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08037638.
+ * sub_08037638 @ 0x08037638
+ */
+
+void sub_08037638(int a, int b, int c, int d)
+{
+    sub_08011B34((void *)sub_08037790);
+    sub_08037610(a + ((c & 0x3ff) << 5));
+    sub_0803768C(a, b, c, d);
+}

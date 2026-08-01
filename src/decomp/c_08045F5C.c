@@ -1,0 +1,19 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08045F5C.
+ * sub_08045F5C @ 0x08045F5C
+ */
+
+/* Two separate `bl`s with the same second argument, so an if/else and not a
+ * ternary over the first. sub_0803CBD8 returns `int` and its result is tested
+ * whole (`cmp r0,#0` with no narrowing shift). */
+void sub_08045F5C(void)
+{
+    if (sub_0803CBD8(0x60))
+        sub_0803CBA0(0x22, 1);
+    else
+        sub_0803CBA0(0x21, 1);
+}

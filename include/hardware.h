@@ -535,6 +535,16 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define REG_DMA3CNT_L (*(vu16 *)(REG_BASE + REG_OFFSET_DMA3CNT_L))
 #define REG_DMA3CNT_H (*(vu16 *)(REG_BASE + REG_OFFSET_DMA3CNT_H))
 
+// Keypad and waitstate control. AgbMain reads KEYINPUT once at boot as
+// `~REG_KEYINPUT & 0x3FF` (`ldrh`, then `adds r0, r3, #0; bics r0, r1` from a
+// 0x3FF pool word) and writes WAITCNT the literal 0x45B4. Both are reached by
+// a bare cast in the ROM -- there is no RAM shadow for either.
+#define REG_OFFSET_KEYINPUT 0x130
+#define REG_KEYINPUT (*(vu16 *)(REG_BASE + REG_OFFSET_KEYINPUT))
+
+#define REG_OFFSET_WAITCNT 0x204
+#define REG_WAITCNT (*(vu16 *)(REG_BASE + REG_OFFSET_WAITCNT))
+
 // Timers. sub_0802ECEC arms timer 3 with a reload of -n and 0xc3
 // (enable | irq | 1024-cycle prescaler).
 #define REG_OFFSET_TM0CNT_L 0x100

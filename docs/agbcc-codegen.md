@@ -12553,3 +12553,423 @@ return 0;
 ```
 
 A forward branch to a label that a later fall-through also reaches is the tell.
+
+## `x & 0xFF` is NOT `(u8)x`, and the difference is six bytes (wave 27, W27-A)
+
+On a value that arrived as a **declared-narrow parameter**, the two spellings of
+the same byte extraction compile differently, because agbcc reaches them from
+opposite directions.
+
+`sub_08011704(u16 a, u16 b, u16 c)` passes `b & 0xFF` and the ROM has:
+
+    adds r4, r1, #0
+    lsls r4, r4, #0x10        @ PROMOTE_MODE's first half, kept live
+    ...
+    movs r1, #0xff
+    lsls r1, r1, #0x10        @ the mask, moved into the SHIFTED domain
+    ands r1, r4
+    lsrs r1, r1, #0x10
+
+Spelled `(u8)b` instead, the same function emits `lsls r1, r1, #0x18; lsrs r1,
+r1, #0x18` — two instructions against five, six bytes shorter, and no match.
+
+The mechanism: PROMOTE_MODE zero-extends a `u16` parameter as `lsls #16; lsrs
+#16`. Written `& 0xFF`, combine keeps the `lsls #16` and folds the *second* half
+into the mask, so the AND happens against `0xFF0000` in the shifted domain.
+Written `(u8)b`, the whole thing is recognised as a byte extract from bit 0 and
+collapses to a single shift pair.
+
+**Read it in reverse:** a mask constant that has been shifted left into the
+promote's domain (`movs #K; lsls #0x10; ands`) is a source-level `& K`, and a
+minimal `lsls #n; lsrs #n` pair on the same value is a source-level cast. The
+same function's first argument, `a & 0x1FF`, folds the *other* way — into one
+`lsls #0x17; lsrs #0x17` pair — because 0x1FF spans the promote boundary, so
+this is not a rule about which is "bigger". It is about whether the mask is
+expressible as a truncation to a machine type.
+
+## A parameter used THREE times DOES discriminate `u16` from `int` plus casts (wave 27, W27-A)
+
+The standing warning is that a probe cannot tell `u16 v` from `int v` with a
+`(u16)` cast at each use, because both fold in a straight line. That warning is
+about a **single** use. Add a second and third and the two separate cleanly, and
+`sub_08011C68` is the worked case — it is a 40-byte function and the choice is
+worth 8 bytes and a different prologue.
+
+    void sub_08011C68(const void *src, void *dst, u16 size)
+    {
+        if (size & 0x1F)  CpuSet(src, dst, size / 2);
+        else              CpuFastSet(src, dst, size / 4);
+    }
+
+With `u16`, PROMOTE_MODE emits `lsls r2, #0x10` **once** and all three uses
+share it: the test runs in the shifted domain against `0x1f0000` (materialised
+`movs #0xf8; lsls #0xd`), and each division is a bare `lsrs #0x11` / `#0x12`.
+r1 is never touched, so the prologue is `push {lr}`.
+
+With `int` and a `(u16)` cast at each use, the cast is re-materialised per use:
+the mask becomes a plain imm8 AND that **clobbers r1**, the `dst` pointer has to
+spill into r4, and the prologue grows to `push {r4, lr}`.
+
+So the discriminator is not the folding — it is **register pressure**. One
+shared promote occupies no scratch register; N independent casts each need one.
+Sweep parameter widths on the function with the most uses of the parameter, not
+the fewest, and read the PROLOGUE as well as the body.
+
+## `a += b` and `a = b + a` differ in which ADDRESS is computed first (wave 27, W27-A)
+
+Size-neutral, invisible to a size check, and it decided four functions this wave
+(sub_08071D70, sub_080110A4, and their subtract twins as the control).
+
+When the destination needs its address materialised — a struct member past the
+displacement range, so `adds rN, rBASE, #0; adds rN, #0x66` — the compound
+assignment computes the **destination** address first:
+
+    adds r1, r2, #0 / adds r1, #0x66      @ dest, from `proc->unk66 += ...`
+    adds r0, r2, #0 / adds r0, #0x64      @ source
+
+Written out longhand as `proc->unk66 = proc->unk64 + proc->unk66;` the operands
+are evaluated left to right and the **source** address is built first, swapping
+the two pointer registers throughout the rest of the block.
+
+The value loads are a separate question and are NOT a reliable tell: `+` is
+commutative and agbcc canonicalises it, so the compound form still loads
+`unk64` before `unk66`. Read the ADDRESS setup, not the load order. (The
+subtract twins are the control — `-=` is not commutative, and there the loads
+follow the addresses.)
+
+## A comparison threshold that is not an imm8 moves the compare into the shifted domain (wave 27, W27-A)
+
+Two functions in this wave are the same source with one constant changed, and
+they look nothing alike:
+
+    sub_08071D70   if (proc->unk66 > 0xFF)     lsls #0x10; asrs #0x10; cmp r0, #0xff
+    sub_080110A4   if (proc->unk66 > 0xFFF)    lsls #0x10; ldr r1,=0x0FFF0000; cmp r0, r1
+
+Both are an `s16` member compared against a positive constant. When the
+constant fits an imm8, agbcc sign-extends the value and compares normally. When
+it does not, it leaves the value in the `lsls #0x10` domain it already has and
+compares against **the constant shifted left 16 and pooled** — which is cheaper
+than pooling the constant *and* emitting the `asrs`.
+
+So a pooled comparison constant with a low half of zero is a plain
+`> K` on a narrow member, with `K = pooled >> 16`. Do not read the shifted
+constant as a source-level value, and do not conclude the two functions have
+different source shapes.
+
+## A `& 0x1FFFFF` FUSES with a signed division's arithmetic shift (wave 27, W27-A)
+
+`sub_08012F6C` looked like it needed an exotic expression and needs an ordinary
+one. The ROM has, for the two arms:
+
+    lsrs r2, r3, #0x1f / adds r2, r3, r2 / lsls r2, r2, #0xa / lsrs r2, r2, #0xb
+    cmp r2,#0 / bge / adds r2, #3       / lsls r2, r2, #0x9 / lsrs r2, r2, #0xb
+
+The bias sequences are signed division by 2 and by 4 — an unsigned count would
+not produce them, so the parameter is a signed `int`. What hides the divisions
+is that the following `& 0x1FFFFF` (`lsls #11; lsrs #11`) **merges** with the
+division's `asrs`: `asr 1` then `lsl 11` becomes `lsl 10`, and `asr 2` then
+`lsl 11` becomes `lsl 9`. Both arms land on a 21-bit result, which is exactly
+the width of the BIOS CpuSet/CpuFastSet length field.
+
+Apply the standing `(u32)x << a >> b` rule and then check whether `b - a`
+matches a division you can already see the bias for; if it does, the leftover
+`32 - b` is a MASK the source wrote, not part of the shift.
+
+## An unexplained `adds rD, rS, #0` that survives to a LATER use is a SECOND LOCAL — and it must be a copy of the first, not of the expression (wave 27, W27-A)
+
+`sub_08012E4C` sat 4 bytes short through seven rewrites because the missing
+instruction looked like a register-allocation tie-break. It is not; it is
+source-visible, and the lever is narrow enough that it is worth stating exactly.
+
+The ROM computes the value once and then copies it:
+
+    ldr r1, [r0]
+    movs r0, #0x1f
+    ands r1, r0
+    adds r0, r1, #0        @ the copy
+    cmp r1, #0xb  ...      @ first two tests read r1
+    cmp r0, #0x1b ...      @ the LAST test reads r0
+
+The copy is **dead on one path** (the `movs r0, #0` arm overwrites it
+immediately), which is what makes it look like noise. It is not: the two hard
+registers are two different pseudos, and only a second local produces them.
+
+The part that costs the time — these two are NOT equivalent:
+
+    u32 w = gUnknown_03004008 & 0x1F;   /* folded away by CSE */
+    u32 w = v;                          /* survives */
+
+Re-writing the *expression* gives CSE an identical computation and it collapses
+both names onto one pseudo, emitting nothing. Copying the *local* is a
+register-to-register move that gcc keeps, because the copy stays live across the
+first branch and copy propagation does not run it back through the join. The
+first spelling is the natural guess and it is the wrong one.
+
+**How to read it going the other way.** An `adds rD, rS, #0` right after a value
+is computed, where a *later* block reads `rD` while nearer blocks read `rS`, means
+the source had two names for one quantity. Add `T w = v;` and use `w` at exactly
+the uses that read `rD`. Which uses those are is a hard readout — you do not have
+to guess the split.
+
+What the second name meant in the original is not recoverable; two
+differently-named variables for the same value produce this too. Only that there
+were two is proved, and the comment should say so.
+
+## A byte-identity percentage is POSITIONAL — a length mismatch makes a perfect body score near zero (wave 27, W27-A)
+
+Worth knowing before it costs a round. `sub_08071918`'s draft was reported at
+"2.1% identical, first difference at +0x1", which reads as a total structural
+miss and prompted a suggestion to re-derive the prologue. The draft was in fact
+**byte-perfect** — it emitted the original's last 40 bytes exactly, and the
+original simply carried an 8-byte prefix of nops that no C can produce.
+
+The scorer compares byte *positions*. Any prefix-length difference shifts every
+subsequent byte and drives the score to roughly chance, and "first difference at
++0x1" is then just the second byte of the prefix, not evidence about the first
+instruction. So:
+
+- **Check the size delta before believing the percentage.** A near-zero score
+  with a non-zero size delta says nothing about the body; a near-zero score at
+  size-exact is a real structural miss.
+- Read the instruction diff instead. If it consists only of leading or trailing
+  material plus uniformly shifted branch and relocation offsets, the body is
+  already right and the boundary is wrong.
+- `verify_split` will not catch this class. Its two gates are that units
+  reconstruct `asm/*.s` byte-for-byte and define every local label they use;
+  both pass when a `thumb_func_start` is simply in the wrong place, because the
+  boundary comes from the symbol table upstream of the split.
+
+## A DEAD `adds rN, r0, #0` before a `bl` is the call result assigned back OVER the parameter (wave 27, W27-B)
+
+W27-A's chapter above covers an `adds rD, rS, #0` that SURVIVES to a later use.
+This is the opposite case and it has a different cause: a copy into a
+CALL-CLOBBERED register, immediately before the `bl` that clobbers it. It is
+dead on any reading of the assembly, and it is not noise.
+
+`sub_0803CA70` opens
+
+    push {lr}
+    adds r3, r0, #0        @ r3 is destroyed by the very next instruction
+    bl   sub_080206B0
+    adds r2, r0, #0
+    ...
+    lsrs r3, r2, #0x10     @ r3 written again, from the RESULT
+
+An earlier wave had already noted the instruction and called it "a dead save of
+the incoming parameter" without explaining it. The explanation is that the
+source assigns the result back over the parameter:
+
+    id = sub_080206B0(id);      /* emits the copy   */
+    k  = sub_080206B0(id);      /* does NOT emit it */
+
+agbcc gives the parameter a home pseudo; writing to that pseudo makes it live
+into the call's own sequence, and the allocator materialises the incoming value
+there before the call overwrites it. Spelling the result into a fresh local
+instead drops the instruction and leaves the function four bytes short.
+
+Read it as a TYPE-FREE signal about the source's variable naming, not about
+widths. It cost W27-B one probe once the rest of the function was aligned; it
+would have cost much more if the width sweep had been run against it first.
+
+## WHERE the base's pool `ldr` sits tells you whether the symbol carries a constant ADDEND (wave 27, W27-B)
+
+Two spellings of the same address differ only in the POSITION of the pool load,
+and it is a reliable readout in both directions.
+
+    ldr  rB, =gSym          @ base FIRST
+    ldr  r0, =gState
+    ldr  r0, [r0]
+    ands r0, ...
+    lsrs r0, ...
+    adds r0, r0, rB
+
+    ldr  r0, =gState        @ base LAST
+    ldr  r0, [r0]
+    ands r0, ...
+    lsrs r0, ...
+    ldr  r1, =gSym
+    adds r0, r0, r1
+
+The first is `gSym + i` with `gSym` a symbol in its own right. The second is
+`&gOther[K + i]` where the constant `K` folds into the relocation's addend --
+the pool word then holds `gOther+K`, which the disassembler prints as a
+different symbol name entirely. `sub_08037790` is the worked case: what
+`asm/` calls `gUnknown_08125410` is `&gUnknown_081253F0[16]`, and the ordering
+is the ONLY evidence that separates them, because both produce the same 32-bit
+word. `try_match` then reports `relocs: name different symbols that resolve to
+the same address`, which is a match.
+
+Corollary, same mechanism: the two-step `ldr rB, =gSym; adds rB, #0x12` means
+the member offset did NOT fold, which is what a struct POINTER variable gives
+(`s = &gSym; b = s->unk12`). `&gSym.unk12[i]` folds it into the addend and
+loses the `adds`. `sub_0803C91C` and `sub_0803CA70` both need the unfolded
+form -- AND need the `s = &gSym` assignment placed AFTER the intervening call,
+or the address is held across it in a callee-saved register and the function
+grows a push.
+
+## A dereference that belongs to the RETURN EXPRESSION schedules after the index multiply (wave 27, W27-B)
+
+`sub_08013D00` selects one of four pointer globals in a `switch` and returns an
+offset from it. Two spellings compute exactly the same address:
+
+    u16 *base;  switch (w) { case 1: base = gA; ... }  return base + y*32 + x;
+    u16 **pp;   switch (w) { case 1: pp = &gA; ... }   return *pp + y*32 + x;
+
+Both cross-jump the `ldr r0, [r0]` into the shared tail, so the block layout is
+identical. They differ in the tail's SCHEDULE:
+
+    ldr r3, [r0]  /  lsl r0, r2, #6  /  add r0, r3, r0   @ `u16 *`  (deref first)
+    lsl r1, r2, #6  /  ldr r0, [r0]  /  add r0, r0, r1   @ `u16 **` (multiply first)
+
+With `u16 *` the load is a separate statement that gcc sinks; with `u16 **` it
+is an operand of the returned expression and gets evaluated in tree order,
+after the multiply. That reordering is what forces the second parameter out of
+r1 and produces a leading `adds r3, r1, #0` -- so the `u16 *` version is four
+bytes SHORT, and the missing instruction is the tell.
+
+The lesson generalises: when a merged tail's instruction ORDER is wrong but its
+instruction SET is right, move the load into or out of the expression rather
+than reaching for types.
+
+## `(x & lowmask) << k` has TWO expansions, and the shift-pair one comes from a 16-BIT INTERMEDIATE (wave 27, W27-B)
+
+Both of these appear in the same wave's batch, and they are not
+interchangeable:
+
+    ldr r1, =0x3ff / ands r1, r0 / lsls r1, #5      @ sub_08037638
+    lsls r1, #0x16 / lsrs r1, #0x11                 @ sub_08037150
+
+The first is the honest `(x & 0x3ff) << 5`. agbcc does NOT contract it to
+shifts, even though the shifts are smaller -- the pool word is emitted.
+
+The second computes the same bits and comes from a narrowing conversion the
+mask never had: `(u16)(x * 0x40) / 2`. The `<<6`, the `<<16; >>16` of the u16
+truncation and the `>>1` combine into `<<22; >>17`. So a shift PAIR whose net
+effect looks like "mask then scale" is a 16-bit intermediate, and a mask with
+an explicit pool constant is a real `&`. Do not convert one spelling into the
+other on the grounds that they are arithmetically equal.
+
+The same asymmetry decides `(u8 *)gPal + (b & 0xFFFE)` versus `gPal + b / 2` in
+`sub_0801368C`: with a `u16` parameter the halving merges with the entry
+narrowing into `lsrs #0x11; lsls #1` and no pool word, while the mask form
+costs a `0xfffe` pool word and an `ands`. The promoted `ApplyPaletteExt` next
+door legitimately uses the MASK form because its `b` is `u32` and so has no
+entry shift to merge with. Same expression, different parameter width,
+different correct spelling.
+
+## `>> 6` is `lsrs` on a `u8` local and `asrs` on an `int` one (wave 27, W27-C)
+
+`sub_08045BF0` and `sub_08045CE8` each load a map byte with `ldrb`, test it
+against 0, and then shift it right by 6. The ROM's shift is `asrs r0, r0, #6`.
+
+    u8  v = tiles[off];   ->  lsr r0, r0, #0x6
+    int v = tiles[off];   ->  asr r0, r0, #0x6
+
+Both are two bytes and both are semantically identical -- the loaded value is
+0..255 either way -- so nothing but the emitted opcode distinguishes them.
+After integer promotion the shift is on `int` in both spellings, but with a
+`u8` local the operand reaches combine as a `zero_extend`, `nonzero_bits`
+proves the sign bit clear, and `ashiftrt` is canonicalised to `lshiftrt`.
+Widening at the ASSIGNMENT is what removes that proof and keeps the arithmetic
+shift.
+
+This is the reverse of the note on `gUnknown_03003F38` in
+include/unknown-globals.h, where the `>> 6` really is `lsrs` -- there the value
+is a `u8` global read directly. The two are not the same expression, and an
+`asrs` in a `>> 6` is therefore a readout of the LOCAL's declared type, not of
+the memory it came from.
+
+## Binding an indirect-call target to a LOCAL moves its load BEFORE the argument (wave 27, W27-C)
+
+Written as one expression, agbcc computes the argument address first and loads
+the function pointer second; bound to a local, the load comes first. Both are
+legal orders for the same source semantics, so the ROM's order is a readout of
+which spelling was used.
+
+    /* one expression */                     /* pointer bound first */
+    ldr r0, [r5]                             ldr r1, [r4]
+    adds r4, r4, r1     <- argument          ldr r1, [r1]      <- pointer
+    ldr r1, [r0]        <- pointer           adds r0, r0, r2   <- argument
+    bl _call_via_r1                          bl _call_via_r1
+
+`sub_08015DC8`, `sub_08015F68` and `sub_08015FA8` all need the second form.
+The lever also decides WHICH trampoline is used, because the pointer lands in
+the first register still free when it is loaded: `sub_0803BBA8` is
+`bl _call_via_r3` for a NULLARY call, purely because r0-r2 were busy computing
+an unrelated byte store while r3 held the handler. Read `_call_via_rN`'s index
+as an argument count only when nothing else is competing for the low registers.
+
+## Binding `&g[i]` to a pointer defers a pointer-global's dereference past the index multiply (wave 27, W27-C)
+
+For a global that IS a pointer (`extern struct X *g;`), reading two fields of
+`g[i]` has two shapes:
+
+    /* g[i].a, g[i].b        */      /* p = &g[i]; p->a, p->b   */
+    ldr r0, =g                       ldr r2, =g
+    ldr r0, [r0]        <- deref     <index multiply>
+    <index multiply>                 ldr r1, [r2]      <- deref
+    add r1, r1, r0                   add r1, r1, r0
+
+`sub_080448E4` and `sub_08044968` both need the right-hand form. The symbol's
+own address stays live in its own register across the arithmetic, and only the
+POINTER load is sunk -- which is the same scheduling family as W27-B's
+"dereference that belongs to the RETURN EXPRESSION" note, reached by a
+different lever.
+
+## A pool word that looks like a pointer global may be `-fforce-addr` (wave 27, W27-C)
+
+`sub_08045210` and `sub_08045254` read `ldr r3,=gUnknown_08091394; ldr r1,[r3]`
+and `=gUnknown_08091398` respectively, which reads exactly like two ROM pointer
+variables. The ROM words at both addresses are `0x03002020` -- one private copy
+per function of `&gUnknown_03002020`, agbcc's own address-constant pool, the
+same thing 0x0808E558 turned out to be in wave 26.
+
+**Before declaring a `gUnknown_08xxxxxx` that is only ever reached by a double
+`ldr`, read the ROM word at that address.** If it is the address of a symbol
+that already exists, the honest spelling of the GLOBAL reproduces the function,
+two-level load and all, and `trymatch` reports it as a `.rodata` pool word that
+needs placing rather than as a mismatch.
+
+## A multi-bit bitfield assignment DOES discriminate, even when every other field is only set (wave 27, W27-C)
+
+The standing rule is that `s.bit4 = 1` and `gU8 |= 0x10` are byte-identical, so
+a function that only ORs bits in cannot settle whether the object is a bitfield
+struct. `sub_080451C8` looks like that case and is not:
+
+    ldrb r1, [r2]
+    movs r0, #0x3f
+    ands r0, r1        <- the CLEAR half
+    movs r1, #0x40
+    orrs r0, r1
+
+The `& 0x3F` before the `| 0x40` is the read-clear-insert that a TWO-bit field
+assignment emits, and no `|=` spelling produces it. One multi-bit field in the
+group settles the model for the single-bit fields beside it; look for a mask
+that is not a power of two minus one before concluding a function is
+undiscriminating.
+
+## trymatch CANNOT verify a call to a unit-local (static) function (wave 27, W27-C)
+
+`AgbMain` calls a two-byte infinite-loop function that lives at 0x08036B48,
+inside its own linker unit and with no exported symbol -- the original object
+resolves that `bl` at assembly time and carries NO relocation for it.
+
+`tools/trymatch.py` compiles `work/<fn>/<fn>.c` alone and takes `cand[:size]`
+from offset 0, so the work file must contain the target function and nothing
+ahead of it. Any sibling that would supply the branch displacement is therefore
+excluded by construction, the `bl` becomes an external `R_ARM_THM_CALL` with a
+`-4` placeholder, and two bytes differ. `reloc_equivalent` cannot rescue it
+either: it requires `len(t_rel) == len(c_rel)`, and the candidate has one reloc
+the original does not.
+
+This is a HARNESS limit, not a decompilation problem, and it will recur on any
+unit whose members call a static helper. The fix, if a later wave wants it, is
+to let `reloc_equivalent` accept a candidate-only `R_ARM_THM_CALL` whose symbol
+resolves to the address the original's encoded displacement points at -- which
+needs the unit base address plumbed into that function.
+
+A neighbour in the SAME unit is fine, though, and `sub_08036B34` proves it: its
+indexed size of 24 covers its own 20 bytes plus the 2-byte hang function and 2
+of padding, and putting both definitions in one work file matches exactly. An
+index size larger than the function's own body is worth reading as a missing
+symbol rather than as a mis-split.

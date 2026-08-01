@@ -1,0 +1,29 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08044968.
+ * sub_08044968 @ 0x08044968
+ */
+
+#include "proc.h"
+struct UnkP448E4
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x66);
+    /* 66 */ s16 unk66;
+};
+
+/* sub_080448E4's second half on its own, against sub_0806AA80 instead of
+ * sub_08029088. Here the single `ldrsh` serves both the guard and the index,
+ * which is what the field being read directly looks like. */
+void sub_08044968(struct UnkP448E4 *proc)
+{
+    struct Unk08499594 *e;
+
+    if (proc->unk66 != 0) {
+        e = &gUnknown_08499594[proc->unk66];
+        sub_0806AA80(e->unk02, e->unk03);
+    }
+}
