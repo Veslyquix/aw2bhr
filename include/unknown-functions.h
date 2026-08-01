@@ -3662,8 +3662,14 @@ void sub_08012FB8();
  * is a separate two-byte `for (;;) ;` function that got folded into its
  * neighbour's extent because it has no symbol. It is defined in the unit's own
  * source, immediately after sub_08036B34, which is what puts it at that
- * address. */
-void sub_08036B48(void);
+ * address.
+ *
+ * It is `static` there and so is NOT declared here. That is not a style
+ * choice: the ROM's `bl` into it carries NO relocation, which only happens
+ * when the assembler can resolve the target itself, which only happens for a
+ * LOCAL symbol. Declared globally the branch keeps its relocation and AgbMain
+ * misses by exactly those two bytes. Verified with
+ * `tools/trymatch.py AgbMain --unit`. */
 
 /* Plain `void (void)` leaves of the boot/reset unit; each is called with no
  * argument set up and its result discarded. */
@@ -3694,7 +3700,7 @@ void sub_0801295C(void);
 void sub_0803B688(void);
 
 /* sub_08080F90 takes one argument; AgbMain's chain passes the literal 0. */
-void sub_08080F90(void);
+void sub_08080F90(int);
 
 /* Returns a value AgbMain compares against -1, so at least `int` wide and
  * SIGNED at the comparison. Declared WITHOUT a prototype because the two

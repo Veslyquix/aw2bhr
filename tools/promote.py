@@ -80,6 +80,95 @@ def verify(name):
     return proc.returncode == 0, proc.stdout.strip().splitlines()[-1:], words
 
 
+def unit_of(name):
+    """(unit record, its function list) from the split manifest, or (None, [])."""
+    path = os.path.join(awlib.REPO, "build", "functions", "units.json")
+    if not os.path.exists(path):
+        return None, []
+    with open(path, encoding="utf-8") as fh:
+        for u in json.load(fh):
+            if name in u.get("functions", []):
+                return u, list(u["functions"])
+    return None, []
+
+
+def verify_unit(name):
+    """True only if the WHOLE unit's .text reproduces the ROM.
+
+    Strictly stronger evidence than every function matching separately -- it is
+    what the split build links -- so it is a legitimate basis for promotion.
+    This is not a way around the gate; it is the gate applied to the artefact
+    that actually gets built.
+
+    It exists because a per-function oracle cannot verify a function that calls
+    a `static` helper defined beside it: compiled alone the call is external and
+    carries a relocation, while the original resolved it locally and carries
+    none. Wave 27's AgbMain differed by exactly those 2 bytes in 252, with seven
+    already-matching siblings stuck behind it because a unit promotes whole or
+    not at all.
+    """
+    proc = subprocess.run(
+        [sys.executable, os.path.join(awlib.REPO, "tools", "trymatch.py"),
+         name, "--unit"],
+        cwd=awlib.REPO, capture_output=True, text=True, timeout=900,
+        stdin=subprocess.DEVNULL)
+    words = []
+    for ln in proc.stdout.splitlines():
+        m = re.search(r'"rodata": \[(.+?)\]', ln)
+        if m:
+            words = re.findall(r'0x[0-9A-Fa-f]{8}', m.group(1))
+    return proc.returncode == 0, proc.stdout.strip().splitlines()[-3:], words
+
+
+def refresh_promoted(names, index, existing):
+    """Re-emit promoted units whose drafts no longer match what was promoted.
+
+    `promote.py` used to print "nothing to promote (all already promoted)" and
+    stop, leaving src/decomp/ holding the OLD text -- while its own messages
+    call the drafts the source of truth. That silence is dangerous rather than
+    merely untidy: src/decomp/ is what the build compiles, so a post-promotion
+    fix to a draft (a call-site cast after a prototype was settled, say) looked
+    applied, verified clean per-function, and would have failed the split build.
+    Wave 27 hit exactly that and caught it by hand.
+
+    A refresh re-verifies the whole unit before rewriting, so a drifted draft
+    cannot smuggle in unverified code.
+    """
+    by_fn = {n: e for e in existing for n in e["functions"]}
+    done, refreshed = set(), []
+    for name in names:
+        entry = by_fn.get(name)
+        if entry is None or entry["file"] in done:
+            continue
+        done.add(entry["file"])
+        run = entry["functions"]
+        if any(not os.path.exists(os.path.join(WORK, f, f + ".c")) for f in run):
+            continue
+        text, err = merge(run, index)
+        if err:
+            continue
+        path = os.path.join(awlib.REPO, entry["file"].replace("/", os.sep))
+        try:
+            current = open(path, encoding="utf-8").read()
+        except OSError:
+            current = None
+        if current == text:
+            continue
+        ok, tail, _ = verify_unit(run[0])
+        if not ok:
+            print("  DRIFT in %s -- the draft(s) differ from the promoted file,"
+                  % entry["file"])
+            print("  but the unit does NOT verify, so it was left alone:")
+            for ln in tail:
+                print("      %s" % ln)
+            continue
+        awlib.write_text(path, text)
+        refreshed.append(entry["file"])
+        print("  refreshed %s from its draft(s) -- unit re-verified"
+              % entry["file"])
+    return refreshed
+
+
 def split_source(name, text):
     """(declarations, body) for one work file.
 
@@ -334,14 +423,21 @@ def all_matched(index):
 def promote(names, index):
     existing = load_promoted()
     already = {n for e in existing for n in e["functions"]}
+    stale = [n for n in names if n in already]
     names = [n for n in names if n not in already]
+    refreshed = refresh_promoted(stale, index, existing) if stale else []
     if not names:
-        print("nothing to promote (all already promoted)")
-        return 0
+        if refreshed:
+            print("refreshed %d already-promoted file(s) from their drafts"
+                  % len(refreshed))
+            print("REBUILD -- src/decomp/ changed. See the commands below.")
+        else:
+            print("nothing to promote (all already promoted, no draft drift)")
+            return 0
 
     os.makedirs(DECOMP_DIR, exist_ok=True)
     added = []
-    for run in contiguous_runs(names, index):
+    for run in contiguous_runs(names, index) if names else []:
         text, err = merge(run, index)
         if err:
             print("error: %s" % err)
@@ -436,11 +532,33 @@ def main():
                 print("error: %s is not in the index" % n)
                 return 1
             ok, tail, _ = verify(n)
-            if not ok:
+            if ok:
+                continue
+            # The per-function oracle can be WRONG in one direction only: it
+            # compiles one function per object, so it cannot reproduce a call
+            # the original resolved inside its own unit. Before refusing, ask
+            # the stronger question -- does the whole unit reproduce the ROM?
+            unit, run = unit_of(n)
+            uok, utail, uwords = (False, [], []) if not run else verify_unit(n)
+            if not uok:
                 print("refusing to promote %s -- it does not match" % n)
                 for ln in tail:
                     print("  %s" % ln)
+                if run:
+                    print("  the whole unit does not reproduce the ROM either:")
+                    for ln in utail:
+                        print("      %s" % ln)
                 return 1
+            print("%s does not match ALONE, but its whole unit reproduces the"
+                  " ROM." % n)
+            print("  Promoting all %d function(s) in %s together -- a unit is"
+                  " linked whole," % (len(run), unit["file"]))
+            print("  so that is the stronger evidence, not a weaker one.")
+            if uwords:
+                POOL_WORDS[n] = uwords
+            for f in run:
+                if f not in names:
+                    names.append(f)
     return promote(names, index)
 
 

@@ -5180,6 +5180,22 @@
   "size": 12
  },
  {
+  "file": "src/decomp/c_08036B34.c",
+  "obj": "src/decomp/c_08036B34.o",
+  "addr_hex": "0x08036B34",
+  "functions": [
+   "sub_08036B34",
+   "sub_08036B4C",
+   "sub_08036C08",
+   "sub_08036C2C",
+   "sub_08036C4C",
+   "sub_08036C80",
+   "sub_08036CB4",
+   "AgbMain"
+  ],
+  "size": 740
+ },
+ {
   "file": "src/decomp/c_08036F68.c",
   "obj": "src/decomp/c_08036F68.o",
   "addr_hex": "0x08036F68",

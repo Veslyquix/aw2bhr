@@ -557,12 +557,201 @@ def check(name, want_diff=False, keep_going=False):
     return 1
 
 
+def check_unit(name, want_diff=False):
+    """Verify a whole linker UNIT: merge every draft in it, compile the merge as
+    ONE translation unit, and compare the unit's entire .text with the ROM.
+
+    THIS EXISTS BECAUSE THE PER-FUNCTION ORACLE HAS A BLIND SPOT IT CANNOT CLOSE
+    BY CONSTRUCTION. `check()` compiles one function per object, so every call
+    it makes is external and carries a relocation. The original source compiled
+    the whole unit at once, so a call to a `static` helper defined beside it was
+    resolved by the assembler and carries NO relocation at all. Wave 27 hit this
+    on AgbMain: it calls a two-byte `for (;;) ;` at 0x08036B48 with a
+    locally-resolved `bl`, 2 of 252 bytes differ, and NO draft can fix it --
+    for `check()` to see no relocation the helper must be defined in AgbMain's
+    own object, while the merged unit may define it exactly once. Seven
+    already-matching siblings were stuck behind that, because a unit promotes
+    whole or not at all.
+
+    A unit that reproduces its whole .text is STRICTLY STRONGER evidence than
+    every function in it matching separately -- it is precisely what the split
+    build links. So `promote.py` may accept it. That is not relaxing the gate,
+    which is the one thing wave 18 said never to do; it is pointing the gate at
+    the thing that makes it true.
+
+    Every function in the unit must have a draft. A unit is all-or-nothing, so
+    a missing draft is a hard failure, not a skip.
+    """
+    rec, unit = resolve(name)
+    if rec is None or unit is None:
+        return 2
+
+    run = list(unit["functions"])
+    missing = [f for f in run
+               if not os.path.exists(os.path.join(WORK, f, f + ".c"))]
+    print("unit %s  --  %d function(s): %s"
+          % (unit["file"], len(run), ", ".join(run)))
+    if missing:
+        print("error: no draft for %s" % ", ".join(missing))
+        print("  A unit is verified whole or not at all. Draft every function")
+        print("  in it (tools/newfunc.py <fn>) before re-running.")
+        return 2
+
+    # The merge is promote.py's, deliberately: verifying a differently-built
+    # text than the one that would be promoted would prove nothing about the
+    # promotion.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import promote as promote_mod
+    index = promote_mod.load_index()
+    text, err = promote_mod.merge(run, index)
+    if err:
+        print("error: %s" % err)
+        return 2
+
+    stem = "u_%s" % unit["functions"][0]
+    src_rel = "build/unitcheck/%s.c" % stem
+    obj_rel = "build/unitcheck/%s.o" % stem
+    awlib.write_text(os.path.join(awlib.REPO, src_rel.replace("/", os.sep)), text)
+
+    rc, so, se = agbenv.compile_c(src_rel, obj_rel, fn=run[0])
+    if rc != 0:
+        print("COMPILE FAILED (the merged unit, not any single draft)")
+        for ln in (se or so).strip().splitlines()[-25:]:
+            print("  " + ln)
+        print("  A merge that fails to compile while every draft compiles alone")
+        print("  is usually two drafts defining one struct tag differently, or")
+        print("  a declaration disagreeing with a sibling's definition.")
+        return 1
+
+    unit_dir = unit.get("dir", "build/functions")
+    unit_s = "%s/%s" % (unit_dir, unit["file"])
+    unit_o = "%s/%s.o" % (unit_dir, unit["unit"])
+    if not os.path.exists(os.path.join(awlib.REPO, unit_o.replace("/", os.sep))):
+        arc, _, ase = agbenv.assemble(unit_s, unit_o)
+        if arc != 0:
+            print("error: could not assemble the original unit\n%s" % ase[-1500:])
+            return 2
+
+    tgt, err = section_bytes(unit_o, "build/unitcheck/_target.bin")
+    if tgt is None:
+        print("error: could not read target .text: %s" % err)
+        return 2
+    cand, err = section_bytes(obj_rel, "build/unitcheck/_cand.bin")
+    if cand is None:
+        print("error: could not read candidate .text: %s" % err)
+        return 2
+
+    print("  size:  %s (%d bytes expected, %d produced)"
+          % ("match" if len(cand) == len(tgt) else "MISMATCH",
+             len(tgt), len(cand)))
+
+    same = (cand == tgt)
+    pool_word_equivalent.needed = []
+    if same:
+        t_rel = relocations(unit_o, 0, len(tgt))
+        c_rel = relocations(obj_rel, 0, len(cand))
+        if t_rel is not None and c_rel is not None and t_rel != c_rel:
+            pool_word_equivalent.needed = []
+            if reloc_equivalent(tgt, cand, t_rel, c_rel, obj_rel):
+                print("  relocs: name different symbols that resolve to the"
+                      " same address")
+            else:
+                same = False
+                print("  bytes: match, but relocations differ")
+                for side, rels in (("original ", t_rel), ("candidate", c_rel)):
+                    for r in rels[:8]:
+                        print("    %s +0x%03x %-18s %s" % (side, r[0], r[1], r[2]))
+        else:
+            print("  relocs: match")
+
+    if same:
+        # Same conditional-match rule as check(): a unit resting on a
+        # `-fforce-addr` pool word is only correct once the build PLACES that
+        # word, and promote.py parses this NOTE to record it.
+        if pool_word_equivalent.needed:
+            words = sorted({a for a, _ in pool_word_equivalent.needed})
+            print("  NOTE: this match needs its .rodata pool word(s) PLACED.")
+            print("        Add to this unit's data/promoted.json entry:")
+            print('          "rodata": [%s]'
+                  % ", ".join('"0x%08X"' % a for a in words))
+            print("        then re-run tools/split_rodata.py and "
+                  "tools/gen_lds.py before building.")
+        print("\nUNIT MATCH -- the whole unit's .text is byte-for-byte"
+              " identical.\n  This verifies ALL %d function(s) above, including"
+              " any that cannot\n  match alone because the original resolved a"
+              " call inside this unit." % len(run))
+        return 0
+
+    n_diff = sum(1 for a, b in zip(tgt, cand) if a != b)
+    common = min(len(tgt), len(cand))
+    print("  bytes: %d of %d differ" % (n_diff, common))
+    first = next((i for i, (a, b) in enumerate(zip(tgt, cand)) if a != b), common)
+    print("  first difference at +0x%x" % first)
+    for f in run:
+        r = index.get(f)
+        if r:
+            off = r["addr"] - int(unit["addr_hex"], 16)
+            if off <= first < off + r["size"]:
+                print("  which is inside %s (+0x%x into it)" % (f, first - off))
+    if want_diff:
+        import difflib
+        a = disassemble(unit_o, 0, len(tgt))
+        b = disassemble(obj_rel, 0, len(cand))
+        print("\n--- original / +++ candidate")
+        for ln in list(difflib.unified_diff(a, b, lineterm="", n=3))[2:]:
+            print("  " + ln)
+    else:
+        print("\n  re-run with --diff for an instruction-level comparison")
+    return 1
+
+
+def self_test():
+    """Both halves of the unit oracle, on the case that motivated it.
+
+    A verifier that cannot fail is worse than none, so this asserts the
+    NEGATIVE as well: sub_08071918's unit must still be rejected. Its C is
+    byte-exact for the whole body and it fails only on four leading `movs
+    r0, r0` of veneer-table padding that no C emits -- exactly the kind of
+    near-miss a too-eager unit check would wave through.
+    """
+    ok = True
+
+    rc = check_unit("AgbMain")
+    good = (rc == 0)
+    print("\n[self-test] AgbMain's unit verifies whole (a function that cannot "
+          "match alone): %s" % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    print()
+    rc = check_unit("sub_08071918")
+    good = (rc == 1)
+    print("\n[self-test] sub_08071918's unit is still REJECTED (leading "
+          "veneer padding): %s" % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    print("\n[self-test] %s" % ("PASS" if ok else "FAIL"))
+    return 0 if ok else 1
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("name", help="function name or address")
+    ap.add_argument("name", nargs="?", help="function name or address")
     ap.add_argument("--diff", action="store_true",
                     help="show an instruction-level diff on mismatch")
+    ap.add_argument("--unit", action="store_true",
+                    help="verify the whole linker unit at once, merging every "
+                         "draft in it -- the only way to verify a function "
+                         "that calls a static helper defined beside it")
+    ap.add_argument("--self-test", action="store_true",
+                    help="check the unit oracle still accepts AgbMain's unit "
+                         "and still rejects sub_08071918's")
     args = ap.parse_args()
+    if args.self_test:
+        return self_test()
+    if not args.name:
+        ap.error("give a function name or address")
+    if args.unit:
+        return check_unit(args.name, want_diff=args.diff)
     return check(args.name, want_diff=args.diff)
 
 
