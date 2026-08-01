@@ -80,7 +80,13 @@ void sub_08001148(u16 *, int, int);
  * `int` and `u8` alike, so `int` is the weakest model that fits. sub_08034534's
  * first parameter is a command id (sub_0802CFFC passes 2) and is the field
  * sub_080344B4 hard-codes to 8. Verified at sub_0802CFFC, which calls both. */
-void sub_08034534(int, u8, int, int);
+/* Wave 30, W30-A retypes the third and fourth parameters from `int` to `u8`.
+ * sub_08041E48 passes two whole-word proc members and the ROM narrows each with
+ * `lsls #0x18; lsrs #0x18` before the `bl` -- 8 bytes that an `int` parameter
+ * does not emit. The previous `int, int` was never evidence: the only other
+ * caller, src/decomp/c_0802CFFC.c, passes two literal zeros, which are
+ * byte-identical at any width. */
+void sub_08034534(int, u8, u8, u8);
 void sub_080344B4(u8, int, int);
 /* Definition promoted in src/decomp/c_080308B4.c; its body copies src[0..19]
  * into the 0x08090CD8 ring, so the block is 20 bytes. */
@@ -1096,6 +1102,11 @@ void sub_0801A538(int, int, int, int);
 void sub_08022580(void);
 void sub_080227A8(void);
 void sub_08085298(ProcPtr);
+/* Wave 30, W30-E. Nullary on the callee's own evidence: it opens
+ * `push {r4,r5,lr}; movs r4,#0; ldr r5,=gUnknown_081D93F8` and never reads r0.
+ * sub_080851CC/sub_08085208 still hold their proc pointer in r0 at the `bl`,
+ * which costs no instruction and is not argument setup. */
+void sub_080853B0(void);
 
 /* F005's callees. None of the 38 reads an argument register before writing
  * it -- every one opens with a `bl`, a pool `ldr` or a `movs` into r0 -- so
@@ -2433,6 +2444,11 @@ void sub_0803CBA0(int, int);
  * src/decomp/c_08019260.c, c_08019850.c, c_0804018C.c and c_08074AAC.c by
  * construction; see those files for the evidence behind each type. */
 bool8 sub_08019260(void);
+/* Wave 30, W30-E. Both widths are read off the callee, not guessed at the
+ * call: it opens `lsls r0,#0x18; lsrs r2,r0,#0x18` (a u8 parameter, used as
+ * the index into one of four ROM byte tables) and ends `ldrb r0, [r0]; bx lr`
+ * (a u8 return). Its three callers are all still in asm/. */
+u8 sub_0804A18C(u8);
 bool8 sub_08019850(void);
 void sub_0804018C(void *);
 void sub_08074AAC(const u8 *, ProcPtr);
@@ -3863,10 +3879,216 @@ void sub_08049F08(int, ProcPtr);
  * declared parameter type. */
 u8 sub_0805C290();
 
-/* The sub_08029088 twin: sub_08044968 passes it the same pair of
- * gUnknown_08499594 bytes, in the same registers, with no narrowing in
- * between -- so the same (s16, s16) that sub_08029088 already carries. */
-void sub_0806AA80(s16, s16);
+/* CORRECTION (wave 30, W30-C): this was `void sub_0806AA80(s16, s16)`, inferred
+ * from sub_08044968 passing two already-narrow gUnknown_08499594 bytes with no
+ * narrowing in between -- which is byte-neutral at that call site and therefore
+ * settles nothing. The BODY is decisive the other way: sub_0806AA80 opens with a
+ * bare `adds r4, r0, #0` / `adds r5, r1, #0` and goes straight to `lsls r4, r4,
+ * #4`, with NO `lsls #0x10; lsrs #0x10` prologue pair. agbcc's PROMOTE_MODE
+ * emits that pair for EVERY sub-word parameter regardless of signedness, so its
+ * absence proves both parameters are `int`. Re-verified: sub_08044968 is still
+ * byte-identical with the wider declaration (the caller's operands are already
+ * narrow, so the conversion costs nothing). Whether sub_08029088 -- the twin
+ * this note used to lean on -- is really (s16, s16) is now unsupported by this
+ * evidence and was NOT rechecked. */
+void sub_0806AA80(int, int);
+
+/* ---- wave 30 (W30-C): the 0x0806A block ---------------------------------- */
+
+/* Already DEFINED in src/decomp/c_08063980.c as `void sub_08063980(int vcount)`
+ * and matched, but nothing declared it. Every one of its nine callers passes a
+ * bare `movs` immediate (0, 0x50, ...), so `int` is what the definition says and
+ * no caller contradicts it. */
+void sub_08063980(int);
+
+/* The palette-ramp step sub_0806A680 runs each frame. Its prologue overwrites
+ * r0 with the gPal pool word before reading it, so it takes nothing; `pop {r0};
+ * bx r0`, so void. */
+void sub_0806A5B8(void);
+
+/* sub_0806AA80's only callee. r0 is the proc Proc_Start just returned (the body
+ * writes words at +0x30..+0x4c and halfwords at +0x58..+0x60 of it), and r1/r2
+ * are used unnarrowed as `lsls #0xc` shift operands, so both are `int`. */
+void sub_0806A6F0(ProcPtr, int, int);
+
+/* A BG0 scroll ping-pong: each of these installs the OTHER through
+ * sub_080638D0, so their addresses cross unit boundaries and both need to be
+ * visible here. `sub_080638D0(int)` is what the header already carries, so the
+ * install is spelled `sub_080638D0((int)sub_0806A180)`. Neither reads an
+ * argument register and both end `pop {r0}; bx r0`, so `void(void)`.
+ * sub_0806A1A8 installs sub_0806A158 the same way. */
+void sub_0806A158(void);
+void sub_0806A180(void);
+/* Registered through `sub_0801F024((void *)sub_0806A534, 0x7F)` by
+ * sub_0806A578, i.e. the void(void) callback shape sub_0801F024's other
+ * clients carry. */
+void sub_0806A534(void);
+
+/* ---- wave 30 (W30-C): the 0x08063 block ---------------------------------- */
+
+/* Already DEFINED and matched in src/decomp; both had their parameter struct
+ * hoisted into unknown-globals.h in this wave so that sub_08063430 and
+ * sub_08063BBC -- which call them with their OWN proc pointer -- can name the
+ * same type instead of each declaring a private copy. Both definitions were
+ * re-verified byte-exact after the move. */
+void sub_08062FB8(struct Unk08062FB8 *);
+void sub_08063BE0(struct Unk8063BE0 *);
+
+/* Neither parameter is narrow: sub_08011D7C's prologue is a bare
+ * `adds r4, r0, #0` / `adds r5, r1, #0` with no PROMOTE_MODE shift pair. r0 is
+ * stored as a whole word into a 12-byte record and r1 with `strh` at +8, so the
+ * store width does not settle r1 and `int` is the weakest model. The return IS
+ * narrow -- both exit paths sign-extend (`lsls #0x10; asrs #0x10`, and -1 on the
+ * full arm) -- hence `s16`. sub_0806366C discards it. sub_08011D7C is still
+ * unmatched, so this declaration is a contract, not a promoted signature. */
+s16 sub_08011D7C(void *, int);
+
+/* ---- wave 30 (W30-C): the 0x08066 block ---------------------------------- */
+
+/* An (x, y) pair. Both prologues are a bare `adds r4, r0, #0` / `adds r5, r1,
+ * #0` with no PROMOTE_MODE shift pair, so both parameters are `int`; both end
+ * `pop {r0}; bx r0`, so void. They are twins -- same guard on
+ * gUnknown_03004008, same `& 0x1FF` / `& 0xFF` wrap, differing only in the id
+ * they pass sub_0801F34C (0x43 vs 0x44) and sub_08064500's extra palette
+ * write. */
+void sub_08064474(int, int);
+void sub_08064500(int, int);
+
+/* The two halves of sub_0806630C's dispatch and the two of sub_08066B40's.
+ * sub_08065F88's prologue overwrites r0 with a pool word before reading it, so
+ * that one is `void(void)` on its own evidence.
+ *
+ * The other five are declared WITHOUT a prototype on purpose, the way
+ * sub_0805C290 above is: their call sites set up no argument, which does not
+ * prove there is none -- in each case r0 happens to hold the dispatch value at
+ * the `bl` -- and none of their bodies has been read. An empty parameter list
+ * keeps the argument-less calls legal without asserting an arity that a later
+ * wave would have to unpick. Do not "tidy" these into `(void)` without reading
+ * the callee. */
+void sub_08065F88(void);
+void sub_08066220();
+void sub_08066874();
+void sub_08066A20();
+void sub_08066D74();
+void sub_08066EBC();
+void sub_08066F20();
+
+/* The dispatch chain itself, all three `void(void)`: each reads its selector
+ * out of *gUnknown_08580934 and none touches an argument register before
+ * writing it. Declared here because they call each other across units --
+ * sub_08066B6C picks between sub_0806630C and sub_08066B40, and sub_08066FE0
+ * calls sub_08066B6C. */
+void sub_0806630C(void);
+void sub_08066B40(void);
+void sub_08066B6C(void);
+
+/* ---- wave 30 (W30-C): the 0x08076 block ---------------------------------- */
+
+/* NOT ordinary compiler output and NOT a `_call_via_rN` trampoline: 0x08071900
+ * is four bytes of `bx pc; nop`, a THUMB-to-ARM interworking veneer in front of
+ * the ARM routine that follows it, and data/asm-resident.json already carries
+ * it. Eleven callers, all passing four register arguments. r0 and r1 are
+ * addresses (sub_0807606C passes `gUnknown_08551A00 + 0x140` and an offset into
+ * gUnknown_08499578), r2 and r3 small counts. The result is discarded
+ * everywhere it is called from so far. */
+void sub_08071900(void *, void *, int, int);
+
+/* Returns 1, 0 or -1 with `bx lr` and reads no argument register. The return is
+ * `int`, not a narrow type: sub_0807610C consumes it with a bare
+ * `adds r1, r0, #0` and no re-narrowing, and agbcc re-narrows a
+ * narrow-returning callee's result at every call site. */
+int sub_08075EC4(void);
+
+/* Takes the proc sub_0807610C is running -- it reads and writes the word at
+ * +0x3c of it as a change-detect cache. `void *` is a placeholder for that
+ * struct, which belongs to whichever unit defines the proc; the parameter is
+ * definitely a pointer and definitely one argument. */
+void sub_08075F44(void *);
+
+/* Three `void(void)` helpers of the 0x08076 screen setup. All three ignore r0
+ * -- sub_08076888 overwrites it with a pool word in its first two
+ * instructions, and sub_08076858 / sub_0807681C never read it -- which matters
+ * because sub_08076ADC calls sub_08076888 while its own proc pointer is still
+ * sitting in r0. sub_08076B20 likewise. */
+void sub_08076888(void);
+void sub_08076858(void);
+void sub_0807681C(void);
+void sub_08076B20(void);
+
+/* Starts gUnknown_086143B8 under `parent`. The first two parameters' WIDTH is
+ * NOT settled: the body does `lsls #0x10; adds; lsrs #0x10`, which is one
+ * truncation of `x - 0x10` and is equally what a u16 parameter plus that cast
+ * collapses to. `int` is the weakest model and is byte-neutral at
+ * sub_08076C8C, which passes literal zeros. The third is a plain word (`adds
+ * r6, r2, #0`, compared against 2 and stored with `str`), the fourth goes
+ * straight to Proc_Start as the parent. Settle the first two when sub_08077CAC,
+ * the other caller, is matched. */
+void sub_0807548C(int, int, int, ProcPtr);
+
+/* Already DEFINED and matched in src/decomp with exactly these signatures, but
+ * nothing declared them -- until this wave every caller was still in asm/, so
+ * the omission was invisible. sub_08076ADC, sub_08076BF0, sub_08076C1C and
+ * sub_08076C8C are the first promoted callers. */
+void sub_0807639C(ProcPtr);
+void sub_08074ED0(void *, ProcPtr);
+void sub_08078480(void *, ProcPtr);
+void sub_08078540(void *, ProcPtr);
+
+/* Two starters run back to back on the caller's own proc as parent.
+ * sub_08076ADC calls it across a unit boundary. */
+void sub_08076C8C(ProcPtr);
+
+/* ---- wave 30 (W30-C): the 0x0806B extension block ------------------------ */
+
+/* sub_080137AC's neighbour and evident twin -- sub_0806B09C calls
+ * `sub_080137AC(-1)` and sub_0806B0E0 calls `sub_08013830(1)`, the two of them
+ * bracketing the same proc's fade. The argument is a bare `movs r0, #1`, which
+ * settles nothing about the width, so `int` is the weakest model;
+ * sub_080137AC next to it carries `s32` on no stronger evidence. */
+void sub_08013830(int);
+
+/* ---- wave 30 (W30-C): the 0x08065 extension block ------------------------ */
+
+/* The cursor-step half of sub_08065EB4's dispatch. All three parameter widths
+ * are read off the prologue: `adds r6, r0, #0` (a bare copy, so `int`),
+ * `lsls r1, #0x10; lsrs r1, #0x10` (`u16` -- it is a key bitmask, tested
+ * against 0x40 and 0x80), and `lsls r2, #0x18; lsrs r2, #0x18` (`u8`, used only
+ * as a truth test to gate a sound effect). */
+void sub_08065DAC(int, u16, u8);
+
+/* The other half. Declared WITHOUT a prototype for the sub_0805C290 reason:
+ * sub_08065EB4 reaches it on the arm where r0 happens to hold the `& 1` result,
+ * so the call site cannot show whether that is an argument, and the body was
+ * not read. */
+void sub_08065D20();
+
+/* Wave 30, W30-E: NOW DECLARED, copied verbatim from the definition in
+ * src/decomp/c_08064BC8.c, and sub_0806502C is matched with an explicit
+ * `(struct Unk08580934_Obj *)` on sub_080152EC's result. A pointer cast emits
+ * no instruction, so the cast is a statement about the type model and costs
+ * the match nothing; leaving the function unmatched bought nothing either.
+ * The type conflict W30-C recorded below is REAL and still open -- the cast is
+ * the marker for it, not a resolution of it. */
+void sub_08064BC8(struct Unk08580934_Obj *, int, int, int);
+
+/* W30-C's original note, kept because the evidence in it is what a future
+ * unification pass needs.
+ * sub_0806502C is `sub_08064BC8(sub_080152EC(gUnknown_08580A38, 3),
+ * obj->unk28 + 8, obj->unk1c, obj->unk1c * 2)` -- but sub_080152EC returns
+ * `struct Unk03001470 *` while src/decomp/c_08064BC8.c defines its first
+ * parameter as `struct Unk08580934_Obj *`, so the call cannot be written
+ * without a cast under -Werror.
+ *
+ * That is evidence, not an obstacle: it is the SECOND independent sign this
+ * wave that the two structs describe one object. sub_08066580 stores another
+ * sub_080152EC slot into gUnknown_08580934->unk74[], whose only reader touches
+ * +0x08 -- a `u32` at the same offset in both models -- and the fields
+ * sub_0806502C reads here line up too (unk1c at +0x1c in both, unk28 at +0x28
+ * in both, with Unk08580934_Obj's unk2a sitting in the high half of
+ * Unk03001470's u32 unk28). Unifying them is a multi-file retype that touches
+ * five already-promoted writers of that u32 and wants a union for the
+ * word/halfword duality; it was deliberately NOT started mid-wave.
+ * sub_0806502C is left unmatched rather than papered over with a cast. */
 
 /* --- the 0x0803B block (wave 27, W27-C) ---------------------------------- */
 
@@ -4572,5 +4794,285 @@ void sub_08012420(void);
 void sub_080546F0(void);
 void sub_08054B14(void);
 void sub_08057270(void);
+
+
+/* ---- Wave 30, W30-A: the 0x08031/0x08032/0x08039 address-locality block ---- */
+
+/* Already promoted as `void sub_080337D8(u32, u32, ProcPtr)`
+ * (src/decomp/c_080337D8.c) but never declared here; sub_08031BF0 is the first
+ * caller outside its own unit. */
+void sub_080337D8(u32, u32, ProcPtr);
+/* The five-argument sibling of sub_080337D8: sub_08031C1C passes the same
+ * gUnknown_02000000 buffer, a 0xA5C size, two zeros and its own proc on the
+ * stack. The proc is last, matching sub_080337D8's third-and-last position. */
+void sub_0803376C(u32, u32, int, int, ProcPtr);
+void sub_08030F60(int);
+/* sub_08031E7C passes (0x11, -1). The -1 is `movs r1,#1; rsbs r1,r1,#0`, the
+ * constant, NOT a bitfield mask -- it goes straight out as the argument with
+ * no `ands` anywhere. */
+void sub_0801394C(int, int);
+void sub_0802F588(struct Unk0202575C *, int);
+void sub_0803227C(void);
+/* Coordinates: sub_08032420 feeds it `gUnknown_0849B060->unk04 * 40` and
+ * `->unk06 * 40`, each emitted as `lsls #2; adds; lsls #0x13; asrs #0x10` --
+ * the x5 strength reduction with the x8 folded into the s16 narrowing, which
+ * is what a declared s16 parameter costs and an int parameter does not. */
+void sub_08032340(ProcPtr, s16, s16);
+void sub_08032950(void);
+void sub_08032A00(void);
+/* Mutually recursive HBlank/VCount handlers: each installs the other with
+ * sub_080638D0. Declared so either can name the other's address. */
+void sub_08032B84(void);
+void sub_08032BA4(void);
+/* THREE parameters, and the third is proved rather than guessed: sub_080397BC
+ * copies its incoming proc pointer into r2 BEFORE loading either argument out
+ * of it (`adds r2,r0,#0; ldr r0,[r2,#0x54]; ldr r1,[r2,#0x58]`). With only two
+ * parameters agbcc keeps the base in r0 and moves the first argument in last
+ * (`ldr r2,[r0,#0x54]; ldr r1,[r0,#0x58]; adds r0,r2,#0`) -- same 16 bytes,
+ * five of them different. The copy lands in r2 because r2 IS the third
+ * argument register. Wave 30, W30-A. */
+/* Already promoted as `void sub_08044144(int)` (src/decomp/c_08044144.c) but
+ * never declared here; sub_08039F58 is the first caller outside its own unit. */
+void sub_08044144(int);
+void sub_08044B28(int, int, ProcPtr);
+/* Same third-parameter proof from sub_08039650, where it additionally forces
+ * the r2/r3 split between the proc pointer and the gUnknown_08499598 base. */
+void sub_08080E74(int, int, ProcPtr);
+/* sub_08039820's predicate. `lsls r0,r0,#0x18` on the result before the `cmp`
+ * is a narrow return being re-narrowed, so it is u8/bool8 and not int. */
+u8 sub_08039850(ProcPtr);
+/* Returns a literal 0 that sub_08039820 discards; the narrow return type is
+ * inferred from sub_08039850, the alternative it is selected against. */
+u8 sub_080398D0(ProcPtr);
+/* The u16 entry narrowing `lsls #0x10; lsrs #0x10` in sub_080397F4's own
+ * prologue IS the parameter declaration -- its only argument, an `ldrh` out of
+ * gUnknown_085D3DD0[..].unk20[], needs no conversion. */
+void sub_080397F4(u16);
+/* All three parameters int, read off the promoted definition in
+ * src/decomp/c_08039BB4.c (bare `adds rN,rM,#0` saves, no PROMOTE_MODE
+ * narrowing). Never declared here before wave 30. */
+void sub_08039BB4(int, int, int);
+
+/* ---- Wave 30, W30-B ---- */
+
+/* sub_0801489C IS A FOUR-BYTE `bx lr` AND NOTHING ELSE (0x0801489C, one
+ * instruction plus alignment). There is no prologue, so the usual
+ * read-the-callee's-narrowing route to its widths does not exist -- every field
+ * of this declaration comes from its four call sites, and two of them
+ * (sub_080148A0, sub_080148E0) are wave 30's:
+ *   - FIVE parameters. Both callers `sub sp, #4` and `str rN, [sp]` a zero
+ *     before the `bl`; nothing else in either function needs stack space.
+ *   - Parameter 2 is `u16`: the value both callers compute is
+ *     `unk000[i] * 2 + unk408[i]`, a 17-bit sum, and both narrow it with
+ *     `lsls #0x10; lsrs #0x10` immediately before the call.
+ *   - The RETURN is `u16` on the same tell -- both callers re-narrow the result
+ *     with `lsls #0x10; lsrs #0x10` before returning it, which is what agbcc
+ *     puts at the call of a narrow-returning callee.
+ *   - Parameters 1, 3, 4 and 5 are NOT constrained. r0 is forwarded untouched
+ *     from the caller's own first argument, r2/r3 are either 0 or values
+ *     already zero-extended by the caller's PROMOTE_MODE, and the stack word is
+ *     always 0 -- every one of those is byte-identical under `int`, `u8` or
+ *     `u16`, so `int` is the weakest model rather than a reading. */
+u16 sub_0801489C(int, u16, int, int, int);
+/* Measures a string: it walks a NUL-terminated byte sequence, special-cases the
+ * range 9..10, and accumulates gUnknown_084C36E4[c] per character. Its only
+ * caller sub_08014D20 converts the result to tiles as `(w + 6) / 8` with the
+ * signed `bge; adds #7; asrs #3` bias sequence, so the return is a SIGNED word
+ * -- an unsigned one would be a bare `lsrs #3`. */
+int sub_08014D38(const char *);
+int sub_08014D20(const char *);
+/* The two halfword-valued queries sub_08027844 / sub_08027A08 run on
+ * gUnknown_03001FBC. Both return s16: each caller re-narrows the result with
+ * `lsls #0x10; asrs #0x10` and then compares it SIGNED (`cmp #0x10; bgt`,
+ * `cmp #4; bgt`). The parameter is s16 for the same reason sub_080157A4 /
+ * sub_080157F4's first is -- gUnknown_03001FBC is a declared `s16` global and
+ * arrives via `ldrsh`.
+ *
+ * CORRECTED at wave-30 integration: the return is `u16`, NOT `s16`, and the
+ * caller-side reading above is a textbook cast-at-a-use error. Both bodies are
+ * a single `return tbl[i].field;` compiled to `ldrh r0, [r0, #60]` flowing
+ * straight into `bx lr` -- an UNSIGNED halfword load with no re-narrowing. `s16`
+ * forces `ldrsh`, which needs the offset in a register (`movs r1, #60; ldrsh
+ * r0, [r0, r1]`) and costs +4 bytes on a 36-byte function; measured at 77.8%.
+ * So the callers' `lsls #0x10; asrs #0x10` is an explicit `(s16)` cast in the
+ * CALLER's source, which is exactly what the brief's copy-then-narrow rule says
+ * a narrowing after a `bl` means when the value is used afterwards. A signed
+ * compare downstream constrains the caller's local, not the callee's return.
+ * The discriminating evidence here is callee-side (`ldrh` vs `ldrsh`) and it
+ * beats the call-site shape. */
+u16 sub_08015820(s16);
+u16 sub_080157D0(s16);
+/* sub_0801C210's allocator and initialiser, read off sub_0801C210 (their only
+ * caller) plus their own bodies. sub_0801C6E8 scans gUnknown_03000288's 16
+ * slots and returns the free one or NULL, which is the value sub_0801C210
+ * NULL-tests and returns. sub_0801C69C takes the handle plus sub_0801C210's
+ * three arguments forwarded unchanged -- their widths are invisible at that
+ * call (the values are already zero-extended by sub_0801C210's own
+ * PROMOTE_MODE, so any narrowing there would be elided), so these mirror
+ * sub_0801C210's declared widths rather than measuring anything. */
+struct Unk0801C210 *sub_0801C6E8(int);
+void sub_0801C69C(struct Unk0801C210 *, void *, u16, u8);
+/* The rest of the 0x0801Cxxx animation-handle vocabulary.
+ *   sub_0801C27C / sub_0801C2DC  the two halves of "advance one step":
+ *     sub_0801C254 calls them in that order and re-narrows only the second's
+ *     result (`lsls #0x18; lsrs #0x18`), which is what makes sub_0801C254 `u8`.
+ *   sub_0801C640  installs a script: it STORES its second argument into the
+ *     handle's +0x00 and derives +0x04/+0x08/+0x0c from it. `void *` because
+ *     the body reads it as u16-offset table or as u32 pointers depending on
+ *     the handle's +0x20 bit 1, so no single element type describes it.
+ *   sub_0801C51C  a PASS-THROUGH wrapper and the arity is only visible that
+ *     way: it never touches r1 at all, yet calls sub_0801C640, which reads r1
+ *     and stores it. A one-parameter sub_0801C51C would be storing garbage.
+ *   sub_0801C67C  re-runs sub_0801C2DC with +0x18/+0x1a forced, restoring
+ *     +0x1a afterwards. void -- `pop {r4, r5}; pop {r0}`. */
+u8 sub_0801C27C(struct Unk0801C210 *);
+u8 sub_0801C2DC(struct Unk0801C210 *);
+void sub_0801C640(struct Unk0801C210 *, void *);
+void sub_0801C51C(struct Unk0801C210 *, void *);
+void sub_0801C67C(struct Unk0801C210 *);
+/* The 0x08028xxx block's callees.
+ *   sub_080266DC(u8) -> u8   sub_080288D8 and sub_08028904 both narrow the
+ *     argument to a byte (`lsls #0x18; lsrs #0x18`) off a u16 parameter and
+ *     truth-test the result with `lsls r0,#0x18`.
+ *   sub_080271CC(int) -> u8  INT, not u16, and sub_080289BC is what proves it:
+ *     it passes a raw `int` parameter bare, where a u16 parameter would have
+ *     put `lsls #0x10; lsrs #0x10` in front of the `bl`. Its other caller
+ *     sub_08028990 passes an already-zero-extended u16 and so cannot see the
+ *     difference. Result re-narrowed to u8 at both sites.
+ *   sub_08028B70 returns `int`: sub_08028CF4 tests it with a BARE `cmp r0,#0`
+ *     and then casts to u8 (`lsls #0x18; lsrs #0x18`) for sub_08019940's u8
+ *     first parameter -- a narrow return would have re-narrowed before the
+ *     compare instead.
+ *   sub_08028BAC returns a byte (`lsls r0,#0x18; cmp r0,#0` at the one site).
+ *   sub_08028A68 / sub_08028AEC / sub_08027118 / sub_08025EA0 are argument-free
+ *     and result-discarded at every site in this block. */
+/* Spelled `bool8` to agree textually with the promoted definition in
+ * src/decomp/c_080266DC.c. `bool8` IS `u8` (include/gba/types.h:27), so this is
+ * the same type either way and no caller changes -- but tools/proto_check.py
+ * compares declaration TEXT and does not resolve typedefs, so the two spellings
+ * read as a mismatch. Wave 30. */
+bool8 sub_080266DC(u8);
+u8 sub_080271CC(int);
+int sub_08028B70(void);
+u8 sub_08028BAC(void);
+void sub_08028A68(void);
+void sub_08028AEC(void);
+void sub_08027118(void);
+void sub_08025EA0(void);
+/* sub_08028874's SECOND PARAMETER IS `int`, NOT `u8` -- corrected in wave 30
+ * from the caller, which is the only place it is visible. sub_08028894 saves
+ * both of its own `int` parameters with bare `adds rN, rM, #0`, builds
+ * SEPARATE u16-narrowed copies for its sub_08028848 call, and then passes the
+ * RAW originals to sub_08028874 with no narrowing at all. A `u8` parameter
+ * there emits `lsls #0x18; lsrs #0x18` in front of that `bl`; a `u16` one emits
+ * `lsls #0x10; lsrs #0x10`. Neither is in the ROM. The already-promoted
+ * definition in src/decomp/c_08028874.c could not see this: its only use of the
+ * value is a `strb` into a u8 struct member, which is byte-identical for every
+ * width, so the definition is the weaker evidence here. Retyped and re-matched
+ * with try_match. */
+void sub_08028874(int, int);
+void sub_08028894(int, int);
+u8 sub_080288D8(u16);
+u8 sub_08028904(u16);
+u8 sub_08028990(u16);
+u8 sub_080289BC(int);
+void sub_08028568(void);
+void sub_08028168(void);
+/* sub_080276D0 / sub_080276F0 are the 0 and 1 halves of one two-line body;
+ * sub_08027844 / sub_08027A08 are the 0x10 and 4 halves of another. All four
+ * are argument-free and end `pop {r0}` / `pop {r4}; pop {r0}`, i.e. void.
+ * sub_08027FBC's second and third parameters are u16: each is used as
+ * `lsls #0x10; lsrs #0xc`, which is PROMOTE_MODE's zero-extension FUSED by
+ * combine with a `* 0x10` -- three instructions collapsed to two, and a shape
+ * an `int` parameter cannot produce. */
+void sub_080276D0(void);
+void sub_080276F0(void);
+void sub_08027844(void);
+void sub_08027A08(void);
+void sub_08027FBC(void *, u16, u16);
+/* The 0x08005xxx menu block. sub_08005838 and sub_080059B4 take THREE
+ * arguments and read only the third, which arrives `lsls #0x18; lsrs #0x18`,
+ * i.e. a `u8` parameter under PROMOTE_MODE. The first two are dead in both
+ * bodies, so `int` is the weakest model for them and not a measurement. */
+void sub_08005154(void);
+void sub_0800517C(void);
+void sub_0800518C(void);
+void sub_08005580(void);
+void sub_08005838(int, int, u8);
+void sub_080059B4(int, int, u8);
+void sub_08005D14(void);
+void sub_08005EF0(int);
+void sub_080145BC(void);
+/* The gUnknown_03000050 arena's allocate / free pair, one level below
+ * sub_08014E44 / sub_08014ED4. Each takes the arena handle in r0 -- its
+ * `!= -1` gate is in the caller, not here -- and the caller's own argument
+ * untouched in r1. sub_08014DCC's result is what sub_08014E44 returns, so
+ * `void *`; sub_08014ED4 discards sub_08014E68's and ends `pop {r0}`. */
+void *sub_08014DCC(int, int);
+void sub_08014E68(int, void *);
+/* Never declared here before wave 30, though both have matched definitions in
+ * src/decomp/ -- these two lines just publish what those files already say
+ * (c_08014D7C.c, c_08028848.c), so that sub_08014DA8 and sub_08028894 can call
+ * them without an implicit declaration. */
+int sub_08014D7C(void *, u32);
+void sub_08028848(u16, u16);
+/* sub_080281D8 parks its second argument in the slot's +0x18 and sub_08028190
+ * is what consumes it -- `ldr r0,[r0,#0x18]`, skip if zero, hand to
+ * sub_080196F4(void *). That shared displacement on a sub_080152EC slot is why
+ * the parameter is `struct Unk03001470 *` and not a Proc. */
+void sub_08028190(struct Unk03001470 *);
+/* Already MATCHED as src/decomp/c_0804360C.c and simply never declared here;
+ * sub_080276D0 / sub_080276F0 need it. Its argument is the same
+ * gUnknown_08090A98 element they have just stored into
+ * gUnknown_03003130.unk04 -- r0 still holds it at the `bl`. */
+void sub_0804360C(int);
+/* Wave 30, W30-B extension work.
+ * sub_08022DD4's three parameters are s16. Its own prologue zero-extends the
+ * first two (PROMOTE_MODE, which says nothing about signedness) and every use
+ * inside re-narrows with `lsls #0x10; asrs #0x10`, including the third, which
+ * is the switch selector. Its only caller sub_080230C4 forwards three
+ * sign-extended values and nothing else in the ROM sees it.
+ * sub_080230DC takes FIVE, and the last two are OUT parameters: `push` saves
+ * four registers plus lr, so `ldr r0, [sp, #0x14]` is argument 5, and both it
+ * and r3 are written with `strh` and never read. Its THIRD parameter is dead --
+ * r2 is overwritten by a pool `ldr` before any read -- but sub_0802323C
+ * materialises it, so it is declared. */
+void sub_08022DD4(s16, s16, s16);
+void sub_080230C4(s16, s16, s16);
+void sub_080230DC(s16, s16, s16, s16 *, s16 *);
+void sub_08049FB0(void);
+void sub_08049FD4(void);
+void sub_08049EB4(void);
+void sub_08049B80(void);
+/* Wave 30, W30-D. THREE parameters on CALLER-side evidence, which is the only
+ * evidence there is: sub_080030BC's own body reads r0 only (r5 = r0, and r1/r2
+ * are clobbered by a pool `ldr` before any read), but its sole caller
+ * sub_08003088 materialises r1 and r2 from saved registers before each of its
+ * four `bl`s. A body that ignores its later arguments is ordinary; the call
+ * site is the stronger evidence. void because sub_080030BC tail-calls
+ * sub_080032EC and sub_08003088 discards r0. */
+void sub_080030BC(int, int, int);
+/* Wave 30, W30-D. Five parameters, all typed from sub_080487B4's OWN prologue,
+ * which narrows every one of them: r0 and r1 with `lsls #0x18; lsrs #0x18`
+ * (u8), r3 and the stack argument at [sp, #0x28] with `lsls #0x10; lsrs #0x10`
+ * (u16). r2 is kept whole and used as the base of `adds r1, r7, r1` after the
+ * index is scaled `lsls #1`, so it is a halfword pointer -- and sub_0804931C
+ * passes gUnknown_08499578, which is already declared `u16 *`. The stack slot
+ * is argument five: `push {r4,r5,r6,r7,lr}` + `push {r5,r6,r7}` + `sub sp,#8`
+ * is exactly 0x28. Return unused at all three call sites. */
+void sub_080487B4(u8, u8, u16 *, u16, u16);
+/* Wave 30, W30-D. Three callees of the 0x08075/0x08087 blocks that had no
+ * declaration. sub_08085F40 and sub_0803D960 are already PROMOTED
+ * (src/decomp/c_08085F40.c, src/decomp/c_0803D960.c) and these two lines just
+ * publish the signatures those definitions already have -- sub_0803D960's
+ * parameter is the Proc_StartBlocking parent it forwards.
+ * sub_08075904 takes an index it scales by 0x30 (`lsls #1; adds; lsls #4`,
+ * i.e. a 3<<4-byte record) into gUnknown_08615194 + 0xc, and returns: one arm
+ * is a bare `movs r0, #0`. Its two callers both discard the result, so `int`
+ * is the widest thing the body supports and nothing narrows it. */
+int sub_08075904(int);
+void sub_080879A0(void);
+void sub_08085F40(void);
+void sub_0803D960(ProcPtr);
 
 #endif // UNKNOWN_FUNCS_H

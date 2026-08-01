@@ -1,0 +1,35 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08005154.
+ * sub_08005154 @ 0x08005154, sub_0800517C @ 0x0800517C, sub_0800518C @ 0x0800518C
+ */
+
+void sub_08005154(void)
+{
+    sub_0801A168();
+    sub_080152EC(gUnknown_08487E8C, 0);
+    gUnknown_0200B0B0->unk02 = 7;
+    sub_08024268();
+}
+
+/* A bare `strb` through `adds rN, #0x9c`, past `strb`'s imm5 range -- which is
+ * the only reason the address arithmetic is a separate instruction. */
+void sub_0800517C(void)
+{
+    gUnknown_0200B0B0->unk9c = 0;
+}
+
+/* gUnknown_08499578 and gUnknown_08499580 are POINTER variables, so each
+ * argument is `ldr rN, =sym; ldr rN, [rN]`. The 0x14 that goes to [sp] is CSEd
+ * into r4 across both calls, which is what costs the function its `push {r4}`;
+ * `movs r1,#0xd8; lsls r1,#2` is just the constant 0x360. */
+void sub_0800518C(void)
+{
+    sub_08012BC8(gUnknown_08499578, 0, 0xE, 0x1E, 0x14, 0);
+    sub_08012BC8(gUnknown_08499580, 0, 0xE, 0x1E, 0x14, 0x360);
+    sub_08013AEC();
+    sub_08013B0C();
+}

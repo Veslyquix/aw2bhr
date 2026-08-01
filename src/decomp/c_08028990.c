@@ -1,0 +1,35 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08028990.
+ * sub_08028990 @ 0x08028990, sub_080289BC @ 0x080289BC
+ */
+
+/* The GUARD is the early return, not the call: the ROM falls through to
+ * `bl sub_080271CC` and parks `movs r0, #1` past the literal pool. With a
+ * single condition, `if (flag) return f(a); return 1;` comes out the other way
+ * round -- gcc makes the trailing `return 1` the fall-through. Its sibling
+ * sub_080289BC needs no inversion because two `&&`-ed conditions already leave
+ * the call as the fall-through. */
+u8 sub_08028990(u16 a1)
+{
+    if ((gUnknown_03003FC0.unk04 & 1) == 0)
+        return 1;
+
+    return sub_080271CC(a1);
+}
+
+/* The parameter is `int`, NOT u16, and this function is the only place that
+ * shows: it hands the raw value to sub_080271CC with no narrowing at all, where
+ * a u16 parameter there would have emitted `lsls #0x10; lsrs #0x10` in front of
+ * the `bl`. Its sibling sub_08028990 passes an already-zero-extended u16 and so
+ * cannot distinguish the two. */
+u8 sub_080289BC(int a1)
+{
+    if (gUnknown_08499598[a1].unk1b == 1 && (gUnknown_03003FC0.unk04 & 0x10))
+        return sub_080271CC(a1);
+
+    return 1;
+}

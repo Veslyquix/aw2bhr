@@ -1,0 +1,48 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08039140.
+ * sub_08039140 @ 0x08039140
+ */
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08039140.
+ * sub_08039140 @ 0x08039140
+ */
+
+
+/* An on-screen test for a box of size (w, h) at (x, y): the camera origin
+ * lives at +0x04 / +0x06 of the map descriptor gUnknown_08499590 points at,
+ * and the box is accepted when it overlaps the 0xF0 x 0xA0 screen.
+ *
+ * `cmn r1, r3` is the tell for the lower bounds: the comparison is against
+ * MINUS the size, `dy > -h`, which agbcc folds into a compare-negative.
+ * Writing it as `dy + h > 0` materialises the sum with an `adds` and costs 4
+ * bytes.
+ *
+ * The first parameter arrives u16 (`lsls #0x10; lsrs #0x10`) and is cast back
+ * to s16 at its single use (`lsls #0x10; asrs #0x10`); the second arrives
+ * already s16. Both entry shift pairs are the declarations; only the one at
+ * the use is a cast in the source. */
+
+int sub_08039140(u16 x, s16 y, u8 w, u8 h)
+{
+    int dx;
+    int dy;
+
+    dy = y - *(s16 *)(gUnknown_08499590 + 6);
+
+    if (dy > -h && dy <= 0x9f)
+    {
+        dx = (s16)x - *(s16 *)(gUnknown_08499590 + 4);
+
+        if (dx > -w && dx <= 0xef)
+            return 1;
+    }
+
+    return 0;
+}

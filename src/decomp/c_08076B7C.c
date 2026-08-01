@@ -1,0 +1,84 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08076B7C.
+ * sub_08076B7C @ 0x08076B7C, sub_08076BC4 @ 0x08076BC4, sub_08076BE0 @ 0x08076BE0, sub_08076BF0 @ 0x08076BF0, sub_08076C1C @ 0x08076C1C, sub_08076C64 @ 0x08076C64, sub_08076C8C @ 0x08076C8C
+ */
+
+#include "proc.h"
+
+/* sub_08076ADC's twin without the proc tail, plus one guarded extra step. */
+void sub_08076B7C(void)
+{
+    sub_08076888();
+    Decompress(gUnknown_081D0BAC, gUnknown_08614280);
+
+    if (gUnknown_0202FDFC.unk11 != 0)
+        sub_08076B20();
+
+    sub_08076858();
+    sub_0807681C();
+    sub_08011E54(gUnknown_08614280, (void *)0x0600F000, 0x1000);
+}
+
+/* A five-argument forwarder: the fifth goes on the stack, which is what the
+ * `sub sp, #4` / `str r0, [sp]` frame is -- not a local. */
+void sub_08076BC4(ProcPtr parent)
+{
+    sub_080785CC(0, 0x78, 0, gUnknown_084BA6D0, parent);
+}
+
+/* A pass-through wrapper: r0 is never written, so the proc arrives and is
+ * forwarded unchanged and costs zero instructions -- the arity is read off the
+ * callee, not off this body. sub_08074C84 returns s32 and the result is
+ * dropped (`pop {r0}; bx r0`). */
+void sub_08076BE0(ProcPtr proc)
+{
+    sub_08074C84(proc, 0, 0xAF, 1);
+}
+
+/* The table read happens BEFORE the guard in the ROM -- a local bound outside
+ * the `if`, the same shape as sub_0806366C. `lsls #3` is the 8-byte record
+ * stride of gUnknown_0861500C. */
+void sub_08076BF0(ProcPtr parent)
+{
+    void *p;
+
+    p = gUnknown_0861500C[gUnknown_0202FDFC.unk0c].unk_04;
+
+    if (gUnknown_0202FDFC.unk11 == 1)
+        sub_08078480(p, parent);
+}
+
+/* `lsls #1; adds; lsls #4` is a MULTIPLY by 3 << 4 == 0x30, i.e. an index into
+ * an array of 0x30-byte structs -- which is exactly sizeof(struct Unk08615194)
+ * -- rather than hand-rolled address arithmetic. Both arms compute an address
+ * and agbcc tail-merges the single `ldr` that follows the join. */
+void sub_08076C1C(ProcPtr parent)
+{
+    void *p;
+
+    if (gUnknown_0202FDFC.unk11 == 0)
+        p = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk1c;
+    else
+        p = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk18;
+
+    if (p != NULL)
+        sub_08078540(p, parent);
+}
+
+/* sub_08076BC4 behind a guard, with a different (x, y). */
+void sub_08076C64(ProcPtr parent)
+{
+    if (sub_0803866C())
+        sub_080785CC(0x50, 0x70, 0, gUnknown_084BA6D0, parent);
+}
+
+/* Two starters under the caller's own proc. */
+void sub_08076C8C(ProcPtr proc)
+{
+    sub_08074ED0(NULL, proc);
+    sub_0807548C(0, 0, 0, proc);
+}

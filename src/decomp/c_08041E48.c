@@ -1,0 +1,43 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08041E48.
+ * sub_08041E48 @ 0x08041E48
+ */
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08041E48.
+ * sub_08041E48 @ 0x08041E48
+ */
+
+#include "proc.h"
+struct Unk41E48Proc
+{
+    /* 0x00 */ PROC_HEADER;
+    /* 0x29 */ STRUCT_PAD(0x29, 0x2c);
+    /* 0x2c */ int unk2c;
+    /* 0x30 */ int unk30;
+    /* 0x34 */ STRUCT_PAD(0x34, 0x64);
+    /* 0x64 */ s16 unk64; /* `ldrsh` through a scratch register, so signed */
+};
+
+/* The same three bracketing calls src/decomp/c_0802CFFC.c opens with, and the
+ * same gUnknown_03003FC0.unk32 gate on the same sub_08034534 command -- this
+ * is that function's per-proc variant, taking the two coordinates off the proc
+ * instead of passing zeros. The `lsls #0x18; lsrs #0x18` pair on each is what
+ * retyped sub_08034534's third and fourth parameters to u8; c_0802CFFC.c's two
+ * literal zeros could never have shown it. */
+
+void sub_08041E48(struct Unk41E48Proc *proc)
+{
+    sub_0802C57C();
+    sub_080424FC();
+    sub_0802C594();
+
+    if (proc->unk64 != 0 && gUnknown_03003FC0.unk32 != 0)
+        sub_08034534(5, gUnknown_03003F38, proc->unk2c, proc->unk30);
+}

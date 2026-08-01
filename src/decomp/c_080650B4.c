@@ -1,0 +1,25 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080650B4.
+ * sub_080650B4 @ 0x080650B4
+ */
+
+/* sub_08065060's twin: the same velocity integration, the opposite screen edge,
+ * and one extra bookkeeping decrement before the same teardown call. */
+void sub_080650B4(struct Unk08580934_Obj *o)
+{
+    o->unk3a += o->unk3c;
+    o->unk2a += o->unk3a;
+
+    if (o->unk2a > 0xA0)
+    {
+        gUnknown_08580934->unk2d--;
+        sub_08030178();
+        sub_08015C30(gUnknown_03001FBC);
+    }
+
+    sub_08064E5C(o);
+}

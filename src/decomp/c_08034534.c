@@ -14,7 +14,7 @@
  * sub_0803446C is the +2..+5 snapshot on its own. The store order is the
  * source's -- +0 first, then the two cursor pairs, then +1/+6/+7 -- and it is
  * not reorderable, which is what fixes this as one statement per line. */
-void sub_08034534(int a, u8 b, int c, int d)
+void sub_08034534(int a, u8 b, u8 c, u8 d)
 {
     struct Unk08499594 *unit = &gUnknown_08499594[b];
 

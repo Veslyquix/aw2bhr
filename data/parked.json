@@ -374,6 +374,50 @@
    ],
    "wave": 28,
    "agent": "W28-A"
+  },
+  "sub_0801C640": {
+   "bytes": 60,
+   "best": "60 bytes (exact), 88.3% identical -- 7 of 60 bytes",
+   "remaining_diff": "Size, relocations and the instruction SEQUENCE are all exact. The only difference is that two quantities get each other's hard register in the second cursor chain: the ROM keeps the cursor in r0 and the one-use inner offset in r1 (`adds r0,r2,r0` / `ldrh r1,[r0]` / `adds r0,r0,r1`), ours is the other way round (`adds r1,r2,r0` / `ldrh r0,[r1]` / `adds r0,r1,r0`). The `adds rD,rD,rM` tie from `p += ...` is already right in both, so this is local-alloc's priority order between the longer-lived cursor and the one-use temp.",
+   "why_it_is_close": "Everything else about the function is settled and measured. `lsrs #1; lsls #1` is `x / 2 * 2` and NOT `x & ~1` -- `& ~1` has to build -2 with `movs; rsbs` and hold it in a register, which gives this leaf a `push {r4, lr}` the ROM does not have, so the absence of a prologue is what proves the shift spelling. The +0x20 bit-1 test selecting a u16 self-relative encoding against a flat u32 pointer table is confirmed by sub_0801C4D4 doing the identical thing with an index. sub_0801C4D4 is parked on exactly the same register-allocation axis, so one probe aimed at agbcc's local-alloc priority would very likely unblock both.",
+   "axes_ruled_out": [
+    "x & ~1 for the shift pairs -- SETTLED THE OTHER WAY, it adds a push",
+    "separate `p` and `v` locals -- v lands in r0 and p in r1, 8 bytes off",
+    "one `p` reused for the +0x04 value and the cursor -- 7 bytes off, the current best",
+    "one `v` reused across BOTH arms including the else arm -- 7 bytes off",
+    "`v = p + ...` versus `p += ...` -- bit-identical output",
+    "declaring the cursor u8 * / void * / u16 * -- bit-identical"
+   ],
+   "settled_by_this_attempt": "The script-data model: +0x00 is the installed script, +0x04/+0x08/+0x0c are three cursors derived from it, and handle +0x20 bit 1 picks the encoding. This is now recorded on struct Unk0801C210 in include/unknown-globals.h.",
+   "wave": "30 (W30-B)"
+  },
+  "sub_0801C4D4": {
+   "bytes": 72,
+   "best": "72 bytes (exact), 86.1% identical -- 10 of 72 bytes",
+   "remaining_diff": "Size, relocations and every instruction are exact. The handle and the script base simply get each other's register: the ROM has `adds r2, r0, #0` / `ldr r3, [r2]` (handle r2, base r3), ours has `adds r3, r0, #0` / `ldr r2, [r3]`. The ten differing bytes are exactly the ten instructions that name one of the two.",
+   "why_it_is_close": "Both quantities are live over the same span and both have five references, so this is local-alloc's tie-break. Under gcc 2.9's `n_refs * floor_log2(n_refs) / (death - birth)` the base wins because it is born later and dies earlier, and no rewrite reached a shape where the handle wins -- lengthening the base's range by reusing one variable for the result raises its priority instead of lowering it. sub_0801C640 next door is parked on the same axis.",
+   "axes_ruled_out": [
+    "x & ~1 instead of / 2 * 2 -- worse, costs a register for -2",
+    "`base` as a local versus `a1->unk00` spelled out at every use -- CSE gives one quantity either way",
+    "u8 * / void * / u16 * for that local -- bit-identical",
+    "a1->unk08 = v; a1->unk0c = v;  vs  a1->unk0c = a1->unk08 = v;  vs  a1->unk0c = a1->unk08; -- the reload is CSEd away so it adds no ref",
+    "one variable for base and result so its range spans to the stores -- raises its priority, wrong direction",
+    "guard as two early returns, as one `||`, and as a block-scoped `if (a1 && a1->unk00) { ... }`",
+    "`p += ...` versus `v = p + ...` in the then-arm -- bit-identical"
+   ],
+   "settled_by_this_attempt": "Second parameter is the entry INDEX into the script's table (`lsls #1` on the u16 path, `lsls #2` plus a +4 displacement on the u32 path), which is why sub_0801C640 is the same body with the index pinned to 0.",
+   "wave": "30 (W30-B)"
+  },
+  "sub_08080EB0": "96.2% by size -- 48 bytes against 52, every instruction in order and every pool word placed correctly. The ONLY difference is one register-allocation artefact: the ROM opens `adds r1, r0, #0` and does both `cmp` against r1, while every candidate keeps the parameter in r0 and compares r0 directly (2 bytes, plus the 2-byte alignment pad they push the pool past). The shape IS settled: else-if with a per-branch `return <cmp>`, and the fall-through returns the PARAMETER, not a literal 0 -- r0 is untouched when the argument is neither 1 nor 2, and a literal 0 costs a `movs r0, #0` the ROM does not have. Ruled out by probe, none of which produced the copy: `if (Proc_Find(x)) return 1;` falling through to a shared `return type` (makes the parameter live across the `bl`, so it lands in r4 and the prologue becomes `push {r4, lr}` -- this is what proves the per-branch return); an uninitialised `int result` assigned in the branches (gcc cross-jumps the two `bl Proc_Find` sites and uses r4); `int t = type;` comparing t and returning t (emits the copy INVERTED -- compares r0 and restores `add r0, r1, #0` at the tail -- and cross-jumps the calls); `int t = type;` comparing t and returning `type` (coalesced, no copy); `switch (type)` with and without a default (both compares hoisted to the top as a decision list, which the ROM does not do); a local ProcPtr holding the call result; and `?:` in place of `!=`. The ROM's shape needs the parameter's pseudo to LOSE r0 to the return value WITHOUT becoming live across a call, and no source spelling reproduces that. Same species as sub_0801A6C0 -- worth re-testing whenever a register-allocation rule lands in docs/agbcc-codegen.md. WAVE 30 (W30-D). Draft at work/sub_08080EB0/.",
+  "sub_08087514": "92.3% by size -- 48 bytes against 52, every instruction and every register assignment identical to the ROM except the FIRST ARGUMENT. The ROM builds it in four instructions -- `movs r0,#5 / subs r3,r0,r3 / adds r0,r3,#0 / adds r0,#0xb8` -- computing (5 - a) and adding 0xB8 as a separate step. agbcc folds every spelling tried to the two-instruction `movs r0,#0xbd; subs r0,r0,r3`: `0xB8 + 5 - a`, `0xB8 + (5 - a)`, `(5 - a) + 0xB8`, `5 + 0xB8 - a`, `int t = 5 - a; t + 0xB8`, `int t = 5 - a; t += 0xB8;`, and the u32 version of the last two. The fold is tree-level in the front end for the literal forms and propagate-then-combine for the temporaries, so blocking it needs the subtraction's result to have a SECOND use, and nothing in this function gives it one. Everything else is settled and cost real probes: the clamp is UNSIGNED (`bhi`), hence `u32` on the first parameter; the row index must be written `b * 2 + 5 + c` and NOT `b * 2 + (c + 5)` -- agbcc reassociates the first into the ROM's `lsls r2,r1,#1; adds r1,r4,#5; adds r2,r2,r1` and the second into `lsl; add #5; add r5`, which also costs an extra callee-saved register; and the byte offset must sit INSIDE the pointer add, `p + (idx * 32 + 9)` rather than `p + idx * 32 + 9`, or the `adds #0x12` lands after the base add instead of before it. WAVE 30 (W30-D). Draft at work/sub_08087514/.",
+  "sub_08073930": {
+   "bytes": 68,
+   "best": "68 bytes (exact), 85.3% identical -- 10 of 68 bytes",
+   "remaining_diff": "Size and relocations are exact and the instruction sequence matches. The ROM holds a pool word in r2 where ours holds it in r3, first visible at +0xb (`ldr r2, [pc, #44]` vs `ldr r3, [pc, #44]`); the choice then propagates through every instruction naming either register.",
+   "why_it_is_close": "Everything except the register assignment is already right, so this is the same local-alloc tie-break axis as sub_0801C4D4 and sub_0801C640 parked this wave -- but unlike those two it has had NO attempt on that axis yet, because the wave ran out of budget here.",
+   "axes_ruled_out": [],
+   "read_this_first": "include/unknown-globals.h already records two facts about this function that a fresh attempt will otherwise re-derive wrongly. (1) It reaches its slot through agbcc's own -fforce-addr word at 0x081CC02C, whose ROM contents are 0x0202FDE4, so the three-level load here is ONE indirection of compiler bookkeeping and NOT a pointer to a pointer -- a draft modelling it as the latter looks structurally right and allocates differently. (2) gUnknown_0202F8DC is read at stride FOUR with the halfword at +2 (two entries per scanline), which contradicts an older note above it claiming a one-halfword table; that reconciliation is still open and is the most likely source-level lever here. Settle the type model before touching allocation.",
+   "wave": "30 (W30-A)"
   }
  }
 }
