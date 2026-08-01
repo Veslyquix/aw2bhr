@@ -663,6 +663,7 @@ def blocks(recs, args):
         print("\n  block 0x%05X000  %2d candidates, %4d bytes  "
               "(%d matched, %d promoted units in block)"
               % (blk, n, sum(f["size"] for f in fns), n_matched, n_units))
+        shown = 0
         for r in sorted(fns, key=lambda x: addr[x["name"]])[:args.per_block]:
             a = addr[r["name"]]
             i = bisect.bisect_left(matched_addrs, a)
@@ -671,6 +672,7 @@ def blocks(recs, args):
                        key=lambda x: abs(x - a), default=None)
             if near is None:
                 continue
+            shown += 1
             # The exemplar is the promoted UNIT that contains the nearest
             # matched neighbour, i.e. the greatest unit address <= it. That is
             # a guess about unit boundaries rather than a lookup, which is why
@@ -681,6 +683,13 @@ def blocks(recs, args):
             print("    %-16s %3dB calls=%-2d refs=%-2d  nearest sub_%08X  %s"
                   % (r["name"], r["size"], len(r["calls"]),
                      len(r["data_refs"]), near, exf or "?"))
+        # NO SILENT CAPS. This listing IS the batching list, so a block that
+        # says "19 candidates" and prints 14 hands the next wave a short batch
+        # that looks complete. Wave 26 caught it only by comparing the two
+        # numbers by hand.
+        if shown < n:
+            print("    (+%d more not shown -- re-run with --per-block %d)"
+                  % (n - shown, n))
     return rows, offered
 
 
@@ -771,6 +780,10 @@ def main():
     args = p.parse_args()
     if args.self_test:
         args.include_parked = True
+        print("[self-test] --include-parked is ON (the anchors are parked), so "
+              "every count below\n            is HIGHER than a plain run's. "
+              "The two outputs are not comparable;\n            batch off the "
+              "plain run.")
         sys.exit(self_test(args))
     report(args)
 

@@ -38,6 +38,31 @@ def load(path, what):
         return json.load(fh)
 
 
+def promoted_file(fn):
+    """The src/decomp path that DEFINES fn, or None if it is not promoted.
+
+    A promoted function keeps its work/<fn>/<fn>.c draft, and this script
+    compiles THAT, never the promoted definition. So the moment a promoted
+    function's signature changes -- which happens whenever a later wave settles
+    a type from newly promoted callers -- the untouched draft starts failing to
+    compile with `conflicting types`, and that reads exactly like a regression
+    caused by the retype. It is not: the draft is stale. Wave 26 hit this on
+    five functions at once.
+    """
+    path = os.path.join(awlib.DATA_DIR, "promoted.json")
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as fh:
+            units = json.load(fh)
+    except (ValueError, OSError):
+        return None
+    for u in units:
+        if fn in u.get("functions", []):
+            return u.get("file")
+    return None
+
+
 def resolve(name):
     recs = load(os.path.join(awlib.DATA_DIR, "functions.json"),
                 "run tools/index_functions.py")
@@ -436,6 +461,13 @@ def check(name, want_diff=False, keep_going=False):
         msg = (se or so).strip().splitlines()
         for ln in msg[-25:]:
             print("  " + ln)
+        prom = promoted_file(fn)
+        if prom:
+            print("  NOTE: %s is already promoted, and this compiled "
+                  "work/%s/%s.c, not %s." % (fn, fn, fn, prom))
+            print("        A stale draft is the likely cause -- diff the two "
+                  "before believing this is a regression. If a header retype "
+                  "settled the signature, sync the draft to it.")
         return 1
 
     tgt, err = section_bytes(unit_o, "work/%s/_target.bin" % fn)

@@ -35,8 +35,19 @@ Run this BEFORE `make SPLIT=1 compare`. It is seconds against ten minutes.
 
 Exits non-zero on any mismatch, so it can gate the promote pipeline.
 
-THE RULE IT ENFORCES: when a promoted file has already named a type, the header
-must agree with it. Weakest-model applies only to types nobody has named.
+THE RULE IT ENFORCES: a header declaration and a promoted definition must
+AGREE. Which one moves is a judgement this script cannot make, and its old
+"the DEFINITION wins -- change the header" was too strong. The default still
+holds -- weakest-model applies only to types nobody has named -- but wave 26
+found the default wrong five times out of six in one wave: that wave promoted
+the FIRST C callers those functions ever had, and caller evidence is the only
+evidence there is for a return width or an unused trailing parameter (four
+`u8`/`u16` returns were really `int`, consumed with no re-narrowing; one 2-arg
+definition was really 3-arg). A definition promoted years of waves ago from
+body-side reasoning alone is a guess, not a fact. So: read which side is new,
+prefer whichever side has caller evidence, and where both are guesses keep the
+definition. Then re-verify the whole affected unit and sync its work drafts --
+a retyped promoted function leaves a stale work/<fn>/<fn>.c behind.
 
 Note on the comparison: parameter NAMES are stripped before comparing, but a
 lone type token is not a name -- `(u8)` and `(u8 a)` are the same signature.
@@ -207,7 +218,16 @@ def main(argv):
                                         'return type AND parameters'))
             print('   header:  %s %s(%s)' % (dret, fn, decl))
             print('   %s:  %s %s(%s)' % (src, fret, fn, defined))
-            print('   the DEFINITION wins -- change the header to agree.')
+            print('   the DEFINITION wins BY DEFAULT -- but check which side is '
+                  'NEW first.')
+            print('   A declaration added THIS wave from caller-side evidence '
+                  'beats a body-side')
+            print('   guess promoted long ago: wave 26 had six of these and '
+                  'FIVE settled toward')
+            print('   the callers. `git diff include/` to see. Whichever side '
+                  'loses, re-verify')
+            print('   every function in the affected unit AND sync its '
+                  'work/<fn>/<fn>.c draft.')
 
     print('checked %d prototype(s) against %d definition(s) -- %d mismatch(es)'
           % (len(protos), len(defs), bad))
