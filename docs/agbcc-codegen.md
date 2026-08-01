@@ -13852,3 +13852,341 @@ forces the copy, the SImode one does not.
 same way (`keys = ~REG_KEYINPUT & 0x3FF;`), which is corroboration rather than
 coincidence — the two functions are in adjacent units and read the same
 register the same way.
+
+## `s16` and `u16` parameters are INDISTINGUISHABLE in the callee — the caller is the only oracle (wave 29, W29-A)
+
+`sub_08025C5C`'s prologue is three `lsls #0x10; lsrs #0x10` pairs, one per
+parameter. That is PROMOTE_MODE, and it is **zero-extending for `s16` exactly as
+it is for `u16`** — probed both ways in one file, byte-identical output. Nothing
+in the body separates them either: all three values only reach a `strb` and a
+`u8` conversion, both of which discard the upper bits.
+
+What separates them is the **caller**. `sub_08025C98` and `sub_08025CC8` each
+SIGN-extend all three arguments (`lsls #0x10; asrs #0x10`) in front of the `bl`.
+Declaring the callee `u16` makes those two emit the zero-extending `lsrs` there
+instead, and neither one matches. Measured, all four combinations:
+
+| caller param | callee param | argument setup at the `bl` |
+|---|---|---|
+| `s16` | `s16` | `lsls #0x10; asrs #0x10` — **the ROM** |
+| `int` | `s16` | `lsls #0x10; asrs #0x10` |
+| `s16` | `u16` | `lsls #0x10; lsrs #0x10` |
+| `int` | `u16` | `lsls #0x10; lsrs #0x10` |
+
+So the callee's own narrowing pair reads out WIDTH and nothing else, and the
+signedness of a narrow parameter is a property you can only measure one call
+site up. A wrong choice is invisible in the function that declares it, which is
+exactly the class of error `try_match` cannot see.
+
+## An invisible forwarded parameter is REFUTABLE, not merely unproved, when the alternative needs a literal (wave 29, W29-A)
+
+The wave-28 direct-call arity tell says to read a pass-through wrapper's arity
+off the callee's prologue. Two functions here sharpen it into a proof rather
+than an inference:
+
+- `sub_08025BB4` opens with a bare `bl sub_08035740` and sub_08035740 --
+  already matched as `void sub_08035740(void *a)` -- reads r0. The usual reading
+  is "so it probably forwards a parameter". The stronger one: `void
+  sub_08025BB4(void)` is **impossible**, because the call would then have to
+  pass *something*, and every literal costs a `movs r0, #N` that is not in the
+  ROM. There is no third option.
+- `sub_080251BC` never writes r2, and its callee `sub_08024F20` reads r2 as a
+  pointer (`ldrh [r2]`, `ldrh [r2,#2]`). Same argument: a third parameter, or an
+  instruction that is not there.
+
+The same shape closed `sub_0802A588`, where an otherwise-unexplained
+`adds r2, r0, #0` in the prologue is the THIRD argument of `sub_0803FECC` being
+staged -- that callee's entire body is `adds r3,r2,#0; movs r2,#0; bl
+sub_0803FF48`, i.e. it forwards r2 into a `ProcPtr` parent slot. **An argument
+register that is set up and then never read locally is an argument.**
+
+## The "loose byte-identical duplicate" axis is REAL — harvested, 4 for 4 (wave 29, W29-A)
+
+`tools/overlap_screen.py`'s loose-duplicate axis (identical instruction streams
+once local labels are stripped and pool *slots* normalised, differing only in
+which pool SYMBOLS they name) had never been harvested and its all-unmatched
+groups were untested. Both remaining candidate pairs were checked instruction by
+instruction and both are genuine — the normalisation is not lying:
+
+- `sub_08005560` / `sub_08005598`, 32 B each. Identical throughout; the two pool
+  words are `gUnknown_0200B0B0` (**the same symbol in both**) and
+  `gUnknown_08488444` vs `gUnknown_0848846C`. One difference, and it is a
+  `sub_080152EC` script blob.
+- `sub_080656E0` / `sub_0806D820`, 32 B each, and they live in DIFFERENT `.s`
+  files (`code-0801D390.s` and `code-0806CFC8.s`). Identical throughout; the one
+  pool word is `gUnknown_08580C7C` vs `gUnknown_08581F40`, again the blob.
+
+One derivation gave both members of each pair, four matches for two pieces of
+work. This is the wave-21 "a loose duplicate pair often has literally ONE
+source" observation confirmed on the remaining unmatched groups. **The axis is
+worth screening on**; it is not a false positive.
+
+## A bare final `return` and an `else` lay the two constants out in OPPOSITE orders (wave 29, W29-B)
+
+`sub_0801F3D4` is five `cmp K; ble <next>` clauses and then a two-way tail. The
+tail's ROM shape is
+
+```
+	cmp r0, #0x3d
+	bgt _0801F3FC
+	movs r0, #0        @ the ZERO is the fallthrough
+	b   _0801F3FE
+_0801F3FC:
+	movs r0, #1
+```
+
+**Seven spellings of that tail were measured; six of them emit `ble` with the
+ONE inline, and only one emits the ROM's `bgt` with the ZERO inline.** The
+winner is the plainest possible source:
+
+```c
+    if (a > 0x3d)
+        return 1;
+    return 0;              /* a BARE return, not `else return 0;` */
+```
+
+Refuted, all giving `ble` and the arms the other way round:
+
+| spelling | result |
+|---|---|
+| `if (a <= 0x3d) return 0; return 1;` | inverted |
+| `if (a <= 0x3d) return 0; else return 1;` | inverted |
+| `if (a < 0x3e) return 0; return 1;` | inverted |
+| `if (!(a > 0x3d)) return 0; return 1;` | inverted |
+| `if (0x3d >= a) return 0; return 1;` | inverted |
+| `else if (a > 0x3d) return 1; else return 0;` (whole ladder chained) | inverted |
+| `if (a > 0x3d) goto one; return 0; one: return 1;` | inverted |
+| `return a > 0x3d ? 1 : 0;` / an `int r` temporary | `do_store_flag`, no branch at all |
+
+So this is NOT the comparison operator and NOT `goto`: **agbcc canonicalises
+`<`/`<=` into the reversed branch AND swaps the two arms, and it also swaps them
+for a trailing `else`. Only the statement-level `if (C) return X;` followed by a
+bare `return Y;` at the end of the function leaves the last block falling into
+the epilogue in source order.** Write the ladder that way by default.
+
+The same lever settled two more functions in the same wave:
+
+* `sub_08016E04` (16 bytes) is `if (a == 0) return FALSE; return TRUE;`.
+  `if (a) return TRUE; else return FALSE;` — the reading everyone writes first —
+  inverts the branch.
+* `sub_0801F024` is an `if/else` around two calls, and the arms come out the
+  ROM's way only WITHOUT `return` on either. Writing `return f(...)` in both
+  halves moves the else-block first and turns `beq` into `bne`. Since both arms
+  are tail calls the `return` is byte-neutral in every other respect, so this is
+  purely a block-ordering lever.
+
+## A `&&` chain and a run of separate `if`s differ by ONE register copy (wave 29, W29-B)
+
+`sub_0803DF54` gates on five conditions and returns a pointer or NULL. Both
+spellings cross-jump the five failure exits into a single `movs r0, #0`, and
+both produce the same 30-odd instructions — except one:
+
+```c
+    p = sub_0803DE94(a, b);
+    if (p == NULL) return NULL;
+    if (!sub_0803DFE0(p, &v)) return NULL;      /* ROM: adds r0, r4, #0 before the bl */
+```
+```c
+    if (p != NULL && sub_0803DFE0(p, &v) && ...)   /* no adds -- 2 bytes short */
+```
+
+With the `&&` chain the null test and the call sit in ONE basic block, so gcc
+coalesces `sub_0803DE94`'s result (already in r0) with `sub_0803DFE0`'s first
+argument and drops the copy. Splitting the null test into its own statement puts
+a block boundary between them, the pseudo gets its own hard register (r4), and
+the argument has to be copied back into r0. **A two-byte `adds rD, rN, #0` in
+front of a `bl` whose argument is the previous call's result is therefore a
+STATEMENT-BOUNDARY tell, not a register-allocation accident.** It also costs a
+callee-saved register: the ROM pushes r7 where the chain spelling does not.
+
+## Three narrowing levers from the same block (wave 29, W29-B)
+
+* **A narrow-returning callee's result assigned to an `int` local narrows ONCE;
+  assigned to a local of the callee's own narrow type it narrows TWICE.**
+  `sub_0803D92C` does `int v = sub_08016D04(1);` where sub_08016D04 returns
+  `s8`, and gets one `lsls #0x18; asrs #0x18` into r4, after which r4 is used
+  sign-extended at all three later uses. Spelling the local `s8` makes agbcc
+  truncate into it with `lsls #0x18; lsrs #0x18` (a QImode truncate, note the
+  LOGICAL shift) and then sign-extend again at every read — four bytes longer.
+  The natural-looking type is the wrong one.
+* **A `u8` parameter and a `u8` callee parameter narrow in DIFFERENT places, and
+  a chain of two `u8`s narrows in neither.** `sub_0801F150` forwards its own
+  fourth argument to `sub_0801F178`. The ROM narrows it nowhere, which forces
+  BOTH to be `int`: declaring the callee `u8` puts `lsls #0x18; lsrs #0x18` in
+  front of the `bl`, and declaring the caller's `u8` puts it at entry instead.
+  Two prototypes, one measurement.
+* **A one-bit bitfield write is spelled `f = 1` / `f = 0`, and a TWO-bit field
+  at the same position is not byte-neutral.** `sub_08016944`/`sub_08016974` set
+  and clear attr0 bit 9 with a bare `orrs #2` and a `movs #3; rsbs r0,r0,#0;
+  ands`. `struct OamData`'s 2-bit `affineMode` cannot produce that: `|= 2` and
+  `&= ~2` on a 2-bit field make gcc extract and re-insert the pair
+  (`lsl #0x1e; lsr #0x1e; orr; and; orr`), eight bytes more. The field had to be
+  split into two 1-bit fields (`affineEnable`, `doubleSize`), which the hardware
+  agrees with.
+
+## A bitfield's READ discriminates where its WRITE does not (wave 29, W29-B)
+
+`struct Unk02028360`'s unk02 carries a 4-bit field at bits 6..9.
+
+* The WRITE (`sub_0803DE68`, clearing it) is `ldrh; and 0xFFFFFC3F; strh`
+  whether the member is a bitfield or a plain `u16` with `&= ~0x3c0` — the
+  32-bit mask that `docs`' bitfield rule calls the tell is produced by BOTH,
+  because `~0x3c0` is an `int` constant either way. **That half of the existing
+  rule does not discriminate when the constant is a plain complement rather than
+  a `movs; rsbs` chain.**
+* The READ (`sub_0803DFE0`) is `ldrh; lsls #0x16; lsrs #0x1c` for the bitfield
+  and `ldrh; lsr #6; movs #0xf; and` for `(unk02 >> 6) & 0xf` — two extra bytes
+  and a different stream.
+
+So on a multi-bit field, **look for a read before deciding**; the clear alone
+will let both spellings through.
+
+## agbcc's switch decision tree pivots on the CASE COUNT, and 4 cases pivot on the second value (wave 29, W29-C)
+
+`sub_0803F27C` returns 1/4/5 for 1/2/3 and 0 otherwise, in 32 bytes:
+
+```
+cmp r0,#1 / beq case1
+cmp r0,#1 / ble default
+cmp r0,#2 / beq case2
+cmp r0,#3 / beq case3
+default: movs r0,#0 ...
+```
+
+Written as the obvious three-case `switch` with a `default`, agbcc bisects the
+case list at **2** and emits `cmp #2; beq / cmp #2; bgt / cmp #1; beq / b` — the
+wrong pivot and the wrong block order. Adding a fourth node makes
+`balance_case_nodes` split one entry earlier, so the root becomes 1 and the
+left subtree is the single low case:
+
+```c
+switch (a)
+{
+case 0:
+default:
+    return 0;
+case 1: return 1;
+case 2: return 4;
+case 3: return 5;
+}
+```
+
+This **corroborates** `src/decomp/c_08013D00.c`, which had already found the
+`case 0:` alongside `default:` recipe for the same four-way shape. Two
+independent functions now, so treat it as the rule: **a `cmp K` repeated with a
+`beq` then a `ble`/`bgt` against the SAME constant means the tree pivoted on K,
+and the number of case labels — not the number of distinct results — is what
+puts it there.** Source order of the arms still decides the order of the
+bodies, and the default body is emitted with the other case bodies.
+
+`sub_08072A3C` is the same four-way switch on the same four globals as
+`sub_08013D00`, and it pins the corollary: **a `default:` that RETURNS is still
+a case body and is emitted BEFORE the code that follows the switch.** The ROM
+puts the `movs r0, #0` failure block AFTER the shared tail, with case 3 falling
+through into that tail rather than branching to it. Only jumping out of the
+switch reproduces it:
+
+```c
+    switch (which) { case 0: ... case 3: pp = &g84; break; default: goto fail; }
+    return &(*pp)[y * 32 + x];
+fail:
+    return NULL;
+```
+
+`default: return NULL;` inside the switch is the same size and misses by 22 of
+76 bytes — every instruction present, all of them in the wrong block order.
+Five spellings probed; the `goto` is the only one that lands.
+
+## An `s16` LOCAL keeps its zero-extend/re-sign round trip only when it lives across a CALL (wave 29, W29-C)
+
+`sub_08064034` and `sub_0806407C` build rotation matrices from
+`sub_0801BAA8` (cos) and `sub_0801BA4C` (sin) and look asymmetric:
+
+```
+bl sub_0801BAA8
+lsls r4,#0x10 / asrs r4,#0x12     <- (s16)result >> 2
+lsls r4,#0x10 / lsrs r4,#0x10     <- store into the narrow local
+bl sub_0801BA4C
+lsls r0,#0x10 ... asrs r0,#0x12   <- (s16)result >> 2, and NOTHING else
+lsls r4,#0x10 / asrs r4,#0x10     <- re-sign at the use
+```
+
+One value carries four shift pairs and the other two. **Both are `s16` locals in
+the source.** agbcc's PROMOTE_MODE stores a narrow local zero-extended and
+re-signs it at each signed use; after `asrs #0x12` the value provably has 18
+sign bits, so `combine` deletes the round trip — but only for the local whose
+definition and uses sit in the same run with no `bl` between them. The one that
+must survive a call keeps it.
+
+Do not read the asymmetry as two different types. Declaring the second `int`
+and the first `s16` also compiles, and is wrong.
+
+## A conditional EXPRESSION loads its condition before materialising the false value (wave 29, W29-C)
+
+`sub_08064738`:
+
+```
+adds r0, #0x48 / ldrb r0, [r0]
+movs r3, #0xc8
+cmp r0, #0 / beq L
+movs r3, #0xcb
+```
+
+The `ldrb` comes FIRST. That is `f(obj->unk48 ? 0xCB : 0xC8, ...)` — a
+conditional expression, where do_store_flag evaluates the condition, presets the
+false value and conditionally overwrites. `int id = 0xC8; if (obj->unk48) id =
+0xCB;` puts the `movs #0xc8` ahead of the `ldrb` and is different bytes. Same
+size either way, so this only shows up as a byte diff.
+
+## A BYTE store through a pointer global forces the global to be reloaded; a WORD store does not (wave 29, W29-C)
+
+`sub_0804B0CC` writes five members of `*gUnknown_030044E0` and the ROM reloads
+the pointer four times, not five:
+
+```
+ldr r0,[r2] / adds r0,#0x5c / strb      <- reload
+ldr r0,[r2] / adds r0,#0x5e / strb      <- reload
+ldr r0,[r2] / adds r0,#0x5f / strb      <- reload
+ldr r0,[r2] / str r5,[r0,#0x58]         <- reload, then NO reload
+              adds r0,#0x60 / strb
+```
+
+A `strb` may alias anything, so agbcc drops the cached pointer after each one;
+the word store does not force it. **Naming the global on every line is what
+reproduces this** — binding it to a local costs all four reloads and is the
+change that looks like the obvious cleanup.
+
+## `gUnknown_030030E0`: the `.raw` / `*(u16 *)&` choice shows up as a STRAY `orrs`, not only as a spill (wave 29, W29-C)
+
+`src/decomp/c_0808A8C0.c` records that `.raw` there costs an extra callee-saved
+register when a zero is in flight from a neighbouring `= 0` store.
+`sub_0806E90C` and `sub_0806E9CC` are a second and third instance with a
+**different symptom**: the register allocation is identical, and `.raw` instead
+emits one extra `orrs r1, rZ` where rZ holds that CSE-able zero — a single stray
+instruction in 92 bytes, 24 of which then differ. The `*(u16 *)&` cast is
+byte-exact.
+
+So the tell to look for is not "an extra push". **If a masked halfword insert on
+one of these shadows is off by a stray `orrs`/`ands` against a register that
+holds a constant from an ADJACENT statement, switch the raw view's spelling
+before looking at anything else.** Both spellings remain live in the tree; do
+not normalise one into the other.
+
+## Two binding locals move a pool word TWO slots, and each one moves it one (wave 29, W29-C)
+
+Refines the `sub_0806E7FC` note in `src/decomp/c_0806E740.c`. For
+`dst[K] = tbl[f(g)]` where `dst`, `tbl` and `g` are all globals, agbcc's
+`expand_assignment` computes the destination address first, so the pool order is
+`(dst, tbl, g)`. Measured on `sub_0806C1E4`, which needs `(tbl, g, dst)`:
+
+| spelling | pool order |
+| --- | --- |
+| one statement | `dst, tbl, g` |
+| bind `tbl` only (the sub_0806E7FC fix) | `tbl, dst, g` |
+| bind the whole RHS to a value local | `tbl, g, dst` but the `dst` load lands after the `ldrh` |
+| bind `tbl` AND the index | `tbl, g, dst`, byte-exact |
+
+Each binding local moves one reference into an earlier statement. Binding the
+index as well is what also pulls the `lsrs` ahead of the destination's pool
+load, which the value-local form does not do. Two locals, not one, when the pool
+has to move two slots.

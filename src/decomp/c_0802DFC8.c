@@ -1,0 +1,39 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802DFC8.
+ * sub_0802DFC8 @ 0x0802DFC8
+ */
+
+#include "hardware.h"
+
+/* A frame step guarded on a key. The `lsls #0x10; lsrs #0x10` after the mask
+ * is a u16 LOCAL, not a stray cast: gcc keeps the value in r4 across three
+ * calls and then reuses it as the `strh` source, which is only worth doing
+ * because the same object is both the tested value and the stored one. Writing
+ * the store as a literal 0 loses that.
+ *
+ * The key is read at gpKeySt->unk00, offset 0, not `held` at +4. */
+
+void sub_0802DFC8(void)
+{
+    u16 v;
+
+    sub_08023824();
+    sub_080236E8();
+    sub_08023908(4);
+    sub_08023274(1);
+
+    v = gpKeySt->unk00 & 2;
+
+    if (v == 0)
+    {
+        sub_08035810();
+        sub_080258CC();
+        sub_08022A08();
+
+        gUnknown_03003334 = v;
+    }
+}

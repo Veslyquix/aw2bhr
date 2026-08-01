@@ -26,7 +26,7 @@
  * Both shift pairs are real and independent: `lsls #0x18; lsrs #0x18` on entry
  * is the u8 parameter, `lsls #0x10; lsrs #0x10` after the call is agbcc
  * re-narrowing a u16-returning callee. */
-u16 sub_0801B598(u8 a, int b)
+u16 sub_0801B598(u8 a, void (**b)(void))
 {
     if (gUnknown_0200CD0C == 1)
         return sub_0808AC44(a, b);

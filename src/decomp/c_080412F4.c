@@ -1,0 +1,83 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080412F4.
+ * sub_080412F4 @ 0x080412F4, sub_08041334 @ 0x08041334, sub_0804134C @ 0x0804134C
+ */
+
+#include "proc.h"
+struct Unk412F4Owner
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x46);
+    /* 46 */ u16 unk46;
+};
+struct Unk412F4Proc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x4c);
+    /* 4c */ s16 unk4c;
+    /* 4e */ s16 unk4e;
+};
+struct Unk41334Proc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x4c);
+    /* 4c */ s16 unk4c;
+};
+struct Unk4134COwner
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x34);
+    /* 34 */ struct Unk0801C210 *unk34;
+    /* 38 */ STRUCT_PAD(0x38, 0x46);
+    /* 46 */ u16 unk46;
+};
+struct Unk4134CProc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x4c);
+    /* 4c */ s16 unk4c;
+};
+
+/* Both `movs rN, #0; ldrsh rD, [rB, rN]` pairs are SIGNED halfword loads at a
+ * ZERO displacement -- the address was already materialised -- so the compare
+ * is a signed one between two s16 fields. The `ldrh r3, [r2]` before it is the
+ * unsigned copy agbcc keeps live for the increment. */
+void sub_080412F4(struct Unk412F4Proc *proc)
+{
+    struct Unk412F4Owner *p = Proc_Find(gUnknown_0849FD44);
+
+    if (proc->unk4c >= proc->unk4e)
+        Proc_Break(proc);
+    else
+        p->unk46 = ++proc->unk4c;
+}
+
+/* The proc pointer survives the call in r4 only so that the store can happen
+ * after it; `adds r4, #0x4c` is the strh displacement limit again. */
+void sub_08041334(struct Unk41334Proc *proc)
+{
+    sub_0803B4DC(0x6F);
+    proc->unk4c = 0x12;
+}
+
+/* The countdown twin of sub_080412F4: same proc, same +0x46 mirror, and the
+ * Proc_Break arm additionally releases the sprite handle. Two statements in
+ * that arm and not a nested call -- Proc_Break is void. */
+void sub_0804134C(struct Unk4134CProc *proc)
+{
+    struct Unk4134COwner *p = Proc_Find(gUnknown_0849FD44);
+
+    if (proc->unk4c == 0)
+    {
+        Proc_Break(proc);
+        sub_0801C4D4(p->unk34, 3);
+    }
+    else
+    {
+        p->unk46 = --proc->unk4c;
+    }
+}

@@ -1,0 +1,24 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0803D92C.
+ * sub_0803D92C @ 0x0803D92C
+ */
+
+/* The local is `int`, NOT `s8`. sub_08016D04 returns s8, so agbcc re-narrows
+ * its result at the call site -- that single `lsls #0x18; asrs #0x18` into r4
+ * IS the narrowing, and r4 is then used sign-extended everywhere. Declaring the
+ * local `s8` makes agbcc truncate with `lsls; lsrs` into the local and
+ * sign-extend again at each read, four bytes longer. */
+void sub_0803D92C(void)
+{
+    int v;
+
+    v = sub_08016D04(1);
+    if (v != 0)
+        sub_08016CEC(v, 0);
+    if (sub_0803861C())
+        sub_080193B0(gUnknown_0849F3A8)->unk10 = v;
+}

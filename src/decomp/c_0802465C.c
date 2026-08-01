@@ -1,0 +1,22 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802465C.
+ * sub_0802465C @ 0x0802465C
+ */
+
+#include "hardware.h"
+
+/* sub_08024584 without the trailing sub_0801237C -- see
+ * src/decomp/c_08024404.c for the 2-bit-field reading. */
+
+void sub_0802465C(void)
+{
+    gUnknown_03002B6C.bits.priority = 0;
+    gUnknown_03001FE8.bits.priority = 2;
+    gUnknown_030030B4.bits.priority = 1;
+    gUnknown_0300251C.bits.priority = 3;
+    sub_08012358();
+}

@@ -7,13 +7,15 @@
  * sub_0801BAA8 @ 0x0801BAA8
  */
 
-/* A one-line forwarder onto a field 0x5a into its parameter. `lsls #0x10;
+/* COSINE, in degrees: sub_0801BA4C is a degree-based sine table lookup, so
+ * adding a quarter turn in front of it gives the cosine. `lsls #0x10;
  * asrs #0x10` after the call is agbcc re-narrowing a narrow-returning callee,
- * and the ARITHMETIC shift makes sub_0801BA4C's return SIGNED -- the one thing
- * this function measures that its callee's own body would have to be read to
- * confirm. Nothing here types what lives at +0x5a, so the parameter stays the
- * byte cursor the address arithmetic implies. */
-s16 sub_0801BAA8(u8 *p)
+ * and the ARITHMETIC shift makes sub_0801BA4C's return SIGNED.
+ *
+ * WAVE 29 (C) retyped the parameter from `u8 *` to `int`; see the note on
+ * sub_0801BA4C in include/unknown-functions.h. Byte-neutral -- `p + 0x5a` and
+ * `a + 0x5a` are both a bare `adds r0, #0x5a`. */
+s16 sub_0801BAA8(int a)
 {
-    return sub_0801BA4C(p + 0x5a);
+    return sub_0801BA4C(a + 0x5a);
 }
