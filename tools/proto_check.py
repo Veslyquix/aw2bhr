@@ -132,15 +132,25 @@ def norm_type(t):
 
 # include/gba/types.h. Resolved so `(int, ProcPtr)` and `(s32, ProcPtr)` are
 # not reported as a conflict -- they are the same type and the compiler agrees.
+# The bool8/16/32 aliases were missing until wave 30, when
+# `u8 sub_080266DC(u8)` against a `bool8` definition was reported as one of
+# four mismatches and cost a real investigation at exactly the moment the wave
+# was separating real conflicts from noise. bool8 IS u8 (types.h:27); nothing
+# to settle, and no caller can ever be affected by the spelling.
 TYPEDEFS = {
     's8': 'signed char', 'u8': 'unsigned char',
     's16': 'short', 'u16': 'unsigned short',
     's32': 'int', 'u32': 'unsigned int',
+    's64': 'long long', 'u64': 'unsigned long long',
     'int32_t': 'int', 'uint32_t': 'unsigned int',
     'int16_t': 'short', 'uint16_t': 'unsigned short',
     'int8_t': 'signed char', 'uint8_t': 'unsigned char',
+    'int64_t': 'long long', 'uint64_t': 'unsigned long long',
     'signed': 'int', 'unsigned': 'unsigned int',
     'signed int': 'int',
+    'bool8': 'unsigned char', 'bool16': 'unsigned short',
+    'bool32': 'unsigned int',
+    'f32': 'float', 'f64': 'double',
 }
 
 

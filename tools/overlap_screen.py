@@ -624,6 +624,42 @@ def blocks(recs, args):
     except (OSError, ValueError):
         pass
 
+    # WAVE 30 MEASURED THE COST SIGNAL, AND IT IS NOT DENSITY. Blocks at
+    # density 9/10/10 went 45/45 at mean 1.24 attempts; 29 of 45 functions
+    # authored new globals/structs and 24 of them still fell first try,
+    # because a global's width and signedness read straight off the target's
+    # own loads. What cost attempts was CALLEE PROTOTYPES -- and callees are
+    # not address-local, so density never could have predicted it. The screen
+    # below therefore counts each block's UNDECLARED, UNPROMOTED callees:
+    #   - declared in include/unknown-functions.h  -> free
+    #   - promoted (status matched)                -> free, even if undeclared
+    #     (the definition exists; wave 30 had three of these and each cost
+    #     nothing)
+    #   - anything else named by a `bl`            -> the real per-block cost
+    declared = set()
+    try:
+        with open(os.path.join(awlib.REPO, "include", "unknown-functions.h"),
+                  encoding="utf-8", errors="replace") as fh:
+            for ln in fh:
+                m = re.match(r'\s*[A-Za-z_][\w\s*]*?\b(sub_[0-9A-Fa-f]{8})'
+                             r'\s*\(', ln)
+                if m and not ln.lstrip().startswith(("*", "/*", "//")):
+                    declared.add(m.group(1))
+    except OSError:
+        pass
+    status_of = {r["name"]: r["status"] for r in recs}
+
+    def undeclared_callees(fns):
+        out = set()
+        for r in fns:
+            for c in r.get("calls", []):
+                if not c.startswith("sub_"):
+                    continue          # upstream-named: declared in its header
+                if c in declared or status_of.get(c) == "matched":
+                    continue
+                out.add(c)
+        return sorted(out)
+
     named = [r for r in recs if r["name"].startswith("sub_")]
     addr = {r["name"]: int(r["name"][4:], 16) for r in named}
     matched_addrs = sorted(addr[r["name"]] for r in named
@@ -644,8 +680,12 @@ def blocks(recs, args):
         n_units = sum(1 for a in promoted_units if a >> 12 == blk)
         if n_matched < args.block_min_matched:
             continue
-        rows.append((len(fns), n_matched, n_units, blk, fns))
-    rows.sort(key=lambda x: (-x[0], -x[1]))
+        und = undeclared_callees(fns)
+        rows.append((len(fns), n_matched, n_units, blk, fns, und))
+    # Cheapest first: fewest undeclared callees PER CANDIDATE (the measured
+    # cost signal), then most candidates. Density is deliberately not in the
+    # key any more -- see the wave-30 comment above.
+    rows.sort(key=lambda x: (len(x[5]) / float(x[0]), -x[0]))
 
     print("\n== ADDRESS-LOCALITY BLOCKS (%d-%dB, straight-line, non-trivial, "
           ">= %d matched in block) ==" % (args.block_min, args.block_max,
@@ -659,10 +699,17 @@ def blocks(recs, args):
     print("  variations of each other.")
 
     offered = []          # [(record, nearest_matched_addr, exemplar_path)]
-    for n, n_matched, n_units, blk, fns in rows[:args.top_blocks]:
+    for n, n_matched, n_units, blk, fns, und in rows[:args.top_blocks]:
         print("\n  block 0x%05X000  %2d candidates, %4d bytes  "
               "(%d matched, %d promoted units in block)"
               % (blk, n, sum(f["size"] for f in fns), n_matched, n_units))
+        if und:
+            print("    undeclared callees: %d -- %s%s"
+                  % (len(und), " ".join(und[:6]),
+                     " (+%d more)" % (len(und) - 6) if len(und) > 6 else ""))
+        else:
+            print("    undeclared callees: 0 -- every bl target is declared"
+                  " or promoted; the CHEAPEST kind of block (wave 30)")
         shown = 0
         for r in sorted(fns, key=lambda x: addr[x["name"]])[:args.per_block]:
             a = addr[r["name"]]

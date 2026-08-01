@@ -25,6 +25,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -49,6 +50,19 @@ def main():
     ap.add_argument("--skip-parked", action="store_true",
                     help="skip the parked-queue re-test (the slow step)")
     args = ap.parse_args()
+
+    # 0. The wave number. Nothing else prints it, it is not derivable from the
+    # metrics, and a wrong one lands in every comment the wave's agents write
+    # -- a session once numbered itself 25 against an existing wave-25 commit
+    # and 40+ annotations had to be renumbered surgically (SKILL.md rule 5).
+    sect("last commits (the wave number comes from HERE, nowhere else)")
+    g = subprocess.run(["git", "log", "--oneline", "-3"],
+                       capture_output=True, text=True)
+    print(g.stdout.strip() or "(git log unavailable)")
+    m = re.search(r"Wave (\d+):", g.stdout)
+    if m:
+        print("=> last wave committed: %s -- this wave is %d"
+              % (m.group(1), int(m.group(1)) + 1))
 
     # 1. families.py -- regenerate FIRST; stale clusters waste the wave.
     sect("families.py (regenerated, self-validated)")
@@ -111,13 +125,38 @@ def main():
           % (len(hot), len([r for r in rows if 70 <= r[0] < 90])))
     print(" before believing it -- a score is not a match)")
 
-    # 5. Parked queue, re-tested by exit code.
+    # 5. Parked queue: format, staleness, then the exit-code re-test.
     sect("parked queue re-test (exit code, not message text)")
+    raw = open("data/parked.json", "rb").read()
+    # Wave 30: the file is CRLF and indent=1. Get either wrong and every one
+    # of its ~380 lines re-serialises, burying a real five-entry addition in a
+    # 425/379 diff. Catch it here rather than in `git diff` at commit time.
+    fmt = []
+    if raw.count(b"\r\n") == 0 and raw.count(b"\n") > 0:
+        fmt.append("LF line endings (the file is CRLF in git)")
+    body = raw.replace(b"\r\n", b"\n")
+    first_key = re.search(rb'\{\n( +)"', body)
+    if first_key and first_key.group(1) != b" ":
+        fmt.append("top-level indent is %d spaces (the file is indent=1)"
+                   % len(first_key.group(1)))
+    if fmt:
+        print("  !! parked.json FORMAT DRIFT: " + "; ".join(fmt))
+        print("  !! rewrite with indent=1 and CRLF before committing, or the")
+        print("  !! whole file churns and real changes become unreviewable")
+    parked = json.load(open("data/parked.json", encoding="utf-8"))["functions"]
+    # A parked entry for a function that is already MATCHED is a stale lie --
+    # wave 30 had an agent park two functions that a later agent then matched,
+    # and left in place they would suppress both from every future pre-flight.
+    stale = [n for n in parked if st.get(n) == "matched"]
+    for n in stale:
+        print("  !! STALE %s -- parked but its status is MATCHED; delete the"
+              " entry" % n)
     if args.skip_parked:
         print("skipped (--skip-parked)")
     else:
-        parked = json.load(open("data/parked.json", encoding="utf-8"))["functions"]
         for name in parked:
+            if name in stale:
+                continue
             r = run(["tools/trymatch.py", name])
             if r.returncode == 0:
                 print("  UNPARKED %s -- matches now, promote it" % name)

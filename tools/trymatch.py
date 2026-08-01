@@ -22,6 +22,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 import agbenv
 import awlib
@@ -421,6 +422,19 @@ def record_best(workdir, name, pct):
     print("  new best: %.1f%% (saved to best.c)" % pct)
 
 
+def _looks_like_torn_header(text):
+    """A compile failure whose error sits in include/ and names a type
+    conflict is, mid-wave, almost always a half-written header seen while
+    another agent's edit was in flight -- not a fault in the draft."""
+    if not text:
+        return False
+    if "include" not in text:
+        return False
+    return bool(re.search(
+        r"conflicting types|redefinition|previous declaration|parse error",
+        text))
+
+
 def check(name, want_diff=False, keep_going=False):
     rec, unit = resolve(name)
     if rec is None or unit is None:
@@ -456,6 +470,18 @@ def check(name, want_diff=False, keep_going=False):
     # Candidate.
     cand_o = "work/%s/%s.o" % (fn, fn)
     rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o, fn=fn)
+    if rc != 0 and _looks_like_torn_header(se or so):
+        # Mid-wave, several agents append to include/unknown-globals.h and
+        # include/unknown-functions.h concurrently, and a compile that starts
+        # while a write is in flight sees a half-written header. Wave 30
+        # measured 27 such failures in one sweep -- every one passed on a
+        # plain re-run -- and the same noise HID two real failures, so the
+        # retry has to live here, once, not in every caller's shell loop.
+        time.sleep(0.5)
+        rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o, fn=fn)
+        if rc == 0:
+            print("note: first compile hit a torn header read "
+                  "(concurrent include/ edit); clean on retry")
     if rc != 0:
         print("COMPILE FAILED")
         msg = (se or so).strip().splitlines()
@@ -647,6 +673,12 @@ def check_unit(name, want_diff=False):
     awlib.write_text(os.path.join(awlib.REPO, src_rel.replace("/", os.sep)), text)
 
     rc, so, se = agbenv.compile_c(src_rel, obj_rel, fn=run[0])
+    if rc != 0 and _looks_like_torn_header(se or so):
+        time.sleep(0.5)
+        rc, so, se = agbenv.compile_c(src_rel, obj_rel, fn=run[0])
+        if rc == 0:
+            print("note: first compile hit a torn header read "
+                  "(concurrent include/ edit); clean on retry")
     if rc != 0:
         print("COMPILE FAILED (the merged unit, not any single draft)")
         for ln in (se or so).strip().splitlines()[-25:]:
