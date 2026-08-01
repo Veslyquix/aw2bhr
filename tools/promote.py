@@ -551,12 +551,24 @@ def main():
                 return 1
             print("%s does not match ALONE, but its whole unit reproduces the"
                   " ROM." % n)
+            # An asm-resident member has no draft and must never be promoted as
+            # C -- but the unit verifying whole PROVES the compiler emits its
+            # bytes, so it is carried by the promotion rather than part of it.
+            # Appending it here would send promote() looking for a draft that
+            # does not exist. (Wave 28: sub_0802C604's unit holds sub_0802C62A.)
+            import index_functions as ixf
+            resident = set(ixf.asm_resident())
+            promotable = [f for f in run if f not in resident]
+            carried = [f for f in run if f in resident]
             print("  Promoting all %d function(s) in %s together -- a unit is"
-                  " linked whole," % (len(run), unit["file"]))
+                  " linked whole," % (len(promotable), unit["file"]))
             print("  so that is the stronger evidence, not a weaker one.")
+            if carried:
+                print("  Carried, not promoted (asm-resident, bytes emitted by"
+                      " the compiler): %s" % ", ".join(carried))
             if uwords:
                 POOL_WORDS[n] = uwords
-            for f in run:
+            for f in promotable:
                 if f not in names:
                     names.append(f)
     return promote(names, index)

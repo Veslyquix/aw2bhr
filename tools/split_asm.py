@@ -167,6 +167,22 @@ def plan_units(af):
     return units
 
 
+def load_resident():
+    """Names in data/asm-resident.json -- functions no C will ever define.
+
+    Read here so a unit is not judged "half promoted" on account of a member
+    that can never be promoted. See the exception in main().
+    """
+    path = os.path.join(awlib.DATA_DIR, "asm-resident.json")
+    if not os.path.exists(path):
+        return set()
+    with open(path, encoding="utf-8") as fh:
+        return set(json.load(fh).get("functions", {}))
+
+
+RESIDENT = load_resident()
+
+
 def load_promoted():
     """function name -> the C object that now provides it."""
     path = os.path.join(awlib.DATA_DIR, "promoted.json")
@@ -219,8 +235,19 @@ def build(clean=False):
             # share one with a function that is still assembly -- the C object
             # would supply some symbols and the unit the rest, at the same
             # addresses.
-            if owners and not all(n in promoted for n in names):
-                left = [n for n in names if n not in promoted]
+            #
+            # An ASM-RESIDENT member is the one exception, and it is not a
+            # loophole (wave 28). Such a function can never be promoted -- it has
+            # no draft by definition -- so requiring it here made its whole unit
+            # permanently unpromotable, which is what blocked sub_0802C604's
+            # 38 bytes from wave 24 onward. It is safe because the unit oracle
+            # (`trymatch.py <fn> --unit`) has to reproduce the unit's ENTIRE
+            # .text, asm-resident bytes included, before promote.py will write
+            # the entry this reads. So reaching here means the C object provably
+            # supplies those bytes and the assembly unit is redundant, rather
+            # than the two splitting the address range between them.
+            left = [n for n in names if n not in promoted and n not in RESIDENT]
+            if owners and left:
                 raise SystemExit(
                     "error: unit %s mixes promoted and unpromoted functions "
                     "(%s still assembly). Promote them together or not at all."

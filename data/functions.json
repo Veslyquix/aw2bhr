@@ -39204,23 +39204,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 38,
-   "best": "100.0% -- 0 of 38 bytes differ, relocs match. THE DECOMPILATION IS DONE.",
-   "remaining_diff": "NONE in the source. trymatch exits 1 reporting `candidate is 40 bytes, original is 38 (+2)` while also reporting `0 of 38 differ` and `relocs: match`. The +2 is agbcc's own .text tail emitting the 0x0000 `.align 2, 0` pad at 0x0802C62A -- verified against baserom.gba -- which the index has split off into the phantom function `sub_0802C62A`. trymatch compares the whole .text section against a 38-byte window, so a correct 40-byte unit reads as a 2-byte overrun.",
-   "why_it_is_close": "It is not close. It is finished. This is a PIPELINE blocker, not a decompilation one.",
-   "axes_ruled_out": [
-    "The source axis entirely -- every byte and every relocation of 0x0802C604..0x0802C62B is already reproduced by work/sub_0802C604/sub_0802C604.c.",
-    "sub_0802C62A being real code: it is `.align 2, 0` padding with zero callers, already documented in data/asm-resident.json as the one non_word_aligned_thumb_func_start of the four that is NOT a genuine mid-stream entry point. `movs r0, r0` is just how 0x0000 disassembles."
-   ],
-   "settled_by_this_attempt": [
-    "The whole function body (wave 24, W24-A).",
-    "That the two pad bytes come from agbcc's .text tail and not from the source, checked against baserom.gba at 0x0802C62A."
-   ],
-   "reason": "UNBLOCKING THIS IS A TOOLING JOB AND IT IS THE NEXT WAVE'S FIRST TASK. The promoted unit must span 0x0802C604..0x0802C62C (40 bytes) and split_asm.py must stop emitting the sub_0802C62A stub, or the two bytes are emitted twice and every address after them shifts. Do this as its OWN change with both builds green before anything else lands on top -- NOT bundled into a matching wave. `asm/` is never modified: the fix is the splitter's unit boundary and the asm-resident entry, not the assembly. Re-running trymatch will keep failing until then; that is expected and is not a regression. WAVE 28 (W28-B), unit-level oracle checked: `python tools/trymatch.py sub_0802C604 --unit` EXITS 2 AND DOES NOT RUN. It reports `unit sub_0802C604.s -- 2 function(s): sub_0802C604, sub_0802C62A` then `error: no draft for sub_0802C62A`. So the unit oracle cannot unblock this one either, and for a NEW reason worth recording: a unit whose members include an ASM-RESIDENT entry can never be drafted whole, because the asm-resident member has no draft by definition. trymatch --unit demands a draft for every member and has no notion of 'this member is asm-resident, emit its assembly'. That is a second tooling fix beside the splitter one already described above, and it is cheap: --unit should treat an asm-resident member as already satisfied. Until then neither oracle can pass this function, which is consistent with -- not evidence against -- the diagnosis above."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -39245,7 +39231,7 @@
   "directive": "non_word_aligned_thumb_func_start",
   "src": "code-0801D390.s",
   "status": "asm-resident",
-  "asm_resident_reason": "Not code at all -- inter-function alignment padding. sub_0802C604 ends `bx r1` at 0x0802C628, and the two bytes at 0x0802C62A are the 0x0000 the assembler emits for `.align 2, 0` ahead of the 4-aligned sub_0802C62C. `movs r0, r0` is simply how 0x0000 disassembles. Zero callers. WAVE 24 (W24-A): these two bytes are now BLOCKING, not merely inert. work/sub_0802C604/sub_0802C604.c compiles to all 38 bytes of sub_0802C604 with `0 of 38 differ` and `relocs: match`, and agbcc's own `.text` tail supplies this same 0x0000 pad -- verified against baserom.gba at 0x0802C62A -- so the draft reproduces 0x0802C604..0x0802C62B, all forty bytes. trymatch still reports +2 because it compares the whole `.text` section against a 38-byte window. sub_0802C604 is therefore parked on the PIPELINE and not on the decompilation; promoting it must also drop this stub from asm/, or the two bytes are emitted twice. No matched function in the tree has size % 4 == 2, so promote.py has never had to do this. See the wave-24 chapter in docs/agbcc-codegen.md.",
+  "asm_resident_reason": "Not code at all -- inter-function alignment padding. sub_0802C604 ends `bx r1` at 0x0802C628, and the two bytes at 0x0802C62A are the 0x0000 the assembler emits for `.align 2, 0` ahead of the 4-aligned sub_0802C62C. `movs r0, r0` is simply how 0x0000 disassembles. Zero callers. WAVE 24 (W24-A): these two bytes are now BLOCKING, not merely inert. work/sub_0802C604/sub_0802C604.c compiles to all 38 bytes of sub_0802C604 with `0 of 38 differ` and `relocs: match`, and agbcc's own `.text` tail supplies this same 0x0000 pad -- verified against baserom.gba at 0x0802C62A -- so the draft reproduces 0x0802C604..0x0802C62B, all forty bytes. trymatch still reports +2 because it compares the whole `.text` section against a 38-byte window. sub_0802C604 is therefore parked on the PIPELINE and not on the decompilation; promoting it must also drop this stub from asm/, or the two bytes are emitted twice. No matched function in the tree has size % 4 == 2, so promote.py has never had to do this. See the wave-24 chapter in docs/agbcc-codegen.md. WAVE 28: PROVEN, and the entry must now STAY for a mechanical reason. tools/trymatch.py sub_0802C604 --unit compiles the unit's C alone and reproduces all 40 bytes of its .text -- 0x0802C604..0x0802C62B, these two padding bytes included -- with relocations matching, so the compiler demonstrably emits them and this is not hand-written assembly. sub_0802C604 is promoted as of wave 28 and both builds are green. DO NOT DELETE THIS ENTRY: tools/split_asm.py reads asm-resident.json to know the member is CARRIED by the promoted unit rather than left behind as assembly. Without it the unit trips 'mixes promoted and unpromoted functions' and the promotion reverts. The entry is documentation of padding plus a load-bearing flag, not a claim of hand-written asm -- read it that way when using this file as the evidence base for what hand-written assembly looks like.",
   "parked_reason": null,
   "named": false,
   "kind": "game",

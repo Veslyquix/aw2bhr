@@ -579,23 +579,56 @@ def check_unit(name, want_diff=False):
     which is the one thing wave 18 said never to do; it is pointing the gate at
     the thing that makes it true.
 
-    Every function in the unit must have a draft. A unit is all-or-nothing, so
-    a missing draft is a hard failure, not a skip.
+    Every function in the unit must have a draft -- EXCEPT an asm-resident one,
+    which by definition never will (see below). A unit is all-or-nothing, so any
+    other missing draft is a hard failure, not a skip.
+
+    ASM-RESIDENT MEMBERS ARE TREATED AS ALREADY SATISFIED (wave 28). A unit
+    holding a function listed in data/asm-resident.json used to be untestable by
+    BOTH oracles: `check()` cannot see a locally-resolved call, and `check_unit()`
+    demanded a draft that, for an asm-resident function, is never going to exist.
+    sub_0802C604 sat behind exactly that -- its unit also holds sub_0802C62A, the
+    two-byte `movs r0, r0` that upstream labelled as a function.
+
+    Skipping them CANNOT produce a false pass, which is why this is safe. The
+    comparison below is unchanged: the merged C still has to reproduce the unit's
+    ENTIRE .text, asm-resident bytes included. So a pass is positive proof that
+    the compiler emits those bytes itself (they were alignment padding all along,
+    mislabelled by an upstream `thumb_func_start`), and a real hand-written
+    assembly member simply makes the unit fail. This converts an exit-2 "cannot
+    test" into an honest verdict; it does not lower the bar.
     """
     rec, unit = resolve(name)
     if rec is None or unit is None:
         return 2
 
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import index_functions as ixf
+    resident = set(ixf.asm_resident())
+
     run = list(unit["functions"])
-    missing = [f for f in run
-               if not os.path.exists(os.path.join(WORK, f, f + ".c"))]
+    resident_here = [f for f in run if f in resident]
+    drafted = [f for f in run if f not in resident]
     print("unit %s  --  %d function(s): %s"
           % (unit["file"], len(run), ", ".join(run)))
+    if resident_here:
+        print("  asm-resident, no draft required: %s" % ", ".join(resident_here))
+        print("  The merged C must still reproduce their bytes as part of the")
+        print("  unit's whole .text -- that is the test, not an exemption.")
+    if not drafted:
+        print("error: every function in this unit is asm-resident")
+        print("  There is nothing to compile, so the unit oracle has no verdict")
+        print("  to give. This is a splitter question, not a decompilation one.")
+        return 2
+
+    missing = [f for f in drafted
+               if not os.path.exists(os.path.join(WORK, f, f + ".c"))]
     if missing:
         print("error: no draft for %s" % ", ".join(missing))
         print("  A unit is verified whole or not at all. Draft every function")
         print("  in it (tools/newfunc.py <fn>) before re-running.")
         return 2
+    run = drafted
 
     # The merge is promote.py's, deliberately: verifying a differently-built
     # text than the one that would be promoted would prove nothing about the
@@ -608,7 +641,7 @@ def check_unit(name, want_diff=False):
         print("error: %s" % err)
         return 2
 
-    stem = "u_%s" % unit["functions"][0]
+    stem = "u_%s" % run[0]
     src_rel = "build/unitcheck/%s.c" % stem
     obj_rel = "build/unitcheck/%s.o" % stem
     awlib.write_text(os.path.join(awlib.REPO, src_rel.replace("/", os.sep)), text)
@@ -679,7 +712,17 @@ def check_unit(name, want_diff=False):
         print("\nUNIT MATCH -- the whole unit's .text is byte-for-byte"
               " identical.\n  This verifies ALL %d function(s) above, including"
               " any that cannot\n  match alone because the original resolved a"
-              " call inside this unit." % len(run))
+              " call inside this unit." % len(unit["functions"]))
+        if resident_here:
+            print("  It also PROVES the compiler emits %s's bytes itself,"
+                  % ", ".join(resident_here))
+            print("  so that member is alignment padding an upstream")
+            print("  thumb_func_start mislabelled, not hand-written assembly.")
+            print("  KEEP its data/asm-resident.json entry -- split_asm.py reads")
+            print("  that file to know the member is CARRIED by this unit rather")
+            print("  than left behind as assembly. Removing it re-breaks the")
+            print("  unit with 'mixes promoted and unpromoted functions'.")
+            print("  Record the new evidence in the entry instead.")
         return 0
 
     n_diff = sum(1 for a, b in zip(tgt, cand) if a != b)
@@ -687,12 +730,19 @@ def check_unit(name, want_diff=False):
     print("  bytes: %d of %d differ" % (n_diff, common))
     first = next((i for i, (a, b) in enumerate(zip(tgt, cand)) if a != b), common)
     print("  first difference at +0x%x" % first)
-    for f in run:
+    # Attribute over EVERY member, not just the drafted ones. A first difference
+    # landing inside an asm-resident member is the whole diagnosis: it says the
+    # compiler does NOT emit those bytes, so the member is real hand-written
+    # assembly rather than mislabelled padding, and no draft will ever close it.
+    for f in unit["functions"]:
         r = index.get(f)
         if r:
             off = r["addr"] - int(unit["addr_hex"], 16)
             if off <= first < off + r["size"]:
-                print("  which is inside %s (+0x%x into it)" % (f, first - off))
+                print("  which is inside %s (+0x%x into it)%s"
+                      % (f, first - off,
+                         "  <-- ASM-RESIDENT: the compiler does not emit these"
+                         " bytes" if f in resident else ""))
     if want_diff:
         import difflib
         a = disassemble(unit_o, 0, len(tgt))
@@ -727,6 +777,31 @@ def self_test():
     good = (rc == 1)
     print("\n[self-test] sub_08071918's unit is still REJECTED (leading "
           "veneer padding): %s" % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    # Wave 28: a unit holding an asm-resident member must produce a VERDICT.
+    # Before the fix this returned 2 ("no draft for sub_0802C62A") -- a draft
+    # that, for an asm-resident function, was never going to exist, so both
+    # oracles were structurally unable to judge the unit and 38 bytes sat parked
+    # from wave 24. Asserting == 0 rather than != 2 is deliberate: it also pins
+    # the finding that the compiler really does emit those two padding bytes.
+    print()
+    rc = check_unit("sub_0802C604")
+    good = (rc == 0)
+    print("\n[self-test] a unit with an ASM-RESIDENT member is judged, not "
+          "skipped (sub_0802C604 + sub_0802C62A): %s"
+          % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    # The exemption must not become a hole: it is scoped to members named in
+    # data/asm-resident.json, and every OTHER missing draft is still a hard
+    # failure. sub_08079EA4's unit holds five functions, four undrafted and
+    # none asm-resident, so it must still refuse to give a verdict.
+    print()
+    rc = check_unit("sub_08079EA4")
+    good = (rc == 2)
+    print("\n[self-test] an ordinary missing draft is still a hard failure "
+          "(sub_08079EA4's 5-member unit): %s" % ("PASS" if good else "FAIL"))
     ok &= good
 
     print("\n[self-test] %s" % ("PASS" if ok else "FAIL"))

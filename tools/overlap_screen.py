@@ -690,6 +690,23 @@ def blocks(recs, args):
         if shown < n:
             print("    (+%d more not shown -- re-run with --per-block %d)"
                   % (n - shown, n))
+
+    # NO SILENT CAPS -- AT THE BLOCK LEVEL EITHER. The per-block notice above
+    # has existed since wave 26; this one had not, so wave 28 read a header
+    # saying "blocks: 28, candidate functions: 284" above six listings totalling
+    # 120 and never saw the other 164. A truncated batching list does not look
+    # truncated -- it looks like the axis is nearly exhausted, which is the
+    # single most expensive wrong belief a wave can start from.
+    if len(rows) > args.top_blocks:
+        hidden = rows[args.top_blocks:]
+        print("\n  (+%d more block(s) NOT SHOWN: %d further candidate "
+              "function(s), %d bytes.\n"
+              "   re-run with --top-blocks %d to see them. The header count "
+              "above covers\n"
+              "   ALL blocks, so it will not agree with the listings until you "
+              "do.)"
+              % (len(hidden), sum(len(r[4]) for r in hidden),
+                 sum(f["size"] for r in hidden for f in r[4]), len(rows)))
     return rows, offered
 
 
@@ -752,6 +769,32 @@ def self_test(args):
                  "threshold, not broken)" if deep
                  else "FAIL (nothing at any threshold -- suspect the screen)"))
         ok &= bool(deep)
+
+    # Wave 28: the block LIST itself was silently truncated to --top-blocks
+    # (default 6). The header counted all 28 blocks while six were listed, so a
+    # wave read "284 candidates" above 120 rows and never learned the other 164
+    # existed. Truncation is fine; unannounced truncation is not, because a short
+    # batching list looks like an exhausted axis rather than a clipped one.
+    #
+    # Assert the property that actually matters -- REACHABILITY. Every candidate
+    # the header counts must be obtainable by raising --top-blocks, and the
+    # totals must agree once it is raised. This catches both the missing notice
+    # and any future off-by-one in the slice.
+    all_rows = blocks(load_index(), args)[0]
+    if len(all_rows) > args.top_blocks:
+        full = argparse.Namespace(**vars(args))
+        full.top_blocks = len(all_rows)
+        full.per_block = max(len(r[4]) for r in all_rows)
+        deep = blocks(load_index(), full)[1]
+        want = sum(len(r[4]) for r in all_rows)
+        good = len(deep) == want
+        print("[self-test] block list truncated to %d of %d -- every hidden "
+              "candidate is reachable via --top-blocks: %s"
+              % (args.top_blocks, len(all_rows),
+                 "PASS (%d of %d offered when raised)" % (len(deep), want)
+                 if good else
+                 "FAIL (%d offered, header counts %d)" % (len(deep), want)))
+        ok &= good
 
     missing = [p for _, _, p in block_offered
                if not p or not os.path.isfile(os.path.join(awlib.REPO, p))]
