@@ -70026,7 +70026,7 @@
   "sub_0806C95C": {
    "name": "sub_0806C95C",
    "addr_hex": "0x0806C95C",
-   "size": 82,
+   "size": 88,
    "callees": [
     "Interpolate",
     "sub_0806BA6C"
@@ -70039,7 +70039,7 @@
    "fan_out": 2,
    "depth": 2,
    "batch": "code-0801D390#067",
-   "difficulty": 7.2,
+   "difficulty": 7.3,
    "trivial": false
   },
   "sub_0806CFC8": {
@@ -87583,7 +87583,7 @@
   "sub_0808BBA4": {
    "name": "sub_0808BBA4",
    "addr_hex": "0x0808BBA4",
-   "size": 22,
+   "size": 24,
    "callees": [
     "sub_0808BB58"
    ],
@@ -87601,7 +87601,7 @@
   "sub_0808D680": {
    "name": "sub_0808D680",
    "addr_hex": "0x0808D680",
-   "size": 88,
+   "size": 90,
    "callees": [
     "sub_08014E44"
    ],
@@ -90290,8 +90290,8 @@
   "sub_08033800",
   "sub_0803D92C",
   "sub_08067E1C",
-  "sub_0806C95C",
   "sub_0801F1EC",
+  "sub_0806C95C",
   "sub_0803550C",
   "sub_0802BBDC",
   "sub_08019348",

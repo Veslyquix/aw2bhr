@@ -744,6 +744,65 @@ the references is also used as a **memory address** — that is the reference
 shares. `sub_0808AD6C` qualifies because its xor'd copy is the source pointer
 of a copy loop.
 
+### MEASURED (wave 32, W32-C): a two-index address folds differently when CSE'd
+
+`gUnknown_084A0090[i].unk1c[j]` — a struct array containing an array — compiles
+**two different ways depending on how many times the address is used**, and only
+one of them is the ROM's:
+
+| uses | code |
+| --- | --- |
+| once (`sub_080445A8`, `sub_08044B28`) | one combined index: `(i*17 + j*5) << 2`, base added LAST |
+| twice, CSE'd into a pseudo (`sub_08044AB8`) | `i*17*4 + base`, then `j*5*4 - 20` on top |
+
+So a struct spelling that matched byte-for-byte in one function can be 25 bytes
+wrong in its neighbour on the same table. **A near-miss whose whole residual is
+an address chain is not automatically evidence that the struct is wrong** —
+check whether the sibling that matched used the address once. The flat spelling
+is what the CSE'd reader wants; the struct spelling is what the single-use
+readers want; both cannot be the source, and which one is real is a type-model
+question, not something the oracle settles.
+
+Same wave, same shape, the other direction: **a `u16` local or parameter whose
+value survives a call costs an extra pseudo.** `int r = b; ... return r;` and
+`u16 n = x / 10;` differ from `return b;` / `int n = (u16)(x / 10);` by one
+`adds rD, rS, #0` and one pushed register (`sub_080315E8`, `sub_08031C58`).
+
+### MEASURED (wave 32, W32-C): when `-fforce-addr` puts `&sym` in `.rodata`
+
+This is the mechanism behind every "pool word four bytes from its neighbour"
+symbol `gen_lds.py` invents, and reading it backwards costs a whole function.
+
+**A global whose ADDRESS is CSE'd into a pseudo that lives ACROSS A CALL gets
+`&sym` emitted as a `.LC` word in `.rodata`, and the function's inline pool
+word points at THAT.** Five probes, one file, same global each time:
+
+| source | pool word | code |
+| --- | --- | --- |
+| `*g` read once | `.word g` | `ldr rB,pool; ldrsh` |
+| `*g` written once | `.word g` | `ldr rB,pool; strh` |
+| `*g` read and written with a `bl` between | `.word .LC` | `ldr rB,pool; ldr rB,[rB]; ldrsh` |
+| same, but the POINTER bound to a local first | `.word g` | `ldr rB,pool; ldr rD,[rB]` once |
+| an ARRAY `gTD[]` indexed twice across a `bl` | `.word .LC` | as above |
+
+So the extra `ldr` is not a level of indirection in the SOURCE. If a target
+does `ldr rB,=gUnknown_08xxxxxx; ldr rD,[rB]; ldrsh rD,[rD,rI]`, check
+`baserom.gba` at that address first: if it holds an IWRAM address, the symbol is
+agbcc's own word and the honest spelling names the IWRAM global directly, one
+`ldr` shorter. Declaring the ROM symbol as a pointer variable reproduces the
+pool words but adds an `ldr` per use, which is how wave 32 lost 8 bytes on
+`sub_0806CFC8` before checking the ROM.
+
+Confirmed instances found by reading `baserom.gba`, all previously mistaken for
+globals: `0816E17C`/`0816E180` = `&gUnknown_03000614`/`&gUnknown_03000616`,
+`0808E524` = `&gUnknown_03000040`, `0808E560` = `&gUnknown_0200C528`,
+`08090D0C`/`08090D10` = `&gUnknown_0849B018`, `08090D14` =
+`&gUnknown_03004008`. **But the neighbours are not automatically pool words:**
+`08090D18`, four bytes further on, is real graphics data, and `0816E7F0` /
+`0816E7F8` / `0816E800` are real OAM blobs (they are EIGHT bytes apart and are
+used as values, with no `ldr` in front). The tell is the extra load, not the
+address.
+
 **Reusing a loop's pointer local for the code AFTER the loop permutes the whole
 loop's allocation, at identical length.** This is a third axis alongside "change
 a type" and "bind a subexpression", and it is the cheapest of the three to
@@ -15367,3 +15426,55 @@ arithmetic belongs to a pointer local declared with an initialiser, while one
 loaded in the middle of the arithmetic belongs to an expression agbcc reached
 in the ordinary way** — the two positions are different source constructs, not
 scheduling noise.
+
+## `x & <pool constant>` makes the CONSTANT operand 0, and that costs a copy when the constant is reused (wave 32, W32-B)
+
+`REG_WAITCNT = (REG_WAITCNT & 0xfffc) | v;` does not compile to the ROM's
+
+```
+    ldrh r1, [r5]
+    ands r1, r6        @ dest is the VALUE; the mask survives in r6
+```
+
+agbcc emits
+
+```
+    ldrh r1, [r6]
+    add  r0, r4, #0    @ copy the MASK, because it is operand 0 and must not die
+    and  r0, r0, r1
+```
+
+The AND's destination is the constant's register, so when the constant has a
+later use it has to be copied first -- 2 bytes, once per function, at the FIRST
+of its uses. At the last use, where the constant dies, the copy disappears and
+the two forms agree, which is what identifies the cause.
+
+**The `|` in the same expression is unaffected**: the ROM's `orrs r1, r0`
+(dest = the AND's result, i.e. operand 0) is reproduced exactly. So this is not
+"agbcc ignores operand order for commutative ops" -- it is specific to a
+commutative op whose second operand is an integer constant too large for a
+THUMB immediate and therefore forced into a register.
+
+MEASURED with `compile_probe`, eleven spellings, none of which removes the copy:
+
+```
+    (REG_WAITCNT & 0xfffc) | v          v | (REG_WAITCNT & 0xfffc)
+    (REG_WAITCNT & ~3) | v              (0xfffc & REG_WAITCNT) | v
+    u16 t = REG_WAITCNT; t &= 0xfffc; t |= v;
+    int t = REG_WAITCNT; t &= 0xfffc; t |= v;
+    int t = REG_WAITCNT & 0xfffc; t |= v;
+    u16 t = REG_WAITCNT; t &= ~3;
+    u16 m = 0xfffc; t &= m;
+    a non-volatile *(u16 *)0x04000204 read in place of the REG_WAITCNT macro
+```
+
+Compound assignment (`t &= m`) does NOT flip it, which is the surprising part
+-- it is the one form whose destination is syntactically operand 0.
+
+**The ROM proves agbcc CAN emit `ands rVal, rConst`,** so the lever exists and
+is somewhere other than the eleven forms above -- most likely in the
+surrounding register pressure rather than in the expression. Until it is found,
+a function that masks with a large constant used twice is 2 bytes over and that
+residual is NOT a type-model or allocation problem. It is the sole difference
+in `sub_0808B074`, `sub_0808B0E8` and `sub_0808B3C0` (wave 32, all three
+otherwise instruction-for-instruction exact); their drafts carry the diff.

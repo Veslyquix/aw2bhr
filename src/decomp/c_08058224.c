@@ -12,15 +12,13 @@
  * shifted intermediate is CSEd into the else arm's `lsrs r0, r2, #0x19`.
  * sub_08042D1C is called twice on purpose -- the ROM recomputes it rather than
  * keeping it live across the compare. */
-struct Unk58224
-{
-    u8 unk00;
-    u8 filler_01[0x05];
-    u8 unk06_0 : 7;
-    u8 unk06_7 : 1;
-};
-
-int sub_08058224(struct Unk58224 *p)
+/* Wave 32 (W32-B) UNIFIES the local struct with struct Unk08499594: the two
+ * members this body reads -- unk00 at +0x00 and the 7-bit bitfield at +0x06 --
+ * are that type's unk00 and unk06_0 at the identical offsets and widths, and
+ * sub_08062730 (promoted this wave) passes gUnknown_08499594 entries straight
+ * in. Byte-neutral; re-verified. The local model is removed rather than kept
+ * so the shared type is the only one a future caller can see. */
+int sub_08058224(struct Unk08499594 *p)
 {
     if (sub_08042D1C(gUnknown_030033EC, p->unk00) > p->unk06_0)
         return p->unk06_0;

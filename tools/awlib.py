@@ -176,6 +176,19 @@ def estimate_size(fn):
             if not rest or rest.startswith("@"):
                 continue
             s = rest
+            # `_0806C99C: .4byte sym` is a pool WORD, not an instruction. The
+            # DIR_RE test above never sees it because the line begins with the
+            # label, so before wave 32 every such word was counted as 2 bytes
+            # and each one made the function 2 bytes short. sub_0806C95C, the
+            # last function of asm/code-0801D390.s, has three of them and was
+            # indexed at 82 bytes instead of 88 -- a correct candidate could
+            # not match, because trymatch slices the ROM to rec["size"].
+            d = DIR_RE.match(s)
+            if d:
+                w = DIRECTIVE_WIDTH.get(d.group(1))
+                if w:
+                    total += w * (s.count(",") + 1)
+                continue
         mnemonic = s.split()[0].lower().rstrip(",")
         total += 4 if (fn.mode == "ARM" or mnemonic in ("bl", "blx")) else 2
     return total

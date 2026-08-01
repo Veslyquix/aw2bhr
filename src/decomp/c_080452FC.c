@@ -1,0 +1,59 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080452FC.
+ * sub_080452FC @ 0x080452FC, sub_08045358 @ 0x08045358
+ */
+
+#include "proc.h"
+/* The two coordinates are DECLARED LOCALS, not argument expressions: the ROM
+ * narrows both to u8 before it materialises the flag, which is the order a
+ * declaration list gives and not the order argument setup would. */
+struct Unk452FC
+{
+    /* 0x00 */ u8 filler_00[0x2c];
+    /* 0x2c */ u8 unk2c;
+    /* 0x2d */ u8 filler_2d[0x0f];
+    /* 0x3c */ int unk3c;
+    /* 0x40 */ int unk40;
+};
+#include "hardware.h"
+struct Unk45358Proc
+{
+    /* 0x00 */ u8 filler_00[0x4c];
+    /* 0x4c */ u8 *unk4c;
+    /* 0x50 */ u16 *unk50;
+};
+
+void sub_080452FC(struct Unk452FC *proc)
+{
+    u8 x;
+    u8 y;
+    u8 flag;
+
+    if (sub_08015BD0((s32)gUnknown_0849A00C) == -1)
+    {
+        x = proc->unk3c;
+        y = proc->unk40;
+        flag = 0;
+
+        if (gUnknown_08499598[proc->unk2c].unk1f == 2)
+            flag = 1;
+
+        sub_08044B08(x, y, flag);
+        Proc_Break(proc);
+    }
+}
+
+/* `gUnknown_03002B6C.bits.chr_block * 0x4000` is the promoted c_08013C00.c
+ * idiom; only the base differs (0x06005600 rather than 0x06000000). */
+void sub_08045358(struct Unk45358Proc *proc)
+{
+    Decompress(gUnknown_08112704, (void *)(gUnknown_03002B6C.bits.chr_block * 0x4000 + 0x06005600));
+    Decompress(proc->unk4c, gUnknown_08499578);
+    sub_08012B00(gUnknown_08499578, 0x800, 0x82b0);
+    ApplyPaletteExt(proc->unk50, 0x100, 0x20);
+    sub_08013AEC();
+}

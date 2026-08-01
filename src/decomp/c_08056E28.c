@@ -7,17 +7,8 @@
  * sub_08056E28 @ 0x08056E28
  */
 
-/* A five-field request record: two indices then four values, all u16. */
-struct Unk56E28
-{
-    /* 00 */ u16 unk00;
-    /* 02 */ u16 unk02;
-    /* 04 */ u16 unk04;
-    /* 06 */ u16 unk06;
-    /* 08 */ u16 unk08;
-    /* 0a */ u16 unk0a;
-    /* 0c */ u16 unk0c;
-};
+/* The record type moved to include/unknown-globals.h in wave 32 (W32-A) so that
+ * sub_0804BCB8, which builds one on its stack, can name it too. */
 
 /* Copies a motion request into gUnknown_02029A10[group].entries[slot]. The
  * 0xb4 and 0x24 strides in the address arithmetic are exactly the declared
