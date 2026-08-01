@@ -65,7 +65,9 @@
   "links all of them. A promoted unit whose .rodata the linker script does not",
   "place either loses the word or shifts every address after it, and because",
   "promote.py acts on trymatch's verdict the failure lands in the build with",
-  "functions already moved. Placement first, verifier second."
+  "functions already moved. Placement first, verifier second.",
+  "",
+  "FORMATTING: this file is written with json.dump(..., indent=1). Dump it with any other indent and every line churns in the diff, which buries the one entry you added -- wave 26 did exactly that and had to redo it."
  ],
  "functions": {
   "sub_0801A6C0": "98.4% -- 64 bytes, size-exact, ONE byte differs at +0x2a. The original stores `strh r2, [r1, #0]`; every candidate produces `strh r3, [r1, #0]`. Both registers hold 0 at that point (r2 was just zeroed and stored to [r1, #4], r3 likewise), so this is a pure register-allocation tie-break with no source-level lever on it -- the instruction selection, the order and every other byte are already correct. Ruled out: the source axis, exhaustively, across two waves plus decomp-permuter runs; and the toolchain axis -- old_agbcc and dropping -fforce-addr were both tried after the wave-10 two-compiler finding and neither moves this byte. Not every allocation near-miss is a flag problem. Worth re-testing whenever a register-allocation rule lands in docs/agbcc-codegen.md.",
@@ -346,6 +348,7 @@
     "The fall-through / negated-condition axis does NOT apply here -- sub_080344F0 contains no `if` at all, so there are no two constants in two blocks to swap."
    ],
    "reason": "One optimiser decision, not source semantics. The type model, the relocation, the statement order and the loop body are all settled and recorded in the draft header. What remains is making agbcc keep the loop counter ascending while still strength-reducing both pointers, and eleven spellings say those two outcomes are mutually exclusive through the source. Worth one look from anyone who finds a third lever on check_dbra_loop -- or a permuter run, which has not been tried here."
-  }
+  },
+  "sub_08004D90": "19.1% by byte score, but 62 of 68 bytes are solved -- the low score is the cascade from one early difference; best spelling is in work/sub_08004D90/sub_08004D90.c. Remaining diff is PLACEMENT, not shape: the ROM materialises `ldr rN, =gUnknown_08499578` inside BOTH arms of the if (two pool words at 0x08004DA4/0x08004DD0 holding the SAME address) and dereferences once after the merge; every candidate emits one address load after the merge. Ruled out: source ordering, exhaustively -- putting the array reference in both arms drags the deref into the arms, or cross-jumping re-merges the whole suffix. It is a -fforce-addr placement artefact with no source-level lever found in wave 26. The arithmetic half is solved and reusable: stage `&g[(x+K)*32+3]` through an int local one step at a time (i = b*2; i += K; i = i*32+3) to block agbcc's tree-level refold; any two steps written as one expression refold. Next attempt: start at the pool-word duplication, not the arithmetic; re-test whenever a -fforce-addr duplication rule lands in docs/agbcc-codegen.md."
  }
 }

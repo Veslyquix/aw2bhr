@@ -8365,6 +8365,30 @@ statement boundary would reorder the pool, put the assignment inside the
 subscript.** Read backwards, a pool word that is out of source order is telling
 you a binding was made at a point no statement boundary can reach.
 
+### Corroborated on a PLAIN STRUCT FIELD, and it is the FE `CallDelayed` idiom (wave 26, W26-B)
+
+W18-C derived this from `tbl[i](a, b)`, where the callee's address has to be
+*computed*. It holds unchanged when the pointer is a bare field load with no
+address arithmetic at all — so do not read the rule as being about the
+subscript. `sub_08072948`:
+
+```c
+proc->unk2c(proc->unk30);            /* ldr r0,[r4,#0x30] ; ldr r1,[r4,#0x2c] */
+func = proc->unk2c; func(proc->unk30); /* ldr r1,[r4,#0x2c] ; ldr r0,[r4,#0x30] */
+```
+
+The ROM has the second. Both are 40 bytes and both use `_call_via_r1`, so
+size, arity and the trampoline all agree and only the two `ldr`s swap — which
+is exactly the failure mode W18-C warns about, seen here with nothing in the
+expression to blame at all.
+
+Worth flagging because this is the Fire Emblem `CallDelayedArg_OnLoop` shape and
+`get_function` volunteers that name via `fe_name`. Its one-argument form needs
+the binding; the nullary `CallDelayed_OnLoop` twin next door (`sub_08072924`)
+does **not**, because with no arguments there is nothing for the load to sink
+past. Two adjacent functions, same idiom, different spellings — take the
+`fe_name` hint as a starting point and not as the C.
+
 ### Argument order in an indirect call is still the direct-call rule
 
 `_call_via_rN`'s register index is the arity (recorded above), and the arguments
@@ -12344,7 +12368,7 @@ missing statement.** An `if`/`else` assigning one result local is byte-identical
 to the matching form, so the guard shape is a free choice once the sense is
 right.
 
-## Probing a promoted function's type: change the DRAFT, not `src/decomp/` (wave 25, orchestrator error)
+## Probing a promoted function's type: change the DRAFT, not `src/decomp/` (wave 26, orchestrator error)
 
 `trymatch` compiles `work/<fn>/<fn>.c`. It does **not** compile
 `src/decomp/c_<addr>.c`. So the obvious way to test "is this promoted
@@ -12353,7 +12377,7 @@ function's return type really `int`?" -- edit the promoted file, re-run
 `conflicting types` or a byte difference that has nothing to do with the
 question.
 
-Wave 25 made exactly this mistake on three functions at once and drew the
+Wave 26 made exactly this mistake on three functions at once and drew the
 wrong conclusion from it: `sub_0804415C`, `sub_0803B628` and `sub_0808B6B0`
 were each declared narrow (`u8`, `bool8`, `u32`) by an agent against promoted
 definitions saying `int`. Narrowing the definitions "broke" all three, so the
@@ -12385,3 +12409,147 @@ header and a promoted definition does not automatically mean the header is
 wrong.** "The definition wins" is the right rule for making the build link, but
 it is a tie-break, not evidence. Probe both spellings properly -- draft synced
 -- before deciding which half to change, and check the callers.
+
+## A NARROW destination changes which expansion agbcc picks — two functions, two different expansions (wave 26, W26-A)
+
+Two functions in the 0x08019000 block came down to the same lever, and it is one
+nobody had written down: **the type of the local a value lands in decides which
+of two equal-size expansions agbcc emits.** Not the operator, not the operand
+types, not the statement structure — the destination.
+
+**Case 1, a comparison used as a value (`sub_080196C0`).** agbcc has two
+expansions for `x != 0` when the result is wanted as a value:
+
+```
+    cmp  r0, #0          @ branching:   6 bytes
+    beq  .L
+    movs r0, #1
+.L:
+
+    rsbs r1, r0, #0      @ branchless:  6 bytes
+    orrs r1, r0
+    lsrs r1, r1, #0x1f
+```
+
+They are **the same six bytes**, so size never tells you which one you are
+missing — only the instruction diff does. Everything that felt like it ought to
+matter does not. All of these probe as the *branching* form:
+
+```c
+    int  i = f() != 0;                 u32 i = f() != 0;
+    ... unk34[f() != 0] ...            ... unk34[f() ? 1 : 0] ...
+    ... unk34[!!f()] ...               t = f(); ... unk34[t != 0] ...
+```
+
+and both of these probe as the *branchless* form the ROM has:
+
+```c
+    u8  i = f() != 0;                  u16 i = f() != 0;
+```
+
+The narrowing on the assignment is the whole difference: it makes gcc want the
+value in a register instead of letting it be a jump. This generalises the
+existing "a returned `!=` is branchless" note in the Control-flow chapter --
+a `return` is not special, a *narrow destination* is, and `return` happened to
+be the case that had been observed.
+
+**Case 2, the shift a signed `/ 2` ends with (`sub_08019DEC`).** `expr / 2` on a
+signed expression expands to the rounding triple
+
+```
+    lsrs r3, r2, #0x1f
+    adds r2, r2, r3
+    asrs r2, r2, #1        @ ROM has  lsrs r2, r2, #1
+```
+
+Once the quotient is `strh`'d, bit 31 is thrown away and the logical shift is
+the same value, so combine is free to rewrite `asrs` to `lsrs` -- and it does,
+but **only when the quotient lands in a narrow local first**:
+
+```c
+    p->unk1e = (a + b) / 2;              /* asrs -- and this does not change   */
+                                         /* whether unk1e is s16 or u16, nor   */
+                                         /* if you swap the addends, nor if    */
+                                         /* you name the dividend `int t`      */
+    u16 t = (a + b) / 2; p->unk1e = t;   /* lsrs -- matches                    */
+```
+
+Assigning straight to the *member* is not enough even when the member is `u16`.
+It has to be a local.
+
+**How to use this.** When a near-miss is one instruction or one small block wide
+and the difference is *which* of two equivalent sequences agbcc chose, stop
+rewriting the expression and start changing the type of what it is assigned to.
+Sweep `u8` / `u16` / `int` on the destination local before anything else. This
+is a different lever from the wave-15 "`u16 v` vs `int v` with a cast" blind
+spot: there the two spellings *folded together* and the probe could not separate
+them, here they separate cleanly and the narrow one is the answer.
+
+## An `ldrsh` at a member offset does NOT prove the member is signed (wave 26, W26-A)
+
+`movs r1, #8; ldrsh r0, [r0, r1]` -- the register-offset load that only exists
+because THUMB has no `ldrsh` immediate form -- reads like a settled `s16`
+member. It is not. Probed on `struct Unk0200C528Node`, whose `unk08` is `u16`
+and is loaded `ldrh` by the already-matched `src/decomp/c_08018C54.c`:
+
+```c
+    f(p->unk08);        /* u16 member  ->  ldrh r0, [r0, #8]              */
+    f((s16)p->unk08);   /* u16 member  ->  movs r1,#8; ldrsh r0,[r0,r1]   */
+    f(p->unk08);        /* s16 member  ->  movs r1,#8; ldrsh r0,[r0,r1]   */
+```
+
+The cast's truncate-then-sign-extend folds into the load, so a `(s16)` cast on a
+`u16` member is **byte-identical** to declaring the member `s16`. That means an
+`ldrsh` is evidence about the *expression*, not the *member*, and it is never a
+reason to retype a shared struct that other matched files depend on. It cost
+nothing to leave `unk08` as `u16` and write the cast in `sub_080190EC` /
+`sub_0801911C`, and retyping it would have put `c_08018C54.c` at risk for no
+gain.
+
+The converse is also worth knowing: a `u8` destination collapses BOTH spellings
+to a plain `ldrb r0, [r0, #8]`, so an assignment to a byte is no evidence about
+the member's width at all.
+
+## W26-B's branch-sense rule needs a qualifier: it holds when both arms RETURN, and inverts when they REJOIN (wave 26, W26-C)
+
+The rule two sections above — "the conditional branch is the source `if`
+condition UNCHANGED, and the block it branches to is the `if` body" — was
+derived from early-return predicates, and it is right for those. It is
+**backwards for an `if`/`else` whose arms fall back together**, which cost two
+probe rounds this wave before the pattern was visible.
+
+Measured on six functions, all `if (C) A; else B;` with nothing else changed:
+
+| arms | emitted | branch tests | inline block |
+|---|---|---|---|
+| both `return` | `br C -> A; B; b end; A:` | C verbatim | the ELSE |
+| rejoin after | `br !C -> B; A; b end; B:` | C negated | the THEN |
+
+Returning arms: `sub_08017CF0`, `sub_08017D30`, `sub_08017DA0`, `sub_08042D84`.
+Rejoining arms: `sub_080176C0`, `sub_08042C24`.
+
+So the practical readout is unchanged in shape but you must look at the arms
+first. For `sub_08017CF0` the ROM's `bne` over an inline cursor-advance needed
+the source written `if (g != 1) return f(a); else { advance; return TRUE; }` —
+condition and arms both flipped from the obvious reading. For `sub_08042C24`,
+whose two `Proc_Start` calls assign the same local and fall through, the ROM's
+`bgt` to `Proc_StartBlocking` needed `if ((int)parent <= 7) Proc_Start(...);
+else Proc_StartBlocking(...);` — the condition written as the negation of what
+the branch tests. Adding or removing an explicit `else` changes nothing in
+either case, confirming W26-B on that point.
+
+**A third shape sits between them and is worth recognising: two separate
+`return`s of the SAME constant get CROSS-JUMPED into one block.** `sub_0804203C`
+ends in `beq L; <second test>; bne L1; L: movs r0,#0; b end; L1: movs r0,#1`,
+where the first test's branch jumps forward over the second test to a label the
+second test also falls into. That is not a compound condition — folding it into
+`if (A && B) return 1; return 0;` puts `return 1` inline instead and is 4 bytes
+wrong. The source is three statements:
+
+```c
+if (A) return 0;
+if (B) return 1;
+return 0;
+```
+
+A forward branch to a label that a later fall-through also reaches is the tell.

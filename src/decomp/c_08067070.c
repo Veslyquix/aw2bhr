@@ -1,0 +1,28 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08067070.
+ * sub_08067070 @ 0x08067070
+ */
+
+/* The gUnknown_08580DD8 slot script's third wrapper, alongside the
+ * sub_080670A0/sub_080670BC installer pair. gUnknown_0202F200 is the same 0/1
+ * mode flag those two set, and here it GUARDS the removal: the mode-0 slot is
+ * torn down (and sub_080658AC run first), the mode-1 slot is left alone.
+ *
+ * `pop {r0}` fixes this as void even though sub_0801537C returns an int, so
+ * both calls are bare statements. */
+
+void sub_08067070(void)
+{
+    sub_080733B8();
+    sub_0801537C(gUnknown_08580CC4);
+
+    if (gUnknown_0202F200 == 0)
+    {
+        sub_080658AC();
+        sub_0801537C(gUnknown_08580DD8);
+    }
+}

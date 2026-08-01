@@ -1,0 +1,23 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08017658.
+ * sub_08017658 @ 0x08017658
+ */
+
+/* The parameter is `struct Unk03001470 *`: a bare `adds r4, r0, #0` prologue
+ * with no narrowing, then `ldrh` at +0x1e, which is that struct's `s16 unk1e`
+ * and is exactly the field sub_08017688 next door writes with `strh`.
+ * gUnknown_030033EC is a u16 read `ldrb` -- the truncation sub_08043DAC's `u8`
+ * parameter folds into the load. */
+void sub_08017658(struct Unk03001470 *proc)
+{
+    sub_0802150C();
+    sub_08016DB8(proc->unk1e);
+    sub_08026798();
+    sub_08023348();
+    sub_0803662C();
+    sub_08043DAC(gUnknown_030033EC);
+}

@@ -16,9 +16,16 @@
  * `movs r1, #0; ldrsh r0, [r0, r1]` is not a variation on the matched siblings
  * -- every member of F038 uses it, including sub_08042E2C/E84/FC4 -- it is just
  * how an s16 member is reached once the offset has been folded onto the base.
- * No re-narrowing after the load, so the return is `int`. */
+ * No re-narrowing after the load, so the return is `int`.
+ *
+ * THREE parameters, not the two this was first promoted with. The third is
+ * unused in this member's body, so the body cannot tell you -- the evidence is
+ * the call site: sub_08042C9C (wave 26, byte-exact) materialises `adds r2, r5,
+ * #0` immediately before the bl, which only an argument produces, and the
+ * sibling sub_08043200 takes and uses the same three. An unused trailing
+ * parameter is byte-neutral here; re-verified with trymatch after the change. */
 
-int sub_08043270(int a, int b)
+int sub_08043270(int a, int b, int c)
 {
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
