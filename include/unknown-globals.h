@@ -3039,8 +3039,15 @@ extern struct Unk03002040 gUnknown_03002040;
  * 0x0816E0B0 and 0x0816E0B4 (the ROM words there are 0x03000600 and
  * 0x03000602), so naming them directly gives the ROM's two-level read. */
 extern s32 gUnknown_030005FC;
-extern s16 gUnknown_03000600;
-extern s16 gUnknown_03000602;
+/* 0x03000600 and 0x03000602 CANNOT BE DECLARED and were removed in wave 32.
+ * aw2bhr.lds names gUnknown_030005FC and then gUnknown_03000604, so both
+ * addresses fall INSIDE the 8-byte gUnknown_030005FC region. gen_lds passes the
+ * RAM symbol table through from that untouched upstream script, so a symbol
+ * invented here has nowhere to live: sub_08064474 verified byte-for-byte with
+ * `trymatch` and then failed the split build with `undefined reference`.
+ * To promote a function that reads them, spell them as offsets into
+ * gUnknown_030005FC (+4 and +6) -- do not re-add these two lines.
+ * tools/proto_check.py now flags this class. */
 extern struct Unk030020A8 gUnknown_030020A8;
 /* gUnknown_030020B4 is the REG_DISPSTAT shadow -- declared in hardware.h */
 extern u8 gUnknown_030020B8;
@@ -7687,8 +7694,12 @@ extern s32 gUnknown_03000610;
  * referenced twice with a call in between gets the .rodata indirection. Naming
  * `gUnknown_0816E17C` as an `s16 *` reproduces the pool words but adds one
  * `ldr` per use, because the ROM word is already the indirection. */
-extern s16 gUnknown_03000614;
-extern s16 gUnknown_03000616;
+/* 0x03000614 and 0x03000616 CANNOT BE DECLARED and were removed in wave 32 --
+ * same reason as 0x03000600/0x03000602 above: both fall INSIDE the 8-byte
+ * gUnknown_03000610 region, which is the last name aw2bhr.lds gives before
+ * gUnknown_03000618. sub_0806CFC8 verified with `trymatch` and then failed the
+ * split build with `undefined reference`. Spell them as offsets into
+ * gUnknown_03000610 (+4 and +6) if a function needs them. */
 
 /* ---- wave 32 (W32-C): the 0x0806E and 0x08049 blocks ---- */
 

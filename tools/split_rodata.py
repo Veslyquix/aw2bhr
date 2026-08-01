@@ -98,6 +98,52 @@ def read_chunks(src):
     return header, chunks
 
 
+def split_for_carves(carve, chunks):
+    """Split any chunk that CONTAINS a carve address so the word stands alone.
+
+    agbcc's -fforce-addr pool word does not have to sit at a label boundary in
+    the original data. Wave 32 hit `0x0808DF94 is 1412 bytes, expected a 4-byte
+    pool word`: sub_080114A0's word is the FIRST word of a 1,412-byte unlabelled
+    blob, and the function -- verified byte-for-byte -- had to be backed out of
+    the wave because the carve could not be expressed.
+
+    Splitting is safe because a chunk is just an `.incbin` range: cutting it into
+    [head][word][tail] re-emits exactly the same bytes in the same order. The
+    label, if any, belongs to the chunk START and stays with whichever piece
+    starts there -- the head, or the carved word itself when the word IS the
+    first thing in the chunk, which is the case that prompted this. The tail is
+    anonymous data nobody references by name.
+    """
+    out = []
+    for c in chunks:
+        hits = sorted(a for a in carve
+                      if c["addr"] <= a < c["addr"] + c["size"])
+        if not hits or c["size"] == 4:
+            out.append(c)
+            continue
+        indent = re.match(r'(\s*)', c["lines"][-1]).group(1)
+
+        def incbin(addr, size):
+            return ('%s.incbin "baserom.gba", 0x%X, 0x%X\n'
+                    % (indent, addr - ROM_BASE, size))
+
+        pos = c["addr"]
+        pre = c["lines"][:-1]           # labels/.global, minus the incbin line
+        for a in hits:
+            if a > pos:
+                out.append({"addr": pos, "size": a - pos,
+                            "lines": pre + [incbin(pos, a - pos)]})
+                pre = []
+            out.append({"addr": a, "size": 4, "lines": pre + [incbin(a, 4)]})
+            pre = []
+            pos = a + 4
+        end = c["addr"] + c["size"]
+        if pos < end:
+            out.append({"addr": pos, "size": end - pos,
+                        "lines": [incbin(pos, end - pos)]})
+    return out
+
+
 def load_carveouts():
     """{addr: obj} for every promoted unit that declares pool words."""
     if not os.path.exists(PROMOTED):
@@ -206,6 +252,7 @@ def main():
     for src, sect in SOURCES:
         stem = src[:-2]
         header, chunks = read_chunks(src)
+        chunks = split_for_carves(carve, chunks)
         mine = {a: o for a, o in carve.items()
                 if any(c["addr"] == a for c in chunks)}
         verify(mine, chunks, strict=True)

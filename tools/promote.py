@@ -483,6 +483,28 @@ def promote(names, index):
     except Exception as exc:                       # never block a promotion
         print("  could not run proto_check.py: %s" % exc)
         rc = 0
+
+    # Line-ending churn, reported HERE because this is the last stop before the
+    # build and the commit. Several repo files are mixed CRLF/LF in git, and an
+    # agent that rewrites one wholesale re-terminates every line: wave 32 turned
+    # a 198-line addition into 921/724 four separate times, and wave 30 turned a
+    # five-entry parked.json change into 425/379. The content is fine; the diff
+    # is unreviewable, which is how a real finding gets missed.
+    print("\nline-ending churn (tools/fix_eol.py):")
+    try:
+        import fix_eol
+        if fix_eol.main.__code__.co_argcount == 0:
+            saved = sys.argv
+            sys.argv = ["fix_eol.py", "--check"]
+            try:
+                if fix_eol.main():
+                    print("  ^ run `python tools/fix_eol.py` -- it restores each")
+                    print("    unchanged line's original ending and touches no "
+                          "content.")
+            finally:
+                sys.argv = saved
+    except Exception as exc:
+        print("  could not run fix_eol.py: %s" % exc)
     if rc:
         print("\n  *** FIX THESE BEFORE BUILDING. ***")
         print("  A prototype/definition conflict or a duplicated type in a")

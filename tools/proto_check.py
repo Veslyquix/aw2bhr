@@ -207,6 +207,76 @@ def duplicate_types():
     return out
 
 
+UPSTREAM_SRC = ('src/proc.c', 'src/title-screen.c')
+
+
+def global_checks():
+    """[(kind, symbol, detail)] for declarations that only fail at LINK time.
+
+    Two failure modes, both found in wave 32, both invisible to every
+    per-function `trymatch` because a per-function check never links.
+
+    unlinkable  a RAM global declared at an address aw2bhr.lds does not name.
+                gen_lds passes the RAM symbol table through from the UNTOUCHED
+                upstream script, so a symbol invented at an unnamed address has
+                nowhere to live and the split build dies with `undefined
+                reference`. Wave 32 lost two functions to this: 0x03000600 and
+                0x03000602 fall INSIDE gUnknown_030005FC, 0x03000614/0x03000616
+                inside gUnknown_03000610.
+
+    upstream    a global DEFINED in src/proc.c or src/title-screen.c and also
+                declared here. Far worse, because it corrupts the ROM instead of
+                failing to link. `s32 IWRAM_DATA gUnknown_03001FDC;` in proc.c is
+                a TENTATIVE definition carrying a section attribute; proc.c
+                includes our headers, so a plain `extern int gUnknown_03001FDC;`
+                is seen first, agbcc drops the section attribute, and the symbol
+                becomes COMMON at 0x08800000 instead of being placed at
+                0x03001FDC by `src/proc.o(.bss)`. Wave 32's split ROM differed in
+                three 4-byte pool words, TWO OF THEM INSIDE proc.o, with the SHA
+                as the only symptom.
+
+    We already knew not to EDIT those two files. Declaring one of their globals
+    is the same hazard, because this header reaches them.
+    """
+    out = []
+    try:
+        with open(os.path.join('aw2bhr.lds'), encoding='utf-8',
+                  errors='replace') as fh:
+            lds = set(re.findall(r'\b(gUnknown_[0-9A-Fa-f]{8})\s*=\s*\.',
+                                 fh.read()))
+    except OSError:
+        return out                      # no linker script, nothing to check
+
+    upstream = set()
+    for f in UPSTREAM_SRC:
+        try:
+            with open(f, encoding='utf-8', errors='replace') as fh:
+                text = fh.read()
+        except OSError:
+            continue
+        # A DEFINITION, not an `extern` -- the tentative-definition form is what
+        # carries the section attribute we must not disturb.
+        for m in re.finditer(r'^\s*(?!extern)[A-Za-z_][\w\s*]*?'
+                             r'\b(gUnknown_[0-9A-Fa-f]{8})\s*(?:=|;|\[)',
+                             text, re.M):
+            upstream.add(m.group(1))
+
+    for hf in sorted(glob.glob('include/*.h')):
+        with open(hf, encoding='utf-8', errors='replace') as fh:
+            for n, ln in enumerate(fh, 1):
+                if ln.lstrip().startswith(('*', '/')):
+                    continue
+                m = re.match(r'\s*extern\s+.*?\b(gUnknown_[0-9A-Fa-f]{8})\b', ln)
+                if not m:
+                    continue
+                sym = m.group(1)
+                if sym in upstream:
+                    out.append(('upstream', sym, '%s:%d' % (hf, n)))
+                elif sym[9:11] in ('02', '03') and sym not in lds:
+                    out.append(('unlinkable', sym, '%s:%d' % (hf, n)))
+    return out
+
+
 def main(argv):
     scan_all = '--all' in argv
     protos = collect_prototypes(scan_all)
@@ -251,7 +321,36 @@ def main(argv):
     print('scanned %d promoted file(s) for duplicate types -- %d file(s) affected'
           % (len(glob.glob('src/decomp/*.c')), len(dups)))
 
-    return 1 if (bad or dups) else 0
+    globs = global_checks()
+    for kind, sym, where in globs:
+        if kind == 'upstream':
+            print('UPSTREAM GLOBAL %s (%s)' % (sym, where))
+            print('   DEFINED in src/proc.c or src/title-screen.c, which include '
+                  'this header.')
+            print('   A plain `extern` here is seen BEFORE the definition and '
+                  'strips its section')
+            print('   attribute, moving the symbol to COMMON at 0x08800000. The '
+                  'split ROM then')
+            print('   differs in pool words INSIDE proc.o and the only symptom '
+                  'is the SHA.')
+            print('   Delete the declaration. A function needing that global '
+                  'cannot be promoted.')
+        else:
+            print('UNLINKABLE GLOBAL %s (%s)' % (sym, where))
+            print('   aw2bhr.lds does not name this address, and gen_lds passes '
+                  'the RAM symbol')
+            print('   table through from that UNTOUCHED script -- so the split '
+                  'build will fail with')
+            print('   `undefined reference`. The address usually falls INSIDE an '
+                  'existing symbol;')
+            print('   find the covering one and spell it as an offset, or leave '
+                  'the function unpromoted.')
+    print('checked %d global declaration(s) -- %d unlinkable, %d upstream-owned'
+          % (len(glob.glob('include/*.h')),
+             sum(1 for g in globs if g[0] == 'unlinkable'),
+             sum(1 for g in globs if g[0] == 'upstream')))
+
+    return 1 if (bad or dups or globs) else 0
 
 
 if __name__ == '__main__':
