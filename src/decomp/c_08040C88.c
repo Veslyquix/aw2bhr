@@ -1,0 +1,28 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08040C88.
+ * sub_08040C88 @ 0x08040C88
+ */
+
+/* The teardown for the proc the matched sub_08040CA4 sets up: it frees the
+ * three animation handles in the order 0x2c, 0x34, 0x38. The struct is the
+ * same one src/decomp/c_08040CA4.c names Unk08040CA4; only the three handles
+ * are needed here. */
+struct Unk40C88Proc
+{
+    /* 00 */ u8 filler_00[0x2c];
+    /* 2c */ struct Unk0801C210 *unk2c;
+    /* 30 */ u8 filler_30[0x04];
+    /* 34 */ struct Unk0801C210 *unk34;
+    /* 38 */ struct Unk0801C210 *unk38;
+};
+
+void sub_08040C88(struct Unk40C88Proc *proc)
+{
+    sub_0801C240(proc->unk2c);
+    sub_0801C240(proc->unk34);
+    sub_0801C240(proc->unk38);
+}

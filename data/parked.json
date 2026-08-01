@@ -417,6 +417,55 @@
    "axes_ruled_out": [],
    "read_this_first": "include/unknown-globals.h already records two facts about this function that a fresh attempt will otherwise re-derive wrongly. (1) It reaches its slot through agbcc's own -fforce-addr word at 0x081CC02C, whose ROM contents are 0x0202FDE4, so the three-level load here is ONE indirection of compiler bookkeeping and NOT a pointer to a pointer -- a draft modelling it as the latter looks structurally right and allocates differently. (2) gUnknown_0202F8DC is read at stride FOUR with the halfword at +2 (two entries per scanline), which contradicts an older note above it claiming a one-halfword table; that reconciliation is still open and is the most likely source-level lever here. Settle the type model before touching allocation.",
    "wave": "30 (W30-A)"
+  },
+  "sub_0802FA64": {
+   "bytes": 56,
+   "best": "56 bytes (exact size), 87.5% identical -- 7 of 56 bytes differ, first at +0xa",
+   "remaining_diff": "The instruction SEQUENCE is exact and so are the three pool words and their order (gUnknown_0202575C, gUnknown_0849B018, gUnknown_03003FC0). Two quantities have each other's hard register: the ROM keeps the gUnknown_0849B018 dereference in r3 and the gUnknown_03003FC0 address in r2, ours keeps them in r2 and r3. The one consequence is the tied operand of the index add -- ROM `adds r2, r2, r1` then `adds r2, #0x3e` (result in the BASE register), ours `add r1, r1, r3` then `add r1, r1, #0x3e` (result in the INDEX register). Nothing else in the function differs.",
+   "why_it_is_close": "Everything about the address expression is already settled by the listing. The 0x3e is added to the address AFTER the index and the pool word is the bare `gUnknown_03003FC0`, which rules out every member-array spelling: `g.field[i]` folds `&g + 0x3e` into the pool word (measured, three ways). So the source is an address constant offset by a runtime index and then displaced by 0x3e, which is exactly what the parked draft writes. This is the same failure as sub_0801C4D4 and sub_0801C640 -- see 'OPEN: two simultaneously-live pointers can swap registers with no source lever' in docs/agbcc-codegen.md -- and it is a THIRD instance, which makes the minimal-probe experiment that section asks for worth more than another rewrite here.",
+   "axes_ruled_out": [
+    "member array `gUnknown_03003FC0.unk3e[i]` and every equivalent (`((u8 *)&g + 0x3e)[i]`, `((u8 *)&g)[i + 0x3e]`) -- all fold &g+0x3e into the literal pool, which the ROM does not do",
+    "pointer local declared and assigned BEFORE the unk00/unk01 stores -- moves gUnknown_03003FC0's pool word to slot 0; the ROM has it in slot 2",
+    "pointer local assigned after the unk01 store, as one statement (`p = (u8 *)&g + i; p[0x3E]`) -- correct pool order, wrong registers",
+    "the same split into two statements (`p = (u8 *)&g; p += i;` and `p = p + i + 0x3E;`) -- identical output to the one-statement form",
+    "binding the index to its own `int` or `s8` local first, so the add's operands are two plain pseudos -- identical",
+    "writing the sum index-first (`*(g0849B018->unk06 + (u8 *)&g + 0x3E)`) to flip the tied operand -- gcc canonicalises, identical",
+    "binding gUnknown_0849B018 to a local `struct Unk0849B018 *` -- moves ITS pool word to slot 0, still r2 for the deref",
+    "binding gUnknown_0202575C to a local `struct Unk0202575C *` -- same, pool order breaks",
+    "reaching the byte through a cast struct pointer with a member at 0x3e (`((struct S *)((u8 *)&g + i))->unk3e`), both inline and via a local -- identical",
+    "the volatile double read of gUnknown_0849B018->unk06 is NOT the issue: the ROM's two `ldrb [r3,#6]` are reproduced exactly, and unk06 is already volatile in unknown-globals.h"
+   ],
+   "wave": "31 (W31-A)"
+  },
+  "sub_08029868": {
+   "bytes": 24,
+   "best": "24 bytes (exact size), 91.7% identical -- 2 of 24 bytes differ, first at +0xa",
+   "remaining_diff": "One compare constant. ROM: `cmp r0, #2; bgt` then `cmp r0, #1; blt`. Ours: `cmp r0, #2; bgt` then `cmp r0, #0; ble`. Everything else -- the u8 prologue `lsls/lsrs #0x18`, the first compare, `movs r0, #0x50`, the call and the epilogue -- is byte-exact.",
+   "why_it_is_close": "Two of the three levers are found and are in the parked draft. (1) The compares are SIGNED, which a plain `u8` parameter does not give: agbcc uses the 0..255 range and picks `bhi`/`beq`. Binding the parameter to an `int` local first is what loses the range and produces `bgt`. (2) That same binding is what stops the two bounds fusing into the `subs #1; cmp #1; bhi` range check a `&&` produces. What is left is that agbcc canonicalises BOTH `v < 1` and `v >= 1` to the zero form (`cmp #0` with `ble`/`bgt`), so the literal 1 in the ROM's second compare has to reach the back end some other way.",
+   "axes_ruled_out": [
+    "`u8` parameter with `a <= 2 && a >= 1` -- fuses to `subs #1; cmp #1; bhi`, 5 instructions",
+    "`u8` parameter with nested ifs -- fuses identically",
+    "`u8` parameter with two early returns -- unsigned `bhi` and `beq`, both compares wrong",
+    "`s8` parameter -- prologue becomes `lsls/asrs`, so the entry narrowing is wrong before any compare",
+    "`int v = a;` then two early returns (`v > 2`, `v < 1`) -- correct `bgt`, but `v < 1` canonicalises to `cmp #0; ble`",
+    "`int v = a;` then `v > 2` early-out and `v >= 1` guarding the call -- correct `bgt`, `v >= 1` canonicalises to `cmp #0; bgt`, same two bytes wrong",
+    "`int v = a;` with `v <= 2 && v >= 1` -- the range fusion comes back"
+   ],
+   "wave": "31 (W31-A)"
+  },
+  "sub_08029948": {
+   "bytes": 48,
+   "best": "48 bytes (exact size); exact instruction sequence and exact pool words, one instruction in the wrong slot",
+   "remaining_diff": "The array's literal-pool load is INTERLEAVED into the sign-extension in the ROM: `lsls r0, r0, #0x18` / `ldr r2, =gUnknown_03001470` / `asrs r0, r0, #0x18`. Every candidate puts that `ldr` either before both shifts or after both. Nothing else differs -- the u16 narrowing of the parameter, the sub_080152C0 call, the `x * 3 << 5` stride chain and the `strh [r1, #0x22]` are all exact.",
+   "why_it_is_close": "The two-instruction sign-extend is ONE RTL operation, so no source-level reordering can place another insn between its halves; the address pseudo is created either before the extend is expanded or after. That makes this an agbcc placement rather than a spelling, the same class as sub_0802FA64's register swap in this wave and sub_0801C4D4 / sub_0801C640 from wave 30. Worth revisiting only after the minimal register-allocation probe docs/agbcc-codegen.md asks for.",
+   "axes_ruled_out": [
+    "subscript written inline (`gUnknown_03001470[(s8)f()].unk22 = ...`) -- ldr BEFORE both shifts",
+    "`s8 i = f();` then the subscript -- ldr BEFORE both shifts",
+    "`struct Unk03001470 *p = &gUnknown_03001470[f()];` then `p->unk22` -- ldr BEFORE both shifts",
+    "`int i = (s8)f();` then the subscript -- ldr AFTER both shifts",
+    "the stored value spelled `(u16)a` against a bare `a` -- byte-identical, the parameter narrowing is unaffected either way"
+   ],
+   "wave": "31 (W31-A)"
   }
  }
 }

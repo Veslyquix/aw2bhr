@@ -1,0 +1,28 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08040088.
+ * sub_08040088 @ 0x08040088
+ */
+
+/* Family F025-adjacent: `f(proc->unk2c, proc->unk30)` with both coordinates
+ * loaded `ldrsh`. The two fields are s16 OBJECTS and not (s16) casts of int
+ * members: `movs rI,#0x2c / ldrsh rD,[rB,rI]` is the s16-object tell -- an int
+ * member converted to sub_08029088's s16 parameters would emit `ldr` and let
+ * the callee narrow, and an (s16) cast on an int member would emit
+ * `ldr; lsls #16; asrs #16`. Same shape as sub_08040984 next door, at 0x2c/0x30
+ * instead of 0x64/0x66. */
+struct Unk40088Proc
+{
+    /* 00 */ u8 filler_00[0x2c];
+    /* 2c */ s16 unk2c;
+    /* 2e */ u8 filler_2e[0x02];
+    /* 30 */ s16 unk30;
+};
+
+void sub_08040088(struct Unk40088Proc *proc)
+{
+    sub_08029088(proc->unk2c, proc->unk30);
+}

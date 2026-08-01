@@ -7959,6 +7959,171 @@ column 0 is neutral, and do not retype a global on column-0 evidence. That is
 why `gUnknown_085D6A48` is still declared `u16 [][12]` in
 `include/unknown-globals.h` with the struct evidence recorded next to it.
 
+### It discriminates on a VARIABLE column too, via scheduling (wave 31, W31-C)
+
+The wave-17 rule above is about a *constant* column folding into the load
+displacement. `sub_08057D58` shows the same type distinction surviving when the
+column is a **variable**, where there is no displacement to fold into and the
+instruction counts are equal.
+
+Three ROM tables of 20-byte rows, five words each, selected by a switch and then
+indexed `[row][col]`. The ROM:
+
+```
+lsls r0, r4, #2
+adds r0, r0, r4
+lsls r0, r0, #2        @ row*20
+adds r0, r0, r3        @ + base
+lsls r1, r2, #2        @ col*4
+adds r0, r0, r1
+ldr  r0, [r0]
+```
+
+`void *const g[][5]` indexed `g[a][c]` folds the whole thing into one address
+tree and schedules the **column** first, coming out with r0 and r1 exchanged --
+same seven instructions, same 56 bytes, five bytes different. Binding the row
+(`row = p[a]; return row[c];`) fixes the order but flips the base/offset add to
+`adds r0, r3, r0`. Only `struct Row { void *w[5]; }` with `p[a].w[c]` produces
+the ROM, because the `COMPONENT_REF` keeps the column out of the row's address
+tree entirely.
+
+**So: equal size and equal instruction count do NOT mean the row type is
+neutral.** If a two-dimensional read near-misses by a register permutation and
+nothing else, try the struct row before touching the statement shape.
+
+### `ldrb` off a STACK PARAMETER is not a `u8` parameter (wave 31, W31-C)
+
+`sub_0803E088` takes ten arguments and reaches the seventh and tenth as
+
+```
+add  r6, sp, #0x24
+ldrb r6, [r6]
+```
+
+which reads as `u8` and is not. A `u8` stack parameter is zero-extended **once,
+in the prologue**, by PROMOTE_MODE:
+
+```
+ldr r4, [sp, #0x24]
+lsl r4, r4, #0x18
+lsr r4, r4, #0x18
+```
+
+and then lives in a register. What the ROM has instead is a fresh `ldrb` at each
+use -- twice for the seventh argument -- which is agbcc folding the `(u8)` of the
+**destination field** into the load, the same fold `sub_080604BC` gets when it
+passes the `s16` `gUnknown_03001FBC` to a `u8` parameter. The parameters are
+`int`.
+
+**The tell is the COUNT and the POSITION of the narrowing, not its width.** Once
+in the prologue = the parameter's type; once per use = a conversion at the use.
+Spelling these two `u8` cost two prologue shift pairs here and also pushed a
+narrowing into the caller `sub_0803E310`'s argument setup, breaking both.
+
+### The ROM often ADVANCES a base pointer twice rather than forming an address (wave 31, W31-C)
+
+The commonest residual on the 0x08499590 map-cell readers is not a type error,
+it is this. The natural spelling
+
+```c
+cells = p + 0x1432;
+v = *(cells + idx);
+```
+
+keeps `p` and builds the address in a scratch register. Large stretches of the
+ROM instead advance the pointer in place, twice:
+
+```c
+p += 0x1432;
+p += idx;
+v = *p;
+```
+
+which is `adds rP, rP, rK; adds rP, rP, rIdx; ldrb rD, [rP]` — the base register
+is the accumulator. The two are the same instruction COUNT, so the tell is which
+register the final `adds` writes, and it is easy to read past.
+
+Both spellings occur in one function: `sub_08003DC4` has four structurally
+identical reads and the ROM uses the preserving form in two and the advancing
+form in the other two. So this is not a per-file habit and cannot be applied
+uniformly — read each block. Applying it took `sub_08003DC4` from 91.8% to 93.7%
+and made `sub_0800C124` instruction-for-instruction exact.
+
+Corollary worth knowing: agbcc will ALSO produce the advancing form on its own
+when the base is dead after the read, which is why a preserving source can
+compile to an advancing body. If you need the preserving form and are not
+getting it, the base's liveness is the lever, not the expression.
+
+### A store DESTINATION bound to a local moves its address load before the call (wave 31, W31-C)
+
+`sub_080867BC` (656 B) matched on this. Three of its stores read
+
+```c
+*(u16 *)&gUnknown_03002B34 = sub_08087248() - buf[i] * n;
+```
+
+and agbcc puts the destination's pool `ldr` AFTER the `bl`. The ROM loads it
+before and holds it across. Binding it first reproduces that exactly:
+
+```c
+dst = (u16 *)&gUnknown_03002B34;
+*dst = sub_08087248() - buf[i] * n;
+```
+
+This is the store-side twin of the base-pointer local recorded for
+`src/decomp/c_0803E560.c`. **It is not unconditional**: the same function's
+`gUnknown_03002F18 = sub_08087298();` stores have nothing between the call and
+the `strh`, their address load stays after the call in the ROM too, and binding
+those breaks them. The discriminator is whether there is work left to do after
+the call — if there is, the destination was bound first.
+
+### A `best.json` percentage counts REGISTER FIELDS, so it is not a ranking of correctness (wave 31, W31-C)
+
+Measured, on `sub_0800C124` (264 B). Its inherited `best.c` scored **92.4%**. A
+rebuild whose instruction stream is identical to the ROM's, in order, including
+the r8 spill, scored **89.4%** — every one of its 28 differing bytes is a
+register name. The structurally exact candidate scores THREE POINTS BELOW the
+structurally wrong one.
+
+The reason is mechanical: the score is a byte diff, and a THUMB instruction
+carries its register numbers in the same halfword as its opcode, so one
+mis-allocated pointer used six times costs six "wrong" bytes exactly as a wrong
+opcode would. Nothing in the number separates "this is the wrong code" from
+"this is the right code in the wrong registers".
+
+Consequences worth acting on:
+
+- **Do not treat a higher `best.json` as a better starting point.** Read the
+  instruction stream. A candidate at 89% with the right stream is one register
+  assignment from matching; a candidate at 93% with the wrong stream is not.
+- `preflight.py`'s near-miss sweep ranks by this number, so the functions it
+  surfaces are biased toward *shape* errors that happen to keep registers, and
+  against *allocation* errors on otherwise-finished work. Both of this wave's
+  90%+ inherited near-misses turned out to be the latter.
+- When you improve the stream and the percentage drops, say so explicitly in the
+  draft's comment, or the next agent will read it as a regression and revert you.
+
+### The decomp-permuter exception is a RULE for this species, not a caveat (wave 31, W31-C)
+
+The brief has carried "one measured exception" since wave 17. On this wave's
+evidence it should be stated positively: **on a residual that is purely register
+allocation, with the instruction stream and its order already correct, the
+permuter returns nothing.**
+
+`sub_0800C124` is the second independent measurement. An earlier wave had
+already spent a run on it (`work/sub_0800C124/permuter/output-1[5-7]*`); this
+wave gave it another 300 s / 4 threads started from the structurally exact
+rebuild rather than from the old blob, on the theory that the starting point was
+the one thing that might matter. It reached permuter score 220 and produced
+nothing above 89.8% at the byte level.
+
+That is consistent with what the permuter actually does: it mutates the SOURCE
+to shake the allocator, so it can only reach assignments some source spelling
+produces. When the stream is already right, every such spelling is bit-identical
+or worse — which is the same wall the hand-written probes hit. Use the priority
+rule under "MEASURED: what orders two simultaneously-live pointers" instead; it
+is a decision procedure, and the permuter is not.
+
 ## A zero-trip `do { } while (0)` also works on straight-line code (wave 17, W17-A)
 
 The lever documented in the soft-float chapter -- `allocno_compare` weights every
@@ -14658,7 +14823,7 @@ already bound to a NAMED symbol such as `gpKeySt` -- and do not use it to size a
 struct. The codegen is the evidence about the source; the linker script is not
 evidence at all here.
 
-## OPEN: two simultaneously-live pointers can swap registers with no source lever (wave 30, W30-B)
+## MEASURED: what orders two simultaneously-live pointers (wave 30 W30-B, wave 31 W31-A, SOLVED wave 31 W31-B)
 
 `sub_0801C4D4` (86.1%) and `sub_0801C640` (88.3%) are both parked with exact
 size, exact relocations and the exact instruction sequence. In each, two
@@ -14676,6 +14841,278 @@ with two pointers of equal reference count and different live lengths and find
 what actually orders them. It would very likely unblock both at once, and the
 shape -- guard, branch on a flag byte, two ways of deriving one value, store it
 twice -- is common enough that it will recur.
+
+**Wave 31 (W31-A) adds a third instance, and it is the smallest one yet.**
+`sub_0802FA64` is 56 bytes, 87.5%, with the exact instruction sequence, the
+exact three pool words in the exact order, and one swap: the ROM holds the
+`gUnknown_0849B018` dereference in r3 and the `gUnknown_03003FC0` address in r2,
+we hold them the other way round. The only downstream effect is which register
+the index `adds` ties to (`adds r2, r2, r1` against `add r1, r1, r3`), so this
+is the tie-break and nothing else. Ten source shapes were measured -- see the
+`axes_ruled_out` list on the entry in `data/parked.json` -- and they split
+cleanly in two: every spelling that folds the constant offset into the literal
+pool is structurally wrong, and every spelling that does not is bit-identical to
+every other. In particular, moving the pointer's binding EARLIER (the lever that
+worked in "The destination's address is created FIRST") does change the outcome,
+but only by moving that pool word to slot 0, which is a different mismatch.
+
+That makes three functions blocked on one unknown, in three unrelated trees, and
+none of them needs a rewrite -- they need the minimal probe. A useful extra
+data point from this instance: both quantities here are created inside the same
+statement sequence with no branch anywhere in the function, so control flow is
+not the variable, and one of them (the address constant) is created LATER in
+source order yet wins the lower register in the ROM -- which rules out plain
+creation order as the tie-break, the assumption the other two instances left
+open.
+
+### The probe was run (wave 31, W31-B). Here is the rule.
+
+Five synthetic functions, two address constants each, **no branches and no
+calls**, differing only in reference counts and in where each pointer's uses
+sit. Every register assignment is predicted exactly by gcc 2.9's
+`block_alloc` priority
+
+```
+priority = floor_log2(n_refs) * n_refs * size / (death - birth)
+```
+
+sorted DESCENDING, **ties broken by quantity number (order of first
+appearance)**, each quantity then taking the lowest free hard register.
+
+| probe | refs: dst / T1 / T2 | predicted order | measured registers |
+|---|---|---|---|
+| `s1` two uses each, interleaved | 5 / 3 / 3 | dst 1.00, T2 0.60, T1 0.50 | r1, r3, r2 |
+| `s2` = s1 + one more T1 use | 6 / **4** / 3 | dst 1.00, **T1 0.80**, T2 0.60 | r1, **r2**, r3 |
+| `s3` = s1 + one more T2 use | 6 / 3 / **4** | **T2 1.14**, dst 1.00, T1 0.50 | r2, r3, **r1** |
+| `s4` T2's uses adjacent | 5 / 3 / 3 | dst 1.00 **=** T2 1.00, T1 0.375 | r1, r3, r2 |
+| `s5` mirrored | 5 / 3 / 3 | dst 1.00 **=** T1 1.00, T2 0.375 | r1, r2, r3 |
+
+**`s1` -> `s2` is the demonstration: ONE added reference to one of the two
+pointers and they exchange registers.** `s3` is the same lever pointed the other
+way, and it pushes a table below the destination pointer as well. `s4` and `s5`
+are exact ties, and both resolve to first-appearance order -- the tie-break the
+note above did not have.
+
+**The lever survives branches, so it is not a `block_alloc`-only effect.** The
+same three shapes with an `if` dropped between the two tables -- which moves them
+out of one basic block and into `global_alloc`/`allocno_compare` -- flip
+identically:
+
+| probe | change | gT1 | gT2 |
+|---|---|---|---|
+| `b1` | s1 + a branch | r3 | r2 |
+| `b2` | b1 + one gT1 reference | **r2** | **r3** |
+| `b3` | b1 + one gT2 reference | r3 | **r1** |
+
+That matters because `sub_0802FA64` has no branch while `sub_0801C4D4`,
+`sub_0801C640` and `sub_08073930` all do; the two passes have separate sort
+functions of the same shape, and the ref-count step reaches both. The one term
+that exists only in `global_alloc` is LOOP DEPTH, which is why the
+`do { } while (0)` lever documented earlier in this file works on loops and does
+nothing in a straight-line function.
+
+**Two corrections to what this section said before.**
+
+- "The shorter-lived quantity wins" is only half of it and is the less useful
+  half. The denominator is continuous and is almost always *coupled* to the
+  thing you were trying to change; the numerator has a **step at every power of
+  two**, because of the `floor_log2`. Going 3 refs -> 4 refs, or 7 -> 8,
+  multiplies priority by 2 and 1.5; going 4 -> 7 does nothing at all. **Aim at
+  the ref count crossing a power of two, not at the live range.** Waves 30 and
+  31 both spent their attempts on live ranges.
+- Ties are real and are broken by which quantity is referenced first. This is
+  the same lever that closed `sub_0803388C` and `sub_08033638` in wave 31: bind
+  the value you want to win to a NAMED LOCAL declared earlier, so its quantity
+  is created first. See "A named local is a register-allocation lever" below.
+
+### The sub-rule that makes `sub_0802FA64` unreachable, and it is not allocation
+
+`sub_0802FA64` needs `adds r2, r2, r1` -- the sum inheriting the **base's**
+register -- where our draft emits `add r1, r1, r3`, the sum inheriting the
+**index's**. That single choice is upstream of the whole swap: whichever operand
+the destination combines with gains the sum's two extra references (2 -> 4,
+across the `floor_log2` step) and wins the priority contest. So the register
+diff is a *consequence*, and the operand order is the actual question.
+
+**MEASURED, and it is a flat rule: in `pointer + runtime_value`, a SYMBOLIC base
+is always operand 2. Only a base that is a value LOADED FROM MEMORY is operand
+1.** Ten spellings, two probe families:
+
+| base | operand 1 |
+|---|---|
+| array symbol `aArr + i` | the index |
+| `(u8 *)&aStruct + i` | the index |
+| symbol, dereferenced once *before* the add | the index |
+| symbol, stored to a global *before* the add | the index |
+| symbol, used for two separate index adds | the index |
+| symbol, sum built in the `int` domain and cast back | the index |
+| symbol, via `p = base; p += i; p += K;` | the index |
+| symbol, bound to a `u8 *const` local declared first | the index |
+| **`aPtr + i` where `aPtr` is a pointer GLOBAL** | **the base** |
+| **`(u8 *)aStructP + i`, pointer global** | **the base** |
+
+Forcing the symbol into a genuine register early does *not* help -- `-fforce-addr`
+materialises it, but the RTL still has it as operand 2. And the `+ K` cannot be
+folded away either, because `ldrb`'s immediate offset caps at 31 and this one is
+0x3E.
+
+So `sub_0802FA64` cannot match while `gUnknown_03003FC0` is reached as
+`&object`; it would need the base to arrive from memory, and the ROM has a
+single `ldr rN, =gUnknown_03003FC0` with no load through it. **Do not spend more
+attempts on rewriting its address expression -- fourteen spellings across two
+waves now say the same thing.** What would actually move it is evidence that the
+byte at `+0x3E` is reached through some pointer object this tree has not
+identified. That is a type-model question, not an allocation one, and it is
+where the next look should go.
+
+### Read this backwards before drafting
+
+A size-exact residual that is a pure register swap is **not** always allocation
+you can steer. Sort it first:
+
+1. **Do the two quantities differ in reference count?** Then the lever is a
+   power-of-two crossing in `n_refs`, and it is usually reachable.
+2. **Are they tied?** Then the lever is which is referenced first -- a named
+   local declared earlier. Cheap, and it closed three functions in wave 31.
+3. **Does one of them feed an index add whose operand order you would have to
+   change?** Then stop: if that operand is an address constant, the order is
+   fixed and no spelling reaches it. Re-open the type model instead.
+
+### When the ref-count lever is unreachable: PINNED references (wave 31, W31-B)
+
+The decision procedure above was run against the whole cluster -- `sub_0801C4D4`,
+`sub_0801C640`, `sub_08070478`, `sub_08070544`, `sub_08070578`. **All five land
+on step 1, the formula predicts the current draft exactly in every one, and in
+every one the lever is unreachable for the same reason.** Naming that reason is
+the useful part, because it is a cheap pre-check that would have saved three
+agents a full budget each.
+
+**A reference is PINNED when it corresponds to an emitted instruction.** The
+ref-count lever needs a reference you can add or remove *without changing the
+instruction stream*. That only exists when a value is re-read and CSEd, or when
+a temporary can absorb or release a use. When every reference of both competing
+quantities is pinned to an instruction the ROM already contains, the ref counts
+are fixed, the live lengths are fixed, and the priority order is fixed -- there
+is nothing left for the source to move.
+
+Worked, with the priority arithmetic:
+
+| function | quantity A | quantity B | predicted | matches |
+|---|---|---|---|---|
+| `sub_0801C4D4` | handle, 6 refs / ~28 -> 0.43 | script base, 5 / ~20 -> **0.50** | base wins | the draft |
+| `sub_0801C640` | cursor, 6 / ~12 -> 1.00 | offset chain, 4 / ~4 -> **2.00** | offset wins | the draft |
+| `sub_08070478` | mplay table, 2 / ~8 -> 0.25 | `song->ms`, 3 / ~2 -> **1.50** | `ms` wins | the draft |
+
+The ROM wants the loser of each pair. Check the smallest available move in each
+and it is pinned:
+
+- `sub_0801C4D4` needs the base down to 4 refs. Its five are the NULL guard's
+  `cmp`, the `ldrh [r3,#2]`, the `adds r0,r3,r0`, and the else arm's
+  `adds r0,r0,r3`, plus the defining `ldr`. Every one is an instruction.
+- `sub_0801C640` needs the offset chain down to 3. Its four are
+  `ldrh` / `lsrs` / `lsls` / the `adds` that consumes it. Every one is an
+  instruction, and the `/ 2 * 2` spelling is already settled (`& ~1` costs a
+  register and a `push`).
+- `sub_08070478` needs the table address up to 4 refs, or `ms` down to 2. The
+  table's two are its pool `ldr` and the one `adds`; `ms`'s three are the
+  `ldrh` and the two uses in the `* 12` expansion (`lsls #1; adds; lsls #2`).
+
+**So `suspect the type model` is not the next move for the m4a three either**,
+which is worth stating because that was the standing read. The ROM's own
+arithmetic already pins every size: `lsls #0x10; lsrs #0xd` makes `struct Song`
+8 bytes, `ldrh [r0,#4]` puts `ms` at offset 4 as a `u16`, and the `* 12` chain
+makes `struct MusicPlayer` 12 bytes with `info` at 0. There is no width left to
+choose.
+
+**Add this as step 1a of the procedure:** once you have the two quantities, ask
+whether either could gain or lose a reference without gaining or losing an
+instruction. If not, stop -- the register assignment is determined, and the
+function is not matchable by any rearrangement of this source. That is a
+finished answer, and it is worth recording as one rather than leaving the
+function to be re-attempted every wave.
+
+`sub_08058744` is NOT in this species despite being parked alongside it: its
+three differing bytes are which register a short-lived pointer reload lands in
+while two `ldrb`s are being set up as arguments, and the constraint comes from
+the declared arity of `sub_08020354` -- which this call site is the sole source
+of. That one is a prototype question.
+
+### A named local is a register-allocation lever (wave 31, W31-B)
+
+This is the *reachable* half of the decision procedure above, and it is the one
+that actually closes functions. Four worked examples, all matched, all from one
+batch. In every case the body is otherwise unchanged: the only edit is binding a
+value to a declared local, or moving that declaration earlier.
+
+**Why it works.** A declared local's quantity is created at `expand_decl`,
+before any statement of the function is expanded. An `-fforce-addr` address
+temporary's quantity is created where its expression is expanded. So a declared
+local always has the lower quantity number, and on a priority TIE the lower
+quantity number is allocated first and takes the lower register. Declaring the
+value you want in the lower register first is the whole mechanism.
+
+**1. `sub_0803388C` -- the tie, and the clearest case.** Two quantities live
+across the same `Proc_Find` call with the same reference count: the proc script's
+address and the `Proc_Find` result. An exact tie, so first appearance decides.
+
+```c
+/* address left as an -fforce-addr temp: ldr r5,<pool> / add r4,r0,#0  -- WRONG */
+ProcPtr found = Proc_Find(gUnknown_0849BB50);
+
+/* address bound FIRST:                   ldr r4,<pool> / add r5,r0,#0  -- ROM   */
+const struct ProcCmd *script = gUnknown_0849BB50;
+ProcPtr found = Proc_Find(script);
+```
+
+Every instruction naming either register differs between the two; 52 of 52
+bytes, matched on the second.
+
+**2. `sub_08033638` -- the same lever moves the LITERAL POOL.** The record
+pointer is dereferenced seven times. Spelled `gUnknown_0849B018->unk22 = ...` at
+each use the emitted body is byte-identical, but the two pool words come out in
+the other order and the gate store is emitted before the pointer load. Bound to
+`struct Unk0849B018 *p = gUnknown_0849B018;` the pointer load comes first and
+the pool reads `gUnknown_0849B018`, `gUnknown_030044D8` -- the ROM. 64 of 64.
+
+**3. `sub_0801AFF4` -- across a call it changes the register CLASS, and costs
+four bytes.** `gUnknown_0200CD0C` is stored twice around a `bl`.
+
+- `gUnknown_0200CD0C = sub_0808AB8C(); ...` -- the address is materialised
+  AFTER the `bl`, into a caller-saved register, and the function opens
+  `push {lr}`.
+- `u8 *p = &gUnknown_0200CD0C; *p = sub_0808AB8C(); ...` -- computed before the
+  `bl` and kept in r4 across it, which is the `push {r4, lr}` / `pop {r4}` pair
+  the ROM has.
+
+So this one is **not** byte-neutral: the local is load-bearing for the frame, and
+a missing `push {r4, lr}` on an otherwise-perfect body is a signal to try it.
+
+**4. `sub_08033678` -- which operand of a binary op gets the result register.**
+
+```c
+/* inline: ldrb r1,[r5,#1] / lsl r1,#8 / ldrb r0,[r5,#2] / orr r0,r0,r1  -- WRONG */
+proc->unk2a = (b[1] << 8) | b[2];
+
+/* through a temp: ldrb r0,[r5,#1] / lsl r0,#8 / ldrb r1,[r5,#2] / orr r0,r0,r1 */
+int v = (b[1] << 8) | b[2];
+proc->unk2a = v;
+```
+
+Naming the value gives the FIRST operand the result register. The expression is
+identical either way, so this is allocation reacting to a declared local and not
+a difference in the arithmetic. 68 of 68.
+
+**The cost, and it is why this is not a free win.** Moving a binding earlier
+also moves that symbol's literal-pool word earlier, because pool slots are
+assigned in order of first reference. That is exactly what ruled the lever out
+for `sub_0802FA64`: W31-A bound the pointer earlier, got a different register
+assignment, and broke the pool order in the same edit. **Check the pool order in
+the same breath as the registers** -- if the lever fixes one and breaks the
+other, it is the wrong lever for that function.
+
+Read this together with "suspect the TYPE before the allocation": both are the
+same lesson, that a residual shaped like register allocation can have a spelling
+as its cause, and the spelling can be nowhere near the differing bytes.
 
 ## MEASURED: block density 9-10 costs the same as 20, and the "vocabulary" theory is looking at the wrong vocabulary (wave 30, W30-A)
 
