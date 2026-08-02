@@ -258,6 +258,8 @@ SECTIONS
 		. = 0x000614; gUnknown_03000614 = .;
 		. = 0x000616; gUnknown_03000616 = .;
 		. = 0x000618; gUnknown_03000618 = .;
+		. = 0x00061C; gUnknown_0300061C = .;
+		. = 0x00061E; gUnknown_0300061E = .;
 		. = 0x000640; gUnknown_03000640 = .;
 		. = 0x00064C; gUnknown_0300064C = .;
 		. = 0x000650; gUnknown_03000650 = .;

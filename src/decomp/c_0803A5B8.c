@@ -1,0 +1,31 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0803A5B8.
+ * sub_0803A5B8 @ 0x0803A5B8
+ */
+
+void sub_0803A5B8(void)
+{
+    u8 d;
+    u8 c;
+    u8 b;
+    u8 a;
+
+    a = gUnknown_0849E318[gUnknown_0849D89C->unk09].unk00;
+    b = gUnknown_0849E318[gUnknown_0849D89C->unk09].unk02;
+    c = gUnknown_0849E358[gUnknown_0849D89C->unk09].unk00;
+    d = gUnknown_0849E358[gUnknown_0849D89C->unk09].unk02;
+    switch (gUnknown_0849D89C->unk09)
+    {
+    case 4:
+        c = sub_08014CEC(gUnknown_08610A38[gUnknown_085D5ABC[gUnknown_0849D89C->unk04->unk00].unk02]);
+        break;
+    case 0xb:
+        c = sub_08014CEC(gUnknown_08610A38[gUnknown_085D5ABC[gUnknown_0849D89C->unk04->unk00].unk04]);
+        break;
+    }
+    sub_08022AF8(a + gUnknown_0849D89C->unk00, b, c, d);
+}

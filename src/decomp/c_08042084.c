@@ -14,10 +14,16 @@
  * sub_08042084 @ 0x08042084
  */
 
-int sub_08042084(u8 *p)
+/* bool8, not int, and the evidence is entirely on the CALLER side: this body is
+ * byte-identical under either return type, but sub_0802CC40 (wave 35, W35-H)
+ * emits `bl sub_08042084; lsls r0,r0,#0x18; cmp r0,#0` -- the narrowing agbcc
+ * inserts at every call site of a sub-word-returning callee. Two instructions
+ * earlier the same function calls sub_080416A4 and tests it with a bare
+ * `cmp r0,#0`, so the shift is not decoration. */
+bool8 sub_08042084(u8 *p)
 {
     if (gUnknown_084995C1[*p] != 0)
-        return 1;
+        return TRUE;
 
-    return 0;
+    return FALSE;
 }

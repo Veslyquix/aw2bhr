@@ -1,0 +1,29 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802D9B8.
+ * sub_0802D9B8 @ 0x0802D9B8
+ */
+
+struct Unk2D9B8Proc
+{
+    /* 0x00 */ u8 filler_00[0x1e];
+    /* 0x1e */ s16 unk1e;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+};
+
+void sub_0802D9B8(struct Unk2D9B8Proc *proc)
+{
+    if (proc->unk20 == proc->unk1e && proc->unk20 > 0)
+        proc->unk1e = proc->unk1e - 1;
+
+    if (proc->unk20 == proc->unk1e + 6 && proc->unk1e <= proc->unk22 - 7)
+        proc->unk1e = proc->unk1e + 1;
+
+    sub_0802D76C();
+    sub_0802D7B4(proc->unk1e);
+    sub_0803AA78(gUnknown_02023830[proc->unk20 * 4]);
+}
