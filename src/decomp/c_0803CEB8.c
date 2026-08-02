@@ -11,7 +11,7 @@ void sub_0803CEB8(u8 a1, const void *a2)
 {
     sub_0801AC58(a1 + 5, gUnknown_02000000);
     sub_0803D3D8((int)a2, gUnknown_02000000);
-    sub_08026040(gUnknown_03003FC0.unk34, gUnknown_03003FC0.unk35,
-                 gUnknown_03003FC0.unk36, gUnknown_03003FC0.unk37);
+    sub_08026040(gUnknown_03003FC0.unk33[1], gUnknown_03003FC0.unk33[2],
+                 gUnknown_03003FC0.unk33[3], gUnknown_03003FC0.unk33[4]);
     sub_08024268();
 }

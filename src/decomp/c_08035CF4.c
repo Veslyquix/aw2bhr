@@ -9,7 +9,11 @@
 
 /* The `adds r0, #0x2c` ahead of the `ldrb` is the THUMB ldrb displacement limit
  * (0-31), not an address being taken. */
-int sub_08035CF4(void)
+/* Wave 37 (W37-H): retyped `int (void)` -> `u8 (ProcPtr)`. The one caller
+ * sub_08035D0C loads r0 with the proc immediately before the `bl` (so the
+ * argument is real, even though this body ignores it) and narrows the result
+ * with `lsls r0,#0x18`. Byte-exact before and after. */
+u8 sub_08035CF4(ProcPtr proc)
 {
     if (gUnknown_03003FC0.unk2c == 1)
         return 1;

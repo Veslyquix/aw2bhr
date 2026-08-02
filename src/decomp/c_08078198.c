@@ -26,7 +26,13 @@ bool8 sub_08078198(void)
  * `&gUnknown_0202FDFC.unk12`; the candidate spells the same address as
  * `gUnknown_0202FDFC+0x12`. */
 
-s32 sub_080781F0(void)
+/* Wave 37, W37-Q2: retyped s32 -> bool8. The body is byte-identical either
+ * way (it returns only the literals 1 and 0), so nothing here settled it; the
+ * first cross-unit caller does. sub_0803BBD4 re-narrows the result with
+ * `lsls r0,#0x18; lsrs r0,#0x18` before its zero test, which is agbcc
+ * re-narrowing a byte-returning callee and is what an s32 return cannot
+ * produce. Re-verified byte-identical after the change. */
+bool8 sub_080781F0(void)
 {
     s32 i;
 

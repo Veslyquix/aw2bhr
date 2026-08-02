@@ -1,0 +1,127 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0806171C.
+ * sub_0806171C @ 0x0806171C, sub_08061788 @ 0x08061788, sub_08061868 @ 0x08061868
+ */
+
+/* The destination record is at 0x02029C54, which aw2bhr.lds does NOT name --
+ * it falls inside gUnknown_02029C20's region at +0x34, and 0x02029C54 + 0x130
+ * is gUnknown_02029D84 exactly, so the two 0x130-byte records are adjacent.
+ * Reaching it through gUnknown_02029C20 is what keeps the split build linkable;
+ * the address constant itself goes to this unit's .rodata, which is the ROM
+ * word at 0x0816DB00 (currently named gUnknown_0816DB00 in data/data.s). */
+#define SCRATCH ((struct Unk085771C4 *)(gUnknown_02029C20 + 0x34))
+
+/* sub_0806171C @ 0x0806171C, 108 bytes.
+ *
+ * The switch subject is read `ldrh; lsls #0x10; asrs #0x10` -- an UNSIGNED
+ * halfword load followed by a separate sign extension. No plain read of a
+ * 16-bit object produces that: agbcc folds `sign_extend (mem:HI)` into
+ * `movs rI,#0; ldrsh rD,[rB,rI]` whatever the declared signedness, and that
+ * fold was probed directly on both an s16 global (gUnknown_03004780) and a u16
+ * one (gUnknown_030033EC), through an intermediate s16 local, through an
+ * intermediate u16 local, through `(s16)(u16)`, through `& 0xffff` and through
+ * `*(u16 *)&`. All six give `ldrsh`. Only a load agbcc's combiner may not touch
+ * -- a volatile-qualified read -- leaves the two halves apart.
+ *
+ * That is a REPRODUCTION, not a claim that the object is volatile:
+ * src/decomp/c_08034394.c's sub_080343D8 reads the same symbol with the
+ * register-offset `ldrsh` that only a non-volatile s16 object gives, and it is
+ * matched. The two readings cannot both come from one declaration, so the
+ * original's two translation units declared gUnknown_03004780 differently. The
+ * header keeps the s16 that has the stronger evidence and this file spells its
+ * own view locally.
+ *
+ * Case bodies come out in source label order, so the ROM's body order
+ * 0,1,2,3,5,4 is the order the arms are written in; case 4 is last and is the
+ * only one without a trailing `b`.
+ */
+void sub_0806171C(void)
+{
+    if (sub_08019260())
+        return;
+
+    switch ((s16)*(volatile u16 *)&gUnknown_03004780)
+    {
+    case 0:
+        sub_08061868();
+        break;
+    case 1:
+        sub_08061B00();
+        break;
+    case 2:
+        sub_0805D438();
+        break;
+    case 3:
+        sub_0805FD64();
+        break;
+    case 5:
+        sub_080606D0();
+        break;
+    case 4:
+        sub_08061AC4();
+        break;
+    }
+}
+
+/* Two arms that do NOT cross-jump: both end in the same sub_08061A40 call but
+ * they compare different values (unk27 reloaded off the element address r3 vs
+ * the local v), which is the documented condition for the tails to stay
+ * separate. Only the third call, after the join, is shared. */
+void sub_08061788(u16 a)
+{
+    u8 v;
+
+    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk27 != 0)
+    {
+        sub_08061A40(SCRATCH,
+            &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk27][gUnknown_08499598[a].unk1d]]);
+    }
+    else
+    {
+        if (gUnknown_030046B8 <= 3)
+            v = gUnknown_08576908[gUnknown_030046B8];
+        else
+            v = 4;
+
+        sub_08061A40(SCRATCH,
+            &gUnknown_085771C4[gUnknown_0857690C[v][gUnknown_08499598[a].unk1d]]);
+    }
+
+    sub_08061A40(&gUnknown_02029D84, SCRATCH);
+}
+
+/* The record selection is a TERNARY over one store, exactly as the matched
+ * sub_08077F30 (src/decomp/c_08077F30.c) spells the same idiom: each arm
+ * computes only `index * 0x30` and a base biased by 0x24 or 0x28, and the two
+ * fall into a shared `adds r0,r0,r2; ldr r0,[r0]; str r0,[r5]`.
+ *
+ * The two zero stores at the end are ONE chained assignment. The destination is
+ * evaluated before the right-hand side, so `gUnknown_030044D8 = gUnknown_03004770 = 0`
+ * emits both pool `ldr`s first (0x030044D8's, then 0x03004770's), then the
+ * single `movs r0,#0`, then the `str` and the `strb` in that order. Two
+ * separate statements interleave the pool loads with their stores instead. */
+void sub_08061868(void)
+{
+    gUnknown_030046B4 = sub_0803866C()
+        ? gUnknown_08615194[gUnknown_03003FC0.unk02 - 0x8a].unk28
+        : gUnknown_08615194[gUnknown_03003FC0.unk02 - 0x8a].unk24;
+
+    sub_08061CDC();
+    sub_08061CF8();
+    sub_08061F34();
+    sub_08061788(gUnknown_030033EC);
+    sub_08062028();
+    sub_0806279C();
+    sub_08062C7C(0);
+    sub_08061E98();
+
+    gUnknown_03004780 = 1;
+    gUnknown_030044D8 = gUnknown_03004770 = 0;
+
+    if (gUnknown_08499598[gUnknown_030033EC].unk1a == 5 && gUnknown_030046B4 != 0)
+        sub_080607E8();
+}

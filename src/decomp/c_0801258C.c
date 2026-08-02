@@ -59,10 +59,10 @@ void sub_0801258C(void)
     gUnknown_03001FC4 = gUnknown_03001FC0;
     gUnknown_03003038 = gUnknown_030030D8;
     gUnknown_03001424 = gUnknown_0300303C;
-    gUnknown_03002030 = gUnknown_03001FC8 | (gUnknown_030024E0 << 16);
-    gUnknown_03002F40 = gUnknown_03001FC8;
+    gUnknown_03002030 = gUnknown_03001FC8.raw | (gUnknown_030024E0.raw << 16);
+    gUnknown_03002F40 = gUnknown_03001FC8.raw;
     gUnknown_03002018 = gUnknown_03002034;
-    gUnknown_03002EDC = gUnknown_03002004;
+    gUnknown_03002EDC = gUnknown_03002004.raw;
     gUnknown_030030B8 = (u64)gUnknown_030020B0 | ((u64)gUnknown_0300309C << 16)
                       | ((u64)gUnknown_03002B60 << 32) | ((u64)gUnknown_03002028 << 48);
     gUnknown_03002024 = gUnknown_030020B0 | (gUnknown_0300309C << 16);

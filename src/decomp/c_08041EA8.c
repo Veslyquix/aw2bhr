@@ -38,7 +38,7 @@ u8 sub_08041EA8(s16 x, s16 y, int t)
     if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
         return 0;
 
-    costs = gUnknown_085D3DD0[1].unk38[0].unk18;
+    costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
     c = (((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx] & 0x1f)
         + gUnknown_085D5ABC[t].unk19 * 32;

@@ -16,8 +16,8 @@
 
 void sub_08026900(void)
 {
-    gUnknown_03003FC0.unk43 = 0;
-    gUnknown_03003FC0.unk44 = 1;
-    gUnknown_03003FC0.unk45 = 2;
-    gUnknown_03003FC0.unk46 = 3;
+    gUnknown_03003FC0.unk42[1] = 0;
+    gUnknown_03003FC0.unk42[2] = 1;
+    gUnknown_03003FC0.unk42[3] = 2;
+    gUnknown_03003FC0.unk42[4] = 3;
 }

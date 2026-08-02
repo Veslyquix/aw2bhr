@@ -1291,7 +1291,15 @@ gUnknown_084A0730:  @ 0x084A0730
 
 	.global gUnknown_084A0756
 gUnknown_084A0756:  @ 0x084A0756
-	.incbin "baserom.gba", 0x4A0756, 0x3A    @ 0x4A0790 - 0x4A0756
+	.incbin "baserom.gba", 0x4A0756, 0x26    @ 0x4A077C - 0x4A0756
+
+	@ Wave 37 (W37-Q4): carved out of the 0x3A block above, which used to run
+	@ 0x4A0756 - 0x4A0790 in one piece. sub_08043CA0 references this address
+	@ directly, so the SPLIT link needs a symbol here; the assembly build was
+	@ unaffected and would have printed OK beside the failure.
+	.global gUnknown_084A077C
+gUnknown_084A077C:  @ 0x084A077C
+	.incbin "baserom.gba", 0x4A077C, 0x14    @ 0x4A0790 - 0x4A077C
 
 	.global gUnknown_084A0790
 gUnknown_084A0790:  @ 0x084A0790

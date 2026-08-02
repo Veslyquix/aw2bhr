@@ -160,6 +160,19 @@ union DispStatBuf
     u16 raw;
 };
 
+// Wave 37 (W37-G). The same both-views problem as BgCntBuf, for the REG_DISPCNT
+// shadow gUnknown_03002004: sub_08018254 clears it with one `strh` and then
+// writes `mode`, `hblank_interval_free`, `obj_mapping` and bg0..bg3_enable as
+// individual bitfields. The 3-bit `mode` is what fixes the reading -- the ROM
+// masks byte 0 with ~7 in one instruction, which no 1- or 2-bit field group at
+// bits 0..2 produces, and the four bg enables at byte 1 arrive as four separate
+// `orr #1` / `orr #2` / `and ~4` / `and ~8` steps, i.e. four 1-bit fields.
+union DispCntBuf
+{
+    struct DispCnt bits;
+    u16 raw;
+};
+
 union WinCntBuf
 {
     struct WinCnt bits;
@@ -256,6 +269,19 @@ extern volatile u16 gUnknown_03002B28;
 extern volatile u32 gUnknown_030024D0[4];
 extern volatile u32 gUnknown_03003020[4];
 extern union BgCntBuf gUnknown_03002B6C;
+// Wave 37 (W37-G). A SECOND set of BG/display shadows, the pair-partner of
+// gUnknown_03002B6C / gUnknown_03001FE8 (c_0801258C.c snapshots the two sets
+// side by side into gUnknown_03002010 and gUnknown_03002030). They were
+// `extern u16` in unknown-globals.h until sub_08018254 was matched, which
+// writes them field by field: `chr_block` copied out of gUnknown_03002B6C /
+// gUnknown_030030B4 (`b0 & ~0x0c | src & 0x0c`, the shift-out/shift-in pair
+// folded away) and `tm_block` set to 0x0d / 0x1c (`b1 & ~0x1f | k`). A scalar
+// u16 cannot produce those byte-wide read-modify-writes. Declared here rather
+// than in unknown-globals.h because that header does not see hardware.h --
+// same reasoning as the gUnknown_03001FE8 note in unknown-globals.h.
+extern union BgCntBuf gUnknown_03001FC8;
+extern union BgCntBuf gUnknown_030024E0;
+extern union DispCntBuf gUnknown_03002004;
 // Both WinCnt shadows are written at BYTE 0, i.e. through the win0_* group:
 // sub_08011300 clears win0_enable_bg0..obj on 030030A4 and sets
 // win0_enable_bg0..blend on 030030DC in the same breath.

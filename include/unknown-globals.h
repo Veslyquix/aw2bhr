@@ -263,7 +263,12 @@ struct Unk0200C420 /* 0xe0 */
                           * `movs #1`, no unconditional branch). Width only. */
     /* 0x15 */ u8 filler_15[0xb];
     /* 0x20 */ u8 unk20[0x18];
-    /* 0x38 */ u8 filler_38[0xa8];
+    /* 0x38 */ u32 unk38; /* Wave 37, W37-Q2: a whole WORD, not filler --
+                           * sub_0803BA1C clears bits 8..19 of it with
+                           * `ldr r1,[r0,#0x38]; ands r1,=0xFFF000FF;
+                           * str r1,[r0,#0x38]`. A 12-bit packed field inside a
+                           * word; signedness unsettled, nothing reads it yet. */
+    /* 0x3c */ u8 filler_3c[0xa4];
 };
 
 /* Reached as a struct, not as the u16 array it was first declared as: there is
@@ -321,16 +326,60 @@ struct Unk0200B0B0 /* >= 0x76 */
     /* 0x17 */ u8 filler_17[0x09];
     /* 0x20 */ u16 unk20; /* sub_080085E0 stores the map tile under (unk08,
                            * unk0a) here on entry -- `strh`, so 16 bits. */
-    /* 0x22 */ u8 filler_22[0x06];
+    /* 0x22 */ u8 filler_22[0x02];
+    /* 0x24 */ u16 unk24; /* Wave 37 (W37-D): a unit-ish id, read `ldrh` three
+                           * times by sub_08008928 and once more by the same
+                           * function's tail. Compared against 0x19 whole, and
+                           * separately masked `& 0x3f` to subscript
+                           * gUnknown_085D5ABC[] (stride 0x5c) -- so the low six
+                           * bits are a type selector inside a wider word, the
+                           * same split unk2a records one field over. */
+    /* 0x26 */ u16 unk26; /* Wave 37 (W37-D): the sibling of unk2c. sub_08007354
+                           * writes one or the other with a bare `strh` from
+                           * gUnknown_0200B0D0[i].unk04, picking unk26 when unk07
+                           * is set and unk2c when it is clear. */
     /* 0x28 */ u16 unk28; /* index into gUnknown_0200B224 (sub_08001CE8) */
     /* 0x2a */ u16 unk2a; /* The action code sub_080085E0 dispatches on: it
                            * switches on `unk2a & 0x1f` over cases 1..19 and
                            * separately passes the UNMASKED halfword to
                            * sub_0800C454, so the low five bits are a selector
                            * inside a wider word rather than the whole field. */
-    /* 0x2c */ u8 filler_2c[0x03];
-    /* 0x2f */ u8 unk2f; /* set by sub_080078D4 */
-    /* 0x30 */ u8 filler_30[0x0a];
+    /* 0x2c */ u16 unk2c; /* Wave 37 (W37-D): see unk26. */
+    /* 0x2e */ u8 unk2e;  /* Wave 37 (W37-D): unk2e/unk2f are copied to
+                           * unk30/unk31 by sub_08007354, byte for byte
+                           * (`ldrb` then `strb`, no extension either way), so
+                           * the two pairs are the same width. */
+    /* 0x2f */ s8 unk2f; /* set by sub_080078D4. SIGNED, wave 37 (W37-D):
+                          * sub_08008928 reads it `ldrb; lsls #0x18; asrs #0x18`
+                          * (the base is already advanced by `adds rN,#0x2f`, so
+                          * `ldrsb` has no addressing mode left) and then both
+                          * `strh`s the value into the u16 gUnknown_030033EC and
+                          * hands it to sub_08025308(int). A u8 member gives no
+                          * sign extension at either use. Was u8; the only
+                          * writer, sub_080078D4, is a bare `strb` and is
+                          * byte-identical either way. */
+    /* 0x30 */ u8 unk30;  /* Wave 37 (W37-D): the copy destinations for
+                           * unk2e/unk2f. */
+    /* 0x31 */ u8 unk31;
+    /* 0x32 */ u8 filler_32[0x02];
+    /* 0x34 */ s8 unk34;  /* Wave 37 (W37-E): sub_08001DAC reads it
+                           * `adds rN,#0x34; ldrb; lsls #0x18; asrs #0x18` and
+                           * hands the value to sub_0800272C/sub_08002844's
+                           * fifth (int) parameter -- the same load form unk2f
+                           * carries, and for the same reason: the base is
+                           * already advanced past ldrsb's register-offset-only
+                           * addressing. No writer found in asm/, so the width
+                           * is a floor. */
+    /* 0x35 */ u8 filler_35[0x01];
+    /* 0x36 */ s8 unk36;  /* Wave 37 (W37-D): two (value, shadow) byte pairs,
+                           * one per unk07 side -- sub_08007354 copies unk36 to
+                           * unk37 and unk38 to unk39. SIGNED because
+                           * sub_080079B8 reads unk36/unk38 `ldrb; lsls #0x18;
+                           * asrs #0x18` before adding 4 / 3; the copy in
+                           * sub_08007354 is byte-to-byte and says nothing. */
+    /* 0x37 */ s8 unk37;
+    /* 0x38 */ s8 unk38;
+    /* 0x39 */ s8 unk39;
     /* 0x3a */ s16 unk3a; /* SIGNED: sub_08007328 reads it `movs r4,#0x3a;
                            * ldrsh r0,[r2,r4]`. A ring index -- 08007328 stores
                            * (unk3a + n - 1) % n into unk3c, with n from unk07. */
@@ -370,9 +419,62 @@ struct Unk0200B0B0 /* >= 0x76 */
                            * THUMB's strh immediate stops at 62. Nothing reads
                            * them yet, so the width is a floor. Wave 26. */
     /* 0x48 */ u16 unk48;
-    /* 0x4a */ u8 filler_4a[0x02];
+    /* 0x4a */ u16 unk4a; /* Wave 37 (W37-E): the second state machine in
+                           * sub_08001DAC, switched over 0 / 0xA / 0x14 / 0x1E /
+                           * 0x64 / 0x6E / 0x78 with a plain `ldrh` and no sign
+                           * extension anywhere, so u16. */
     /* 0x4c */ u16 unk4c;
-    /* 0x4e */ u8 filler_4e[0x1c];
+    /* 0x4e */ s16 unk4e; /* Wave 37 (W37-E): a screen x eased toward a target by
+                           * `v += (K - v) >> 3`, exactly like unk82 -- the
+                           * `K - v` read is a bare `movs rI,#0; ldrsh`, which a
+                           * u16 member cannot produce, and the values run
+                           * 0xFC40..0x1180. sub_08001DAC also reads it
+                           * `ldrh; lsls #0x10; asrs #0x14`, the sign extension
+                           * merged into a `>> 4`. */
+    /* 0x50 */ s16 unk50; /* Wave 37 (W37-E): a screen y walked by unk54 and
+                           * clamped to 0x6A..0xB8. SIGNED: every read in
+                           * sub_08001DAC is `movs rI,#0; ldrsh`. */
+    /* 0x52 */ u8 filler_52[0x02];
+    /* 0x54 */ s16 unk54; /* Wave 37 (W37-E): the step added to unk50, capped at
+                           * 8. SIGNED: sub_08001DAC does `ldrh; adds #n; strh`
+                           * and then tests the STORED value `lsls #0x10;
+                           * asrs #0x10; cmp #7; ble` -- the same shorten_binary_op
+                           * pair unk7a carries. */
+    /* 0x56 */ u8 filler_56[0x04];
+    /* 0x5a */ u8 unk5a; /* Wave 37 (W37-E): sub_08002510's state byte, the same
+                          * 0 -> 0xA -> 0x14 -> 0x1E -> 0x32 -> 0x3C -> 0x46 ->
+                          * 0x50 machine sub_080030BC runs on unk72, but a single
+                          * lane rather than an array. Plain `ldrb`/`strb`. */
+    /* 0x5b */ u8 unk5b; /* Wave 37 (W37-E): sub_08002510's tail counter,
+                          * `ldrb; adds #1; ands #0x3f; strb` -- the `adds #1`
+                          * (not `adds #255`) says nothing about signedness
+                          * because it is an increment; the `& 0x3f` keeps it in
+                          * range either way, so u8 is the weakest fit. */
+    /* 0x5c */ s16 unk5c; /* Wave 37 (W37-E): unk5a's companion, unk82's role for
+                           * this lane -- eased by `v += (K - v) >> 3` with the
+                           * `K - v` read a bare `ldrsh`, values 0xFD80..0x11A0. */
+    /* 0x5e */ u8 filler_5e[0x07];
+    /* 0x65 */ u8 unk65; /* Wave 37 (W37-E): a one-shot "cursor moved" flag.
+                          * sub_08000BF8 sets it to 1 with a bare `strb` when the
+                          * terrain or unit under (unk08, unk0a) differs from the
+                          * cached unk2a/unk24; sub_08001DAC tests it `ldrb;
+                          * cmp #0` to decide whether to run the unk66 animation,
+                          * and clears it there. */
+    /* 0x66 */ u8 unk66; /* Wave 37 (W37-E): that animation's state byte, switched
+                          * over 0 / 8 / 9 / 0xA and stepped `ldrb; adds #1;
+                          * strb`. */
+    /* 0x67 */ s8 unk67; /* SIGNED, wave 37 (W37-E), on the W37-A `--` test rather
+                          * than the load form: sub_08001DAC does
+                          * `ldrb; subs r0,#1; strb`, and agbcc emits `subs #1`
+                          * only through a signed lvalue -- a u8 `x--` gives the
+                          * modulo-256 `adds rD,rS,#0; adds rD,#255`. The reload
+                          * that follows tests it `ldrb; lsls #0x18; asrs #0x18;
+                          * cmp #0; bge`, i.e. as a signed frame countdown. */
+    /* 0x68 */ s16 unk68; /* Wave 37 (W37-E): the animation's angle/scale word,
+                           * stepped `+= 0x20` and clamped at 0x100, then fed to
+                           * gSinLut and Div. SIGNED: read `movs rI,#0; ldrsh`
+                           * and the clamp tests the stored value
+                           * `lsls #0x10; asrs #0x10; cmp #0xff; ble`. */
     /* 0x6a */ u8 unk6a;  /* A one-byte result code sub_080085E0 leaves behind:
                            * 0x2d, 0x4b, 0x87, 0x88, 0x89 or 0x8a depending on
                            * which of its nineteen cases ran. Reached as
@@ -387,10 +489,48 @@ struct Unk0200B0B0 /* >= 0x76 */
                            * W20-C). */
     /* 0x6c */ u8 unk6c;  /* cleared alongside unk6e/unk70 by sub_08005D50,
                            * sub_08007A0C */
-    /* 0x6d */ u8 filler_6d[0x01];
-    /* 0x6e */ u16 unk6e; /* an x/y pair: (0x100,0x800) by sub_08005D50,
-                           * (0x780,0x970) by sub_08007A0C */
-    /* 0x70 */ u16 unk70;
+    /* 0x6d */ u8 unk6d;  /* Wave 37 (W37-D): the dwell counter for the unk6c
+                           * state machine. sub_08007A30 seeds it with 0x1e on
+                           * the 0x0a -> 0x14 edge and, in state 0x14, does
+                           * `ldrb; subs #1; strb` and then tests the value it
+                           * READ (not the one it stored) as signed --
+                           * `lsls #0x18; cmp #0; bgt` -- so it is a
+                           * post-decrement compared `<= 0`. Left u8 with the
+                           * sign supplied by an (s8) cast at the one use: the
+                           * load is a plain `ldrb`, which an s8 member does not
+                           * produce here.
+                           *
+                           * WAVE 37, W37-A DISAGREES, with a DISCRIMINATING
+                           * use rather than a load form: sub_08005D74 and
+                           * sub_08005E30 (both matched) decrement it, and the
+                           * ROM does `ldrb r1; subs r2, r1, #1; strb r2`.
+                           * Spelled `gUnknown_0200B0B0->unk6d--` on a u8 member
+                           * agbcc emits `adds r2, r1, #0; adds r2, #255` -- the
+                           * modulo-256 wraparound -- and both functions miss by
+                           * +2 bytes; through an `s8` lvalue they match. So the
+                           * OBJECT is signed and the member should probably be
+                           * `s8`; it is left `u8` only because W37-D's
+                           * sub_08007A30 was in flight against this
+                           * declaration in the same wave. Whoever touches it
+                           * next: retype to `s8`, drop the `*(s8 *)&` in
+                           * work/sub_08005D74 and work/sub_08005E30, and
+                           * re-run trymatch on sub_08007A30 -- the `--` beats
+                           * the load form, because the load form was measured
+                           * in wave 30 to be a position artefact and not a type
+                           * tell (see docs/agbcc-codegen.md). */
+    /* 0x6e */ s16 unk6e; /* an x/y pair: (0x100,0x800) by sub_08005D50,
+                           * (0x780,0x970) by sub_08007A0C.
+                           * SIGNED, wave 37 (W37-D): sub_08007A30 reads both
+                           * halves `movs r1,#0; ldrsh r3,[r0,r1]` while easing
+                           * them toward a target with `v += (K - v) >> 3`, and
+                           * separately reads them for the sub_0801BD00 calls as
+                           * `ldrh; lsls #0x10; asrs #0x14`, which is the
+                           * sign-extension merged into the `>> 4`. A u16 member
+                           * gives `lsrs #0x14` there and no `ldrsh` at all. The
+                           * two literal-store functions above are
+                           * byte-identical either way (re-verified with
+                           * trymatch after the change). */
+    /* 0x70 */ s16 unk70;
     /* 0x72 */ u8 unk72[4]; /* An ARRAY, wave 36 (W36-I): sub_080030BC indexes
                              * it by its own first parameter (`adds rN,#0x72;
                              * adds r4,rN,r5`) and sub_08003088 calls that with
@@ -400,7 +540,13 @@ struct Unk0200B0B0 /* >= 0x76 */
                              * separate members, which is why sub_08003040 and
                              * sub_08003064 write all four one after another;
                              * both re-verified after the change. */
-    /* 0x76 */ u8 filler_76[0x04];
+    /* 0x76 */ u8 unk76[4]; /* An ARRAY, wave 37 (W37-E), the same four lanes as
+                             * unk72: sub_080032EC indexes it by its own first
+                             * parameter (`adds rN,#0x76; add rN,r8`) and
+                             * sub_080030BC -- which sub_08003088 calls with
+                             * 0, 1, 2, 3 -- is what calls sub_080032EC. A second
+                             * per-lane state byte, stepped 0 -> 0xA -> 0x14 ->
+                             * 0x1E. */
     /* 0x7a */ s16 unk7a[4]; /* Wave 36 (W36-I): the same four lanes as unk72,
                               * a frame countdown. sub_080030BC does
                               * `ldrh; subs #1; strh` and then tests the stored
@@ -414,7 +560,18 @@ struct Unk0200B0B0 /* >= 0x76 */
                               * range over 0xFD80..0x1180, i.e. -640..4480.
                               * The `ldrh` in the `+=` is shorten_binary_op on
                               * the same member, not a second object. */
-    /* 0x8a */ u8 filler_8a[0x12];
+    /* 0x8a */ s16 unk8a[4]; /* Wave 37 (W37-E): four lanes again, the sprite
+                              * scale sub_080032EC divides gSinLut by. SIGNED:
+                              * every read is `movs rI,#0; ldrsh`, and the
+                              * clamp at 0x100 tests the stored value
+                              * `lsls #0x10; asrs #0x10`. */
+    /* 0x92 */ s16 unk92[4]; /* Wave 37 (W37-E): the matching per-lane angle,
+                              * counted down by 0x20 with a wrap to +0x148 and
+                              * masked `& 0xff` before indexing gSinLut. SIGNED
+                              * for the same `movs rI,#0; ldrsh` reason; the
+                              * `ldrb` at the first gSinLut read is the `& 0xff`
+                              * folded into the load, not a second object. */
+    /* 0x9a */ u8 filler_9a[0x02];
     /* 0x9c */ u8 unk9c; /* Wave 30, W30-B: sub_0800517C is nothing but
                           * `gUnknown_0200B0B0->unk9c = 0`, reached as
                           * `adds rN, #0x9c` (past `strb`'s imm5) with a bare
@@ -426,6 +583,33 @@ struct Unk0200B0B0 /* >= 0x76 */
                           * weakest fit and the extent above is a floor, not a
                           * measurement. Wave 26. */
 };
+
+/* Wave 37 (W37-D). Stride 0x1c, proved by the `lsls #3; subs; lsls #2` multiply
+ * (i * 8 - i, then * 4 == i * 28) that sub_08007354 and sub_080079B8 both use on
+ * the bare symbol -- so the symbol IS the array, not a pointer to one. The two
+ * agree on the element too: sub_080079B8 `strh`s its parameter into +4 and
+ * sub_08007354 `ldrh`s the same slot back out into struct Unk0200B0B0's
+ * unk26/unk2c. Nothing reaches any other offset, so the extent of filler_06 is
+ * the stride and not a measurement, and the width of unk04 is the store width.
+ * The index runs 0..9 (sub_08007354 wraps `i + 4` at 9 and `i + 3` at 7), which
+ * is a floor on the element count.
+ */
+struct Unk0200B0D0 /* 0x1c */
+{
+    /* 0x00 */ u8 filler_00[0x04];
+    /* 0x04 */ u16 unk04;
+    /* 0x06 */ u8 filler_06[0x16];
+};
+
+extern struct Unk0200B0D0 gUnknown_0200B0D0[];
+
+/* Wave 37 (W37-D). Two ROM blobs sub_08007A30 hands to sub_0801BD00's `void *`
+ * third parameter, one per axis, alongside the x/y it eases out of
+ * gUnknown_0200B0B0's unk6e/unk70. Nothing dereferences either one here, so the
+ * element type is the weakest thing that converts to `void *` without a
+ * const-discard warning, and the extent is unknown. */
+extern u8 gUnknown_08488880[];
+extern u8 gUnknown_08488888[];
 
 /* Stride 4, proved by `lsls #2` in sub_08001CE8, sub_08001D24 and sub_08006288;
  * sub_080077EC reaches element 9 as `+ 0x24`. Member +0x00 is SIGNED --
@@ -520,6 +704,23 @@ struct Unk02027F74 /* >= 0x38 */
     /* 0x37 */ u8 unk37;
 };
 
+/* Wave 37, W37-Q1. A 16-entry table of 8-byte slots -- aw2bhr.lds puts
+ * gUnknown_02027FB0 at 0x02027FB0 and the next symbol at 0x02028030, i.e.
+ * exactly 0x80 bytes, and sub_0803C750 walks it with `adds r2, #8` for
+ * `i = 0 .. 0xf`.
+ *
+ * unk00 is a POINTER and not an int: sub_0803C784 fills the table from
+ * gUnknown_0849EDB0[].unk08, which it also calls through `bl _call_via_r1`.
+ * unk04 is one byte (`ldrb`/`strb` at +4) and UNSIGNED -- sub_0803C750 rejects
+ * an entry whose unk04 is above 1 with `cmp r0,#1; bhi`, the unsigned form.
+ * It is a small use count capped at 2. */
+struct Unk02027FB0 /* 0x08 */
+{
+    /* 0x00 */ int (*unk00)(int);
+    /* 0x04 */ u8 unk04;
+    /* 0x05 */ u8 filler_05[0x03];
+};
+
 struct Unk02028030 /* 0x48 */
 {
     /* 0x00 */ u8 unk00[8];
@@ -604,7 +805,20 @@ struct Unk02029A10 /* 0x24 */
                            * the `u8 unk00`/`u8 unk01` pair's third byte. */
     /* 0x1e */ u16 unk1e; /* zeroed with `strh` by sub_0804D290/sub_0804DCA8 as
                            * the last of the five entry writes. */
-    /* 0x20 */ u8 filler_20[0x04];
+    /* 0x20 */ u16 unk20; /* Wave 37, W37-I. An accumulator whose LOW NIBBLE is
+                           * the phase: sub_0804CA98 does
+                           * `unk20 += gUnknown_02029B94[side][slot]` with an
+                           * `ldrh; adds; strh` pair, acts when
+                           * `(unk20 & 0xf) == 1`, and parks 0xff in it to stop
+                           * the sequence. Halfword from the read-modify-write;
+                           * signedness unproved. Was the head of filler_20. */
+    /* 0x22 */ u16 unk22; /* Wave 37, W37-I. The step counter unk20's phase
+                           * drives: sub_0804CA98 does `unk22++` with `ldrh;
+                           * adds #1; strh`, compares the STORED value against 3
+                           * through a zero-extending `lsls #0x10; lsrs #0x10`
+                           * (which is what makes it u16 and not s16), and uses
+                           * it as the ENTRY index into this same group for the
+                           * x/y pair it then writes. Was filler_20. */
 };
 
 /* Wave 32, W32-A. The per-side animation driver record, one per
@@ -1226,17 +1440,27 @@ struct Unk03003FC0 /* 0x47 */
                           * `unk32 == 0 && unk0d == 0`, then reuses the loaded
                           * zero to clear gUnknown_03004074 -- a second mode
                           * flag beside unk32, not part of the filler. */
-    /* 0x0e */ u8 filler_0e[0x06];
-    /* Wave 34, W34-C: five WORDS carved out of the old filler_0e[0x1a].
+    /* 0x0e */ u8 filler_0e[0x02];
+    /* Wave 34, W34-C carved five WORDS out of the old filler_0e[0x1a]:
      * sub_08034780 clears all five with `str r4,[r7,#disp]` at displacements
      * 0x14/0x18/0x1c/0x20/0x24 -- whole-word stores at displacements `strb` and
      * `strh` cannot reach in that encoding, and the run is contiguous and
-     * word-aligned. Signedness unsettled; the only access in the tree so far is
-     * this clear, so nothing reads them. */
-    /* 0x14 */ u32 unk14;
-    /* 0x18 */ u32 unk18;
-    /* 0x1c */ u32 unk1c;
-    /* 0x20 */ u32 unk20;
+     * word-aligned.
+     *
+     * Wave 37, W37-Q2: the first FOUR of those are one ARRAY based at 0x10, a
+     * fifth parallel per-slot array beside unk33/unk38/unk3d/unk42 and indexed
+     * 1..4 the same way. sub_0803BE60 writes them in a loop whose index runs
+     * 1..4 against a base hoisted as `adds r5,r2,#0; adds r5,#0x10` with the
+     * element address `lsls r0,r1,#2; adds r0,r0,r5` -- a variable index on a
+     * 0x10 base, which is the member-array spelling and nothing else. Element 0
+     * (0x10..0x13) is never touched, exactly like the four byte arrays.
+     * The old names unk14/unk18/unk1c/unk20 are unk10[1..4]; every existing use
+     * was a constant index, so the rename is byte-neutral and c_08034780.c was
+     * re-verified after it. unk24 stays a separate scalar -- sub_0803BE60's
+     * loop stops at index 4 and sub_08034780 writes 0x24 out of order, before
+     * the run, not after it.
+     * Signedness unsettled; nothing reads any of them yet. */
+    /* 0x10 */ u32 unk10[0x05];
     /* 0x24 */ u32 unk24;
     /* 0x28 */ u32 unk28; /* wave 27, W27-C: sub_0803BD78 arms it with 1000
                            * (`movs r0,#0xfa; lsls r0,#2`) through a whole-word
@@ -1260,17 +1484,25 @@ struct Unk03003FC0 /* 0x47 */
     /* 0x30 */ u8 unk30;
     /* 0x31 */ u8 unk31;
     /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 filler_33[0x01];
-    /* Wave 34, W34-C: four bytes carved out of the old filler_33[0x05].
-     * sub_08034780 seeds them with 1, 2, 3, 4 -- unk34 reached by `subs r0,#8`
-     * off the unk3c address and unk35..unk37 by two fresh `adds rB,#disp` bases,
-     * i.e. four separate statements, not one array store. Every displacement is
-     * past `strb`'s 5-bit range from the struct base, which is why each needs
-     * its own address register. */
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ u8 unk36;
-    /* 0x37 */ u8 unk37;
+    /* Wave 37, W37-Q1: 0x33, 0x38, 0x3d and 0x42 are FOUR PARALLEL 5-BYTE
+     * ARRAYS indexed 1..4 by player slot, not one array plus loose scalars.
+     * sub_0803C1D4 settles it: one loop body, `i` counting 0..3, writes all
+     * four with the SAME index expression `i + 1` (the increment `adds r2,
+     * r6, #1` is computed once and reused as the index against every one of
+     * the four bases 0x33 / 0x38 / 0x3d / 0x42) from the four parallel
+     * gUnknown_08580934 tables at +0x09 / +0x0d / +0x11 / +0x20. Element 0 of
+     * each is never touched anywhere in the tree.
+     *
+     * The old names were unk34..unk37 (= unk33[1..4]), unk3e[0..3]
+     * (= unk3d[1..4]) and unk43..unk46 (= unk42[1..4]); every existing use is
+     * a CONSTANT index, so the rename is byte-neutral and c_08026900.c,
+     * c_08034780.c and c_0803CEB8.c were re-verified after it.
+     *
+     * Wave 34's W34-C note that sub_08034780 emits "four separate statements,
+     * not one array store" is still true and is not evidence against an array:
+     * that function seeds them with four different constants, which is four
+     * statements either way. */
+    /* 0x33 */ u8 unk33[0x05];
     /* 0x38 */ u8 unk38[0x05]; /* A byte array, not a scalar: sub_08018C0C
                                 * writes it as `.unk38[i]` with a variable
                                 * index (the `adds rB,#0x38` on the BASE that
@@ -1280,19 +1512,14 @@ struct Unk03003FC0 /* 0x47 */
                                 * from gUnknown_030040F8's player-slot count
                                 * and is NOT proved -- the extent may be
                                 * anything up to 0x43. */
-    /* 0x3d */ u8 filler_3d[0x01];
-    /* 0x3e */ u8 unk3e[0x05]; /* wave 32 (W32-C): sub_0803BF10 writes it as
-                                * `.unk3e[i]` with a variable index -- the
-                                * `adds rB,rI; adds rB,#0x3e` on the struct
-                                * BASE that only a member array produces. The
-                                * index is gUnknown_0849ECDC->unk01, a small
-                                * cursor bounded by that record's unk00; 5 is
-                                * the room left before unk43 and is a CEILING,
-                                * not a measurement. */
-    /* 0x43 */ u8 unk43;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
+    /* 0x3d */ u8 unk3d[0x05]; /* the third of the four parallel slot arrays --
+                                * see the note above unk33. Wave 32 (W32-C)
+                                * read sub_0803BF10's variable index against a
+                                * 0x3e base (`adds rB,rI; adds rB,#0x3e`), i.e.
+                                * that function's cursor is already biased and
+                                * addresses unk3d[1..] as unk3e[0..]; nothing
+                                * in this tree writes unk3d[0]. */
+    /* 0x42 */ u8 unk42[0x05];
     /* 0x47 */ u8 unk47; /* wave 35 (W35-J): sub_08029CB8 reads it with
                           * `adds r0, #0x47; ldrb` (the displacement is past
                           * ldrb's 5-bit field, hence the separate add) and
@@ -1478,7 +1705,22 @@ struct Unk030044E0 /* >= 0x6c */
                            * in a REGISTER is a signed halfword at a constant
                            * displacement (THUMB has no ldrsh immediate form),
                            * not an array subscript. */
-    /* 0x22 */ u8 filler_22[0x2a - 0x22];
+    /* 0x22 */ s16 unk22; /* Wave 37, W37-I. Two independent animation clocks in
+                           * four consecutive halfwords, driven identically by
+                           * sub_0804ABDC: `if (unkN+2 != 0) unkN+2--; else
+                           * unkN++;`, with the counter wrapped to 0 above 0x78
+                           * and `(unkN / 4) & 0xf` used as the frame index into
+                           * gUnknown_0813204C / gUnknown_08131D8C /
+                           * gUnknown_08131DEC. The DELAYS unk24/unk28 are
+                           * SIGNED -- the `!= 0` test is a bare
+                           * `movs rI,#0x24; ldrsh` while the decrement reuses a
+                           * plain `ldrh`, the s16-object pattern -- and the
+                           * counters unk22/unk26 are compared `> 0x78` after a
+                           * bare `ldrsh` too but only ever hold small positive
+                           * values. Was filler_22. */
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
     /* 0x2a */ s16 unk2a; /* Wave 34, W34-I. A SIGNED halfword, and sub_0804AFCC
                            * proves it by reading the same address both ways in
                            * one statement: `movs r4,#0x2a; ldrsh r0,[r1,r4]`
@@ -1690,7 +1932,15 @@ struct Unk08499598 /* 0x3c */
                           * constant shift pair (wave 20, W20-C). */
     /* 0x2d */ u8 unk2d; /* bit 7 is a flag: sub_08026D44 returns
                           * `(unk2d & 0x80) == 0` */
-    /* 0x2e */ u8 filler_2e[0x01];
+    /* 0x2e */ u8 unk2e; /* Wave 37, W37-I. The partner of unk2d: sub_080267AC
+                          * masks BOTH with `& 0x7f` off the same `* 0x3c`
+                          * element base (`adds rB,#0x2d` / `adds rB,#0x2e`,
+                          * past the imm5 range) and hands the pair to
+                          * sub_08022AAC(s16, s16) as one coordinate pair, the
+                          * same role unk2f/unk30 play in the same function's
+                          * tail. Byte from the `ldrb`; the 0x7f mask says bit 7
+                          * is the flag unk2d's note describes and the value is
+                          * seven bits wide. Was filler_2e. */
     /* 0x2f */ u8 unk2f; /* Wave 29, W29-A. An ADJACENT PAIR: sub_0802A4DC reads
                           * unk2f and unk30 off one element address (`adds
                           * rB,#0x2f` / `adds rB,#0x30`, both past `ldrb`'s
@@ -1945,7 +2195,13 @@ struct Unk0849CD88 /* 0x24 */
     /* 0x14 */ u32 unk14;
     /* 0x18 */ s16 unk18; /* wave 28, W28-A: `ldrsh`, and sub_08035B00 returns
                            * it as `s16` both bare and doubled. */
-    /* 0x1a */ u8 filler_1a[0x04];
+    /* 0x1a */ u16 unk1a; /* wave 37, W37-H: sub_08035E90 and sub_08035FA8 both
+                           * test it `!= 0` with a plain `ldrh` and then hand it
+                           * to sub_0803B48C(s16) as an `ldrsh`. UNSIGNED and not
+                           * s16: an s16 member would have made the `!= 0` test
+                           * an `ldrsh` too, while `(s16)` of a u16 member is
+                           * exactly what combine folds into the `ldrsh`. */
+    /* 0x1c */ u8 filler_1c[0x02];
     /* 0x1e */ u16 unk1e; /* wave 28, W28-A: `ldrh`, compared against 0x8000 by
                            * sub_08035F68 -- a sentinel, so the width is a floor
                            * and the signedness is open. */
@@ -2197,12 +2453,28 @@ struct Unk08580934
     /* 0x18 */ u8 *unk18; /* wave 36 (W36-G): `ldr [r0, #0x18]` then `adds r0,
                            * r0, r4; ldrb` -- a byte table indexed by the unk1c[]
                            * cursor, whose element sub_08065DAC hands to
-                           * sub_08043E3C's int first parameter. */
-    /* 0x1c */ u8 unk1c[0x08]; /* wave 36 (W36-G): a per-slot cursor array,
+                           * sub_08043E3C's int first parameter.
+                           *
+                           * Wave 37, W37-Q1: the length was a guess bounded by
+                           * unk24 at 0x24; it is FOUR, because 0x20 starts a
+                           * fourth per-slot byte table beside unk09/unk0d/unk11
+                           * -- sub_0803C1D4 copies all four in one loop body
+                           * with the same index (`ldr rB,[rP]; adds rB,#K;
+                           * adds rB,rB,rI; ldrb` for K = 9, 0xd, 0x11 and
+                           * 0x20). A declared array LENGTH never enters address
+                           * arithmetic, so shrinking this is byte-neutral for
+                           * sub_08065DAC. */
+    /* 0x1c */ u8 unk1c[0x04]; /* wave 36 (W36-G): a per-slot cursor array,
                            * reached as `adds r0, #0x1c; adds r0, r0, r6` with
                            * the slot index in r6 and read/written `ldrb`/`strb`.
                            * The LENGTH is a guess bounded by unk24 at 0x24;
                            * only the 0x1c start offset enters the arithmetic. */
+    /* 0x20 */ u8 unk20[0x04]; /* Wave 37, W37-Q1: the fourth of the parallel
+                          * per-slot byte tables that start at 0x09, 0x0d and
+                          * 0x11 -- sub_0803C1D4's loop reads all four with one
+                          * index and stores them into four parallel 5-byte
+                          * arrays in gUnknown_03003FC0. Extent 4 from the trip
+                          * count (i <= 3) and from unk24 following. */
     /* 0x24 */ u8 unk24;  /* wave 30 (W30-C): a plain mode flag. sub_08066B6C
                            * reads it with a BARE `ldrb` and tests it against
                            * zero to pick sub_0806630C or sub_08066B40 -- no
@@ -2505,7 +2777,17 @@ struct Unk085C77A0 /* 0x5c */
                            * gUnknown_085C77A0[gUnknown_03003FC0.unk02] and
                            * returns it when non-zero, falling back to
                            * gUnknown_03003FC0.unk30. Width only. */
-    /* 0x26 */ u8 filler_26[0x02];
+    /* 0x26 */ u8 filler_26[0x01];
+    /* 0x27 */ u8 unk27; /* Wave 37, W37-K3. sub_08061788 reads it off
+                          * gUnknown_085C77A0[gUnknown_03003FC0.unk02] with
+                          * `adds rB,#0x27; ldrb` (past ldrb's imm5, so the add
+                          * is addressing and not a member array), tests it
+                          * against 0 and, when non-zero, uses it as the ROW
+                          * index into gUnknown_0857690C[][19] -- i.e. a small
+                          * override selector whose fallback comes from
+                          * gUnknown_030046B8. Width from the load; the compare
+                          * is `beq`, so signedness is unproved. Was the second
+                          * byte of filler_26. */
     /* 0x28 */ u8 unk28;
     /* 0x29 */ u8 filler_29[0x03];
     /* 0x2c */ void *unk2c[2]; /* Wave 35, W35-C: an ARRAY of two words, the
@@ -2581,15 +2863,24 @@ struct Unk085D3DD0Entry /* 0x44 */
     /* 0x12 */ s16 unk12;
     /* 0x14 */ s16 unk14; /* `ldrsh`, sub_08043270 (K = 0x4c = 0x38 + 0x14) */
     /* 0x16 */ s16 unk16;
-    /* 0x18 */ s8 *unk18; /* Wave 34, W34-F. A pointer to a [movement type][32
+    /* 0x18 */ s8 *unk18[3]; /* Wave 34, W34-F. A pointer to a [movement type][32
                            * terrain] table of SIGNED cost bytes: sub_08041EA8
                            * reads `unk18[(cell & 0x1f) + gUnknown_085D5ABC[t]
                            * .unk19 * 32]` with `movs r0,#0; ldrsb r0,[r3,r0]`
                            * and rejects the cell when it is negative, so the
                            * pointee is s8 and the row stride is 32. Reached as
                            * the constant offset 0x154 == 1 * 0x104 + 0x38 +
-                           * 0x18, i.e. gUnknown_085D3DD0[1].unk38[0].unk18. */
-    /* 0x1c */ u8 filler_1c[0x08];
+                           * 0x18, i.e. gUnknown_085D3DD0[1].unk38[0].unk18.
+                           *   WAVE 37 (W37-H): widened from a scalar `s8 *` to
+                           * `s8 *[3]`, absorbing the old filler_1c[0x08] --
+                           * 0x18 + 3*4 == 0x24 fills the gap up to unk24
+                           * exactly. sub_08038848 selects between the three
+                           * with gUnknown_03003FC0.unk2c (`(unk1e * 17 +
+                           * unk2c) << 2` off the +0x50 member base, i.e. a
+                           * 4-byte element stride inside a 0x44 entry stride).
+                           * The start offset is unchanged, so this is
+                           * byte-neutral; src/decomp/c_08041EA8.c was updated
+                           * to `.unk18[0]` and re-verified byte-exact. */
     /* 0x24 */ s16 *unk24[8]; /* An array of POINTERS, not values: family F049
                                * (sub_080430B0/08043120/08043190/08043200)
                                * loads one word out of it and then reads an s16
@@ -2636,7 +2927,24 @@ struct Unk085D3DD0 /* 0x104 */
                           * -- so it is a small enumerated direction/side tag. */
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 filler_17[0x09];
+    /* 0x17 */ u8 unk17; /* Wave 37, W37-K2. sub_0805DB70 reads it with a
+                          * plain `ldrb` off the 0x104 element and multiplies
+                          * sub_08044208's result minus sub_080441D4's by it
+                          * before `Div(.., 100)` -- a per-terrain percentage,
+                          * the companion of unk0c/unk10 above. */
+    /* 0x18 */ u8 unk18; /* Wave 37, W37-K2. Compared UNSIGNED (`cmp; bhs`)
+                          * against `sub_080129E0() % 100` in the same
+                          * function -- a percentage chance. Plain `ldrb`. */
+    /* 0x19 */ u8 filler_19[0x03];
+    /* 0x1c */ u8 (*unk1c)(int); /* Wave 37, W37-K2. A whole-word function
+                          * pointer: sub_0805DB70 loads it, tests it against
+                          * NULL and calls it through `bl _call_via_r1` with
+                          * ONE argument (2 on one path, 1 on the other), then
+                          * narrows the result with `lsls #0x18; lsrs #0x18`
+                          * before `cmp #1` -- so u8 in, one int argument. The
+                          * register index of the veneer is what fixes the
+                          * arity. Carved out of filler_17, offsets
+                          * unchanged. */
     /* 0x20 */ u16 unk20[0x06]; /* Wave 30, W30-A: sub_080398D0 picks one of
                                  * SIX with `sub_080129E0() % 6` and hands it
                                  * to sub_080397F4(u16). The `adds r4,#0x20` on
@@ -3160,8 +3468,14 @@ extern struct Unk0200B0B0 *gUnknown_0200B0B0;
 extern struct Unk0200B224 gUnknown_0200B224[];
 /* Wave 32 (W32-B): the HBlank scanline buffer sub_08011228 fills and
  * sub_08011298 / sub_0801137C hand to sub_080111C8 as a plain source address.
- * Nothing here reads an element, so `u8 []` is the weakest type that fits. */
-extern u8 gUnknown_0200B274[];
+ * Nothing here reads an element, so `u8 []` is the weakest type that fits.
+ *
+ * Wave 37 (W37-P1): retyped to `u16 []`. sub_08011228 IS the filler and it
+ * writes `strh` at `lsls #1` stride over i = 0..159, so the element is 16-bit
+ * and the array is 160 entries. Byte-neutral at both call sites -- they only
+ * hand the base to sub_080111C8's `void *` first parameter (c_08011298.c and
+ * c_0801137C.c both re-verified). */
+extern u16 gUnknown_0200B274[];
 /* Exactly 48 entries: sub_08011C18 clears 0..0x2f (`cmp #0x2f; bls`) at stride
  * 0x0c, and 0x0200B3B4 + 48*0x0c == 0x0200B5F4, the next symbol. */
 extern struct Unk0200B3B4 gUnknown_0200B3B4[];
@@ -3268,6 +3582,7 @@ extern struct Unk02027F74 gUnknown_02027F74;
  * with no addend, `.4byte gUnknown_02027F74` with the 0x36/0x37 as runtime
  * adds), which a single-object spelling cannot produce. */
 extern u8 gUnknown_02027F78[];
+extern struct Unk02027FB0 gUnknown_02027FB0[16];
 extern struct Unk02028030 gUnknown_02028030;
 /* The shadow copy of gUnknown_02028030, and it is the SAME type: the two
  * symbols are adjacent (0x02028030 + 0x48 == 0x02028078) and sub_0803BCA0 /
@@ -3311,6 +3626,19 @@ extern u16 gUnknown_02028E5C[][2];
  * own -fforce-addr address constants for this array, one private copy per
  * function, and not objects in ROM. Same reading as gUnknown_0808E540 above. */
 extern struct Unk02029690 gUnknown_02029690[];
+/* Wave 37, W37-B: the SAME reading applies to the whole run at 0x08136130 and
+ * up, which is more agbcc `.rodata` address-constant pool and not objects.
+ * Dereferenced in baserom.gba:
+ *   0x08136130 -> 0x02029C04    0x08136134 -> 0x03004580
+ *   0x08136138 -> 0x020296B0    0x0813613C -> 0x03001470
+ *   0x08136140 -> 0x02029A10    0x08136144 -> 0x03004548
+ *   0x08136148 -> 0x03004538    0x0813614C -> 0x03004580
+ * so `ldr rN,=gUnknown_081361xx; ldr rM,[rN]` is ONE indirection of compiler
+ * bookkeeping, not a pointer global. Name the target global directly and agbcc
+ * rebuilds the word; sub_080542EC, sub_080543E0 and sub_08054BA0 all matched
+ * that way and carry `rodata` entries. Note 0x08136134 and 0x0813614C both hold
+ * 0x03004580 -- one private copy per function, so two of these symbols naming
+ * one address is expected and is not evidence of two objects. */
 extern struct Unk02029A10Group gUnknown_02029A10[];
 /* One byte per gUnknown_02029A10 slot, five per side -- sub_08051BEC indexes
  * it `a * 5 + j` (the `a * 5` is CSEd with gUnknown_08552178's row scaling in
@@ -3364,6 +3692,13 @@ extern struct Unk0202FDFC gUnknown_0202FDFC;
 
 /* 16 entries: sub_08011B18 clears indices 0..15 and sub_08011B34 stops
  * scanning at gUnknown_03000040, the next symbol in the linker script. */
+/* Wave 37 (W37-P1): the ROM word at 0x0808E518 holds 0x03000000. It is agbcc's
+ * own -fforce-addr copy of THIS array's address, not a pointer global -- the
+ * splitter names it gUnknown_0808E518 and sub_08011B5C reaches the array
+ * through it with two `ldr`s. sub_08011B5C references the array four times
+ * (read and write, in the peeled first iteration and in the rotated loop) and
+ * gets the .rodata word; sub_08011B34 references it twice and gets the plain
+ * `ldr rN, =gUnknown_03000000`. There is no object at 0x0808E518 to declare. */
 extern void *gUnknown_03000000[];
 extern u16 gUnknown_03000040;
 /* A u16 pair set together by sub_0801224C. Two separate pool words in that
@@ -3606,7 +3941,15 @@ extern void (*gUnknown_030013EC)();
  * user touches it exactly once per function, which is why the qualifier was
  * invisible until a function read it twice. */
 extern volatile u16 gUnknown_03001400;
-extern u16 gUnknown_03001404;
+/* SIGNED -- wave 37, W37-O2. Retyped u16 -> s16. sub_08019470 tests it
+ * `!= 0` and the ROM reads it with the register-offset `movs r2,#0;
+ * ldrsh r0,[r0,r2]`, which agbcc emits only for a signed HImode object: a
+ * `(s16)` cast on a u16 global folds away entirely at a zero test (measured
+ * with compile_probe -- the cast spelling gives a plain `ldrh`), so no cast
+ * reproduces the sign-extending load. The only other users are the pair of
+ * stores in src/decomp/c_08017E74.c (`= 1` / `= 0`), which are `strh` either
+ * way; that file was re-verified with trymatch after the change. */
+extern s16 gUnknown_03001404;
 /* A byte buffer whose ADDRESS is what gets passed: family F059 hands it to
  * sub_0803CCB8, which forwards it to sub_0803CC84 as the destination of a
  * NUL-terminated copy out of gUnknown_020280C0[i].unk02 (0x11 bytes). Extent
@@ -3625,6 +3968,13 @@ extern volatile u16 gUnknown_03001420;
  * `strh 0` writers (sub_0801DA94, sub_0801DAE8) cannot see the difference.
  * sub_0801DAE8 takes an s16 index and skips -1, so -1 is "no slot". */
 extern s16 gUnknown_03001430[];
+/* Wave 37, W37-Q3: the ROM words the disassembly calls gUnknown_0808E534 and
+ * gUnknown_0808E538 BOTH hold 0x03001470 -- verified against baserom.gba -- so
+ * they are two agbcc -fforce-addr address-constant copies of this array's
+ * address, one per function, and not objects. Do not declare them. Naming
+ * gUnknown_03001470 directly is what reproduces them; sub_08015D24 matches that
+ * way and promotion carries `"rodata": ["0x0808E534"]`. Same reading as
+ * gUnknown_08136030/_34 and gUnknown_08136090/_C8 recorded above. */
 extern struct Unk03001470 gUnknown_03001470[];
 /* Wave 35, W35-F: THREE -fforce-addr pool words point here or next door and
  * none of them is an object -- 0x0813606C and 0x08136070 both hold 0x03001FBC
@@ -3996,6 +4346,18 @@ extern union Unk802C57CBuf gUnknown_03003F24;
  * gUnknown_08499594[i]. `ldrh` with no sign extension anywhere, and the `+ 1`
  * is the usual 1-based unit-id convention. */
 extern u16 gUnknown_03003F2C;
+/* Wave 37, W37-P3: the 0x0805Cxxx window above is the same one the 0x08045xxx
+ * army scanners use, spelled `for (i = (u16)gUnknown_084995FE[gUnknown_03003F2C]
+ * + 1; i < ... + 0x33; i++)` -- so this holds the ARMY NUMBER, not a unit id;
+ * it is what indexes gUnknown_084995FE to get that army's base unit id.
+ *   Beware its `data_refs`: sub_080459E4 and sub_08045A78 reach it through
+ * agbcc -fforce-addr words at 0x0812A0F4 and 0x0812A0F8, and BOTH ROM words
+ * contain 0x03003F2C. gen_lds.py invents `gUnknown_0812A0F4`/`gUnknown_0812A0F8`
+ * at those addresses and the index lists them as data_refs, so the two functions
+ * look like they touch two unknown ROM globals when they touch this one. Both
+ * read it twice (preheader plus a bound recomputed at the bottom of a loop
+ * containing a `Div` call); sub_08045924 reads it once and gets a plain
+ * `ldr =gUnknown_03003F2C`. Honest spelling matched all three. */
 /* At least 7 bytes: sub_0803BBD4 clears [0..6] through a variable index, so
  * this really is an array and not a struct. Elements are SIGNED --
  * sub_0803BB44/BB5C/BB74 and sub_0803B8E0/B904 all read one with
@@ -4233,6 +4595,16 @@ extern int gUnknown_030045D8;
 struct Unk35828Proc;
 extern struct Unk35828Proc *gUnknown_030045E0[];
 extern u8 gUnknown_030046B8;
+/* Wave 37, W37-K1. sub_0805A95C's only output, and its whole body: a single
+ * `strb` of gUnknown_0857680F[gUnknown_030040D8->unk00], or of 0 when that
+ * byte reads exactly 4 AND the current unit's three-bit +0x09 field is clear.
+ * Byte from the `strb`; signedness is open because nothing reads it yet.
+ * A REAL OBJECT and not a slice of a neighbour -- aw2bhr.lds names
+ * gUnknown_030046AC at 0x030046AC in its own right, checked before declaring.
+ * Reached through TWO separate inline pool words, one per arm of the if/else,
+ * rather than a single -fforce-addr .rodata word: the documented two-use case
+ * where CSE const-propagates the address instead of holding it. */
+extern u8 gUnknown_030046AC;
 /* A zero-terminated list of small ids. sub_0805D344 walks it with
  * `while (gUnknown_030045F0[i] != 0)`, sub_0805CDF0/sub_0805CE20 seed it with
  * {0x40, 0} and point gUnknown_030046B0 at it. Byte array, not a struct:
@@ -4278,6 +4650,22 @@ extern void (*gUnknown_03004778)(void);
  * source, so `s16` is the honest model. Every existing writer stores a
  * `movs`-sized constant with `strh`, which is byte-identical either way, so
  * this retype changes no promoted file (spot-checked on c_0805D338.c). */
+/* Wave 37, W37-K2. The s16 stays, but the two readers of this symbol CANNOT
+ * both come from one declaration and that is worth recording. sub_080343D8
+ * (src/decomp/c_08034394.c, matched) reads it `movs r1,#0; ldrsh r0,[r0,r1]`.
+ * sub_0806171C switches on it with `ldrh; lsls #0x10; asrs #0x10` -- an
+ * unsigned load and a separate sign extension. Seven spellings were probed on
+ * this global and on the u16 gUnknown_030033EC ((s16)g, (s16)(u16)g, an s16
+ * local, a u16 local, `& 0xffff`, `*(u16 *)&g`, and the bare switch); every one
+ * folds to `ldrsh`, because combine simplifies
+ * `sign_extend (subreg:HI (zero_extend (mem:HI)))` back to
+ * `sign_extend (mem:HI)`. The shift pair is therefore an aliasing fact, not a
+ * width fact: the original's two translation units declared this object
+ * differently. c_0806171C.c spells its own view with a volatile-qualified
+ * pointer read, which is the only load combine may not touch; that is a
+ * reproduction of the foreign declaration and NOT a claim that the object is
+ * volatile. See docs/agbcc-codegen.md, "`sign_extend (mem:HI)` ALWAYS folds to
+ * `ldrsh`". */
 extern s16 gUnknown_03004780;
 /* A whole-word flag: sub_0802F3D8 stores a register into it with `str`, and
  * the 0x0805Cxxx list builders pass it straight to sub_0805D344, which spills
@@ -4708,6 +5096,18 @@ extern u8 gUnknown_081268F8[]; /* handed out by sub_0801F49C */
  * (sub_080152EC's `const void *`, sub_080193B0's `const u8 *`) take them as
  * opaque pointers. Widen them to real struct arrays when a consumer is matched
  * -- the strides above are what the element size will have to be. */
+/* Wave 37 (W37-C). A ROM lookup table read as a SIGNED halfword
+ * (`lsls r1,r5,#1; adds r1,r1,r0; movs r2,#0; ldrsh r0,[r1,r2]`) and returned
+ * straight out of sub_0800A95C, whose one caller sub_0800A588 branches on the
+ * result both `bge` and `ble` -- so the entries are signed, not a bool.
+ * The index sub_0800A95C builds is a 9-bit neighbour mask (bits 8..0 = NW, N,
+ * NE, W, <unused bit 4>, E, SW, S, SE), so the table is at most 0x200 entries;
+ * the extent is not otherwise pinned and the array is left incomplete. */
+extern const s16 gUnknown_08486BC4[];
+/* The same shape, one table earlier: sub_0800A884 reads it with the identical
+ * `lsls #1; adds; movs r2,#0; ldrsh` idiom off a 9-bit neighbour mask.  Wave 37
+ * (W37-C). */
+extern const s16 gUnknown_084867C4[];
 extern const u8 gUnknown_084873BC[];
 extern const u8 gUnknown_08487404[];
 extern const u8 gUnknown_0848744C[];
@@ -5017,6 +5417,22 @@ extern u8 **const gUnknown_0808D7FC;
 extern u8 **const gUnknown_0808D81C;   /* sub_0800977C */
 extern u8 **const gUnknown_0808D83C;   /* sub_0800A3D4 */
 extern u8 **const gUnknown_0808D854;   /* sub_0800AA30 */
+/* Wave 37 (W37-C).  sub_0800ABD0 is the one function in the 0x0800A/0x0800B
+ * block that did NOT close, and this word is why, so the declaration is kept
+ * for the next attempt.  Eleven other functions in the same two blocks
+ * (sub_0800A098, sub_0800A2EC, sub_0800A588, sub_0800A6AC, sub_0800A798,
+ * sub_0800A884, sub_0800A95C, sub_0800BB2C, sub_0800BCD0, sub_0800BEE4 ...)
+ * all matched with the HONEST `gUnknown_08499590` spelling and never needed
+ * their pool word named, which is wave 20's finding replicated ten times over.
+ *   sub_0800ABD0 is the exception because its ROM materialises the address in
+ * the PROLOGUE (`ldr r0,=<word>; mov r8, r0` before the first `cmp`) and then
+ * RE-materialises it at the third arm's bound.  Honest spelling gives the lazy
+ * single materialisation (726 of 732); `pp = &gUnknown_0808D858;` as the first
+ * statement buys the prologue pair but loses the re-materialisation (724);
+ * and reading the bound through `*gUnknown_0808D858` -- the c_0800A3D4.c
+ * spelling -- force-addrs the pool word's OWN address into a second .rodata
+ * word and a second high register (736).  See work/sub_0800ABD0/. */
+extern u8 **const gUnknown_0808D858;   /* sub_0800ABD0 */
 extern u8 **const gUnknown_0808D86C;   /* sub_0800BF78 */
 /* Three more owners of the same block, identified in wave 20 (W20-B) by the
  * address-order interpolation the note above describes: 0x0808D88C is
@@ -5188,7 +5604,16 @@ extern const u8 gUnknown_084995C1[];
  * The element type is READ as s16 (`movs r1,#0; ldrsh r0,[r0,r1]`), but that
  * is forced by sub_08026FD0's s16 parameter and would be the same bytes for a
  * u16 array, so the signedness is not pinned; every stored value is positive.
- * `const` is safe -- the one consumer takes it by value. */
+ * `const` is safe -- the one consumer takes it by value.
+ *   Wave 37, W37-P2: the underlying table really is UNSIGNED. sub_08045090
+ * uses an entry as the base of a gUnknown_08499594 subscript and the ROM reads
+ * it with a bare `ldrh`, so the matching source is
+ * `(u16)gUnknown_084995FE[army]`; without the cast agbcc emits `movs r1,#0;
+ * ldrsh r0,[r0,r1]` and that was the only remaining diff. work/sub_080287D0
+ * measured the same thing independently in wave 34. The declaration is left
+ * `s16` because retyping it would push a conversion onto the promoted
+ * src/decomp/c_080257C0.c, whose sub_08026FD0 call wants s16 anyway -- the
+ * cast at each unsigned reader is the cheaper contract. */
 extern const s16 gUnknown_084995FE[];
 /* A tree-3 proc script pair: sub_08027278 starts 08499CFC and sub_0802723C
  * starts 08499D2C, with identical bodies that differ only in the script and in
@@ -5596,6 +6021,15 @@ extern u16 gUnknown_084A0730[];
 extern const struct ProcCmd gUnknown_0849EAAC[];
 extern const struct ProcCmd gUnknown_0849EBBC[];
 extern const struct ProcCmd gUnknown_0849EC1C[];
+/* Wave 37, W37-Q2: a ROM byte table read `ldrb` with a variable index by
+ * sub_0803B930 (`subs r1, r2, #1; add r1, ip; ldrb r1, [r1]`, i.e.
+ * gUnknown_0849EA78[i - 1] for i = 1..gUnknown_0849ECDC->unk00). The bytes in
+ * baserom.gba at 0x0849EA78 are 01 03 02 04 06 00 01 00, i.e. a small
+ * per-slot seed table whose values land in gUnknown_03003FC0.unk3d[1..4].
+ * The extent is not proved; the largest index reached is unk00 - 1, and unk00
+ * is armed with 2/3/4 by sub_0803BDF8/sub_0803BE10/sub_0803BE28, so at least
+ * four elements are live. Not `const` here -- nothing in the tree pins it. */
+extern u8 gUnknown_0849EA78[];
 extern struct Unk0849ECDC *gUnknown_0849ECDC;
 extern const struct ProcCmd gUnknown_0849ECE0[];
 /* The fallback name string sub_0803CCEC hands out in place of
@@ -6314,7 +6748,17 @@ struct Unk085D6C88 /* 0x18 */
                                  * sub_0803B48C its `s16` argument -- the
                                  * s16-object pattern, and decisive for the sign.
                                  * Was the head of filler_00. */
-    /* 0x08 */ u8 filler_08[0x04];
+    /* 0x08 */ s16 unk08[2]; /* Wave 37, W37-B. A THIRD entry group on the same
+                              * row, between unk00 and unk0c and on the FIRST of
+                              * their two indices only: sub_080541F0 reads
+                              * `unk08[gUnknown_03004580[i][3] == 2]` off
+                              * `gUnknown_03004580[i][1] * 24` and hands it to
+                              * sub_0803B48C through a bare
+                              * `movs r1,#0; ldrsh r0,[r0,r1]` -- the s16-object
+                              * pattern, decisive for the sign exactly as it is
+                              * for unk00. The `== 2` index arrives as a
+                              * conditional `adds r2,#2` on the row offset, not
+                              * as a stored flag. Was filler_08. */
     /* 0x0c */ s16 unk0c[2][2];
     /* 0x14 */ u8 filler_14[0x04];
 };
@@ -7559,8 +8003,14 @@ extern u32 gUnknown_03001FB0;
 extern u16 gUnknown_03001FB4;
 extern u16 gUnknown_03001FB8;
 extern u16 gUnknown_03001FC0;
+/* gUnknown_03001FC8, gUnknown_030024E0 and gUnknown_03002004 ARE NOT DECLARED
+ * HERE.  Wave 37 (W37-G) moved them to include/hardware.h as
+ * `union BgCntBuf` / `union BgCntBuf` / `union DispCntBuf` -- sub_08018254
+ * writes all three field by field with byte-wide read-modify-writes that a
+ * scalar u16 cannot produce.  Re-adding an `extern u16` here breaks every
+ * translation unit that includes both headers with `conflicting types`,
+ * exactly as the gUnknown_03001FE8 note above records. */
 extern u16 gUnknown_03001FC4;
-extern u16 gUnknown_03001FC8;
 extern u16 gUnknown_03001FCC;
 extern u8 gUnknown_03001FD8;
 /* Wave 35, W35-I: VOLATILE, and that is measured -- but the qualifier is NOT on
@@ -7576,7 +8026,6 @@ extern u8 gUnknown_03001FD8;
  * need it and retyping the global would force a re-verify of every other user;
  * promote the qualifier onto the declaration if a second function wants it. */
 extern u16 gUnknown_03001FEC;
-extern u16 gUnknown_03002004;
 extern u16 gUnknown_03002008;
 extern u32 gUnknown_03002010;
 extern u16 gUnknown_03002014;
@@ -7588,7 +8037,6 @@ extern u16 gUnknown_03002034;
 extern u8 gUnknown_030020A4;
 extern u16 gUnknown_030024C4;
 extern u16 gUnknown_030024CC;
-extern u16 gUnknown_030024E0;
 extern u16 gUnknown_03002518;
 extern u32 gUnknown_03002B3C;
 extern u16 gUnknown_03002B48;
@@ -7739,10 +8187,33 @@ struct Unk020296B0 /* 0x28 */
                           * in the load when this is a NAMED member -- reached
                           * through a `(u8 *)` cast agbcc folds it into the pool
                           * word instead. */
-    /* 0x1d */ u8 filler_1d[0x0b];
+    /* 0x1d */ u8 filler_1d[0x01];
+    /* 0x1e */ u16 unk1e[5]; /* Wave 37, W37-B. The TIMESTAMP row that goes with
+                              * the unk0c command row and shares its unk18
+                              * cursor: sub_08054278 reads `unk1e[unk18]` off the
+                              * SAME CSEd `i * 0x28 + unk18 * 2` it used for
+                              * unk0c and compares it for equality against the
+                              * u16 gUnknown_03004508 frame counter before
+                              * dispatching the command through
+                              * gUnknown_08553744. `adds rB,#0x1e` with a zero
+                              * `ldrh` displacement -- the member-array form, and
+                              * the shared index register is what rules out
+                              * `unk0c[unk18 + 9]` as the spelling.
+                              * gUnknown_020298E0's unk0c/unk1a pair plays the
+                              * same two roles with the layout swapped. The [5]
+                              * is what the 0x1e..0x28 span allows; like unk0c
+                              * the cursor can run past it. Was filler_1d. */
 };
 
 extern s16 gUnknown_02029668[][5];
+/* Wave 37, W37-J. 0x0202967C is gUnknown_02029668 + 0x14, i.e. ROW 2 of the
+ * table above, reached through its own linker symbol because sub_0804FF44
+ * indexes it as `base + i * 10` with a pool word of exactly 0x0202967C -- the
+ * same 10-byte row stride (`(i * 4 + i) * 2`). Element [0] receives
+ * sub_08015410's s8 return sign-extended and stored `strh`, which is what makes
+ * the element 16 bits; nothing here proves the signedness beyond agreeing with
+ * gUnknown_02029668. */
+extern s16 gUnknown_0202967C[][5];
 /* The per-side movement record: 0x58 bytes, indexed by
  * gUnknown_03001470[proc].unk30 (the 0/1 side), holding five parallel slots
  * indexed by gUnknown_03001470[proc].unk34. sub_08050958 is the whole
@@ -7832,6 +8303,14 @@ extern u16 gUnknown_02029C00[2];
  * only as `& 1` -- the same role gUnknown_020296B0[i].unk1a plays for the
  * other channel. u16 from the read-modify-write. */
 extern u16 gUnknown_02029C04[2];
+/* Wave 37, W37-B. The read cursor into gUnknown_020296B0[i].unk0c for
+ * sub_0805414C's channel -- a THIRD cursor over the same command row, beside
+ * gUnknown_02029C00 (sub_08053FBC's) and gUnknown_020296B0[i].unk18
+ * (sub_08054278's). `ldrh; adds #1; strh` off `i * 2` once a command is
+ * accepted, and the same value subscripts gUnknown_08551E12, exactly as
+ * gUnknown_02029C00 does. u16 from the pair; the [2] is the 4-byte gap to
+ * gUnknown_02029C0C, i.e. one per side. */
+extern u16 gUnknown_02029C08[2];
 /* 0x90-byte per-side records -- the stride is `(s*8+s)*16` at all 55 sites in
  * code-0801D390.s. Two five-slot halfword arrays are reached here, at +0x26 and
  * +0x30, indexed by gUnknown_03001470[proc].unk34 (the slot) and summed into a
@@ -7844,18 +8323,58 @@ extern u16 gUnknown_02029C04[2];
  * (wave 20, W20-C). */
 struct Unk020298E0 /* 0x90 */
 {
-    /* 0x00 */ u8 filler_00[0x02];
-    /* 0x02 */ s16 unk02[10]; /* Wave 33, W33-E. sub_08050F24 writes
+    /* 0x00 */ u16 unk00; /* Wave 37, W37-B. A tile base, and the THIRD member of
+                           * a set written together: sub_08054EE0 and
+                           * sub_08054F50 store one value into
+                           * gUnknown_020297C0[i].unk00, gUnknown_020296B0[i]
+                           * .unk00 and this one back to back, and the first two
+                           * are already typed u16 tile bases. `strh` of a value
+                           * built as `(u16)(i * 0x100 + 0x50)`. Was filler. */
+    /* 0x02 */ s16 unk02[5];  /* Wave 33, W33-E. sub_08050F24 writes
                                * unk02[unk16 - 1] with sub_08015410's `s8` return
                                * SIGN-extended (`lsls #0x18; asrs #0x18`) and
                                * stored `strh`, so the element is a signed
-                               * halfword holding a signed byte. Extent 10 is
-                               * what the 0x02..0x16 span allows exactly; the
-                               * count member bounds it. */
+                               * halfword holding a signed byte.
+                               *   Wave 37, W37-B narrowed the extent from 10 to
+                               * 5: sub_08054488 reads a SECOND halfword row at
+                               * +0x0c off the same element base with unk16 as a
+                               * bare `unk16 * 2` index CSEd with the +0x1a row
+                               * below, which is the member-array form and not
+                               * `unk02[unk16 + 5]` (that spelling would have to
+                               * add 5 before the shift and could not share the
+                               * index register). The two views do overlap if
+                               * unk16 ever exceeds 5; a declared LENGTH never
+                               * enters address arithmetic, so the narrowing is
+                               * byte-neutral for sub_08050F24 either way. */
+    /* 0x0c */ u16 unk0c[5];  /* Wave 37, W37-B. The TIMESTAMP row for the unk1a
+                               * command row below, on the shared unk16 cursor:
+                               * sub_08054488 compares `unk0c[unk16]` for
+                               * equality against the u16 gUnknown_03004508
+                               * frame counter. `adds rB,#0xc`, zero `ldrh`
+                               * displacement. Same pair gUnknown_020296B0's
+                               * unk0c/unk1e form, with the roles of the two
+                               * offsets swapped. */
     /* 0x16 */ u16 unk16;     /* Wave 33, W33-E. The fill level of unk02 above:
                                * read `ldrh`, decremented by one and used as the
                                * subscript, i.e. the last written slot. */
-    /* 0x18 */ u8 filler_18[0x26 - 0x18];
+    /* 0x18 */ u16 unk18;     /* Wave 37, W37-J. A three-state phase counter,
+                               * ONE per side rather than per slot (no slot term
+                               * in the address chain): sub_08050FF8 does
+                               * `ldrh [rB,#0x18]; adds #1; strh` and then
+                               * re-reads it and zeroes it when it reaches 3,
+                               * while sub_08051454 bumps it the same way and
+                               * uses it to index gUnknown_08553BFC. u16 from
+                               * the read-modify-write. Was filler_18. */
+    /* 0x1a */ u16 unk1a[6];  /* Wave 37, W37-B. The COMMAND row this record's
+                               * unk16 cursor walks -- sub_08054488 reads
+                               * `unk1a[unk16]`, stops on the 0xff terminator and
+                               * otherwise dispatches through
+                               * gUnknown_0855374C. Exactly gUnknown_020296B0's
+                               * unk0c, for the other channel. u16 from the
+                               * `ldrh`; the 0xff sentinel says nothing about the
+                               * signedness of the other entries. [6] is the
+                               * 0x1a..0x26 span and the cursor can run past it.
+                               * Was the head of filler_18. */
     /* 0x26 */ u16 unk26[5];
     /* 0x30 */ u16 unk30[5];
     /* 0x3a */ s16 unk3a[5]; /* A third five-slot halfword array on the same
@@ -7869,11 +8388,20 @@ struct Unk020298E0 /* 0x90 */
                               * forced by the store-back, not by the type.
                               * Extent 5 by analogy with unk26/unk30, which is
                               * what the +0x44 boundary allows (wave 21, W21-A). */
-    /* 0x44 */ u8 filler_44[0x0a]; /* == gUnknown_02029924[i][0..4]; reached
-                                    * through its OWN linker symbol, the way
-                                    * gUnknown_0202972C overlaps
-                                    * gUnknown_02029710. Kept as filler here so
-                                    * the two spellings cannot drift apart. */
+    /* 0x44 */ u16 unk44[5]; /* == gUnknown_02029924[i][0..4], reached through
+                              * its OWN linker symbol as well, the way
+                              * gUnknown_0202972C overlaps gUnknown_02029710.
+                              * BOTH spellings are real and which one a function
+                              * needs is readable off its pool word: sub_080517BC
+                              * holds `=gUnknown_02029924` and indexes it flat,
+                              * while sub_08051454 holds `=gUnknown_020298E0`
+                              * and reaches the same halfword as
+                              * `adds rB,#0x44` with a zero `strh` displacement,
+                              * i.e. the member-array form. Wave 37 (W37-J)
+                              * narrowed it out of filler_44 for that reason;
+                              * the two views must stay the same offset and
+                              * length. u16 to agree with gUnknown_02029924,
+                              * whose unsignedness W36-C measured. */
     /* 0x4e */ s16 unk4e[5]; /* Wave 36, W36-C. The whole (integer) half of a
                               * second 8.8 fixed-point axis, stepped by
                               * sub_080517BC as `unk6c[j] += unk76[j];
@@ -7925,6 +8453,13 @@ extern struct Unk020298E0 gUnknown_020298E0[];
  * element makes the addition a genuine 32-bit one and the load becomes
  * `ldrsh`. (Wave 36, W36-C.) */
 extern u16 gUnknown_02029924[][72];
+/* Wave 37, W37-J. == gUnknown_020298E0 + 0x26, i.e. the unk26 row through its
+ * own linker symbol, exactly as gUnknown_02029924 is the unk44 row through
+ * one. sub_08050FF8 holds a pool word for THIS symbol and indexes it flat
+ * (`i * 0x90 + k * 2` from the symbol, three times), which is what fixes the
+ * spelling -- the member form would have given `=gUnknown_020298E0` plus
+ * `adds rB,#0x26`. The 72-halfword row IS the 0x90 stride, not an extent. */
+extern u16 gUnknown_02029906[][72];
 extern struct Unk02029808 gUnknown_02029808[];
 /* Wave 33, W33-D. A 0x24-byte per-side record indexed by gUnknown_0300453C
  * (`((i * 9) << 2)` at both sites). Two readers, both in the 0x08051 block:
@@ -8199,6 +8734,11 @@ extern const s16 gUnknown_08488954[];
  * sub_08011A20's unnarrowed `int` third parameter. */
 extern u16 gUnknown_03004514;
 extern u16 gUnknown_03004524;
+/* Wave 37, W37-B. One halfword per gUnknown_0300453C side, `strh` of the
+ * constant 1 by sub_08054500 off a bare `i * 2` from the symbol -- so the
+ * symbol IS the array. Nothing matched reads it back, so the `strh` is the
+ * whole evidence for the width and the signedness is unconstrained. */
+extern u16 gUnknown_03004548[];
 extern u16 gUnknown_03004540;
 extern s16 gUnknown_03004550[];
 extern u16 gUnknown_030045AC;
@@ -8335,7 +8875,109 @@ extern const s16 gUnknown_08090986[];
  * retires the command the cursor is sitting on. u16 from the `ldrh` and from
  * the unsigned compare against a u16 global. */
 extern u16 gUnknown_08551E12[];
+/* Wave 37, W37-B. The two ROM dispatch tables of the 0x08054xxx cutscene
+ * player, one per channel: sub_08054278 and sub_08054488 pick a row with
+ * `gUnknown_085D6A48[gUnknown_03004580[i][1]][2]`, load the word with `lsls #2`
+ * and call it `bl _call_via_r2` with (side, command) already in r0/r1 -- the r2
+ * index counts the TWO arguments here, and both are values the caller already
+ * holds. Nothing narrows either at the call, so the parameter types are the
+ * callers' own u16s. */
+extern void (*const gUnknown_08553744[])(u16, u16);
+extern void (*const gUnknown_0855374C[])(u16, u16);
+/* Wave 37, W37-B. A halfword table sub_08054500 reads with
+ * `gUnknown_02029A10[i].entries[j].unk00 * 2 + .unk01` -- the FACTORED index
+ * (`(a*2+b)*2`), which is the flat-array form; a `[][2]` spelling would scale
+ * the two subscripts separately. Only `== 1` is ever tested. u16 from the
+ * `ldrh`. Extent unproved. */
+extern u16 gUnknown_08553838[];
+/* Wave 37, W37-B. Two CpuFastSet SOURCE blobs for the cutscene player's OBJ
+ * VRAM at 0x06010000: sub_08054EE0 copies 0x288 words of gUnknown_08540FBC and
+ * sub_08054F50 copies 0x348 words of gUnknown_0854E67C, both to
+ * `0x06010000 + (u16)(side * 0x2000 + 0xa00)`. Only the symbol address is used,
+ * so the element type is the weakest thing CpuFastSet's `const void *` accepts;
+ * the word counts are transfer lengths, not proved extents. */
+extern const u8 gUnknown_08540FBC[];
+extern const u8 gUnknown_0854E67C[];
+/* Wave 37, W37-B. A ROM table of 20-byte rows of words, reached at a FIXED
+ * +0x68 into the object: sub_08054F50 loads
+ * `gUnknown_08553D80.unk68[gUnknown_03004580[i][0]][0]` as one pool word plus a
+ * run-time `adds rB,#0x68`, with the row's `* 20` added after it and a ZERO
+ * `ldr` displacement -- the struct-member-array form. The word is handed
+ * straight to CpuFastSet as a source, hence `const void *`. Both extents are
+ * unproved: one column of one row has a reader, and the 0x68 is a constant in
+ * the address chain rather than a proved member boundary. */
+struct Unk08553D80
+{
+    /* 0x00 */ u8 filler_00[0x68];
+    /* 0x68 */ const void *unk68[8][5];
+};
+extern const struct Unk08553D80 gUnknown_08553D80;
 extern u16 gUnknown_08552148[];
+/* Wave 37, W37-J. One ROM halfword per (gUnknown_02029664 bit0 + bit3) sum,
+ * i.e. an index in 0..2: sub_08050FF8 reads it with a bare `ldrh` off `n * 2`
+ * from the symbol and drops the value straight into OamData.priority, so only
+ * the low two bits are consumed. Extent unproved. */
+extern u16 gUnknown_08552394[];
+/* Wave 37, W37-J. A ROM halfword per gUnknown_0300453C side, `ldrh` off a bare
+ * `lsls #1` from the symbol; sub_0804FFFC copies it into gUnknown_02029C0C[i]
+ * (u16) in the same statement that sets gUnknown_02029C10[i] to 0x96. */
+extern u16 gUnknown_0855357C[];
+/* Wave 37, W37-J. Two ROM tables 4 bytes apart that sub_08051454 divides
+ * element [1] of one by element [1] of the other (`ldrh [rN,#2]` on each, then
+ * __udivsi3 -- an UNSIGNED divide, which is what keeps both u16). The quotient
+ * becomes gUnknown_020298E0[side].unk8a. gUnknown_08553668 is 4 bytes further
+ * on and is a per-(unk16 - 1) y offset added to a sprite coordinate in the same
+ * function; all three extents are unproved. */
+extern u16 gUnknown_08553660[];
+extern u16 gUnknown_08553664[];
+extern u16 gUnknown_08553668[];
+/* Wave 37, W37-J. A per-side halfword pair, read `gUnknown_08553B58[side]` off
+ * a bare `lsls #1`, and the four-halfword rows immediately after it, indexed
+ * `gUnknown_08553B5C[gUnknown_085D6A48[..][4]][side]` with an 8-byte row stride
+ * (`lsls #3`) and the side term folded into the same index register. Both are x
+ * offsets summed into gUnknown_02029A10[..].entries[..].x by sub_08050FF8. The
+ * [4] is the measured stride, not a proved extent; the two symbols overlap the
+ * way gUnknown_03004580/gUnknown_03004582 do. */
+extern u16 gUnknown_08553B58[];
+extern u16 gUnknown_08553B5C[][4];
+/* Wave 37, W37-J. Eight-byte ROM rows indexed by gUnknown_020298E0[side].unk18
+ * (the 0..2 phase counter). sub_08050FF8 and sub_08051454 both read unk04 as
+ * `adds rB,rIdx; ldrh [rB,#4]` -- the offset in the LOAD DISPLACEMENT, which is
+ * the struct form; a flat `u16 [][4]` folds the +4 onto the symbol instead. The
+ * value is a y offset added to gUnknown_02029A10[..].entries[..].y. Nothing
+ * reaches the other three halfwords. */
+struct Unk08553BFC /* 0x08 */
+{
+    /* 0x00 */ u8 filler_00[0x04];
+    /* 0x04 */ u16 unk04;
+    /* 0x06 */ u8 filler_06[0x02];
+};
+extern struct Unk08553BFC gUnknown_08553BFC[];
+/* Wave 37, W37-J. A ROM table of 0x24-byte rows, the row indexed by
+ * `gUnknown_085D6A48[gUnknown_085D6A48[gUnknown_03004580[i][1]][0]][10]` -- the
+ * two-step chain sub_080505A4 and sub_08050F24 already walk. The 36-byte stride
+ * is `((m * 8) + m) * 4` at all four sites.
+ *   unk08 is a MEMBER ARRAY indexed by gUnknown_0300453C and unk10 is a plain
+ * scalar, and that asymmetry is the ROM's: sub_080506B0 reads the first as
+ * `adds rB,#8` with the side term in the index register and a zero `ldrh`
+ * displacement, and the second as a bare `ldrh [rB,#0x10]` with no side term at
+ * all -- the same split struct Unk085D7E28 records. unk16/unk1c are a second
+ * (x, y) pair read by sub_08051454, unk16 being the one that gets negated for
+ * side 0. All u16 from bare `ldrh`s; the sign appears only at the use, as an
+ * explicit `lsls #0x10; asrs #0x10` on the local. */
+struct Unk08553C18 /* 0x24 */
+{
+    /* 0x00 */ u8 filler_00[0x08];
+    /* 0x08 */ u16 unk08[2];
+    /* 0x0c */ u8 filler_0c[0x04];
+    /* 0x10 */ u16 unk10;
+    /* 0x12 */ u8 filler_12[0x04];
+    /* 0x16 */ u16 unk16;
+    /* 0x18 */ u8 filler_18[0x04];
+    /* 0x1c */ u16 unk1c;
+    /* 0x1e */ u8 filler_1e[0x06];
+};
+extern struct Unk08553C18 gUnknown_08553C18[];
 /* Wave 36, W36-C. Two ROM descriptors whose ADDRESS is used and never
  * dereferenced -- each is sub_08015410's `void *` first argument and nothing
  * else, in sub_080505A4's two arms. `u8 []` for the same reason every other
@@ -8379,6 +9021,25 @@ extern void *gUnknown_08557B94[][3];
 extern u8 gUnknown_08553444[];
 extern u8 gUnknown_08553474[];
 extern u8 gUnknown_08562128[];
+/* Wave 37, W37-J, from sub_0804FF44 -- the same CpuFastSet-source family as
+ * gUnknown_08557B58 above, but a flat pointer table rather than 3-column rows:
+ * `gUnknown_08552138[gUnknown_08562128[..]]` is `lsls #2` plus a word `ldr`
+ * handed straight to CpuFastSet. baserom.gba holds 08504FD8, 085051D8,
+ * 085053D8, 085055D8 at 0x08552138 -- four sources 0x200 apart -- and
+ * gUnknown_08552148, already declared, starts immediately after, so the extent
+ * is four. */
+extern void *gUnknown_08552138[];
+/* Wave 37, W37-J. Two more of sub_08015410's first/fourth argument pair, from
+ * sub_0804FF44, which passes the ADDRESS of each and nothing else.
+ * gUnknown_08553580 is an animation descriptor of the gUnknown_08553444 kind
+ * (baserom.gba: 080404FD, 00020000, 080500D1, ... -- odd THUMB pointers
+ * interleaved with counts), so `u8 []` for the same reason as that family.
+ * gUnknown_08559420 is a table of pointers into its own neighbourhood
+ * (08559414, 08559418, ...), which is why it is spelled as an array of void *
+ * rather than u8 -- but only its base address is ever taken, so the element
+ * type is inferred from baserom, not proved by a use. */
+extern u8 gUnknown_08553580[];
+extern void *gUnknown_08559420[];
 /* Wave 34 (W34-A). A ROM table of POINTERS to 3x4 grids of (x, y) halfword
  * pairs, selected by gUnknown_020296B0[side].unk1c. Every stride is read off
  * sub_08050D44's address chain rather than guessed: the row index scales by 48
@@ -8891,6 +9552,25 @@ extern s16 gUnknown_08552500[];
  * `base + 2 + a * 4` and is different code. The pair goes into
  * struct Unk56E28's unk04/unk06, i.e. it is a position. Plain `ldrh`. */
 extern const u16 gUnknown_085534EC[];
+/* Wave 37, W37-J. Three more of gUnknown_085534EC's species -- ROM halfword
+ * (x, y) PAIRS, and FLAT for the same reason: the byte offset of the first
+ * element of a pair is CSEd out of an index chain the function already needs,
+ * and the second element is `(n + 1) * 2` off it, one chain.
+ *   gUnknown_085534BC  a pair per SIDE. sub_0804EB78 reads `[c * 2]` with the
+ *                      byte offset `c << 2` shared with gUnknown_02028E5C and
+ *                      gUnknown_084C3F78, and `[c * 2 + 1]`; the pair becomes
+ *                      struct Unk56E28's unk04/unk06, i.e. a position.
+ *   gUnknown_085534C4  a pair per (side, frame): sub_0804EB78 reads
+ *                      `[(c * 5 + f) * 2]` and `+ 1`, with `c * 10` shared
+ *                      with the gUnknown_02029B94[c][e] row offset. The two
+ *                      halves are added to another entry's x and y.
+ *   gUnknown_08553524  gUnknown_085534C4's exact counterpart in sub_0804F3C8,
+ *                      same index shape and same two consumers.
+ * Plain `ldrh` at all six reads, so nothing signs them; the extents are the
+ * index shapes, not proved bounds. */
+extern const u16 gUnknown_085534BC[];
+extern const u16 gUnknown_085534C4[];
+extern const u16 gUnknown_08553524[];
 /* Wave 32, W32-A. Indexed by gUnknown_02028E5C[side][1] after that counter is
  * bumped, `ldrh` off a `lsls #1` element -- sub_0804B3E0 hands the value
  * straight to `*gUnknown_084C3F78[side]`, which is `u16`. Nothing bounds the
@@ -9399,12 +10079,30 @@ struct Unk0849EDB0 /* 0x18 */
                            * parameter with `p->unk1f + 1`, and the two call
                            * sites are what settle it -- nothing dereferences
                            * this field. */
-    /* 0x08 */ u8 filler_08[0x04];
+    /* 0x08 */ int (*unk08)(int); /* Wave 37, W37-Q1. The second callback
+                          * (0x0803C40D / 0x0803C435). sub_0803C814 calls it
+                          * `bl _call_via_r1` -- the trampoline index counts the
+                          * arguments, so exactly ONE -- with unk10 as that
+                          * argument, and compares the result against -1;
+                          * sub_0803C784 calls it the same way and compares
+                          * against 1. So `int (*)(int)`. sub_0803C784 also
+                          * hands the POINTER ITSELF to sub_0803C750, which
+                          * `str`s it into gUnknown_02027FB0[].unk00, and that
+                          * is what fixes the field as a pointer rather than an
+                          * int the two callers happen to call through. */
     /* 0x0c */ void (*unk0c)(int, int);
     /* 0x10 */ int unk10;
     /* 0x14 */ u8 filler_14[0x04];
 };
-extern const struct Unk0849EDB0 gUnknown_0849EDB0[];
+/* NOT `const`, and sub_0803C784 is the only thing in the tree that can tell:
+ * it reads `gUnknown_0849EDB0[i].unk08` twice with an indirect call in
+ * between, and the ROM keeps the ADDRESS of that member in r4 across the call
+ * and RE-LOADS the pointer (`ldr r0, [r4]; bl sub_0803C750`). A `const` array
+ * is TREE_READONLY, so gcc treats the MEM as unchanging, keeps the VALUE in
+ * r4 and emits `adds r0, r4, #0` -- one instruction shorter and the wrong
+ * bytes. Every other reader loads each member once and is byte-neutral either
+ * way. Wave 37, W37-Q1. */
+extern struct Unk0849EDB0 gUnknown_0849EDB0[];
 
 /* 0x08091140 is NOT a global -- do not declare one. It is agbcc's own
  * -fforce-addr address-constant pool, the same case as 0x0808E558: the word
@@ -10419,6 +11117,23 @@ extern const u8 gUnknown_0848863C[];
 extern const u8 gUnknown_0848867C[];
 extern const u8 gUnknown_084886BC[];
 extern const u8 gUnknown_084886CC[];
+/* Wave 37, W37-A: seven more of the same 0x08005xxx menu-block blobs, reached
+ * only as arguments. gUnknown_08488164 / _224 / _2E4 / _394 are sub_080193B0's
+ * four script stops in sub_0800520C, sub_080052D8 and sub_080053A8 (one triple
+ * of near-identical functions, all four blobs shared between them);
+ * gUnknown_08488494 and gUnknown_08488514 are sub_08019F2C's first argument in
+ * sub_080057EC / sub_08005964; gUnknown_08488664 is sub_0801BD00's third
+ * argument in BOTH sub_08005D74 and sub_08005E30, and that parameter is
+ * declared `void *`, so those two call sites cast the const away. Nothing
+ * dereferences any of them, so `const u8 []` is the weakest fit exactly as for
+ * the block above. */
+extern const u8 gUnknown_08488164[];
+extern const u8 gUnknown_08488224[];
+extern const u8 gUnknown_084882E4[];
+extern const u8 gUnknown_08488394[];
+extern const u8 gUnknown_08488494[];
+extern const u8 gUnknown_08488514[];
+extern const u8 gUnknown_08488664[];
 /* An OBJ list of the gUnknown_08499E10 shape -- sub_08027C8C hands it to
  * PutSprite, whose fourth parameter is `u16 *`, so NOT const. */
 extern u16 gUnknown_08499E08[];
@@ -11147,5 +11862,435 @@ extern const u16 gUnknown_08499F4C[];
  * gUnknown_0848930C. Wave 36, W36-M. */
 extern const u16 gUnknown_0849A1F0[];
 extern const u16 gUnknown_0849A240[];
+
+/* Wave 37 (W37-E). Two more sub_080193B0 script openers, picked by
+ * sub_080005FC on sub_08004E44()'s result. `const u8 []` because that is
+ * sub_080193B0's declared parameter and nothing here dereferences them. */
+extern const u8 gUnknown_084856FC[];
+extern const u8 gUnknown_084857AC[];
+
+/* Wave 37 (W37-E). Three ROM tables sub_080032EC memcpys to its own stack with
+ * sub_0808B6E8, one call each, so the element type is what the STACK COPY is
+ * read as and the extent is the byte count divided by it:
+ *   0808D760  8 bytes  28 00 48 00 68 00 88 00  -> read `ldrh`, so u16[4].
+ *             These are sub_0800C6E8's kind codes (0x28/0x48/0x68/0x88).
+ *   0808D768  4 bytes  00 12 00 12              -> read `ldrb; lsls #0x18;
+ *   0808D76C  4 bytes  D0 D0 E2 E2                 asrs #0x18`, so s8[4].
+ *             An x and a y offset per lane; 0xD0/0xE2 are -48 and -30, which
+ *             only make sense signed.
+ * The neighbouring 0x0808D770 is NOT one of these -- it is an -fforce-addr
+ * address constant holding &gUnknown_0200B0B0 (dereferenced in baserom.gba),
+ * the same as 0x0808D6DC/0x0808D70C/0x0808D710/0x0808D714 in the same run. */
+extern const u16 gUnknown_0808D760[];
+extern const s8 gUnknown_0808D768[];
+extern const s8 gUnknown_0808D76C[];
+
+/* Wave 37 (W37-E). sub_08001DAC's two blobs: gUnknown_08485B2C is PutSprite's
+ * `u16 *` fourth argument and gUnknown_084891C0 is ApplyPaletteExt's `u16 *`
+ * first, 0x20 bytes applied at palette byte offset 0x260. Neither is
+ * dereferenced here, so the element type is the parameter's and the extent is
+ * unknown. */
+extern u16 gUnknown_08485B2C[];
+extern u16 gUnknown_084891C0[];
+
+/* Wave 37 (W37-F). The tile-id table sub_0800F418 indexes with the 8-neighbour
+ * bitmask it builds, so 0x100 entries. Read `movs r2,#0; ldrsh r0,[r1,r2]`,
+ * and the ROM run at 0x084865C4 is full of 0xFFFF entries interleaved with
+ * small positive ids (0x61, 0x83, 0x41, 0x42, 0xe0), so the 0xFFFF are -1
+ * reject markers and the element type is SIGNED s16, not u16. */
+extern s16 gUnknown_084865C4[];
+
+/* Wave 37 (W37-H). sub_08039C70's OBJ blob: handed straight to
+ * sub_0801BD00's `void *` third parameter with no arithmetic in front of it,
+ * exactly like gUnknown_08499B6C and gUnknown_0849A3B8. Nothing indexes or
+ * dereferences it here, so the element type is unconstrained and `u8 []` is the
+ * weakest spelling that converts to `void *` without a const cast. */
+extern u8 gUnknown_0849D824[];
+
+/* 0x03000060 CANNOT BE DECLARED -- wave 37 (W37-G), the same class as
+ * 0x03000600/0x03000602 above. aw2bhr.lds names gUnknown_0300005C at 0x5c and
+ * then jumps to gUnknown_03000068, so 0x03000060 falls INSIDE the
+ * gUnknown_0300005C region and an invented symbol has nowhere to live;
+ * tools/proto_check.py flags it and the split build would fail with
+ * `undefined reference` even though trymatch reports a match.
+ *   Spell it `((u32 *)&gUnknown_0300005C)[1]`, which is what
+ * work/sub_0801BB10 does.
+ *   What it IS: the interrupt-enable shadow. sub_0801BB10 is its whole
+ * interface -- a three-case switch that SETs / ANDs / ORs it with the caller's
+ * mask and then pushes it to the hardware as
+ * `REG_IE = g; REG_IME = (g & 0x10000) != 0`. A WORD (`ldr`/`str` at every
+ * access) even though only the low halfword reaches REG_IE; bit 16 is the
+ * software IME flag, which is what makes it 32 bits rather than a u16. Not
+ * volatile: the single load at the tail feeds both the `strh` to REG_IE and
+ * the 0x10000 test, i.e. agbcc CSEd it. Reached through the -fforce-addr
+ * .rodata word at 0x0808F088, whose ROM content is 0x03000060, because the
+ * switch names it on four separate arms. */
+
+/* Wave 37 (W37-H). sub_08038C98 copies 0xa00 bytes of it to 0x06013940 with
+ * sub_08011E54, with no arithmetic on the symbol -- a single tile blob, the
+ * same shape as the 08122xxx/08123xxx run. `u8 []` is the weakest spelling
+ * that reaches sub_08011E54's `void *` without a const cast. */
+extern u8 gUnknown_080A1C24[];
+
+/* Wave 37 (W37-N). The two-byte glyph pairs sub_080724D4 stamps when it
+ * formats an integer into a text buffer: 08613F24 is the '0' glyph and
+ * 08613F28 the '-' sign. Both are read a byte at a time (`ldrb [r0]`,
+ * `ldrb [r0, #1]`) and the second byte of the '0' pair has the digit added to
+ * it, so the pair is (attribute, character) and the characters are
+ * consecutive. `u8 []` from the `ldrb`s; const because they live in ROM and
+ * nothing writes them. */
+extern const u8 gUnknown_08613F24[];
+extern const u8 gUnknown_08613F28[];
+
+/* Wave 37 (W37-N). The 21-entry scale ramp sub_08072CE4 indexes with
+ * `unk64 - i * 4` (0..0x14 inclusive, anything above clamped to 0x100).
+ * WORDS -- `ldr r2, [r0]` off a `<< 2` index -- and the value is handed
+ * straight to `Div`'s s32 divisor, so `s32`. The array bound is exact:
+ * 0x081CC01C - 0x081CBFC8 = 0x54 = 21 words, and 0x081CC01C is the next
+ * symbol. */
+extern const s32 gUnknown_081CBFC8[0x15];
+
+/* Wave 37 (W37-N). An OAM sprite blob in ROM, reaching nothing but the `u16 *`
+ * fourth parameter of PutSprite / PutSpriteExt in the 0x08072CE4-0x08073070
+ * proc bodies -- the same model as gUnknown_0849B6C8. NOT const, because that
+ * parameter is not. */
+extern u16 gUnknown_081CC01C[];
+
+/* Wave 37 (W37-G). sub_08018254 hands it to sub_08071948's `const void *`
+ * fourth parameter with no arithmetic in front of it, the same shape as
+ * gUnknown_0849D824 above.  The ROM word at 0x080D445C is 0x081F051D, an ODD
+ * value, so it is data and not an address table; nothing here dereferences
+ * it, which leaves `const u8 []` as the weakest spelling that fits. */
+extern const u8 gUnknown_080D445C[];
+
+/* Wave 37 (W37-H). sub_08035BC4's sprite pair: parameters 1 and 3 of the same
+ * `sub_08015438(void *, int, void *, ...)` call that src/decomp/c_0803B264.c
+ * fills with gUnknown_0849E700 / gUnknown_0849E6F8 and c_08027A50.c with
+ * gUnknown_08499DE8 / gUnknown_08499DDC. Non-const `u8 []` on the same
+ * reasoning as gUnknown_08499B6C: the callee's parameters are plain `void *`,
+ * nothing here indexes or dereferences either symbol, and `u8 []` is the
+ * weakest spelling that converts without a const cast. UNVERIFIED --
+ * sub_08035BC4 did not close this wave, so no matched code reads them yet. */
+extern u8 gUnknown_0849BDE0[];
+extern u8 gUnknown_0849BFD8[];
+
+/* Wave 37 (W37-I). The "turn banner" text block at 0x08090D90..0x08090E24,
+ * read straight out of baserom.gba rather than guessed:
+ *   0x08090D90  0000 0001 0002 0003 0003 0003 0002 0001 0000 0000  (u16 x 10)
+ *   0x08090DA4  "NEXT TURN"        0x08090DB0  "PRESS A BUTTON"
+ *   0x08090DC0/DD0, 0x08090DE0/DF0 the other two language pairs, and
+ *   0x08090E04  " PR'OXIMA FASE"   0x08090E14  " PULSA BOT'ON A"
+ * sub_08034AF8 indexes the first table with `(gUnknown_03004008 / 3) % 10` and
+ * adds 0x68 to the entry to get the x of the second string, and hands the eight
+ * string addresses to sub_08034A58's `const char *`. The u16 table is a
+ * bare `lsls #1; adds; ldrh` off its own pool word, so it is a halfword array
+ * and NOT a force-addr word; 0x08090E24 immediately after it IS one (it holds
+ * 0x030033EC). */
+extern const u16 gUnknown_08090D90[];
+extern const char gUnknown_08090DA4[];
+extern const char gUnknown_08090DB0[];
+extern const char gUnknown_08090DC0[];
+extern const char gUnknown_08090DD0[];
+extern const char gUnknown_08090DE0[];
+extern const char gUnknown_08090DF0[];
+extern const char gUnknown_08090E04[];
+extern const char gUnknown_08090E14[];
+
+/* Wave 37 (W37-I). sub_080409E8 starts this script on tree 3 and then hands the
+ * proc it gets back to Proc_Start(gUnknown_0849FD44, proc) as the parent, so the
+ * two are the halves of one pair and take the same `const struct ProcCmd []`
+ * gUnknown_0849FD44 already has. */
+extern const struct ProcCmd gUnknown_0849FD84[];
+
+/* Wave 37 (W37-I). Two four-entry s16 offset rows read only as
+ * `movs rI,#{0,2,4,6}; ldrsh` off their own pool words by sub_0803EF70, which
+ * adds entry i of each to a screen x/y before masking to 0x1ff / 0xff. SIGNED
+ * from the `ldrsh`s; the [4] is what the four indices prove and the 8-byte gap
+ * between the two symbols allows exactly that. */
+extern const s16 gUnknown_0849F820[4];
+extern const s16 gUnknown_0849F828[4];
+
+/* Wave 37 (W37-I). sub_0803EF70's four graphics blobs: BE0 and 3D0 go to
+ * Decompress's `u8 *` source, E34 to ApplyPaletteExt's `u16 *`, and F84/740 to
+ * sub_0801C70C's `const void *` first parameter. */
+extern u8 gUnknown_08113BE0[];
+extern const u8 gUnknown_08113F84[];
+extern u8 gUnknown_081143D0[];
+extern const u8 gUnknown_08114740[];
+extern u16 gUnknown_08114E34[];
+
+/* Wave 37 (W37-I). sub_0803F6BC's shared 0x40-byte tail block: it is
+ * sub_08011E54's `void *` source in six of the seven switch arms and never
+ * indexed, so `u8 []` is the weakest spelling that converts. */
+extern u8 gUnknown_08485A2C[];
+
+/* Wave 37 (W37-I). gUnknown_08551D18 is the second COLUMN VIEW of
+ * gUnknown_08551D0C's three-halfword rows (0x08551D0C + 0xc), reached through
+ * its own pool word by sub_0804B180 with a bare `lsls #1` on the side index --
+ * the same "one symbol per column" split gUnknown_0202972C / gUnknown_02029710
+ * and gUnknown_03004582 / gUnknown_03004580 already have. Masked with 0x3ff and
+ * placed at bit 0 of the OAM attr2 word, i.e. a tile number. */
+extern u16 gUnknown_08551D18[];
+
+/* Wave 37 (W37-I). The sub_0804C5A4 / sub_0804CA98 script tables, all four
+ * indexed off the `side` (0/1) key:
+ *   gUnknown_08553318  a flat halfword row indexed by gUnknown_020296B0.unk18,
+ *                      compared for equality against gUnknown_03004508
+ *   gUnknown_08553354  a PAIR per side, both halves stored into a
+ *                      struct Unk56E28's unk04/unk06
+ *   gUnknown_0855335C  five PAIRS per side (`side * 10 + step * 2 + half` in
+ *                      halfword units), added to an entry's x and y
+ *   gUnknown_08553C14  a BYTE pair per gUnknown_0300450C, added to
+ *                      gUnknown_08553318's entry before the compare
+ * The row lengths are what the index arithmetic proves; nothing bounds the
+ * outer dimension. Signedness unproved -- every read is a bare `ldrh`/`ldrb`
+ * feeding an add. */
+extern u16 gUnknown_08553318[];
+extern u16 gUnknown_08553354[][2];
+extern u16 gUnknown_0855335C[][5][2];
+extern u8 gUnknown_08553C14[][2];
+
+/* Wave 37 (W37-I). sub_0804ABDC's four sprite blobs. The three `u16 []` ones
+ * are sub_08013664's first parameter and are indexed by a 4-bit animation
+ * phase scaled `lsls #1`, so they are halfword arrays; the two `u8 []` ones are
+ * sub_0801BD00's `void *` third parameter and are never indexed.
+ * gUnknown_0813204C is NOT gUnknown_0812A294 -- that address is a
+ * `-fforce-addr` .rodata word holding this one (dumped from baserom.gba), and
+ * the same is true of 0x0812A290 -> gUnknown_030044E0, 0x0812A298 ->
+ * gUnknown_030030A0 and 0x0812A29C -> gUnknown_0848B6C6. */
+extern u16 gUnknown_0813204C[];
+extern u16 gUnknown_08131D8C[];
+extern u16 gUnknown_08131DEC[];
+extern u8 gUnknown_0848B688[];
+extern u8 gUnknown_084C3B72[];
+
+/* Wave 37 (W37-I). Two byte lookup rows sub_0804ABDC indexes with the s16
+ * gUnknown_030044E0->unk1e / ->unk20 to build sub_0801BD00's x and y. Bare
+ * `ldrb`, so byte-wide; nothing signs them. */
+extern u8 gUnknown_084C3D14[];
+extern u8 gUnknown_084C3D5C[];
+
+/* Wave 37 (W37-I). The two `side` bytes sub_08041978 derives from
+ * sub_08041D40's result and its complement (`1 - x`) and then uses as the row
+ * index into gUnknown_03004580 and gUnknown_03004528. Bare `strb`/`ldrb`
+ * pairs, so byte-wide; unsigned is unproved. */
+extern u8 gUnknown_03003F50;
+extern u8 gUnknown_03004484;
+
+/* Wave 37 (W37-I). Two byte tables inside one blob at 0x08091318 (0x0809131E is
+ * 0x08091318 + 6), both indexed with a bare `ldrb`: the first by the s16 at
+ * gUnknown_030013D0 + 0x18 / gUnknown_030013B0 + 0x18, the second by the u8 at
+ * the head of a gUnknown_08499594 record. The ROM bytes are
+ * 00 01 01 01 01 02 | 00 00 01 02 03 04 05 06 07 06 ... -- a small remap, and
+ * the two symbols overlap exactly as gUnknown_08551D0C / gUnknown_08551D18 do. */
+extern const u8 gUnknown_08091318[];
+extern const u8 gUnknown_0809131E[];
+
+/* Wave 37 (W37-J3), block 0x08056. Six ROM tables that sub_08056D8C and
+ * sub_08056EEC read, all with plain `ldrh`/`ldrb` and none of them signed by
+ * any use:
+ *   0x08553858  u8[12] = 0,0,0,1,1,2,2,3,3,4,4,0 -- subscripted by
+ *               gUnknown_03004580[i][5] and [i][6] and used as the LOW index
+ *               of gUnknown_08557914.
+ *   0x08553864  u16[8], the multiples of 25 (0, 0x19, 0x32 .. 0xAF), indexed
+ *               by sub_08056EEC's third argument.
+ *   0x08553874  u16 = 0x0050, 0x0122; 0x08553884 u16 = 1, 0; 0x08553888 u16 =
+ *               7, 8 -- all three indexed by the side index i, so a pair each.
+ *   0x08553878  u16[6], indexed
+ *               `gUnknown_085D6A48[gUnknown_03004580[i][1]][1] * 2 + i`, the
+ *               same subscript sub_08057048 uses on gUnknown_085538A2.
+ * All five halfword tables feed the six-halfword record sub_08056EEC hands to
+ * sub_08056F8C, exactly as gUnknown_0855388C / gUnknown_085538A2 feed
+ * sub_08057048's. */
+extern u8 gUnknown_08553858[];
+extern u16 gUnknown_08553864[];
+extern u16 gUnknown_08553874[];
+extern u16 gUnknown_08553878[];
+extern u16 gUnknown_08553884[];
+extern u16 gUnknown_08553888[];
+/* Ten words -- 3, 5, 6, 7, 8 twice over -- read with `ldr` by sub_08056D8C as
+ * `[gUnknown_03004580[i][0] * 5 + gUnknown_08553858[...]]` (five per row, two
+ * rows) and stored straight into struct Unk02029BA8's `void *` unk10.
+ * UNPROVEN: the CONTENTS are small integers and not addresses, so unk10 is
+ * very probably an id rather than a pointer; `void *` is spelled here only so
+ * the store agrees with the already-promoted struct, which nothing else
+ * contradicts. Left flat rather than `[][5]` because the ROM computes
+ * `(row * 5 + col) * 4` as one scaled index, not `row * 20 + col * 4`. */
+extern void *gUnknown_08557914[];
+
+/* Wave 37, W37-O1. The eight-slot array immediately below gUnknown_0200C528
+ * (0x0200C528 - 0x0200C508 == 0x20 == 8 * 4), and aw2bhr.lds names both.
+ * Element type is read off two independent sites: sub_08019348 stores its own
+ * `const u8 *` parameter -- the one it also hands to sub_080193B0 -- into the
+ * first NULL slot, and sub_08019380 loads a slot and passes it straight to
+ * sub_080193B0(const u8 *) with no intervening instruction. A producer and a
+ * consumer agreeing independently, so the element really is the script pointer
+ * and not an opaque word. sub_080191B0 clears all eight with a `str` of 0. */
+extern const u8 *gUnknown_0200C508[];
+
+/* Wave 37, W37-K2. A ROM table with TWO-BYTE elements, indexed by
+ * gUnknown_03003F40: sub_0806056C hands `&gUnknown_08576900[gUnknown_03003F40]`
+ * to sub_080357E0's fifth (void *) parameter and the only scaling is `lsls #1`.
+ * The other arm of the same call passes the u8 buffer gUnknown_03003110, so the
+ * callee proves nothing about the element type -- only the stride is evidence,
+ * and the signedness is unknown. */
+extern u16 gUnknown_08576900[];
+/* Wave 37, W37-K2. A whole-word counter incremented by sub_0806056C with
+ * `ldr; adds #1; str` and NOT re-read after the store, so plain `int` rather
+ * than the volatile shape gUnknown_030046D4 has. Signedness unproved. */
+extern int gUnknown_03004774;
+
+/* Wave 37, W37-K3. The block at 0x08061788..0x08061E98 carries an agbcc
+ * `-fforce-addr` address-constant pool in ROM at 0x0816DB00..0x0816DB0F, and
+ * data/data.s currently names the four words gUnknown_0816DB00/04/08/0C. They
+ * are NOT globals: dumping baserom.gba gives 0x02029C54, 0x030046B4,
+ * 0x03004784 and 0x085D5ABC -- three of which already have real declarations
+ * above. So the honest spelling names the object and lets the build place the
+ * pool word; nothing should ever declare a gUnknown_0816DBxx. (0x0816DB10 is
+ * the same TU's 12-byte `.LC` initialiser that sub_08061E98 `ldm`s onto its
+ * stack, three THUMB function pointers into this same block.) */
+
+/* Wave 37, W37-K3. A 0x130-byte record. sub_08061A40 is its whole-struct
+ * assignment (`*dst = *src`, 0x130 bytes of byte copy: 0x10 unrolled pairs then
+ * a 24-trip loop of 0xc), and sub_08061788 subscripts the ROM table with a
+ * `* 0x130` stride synthesised as `((x*4+x)*4-x)*16`. The contents are not
+ * modelled -- only the size is proved, by the copy length and the stride
+ * agreeing. */
+struct Unk085771C4
+{
+    /* 0x00 */ u8 filler_00[0x130];
+};
+extern const struct Unk085771C4 gUnknown_085771C4[];
+/* The RAM destination of the second sub_08061A40 in sub_08061788; one whole
+ * record, and the linker script gives it its own symbol. */
+extern struct Unk085771C4 gUnknown_02029D84;
+/* Wave 37, W37-K3. The scratch copy that sub_08061788 fills and then hands to
+ * gUnknown_02029D84 lives at 0x02029C54, which is gUnknown_02029C20 + 0x34 --
+ * aw2bhr.lds names NO symbol there, so it must be reached through this one or
+ * the split build breaks on an undefined reference (the wave-37 W37-G finding).
+ * 0x02029C54 + 0x130 == 0x02029D84 exactly, i.e. the two records are adjacent
+ * and the second one is the one the splitter happened to name. Typed `u8 []`
+ * because nothing here reads gUnknown_02029C20's own first 0x34 bytes; the two
+ * remaining users (sub_08060AB0, sub_08062C94) are still assembly. */
+extern u8 gUnknown_02029C20[];
+
+/* Wave 37, W37-K3. Four ROM bytes, indexed by gUnknown_030046B8 with an
+ * explicit `<= 3` guard in sub_08061788 (`cmp #3; bhi`) that supplies 4 as the
+ * out-of-range fallback -- so the extent 4 is proved by the bound, not guessed.
+ * The byte it yields is the same row selector gUnknown_085C77A0.unk27 supplies
+ * on the other arm. */
+extern const u8 gUnknown_08576908[4];
+/* Wave 37, W37-K3. Rows of NINETEEN bytes: sub_08061788 forms
+ * `selector * 19 + gUnknown_08499598[army].unk1d` (the `(x*4+x)*4-x` synthesis
+ * of *19) and `ldrb`s the result, then uses that byte as the subscript of
+ * gUnknown_085771C4[]. So it maps (mode, unk1d) to a record id. The row count
+ * is unknown; the column count is the one that is proved. */
+extern const u8 gUnknown_0857690C[][19];
+
+/* Wave 37, W37-K3. Two ROM tables of nullary function pointers, stepped by the
+ * shared cursor gUnknown_03004770: sub_08061B00 runs
+ * `table[gUnknown_03004770++]()` and picks the table on
+ * gUnknown_03003FC0.unk0d. `bl _call_via_r0` with no argument register set up,
+ * which is the arity readout. gUnknown_085766E8 has 20 slots before
+ * gUnknown_08576738 begins; neither extent is otherwise bounded. */
+extern void (*const gUnknown_085766E8[])(void);
+extern void (*const gUnknown_08576738[])(void);
+
+/* Wave 37, W37-K3. A whole-word accumulator: sub_08061CF8 zeroes it and then
+ * adds `sub_08061DA8(n)` into it once per set bit of
+ * gUnknown_08499598[gUnknown_030033EC].unk2c, with `ldr; adds; str` each time.
+ * `int` because that is sub_08061DA8's declared return type; nothing compares
+ * it, so the signedness is inherited rather than proved. */
+extern int gUnknown_03004788;
+
+
+/* Wave 37, W37-O2. The gUnknown_0200C528 script-command DISPATCH TABLE.
+ * sub_08019404 indexes it with the current node's byte 0
+ * (`gUnknown_0200C528[a].unk04->filler_00[0]`), loads a word and calls it
+ * through `bl _call_via_r1` with the sign-extended slot index in r0, looping
+ * while the result tests nonzero after `lsls #0x10`. The twelve entries read
+ * out of baserom.gba as sub_08017A80, sub_08017A58, sub_08017B50 x3,
+ * sub_08017B60, sub_08017B64, sub_08017B8C, sub_08017BB0, sub_08017BD4,
+ * sub_08017BFC, sub_08017C24 -- exactly the `s16 (s16)` handler family
+ * unknown-functions.h documents beside sub_08017A80, which is what fixes the
+ * element type. ROM data, so `const`; the extent is unbounded because only the
+ * indexed load reaches it. */
+extern s16 (*const gUnknown_0848A244[])(s16);
+
+/* Wave 37, W37-K3, and this is the `c_local` workaround, not a model of the
+ * source: the two words below are the SAME `-fforce-addr` pool block described
+ * beside gUnknown_085771C4 above, holding &gUnknown_03004784 and
+ * gUnknown_085D5ABC. The honest spelling does not reproduce them in
+ * sub_08061DCC and the measured reason is new: force-addr's reroute is decided
+ * AFTER CSE has merged the references, and a POINTER global read twice around a
+ * `bl __divsi3` collapses to ONE reference because a libcall does not clobber
+ * memory. The honest draft then loses the ROM's recompute-per-statement as
+ * well. Naming the pool words gives back both, and the relocation is checkable
+ * because data/data.s really does define these symbols. Do NOT read them as
+ * evidence that objects live at 0x0816DB08 / 0x0816DB0C.
+ * The `volatile` is likewise a reproduction device and NOT a claim about the
+ * object: it is what restores the ROM's re-dereference at every use (+8 bytes
+ * over the plain declaration, measured this wave). `const` changes nothing
+ * either way, as the -fforce-addr chapter of docs/agbcc-codegen.md records.
+ * Only sub_08061DCC's parked draft names these two; nothing else should. */
+extern u8 **volatile gUnknown_0816DB08;
+extern struct Unk085D5ABC *volatile gUnknown_0816DB0C;
+
+
+/* Wave 37, W37-O2. The 0x0808E59C..0x0808E5B8 run is agbcc's `-fforce-addr`
+ * ADDRESS-CONSTANT POOL for the 0x08017xxx-0x08019xxx block, NOT a table of
+ * globals. Dereferenced in baserom.gba:
+ *
+ *   0x0808E59C -> 0x0200C528   &gUnknown_0200C528
+ *   0x0808E5A0 -> 0x0200C528   &gUnknown_0200C528   (a second private copy)
+ *   0x0808E5A4 -> 0x03002EF0   &gUnknown_03002EF0   (sub_08019470)
+ *   0x0808E5A8 -> 0x03002EE0   &gpKeySt
+ *   0x0808E5AC -> 0x030033EC   &gUnknown_030033EC   (sub_080196F4)
+ *   0x0808E5B0 -> 0x03003F2C   &gUnknown_03003F2C   (sub_080196F4)
+ *   0x0808E5B4 -> 0x08499598   &gUnknown_08499598   (sub_08019940)
+ *   0x0808E5B8 -> 0x03002EE0   &gpKeySt             (a second private copy)
+ *
+ * Two words holding the SAME address is the giveaway -- -fforce-addr gives
+ * each function its own copy. Write the honest spelling (`gUnknown_030033EC`,
+ * `gpKeySt->held`, ...) and let agbcc emit the word into the unit's own
+ * `.rodata`; trymatch then reports `name different symbols that resolve to
+ * the same address` and prints the address promotion must carry. Contrast
+ * gUnknown_08499588/8C/98 at 0x08499xxx, which ARE real globals -- same
+ * block, opposite answers, so dereference the candidate in baserom.gba
+ * before deciding.
+ *
+ * Note the SECOND indirection this creates for gUnknown_08499598, which is
+ * itself a pointer: sub_08019940 reads `ldr r0,[pool]` (= 0x08499598) then
+ * `ldr r1,[r0]` (= the array base), both INSIDE its loop, and that is one
+ * plain `gUnknown_08499598[i]` subscript, not two source dereferences. */
+
+/* ---- wave 37 (W37-Q4): the 0x080439A8-0x08043F92 run ---- */
+
+/* Two more of the 8-byte PutSprite object-list blobs packed through
+ * 0x084A0024..0x084A0069 (see gUnknown_084A0052/gUnknown_084A005A above).
+ * sub_080439A8 picks between them on its sixth argument and hands the chosen
+ * one to PutSprite's `u16 *` fourth parameter with no arithmetic, so `u16 []`
+ * exactly like its neighbours. Each holds a leading count of 1 followed by one
+ * three-halfword OAM entry, which is what fixes the 8-byte stride. */
+extern u16 gUnknown_084A0042[];
+extern u16 gUnknown_084A004A[];
+/* A 32-entry byte table filling 0x084A006E..0x084A008D, i.e. right up to
+ * gUnknown_084A0090. sub_080439A8 subscripts it with `DivRem(x, 0x20)`, which
+ * is what makes the extent exactly 32, and reads it with a bare `ldrb` whose
+ * result is SUBTRACTED from a y coordinate -- a per-frame vertical bob offset.
+ * Values are 06 00 01 01 02 02 02 01 01 and then zeros. */
+extern u8 gUnknown_084A006E[];
+/* Nineteen bytes at 0x084A077C, ending exactly where gUnknown_084A0790 begins:
+ * `00 01 02 04 0f 03 05 10 06 07 12 08 09 11 0b 0c 0d 0e 0a`, a permutation of
+ * 0x00..0x12. sub_08043CA0 walks i = 0..0x12 over it and feeds each byte to
+ * sub_0803CAB8(u32) -- a CO display order, filtered down to the unlocked ones.
+ * Reached through the 0x08091378 force-addr word, not by a direct pool `ldr`. */
+extern u8 gUnknown_084A077C[];
+/* The 0x180-byte (192 halfword) EWRAM staging buffer sub_08043E8C fills with
+ * sub_08011C68 and then rewrites nibble by nibble into its caller's tile
+ * buffer, 12 rows of 16 halfwords. `u16 []` from the `ldrh`/`adds r6,#2` walk;
+ * 0x180 is both sub_08011C68's explicit byte count and 12*16*2, which is what
+ * bounds it. */
+extern u16 gUnknown_02017C50[];
 
 #endif // UNKNOWN_GLOBALS_H

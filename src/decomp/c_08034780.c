@@ -16,14 +16,14 @@ void sub_08034780(void)
     gUnknown_03003FC0.unk38[2] = 1;
     gUnknown_03003FC0.unk38[3] = 1;
     gUnknown_03003FC0.unk38[4] = 1;
-    gUnknown_03003FC0.unk34 = 1;
-    gUnknown_03003FC0.unk35 = 2;
-    gUnknown_03003FC0.unk36 = 3;
-    gUnknown_03003FC0.unk37 = 4;
-    gUnknown_03003FC0.unk3e[0] = 1;
-    gUnknown_03003FC0.unk3e[1] = 2;
-    gUnknown_03003FC0.unk3e[2] = 4;
-    gUnknown_03003FC0.unk3e[3] = 0xb;
+    gUnknown_03003FC0.unk33[1] = 1;
+    gUnknown_03003FC0.unk33[2] = 2;
+    gUnknown_03003FC0.unk33[3] = 3;
+    gUnknown_03003FC0.unk33[4] = 4;
+    gUnknown_03003FC0.unk3d[1] = 1;
+    gUnknown_03003FC0.unk3d[2] = 2;
+    gUnknown_03003FC0.unk3d[3] = 4;
+    gUnknown_03003FC0.unk3d[4] = 0xb;
 
     sub_08026900();
 
@@ -31,10 +31,10 @@ void sub_08034780(void)
     gUnknown_03003FC0.unk31 = 0;
     gUnknown_03003FC0.unk28 = 1000;
     gUnknown_03003FC0.unk24 = 0;
-    gUnknown_03003FC0.unk14 = 0;
-    gUnknown_03003FC0.unk18 = 0;
-    gUnknown_03003FC0.unk1c = 0;
-    gUnknown_03003FC0.unk20 = 0;
+    gUnknown_03003FC0.unk10[1] = 0;
+    gUnknown_03003FC0.unk10[2] = 0;
+    gUnknown_03003FC0.unk10[3] = 0;
+    gUnknown_03003FC0.unk10[4] = 0;
     gUnknown_03003FC0.unk0d = 0;
     gUnknown_03003FC0.unk2f = 0;
     gUnknown_03003FC0.unk2c = 0;

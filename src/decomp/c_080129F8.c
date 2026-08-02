@@ -15,7 +15,10 @@
  * `movs #0; b` / `movs #1` split across the pool is the if/else-return form,
  * not a returned comparison -- a returned comparison would preset the false
  * value and arrive via `adds r0, r1, #0` with no unconditional branch. */
-int sub_080129F8(u16 a)
+/* Wave 37 (W37-H): retyped `int` -> `u8`. Its only caller sub_08035170 narrows
+ * the result with `lsls r0,#0x18; cmp r0,#0`, which an int return does not
+ * produce. Byte-exact before and after -- both arms return a 0/1 constant. */
+u8 sub_080129F8(u16 a)
 {
     if (sub_080129E0() % 10000 < a * 100)
         return 1;
