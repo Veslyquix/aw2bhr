@@ -12,7 +12,12 @@
  * sub_0802C594 puts it back, so the two middle calls run with the position
  * stashed. */
 
-void sub_0804096C(void)
+/* Wave 34 integration: takes a ProcPtr. The sole call site spends
+ * `adds r0, r5, #0` immediately before the `bl` -- materialised argument setup
+ * that a void(void) prototype cannot emit. That is a caller-side fact, so it
+ * beats this body, which simply never reads the parameter. Unused, so the
+ * definition stays byte-for-byte identical. */
+void sub_0804096C(ProcPtr proc)
 {
     sub_0802C57C();
     sub_080424FC();

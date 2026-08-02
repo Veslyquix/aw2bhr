@@ -10,8 +10,14 @@
 /* unk16 is a running count and unk18 its high-water mark. The two are sibling
  * members at constant offsets, so the `strh` does not kill the cached deref
  * and the plain repeated spelling gets one index computation. The `cmp; bls`
- * is unsigned, which is what types both halfwords. */
-void sub_08026588(u8 a)
+ * is unsigned, which is what types both halfwords.
+ *
+ * Wave 34 (W34-D) widened the signature to three parameters. `b` and `c` are
+ * genuinely unused here -- the body below is unchanged and still byte-exact --
+ * but sub_080250E8 sets r0, r1 and r2 before every `bl`, and computes r0 and r1
+ * with a full pointer-difference-by-12 divide each. See the note in
+ * include/unknown-functions.h. */
+void sub_08026588(u8 a, u8 b, u8 c)
 {
     gUnknown_08499598[a].unk16++;
 

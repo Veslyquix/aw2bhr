@@ -248,9 +248,15 @@ SECTIONS
 		. = 0x0005F4; gUnknown_030005F4 = .;
 		. = 0x0005F8; gUnknown_030005F8 = .;
 		. = 0x0005FC; gUnknown_030005FC = .;
+		. = 0x000600; gUnknown_03000600 = .;
+		. = 0x000602; gUnknown_03000602 = .;
 		. = 0x000604; gUnknown_03000604 = .;
+		. = 0x000608; gUnknown_03000608 = .;
+		. = 0x00060A; gUnknown_0300060A = .;
 		. = 0x00060C; gUnknown_0300060C = .;
 		. = 0x000610; gUnknown_03000610 = .;
+		. = 0x000614; gUnknown_03000614 = .;
+		. = 0x000616; gUnknown_03000616 = .;
 		. = 0x000618; gUnknown_03000618 = .;
 		. = 0x000640; gUnknown_03000640 = .;
 		. = 0x00064C; gUnknown_0300064C = .;

@@ -15,7 +15,7 @@
  * `movs r2, #0x80; lsls r2, #5` is the constant 0x1000. */
 void sub_08076ADC(ProcPtr proc)
 {
-    sub_08076888();
+    sub_08076888(proc);
     Decompress(gUnknown_081D0BAC, gUnknown_08614280);
     sub_08076858();
     sub_0807681C();

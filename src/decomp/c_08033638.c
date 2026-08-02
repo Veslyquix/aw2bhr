@@ -57,7 +57,7 @@ void sub_08033678(struct Unk33678Proc *proc)
 {
     int v;
 
-    if (sub_080309AC(gUnknown_03004400, 0) != -1)
+    if (sub_080309AC((void *)gUnknown_03004400, 0) != -1)
     {
         proc->unk28 = gUnknown_03004400[0];
         v = (gUnknown_03004400[1] << 8) | gUnknown_03004400[2];

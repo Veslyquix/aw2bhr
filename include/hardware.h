@@ -61,7 +61,15 @@ struct IO_ALIGNED(2) DispStat
 // sub_08032AFC and sub_08080254 both clear it on gUnknown_03002B6C and
 // gUnknown_030030B4 with `ldrb r0,[r,#1]; mov r1,#0x3f; and; strb r0,[r,#1]` --
 // a byte-wide read-modify-write masking exactly bits 6-7 of byte 1, which is
-// bits 14-15 of the halfword. Nothing yet reaches `wrap` at bit 13.
+// bits 14-15 of the halfword.
+//
+// WAVE 34, W34-K: `wrap` at bit 13 is now reached, which this note previously
+// said nothing had done. sub_08069924 sets it on gUnknown_030030B4 with
+// `ldrb r0,[r4,#1]; mov r1,#0x20; orr; strb r0,[r4,#1]` -- bit 5 of byte 1, so
+// bit 13 of the halfword, immediately after handing the same shadow to
+// sub_08012C48. A bare `orr` of one bit is not by itself proof of a bitfield
+// (a scalar `|= 0x20` on byte 1 is the same bytes), so this confirms the
+// field's POSITION and nothing more about the access.
 struct IO_ALIGNED(2) BgCnt
 {
     /* bit  0 */ u16 priority : 2;

@@ -9,10 +9,13 @@
 
 #include "proc.h"
 
-/* sub_08076ADC's twin without the proc tail, plus one guarded extra step. */
-void sub_08076B7C(void)
+/* sub_08076ADC's twin without the proc tail, plus one guarded extra step.
+ * The proc is taken and forwarded to sub_08076888 and nothing else, which costs
+ * zero instructions -- see the sub_08076888 note in unknown-functions.h for why
+ * wave 34 gave that callee a parameter. */
+void sub_08076B7C(ProcPtr proc)
 {
-    sub_08076888();
+    sub_08076888(proc);
     Decompress(gUnknown_081D0BAC, gUnknown_08614280);
 
     if (gUnknown_0202FDFC.unk11 != 0)
