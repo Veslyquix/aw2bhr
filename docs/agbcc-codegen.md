@@ -15478,3 +15478,585 @@ a function that masks with a large constant used twice is 2 bytes over and that
 residual is NOT a type-model or allocation problem. It is the sole difference
 in `sub_0808B074`, `sub_0808B0E8` and `sub_0808B3C0` (wave 32, all three
 otherwise instruction-for-instruction exact); their drafts carry the diff.
+
+## Wave 33 (W33-A): is an inherited near-miss draft a good start, or a trap?
+
+**Measured answer: keep the CODE, discard the CONCLUSIONS. Two of eight were
+traps, and what distinguished them is that the trap's note ended in a
+PROHIBITION rather than a measurement.** The preflight has surfaced
+`work/*/best.json` near-misses every wave and nobody had checked whether
+opening one pays. W33-A was handed eight (four clean, four low-scoring) and
+opened six.
+
+Per draft -- verdict, then attempts:
+
+| draft | inherited | after | verdict |
+|---|---|---|---|
+| `sub_080319AC` | 97.50% | 97.5% | kept whole; note exact; 1 attempt, no gain |
+| `sub_08031A24` | 94.17% | 94.2% | kept whole; note exact; 1 attempt, no gain |
+| `sub_0803BF10` | 94.79% | 94.8% | kept whole; note exact; 1 attempt, no gain |
+| `sub_080287D0` | 90.83% | 90.8% | kept whole; note exact; 1 attempt, no gain |
+| `sub_080111C8` | no score | **MATCH** | code kept verbatim, note's blocker overturned |
+| `sub_08044AB8` | 68.75% | 88.8% | **structure discarded and re-derived**, 3 attempts |
+
+The four high scorers are honest: each note named a register tie-break, listed
+the spellings already measured against it, and every one of those measurements
+reproduced. Re-deriving them from the assembly would have been pure waste. But
+they are also worth nothing -- **four clean near-misses cost four attempts and
+produced ZERO matches, while four untouched functions in the same batch
+produced four matches in eight attempts.** A near-miss above ~90% that has
+already had a spelling sweep is the most expensive work on the board per byte,
+not the cheapest, and its score says so only if you read the score as "how much
+has already been tried".
+
+The two that paid are the two whose notes ended in a prohibition:
+
+- `sub_08044AB8`'s note said the table's struct spelling was right and to
+  "re-open as a type-model question rather than changing the struct, which two
+  matched functions now depend on". The struct IS right about the layout and
+  the two matched functions do depend on it -- and this reader still has to
+  reach it through `(const u8 *)` with a folded `(i*17 + (j-1)*5)*4` index.
+  Both statements are true at once; the note collapsed them into a
+  prohibition. 68.8% -> 88.8%, instruction stream now exact.
+- `sub_080111C8`'s note (in `unknown-globals.h`) said a function needing
+  `gUnknown_03001FDC` "must be left unpromoted". It must only be kept out of
+  the SHARED header -- a TU-local `extern` in the decomp `.c` never reaches
+  `src/proc.c`, which is the whole of the wave-32 hazard. Matched first try.
+
+**So the rule for the next wave: open an inherited draft for its C and its
+measurements, and treat any sentence of the form "X cannot be changed" or "this
+must be left alone" as the first thing to test.** A note that says what was
+measured is evidence; a note that says what is impossible is a hypothesis that
+nobody re-ran. And do not spend a wave on the 90%+ band at all unless the batch
+has nothing else.
+
+### N consecutive bitfield writes are ONE read-modify-write -- do not factor them
+
+Worth 8 bytes and 40 points on `sub_08067690`, and it inverts the usual advice
+about hoisting common code. Five `gDispIo.disp_ct.*_enable` writes in a row
+compile to one `ldrb` / mask+or chain / `strb`. When two arms of an `if/else`
+each write the same five fields and the ROM shows a shared tail, that tail is
+**cross-jumping of two identical sequences, not source factoring.** Write the
+common three fields after the `if/else` and the control-flow merge lands in the
+middle of the read-modify-write: agbcc has to `strb` the half-updated byte,
+reload it and start over, and the extra live value then costs an
+`-fforce-addr` `.rodata` word for the container's address on a function whose
+ROM has plain pool words. **Duplicate the writes in both arms and let
+cross-jumping re-share them.** Read backwards: an `.rodata` address word that
+the ROM does not have, on a function full of bitfield writes, means a merge was
+put inside an RMW.
+
+### `A && B` on one variable becomes a RANGE TEST -- two `cmp`s means NESTED ifs
+
+`fold_range_test` rewrites `t > 8 && t <= 0x1c` (and the `||` complement) into
+`(unsigned)(t - 9) <= 19`, which for a `u8` costs `subs; lsl #24; lsr #24; cmp`
+where the ROM has `cmp #8; bls` / `cmp #0x1c; bhi`. Both `&&` and `||`
+spellings fold, so swapping them does not help. The two-comparison form comes
+from NESTING:
+
+```c
+if (t > 8) { if (t <= 0x1c) v = 0; else v = 1; } else v = 1;
+```
+
+which emits the two compares in the ROM's order and lets cross-jumping merge
+the two `v = 1` arms into the single out-of-line block. This was the whole
+difference on `sub_08022AF8`. **Read backwards: two separate compares against
+adjacent constants on the same variable are positive evidence of nested `if`s,
+because the flat spelling cannot produce them.**
+
+### A pooled `0x0000FFxx` added then truncated to u16 is a u16 SUBTRACTION
+
+`ldr r3, =0x0000FFE0; adds r2, r2, r3; lsls #16; lsrs #16` is not `x + 65504`
+and it is not `x - 0x20` either -- writing `x - 0x20` gets you `subs r2, #32`,
+2 bytes short and no pool word. The pooled positive constant is what
+`shorten_binary_op` leaves when the subtraction is performed in `unsigned
+short`: it converts both operands to u16 and `fold` then turns `a - C` into
+`a + (-C)` **computed in u16**, so `-0x20` becomes `0xFFE0` and widens to
+`0x0000FFE0`. Spelling the complement directly (`c + 0xffe0`) reproduces it
+exactly. `sub_08012E9C` matched on this and nothing else; the three constants
+there are `0xffbf`, `0xffdf`, `0xffe0` for `- 0x41`, `- 0x21`, `- 0x20`.
+
+### A pool word BEYOND the function's own extent is a park category, not a puzzle
+
+`sub_0806FD98` reads `ldr r0, [pc, #680]` for a word at 0x08070044 while the
+function ends at 0x0806FDE4 -- the word lives in a later function's pool, and
+the function also carries a local pool of its own for two other constants. A
+single function compiled alone can only emit its own pool, so those `ldr`
+encodings cannot be reproduced at any spelling. **Check the pool-word addresses
+against the function's extent before spending attempts:** if any is outside,
+the function is blocked until its region is promoted as a whole file, and the
+residual is the PC offset rather than anything about the C.
+
+### WHICH ARM GOES LAST: `if/else` and `if/return` are OPPOSITE (wave 33, W33-D)
+
+The "the THEN arm always goes LAST" rule (wave 24, W24-A) is right for the
+shape it was measured on and **inverted for the other one**, and getting it
+backwards costs exactly one attempt every time. Four datapoints this wave, all
+first-attempt misses that closed on nothing but swapping the arms:
+
+| source shape | block emitted LAST (after the pool) |
+|---|---|
+| `if (c) return X; return Y;` | `return X` — the THEN arm |
+| `if (c) { A } else { B }` | `B` — the ELSE arm |
+
+- `sub_08014BE8`: `if (f() != g) return FALSE; return TRUE;` put `return FALSE`
+  last; the ROM wanted `return TRUE` last, i.e. `if (f() == g) return TRUE;
+  return FALSE;`.
+- `sub_0806A218`: `if (n == 0) { Proc_Break(p); ... } else { n--; }` put
+  Proc_Break first; the ROM has `if (n != 0) { n--; } else { Proc_Break(p); }`.
+- `sub_08017F54`: same swap on a `gUnknown_03002514 == 1` guard.
+- `sub_080113EC`: `if (v > 8) A; else B;` vs `if (v <= 8) B; else A;` — 98.3%
+  and three bytes, all of them the branch condition and the two `movs`.
+
+**Read it off the listing mechanically, and do not reason about it.** Find the
+conditional branch at the top; whichever block its TARGET is, that block is
+emitted last. Then: if the two blocks both end in a return, the target block is
+the THEN arm and the fall-through is the trailing statement; if only one of them
+ends in a `b` to the epilogue, the target block is the ELSE arm.
+
+### A bitfield store's RHS: an `int` local costs one `adds rD,rS,#0` that a `u16` local does not (wave 33, W33-D)
+
+`oam.tileNum = v` on `struct OamData`'s 10-bit field emits, for a **HImode**
+RHS (a `u16` local, or the member read written inline):
+
+```
+    ldrh r1, [r0]
+    ldr  r0, =0x000003FF
+    ands r1, r0
+```
+
+and for an **SImode** RHS (an `int`/`u32` local, or any int expression) one
+instruction more:
+
+```
+    ldrh r1, [r0]
+    ldr  r2, =0x000003FF
+    adds r0, r2, #0        @ <-- the extra copy of the MASK, not of the value
+    ands r1, r0
+```
+
+The copy is of the mask constant, which is why it does not read as a width
+problem at all. `store_fixed_bit_field` converts the value to the container
+mode and then calls `expand_and` in **that** mode; with a HImode value the
+widening to SImode leaves the constant as a `CONST_INT` and nothing is copied,
+while an SImode value takes a different path through `expand_binop` and the
+constant ends up in a pseudo that reload then copies.
+
+This was the entire residual on `sub_08051A44` for three attempts (64.8% ->
+65.3% -> 65.3%), and the tell was sitting in an already-matched twin the whole
+time: `src/decomp/c_0804E3B4.c` writes `oam.tileNum = gUnknown_0300453C *
+0x100 + 0xc0`, an int expression, and its ROM HAS the copy. **Read backwards: a
+lone `adds rD,rS,#0` between a pooled bitfield mask and the `ands` means the
+RHS is an `int`, and its absence means the RHS is the narrow type.** A probe
+cannot tell you this — both spellings fold in a straight-line probe; you have
+to look at the ROM.
+
+### FOUR reads of one global with no call between them is a `volatile` tell, and volatile also blocks the `ldrsh` fold (wave 33, W33-D)
+
+Two separate facts, both from `sub_08017880`, and together they were worth 66
+points:
+
+- agbcc CSEs a non-volatile global across straight-line code, so a second
+  `ldrh` of the same symbol with **no call in between** cannot be compiler
+  output. `sub_08017880` reads `gUnknown_030030A8` four times in one
+  call-free body.
+- `(s16)g` on a `u16` global normally folds into one `movs rI,#0; ldrsh` --
+  combine collapses `sign_extend(truncate(zero_extend(mem:HI)))`. It does NOT
+  fold on a **volatile** MEM: the ROM keeps the unfolded `ldrh; lsls #0x10;
+  asrs #0x10`. So the three-instruction form on a global that the surrounding
+  code also re-reads is corroborating evidence for the same conclusion, not a
+  separate puzzle.
+
+The inverse is the standing trap the doc already records for `x`/`y` in
+`struct Unk02029A10`: on a NON-volatile u16, `ldrsh` says nothing about the
+object's signedness.
+
+### A parameter copied into a local costs a real instruction — cast instead (wave 33, W33-D)
+
+Where a declared prototype forces `void *` but the body wants a struct pointer,
+`struct T *p = arg;` emits **both** `adds r6, r0, #0` (the parameter into its
+callee-saved home) and `adds r7, r6, #0` (the local) — agbcc does not coalesce
+the two, even though `arg` is dead immediately after. A file-scope
+`#define P ((struct T *)arg)` removes the second copy and nothing else changes.
+Worth 2 bytes and a whole-function register shift on `sub_08019A60`; the same
+shape will appear on any handler whose shared declaration is `void *`.
+
+### `compile_probe` returns the debug sections too
+
+One three-function probe came back at 10,486 lines, most of it `.debug_line`
+and `.debug_abbrev` byte tables. The brief calls the probe "free" and it is
+free of *attempts*, but it is not free of context, and context replay is the
+real cost. `try_match`'s diff is a fraction of the size and carries the verdict.
+**Use `try_match` as the exploration tool and reserve `compile_probe` for
+comparing several spellings in one shot, where reading one dump beats three
+diffs.**
+
+## Wave 33 (W33-B): does deriving a callee before its dependents help?
+
+**Controlled result: NO. The prototype is fully recoverable from the call site,
+so match order does not matter -- confirming the wave-19 arity/void-ness rule.**
+
+Two blocks were run in opposite directions:
+
+- Block `0x0803F000`: `sub_0803FD80` matched FIRST, then its dependent
+  `sub_0803F5E4`. One attempt each.
+- Block `0x08023000`: the dependents `sub_08023274` / `sub_080232CC` matched
+  FIRST (one attempt each), with `sub_08023168` only DECLARED from the call
+  sites, then the callee attempted afterwards.
+
+In the "after" case the derived prototype
+`void sub_08023168(s16, s16, s16, s16 *, s16 *)` read straight off the call
+sites: the three value args are narrowed with `lsls #0x10; asrs #0x10` before
+the `bl` (s16), the fourth/fifth are `add r3, sp, #4` and a stacked
+`str r5, [sp]` of `&local` (two s16 out-params), and `pop {..}; pop {r0}; bx r0`
+with no re-narrowing fixes it void. Nothing about matching the callee body first
+would have changed any of those. **The missing definition was never a blocker;
+kill the "derive callees first" idea.**
+
+## Wave 33 (W33-B): controlling which arm of an `if` is emitted out of line
+
+Three functions this wave hit the recurring "agbcc placed the `then` block out
+of line, reached by a forward branch, and my candidate placed it inline"
+mismatch. Two levers, both confirmed by a match:
+
+- **A short early-return arm gets inverted.** `if (cond){ long; return X; } return Y;`
+  put the short `return Y` inline first. Rewriting as a SINGLE return through a
+  result variable -- `if (cond){ ...; r = X; } else { r = Y; } return r;` -- keeps
+  the long arm as the fall-through and matched `sub_080307E0` exactly.
+- **A shared-tail two-way needs the constant-reusing test out of line.**
+  `sub_0803FFA0` compares `v` against `-2` then `-1`, reusing the `-2` constant
+  as `-2 + 1`; that only works if the `-2` body is out of line so `r0` survives.
+  `if (v == -2){A} else if (v == -1){B}` placed A inline and recomputed `-1`.
+  `if (v != -2){ if (v == -1){B} } else {A}` puts A (the else) LAST, so it keeps
+  the shared Div tail and `-1` is `-2 + 1`. Exact match.
+
+## Wave 33 (W33-B): the volatile-store dead-load is per-CONTEXT, not per-field
+
+`docs` already records that a `volatile` aggregate member store emits a dead
+load of the destination in front of the `strb`/`strh`. `sub_0802F348` shows the
+dead load is NOT emitted for every volatile store: `gUnknown_0849B018->unk06 =
+0xff` (volatile s8) compiled to a bare `movs #0xff; strb` with NO preceding
+`ldrb` -- because the base pointer was already live in a register from the prior
+store. The SAME field in `sub_08030ED4`, reached through a freshly-loaded
+pointer, DOES carry the dead `ldrb`. So the dead-load tell settles a field as
+volatile only when it appears; its ABSENCE at one store site does not unset it.
+`unk08`/`unk09` were non-volatile until this function's plain `= 0` showed the
+dead `ldrb` and forced the volatile (byte-neutral at the `>> & 1` readers).
+
+## Wave 33 (W33-E): `.raw` vs `*(u16 *)&` is decided by what comes AFTER the union, not by the union
+
+`include/hardware.h` already says the two spellings of a raw halfword
+read-modify-write on `gUnknown_030030E0` are not predictable from the source and
+must not be normalised across files. Wave 33 measured *what* separates them, on
+two functions carrying the SAME eight-statement blend-config preamble:
+
+- `sub_0807FE90` ends with the preamble and four calls. `.raw` matches; it was
+  right first try.
+- `sub_080805E0` opens with the same preamble (one constant differs) and then
+  does `proc->unk58 = sub_0807F8FC(...); proc->unk4c = 0;`. With `.raw` it is
+  SIZE-EXACT at 208 bytes and 48.1% identical: agbcc materialises the trailing
+  `strh` of 0 EARLY -- `movs r6, #0` lands in the middle of the
+  `raw &= 0xFFE0` statement -- and parks it in a third callee-saved register, so
+  the function pushes `{r4,r5,r6}` where the ROM pushes `{r4,r5}`. Rewriting the
+  three raw accesses as `*(u16 *)&gUnknown_030030E0` matched byte-for-byte with
+  no other change.
+
+The lever is therefore not local to the union access at all: the two spellings
+build different RTL for the same bytes, and the difference only becomes visible
+when a LATER constant has to survive a call. **Read the push list first.** If a
+`.raw` candidate is size-exact but carries one more callee-saved register than
+the ROM, and the extra register holds a small constant materialised far from its
+use, try the cast before touching anything else -- and vice versa. Neither
+spelling is "the normalised one".
+
+## Wave 33 (W33-E): an `int` result local removes the copy a `u8` one forces
+
+`sub_08074320` is the seventh member of the `sub_080742FC` null-guard family and
+keeps `sub_08074484`'s `u8` return to test it and then return it. The natural
+
+```c
+u8 r = sub_08074484(...);
+if (r != 0) Proc_Start(...);
+return r;
+```
+
+is size-exact at 100 bytes and 82.0% identical: agbcc emits agbcc's usual
+re-narrowing `lsls r0,#24; lsrs r0,#24` into r0 and then a separate
+`adds r4, r0, #0` into the register that survives the call. The ROM narrows
+straight into the surviving register (`lsls r0,#24; lsrs r4,r0,#24`). Declaring
+the local `int` instead -- the narrowing is the CALLEE's return conversion and
+happens either way -- lets the narrow's destination be the callee-saved pseudo
+and matched byte-for-byte.
+
+This is the wave-20 "an `int` binding on the RESULT is a different lever from a
+cast on the OPERAND" rule reaching a second case. Generalised: **when a narrow
+value is produced by a call and consumed after another call, spell the local
+`int`.** A narrow local adds a conversion the value has already had, and the
+only trace is a register copy.
+
+## Wave 33 (W33-E): a `.LC` on a function whose ROM is clean, that no spelling of the DEREFERENCE removes
+
+`sub_0807FF78` / `sub_0807FFF0` read a `volatile u16 *` ROM pointer global
+(`gUnknown_081D937C` / `gUnknown_081D9380`), bump the pointee inside an `if`, and
+test it again after the merge. The ROM has ONE direct pool word for the symbol,
+copied into a register that spans the merge.
+
+Naming the global directly at all three uses -- the honest spelling the
+`-fforce-addr` section tells you to write first -- parks its address in this
+unit's `.rodata` and reaches it through a SECOND `ldr` at both use sites: +4
+bytes, and `trymatch` prints the reloc as `.rodata` rather than as the symbol.
+Two uses across a merge is enough to trigger it here, which is below the
+"needs FOUR uses" threshold recorded above for the case where the ROM *has* the
+pool word. Caching the POINTER in a local does not move it; mixing the spellings
+brings it back.
+
+What removes it is binding the ADDRESS: `volatile u16 **pp = &g;` and `**pp`
+throughout. That restores the direct pool word and takes both functions to
+size-exact / -4, with one register-allocation copy left (the ROM's
+`adds r3, r0, #0`). So the `&global` anchor of wave 20 has a second, unrelated
+use: **it is also the way to STOP agbcc from creating an address-constant pool
+entry, not only the way to position one.** Both functions are parked on the
+residual copy; the drafts and the ruled-out axes are in `work/sub_0807FF78/` and
+`work/sub_0807FFF0/`.
+
+## Wave 33 (W33-F): `g[i].m` expands the BASE first, `(g + i)->m` expands the INDEX first
+
+Worth three matches on its own, and it is a two-instruction-position lever with
+no size cost, so a candidate carrying it wrong sits at 90-95% forever.
+
+For a global table `g` of a struct type and a variable index `i`:
+
+```
+    g[i].m        ldr rB, =g  /  <index multiply>  /  adds rX, rIdx, rB
+    (g + i)->m    <index multiply>  /  ldr rB, =g  /  adds rX, rIdx, rB
+```
+
+`g[i]` is an ARRAY_REF, so `expand_expr` goes through `get_inner_reference` and
+expands the base object BEFORE the offset — the pool `ldr` comes out first.
+`*(g + i)` is an INDIRECT_REF over a PLUS_EXPR, and `fold` canonicalises a
+PLUS_EXPR to put the CONSTANT operand last, so the ADDR_EXPR of `g` becomes op1
+and the index multiply op0 — expanded in that order, the pool `ldr` comes out
+last. This is the same distinction the brief records as "`p[X + C]` and
+`*(p + X + C)` are different code", read as an ordering lever rather than an
+addressing one.
+
+Measured on `sub_080576D4`, `sub_08057A24` and `sub_080577E4`, which each index
+a 0x1c-stride ROM table (`gUnknown_08553A1C` and its two overlapping views).
+`g[i]` put the `ldr` before the three-instruction `i * 0x1c` chain and cost 8
+bytes of difference at an otherwise size-exact match; `(g + i)->` moved it after
+and all three matched. In the SAME functions, tables whose index is one
+instruction (`gUnknown_08553AC0[i]`, `gUnknown_08562124[i & 1]`) want the plain
+`g[i]` form — the ROM loads those bases first. So this is per-table, decided by
+reading where the `ldr` sits, not a style choice to apply uniformly.
+
+A second, independent readout from the same three: **`i & 1` computed at the top
+of the function, before the table index arithmetic, means it is a separate local
+in the source.** Written inline at its use (`if (i & 1)`, or as an array index in
+the last argument) the `ands` lands where it is used. `sub_08057A24` needed
+`int flip = i & 1;` and `sub_080577E4` needed `int j = i & 1;` — the latter also
+puts the `ands` before the pool `ldr` of the table it indexes, which the inline
+form cannot do.
+
+## Wave 33 (W33-F): a local does NOT stop agbcc folding an address chain — only a control-flow MERGE does
+
+`sub_080029F4`'s ROM computes a VRAM destination as eight instructions:
+
+```
+    subs r1, r6, #1  /  lsls r1, r1, #3  /  movs r2, #0xa3  /  lsls r2, r2, #2
+    adds r1, r1, r2  /  lsls r1, r1, #5  /  ldr r2, =0x06010000  /  adds r1, r1, r2
+```
+
+i.e. `(a1 - 1) * 8 + 0x28C`, then `<< 5`, then `+ 0x06010000`, with nothing
+folded together. Every straight-line spelling of that collapses to two
+instructions and one pool word, `lsls r1, r6, #8` plus `=0x06015080`.
+
+The natural fix — bind the index to a local so `fold` cannot see through it —
+**does not work**, and that is the measured result. Five spellings were probed
+in one `compile_probe`:
+
+| spelling | result |
+|---|---|
+| `int idx = (a1-1)*8 + 0x28C;` then `0x06010000 + (idx << 5)` | folded |
+| the same split into three separate assignment statements | folded |
+| `u32 idx` instead of `int` | folded |
+| base bound to a `void *` local | folded |
+| `idx` assigned in the two arms of an `if/else`, used after the merge | **NOT folded** |
+
+So the tree-level block a VAR_DECL gives you is undone by RTL CSE and combine,
+which reassociate the whole chain freely **inside one basic block**; what they
+cannot cross is a basic-block boundary. The PHI spelling reproduces the ROM's
+`lsls #5` and its separate `=0x06010000` pool word exactly.
+
+The consequence for reading assembly: **an unfolded address chain in a
+straight-line block is evidence that the value's DEFINITION is in a different
+block**, not that the source bound it to a variable. `sub_080029F4` is parked at
+37.2% for exactly this reason — its unfolded chain sits in a block whose only
+predecessors are the two arms of the `a4 != 0x19` test, and no arrangement of
+locals inside that arm reproduces it. The draft and the residual are in
+`work/sub_080029F4/`.
+
+## Wave 33 (W33-F): `gUnknown_085D6A48`'s column offset — three spellings, none of them both right
+
+`sub_08057048` reads `gUnknown_085D6A48[X][1]` (0x18-byte rows, declared
+`u16 [][12]`) inside a nested index expression. The ROM wants TWO things at
+once and no spelling tried gives both:
+
+* the pool `ldr` for `gUnknown_085D6A48` expanded SECOND of the three tables in
+  the expression (outermost-first nesting), and
+* the column offset in the load displacement, `ldrh r0, [r0, #2]`.
+
+| spelling | nesting order | column offset |
+|---|---|---|
+| `gUnknown_085D6A48[X][1]` | correct | `adds rB, #2` then `ldrh [r,#0]` (+4 bytes) |
+| `row = gUnknown_085D6A48[X];` `row[1]` | wrong (base loaded last) | correct |
+| `*(gUnknown_085D6A48[X] + 1)` | wrong | pool word gets an ADDEND, `g+2` |
+| `((struct Row *)gUnknown_085D6A48)[X].unk02` | wrong | correct |
+| `((struct Row *)&gUnknown_085D6A48[X])->unk02` | wrong | correct |
+
+This is the wave-17 "column-offset fold is a TYPE discriminator" section seen
+from the other side: the struct row is what puts the offset in the
+displacement, and this table is declared as an array row because promoted
+callers read it that way. Resolving it means retyping `gUnknown_085D6A48` in
+`include/unknown-globals.h` as a struct and re-verifying every promoted reader —
+the header's own note already records that the 24-byte row "would be
+`{ u16 unk00; u8 filler_02[0x10]; u16 unk12; u8 filler_14[4]; }`", so this is
+the second column that wants it. Parked at 79.8%, size-exact, in
+`work/sub_08057048/`; the only differences are that one `ldr` and the register
+pair it costs.
+
+## Wave 33 (W33-F): a member-pointer binding must sit INSIDE the expression when another symbol's pool `ldr` has to come first
+
+`sub_0801DB04` (256 B, four `Div` calls, `gSinLut`) needed two separate bindings
+and they pull in opposite directions. Both were worth the match.
+
+**1. `&e->member` must be a binding local, or reload manufactures a copy.**
+Left to CSE, `&e->unk40` lands in a HIGH register, every one of its four
+`ldrb`/`ldrh` reads needs a `mov` to a low register first, and reload then
+splits the live range into a second high register — which costs the register the
+ROM spends on the third `Div` result and pushes it to the stack. That is a 4-byte
+frame difference and a 21.9% score on a function whose instruction stream is
+otherwise already right. Writing `s16 *ang = &e->unk40;` puts it in r7 and takes
+the same draft to 96.9%. **Read backwards: a high-register base with a `mov` in
+front of every load, plus one extra spill slot, is one missing binding local —
+not a wrong type and not a permuter problem.**
+
+**2. Where that binding sits decides the pool-load order, and a separate
+statement is too early.** With `ang` assigned in its own statement the remaining
+8 bytes were `ldr =gSinLut; mov r9,r0` landing AFTER `mov r7,r8; adds r7,#0x40`
+instead of before. An address constant's `ldr` is emitted at the head of the
+statement that first names the symbol (wave 28, W28-B), so as long as `ang` has
+its own statement it wins. Moving the binding to its FIRST USE inside the call —
+`Div(gSinLut[(*(ang = &e->unk40) & 0xFF) + 0x40] * 16, ...)` — makes both
+pseudos belong to the same statement, where `gSinLut`'s ARRAY_REF base is
+expanded before the index that needs `ang`. That matched.
+
+**And the obvious alternative is a trap:** binding `gSinLut` itself to a pointer
+local (`const s16 *lut = gSinLut;`) does reorder the two `ldr`s, but it also
+changes `gSinLut[(x & 0xFF) + 0x40]` from `adds r0,#0x40; lsls r0,#1; add r0,rB`
+into `lsls r0,#1; add r0,rB; adds r0,#0x80` — the `+ 0x40` moves out of the index
+domain and into the byte-offset domain, twice, for -2 bytes and 74.2%. **A
+pointer local to a `const` ARRAY is not free the way one to a pointer global is:
+it defers the scaling past the constant index add.**
+
+## Wave 33 (W33-G): a `-fforce-addr` word declared as a POINTER is one indirection too many
+
+The single highest-cost error available in this block, and it looks exactly like
+a correct derivation. A ROM word whose contents is another address — the asm
+shows `ldr rN, =gUnknown_0808E580` then `ldr rM, [rN]` before any member access
+— reads as "a pointer variable in ROM", and declaring
+`extern struct T *gUnknown_0808E580;` and writing `gUnknown_0808E580[a].m`
+compiles and looks right. **It emits `.LC -> &g -> g -> element` where the ROM
+has `.LC -> g -> element`.** agbcc adds its own `-fforce-addr` level on top of
+whatever you declare, so the pointer spelling always lands one deep.
+
+Measured on `sub_080185D0`: `0x0808E580` and `0x0808E588` BOTH hold
+`0x0200C528`, and `0x0808E584` and `0x0808E58C` both hold `0x03002514` — one
+private pair per function, for the same two objects. The honest spelling
+(`gUnknown_0200C528[a]`, `gUnknown_03002514`) matched byte-for-byte with
+`trymatch` reporting the two `rodata` entries. Same correction applied to
+`gUnknown_080909FC` / `_08090A00` / `_08090A04` / `_08090A14` (`sub_0802361C`,
+`sub_08023860`) and to `gUnknown_0809095C` (`sub_080211DC`).
+
+**W33-B's `gUnknown_080909E8` and `gUnknown_080909EC` were declared this way and
+are wrong** — both words hold `0x030033E0`, so they are not "the two move-toward
+cursors" but two private copies of one. The declarations have been removed from
+`include/unknown-globals.h` with the evidence; nothing in `src/decomp/` used
+them. **Dereference the word in `baserom.gba` before believing it is an
+object.** Two consecutive words holding the SAME address is the tell.
+
+The corollary is the useful half: **the force-addr level appears only on an
+address the function names MORE THAN ONCE.** In `sub_080185D0`,
+`gUnknown_0200C528` (3 references) and `gUnknown_03002514` (2) get `.rodata`
+words, while `gUnknown_08610A38`, `gUnknown_08499588` and `gUnknown_03002F08`
+are named once each and get ordinary direct pool words — in the same function,
+in the same pool. So the presence or absence of the extra `ldr` is a READOUT of
+how many times the source names the symbol.
+
+## Wave 33 (W33-G): `x & C1 & C2` folds — an assignment between them does not
+
+`sub_0801ECE8` masks two bits off a `long long` and the ROM carries two pool
+words, `0xFFFFDFFF` and `0xFFFFEFFF`, with a bare register copy between the two
+`ands`. `a5 & ~0x2000 & ~0x1000` cannot produce that: `fold` combines the
+constants before any RTL exists and you get one `& 0xFFFFCFFF`, -12 bytes.
+Three spellings measured:
+
+- `a5 &= ~0x2000; a5 &= ~0x1000;` keeps both constants, but modifying a
+  parameter gives it a stack HOME (`sub sp,#8` plus a str/ldr pair of both
+  halves) and hoists the masking to the top of the function.
+- `(v = a5 & ~0x2000) & ~0x1000` with a `long long` local keeps both constants
+  AND the copy, at the right place — **the otherwise unexplained
+  `adds rD, rS, #0` between two masks is the local.** Size exact.
+- Both constants are `int`, so each widens with its high half all ones and agbcc
+  drops the identity AND on the high word. A member masked in its low half only
+  does NOT need retyping to two `u32`s; that spelling was tried and costs +20
+  bytes because each pointer cast starts its own address expression.
+
+## Wave 33 (W33-G): the exact-division chain's TRAILING SHIFT is the divisor, and a following `>>` folds into it
+
+The `*5 / *17 / *257 / *65537` shift-add chain plus `rsbs` (documented above as
+an exact pointer division) ends in an `asrs` whose count picks the divisor:
+`asrs #2` is 3 * 4 = 12, `asrs #8` is 3 * 256 = 768. `sub_080211DC` ends
+`asrs #8` on a difference of `struct Unk08499594 *` (stride 0x0c), and the
+reading that works is **`(e - g) >> 6` — the pointer difference's own `asrs #2`
+and the source's `>> 6` FOLD into one shift.** The two natural alternatives both
+fail and fail differently:
+
+- `(e - g) / 64` is a signed division, so it adds the round-toward-zero
+  correction `cmp #0; bge; adds #63; asrs #6` (+8 bytes).
+- `((u8 *)e - (u8 *)g) / 768` is not a magic-multiply case at all — agbcc calls
+  `__divsi3` (-28 bytes).
+
+So a chain ending in a shift LARGER than the stride's own is a source-level
+shift on the index, not a bigger divisor, and reading it as one sends you to a
+library call.
+
+## Wave 33 (W33-G): a store to ANY global invalidates every memory value CSE is holding
+
+`sub_08023860` reads `*(u16 *)(p + 4)` in six consecutive statements, each
+storing to a different global, and the ROM loads it ONCE. Written flat, agbcc
+reloads it every time: `cse.c` cannot disambiguate a SYMBOL_REF base from a REG
+base, so each store invalidates the whole table. **Casting the volatile off the
+destinations changes nothing** — `*(u16 *)&gUnknown_03002B34 = ...` produced
+byte-identical output, so this is not the volatile rule and the two are worth
+keeping apart.
+
+Only a LOCAL survives, and where it is assigned is the remaining 4 bytes:
+assigned as its own statement the `ldrh` hoists above the first destination's
+pool load; assigned inside the first statement that needs it
+(`g = (x = *(u16 *)(p+4)) - *(u16 *)(p+0xc) * 16;`) it moves into the statement
+but still lands BEFORE the product, where the ROM has it after. Parked at 83.3%
+with the size exact; the position of the binding load is the open question.
+
+## Wave 33 (W33-G): N member casts make N address pseudos — cast the RECORD, not the members
+
+`sub_0801E18C` reads three `s16` members of one 0x10-byte record with
+`movs rI,#k; ldrsh r0,[r4,rI]` off a SINGLE base (Thumb has no immediate-offset
+`ldrsh`, so k is the offset register). Written as
+`*(s16 *)&gUnknown_0200F720[a].unk00`, `...unk02`, `...unk04` — the obvious way
+to take a signed read of a `u16` member without retyping a shared struct — each
+cast starts its own address expression, so agbcc makes three address pseudos,
+spends `sl` and `r7` on them, and the function comes out **+24 bytes**. One
+`s16 *e = (s16 *)&gUnknown_0200F720[a];` with `e[0]`, `e[1]`, `e[2]` matched
+first time. The pointer-cast-per-member trick from the same wave is still right
+for a SINGLE member (`sub_080185D0` uses it and matched); it is the repetition
+over one record that costs.

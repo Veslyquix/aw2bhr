@@ -1,0 +1,45 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08014BE8.
+ * sub_08014BE8 @ 0x08014BE8
+ */
+
+#include "proc.h"
+
+bool8 sub_08014BE8(void)
+{
+    if (Proc_Find(gUnknown_0848A140))
+        return TRUE;
+
+    if (Proc_Find(gUnknown_0848A150))
+        return FALSE;
+
+    if (sub_08015BD0((s32)gUnknown_0848A130) != -1)
+        return TRUE;
+
+    if (sub_08015BD0((s32)gUnknown_0848A120) != -1)
+        return FALSE;
+
+    if (sub_08019290(gUnknown_0849A520) != -1)
+        return FALSE;
+
+    if (sub_08019290(gUnknown_0849A5E0) != -1)
+        return FALSE;
+
+    if (sub_08019290(gUnknown_0849A8F0) != -1)
+        return FALSE;
+
+    if (sub_08015BD0((s32)gUnknown_084C1824) != -1)
+        return FALSE;
+
+    if (sub_08015BD0((s32)gUnknown_0849E240) != -1)
+        return FALSE;
+
+    if (sub_080366DC() == sub_080369BC)
+        return TRUE;
+
+    return FALSE;
+}

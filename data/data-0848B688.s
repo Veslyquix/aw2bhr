@@ -214,7 +214,16 @@ gUnknown_08499C54:  @ 0x08499C54
 
 	.global gUnknown_08499C68
 gUnknown_08499C68:  @ 0x08499C68
-	.incbin "baserom.gba", 0x499C68, 0x54    @ 0x499CBC - 0x499C68
+	.incbin "baserom.gba", 0x499C68, 0x14    @ 0x499C7C - 0x499C68
+
+@ Wave 33: carved out of the block above, which used to run 0x499C68..0x499CBC
+@ as one 0x54-byte piece. sub_0800105C (W33-D) and sub_0802361C (W33-G) both
+@ name this address in C, so agbcc emits an -fforce-addr .rodata word holding
+@ it and the link needs a real symbol here. Byte-neutral: the two .incbin
+@ pieces still cover exactly 0x499C68..0x499CBC.
+	.global gUnknown_08499C7C
+gUnknown_08499C7C:  @ 0x08499C7C
+	.incbin "baserom.gba", 0x499C7C, 0x40    @ 0x499CBC - 0x499C7C
 
 	.global gUnknown_08499CBC
 gUnknown_08499CBC:  @ 0x08499CBC

@@ -1,0 +1,37 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0803F140.
+ * sub_0803F140 @ 0x0803F140
+ */
+
+struct UnkF140Proc
+{
+    /* 00 */ u8 filler_00[0x54];
+    /* 54 */ int unk54;
+    /* 58 */ int unk58;
+    /* 5c */ u8 filler_5c[0x0c];
+    /* 68 */ s16 unk68;
+    /* 6a */ s16 unk6a;
+};
+
+void sub_0803F140(struct UnkF140Proc *proc)
+{
+    int x;
+    int y;
+
+    x = 0;
+    y = 0;
+    sub_0803F29C(&x, &y, proc->unk6a);
+    Decompress(sub_0803F110(proc->unk6a), (void *)0x06013940);
+    ApplyPaletteExt(gUnknown_08109564, 0x260, 0x40);
+    sub_0801C70C(sub_0803F128(proc->unk6a),
+                 proc->unk54 * 16 - *(s16 *)(gUnknown_08499590 + 4) + x,
+                 proc->unk58 * 16 - *(s16 *)(gUnknown_08499590 + 6) + y,
+                 0x31CA,
+                 sub_0803F27C(proc->unk68),
+                 0);
+    sub_0803B4DC(0x1C4);
+}
