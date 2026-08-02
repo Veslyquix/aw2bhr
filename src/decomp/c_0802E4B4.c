@@ -30,7 +30,7 @@
  * gUnknown_030040D8 is the same object as gUnknown_08499594[i] -- see the note
  * on struct Unk030040D8 in unknown-globals.h for why the cast is here rather
  * than in the global's type. */
-void sub_0802E4B4(u16 x, u16 y)
+void sub_0802E4B4(s16 x, s16 y)
 {
     u8 *p;
     u8 *rows;

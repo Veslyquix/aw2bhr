@@ -18,13 +18,16 @@
  * modelled -- only +8 is reached here -- so the struct stays local to this
  * file rather than going into unknown-globals.h. */
 
-struct Unk8024ED8
-{
-    /* 0x00 */ u8 filler_00[0x08];
-    /* 0x08 */ s16 unk08;
-};
+/* WAVE 36 (W36-A): the local struct is GONE and the parameters are the shared
+ * struct Unk030013D0. sub_08024F20's call site settles it -- it passes
+ * gUnknown_030013D0 and gUnknown_030013B0, the same two records it hands to
+ * sub_08024A2C / sub_08024ABC / sub_08024C58 / sub_08024E60 -- and the choice
+ * is byte-visible at that caller, because two tags naming one symbol split
+ * agbcc's -fforce-addr pool word in two where the ROM has one. The `s16 unk08`
+ * measured below IS Unk030013D0's unk08; this function still matches
+ * byte-for-byte after the change. See include/unknown-functions.h. */
 
-void sub_08024ED8(struct Unk8024ED8 *a, struct Unk8024ED8 *b)
+void sub_08024ED8(struct Unk030013D0 *a, struct Unk030013D0 *b)
 {
     if (a->unk08 <= 0)
     {

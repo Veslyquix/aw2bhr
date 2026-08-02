@@ -13,7 +13,11 @@
  * with identical arguments and the ROM keeps both copies: cross-jumping cannot
  * merge them because the `0` that goes to [sp, #4] is CSEd with the two `strh`
  * zeroes in the then-arm and so lands in r4 there and r1 in the else-arm. */
-void sub_080055B8(void)
+/* The three parameters are unused here and so are invisible in this body --
+ * `(void)` was byte-identical. They are proved by the only call site,
+ * sub_08004D28, which materialises `movs r0,#0; movs r1,#0; movs r2,#0` in
+ * front of each of the three `bl`s. Widened and re-verified in wave 36. */
+void sub_080055B8(int a, int b, int c)
 {
     if (sub_0803CCB8(0, gUnknown_0200B204) != 1)
     {
@@ -37,7 +41,7 @@ void sub_080055B8(void)
  * with identical arguments and the ROM keeps both copies: cross-jumping cannot
  * merge them because the `0` that goes to [sp, #4] is CSEd with the two `strh`
  * zeroes in the then-arm and so lands in r4 there and r1 in the else-arm. */
-void sub_08005634(void)
+void sub_08005634(int a, int b, int c)
 {
     if (sub_0803CCB8(1, gUnknown_0200B204) != 1)
     {
@@ -61,7 +65,7 @@ void sub_08005634(void)
  * with identical arguments and the ROM keeps both copies: cross-jumping cannot
  * merge them because the `0` that goes to [sp, #4] is CSEd with the two `strh`
  * zeroes in the then-arm and so lands in r4 there and r1 in the else-arm. */
-void sub_080056B0(void)
+void sub_080056B0(int a, int b, int c)
 {
     if (sub_0803CCB8(2, gUnknown_0200B204) != 1)
     {

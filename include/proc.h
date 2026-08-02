@@ -137,6 +137,11 @@ struct Proc
 #define PROC_TREE_7     ((ProcPtr) 7)
 #define PROC_IS_ROOT(aProc) ((uintptr_t)aProc <= (u32)PROC_TREE_7)
 
+/* Defined in src/proc.c. Declared here in wave 36 (W36-F): the ROOT_PROC macro
+ * below has always named it, but nothing declared it, so every user outside
+ * proc.c failed to compile. Type copied from the definition. */
+extern struct Proc *gProcTreeRootArray[8];
+
 #define ROOT_PROC(treenum) (*(gProcTreeRootArray + (treenum)))
 
 void Proc_Init(void);

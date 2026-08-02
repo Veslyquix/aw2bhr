@@ -18,16 +18,6 @@
  * WRAPPING (non-zero) or CLAMPING (zero) behaviour, and the two halves are
  * spelled with the `== 0` case FIRST: the ROM branches away on `bne`, which
  * puts the equality arm inline. */
-struct Unk08066C70
-{
-    /* 0x00 */ u8 filler_00[0x47];
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ u8 unk48;
-    /* 0x49 */ u8 unk49;
-    /* 0x4a */ u8 filler_4a[0x01];
-    /* 0x4b */ u8 unk4b;
-};
-
 /* Steps the seven-entry unk54[] selector at gUnknown_08580934->unk33 with the
  * gpKeySt->unk02 bitmask, and plays sound 0x64 whenever the index actually
  * moved. Byte-identical twin of sub_0806DCB8: the two differ only in which
@@ -84,7 +74,7 @@ void sub_08066BF4(void)
     gUnknown_08580934->unk33 = i;
 }
 
-void sub_08066C70(struct Unk08066C70 *p)
+void sub_08066C70(struct Unk08580934_Obj *p)
 {
     p->unk49 = p->unk48;
 

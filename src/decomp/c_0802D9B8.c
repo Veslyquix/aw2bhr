@@ -7,15 +7,7 @@
  * sub_0802D9B8 @ 0x0802D9B8
  */
 
-struct Unk2D9B8Proc
-{
-    /* 0x00 */ u8 filler_00[0x1e];
-    /* 0x1e */ s16 unk1e;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-};
-
-void sub_0802D9B8(struct Unk2D9B8Proc *proc)
+void sub_0802D9B8(struct Unk03001470 *proc)
 {
     if (proc->unk20 == proc->unk1e && proc->unk20 > 0)
         proc->unk1e = proc->unk1e - 1;

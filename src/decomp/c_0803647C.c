@@ -19,7 +19,7 @@ void sub_0803647C(ProcPtr procArg)
 {
     struct Unk3647CProc *proc = procArg;
 
-    sub_08036024();
+    sub_08036024(proc);
     proc->unk35 = 1;
     gUnknown_030040E4 = 0;
 }

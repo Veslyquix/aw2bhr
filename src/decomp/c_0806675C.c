@@ -1,0 +1,71 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0806675C.
+ * sub_0806675C @ 0x0806675C, sub_08066808 @ 0x08066808
+ */
+
+struct Unk6675CProc
+{
+    /* 0x00 */ u8 filler_00[0x26];
+    /* 0x26 */ s16 unk26;
+};
+struct Unk66808Proc
+{
+    /* 0x00 */ u8 filler_00[0x26];
+    /* 0x26 */ s16 unk26;
+};
+
+void sub_0806675C(struct Unk6675CProc *proc)
+{
+    if (--proc->unk26 == 6)
+        sub_0806377C(gUnknown_08580D0C);
+
+    if (proc->unk26 == 3)
+    {
+        if (gUnknown_08580934->unk08 == 2)
+        {
+            gUnknown_08580934->unk30 = 0;
+            gUnknown_08580934->unk26 = 2;
+            sub_08063A00(gUnknown_08580AF0, sub_08065F78);
+            sub_080654E8();
+            sub_08064A44();
+            return;
+        }
+
+        gUnknown_08580934->unk26 = 1;
+        sub_0806377C(gUnknown_08580AF0);
+        sub_0806377C(gUnknown_08580B90);
+        sub_0806377C(gUnknown_08580BC8);
+    }
+
+    if (proc->unk26 < 0)
+    {
+        sub_08015C30(gUnknown_03001FBC);
+        gUnknown_08580934->unk2d--;
+        sub_08030178();
+    }
+}
+
+void sub_08066808(struct Unk66808Proc *proc)
+{
+    if (--proc->unk26 == 6)
+        sub_0806377C(gUnknown_08580D0C);
+
+    if (proc->unk26 == 3)
+    {
+        sub_0803B4DC(0x67);
+        sub_080654E8();
+        sub_08064A44();
+        gUnknown_08580934->unk30 = 0;
+    }
+
+    if (proc->unk26 < 0)
+    {
+        sub_08015C30(gUnknown_03001FBC);
+        gUnknown_08580934->unk2d--;
+        sub_08030178();
+    }
+}

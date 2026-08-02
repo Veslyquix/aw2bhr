@@ -1,0 +1,64 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080699E8.
+ * sub_080699E8 @ 0x080699E8
+ */
+
+#include "proc.h"
+#include "hardware.h"
+struct Unk699E8Proc
+{
+    /* 0x00 */ u8 filler_00[0x2c];
+    /* 0x2c */ int unk2c;
+};
+
+void sub_080699E8(struct Unk699E8Proc *proc)
+{
+    switch (0xaa - proc->unk2c)
+    {
+    case 6:
+        SetDispEnable(0, 1, 1, 1, 1);
+        sub_0806974C(proc);
+        break;
+    case 0x1f:
+        sub_08067ED0(0, 0xa, 0x78, 0x78, 0xa, 0, 1, 1, proc);
+        break;
+    case 0x20:
+        sub_08068014(0, 0xa, 0x28, proc);
+        break;
+    case 0x2c:
+        SetDispEnable(1, 1, 1, 1, 1);
+        sub_0806978C();
+        break;
+    case 0x4a:
+        SetDispEnable(0, 1, 1, 1, 1);
+    case 0x90:
+        sub_080697A4();
+        break;
+    case 0x68:
+        SetDispEnable(1, 1, 1, 1, 0);
+        sub_0806978C();
+        break;
+    case 0x74:
+        SetDispEnable(0, 0, 1, 0, 0);
+        sub_08069924(1);
+        sub_08067898(0x100, 0x200, 0, proc);
+        break;
+    case 0x9a:
+        sub_08069924(0);
+        sub_080678BC(1);
+        break;
+    case 0xa4:
+        Proc_EndEach(gUnknown_08581108);
+        sub_080697BC();
+        break;
+    }
+
+    if (proc->unk2c != 0)
+        proc->unk2c--;
+    else
+        Proc_Break(proc);
+}
