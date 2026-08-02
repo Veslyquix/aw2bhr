@@ -277,6 +277,101 @@ def global_checks():
     return out
 
 
+def header_checks():
+    """[(kind, symbol, detail)] for the three wave-33 header failure classes.
+
+    dup-extern  one symbol declared `extern` twice with CONFLICTING types.
+                gUnknown_08499590 was declared `u8 *` (63 promoted files do
+                byte arithmetic on it) and `struct Unk08499590 *` in the same
+                wave; EVERY compile in the repo failed, including promoted
+                functions unrelated to the wave. Identical duplicates are
+                legal C and are not reported.
+
+    dup-tag     one struct/union tag given a BODY twice. `struct Unk0848B780`
+                was defined twice because the second agent's grep hit was cut
+                by head_limit -- a truncated grep reads exactly like an absent
+                symbol. Forward declarations are fine; two bodies fail every
+                TU.
+
+    rom-undef   a ROM-range (0x08...) gUnknown_ referenced by promoted C with
+                no definition anywhere: no `.global`/label in data/*.s or
+                asm/*.s, no lds binding, no C definition. The RAM check in
+                global_checks() cannot see these -- it only tests 02/03
+                addresses against aw2bhr.lds. gUnknown_08499C7C was declared
+                with evidence, referenced from two promoted units' -fforce-addr
+                .rodata words, and defined nowhere; the SPLIT link failed while
+                the assembly build printed `aw2bhr.gba: OK`.
+    """
+    out = []
+
+    # -- dup-extern and dup-tag, over the shared headers ---------------------
+    ext = {}                    # symbol -> {(normalized type, file:line)}
+    tag = {}                    # tag -> [file:line of each BODY]
+    for hf in sorted(glob.glob('include/*.h')):
+        with open(hf, encoding='utf-8', errors='replace') as fh:
+            lines = fh.readlines()
+        for n, ln in enumerate(lines, 1):
+            s = ln.strip()
+            if s.startswith(('*', '/', '@')):
+                continue
+            m = re.match(r'extern\s+(.*?)\s*\b([A-Za-z_]\w*)\s*'
+                         r'((?:\[[^\]]*\])*)\s*;', s)
+            if m:
+                ty = ' '.join(m.group(1).split())
+                if m.group(3):
+                    ty += ' ' + re.sub(r'\s+', '', m.group(3))
+                ext.setdefault(m.group(2), set()).add(
+                    (ty, '%s:%d' % (hf, n)))
+            m = re.match(r'(?:struct|union)\s+([A-Za-z_]\w*)\s*(\{)?\s*$', s)
+            if m:
+                body = bool(m.group(2))
+                if not body:
+                    for nxt in lines[n:n + 3]:
+                        t = nxt.strip()
+                        if not t or t.startswith(('*', '/')):
+                            continue
+                        body = t.startswith('{')
+                        break
+                if body:
+                    tag.setdefault(m.group(1), []).append('%s:%d' % (hf, n))
+    for sym, tys in sorted(ext.items()):
+        if len({t for t, _ in tys}) > 1:
+            out.append(('dup-extern', sym,
+                        '; '.join('%s (%s)' % t for t in sorted(tys))))
+    for t, sites in sorted(tag.items()):
+        if len(sites) > 1:
+            out.append(('dup-tag', t, ', '.join(sites)))
+
+    # -- rom-undef, over everything the split build actually links -----------
+    defined = set()
+    for sf in glob.glob('data/*.s') + glob.glob('asm/*.s'):
+        with open(sf, encoding='utf-8', errors='replace') as fh:
+            for ln in fh:
+                m = re.match(r'\s*\.global\s+(gUnknown_08\w+)', ln) or \
+                    re.match(r'(gUnknown_08\w+):', ln)
+                if m:
+                    defined.add(m.group(1))
+    try:
+        with open('aw2bhr.lds', encoding='utf-8', errors='replace') as fh:
+            defined |= set(re.findall(r'\b(gUnknown_08\w+)\s*=', fh.read()))
+    except OSError:
+        pass
+    referenced = {}             # symbol -> first referencing file
+    for cf in sorted(glob.glob('src/decomp/*.c') + glob.glob('src/*.c')):
+        with open(cf, encoding='utf-8', errors='replace') as fh:
+            text = re.sub(r'/\*.*?\*/', '', fh.read(), flags=re.S)
+        for m in re.finditer(r'\b(gUnknown_08[0-9A-Fa-f]{6})\b', text):
+            referenced.setdefault(m.group(1), cf)
+        # a C-side DEFINITION (const table carved into a unit) also satisfies
+        for m in re.finditer(r'^[^;{}\n]*?[^n]\s(gUnknown_08[0-9A-Fa-f]{6})'
+                             r'\s*(?:\[[^\]]*\])*\s*=', text, re.M):
+            if 'extern' not in m.group(0):
+                defined.add(m.group(1))
+    for sym in sorted(set(referenced) - defined):
+        out.append(('rom-undef', sym, 'first ref %s' % referenced[sym]))
+    return out
+
+
 def main(argv):
     scan_all = '--all' in argv
     protos = collect_prototypes(scan_all)
@@ -350,7 +445,46 @@ def main(argv):
              sum(1 for g in globs if g[0] == 'unlinkable'),
              sum(1 for g in globs if g[0] == 'upstream')))
 
-    return 1 if (bad or dups or globs) else 0
+    hdr = header_checks()
+    for kind, sym, where in hdr:
+        if kind == 'dup-extern':
+            print('CONFLICTING DUPLICATE EXTERN %s' % sym)
+            print('   %s' % where)
+            print('   Two agents declared the same symbol with different '
+                  'types; EVERY compile in')
+            print('   the repo fails, promoted functions included. Settle it '
+                  'on the evidence --')
+            print('   promoted byte arithmetic beats a new struct model '
+                  '(wave 33: 63 files used')
+            print('   `u8 *`; the struct pointer would have silently rescaled '
+                  'them all).')
+        elif kind == 'dup-tag':
+            print('DUPLICATE STRUCT/UNION BODY %s (%s)' % (sym, where))
+            print('   Two BODIES for one tag fails every TU. The wave-33 '
+                  'cause: the second')
+            print('   agent\'s grep for the tag was truncated by head_limit, '
+                  'and a truncated')
+            print('   grep reads exactly like an absent symbol. Keep the more '
+                  'refined body.')
+        else:
+            print('UNDEFINED ROM GLOBAL %s (%s)' % (sym, where))
+            print('   Referenced by compiled C but defined nowhere -- no '
+                  '.global in data/*.s or')
+            print('   asm/*.s, no lds binding, no C definition. Only the '
+                  'SPLIT link sees this,')
+            print('   and the assembly build will still print `aw2bhr.gba: '
+                  'OK` beside the failure.')
+            print('   Fix: carve the symbol out of the covering .incbin block '
+                  'in data/*.s')
+            print('   (wave 33 split gUnknown_08499C68\'s 0x54-byte block '
+                  'into 0x14 + 0x40).')
+    print('header integrity -- %d conflicting extern(s), %d duplicate tag '
+          'body(ies), %d undefined ROM reference(s)'
+          % (sum(1 for h in hdr if h[0] == 'dup-extern'),
+             sum(1 for h in hdr if h[0] == 'dup-tag'),
+             sum(1 for h in hdr if h[0] == 'rom-undef')))
+
+    return 1 if (bad or dups or globs or hdr) else 0
 
 
 if __name__ == '__main__':

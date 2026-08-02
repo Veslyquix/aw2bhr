@@ -670,6 +670,17 @@ def blocks(recs, args):
             and args.block_min <= r["size"] <= args.block_max
             and r["backward_branches"] == 0 and not r["trivial"]]
 
+    # Wave 33: the CEILING is a floor artifact too. At the old default of 72
+    # this screen read "2 blocks, 3 candidates" -- indistinguishable from an
+    # exhausted axis -- while 565 candidates (80KB) sat between 72 and 256.
+    # Report what the ceiling excludes, exactly as --min-size reports its
+    # floor, so the next artifact self-reports instead of waiting for a wave
+    # to stumble on it.
+    above = [r for r in named
+             if r["status"] == "asm" and r["mode"] == "THUMB"
+             and r["size"] > args.block_max
+             and r["backward_branches"] == 0 and not r["trivial"]]
+
     by_block = collections.defaultdict(list)
     for r in pool:
         by_block[addr[r["name"]] >> 12].append(r)
@@ -693,6 +704,12 @@ def blocks(recs, args):
     print("blocks: %d   candidate functions: %d   bytes: %d"
           % (len(rows), sum(r[0] for r in rows),
              sum(f["size"] for r in rows for f in r[4])))
+    if above:
+        print("EXCLUDED BY --block-max %d: %d straight-line unmatched THUMB "
+              "functions, %d bytes, sit ABOVE the ceiling."
+              % (args.block_max, len(above), sum(r["size"] for r in above)))
+        print("  A dry result here is a statement about THIS CEILING, not the "
+              "corpus (wave 33).")
     print("  Cost is the block's VOCABULARY, not its shapes -- see blocks().")
     print("  Give ONE block per agent and name each target's nearest matched")
     print("  neighbour as its exemplar. Tell the agent the shapes are NOT")
@@ -851,6 +868,26 @@ def self_test(args):
                   % (len(missing), ", ".join(sorted(set(map(str, missing)))[:3]))))
     ok &= not missing
 
+    # Wave 33: the CEILING check. --block-max hid 565 candidates behind
+    # "2 blocks, 3 candidates" for nine waves because nothing asserted the
+    # ceiling reports what it excludes. Same discipline as the floor checks:
+    # raise the ceiling and require that the candidate pool is non-decreasing
+    # and that whatever sits above the default ceiling is REPORTED, not silent.
+    wide = argparse.Namespace(**vars(args))
+    wide.block_max = max(args.block_max * 2, 512)
+    wide.top_blocks = 10 ** 6
+    wide_offered = blocks(load_index(), wide)[1]
+    base_offered = blocks(load_index(), argparse.Namespace(
+        **{**vars(args), "top_blocks": 10 ** 6}))[1]
+    good = len(wide_offered) >= len(base_offered)
+    print("[self-test] raising --block-max %d -> %d never LOSES candidates: %s"
+          % (args.block_max, wide.block_max,
+             "PASS (%d -> %d)" % (len(base_offered), len(wide_offered))
+             if good else
+             "FAIL (%d -> %d; the ceiling filter is broken)"
+             % (len(base_offered), len(wide_offered))))
+    ok &= good
+
     print("[self-test] %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 
@@ -874,11 +911,15 @@ def main():
                         "until promotion")
     p.add_argument("--block-min", type=int, default=12,
                    help="smallest function the address-locality screen offers")
-    p.add_argument("--block-max", type=int, default=72,
-                   help="largest function the address-locality screen offers; "
-                        "above this the per-function work stops being one or "
-                        "two statements and the block's shared vocabulary "
-                        "stops being the dominant cost")
+    p.add_argument("--block-max", type=int, default=256,
+                   help="largest function the address-locality screen offers. "
+                        "Was 72 until wave 33, when the default hid 565 "
+                        "candidates (80KB) behind '2 blocks, 3 candidates' -- "
+                        "the third floor artifact in this tool and the first "
+                        "on an UPPER bound. 76-256B functions in a half-"
+                        "promoted block are still exemplar-cheap (wave 33 "
+                        "measured 115 bytes/attempt); they just need batches "
+                        "sized by BYTES, ~2-5KB per agent, not by count")
     p.add_argument("--block-min-matched", type=int, default=20,
                    help="skip blocks with fewer matched functions than this -- "
                         "the axis is only cheap where the vocabulary is ALREADY "
