@@ -29,7 +29,39 @@
     "CONSTRAINT: an overridden function must sit in a .c file of its own. The",
     "build applies flags per object, so a shared file would silently recompile",
     "its neighbours with the wrong toolchain. tools/gen_overrides_mk.py fails",
-    "loudly rather than emitting a rule that would do that."
+    "loudly rather than emitting a rule that would do that.",
+    "",
+    "WAVE 38 (W38-A) -- DISCRIMINATOR, measured on the five MPlay*Control entry",
+    "points at 0x08071420..0x080715F8. The wave brief predicted all five would",
+    "need old_agbcc. They do not, and the split is clean:",
+    "",
+    "  match under BOTH compilers  sub_08071420 sub_08071488 sub_080714FC",
+    "  need old_agbcc              sub_08071584 sub_080715F8",
+    "",
+    "These five are the same skeleton -- ident guard, ident+1, walk tracks[] on a",
+    "0x50 stride testing trackBits, restore ident -- and differ only in the loop",
+    "body. The two that need the override are EXACTLY the two whose loop body",
+    "contains a CALL (both to sub_08071564/ClearModM); the three that do not are",
+    "exactly the three whose body is pure stores. So the axis is not `m4a`, not",
+    "the file, and not the skeleton: it is a call inside a loop body, which is",
+    "where r0 is simultaneously the argument register and the only free scratch,",
+    "and that is the one place the two allocators diverge. Both misses were",
+    "94.8% with the SIZE ALREADY EXACT -- register choice and instruction order,",
+    "never an instruction count.",
+    "",
+    "Consequence for future waves, and it cuts BOTH ways. Verified by adding",
+    "throwaway entries for the three and re-running try_match: all three ALSO",
+    "match byte-for-byte under old_agbcc. So across all five, old_agbcc matches",
+    "5/5 and default agbcc matches 3/5 -- old_agbcc is a strict superset here.",
+    "Defaulting the 0x0806F710-0x080745C0 region to old_agbcc is therefore SAFE",
+    "(it agrees with the existing note that no promoted file in that range",
+    "differs under it) and is the better first guess for anything new there.",
+    "But the three entries were still REMOVED rather than kept: an override that",
+    "changes no bytes is unfalsifiable, it makes the file stop being evidence,",
+    "and gen_overrides_mk.py's one-function-per-.c constraint would force three",
+    "needless file splits. Keep entries only where the default is measurably",
+    "wrong. If you are matching in this region and land at 90-99% with the size",
+    "exact, try old_agbcc BEFORE touching the C -- but do not assume you need it."
   ],
   "functions": {
     "sub_080713F8": {
@@ -41,6 +73,16 @@
       "cc1": "old_agbcc",
       "cflags_remove": ["-fprologue-bugfix"],
       "reason": "m4a MP_clear_modM, the compiled twin of the hand-written sub_08070300. Under agbcc a two-armed if/else assigning one object collapses to 'store the else value, conditionally overwrite' -- one arm, no unconditional b, one instruction shorter. old_agbcc does not do that rewrite: both arms and the b survive, the shared operand is loaded after the merge, and the branchless arm's constant stays as a second, dead movs. That one rewrite was the entire 4-byte deficit, after eighteen source spellings had been probed against it."
+    },
+    "sub_08071584": {
+      "cc1": "old_agbcc",
+      "cflags_remove": ["-fprologue-bugfix"],
+      "reason": "m4a m4aMPlayModDepthSet. Wave 38 (W38-A). Default agbcc gets this to 110 of 116 bytes (94.8%) with the size already exact and TWO independent 3-byte deltas, both inside the loop body and both allocator/scheduler, not source: (1) the ROM emits `movs r0,#0x80` BEFORE `ldrb r1,[r4]` and agbcc emits the ldrb first; (2) the re-read of the just-stored `track->mod` lands in r1 under old_agbcc (`mov r1,sb; cmp r1,#0`) and in r0 under agbcc (`mov r0,r9; cmp r0,#0`) -- r0 being the register the `bl sub_08071564` two instructions later needs for its argument. Nothing in the C reaches either choice; the same source is byte-exact under old_agbcc. See sub_080715F8, its twin, and the DISCRIMINATOR note below."
+    },
+    "sub_080715F8": {
+      "cc1": "old_agbcc",
+      "cflags_remove": ["-fprologue-bugfix"],
+      "reason": "m4a m4aMPlayLFOSpeedSet -- structurally identical to sub_08071584 (same 116 bytes, same loop, differing only in the member written: lfoSpeed at +0x19 rather than mod at +0x17). Default agbcc produces the SAME two 3-byte deltas at the same offsets, 94.8%. Matches byte-for-byte under old_agbcc."
     },
     "sub_0808AD6C": {
       "cflags_remove": ["-fforce-addr"],

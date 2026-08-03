@@ -7,14 +7,6 @@
  * sub_08039140 @ 0x08039140
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08039140.
- * sub_08039140 @ 0x08039140
- */
-
-
 /* An on-screen test for a box of size (w, h) at (x, y): the camera origin
  * lives at +0x04 / +0x06 of the map descriptor gUnknown_08499590 points at,
  * and the box is accepted when it overlaps the 0xF0 x 0xA0 screen.
@@ -27,9 +19,15 @@
  * The first parameter arrives u16 (`lsls #0x10; lsrs #0x10`) and is cast back
  * to s16 at its single use (`lsls #0x10; asrs #0x10`); the second arrives
  * already s16. Both entry shift pairs are the declarations; only the one at
- * the use is a cast in the source. */
+ * the use is a cast in the source.
+ *
+ * RETURN RETYPED FROM `int` TO `u8` in wave 38 (W38-F). The body cannot tell
+ * the difference -- it returns the literals 1 and 0 -- but its only caller
+ * sub_08039188 re-narrows the result with `lsls r0,#0x18` before testing it,
+ * which is agbcc re-narrowing a u8-returning callee and is exactly what an
+ * `int` return does not produce. */
 
-int sub_08039140(u16 x, s16 y, u8 w, u8 h)
+u8 sub_08039140(u16 x, s16 y, u8 w, u8 h)
 {
     int dx;
     int dy;

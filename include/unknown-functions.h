@@ -411,11 +411,20 @@ void *sub_08014E44(int);
 void sub_08014ED4(void *);
 
 /* A pair always called together on the same object, each `(ptr, u8 flag)` and
- * each returning an accumulated total in r0. The pointer is left `void *`
- * because the struct it walks (bytes at +0, +4, +6, a 4-bit and a 7-bit field)
- * is not modelled anywhere yet; sub_08044518 only forwards it. */
-int sub_08029978(void *, u8);
-int sub_08029A48(void *, u8);
+ * each returning an accumulated total in r0.
+ *
+ * WAVE 38 (W38-J): the object IS modelled -- it is `struct Unk08499594`, and
+ * the note that used to stand here ("bytes at +0, +4, +6, a 4-bit and a 7-bit
+ * field ... not modelled anywhere yet") was in fact a field-for-field
+ * description of it. The three offsets it lists are unk00, the unk04 bitfield
+ * container and unk06_0, and the two field widths are unk04_7:4 and unk06_0:7
+ * exactly as sub_08025B80 and sub_08042998 established them. unk00 clinches it:
+ * both functions multiply it by 0x5c to subscript gUnknown_085D5ABC, which is
+ * the defining use of that member. Retyped from `void *`; sub_08029D1C and
+ * sub_08044518 forward a `void *` and convert implicitly, so the change is free
+ * at every existing caller (c_08029D1C.c re-verified byte-exact after it). */
+int sub_08029978(struct Unk08499594 *, u8);
+int sub_08029A48(struct Unk08499594 *, u8);
 /* Both parameters are `s16`: the prologue sign-extends r0 and r1 with
  * `lsls #16; asrs #16` before forwarding to sub_080290B0. */
 void sub_08029088(s16, s16);
@@ -469,6 +478,14 @@ void sub_08030ED4(void);
  * argument -- it is still declared, because their forwarders load and pass it.
  */
 int sub_08042DCC(int);
+/* Wave 38 (W38-J). Copied verbatim from the PROMOTED definition in
+ * src/decomp/c_0804209C.c, which had no declaration here at all -- the only
+ * caller in C so far, sub_08029D3C, would not compile without it. The `bool8`
+ * return is what puts the `lsls #0x18; lsrs #0x18` re-narrowing at that call
+ * site, and the `s16` parameters are what narrow the two coordinate sums
+ * there, so the call site corroborates the definition rather than merely
+ * agreeing with it. */
+bool8 sub_0804209C(s16 x, s16 y);
 /* `int` and not `u8`, even though its body is a bare `ldrb`. The conclusion
  * stands but the evidence recorded here and in src/decomp/c_08042E18.c was the
  * WRONG CALLER, corrected in wave 12: sub_08042DFC is a bare
@@ -630,7 +647,17 @@ void sub_0803B524(int);
  *
  * sub_08039A58 is sub_080399F8's sibling -- sub_08039948 calls the two from
  * different arms of one switch with the identical (0x2b0, 8) argument pair.
- * sub_08039544 sets up no argument register at all.
+ * CORRECTED, wave 38 (W38-F): sub_08039544 was declared `void (void)` here
+ * because its one caller sub_080396F4 "sets up no argument register at all".
+ * That reading is wrong and the callee refutes it -- sub_08039544 opens
+ * `adds r4, r0, #0` and immediately does `ldrb r0, [r4]`, so r0 IS a
+ * parameter. The caller sets nothing up because the argument is already in
+ * r0: the pair is `sub_08039544(sub_08039F18(proc->unk54))`, sequential `bl`s
+ * carrying a nested call. That also corrects the claim below that
+ * sub_08039F18's result is discarded at that site -- it is consumed here.
+ *
+ * src/decomp/c_080396F4.c was updated to spell the nest and re-verified with
+ * try_match (still byte-identical).
  *
  * sub_08039F18 is `u8 *`, TRANSCRIBED from src/decomp/c_08039F18.c and not
  * inferred: its one readable call site (sub_080396F4) discards the result, so
@@ -641,7 +668,35 @@ void sub_0803B524(int);
  * promoted definition, read the definition; tools/proto_check.py is what
  * catches this, because per-function try_match compiles one unit and cannot. */
 void sub_080168BC(int);
-void sub_08039544(void);
+/* Wave 38 (W38-F). TRANSCRIBED from the promoted definition in
+ * src/decomp/c_080393CC.c, which had no declaration here -- sub_080394B4 is
+ * its first C caller and reaches both arguments with a bare `ldrsh` off an
+ * s16 member, which is how an s16 object feeds an `int` parameter. */
+/* Wave 38 (W38-F), the 0x08039xxx overworld-marker trio. All three are read
+ * off sub_08039188's call sites.
+ *
+ * sub_08039140's RETURN IS `u8`, and that is settled from its only caller, not
+ * from its body: sub_08039188 does `lsls r0,#0x18; cmp r0,#0; beq` on the
+ * result, which is agbcc re-narrowing a u8-returning callee (see sub_08039850
+ * and src/decomp/c_080397BC.c for the identical tell). An `int` return gives a
+ * bare `cmp r0,#0` there. src/decomp/c_08039140.c was retyped from `int` to
+ * match and re-verified with try_match -- its body returns literal 0/1, so the
+ * change is byte-neutral there and only the caller discriminates. Parameters
+ * are TRANSCRIBED from that definition.
+ *
+ * sub_08039064 and sub_080390CC take `u8`: sub_08039188 holds its `s8` loop
+ * counter in the shifted form `i << 24` and reaches both with
+ * `lsrs r5,r5,#0x18` -- a TRUNCATION of the s8 to 8 unsigned bits, which is
+ * what converting `s8` to a `u8` parameter costs and which an `int` or `s8`
+ * parameter could not produce (either would need `asrs`). Both RETURN `u8` on
+ * the same re-narrowing tell: each result is re-narrowed with `lsls #0x18`
+ * before it indexes gUnknown_0849D5C4, and sub_080390CC's is copied to a
+ * callee-saved register FIRST and narrowed later, at its use. */
+u8 sub_08039064(u8);
+u8 sub_080390CC(u8);
+u8 sub_08039140(u16, s16, u8, u8);
+void sub_0803941C(int, int);
+void sub_08039544(u8 *);
 void sub_08039930(int, ProcPtr);
 void sub_080399F8(int, int);
 void sub_08039A58(int, int);
@@ -744,7 +799,11 @@ void sub_080703F4(void);
 void sub_08070478(u16);
 void sub_080705AC(void);
 void sub_08070610(void *, u16);
-void sub_08071420(void *, u16, u16);
+/* Wave 38 (W38-A): retyped from `void *` to `struct MusicPlayerInfo *` when the
+ * body was matched -- it reads ident at +0x34, trackCount at +0x08 and tracks
+ * at +0x2c, so the struct is reached from C now. Callers passing `void *`
+ * convert implicitly. Same change made to sub_08071488 below. */
+void sub_08071420(struct MusicPlayerInfo *, u16, u16);
 /* Two more, both `full` in data/fe_matches.json and both leaves that end in a
  * bare `bx lr` -- m4aMPlayFadeOutPause (sub_08070620, from sub_0803B7D8) and
  * m4aMPlayFadeInContinue (sub_08070640, from sub_0803B804). The second
@@ -2068,7 +2127,17 @@ u8 sub_08074320(struct Unk030040D8 *);
  * passes it the already sign-extended `(s8)*proc->unk_2c` in r0 with no
  * narrowing in front of the `bl` -- so the parameter is word-wide, not `s8` --
  * and discards any result. */
-void sub_08074754(int);
+/* NARROWED in wave 38 (W38-B): `s16`, not `int`. Its own prologue opens
+ * `lsls r0,#0x10; lsrs r0,#0x10`, which is PROMOTE_MODE on a sub-word
+ * parameter and cannot appear for an `int` one, and every later use of the
+ * value re-sign-extends (`lsls #0x10; asrs #0x10`) -- the wave-11 reading, and
+ * the u16-at-entry/s16-at-use pair that pins the sign. sub_080747FC confirms
+ * it from the caller side: it holds the loop counter as a plain `int` and
+ * narrows with `lsls #0x10; asrs #0x10` in front of the `bl`. The wave-33
+ * reading above ruled out `s8`, which `s16` also satisfies -- sub_08074A28
+ * passes an already sign-extended `s8`, so gcc emits no extra narrowing there
+ * and c_08074A28.c is byte-identical under either spelling (re-verified). */
+void sub_08074754(s16);
 /* Wave 33, W33-E. All four are already PROMOTED (src/decomp/c_08074BDC.c and
  * src/decomp/c_08074C5C.c) and were never declared; these publish those
  * definitions unchanged. sub_08074C84 is the caller that needed them: it picks
@@ -2085,6 +2154,27 @@ int sub_08074C70(int);
  * nothing caught it; re-verified byte-for-byte after the change. */
 ProcPtr sub_08035584(struct Unk030040D8 *);
 void sub_08024454(void);
+/* Wave 38, W38-G. `u8 *` CONFIRMED, and the 28 call sites say more than the
+ * width: every one of them passes `gUnknown_08499590 + K` -- the map pointer
+ * plus a constant PLANE offset -- so the parameter is a plane base inside the
+ * map descriptor, never an arbitrary buffer. Read off asm/code-0801D390.s and
+ * src/decomp/c_0802E4B4.c: K = 0x2852 (sub_0802E2D0, sub_0802E4B4,
+ * sub_08038D7C, sub_0803E808 and c_0802E4B4.c), 0x2D5A (sub_08038D7C's other
+ * arm) and 0x193A (sub_080219AC). The one caller that does not spell the
+ * addition at the call site, sub_0803E9F8, forwards its own pointer parameter
+ * unchanged (`adds r0, r1, #0`), so it is not a counter-example.
+ *   That is what fixes the whole shape: the function rebuilds the
+ * gUnknown_03003340 row-pointer table as `a1 + rowOffset[y]` off the map's
+ * +0x417A halfword table, i.e. gUnknown_03003340 is a per-PLANE row index that
+ * is rebuilt whenever the active plane changes, not a fixed screen. K = 0x193A
+ * corroborates independently: unknown-globals.h has +0x193A typed `s8` with -1
+ * as its sentinel, and sub_0801FD9C reads gUnknown_03003340's rows through
+ * `ldrsb` treating negatives as empty -- producer and consumer agreeing on the
+ * signedness without either being able to see the other.
+ *   The declaration is NOT `u8 **` and the ROM's three-level load chain is not
+ * evidence of one: the pool word at 0x08090934 is agbcc's own -fforce-addr copy
+ * of &gUnknown_08499590 (see include/unknown-globals.h), and the honest
+ * spelling reproduces all three levels. */
 void sub_0801F92C(u8 *);
 void sub_080202A4(struct Unk030040D8 *);
 void sub_08022990(int, int, u16);
@@ -2302,6 +2392,12 @@ const struct Unk08074584 *sub_08074584(void);
  * signature copied verbatim from that definition. */
 const struct Unk085C77A0 *sub_08035000(int);
 u8 sub_08074484(u8 *, struct Unk030040D8 *, int);
+/* Already PROMOTED (src/decomp/c_08074570.c) and never declared here until
+ * wave 38 (W38-E); signature copied verbatim from that definition. Its only
+ * caller is sub_08074484, which does `adds r4, r0, #0` right after the `bl`
+ * and keeps walking the same 8-byte-stride record array through the result --
+ * so the pointer return and the `u8 *` parameter are both fixed by that use. */
+u8 *sub_08074570(u8 *);
 void sub_0802817C(void);
 u8 sub_08074460(void);
 /* sub_08034DB0 tests the result with a BARE `lsls #0x18` -- flags only, no
@@ -3759,6 +3855,25 @@ void sub_080409E8(int, int, int, int, int);
 bool8 sub_080422A8(s16, s16);
 bool8 sub_080421D0(struct Unk030040D8 *, s16, s16);
 bool8 sub_0804223C(struct Unk030040D8 *, s16, s16);
+/* Wave 38 (W38-K). Two more members of the same predicate cluster, both already
+ * PROMOTED (src/decomp/c_0804209C.c, src/decomp/c_0804247C.c) and neither
+ * declared anywhere until now -- signatures copied from the definitions except
+ * for sub_0804247C's return, corrected below.
+ *
+ * sub_0804247C was promoted as `int`. It is not: it is bool8, on exactly the
+ * wave-24 evidence recorded above for sub_080422A8. Its ONLY caller,
+ * sub_08041758, narrows the result with `lsls #0x18; lsrs #0x18` before
+ * `cmp #1` -- the value-kept form agbcc emits only for a narrow-returning
+ * callee, never for an `int` one. The definition's body is byte-neutral either
+ * way (it returns literal 0 or 1, so there is nothing to re-narrow), which is
+ * why `int` survived promotion unchallenged; c_0804247C.c was re-run through
+ * trymatch after this edit and still matches byte-for-byte.
+ * This also brings it into line with sub_0804236C, its near-twin: the two are
+ * the same shape over different tables and their two callers, sub_0804151C and
+ * sub_08041758, differ in ONE instruction (the `bl` target) and nothing else --
+ * which is only possible if the two callees agree on return width. */
+bool8 sub_0804236C(s16, s16);
+bool8 sub_0804247C(s16, s16);
 bool8 sub_0802C8F8(void);
 bool8 sub_0802C958(void);
 /* sub_0802CBA0 is matched in wave 24 and four of its neighbours call it
@@ -4222,7 +4337,10 @@ u8 sub_0803BB74(void);
  * ends `pop {r0}; bx r0`, so it is `void(u16)` -- the same unit index
  * sub_0804C400 takes. */
 void sub_080324C4(int, int, u8);
-int sub_08029AF8(void *, u16, u8);
+/* Wave 38 (W38-J): same object as sub_08029978 / sub_08029A48 above, and
+ * retyped on the same evidence -- it walks unk00 (the `* 0x5c` subscript into
+ * gUnknown_085D5ABC) and the unk04_0:7 field, clamping the latter at 100. */
+int sub_08029AF8(struct Unk08499594 *, u16, u8);
 void sub_08053670(u16);
 
 /* The three callees of sub_08043418.
@@ -4439,6 +4557,16 @@ struct Unk02028360 *sub_0803DE94(int, int);
  * shift pairs and moves the loads, and it also forces a narrowing into
  * sub_0803E310's argument setup. */
 void sub_0803DF98(int, struct Unk02028360Pos *);
+/* Wave 38, W38-C. Appends one record to *gUnknown_03003338; defined in
+ * src/decomp/c_0803E560.c. The four parameters are `u16` on CALLER evidence
+ * only -- the callee body compiles byte-identically with `int`, see the note in
+ * that file. sub_0803E764 and sub_0803E6C4 both narrow exactly the arguments
+ * that are not already provably 16-bit and leave the `ldrh`/`ldrb` results
+ * alone, which is implicit conversion to a u16 parameter rather than four
+ * explicit casts. Note this is NOT the "no prologue narrowing" rule: that rule
+ * holds for STACK parameters (see sub_0803E088 above), and these four are all
+ * register parameters, where PROMOTE_FUNCTION_ARGS leaves the callee clean. */
+void sub_0803E560(u16, u16, u16, u16);
 void *sub_0803E01C(int, int, int, int, int, int);
 void *sub_0803E088(int, int, int, int, int, int, int, int, int, int);
 void *sub_0803E7C0(int, int);
@@ -4480,6 +4608,12 @@ int sub_0801A7D8(u8, void *, int);
 int sub_08016BC0(void *);
 void sub_08016C70(u8);
 void sub_08016E14(void);
+/* Wave 38, W38-H: both promoted already (src/decomp/c_08016E8C.c and
+ * src/decomp/c_08017870.c) but never declared, because nothing had called
+ * either across a file boundary until sub_08016ED8 and sub_08016A54.
+ * sub_08017870's parameter pair is the promoted definition's, not a guess. */
+void sub_08016E8C(void);
+void sub_08017870(int, u8);
 
 /* ---- wave 29, W29-B: address-locality blocks 0x0803A and 0x08084 -------- */
 /* The two gUnknown_03004100 consumers sub_0803AA78 chains. Argument 1 of both
@@ -5568,8 +5702,14 @@ void sub_08076B20(void);
  * passes its own s32 first argument and `mov r1, sp`, then reads back an s16 at
  * +0x02, an s16 at +0x04 and a word at +0x08. +0x00 is written by the callee
  * but never read by that caller, so the record's own layout is only partly
- * known -- the parameter is `void *` here for that reason. */
-void sub_08074834(s32, void *);
+ * known -- the parameter is `void *` here for that reason.
+ * TYPED in wave 38 (W38-B): the record is `struct Unk0202FE38` -- the function
+ * is the lookup half of the same 12-byte list sub_08074754 appends to, and it
+ * copies +0x00/+0x02/+0x04/+0x08 out of the matching entry field by field. It
+ * also RETURNS: 1 on a hit (after compacting the array over the removed
+ * entry) and 0 when the scan runs off the end of the 16 slots, which the old
+ * `void` could not express. */
+int sub_08074834(s32, struct Unk0202FE38 *);
 
 /* Returns a u8 -- sub_08075BF4 re-narrows the result with `lsls #0x18; lsrs
  * #0x18` before storing it, which is agbcc re-narrowing a narrow-returning
@@ -5996,7 +6136,9 @@ void sub_0803F29C(int *, int *, int);
 void sub_08035760(ProcPtr, void *);
 void sub_08035DF4(void *);
 void sub_08035E90(ProcPtr);
-void sub_08071488(void *, u16, s16);
+/* Wave 38 (W38-A): first parameter retyped from `void *` to
+ * `struct MusicPlayerInfo *` -- see sub_08071420. */
+void sub_08071488(struct MusicPlayerInfo *, u16, s16);
 
 /* ---- wave 28 (W28-A extension): the 0x08036000 block ---- */
 
@@ -6793,6 +6935,10 @@ void sub_08028874(int, int);
 void sub_08028894(int, int);
 u8 sub_080288D8(u16);
 u8 sub_08028904(u16);
+/* Wave 38, W38-I. Was undeclared even though src/decomp/c_08028944.c has been
+ * promoted since wave 32; sub_08028A68 and sub_08028AEC are the first callers
+ * outside its own file. Text copied from that definition. */
+bool8 sub_08028944(u16);
 u8 sub_08028990(u16);
 u8 sub_080289BC(int);
 void sub_08028568(void);
@@ -7474,6 +7620,22 @@ void sub_0806FBD4(void *);
 void sub_080708EC(u32);
 void sub_08070668(struct MusicPlayerInfo *);
 void sub_080714FC(struct MusicPlayerInfo *, u16, s8);
+/* Wave 38 (W38-A): m4a ClearModM, already DEFINED in src/decomp/c_08071564.c as
+ * `void sub_08071564(struct MusicPlayerTrack *)` but never declared here. Its
+ * two callers sub_08071584 and sub_080715F8 pass the loop's own track pointer
+ * straight through in r0, which agrees. The definition wins, not this line. */
+void sub_08071564(struct MusicPlayerTrack *);
+/* Wave 38 (W38-A): m4a ModDepthSet / LFOSpeedSet -- the two MPlay*Control entry
+ * points that call ClearModM. Third parameter is u8 in both: `lsls #0x18;
+ * lsrs #0x18` at entry and a bare `strb` into `mod` (+0x17) / `lfoSpeed`
+ * (+0x19). Both have fan-in 0, so nothing corroborates from a call site. */
+void sub_08071584(struct MusicPlayerInfo *, u16, u8);
+void sub_080715F8(struct MusicPlayerInfo *, u16, u8);
+/* Wave 38 (W38-A): the wave-27 palette pair, already DEFINED in
+ * src/decomp/c_08071C84.c as `void (int)` but never declared here. Declared now
+ * because sub_08071CC4 / sub_08071CDC call them. The definitions win. */
+void sub_08071C84(int);
+void sub_08071CA4(int);
 void sub_08073228(const void *, void *, u16, ProcPtr);
 void sub_0806CFC8(int, int);
 void sub_0806D050(int, int);
@@ -7495,7 +7657,16 @@ void sub_0806DDF4(void);
  * (r0-r3 plus `[sp]` and `[sp,#4]`), sub_0801FAC4 takes 5. sub_0803AB3C and
  * sub_0803D6D0 get no argument set up at all. */
 void sub_0803AB3C(void);
-void sub_08071948(u16 *, int, int, const void *, int);
+/* Wave 38 (W38-A): fifth parameter retyped `int` -> `u16`. It arrives on the
+ * stack and the ROM normalises it `ldr r0,[sp,#0x18]; lsls r0,#0x10;
+ * lsrs r6,r0,#0x10` -- that is PROMOTE_MODE's prologue zero-extension of a
+ * sub-word parameter, which an `int` does not get, and with `int` the function
+ * is two instructions short at entry. All three promoted callers
+ * (c_0803A338.c, c_0803A4A8.c, c_08046D30.c) pass the literal 0x8360, so the
+ * narrowing is a compile-time no-op there; all three re-verified byte-for-byte
+ * after this change. It is a BG tilemap entry (palette 8 | tile 0x360), which
+ * is 16-bit anyway. */
+void sub_08071948(u16 *, int, int, const void *, u16);
 /* W35-E: sub_0803D6FC is DEFINED in src/decomp/c_0803D6B8.c (not c_0803D6FC.c),
  * which is why a glob for its own file missed it. Signature copied verbatim. */
 struct Unk3D6FC;

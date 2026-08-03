@@ -178,6 +178,7 @@ def duplicates(recs, bodies):
     """
     strict = collections.defaultdict(list)
     loose = collections.defaultdict(list)
+    callee = collections.defaultdict(list)
     for r in recs:
         body = bodies.get(r["name"])
         if not body or len(body[0]) < 4:
@@ -187,8 +188,41 @@ def duplicates(recs, bodies):
         loose[digest(list(insns) + ["POOL"] + ["#%d" % i
                                                for i in range(len(pool))])
               ].append(r)
+        callee[digest(normalise_callees(insns) + ["POOL"]
+                      + ["#%d" % i for i in range(len(pool))])].append(r)
     return ({k: v for k, v in strict.items() if len(v) > 1},
-            {k: v for k, v in loose.items() if len(v) > 1})
+            {k: v for k, v in loose.items() if len(v) > 1},
+            {k: v for k, v in callee.items() if len(v) > 1})
+
+
+BL_TARGET = re.compile(r"^bl (sub_[0-9A-Fa-f]{8})$")
+
+
+def normalise_callees(insns):
+    """Instruction stream with `bl sub_XXXXXXXX` targets replaced by an index.
+
+    WAVE 38. The strict and loose tiers both key on the literal callee name, so
+    two functions that are ONE SHAPE calling a different sibling do not group --
+    and that turns out to be a common way for this ROM to repeat itself.
+    sub_08028A68 and sub_08028AEC are 132 bytes each, 56 instructions each, and
+    differ in exactly one thing: four `bl` sites naming sub_08028894 against
+    sub_08028874. Neither the strict nor the loose tier saw them; the wave-38
+    orchestrator found the pair by hand while batching, which is not a screen.
+
+    Indexing by ORDER OF FIRST APPEARANCE rather than erasing the name keeps the
+    tier honest: two functions calling three different callees still only group
+    if they call them in the same PATTERN. One derivation gives every member --
+    the callee is a parameter of the transcription, not new work.
+    """
+    seen = {}
+    out = []
+    for t in insns:
+        m = BL_TARGET.match(t)
+        if not m:
+            out.append(t)
+            continue
+        out.append("bl CALLEE#%d" % seen.setdefault(m.group(1), len(seen)))
+    return out
 
 
 def overlaps(targets, matched, min_shared, min_j):
@@ -455,7 +489,7 @@ def report(args):
     print("pairs: %d   distinct unmatched functions: %d   bytes: %d"
           % (len(pairs), len(covered), sum(v[0]["size"] for v in covered.values())))
 
-    strict, loose = duplicates(recs, bodies)
+    strict, loose, by_callee = duplicates(recs, bodies)
 
     def kinds(group):
         st = set(r["status"] for r in group)
@@ -515,6 +549,31 @@ def report(args):
             continue
         if max(r["size"] for r in g) < args.min_size:
             continue
+        print("    %5dB  %-9s %s"
+              % (g[0]["size"], kinds(g),
+                 "  ".join("%s[%s]" % (r["name"], r["status"]) for r in g)))
+        shown += 1
+        if shown >= args.top:
+            break
+    if not shown:
+        print("    (none)")
+
+    # WAVE 38: the callee-normalised tier. Reported separately from strict and
+    # loose because it is a WEAKER claim -- one shape whose `bl` targets differ
+    # -- but it is the tier that catches this ROM's commonest repeat, and the
+    # first pair it found was invisible to both of the others.
+    print("\n  CALLEE-NORMALISED groups (one shape, different `bl` targets --"
+          "\n  derive one member, transcribe the rest with the callee swapped):")
+    seen_sets = set(frozenset(r["name"] for r in g)
+                    for g in list(strict.values()) + list(loose.values()))
+    shown = 0
+    for g in sorted(by_callee.values(), key=lambda g: -sum(r["size"] for r in g)):
+        if all(r["status"] == "matched" for r in g):
+            continue
+        if max(r["size"] for r in g) < args.min_size:
+            continue
+        if frozenset(r["name"] for r in g) in seen_sets:
+            continue          # already reported by a stronger tier
         print("    %5dB  %-9s %s"
               % (g[0]["size"], kinds(g),
                  "  ".join("%s[%s]" % (r["name"], r["status"]) for r in g)))
@@ -665,10 +724,17 @@ def blocks(recs, args):
     matched_addrs = sorted(addr[r["name"]] for r in named
                            if r["status"] == "matched")
 
+    # Wave 37: the loop filter was the fourth and largest screen artifact.
+    # `--allow-loops` lifts it; the band it admits measured at or above the
+    # straight-line hit rate. Loop candidates are marked `[loop]` in the
+    # listing so a batch can still be kept to one kind if a wave wants that.
+    def in_band(r):
+        return (r["status"] == "asm" and r["mode"] == "THUMB"
+                and not r["trivial"]
+                and (args.allow_loops or r["backward_branches"] == 0))
+
     pool = [r for r in named
-            if r["status"] == "asm" and r["mode"] == "THUMB"
-            and args.block_min <= r["size"] <= args.block_max
-            and r["backward_branches"] == 0 and not r["trivial"]]
+            if in_band(r) and args.block_min <= r["size"] <= args.block_max]
 
     # Wave 33: the CEILING is a floor artifact too. At the old default of 72
     # this screen read "2 blocks, 3 candidates" -- indistinguishable from an
@@ -676,10 +742,15 @@ def blocks(recs, args):
     # Report what the ceiling excludes, exactly as --min-size reports its
     # floor, so the next artifact self-reports instead of waiting for a wave
     # to stumble on it.
-    above = [r for r in named
-             if r["status"] == "asm" and r["mode"] == "THUMB"
-             and r["size"] > args.block_max
-             and r["backward_branches"] == 0 and not r["trivial"]]
+    above = [r for r in named if in_band(r) and r["size"] > args.block_max]
+
+    # And report what the LOOP filter excludes, for the same reason the
+    # ceiling and the floor report theirs.
+    loops_hidden = [] if args.allow_loops else [
+        r for r in named
+        if r["status"] == "asm" and r["mode"] == "THUMB" and not r["trivial"]
+        and r["backward_branches"] > 0
+        and args.block_min <= r["size"] <= args.block_max]
 
     by_block = collections.defaultdict(list)
     for r in pool:
@@ -698,8 +769,10 @@ def blocks(recs, args):
     # key any more -- see the wave-30 comment above.
     rows.sort(key=lambda x: (len(x[5]) / float(x[0]), -x[0]))
 
-    print("\n== ADDRESS-LOCALITY BLOCKS (%d-%dB, straight-line, non-trivial, "
+    print("\n== ADDRESS-LOCALITY BLOCKS (%d-%dB, %s, non-trivial, "
           ">= %d matched in block) ==" % (args.block_min, args.block_max,
+                                          "loops INCLUDED" if args.allow_loops
+                                          else "straight-line",
                                           args.block_min_matched))
     print("blocks: %d   candidate functions: %d   bytes: %d"
           % (len(rows), sum(r[0] for r in rows),
@@ -710,6 +783,12 @@ def blocks(recs, args):
               % (args.block_max, len(above), sum(r["size"] for r in above)))
         print("  A dry result here is a statement about THIS CEILING, not the "
               "corpus (wave 33).")
+    if loops_hidden:
+        print("EXCLUDED BY THE LOOP FILTER: %d unmatched THUMB functions in "
+              "band, %d bytes,\n  have backward branches. Wave 37 measured "
+              "that band at 39/41 and 62-166 B/attempt --\n  pass "
+              "--allow-loops to screen them."
+              % (len(loops_hidden), sum(r["size"] for r in loops_hidden)))
     print("  Cost is the block's VOCABULARY, not its shapes -- see blocks().")
     print("  Give ONE block per agent and name each target's nearest matched")
     print("  neighbour as its exemplar. Tell the agent the shapes are NOT")
@@ -744,9 +823,11 @@ def blocks(recs, args):
             ex = [u for u in promoted_units if u <= near]
             exf = "src/decomp/c_%08X.c" % max(ex) if ex else None
             offered.append((r, near, exf))
-            print("    %-16s %3dB calls=%-2d refs=%-2d  nearest sub_%08X  %s"
+            print("    %-16s %3dB calls=%-2d refs=%-2d  nearest sub_%08X  %s%s"
                   % (r["name"], r["size"], len(r["calls"]),
-                     len(r["data_refs"]), near, exf or "?"))
+                     len(r["data_refs"]), near, exf or "?",
+                     "  [loop x%d]" % r["backward_branches"]
+                     if r["backward_branches"] else ""))
         # NO SILENT CAPS. This listing IS the batching list, so a block that
         # says "19 candidates" and prints 14 hands the next wave a short batch
         # that looks complete. Wave 26 caught it only by comparing the two
@@ -929,6 +1010,17 @@ def main():
                    help="targets listed per block; ~13 is one agent's batch")
     p.add_argument("--no-blocks", action="store_true",
                    help="skip the address-locality screen")
+    p.add_argument("--allow-loops", action="store_true",
+                   help="also offer functions with backward branches. Every "
+                        "band screen since wave 16 hard-filtered "
+                        "backward_branches == 0 on the theory that a loop is "
+                        "one COUPLED decision. WAVE 37 REFUTED THAT: seven "
+                        "agents measured 39 of 41 loop functions matched at "
+                        "62-166 bytes/attempt, at or above the straight-line "
+                        "rate, with every miss pointing at itself. 869 clean "
+                        "loop functions / 227,912 bytes sit behind this filter "
+                        "against 244 / 41,078 in front of it -- the fourth "
+                        "screen artifact in this tool and by far the largest")
     p.add_argument("--self-test", action="store_true")
     p.add_argument("--include-parked", action="store_true",
                    help="also screen parked functions as targets; implied by "

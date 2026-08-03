@@ -1,0 +1,115 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08074754.
+ * sub_08074754 @ 0x08074754, sub_080747FC @ 0x080747FC, sub_08074834 @ 0x08074834
+ */
+
+#include "proc.h"
+
+/* Appends one marker to the 12-byte record list at &gUnknown_0202FDFC.unk3c:
+ * scan to the -1 terminator, fill that slot from gUnknown_08615194[id], and
+ * re-terminate the slot after it. See gUnknown_0202FE38 in
+ * include/unknown-globals.h for the record type and for why the list and the
+ * struct are one symbol.
+ * The zero-trip `do { } while (0)` is the wave-17 register-allocation lever and
+ * it is load-bearing here: without it the cursor and gUnknown_08615194[id]
+ * swap r5 and r6, an otherwise instruction-identical 91.1%. Binding the base
+ * to `new_var` alone does NOT do it -- that was tested separately and still
+ * scored 91.1%, so the wrapper is the whole effect. Found by the permuter.
+ */
+void sub_08074754(s16 id)
+{
+  const struct Unk08615194 *r;
+  struct Unk0202FE38 *p;
+  s16 *new_var;
+  struct Unk0801C210 *sprite;
+  int mode;
+  new_var = &gUnknown_0202FDFC.unk3c;
+  for (p = (struct Unk0202FE38 *) new_var; p->unk00 != (-1); p++)
+  {
+    ;
+  }
+
+  mode = 1;
+  r = &gUnknown_08615194[id];
+  if (r->unk02 & 4)
+  {
+    mode = 2;
+  }
+  if (r->unk02 & 8)
+  {
+    mode = 3;
+  }
+  sprite = sub_0801C210(gUnknown_081D2930, 1, 1);
+  sub_0801C4D4(sprite, mode);
+  p->unk08 = sprite;
+ do { p->unk02 = r->unk06; p->unk04 = r->unk08; } while (0);
+  p->unk00 = id;
+  gUnknown_0202FDFC.unk12[id] |= r->unk02;
+  p[1].unk00 = -1;
+}
+
+/* Re-announces every already-live marker: one pass over the 42 owner bytes,
+ * calling sub_08074754 for each that has bit 0 set. The `|= 1` afterwards is
+ * redundant against the test that guards it, but it is what the ROM does --
+ * `movs r6,#1` is hoisted out of the loop and reused by the `orrs`.
+ * The `lsls #0x10; asrs #0x10` in front of the `bl` is the s16 conversion of
+ * the plain `int` counter; see sub_08074754 in include/unknown-functions.h.
+ */
+void sub_080747FC(void)
+{
+    int i;
+
+    for (i = 0; i <= 0x29; i++)
+    {
+        if (gUnknown_0202FDFC.unk12[i] & 1)
+        {
+            sub_08074754(i);
+            gUnknown_0202FDFC.unk12[i] |= 1;
+        }
+    }
+}
+
+/* The lookup-and-remove half of the 12-byte record list sub_08074754 appends
+ * to; see gUnknown_0202FE38 in include/unknown-globals.h. The record base is
+ * reached through agbcc's own -fforce-addr word (the ROM's `gUnknown_081CC4C0`
+ * is that word, not a table), which is why the second loop RELOADS the base
+ * rather than keeping it live -- naming the object at each use is what puts it
+ * there. The compaction loop needs its OWN counter: sharing `i` with the
+ * search loop makes one long-lived allocno and swaps three registers.
+ */
+int sub_08074834(s32 id, struct Unk0202FE38 *out)
+{
+    struct Unk0202FE38 *p;
+    int i;
+    int j;
+
+    p = (struct Unk0202FE38 *)&gUnknown_0202FDFC.unk3c;
+
+    for (i = 0; i < 16; i++)
+    {
+        if (p->unk00 == id)
+        {
+            out->unk00 = p->unk00;
+            out->unk02 = p->unk02;
+            out->unk04 = p->unk04;
+            out->unk08 = p->unk08;
+            break;
+        }
+
+        p++;
+    }
+
+    if (i == 16)
+        return 0;
+
+    p = (struct Unk0202FE38 *)&gUnknown_0202FDFC.unk3c;
+
+    for (j = i + 1; j < 16; j++)
+        p[j - 1] = p[j];
+
+    return 1;
+}

@@ -205,7 +205,16 @@ $(BUILD_DIR)/%.d: %.c
 	@$(CPP) $(CPPFLAGS) $< -o $@ -MM -MG -MT $@ -MT $(BUILD_DIR)/$*.o
 
 # C object
-$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)/%.d
+#
+# The overrides makefile is a prerequisite, not just an `-include`: a
+# target-specific `CC1 :=` changes how an object is BUILT but does not make an
+# existing .o out of date, so make happily keeps one compiled by the previous
+# toolchain. Wave 38 added two old_agbcc entries, regenerated the .mk, rebuilt,
+# and got a 12-byte ROM mismatch inside exactly those two functions -- the .o
+# was simply never recompiled. gen_overrides_mk.py writes only when the CONTENT
+# changes, so this costs a full rebuild when the override set really changes
+# (four times in 38 waves) and nothing on an ordinary wave.
+$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)/%.d $(BUILD_DIR)/compiler-overrides.mk
 	@echo "[ CC]	$<"
 	@$(CPP) $(CPPFLAGS) $< | iconv -f UTF-8 -t CP932 | $(CC1) $(CFLAGS) -o $(BUILD_DIR)/$*.s
 	@printf ".text\n\t.align\t2, 0\n" >> $(BUILD_DIR)/$*.s
