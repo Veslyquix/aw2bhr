@@ -694,7 +694,20 @@ def blocks(recs, args):
     #   - promoted (status matched)                -> free, even if undeclared
     #     (the definition exists; wave 30 had three of these and each cost
     #     nothing)
-    #   - anything else named by a `bl`            -> the real per-block cost
+    #   - anything else named by a `bl`            -> declarations to WRITE
+    #
+    # WAVE 31 THEN REFUTED THE COUNT AS A COST RANKING, from both directions
+    # in one wave: W31-A's callee-HEAVY tier went 20/20 while both its parks
+    # came from the ONE-undeclared tier, and W31-C's nine-undeclared block was
+    # the cheapest it touched. An undeclared callee called with literals
+    # constrains nothing -- arity and void-ness read off the callee's own
+    # prologue -- so the count predicts WORK (declarations an agent must
+    # write), not COST (attempts). It is printed per block as a workload note
+    # and is NO LONGER THE SORT KEY. Blocks list in ADDRESS ORDER, which is
+    # the one batching signal that has survived measurement (wave 34:
+    # adjacency tracked hit rate almost monotonically while size and count
+    # were flat; feeding slots in address order compounds vocabulary because
+    # each finished block hands the next its callees and drafts).
     declared = set()
     try:
         with open(os.path.join(awlib.REPO, "include", "unknown-functions.h"),
@@ -764,10 +777,13 @@ def blocks(recs, args):
             continue
         und = undeclared_callees(fns)
         rows.append((len(fns), n_matched, n_units, blk, fns, und))
-    # Cheapest first: fewest undeclared callees PER CANDIDATE (the measured
-    # cost signal), then most candidates. Density is deliberately not in the
-    # key any more -- see the wave-30 comment above.
-    rows.sort(key=lambda x: (len(x[5]) / float(x[0]), -x[0]))
+    # ADDRESS ORDER, deliberately: the undeclared-callee ratio was the sort
+    # key from wave 30 until wave 39, and wave 31 had already refuted it as a
+    # cost ranking (see the comment above undeclared_callees). Address order
+    # is the signal wave 34 validated and the order waves feed slots in
+    # anyway -- a sort the orchestrator overrides every wave is worse than
+    # none, because --top-blocks truncates on it.
+    rows.sort(key=lambda x: x[3])
 
     print("\n== ADDRESS-LOCALITY BLOCKS (%d-%dB, %s, non-trivial, "
           ">= %d matched in block) ==" % (args.block_min, args.block_max,
@@ -800,12 +816,13 @@ def blocks(recs, args):
               "(%d matched, %d promoted units in block)"
               % (blk, n, sum(f["size"] for f in fns), n_matched, n_units))
         if und:
-            print("    undeclared callees: %d -- %s%s"
+            print("    undeclared callees: %d (declarations to WRITE -- a "
+                  "workload note, not a cost rank; wave 31) -- %s%s"
                   % (len(und), " ".join(und[:6]),
                      " (+%d more)" % (len(und) - 6) if len(und) > 6 else ""))
         else:
             print("    undeclared callees: 0 -- every bl target is declared"
-                  " or promoted; the CHEAPEST kind of block (wave 30)")
+                  " or promoted")
         shown = 0
         for r in sorted(fns, key=lambda x: addr[x["name"]])[:args.per_block]:
             a = addr[r["name"]]
