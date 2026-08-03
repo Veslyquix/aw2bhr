@@ -229,8 +229,36 @@ def section_relocs(obj_rel, section):
     return out
 
 
+def _thumb_functions():
+    """Names of THUMB functions, for the linker's T bit on ABS32 relocs.
+
+    An R_ARM_ABS32 against a THUMB function links to S + A with bit 0 SET --
+    the interworking T bit -- so a `.rodata` word holding `.word sub_XXXX`
+    lands in the ROM as the address | 1. Resolving `base + addend` alone
+    misses every such word by exactly one, which is how a finished
+    function-pointer table read as a relocation mismatch for a whole wave
+    (sub_0802CDA4, wave 39).
+    """
+    if _thumb_functions.cache is None:
+        names = set()
+        try:
+            with open(os.path.join(awlib.DATA_DIR, "functions.json"),
+                      encoding="utf-8") as fh:
+                data = json.load(fh)
+            for f in (data["functions"] if isinstance(data, dict) else data):
+                if f.get("mode") == "THUMB":
+                    names.add(f["name"])
+        except (OSError, ValueError, KeyError, TypeError):
+            pass
+        _thumb_functions.cache = names
+    return _thumb_functions.cache
+
+
+_thumb_functions.cache = None
+
+
 def pool_word_equivalent(cand_o, rodata_off, rom_addr):
-    """True if the candidate's own `.rodata` word will hold the ROM's bytes.
+    """ROM word addresses the candidate's `.rodata` reproduces, else None.
 
     A draft that names a global directly the way the original source did makes
     agbcc park the address in THIS unit's `.rodata` (a `-fforce-addr` pool word),
@@ -239,40 +267,68 @@ def pool_word_equivalent(cand_o, rodata_off, rom_addr):
     data/data.s supplies. Both link to the same byte once the build places the
     word at that address, which tools/split_rodata.py now does.
 
-    The check is the substantive one rather than a name comparison: resolve what
-    the candidate's `.rodata` word will contain, and require it to equal the word
-    the ROM actually has at the address the original's code loads. If those agree
-    then promoting with a `rodata` entry naming `rom_addr` reproduces the ROM.
+    THE UNIT OF ACCEPTANCE IS THE WHOLE SECTION, NOT ONE WORD (wave 39). The
+    build places the candidate object's ENTIRE `.rodata` at the carve address
+    -- split_rodata.py's own build() comment says placing per word would emit
+    the section once per word and overrun the next piece -- so what must equal
+    the ROM is every byte the section will occupy, anchored where the `.text`
+    reference says its start lands (`rom_addr - rodata_off`). That closes two
+    holes at once:
+
+    - A MULTI-WORD blob (sub_0802CDA4's `void (*[4])()` initialiser template,
+      four `.word sub_XXXX` entries) was rejected by the old single-word check
+      even at 0 differing `.text` bytes, because only the referenced word was
+      examined and its T bit was not applied.
+    - Two pool words whose ROM homes are NOT adjacent could each pass a
+      per-word check and then fail at link time, since the section links
+      contiguously. Whole-section comparison rejects that up front.
+
+    Words carrying a relocation resolve the way the linker will (S + A from
+    the inline addend, T bit for THUMB functions); words without one must
+    match the ROM raw. On success returns the ROM address of EVERY word the
+    section covers -- the full `"rodata"` list the promotion must carry.
     """
     rom_path = os.path.join(awlib.REPO, "baserom.gba")
-    if not os.path.exists(rom_path) or not (0x08000000 <= rom_addr < 0x0A000000):
-        return False
+    if not os.path.exists(rom_path):
+        return None
+    sect_base = rom_addr - rodata_off
+    if not (0x08000000 <= sect_base < 0x0A000000):
+        return None
     rel = {o: (t, s) for o, t, s in section_relocs(cand_o, ".rodata")}
-    if rodata_off not in rel:
-        return False
-    typ, sym = rel[rodata_off]
-    if typ != "R_ARM_ABS32":
-        return False
-    name, extra = _split_sym(sym)
-    base = sym_addr(name, symbol_addresses())
-    if base is None:
-        return False
     prefix = agbenv.makefile_var("PREFIX") or "arm-none-eabi-"
     out_rel = "build/probe/_cand_rodata.bin"
     os.makedirs(os.path.join(awlib.REPO, "build", "probe"), exist_ok=True)
     rc, _, _ = agbenv.run('%sobjcopy -O binary --only-section=.rodata "%s" "%s"'
                           % (prefix, cand_o, out_rel))
     if rc != 0:
-        return False
+        return None
     data = open(os.path.join(awlib.REPO, out_rel.replace("/", os.sep)), "rb").read()
-    if rodata_off + 4 > len(data):
-        return False
-    value = base + extra + int.from_bytes(
-        data[rodata_off:rodata_off + 4], "little")
+    if not data or len(data) % 4 or rodata_off >= len(data):
+        return None
+    syms = symbol_addresses()
     with open(rom_path, "rb") as fh:
-        fh.seek(rom_addr - 0x08000000)
-        rom_word = int.from_bytes(fh.read(4), "little")
-    return value == rom_word
+        fh.seek(sect_base - 0x08000000)
+        rom = fh.read(len(data))
+    if len(rom) != len(data):
+        return None
+    for off in range(0, len(data), 4):
+        rom_word = int.from_bytes(rom[off:off + 4], "little")
+        if off in rel:
+            typ, sym = rel[off]
+            if typ != "R_ARM_ABS32":
+                return None
+            name, extra = _split_sym(sym)
+            base = sym_addr(name, syms)
+            if base is None:
+                return None
+            value = base + extra + int.from_bytes(data[off:off + 4], "little")
+            if name in _thumb_functions():
+                value |= 1
+            if value != rom_word:
+                return None
+        elif data[off:off + 4] != rom[off:off + 4]:
+            return None
+    return [sect_base + off for off in range(0, len(data), 4)]
 
 
 pool_word_equivalent.needed = []
@@ -342,9 +398,11 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o=None):
         if c_name == ".rodata" and cand_o is not None:
             rodata_off = c_extra + int.from_bytes(
                 cand_fn[c_off:c_off + 4], "little")
-            if not pool_word_equivalent(cand_o, rodata_off, t_addr):
+            words = pool_word_equivalent(cand_o, rodata_off, t_addr)
+            if words is None:
                 return False
-            pool_word_equivalent.needed.append((t_addr, rodata_off))
+            pool_word_equivalent.needed.extend(
+                (w, rodata_off) for w in words)
             sites.append(t_off)
             continue
 
@@ -834,6 +892,21 @@ def self_test():
     good = (rc == 2)
     print("\n[self-test] an ordinary missing draft is still a hard failure "
           "(sub_08079EA4's 5-member unit): %s" % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    # Wave 39: a MULTI-WORD .rodata blob (sub_0802CDA4's function-pointer
+    # initialiser template -- four `.word sub_XXXX` entries whose linked
+    # values carry the THUMB T bit) is accepted, and the promotion hint
+    # carries EVERY word. The build places the whole section, so a partial
+    # list would overrun the next rodata piece; asserting the exact four
+    # addresses pins both the acceptance and the completeness of the hint.
+    print()
+    rc = check("sub_0802CDA4")
+    words = sorted({a for a, _ in pool_word_equivalent.needed})
+    good = (rc == 0 and
+            words == [0x08090BE4, 0x08090BE8, 0x08090BEC, 0x08090BF0])
+    print("\n[self-test] a multi-word .rodata blob is accepted with every "
+          "word listed (sub_0802CDA4): %s" % ("PASS" if good else "FAIL"))
     ok &= good
 
     print("\n[self-test] %s" % ("PASS" if ok else "FAIL"))

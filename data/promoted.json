@@ -7905,6 +7905,21 @@
   "size": 124
  },
  {
+  "file": "src/decomp/c_0802CDA4.c",
+  "obj": "src/decomp/c_0802CDA4.o",
+  "addr_hex": "0x0802CDA4",
+  "functions": [
+   "sub_0802CDA4"
+  ],
+  "size": 96,
+  "rodata": [
+   "0x08090BE4",
+   "0x08090BE8",
+   "0x08090BEC",
+   "0x08090BF0"
+  ]
+ },
+ {
   "file": "src/decomp/c_0802CE04.c",
   "obj": "src/decomp/c_0802CE04.o",
   "addr_hex": "0x0802CE04",
