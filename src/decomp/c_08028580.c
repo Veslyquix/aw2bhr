@@ -1,0 +1,168 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08028580.
+ * sub_08028580 @ 0x08028580
+ */
+
+/* MATCHED byte-for-byte (592/592).
+ *
+ * PROMOTION NOTE -- this match needs its .rodata pool words PLACED. Add to this
+ * function's data/promoted.json entry:
+ *     "rodata": ["0x08090B50", "0x08090B54"]
+ * then re-run tools/split_rodata.py and tools/gen_lds.py before building. Those
+ * two words are agbcc's own -fforce-addr address constants for
+ * &gUnknown_08499598 and &gUnknown_08499590; writing the globals' names
+ * honestly reproduces the ROM's three-level `ldr rN,=<word>; ldr rN,[rN];
+ * ldr rD,[rN]` exactly, which is why neither needs a declaration. Both symbols
+ * ALSO appear as ordinary inline pool words elsewhere in this same function --
+ * one honest name, two spellings, same as src/decomp/c_080240B4.c.
+ *
+ * THE LAST 10 BYTES, and the reusable rule behind them. The function sat at
+ * 98.3% with size exact and a single divergent statement,
+ * `gUnknown_08499594[v].unk05_3 = 0;`: same six instructions, but the ROM
+ * computes `v * 12` BEFORE dereferencing the pointer global, and the plain
+ * subscript dereferences it immediately.
+ *
+ *     original                          plain subscript (WRONG)
+ *     ldr  r1, [pc, #112]  &g           ldr  r0, [pc, #112]
+ *     lsls r0, r4, #1                   ldr  r0, [r0, #0]      <- eager
+ *     adds r0, r0, r4                   lsls r1, r4, #1
+ *     lsls r0, r0, #2                   adds r1, r1, r4
+ *     ldr  r1, [r1, #0]    *g           lsls r1, r1, #2
+ *     adds r1, r1, r0                   adds r1, r1, r0
+ *
+ * BINDING THE ELEMENT ADDRESS TO ITS OWN LOCAL IS THE FIX, and it is measured,
+ * not guessed -- compile_probe, one body and two spellings:
+ *   `g[v].m = 0;`            -> ldr .L ; ldr [.] ; lsl ; add ; lsl ; add
+ *   `u = &g[v]; u->m = 0;`   -> ldr .L ; lsl ; add ; lsl ; ldr [.] ; add
+ * The second is the ROM, down to r0 holding the index and r1 the pointer.
+ * `&g[v]` is an ADDRESS expression, so the global stays a MEM through operand
+ * expansion and is forced into a register only at the add, after the index is
+ * already computed. See docs/agbcc-codegen.md, wave 39 W39-E.
+ *
+ * REFUTED on the way, worth not repeating: `(v + gUnknown_08499594)->unk05_3`,
+ * to put the index syntactically first, is byte-for-byte IDENTICAL to the plain
+ * subscript -- C defines them as the same tree and fold canonicalises them
+ * together. And decomp-permuter found nothing better than the 98.3% starting
+ * point in 300 s / ~17,000 iterations / 4 threads; it is useless on a residual
+ * this shaped, exactly as the brief says.
+ *
+ * TWO TYPE FINDINGS THAT WERE EACH WORTH REAL BYTES:
+ *
+ * 1. gUnknown_084995F4 IS NOT `const`, worth 4 bytes and half the loop's
+ *    register allocation. The table is in .rodata and every site is a read, so
+ *    `const u16` is the obvious declaration; it is wrong. This function stores
+ *    into the map plane THROUGH gUnknown_08499590 and then passes
+ *    gUnknown_084995F4[team] to sub_080240B4. With `const`, agbcc proves the
+ *    store cannot alias the table and reuses the register it loaded for the
+ *    store; the ROM reloads it (`ldrb r2,[r5]` after the `strb`). With `const`
+ *    the function came out 588 bytes AND mis-allocated the loop; dropping it
+ *    fixed size and every register slot at once.
+ *
+ * 2. gUnknown_03003150 MUST be a struct, not `u8 [][4]`. The ROM forms the
+ *    element address once and takes the three fields off it as `[r,#0]/#1/#2`
+ *    displacements, which only a COMPONENT_REF preserves; the flat array spells
+ *    each field as its own address expression and agbcc answers with separate
+ *    `+1` and `+2` force-addr pool words plus enough pressure to spill a value
+ *    the ROM keeps in a register.
+ *
+ * Readout notes: `gUnknown_08499598[(v >> 6) + 1].unk2a` is the ROM's
+ * `adds r1, #0x66` -- 0x3c + 0x2a, the 1-based army slot, NOT a member at +0x66
+ * (struct Unk08499598 is only 0x3c long, and its unk2a comment already records
+ * sub_08026F9C/sub_08026FD0 reaching it the same way). `i` is u16 from
+ * `adds #1; lsls #0x10; lsrs #0x10` and the unsigned `bhi`; the `i <= 0x5b` half
+ * of the loop condition folds away at the top guard because i is 0 there. r5
+ * (&gUnknown_084995F4[team]) and sl (&gUnknown_03003150) are LICM hoists, not
+ * source, and so is the `str r2,[sp,#4]` holding &p->unk68 across the loop.
+ */
+
+struct Unk28580Map
+{
+    /* 0x0000 */ u8 filler_0000[0x12];
+    /* 0x0012 */ u8 owner[0x1432 - 0x12];
+    /* 0x1432 */ u8 plane[0x417A - 0x1432];
+    /* 0x417A */ u16 rowOffset[1];
+};
+struct Unk28580
+{
+    /* 0x0000 */ u8 filler_0000[0x64];
+    /* 0x0064 */ s16 unk64;
+    /* 0x0066 */ s16 unk66;
+    /* 0x0068 */ u16 unk68;
+};
+
+void sub_08028580(struct Unk28580 *p)
+{
+    u16 i;
+    int team;
+    u8 v;
+    struct Unk08499594 *unit;
+
+    sub_08019818(gUnknown_08499FA0[gUnknown_08499598[p->unk64].unk1a - 1], 0, 0);
+
+    if (p->unk66 == 2)
+    {
+        struct Unk28580Map *map;
+        int idx;
+
+        map = (struct Unk28580Map *)gUnknown_08499590;
+        idx = map->rowOffset[gUnknown_08499598[p->unk64].unk2e & 0x7f]
+            + (gUnknown_08499598[p->unk64].unk2d & 0x7f);
+        team = map->plane[idx] >> 5;
+        map->plane[idx] = 8 | gUnknown_084995F4[p->unk64];
+        sub_080240B4(gUnknown_08499598[p->unk64].unk2d & 0x7f,
+                     gUnknown_08499598[p->unk64].unk2e & 0x7f,
+                     gUnknown_084995F4[p->unk64]);
+        sub_080219AC();
+    }
+    else
+    {
+        team = 0;
+    }
+
+    for (i = 0; i <= 0x5b && gUnknown_03003150[i].flags != 0xff; i++)
+    {
+        if ((gUnknown_03003150[i].flags & 0xe0) == gUnknown_084995F4[p->unk64])
+        {
+            v = ((struct Unk28580Map *)gUnknown_08499590)->owner[
+                    ((struct Unk28580Map *)gUnknown_08499590)->rowOffset[
+                        gUnknown_03003150[i].y] + gUnknown_03003150[i].x];
+
+            if (v != 0
+             && gUnknown_08499598[(v >> 6) + 1].unk2a == gUnknown_08499598[team].unk2a)
+            {
+                unit = &gUnknown_08499594[v];
+                unit->unk05_3 = 0;
+            }
+
+            if ((gUnknown_03003150[i].flags & 0x1f) == 8)
+            {
+                ((struct Unk28580Map *)gUnknown_08499590)->plane[
+                    ((struct Unk28580Map *)gUnknown_08499590)->rowOffset[
+                        gUnknown_03003150[i].y] + gUnknown_03003150[i].x]
+                            = 6 | gUnknown_084995F4[team];
+                sub_0802419C(gUnknown_03003150[i].x, gUnknown_03003150[i].y, 0);
+                sub_080240B4(gUnknown_03003150[i].x, gUnknown_03003150[i].y,
+                             gUnknown_084995F4[team]);
+            }
+            else
+            {
+                ((struct Unk28580Map *)gUnknown_08499590)->plane[
+                    ((struct Unk28580Map *)gUnknown_08499590)->rowOffset[
+                        gUnknown_03003150[i].y] + gUnknown_03003150[i].x]
+                            = (gUnknown_03003150[i].flags & 0x1f)
+                            | gUnknown_084995F4[team];
+                sub_080240B4(gUnknown_03003150[i].x, gUnknown_03003150[i].y,
+                             gUnknown_084995F4[team]);
+            }
+        }
+    }
+
+    sub_08024268();
+    sub_080219AC();
+    sub_08026D68();
+    p->unk68 = 1;
+}

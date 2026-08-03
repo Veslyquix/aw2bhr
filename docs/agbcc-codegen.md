@@ -5915,6 +5915,22 @@ this file where a probe reproduced the *wrong* answer confidently, so: **when th
 question is about a narrowing, the probe has to carry the target's control flow,
 not just its expression.**
 
+**Wave 39 (W39-G) narrows the claim: `int` + cast holds the pair only for an
+ARITHMETIC use, not for a COMPARISON.** In `sub_0802E010` the ROM narrows
+`n >> 1` to `u16` at the loop-guard compare (`lsls r0, r6, #0x10; lsrs r0, r0,
+#0x10; cmp r3, r0`) with the definition two basic blocks earlier — the exact
+shape the rule above predicts. `int half` plus `i < (u16)half` was tried in the
+target's own control flow and produced `adds r0, r6, #0`: the copy residue, no
+shifts, two bytes short. The reason is that the value arrives through a `ldrb`,
+so `nonzero_bits` proves it `<= 0x7f`, and in a comparison `simplify_comparison`
+strips a provably-redundant extension no matter which side of a branch its
+definition sits on. The `u16` local folds it even harder (no residue at all, and
+the bound is finalised into its register *before* the intervening loop), so the
+two spellings are still different code — the cast is worth exactly one copy
+here, not one shift pair. **A surviving `lsls #0x10; lsrs #0x10` on a value that
+`nonzero_bits` can prove narrow is therefore evidence of something other than a
+cast**, and on that function it remains underived.
+
 Two things ruled out on the same question, both cheap and both negative:
 
 - **`old_agbcc` is not the axis.** All three of this batch's near-misses compile
@@ -19599,7 +19615,35 @@ problem, so stop rewriting the arithmetic:
 In all three, `nonzero_bits` proves the value fits (10 bits then `<<5` cannot
 overflow into the `>>2`; a 16-bit OR a 9-bit value is already a u16), the
 operation the ROM emitted is provably an identity, and combine deletes it. It
-takes 44 bytes off sub_0801C01C and 4 off each of the other two.
+takes 44 bytes off sub_0801C01C.
+
+**CORRECTION (wave 39, W39-B): it takes ZERO bytes off sub_0801F19C, and the
+"4 off each of the other two" above is wrong.** Counted instruction by
+instruction against a fresh wave-39 diff, the folded and unfolded forms are the
+same length:
+
+```
+ROM        ands r4,r0 ; lsls r2,r4,#5 ; lsrs r2,r2,#2     3 insns
+candidate  ands r4,r1 ; lsls r4,r4,#3 ; adds r2,r4,#0     3 insns
+```
+
+The saved shift is spent on a copy, because the folded form computes the count
+into `r4` and must move it to the argument register while the ROM's two-shift
+form writes the first shift straight into `r2`. **The whole -4 on sub_0801F19C
+is instead one register-allocation fact: the ROM gives the 0x3FF constant `r0`,
+the register sub_0801F444's result arrives in, and therefore has to park the
+result (`adds r3,r0,#0`) and restore it (`adds r0,r3,#0`).** Those two
+instructions are the entire difference; everything up to and including the call
+is byte-exact. sub_0801F234's +4 is the same constant-allocation fact plus `n`
+landing in a hi register instead of `r7`.
+
+So this section's advice ("stop rewriting the arithmetic") stands, but its
+reason does not transfer: **for the two sub_0801F* functions the fold is not
+what is costing bytes, so a lever that defeated `nonzero_bits` would not close
+them anyway.** Attack the allocation. Also refuted in wave 39, cheaply: binding
+the call result to its own local before the call statement does NOT create the
+pseudo that would let the constant win `r0` -- gcc coalesces the copy and the
+output is byte-identical to the nested form.
 
 **Wave 38 (W38-D) closed off the axis this section proposed as "the next thing
 to try", so nobody needs to spend a turn on it again.** The note above suggests
@@ -19647,6 +19691,53 @@ Two consequences for the next wave:
   expression nested in the call argument emits the low-half form
   (`lsl#16; lsr#16; mov r1,#0xff; and`). Two words of that function and its
   whole argument setup came from adding five one-line locals.
+
+## Integer-space address arithmetic is the operand-order lever `pointer_int_sum` hides (wave 39, W39-B)
+
+**This closed `sub_0801FD9C`, which had sat at 99.5% -- 203 of 204 bytes, size
+exact, ONE instruction differing in its register fields only -- across two
+waves and 19,274 permuter iterations.** It is the cheapest kind of residual to
+recognise and, until now, the one with no known lever.
+
+The diff was a commutative `add` whose operands were the wrong way round in
+exactly one of four otherwise byte-identical neighbour blocks:
+
+```
+original   adds r1, r2, r0     x + row
+candidate  adds r1, r0, r2     row + x
+```
+
+The standing (and correct) rule is that **you cannot reach this from C with
+pointer arithmetic**: `build_binary_op` hands any `int + pointer` to
+`pointer_int_sum`, which normalises to pointer-first, so `x + (s8 *)row`,
+`(s8 *)row + x` and `&((s8 *)row)[x]` all compile identically. Three separate
+agents ruled the axis out on that basis and moved on to allocation theories.
+
+**The way out is to take the addition out of pointer space entirely:**
+
+```c
+q = (s8 *)(x + (int)gUnknown_03003340[y]);   /* adds r1, r2, r0  -- x first  */
+q = (s8 *)gUnknown_03003340[y] + x;          /* adds r1, r0, r2  -- row first */
+```
+
+Cast the pointer to `int` and both operands are integers, so `pointer_int_sum`
+never runs. gcc 2.95's `fold` reorders commutative operands only to put
+CONSTANTS last -- two non-constant operands are left alone -- so the source
+order survives all the way to expand. The casts themselves are free, and
+nothing else about the function changes: in `sub_0801FD9C` only the
+right-neighbour block needed it and the other three kept the ordinary pointer
+form.
+
+Two things to carry:
+
+- **A residual of "one commutative operand order, allocation already correct"
+  is now a source-level question again, not a permuter or register question.**
+  Wave 17's measured exception (the permuter does nothing on this shape) still
+  holds and is exactly the signal that you are looking at this lever.
+- **Also refuted here:** giving the offending block its own pointer local
+  (a fresh `q` instead of reassigning `p`) is byte-identical. The operand order
+  is not a live-range or allocation effect, which is why every allocation-shaped
+  theory about it came back negative.
 
 ## Arity hidden by a pass-through caller: `sub_0801C27C` took three (wave 36, W36-H)
 
@@ -23341,3 +23432,282 @@ fall-through leaves r0 untouched — no `movs r0, #0`, no `adds r0, rN, #0` —
 write one. The sibling `sub_080270F0` in the same block DOES have the trailing
 `return 0;` and shows the `movs r0, #0` that proves it, so the two spellings are
 distinguishable from the assembly alone.
+
+## Writing `(i + 1)` in a loop body can disable strength reduction ENTIRELY (wave 39, W39-A)
+
+Measured on `sub_08012198` (116 bytes, four iterations, three calls per
+iteration over a 0x0c-stride array). The ROM strength-reduces everything: two
+pointer givs stepping `0xc` and a third giv for a call argument. Two spellings
+of the same arithmetic were probed and they are **not** close variants — one
+matched, the other lost strength reduction on the whole loop.
+
+- `sub_080119D4(0x40, (i + 1) * 8, gUnknown_0200B3B4[i].unk00)` — **no
+  strength reduction anywhere.** The array subscript is recomputed from scratch
+  every iteration (`lsl r4,r0,#1; add r4,r4,r0; lsl r4,#2`, i.e. `i * 12`) and a
+  second loop-invariant `base + 4` is hoisted into a high register.
+- `sub_080119D4(0x40, i * 8 + 8, gUnknown_0200B3B4[i].unk00)` — **exact match**,
+  first try.
+
+The reason is visible in the bad output's loop: gcc reused the `i + 1`
+subexpression **as the loop increment**. The body opens with
+`add r1, r0, #1; mov r8, r1` and closes with `mov r0, r8`, so `i`'s update is
+not a single `reg = reg + const` insn. `basic_induction_var` does not recognise
+that as a biv, and once there is no biv `strength_reduce` bails on the entire
+loop — the array givs go with it, even though they never mentioned `i + 1`.
+
+**So an `(i + c)` subexpression in a loop body is a hazard, not a neutral
+spelling.** Distribute it (`i * K + K`) and `i` stays a clean biv. This is
+cheap to check: if your candidate recomputes an array subscript where the ROM
+walks a pointer, look for an `(i + c)` before you look at anything else.
+
+Two corollaries, both measured on the same function:
+
+- **A pre-shifted giv is what a narrowed argument looks like — do not author
+  it.** `sub_080119D4`'s second parameter is `u16`, so the argument is
+  `(u32)v << 16 >> 16`. `loop` runs BEFORE `combine`, so at loop time the
+  `<< 16` is still its own insn and becomes a giv in its own right. The ROM
+  inits it `movs r7,#0x80; lsls r7,#0xc` (0x80000), steps it by 0x80000, and
+  reads it `lsrs r4, r7, #0x10`. That is `(i * 8 + 8) << 16` read back `>> 16`.
+  Nothing in the source says 0x80000; trying to spell it costs an attempt.
+- **A non-address giv on the counter blocks `check_dbra_loop`.** A third
+  spelling — keeping a separate `int bank` accumulator incremented by 8 —
+  strength-reduced the arrays correctly but left `bank` as a second biv, and gcc
+  then REVERSED the loop counter into a countdown (`sub r7,#1; cmp #0; bge`).
+  With `i * 8 + 8` the argument is a giv *of i*, `i` is therefore used by a giv
+  that is not an address, `no_use_except_counting` is false, and the loop stays
+  ascending (`mov r0,r8; cmp r0,#3; ble`) exactly as the ROM has it. This is the
+  complement of the existing rule that `subs; cmp #0; bge` does not prove a
+  descending source loop: an ascending ROM loop over a counter that feeds a
+  non-address giv is evidence the counter feeds a *value*, not just addresses.
+
+## A LONE prologue `lsls #0x10` is a narrow PARAMETER; the pair is a cast (wave 39, W39-A)
+
+Parameter width is usually described as visible only at a caller, and weakly.
+The callee's prologue carries it too, and the tell is precise. Measured on
+`sub_08012B70` (five arguments, three of them sub-word).
+
+Count the `lsls rN, rN, #0x10` in the prologue and look for each one's partner:
+
+- **`lsls` in the prologue with the matching `lsrs` MISSING** — the `lsrs` has
+  been fused into a scale at the use site. `u16 x` used as `dst + x` on a
+  `u16 *` emits `lsls r2,#0x10` at entry and `lsrs r2,#0xf` at the use (net
+  `* 2`); `u16 y` used as `y * 0x20` emits `lsls r3,#0x10` and `lsrs r3,#0xa`
+  (net `* 0x40`). **This is a sub-word PARAMETER.**
+- **`lsls` and `lsrs` adjacent in the prologue** — a sub-word parameter whose
+  uses carry no scale, so PROMOTE_MODE's pair survives intact.
+- **No prologue `lsls` at all, and a `lsls #0x10; lsrs #0x10` down at the use** —
+  an `int` parameter with an explicit `(u16)` cast written in the source.
+
+The third case is what a first draft naturally writes when the header declares
+`int`, and it costs exactly the two prologue `lsls` — a diff that points at the
+prologue for a mistake that is really in the declaration. `sub_08012B70` was
+declared `(u16 *, void *, int, int, int)` on caller-side evidence ("every
+argument arrives as a bare register or a shifted immediate with no narrowing");
+the callee's prologue says the last three are `u16`, and after the retype all
+three callers still match byte-for-byte, because each passes a constant or an
+already-cast value.
+
+Same function, same paragraph of prologue: **a pointer parameter that is walked
+directly gets its copy in the PROLOGUE, ahead of the stack-parameter load.**
+`adds r5, r1, #0` as the second instruction means parameter 2 *is* the walking
+pointer. A `void *` parameter copied into a local `u16 *` puts that copy seven
+instructions later, after the stack argument is loaded and narrowed, and no
+amount of statement reordering moves it — the local is a body statement and
+parameter setup always precedes it. If the ROM copies both pointer arguments
+before touching `[sp]`, both are used directly and neither is a `void *` with a
+local alias.
+
+## LICM hoists a conditionally-executed loop invariant, and the ONLY thing that blocks it is a second assignment (wave 39, W39-C)
+
+`sub_08024720` is a four-iteration loop that, under two nested conditions,
+calls `sub_0801368C(&gUnknown_0809139C[idx], ...)` where `idx` is computed
+BEFORE the loop. The address is loop-invariant, and agbcc hoists it:
+
+    ldr  r0, =.LC0        \
+    mov  r8, r0            |  preheader
+    ldr  r7, =gUnknown_0809139C
+    lsl  r6, r5, #0x1     /   <- idx * 2, hoisted
+  .Lloop:
+    ...
+    add  r0, r6, r7           <- all that is left in the body
+
+The ROM does not hoist: it keeps `ldr r1, =gUnknown_0809139C; lsls r0, r0, #1;
+adds r0, r0, r1` inside the loop body, and the difference is **8 bytes** --
+the two hoisted values need two more callee-saved registers, so
+`push {r4, r5, r6, lr}` becomes `push {r4, r5, r6, r7, lr}` plus
+`mov r7, r8; push {r7}` and a matching epilogue.
+
+**The intuition that a conditionally-executed invariant is safe from LICM is
+wrong.** The address sits inside `if (unk1b != 0)` and then inside
+`if (sub_0804415C(i) && idx >= 0)`, so it is guarded by two conditionals AND
+preceded by a call -- `maybe_never` and `call_passed` are both set -- and agbcc
+hoists it anyway. Neither flag is a barrier on its own.
+
+SEVEN spellings were probed against this one function. SIX still hoist:
+
+  - `&gUnknown_0809139C[idx]` and `gUnknown_0809139C + idx` -- identical code.
+  - `continue` on the outer test instead of a nested `if`.
+  - a nested `if (sub_0804415C(i))` with the else body written out twice
+    (cross-jumping merges them back, so it is the same code as `&&`).
+  - binding the pointer to a local in the THEN branch only.
+  - binding the index to a second `int` local before the `if` (copy propagation
+    erases the copy and the address is invariant again).
+  - binding the array base to a local before the loop -- strictly worse, it
+    hoists the base AND the shift and costs a third register.
+
+**What blocks it: assign the SAME local in BOTH arms.**
+
+    if (sub_0804415C(i) && idx >= 0)
+    {
+        p = gUnknown_0809139C + idx;
+        sub_0801368C(p, v, 2);
+    }
+    else
+    {
+        p = gUnknown_0809139C;
+        sub_0801368C(p, v, 2);
+    }
+
+`scan_loop` only records a movable for a pseudo set exactly once in the loop.
+Two assignments to `p` make `n_times_set == 2`, the address computation is
+never a movable candidate at all, and the preheader collapses back to the ROM's
+single hoisted pool address with `push {r4, r5, r6, lr}`. Worth 8 bytes here.
+
+Three related negatives, all measured on this function, all worth knowing
+because each looks like it should work:
+
+  - Writing the else's argument as the bare symbol (`sub_0801368C(
+    gUnknown_0809139C, v, 2)`) gives the right ARGUMENT ORDER for that block --
+    parameter copies, then the pool `ldr`, then the `mov #imm8` -- but it is
+    one assignment to `p` again, so the hoist comes straight back.
+  - Assigning `p` AFTER the call in the else keeps the dead store (gcc does not
+    delete it before loop opt) and STILL hoists the base. Worst of the three.
+  - A `?:` on the pointer argument also blocks the hoist, for the same
+    two-assignment reason, but it merges the two calls into one and duplicates
+    nothing -- so it is only usable when the ROM itself has a single call.
+
+The read-out direction: **if your candidate's preheader carries a shift or an
+address add that the ROM computes in the loop body, do not go looking for a
+`volatile` or for register pressure. Count the assignments to the local that
+receives it.** One assignment is hoistable no matter how deeply it is guarded;
+two is not.
+
+## A reloaded array base swaps the `adds` operand order, and a binding local swaps it back (wave 39, W39-D)
+
+Two-byte rule, measured on a pair of loops sharing one array, and it is the
+only thing that stood between a first-attempt match and a miss.
+
+When a loop walks a POINTER global's array (`extern struct T *g;`), the element
+address is `base + index * stride`. Whether the ROM emits `adds rD, rBASE,
+rOFF` or `adds rD, rOFF, rBASE` depends on whether the base survives the loop:
+
+- **Base hoisted** (nothing in the loop stores to memory): LICM lifts the
+  `ldr rBASE,[rPOOL]` into the preheader, `strength_reduce` turns the whole
+  ADDRESS into a biv that just does `adds rP, #stride` each iteration, and the
+  one-off preheader add comes out **offset-first** — `adds r1, r0, r1` with the
+  offset in r0. `sub_08025AEC` is this shape and the plain subscript
+  `gUnknown_08499594[i].unk00` matches it directly.
+- **Base reloaded** (the loop body stores, killing the load): only `i * stride`
+  is a giv, the base is re-`ldr`ed at the top of every iteration, and the ROM
+  adds them **base-first** — `adds r1, r0, r4`, r0 being the freshly loaded
+  base. `sub_08025EA0` is this shape, and here the plain subscript emits
+  `add r1, r4, r0`, i.e. the operands the other way round. Two bytes, and no
+  amount of reassociating the index expression moves it.
+
+**The lever is a binding local for the ELEMENT, inside the loop:**
+
+```c
+for (i = ...; ...; i++)
+{
+    struct Unk08499594 *p = &gUnknown_08499594[i];   /* base-first */
+    if (p->unk00 != 0 && !(p->unk01 & 8))
+        p->unk01 &= ~1;
+}
+```
+
+versus repeating `gUnknown_08499594[i].member` at each use, which is
+offset-first. Everything else about the two spellings is byte-identical —
+same preheader, same giv, same `ldr` per iteration, same displacements — so
+this is a clean single-variable measurement. `sub_08025EA0` matched on the
+binding-local form and missed by exactly those two bytes on the subscript form.
+
+Note the direction, because it is the opposite of the c_08025340.c and
+c_08025B28.c notes on the same array: there the binding local exists to stop
+the pointer being RELOADED at each statement. Here the reload is what the ROM
+already does and the local is buying operand order instead. **Same idiom, two
+different jobs — decide which one you need from whether the loop body stores.**
+
+The corroborating case is in `sub_080254AC`, which has both shapes in one
+function: its loop bodies use a preheader-hoisted base and emit
+`adds r1, r1, r5` (offset-first), while its shared tail block — reached after a
+`strh` has killed the load, so it re-`ldr`s — emits `adds r0, r0, r1`
+(base-first). One function, one source spelling, both orders, selected purely
+by whether the base was live.
+
+## Bind the ELEMENT ADDRESS to defer a pointer global's load past the index (wave 39, W39-E)
+
+A pointer global is read `ldr rN,=sym; ldr rN,[rN]` -- two levels -- and **where
+the SECOND `ldr` lands is a source-level choice.** `sub_08028580` sat at 98.3%,
+size exact, on one divergent statement worth ten bytes:
+
+```
+original                        g[v].m = 0;   (WRONG)
+ldr  r1, [pc, #112]   &g        ldr  r0, [pc, #112]
+lsls r0, r4, #1                 ldr  r0, [r0, #0]     <- eager deref
+adds r0, r0, r4                 lsls r1, r4, #1
+lsls r0, r0, #2                 adds r1, r1, r4
+ldr  r1, [r1, #0]     *g        lsls r1, r1, #2
+adds r1, r1, r0                 adds r1, r1, r0
+```
+
+Same six instructions, r0/r1 swapped, and the ROM computes `v * 12` BEFORE
+dereferencing. Controlled `compile_probe`, one body and two spellings:
+
+| source | emitted |
+|---|---|
+| `g[v].m = 0;` | `ldr .L ; ldr [.] ; lsl ; add ; lsl ; add` |
+| `u = &g[v]; u->m = 0;` | `ldr .L ; lsl ; add ; lsl ; ldr [.] ; add` |
+
+The second is the ROM, down to r0 holding the index and r1 the pointer.
+**`&g[v]` is an ADDRESS expression, so the global stays a MEM through operand
+expansion and is forced into a register only at the `add` -- after the index is
+already computed. The plain subscript expands it to a register eagerly.**
+
+REFUTED, so do not spend an attempt on it: `(v + g)->m`, to put the index
+syntactically first, is byte-for-byte IDENTICAL to `g[v].m`. C defines the two
+as the same tree and `fold` canonicalises them together, so **no rearrangement
+of the subscript can reach this** -- only the binding can. decomp-permuter gets
+nothing either: 300 s, ~17,000 iterations, 4 threads from the 98.3% draft found
+nothing better than the starting point.
+
+Read this with "Whether to BIND or INLINE decides where a pool word is loaded"
+(wave 36) -- same idiom, a third job. That note is about which `ldr =sym` is
+emitted and where; this is about the SECOND load, and it moves independently of
+the pool word.
+
+## `const` on a ROM table is BYTE-VISIBLE through aliasing (wave 39, W39-E)
+
+The first oracle this project has found for a `const` qualifier, and it says the
+original source did NOT spell these tables `const` whatever section they landed
+in. `gUnknown_084995F4` is a `.rodata` table and every reference is a read, so
+`extern const u16` looks unarguable. It is wrong, and it cost `sub_08028580`
+4 bytes AND half the loop's register allocation (588/592 bytes and a spilled
+value where the ROM keeps a register; dropping `const` fixed size and every
+register slot in one edit).
+
+The mechanism needs three things in one function, which is why it is rare:
+a store through a POINTER global, a read of the candidate table, and the read
+reaching a call argument or second use afterwards.
+
+```c
+map->plane[idx] = 6 | tbl[team];      /* store through gUnknown_08499590 */
+sub_080240B4(x, y, tbl[team]);        /* ROM RELOADS tbl[team] here */
+```
+
+With `const`, agbcc proves the store cannot alias `tbl` and reuses the register
+it loaded for the store. Without it, the store kills the load and the second
+read re-emits `ldrb`. **An `ldrb`/`ldrh` of a global reloaded across a store
+through an unrelated pointer is positive evidence of a NON-const declaration**
+-- and the converse, a reused register, does not prove `const`, because CSE
+reaches it by other routes too. Prefer non-const for these tables unless a
+discriminating use says otherwise.

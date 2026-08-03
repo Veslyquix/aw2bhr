@@ -257,6 +257,13 @@ void sub_08012B00(u16 *, u16, u16);
  * skipping the u16 narrowing at the call; sub_08012E9C's third argument is the
  * `lsls #0x10; lsrs #0x10` pair that proves the u16 is real. */
 void sub_08012E74(u16, u16, u16);
+/* Wave 39 (W39-A). Same situation as sub_08012E74 above and settled the same
+ * way: src/decomp/c_08012E9C.c already DEFINES this as
+ * `void sub_08012E9C(u16 x, u16 y, u8 c)` and a promoted definition wins. It
+ * had no declaration anywhere and, until sub_08012F40, no caller in C either,
+ * so nothing was compiling against the implicit `int f()` and adding this
+ * changes no existing file. */
+void sub_08012E9C(u16, u16, u8);
 void sub_08013C00(void);
 void sub_08024268(void);
 /* Registered by address into the gUnknown_03000000 callback list, never called
@@ -3297,7 +3304,30 @@ int sub_08071908(void *);
  * shifted immediate with no narrowing. sub_0807898C is called for effect with
  * no argument register read and ends `pop {r0}; bx r0`. */
 void sub_0807898C(void);
-void sub_08012B70(u16 *, void *, int, int, int);
+/* Wave 39 (W39-A): sub_08012B70's last THREE arguments retyped int -> u16, and
+ * the second void * -> u16 *, off the callee's own prologue. c_080399F8.c had
+ * predicted the fifth and deferred the retype for want of caller re-verification;
+ * this wave did that -- sub_080399F8, sub_0807FE90 and sub_08080498 were all
+ * re-run through trymatch after the change and all three are still byte-
+ * identical. They pass 0, 0 and either a constant or an already-cast value, so
+ * the narrowing is a no-op at every call site.
+ *
+ * The width evidence is a SPLIT PROMOTE_MODE pair: `lsls r2,#0x10` and
+ * `lsls r3,#0x10` sit in the prologue with NO matching `lsrs`, and those `lsrs`
+ * reappear at the use fused with the scale (`lsrs #0xf` for x, i.e. *2, and
+ * `lsrs #0xa` for y, i.e. *0x40), while the fifth argument keeps its whole
+ * `lsls #0x10; lsrs #0x10` pair at entry. An `int` parameter with an explicit
+ * `(u16)` cast emits the narrowing whole at the USE instead and leaves no
+ * prologue `lsls` behind -- that spelling was probed and costs those two.
+ * The second argument is walked directly as a halfword pointer: `adds r5,r1,#0`
+ * is a prologue copy, ahead of the stack-parameter load, which a `void *`
+ * copied into a local `u16 *` cannot reproduce (it lands seven instructions
+ * later). gUnknown_080A31A4 was retyped u8 [] -> u16 [] to suit; it has no
+ * other reader.
+ *
+ * sub_08012B70 itself is NOT matched -- parked at 87.5% with the instruction
+ * stream 1:1 and only register numbers differing. See work/sub_08012B70/. */
+void sub_08012B70(u16 *, u16 *, u16, u16, u16);
 void sub_08073574(int, int, int, int, int, int);
 
 /* The two text/graphics emitters sub_080852A8 chooses between. Six arguments
@@ -6913,6 +6943,12 @@ void sub_0801C67C(struct Unk0801C210 *);
  * compares declaration TEXT and does not resolve typedefs, so the two spellings
  * read as a mismatch. Wave 30. */
 bool8 sub_080266DC(u8);
+/* Wave 39 (W39-E). Was undeclared even though src/decomp/c_08026F28.c has been
+ * promoted; sub_08028BAC is its first caller outside its own file, and an
+ * implicit declaration there would default-promote both arguments to int and
+ * drop the `lsls #0x10; lsrs #0x10` pair the ROM has in front of the `bl`.
+ * Text copied from that definition. */
+bool8 sub_08026F28(u16, u16);
 u8 sub_080271CC(int);
 int sub_08028B70(void);
 u8 sub_08028BAC(void);
@@ -7413,6 +7449,34 @@ int sub_08042C68(int, int);
 void sub_08025B24(struct Unk08499594 *, int);
 /* One record pointer, result unused (sub_08025D60). */
 void sub_0802A5C4(struct Unk08499594 *);
+/* Wave 39, W39-F. The 0x0802A3FC unit-scan block.
+ *
+ * sub_0802A304 is a sub_0802A38C callback, the sibling of sub_0802A2E4, and
+ * both are typed `void *` because the object -- a struct Unk08499594 record --
+ * is reached through a file-local view: sub_0802A304 indexes unk07/unk08 as a
+ * 2-element cargo array, which the shared struct cannot express and which is
+ * not worth reshaping it for (see the note on struct Unk08499594.unk07).
+ *
+ * sub_0802A38C and sub_0802A258 are DELIBERATELY NOT DECLARED HERE.
+ * src/decomp/c_0802A38C.c defines sub_0802A38C with a file-local `struct
+ * Unk2A38C *` parameter, so any declaration in this header is a conflicting
+ * type for that unit; the callers declare it themselves as
+ * `bool8 sub_0802A38C(void *, int (*)(void *))`, which is the weakest
+ * spelling that agrees with both call sites. The work/ draft for sub_0802A258
+ * is in the same position.
+ *
+ * ONE FINDING TO CARRY FORWARD: work/sub_0802A258 declares itself `bool8`,
+ * and that is REFUTED by its only call site. sub_0802A3FC truth-tests the
+ * result with `lsls r0, #0x10`, which is a 16-bit return; a bool8/u8 return
+ * gives `lsls #0x18`. The callee's own body returns only the literals 0 and 1
+ * and so cannot tell the two apart -- exactly the situation the note on
+ * sub_0802A1E4 above describes for that function. u16 vs s16 is still open;
+ * nothing narrows or sign-extends it. Whoever promotes sub_0802A258 should
+ * make it 16-bit. */
+int sub_0802A2E4(void *); /* promoted in src/decomp/c_0802A2E4.c */
+int sub_0802A304(void *);
+void sub_0802A3FC(void);
+void sub_0802A6B0(void);
 /* Promoted in src/decomp/c_08025B28.c; declared here so other units can call
  * it. */
 void sub_08025B28(u16, u32);
@@ -7555,7 +7619,22 @@ void sub_0803F880(int, int);
  * instruction pair immediately before the `bl`, with r0 and r1 already holding
  * its own two sign-extended s16 parameters. Nobody computes a mask to pass a
  * dead argument. Result unused (r0 is not read before the next `bl`). */
-void sub_080240B4(int, int, int);
+/* RETYPED, wave 39 (W39-C), from `void sub_080240B4(int, int, int)`. The body
+ * settles all four: it RETURNS `(s16)n` (`lsls r2,#0x10; asrs r2,#0x10;
+ * adds r0,r2,#0` at the epilogue), and it narrows r0/r1 to 16 bits and r2 to 8
+ * at entry. Per PROMOTE_MODE the entry pair is a ZERO-extend for `s16` just as
+ * much as for `u16`; what makes these s16 rather than u16 is that every USE
+ * re-extends with `asrs` (the second shift pair). The narrow types cost the
+ * promoted caller sub_08024058 nothing -- it already holds two s16 parameters
+ * and a `v & 0xe0` that fits u8 -- and c_08024058.c was re-run through
+ * try_match after this change and still matches. The old prototype's `void`
+ * was read off that one caller discarding the result, which is exactly the
+ * "agreement between files, not correctness" failure the brief describes. */
+s16 sub_080240B4(s16, s16, u8);
+/* Wave 39, W39-C. sub_080240B4's near-twin, same three narrowed parameters and
+ * the same `(s16)n` return, read off its own body -- its only caller
+ * (sub_08028580) is still assembly, so nothing external constrains it. */
+s16 sub_0802419C(s16, s16, u8);
 /* Already DEFINED and promoted in src/decomp/c_080249EC.c but never declared.
  * This line publishes the promoted signature so sub_08024A2C (a different
  * unit) can call it. The definition wins -- do not weaken it. */

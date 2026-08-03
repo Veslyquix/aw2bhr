@@ -1,0 +1,21 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08025AEC.
+ * sub_08025AEC @ 0x08025AEC
+ */
+
+struct Unk08499594 *sub_08025AEC(void)
+{
+    int i;
+
+    for (i = gUnknown_03003F2C + 1; i < gUnknown_03003F2C + 0x33; i++)
+    {
+        if (gUnknown_08499594[i].unk00 == 0)
+            return &gUnknown_08499594[i];
+    }
+
+    return 0;
+}

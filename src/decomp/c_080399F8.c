@@ -28,7 +28,13 @@
  * parameter is really `u16` rather than the `int` it is declared with; the cast
  * is written here rather than retyping the prototype, because that would need
  * every other caller re-verified and this wave did not do that. The two
- * spellings are byte-identical at this call site. */
+ * spellings are byte-identical at this call site.
+ *
+ * Wave 39 (W39-A) did the retype: sub_08012B70's last three arguments are u16
+ * and the callee's own prologue proves it. All three callers were re-run
+ * through trymatch and all three still match, so the cast below is now
+ * redundant -- it is left in place because it is byte-identical either way and
+ * removing it would be churn on a matched function. */
 void sub_080399F8(int a, int b)
 {
     sub_08011E54(gUnknown_080A29A4,
