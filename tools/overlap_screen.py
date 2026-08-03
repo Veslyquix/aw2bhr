@@ -969,6 +969,53 @@ def self_test(args):
              % (len(base_offered), len(wide_offered))))
     ok &= good
 
+    # Wave 38: the LOOP filter, checked the same way as the ceiling and the two
+    # floors. It hid 532 in-band functions for 22 waves. Lifting it must never
+    # lose candidates -- if it does, --allow-loops is filtering rather than
+    # admitting, which is how a "dry" axis gets manufactured.
+    loose = argparse.Namespace(**{**vars(args), "top_blocks": 10 ** 6})
+    loose.allow_loops = True
+    loop_offered = blocks(load_index(), loose)[1]
+    good = len(loop_offered) >= len(base_offered)
+    print("[self-test] --allow-loops never LOSES candidates: %s"
+          % ("PASS (%d -> %d)" % (len(base_offered), len(loop_offered))
+             if good else
+             "FAIL (%d -> %d; the loop filter is inverted)"
+             % (len(base_offered), len(loop_offered))))
+    ok &= good
+
+    # Wave 38: the callee-normalised tier must be able to SUBSTANTIATE its own
+    # claim. Rather than hardcode a pair (which rots the moment it is matched),
+    # re-derive every group it reports and require that the members' instruction
+    # streams differ ONLY on `bl` lines. A tier that groups functions differing
+    # anywhere else is lying, and the whole value of a duplicate group is that
+    # one derivation gives every member.
+    bodies = asm_bodies()
+    _, _, by_callee = duplicates(load_index(), bodies)
+    bad = []
+    for g in by_callee.values():
+        streams = [bodies[r["name"]][0] for r in g if r["name"] in bodies]
+        if len(streams) < 2:
+            continue
+        base = streams[0]
+        for other in streams[1:]:
+            if len(base) != len(other):
+                bad.append(g)
+                break
+            for x, y in zip(base, other):
+                if x != y and not (BL_TARGET.match(x) and BL_TARGET.match(y)):
+                    bad.append(g)
+                    break
+            else:
+                continue
+            break
+    good = not bad
+    print("[self-test] callee-normalised groups differ ONLY at `bl` targets: %s"
+          % ("PASS (%d group(s) checked)" % len(by_callee) if good else
+             "FAIL (%d group(s) differ elsewhere, e.g. %s)"
+             % (len(bad), " ".join(r["name"] for r in bad[0]))))
+    ok &= good
+
     print("[self-test] %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 
