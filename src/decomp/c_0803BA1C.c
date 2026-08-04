@@ -11,10 +11,15 @@
  *
  * gUnknown_0200C420.unk38 is a WORD and not part of the old filler_38[0xa8]:
  * `ldr r1,[r0,#0x38]; ands r1,=0xFFF000FF; str r1,[r0,#0x38]` is a whole-word
- * read-modify-write clearing bits 8..19. Spelled as a literal mask rather than
- * a bitfield assignment -- a bitfield clear narrows to a byte-sized
- * `movs #N; rsbs; ands`, and this is a 32-bit pool constant on a `ldr`/`str`
- * pair.
+ * read-modify-write clearing bits 8..19.
+ *
+ * Wave 43 (W43-E) retyped unk38 as an array of 0x2a 8/12/12 bitfield records
+ * (see include/unknown-globals.h), so the literal mask is now the bitfield
+ * clear it always was, and this file was re-verified byte-identical after the
+ * change. W37-Q2's note that a bitfield clear "narrows to a byte-sized
+ * `movs #N; rsbs; ands`" was wrong: that holds only for a field store_bit_field
+ * can reach in QImode, and this one spans bytes 1..2, so it goes out in SImode
+ * against the same 32-bit pool constant.
  *
  * The loop counter is a signed int, not the u8 the neighbouring functions in
  * this block use: the exit test is `cmp r4,#0x9f; ble` on a plain `adds r4,#1`
@@ -25,7 +30,7 @@ void sub_0803BA1C(void)
     int i;
 
     sub_080745C0();
-    gUnknown_0200C420.unk38 &= 0xFFF000FF;
+    gUnknown_0200C420.unk38[0].unk00_08 = 0;
 
     for (i = 0x60; i <= 0x9f; i++)
         sub_0803CBA0(i, 0);

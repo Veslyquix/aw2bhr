@@ -792,6 +792,32 @@ void sub_080168BC(int);
  * callee-saved register FIRST and narrowed later, at its use. */
 u8 sub_08039064(u8);
 u8 sub_080390CC(u8);
+/* Wave 43, W43-I. LEAVE BOTH OF THE FIRST TWO PARAMETERS ALONE. This
+ * declaration is right for the DEFINITION and wrong for its only caller, and
+ * that is a property of the original source, not of the repo.
+ *
+ * sub_08039140's prologue narrows all four parameters -- `lsls r0,#0x10;
+ * lsrs r4,r0,#0x10` (u16), `lsls r1,#0x10; asrs r1,#0x10` (s16), and two
+ * `lsls #0x18; lsrs #0x18` pairs (u8, u8). Drop the `u16` and c_08039140.c is
+ * 4 bytes short, so the definition's types are settled.
+ *
+ * But sub_08039188 passes the first TWO arguments with NO narrowing at all:
+ * `lsls r7,r2,#4` and `lsls r0,r0,#4` go straight into r0/r1, and a `u16` or
+ * `s16` parameter costs the caller a shift pair for each. ONE unnarrowed
+ * argument would be an ambiguous type signal; TWO independent ones, of
+ * different signedness, is not a wrong type at all -- it is the caller's
+ * translation unit having NO PROTOTYPE in scope, so C89 default argument
+ * promotion passed both as `int`. The callee's own PROMOTE_MODE prologue
+ * re-normalises them, which is why the ROM is correct in spite of it.
+ *
+ * A single shared header cannot express "declared in one TU, undeclared in
+ * another", so sub_08039188 CANNOT be matched here, and retyping either
+ * parameter to `int` only moves the 4-byte loss into c_08039140.c. See
+ * work/sub_08039188/ -- it is parked for this reason and not for want of
+ * spellings. The general lesson: an argument the caller does not narrow is
+ * evidence about the DECLARATION VISIBLE TO THE CALLER, which may be no
+ * declaration at all, and a second unnarrowed argument in the same call is
+ * what tells the two apart. */
 u8 sub_08039140(u16, s16, u8, u8);
 void sub_0803941C(int, int);
 void sub_08039544(u8 *);
@@ -2447,6 +2473,21 @@ void sub_08034400(u8 *, u8 *);
  * second is a predicate run over the object; sub_08034394 passes
  * sub_08034380 and the other two call sites pass a `movs`-sized 0. */
 s16 sub_080309AC(void *, int (*)(u8 *));
+/* Wave 43 (W43-C). The same shape as sub_080309AC above, and typed from the
+ * same evidence. Returns s16: its ONE caller, sub_080336BC, re-narrows the
+ * result with `lsls #0x10; asrs #0x10` before comparing it against -1, and the
+ * callee's own body confirms nothing narrower fits -- the two exits produce
+ * `movs r0,#1; rsbs r0,r0,#0` (-1) and an unextended `ldrb`, so u8 is
+ * impossible (it would truncate the -1 the caller tests for) and s8 would have
+ * made the caller shift by 24.
+ *   The second parameter is a predicate run over the buffer, called through
+ * `bl _call_via_sl`. Declared `int (*)(u8 *)` to agree with sub_080309AC, but
+ * note the disagreement: sub_08030B00 narrows the predicate's result with
+ * `lsls r0,#0x18` before testing it, which argues for a u8/bool8 return. This
+ * is byte-neutral here because the sole caller passes a `movs`-sized 0, so it
+ * is recorded rather than acted on -- a real function pointer reaching either
+ * of these two would settle it. */
+s16 sub_08030B00(void *, int (*)(u8 *));
 /* ---- wave 31, W31-B: the 0x08033000 block's undeclared callees ---- */
 /* Nullary and void: it reads no argument register before writing one and ends
  * `pop {r0}` off the frame. It is the big "reset every per-army table" routine
@@ -2723,7 +2764,22 @@ void sub_080359A4(ProcPtr);
  * narrow, which under the wave-11 reading is a cast at a use rather than
  * PROMOTE_MODE. sub_080255F4 returns a BYTE -- the caller tests it with
  * `lsls r0, #0x18`. */
-void sub_080358C4(int, int);
+/* RETYPED in wave 43 (W43-B) from `(int, int)` to `(s16, s16)`, on
+ * callee-side evidence the note above could not see. sub_080358C4's entry is
+ * `lsls r1,#0x10; lsrs r7,#0x10` for the SECOND parameter -- a ZERO-extension,
+ * which no `int` parameter ever produces -- and every later use of it
+ * sign-extends (`lsls #0x10; asrs #0x10`). That pair is PROMOTE_MODE read
+ * forwards: agbcc zero-extends a sub-word parameter at entry regardless of
+ * signedness, and the sign is in the shift pair at the use. The FIRST
+ * parameter shows only `lsls #0x10; asrs #0x10` because its use is in the
+ * entry block, so combine folds the promotion into it; the second parameter's
+ * first use is past two `if` blocks, and combine does not cross a basic block.
+ * Spelling it `int` costs a `u16` local to carry the zero-extended copy, and
+ * that extra pseudo spills three more callee-saved registers than the ROM
+ * pushes -- measured with compile_probe, which is how the retype was found.
+ * sub_080359A4 is the only caller and is still `asm`, so no promoted file
+ * depends on the old spelling. */
+void sub_080358C4(s16, s16);
 /* CORRECTED in wave 18 (W18-C): sub_080255F4 is
  * `u8 (struct Unk08499594 *, s16, s16)`, not `(int, int, int)`.
  *   - Parameter 0 is a POINTER, not an int: the body NULL-tests it
@@ -4254,10 +4310,91 @@ void sub_08043B60(int, int, u32, u32);
  * function's own declaration already types `int`. */
 void sub_0803CA28(u32, u8);
 void sub_08038484(void);
+/* Wave 43 (W43-F). VOID and nullary: no argument register is read before being
+ * written and the epilogue pops the return address into r0 without setting a
+ * result. It has NO callers anywhere in the ROM, so nothing else constrains
+ * it -- it is the per-map setup routine that fills gUnknown_0202FDEC. */
+void sub_08038240(void);
 void sub_08038548(void);
 void sub_08038568(void);
 int sub_08038434(void);
 int sub_08038474(void);
+/* Wave 43 (W43-E). Both MATCHED, so these two signatures come from their own
+ * definitions rather than from a call site.
+ *
+ * sub_08038368 is VOID and takes THREE arguments: the epilogue pops the return
+ * address into r0 and sets no result, and r0/r1/r2 are each copied to a
+ * callee-saved register in the prologue before anything is written. It appends
+ * one gUnknown_0200C420.unk38[] record -- a1 is the id it first searches the
+ * live run for, a2 the bits-8..19 field and a3 the bits-20..31 field. a1 is
+ * `int` and NOT `u8`: sub_08038484, its only caller, passes the int expression
+ * `gUnknown_03003FC0.unk02 - 0x8a` with no re-narrowing before the `bl`, which
+ * a narrow parameter would force. a2 and a3 arrive as bare `ldrh` results, so
+ * `u16` would fit them equally well (PROMOTE_MODE zero-extends either way and
+ * the bitfield stores mask to 12 bits regardless) -- `int` is the weakest type
+ * that fits and nothing in the tree discriminates.
+ *
+ * sub_080381C0 is nullary: no argument register is read before being written,
+ * and it is reached only from sub_08038240. It returns a plain 0/1 that
+ * nothing narrows. */
+void sub_08038368(int, int, int);
+/* Wave 43 (W43-F) RETYPED this from `int` to `bool8`, on its CALLER rather than
+ * its body -- W43-E's note above reads "returns a plain 0/1 that nothing
+ * narrows", and its one caller does narrow it. sub_08038240 truth-tests the
+ * result with `lsls r0,#0x18; cmp r0,#0`, and that leading shift is agbcc
+ * re-narrowing a sub-word return; an `int` return truth-tests with a bare
+ * `cmp r0,#0` and no shift. Byte-neutral for sub_080381C0 itself, whose two
+ * arms return the literals 0 and 1 and so need no narrowing either way -- its
+ * match was re-verified after this change.
+ *   WHAT MAKES THIS ONE DECISIVE is that sub_08038240 feeds the result STRAIGHT
+ * into the `if`, with no local in between. Probed both ways: `if (int_fn())`
+ * emits a bare `cmp r0,#0` and `if (bool8_fn())` emits `lsl #0x18; cmp r0,#0`.
+ * Do NOT generalise the shift on its own -- where the result lands in a local
+ * first, a `u8` local reproduces it from an `int` return and the tell proves
+ * nothing. See the sub_0807821C note below, which made exactly that error. */
+bool8 sub_080381C0(void);
+/* Wave 43 (W43-F). A saturating add into the two words of gUnknown_0808E558's
+ * record, each clamped at 9999 (0x270F) with an UNSIGNED `cmp; bhs`. VOID: the
+ * epilogue is `pop {r4,r5}; pop {r0}; bx r0`, which pops the return address
+ * into r0 and sets no result.
+ *   `u32` and NOT the `int` this declaration first carried: src/decomp is
+ * authoritative and c_080176C0.c was promoted long ago as `void
+ * sub_080176C0(u32 a)`. Caught by tools/proto_check.py, which is the ONLY
+ * check that sees it -- try_match compiles one unit and sub_08038240 matched
+ * byte-for-byte under both spellings, because its argument is an unnarrowed
+ * `ldrh` result that needs no conversion either way. The unsigned clamp
+ * corroborates the promoted type. */
+void sub_080176C0(u32);
+/* Wave 43 (W43-F), all four read off their own prologues for sub_08038484.
+ *
+ * sub_0803BADC and sub_08045790 are nullary: each is `push {lr}; ldr r0,=<proc
+ * script>; movs r1,#3; bl Proc_Start`, so no argument register is read before
+ * being written and neither sets a result.
+ *
+ * sub_0807823C's whole body is `bx lr` -- it does nothing at all. Its arity is
+ * therefore invisible from the body and comes from the one call site, which
+ * sets up r0 only. `int` because that site passes the int expression
+ * `gUnknown_03003FC0.unk02 - 0x8a` with no narrowing before the `bl`.
+ *
+ * sub_0807821C returns `gUnknown_08615194[a].unk02 & 0x10` as a literal 0 or 1
+ * through two arms. Its parameter is scaled `(a * 2 + a) << 4`, a 0x30 stride,
+ * from the same unnarrowed int expression as sub_0807823C's.
+ *   ITS RETURN WIDTH IS UNPROVEN and bool8 is a CONVENTION, not a measurement.
+ * This note previously claimed the width was forced because sub_08038484
+ * re-narrows the result with `lsls #0x18; lsrs #0x18`, "which an `int` return
+ * would not produce". That is wrong, and W43-E's challenge is what got it
+ * probed: sub_08038484 assigns the result to a LOCAL first, and an `int` return
+ * assigned into a `u8` local emits exactly the same shift pair. `bool8` + an
+ * `int` local and `int` + a `u8` local are byte-identical, so the call site
+ * cannot discriminate and there is no oracle at all here -- bool8 is kept only
+ * because the body returns literal 0/1 like its sibling sub_0803861C.
+ *   CONTRAST sub_080381C0 above, where the same tell IS decisive: its caller
+ * truth-tests the result directly with no local to absorb a narrowing. The
+ * discriminator is the absence of an intervening local, NOT the shift. */
+void sub_0803BADC(void);
+void sub_08045790(void);
+void sub_0807823C(int);
+bool8 sub_0807821C(int);
 void sub_080346FC(void);
 void sub_0803BCB8(void);
 void sub_0803B8B8(void);
@@ -4864,6 +5001,14 @@ void sub_0803B7B4(void);
  * with no conversion in front of the `bl`. */
 void sub_0803DE14(void);
 struct Unk02028360 *sub_0803DE94(int, int);
+/* Wave 43 (W43-G). sub_0803DE94 with a third test: the same rectangle scan
+ * over gUnknown_02028360, additionally requiring the record's unk02_6 kind
+ * field to equal the third argument. Returns the record or NULL, read off the
+ * body (`adds r0,r3,#0` on the hit, `movs r0,#0` on the fall-out) and NOT off
+ * any caller -- it has none in this tree, so the pointer return is the twin's
+ * shape rather than a measured fact, and the three `int` parameters are the
+ * weakest types that fit. */
+struct Unk02028360 *sub_0803DEEC(int, int, int);
 /* Wave 31 (W31-C). sub_0803DF98 fills the same {u16, u16} out-parameter
  * sub_0803DFE0 does -- sub_0803E310 binds a local one, calls it as
  * `sub_0803DF98(7, &pos)` and then subtracts pos.unk00 / pos.unk02 from its own
@@ -5665,6 +5810,19 @@ int sub_0801AC58(u8, u8 *);
 void sub_0803D2F8(int, u8 *);
 void sub_0803D238(u8 *);
 
+/* Wave 43 (W43-G). Copied verbatim from the promoted definition in
+ * src/decomp/c_080215FC.c so sub_0803D2F8 can call it. */
+void sub_080215FC(void);
+
+/* Wave 43 (W43-G). The parameter is `u8`: the prologue narrows r0 in place
+ * (`lsls #0x18; lsrs #0x18`) and every later use reads the narrowed value.
+ * RETURNS int -- both exits set r0 (`movs r0,#0` at _0803D4CE, `movs r0,#1`
+ * at _0803D532) -- but the width is NOT settled, because the only caller
+ * (sub_0803D48C, a 0..11 loop) discards it and so re-narrows nothing. `int`
+ * is the weakest spelling that fits and costs no caller a conversion; if a
+ * caller ever appears that tests the result, it may well be bool8. */
+int sub_0803D4A8(u8);
+
 /* Matched in wave 27. The first parameter is `u8` (`lsls #0x18; lsrs #0x18`
  * in the prologue, in place on r0); the second is never touched -- it is
  * forwarded straight to sub_0803D2F8 -- and sub_0803CF3C is a pass-through
@@ -5689,7 +5847,32 @@ void sub_08037DC8(void);
  * already zero-extended by the `ldrb` of the table read, so nothing in the
  * caller fixes the width and `int` is the weakest fit. The result is
  * discarded (sub_080375A4 ends `pop {r0}; bx r0`). */
-void sub_08037448(int);
+/* Wave 43 (W43-D): RETYPED from `void sub_08037448(int)`. The body returns 1
+ * or 0 in r0 (`movs r0, #1` / `movs r0, #0` both reaching the epilogue), which
+ * no `void` function can be spelled to do; and the parameter is narrowed
+ * `lsls #0x18; lsrs #0x18` on entry with NO preceding copy, which is
+ * PROMOTE_MODE's u8 parameter conversion rather than a cast at a use.
+ * Byte-neutral at the only promoted caller: c_080375A4.c passes a `const u8`
+ * element, which converts to u8 and to int identically, and discards the
+ * result. c_080375A4.c was re-verified with trymatch after the change. */
+u8 sub_08037448(u8);
+
+/* Wave 43 (W43-D), settled from the definition rather than a call site.
+ * `u8` return: sub_08037448 re-narrows the result `lsls #0x18` before testing
+ * it, which agbcc only emits for a narrow-returning callee, and the two
+ * `movs r0, #0/1` need no narrowing of their own. Both parameters are narrowed
+ * `lsls #0x10; lsrs #0x10` on entry. */
+u8 sub_080373F0(u16, u16);
+
+/* Wave 43 (W43-D): both of these are DEFINED in src/decomp (c_08026340.c and
+ * c_0803CC3C.c) but had no declaration here, so sub_080373F0/sub_08037448 --
+ * the first callers outside those files -- would have got the C89 implicit
+ * `int ()`. Copied from the promoted definitions, not guessed: an implicit
+ * `int` return for sub_08026340 loses the caller's `lsls #0x18; lsrs #0x18`.
+ * sub_0803CC64 genuinely returns `int`, so its caller's `lsls #0x18` is a u8
+ * cast written in the source, not agbcc re-narrowing a u8 callee. */
+u8 sub_08026340(void);
+int sub_0803CC64(u16);
 
 /* Matched in wave 27. `u8` and not `int`: the `lsls #0x18; lsrs #0x18` is in
  * the prologue operating on r0 IN PLACE, which is PROMOTE_MODE narrowing a
@@ -6491,6 +6674,26 @@ const u16 *sub_0803F128(int);
 int sub_0803F27C(int);
 void sub_0803F29C(int *, int *, int);
 void sub_08035760(ProcPtr, void *);
+/* Wave 43, W43-B. sub_08035850 spawns the gUnknown_0849BDB8 proc on
+ * PROC_TREE_5 and seeds it. All three parameters are `int`: each reaches its
+ * use unnarrowed -- `lsls #4` straight off the incoming register for the first
+ * two, a bare `strb` for the third -- and an s16 parameter would have needed a
+ * sign-extension in front of the shift. `pop {r0}` makes it void.
+ *
+ * sub_08035BC4's three parameters are s16, and that is PROMOTE_MODE read
+ * forwards: each is zero-extended once at entry and sign-extended again at
+ * every arithmetic use, while the gUnknown_03001470 unk1e/unk20 stores use the
+ * RAW zero-extended copies -- which is exactly `strh` of an s16 parameter.
+ * Its own fan-in is 0, so nothing constrains this from the caller side.
+ *
+ * The last three are the "PROMOTED BUT NEVER DECLARED" trap: all are already
+ * matched, in src/decomp/c_0801BD00.c and src/decomp/c_08042E2C.c. The types
+ * below are COPIED FROM THOSE DEFINITIONS and were not re-derived. */
+void sub_08035850(int, int, int);
+void sub_08035BC4(s16, s16, s16);
+void sub_0801BDB4(s32, s32, u16 *, s32);
+int sub_08042F5C(int);
+int sub_08042FA4(int);
 void sub_08035DF4(void *);
 void sub_08035E90(ProcPtr);
 /* Wave 38 (W38-A): first parameter retyped from `void *` to
@@ -7672,7 +7875,12 @@ void sub_080247A4(u16);           /* one `ldrb` from a byte table */
 void sub_080860DC(ProcPtr);       /* sub_0808603C hands it the same proc it
                                    * gives sub_08086688, which IS declared
                                    * ProcPtr -- that is the whole argument */
-void sub_08037A20(u16 *, int);    /* (gUnknown_0849957C, 0x6200) */
+/* Wave 43 (W43-D) CONFIRMED `int`, do not "fix" it to u16. The body copies the
+ * second argument with a bare `adds r6, r1, #0` and never narrows it: a u16
+ * parameter would arrive with PROMOTE_MODE's `lsls #0x10; lsrs #0x10` instead,
+ * which is +2 bytes and was measured as the function's only diff.
+ * (gUnknown_0849957C, 0x6200) */
+void sub_08037A20(u16 *, int);
 void sub_080620C0(void);
 void sub_080620FC(int, int);      /* (0,1) (1,6) (2,5) from sub_0806209C */
 void sub_080627F4(int);
@@ -8174,7 +8382,16 @@ void sub_0801FD30(int, int, int);
 void sub_0803A338(void);
 void sub_0803A4A8(void);
 void sub_0803A5B8(void);
-void sub_0803AAC0(u8, u8, u8);
+/* Wave 43, W43-I: FOURTH PARAMETER ADDED, and W35-E's arity above is what was
+ * wrong -- not the types. sub_0803AB3C sets r3 up as well, `lsls r3,#0x18;
+ * asrs r3,#0x18` immediately before the `bl`, which is an s8 conversion of a
+ * value that is 0, 0xd or -1 and cannot be anything but a fourth argument.
+ * c_0803AAC0.c never reads it; a trailing parameter that is never referenced
+ * costs no instructions, and that file was re-verified byte-for-byte after the
+ * change. The arity was read "off the argument setup" in wave 35 from the call
+ * sites that existed THEN -- sub_0803AB3C was still unmatched, so its r3 was
+ * never in evidence. */
+void sub_0803AAC0(u8, u8, u8, s8);
 void sub_0803CEB8(u8, const void *);
 void sub_0803CF54(u8, const void *, u8);
 int sub_0801AD70(u8);
@@ -8206,7 +8423,29 @@ int sub_0804B42C(int, int);
 int sub_0804B4C4(int, int);
 u16 sub_0804B55C(u16, u8 *, int);
 u16 sub_0804B644(u16, u16);
-void sub_0804B850(int, u16, void *, void *, void *, void *, void *);
+/* Wave 43, W43-K: parameter 1 was `int` and is NARROW. sub_0804B850's prologue
+ * truncates BOTH r0 and r1 with `lsls #0x10; lsrs #0x10` back to back, which is
+ * the PROMOTE_MODE entry pattern for a sub-word parameter -- an `int` gets no
+ * such pair, and a cast at the single use would sit next to that use instead of
+ * in the prologue. The only caller, c_0804B744.c, passes the literals 0 and 1,
+ * so the change is byte-neutral there; re-verified after the edit. */
+void sub_0804B850(u16, u16, void *, void *, void *, void *, void *);
+/* Wave 43, W43-K -- sub_0804B850's three callees, read off its call sites.
+ * sub_0804BB28 and sub_0804BB44 are PROMOTED in src/decomp/c_0804BB28.c and
+ * these agree with the definitions there; sub_0804BB28's third parameter is
+ * dead in its own body and was added to that definition in this wave (see the
+ * comment on it). sub_0804BB74's third parameter is `u32` because its body
+ * opens `lsrs r6, r6, #2` on the raw incoming value -- a bare logical shift
+ * right, which an `int` would have made `asrs`; its first parameter is NOT
+ * narrowed at entry, so it is `int` where sub_0804BB28's sibling index is. */
+/* Wave 43, W43-K: both are PROMOTED -- src/decomp/c_0804A18C.c and
+ * c_0804AE10.c -- and these are copied from those definitions, not inferred.
+ * sub_0804A6D8 is the first C caller of either. */
+void sub_0804A1E4(u8);
+void sub_0804AE10(void);
+void sub_0804BB28(int, void *, int);
+void sub_0804BB44(int, void *, int);
+void sub_0804BB74(int, void *, u32, int);
 void sub_0804B8BC(u16, u16);
 /* Wave 35, W35-F. sub_0804D6C8/sub_0804D6FC are PROMOTED in
  * src/decomp/c_0804D6C8.c and c_0804D6FC.c with an unread second parameter;
@@ -8266,6 +8505,25 @@ void sub_080199D0(u8);
 void sub_08047190(void *, u8);
 void sub_08047920(void *);
 void sub_080488E0(void);
+/* Wave 43, W43-L. Already DEFINED in src/decomp/c_08048F10.c; it had no
+ * declaration here because nothing outside its own unit called it until
+ * sub_08048FD8 (matched this wave) did. The type is the definition's: it
+ * returns the NEW value of the s16 gUnknown_084C30F8->unk832 as u16, and
+ * sub_08048FD8 truth-tests that result with a bare `lsls #0x10`, which agrees. */
+u16 sub_08048F10(void);
+/* Wave 43, W43-L. Already DEFINED in src/decomp/c_080485DC.c; it had no
+ * declaration here because nothing outside its own unit called it until
+ * sub_08048FD8 (matched this wave) did. The type is the definition's. */
+void sub_080485DC(const u8 *);
+/* Wave 43, W43-L, matched -- this declaration is taken from sub_08048850's OWN
+ * definition rather than from a call site, which is why the widths are firm.
+ * Both parameters narrow in the prologue (`lsls #0x10; lsrs #0x10`), so both
+ * are 16-bit; UNSIGNED because a1 only ever feeds `i < a1 + 3` and a2 only
+ * ever indexes the u8 array gUnknown_02028E1C, and PROMOTE_MODE would emit the
+ * same prologue for s16 either way -- nothing re-narrows a use, so the sign is
+ * unproved and u16 is the weakest fit. Void: the epilogue sets no r0 and both
+ * callers (sub_08049178, sub_08049B80) discard. */
+void sub_08048850(u16, u16);
 
 /* The W35-L batch itself. sub_08048EC4 returns `u16`: sub_080490BC narrows its
  * result with `lsls #0x10; lsrs #0x10` and then reuses the same register as an
@@ -8440,11 +8698,24 @@ void sub_080470E8(void);
 void sub_08046778(int, int);
 void sub_08046914(int, int);
 
-/* Derived from sub_080499F8's call site: five arguments, the fifth on the
- * stack (`str r1, [sp]`). r0 is a `ldrh` of gUnknown_084C30F8->unk028 and r3 a
- * `ldrb` of ->unk835, neither narrowed at the call, so `int` is the weakest
- * model for both; r1 and r2 are literals. The result is discarded. */
-void sub_08049944(int, int, int, int, int);
+/* Wave 43, W43-L. RETYPED from all-`int` off sub_080499F8's call site to the
+ * widths sub_08049944's OWN prologue proves -- the definition matched this
+ * wave. All five arguments narrow at entry, in argument order, before any
+ * other work: `lsls #0x10; lsrs #0x10` on a1/a2/a3/a5 and `lsls #0x18;
+ * lsrs #0x18` on a4. An `int` parameter cast at a use puts those shifts at the
+ * use, not in the prologue, so these are declared narrow.
+ *
+ * The SIGNS are settled at the uses, per PROMOTE_MODE (entry is zero-extending
+ * for s16 and u16 alike): a2 and a3 are re-widened `lsls #0x10; asrs #0x10`
+ * before sub_08014B0C's two `int` parameters, which only an s16 source can
+ * produce; a1 is compared `blo`/`bhs` against the digit ramp, unsigned; a5
+ * goes to sub_08014B0C's `u16` fifth parameter unnarrowed.
+ *
+ * Byte-neutral at the one existing caller and re-verified there: c_080499F8.c
+ * passes a u16 member, two literals, a u8 member and 0x3000, every one of
+ * which converts to the narrow parameter with the same instructions it already
+ * used to convert to `int`. */
+void sub_08049944(u16, s16, s16, u8, u16);
 
 /* Wave 36 (W36-L): the four undeclared callees of the 0x08020/0x08021 blocks,
  * all read off their call sites in sub_08020354 / sub_080201E0 / sub_08020D50 /

@@ -34,7 +34,11 @@ gUnknown_0848B6C6:  @ 0x0848B6C6
 
 	.global gUnknown_0848B6CE
 gUnknown_0848B6CE:  @ 0x0848B6CE
-	.incbin "baserom.gba", 0x48B6CE, 0x18    @ 0x48B6E6 - 0x48B6CE
+	.incbin "baserom.gba", 0x48B6CE, 0x8    @ 0x48B6D6 - 0x48B6CE
+
+	.global gUnknown_0848B6D6
+gUnknown_0848B6D6:  @ 0x0848B6D6
+	.incbin "baserom.gba", 0x48B6D6, 0x10    @ 0x48B6E6 - 0x48B6D6
 
 	.global gUnknown_0848B6E6
 gUnknown_0848B6E6:  @ 0x0848B6E6

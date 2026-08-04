@@ -12,7 +12,12 @@
  * The `adds r3, #4` on the BASE rather than an `ldr r0, [r2, #4]` is
  * -fforce-addr putting the bare symbol in the pool and adding the member
  * offset to it; the honest `gUnknown_08555850[a].unk04` produces it. */
-void sub_0804BB28(int a, void *dst)
+/* Wave 43, W43-K: the dead third parameter was added when sub_0804B850 was
+ * matched. It is invisible here -- r2 is written by the index multiply before
+ * any read -- but the only caller emits `movs r2,#0x80; lsls r2,#7` in front of
+ * the `bl`, which nothing else consumes, so the arity is 3. Same reading as the
+ * sub_0804B55C note in unknown-functions.h. Byte-neutral: re-verified. */
+void sub_0804BB28(int a, void *dst, int c)
 {
     LZ77UnCompVram(gUnknown_08555850[a].unk04, dst);
 }

@@ -392,6 +392,25 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o=None):
             continue
         t_name, t_extra = _split_sym(t_sym)
         c_name, c_extra = _split_sym(c_sym)
+
+        # Both sides name the IDENTICAL symbol, so the two relocations resolve
+        # to the same address exactly when the stored addends agree -- and the
+        # byte loop below already enforces that, because this offset is never
+        # added to `sites`. Nothing needs resolving, which matters because a
+        # SECTION symbol has no address to look up: a `switch`'s jump table
+        # relocates its words against `.text`, and sym_addr(".text") is None.
+        #
+        # Without this, one jump table sank the whole check before any pool
+        # word was examined -- the same shape as the wave-15 R_ARM_THM_CALL
+        # hole above, and the wave-42 `.rodata` one below. Wave 43 found
+        # sub_080389D8 reported as "bytes: match, but relocations differ" at
+        # 0 of 256 bytes differing, its only true difference the ordinary
+        # -fforce-addr pool word that the `.rodata` branch below exists to
+        # accept. Every function carrying both a jump table and a pool word
+        # was unmatchable.
+        if t_sym == c_sym:
+            continue
+
         if t_off + 4 > len(tgt_fn):
             return False
         t_base = sym_addr(t_name, syms)
@@ -918,6 +937,24 @@ def self_test():
             words == [0x08090BE4, 0x08090BE8, 0x08090BEC, 0x08090BF0])
     print("\n[self-test] a multi-word .rodata blob is accepted with every "
           "word listed (sub_0802CDA4): %s" % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    # Wave 43: a function carrying BOTH a jump table and a -fforce-addr pool
+    # word. sub_080389D8's switch relocates its eleven table words against the
+    # section symbol `.text`, which has no address for sym_addr() to return, so
+    # relocs_equivalent() bailed on the FIRST table word and never reached the
+    # `.rodata` branch that the pool word needed. It reported "bytes: match, but
+    # relocations differ" at 0 of 256 bytes differing -- a byte-perfect function
+    # called a miss, the same failure shape as the wave-15 R_ARM_THM_CALL hole
+    # and the wave-42 `.rodata` one. Identically-named symbols are now skipped
+    # and left to the byte comparison. Asserting the pool-word hint too keeps
+    # the fix from degenerating into "ignore every relocation".
+    print()
+    rc = check("sub_080389D8")
+    words = sorted({a for a, _ in pool_word_equivalent.needed})
+    good = (rc == 0 and words == [0x08090F0C])
+    print("\n[self-test] a jump table does not mask a .rodata pool word "
+          "(sub_080389D8): %s" % ("PASS" if good else "FAIL"))
     ok &= good
 
     print("\n[self-test] %s" % ("PASS" if ok else "FAIL"))

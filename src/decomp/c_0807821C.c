@@ -14,7 +14,7 @@
  * The literal pool sitting BETWEEN the two return blocks is the if/return
  * form's signature -- a ternary would put it after the `bx lr`. */
 
-int sub_0807821C(int i)
+bool8 sub_0807821C(int i)
 {
     if (gUnknown_08615194[i].unk02 & 0x10)
         return 1;

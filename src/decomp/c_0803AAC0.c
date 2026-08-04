@@ -7,7 +7,11 @@
  * sub_0803AAC0 @ 0x0803AAC0
  */
 
-void sub_0803AAC0(u8 a1, u8 a2, u8 a3)
+/* The fourth parameter is real but unread here -- sub_0803AB3C passes an s8 in
+ * r3 (0, 0xd or -1) and this body never touches it. An unreferenced trailing
+ * parameter costs no instructions, so adding it left this file byte-identical.
+ * Wave 43, W43-I. */
+void sub_0803AAC0(u8 a1, u8 a2, u8 a3, s8 a4)
 {
     int x;
     int t;
