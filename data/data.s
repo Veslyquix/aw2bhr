@@ -3698,7 +3698,11 @@ gUnknown_0848896C:  @ 0x0848896C
 
 	.global gUnknown_08488974
 gUnknown_08488974:  @ 0x08488974
-	.incbin "baserom.gba", 0x488974, 0x12    @ 0x488986 - 0x488974
+	.incbin "baserom.gba", 0x488974, 0x8    @ 0x48897C - 0x488974
+
+	.global gUnknown_0848897C
+gUnknown_0848897C:  @ 0x0848897C
+	.incbin "baserom.gba", 0x48897C, 0xA    @ 0x488986 - 0x48897C
 
 	.global gUnknown_08488986
 gUnknown_08488986:  @ 0x08488986

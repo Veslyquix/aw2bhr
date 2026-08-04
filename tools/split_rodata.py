@@ -182,9 +182,23 @@ def verify(carve, chunks, strict):
                              "4-byte pool word" % (addr, obj, c["size"]))
         val = int.from_bytes(rom[addr - ROM_BASE:addr - ROM_BASE + 4], "little")
         if not (0x02000000 <= val < 0x0A000000):
-            raise SystemExit("error: 0x%08X (%s) holds 0x%08X, which is not an "
-                             "address -- refusing to carve it"
-                             % (addr, obj, val))
+            # Wave 42: a unit's .rodata is not only address words. The wave-39
+            # whole-section acceptance means a promoted list can carry string
+            # literals and initialiser templates (sub_080281F0's holds "ON\0\0"
+            # inside its { "OFF", "ON" } table), and trymatch byte-validated
+            # every listed word against baserom before promote.py recorded it.
+            # Accept a non-address word ONLY as part of that case: the same
+            # unit must claim an adjacent word, i.e. it sits inside a
+            # consecutive multi-word run. A LONE non-address word is still a
+            # typo until proven otherwise, and the final oracle is unchanged
+            # either way -- a wrong carve fails `make SPLIT=1 compare`.
+            same_unit_neighbour = (carve.get(addr - 4) == obj
+                                   or carve.get(addr + 4) == obj)
+            if not same_unit_neighbour:
+                raise SystemExit("error: 0x%08X (%s) holds 0x%08X, which is "
+                                 "not an address and has no adjacent word in "
+                                 "the same unit -- refusing to carve it"
+                                 % (addr, obj, val))
 
 
 def build(header, chunks, carve, stem):

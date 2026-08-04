@@ -68,6 +68,13 @@ void sub_08004A30(int);
  * prologue is bare. So `int`, and the sign stays undetermined because the one
  * call site passes 0. Both functions are matched, which pins it. */
 void sub_08001148(u16 *, int, int);
+/* The BYTE fill sixteen bytes in front of it, and the identical body with
+ * `strb` and `adds #1` where sub_08001148 has `strh` and `adds #2`. Wave 42
+ * matched it by changing the pointer type in c_08001148.c and nothing else.
+ * The third parameter is `int` for the reason spelled out above -- a `u8` there
+ * puts an `lsl #24; lsr #24` pair in the prologue that the ROM does not have.
+ * No caller in the tree yet, so only the body constrains the widths. */
+void sub_08001138(u8 *, int, int);
 
 /* Two builders of the same gUnknown_030044B0 command block, both handing it to
  * sub_080308B4 at the end and both void (`pop {r0}; bx r0`).
@@ -1302,6 +1309,11 @@ int sub_0801E9B0(s16, s16, s16, void *, long long, s16);
  * r4,#2`, and its fifth arrives on the stack as an affine-parameter index. */
 void sub_0801E2A4(void);
 int sub_0801E3E8(int, int, int, u16 *, int);
+/* Wave 42 (W42-G): sub_0801DFE8's third switch arm, called with exactly the
+ * argument block sub_0801E3E8 gets (same five slots, same registers, same
+ * `str` of the fifth). Types are copied from that sibling; the result is
+ * ignored at the only call site, so `int` is the weakest thing that fits. */
+int sub_0801E508(int, int, int, u16 *, int);
 /* Wave 33, W33-B: sub_080466DC's tail reset, nullary void. */
 void sub_08045FC8(void);
 /* Wave 33, W33-B: the 56-frame cursor advance sub_080466DC leads with (matched,
@@ -1983,6 +1995,11 @@ void sub_08004724(void);
  * and gates the whole body, and r0 is the 6..17 switch selector. */
 int sub_08001D04(int);
 void sub_0803F6BC(int, int, void *, int);
+/* Wave 42, W42-A. One argument (a map-tile halfword in sub_08002F1C, passed
+ * with no narrowing at the call), and the result is handed straight to
+ * sub_0802BD54's `u32` third parameter with no `lsl/lsr` pair after the `bl`,
+ * so the return is word-width. Parameter left as the weakest `int`. */
+u32 sub_0800C8A0(int);
 
 /* The deferred-copy queue push, with 58 callers -- the widest fan-in in the
  * ROM after the proc API. It appends (src, dest, size) to gUnknown_0200B3B4[]
@@ -2139,6 +2156,13 @@ void sub_080546BC(void); /* src/decomp/c_080546BC.c */
  * sub_080339B0 passes 0x40 in r2, so the declaration really does have three
  * parameters and only the width of the unused one is open. */
 u16 sub_080315E8(u16, u16, int);
+/* Wave 42, W42-L: sub_08031948's third callee, and undeclared before this wave.
+ * `bl sub_08031824` with no argument register set up in front of it and no use
+ * of r0 after it, so void/void is the weakest model that fits. Its own body has
+ * not been read -- if a later agent matches it and finds parameters, the call
+ * site here cannot contradict that, because a wrapper passing nothing costs no
+ * instructions either way. */
+void sub_08031824(void);
 void sub_08033930(void);
 void sub_0803D48C(void);
 void sub_08085AF4(void); /* src/decomp/c_08085AF4.c */
@@ -3011,6 +3035,10 @@ void sub_0800ABD0(int, int);
 void sub_0800B048(int, int);
 s16 sub_0800B61C(int, int);
 int sub_0800F418(int, int);
+/* Wave 42 (W42-C). Void is read off the tail: it ends `pop {r0}; bx r0` after
+ * the register restores rather than after a call, and its only caller
+ * (sub_08010ADC) discards r0. */
+void sub_08010664(int, int);
 void sub_08010ADC(int, int);
 /* Already promoted in src/decomp/, but never declared -- wave 37 (W37-D) needed
  * them from a second unit. Types are the promoted definitions', not new work. */
@@ -6644,6 +6672,22 @@ void sub_0806D840(void);
  * The register that survives is the argument. */
 void sub_0801E18C(int);
 
+/* Wave 42, W42-F: the two callees of sub_0801DF94 that had no declaration in
+ * this header. Both are `void` -- each ends `pop {r0}; bx r0`, which destroys
+ * the callee's result in r0 before returning. sub_0801E0A4 sets up r0/r1/r2 for
+ * sub_08011C90 entirely from its own constants, so it takes nothing.
+ *
+ * sub_0801E22C's three narrow parameters are NOT a caller-side reading: it is
+ * already promoted as `void sub_0801E22C(int index, u16 a, u16 b, u16 c)` in
+ * src/decomp/c_0801E22C.c, and the promoted definition wins. The call site
+ * cannot see the difference -- sub_0801DF94 (its only caller) passes 0x100,
+ * 0x100 and 0 as constants, which need no narrowing either way -- so `int`
+ * would have compiled and matched here while silently disagreeing with the
+ * definition, exactly the class of error trymatch cannot catch because it
+ * compiles one unit. tools/proto_check.py is what caught it. */
+void sub_0801E22C(int, u16, u16, u16);
+void sub_0801E0A4(void);
+
 /* sub_0801E334 returns `int`, NOT the `u16` its promoted definition in
  * src/decomp/c_0801E334.c carried until wave 28 -- the definition has been
  * retyped to agree and re-verified byte-identical (the body is `return *p;`,
@@ -7076,8 +7120,24 @@ s8 sub_0802F4F4(void);
  * `lsls #0x18; asrs #0x18`, which is the s8 parameter and not a source cast. */
 bool8 sub_0802F460(s8);
 bool8 sub_0802F480(s8);
+/* Wave 42, W42-M. Copied from the promoted definition (src/decomp/c_0802F504.c)
+ * -- the definition wins. Declared now because sub_0803227C is its first
+ * cross-file caller. The caller narrows the result `lsls #0x18; lsrs #0x18`,
+ * which looks like a u8 return but is not: PROMOTE_MODE holds the s8 pseudo
+ * zero-extended, and every READ of it re-extends signed (`lsls #0x18; asrs`). */
+s8 sub_0802F534(void);
 void sub_08063454(struct Unk08062FB8 *, int, int, u8, s8);
 int sub_08063518(struct Unk08062FB8 *);
+/* Wave 42 (W42-K). The parameter is a BYTE BUFFER and `u32` is very probably
+ * the wrong spelling -- the body is sub_080308B4's twin and copies
+ * `unk06[i] = a1[i]` for i = 0..127 out of it, and sub_080308B4 is promoted
+ * taking `u8 *`. LEFT AS `u32` ANYWAY, deliberately: the one caller,
+ * src/decomp/c_0803355C.c, is already matched and passes `proc->unk24`, whose
+ * file-local struct member is `u32` and is assigned in a chain with three
+ * integer siblings (`p->unk24 = p->unk26 = p->unk28 = p->unk2a = 0`), so it
+ * cannot become a pointer without churn there. The question is byte-neutral --
+ * the value arrives in r0 either way -- so there is no oracle to settle it and
+ * the promoted caller wins. sub_08030930 casts internally. */
 void sub_08030930(u32);
 void sub_080338C0(int);
 void sub_08026900(void);

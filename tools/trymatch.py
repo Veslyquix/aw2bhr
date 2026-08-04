@@ -318,7 +318,18 @@ def pool_word_equivalent(cand_o, rodata_off, rom_addr):
             if typ != "R_ARM_ABS32":
                 return None
             name, extra = _split_sym(sym)
-            base = sym_addr(name, syms)
+            # Wave 42, W42-M. A word pointing back into THIS section relocates
+            # against the local `.rodata` section symbol, and no symbol table
+            # can resolve that: nm does not name section symbols, and the
+            # linked ELF's `.rodata` is the FINAL section, not this unit's. It
+            # used to fall straight into `return None`, so an otherwise exact
+            # function was reported as a differing pool word forever. The
+            # section's own base is already known -- it is `sect_base` -- and
+            # every word is still compared against the ROM below, so a wrong
+            # base cannot pass. Found on sub_08032A00, whose `u8 *v[3]`
+            # initialiser template is three pointers into the three string
+            # literals emitted just before it in the same section.
+            base = sect_base if name == ".rodata" else sym_addr(name, syms)
             if base is None:
                 return None
             value = base + extra + int.from_bytes(data[off:off + 4], "little")
