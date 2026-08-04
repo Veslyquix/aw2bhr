@@ -24369,3 +24369,330 @@ before declaring.
 **Still open:** `sub_0801EE10`'s ROM has a loop with two calls in it and a
 plain pool word, which none of the above reproduces. Whatever the real source
 lever is, it is not in this list.
+
+## Where the shared `movs rD,#K` of a duplicated `return K` LANDS is a source-shape readout (wave 41, W41-A)
+
+Two functions in one batch, both 88–96 bytes, both size-exact on the first
+attempt with **every instruction right and only the position of one two-insn
+block wrong**. They fell to opposite spellings of the same guard, so this is a
+discriminator, not a preference.
+
+A `return K` that appears more than once in a function is emitted once and
+jumped to; cross-jumping decides WHICH copy survives, and the survivor's
+position is visible in the listing because agbcc dumps a literal pool after the
+unconditional `b` that block ends with.
+
+- **`sub_0801AD70`** — ROM keeps the block EARLY, at the top, with the loop's
+  two rejects reaching it by `b _0801AD88` / `bne _0801AD88` (backward), and the
+  guard's second test inverted to `bne <loop>` so the block is its FALL-THROUGH.
+  `if (A || B) return 1;` does NOT produce this: the `||` makes both tests
+  branch forward, the top block has no fall-through predecessor, and
+  cross-jumping deletes it in favour of the loop's first reject — 53.4%.
+  **Two separate statements, `if (A) return 1; if (B) return 1;`, matched.**
+- **`sub_0801ABF8`** — ROM keeps the block LAST, past both literal pools, with
+  the guard branching forward to it. The early form
+  `if (id == 0) return 1; <body>` emits `movs r0,#1` inline right after the
+  guard — 16.7%. **Nesting the body, `if (id != 0) { <body>; return f(); }
+  return 1;`, matched.**
+
+**Read it off the ROM before writing the C:** find the `movs rD,#K` that every
+early exit shares and note whether it sits before or after the function's
+literal pools. Before the pools -> separate `if`s with the early `return`.
+After them -> the body nests in the inverted `if` and the `return K` is the last
+statement. `||` is the one spelling that produced NEITHER.
+
+## The honest spelling of a `-fforce-addr` pointer global also fixes REGISTER ALLOCATION (wave 41, W41-A)
+
+Corollary to the "TWO levels is an address constant, THREE means you invented a
+global" chapter. `sub_0801A474` reads a tilemap base as
+`ldr r0,=gUnknown_0808E5C4; ldr r0,[r0]; ldr r0,[r0]`, where the ROM word at
+0x0808E5C4 holds `&gUnknown_0849958C`. Naming the ROM word and writing
+`**gUnknown_0808E5C4` reproduced the instruction stream **exactly** — same
+insns, same order, same size — and still failed at 92.3% because three
+callee-saved registers were permuted (`dst`/`alt`/`i` got r5/r7/r6 where the ROM
+has r6/r5/r7). Declaration order of the locals does not move it; neither does
+statement order.
+
+Writing the global honestly, `gUnknown_0849958C + a1 + a2 * 32`, matched on the
+next attempt. agbcc parks the address in this unit's own `.rodata` (trymatch
+prints `"rodata": ["0x0808E5C4"]`) AND the source-level reference to
+`gUnknown_0849958C` now exists at the top of the function instead of only at the
+`sub_08011C68` call at the bottom, which creates its allocno earlier and shifts
+everything after it.
+
+**Independent corroboration that this is the real mechanism:** a 300 s permuter
+run on the wrong spelling reached 98.0% by inserting `gUnknown_0849958C =
+gUnknown_0849958C;` as the second statement — a no-op whose only effect is an
+early reference to that symbol. The permuter found the lever; the honest
+spelling *is* the lever. **So when a force-addr candidate is instruction-exact
+and only registers are wrong, do not reach for the permuter — check whether you
+spelled the ROM word instead of the global it points at.**
+
+## `break` vs `return` decides whether the loop exit test is duplicated (wave 41, W41-B)
+
+`duplicate_loop_exit_test` copies a `while` loop's condition above the loop, so
+the guard evaluates the condition with the induction variable at its initial
+value (constant-folded) and the loop itself becomes bottom-tested. Whether it
+fires is decided by how the loop's OTHER exit is spelled, and the two spellings
+are otherwise semantically identical.
+
+`sub_080206B0` is the measurement — a 0x5c-stride table scan bounded at 0xbf:
+
+```c
+i = 0;
+while ((u32)gUnknown_085C77A0[i].unk2c[0] != a1)
+{
+    i++;
+    if (i > 0xbf)
+        return i;      /* 52 bytes: MATCH */
+     /* break;             44 bytes, and structurally different */
+}
+return i;
+```
+
+With `return i;` agbcc emits the duplicated guard — `ldr r3,=gUnknown_085C77A0;
+ldr r0,[r3,#0x2c]; cmp r0,r2; beq done` — and then hoists the member offset onto
+the base for the loop body (`adds r3, #0x2c`), which is the ROM.
+
+With `break;` the duplication does not happen at all. The loop comes out
+top-tested with the subscript computed from `i` on the first iteration too, and
+because the raw base then has no other use, the `+0x2c` folds into the pool
+word's RELOCATION ADDEND (`.word gUnknown_085C77A0+0x2c`) instead of being an
+`adds` at run time. So one keyword changes the guard, the base hoist AND the
+relocation — three apparent differences that are one fact.
+
+Read backwards: **a duplicated exit test in the ROM is evidence the source's
+early exit was a `return`, not a `break`** — and if your candidate is missing
+the guard, try the other keyword before touching the loop's shape.
+
+## `A op B ? A : C` — fold inverts the ternary when the then-arm IS a comparison operand (wave 41, W41-B)
+
+Binding a subexpression to a local can flip which arm of a ternary agbcc emits
+inline. `sub_08020864` wraps a faction index against 4, twice:
+
+```c
+/* MATCHES -- the sum written out at both the comparison and the arm */
+sub_08020824(a, a + k <= 4 ? a + k : a + k - 4)
+
+/* +4 bytes -- the two ternaries come out with their arms swapped */
+t = a + k;
+sub_08020824(a, t <= 4 ? t : t - 4)
+```
+
+With the local, the tree is literally `A op B ? A : C` (the then-arm is the
+comparison's own left operand), which is fold's MIN/MAX-recognition pattern.
+fold cannot build a MIN_EXPR here — C is not B — but it still inverts the
+condition and swaps the arms, so agbcc emits `ble` to the `t` arm with the
+`t - 4` arm inline where the ROM has `bgt` to the `t - 4` arm with the `t` arm
+inline. Written as `a + k` the comparison operand and the arm are different
+trees, the pattern does not fire, and the source's arm order survives.
+
+**The inversion is not reachable by rewriting the condition.** `t <= 4 ? t :
+t - 4`, `t < 5 ? t : t - 4`, `!(t > 4) ? t : t - 4`, `4 < t ? t - 4 : t` and
+`t > 4 ? t - 4 : t` all produce byte-identical output — they normalise to the
+same tree. The only lever is whether the arm and the comparison operand are the
+same expression node.
+
+Corollary for reading a listing: **an arm order that no spelling of the
+condition reproduces means the source did NOT have that subexpression in a
+local.** The rule cuts against the usual "bind it to a local" instinct, and it
+is separate from the register-allocation reason for binding (see "One binding
+local PER STATEMENT").
+
+## A `(u16)` cast is a FREE fold barrier when the value ends up in a `strh` (wave 41, W41-B)
+
+Two expressions that are arithmetically equal but written differently will CSE
+into one value if `fold` re-associates them into the same tree. `fold`'s
+`split_tree` pulls an integer constant out of a subtraction, so
+`base - (w - 1)` becomes `(base + 1) - w` — which is exactly the tree
+`base + 1 - w + 2` is built from, and the two collapse.
+
+`sub_0802BDBC` writes a 2x2 tile block whose four entries are, in ROM order,
+`base + w`, `base - (w - 1)`, `base + w + 2` and `base + 1 - w + 2`. The ROM
+keeps the second and fourth as SEPARATE values computed from different trees
+(`subs rT, w, #1; subs rB, base, rT` versus `adds rT, base, #1; subs rT, rT, w;
+adds rD, rT, #2`), and no spelling of the second in plain `int` arithmetic
+reproduces that — `base - (w - 1)`, `base + (1 - w)` and `base - w + 1` all fold
+to the same thing and CSE, losing 4 bytes and a callee-saved register.
+
+**`base - (u16)(w - 1)` is the fix.** The cast is a NOP_EXPR that `split_tree`
+will not look through, so the subtrahend survives as its own tree, and it costs
+nothing: the value's only use is a `strh`, so the truncation is dead and combine
+deletes the shift pair. The same cast written where the result feeds anything
+wider WOULD cost the `lsls #0x10; lsrs #0x10` pair — bind it to a `u16` local
+instead and you pay for it (measured: +2 instructions).
+
+Read backwards: **two ROM values that are equal but computed from different
+trees mean the source spelled them inconsistently, and a width cast is the
+cheapest thing that reproduces it.** This is the same family as the wave-41
+`A op B ? A : C` ternary inversion — both are fold rewriting a tree you have to
+stop it from touching.
+
+## `break` rotates a loop, `return` does not — now measured on `for(;;)` too (wave 41, W41-B)
+
+The `sub_080206B0` finding above (a `while` loop's early exit spelled `break`
+suppresses `duplicate_loop_exit_test`) has a second, larger form.
+
+`sub_0802BCF0` is `for(;;) { call; value /= 10; if (value == 0) EXIT; x -= 7; }`.
+With `EXIT` = `return` this is the ROM: the body stays at the top of the loop,
+the test falls straight into the epilogue, and the trailing `x -= 7` is followed
+by an unconditional `b` back.
+
+With `EXIT` = `break` agbcc **rotates the loop**: the trailing `x -= 7` is moved
+to the TOP behind an entry `b`, so the loop is entered in the middle. That is
+not just two instructions — it changes the live range of `x`, which pushes `x`
+and then `y` into high registers and makes the function save a THIRD
+callee-saved high register. The diff looks like a register-allocation problem
+and is not one.
+
+So the discriminator generalises: **an early exit that jumps to the function
+epilogue was written `return`; one that jumps to a label after the loop body was
+written `break`, and the two are not interchangeable.** When a loop's prologue
+and register allocation are wrong in a way that has nothing obvious to do with
+the loop, try the other keyword before reading the allocation.
+
+## `x++` on a short local in the `<<16` domain DISCRIMINATES `s16` from `u16` (wave 41, W41-B)
+
+`PROMOTE_MODE` zero-extends both `s16` and `u16` locals, and the brief has long
+said the two are indistinguishable at the prologue. **They are distinguishable at
+an increment, provided the variable is also read in a sign-extended context.**
+
+`sub_0802BEC4` carries a phase counter that is passed to an `s16` parameter each
+iteration and decremented each iteration:
+
+- `s16 phase` — the local is stored zero-extended (`lsrs r6, r0, #0x10`) and
+  sign-extended at the use (`lsls #0x10; asrs #0x10`). Because the shifted form
+  is live anyway, combine does the decrement THERE:
+  `lsls r0, r1, #0x10; ldr r2,=0xFFFF0000; adds r0, r0, r2; lsrs r6, r0, #0x10`.
+- `u16 phase` — the same source decrements first and truncates after:
+  `subs r0, r1, #0x1; lsls r0, #0x10; lsrs r6, r0, #0x10`. One instruction and
+  one pool word shorter.
+
+So **a `0xFFFF0000` or `0x10000` pool constant added to a `<<0x10` value is an
+`s16` local being stepped by one**, not a loop-optimiser giv you have to author,
+and not a `u16`. `sub_0802BF20` is the `+0x10000` twin of the same shape.
+
+Note the constant is a POOL WORD in the decrement case and an inline
+`movs #0x80; lsls #9` in the increment case — the same fact, two encodings,
+because 0x10000 is buildable with a shifted imm8 and 0xFFFF0000 is not.
+
+## A dead load in front of a store is `volatile`, NOT a bitfield — and one function can contain the control (wave 41, W41-E)
+
+W41-E's brief proposed that
+
+```
+ldrh r0, [r1, #4]     @ loaded, never used
+movs r0, #0
+strh r0, [r1, #4]
+```
+
+is a **bitfield** read-modify-write whose mask folded away because the field
+fills its storage unit, and that the members should be declared as bitfields.
+**That is wrong.** It is the `volatile` tell this doc has documented since wave
+30, and declaring bitfields is not needed: all eight functions in the batch
+matched on the first attempt with plain `volatile u8` / `volatile u16` members.
+
+`sub_08030838` is a clean **in-function control**, which the previous write-ups
+of this tell did not have. One 124-byte function contains both:
+
+- `dst->unk00/unk01/unk02/unk04 = src->...` on the NON-volatile members of
+  `struct Unk08090CD8Entry` — `ldrb; strb` and `ldrh; strh`, **no dead load**;
+- `p->unk1aaf++` and `p->unk1aaf &= 0xf` on a `volatile u8` two bytes away —
+  `ldrb; adds #1; ldrb; strb` and `ldrb; movs #0xf; ands; ldrb; strb`, **dead
+  load every time**.
+
+Same compiler invocation, same struct base register, same access widths. So the
+dead load tracks the `volatile` qualifier and nothing else, and any explanation
+that would apply to the members uniformly (bitfields, aggregate-member lvalues,
+the storage unit being full) is ruled out by the two halves disagreeing.
+
+Two corollaries worth keeping:
+
+- **The load's POSITION splits the two volatile mechanisms.** Dead load
+  *before* the store is a volatile lvalue being assigned (`p->v = 0`,
+  `p->v++`). A load *after* the store is old gcc re-reading the lvalue for the
+  **value of the assignment expression**, which only appears in a CHAIN --
+  `sub_08030768` ends with `gUnknown_03003F1C = gUnknown_030044C4 =
+  gUnknown_030040AC = 0;` and emits `strb; ldrb; strb; ldrb; strb`. Reading a
+  trailing load as a leading one will make you invent a statement.
+- **If you must discriminate bitfield from volatile, look for a member of the
+  same struct written in the same function without the load.** Absent that,
+  prefer `volatile`: it is what the ROM's link/IRQ-facing records actually are,
+  and the bitfield reading costs a declaration that later widens wrongly.
+
+## An INCREMENTING giv pair under a `subs; cmp #0; bge` bottom test is an ASCENDING source loop (wave 41, W41-E)
+
+A re-confirmation, because a wave brief predicted the opposite for a whole
+batch and said the direction "is not reversible". The five twins at 0x08030584 /
+600 / 670 / 6E4 / 768 each end with
+
+```
+	ldrh r0, [r2]
+	ldrh r1, [r3]
+	strh r0, [r3]
+	adds r2, #2
+	adds r3, #2
+	subs r4, #1
+	cmp r4, #0
+	bge _loop
+```
+
+which reads as a countdown from 3 and is not one. `for (i = 0; i < 4; i++)
+gUnknown_03003F48[i] = gUnknown_03003128[i];` produces it exactly;
+`check_dbra_loop` reverses the *counter* while `strength_reduce`'s givs keep
+walking **forwards**. **The givs are the readout, not the counter** — two
+pointers stepping `+2` cannot come from a descending source, whatever the
+counter and the branch condition look like. This is the concrete case for the
+existing "`subs; cmp #0; bge` does NOT prove a descending source loop" rule.
+
+## A dead load before a store is `volatile` and NOT a full-width bitfield — the two are NOT ambiguous (wave 41, W41-D)
+
+The wave-41 batch-G brief asserted that the discarded load in front of a store
+
+```
+ldrb r0, [r1, #7]     @ loaded, never used
+movs r0, #0
+strb r0, [r1, #7]
+```
+
+is a **bitfield** read-modify-write whose mask folds away when the field fills
+its storage unit, and instructed agents to declare bitfield members. It then
+issued a correction saying the tell is `volatile` but that the two spellings are
+**ambiguous**, so the member's existing declaration must be grepped before
+theorising.
+
+**The first claim is wrong and the second is also wrong. Measured, both widths,
+all three access shapes:**
+
+| spelling | `p->x = 0;` | `p->x++;` | `p->x &= 0x3ff;` |
+| --- | --- | --- | --- |
+| plain `u8` / `u16` | no dead load | no dead load | no dead load |
+| **`volatile u8` / `volatile u16`** | **dead load** | **dead load** (two loads) | **dead load** |
+| full-width bitfield `u8 x : 8` / `u16 x : 16` | no dead load | no dead load | no dead load |
+
+The full-width bitfield is **byte-identical to the plain member in all six
+cases**. `store_bit_field` sees the field covering the whole unit, falls
+straight through to a plain `store_expr` on the unit's mode, and never emits a
+read half at all — there is nothing for the mask to fold away *from*. Only
+`volatile` produces the extra access, because it is `expand_expr` honouring the
+side effect, not the bitfield machinery.
+
+So the tell is **discriminating, not ambiguous**: a dead load before a store
+means `volatile` and cannot mean a full-width bitfield. Grepping the member's
+declaration first is still the right habit — it is free and it settles the
+question in one step — but the reason is "someone already typed it", not "the
+assembly cannot tell".
+
+The probe was six struct/spelling pairs through `compile_probe`; reproduce it by
+compiling `p->x = 0`, `p->x++` and `p->x &= 0x3ff` against `struct { u8 x; }`,
+`struct { volatile u8 x; }` and `struct { u8 x : 8; }`, and the same three at
+`u16`.
+
+Consistent with everything the tree already recorded: `struct Unk0849B018`'s
+members were declared `volatile` on exactly this evidence in waves 30, 31, 32,
+33 and 34, and `sub_08030574` is the promoted one-line control
+(`gUnknown_0849B018->unk04 = 5;` with a dead `ldrh`). Wave 41 (W41-D) added the
+same reading for `gUnknown_03003128`, `gUnknown_02025564`'s head members and
+`gUnknown_020257E4`, and every one of those matched with an ordinary assignment
+against a `volatile`-qualified declaration. **No bitfield spelling was written
+anywhere in that batch, so nothing was spent on the wrong theory.**
