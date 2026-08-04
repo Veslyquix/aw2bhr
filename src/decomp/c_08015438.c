@@ -14,10 +14,16 @@
  * The two result locals are DIFFERENT types and both readouts are in the
  * epilogue. `i` is `s8`: the ROM keeps the zero-extended copy in sl and
  * re-signs it at the return (`lsls #0x18; asrs #0x18`), which is PROMOTE_MODE
- * on an s8 local. `j` is `int`: it gets ONE `lsls #0x18; asrs #0x18` -- the
- * call-site re-narrowing of sub_0801DC04's s8 return into a wide local -- and
+ * on an s8 local. `j` is `int`: it gets ONE `lsls #0x18; asrs #0x18`, and
  * every later use, including `return j`, reads that register with no further
  * extension. Declaring `j` as `s8` adds a second pair.
+ *
+ * Wave 40, W40-I: that single pair used to be explained as agbcc re-narrowing
+ * an `s8` return from sub_0801DC04, and it is now written as an explicit
+ * `(s8)` cast instead. sub_0801DC04's own body (matched this wave) narrows the
+ * value it returns at #0x10, not #0x18, so it cannot be an s8-returning
+ * function; the truncation is this caller's. The emitted bytes here are
+ * unchanged either way -- re-verified with trymatch.
  *
  * Parameter 4 arrives as `void *` from the already-promoted sub_08015410 and
  * its only use here is `lsls #0x10; asrs #0x10`, so the cast chain is written
@@ -35,7 +41,7 @@ s8 sub_08015438(void *a, int b, void *c, void *d, int e)
 
     if (i != -1)
     {
-        j = sub_0801DC04(c, (s16)(int)d, (s16)e);
+        j = (s8)sub_0801DC04(c, (s16)(int)d, (s16)e);
 
         if (j == -1)
             return j;
