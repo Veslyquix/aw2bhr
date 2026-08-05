@@ -3113,6 +3113,24 @@ width**; at a call site taking a narrow signed parameter, `ldrsh` says nothing
 about the object and the `ldrh`/`ldrsh` caller signal in the parameter-width
 section above is the one that applies.
 
+**And the wave-37 corollary — "`ldrh; lsls; asrs` is not an `(s16)` cast in the
+source, because `sign_extend (mem:HI)` always folds to `ldrsh`" — needs one
+qualifier: it does not fold through a VOLATILE mem (wave 45, W45-H).** combine
+will not rewrite a volatile memory reference, so on a volatile `u16` global the
+sign-extending read stays split as `ldr rA,=g; ldrh rA,[rA]; lsls #0x10;
+asrs #0x10` — four instructions where the non-volatile spelling collapses to
+`movs r1,#0; ldrsh r0,[r0,r1]`, two bytes shorter. This was the entire residual
+of `sub_0805FD64`, whose switch operand is `gUnknown_030045D4`: `switch ((s16)g)`,
+an `s16` local assigned from `g`, and an `int` local narrowed with `(s16)` at the
+switch all produced the `ldrsh` and all missed by the same 4 bytes;
+`(s16)*(volatile u16 *)&g` matched. So **an unfoldable `ldrh; lsls; asrs` on a
+plain global is positive evidence that the global is `volatile`** — it is the
+read-side twin of the "broken absolute-address chain" volatile tell, and it
+costs 2 bytes rather than 4.
+
+Do not read this backwards: the wave-37 rule still holds for ordinary globals
+and struct members, where those shifts really did come from somewhere else.
+
 `sub_08034F8C` is the
 case; a `u8` there collapses to one `ldrb`, and an `s8 a:8` bitfield is
 byte-identical to the plain `s8`.
@@ -4148,6 +4166,48 @@ back. So:
   of a bitfield, and the two-instruction form is positive evidence against one.**
   This is the byte-form counterpart of the four-field 32-bit tell already in the
   Bitfields chapter.
+
+### Hoisting a pointer global's address into a loop PREHEADER: bind the address, not the value (wave 45, W45-E)
+
+`sub_08058144` (matched) has a loop whose body reads one element of a pointer
+global, `gUnknown_084995A0[v]`. The ROM puts `ldr r6, =gUnknown_084995A0` in the
+**preheader** and only `ldr r1, [r6]` inside the loop — the address constant is
+hoisted, the value is not (it cannot be; the loop calls a function).
+
+Writing the global's name inline, the honest way, does **not** reproduce that.
+agbcc emits the `-fforce-addr` address load next to its use inside the loop and
+LICM leaves it there, because the pseudo's lifetime is one or two insns. Three
+spellings were measured against the same target:
+
+- `q = &gUnknown_084995A0[v];` inside the loop — address load stays in the loop.
+  Everything else about the function was already byte-exact; this one insn's
+  placement was the whole residual.
+- Naming the global **three** times in the loop body (test, increment, return)
+  to raise LICM's `savings` — still not hoisted, and worse, it broke the CSE
+  that gives the ROM its `adds r0, r1, #0` return of the already-computed
+  element pointer.
+- **Binding the ADDRESS to a local before the loop** —
+  `struct Unk084995A0 **arrp = &gUnknown_084995A0;` then `q = &(*arrp)[v];` —
+  puts the `ldr` in the preheader, gives it a callee-saved register, and leaves
+  the value load at the use. **Match.**
+
+This is the `-fforce-addr` `c_local` workaround pointed at a *loop* rather than
+at a pool word, and it is the only one of the three that works. The tell that
+you need it: an address load in the ROM's preheader whose **value** is still
+re-loaded every iteration.
+
+### The preheader read-out rule predicted a whole function (wave 45, W45-E)
+
+`sub_08057FE8` (matched) confirms the ordering rule in the Control flow chapter
+from the other direction. Its preheader is `movs r4,#0` (the `for` init) and
+*then* a five-instruction chain computing
+`gUnknown_08499598[gUnknown_030033EC].unk2c` into `ip`. Because the loop's own
+init comes FIRST, everything after it is LICM's, so that chain must **not** be
+authored: the first attempt hoisted the mask to a local before the loop and came
+out +12 bytes with the `movs r4,#0` in the wrong place. Moving the whole
+expression inside the loop body, where the source had it, matched on the next
+attempt. **A source statement cannot appear after the loop init in a preheader —
+if it does, you wrote something the compiler wanted to write itself.**
 
 ---
 
@@ -6873,6 +6933,29 @@ because `REG_ALLOC_ORDER` offers r0-r3 first to any allocno with
 
 ## Workflow
 
+- **`start_function`'s `stub` field is NOT always a stub. If a `work/<fn>/`
+  directory already exists, it is that directory's `.c` file, verbatim —
+  another agent's draft, at any state including MATCHED — and nothing in the
+  response says so.** Wave 45, W45-E and W45-F. `tools/newfunc.py:182` keeps an
+  existing `work/<fn>/<fn>.c` rather than overwriting it (good — it does not
+  destroy a teammate's work), and `tools/mcp_server.py:540-543` then reads that
+  path back and returns its contents under the key `"stub"`. A *generated* stub
+  can only ever be `return 0;` or an empty body (`newfunc.py:128`), so the two
+  are trivially distinguishable by eye — **a `stub` containing real statements,
+  compares or labels is somebody's draft.**
+  This is consequential in both directions. W45-E received a matched
+  `sub_0805B4A8` draft this way, classified it as tool scaffolding, discounted
+  it on the strength of the brief's "the returned signature is often wrong — it
+  is a starting point", and spent all three attempts elsewhere. Read the other
+  way, it is a live hazard for the inherited-draft rule (waves 33/34/37): an
+  agent told its batch is clean can be silently seeded with a 99.6% near-miss
+  and never know it was not scaffolding. **Neither the brief's "no `work/`
+  directory" promise nor `status` in `data/functions.json` can be checked from
+  tool output — `status` is a pipeline state, not an ownership record, and it
+  still reads `asm` while another agent holds the function.**
+  Until the field is split, treat a non-trivial `stub` as an inherited draft and
+  apply the wave-37 rule to it: take its C and its measurements, delete the
+  body, rewrite from the exemplar.
 - **A near-miss whose only difference is a pool word's relocation may be a
   false mismatch, not a bug in your C.** `asm/` is disassembled output, so a
   pool word holding an address gets symbolized as whichever symbol happens to
@@ -8890,6 +8973,62 @@ The general form is worth stating, because it is the opposite of the usual
 instinct to reuse a variable: **binding locals are punctuation, not storage.**
 Give each statement its own, and let the register allocator see the short live
 ranges the original had.
+
+### The mechanism, quantified — and it is a CLIFF at 4 refs (wave 45, W45-A)
+
+Wave 17 established the lever and read it as a live-range effect. It is mostly a
+**reference-count** effect, and knowing the formula turns "try splitting it" into
+a prediction you can make before compiling. `global_alloc`'s `allocno_compare`
+orders allocnos by roughly
+
+```
+priority  ~  floor_log2(n_refs) * n_refs * freq / live_length
+```
+
+and the register each pseudo gets is decided by that order — first served takes
+the lowest free register in `REG_ALLOC_ORDER`, and everything else shifts down.
+
+The `floor_log2` factor is what makes this discrete rather than gradual.
+**Splitting one local into N drops each piece below 4 refs, where `floor_log2`
+steps from 2 to 1, roughly halving the priority on top of the smaller ref
+count.** So a split is not a nudge; it moves a pseudo from the front of the
+queue to the back.
+
+`sub_08045B30` is the clean measurement. Eight terrain tests reading four row
+offsets, size-exact and instruction-exact at 83.85% for two waves with only the
+register numbering wrong:
+
+| pseudo | one reused `a` | three locals `b`,`c`,`d` |
+|---|---|---|
+| row offset(s) | 9 refs, `3*9/45 = 0.60` → **r2 (first)** | 3 refs each, `1*3/14 = 0.21` → **r4 (last)** |
+| `0xe0` constant | `3*10/62 = 0.48` → r3 | → **r2** |
+| terrain base | `3*9/64 = 0.42` → r4 | → **r3** |
+
+The right-hand column is the ROM. Nothing else changed; the three-way rotation
+of *every other* register in the function was a downstream consequence of one
+variable's ref count. Same wave, `sub_08044610` needed the opposite move: writing
+`proc->unk68++` in **both** arms of an if/else rather than once after it raised
+that pseudo's ref count enough to win a low callee-saved register, and cost zero
+bytes because cross-jumping merged the two identical tails back into one block.
+
+**Corollaries worth having in hand:**
+
+- **Count refs before touching anything else** when a candidate is size-exact and
+  sequence-exact with the wrong registers. It is a two-minute calculation off the
+  listing and it names which pseudo to change.
+- **The direction is not always "split".** Splitting lowers priority, duplicating
+  a statement raises it. Read the ROM for which way it needs to go.
+- **A value written inline at its uses instead of bound to a local becomes a
+  CSE-created pseudo**, which is created late and loses the tie-break (see the
+  W17-A chapter above on address constants). That is a *third* setting, distinct
+  from one local and from N locals: it is how `sub_08045B30`'s first row offset
+  lands in the scratch that just held a pool constant, and how `sub_08045C18`'s
+  row offsets get pushed all the way out to `ip`.
+- **The model does not explain everything.** `sub_08045C18` is `sub_08045B30`
+  with ten tests instead of eight; the extra two give its terrain base one more
+  ref than the `0xe0` constant, the formula says terrain is allocated first, and
+  the ROM allocates the constant first. That pair is left parked as the
+  controlled experiment for whoever refines this.
 
 ## The `.LC` pool block is one unit's, and its slot order IS function order (wave 18, W18-B)
 
@@ -13111,6 +13250,84 @@ reproduced the order.
 Corollary for typing: **signed compares against small literals on a value
 loaded with `ldrb` are not evidence about the global's type.** They were read
 that way first here and cost a probe round; `gUnknown_02028DD6` is a plain `u8`.
+
+## A jump-table switch's case BODIES are laid out in SOURCE order, and the arm carrying the explicit `b` is the earlier one (wave 45, W45-G)
+
+The section above reads the decision TREE. For a switch dense enough that
+`expand_case` emits a jump table there is no tree to read — but the bodies are
+still a fingerprint, and a free one.
+
+`sub_0800C7E8` (88 B) classifies the low five bits of a terrain byte into
+0, 1 or 2 over the dense range 6..17. Its tail is
+
+```
+_0800C834:
+    movs r2, #2
+    b    _0800C83A
+_0800C838:
+    movs r2, #1
+_0800C83A:
+    adds r0, r2, #0
+    bx   lr
+```
+
+Written with the six-way `case 6: case 10: case 11: case 14: case 16: case 17:`
+group FIRST and the lone `case 8:` second, it comes out 89.8% — **size-exact,
+and every one of the nine differing bytes is the two bodies swapped plus the six
+jump-table words that point at them.** Moving `case 8:` ahead of the group,
+even though 8 sits inside the group's value range, matched.
+
+The readout, on any jump-table switch:
+
+- Case bodies are emitted in the order the `case` labels appear in the SOURCE,
+  not in value order and not in table order. The jump table is built afterwards
+  and just points wherever each body landed, so **the table is not evidence
+  about source order — the bodies are.**
+- Consequently the arm that needs an explicit `b` to the merge point is the
+  EARLIER one in the source, and the arm that falls through into the merge is
+  the LATER one. One `b` in a two-body switch settles the whole ordering.
+- The `movs r2, #0` ahead of the switch plus a shared `adds r0, r2, #0` tail is
+  the c_0800164C.c shared-result-variable idiom (`int r = 0; switch … return
+  r;`), not a `return` per arm — a `return` per arm writes r0 directly at each
+  one. That is a separate question from the ordering above and both have to be
+  right.
+
+The same swap costs nothing in size, so **this is invisible to a size check and
+shows up only in the diff.** Read the bodies before spending an attempt.
+
+## `x++` LOSES x its register to a CSE temp; `x + 1` at each use keeps it (wave 45, W45-G)
+
+`sub_0800EAF4` (104 B) makes four calls in one block: two at `(x, y)` and
+`(x, y + 1)`, two at `(x + 1, y)` and `(x + 1, y + 1)`. The ROM's allocation is
+x in r4, y in r6, `y + 1` in r5. Four spellings were probed, **all 104 bytes and
+all with identical instruction streams** — the only difference anywhere is which
+of r4/r5 holds x and which holds `y + 1`:
+
+| source | x | y + 1 |
+|---|---|---|
+| `int n; … n = y + 1;` after call 1, then `x++` | r5 | r4 |
+| `int n;` assigned BEFORE call 1, then `x++` | r5 | r4 |
+| `y + 1` written inline at both uses, then `x++` | r5 | r4 (temp) |
+| `y + 1` AND `x + 1` both written inline at their uses | **r4** | **r5** (temp) — ROM |
+
+So the discriminator is **not** how the second value is spelled — a named local
+and a CSE temp behave identically here, in all three positions tried. It is
+whether the parameter is MUTATED. `x++` as a statement splits x into two
+pseudos, a pre-increment one that dies at the increment and a post-increment one
+created late; neither has the live range of the undivided parameter, so the
+CSE temp for `y + 1` outranks both and takes r4. Writing `x + 1` at each use
+leaves x as one pseudo live across the whole block, which is the ROM's highest
+priority allocno.
+
+This is the mirror image of the "binding locals are punctuation" rule in the
+large-function section — there, one local where the original had N parks a value
+in a callee-saved register the ROM recomputes. Here, one MUTATION where the
+original had none costs the parameter its register. **When two callee-saved
+registers are swapped between a parameter and a derived value and the streams
+are otherwise identical, check for a `++` on the parameter before touching
+anything else.** c_08007C04.c next door does use `y++` and matches, so neither
+spelling is generally right; the register assignment is what decides, and it is
+readable straight off the prologue.
 
 ## A stored halfword member re-read in the next statement: agbcc chooses reload vs forward-and-mask by a coin flip, and no source spelling moved it (wave 35, W35-L, OPEN)
 
@@ -27614,3 +27831,122 @@ loop, not by how the call is spelled. The permuter has not been run on it.
 function-address arithmetic". It does none — it is a three-call proc wrapper
 with an `s16` member test. At the time of writing NO promoted file performs
 function-address arithmetic, which is why this chapter spells the casts out.
+
+## A `switch` dispatch NEVER carries a bound check — so a stray `cmp/ble` in one is source (wave 45, W45-F)
+
+gcc's `emit_case_nodes` is documented to guard a decision-tree node with a
+low-bound (`index < node->low`) and high-bound (`index > node->high`) jump to
+the default label whenever `node_has_low_bound` / `node_has_high_bound` cannot
+prove the bound from the node's ancestors. **agbcc emits neither, for any node,
+ever.** Controlled probe, one body, three case lists:
+
+    switch (v) { case 4: return 2; case 2: return 1; }  return 0;
+
+        cmp r0,#2 / beq case2 / cmp r0,#4 / bne default / <case4>
+
+    switch (v) { case 4: return 2; case 2: return 1; case 6: return 3; } return 0;
+
+        cmp r0,#4 / beq case4 / cmp r0,#4 / bgt L6 / cmp r0,#2 / beq case2
+        / b default / L6: cmp r0,#6 / beq case6 / b default
+
+The three-case tree is root 4 with left 2 and right 6. Neither the root nor the
+left leaf gets a bound check, and the left leaf's low bound is provable from
+nothing at all. Hoisting the index into an `int` local first (so `index_type`
+is `int` and `TYPE_MIN_VALUE` is `INT_MIN` rather than a `u8`'s 0) changes
+nothing — the output is byte-identical.
+
+**Consequence, and it is the useful direction:** if a candidate's dispatch is
+short by exactly a `cmp rX,#K / ble` pair against a value that is already a case
+label, do not go hunting for a case list that produces it. No case list does.
+That compare is an explicit source-level `v <= K`, and the function is an
+if-chain, not a `switch`.
+
+### The other half: which arm is the fall-through
+
+The two shapes also lay their blocks out differently, and that is the second
+discriminator:
+
+* `if (v == K) return A;` puts the `return A` block INLINE as the fall-through
+  and jumps over it (`cmp #K; bne past`).
+* A `switch` reaches every case body with a forward branch and emits the bodies
+  AFTER the dispatch and after the literal pool, in source order.
+
+So a ROM that reaches `return A` with a forward `beq` and parks it after the
+pool did not come from a leading `if`. `sub_0805B4A8` needs both properties at
+once — the `ble` guard, which only an if-chain gives, and the out-of-line first
+arm, which only a switch gives — and the only spelling that produces both is
+explicit `goto`s, where the block order is simply the source order:
+
+    if (v == 2) goto one;
+    if (v <= 2) goto zero;
+    if (v != 4) goto zero;
+    return 2;
+    one:  return 1;
+    zero: return 0;
+
+That matched. Two earlier attempts did not: the plain switch was 4 bytes short
+(right layout, missing guard) and the plain if-chain was size-exact with the
+same instruction multiset but the first arm inline (right guard, wrong layout).
+**A size-exact near-miss whose only fault is arm order is an ordering problem,
+not a codegen one — reach for `goto` rather than re-spelling the condition.**
+
+### The other half of that hazard: `try_match` destroys a matched draft silently (wave 45, W45-F)
+
+W45-E's finding above is that `start_function` hands back an existing
+`work/<fn>/<fn>.c` under the key `stub`, so one agent's draft can arrive at
+another labelled as generated scaffolding. `tools/newfunc.py` at least refuses
+to overwrite an existing `.c` ("kept existing … use --force"). **`try_match`
+has no such guard**, `tools/mcp_server.py:572`:
+
+    awlib.write_text(os.path.join(work, name + ".c"), c_code)
+
+Unconditional, before the compile, with no existence check and no check of
+whether what is already there MATCHES. So any agent's `try_match` replaces
+whatever is in that file, including a byte-exact draft.
+
+**And a first-attempt match leaves no other trace.** `best.c` / `best.json` are
+only written on a MISS, so a function matched on attempt one has exactly one
+artefact — the `.c` itself. Overwrite it and there is nothing to recover from
+and nothing that records the match ever existed.
+
+**Scope it correctly, though: this is a LOST-WORK bug, not a correctness bug.**
+`promote.py` re-verifies before promoting, so a clobbered match fails closed at
+promotion rather than entering the ROM silently. What is destroyed is the
+DERIVATION — the C that cost an agent its attempts to find — and nothing
+downstream ever breaks, which is why it has survived however many waves
+unnoticed. Do not escalate it as a ROM-integrity risk; do not deprioritise it
+either, because the cost is measured in whole agent-runs.
+
+The two compose into the expensive loop, which is what happened to
+`sub_0805B4A8` this wave: A matches → B's `start_function` returns A's matched C
+labelled `stub` → B reads it as scaffolding and rewrites → B's `try_match`
+overwrites the match with a worse draft → the match is gone, silently.
+
+Until this is fixed between waves, the cheap defences are:
+
+* **A stub with real statements in it is somebody's draft.** `newfunc.py:128`
+  only ever generates `return 0;` or an empty body, so anything with a compare,
+  a local or a label in it came off disk.
+* **`status` in `data/functions.json` is a pipeline state, not an ownership
+  record.** It reads `asm` until a promotion runs, so it stays `asm` for the
+  whole time an agent holds and matches a function. It cannot gate overflow
+  work — wave 45 offered the same two functions to two agents on exactly that
+  check.
+* **If you matched it, re-verify at the end of your run.** One `try_match` per
+  function re-confirms the match and rewrites the file, which both detects a
+  clobber and repairs it. This is the only defence that works today, and it
+  only works while the agent is still alive — an agent that exits after a
+  first-attempt match cannot protect its own draft at all.
+
+**The fix, when someone takes it between waves: write candidates to
+`work/<fn>/candidate.c` and only promote to `<fn>.c` on a strictly better
+result.** W45-E's argument for preferring this over a keep-existing guard on
+`try_match` is right and worth recording, because the guard is the obvious fix
+and it is the weaker one: to decide "does the current file already match" the
+guard has to compile the existing file on every attempt, and it fails OPEN on
+exactly the case that matters — a first-attempt match by an agent that has since
+exited, where there is no recorded verdict to compare against. Promote-on-better
+makes the invariant structural (`<fn>.c` only ever moves forward) and supplies
+the missing artefact for free, since a first-attempt match then has a
+`candidate.c` beside it. Do not do this mid-wave: it is shared infrastructure
+and live agents are writing through that path.
