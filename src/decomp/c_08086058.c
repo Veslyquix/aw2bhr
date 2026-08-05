@@ -32,6 +32,10 @@
  * the proc -- it opens `adds r4,r0,#0` and dereferences +0x30, +0x4e and +0x5c
  * -- so both calls receive it. sub_0808603C next door drives the same object
  * through sub_0808606C, sub_080860DC and sub_08086688 in a row.
+ *
+ * Wave 44 (W44-C) retyped sub_0808606C's parameter to its own struct; ProcPtr
+ * is `void *`, so the argument converts implicitly here and this stays
+ * byte-for-byte identical. Re-verified with the new declaration in place.
  */
 
 void sub_08086058(ProcPtr proc)

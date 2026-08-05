@@ -14,7 +14,12 @@
  * sub_0803CB24 @ 0x0803CB24
  */
 
-int sub_0803CB24(u32 id)
+/* Return re-typed from `int` to `u8` in wave 44 (W44-C) -- byte-identical here
+ * (the `ldrb`-derived operand already has nonzero_bits <= 0xff, so the
+ * narrowing is a no-op), but sub_08084938 tests the result with a bare
+ * `lsls r0, r0, #0x18` at both call sites, which an `int` return cannot
+ * produce. See include/unknown-functions.h next to sub_0803CAD4. */
+u8 sub_0803CB24(u32 id)
 {
     struct Unk02028030 *s = &gUnknown_02028030;
     u32 idx = id >> 3;

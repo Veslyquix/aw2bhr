@@ -90,7 +90,7 @@ u16 sub_0801B618(u16 a, int b)
 int sub_0801B648(u16 a, int b)
 {
     if (gUnknown_0200CD0C == 1)
-        return sub_0808AF00(a);
+        return sub_0808AF00(a, b);
     else
         return b;
 }

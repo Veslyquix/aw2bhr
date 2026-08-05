@@ -142,6 +142,18 @@ struct Proc
  * proc.c failed to compile. Type copied from the definition. */
 extern struct Proc *gProcTreeRootArray[8];
 
+/* Defined in src/proc.c. Declared here in wave 44 (W44-B), by the same argument
+ * and in the same shape as gProcTreeRootArray above.
+ *
+ * The wave-44 brief asserted sProcArray is `static` in src/proc.c and that
+ * reaching it would mean editing that file. It is NOT static: proc.c:18 reads
+ * `struct Proc EWRAM_DATA sProcArray[PROC_COUNT] = {};`, external linkage, and
+ * the EWRAM_DATA-definition/plain-extern-declaration pair is exactly what
+ * gProcTreeRootArray on the line above has been doing since wave 36. So the two
+ * open-coded Proc_BreakEach/Proc_EndEach clones at 0x08067504 and 0x0806752C
+ * reach it with no edit to proc.c at all. */
+extern struct Proc sProcArray[];
+
 #define ROOT_PROC(treenum) (*(gProcTreeRootArray + (treenum)))
 
 void Proc_Init(void);

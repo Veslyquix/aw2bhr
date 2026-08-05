@@ -726,6 +726,84 @@
     "`mov r7, r8` in the prologue is five-plus live values, not a loop signal"
    ],
    "reason": "One expression shape, not register allocation and not semantics. What is wanted is a spelling of `n * 16 + 16` whose multiply is NOT a common subexpression with the loop init; every spelling tried either shares it (and splits the hoist) or changes the arithmetic. Unpark when such a spelling is found. Draft at work/sub_080353E8/."
+  },
+  "sub_08061A40": {
+   "bytes": 132,
+   "best": "44 bytes (-88), 0.0% identical at +0x0 -- the candidate is a WORD/ldm copy where the ROM is a BYTE copy, so no instruction lines up despite the statement structure being right.",
+   "remaining_diff": "GRANULARITY ONLY. The statement structure is settled and reproduces the ROM's layout exactly: prologue-free entry (`bx lr`, no push), the same `adds r2,r0,#0 / adds r2,#0x10 / adds r1,#0x10` preheader, the same `movs r3,#0x17` down-counter and the same `subs r3,#1; cmp r3,#0; bge` bottom. The ROM moves BYTES (`ldrb`/`strb` pairs -- 16 unrolled at offsets 0x00..0x0f, then 12 per trip for 24 trips); every agbcc configuration tested moves WORDS. 0x10 + 24 * 0xc == 0x130, which independently agrees with the record size sub_08061788 proves via its `* 0x130` stride, so the TWO-STATEMENT reading (a 0x10-byte copy, then a 24-trip loop of 0xc bytes) is solid.",
+   "ruled_out": [
+    "STRUCT ASSIGNMENT (`*dst = *src`) -- this was the wave-44 brief's assertion and it is WRONG. Refuted by controlled probe, W44-H. agbcc has exactly two block-move paths and neither can emit an unrolled byte copy.",
+    "thumb `movstrqi`: gated on `align == 4 && size <= 48`, moves 12 bytes at a time via ldmia/stmia triples. Measured: 48 bytes -> four ldm/stm pairs; 52 bytes -> `bl memcpy`; 0x130 -> `bl memcpy`.",
+    "`move_by_pieces` (the only path that emits byte moves) is switched off entirely by MOVE_RATIO: `memcpy(u8 *, const u8 *, N)` is a libcall for N = 2, 3, 4, 8 and 16 alike. There is no N at which it unrolls.",
+    "No struct type can present alignment 1 to either path -- structs here are always at least 4-aligned (`struct { u8 v[3]; }` copies as a single WORD; a member declared after `u8 pad[1]` lands at offset 4).",
+    "PER-FILE COMPILER AXIS (data/compiler-overrides.json) -- checked and NEGATIVE, do not re-run. Four configurations via the `agbenv.flags` monkeypatch: default, `-mstructure-size-boundary=8`, `old_agbcc`, and `old_agbcc` with `-mstructure-size-boundary=8`. ALL FOUR emit byte-for-byte the same 44-byte ldm/stm version."
+   ],
+   "next": "Do NOT re-attempt from the source axis without a new mechanism -- four axes are closed above. The open question is what produces an UNROLLED BYTE copy at all: either a compiler/flag combination not in compiler-overrides.json, or the source wrote the byte moves explicitly in a form that survives to -O2. See the 'Block moves' chapter in docs/agbcc-codegen.md (wave 44, W44-H) for the full measurement before spending anything here.",
+   "wave": 44,
+   "agent": "W44-H"
+  },
+  "sub_0808AE54": {
+   "bytes": 124,
+   "best": "124 bytes (size-exact), 26.6% identical at +0x4",
+   "remaining_diff": "ONE CAUSE, THREE FUNCTIONS -- do not work these separately. `mov r3, sp; adds r3, #1` (the entry address of the relocated copy) is emitted AFTER the copy loop in the ROM and BEFORE it by every candidate: agbcc hoists it into the loop preheader, under the `while`'s own line note immediately ahead of the guard, which is where LICM writes. The value is then live across the loop and the whole function is allocated one register to the left -- a1 lands in r5 instead of r4 and the last parameter is pushed out to `ip`. Symptom 2 (loop entry): the ROM `b`s to a bottom test SHARED by the entry path and the back edge with one `lsrs r1, r0, #0x10` serving both; candidates get `duplicate_loop_exit_test` instead. Explicit `goto`s DO suppress the duplication and produce the `b`, but the two `lsr`s then fail to cross-jump because the hoisted `mov rN, sp; adds rN, #1` sits between the entry path's `lsr` and its `b` and breaks the common tail -- so symptom 2 is DOWNSTREAM of the hoist. Symptom 3: the ROM loads the copied function's pool word TWICE (once for the THUMB-bit XOR, once for the size subtraction) and XORs in place; candidates load once and keep it live. Same family -- one value fewer live in the ROM.",
+   "siblings": [
+    "sub_0808AF00",
+    "sub_0808AF74"
+   ],
+   "ruled_out": [
+    "`for (n = k; n != 0; n--)` vs `while (n != 0) { ...; n--; }`: byte-identical output. The loop spelling is not the lever.",
+    "a nested `{ }` block around the loop: block notes do not reach the region `duplicate_loop_exit_test` scans.",
+    "`while (n--)`: materialises the 0xFFFF sentinel in its own pool word and costs a register. Visibly wrong.",
+    "a `volatile` destination pointer in the copy loop: identical output, so the hoist is NOT blocked by a volatile store inside the loop.",
+    "reusing the source-pointer local as the call target instead of a fresh name: agbcc splits the live range and hoists anyway.",
+    "binding the call target to a declared `void (*fp)(...)` local: same.",
+    "CONTROL: with NO loop at all, a probe puts `sp + 1` at the call exactly where the ROM has it -- so the hoist is caused by the LOOP, not by how the call is spelled."
+   ],
+   "next": "1. Anything that stops agbcc hoisting a FRAME-ADDRESS constant into a loop preheader. Everything else falls out of it. 2. The permuter -- order-wrong and slot-wrong are precisely its cases and this residual is instruction placement plus register slots, not a missing instruction. Read the 'Self-relocating code' chapter in docs/agbcc-codegen.md (wave 44, W44-G) first: the idiom itself (THUMB-bit XOR, inter-function size arithmetic, the (u16)(size/2) halfword counter) is FULLY DERIVED and is NOT the open question.",
+   "wave": 44,
+   "agent": "W44-G"
+  },
+  "sub_0808AF00": {
+   "bytes": 116,
+   "best": "116 bytes (size-exact), 23.3% identical at +0x0",
+   "remaining_diff": "ONE CAUSE, THREE FUNCTIONS -- do not work these separately. `mov r3, sp; adds r3, #1` (the entry address of the relocated copy) is emitted AFTER the copy loop in the ROM and BEFORE it by every candidate: agbcc hoists it into the loop preheader, under the `while`'s own line note immediately ahead of the guard, which is where LICM writes. The value is then live across the loop and the whole function is allocated one register to the left -- a1 lands in r5 instead of r4 and the last parameter is pushed out to `ip`. Symptom 2 (loop entry): the ROM `b`s to a bottom test SHARED by the entry path and the back edge with one `lsrs r1, r0, #0x10` serving both; candidates get `duplicate_loop_exit_test` instead. Explicit `goto`s DO suppress the duplication and produce the `b`, but the two `lsr`s then fail to cross-jump because the hoisted `mov rN, sp; adds rN, #1` sits between the entry path's `lsr` and its `b` and breaks the common tail -- so symptom 2 is DOWNSTREAM of the hoist. Symptom 3: the ROM loads the copied function's pool word TWICE (once for the THUMB-bit XOR, once for the size subtraction) and XORs in place; candidates load once and keep it live. Same family -- one value fewer live in the ROM.",
+   "siblings": [
+    "sub_0808AE54",
+    "sub_0808AF74"
+   ],
+   "ruled_out": [
+    "`for (n = k; n != 0; n--)` vs `while (n != 0) { ...; n--; }`: byte-identical output. The loop spelling is not the lever.",
+    "a nested `{ }` block around the loop: block notes do not reach the region `duplicate_loop_exit_test` scans.",
+    "`while (n--)`: materialises the 0xFFFF sentinel in its own pool word and costs a register. Visibly wrong.",
+    "a `volatile` destination pointer in the copy loop: identical output, so the hoist is NOT blocked by a volatile store inside the loop.",
+    "reusing the source-pointer local as the call target instead of a fresh name: agbcc splits the live range and hoists anyway.",
+    "binding the call target to a declared `void (*fp)(...)` local: same.",
+    "CONTROL: with NO loop at all, a probe puts `sp + 1` at the call exactly where the ROM has it -- so the hoist is caused by the LOOP, not by how the call is spelled."
+   ],
+   "next": "1. Anything that stops agbcc hoisting a FRAME-ADDRESS constant into a loop preheader. Everything else falls out of it. 2. The permuter -- order-wrong and slot-wrong are precisely its cases and this residual is instruction placement plus register slots, not a missing instruction. Read the 'Self-relocating code' chapter in docs/agbcc-codegen.md (wave 44, W44-G) first: the idiom itself (THUMB-bit XOR, inter-function size arithmetic, the (u16)(size/2) halfword counter) is FULLY DERIVED and is NOT the open question.",
+   "wave": 44,
+   "agent": "W44-G"
+  },
+  "sub_0808AF74": {
+   "bytes": 116,
+   "best": "120 bytes (+4), 24.1% identical at +0x0 -- the +4 is the last parameter displaced to a fifth callee-saved register by the same hoist",
+   "remaining_diff": "ONE CAUSE, THREE FUNCTIONS -- do not work these separately. `mov r3, sp; adds r3, #1` (the entry address of the relocated copy) is emitted AFTER the copy loop in the ROM and BEFORE it by every candidate: agbcc hoists it into the loop preheader, under the `while`'s own line note immediately ahead of the guard, which is where LICM writes. The value is then live across the loop and the whole function is allocated one register to the left -- a1 lands in r5 instead of r4 and the last parameter is pushed out to `ip`. Symptom 2 (loop entry): the ROM `b`s to a bottom test SHARED by the entry path and the back edge with one `lsrs r1, r0, #0x10` serving both; candidates get `duplicate_loop_exit_test` instead. Explicit `goto`s DO suppress the duplication and produce the `b`, but the two `lsr`s then fail to cross-jump because the hoisted `mov rN, sp; adds rN, #1` sits between the entry path's `lsr` and its `b` and breaks the common tail -- so symptom 2 is DOWNSTREAM of the hoist. Symptom 3: the ROM loads the copied function's pool word TWICE (once for the THUMB-bit XOR, once for the size subtraction) and XORs in place; candidates load once and keep it live. Same family -- one value fewer live in the ROM.",
+   "siblings": [
+    "sub_0808AE54",
+    "sub_0808AF00"
+   ],
+   "ruled_out": [
+    "`for (n = k; n != 0; n--)` vs `while (n != 0) { ...; n--; }`: byte-identical output. The loop spelling is not the lever.",
+    "a nested `{ }` block around the loop: block notes do not reach the region `duplicate_loop_exit_test` scans.",
+    "`while (n--)`: materialises the 0xFFFF sentinel in its own pool word and costs a register. Visibly wrong.",
+    "a `volatile` destination pointer in the copy loop: identical output, so the hoist is NOT blocked by a volatile store inside the loop.",
+    "reusing the source-pointer local as the call target instead of a fresh name: agbcc splits the live range and hoists anyway.",
+    "binding the call target to a declared `void (*fp)(...)` local: same.",
+    "CONTROL: with NO loop at all, a probe puts `sp + 1` at the call exactly where the ROM has it -- so the hoist is caused by the LOOP, not by how the call is spelled."
+   ],
+   "next": "1. Anything that stops agbcc hoisting a FRAME-ADDRESS constant into a loop preheader. Everything else falls out of it. 2. The permuter -- order-wrong and slot-wrong are precisely its cases and this residual is instruction placement plus register slots, not a missing instruction. Read the 'Self-relocating code' chapter in docs/agbcc-codegen.md (wave 44, W44-G) first: the idiom itself (THUMB-bit XOR, inter-function size arithmetic, the (u16)(size/2) halfword counter) is FULLY DERIVED and is NOT the open question.",
+   "wave": 44,
+   "agent": "W44-G"
   }
  }
 }
