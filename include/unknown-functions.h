@@ -432,6 +432,16 @@ struct Unk03001470 *sub_080152EC(const void *, u8);
  * in the ROM today, and finding one flips both lines back. */
 int sub_0801537C(const void *);
 s8 sub_08015BD0(s32);
+/* Wave 46 (W46-F): the `s32` parameter is almost certainly wrong and is left
+ * alone deliberately -- retyping a shared prototype mid-wave is how builds
+ * break. Every call site seen so far passes a ROM SCRIPT ADDRESS, not a
+ * number: sub_080654E8 hands it gUnknown_08580AF0 / _08580B90 / _08580BC8 and
+ * then hands the same three to sub_0806377C, which is declared
+ * `const void *` for exactly this reason. `const void *` would be the honest
+ * type and is byte-neutral (the argument is a pointer in a register either
+ * way), but until then callers need an `(s32)` cast that buys nothing.
+ * The RETURN is not in doubt -- `s8` is what the `lsls #24; asrs #24` at every
+ * call site reads back, and it is compared against -1. */
 /* Matched and promoted in src/decomp/c_080366DC.c -- it is `return
  * gUnknown_030040EC;` and that global is a `void (*)(void)`. Declared here in
  * wave 33 (W33-D) for sub_08014BE8, whose last test compares the result
@@ -1170,6 +1180,12 @@ u8 sub_0808AD68(u8 *);
 /* Wave 32 (W32-B): DEFINED in src/decomp/c_0808AD6C.c and never declared, which
  * nothing noticed until this wave gave it C callers. Published unchanged. */
 void sub_0808AD6C(u16 *);
+/* Wave 46 (W46-D). The flash chip's ReadFlashId: relocates sub_0808AD68's
+ * `ldrb r0,[r0]; bx lr` into a stack buffer with sub_0808AD6C, calls the copy
+ * through `sp + 1` twice to read the maker and device bytes, and returns them
+ * packed as `(maker << 8) | device`. The u16 return is settled at its one
+ * caller, sub_0808AB8C, which re-narrows with `lsls #0x10; lsrs #0x10`. */
+u16 sub_0808AAF4(void);
 /* Two whole-list sweeps, each reached only through a 16-byte
  * `push {lr}; ldr r0,=g; bl <it>; pop {r0}; bx r0` forwarder. Both end
  * `pop {r4,...}; pop {r0}; bx r0`, so both are void.
@@ -3097,9 +3113,17 @@ void sub_0802D5CC(int, int);
 void sub_08065238(void);
 void sub_0806574C(void);
 void sub_0806D268(void);
+/* Wave 46 (W46-E): had no declaration. `pop {r0}; bx r0` and no argument
+ * register read before it is written, so void(void). */
+void sub_0806D53C(void);
 void sub_0806D620(void);
 void sub_0806D820(void);
 void sub_0806D850(void);
+/* Wave 46 (W46-E): declared to match the already-promoted definition in
+ * src/decomp/c_0806D8B8.c, which had no declaration here at all. Nullary and
+ * void: `pop {r0}; bx r0`, and its one caller sub_0806D850 sets up no argument
+ * register and discards r0. */
+void sub_0806D8B8(void);
 /* WAVE 35 (W35-D): RETURN TYPE CORRECTED from `void` to ProcPtr. The last
  * thing before the epilogue is `adds r0, r7, #0`, which a void function does
  * not emit -- it hands back the gUnknown_086140D4 proc it just started. All
@@ -3659,8 +3683,22 @@ void sub_0802BD54(u16, u16, u32);
 void sub_0802BDBC(u8, s16, u16);
 int sub_0803CA54(u32);
 u16 sub_08087298(void);
-void sub_08086BF8(u32, u32, int);
-void sub_08086CE0(u32, u32, int);
+/* Wave 46, W46-G: the SECOND parameter is retyped `u32` -> `int`, from the
+ * bodies of both functions rather than from a call site.  Each opens with
+ * `ldrb` of gUnknown_02027F74.unk37 compared against it using `bge`, and
+ * follows with `ble` against the literal 2 -- both SIGNED, which a u32 operand
+ * cannot produce (the u8 promotes to int and would then convert to unsigned,
+ * giving `bhs`/`bls`).  Byte-neutral at every call site: both spellings are
+ * word-wide with no narrowing, so no caller changes. */
+void sub_08086BF8(u32, int, int);
+void sub_08086CE0(u32, int, int);
+
+/* Wave 46, W46-G.  Copied from the promoted definition in
+ * src/decomp/c_0802490C.c, which is authoritative -- it returns a `u8 *` out of
+ * gUnknown_08610A38 and nothing narrows it.  sub_08086BF8/sub_08086CE0 are the
+ * first callers to need it; they hand the result straight to sub_080149C0's
+ * `u8 *` fourth parameter. */
+u8 *sub_08024944(u16);
 
 /* ---- wave 13 (A1), second block ----
  * Three more of the (x, y) cell family the A8 block above documents, same
@@ -6996,6 +7034,11 @@ void sub_0808A368(ProcPtr);
  * in unknown-globals.h -- it takes the same u8 slot id sub_0808AC44 does
  * (`lsls #0x18; lsrs #0x18` at entry) and returns nothing. */
 void sub_0808AC7C(u8);
+/* The disarm half of the same 0x03000F68 timer module: stops the timer, clears
+ * the timer's REG_IE bit and restores REG_IME. void/void -- sub_0808ADA4 calls
+ * it with no argument set up and ignores r0 afterwards, returning a value it
+ * had already parked in r8 across the call. */
+void sub_0808AD24(void);
 
 /* sub_0801B9C8 -- four arguments. The result is added to a u8 field and to a
  * word field with no narrowing in between, so the return is at least `int`.
@@ -8166,6 +8209,76 @@ void sub_08063A58(int, u8 *, u8 *, u8 *);
  * five times is the weakest model that fits every site. Its own body (272 B,
  * Div/SetObjAffine/gSinLut) is still asm and may narrow these later. */
 void sub_08063CCC(int, int, int, int, int);
+
+/* ---- wave 46 (W46-B): the 0x08064 block -------------------------------- */
+
+/* CORRECTION TO THE WAVE-46 BRIEF, and it cuts BOTH ways -- record both halves,
+ * because the first half alone is the dangerous reading.
+ *
+ * The brief said block 0x08064000 has ZERO undeclared callees and that no new
+ * prototype would be needed. Grepping include/ for the five names returns
+ * nothing, which reads exactly like "undeclared" -- and acting on that reading
+ * is how this nearly broke the build. All five are already DEFINED, and matched,
+ * in src/decomp/ (c_08063DDC.c, c_08063E28.c, c_08063FEC.c, c_08064034.c); they
+ * are simply not declared in any shared header. So the brief was right that
+ * nothing needed deriving and wrong that nothing needed writing.
+ *
+ * GREP src/decomp/ AND NOT ONLY include/. `trymatch` compiles ONE unit and
+ * cannot see a prototype that disagrees with a promoted definition in another
+ * unit, so a wrong signature here passes every per-function check and breaks
+ * only the SPLIT build -- the wave-14 failure, repeated. The first draft of
+ * this block declared all five as `int *` from the assembly alone and matched
+ * sub_08064214 byte-for-byte with it.
+ *
+ * sub_08063FEC, sub_08064034 and sub_0806407C each fill one 0x30-byte matrix
+ * (twelve words) from an angle. sub_08064214 gives them three consecutive 0x30
+ * slots of its own frame and an `(s16)` cast of each of its three parameters --
+ * `adds rN, r0, #0` then `lsls #0x10; asrs #0x10`, which is copy-then-narrow,
+ * so its OWN parameters are int and the cast is at the use. The angle argument
+ * is declared int for the same reason sub_0801BA4C's is: those two build
+ * rotation matrices by handing it straight to sub_0801BA4C / sub_0801BAA8.
+ *
+ * sub_08063E28(a, b, out) composes two matrices. sub_08064214 calls it twice
+ * with out == b, which is why the destination is a third argument and not a
+ * return value.
+ *
+ * sub_08063DDC(v, m, dst) transforms one three-word vector by the rotation part
+ * of one matrix; sub_08064214 passes a gUnknown_0202F140 entry's two vectors
+ * and the composed matrix.
+ *
+ * EVERY SIGNATURE BELOW IS COPIED FROM THE PROMOTED DEFINITION, not derived
+ * from the call site -- the definitions win. Note that sub_08064034 and
+ * sub_0806407C take their own per-function matrix tags rather than
+ * `struct Mtx43`: c_08064034.c re-declared the identical 4x3 layout under
+ * separate tags so promote.py could merge that draft into a unit that already
+ * defined Mtx43, and a declaration here has to agree with what is written
+ * there. The angle is `s16` at all three matrix builders for the same reason. */
+/* sub_080633E4 is likewise DEFINED in src/decomp/c_080633E4.c and merely never
+ * declared in a shared header -- see the correction above. Its signature is
+ * that file's, `(struct Unk08062FB8 *, u16)` returning int, NOT the
+ * `(..., int)` the call site alone suggests. sub_08063528 tail-returns its
+ * result from three separate sites (jump.c cross-jumps the three into one
+ * `bl`). The second argument arrives either as a bare `movs r1, #0` or as a
+ * `ldrh` of the link record's +0x00, which is a (u16) cast at the call and not
+ * a narrow
+ * parameter -- `int` takes both without a narrowing anywhere. */
+int sub_080633E4(struct Unk08062FB8 *, u16);
+
+/* THE TAGS MUST BE FORWARD-DECLARED AT FILE SCOPE FIRST. A tag that appears for
+ * the first time inside a prototype has PROTOTYPE scope in C89, so the later
+ * file-scope definition in src/decomp/ would be a DIFFERENT type and every one
+ * of these would become an incompatible redeclaration. These four lines are
+ * what make the declarations agree with the definitions. */
+struct Vec3;
+struct Mtx43;
+struct Unk64034Mtx;
+struct Unk6407CMtx;
+
+void sub_08063FEC(struct Mtx43 *, s16);
+void sub_08064034(struct Unk64034Mtx *, s16);
+void sub_0806407C(struct Unk6407CMtx *, s16);
+void sub_08063E28(struct Mtx43 *, struct Mtx43 *, struct Mtx43 *);
+void sub_08063DDC(struct Vec3 *, struct Mtx43 *, struct Vec3 *);
 
 /* ---- wave 33 (W33-C): the 0x08085 address-locality block ---- */
 
@@ -9642,5 +9755,56 @@ void sub_0800C75C(int, int, int);
  * ever being written, and its caller sub_0800EAF4 sets it to a literal 0x25
  * and 0x65 at the two call sites.  Void: `pop {r4, r5}; pop {r0}; bx r0`. */
 void sub_0800EBFC(int, int, int);
+
+/* Wave 46, W46-A.  Copied verbatim from the promoted definition in
+ * src/decomp/c_080736F4.c, which is authoritative -- the function was matched
+ * without ever being declared, so sub_08073714 was the first caller to need
+ * it.  Row index is UNSIGNED (`bhi` guard) and x is signed (`< 0` clamp). */
+void sub_080736F4(int x, u32 y, u16 *row);
+
+/* Wave 46, W46-G.  Same story as sub_080736F4 directly above: copied verbatim
+ * from the promoted definition in src/decomp/c_08073974.c, which is
+ * authoritative.  sub_08073998 is the first caller to need it. */
+void sub_08073974(int x, u32 y, int c, u16 *base);
+
+/* Wave 46, W46-G.  Copied verbatim from the promoted definition in
+ * src/decomp/c_0806E4BC.c, which is authoritative -- it too was matched before
+ * anything calling it was, so sub_0806E510 is the first caller to need it.
+ * Seven parameters; the fourth is the only narrow one and the seventh is
+ * Proc_Start's parent.  It RETURNS the proc (`pop {r1}; bx r1` with r0 live). */
+ProcPtr sub_0806E4BC(int a1, int a2, int a3, u16 a4, int a5, int a6, ProcPtr parent);
+
+/* Wave 46, W46-F.  Both copied from their promoted definitions, which are
+ * authoritative: src/decomp/c_08065200.c and src/decomp/c_08065818.c.  Neither
+ * had ever been declared -- they were matched before anything that calls them,
+ * and sub_08065238 / sub_0806530C / sub_0806540C (for the first) and
+ * sub_0806574C (for the second) are the first callers to need a prototype.
+ * sub_08065200's `int` return is corroborated at all three call sites: the
+ * result goes straight into an `strh` with no re-narrowing in between. */
+int sub_08065200(int);
+void sub_08065818(void);
+
+/* Wave 46, W46-F.  Copied verbatim from the promoted definition in
+ * src/decomp/c_08064D44.c, which is authoritative; sub_0806530C is the first
+ * caller to need it. */
+void sub_08064D44(struct Unk08580934_Obj *, int, int, int);
+
+/* Wave 46, W46-F.  ONE parameter (`adds r5, r0, #0` is the only register read
+ * before anything is written) and void -- the two exit paths leave 0x80 and
+ * sub_08021810's result in r0 respectively, so nothing consistent is returned,
+ * and sub_0806574C discards it.  The argument is gUnknown_08580934 at that
+ * call site and the body writes the whole +0x00..+0x20 header through it, but
+ * `void *` is the weakest type that fits and costs the caller nothing --
+ * leaving the eventual definition of sub_0803BFBC free to name its own type
+ * rather than being pinned to struct Unk08580934 by a caller.
+ *   Wave 46, W46-E: agreed with, not changed -- sub_0806D850 is the second
+ * caller and passes the same global, so `void *` still costs nothing. Worth
+ * recording that the body CORROBORATES struct Unk08580934 independently of
+ * everything that typed it: it writes +0x04 as a `strh` (the s16 unk04),
+ * +0x18 as a whole word (the u8 *unk18), and fills exactly the four parallel
+ * byte tables at +0x09, +0x11, +0x1c and +0x20 four entries at a time -- the
+ * extents unk09/unk0d/unk11/unk20 were only ever guessed at from "whatever
+ * fits below the next member". */
+void sub_0803BFBC(void *);
 
 #endif // UNKNOWN_FUNCS_H

@@ -2151,6 +2151,91 @@ Two cautions that came with it on the same statement:
 
 ---
 
+## A STATEMENT BOUNDARY is a fold barrier, an evaluation-order lever and a LICM lever — three parks fell to it in one batch (wave 46, W46-C)
+
+W46-C's batch was five functions in 0x08087, four of them carrying inherited
+drafts parked at 96.0%, 92.4%, 45.6% and 23.3%. Three of the four fell, and
+**all three fell to the same one-line change: moving a subexpression into a
+statement of its own, or moving a statement into or out of a loop body.** None
+needed a new type, a new global, or a different control-flow shape. It is worth
+reaching for before anything else when a draft is size-exact and the diff is a
+short window.
+
+The chapter above (W43-I) is the same phenomenon seen from one side. The
+general statement is that **agbcc's output depends on the statement structure of
+the source far more than on how an expression is parenthesised**, because three
+separate passes key off statement boundaries.
+
+**1. Against `fold`'s constant re-association — `sub_08087B74`, parked at 45.6%.**
+The ROM computes a byte-table address as `muls; adds r0, #1; adds r0, r5, r0;
+add r0, sb` — a runtime `+ 1` against a CLEAN pool word. Written inline as
+`tbl[v * 0x5c + 1 + i]`, fold associates the constant to the end of the address
+sum and it lands in the pool word's addend (`.word gUnknown_085C77DC+0x1`) or in
+the load displacement (`ldrb r0, [r0, #1]`); re-associating by hand only moves
+it between those two. Binding it —
+
+```c
+k = v * 0x5c + 1;        /* its own statement */
+... tbl[i + k] ...
+```
+
+— gives fold nothing to move: `k` is a `VAR_DECL`, so `(k) + i` has no constant
+to hoist out, and combine cannot fold `k`'s definition into the address because
+the result needs three operands, which THUMB has no `ldrb` form for. `k` dies
+inside the iteration, so it costs no register. This is the same lever as the
+"binding locals are punctuation" rule, used for a fold barrier rather than for
+allocation. **A `(u16)` cast also blocks the re-association but is NOT
+equivalent — the truncation is not provably dead in an address, so it emits a
+live `lsl`/`lsr` pair.**
+
+**2. Against the operand order of a comparison — `sub_08087168`, parked at 92.4%.**
+agbcc expands a comparison's op0 completely before op1, so for a global `g` and
+an expression `e` there are only two single-expression orderings and the ROM
+matched neither: `e != g` puts `g`'s two loads *after* `e`'s final `+ 1` and
+compares `r0, r1`, while `g != e` puts them *before* `e` entirely and inverts
+the literal-pool word order. The ROM interleaves them — part of `e`, then `g`,
+then the rest of `e`. Splitting `e`'s first half into a preceding statement is
+what makes that legal: the split half is no longer part of op1, so the
+comparison genuinely evaluates op0 (`g`) first and lands its loads exactly where
+the ROM has them.
+
+**Corollary, and it is the non-obvious half: bind the global too.** Left as a
+bare `g`, `expand_expr` returns the `MEM` *unloaded*; `-fforce-addr`'s address
+load floats to the top of the comparison and the value load is deferred to the
+`cmp`, leaving the remaining `+ 1` wedged between the two. Assigning `g` to a
+local forces the `ldr; ldr` pair to be emitted as a unit at that statement.
+
+**3. For LICM placement in a loop preheader — `sub_08087B74` again.**
+The preheader is written by three passes in a fixed order (source, LICM hoists,
+`strength_reduce` inits), so **which side of the loop brace an invariant
+assignment sits on decides where its insns land.** `tbl = (u8 *)g;` written
+*before* the loop is a source statement and lands ahead of the guard; written
+*inside* the loop body it is hoisted by LICM and lands after the guard and
+before the giv inits — which was the ROM. Naming the array directly instead did
+not hoist at all and re-loaded the pool word every iteration. Read backwards:
+**an invariant load sitting after a loop guard was hoisted, so it must be
+authored INSIDE the loop, not before it.**
+
+### Two negative results from the same batch, both worth having
+
+- **`ADDS Rd, Rn, Rm` encodes its two source registers in different fields, so
+  `i + k` and `k + i` are DIFFERENT BYTES** — same value, same instruction
+  count, same cycle count. `k + i` emitted `adds r0, r0, r5` where the ROM had
+  `adds r0, r5, r0`. If a diff shows two bytes changing on an `adds` of two
+  registers and nothing else, swap the operands in the source before looking for
+  anything structural.
+- **The permuter failed on a textbook slot-wrong residual (`sub_08087040`).**
+  900 s over two runs, 4 threads, against a candidate whose instruction stream
+  was otherwise right and which differed only by one spilled giv. It did *not*
+  match, and worse, it left `work/<fn>/best.c` holding a 55.8% candidate that is
+  semantically broken (reads two locals before they are ever assigned) and so
+  scores by undefined behaviour rather than by finding the spill. The brief's
+  "the permuter is not useless on register allocation" is not refuted — it
+  closed `sub_08087168` in ~2500 iterations in this same batch — but **it is not
+  reliable on spill-vs-register, and it can leave a contaminated `best.c` that
+  reads as a large lead over the honest draft.** Check the body of any `best.c`
+  the permuter improved before treating its score as real.
+
 ## Five readouts from the 0x08037 map block (wave 43, W43-D)
 
 Five of six matched; each of these was the whole difference on at least one.
@@ -2205,6 +2290,49 @@ which is also the order of four unrelated zero-stores earlier in the same
 function, a free consistency check. Ordering them by ascending case value
 reverses all four bodies and flips the last test from `bne` to `beq`+`b`. The
 dispatch TREE is still built by value and does not move.
+
+## A GOTO LOOP IS INVISIBLE TO loop.c — no LICM, no giv, no `check_dbra_loop` (wave 46, W46-B)
+
+gcc 2.9 finds loops from `NOTE_INSN_LOOP_BEG`/`END`, which the front end emits
+only for `for`, `while` and `do`/`while`. **A loop built from a label and a
+conditional `goto` gets no notes, so `loop.c` never runs on it at all.** All
+three of its passes disappear together, and that is what makes the tell
+readable:
+
+- no LICM, so loop-invariant constants are **rebuilt every iteration**;
+- no `strength_reduce`, so there is **no giv** — any stride has to be an
+  explicit source variable;
+- no `check_dbra_loop`, so an **ascending counter stays ascending**.
+
+**Read the loop body for rebuilt constants first.** One constant materialised
+inside a loop is an allocation accident; *several* is this. `sub_08063698`'s
+loop rebuilds `0x1FFE0`, `0x06000000` (`movs r0,#0xc0; lsls r0,#0x13`) and its
+`0x100` stride on every pass — three hoistable invariants left in place. Wave 44
+read the first of those as a single stray LICM hoist and spent the wave trying
+to spell the mask so `combine` would build it after loop-opt; the mask was never
+the axis. Rewriting the `for` as a goto loop removed the hoist, the extra
+preheader `ldr`, the `r7` push/pop pair and the +2 bytes in one edit and took
+the function from parked to size-exact.
+
+`sub_08063528` is the same tell in a function that has BOTH kinds. Its default
+arm is a real `do`/`while`: the constant `1` is hoisted into `r6` and
+`SIOMULTI[i]` is strength-reduced to a pointer walking down by 2 from
+`0x04000126`. Its `0xE7`/`0xE8` arm runs the same source expression as a goto
+loop and gets neither — `movs r1, #1` inside the body and the address rebuilt
+as `0x04000120 + i * 2` every pass. Two loops over the same registers in one
+function, optimised and not, is decisive.
+
+**The converse is the cost, and it is why this is not a free lever.** A goto
+loop that needs a giv cannot have one. `sub_0806412C`'s ROM has an ascending
+counter *and* a 0x18 giv in the same loop; written as a `for` the counter gets
+reversed by `check_dbra_loop`, and written as a goto loop the stride has to
+become a source variable whose increment agbcc then schedules above the inner
+loop instead of at the bottom. Nothing gives both, and it is parked on exactly
+that.
+
+**Do not reach for this on a plain counter-direction mismatch.** `subs; cmp #0;
+bge` on its own still proves nothing (see the `check_dbra_loop` rule below) —
+the discriminator is the rebuilt constants, not the branch.
 
 ## Control flow
 
@@ -14120,6 +14248,40 @@ the first register still free when it is loaded: `sub_0803BBA8` is
 `bl _call_via_r3` for a NULLARY call, purely because r0-r2 were busy computing
 an unrelated byte store while r3 held the handler. Read `_call_via_rN`'s index
 as an argument count only when nothing else is competing for the low registers.
+
+## `_call_via_rN` for a CALLEE-SAVED N is not an argument count at all (wave 46, W46-D)
+
+The qualification above is not a corner case, and outside r0-r3 the arity
+reading is simply **wrong**. The register file splits the rule cleanly:
+
+- **r0-r3 (scratch):** the index counts the arguments, as the chapter above
+  says. `sub_0808AFE8` confirms it again -- `ldr r2,[gUnknown_03005C74];
+  bl _call_via_r2` against that global's declared `u16 (*)(u16, int)`, two
+  arguments. `sub_0808ADA4` likewise reads `_call_via_r1` against
+  gUnknown_03000F6C's `u8 (*)(u8 *)`, one argument.
+- **r4 and up (callee-saved):** the index says the pointer had to SURVIVE
+  something, and nothing about arity.
+
+`sub_0808AAF4` is the decisive case. It calls `bl _call_via_r5` **twice with
+exactly ONE argument each**, so the naive reading would claim five. What is
+actually in r5 is `sp + 1` -- the THUMB entry point of the four bytes
+`sub_0808AD6C` relocates onto the stack -- computed once immediately after that
+call and then held across two `bl`s and two delay loops. A value live across a
+call cannot sit in a scratch register, so r5 is forced by LIFETIME, and its
+index is decided by which callee-saved register the allocator reached first.
+
+The already-recorded `_call_via_r4` in the wave-37 `const` chapter is the same
+phenomenon reached from the other direction: making the array `const` let gcc
+keep a *value* in r4 across the call, and the trampoline index moved with it.
+Two independent cases, both callee-saved, neither an argument count.
+
+**So read the index in two steps.** First ask whether the pointer is live
+across a call or a loop; if it is, the trampoline number is an allocation
+artefact and the arity has to come from the callee's own prototype or from the
+argument registers actually set up at the call site (r0 alone, here). Only when
+the pointer is loaded and used inside one basic block does the index count
+arguments. The wave-14 rule stands for the case it was measured on and does not
+generalise past r3.
 
 ## Binding `&g[i]` to a pointer defers a pointer-global's dereference past the index multiply (wave 27, W27-C)
 
@@ -27950,3 +28112,1048 @@ makes the invariant structural (`<fn>.c` only ever moves forward) and supplies
 the missing artefact for free, since a first-attempt match then has a
 `candidate.c` beside it. Do not do this mid-wave: it is shared infrastructure
 and live agents are writing through that path.
+
+## Three source levers for register/pseudo ORDER, all measured in one batch (wave 46, W46-A)
+
+The 0x08073 HBlank block gave three separate cases where the instruction stream
+was already correct and the only residual was *which register* something landed
+in. All three turned out to be reachable from source, and two of them closed a
+function outright. They extend the wave-17 rule "of two address constants, the
+pseudo created FIRST wins the register" with concrete levers.
+
+### 1. `p[i]` and `*(i + p)` create their pseudos in OPPOSITE order
+
+`sub_08073480` reads `gSinLut[b & 0xff]` inside a 160-iteration loop. Two
+loop-invariants get hoisted into the preheader: the constant `0xff` (THUMB has
+no `and` immediate, so the mask is a register) and the address of `gSinLut`.
+The ROM hoists them in this order:
+
+```
+	movs r0, #0xff
+	mov  r8, r0
+	ldr  r1, =gSinLut
+	mov  ip, r1
+```
+
+Written as an ARRAY_REF, `gSinLut[b & 0xff]`, agbcc emits the two hoists the
+other way round — the base's pseudo is created first, so it wins `r8` and the
+mask gets `ip`. **Writing the same access as `*((b & 0xff) + gSinLut)` — the
+index first, which C permits for pointer arithmetic — creates the mask's pseudo
+first and reproduces the ROM exactly.** The in-loop instructions are identical
+either way; only the preheader order and the two `mov rN, rHI` reads change.
+This is byte-neutral in a straight-line probe and only shows up once the values
+are loop-invariant and compete for the two high registers.
+
+### 2. The "give the pointer global its own statement" rule also decides the
+### DESTINATION register of the address ADD
+
+The wave-43 (W43-I) rule says a pointer global inside an address expression is
+loaded LATE, so give it its own statement. `sub_080733C8` shows the rule has a
+second half. The ROM computes a tile address as
+
+```
+	ldr  r1, [r6]          @ p = gUnknown_03003F68
+	ldrb r0, [r1]          @ p[0]
+	muls r0, r7            @ * y
+	adds r0, r0, r2        @ + x
+	lsls r0, r0, #1
+	adds r1, r1, r0        @ <- destination is the POINTER's register
+	ldrh r1, [r1, #2]
+```
+
+Spelled inline as `((u16 *)gUnknown_03003F68)[y * ((u8 *)gUnknown_03003F68)[0]
++ x + 1]` every instruction matches except that last `adds`, which comes out
+`adds r0, r0, r1` — the sum lands in the *index's* register instead of the
+base's. Two bytes, and it was the entire residual of a 98.9% candidate; no
+operand reordering inside the expression moved it (`*(idx + (u16 *)g)` is
+byte-identical to the array form here). What fixed it was splitting the pointer
+out exactly as W43-I prescribes:
+
+```c
+tile = (u16 *)gUnknown_03003F68;
+tile += y * ((u8 *)gUnknown_03003F68)[0] + x;
+t = gUnknown_0849959C[tile[1]] & 0x1f;
+```
+
+That matched byte-for-byte. **Read backwards: if your candidate's address `adds`
+puts the sum in the offset's register where the ROM puts it in the base's, the
+original bound the pointer to a local.** The `+ 1` stays in the load
+displacement in both spellings, so this is not the struct-vs-pointer question of
+`c_080377C4` — it is purely the binding.
+
+### 3. `strength_reduce` only sees a giv that is a standalone SET — bind it to a
+### block-local temp
+
+`sub_08073714` is a Bresenham circle. Its ROM preheader is
+
+```
+	blt  _end                  @ duplicated loop guard
+	mov  r8, r2                @ LICM hoist of &gUnknown_0202FDE4
+	lsls r0, r4, #1
+	subs r7, r0, #2            @ r7 = 2*x - 2
+```
+
+and `r7` is decremented by 2 inside the same `if` that decrements `x`. By the
+preheader-ordering rule the `2*x - 2` init sits AFTER a LICM hoist, so it is
+`strength_reduce`'s work and must not be authored. But writing the obvious
+source, `if (d < 0) { d += x * 2 - 2; x--; }`, does **not** produce it: `fold`
+reassociates `d + (x*2 - 2)` into `(d - 2) + x*2` and agbcc then emits
+`sub r1, r5, #2; lsl r0, r4, #1; add r5, r1, r0` inline, with no giv at all.
+Verified by probe with the competing giv removed — it is not a competition
+effect, agbcc simply never forms this giv from the inline spelling.
+
+**Binding the expression to a temp declared at the top of the `if` block makes
+it a giv:**
+
+```c
+if (d < 0)
+{
+    int t = x * 2 - 2;
+
+    d += t;
+    x--;
+}
+```
+
+That produces `lsls r0, r4, #1; subs rN, r0, #2` in the preheader after the LICM
+hoist, and `subs rN, #2` immediately before the biv's `subs r4, #1` — the ROM's
+layout. (Note the giv update is emitted BEFORE the biv update, because
+`strength_reduce` uses `emit_insn_before` on the biv increment. Do not read
+"delta update before the counter update" as evidence of source order.)
+
+So the preheader-ordering rule needs a companion: **an expression only becomes a
+giv if the multiply is its own SET, and whether it is one depends on whether
+`fold` could absorb it into a surrounding add.** A temp is the lever in both
+directions — introduce one to create a giv, remove one to destroy it.
+
+### Still open on the same batch
+
+`sub_08073714` also has an unreduced `y * 2` in `d = d + 1 - y * 2;` that agbcc
+reduces in every spelling tried (`y * 2`, `y << 1`, `d -= y*2 - 1`, with and
+without the temp above). With the temp both givs get reduced, costing +12 bytes
+and a second high register; the ROM has exactly one. No source lever found for
+suppressing a giv whose multiply is already a bare subexpression of a larger
+add. Parked at 78.3%, size-exact.
+
+## `convert_to_integer` distributes a narrowing over `+`, which DELETES a `(s16)` cast (wave 46, W46-A)
+
+`sub_08073228` accumulates into a 16-bit value and the ROM reads it back
+sign-extended but stores it back zero-extended:
+
+```
+	ldr  r2, [sp, #0xc]
+	lsls r2, r2, #0x10        @ hoisted to the top of the loop body
+	...
+	mov  r7, sb
+	asrs r0, r7, #0x10        @ (s16) of the accumulator
+	adds r0, r0, r1
+	lsls r0, r0, #0x10
+	lsrs r0, r0, #0x10        @ stored zero-extended
+	str  r0, [sp, #0xc]
+```
+
+The obvious readings — `u16 acc; acc = (s16)acc + x;` and
+`int acc; acc = (u16)((s16)acc + x);` — BOTH lose the `asrs`. The C front end's
+`convert_to_integer` distributes a narrowing conversion over `PLUS_EXPR`, so
+`(u16)((s16)acc + x)` becomes `(u16)((u16)(s16)acc + (u16)x)` and the inner
+sign-extension is dead. **A `lsls #16; asrs #16` that survives underneath a
+`lsls #16; lsrs #16` store is therefore NOT a cast written in the same
+expression** — the two must be separated by a statement boundary (or the sign
+extension belongs to something other than the stored variable). Note this is the
+same fold family as `shorten_binary_op` but fires even when the other operand is
+a full `int`, which `shorten_binary_op` itself will not do.
+
+## `?:` CANNOT produce a zero-arm-first layout — that shape is an if/else STATEMENT (wave 46, W46-F)
+
+Wave 45 established that gcc lays switch case bodies out in source order, so the
+arm carrying an explicit `b` to the tail is the EARLIER one. That generalises to
+`if`/`else`, but **not** to `?:`, and the difference is a usable discriminator
+between the two spellings of the same conditional store.
+
+`src/decomp/c_08065818.c` is a matched exemplar of the `?:` form. Its
+`unk87 = unk03 ? unk03 - 4 : 0` compiles to
+
+    cmp r3,#0 / beq Lzero / subs r3,#4 / b Ltail / <pool> / Lzero: movs r3,#0 / Ltail: strb
+
+— the NON-ZERO arm first, carrying the `b`. Spelling the condition the other way
+round (`unk03 == 0 ? 0 : unk03 - 4`) folds to the byte-identical stream; both
+were probed in one call. **So the arm order of a `?:` is not reachable by
+rewriting its condition.**
+
+sub_080658AC has the opposite order at the structurally identical store:
+
+    cmp r0,#0 / bne Lnonzero / movs r0,#0 / b Ltail / <pool> / Lnonzero: adds r0,#4 / Ltail: strb
+
+and the only spelling that reaches it is the statement form
+`if (x == 0) f = 0; else f = x + 4;`. Note the `movs rD,#0` survives even though
+the register provably already holds 0 — a `?:` in that position would have
+elided it. **A redundant `movs rD,#0` in the zero arm is the tell.**
+
+Second readout from the same function: its +0x07 store keeps TWO `strb`s where
+its +0x03 store has one, from if/else statements of the same shape.
+Cross-jumping merges the arms' stores only when both arms leave the value in the
+SAME register; when the else arm computes in place on the loaded register and
+the then arm needs a live copy, the merge is blocked and you get two stores plus
+an `adds rN, rM, #0` copy before the `cmp`. **A doubled store is not a doubled
+statement, and the copy is not a spare local.**
+
+### When BOTH arms are constants, only two separate STATEMENTS keep the branch
+
+sub_08065D20 sharpens this, and it is the case that actually costs bytes.
+`unk09[k]` is set to 2 or 1 on a test of its own current value. Probed three
+ways:
+
+| source | emitted |
+|---|---|
+| `unk09[k] = unk09[k] == 1 ? 2 : 1;` | `movs rD,#1; cmp; bne L; movs rD,#2; L: strb` |
+| `if (…) v = 2; else v = 1; unk09[k] = v;` | identical to the above |
+| `if (…) unk09[k] = 2; else unk09[k] = 1;` | `cmp; bne L1; movs rD,#2; b L2; L1: movs rD,#1; L2: strb` |
+
+The first two collapse to preset-then-conditionally-overwrite because both arms
+are small constants, and they are **4 bytes short**. Only two separate
+assignment statements keep the branch — and cross-jumping then merges the two
+identical `strb`s back into one, so the ROM shows a single store with the two
+`movs` split across a `b`. That is the same merge rule as above, read the other
+way: **a single store does not rule out two statements.** c_08065818.c's `?:`
+keeps its branch only because its true arm is not a constant, so it is not a
+counter-example.
+
+Worth noting how this presented: the collapsed form left CSE a spare register,
+which it used to keep a `-fforce-addr` first-level load live across a later
+loop, costing a third callee-saved register in the prologue and turning that
+loop's two-level reload into one. That looked like an independent
+register-allocation problem and was not — fixing the store shape fixed both.
+**Four bytes of missing straight-line code can pay for someone else's
+allocation.**
+
+## `(a - 1) + b` reassociates the constant onto `b` — only a QImode cast pins it (wave 46, W46-F)
+
+Three spellings of the same value, all stored into a `u8` member, all the same
+size, all different instructions. Probed together against sub_080658AC:
+
+| source | emitted |
+|---|---|
+| `p->unk88 - 1 + p->unk15` | `ldrb <unk15>; adds rN,#0xff; adds` |
+| `p->unk88 - (1 - p->unk15)` | `subs rN,#1; ldrb <unk15>; adds` |
+| `(u8)(p->unk88 - 1) + p->unk15` | `adds rN,#0xff; ldrb <unk15>; adds` |
+
+Two independent things are happening. Fold reassociates `(a - 1) + b` into
+`a + (b - 1)`, which moves the constant onto the operand that has not been
+loaded yet and so REORDERS the load; and `shorten_binary_op` narrows the -1 to
+QImode (`0xff`) on whichever side it lands, but only when that side is itself
+narrow. `- (1 - b)` blocks the reassociation and keeps the constant in SImode,
+giving the right order with the wrong constant. Only the cast does both.
+
+Binding the value to a `u8` LOCAL first does **not** substitute for the cast:
+`u8 t = p->unk88; ... t - 1 + p->unk15` reassociates exactly like the first row.
+The cast has to sit on the subexpression whose order you are pinning.
+
+## An array base bound INSIDE the loop body is hoisted by LICM and folds into the giv (wave 46, W46-F)
+
+The existing rule "binding an array base to a local BEFORE the loop reorders the
+pool" is right but incomplete, and the missing third case is the one the ROM
+usually wants. sub_08065E5C walks a 0x14-stride `struct KeySt` array off
+`&gUnknown_03002040` inside a loop guarded on `gUnknown_08580934->unk08`. Three
+spellings, all correct C, all different code:
+
+| source | result |
+|---|---|
+| `ks` bound at FUNCTION scope before the loop | pool load sits ahead of the zero-trip guard, preheader gets a register copy, and gUnknown_03002040's pool word comes FIRST. +2 bytes. |
+| `((struct KeySt *)&gUnknown_03002040)[i]` written inline at the use | base is never folded into the giv: the giv is `i * 0x14` and the base is rematerialised from the pool at every use, inside the `if`. |
+| `ks` declared and initialised at the top of the LOOP BODY's block | ROM. |
+
+The third works because the initialiser is loop-invariant, so LICM hoists it
+into the preheader — i.e. AFTER the guard — and strength_reduce then folds the
+base into the giv, giving the ROM's `ldr r5,=gUnknown_03002040` sitting after
+the preheader's other copies and stepping by `adds r5,#0x14`. It also fixes the
+pool order for free: the guard's global is referenced first in the source, so it
+gets the first pool word.
+
+This is the constructive half of the preheader rule at the top of the loops
+section. **You cannot author a hoisted invariant, but you CAN choose whether an
+invariant exists to be hoisted, and block scope is the switch.**
+
+
+## `member |= 0xff` FOLDS to a plain store — the ROM's read-modify-write is a wider expression (wave 46, W46-E)
+
+A byte member ORed with an all-ones mask does **not** compile to
+`ldrb; orrs; strb`. `shorten_binary_op` narrows the OR to QImode, `fold` then
+sees `x | (QI)-1` and collapses the whole statement to a store of -1. Probed
+five spellings against sub_0806D850's last loop, whose ROM is
+
+```
+movs r3, #0xff          <- the mask, hoisted
+movs r2, #7
+_loop:
+    ldr  r1, [r4]
+    adds r1, #0x32
+    ldrb r0, [r1]
+    orrs r0, r3
+    strb r0, [r1]
+```
+
+| source | emitted |
+|---|---|
+| `g->unk32 \|= 0xff;` | `movs #1; neg; strb` — folded |
+| `g->unk32 = g->unk32 \| 0xff;` | identical, folded |
+| `*(u8 *)&g->unk32 \|= 0xff;` | `movs #0xff; strb` — folded |
+| `g->unk32 \|= 0xffff;` | folded, the wider constant narrows first |
+| `*(volatile u8 *)&g->unk32 \|= 0xff;` | `ldrb` kept, but the OR is still folded away — a dead load plus `strb 0xff` |
+| `v = *(u8 *)&g->unk32; v \|= 0xff; g->unk32 = v;` | **exact** |
+
+Two separate facts, and both are needed:
+
+- **Routing through an `int` local is what survives the fold.** The local is a
+  promoted SImode pseudo, so the OR happens in SImode and `shorten_binary_op`
+  never gets to narrow the mask; the truncation is at the store instead.
+- **Reading through `(u8 *)` is what makes the load `ldrb`.** The member is
+  declared `s8`, so the honest read is `ldrsb`, and THUMB has no `ldrsb` at an
+  immediate offset — it costs an extra `movs rN, #0` for the register-offset
+  form. The cast is a statement about the ACCESS, not about the member, and it
+  does not touch the shared struct.
+
+Read backwards this is a diagnostic: **an `ldrb; orrs; strb` on a byte with an
+all-ones mask proves the source did not write the obvious `|=`**, because the
+obvious `|=` cannot produce it at any optimisation level.
+
+## An empty countdown delay loop needs TWO locals and an explicit `if` (wave 46, W46-E)
+
+sub_0806D850 contains a busy-wait — gcc 2.9 has no dead-loop elimination, so an
+empty loop survives -O2 exactly as written. Its ROM is
+
+```
+ldrb r0, [r0, #8]
+cmp  r0, #0
+beq  _skip
+adds r2, r0, #0        <- an UNCOALESCED copy, and the whole difficulty
+_loop:
+    subs r2, #1
+    cmp  r2, #0
+    bne  _loop
+_skip:
+```
+
+Every one-variable spelling coalesces that copy away and comes out exactly one
+instruction (2 bytes) short. Probed, all five:
+
+| source | copy? |
+|---|---|
+| `i = g->unk08; while (i != 0) i--;` | no — counter lands in r2, no copy |
+| `n = g->unk08; while (n != 0) n--;` (fresh name) | no — counter lands in r0 |
+| `for (i = 0; i < g->unk08; i++) ;` | no — `check_dbra_loop` reverses it and coalesces |
+| `for (i = g->unk08; i != 0; i--) ;` | no |
+| `n = g->unk08; if (n != 0) { i = n; do i--; while (i != 0); }` | **yes — exact** |
+
+The lever is that the guard's value and the counter have to be two DIFFERENT
+locals with the guard written as its own `if`. Writing the guard as the loop's
+own condition lets the loop optimiser fuse the two into one pseudo whatever
+names the source uses; hoisting the `if` out puts the compare in a block the
+loop does not own, and the copy into the counter then survives allocation.
+Corollary for the fresh-name-vs-reuse question elsewhere in this file: on this
+shape the choice of NAME changed only which hard register was used (r0 vs r2)
+and never produced the copy — it is the statement structure that decides, not
+the naming.
+
+## Loop-invariant hoisting that the original build did not do
+
+Wave 46 (W46-G), measured on `sub_08086CE0` (184 B) and `sub_08086BF8` (232 B),
+which are twins and park on the *identical* residual: **-16 bytes, same
+instructions, same sign.** Everything else in both is byte-exact. The whole
+difference is that our agbcc hoists two invariants out of the loop and the
+original's did not.
+
+The ROM's loop:
+
+    mov  r1, r8        @ a3, parked in a HIGH register across the loop
+    adds r1, #9
+    adds r1, r7, r1    @ r7 is a giv for `i * 2`, init 4, step +2
+    lsls r1, r1, #0x10
+    asrs r1, r1, #0x10
+
+recomputed in **each** arm of an if/else, five instructions twice over. Our
+build instead merges `a3 + 9 + i * 2` into ONE induction variable (init
+`a3 + 0xd`, step +2) and leaves only `lsls; asrs` at each use. `a3` then dies
+in the preheader, r8 is never needed, and the `mov r7, r8; push {r7}` /
+`pop {r3}; mov r8, r3` pair disappears with it. The same build also hoists a
+plain `flag = 1;` into the preheader where the ROM leaves it inside the loop.
+**Both differences are one phenomenon**, so do not chase them separately.
+
+Spellings tested by controlled probe that do **not** stop the merge -- all four
+compiled byte-identically to each other, so none of them is a lever:
+
+- `i * 2` written as its own source biv (`j = 4; ... j += 2;`), which is what
+  the preheader ordering rule ("source first, then LICM, then giv inits")
+  predicts from `movs r7, #4` appearing first. The prediction is right about
+  where the instruction comes from and still does not survive the merge.
+- `i * 2` bound to a plain local at the top of the body (`k = i * 2;`).
+- the sum written inline as `(s16)(a3 + 9 + i * 2)` in both calls.
+- the `(s16)` as an explicit cast rather than an assignment.
+
+**One spelling does buy something and is worth knowing:** assigning the sum to
+an `s16` local *inside each arm* stops agbcc reducing the `<<16` itself into
+the induction variable. With the plain `(s16)` cast, agbcc reduces the shifted
+value too -- preheader `lsl rN, rM, #0x10` and a `mov #0x80; lsl #0xa; add`
+increment in the loop tail -- and emits `asr rN, #0x10` alone at each use. With
+the `s16` local it emits the ROM's `lsl; asr` pair at each use instead. That is
+the difference between a 3-instruction and a 1-instruction loop tail, and it is
+a real, transferable lever even though it did not close these two.
+
+So the general rule, stated the way it is checkable: **if your candidate is
+short by exactly the cost of a high-register save/restore plus a recomputed
+address or index expression, look for an invariant your build hoisted and the
+ROM's did not, and read the ROM's high-register use as the symptom rather than
+the cause.** A value parked in r8/sb that your version never needs means one of
+your expressions collapsed into an induction variable.
+
+### Two smaller findings from the same wave
+
+- **`flag = 1; if (cond) flag = 0;` and `flag = (cond == 0);` are DIFFERENT
+  code**, and the two-statement form is the one that matches
+  `lsls; movs #1; cmp; beq; movs #0`. The comparison form goes through the
+  `jumpifnot` fallback and presets the FALSE value (`movs #0; cmp; bne;
+  movs #1`) -- the opposite polarity. `cond ? 0 : 1` folds to the comparison
+  form and is not a third option. This is a genuine exception to reading
+  "preset then conditionally overwrite" as always being `do_store_flag`.
+- **`__divsi3` is nothing more than a literal `/` on `int`.** `sub_08073998`
+  matched first try with `((x2 - x1) << 16) / (y2 - y1)` written plainly.
+  In the same function, a three-move register swap reads out its source order:
+  the ROM's `t = x2; x2 = x1; x1 = t;` and the other order `t = x1; ...` emit
+  the same six moves with the operands of the first two exchanged, so the
+  temporary's FIRST source is readable straight off the assembly.
+
+### Screening note: `undeclared callees: 0` is not reliable
+
+Wave 46's W46-G batch was screened as `undeclared callees: 0` for all four of
+its source blocks. Three of its callees had no prototype at all:
+`sub_08073974`, `sub_0806E4BC` and `sub_08024944`. All three were **matched and
+promoted before anything that calls them**, so a definition exists in
+`src/decomp/` while `include/unknown-functions.h` has nothing -- which is
+exactly the case the screen misses, and it is common precisely because the
+cheapest functions get matched first. Copy the prototype from the promoted
+definition (it is authoritative) rather than inferring one from the call site.
+The failure mode is loud -- agbcc's `implicit declaration` warning is fatal
+under `-Werror` -- so it costs a probe round, not a wrong match.
+
+## The flash driver at 0x0808A000 is NOT a toolchain-axis block — five configurations, measured (wave 46, W46-I)
+
+**Negative result, recorded so no later wave repeats it.** The wave-46 brief
+predicted that block 0x0808A000 needed `old_agbcc`, on the strength of
+`data/compiler-overrides.json`'s own header sentence ("the sound and flash
+libraries came out of the SDK prebuilt with their own settings") plus the shape
+of the failures: four of six functions differing at **+0x0**, the `push` itself.
+That prediction is wrong, and the axis is dead here.
+
+Method: the candidate C was **held constant** and compiled under five
+configurations, with the resulting `.text` compared against `work/<fn>/_target.bin`.
+Holding the C constant is the whole point — a source edit between configurations
+would make the comparison meaningless.
+
+| function | default | `-fprologue-bugfix` off | `-fforce-addr` off | `old_agbcc` | `old_agbcc` + no force-addr |
+|---|---|---|---|---|---|
+| `sub_0808AAF4` 152B | 117 differ | *identical* | *identical* | *identical* | *identical* |
+| `sub_0808ADA4` 140B | 128 differ | *identical* | 152B, worse | 128 differ, other bytes | = no-force-addr |
+| `sub_0808AC7C` 168B | 89 differ | *identical* | 102 differ | *identical* | = no-force-addr |
+| `sub_0808A3DC` 160B | 64 differ | *identical* | 127 differ | **71 differ, WORSE** | 128 differ |
+| `sub_0808AFE8` 68B | **MATCHES** | MATCHES | MATCHES | MATCHES | MATCHES |
+
+Readings:
+
+- **`old_agbcc` never helps and sometimes hurts.** It is byte-for-byte
+  *identical* to the default on `sub_0808AAF4` and `sub_0808AC7C` — it does not
+  change one instruction — and it makes `sub_0808A3DC` strictly worse (64 → 71
+  differing bytes). Nothing in this block behaves like the m4a entry points at
+  0x08071584, where the same source was byte-exact under `old_agbcc`.
+- **Dropping `-fforce-addr` is strictly worse on three of the four.** The
+  existing `sub_0808AD6C` entry, which does exactly that, remains valid — it is a
+  genuine one-function result about a routine that relocates code into RAM, and
+  it does **not** generalise to its neighbours.
+- **`-fprologue-bugfix` is byte-neutral on all five**, so any change seen under
+  `old_agbcc` is `old_agbcc`'s and not the flag's. That matters because
+  `old_agbcc` rejects the flag outright and the two can only be tested together.
+- **`sub_0808AFE8` matches under all five configurations** and therefore gets no
+  entry, per the wave-38 rule that an override changing no bytes is
+  unfalsifiable.
+
+**The controls are what make the negative trustworthy**, so check them before
+reusing this result. `sub_0808ADA4` and `sub_0808A3DC` produce *different* bytes
+under `old_agbcc`, which proves the harness really did switch compilers rather
+than silently ignoring the entry; and a deliberate compile error came back
+labelled `old_agbcc:`, which proves `tools/agbenv.py` applied the override.
+`try_match` shells out to `trymatch.py`, so the `_OVERRIDES` module-level cache
+is re-read per call and a stale cache cannot manufacture a false negative here.
+
+**What the four +0x0 failures actually were** is the next chapter: a loop shape,
+not a compiler. The prologue differed because the candidate carried one more
+long-lived value than the original, which is a source-side fact.
+
+## agbcc ROTATES every `for`/`while` — a `b` INTO the loop with ONE copy of the test is a GOTO loop (wave 46, W46-I)
+
+The strongest new tell from the 0x0808A flash block, and it is cheap to read.
+
+**Swept, in one probe: eight spellings of a `volatile` counter loop** —
+`for (i = 20000; i != 0; i--)`, the same with a truth test, `while` with `i--`,
+`while` with `i = i - 1`, `while (i-- != 0)`, `for` with the decrement in the
+body, and `for (;;)` with an `if (…) break`. **All eight compile to the same
+thing**: the init store, then a *copy of the exit test as an entry guard*
+(`ldrh; cmp; beq`), then a `do`/`while` with the test again at the bottom. agbcc
+rotates a top-tested loop and duplicates the test, every time. A `do`/`while`
+source loses the guard but leaves the init store outside the loop and emits no
+`b`.
+
+**None of those is what the ROM has.** The flash delay loops read
+
+```
+    ldr  r2, =0x00004E20
+    adds r0, r2, #0
+    b    _0808AB2C            @ INTO the middle of the loop
+_0808AB28:
+    ldrh r0, [r1]
+    subs r0, #1
+_0808AB2C:
+    strh r0, [r1]             @ the init store and the body's store, merged
+    ldrh r0, [r1]
+    cmp  r0, #0
+    bne  _0808AB28
+```
+
+— a `b` *into* the loop and **exactly one** copy of the test. That is the
+un-rotated form, and only a label-and-`goto` loop produces it, because
+`loop.c` never sees such a loop at all (see W46-B's chapter above). Cross-jumping
+then merges the init store with the body's store, and the `b` lands on the merged
+instruction, which is why the store appears to be inside the loop.
+
+The source shape that reproduces it byte-for-byte:
+
+```c
+    i = 20000;
+    goto test;
+body:
+    i--;
+test:
+    if (i != 0)
+        goto body;
+```
+
+**The tell, stated for reuse:** if your candidate has an entry guard and the ROM
+does not, and the ROM reaches its loop through a `b` that lands *past* the first
+instruction of the body, stop editing the body — the loop is a `goto` loop. Do
+not read the missing guard as a bounds fact; W20-C's rule that a guard reads out
+non-constant bounds is about a guard the ROM *has*, and says nothing about one it
+lacks.
+
+**This is a second, independent tell for W46-B's goto loops, and it works where
+W46-B's does not.** W46-B reads goto loops off *rebuilt loop-invariant
+constants* — no LICM, so invariants stay in the body. A delay loop has nothing
+invariant to hoist, so that tell is silent on it; the rotation tell still fires.
+Read both.
+
+Measured on two functions, on the existing C with only the loop respelled:
+
+- `sub_0808AB8C` **5.4% → 55.4%**, loop region exact.
+- `sub_0808AAF4` **23.0% → 28.3%**, loop region exact.
+
+Both still miss, and **both residuals are the same kind of thing** — the
+candidate holds a value the original recomputes, which is the wave-17 rule:
+
+- `sub_0808AAF4`, +4 bytes. The ROM computes `add r1, sp, #0x40` once per delay
+  loop into a *scratch* register; agbcc CSEs the two into one pseudo which then
+  lives across two `bl`s, so it takes a callee-saved register (`push {r4, r5, r6,
+  lr}` against the ROM's `push {r4, r5, lr}`) and pushes `readFlash1` from r5 to
+  r6 — which is also why the trampoline reads `_call_via_r6`. The extra register
+  is what stops the init store cross-jump-merging, and that is the whole +4.
+  **Splitting the counter into two locals does not fix it, and this was measured
+  both ways:** two counters in disjoint blocks compile *byte-identically* to one
+  (gcc shares the slot and the pseudo), and two counters at function scope get
+  *distinct* slots — the second lands at `sp+0x42` where the ROM uses `sp+0x40`
+  for both loops. So the ROM has one object whose address it recomputes, and
+  there is no source spelling for "same slot, second pseudo".
+- `sub_0808AB8C`, −12 bytes. The ROM re-reads `*cursor` from memory before each
+  of the six tail stores (`ldr r0, [r2]; ldr r0, [r0, #N]`); the candidate keeps
+  the record pointer the loop already loaded and uses displacements off it
+  (`ldr r0, [r2, #N]`). Six loads × 2 bytes is exactly the deficit. A store to a
+  neighbouring global does **not** invalidate it — agbcc kept the register across
+  all six — so the wave-33 "a store to any global invalidates every memory value"
+  rule does not reach a value already sitting in a register.
+
+## Two `* 2` givs, opposite decisions: a binding local is a strength-reduction lever in BOTH directions (wave 46, W46-H)
+
+`sub_08073714` (92 bytes, a Bresenham circle rasteriser) is one shape and two
+opposite uses of the same lever. It had been parked at 78.3% size-exact and
+described as "which of the two `* 2` givs agbcc strength-reduces", as though the
+two terms were competing for one register. **They are not competing.** They are
+two independent `fold` decisions, and the source has to take opposite sides on
+them.
+
+The ROM reduces `x * 2 - 2` (preheader `lsls r0,r4,#1; subs r7,r0,#2`, update
+`subs r7,#2` beside `subs r4,#1`) and leaves `y * 2` inline as
+`adds r1,r5,#1; lsls r0,r6,#1; subs r5,r1,r0`.
+
+- Written inline, `d += x * 2 - 2;` produces **no** giv: `fold` reassociates it
+  to `(d - 2) + x * 2`, so `strength_reduce` only ever sees a bare `x * 2`.
+  Binding the whole delta to a block-local temp restores the two-operation giv:
+
+      if (d < 0) { int t = x * 2 - 2; d += t; x--; }
+
+- Written inline, `d = d + 1 - y * 2;` produces a giv you do **not** want:
+  `fold` reassociates it to `d - (y * 2 - 1)`, which IS a two-operation giv, so
+  agbcc reduces that one too. The loop then carries a sixth value — an extra
+  callee-saved register in the push/pop and `mov r0,#1; neg r0,r0; mov r8,r0` in
+  the preheader, +12 bytes. Binding `d + 1` to its own local blocks the
+  reassociation and leaves a bare `y * 2` that stays inline:
+
+      u = d + 1; d = u - y * 2;
+
+Both halves are the statement-boundary fold barrier of the W46-C chapter above,
+but note the polarity: **the same lever ADDS a giv when it groups a multiply
+with its addend and REMOVES one when it separates them.** Deciding "should this
+be its own local?" from a preference rather than from which side of the multiply
+the constant lands on gets it wrong half the time.
+
+The generalisation that did the work here: **a one-operation giv (a bare shift
+or bare multiply of a biv) is below `strength_reduce`'s worth-while threshold
+and stays inline; a two-operation giv (a multiply plus a constant add) is above
+it.** That single fact predicted both halves. It also reads across to
+`sub_08073228`, whose inner loop recomputes `k = j * 8` with `lsls` each
+iteration while the ROM — which has the table address folded into the same
+expression — reduces it to `adds r4, #8`.
+
+To read it off a ROM: a reduced giv has an init in the preheader (after the
+duplicated loop guard) and an update beside its biv's; an unreduced one is
+recomputed inline in the body.
+
+## agbcc's PROMOTE_MODE applies to LOCALS too — a signed `short` local sign-extends at every READ (wave 46, W46-H)
+
+The rule already in this file is stated for parameters ("agbcc's `PROMOTE_MODE`
+zero-extends every sub-word parameter regardless of signedness"). It applies to
+sub-word **locals** in exactly the same way, and that has a searchable
+signature:
+
+    ldr  rX, [sp, #slot]      @ read
+    lsls rX, rX, #16
+    asrs rX, rX, #16          @ ARITHMETIC shift -- sign extend
+    ...
+    lsls rY, rY, #16
+    lsrs rY, rY, #16          @ LOGICAL shift -- truncate
+    str  rY, [sp, #slot]      @ write
+
+A `short acc;` local lives in SImode **zero**-extended, so every read costs an
+`lsls`/`asrs` pair and every write an `lsls`/`lsrs` pair. **Read that asymmetric
+pair — arithmetic on the read, logical on the write — as a signed `short`
+declaration, and do not try to spell it with a cast.** `u16 acc;` with
+`acc = (u16)((s16)acc + x);` does NOT reproduce it: `convert_to_integer`
+distributes the narrowing over the `+` and deletes the sign extension. Two
+waves lost attempts hunting a cast spelling for this before the declaration
+turned out to be the whole answer.
+
+A second thing falls out free. When such a local is live across a call, the
+`lsls` (first half of the sign extension) is emitted at the TOP of the loop body
+and the `asrs` at the BOTTOM, straddling the call, because the value has to be
+carried in a callee-saved register. **That split is not evidence of two separate
+source statements** — it is one read of one `short` local.
+
+## Aliasing a parameter to a local costs a stack slot — use the parameter directly (wave 46, W46-H)
+
+The idiomatic decomp opening
+
+    struct Foo *proc = a4;
+    const u8 *str = a1;
+
+is **not** byte-neutral against using the parameters directly with a cast at
+each use. In `sub_08073228` it was worth a whole stack slot and the entire
+frame:
+
+- with the aliasing locals: `sub sp, #0x1c`, `a1` kept in `sl`, spills in the
+  order a2, a4;
+- using the parameters directly (`((const u8 *)a1)[i]`,
+  `((struct Foo *)a4)->unk58`): `sub sp, #0x20`, with `a1`, `a2` and `a4` all
+  spilled to `[sp,#0]`, `[sp,#4]`, `[sp,#8]` **in parameter order** — which is
+  what the ROM does.
+
+The casts generate no code; the extra pseudo does. **If the ROM spills its
+parameters to the bottom of the frame in parameter order, the original used them
+directly** — the alias is the decompiler's habit, not the original author's.
+Check this before anything else in a function with a frame, because it moves
+every later stack offset and therefore every byte of the positional score.
+
+## The permuter DOES apply to a residual of MISSING copies (wave 46, W46-H)
+
+This file and the wave brief both say the permuter is useless on "a residual of
+one extra instruction". That exclusion has been read too broadly.
+`sub_08073480` was parked at 50.4% with the note "two instructions SHORT rather
+than slot-wrong, which the brief says the permuter cannot fix", and the permuter
+was never run on it. One 300 s / 4-thread run took it to **76.2%** and moved the
+first difference from +0xe to +0x52.
+
+The distinction that actually holds: **a residual is a permuter case when its
+cause is which register something landed in, whatever the instruction-count
+symptom.** THUMB's two-operand `muls rD, rM` ties the destination to operand 1,
+so an allocation that puts a product in a different pseudo from its operand
+*manifests* as an extra `adds rD, r0, #0` copy. The copy is the symptom, the
+allocation is the cause, and the permuter perturbs exactly that. What the
+permuter genuinely cannot do is invent a missing statement, or fix a wrong
+struct layout or control-flow shape.
+
+## The ROM's y-offset is an EXPLICIT SOURCE BIV, and the loop ENTRY GUARD tells you which inits are yours (wave 46, W46-J)
+
+Block 0x08086's `sub_08086BF8` / `sub_08086CE0` pair failed at +0x2 for four
+waves with a candidate 16 bytes SHORT, because the draft let agbcc fold a whole
+offset sum into one induction variable where the ROM keeps the invariant alive
+in a high register and recomputes it. This section is the readout that gets it
+back, plus the probes that pin each half of it. Both functions are now
+size-exact (96.1% and 85.3%); what is left is written up in their `work/` drafts.
+
+### The shape
+
+Both ROMs hold a parameter `a3` in `r8` across the loop and, in EACH arm of a
+two-way branch inside the loop, do
+
+```
+mov  r1, r8         @ a3
+adds r1, #9         @ a3 + 9
+adds r1, r7, r1     @ + the loop's own +2 counter
+lsls r1, r1, #0x10
+asrs r1, r1, #0x10
+```
+
+The obvious C, `sub_080149C0(1, (s16)(a3 + 9 + i * 2), ...)`, does NOT produce
+it. `fold` reassociates `(a3 + 9) + i*2` to `(a3 + i*2) + 9`, `simplify_giv_expr`
+sees `invariant + giv` twice over, and the entire sum collapses into ONE giv
+with init `a3 + 9 + <first i*2>` and step 2. `a3` then dies in the preheader,
+`r8` is never needed, the `mov r7, r8` / `push {r7}` and `pop {r3}` / `mov r8, r3`
+pairs disappear with it, and each arm keeps only the `lsls`/`asrs`. That is the
+whole 16 bytes, and it is why the failure shows up at the PROLOGUE (+0x2, the
+second register save) for a defect whose cause is in the loop body.
+
+### Two independent things are needed, and each was probed alone
+
+**1. `a3 + 9` must be a STATEMENT of its own.** A pseudo that is SET INSIDE the
+loop and is neither a biv nor a giv is not `loop_invariant_p`, so
+`simplify_giv_expr` returns 0 for it and the enclosing `plus` stops being a giv.
+`y = a3 + 9; y += j;` gets the invariant recomputed in the arms exactly as the
+ROM does; `y = a3 + 9 + j;` on one line does not. LICM does not rescue the split
+form because the arms sit behind conditional branches, so `maybe_never` is set
+and the invariant is never hoisted. This is the same lever as the wave-46 W46-C
+section "A STATEMENT BOUNDARY is a fold barrier", reached from the other side.
+
+**2. agbcc will NOT strength-reduce `i * 2` here, so the +2 counter has to be a
+SOURCE biv.** Four spellings were probed and all four emit `lsl rN, rI, #1`
+inline inside the loop, leave the biv `i` alive, and lose `check_dbra_loop`'s
+reversed countdown:
+
+- `y += i * 2;` in each arm;
+- `j = i * 2;` as the first statement of the loop body;
+- `j = i * 2;` with the sum spelled `(s16)(j + y)` instead of `j + y`;
+- the same with the flag rewritten so register pressure differs.
+
+A multiply by 2 is a shift on THUMB, so the giv's `benefit` does not clear
+`strength_reduce`'s profitability test, and because the giv is not reduced the
+biv is not eliminable either. Writing `j = 4; ... j += 2;` as real source
+statements produces the ROM's `movs r7, #4` / `adds r7, #2` / reversed countdown
+in one step. **Do not read a `+K` counter at a loop bottom as evidence that gcc
+strength-reduced something; when the multiply would be a single cheap shift it
+is more likely a variable the author wrote.**
+
+> **REFUTED IN WAVE 46 BY W46-L, AND THE WHOLE OF ITEM 2 IS WRONG. `i * 2` IS
+> strength-reduced here; a source biv is NOT needed and is what kept both
+> functions from matching.** The four spellings above all share one property:
+> the multiply is either embedded in a larger expression or bound to a
+> **function-scope** local. Bind it to a **block-local temp declared inside the
+> arm that uses it** and it reduces immediately:
+>
+> ```c
+> {
+>     int k = i * 2;      /* declared in the arm's own block */
+>     y = a3 + 9;
+>     z = k + y;
+>     ...
+> }
+> ```
+>
+> That is W46-A's lever 3 ("`strength_reduce` only sees a giv that is a
+> standalone SET -- bind it to a block-local temp") applied verbatim, and the
+> block scope is load-bearing: the identical statement with `j` declared at
+> function scope (probed as bullet 2 above) does **not** reduce. With it, the
+> giv init lands in the preheader after the entry guard exactly as the ROM has
+> it, `check_dbra_loop` still reverses the loop, and `a3 + 9` is still
+> recomputed in each arm. Both `sub_08086BF8` and `sub_08086CE0` matched this
+> way. **Reading backwards: a `+K` counter at a loop bottom whose init sits
+> after the entry guard IS a reduced giv, and the reason your spelling of it
+> will not reduce is scope, not profitability.**
+
+### The new readout: the loop ENTRY GUARD separates YOUR inits from the compiler's
+
+The preheader is written by three passes in a fixed order -- source, then LICM
+hoists, then `strength_reduce`'s biv/giv inits. What was not written down is
+where the *entry guard* lands in that sequence, and it is a sharp divider:
+
+> A `for`/`while` loop's duplicated entry test is inserted at `NOTE_INSN_LOOP_BEG`,
+> which sits AFTER the loop's source initialisers. So an initialiser that appears
+> **before** the guard was written by the author, and one that appears **after**
+> the guard was manufactured by LICM or by strength reduction. Anything after a
+> hoisted invariant is a giv init.
+
+That reads straight off the ROM before you write a line of C, and it is free.
+Applied to this pair it says something useful and something awkward: the array
+pointer's base (after the guard) is a giv and must NOT be authored, while the
+`+2` counter's `movs r7, #4` -- also after the guard -- ought to be one too. It
+is the one fact in these two functions that the source shape above does not
+reproduce; the candidates put `mov r7, #4` two instructions early, on the wrong
+side of the guard. Restructuring to `i = 2; if (i < a2) { j = 4; do { ... } while
+(i < a2); }` DOES move it to the ROM's position and is a net loss: the `do/while`
+stops `check_dbra_loop` eliminating `i` (it lands in a high register) and makes
+`a3 + 9` LICM-hoistable again, which undoes item 1 above.
+
+> **The readout above is correct and it was right to trust it -- `movs r7, #4`
+> IS a giv init. What was wrong is the conclusion that no source shape produces
+> it.** The block-local temp in the box under item 2 authors nothing and moves
+> it, keeping both the reversed countdown and the recompute. **When the entry
+> guard tells you an initialiser is the compiler's, do not conclude the shape is
+> unreachable and do not author the init: go and find the spelling that makes
+> the value a reducible giv.** W46-L also confirmed, by direct probe, that the
+> do/while's LICM behaviour differs from the `for`'s exactly as described here
+> -- `a3 + 9` is hoisted under `do/while` and recomputed under `for`, with
+> everything else identical -- so that half of the paragraph stands.
+
+### Answering the wave-46 question: reading the live-value count off the prologue
+
+Three blocks failed at the prologue this wave for three different reasons --
+0x08073 (frame too small), 0x0808A (too many registers), 0x08086 (too few) --
+and the prologue alone does not tell them apart, because it only reports the
+TOTAL. The count that actually discriminates is read off the LOOP BOTTOM and the
+ARMS, not the prologue, and it is mechanical:
+
+1. Count the loop-bottom updates (`adds rN, #k`, `subs rN, #1`). Each is one
+   induction variable. One of them is `check_dbra_loop`'s countdown if the
+   compare is against 0 and no source variable survives.
+2. Count the values read inside the loop that are never written in it. Each is
+   an invariant that had to survive; if it is in `r8`+ it survived a call.
+3. **For each invariant in (2), find where it is combined with an induction
+   variable.** If the ROM combines them with an `adds` INSIDE the loop, the
+   source has a statement boundary between them and the invariant is a live
+   value. If the ROM shows no such `adds`, the sum was folded into a giv and the
+   invariant is NOT live -- do not give it a register.
+
+Step 3 is the discriminator, and it is the one the previous drafts skipped. The
+prologue's high-register saves are then a CHECKSUM on the count, not its source:
+`sub_08086BF8` saves two (`r8` = `a3`, `sb` = the `-fforce-addr` pool address),
+`sub_08086CE0` saves one, and the difference between them is exactly that
+`sub_08086BF8` reads its pool word three times across a merge while
+`sub_08086CE0` reloads from a text pool in each arm.
+
+### Two smaller readouts from the same pair
+
+**`adds rD, rN, rM` operand order distinguishes `x += y` from an rvalue sum.**
+`y += j` and `y = j + y` both emit `adds r1, r1, r7`: `expand_binop` swaps a
+commutative operand when the target already holds one of them. The ROM's
+`adds r1, r7, r1` is the rvalue form `(s16)(j + y)`, whose result pseudo happens
+to be allocated to the temp's register. Spelling it as an rvalue does fix the
+operand order, but it also moves the `a3 + 9` temp out of `r1` into `r0`
+(`mov r0, r8; add r0, r0, #9; add r1, r7, r0`), so it costs three instructions
+per arm to save one. This is the same residual as `sub_0802E010` item (2) in
+`data/parked.json` -- the two entries are one phenomenon and neither has a
+source-level fix yet.
+
+**Where `movs rN, #1` sits relative to a `bl` tells you whether the flag is a
+comparison or two assignments, and the polarity tells you which.** For
+`flag = 1; if (f(x)) flag = 0;` gcc emits the `movs #1` in source order, BEFORE
+the `ldrb`/`bl` of the condition, and the scheduler will not move it across the
+call. For `flag = (f(x) == 0)` -- and `flag = !f(x)`, which folds to the same
+tree -- `expand_expr`'s generic comparison path presets **0**, jumps if false,
+and stores 1, giving `mov #0` / `bne` / `mov #1`. The ROM here has `lsls` /
+`movs #1` / `cmp` / `beq` / `movs #0`: preset **1**, i.e. two assignments, with
+the `movs #1` sunk past the call. The spelling that produces it is to bind the
+call's result first:
+
+```c
+t = sub_0803CB24(...);   /* u8 local */
+flag = 1;
+if (t)
+    flag = 0;
+```
+
+The `u8` binding is free -- the re-narrowing `lsr` is dropped because the value
+is only truth-tested -- and it is what puts the `movs #1` after the `bl`.
+
+### BOTH FUNCTIONS CLOSED (wave 46, W46-L) -- and the two levers generalise
+
+`sub_08086BF8` and `sub_08086CE0` both match byte-for-byte. Three residuals fell
+to two levers plus a permuter run, and none of them needed a new type, global or
+control-flow shape. The block-local giv temp is written up under item 2 above;
+the other two are here.
+
+**1. `ADDS Rd, Rn, Rm` operand order: use a THIRD variable, not a different
+expression.** The ROM's `adds r1, r7, r1` has the counter in `Rn` and the
+destination sharing `Rm`'s register. Both `y += j;` and `y = j + y;` emit
+`adds r1, r1, r7` -- the operands the other way round -- and the reason is real:
+`expand_binop` swaps a commutative operand when the target register already
+holds one of them, so **any assignment back into `y` canonicalises to
+`(plus y j)` no matter how the source is written.** The fix is to stop assigning
+back into `y`:
+
+```c
+y = a3 + 9;
+z = j + y;          /* a DIFFERENT local */
+... (s16)z ...
+```
+
+`z`'s target is a fresh pseudo at expand time, so no swap happens, and the
+allocator then coalesces `z` onto `y`'s register anyway -- the emitted code is
+the same size and lands on the ROM's operand order. This is the missing third
+option next to the wave-46 W46-C note "`i + k` and `k + i` are DIFFERENT BYTES";
+that note is about which operand you write first, and this one says **when the
+result is assigned back into one of the operands, writing order stops mattering
+and only a fresh destination gets you the other encoding.** Worth 4 bytes here
+and it cost one probe.
+
+**2. The permuter DOES close a two-register swap between two pinned pseudos --
+in eleven iterations.** After the two levers above, `sub_08086CE0` was 90.2%
+with a byte-identical instruction stream and `r4`/`r5` exchanged throughout
+(`a2` against the `&gUnknown_02027F74` pseudo). Every source lever tried failed:
+binding the `.unk37` byte to a local first, and the W46-A lever 1 index-first
+spelling `*((a1 + i) + g.unk04)` (which instead blew the whole address model
+apart into a `.rodata` word plus `sl`/`r9`/`r8`). A single 300 s / 4-thread
+`permute` run found it on iteration 11. **What it changed is one statement
+boundary in ONE arm:**
+
+```c
+/* then-arm keeps:  y = a3 + 9;    */
+/* else-arm becomes: y = a3;
+                     y = y + 9;    */
+```
+
+Byte-neutral on its own -- the emitted instructions are identical either way --
+but it changes pseudo creation order enough to flip the allocno tie-break. Two
+lessons. **(a) An asymmetric statement split between two arms of the same `if`
+is a real allocation lever and no human would guess it; that is exactly what the
+permuter is for.** **(b) 184 bytes is well under the brief's "above 256 bytes,
+run the permuter" threshold, and the threshold cost this pair a wave** -- W46-J
+reached the same 90%-class residual and did not run it. On a residual that is
+*purely* which register a value landed in, with the stream already correct, run
+the permuter regardless of size; it is minutes. This does not contradict
+`sub_08087040`, where 900 s failed: that residual is a missing live value, not a
+slot swap.
+
+## `int + ptr` is REWRITTEN to `ptr + int` by the front end -- the only lever on an address's evaluation order is a statement boundary on the SCALED value (wave 46, W46-K)
+
+`sub_08064500` sat at 97.1%, size-exact, for three attempts across waves 33 and
+34. The whole residual was four bytes: two transposed instructions after a call.
+
+```
+ROM        bl DivRem / lsls r0,r0,#1 / ldr r1,=gUnknown_08239F84 / adds r0,r0,r1
+candidate  bl DivRem / ldr r1,=gUnknown_08239F84 / lsls r0,r0,#1 / adds r0,r0,r1
+```
+
+Waves 33 and 34 read this as an operand-order problem and went looking for a
+spelling that would put the index first. **There is none, and the reason is in
+the front end, not in RTL.** `build_binary_op` routes a PLUS of a pointer and
+an integer through `pointer_int_sum`, which normalises the POINTER to operand 0
+in both directions:
+
+```c
+      if (code0 == POINTER_TYPE && code1 == INTEGER_TYPE)
+	return pointer_int_sum (PLUS_EXPR, op0, op1);
+      else if (code1 == POINTER_TYPE && code0 == INTEGER_TYPE)
+	return pointer_int_sum (PLUS_EXPR, op1, op0);
+```
+
+So `arr[i]`, `i[arr]`, `&arr[i]`, `arr + i` and `i + arr` are all one tree, and
+`expand_expr` expands op0 (the base) before op1 (the index). Every one of them
+emits the base's `ldr` first. Wave 34 measured `i[arr]` as byte-identical and
+was right; what it concluded -- keep hunting for an operand order -- was the
+wrong next step. **Do not spend attempts permuting the subscript.**
+
+**The lever is a statement boundary, and it must fall on the SCALED value.**
+Wave 34 also tried binding the call's result to its own `int` first and
+correctly reported no change: with `i = DivRem(...)` the `lsls` still sits in
+the same statement as the `ldr` and still loses. Binding the product moves the
+shift into the earlier statement:
+
+```c
+i = DivRem (Div (g, 4), 0x10) * 2;                    /* lsls lands here */
+ApplyPaletteExt ((u16 *)((u8 *)gUnknown_08239F84 + i), 0x358, 2);
+```
+
+That matched. **Read backwards: when a scale and a pool `ldr` are transposed
+around a call, the original bound the scaled index, not the raw one.** This is
+the W46-C statement-boundary rule applied to evaluation order, and the
+distinction between binding `x` and binding `x * k` is the whole content --
+they are not interchangeable and only the second is a barrier.
+
+Two corollaries worth keeping:
+
+- **W46-A's `p[i]` versus `*(i + p)` lever is real but narrow.** It works in
+  that chapter because the two competing values are LICM-hoisted loop
+  invariants competing for high registers, where the order pseudos are CREATED
+  decides who wins. It does NOT transfer to an ordinary in-block address, where
+  the front-end normalisation above erases the spelling entirely. Do not reach
+  for it outside a preheader.
+- **The `.rodata` pool words were never a defect.** try_match reported
+  `+0x09c original gUnknown_0816E0B8 / candidate .rodata` and `+0x0a0 ...
+  gUnknown_0816E0BC / .rodata+4`, and the addend byte counted as one of the
+  five differing bytes, which reads exactly like a locally-defined table. It is
+  the ordinary -fforce-addr address-constant pool: the matched sibling
+  sub_08064474 is promoted with the adjacent pair 0x0816E0B0 / 0x0816E0B4 from
+  the same run. **An adjacent pair of ROM addresses 4 apart, relocated
+  `.rodata`+0 and `.rodata`+4, is the pool, and the `extern` the splitter left
+  in include/unknown-globals.h for it is an artefact -- referencing it would be
+  wrong.** Check data/promoted.json for a neighbouring `rodata` entry before
+  believing you invented a table.
+
+## A GOTO LOOP CANNOT BE FIXED WITH LICM OR strength_reduce LEVERS -- and a scratch register after a call is decided by the BASIC BLOCK, not by the expression (wave 46, W46-K)
+
+`sub_08063698` is size-exact at 116 bytes with three bytes differing: the ROM
+builds the loop's 0x100 stride in r1, every candidate builds it in r0. W46-K was
+sent at it with W46-A's three pseudo-order levers.
+
+**Two of those three levers cannot apply, by construction.** Lever 1 (`p[i]`
+versus `*(i + p)`) is about which of two LICM-hoisted invariants wins a high
+register; lever 3 (bind a giv to a block-local temp) is about what
+`strength_reduce` will accept as a standalone SET. W46-B established in this
+same wave that `sub_08063698`'s loop is a **goto loop** -- no
+`NOTE_INSN_LOOP_BEG`, so loop.c never runs on it. **There are no hoists and
+there are no givs to lever.** Lever 2 applied in principle and was tried in its
+literal form (the destination address bound to its own `void *` local before
+the call): byte-identical.
+
+**Generalise this, because it will recur.** Before reaching for any rule filed
+under LICM, strength reduction, `check_dbra_loop` or preheader ordering, check
+whether the loop is a goto loop. If it is, that whole family of levers is
+inert, and a confidently-stated diagnosis drawn from it will burn a wave. The
+tell is in the goto-loop chapter: several constants rebuilt inside the body
+that a real loop would have hoisted.
+
+**What the residual actually is.** A controlled probe put the same
+`v += 0x100` into two different basic blocks of one function, by wrapping it in
+an `if`/`else` whose arms are textually identical:
+
+```
+    bl   sub_08011E54
+    lsl  r0, r0, #0x10
+    cmp  r0, #0
+    bne  .L11
+    mov  r0, #0x80        @ fall-through arm  -> r0
+    lsl  r0, r0, #0x1
+    add  r4, r4, r0
+    b    .L12
+.L11:
+    mov  r1, #0x80        @ branch target     -> r1
+    lsl  r1, r1, #0x1
+    add  r4, r4, r1
+.L12:
+```
+
+Same statement, same expression, same surrounding values, two registers. **The
+arm that is a straight-line continuation of the call's block gets r0; the arm
+that is a BRANCH TARGET gets r1.** So this class of residual -- "a scratch
+constant after a call landed one register off" -- is a basic-block and liveness
+question, and no amount of respelling the expression will move it. Read
+backwards: **if the ROM builds a post-call scratch constant in r1 where you
+build it in r0, the ROM's increment section has an incoming edge that yours
+does not.**
+
+Also settled, so nobody repeats it: **~50,000 decomp-permuter iterations across
+two waves (240 s in wave 44, 300 s on 8 threads / 34,638 iterations in wave 46)
+found nothing better than the starting point.** The brief's "the permuter is not
+useless on register allocation" is not refuted -- it closed sub_08087168 -- but
+it is useless on a residual of ONE constant in the wrong register inside a goto
+loop, which has almost no allocation freedom for it to search.

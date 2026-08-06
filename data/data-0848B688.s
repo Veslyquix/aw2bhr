@@ -2419,7 +2419,15 @@ gUnknown_0858096C:  @ 0x0858096C
 
 	.global gUnknown_085809A4
 gUnknown_085809A4:  @ 0x085809A4
-	.incbin "baserom.gba", 0x5809A4, 0x34    @ 0x5809D8 - 0x5809A4
+	.incbin "baserom.gba", 0x5809A4, 0x10    @ 0x5809B4 - 0x5809A4
+
+	.global gUnknown_085809B4
+gUnknown_085809B4:  @ 0x085809B4
+	.incbin "baserom.gba", 0x5809B4, 0x1C    @ 0x5809D0 - 0x5809B4
+
+	.global gUnknown_085809D0
+gUnknown_085809D0:  @ 0x085809D0
+	.incbin "baserom.gba", 0x5809D0, 0x8    @ 0x5809D8 - 0x5809D0
 
 	.global gUnknown_085809D8
 gUnknown_085809D8:  @ 0x085809D8

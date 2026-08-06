@@ -1,0 +1,48 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0806574C.
+ * sub_0806574C @ 0x0806574C
+ */
+
+/* Session setup: seeds the gUnknown_08580934 header, rebuilds the per-slot
+ * tables and clears the cursor state, then hands off to sub_0803BFBC and
+ * sub_08065818.
+ *
+ * gUnknown_0816E108 is agbcc's own -fforce-addr word holding &gUnknown_08580934
+ * (the same block of ROM words as gUnknown_0816E10C for sub_08065818 and
+ * gUnknown_0816E110 for sub_080658AC). Naming the global honestly is what
+ * produces the ROM's three-level `ldr r3,=<word>; ldr r2,[r3]; ldr r0,[r2]`
+ * and the copy into r6 that survives the loop -- do not spell the word.
+ *
+ * `unk09[i] = i == 0 ? 1 : 2` then an unconditional `if (unk24 == 1)` override:
+ * the second store reuses the loaded unk24 (known to be 1) as its source
+ * operand and the +0x24 address register minus 0x1b as its destination, which
+ * is why only one `ldrb` appears for two uses of the field. */
+void sub_0806574C(void)
+{
+    int i;
+
+    gUnknown_08580934->unk26 = 0;
+    gUnknown_08580934->unk2c = gUnknown_0202F200;
+    gUnknown_08580934->unk24 = gUnknown_03003FC0.unk32;
+    gUnknown_08580934->unk25 = gUnknown_08580934->unk24 ? sub_0802F4F4() : -1;
+    sub_0803BFBC(gUnknown_08580934);
+    sub_08065818();
+
+    for (i = 0; i < gUnknown_08580934->unk08; i++)
+    {
+        gUnknown_08580934->unk20[i] = gUnknown_08580934->unk18[gUnknown_08580934->unk1c[i]];
+        gUnknown_08580934->unk09[i] = i == 0 ? 1 : 2;
+        if (gUnknown_08580934->unk24 == 1)
+            gUnknown_08580934->unk09[i] = 1;
+    }
+
+    gUnknown_08580934->unk30 = 0;
+    gUnknown_08580934->unk33 = 0;
+    gUnknown_08580934->unk32 = 0;
+    gUnknown_08580934->unk2d = 0;
+    gUnknown_08580934->unk2e = 0;
+}
