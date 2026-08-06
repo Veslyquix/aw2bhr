@@ -1,92 +1,123 @@
 {
-  "_comment": [
-    "Functions the original build did NOT compile with the default toolchain.",
-    "",
-    "tools/agbcc/bin/ holds two compilers. The Makefile defined CC1_OLD for",
-    "old_agbcc from the start and never referenced it; wave 10 found out why it",
-    "is there. The sound and flash libraries came out of the SDK prebuilt with",
-    "their own settings and were dropped into the game's build, which is the",
-    "same layout every other GBA tree has.",
-    "",
-    "This file is the single source of truth for that. tools/agbenv.py applies",
-    "it so trymatch.py and compile_probe judge a candidate the way the ROM was",
-    "actually built, and tools/gen_overrides_mk.py turns it into target-specific",
-    "make variables. Both must agree: an override known only to the build makes",
-    "every later wave re-attempt an already-solved function and conclude it",
-    "cannot be matched.",
-    "",
-    "An entry needs the same standard of evidence as data/asm-resident.json --",
-    "a byte-for-byte match under the named configuration, and a note on what the",
-    "default configuration does differently. 'It matched when I changed a flag'",
-    "with no mechanism is how a real bug gets papered over.",
-    "",
-    "Blast radius, measured by recompiling all 520 promoted files both ways:",
-    "old_agbcc changes 100 of them, dropping -fforce-addr changes 17. Neither",
-    "is a candidate for a global change. Per-file it costs nothing -- no",
-    "promoted file between 0x0806F710 and 0x080745C0 differs under old_agbcc,",
-    "and none above 0x08063A3C differs without -fforce-addr.",
-    "",
-    "CONSTRAINT: an overridden function must sit in a .c file of its own. The",
-    "build applies flags per object, so a shared file would silently recompile",
-    "its neighbours with the wrong toolchain. tools/gen_overrides_mk.py fails",
-    "loudly rather than emitting a rule that would do that.",
-    "",
-    "WAVE 38 (W38-A) -- DISCRIMINATOR, measured on the five MPlay*Control entry",
-    "points at 0x08071420..0x080715F8. The wave brief predicted all five would",
-    "need old_agbcc. They do not, and the split is clean:",
-    "",
-    "  match under BOTH compilers  sub_08071420 sub_08071488 sub_080714FC",
-    "  need old_agbcc              sub_08071584 sub_080715F8",
-    "",
-    "These five are the same skeleton -- ident guard, ident+1, walk tracks[] on a",
-    "0x50 stride testing trackBits, restore ident -- and differ only in the loop",
-    "body. The two that need the override are EXACTLY the two whose loop body",
-    "contains a CALL (both to sub_08071564/ClearModM); the three that do not are",
-    "exactly the three whose body is pure stores. So the axis is not `m4a`, not",
-    "the file, and not the skeleton: it is a call inside a loop body, which is",
-    "where r0 is simultaneously the argument register and the only free scratch,",
-    "and that is the one place the two allocators diverge. Both misses were",
-    "94.8% with the SIZE ALREADY EXACT -- register choice and instruction order,",
-    "never an instruction count.",
-    "",
-    "Consequence for future waves, and it cuts BOTH ways. Verified by adding",
-    "throwaway entries for the three and re-running try_match: all three ALSO",
-    "match byte-for-byte under old_agbcc. So across all five, old_agbcc matches",
-    "5/5 and default agbcc matches 3/5 -- old_agbcc is a strict superset here.",
-    "Defaulting the 0x0806F710-0x080745C0 region to old_agbcc is therefore SAFE",
-    "(it agrees with the existing note that no promoted file in that range",
-    "differs under it) and is the better first guess for anything new there.",
-    "But the three entries were still REMOVED rather than kept: an override that",
-    "changes no bytes is unfalsifiable, it makes the file stop being evidence,",
-    "and gen_overrides_mk.py's one-function-per-.c constraint would force three",
-    "needless file splits. Keep entries only where the default is measurably",
-    "wrong. If you are matching in this region and land at 90-99% with the size",
-    "exact, try old_agbcc BEFORE touching the C -- but do not assume you need it."
-  ],
-  "functions": {
-    "sub_080713F8": {
-      "cc1": "old_agbcc",
-      "cflags_remove": ["-fprologue-bugfix"],
-      "reason": "m4a MPlayTempoControl. old_agbcc keeps a member re-read live instead of coalescing it with the value just stored there, and substitutes the stored register rather than emitting a reload: `mplayInfo->tempoU = tempo; ... mplayInfo->tempoD * mplayInfo->tempoU` emits a second ldrh under agbcc and reuses the register under old_agbcc. That extra live value is what forces the `adds r0, r1, #0` copy, the r4 allocation and the `push {r4, lr}` frame -- all three of which the default build was missing at once. Parked at 32 of 40 bytes for two waves against the source axis, which was never the axis. old_agbcc rejects -fprologue-bugfix outright."
-    },
-    "sub_08071564": {
-      "cc1": "old_agbcc",
-      "cflags_remove": ["-fprologue-bugfix"],
-      "reason": "m4a MP_clear_modM, the compiled twin of the hand-written sub_08070300. Under agbcc a two-armed if/else assigning one object collapses to 'store the else value, conditionally overwrite' -- one arm, no unconditional b, one instruction shorter. old_agbcc does not do that rewrite: both arms and the b survive, the shared operand is loaded after the merge, and the branchless arm's constant stays as a second, dead movs. That one rewrite was the entire 4-byte deficit, after eighteen source spellings had been probed against it."
-    },
-    "sub_08071584": {
-      "cc1": "old_agbcc",
-      "cflags_remove": ["-fprologue-bugfix"],
-      "reason": "m4a m4aMPlayModDepthSet. Wave 38 (W38-A). Default agbcc gets this to 110 of 116 bytes (94.8%) with the size already exact and TWO independent 3-byte deltas, both inside the loop body and both allocator/scheduler, not source: (1) the ROM emits `movs r0,#0x80` BEFORE `ldrb r1,[r4]` and agbcc emits the ldrb first; (2) the re-read of the just-stored `track->mod` lands in r1 under old_agbcc (`mov r1,sb; cmp r1,#0`) and in r0 under agbcc (`mov r0,r9; cmp r0,#0`) -- r0 being the register the `bl sub_08071564` two instructions later needs for its argument. Nothing in the C reaches either choice; the same source is byte-exact under old_agbcc. See sub_080715F8, its twin, and the DISCRIMINATOR note below."
-    },
-    "sub_080715F8": {
-      "cc1": "old_agbcc",
-      "cflags_remove": ["-fprologue-bugfix"],
-      "reason": "m4a m4aMPlayLFOSpeedSet -- structurally identical to sub_08071584 (same 116 bytes, same loop, differing only in the member written: lfoSpeed at +0x19 rather than mod at +0x17). Default agbcc produces the SAME two 3-byte deltas at the same offsets, 94.8%. Matches byte-for-byte under old_agbcc."
-    },
-    "sub_0808AD6C": {
-      "cflags_remove": ["-fforce-addr"],
-      "reason": "SetReadFlash1 -- the flash library, not the game. Relocates a 4-byte THUMB routine into RAM and publishes it through gUnknown_03000F6C with the THUMB bit set. -fforce-addr is what made agbcc keep the sub_0808AD68 pool word in a register across the eors that clobbers it; without the flag it rematerialises, which is the double load the ROM has. Either compiler works. Parked at 85.7% across two waves and a permuter run, all of it spent on the source."
-    }
+ "_comment": [
+  "Functions the original build did NOT compile with the default toolchain.",
+  "",
+  "tools/agbcc/bin/ holds two compilers. The Makefile defined CC1_OLD for",
+  "old_agbcc from the start and never referenced it; wave 10 found out why it",
+  "is there. The sound and flash libraries came out of the SDK prebuilt with",
+  "their own settings and were dropped into the game's build, which is the",
+  "same layout every other GBA tree has.",
+  "",
+  "This file is the single source of truth for that. tools/agbenv.py applies",
+  "it so trymatch.py and compile_probe judge a candidate the way the ROM was",
+  "actually built, and tools/gen_overrides_mk.py turns it into target-specific",
+  "make variables. Both must agree: an override known only to the build makes",
+  "every later wave re-attempt an already-solved function and conclude it",
+  "cannot be matched.",
+  "",
+  "An entry needs the same standard of evidence as data/asm-resident.json --",
+  "a byte-for-byte match under the named configuration, and a note on what the",
+  "default configuration does differently. 'It matched when I changed a flag'",
+  "with no mechanism is how a real bug gets papered over.",
+  "",
+  "Blast radius, measured by recompiling all 520 promoted files both ways:",
+  "old_agbcc changes 100 of them, dropping -fforce-addr changes 17. Neither",
+  "is a candidate for a global change. Per-file it costs nothing -- no",
+  "promoted file between 0x0806F710 and 0x080745C0 differs under old_agbcc,",
+  "and none above 0x08063A3C differs without -fforce-addr.",
+  "",
+  "CONSTRAINT: an overridden function must sit in a .c file of its own. The",
+  "build applies flags per object, so a shared file would silently recompile",
+  "its neighbours with the wrong toolchain. tools/gen_overrides_mk.py fails",
+  "loudly rather than emitting a rule that would do that.",
+  "",
+  "WAVE 38 (W38-A) -- DISCRIMINATOR, measured on the five MPlay*Control entry",
+  "points at 0x08071420..0x080715F8. The wave brief predicted all five would",
+  "need old_agbcc. They do not, and the split is clean:",
+  "",
+  "  match under BOTH compilers  sub_08071420 sub_08071488 sub_080714FC",
+  "  need old_agbcc              sub_08071584 sub_080715F8",
+  "",
+  "These five are the same skeleton -- ident guard, ident+1, walk tracks[] on a",
+  "0x50 stride testing trackBits, restore ident -- and differ only in the loop",
+  "body. The two that need the override are EXACTLY the two whose loop body",
+  "contains a CALL (both to sub_08071564/ClearModM); the three that do not are",
+  "exactly the three whose body is pure stores. So the axis is not `m4a`, not",
+  "the file, and not the skeleton: it is a call inside a loop body, which is",
+  "where r0 is simultaneously the argument register and the only free scratch,",
+  "and that is the one place the two allocators diverge. Both misses were",
+  "94.8% with the SIZE ALREADY EXACT -- register choice and instruction order,",
+  "never an instruction count.",
+  "",
+  "Consequence for future waves, and it cuts BOTH ways. Verified by adding",
+  "throwaway entries for the three and re-running try_match: all three ALSO",
+  "match byte-for-byte under old_agbcc. So across all five, old_agbcc matches",
+  "5/5 and default agbcc matches 3/5 -- old_agbcc is a strict superset here.",
+  "Defaulting the 0x0806F710-0x080745C0 region to old_agbcc is therefore SAFE",
+  "(it agrees with the existing note that no promoted file in that range",
+  "differs under it) and is the better first guess for anything new there.",
+  "But the three entries were still REMOVED rather than kept: an override that",
+  "changes no bytes is unfalsifiable, it makes the file stop being evidence,",
+  "and gen_overrides_mk.py's one-function-per-.c constraint would force three",
+  "needless file splits. Keep entries only where the default is measurably",
+  "wrong. If you are matching in this region and land at 90-99% with the size",
+  "exact, try old_agbcc BEFORE touching the C -- but do not assume you need it."
+ ],
+ "functions": {
+  "sub_08070B34": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "Wave 47 (orchestrator). NOT an independent measurement of this function -- it matched under DEFAULT agbcc too. It is here because COMPILER FLAGS APPLY TO THE WHOLE OBJECT FILE and this function shares src/decomp/c_08070B34.c with sub_08070BAC, which genuinely requires old_agbcc (see its entry). The SPLIT build refuses a file whose members carry different overrides -- 'error: sub_08070BAC needs a compiler override but shares ... which carry a DIFFERENT override (or none)' -- so the choice was to split the file or to make the whole file old_agbcc. Verified by exit status that this function is byte-identical under old_agbcc as well, so the file is consistent and nothing is lost. That it matches under BOTH compilers is the expected case rather than a surprise: the two differ only where register allocation or prologue handling diverges, and this function has neither. Historically it is also the more accurate configuration -- the whole m4a span 0x0806F710-0x080745xx is old_agbcc, and five of its functions already carry this override. IF YOU EVER SPLIT c_08070B34.c INTO SEPARATE FILES, this entry and the one for sub_08070C90 can be deleted; they are file-consistency entries, not findings."
+  },
+  "sub_08070BAC": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a MPlayStart. Wave 47 (W47-F). Parked at 228 bytes SIZE-EXACT / 89.5% by hand and 90.4% after a 17,970-iteration permuter run, with six residuals that were all the same shape: the ROM puts a value in r1 where default agbcc puts it in r0, and materialises a `movs rD,#imm` one instruction EARLIER than agbcc does. Byte-for-byte identical under old_agbcc with the SAME source -- not one character of the C changed. Consistent with the wave-38 DISCRIMINATOR note above: this is 0x08070BAC, inside the 0x0806F710-0x080745C0 m4a region where old_agbcc is a strict superset, and the body contains calls inside loop bodies, which is exactly where the two allocators diverge over r0 being both the argument register and the only free scratch. -O1 is NOT the axis here (it is strictly worse, 19.2%); the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations."
+  },
+  "sub_08070C90": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "Wave 47 (orchestrator). NOT an independent measurement of this function -- it matched under DEFAULT agbcc too. It is here because COMPILER FLAGS APPLY TO THE WHOLE OBJECT FILE and this function shares src/decomp/c_08070B34.c with sub_08070BAC, which genuinely requires old_agbcc (see its entry). The SPLIT build refuses a file whose members carry different overrides -- 'error: sub_08070BAC needs a compiler override but shares ... which carry a DIFFERENT override (or none)' -- so the choice was to split the file or to make the whole file old_agbcc. Verified by exit status that this function is byte-identical under old_agbcc as well, so the file is consistent and nothing is lost. That it matches under BOTH compilers is the expected case rather than a surprise: the two differ only where register allocation or prologue handling diverges, and this function has neither. Historically it is also the more accurate configuration -- the whole m4a span 0x0806F710-0x080745xx is old_agbcc, and five of its functions already carry this override. IF YOU EVER SPLIT c_08070B34.c INTO SEPARATE FILES, this entry and the one for sub_08070C90 can be deleted; they are file-consistency entries, not findings."
+  },
+  "sub_080713F8": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a MPlayTempoControl. old_agbcc keeps a member re-read live instead of coalescing it with the value just stored there, and substitutes the stored register rather than emitting a reload: `mplayInfo->tempoU = tempo; ... mplayInfo->tempoD * mplayInfo->tempoU` emits a second ldrh under agbcc and reuses the register under old_agbcc. That extra live value is what forces the `adds r0, r1, #0` copy, the r4 allocation and the `push {r4, lr}` frame -- all three of which the default build was missing at once. Parked at 32 of 40 bytes for two waves against the source axis, which was never the axis. old_agbcc rejects -fprologue-bugfix outright."
+  },
+  "sub_08071564": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a MP_clear_modM, the compiled twin of the hand-written sub_08070300. Under agbcc a two-armed if/else assigning one object collapses to 'store the else value, conditionally overwrite' -- one arm, no unconditional b, one instruction shorter. old_agbcc does not do that rewrite: both arms and the b survive, the shared operand is loaded after the merge, and the branchless arm's constant stays as a second, dead movs. That one rewrite was the entire 4-byte deficit, after eighteen source spellings had been probed against it."
+  },
+  "sub_08071584": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a m4aMPlayModDepthSet. Wave 38 (W38-A). Default agbcc gets this to 110 of 116 bytes (94.8%) with the size already exact and TWO independent 3-byte deltas, both inside the loop body and both allocator/scheduler, not source: (1) the ROM emits `movs r0,#0x80` BEFORE `ldrb r1,[r4]` and agbcc emits the ldrb first; (2) the re-read of the just-stored `track->mod` lands in r1 under old_agbcc (`mov r1,sb; cmp r1,#0`) and in r0 under agbcc (`mov r0,r9; cmp r0,#0`) -- r0 being the register the `bl sub_08071564` two instructions later needs for its argument. Nothing in the C reaches either choice; the same source is byte-exact under old_agbcc. See sub_080715F8, its twin, and the DISCRIMINATOR note below."
+  },
+  "sub_080715F8": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a m4aMPlayLFOSpeedSet -- structurally identical to sub_08071584 (same 116 bytes, same loop, differing only in the member written: lfoSpeed at +0x19 rather than mod at +0x17). Default agbcc produces the SAME two 3-byte deltas at the same offsets, 94.8%. Matches byte-for-byte under old_agbcc."
+  },
+  "sub_0808AD6C": {
+   "cflags_remove": [
+    "-fforce-addr"
+   ],
+   "reason": "SetReadFlash1 -- the flash library, not the game. Relocates a 4-byte THUMB routine into RAM and publishes it through gUnknown_03000F6C with the THUMB bit set. -fforce-addr is what made agbcc keep the sub_0808AD68 pool word in a register across the eors that clobbers it; without the flag it rematerialises, which is the double load the ROM has. Either compiler works. Parked at 85.7% across two waves and a permuter run, all of it spent on the source."
   }
+ }
 }

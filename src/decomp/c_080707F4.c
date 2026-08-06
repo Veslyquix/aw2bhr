@@ -46,7 +46,7 @@ void sub_080707F4(struct SoundInfo *soundInfo)
     soundInfo->unk07 = 0xf;
     soundInfo->unk38 = sub_080700C0;
     soundInfo->unk28 = sub_080718E4;
-    soundInfo->unk2c = sub_080718E4;
+    soundInfo->unk2c = (void (*)(u8))sub_080718E4;
     soundInfo->unk30 = sub_080718E4;
     soundInfo->unk3c = sub_080718E4;
 

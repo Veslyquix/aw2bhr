@@ -144,7 +144,15 @@ def setup(rec, unit, prefer_best):
     # base.c must be a self-contained translation unit: the permuter parses it
     # with pycparser after running `cpp -P -nostdinc`, which resolves no include
     # paths, so anything left unexpanded here fails at load time.
-    f = agbenv.flags()
+    # flags(NAME), not flags(): compile.sh below is the permuter's whole notion
+    # of how this function is built, so an unnamed call silently searches with
+    # the DEFAULT toolchain against a function the ROM built with another one.
+    # Every candidate is then scored under the wrong compiler and the run
+    # reports "no candidate scored better" for a residual that was never
+    # reachable. Wave 47 (W47-F): sub_08070F44 had been permuted for 300 s under
+    # default agbcc while its block is old_agbcc, and the flash trio at
+    # 0x0808B had 38,000 iterations spent at -O2 against an -O1 library.
+    f = agbenv.flags(name)
     rel_src = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
     rel_base = os.path.relpath(os.path.join(pdir, "base.c"),
                                awlib.REPO).replace(os.sep, "/")

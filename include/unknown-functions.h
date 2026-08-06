@@ -1180,6 +1180,13 @@ u8 sub_0808AD68(u8 *);
 /* Wave 32 (W32-B): DEFINED in src/decomp/c_0808AD6C.c and never declared, which
  * nothing noticed until this wave gave it C callers. Published unchanged. */
 void sub_0808AD6C(u16 *);
+/* Wave 47 (W47-H). ProgramFlashSector's byte-copy twin of sub_0808B430: the
+ * same unlock sequence and sector-address computation, but the fill loop
+ * copies from a caller buffer instead of storing 0xFF. The u16 return is
+ * settled at its only caller, sub_0808B5B8, which re-narrows the result with
+ * `lsls #0x10; lsrs #0x10`; the second parameter is a byte pointer because
+ * that caller advances it by the sector size in bytes. */
+u16 sub_0808B540(u16, const u8 *);
 /* Wave 46 (W46-D). The flash chip's ReadFlashId: relocates sub_0808AD68's
  * `ldrb r0,[r0]; bx lr` into a stack buffer with sub_0808AD6C, calls the copy
  * through `sp + 1` twice to read the maker and device bytes, and returns them
@@ -1782,8 +1789,56 @@ void sub_080703B8(struct MusicPlayerInfo *);
  * declared from the promoted definition in src/decomp/c_080703B8.c and not from
  * that call site: sub_08070610 itself takes `void *`, which converts silently
  * and would have hidden the disagreement until the SPLIT build. */
-void sub_08070BAC(struct MusicPlayerInfo *, void *);
+/* Wave 47 (W47-B): the second parameter is retyped from `void *` to
+ * `struct SongHeader *`. The body reads five members through it -- trackCount,
+ * priority, reverb, tone and part[i] -- so the shape is no longer invisible.
+ * Byte-neutral at every existing call site: they all pass `struct Song::header`,
+ * which is `void *` and converts implicitly. */
+void sub_08070BAC(struct MusicPlayerInfo *, struct SongHeader *);
 void sub_08070C90(struct MusicPlayerInfo *);
+/* Wave 47 (W47-A), the two per-track m4a helpers that walk a track's channel
+ * chain. Both take (mplayInfo, track) and both IGNORE the first parameter --
+ * r0 is dead on entry in each body and only r1 is read. The parameter is kept
+ * because sub_08070C90 passes it: `adds r0,r6,#0; adds r1,r5,#0` at the call
+ * site is two argument copies, not one.
+ *   sub_0807004C -- TrackStop. Detaches every SoundChannel on the chain,
+ *     silencing the CGB ones through SoundInfo::CgbOscOff first.
+ *   sub_080702C0 -- ply_endtie. Reads the next command byte through
+ *     MusicPlayerTrack::cmdPtr and sets 0x40 on the channel whose `mk` matches.
+ *     Its OWN first parameter is a floor read off the register use, not off a
+ *     caller: nothing in C reaches it yet, so `struct MusicPlayerInfo *` is
+ *     lifted from the sub_0807004C twin beside it rather than proved. */
+void sub_0807004C(struct MusicPlayerInfo *, struct MusicPlayerTrack *);
+void sub_080702C0(struct MusicPlayerInfo *, struct MusicPlayerTrack *);
+/* Wave 47 (W47-B), the rest of the m4a driver core.
+ *   sub_0806F7C8 -- never CALLED, only its address is taken, with the THUMB bit
+ *     masked off so sub_080703F4 can CpuSet its code into IWRAM. `void(void)`
+ *     is the weakest shape that fits.
+ *   sub_0806FDE4 -- MPlayMain. Also never called from C here; sub_08070B34
+ *     parks its address in SoundInfo::func, and that member's type is what
+ *     pins the signature.
+ *   sub_0807004C -- TrackStop. sub_08070BAC calls it once per track in each of
+ *     its two loops, always (mplayInfo, track).
+ *   sub_080706B0 -- MPlayExtender, handed the gUnknown_030057D0 CGB channel
+ *     array by m4aSoundInit.
+ *   sub_080707E0 -- Clear64byte. Its parameter is retyped from `int` (see
+ *     gUnknown_030057CC in unknown-globals.h): sub_08070B34 hands it a
+ *     `struct MusicPlayerInfo *`, which is exactly 0x40 bytes, and that is the
+ *     first call site to say anything about the type at all.
+ *   sub_080707F4 -- SoundInit, already promoted in src/decomp/c_080707F4.c
+ *     taking `struct SoundInfo *`; declared here so m4aSoundInit can call it.
+ *   sub_08070A28 -- SoundClear, `pop {r0}; bx r0` and no argument register read
+ *     before being written.
+ *   sub_08070B34 -- MPlayOpen. The third parameter is narrowed
+ *     `lsls #0x18; lsrs #0x18` on entry and clamped to 0x10, so u8. */
+void sub_0806F7C8(void);
+void sub_0806FDE4(struct MusicPlayerInfo *);
+void sub_0807004C(struct MusicPlayerInfo *, struct MusicPlayerTrack *);
+void sub_080706B0(struct CgbChannel *);
+void sub_080707E0(void *);
+void sub_080707F4(struct SoundInfo *);
+void sub_08070A28(void);
+void sub_08070B34(struct MusicPlayerInfo *, struct MusicPlayerTrack *, u8);
 void sub_080703D4(struct MusicPlayerInfo *, u16);
 
 /* The gUnknown_0200C528 lookup, and the s16 twin of sub_08015BD0: it scans the
@@ -4132,6 +4187,36 @@ int sub_08057FA8(int);
  * sub_08060A20 is its only caller. */
 int sub_08057F54(int);
 int sub_08060ED4(int);
+/* Wave 47, W47-E, from the 0x08060 AI block.
+ *
+ * sub_08060718 takes ONE s16: sub_080606D0 reads its stack local with
+ * `movs r1, #0; ldrsh r0, [r5, r1]` at every call, and a `ldrsh` at the CALLER
+ * is the s16 readout -- a u16 parameter would have needed the zero-extending
+ * `ldrh` there. Its own prologue zero-extends (PROMOTE_MODE does that
+ * regardless of signedness, so the prologue proves only the width), and it
+ * re-signs the value with `lsls #0x10; asrs #0x10` before handing it to
+ * sub_08060894, whose promoted definition already takes s16.
+ *
+ * sub_08060D4C, sub_08060D78 and sub_08060894 are hoisted from their promoted
+ * definitions in src/decomp/c_08060D4C.c and c_08060894.c, which had none.
+ * sub_080606D0 is sub_08060D78's first C caller and hands it `mov r0, sp` --
+ * the same r0 the preceding `strh` set up -- so the argument is the local's
+ * ADDRESS, an out-parameter, which is what that definition already assumes.
+ *
+ * sub_08060DAC's result is a signed loop count in sub_080606D0 (a `cmp r0, #0;
+ * ble` zero-trip guard over a countdown), so `int`. sub_08057FE8's is stored
+ * whole into the `int` gUnknown_030045D8 with no re-narrowing. sub_08060930,
+ * sub_08060A7C and sub_08060AB0 are called for effect only, with no argument
+ * register written before the `bl` and no use of r0 after it. */
+void sub_08060718(s16);
+void sub_08060D4C(void);
+void sub_08060D78(s16 *);
+void sub_08060894(s16);
+int sub_08060DAC(void);
+int sub_08057FE8(int);
+void sub_08060930(void);
+void sub_08060A7C(void);
+void sub_08060AB0(void);
 /* Wave 32, W32-A: hoisted from the definition in src/decomp/c_08061DA8.c, which
  * had no declaration. sub_08060894 is its first C caller and agrees -- it takes
  * the result with a bare `adds r2, r0, #0`, tests it against 0 and hands it to
@@ -7026,6 +7111,41 @@ u8 *sub_0808AED0(const u8 *, u8 *, int);
  * sub_0808AF00 above. Parameter 2 is `int` for the same reason too. */
 int sub_0808AF74(u16, int, int);
 
+/* ---- the 0x0808B flash driver (wave 47, W47-D) ------------------------ */
+
+/* sub_0808B02C is sub_0808AFE8 with a caller-supplied length: same three-try
+ * program-and-verify loop, but sub_0808AF74 in place of sub_0808AF00, so it
+ * carries the extra `int` and returns `int` for the same reason. */
+int sub_0808B02C(u16, int, int);
+
+/* Erase-sector primitives. Every one of these returns a u16 status -- each
+ * caller re-narrows the result with `lsls #0x10; lsrs #0x10`, which is agbcc
+ * re-narrowing a u16-returning callee, and 0x000080FF is the shared "bad sector
+ * number" code the range checks return.
+ *
+ * sub_0808B430 writes the JEDEC unlock/erase command for ONE sector and is
+ * called only by sub_0808B4B4, which passes it a u16; sub_0808B0E8 is its
+ * already-in-asm twin one level up, called by sub_0808B31C the same way. */
+u16 sub_0808B0E8(u16);
+u16 sub_0808B430(u16);
+u16 sub_0808B4B4(u16);
+
+/* sub_0808B184's two parameters are read off its matched body in
+ * src/decomp/c_0808B184.c: a byte source and a flash destination, both walked
+ * one byte at a time by sub_0808B31C. */
+u16 sub_0808B184(u8 *, u8 *);
+
+/* sub_0808B31C programs one sector: sector number then the source buffer it
+ * hands to sub_0808B184 unchanged apart from the increment, hence `u8 *`. */
+u16 sub_0808B31C(u16, u8 *);
+
+/* sub_0808B2E0 is the "is this sector still blank" scan and is the one function
+ * in the block that does NOT return a status: it counts down from
+ * gUnknown_03005C78->unk04 and returns whatever is left when the walk hits a
+ * non-0xFF byte, with no narrowing at `adds r0, r1, #0`, so the return is the
+ * member's own width. */
+u32 sub_0808B2E0(u8 *);
+
 /* sub_0808A368 forwards its only argument unchanged as sub_08071AF0's
  * ProcPtr third parameter, so it is a ProcPtr and nothing narrows it. */
 void sub_0808A368(ProcPtr);
@@ -9601,6 +9721,12 @@ void sub_0805BAFC(int, int, int, u16 *);
 int sub_08058318(void);
 int sub_0805848C(void);
 int sub_080585D4(void);
+/* Wave 47, W47-G. The other two census counters of the same family, both
+ * already DEFINED (src/decomp/c_080583DC.c, src/decomp/c_08058254.c) and never
+ * declared; these publish the definitions unchanged. sub_0805BEA0 compares
+ * `sub_08058254() < sub_080583DC() + 5` with a signed `bge`, the same tell. */
+int sub_080583DC(void);
+int sub_08058254(void);
 /* Copied verbatim from the promoted definition in src/decomp/c_08058BB4.c,
  * which had no prototype; the definition wins. */
 void sub_08058F30(u8 *);
@@ -9806,5 +9932,31 @@ void sub_08064D44(struct Unk08580934_Obj *, int, int, int);
  * extents unk09/unk0d/unk11/unk20 were only ever guessed at from "whatever
  * fits below the next member". */
 void sub_0803BFBC(void *);
+
+/* ---- wave 47 (W47-G) ---- the 0x0805B4A8 / 0x0805BC7C cursor-target block.
+ *
+ * sub_0808B6C4, sub_0805B4A8 and sub_0805BD40 are already DEFINED in
+ * src/decomp/ and were never declared; these publish those definitions
+ * unchanged (sub_0808B6C4 is the tree's memset -- dst, fill byte, length).
+ *
+ * sub_0805B4D8 returns a BOOLEAN BYTE: its body only ever produces the
+ * literals 0 and 1, and its caller sub_0805BDE4 re-narrows the result with
+ * `lsls #0x18; lsrs #0x18` before `cmp #1` -- the call-site narrowing agbcc
+ * emits for a byte-returning callee. The second and third arguments are
+ * out-parameters written with a whole-word `str` (`str r4,[r6]` and
+ * `str r0,[r1]`), so they are `int *` and not halfword pointers.
+ *
+ * The four x/y/out builders below all take the cell key as two unnarrowed
+ * `int`s (`adds rN, r0, #0` with no shift pair in any prologue) and write the
+ * pair back as two `strh` through the third argument, the same shape as the
+ * promoted sub_0805BE10 / sub_0805BEF0 family. sub_0805BC7C returns 0 or 1. */
+void *sub_0808B6C4(void *, int, int);            /* c_0808B6C4.c */
+int sub_0805B4A8(void);                          /* c_0805B4A8.c */
+u8 sub_0805B4D8(int, int *, int *);
+int sub_0805BD40(int, int, int, int, s16 *);     /* c_0805BD40.c */
+int sub_0805BC7C(int, int, u16 *);
+void sub_0805BDE4(int, int, u16 *);
+void sub_0805BEA0(int, int, u16 *);
+void sub_0805BF3C(int, int, u16 *);
 
 #endif // UNKNOWN_FUNCS_H

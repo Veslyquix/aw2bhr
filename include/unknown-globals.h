@@ -1797,7 +1797,22 @@ struct Unk030040D8
     /* 0x04 */ u8 unk04_7 : 1;
     /* 0x05 */ u8 unk05;
     /* 0x06 */ u8 filler_06[0x01];
-    /* 0x07 */ u8 unk07[0x05]; /* wave 13 (A4): sub_0802966C reads
+    /* 0x07 */ u8 unk07[0x05]; /* Wave 47, W47-G: element [2] (offset 0x09) is
+                                * really a BITFIELD container, and unk07[1] and
+                                * unk07[4] are not. sub_0805BFDC writes bits
+                                * 3..5 of offset 0x09 with store_bit_field's
+                                * exact output -- `movs r0,#7; ands r5,r0;
+                                * lsls r2,r5,#3` ahead of the member load, then
+                                * a clear with -0x39 -- which no `u8` masking
+                                * spelling produces (shorten_binary_op narrows
+                                * that AND to `mov r0,#0xc7` and puts the load
+                                * first). DELIBERATELY NOT RESHAPED: the same
+                                * array is read as `unk07[0]`, `unk07[1]` and
+                                * `unk07[4]` by promoted code, so sub_0805BFDC
+                                * uses a file-local bitfield view of offset
+                                * 0x09 instead. Anyone who does split this must
+                                * re-verify c_0805B980.c and c_0805BC7C.c.
+                                *   wave 13 (A4): sub_0802966C reads
                                 * `->unk07[i]` with the `adds rB,#7` on the
                                 * BASE that only the member-array spelling
                                 * produces. The extent 5 makes this 0x0c
@@ -3822,6 +3837,14 @@ struct Unk08615194 /* 0x30 */
  * 0x80 into a high register outside the loop. That is MPT_FLG_EXIST in the
  * public layout and 0x80 occurs nowhere else against this member. */
 #define MPT_FLG_EXIST 0x80
+/* Wave 47 (W47-B): sub_08070BAC (MPlayStart) both TESTS this bit on track 0 in
+ * its entry guard -- "the running song is still playing" -- and stores it with
+ * MPT_FLG_EXIST as 0xc0 on every track it starts. An install/test pair on one
+ * bit, which is the discriminating evidence a single store never gives.
+ * MPT_FLG_START in the public layout. (work/sub_08070BAC/sub_08070BAC.c still
+ * spells it 0x40 -- that draft is parked on register allocation and is left
+ * byte-for-byte as measured.) */
+#define MPT_FLG_START 0x40
 
 struct ToneData /* 0x0c */
 {
@@ -3847,18 +3870,98 @@ struct ToneData /* 0x0c */
  * SoundChannel, so the rest of that layout is safe to narrow into as functions
  * reach it; nothing between +0x04 and +0x11 is reached yet.
  */
-struct SoundChannel /* >= 0x15 */
+struct SoundChannel /* 0x40 */
 {
-    /* 0x00 */ u8 filler_00[0x02];
+    /* 0x00 */ u8 status;          /* wave 47 (W47-B): sub_08070A28 (SoundClear)
+                                    * walks twelve of these from SoundInfo+0x50
+                                    * at stride 0x40 and zeroes the first byte
+                                    * of each. */
+    /* 0x01 */ u8 type;            /* wave 47 (W47-A): sub_0807004C (TrackStop)
+                                    * reads it `ldrb [r4,#1]`, masks with 7 and
+                                    * calls SoundInfo::CgbOscOff on the result
+                                    * when it is non-zero -- the canonical MP2K
+                                    * "low three bits are the CGB channel 1..4"
+                                    * test, and the only reader of this byte. */
     /* 0x02 */ u8 rightVolume;
     /* 0x03 */ u8 leftVolume;
-    /* 0x04 */ u8 filler_04[0x0e]; /* attack decay sustain release ky
+    /* 0x04 */ u8 filler_04[0x0d]; /* attack decay sustain release ky
                                     * envelopeVolume envelopeVolumeRight
                                     * envelopeVolumeLeft echoVolume echoLength
-                                    * d1 d2 gt mk */
+                                    * d1 d2 gt */
+    /* 0x11 */ u8 mk;              /* wave 47 (W47-A): sub_080702C0 (ply_endtie)
+                                    * compares it against the track's key at
+                                    * MusicPlayerTrack+0x05 to find the channel
+                                    * playing that note. Both sides are bare
+                                    * `ldrb`, so u8 is a floor as well as the
+                                    * canonical MP2K width. */
     /* 0x12 */ u8 ve;
     /* 0x13 */ u8 filler_13[0x01]; /* pr */
     /* 0x14 */ s8 rp;
+    /* 0x15 */ u8 filler_15[0x17]; /* wave 47 (W47-B): the 0x40 total size is
+                                    * PROVED, not lifted. SoundInfo's channel
+                                    * array starts at +0x50, sub_08070A28 walks
+                                    * exactly twelve of them at stride 0x40, and
+                                    * 0x50 + 12*0x40 == 0x350 -- which W35-D had
+                                    * already pinned as pcmBuffer.
+                                    * d3[3] ct fw freq wav cp */
+    /* 0x2c */ void *track;        /* wave 47 (W47-A): sub_0807004C stores a null
+                                    * pointer here for every channel it detaches.
+                                    * Only ever written, never read, so the
+                                    * pointee type is NOT proved -- `void *` is
+                                    * the weakest that fits, the same choice
+                                    * MusicPlayerTrack::chan makes in reverse. */
+    /* 0x30 */ u8 filler_30[0x04]; /* pp */
+    /* 0x34 */ struct SoundChannel *np;
+                                   /* wave 47 (W47-A): the chain link. Both
+                                    * sub_0807004C and sub_080702C0 walk the
+                                    * channel list `chan = chan->np` with
+                                    * `cmp #0` as the terminator. */
+    /* 0x38 */ u8 filler_38[0x08]; /* d4 xpi xpc */
+};
+
+/* The MP2K CGB oscillator channel. sub_08070A28 (SoundClear) walks four of
+ * these from SoundInfo::cgbChans at stride 0x40 -- indices 1..4 inclusive --
+ * zeroing the first byte of each, and sub_080703F4 (m4aSoundInit) hands
+ * gUnknown_030057D0 to sub_080706B0 (MPlayExtender) as the array base. Only the
+ * stride and +0x00 are proved here; the canonical MP2K CgbChannel is 0x40 bytes
+ * with `sf` (statusFlags) at +0x00, which is what the zeroing store hits. */
+/* WAVE 47 (W47-C): eight bytes carved out of the old filler_01[0x3f] from
+ * sub_08070F44 (CgbModVol), which reads or writes every one of them. `sf` at
+ * +0x00 is untouched and no existing member changes width.
+ *
+ * rightVolume and leftVolume are `volatile`, and that is PROVED rather than
+ * lifted -- it is the answer to residual 1 of the wave-32 park, which wave 35
+ * left open after ruling out u8 locals and `u8 x : 8` bitfields.
+ * sub_08070F44 reads each of them as `ldrb; lsls #0x18; lsrs #0x18` and then
+ * takes the halving straight out of the `<<24` value (`lsrs r0, r2, #0x19`).
+ * A plain `u8` member cannot produce that round trip: `ldrb` already
+ * zero-extends, so combine deletes the pair and emits a bare `lsr #1` for the
+ * halving. With the qualifier agbcc must load the byte into a QImode pseudo
+ * (one read, exactly as the source asks) and zero-extend it afterwards, which
+ * is the shift pair, and CSE then shares the `<<24` between the value and its
+ * halving. Reproduced by compile_probe, instruction for instruction.
+ * The same qualifier explains why the function RE-READS both bytes for the
+ * `(left + right) >> 4` sum instead of reusing the two values it already has.
+ *
+ * The other six are plain. envelopeGoal is written and then re-read for the
+ * multiply, but that is one non-volatile store/load pair CSE keeps in a
+ * register -- it is not evidence for a qualifier. */
+struct CgbChannel /* 0x40 */
+{
+    /* 0x00 */ u8 sf;
+    /* 0x01 */ u8 filler_01[0x01];
+    /* 0x02 */ volatile u8 rightVolume;
+    /* 0x03 */ volatile u8 leftVolume;
+    /* 0x04 */ u8 filler_04[0x02];
+    /* 0x06 */ u8 unk06;
+    /* 0x07 */ u8 filler_07[0x03];
+    /* 0x0a */ u8 envelopeGoal;
+    /* 0x0b */ u8 filler_0b[0x0e];
+    /* 0x19 */ u8 unk19;
+    /* 0x1a */ u8 filler_1a[0x01];
+    /* 0x1b */ u8 pan;
+    /* 0x1c */ u8 panMask;
+    /* 0x1d */ u8 filler_1d[0x23];
 };
 
 /* The canonical MP2K WaveData. Only +0x04 is reached (sub_08070350 /
@@ -3889,6 +3992,12 @@ extern const u32 gUnknown_081B9EA8[];
 extern const u8 gUnknown_081B9EF0[];
 extern const s16 gUnknown_081B9F74[];
 extern const u8 gUnknown_081B9F8C[];
+/* Wave 47 (W47-B): MP2K's gPcmSamplesPerVBlankTable. sub_080708EC indexes it
+ * `[freq - 1]` with a plain `ldrh` at stride 2 and stores the result into a
+ * signed 32-bit member, so u16 is the element type and the array is
+ * `const` -- it lives in ROM and nothing writes it. Its length is not proved
+ * here; the freq nibble is 4 bits, so 15 is the ceiling. */
+extern const u16 gUnknown_081B9ED8[];
 
 struct MusicPlayerTrack /* 0x50 */
 {
@@ -3896,10 +4005,18 @@ struct MusicPlayerTrack /* 0x50 */
     /* 0x01 */ u8 wait;
     /* 0x02 */ u8 patternLevel;
     /* 0x03 */ u8 repN;
-    /* 0x04 */ u8 filler_04[0x04]; /* gateTime key velocity runningStatus.
-                                    * sub_080700C0 uses +0x05 as key and +0x06
+    /* 0x04 */ u8 filler_04[0x01]; /* gateTime */
+    /* 0x05 */ u8 key;             /* sub_080700C0 uses +0x05 as key and +0x06
                                     * as velocity, which agrees with the
-                                    * canonical MP2K layout. */
+                                    * canonical MP2K layout. Wave 47 (W47-A)
+                                    * narrowed key out of the filler:
+                                    * sub_080702C0 (ply_endtie) both stores the
+                                    * incoming command byte here and reads it
+                                    * back on the other arm of the same `if`,
+                                    * then compares it against SoundChannel::mk
+                                    * -- a producer and a consumer agreeing on
+                                    * one byte, which is what settles it. */
+    /* 0x06 */ u8 filler_06[0x02]; /* velocity runningStatus */
     /* 0x08 */ u8 keyM;            /* wave 35 (W35-D): the eight bytes +0x08..
                                     * +0x0f are all reached by sub_08070D98
                                     * (TrkVolPitSet) and land exactly on the
@@ -3986,12 +4103,37 @@ struct MusicPlayerTrack /* 0x50 */
  * real match to fix a function that cannot close either way. Whoever promotes
  * this region as a whole file should settle it then -- the discriminating test
  * is whether sub_08070AF8 still matches with a plain `u8` here.
+ *
+ * WAVE 47 (W47-H) MEASURES THE COST OF THE QUALIFIER, WHICH NOBODY HAD DONE,
+ * AND IT SHARPENS THE CONTRADICTION RATHER THAN SETTLING IT. Restating
+ * SoundInfo's first 12 bytes in a throwaway local struct with a plain `u8`
+ * here, changing nothing else in sub_0806FD98's C, drops BOTH dead loads and
+ * takes that function from 100 to 96 bytes:
+ *
+ *     vu8   ldrb r0,[r1,#4] ; subs r0,#1 ; ldrb r1,[r1,#4] ; strb r0,[r1,#4]
+ *     u8    ldrb r0,[r1,#4] ; subs r0,#1 ;                   strb r0,[r1,#4]
+ *     ROM   ldrb r1,[r0,#4] ; subs r1,#1 ;                   strb r1,[r0,#4]
+ *
+ * So `u8` reproduces the ROM's decrement EXACTLY and the whole residual on
+ * that statement collapses to one `cmp r0,#0` before the `bgt`. That is the
+ * strongest evidence yet that this member is not volatile, and it costs 4
+ * bytes wherever it is wrong. STILL NOT CHANGED, for the reason above: only
+ * re-running sub_08070AF8 can settle it, and that function is promoted.
+ *
+ * Also W47-H: the qualifier is NOT a build-configuration artefact. The same C
+ * is BIT-IDENTICAL under old_agbcc and the default agbcc (both 100 bytes,
+ * `cmp` included) and strictly worse at -O1 (104). The m4a block being an
+ * old_agbcc block does not reach this, and neither does the flash block's
+ * -O1 finding -- do not re-sweep those axes against this member.
  */
+struct MusicPlayerInfo;
 struct SoundInfo
 {
     /* 0x00 */ vu32 ident;
     /* 0x04 */ vu8 pcmDmaCounter;
-    /* 0x05 */ u8 filler_05[0x01];
+    /* 0x05 */ u8 reverb;  /* wave 47 (W47-B): sub_08070990 (m4aSoundMode)
+                            * stores `mode & 0xff & 0x7f` here -- the canonical
+                            * MP2K SOUND_MODE_REVERB field. Bare `strb`. */
     /* 0x06 */ u8 unk06;   /* wave 35 (W35-D): sub_080707F4 (SoundInit)
                             * seeds these two with 8 and 0xf right after
                             * the CpuSet that zeroes the whole block --
@@ -3999,7 +4141,12 @@ struct SoundInfo
                             * pair. Bare `strb`, so the widths are a
                             * floor. */
     /* 0x07 */ u8 unk07;
-    /* 0x08 */ u8 filler_08[0x03];
+    /* 0x08 */ u8 freq;             /* wave 47 (W47-B): sub_080708EC
+                                     * (SampleFreqSet) stores `(mode & 0xf0000)
+                                     * >> 16` here and uses the same value,
+                                     * minus one, to index gUnknown_081B9ED8.
+                                     * Bare `strb`. */
+    /* 0x09 */ u8 filler_09[0x02];  /* mode c15 */
     /* 0x0b */ u8 pcmDmaPeriod;     /* wave 33 (W33-A): sub_0806FD98 (the
                                      * m4aSoundVSync shape) reloads
                                      * pcmDmaCounter from this byte when the
@@ -4009,7 +4156,37 @@ struct SoundInfo
                                      * this offset. Not volatile: it is read
                                      * once and nothing here needs the
                                      * qualifier. */
-    /* 0x0c */ u8 filler_0c[0x1c];
+    /* 0x0c */ u8 filler_0c[0x04];  /* maxLines gap[3] */
+    /* 0x10 */ s32 pcmSamplesPerVBlank;
+                                    /* wave 47 (W47-B): the three s32 at +0x10/
+                                     * +0x14/+0x18 are all set by sub_080708EC
+                                     * and every one of them is an operand of a
+                                     * `bl __divsi3`, not `__udivsi3` -- so they
+                                     * are SIGNED, and that is the only thing
+                                     * pinning the signedness. +0x10 is
+                                     * gUnknown_081B9ED8[freq-1] (a u16 load
+                                     * widened by the `str`), +0x14 is
+                                     * (samples * 597275 + 5000) / 10000, and
+                                     * +0x18 is (0x1000000 / +0x14 + 1) >> 1 --
+                                     * note the last one divides by the value
+                                     * just stored at +0x14, NOT by +0x10. */
+    /* 0x14 */ s32 pcmFreq;
+    /* 0x18 */ s32 divFreq;
+    /* 0x1c */ struct CgbChannel *cgbChans;
+                                    /* wave 47 (W47-B): sub_08070A28 null-checks
+                                     * it, then walks four 0x40-byte records
+                                     * from it. */
+    /* 0x20 */ void (*func)(struct MusicPlayerInfo *);
+                                    /* wave 47 (W47-B): the MP2K func/intp pair.
+                                     * sub_08070B34 (MPlayOpen) chains them --
+                                     * it moves any existing pair into the new
+                                     * player's own +0x38/+0x3c, then parks
+                                     * sub_0806FDE4 (MPlayMain) in +0x20 and the
+                                     * MusicPlayerInfo it was handed in +0x24.
+                                     * The stored function ADDRESS is what fixes
+                                     * the member as a pointer-to-function
+                                     * rather than a u32. */
+    /* 0x24 */ struct MusicPlayerInfo *intp;
     /* 0x28 */ void (*unk28)(void); /* wave 35 (W35-D): SoundInit parks the
                                      * SAME address (sub_080718E4) in all
                                      * four of +0x28/+0x2c/+0x30/+0x3c and
@@ -4019,12 +4196,31 @@ struct SoundInfo
                                      * weakest shape that fits; +0x34 gets
                                      * the ADDRESS of gUnknown_03005740, the
                                      * table sub_0806FBD4 has just filled. */
-    /* 0x2c */ void (*unk2c)(void);
+    /* 0x2c */ void (*unk2c)(u8);   /* wave 47 (W47-B): retyped from
+                                     * `void (*)(void)`. W35-D's note said
+                                     * `void (void)` was the weakest shape that
+                                     * fits BECAUSE nothing called it; that
+                                     * condition is now gone. sub_08070A28
+                                     * calls it through this member with exactly
+                                     * one argument, zero-extended to u8 by an
+                                     * `lsls #0x18; lsrs #0x18` pair at the call
+                                     * -- the CGB oscillator-off hook. The four
+                                     * stores in sub_080707F4 (c_080707F4.c)
+                                     * pick up a cast, which is byte-neutral;
+                                     * that file was re-verified as still
+                                     * matching after this change. */
     /* 0x30 */ void (*unk30)(void);
     /* 0x34 */ void *unk34;
     /* 0x38 */ void (*unk38)(void);
     /* 0x3c */ void (*unk3c)(void);
-    /* 0x40 */ u8 filler_40[0x310];
+    /* 0x40 */ u8 filler_40[0x10];
+    /* 0x50 */ struct SoundChannel chans[12];
+                                    /* wave 47 (W47-B): carved out of the old
+                                     * filler_40[0x310] at the same offsets --
+                                     * sub_08070A28 zeroes twelve `status`
+                                     * bytes from +0x50 at stride 0x40, and the
+                                     * array ends exactly where pcmBuffer
+                                     * begins. */
     /* 0x350 */ u8 pcmBuffer[2][0x630];
                                     /* wave 35 (W35-D): the two DMA source
                                      * buffers, and the extents are PROVED
@@ -4056,17 +4252,68 @@ struct Song /* 0x08 */
 struct MusicPlayer /* 0x0c */
 {
     /* 0x00 */ struct MusicPlayerInfo *info;
-    /* 0x04 */ u8 filler_04[0x08];
+    /* 0x04 */ struct MusicPlayerTrack *track;
+    /* 0x08 */ u8 trackCount;
+    /* 0x09 */ u8 filler_09[0x01];
+    /* 0x0a */ u16 unk_0a;
+};
+
+/* The MP2K song header, i.e. what struct Song::header points at and what
+ * sub_08070BAC (MPlayStart) is handed as its second argument. Wave 47 (W47-B):
+ * every member below is read by that function -- trackCount and priority
+ * `ldrb`, reverb `ldrb` and tested against 0x80, tone `ldr`, and part[i] as a
+ * word at `songHeader + 8 + i*4`. */
+struct SongHeader
+{
+    /* 0x00 */ u8 trackCount;
+    /* 0x01 */ u8 blockCount;
+    /* 0x02 */ u8 priority;
+    /* 0x03 */ u8 reverb;
+    /* 0x04 */ struct ToneData *tone;
+    /* 0x08 */ u8 *part[1];
 };
 extern const struct MusicPlayer gUnknown_08242308[];
 extern const struct Song gUnknown_0824238C[];
+/* WAVE 47 (W47-A): the m4a player COUNT, and it is an ABSOLUTE SYMBOL whose
+ * link-time value is 11 -- not an integer constant. Three functions read it and
+ * all three do it the same way: `ldr rN, =0x0000000B; lsls #0x10; lsrs #0x10;
+ * cmp rN, #0; beq` (sub_080703F4 m4aSoundInit at pool 0x08070460, sub_080705AC
+ * at 0x080705D0, sub_080705E4 at 0x08070608). Those are the ONLY three pooled
+ * small integers in the whole ROM.
+ *
+ * Every part of that sequence is evidence for a symbol and against a literal:
+ * 11 fits `movs rN, #imm8`, so agbcc would never pool it (measured -- a plain
+ * `11`, `(u16)11`, a `u16` local, a `const u16` local, `sizeof(tbl)/sizeof(*tbl)`
+ * and `(u16)` of that all emit `mov rN, #0xb`); the `(u16)` truncation survives
+ * unfolded, which only happens when the value is unknown at compile time; and
+ * the `cmp #0` zero-trip guard exists at all, which the loop optimiser would
+ * have deleted for a known-positive bound. `(u16)(u32)&symbol` reproduces all
+ * three at once and the whole of sub_080705AC byte-for-byte.
+ *
+ * NOT YET DEFINED ANYWHERE. tools/gen_lds.py invents no symbols and no data blob
+ * carries this address, so before either reader can be PROMOTED the linker
+ * script needs `gUnknown_0000000B = 0x0000000B;` alongside the other absolute
+ * symbol definitions. Declaring it here is inert until then -- an unreferenced
+ * extern costs nothing at link -- and per-function trymatch resolves it through
+ * sym_addr()'s `gUnknown_<addr>` fallback, which is why the match verifies. */
+extern const u8 gUnknown_0000000B;
 /* Two adjacent IWRAM function pointers, each with a 20-byte forwarder of its
  * own -- sub_080707CC and sub_080707E0. Both are `bl _call_via_r1`, and the
  * register index is the argument count, so each takes one argument that its
  * forwarder passes straight through from r0 without touching it. The argument's
- * type is invisible on both sides; `int` is the weakest that fits. */
-extern void (*gUnknown_030057C8)(int);
-extern void (*gUnknown_030057CC)(int);
+ * type is invisible on both sides; `int` is the weakest that fits.
+ *
+ * WAVE 47 (W47-B): gUnknown_030057CC's forwarder sub_080707E0 now has a caller.
+ * sub_08070B34 (MPlayOpen) hands it the `struct MusicPlayerInfo *` it is about
+ * to fill in, immediately before writing that player's members -- i.e. it is
+ * MP2K's Clear64byte, and a MusicPlayerInfo is exactly 0x40 bytes. Retyped to
+ * `void *` rather than to the concrete pointer, because the callee is a
+ * memory-clearing primitive and nothing here says it only ever sees players.
+ * gUnknown_030057C8 has no call site yet and is retyped only to keep the pair
+ * spelled the same way; that half is NOT proved. src/decomp/c_080707CC.c was
+ * updated with it and re-verified. */
+extern void (*gUnknown_030057C8)(void *);
+extern void (*gUnknown_030057CC)(void *);
 struct MusicPlayerInfo /* 0x40 */
 {
     /* 0x00 */ void *songHeader;
@@ -4082,11 +4329,23 @@ struct MusicPlayerInfo /* 0x40 */
                                     * offset, same width, nothing else read it. */
     /* 0x09 */ u8 priority;        /* sub_080700C0 adds it to the track's own
                                     * priority at +0x1d and clamps to 0xff */
-    /* 0x0a */ u8 filler_0a[0x12]; /* cmd unk_0b clock gap[8] memAccArea */
+    /* 0x0a */ u8 filler_0a[0x01]; /* cmd */
+    /* 0x0b */ u8 unk_0b;          /* wave 47 (W47-B): sub_080703F4 seeds it
+                                    * from struct MusicPlayer::unk_0a, and
+                                    * sub_08070BAC (MPlayStart) reads it `ldrb`
+                                    * as the first term of its three-way entry
+                                    * guard -- zero means "always accept the new
+                                    * song". */
+    /* 0x0c */ u32 clock;          /* zeroed by MPlayStart */
+    /* 0x10 */ u8 filler_10[0x08]; /* gap[8] */
+    /* 0x18 */ u8 *memAccArea;     /* wave 47 (W47-B): sub_080703F4 points every
+                                    * player at gUnknown_03005BE0. */
     /* 0x1c */ u16 tempoD;
     /* 0x1e */ u16 tempoU;
     /* 0x20 */ u16 tempoI;
-    /* 0x22 */ u8 filler_22[0x02]; /* tempoC */
+    /* 0x22 */ u16 tempoC;         /* wave 47 (W47-B): MPlayStart zeroes it
+                                    * `strh` in the same run as tempoD/tempoU/
+                                    * tempoI. */
     /* 0x24 */ u16 fadeOI;
     /* 0x26 */ u16 fadeOC;
     /* 0x28 */ u16 fadeOV;
@@ -4094,7 +4353,14 @@ struct MusicPlayerInfo /* 0x40 */
     /* 0x2c */ struct MusicPlayerTrack *tracks;
     /* 0x30 */ struct ToneData *tone;
     /* 0x34 */ u32 ident;
-    /* 0x38 */ u8 filler_38[0x08];
+    /* 0x38 */ void (*func)(struct MusicPlayerInfo *);
+                                   /* wave 47 (W47-B): the receiving half of
+                                    * SoundInfo's func/intp pair -- sub_08070B34
+                                    * copies SoundInfo+0x20/+0x24 straight into
+                                    * these two when it displaces them. Same
+                                    * types as there, and the assignment is what
+                                    * requires them to agree. */
+    /* 0x3c */ struct MusicPlayerInfo *intp;
 };
 
 /* -------------------------------------------------------------- EWRAM -- */
@@ -5956,7 +6222,33 @@ extern u32 gUnknown_030059C0[];
  * at +0x34, trackCount at +0x08 and tracks at +0x2c through this pointer, so
  * the condition that note was waiting on is now met. Retyped with the other
  * seven of its group. */
+/* Wave 47 (W47-B), the four objects sub_080703F4 (m4aSoundInit) wires up.
+ *   gUnknown_03000FB0 -- the IWRAM landing zone for the copy of sub_0806F7C8's
+ *     code: CpuSet's destination, with a mode word of 0x04000100, i.e. 0x100
+ *     words == 0x400 bytes. Declared as an array so the bare name produces the
+ *     `ldr r1, =sym` the ROM has; the element type is not pinned by anything.
+ *   gUnknown_03004790 -- the one struct SoundInfo. Its address is handed to
+ *     sub_080707F4 (SoundInit), which is already promoted taking a
+ *     `struct SoundInfo *`, and that call is what fixes the type.
+ *   gUnknown_030057D0 -- gCgbChans. Handed to sub_080706B0 (MPlayExtender) and
+ *     thence parked in SoundInfo::cgbChans, which sub_08070A28 walks as four
+ *     0x40-byte records. Four elements is the canonical count and is NOT proved
+ *     here; only the element type is.
+ *   gUnknown_03005BE0 -- gMPlayMemAccArea, pointed at by every player's
+ *     memAccArea. Declared as a SCALAR and taken by address, not as an array,
+ *     and that is forced rather than stylistic: sub_080703F4 stores the address
+ *     inside a loop with a plain in-function `ldr rN, =sym` re-loaded every
+ *     iteration. Spelled as an array, `-fforce-addr` builds a `.rodata`
+ *     address-constant word instead, LICM hoists it out of the loop, and the
+ *     store becomes a double indirection -- measured, 2 extra instructions.
+ *     `&scalar` is an ADDR_EXPR and skips that path; c_080707F4.c already
+ *     relies on the same thing for gUnknown_03005740. Nothing reads an element
+ *     anywhere, so no size or element type is claimed. */
+extern u32 gUnknown_03000FB0[];
+extern struct SoundInfo gUnknown_03004790;
+extern struct CgbChannel gUnknown_030057D0[];
 extern struct MusicPlayerInfo gUnknown_03005AE0[];
+extern u8 gUnknown_03005BE0;
 /* SOUND_INFO_PTR. The AGB BIOS/driver convention puts it at exactly 0x03007FF0
  * and this ROM follows it: sub_0806F744 (SoundMain) loads it and compares
  * `[r0]` against 0x68736D53. NOT const -- sub_08070AF8 re-`ldr`s nothing, but
@@ -11516,6 +11808,40 @@ extern volatile int gUnknown_030046D4;
  * divisor of `gUnknown_030046D4 * 100` in sub_08060894 -- `__divsi3`, so
  * signed. Nothing writes it in the matched tree yet. */
 extern int gUnknown_03004674;
+/* Wave 47, W47-E. The AI's per-unit-type score array, written by sub_08060F00
+ * (a scaled ratio, or 0xFF when the type's weight is zero) and by sub_08060F74
+ * (0xFF to veto a type), and read back by sub_08060FFC. Index 1..24 in both
+ * writers -- `ldr rN,=gUnknown_03004640; adds rM,rN,#2` seeds the giv -- so
+ * element 0 is never touched and 25 is the extent the writers prove.
+ *
+ * VOLATILE, and this one is measured rather than inferred. All four `strh`s
+ * across the two functions are preceded by an `ldrh` of the SAME address whose
+ * result is immediately dead (it lands in a register the next instruction
+ * overwrites, or in a scratch nothing reads). A plain `u16` array emits the
+ * bare `strh`; `volatile u16` emits `ldrh` then `strh` for a simple assignment,
+ * with no source-level read anywhere. Probed in isolation -- see the
+ * "Volatile narrow stores" chapter in docs/agbcc-codegen.md. Note the contrast
+ * with the volatile SImode gUnknown_030046D4 above, whose store in sub_08060718
+ * is a bare `str`: the dead load is specific to the narrow store. */
+extern volatile u16 gUnknown_03004640[];
+/* Wave 47, W47-E. A whole-word counter incremented in sub_08060718's 64-cell
+ * sweep once per cell whose gUnknown_08499594 record has a unit type that
+ * gUnknown_08576877 classes non-zero -- the "units that matter" tally beside
+ * gUnknown_03004674's "occupied cells" tally, which the same loop keeps. Both
+ * are cleared together by one chained `a = b = 0`. `ldr`/`adds #1`/`str`, so
+ * word-wide; nothing compares it in matched code, so the signedness is unproved
+ * and `int` is the weakest fit (gUnknown_03004674 beside it is already `int`). */
+extern int gUnknown_030045D0;
+/* Wave 47, W47-E. A 25-byte ROM classification table indexed by a unit type
+ * byte out of gUnknown_08499594[i].unk00, read by sub_08060718 as
+ * `add r0, r8; ldrb r0, [r0]` with the symbol's address LICM-hoisted into r8 --
+ * i.e. a bare `ldr rN, =sym`, which is what fixes the symbol as the array
+ * itself rather than a pointer to one. The bytes at 0x08576877 are
+ * 00 00 00 01 01 01 01 00 00 01 01 01 00 01 01 01 01 01 01 01 00 01 01 00 01,
+ * i.e. a 0/1 flag over exactly the 1..24 type range the two AI scoring loops
+ * walk, and 0x0857689C onwards is unrelated pointer data. Only tested against
+ * zero, so nothing narrows it past `u8`. */
+extern const u8 gUnknown_08576877[];
 /* A ROM word holding a pointer to 12-byte records -- the stride is
  * `((n*2)+n)*4` in sub_0805D438, i.e. exactly 12. Only the +4 member has a
  * user: the step parks `&g[gUnknown_030040D8->unk00].unk04` in
@@ -12680,9 +13006,21 @@ extern u32 gUnknown_0200CC88[];
  * is independently the id sub_0808AB8C matches ReadFlashId's result against.
  * A producer and a consumer of one field agreeing without being derived from
  * each other. */
+/* Wave 47 (W47-D): unk04 added -- an EXTENSION inside the old filler_00, no
+ * existing member moved or rewidened. sub_0808B2E0 reads `ldr r1, [r0, #4]`
+ * and counts DOWN from it while walking a byte pointer, and sub_0808B31C reads
+ * the same word and stores it to gUnknown_03005C7C with a truncating `strh`
+ * before using it as that same walk's counter. A WORD at both sites, used only
+ * as an unsigned count (`cmp #0` / `subs #1`), hence u32: it is the sector's
+ * SIZE IN BYTES.
+ *
+ * It is the same halfword-pair as gUnknown_084856A4 +0x18, and that
+ * correspondence is what makes the whole record legible -- see the
+ * gUnknown_084856A4 note below. */
 struct Unk03005C78
 {
-    /* 0x00 */ u8 filler_00[0x08];
+    /* 0x00 */ u8 filler_00[0x04];
+    /* 0x04 */ u32 unk04;
     /* 0x08 */ u8 unk08;
     /* 0x09 */ u8 filler_09[0x07];
     /* 0x10 */ u16 unk10;
@@ -12694,8 +13032,48 @@ extern struct Unk03005C78 *gUnknown_03005C78;
 /* Wave 32 (W32-B): sub_0808B3C0 reads the halfword at +0x24 and uses it exactly
  * the way its twin sub_0808B074 uses gUnknown_03005C78->unk10 -- as the WAITCNT
  * low two bits. Spelled as a u16 subscript because a subscript is all the ROM
- * shows; whether +0x24 is one member of a larger flash record is not settled. */
+ * shows; whether +0x24 is one member of a larger flash record is not settled.
+ *
+ * Wave 47 (W47-D) SETTLES IT, and the declaration is deliberately left alone
+ * anyway. 0x084856A4 is one `struct Unk0848548C` -- a flash chip descriptor of
+ * the same shape as the entries of the gUnknown_0848548C table -- and the three
+ * offsets the erase path reads off it are exactly the three members
+ * `struct Unk03005C78` already names, shifted by the +0x14 that sub_0808AB8C
+ * adds when it installs gUnknown_03005C78:
+ *
+ *     gUnknown_084856A4 +0x18  ldr   ==  Unk03005C78 +0x04  unk04  sector bytes
+ *     gUnknown_084856A4 +0x1c  ldrb  ==  Unk03005C78 +0x08  unk08  sector shift
+ *     gUnknown_084856A4 +0x24  ldrh  ==  Unk03005C78 +0x10  unk10  WAITCNT bits
+ *     gUnknown_084856A4 +0x28  ldrh  ==  Unk03005C78 +0x14  unk14  chip id
+ *
+ * Four independent offsets agreeing in width AND in use across two symbols
+ * nobody derived from the other. It is NOT respelled as a struct here because
+ * `struct Unk03005C78` is declared 0x16 bytes wide against a 0x14-byte
+ * reservation (see gUnknown_0848548C's note), so embedding it would move +0x28;
+ * the subscript and the two casts in c_0808B430.c / c_0808B4B4.c are the honest
+ * statement of what the ROM shows. Retyping this is a separate job that has to
+ * bound Unk03005C78 first. */
 extern const u16 gUnknown_084856A4[];
+/* Wave 47 (W47-H). 0x08485678 -- read at ONE site only, sub_0808B5B8, which
+ * does `ldr r0,=gUnknown_08485678; ldr r0,[r0,#0x18]` and stores the word
+ * truncated into gUnknown_03005C7C as the byte count of a whole save slot,
+ * then walks it down by gUnknown_084856A4 +0x18 (one sector) per iteration.
+ * So +0x18 is a 32-bit member and it is NOT the same member gUnknown_084856A4
+ * +0x18 is, despite the identical offset -- one is the slot size, the other
+ * the sector size, and the loop would run exactly once if they agreed.
+ * 0x084856A4 - 0x08485678 = 0x2C, so this is a DIFFERENT record, not the same
+ * one at another offset; nothing else in the tree reads it and no other
+ * member is observed, so the width is spelled the way the one access reads it
+ * and the shape is left open. */
+extern const u16 gUnknown_08485678[];
+/* Wave 47 (W47-D). 0x03005C7C -- the flash sector-program loop's REMAINING
+ * BYTE COUNT, and a genuine global rather than a local: sub_0808B31C seeds it
+ * from gUnknown_03005C78->unk04 with a truncating `strh`, then re-loads it
+ * (`ldrh [r6]`) at the top of every iteration and stores it back after every
+ * `subs #1`. It needs no `volatile` for that -- the reload is forced by the
+ * sub_0808B184 call in the loop body, which agbcc must assume can touch it.
+ * u16 by every access, and unsigned by the `cmp #0` exit test. */
+extern u16 gUnknown_03005C7C;
 extern u16 (*gUnknown_03005C74)(u16, int);
 extern u16 (*gUnknown_03005C80)(void);
 extern u16 (*gUnknown_03005C84)(u16);
@@ -15256,5 +15634,16 @@ extern const struct Unk08614024 gUnknown_08614024[];
  * HBlank scanline table that DMA0 then feeds to REG_BLDY. Halfword stride is
  * from the `ldrh`; the count is the `cmp #0x1b; ble` bound. */
 extern const u16 gUnknown_08614154[];
+
+/* Wave 47 (W47-G). 0x085768B8, 0x28 bytes = TEN function pointers.
+ * sub_0805BF3C selects an entry with `lsls #2` off a u8 index and calls it
+ * through `_call_via_r3` with three arguments (its own x, y and out-pointer),
+ * so the element type is a pointer to a three-argument function. Both call
+ * sites in that function pass the same triple, and the second one indexes with
+ * a byte taken out of a 25-byte stack table, which is what fixes the extent at
+ * ten rather than at whatever the largest constant index happens to be.
+ * Not const-qualified: the ROM section it lives in is shared with the
+ * gUnknown_085768E0 / gUnknown_08576900 tables and nothing has proved it. */
+extern void (*gUnknown_085768B8[])(int, int, u16 *);
 
 #endif // UNKNOWN_GLOBALS_H
