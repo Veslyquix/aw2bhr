@@ -1,0 +1,107 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08088CDC.
+ * sub_08088CDC @ 0x08088CDC, sub_08088DA4 @ 0x08088DA4
+ */
+
+struct Unk08088CDC
+{
+    /* 0x00 */ u8 filler_00[0x4c];
+    /* 0x4c */ s16 unk4c;
+    /* 0x4e */ u8 filler_4e[4];
+    /* 0x52 */ u16 unk52;
+    /* 0x54 */ u8 filler_54[4];
+    /* 0x58 */ int unk58;
+    /* 0x5c */ int unk5c;
+    /* 0x60 */ int unk60;
+};
+struct Unk08088DA4
+{
+    /* 0x00 */ u8 filler_00[0x4c];
+    /* 0x4c */ s16 unk4c;
+    /* 0x4e */ u8 filler_4e[4];
+    /* 0x52 */ u16 unk52;
+    /* 0x54 */ u8 filler_54[4];
+    /* 0x58 */ int unk58;
+    /* 0x5c */ int unk5c;
+    /* 0x60 */ int unk60;
+};
+
+void sub_08088CDC(struct Unk08088CDC *p)
+{
+    int v0;
+    int v1;
+    int v2;
+    s16 *m;
+
+    v0 = gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c];
+    v1 = gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c];
+    v2 = gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c];
+
+    m = &p->unk4c;
+
+    if (*m == 9)
+        sub_08043BC8(v0, 0x40);
+
+    if (*m == 0xa)
+    {
+        sub_08043BF8(v0, 0x40);
+        sub_08043AA0(v0, 0x11);
+    }
+
+    if (*m == 0x10)
+    {
+        sub_08043E3C(v0, (void *)0x06013000, 0x12);
+        sub_08043E3C(v1, (void *)0x06013480, 0x13);
+        sub_08043E3C(v2, (void *)0x06013900, 0x14);
+    }
+}
+
+void sub_08088DA4(struct Unk08088DA4 *p)
+{
+    int v0;
+    int v1;
+    int v2;
+    s16 *m;
+
+    v0 = gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c];
+    v1 = gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c];
+    v2 = gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c];
+
+    m = &p->unk4c;
+
+    if (*m == 0xd)
+        sub_08043BC8(v0, 0x40);
+
+    if (*m == 0xe)
+    {
+        sub_08043BF8(v0, 0x40);
+        sub_08043AA0(v0, 0x11);
+    }
+
+    if (p->unk60 < 0)
+    {
+        if (*m == 0xd)
+            sub_08043E3C(v0, (void *)0x06013000, 0x12);
+
+        if (*m == 0xe)
+            sub_08043E3C(v1, (void *)0x06013480, 0x13);
+
+        if (*m == 0xf)
+            sub_08043E3C(v2, (void *)0x06013900, 0x14);
+    }
+    else if (p->unk60 > 0)
+    {
+        if (*m == 0xd)
+            sub_08043E3C(v0, (void *)0x06013000, 0x12);
+
+        if (*m == 9)
+            sub_08043E3C(v1, (void *)0x06013480, 0x13);
+
+        if (*m == 6)
+            sub_08043E3C(v2, (void *)0x06013900, 0x14);
+    }
+}

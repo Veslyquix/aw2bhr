@@ -1,0 +1,49 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0805FB70.
+ * sub_0805FB70 @ 0x0805FB70
+ */
+
+struct Unk5FB70Map
+{
+    /* 0x0000 */ u8 filler_00[0x12];
+    /* 0x0012 */ u8 plane[0x4168];
+    /* 0x417a */ u16 rows[1];
+};
+struct Unk5FB70Rec
+{
+    /* 0x00 */ u8 filler_00[9];
+    /* 0x09 */ u8 unk09_0 : 3;
+               u8 unk09_3 : 3;
+               u8 unk09_6 : 2;
+};
+struct Unk5FB70Unit
+{
+    /* 0x00 */ u8 filler_00[9];
+    /* 0x09 */ u8 unk09_0 : 6;
+               u8 unk09_6 : 2;
+    /* 0x0a */ u8 filler_0a[2];
+};
+
+void sub_0805FB70(void)
+{
+    union Unk802C57CBuf v;
+    struct Unk08499594 *u;
+
+    v.pos.unk00 = 0x270F;
+    sub_080202A4(gUnknown_030040D8);
+    sub_0805FC1C(((struct Unk5FB70Rec *)gUnknown_030040D8)->unk09_3, &v);
+    if (v.pos.unk00 != 0x270F)
+    {
+        ((struct Unk5FB70Rec *)gUnknown_030040D8)->unk09_3 = 0;
+        u = &gUnknown_08499594[
+            ((struct Unk5FB70Map *)gUnknown_08499590)->plane[
+                ((struct Unk5FB70Map *)gUnknown_08499590)->rows[v.pos.unk02]
+                + v.pos.unk00]];
+        ((struct Unk5FB70Unit *)u)->unk09_6++;
+        sub_0805D648(v.spos.unk00, v.spos.unk02, 7, 0, 0);
+    }
+}

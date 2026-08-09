@@ -9,9 +9,15 @@
 
 /* The army loop clears gUnknown_0849B018->unk0a[i] only for armies
  * sub_0802F460 reports as gone, but clears gUnknown_0300449C[i] for all four.
- * Both stores carry the dead-`ldrb`-before-`strb` volatile tell; the store to
- * the non-volatile gUnknown_03003F1C two lines above does not, which is what
- * fixes that global as NOT volatile (see the park note on sub_080319AC).
+ * Both stores carry the dead-`ldrb`-before-`strb` volatile tell.
+ *
+ * Wave 51, W51-B -- CORRECTION. This comment used to read the ABSENCE of that
+ * tell on the gUnknown_03003F1C store two lines above as fixing that global as
+ * NOT volatile. It does not: the dead load appears only where the assignment's
+ * VALUE is consumed (a chained assignment), and this store is in statement
+ * position. gUnknown_03003F1C IS volatile, decided by its only reader,
+ * sub_080319AC, where the qualifier is worth 3 bytes. This function is
+ * unchanged by it and still matches.
  *
  * The `strb r2` reusing sub_0802F460's returned zero rather than a fresh
  * `movs` is cse propagating the known value inside the `== 0` arm; the

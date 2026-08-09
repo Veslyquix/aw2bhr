@@ -32,7 +32,7 @@ MAKEFILE = os.path.join(awlib.REPO, "Makefile")
 
 
 def wsl_path(win_path):
-    r"""D:\Codes and Projects\x -> /mnt/d/Codes and Projects/x"""
+    r"""Windows path to its WSL mount point: C:\foo\bar -> /mnt/c/foo/bar"""
     p = os.path.abspath(win_path)
     drive, rest = os.path.splitdrive(p)
     if not drive:

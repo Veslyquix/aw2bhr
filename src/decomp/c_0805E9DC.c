@@ -1,0 +1,91 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0805E9DC.
+ * sub_0805E9DC @ 0x0805E9DC, sub_0805EA54 @ 0x0805EA54
+ */
+
+/* A file-local bitfield view of gUnknown_030040D8's offset 0x09, which is
+ * struct Unk030040D8's unk07[2]. The header records that the byte really is a
+ * bitfield container and that it is DELIBERATELY not reshaped, because promoted
+ * code reads unk07[0], unk07[1] and unk07[4] as an array -- sub_0805BFDC uses
+ * the same file-local view. */
+struct Unk5E9DCFlags
+{
+    /* 0x00 */ u8 filler_00[0x09];
+    /* 0x09 */ u8 unk09_0 : 3;
+               u8 unk09_3 : 5;
+};
+struct Unk5EA54Flags
+{
+    /* 0x00 */ u8 filler_00[0x09];
+    /* 0x09 */ u8 unk09_0 : 3;
+               u8 unk09_3 : 5;
+};
+
+void sub_0805E9DC(void)
+{
+    void (*fns[2])(void) = { sub_0805E87C, sub_0805E778 };
+
+    sub_0801F92C(gUnknown_08499590 + 0x2852);
+
+    if ((gUnknown_030040D8->unk05 & 0xf8) == 0
+        && ((struct Unk5E9DCFlags *)gUnknown_030040D8)->unk09_0 != 0
+        && ((struct Unk5E9DCFlags *)gUnknown_030040D8)->unk09_0 <= 2)
+    {
+        gUnknown_030045CC.unk00_1 = 1;
+        sub_0805EA54();
+        fns[((struct Unk5E9DCFlags *)gUnknown_030040D8)->unk09_0 - 1]();
+    }
+}
+
+void sub_0805EA54(void)
+{
+    int best;
+    int bestX;
+    int bestY;
+    int i;
+
+    best = 0;
+    bestX = -1;
+    bestY = 0;
+
+    if (gUnknown_030040D8->unk04 > 0x32)
+        return;
+
+    sub_080202A4(gUnknown_030040D8);
+
+    for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
+    {
+        struct Unk08499594 *p;
+
+        p = &gUnknown_08499594[i];
+
+        if (gUnknown_030040D8->unk00 != p->unk00)
+            continue;
+        if (gUnknown_030040D8->unk04 + p->unk04_0 > 0x64)
+            continue;
+        if (gUnknown_030040D8->unk07[0] != -p->unk07)
+            continue;
+        if ((struct Unk08499594 *)gUnknown_030040D8 == p)
+            continue;
+        if (p->unk01 & 8)
+            continue;
+        if (p->unk04_0 <= best)
+            continue;
+        if ((s8)gUnknown_03003340[p->unk03][p->unk02] <= 0)
+            continue;
+
+        bestX = p->unk02;
+        bestY = p->unk03;
+        best = p->unk04_0;
+    }
+
+    if (bestX == -1)
+        return;
+
+    ((struct Unk5EA54Flags *)gUnknown_030040D8)->unk09_0 = 0;
+    sub_0805D648(bestX, bestY, 0xa, 0, 0);
+}

@@ -1,0 +1,87 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080691BC.
+ * sub_080691BC @ 0x080691BC
+ */
+
+#include "proc.h"
+#include "hardware.h"
+struct Unk691BCProc
+{
+    /* 0x00 */ u8 filler_00[0x2c];
+    /* 0x2c */ int unk2c;
+};
+
+void sub_080691BC(struct Unk691BCProc *proc)
+{
+    int i;
+
+    switch (0xc6 - proc->unk2c)
+    {
+    case 5:
+        sub_08067BD0(1, -1, 0x20, proc);
+        break;
+
+    case 0x1a:
+        sub_08067A24();
+        break;
+
+    case 0x26:
+        for (i = 1; i < 16; i++)
+            gPal[i] = 0x7fff;
+        sub_080135A4();
+        sub_080677E8();
+        break;
+
+    case 0x2a:
+        ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
+        sub_08067D04(1, 1, 0xc, proc);
+        sub_080679D8(0, -1, 0, 0x88, 0, 0x4000, 0x100, 0xc0, 0xc, proc);
+        break;
+
+    case 0x5c:
+        for (i = 1; i < 16; i++)
+            gPal[i] = 0x7fff;
+        sub_080135A4();
+        break;
+
+    case 0x60:
+        ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
+        sub_08067C7C(0x28);
+        sub_0806780C();
+        sub_08067A24();
+        sub_08067D4C();
+        break;
+
+    case 0x8c:
+        SetDispEnable(1, 1, 0, 0, 1);
+        sub_08063994();
+        sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 1);
+        sub_080673D0(0x30, 1, proc);
+        break;
+
+    case 0xb9:
+        Decompress(gUnknown_0817DA38, (void *)0x06008000);
+        break;
+
+    case 0xba:
+        Decompress(gUnknown_0817E208, gUnknown_08499580);
+        ApplyPaletteExt(gUnknown_0817DA18, 0x20, 0x20);
+        sub_08013B0C();
+        break;
+
+    case 0xbe:
+        sub_08012358();
+        SetDispEnable(0, 0, 1, 0, 1);
+        sub_08067820();
+        break;
+    }
+
+    if (proc->unk2c != 0)
+        proc->unk2c--;
+    else
+        Proc_Break(proc);
+}
