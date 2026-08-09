@@ -130,11 +130,27 @@ void sub_08010D28(int x, int y)
  * low or sub_0800C840 accepting the cell. sub_08010604 supplies the tile id
  * that both sub_08001158 and sub_0800C574 are handed.
  *
- * `(s8)gUnknown_0200B0B0->unk12` is a CAST on a u8 member, not an s8 member:
- * the read is `ldrb; lsl #24; asr #24`, where an s8 member would have needed
- * `movs rN,#0x12; ldrsb r0,[r1,rN]` (ldrsb has no immediate form) -- which is
- * exactly what sub_0800C574 does with the same member two functions later.
- * The two readers disagree, and this one is the matched evidence. */
+ * `(s8)gUnknown_0200B0B0->unk12` is a CAST on a u8 member, not an s8 member.
+ *
+ * Wave 48 (W48-A) corrects the REASON this comment used to give.  It read the
+ * `ldrb; lsl #24; asr #24` here as proof of the u8 declaration, on the grounds
+ * that an s8 member would have needed `movs rN,#0x12; ldrsb r0,[r1,rN]`
+ * (ldrsb has no immediate form) -- and noted that sub_0800C574 does exactly
+ * that with the same member, concluding "the two readers disagree, and this one
+ * is the matched evidence".  They do not disagree: sub_0800C574 and
+ * sub_0800C608 are both matched now, both read this same u8 member with the
+ * same `(s8)` cast, and both get `ldrsb`.  One member, one spelling, two
+ * outputs, three matches.
+ *
+ * So the choice between `ldrsb` and the shift pair is context, not signedness,
+ * and neither form is evidence about the type.  That holds at a REGISTER offset
+ * too: sub_0800C6E8 reads two u8 members four instructions apart at the same
+ * `base + K + i` addressing under the same test and gets one of each.  What
+ * does settle a byte member is an operation that folds under only one
+ * signedness -- sub_0800C8D8's `|= 0xFF` -- see the
+ * "`ldrsb` vs `ldrb; lsl #24; asr #24`" chapter of docs/agbcc-codegen.md.
+ *
+ * The u8 declaration itself is unaffected -- this file still matches. */
 void sub_08010D80(int x, int y)
 {
     int t;

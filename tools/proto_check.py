@@ -322,7 +322,17 @@ def header_checks():
                     ty += ' ' + re.sub(r'\s+', '', m.group(3))
                 ext.setdefault(m.group(2), set()).add(
                     (ty, '%s:%d' % (hf, n)))
-            m = re.match(r'(?:struct|union)\s+([A-Za-z_]\w*)\s*(\{)?\s*$', s)
+            # The trailing `/* 0xNN */` size comment is this project's OWN
+            # convention for a tag declaration, and the version of this regex
+            # without the comment clause required end-of-line after the tag --
+            # so it saw 65 of 180 tag declarations and was blind to the other
+            # 115. Wave 48: three tags were each given two divergent bodies
+            # (Unk0200C078Rec, Unk0200C420, Unk0200B0B0), every compile in the
+            # repo failed, and THIS CHECK REPORTED CLEAN THROUGHOUT -- all
+            # three carry a size comment. A checker that cannot see two thirds
+            # of its own corpus reads exactly like an all-clear.
+            m = re.match(r'(?:struct|union)\s+([A-Za-z_]\w*)\s*'
+                         r'(?:/\*.*?\*/)?\s*(\{)?\s*$', s)
             if m:
                 body = bool(m.group(2))
                 if not body:

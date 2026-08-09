@@ -59,7 +59,7 @@ struct Map
  *
  * The fourth call's `adds r4,#1` clobbers y because y is dead after it; that
  * falls out of writing `y + 1` last. */
-int sub_0805ACA8(int x, int y, u16 * out)
+u8 sub_0805ACA8(int x, int y, u16 * out)
 {
     int sentinel;
 

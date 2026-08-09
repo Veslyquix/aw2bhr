@@ -1503,7 +1503,11 @@ gUnknown_084C327C:  @ 0x084C327C
 
 	.global gUnknown_084C36E4
 gUnknown_084C36E4:  @ 0x084C36E4
-	.incbin "baserom.gba", 0x4C36E4, 0x11C    @ 0x4C3800 - 0x4C36E4
+	.incbin "baserom.gba", 0x4C36E4, 0x100    @ 0x4C37E4 - 0x4C36E4
+
+	.global gUnknown_084C37E4
+gUnknown_084C37E4:  @ 0x084C37E4
+	.incbin "baserom.gba", 0x4C37E4, 0x1C    @ 0x4C3800 - 0x4C37E4
 
 	.global gUnknown_084C3800
 gUnknown_084C3800:  @ 0x084C3800

@@ -84,7 +84,7 @@ void sub_0805B980(void)
     out->v = 0xFFFF;
 }
 
-int sub_0805BA34(int x, int y, u16 *out)
+u8 sub_0805BA34(int x, int y, u16 *out)
 {
     struct Unk08499594 *unit;
     struct Unk085D5ABCUnk14 *tbl;
@@ -151,7 +151,7 @@ void sub_0805BAFC(int x, int y, int t, u16 *out)
     out[1] = y;
 }
 
-int sub_0805BB8C(int x, int y)
+u8 sub_0805BB8C(int x, int y)
 {
     int n;
 

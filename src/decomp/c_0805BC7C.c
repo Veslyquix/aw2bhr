@@ -37,7 +37,7 @@ struct UnkPos5BC7C
     /* 0x02 */ u16 unk02;
 };
 
-int sub_0805BC7C(int x, int y, u16 *out)
+u8 sub_0805BC7C(int x, int y, u16 *out)
 {
     struct Unk08499594 *e;
     struct UnkPos5BC7C loc;

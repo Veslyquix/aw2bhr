@@ -3666,6 +3666,18 @@ void sub_08073CB8(u8 *, u32 *, int, int);
  * It clears a 20x22 halfword window of *gUnknown_08499578 and flushes. */
 void sub_0806C8A0(void);
 void sub_0806B9CC(int, int, int, int);
+/* Wave 48 (W48-C), matched byte-for-byte, so this is the definition's own
+ * signature rather than a caller-side guess. Renders a NUL-terminated byte
+ * string into two tilemap rows and RETURNS its pixel width (8 per glyph) --
+ * sub_0806BF40, its only caller so far, discards the result, which is why the
+ * return type is not visible there. The first parameter is a `u16 *` tilemap
+ * cursor, not a struct pointer; see src/decomp/c_0806BD6C.c for the
+ * discriminator. */
+int sub_0806BD1C(u16 *, u8 *);
+/* Wave 48 (W48-C), matched byte-for-byte. Starts the gUnknown_08581A34 proc
+ * under `parent` and loads a byte string into its +0x2a halfword table. The
+ * first parameter is a row index, scaled `* 24 + 8` into the proc's +0x58. */
+void sub_0806BED8(int, u8 *, ProcPtr);
 void sub_0806BA6C(int, int, int, int);
 void *sub_0808B6E8(void *, const void *, int);
 /* Wave 32 (W32-B): four arguments, read off its own prologue -- r1, r2 and r3
@@ -8272,6 +8284,28 @@ void sub_080860DC(ProcPtr);       /* sub_0808603C hands it the same proc it
 void sub_08037A20(u16 *, int);
 void sub_080620C0(void);
 void sub_080620FC(int, int);      /* (0,1) (1,6) (2,5) from sub_0806209C */
+/* Matched in src/decomp/c_0806209C.c as `void sub_0806209C(void)`; this
+ * declaration only makes it visible to its one caller, sub_08062038. */
+void sub_0806209C(void);
+/* Wave 48 (W48-D).  `pop {r0}; bx r0` in the epilogue, so void: the return
+ * register is destroyed restoring lr.  Rebuilds the gUnknown_03003F20 cell
+ * list from gUnknown_084995A0 and takes nothing. */
+void sub_08062330(void);
+/* Wave 48 (W48-D), MATCHED.  Two OUT-parameters, both `int *` from the `str`
+ * at each -- not u8 *, though the values stored are u8 map coordinates.
+ * Returns 1 when it found a cell and 0 when it did not (`movs r0,#1` / `movs
+ * r0,#0` across a `b`, the two-arm form). */
+int sub_080623C4(int *, int *);
+/* Wave 48 (W48-D).  void: `pop {r0}; bx r0`, and it reads no argument
+ * register before writing it. */
+void sub_08062474(void);
+/* Wave 48 (W48-D), from the CALL SITE in sub_08062474 only -- not matched, so
+ * this is the weakest contract that fits, NOT ground truth.  Two arguments:
+ * r0 is a small literal 1..4 (`movs r0,#N`) and r1 is the u8
+ * gUnknown_085D5ABC[..].unk1d passed with no narrowing in front of it, which
+ * an int parameter and a u8 parameter both explain.  Result unused at the
+ * only call site, and there are four of them. */
+void sub_08062560(int, int);
 void sub_080627F4(int);
 void sub_08062AE4(void);
 void sub_08077620(int, int);      /* (0, 0xA8 - gUnknown_0300064C), twice */
@@ -8474,6 +8508,31 @@ const u8 *sub_0802A8AC(int, int);
 /* sub_08057048 fills a six-halfword stack record and passes its address; the
  * record's layout is described in that function's own file. */
 void sub_080570C4(void *);
+/* Wave 48, W48-G. PROMOTED in src/decomp/c_08057110.c with exactly this
+ * signature: (chr, offset, pal, flip) -> gUnknown_08551A00[offset]. */
+void sub_08057110(u16, u16, u16, u16);
+/* Wave 48, W48-G. The gUnknown_08551A04 twin of sub_08057110, PROMOTED in
+ * src/decomp/c_0805701C.c with exactly this signature. */
+void sub_0805701C(u16, u16, u16, u16);
+/* Wave 48, W48-G. The four sprite-row painters sub_080579B8 fans out to, all
+ * called with the identical (u16 *dst, int idx, &pos) triple. sub_080576D4 and
+ * sub_08057A24 are PROMOTED with exactly this signature; the third argument's
+ * pointee is the two-halfword {u16 x; u16 y;} record those files spell locally,
+ * so the tag is only forward-declared here and each .c completes it.
+ * sub_080577E4/sub_08057860 are not matched yet -- their third argument is
+ * assumed the same record because sub_080579B8 hands all four the same stack
+ * slot, which is evidence about the CALL, not about their bodies. */
+struct Unk8057Pos;
+void sub_080576D4(u16 *, int, struct Unk8057Pos *);
+void sub_0805772C(u16 *, int, struct Unk8057Pos *);
+void sub_080577E4(u16 *, int, struct Unk8057Pos *);
+void sub_08057860(u16 *, int, struct Unk8057Pos *);
+void sub_08057A24(u16 *, int, struct Unk8057Pos *);
+/* Wave 48, W48-G. The two per-side fan-outs over the four painters above, both
+ * MATCHED with this signature. sub_08057AE8 hands each `gUnknown_08499578`,
+ * which is already a `u16 *`. */
+void sub_080579B8(u16 *);
+void sub_08057A80(u16 *);
 /* Allocates a slot or fails: sub_0801D6E8 calls it when its own fifth argument
  * is above 0x1f, compares the result against -1 and RETURNS IT UNCHANGED on
  * that path (`adds r0,r3,#0`, not a rematerialised -1), which is what makes the
@@ -8963,6 +9022,17 @@ void sub_08014B60(int, int, u16 *, int, u16);
 void sub_080199D0(u8);
 void sub_08047190(void *, u8);
 void sub_08047920(void *);
+/* Wave 48, W48-I: both MATCHED this wave, so these two are the definitions'
+ * own types rather than call-site guesses. sub_0804769C returns a u16 counter
+ * and its sole caller sub_080484CC truth-tests the result with a bare
+ * `lsls #0x10`, which agrees. `struct Unk0804769C` is in unknown-globals.h
+ * because caller and callee land in different translation units. */
+u16 sub_0804769C(struct Unk0804769C *, u16);
+void sub_080484CC(struct Unk0804769C *);
+/* Declared from sub_080484CC's call site only: one argument, the same record
+ * pointer forwarded unchanged, result discarded. `void *` is the weakest type
+ * that fits; widen it when the definition is matched. */
+void sub_080482D8(void *);
 void sub_080488E0(void);
 /* Wave 43, W43-L. Already DEFINED in src/decomp/c_08048F10.c; it had no
  * declaration here because nothing outside its own unit called it until
@@ -9007,6 +9077,24 @@ void sub_08076298(ProcPtr);
 void sub_0807B2F8(ProcPtr);
 void sub_0807BCF0(ProcPtr);
 void sub_0807BED8(ProcPtr);
+/* Wave 48 (W48-C), read entirely off its ONE call site, sub_0806AB24 -- the
+ * body is still assembly, so every field below is a caller-side reading and
+ * none of it is confirmed at the callee.
+ *   FIVE parameters, the fifth on the stack (`str r4, [sp]` with sp lowered by
+ * 8). A text layout/wrap routine: arg1 is whatever `u8 *sub_08024944(u16)`
+ * returned, arg2 is `&<u16 local>` -- an OUT-parameter, read back with `ldrh`
+ * straight after the call -- arg3 is a `u8 *` into the caller's own proc at
+ * +0x2f which the caller then fills as a per-line width array, arg4 is a u16
+ * proc field (a wrap width), arg5 is the caller's proc.
+ *   The result is a LINE COUNT: the caller stores it into an `int` field and
+ * uses it as a `< n` loop bound over arg3's array. Declared `u16` because the
+ * call site narrows with `lsls #0x10; lsrs #0x10` -- but that is byte-neutral
+ * against `int` plus an explicit `(u16)` cast at the one use (agbcc re-narrows
+ * a narrow-returning callee at every call site), so the width is NOT proved.
+ * Likewise arg4: a narrow and a wide parameter are identical at this call. */
+void sub_0807B51C(int, int, int, int);
+void sub_0807B738(ProcPtr);
+u16 sub_0807B7BC(u8 *, u16 *, u8 *, int, void *);
 /* Nullary: sub_0807A0C4 calls it with `bl` and no argument register set up,
  * and its own prologue reads none. It ends by writing 2 into +0x3a of the
  * struct Unk03001470 sub_08014740 returns, so the result is discarded too. */
@@ -9097,7 +9185,7 @@ void sub_080369BC(void);
  * which are the only call sites in the tree that constrain them:
  *   sub_08002F1C  no argument register written before the `bl`, result
  *                 discarded -- nullary void.
- *   sub_0800C8D8  likewise.
+ *   sub_0800C8D8  likewise -- but see below, this one was WRONG.
  *   sub_0800C874  nullary; its r0 is `strb`d straight into
  *                 gUnknown_0200B0B0->unk12, so the return is at least a byte
  *                 and `int` is the weakest fit (no re-narrowing appears).
@@ -9108,7 +9196,21 @@ void sub_080369BC(void);
  *                 &gUnknown_0200B0B0->unk9c -- and the result is a bare
  *                 `cmp r0,#0`, so a comparison predicate. */
 void sub_08002F1C(void);
-void sub_0800C8D8(void);
+/* Wave 48 (W48-A) retypes sub_0800C8D8 from `void` to `int`.  W36-I inferred
+ * void from its two call sites (sub_08003B8C and sub_08004E88) discarding the
+ * result, which is exactly the blind spot the brief warns about: a discarded
+ * result constrains nothing.  The body ends `adds r0, r5, #0` before the pop,
+ * where r5 is a counter the second loop increments, so it returns that count --
+ * the same "how many entries did I touch" value its neighbours sub_0800C874,
+ * sub_0800C8A0 and sub_0800C6A8 all return.  Both callers still discard it and
+ * both were re-verified byte-identical under the new type.
+ *
+ * sub_0800C958 had no declaration anywhere in the tree.  It is `int (int)`:
+ * the argument reaches sub_0800C6E8's first parameter unchanged and is then
+ * switched over the same 0x28/0x48/0x68/0x88 ids, and the result is summed
+ * into sub_0800C9E8's counters with no narrowing at either of its uses. */
+int sub_0800C8D8(void);
+int sub_0800C958(int);
 /* sub_08004E38's signature is copied verbatim from the byte-verified
  * definition in src/decomp/c_08004E38.c, which had no declaration anywhere.
  * sub_0800376C likewise (src/decomp/c_0800376C.c). sub_080036A4 and
@@ -9617,7 +9719,12 @@ bool8 sub_0801906C(s16);
  * with try_match after the edit). Its `u16` first parameter is what makes
  * sub_0805DA84's `lsls #0x10; lsrs #0x10` appear in front of the `bl`. */
 void sub_0805ACFC(int, int, u16 *);
-int sub_0805ACA8(int, int, u16 *);
+/* Wave 48, W48-F: u8, not int -- same correction as sub_0805BA34/sub_0805BB8C/
+ * sub_0805BC7C in this block. sub_0805A514 re-narrows the result with
+ * `lsls #0x18; lsrs #0x18` before `cmp r0,#1`, which agbcc does not emit for an
+ * int return. Byte-neutral in src/decomp/c_0805ACA8.c (only 0 and 1 are
+ * produced) and re-verified there after the change. */
+u8 sub_0805ACA8(int, int, u16 *);
 void sub_0805C128(int, int, u16 *);
 int sub_0805A854(u16 *);
 void sub_0805A5E0(int *);
@@ -9954,9 +10061,75 @@ void *sub_0808B6C4(void *, int, int);            /* c_0808B6C4.c */
 int sub_0805B4A8(void);                          /* c_0805B4A8.c */
 u8 sub_0805B4D8(int, int *, int *);
 int sub_0805BD40(int, int, int, int, s16 *);     /* c_0805BD40.c */
-int sub_0805BC7C(int, int, u16 *);
+/* Wave 48, W48-F: u8, not int. Its one caller sub_0805B814 re-narrows the result
+ * with `lsls #0x18; lsrs #0x18` before `cmp r0,#1`, which agbcc does not emit for
+ * an int return. Byte-neutral in the body (only 0 and 1 are produced), verified
+ * against src/decomp/c_0805BC7C.c after the change. */
+u8 sub_0805BC7C(int, int, u16 *);
 void sub_0805BDE4(int, int, u16 *);
 void sub_0805BEA0(int, int, u16 *);
 void sub_0805BF3C(int, int, u16 *);
+
+/* ---- wave 48 (W48-B) ---- the 0x0805B744 AI-turn driver block.
+ *
+ * sub_0805B980 is already DEFINED in src/decomp/c_0805B980.c and was never
+ * declared; this publishes that definition unchanged (it takes nothing and
+ * computes no value after its final store).
+ *
+ * sub_0805B744 sets up ONE 4-byte stack slot, passes its address to
+ * sub_0805B8F4 and then to sub_0805B814, and nothing else in the frame is
+ * addressed -- so both take a single pointer to that slot.  Its neighbours
+ * sub_0805BC7C / sub_0805BDE4 write the same-sized slot as an x/y pair of
+ * `strh`, hence `u16 *`.  sub_0805B8F4's result is re-narrowed at the call
+ * site with `lsls #0x18; lsrs #0x18` before `cmp #1`, the narrowing agbcc
+ * emits for a byte-returning callee, so it returns u8. */
+/* sub_08059C00 takes the scratch cell list (gUnknown_03003F20, dereferenced
+ * from its own pointer global) and the address of the same 4-byte x/y pair
+ * sub_080591E4 and sub_0805BAFC use; sub_0805B778 seeds +0 with 9999 before
+ * the call and re-reads it with `ldrh` afterwards, so `u16 *`.  Its result is
+ * never read at either call site.  sub_0805F7B8 is nullary and its result is
+ * likewise never read. */
+void sub_08059C00(void *, u16 *);
+void sub_0805F7B8(void);
+/* sub_080581A4's first argument is a plane inside the gUnknown_08499590 map
+ * (`gUnknown_08499590 + 0x3C72`, the same plane c_0805B980.c reads), passed as
+ * a raw `u8 *` the way sub_0801F92C takes `gUnknown_08499590 + 0x2852` beside
+ * it; the second is a bare `movs r1,#0` at the only call site, unnarrowed. */
+void sub_080581A4(u8 *, int);
+/* sub_0805B5BC and sub_0805B6A0 are sub_0805B4D8's twins over the same
+ * gUnknown_02029ED8 record (see that symbol's comment). They differ from it
+ * only in taking the two cursor indices BY POINTER instead of by value --
+ * both are `ldr rN,[rN]` at entry and the second is written back with `str`
+ * when the 0xFE branch advances it -- and, for sub_0805B6A0, in dropping the
+ * terrain predicate entirely. Third and fourth arguments are the same pair of
+ * whole-word out-parameters sub_0805B4D8 has, so `int *`.
+ *   Return type is UNSETTLED: both bodies only ever produce 0 and 1, and no
+ * caller was inspected. `int` is the weakest type that fits and is what they
+ * were matched under; if a caller turns up that re-narrows with
+ * `lsls #0x18; lsrs #0x18`, they are u8 like sub_0805B4D8 and this must
+ * change. Changing it is byte-neutral in their own bodies.
+ *   sub_0805B3F4 is the turn-start entry beside them: it takes nothing,
+ * computes nothing after its final indirect call, and dispatches through
+ * gUnknown_08576890. */
+void sub_0805B3F4(void);
+int sub_0805B5BC(int *, int *, int *, int *);
+int sub_0805B6A0(int *, int *, int *, int *);
+void sub_0805B980(void);
+void sub_0805B744(void);
+void sub_0805B778(void);
+void sub_0805B814(u16 *);
+u8 sub_0805B8F4(u16 *);
+/* Wave 48, W48-F. Both are DEFINED in src/decomp/c_0805B980.c and were matched
+ * there under `int`, which W45-F flagged as unsettled because no caller had been
+ * inspected. The callers exist and they settle it as u8: sub_0805B814 re-narrows
+ * sub_0805BA34's result with `lsls r0,#0x18; cmp r0,#0` before its truth test,
+ * and sub_0805B8F4 re-narrows sub_0805BB8C's with `lsls #0x18; lsrs #0x18` before
+ * `cmp r0,#1`. agbcc emits neither for an `int` return, and both call sites are
+ * the plain `if (f(...))` / `if (f(...) == 1)` spelling with no cast in sight.
+ * The definitions in c_0805B980.c were changed to match and both re-verified
+ * byte-identical, as predicted -- the bodies only ever produce 0 and 1, so
+ * narrowing the return is free there. */
+u8 sub_0805BA34(int, int, u16 *);
+u8 sub_0805BB8C(int, int);
 
 #endif // UNKNOWN_FUNCS_H

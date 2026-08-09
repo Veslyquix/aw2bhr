@@ -15,9 +15,14 @@ struct Proc7B738
 #include "hardware.h"
 #include "proc.h"
 
-void sub_0807B738(struct Proc7B738 *proc)
+/* Wave 48 (W48-E): retyped from `struct Proc7B738 *` to ProcPtr so the
+ * function can be DECLARED in include/unknown-functions.h -- sub_0807B690
+ * tail-calls it with its own view of the same proc, and a file-local struct
+ * tag cannot appear in a shared prototype. Byte-identical either way; the
+ * cast is where the type now lives. */
+void sub_0807B738(ProcPtr proc)
 {
-    PutSprite(0, 0x71, (proc->unk_30 + 1) * 8, gUnknown_0848B690, 0x1064);
+    PutSprite(0, 0x71, (((struct Proc7B738 *)proc)->unk_30 + 1) * 8, gUnknown_0848B690, 0x1064);
 }
 
 void sub_0807B760(ProcPtr proc)
