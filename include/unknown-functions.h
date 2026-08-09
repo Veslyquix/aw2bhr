@@ -457,6 +457,11 @@ void sub_080369BC(void);
 void sub_0801D8B4(void);
 void sub_0801DED8(void);
 void sub_0801DF20(void);
+/* Wave 50, W50-F: the other two sweeps of the same shape. Both open
+ * `push {r4,r5,r6,lr}; movs r4,#0` -- neither reads an argument register -- and
+ * both are called bare from sub_08052EA8's main loop. Same void(void). */
+void sub_0801D8E4(void);
+void sub_0801D924(void);
 /* Wave 40, W40-I: the per-slot workers those sweeps drive. All four sweeps
  * (sub_0801D8E4, sub_0801D924, sub_0801DED8, sub_0801DF20) call them as
  * `f(i, 0)` or `f(i, 1)` where i is the plain int loop counter -- no narrowing
@@ -932,6 +937,19 @@ void sub_0803B350(u16);
  * model. sub_0803AF5C is already promoted as void(void) in
  * src/decomp/c_0803AF5C.c; declared here so sub_0803B0EC can call it. */
 void sub_0803ABD8(void);
+/* WAVE 50, W50-B. The 0x0803AF78/84/90 forwarder trio and the 0x0803A174
+ * blitter. All four are ALREADY MATCHED -- src/decomp/c_0803AF78.c and
+ * src/decomp/c_0803A174.c define every one of them `void f(void)`, read off
+ * the `pop {r0}` epilogue. They are declared here because sub_0803A190
+ * installs sub_0803A174 as a callback (`sub_08011AAC((void *)sub_0803A174)`)
+ * and sub_0803AFA0 calls the other three, and a declaration that disagreed
+ * with a promoted definition is exactly what broke wave 14's first split
+ * build -- so these agree with those definitions rather than being re-derived
+ * from the call sites. */
+void sub_0803A174(void);
+void sub_0803AF78(void);
+void sub_0803AF84(void);
+void sub_0803AF90(void);
 void sub_0803AF5C(void);
 
 /* Four more m4a entry points, on top of the five listed above. All four names
@@ -1681,6 +1699,11 @@ void sub_080553C8(void);
 void sub_08054C04(void);
 void sub_0805AC88(void);
 void sub_08061B4C(void);
+/* Wave 50, W50-M, MATCHED. The map-editor debug overlay: reads the unit under
+ * the cursor out of the gUnknown_08499590 +0x12 plane, publishes it to
+ * gUnknown_03003F38 and gUnknown_030040D8, and prints five sub_08013428 lines
+ * for it plus four each for its two transported units. */
+void sub_08062DF0(void);
 /* The one non-void member: `pop {r3,r4,r5}; pop {r4,r5,r6,r7}; pop {r1};
  * bx r1`. Its only caller, sub_0803AF90, discards the result, so only the
  * non-void-ness is proved and the width is a guess. */
@@ -1740,6 +1763,9 @@ void sub_0803B774(void);            /* src/decomp/c_0803B774.c */
 void sub_0803C890(void);
 void sub_08049BD8(void);            /* src/decomp/c_08049BD8.c */
 void sub_08052F3C(void);
+/* Wave 50, W50-F: already DEFINED as void(void) in src/decomp/c_08057464.c and
+ * simply never declared, because until now its only caller was assembly. */
+void sub_08057464(void);
 void sub_080736D8(void);
 void sub_080767A8(void);            /* src/decomp/c_080767A8.c */
 /* Wave 37, W37-Q2: its one caller sub_0803BBD4 passes the u8
@@ -2136,7 +2162,16 @@ void sub_0804BA4C(void);
 /* Wave 34, W34-L. sub_08053670's tail call: both argument registers are set up
  * from halfword values (the side index and gUnknown_02029808[side].unk02[i]),
  * and nothing is done with a result. */
-void sub_080536D8(u16, u16);
+/* Wave 50, W50-F: THREE parameters, not two -- the wave-34 reading was taken
+ * from the call site alone. The body narrows r0 AND r2 (`lsls #0x10; lsrs #0x10`
+ * on each) and never reads r1 at all; r2 is the loop count. sub_08053670 sets up
+ * only r0 and r1 at the `bl` because r2 ALREADY holds the value it wants there:
+ * the `ldrh r2, [r1]` two statements earlier loaded
+ * gUnknown_02029808[side].unk0e[unk00] into it for the `cmp #0xfe` guard, so the
+ * third argument costs no instruction. Reading arity off that call site alone is
+ * exactly the trap the header warns about elsewhere. The middle parameter is
+ * genuinely unused by the body. */
+void sub_080536D8(u16, u16, u16);
 /* Wave 34, W34-L. sub_08053670 passes the same halfword side index and uses no
  * result. */
 /* Wave 34 integration: the parameter is int, per the promoted definition. A
@@ -2771,6 +2806,10 @@ int sub_0800BCD0(int, int);
  * is modelled: its body is byte-identical up to the epilogue and 2 bytes short
  * there. See work/sub_0808BBA4/sub_0808BBA4.c. */
 void sub_0808BB58(void);
+/* Wave 50, W50-F: reads no argument register (its whole body is a
+ * gUnknown_03000F80 once-only guard around sub_0808BB58) and its one call site,
+ * sub_08052EA8, sets none up. void(void). */
+void sub_0808BBA4(void);
 
 /* ---- wave 31, W31-B: the 0x08053000 extension block's callees ---- */
 /* All four take ONE `u16` and return nothing, and both halves are read off
@@ -3080,6 +3119,19 @@ void sub_0805741C(u16);
 int sub_080015E4(int, int);
 void sub_08007F14(int, int, int);
 
+/* ---- wave 50 (W50-E) ----
+ * Four callees of sub_08000E48 that were already DEFINED in src/decomp and
+ * only ever missing a declaration. Each signature is copied from the promoted
+ * definition, not inferred -- a definition wins over a weaker guess, and
+ * disagreeing here is a `conflicting types` build failure rather than a
+ * mismatch. sub_08001124 is the block clear (`u8 *`, so sub_08000E48's two
+ * calls cast); sub_08007328 returns int and every caller so far discards it. */
+void sub_08001124(u8 *, int);
+void sub_08003910(void);
+int sub_08007328(void);
+void sub_080078E4(int, int);
+void sub_08002EB4(void);
+
 /* ---- wave 13 (A6) ----
  * The tile-edit helpers sub_0800B244 drives, all keyed by the same (x, y) cell
  * coordinate pair. Every argument arrives as a bare `adds rN, r0, #0` with no
@@ -3269,6 +3321,14 @@ float sub_0808BB0C(float);
  * `blt 0` (so it is signed and -1 means "none"), sub_0800C840's and
  * sub_0800BF78's and sub_08009F10's are only `cmp r0, #0`. */
 void sub_080011F4(int, int, int);
+
+/* Wave 50 (W50-I). sub_080012DC is already matched in src/decomp/c_080012DC.c
+ * as `int sub_080012DC(int)` and was simply never declared; this line only
+ * publishes that definition's own signature. Its single caller sub_0800C454
+ * narrows the result with `lsls #16; lsrs #16`, so the (u16) is a CAST AT THE
+ * CALL SITE and not a narrow return type -- the definition returns a plain
+ * `int` register (`adds r0, r2, #0; bx lr`) whose values run to 0x1D7. */
+int sub_080012DC(int);
 void sub_08007CA0(int, int);
 /* Wave 37 (W37-D), blocks 0x08007 and 0x08008. The (int, int) pair is the same
  * (x, y) cell coordinate the rest of the 0x0800xxxx tile family takes, and the
@@ -5089,6 +5149,16 @@ void sub_08019940(u8, u8);
  * chain consumes r0. Every caller in the ROM discards the result, so `int` is
  * the weakest fit for the return rather than a measurement. */
 int sub_080413E8(void);
+/* Wave 50, W50-J. Both newly declared from sub_080413E8's call sites.
+ * sub_0804138C: `void (void)` -- the comment above already records that it is
+ * four instructions that only store 0, and sub_080413E8 calls it with no
+ * argument set-up and ignores r0.
+ * sub_080413B4: the parameter list is NOT inferred, it is copied from the
+ * PROMOTED definition in src/decomp/c_080413B4.c, which is byte-exact and
+ * wins over any weaker model. sub_080413E8 passes (x, y, unitId, 0) in one
+ * arm and (x, y, 0, kind) in the other, which agrees. */
+void sub_0804138C(void);
+void sub_080413B4(int, int, int, int);
 
 /* The structural twin of sub_0801537C above, and NOT interchangeable with it:
  * sub_0801537C scans gUnknown_03001470[] for the slot whose `.unk00` equals the
@@ -5624,6 +5694,13 @@ int sub_0800E8CC(int, int);
 int sub_0800E9F4(int, int);
 void sub_0800EAF4(int, int);
 void sub_0800EB5C(int, int);
+
+/* Wave 50 (W50-I). sub_0800CFDC itself, the 6,384-byte driver the four helpers
+ * above belong to, was never declared. It is parked, not matched, but
+ * work/sub_0800CFDC/sub_0800CFDC.c settled its shape as `void (int, int)` and
+ * its ONE caller sub_0800CF28 agrees: `adds r0,r4,#0; adds r1,r5,#0;
+ * bl sub_0800CFDC` with nothing read out of r0 afterwards. */
+void sub_0800CFDC(int, int);
 
 /* ---- wave 21 (W21-A): the gUnknown_0200C020 pair ----
  * sub_08014074 is already matched in src/decomp/c_08014074.c and was simply
@@ -7855,6 +7932,13 @@ int sub_08063518(struct Unk08062FB8 *);
  * the value arrives in r0 either way -- so there is no oracle to settle it and
  * the promoted caller wins. sub_08030930 casts internally. */
 void sub_08030930(u32);
+/* Wave 50, W50-J. Two arguments, from sub_08033C68's only call site: r0 is the
+ * u8 proc->unk36 cursor and r1 is the caller's own proc pointer, which is the
+ * (value, proc) order sub_080337D8 above also uses. Return value unused there,
+ * and `int` is the weakest first parameter that reproduces the bare `ldrb` at
+ * the call -- a `u8` parameter is byte-identical, so the width is NOT settled.
+ * Arity is a floor, not a proof: anything past r1 would be invisible here. */
+void sub_0803388C(int, ProcPtr);
 void sub_080338C0(int);
 void sub_08026900(void);
 void sub_0802BFA8(void);
@@ -8431,9 +8515,28 @@ void sub_08062474(void);
  * gUnknown_085D5ABC[..].unk1d passed with no narrowing in front of it, which
  * an int parameter and a u8 parameter both explain.  Result unused at the
  * only call site, and there are four of them. */
-void sub_08062560(int, int);
-void sub_080627F4(int);
+/* Wave 50 (W50-A), RETYPED from (int, int).  Both parameters are narrowed by
+ * PROMOTE_MODE at entry before anything else happens -- `lsls r0,#0x10;
+ * lsrs r0,#0x10; str r0,[sp,#4]` and `lsls r1,#0x18; lsrs r1,#0x18;
+ * str r1,[sp,#8]` -- which is the sub_080247A4 readout above: the spilled
+ * value IS the truncated one, so the parameters' own modes are HImode and
+ * QImode.  Caller-neutral: the one caller (sub_08062474) is still assembly. */
+void sub_08062560(u16, u8);
+/* Wave 50 (W50-A), RETYPED from int.  Same readout: `lsls r0,#0x18;
+ * lsrs r0,#0x18; str r0,[sp,#4]` at entry and the spilled value is the
+ * truncated one.  Caller-neutral: src/decomp/c_08062C7C.c passes its own u8
+ * parameter, which needs no narrowing for either type. */
+void sub_080627F4(u8);
 void sub_08062AE4(void);
+/* Wave 50 (W50-A).  void: `pop {r0}; bx r0` destroys the return register, and
+ * it reads no argument register before writing it. */
+void sub_08062C94(void);
+/* Wave 50 (W50-A).  Types copied from the already-promoted definition in
+ * src/decomp/c_08062730.c -- NOT re-derived.  sub_08062560's call site hands it
+ * `gUnknown_030040D8` (declared `struct Unk030040D8 *`) as the first argument
+ * and casts; the result is tested `lsls #0x18` at that site, so the caller
+ * narrows the `int` return to u8 itself. */
+int sub_08062730(struct Unk08499594 *, struct Unk08499594 *);
 void sub_08077620(int, int);      /* (0, 0xA8 - gUnknown_0300064C), twice */
 void sub_080758BC(int, int, int, ProcPtr);
                                   /* FOUR arguments: sub_08077E9C sets r0, r1
@@ -9046,6 +9149,17 @@ void sub_0803AAC0(u8, u8, u8, s8);
 void sub_0803CEB8(u8, const void *);
 void sub_0803CF54(u8, const void *, u8);
 int sub_0801AD70(u8);
+/* Wave 50 (W50-K). Read off sub_0801B2FC's two call sites, which set up NO
+ * arguments at all (`bl sub_0801ADC8` with r0-r3 dead) and use no result. That
+ * is the whole evidence: arity is invisible in a pass-through wrapper, but this
+ * is not one -- nothing is forwarded. NOT PROVEN against its own prologue; if a
+ * later wave promotes sub_0801ADC8 itself, its definition wins over this. */
+void sub_0801ADC8(void);
+/* Wave 50 (W50-K). Copied from the PROMOTED definition in src/decomp/c_0801B018.c
+ * rather than read off a call site -- a promoted definition wins. sub_0801AC58
+ * calls it with an `int` loop index and the ROM narrows it (`lsls #0x10;
+ * lsrs #0x10`) at the call, which is what the u16 parameter produces. */
+int sub_0801B018(u16);
 /* Wave 41 (W41-A): the slot allocator sub_0801AD70/sub_0801ADC8/sub_0801B2FC
  * all ask before touching gUnknown_0200CC38. RETURN TYPE READ OFF ITS OWN
  * BODY, not off a call site: the "none" path is `ldr r0, =0x0000FFFF`, a
@@ -9595,6 +9709,14 @@ void sub_080073F8(int, int);
 void sub_08002298(int, int);
 void sub_08002510(int, int);
 
+/* Wave 50, W50-G. Both are nullary and void: sub_08002AB0 and sub_08002C38
+ * `bl` each of them with no argument setup at all and discard r0, and neither
+ * callee reads r0-r3 before writing them (sub_08007B54's first instruction
+ * after the push loads its own pool word; sub_08007B74's loads
+ * gUnknown_0200B0B0). */
+void sub_08007B54(void);
+void sub_08007B74(void);
+
 /* Arities from sub_08001DAC's call sites, which put 5, 6 and 7 words in place;
  * sub_0800272C's is additionally fixed by its promoted definition in
  * src/decomp/c_0800272C.c and must agree with it. */
@@ -10078,6 +10200,14 @@ void sub_08062C7C(u8);
  * matched; the signature is read off the copy length, which is why the pointee
  * is the sized record rather than `void`. */
 void sub_08061A40(struct Unk085771C4 *, const struct Unk085771C4 *);
+/* Wave 50, W50-M, MATCHED. Builds one gUnknown_085771C4-shaped record into the
+ * destination: the 0x10-byte header is copied from gUnknown_085771C4[a2] and
+ * the 24 following 0xc-byte rows are that record summed byte-wise with
+ * gUnknown_085771C4[gUnknown_0857690C[a3][gUnknown_08499598[a4].unk1d]]. The
+ * pointee is the sized record for the same reason sub_08061A40's is -- the
+ * 0x130 stride is what proves it. Parameter widths are read straight off the
+ * entry narrowings: `lsls/lsrs #0x18` twice then `#0x10`. */
+void sub_08061928(struct Unk085771C4 *, u8, u8, u16);
 
 /* Wave 37, W37-K3. Nullary: each prologue overwrites r0 before reading it. */
 void sub_080607E8(void);
@@ -10156,6 +10286,13 @@ bool8 sub_08015D24(u8);
  * wrote, not counting the 0xff terminator. `u8`: sub_08043D00 re-narrows the
  * result with `lsls #0x18; lsrs #0x18` before doing anything with it. */
 u8 sub_08043CA0(void);
+/* Wave 50 (W50-H). sub_08043C98 is sub_08043CA0's neighbour and its only known
+ * caller is sub_0803BFBC, which stores the result with a whole-word `str` into
+ * struct Unk08580934's `u8 *unk18`. That member's type was settled in wave 36
+ * from its own reader (`ldr [r0,#0x18]` then an unscaled index and `ldrb`), so
+ * `u8 *` is the return type both ends already agree on and the assignment needs
+ * no cast. Nothing narrower is provable -- this is the only call site. */
+u8 *sub_08043C98(void);
 /* Third argument is compared against 14 as a SIGNED int and then used two ways:
  * as sub_08043AA0's palette-slot index when it is small, and as CpuFastSet's
  * `void *` destination when it is not -- so `int`, with the cast at the
@@ -10372,5 +10509,34 @@ u8 sub_0805B8F4(u16 *);
  * narrowing the return is free there. */
 u8 sub_0805BA34(int, int, u16 *);
 u8 sub_0805BB8C(int, int);
+
+/* Wave 50, W50-D. sub_08032484 is already PROMOTED (src/decomp/c_08032484.c)
+ * but was never declared here; sub_080324C4 is its first caller outside its
+ * own unit, and passes `gUnknown_08499578 + 0x221`. The promoted definition
+ * names the parameter type, so this must agree with it. */
+void sub_08032484(u16 *);
+/* Wave 50, W50-D. All four are void/void: sub_080324C4 and sub_08032BCC call
+ * them with no argument register set up and never read r0 afterwards. */
+void sub_08034290(void);
+void sub_080328EC(void);
+void sub_08032AFC(void);
+/* Wave 50, W50-D. sub_08032BCC calls it as sub_08031B6C(&gUnknown_02027C2C[i
+ * * 0x13], <the 0x34-byte stack buffer sub_0803CCB8(int, u8 *) just filled>),
+ * result unused. sub_08032BCC itself is NOT declared here: it is a proc
+ * callback reached only through a ProcCmd table, its parameter is a proc
+ * struct local to its own unit, and a `void *` declaration here would
+ * conflict with that definition. */
+void sub_08031B6C(u8 *, u8 *);
+/* Wave 50, W50-D. All four read off sub_08031638's call sites, which narrow
+ * every result: sub_0802F408 is tested with a BARE `lsls #24` (a truth test on
+ * a byte), sub_0802F4A0 with `lsls #24; lsrs #24; cmp #1` (a value kept, and
+ * sub_080312AC tests the same function both ways), sub_0802F504 with
+ * `lsls #24; asrs #24; cmp #1; ble` -- signed, i.e. the same s8 its neighbour
+ * sub_0802F534 is already declared to return. sub_08030D84 is a bare tail call
+ * with no argument set up and its result unread. */
+bool8 sub_0802F408(void);
+bool8 sub_0802F4A0(void);
+s8 sub_0802F504(void);
+void sub_08030D84(void);
 
 #endif // UNKNOWN_FUNCS_H

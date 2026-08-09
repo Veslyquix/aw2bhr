@@ -77,9 +77,22 @@ def declared_prototype(name):
                 continue
             path = os.path.join(dirpath, entry)
             for ln in awlib.read_lines(path):
-                if pat.match(ln) and ln.split("//")[0].rstrip().endswith(";"):
+                # Strip BOTH comment forms before testing for the `;`. Wave 50:
+                # only `//` was stripped, so any declaration carrying a trailing
+                # /* ... */ ended in `*/` and was reported as "no prototype
+                # exists" -- 55 of the header's 2,274 sub_ declarations are
+                # written that way, and the caller evidence is usually in
+                # exactly that comment. The agent then scaffolds a signature
+                # that disagrees and loses an attempt to `conflicting types`.
+                # ...and the comment often OPENS on the declaration line and
+                # runs on for several more, so after closing pairs are removed
+                # anything from a surviving `/*` is truncated too. The
+                # declaration text always precedes its comment, so this is safe.
+                code = re.sub(r"/\*.*?\*/", "", ln.split("//")[0])
+                code = code.split("/*")[0].rstrip()
+                if pat.match(ln) and code.endswith(";"):
                     rel = os.path.relpath(path, awlib.REPO).replace("\\", "/")
-                    return ln.split("//")[0].strip().rstrip(";"), rel
+                    return code.strip().rstrip(";"), rel
     return None, None
 
 

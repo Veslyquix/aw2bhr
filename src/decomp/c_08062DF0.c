@@ -1,0 +1,136 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x08062DF0.
+ * sub_08062DF0 @ 0x08062DF0
+ */
+
+#include "hardware.h"
+/* MATCHED. The map-editor debug overlay.
+ *
+ * gUnknown_0816DB40/50/5C/68/74/80 are printf FORMAT STRINGS, not data objects:
+ * baserom.gba holds "UNIT  C0  C1", "PSQ(%1d)", "ASQ(%1d)", "USQ(%1d)",
+ * "CPT(%1d)" and "(%1d)" there, and sub_08013428's third parameter is
+ * `const char *`. Their ROM spacing (0x10, 0xc, 0xc, 0xc, 0xc) is exactly
+ * agbcc's 4-byte alignment of 13, 9, 9, 9, 9 and 6 bytes, which confirms both
+ * the reading and each extent. They are NOT the -fforce-addr pool words at
+ * 0x0816DB00..0x0816DB1C: the ADDRESS is the argument, never dereferenced.
+ *
+ * The honest spelling is a string literal -- matched c_080281F0.c spells its
+ * "SNOW:%s" siblings that way -- and it produces a .rodata section BYTE-
+ * IDENTICAL to ROM 0x0816DB40..0x0816DB86 (verified against baserom.gba), at
+ * 98.9% with the five string pool words as the only differing bytes. It is
+ * rejected by tools/trymatch.py:306, which requires `len(.rodata) % 4 == 0`
+ * and this section is 0x46. Naming the symbols is the compromise; see
+ * docs/agbcc-codegen.md.
+ *
+ * sub_08013428 is VARARGS, and that is what explains the FIRST call leaving r3
+ * holding gUnknown_030040D8: a three-argument call never writes r3, so the
+ * leftover is not an argument. A fixed-arity prototype cannot produce it.
+ *
+ * gUnknown_030040D8 keeps its declared `struct Unk030040D8 *` -- over a hundred
+ * promoted files reach it that way -- so the assignment uses c_0802E4B4.c's
+ * cast idiom. The three extractions off byte 9 (`lsls #0x1d/lsrs #0x1d`,
+ * `lsls #0x1a/lsrs #0x1d`, `lsrs #6`) are a 3/3/2 bitfield view; c_0805B814.c's
+ * struct Unk40D8Bits covers the SAME byte with a 6/2 split, so the tag is named
+ * differently here on purpose -- do not merge them.
+ *
+ * The map planes go through the `struct Map` cast of c_08000BF8.c. Plain `u8 *`
+ * arithmetic on gUnknown_08499590 reassociates the 0x417A / 0x12 constants past
+ * the index and does not match.
+ */
+
+struct Map
+{
+    /* 0x0000 */ u16 unk00;
+    /* 0x0002 */ u16 unk02;
+    /* 0x0004 */ u16 unk04;
+    /* 0x0006 */ u16 unk06;
+    /* 0x0008 */ u8 filler_0008[0x08];
+    /* 0x0010 */ u16 unk10;
+    /* 0x0012 */ u8 unk0012[0x0508];
+    /* 0x051A */ u8 unk051A[0x0F18];
+    /* 0x1432 */ u8 unk1432[0x0A10];
+    /* 0x1E42 */ u8 unk1E42[0x0508];
+    /* 0x234A */ u8 unk234A[0x0508];
+    /* 0x2852 */ u8 unk2852[0x0A10];
+    /* 0x3262 */ u8 unk3262[0x0F18];
+    /* 0x417A */ u16 unk417A[0x100];
+};
+struct Unk8062DF0Bits
+{
+    /* 0x00 */ u8 filler_00[0x09];
+    /* 0x09 */ u8 unk09_0 : 3;
+               u8 unk09_3 : 3;
+               u8 unk09_6 : 2;
+};
+#define MAP ((struct Map *)gUnknown_08499590)
+#define BITS(p) ((struct Unk8062DF0Bits *)(p))
+
+void sub_08062DF0(void)
+{
+    struct Unk030040D8 *a;
+    struct Unk030040D8 *b;
+
+    a = 0;
+    b = 0;
+
+    sub_08023824();
+    sub_0802361C();
+    sub_08023908(4);
+    sub_08023274(0);
+
+    if ((MAP->unk10 & 0xF) == 0)
+    {
+        if (gpKeySt->held == 1)
+        {
+            gUnknown_03004780 = gUnknown_030045DC;
+            sub_08024584();
+            sub_08013C00();
+            sub_08013AEC();
+            return;
+        }
+
+        if ((gpKeySt->unk00 & 4)
+            && MAP->unk0012[MAP->unk417A[gUnknown_030033E4.unk02]
+                            + gUnknown_030033E4.unk00] != 0)
+        {
+            gUnknown_03003F38 = MAP->unk0012[MAP->unk417A[gUnknown_030033E4.unk02]
+                                             + gUnknown_030033E4.unk00];
+            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+
+            if (gUnknown_030040D8->unk07[0] != 0)
+                a = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_030040D8->unk07[0]];
+
+            if (gUnknown_030040D8->unk07[1] != 0)
+                b = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_030040D8->unk07[1]];
+
+            sub_08013428(2, 4, gUnknown_0816DB40);
+            sub_08013428(2, 5, gUnknown_0816DB50, BITS(gUnknown_030040D8)->unk09_0);
+            sub_08013428(2, 6, gUnknown_0816DB5C, BITS(gUnknown_030040D8)->unk09_3);
+            sub_08013428(2, 7, gUnknown_0816DB68, BITS(gUnknown_030040D8)->unk09_6);
+            sub_08013428(2, 8, gUnknown_0816DB74, gUnknown_030040D8->unk07[4]);
+
+            if (a != 0)
+            {
+                sub_08013428(9, 5, gUnknown_0816DB80, BITS(a)->unk09_0);
+                sub_08013428(9, 6, gUnknown_0816DB80, BITS(a)->unk09_3);
+                sub_08013428(9, 7, gUnknown_0816DB80, BITS(a)->unk09_6);
+                sub_08013428(9, 8, gUnknown_0816DB80, a->unk07[4]);
+            }
+
+            if (b != 0)
+            {
+                sub_08013428(0xE, 5, gUnknown_0816DB80, BITS(b)->unk09_0);
+                sub_08013428(0xE, 6, gUnknown_0816DB80, BITS(b)->unk09_3);
+                sub_08013428(0xE, 7, gUnknown_0816DB80, BITS(b)->unk09_6);
+                sub_08013428(0xE, 8, gUnknown_0816DB80, b->unk07[4]);
+            }
+        }
+    }
+
+    sub_0802A7C4();
+    sub_0802776C(0);
+}
