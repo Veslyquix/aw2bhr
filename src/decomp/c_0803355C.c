@@ -36,7 +36,7 @@ void sub_0803355C(struct Unk3355CProc *proc)
     gUnknown_030044D8 = 0;
 
     p->unk22 = p->unk20 = 0;
-    p->unk24 = p->unk26 = p->unk28 = p->unk2a = 0;
+    p->unk24[0] = p->unk24[1] = p->unk24[2] = p->unk24[3] = 0;
 
     sub_0802F03C();
 

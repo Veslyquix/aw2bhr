@@ -35,6 +35,6 @@ void sub_0803DE14(void)
         gUnknown_02028360[i].filler_05[0] = 0;
         gUnknown_02028360[i].unk02_a = 0;
         gUnknown_02028360[i].unk06 = 0;
-        gUnknown_02028360[i].filler_07[0] = 0;
+        gUnknown_02028360[i].unk07 = 0;
     }
 }

@@ -441,6 +441,7 @@ SECTIONS
 		. = 0x0032C0; gUnknown_030032C0 = .;
 		. = 0x0032C4; gUnknown_030032C4 = .;
 		. = 0x0032CC; gUnknown_030032CC = .;
+		. = 0x0032D0; gUnknown_030032D0 = .;
 		. = 0x0032D8; gUnknown_030032D8 = .;
 		. = 0x0032DC; gUnknown_030032DC = .;
 		. = 0x0032E0; gUnknown_030032E0 = .;

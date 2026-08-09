@@ -1,0 +1,72 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0803EBA4.
+ * sub_0803EBA4 @ 0x0803EBA4
+ */
+
+/* MATCHED (wave 49, W49-C), first attempt. 324/324 bytes, relocs match.
+ *
+ * The proc step behind the sub_0803EB84 filter (src/decomp/c_0803EB84.c), whose
+ * +0x4c s16 cursor this one walks and increments.
+ *
+ * The `subs #1; cmp #4; bhi` switch is the dense jump-table form, so table entry
+ * N is source value N + 1, and the five case bodies come out in source order
+ * 1..5. Cases 3 and 4 are cross-jumped onto one tail at _0803ECAA -- they differ
+ * only in the fifth argument (3 vs 4), which is why the shared code starts at
+ * `str r4,[sp]`; that is jump.c, not a grouped case label.
+ *
+ * `p = gUnknown_03003338;` is the c_0803E560.c idiom: the pointer global is read
+ * once into r4 and every record reached as `p[i]`, which is what keeps the base
+ * in one register across the whole function.
+ */
+
+#include "proc.h"
+struct Unk3EBA4Proc
+{
+    /* 00 */ PROC_HEADER;
+    /* 29 */ STRUCT_PAD(0x29, 0x4c);
+    /* 4c */ s16 unk4c;
+};
+
+void sub_0803EBA4(struct Unk3EBA4Proc *proc)
+{
+    struct Unk03003338 *p;
+    struct Unk08499594 *u;
+    struct Unk02028360 *q;
+    int i;
+
+    p = gUnknown_03003338;
+    for (i = 0; p[i].unk00 == 0; i++)
+        ;
+    u = &gUnknown_08499594[p[i].unk00];
+    if (p[proc->unk4c].unk00 != 0)
+        return;
+    switch (p[proc->unk4c].unk02)
+    {
+    case 1:
+        sub_0803EF44(p[proc->unk4c].unk04, p[proc->unk4c].unk06, proc);
+        break;
+    case 2:
+        sub_0803F2B8(p[proc->unk4c].unk04, p[proc->unk4c].unk06,
+                     (int)gUnknown_0849F728[gUnknown_03004080 & 1], proc);
+        break;
+    case 3:
+        q = sub_0803DE94(p[proc->unk4c].unk04, p[proc->unk4c].unk06);
+        sub_0803F0A4(p[proc->unk4c].unk04, p[proc->unk4c].unk06, u->unk02, u->unk03,
+                     3, q->unk02_e, proc);
+        break;
+    case 4:
+        q = sub_0803DE94(p[proc->unk4c].unk04, p[proc->unk4c].unk06);
+        sub_0803F0A4(p[proc->unk4c].unk04, p[proc->unk4c].unk06, u->unk02, u->unk03,
+                     4, q->unk02_e, proc);
+        break;
+    case 5:
+        sub_0803F510(p[proc->unk4c].unk04, p[proc->unk4c].unk06, proc);
+        break;
+    }
+    proc->unk4c++;
+    Proc_Goto(proc, 0);
+}

@@ -47,11 +47,26 @@ u16 sub_080206B0(u32 a1)
     return i;
 }
 
-void sub_080206E4(u8 *dst, u16 value)
+
+/* Wave 49, W49-K RETYPES the second parameter from `u16` to `int`, with the
+ * narrowing moved into an explicit `u16` local -- byte-identical here (still
+ * `lsls r1,#0x10; lsrs r7,#0x10` at entry) and REQUIRED by the newly matched
+ * caller sub_080213AC, which passes `1 - gUnknown_03003FC0.unk0d` with no
+ * narrowing at all.  agbcc narrows a `u16` argument AT THE CALL SITE as well as
+ * at entry (measured: +4 bytes per site, and sub_0802163C's `sub_080247A4(a)`
+ * shows the same pair on the caller side), so a `u16` prototype cannot produce
+ * the ROM's caller.  The original almost certainly had no prototype in the
+ * caller's translation unit -- default argument promotions passed an int and
+ * the callee re-narrowed -- and since this tree has one shared header, spelling
+ * the parameter `int` plus a local is the only way to say that once. */
+void sub_080206E4(u8 *dst, int value)
 {
     s16 x, y;
+    u16 v;
+
+    v = value;
 
     for (y = 0; y < MAP->height; y++)
         for (x = 0; x < MAP->width; x++)
-            dst[MAP->rowOffset[y] + x] = value;
+            dst[MAP->rowOffset[y] + x] = v;
 }

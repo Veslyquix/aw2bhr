@@ -2408,6 +2408,189 @@ where the array's base `ldr` sits. All four measured on `sub_08049F24`
 pointer and integer operands of a pointer addition changes nothing**, so do not
 spend an attempt on it.
 
+## NOT binding a VALUE to a local is a lever, and it is the exact inverse of "binding locals are punctuation" (wave 49, W49-A)
+
+The wave-17 rule says a value assigned in N consecutive statements is ONE pseudo
+whose live range spans all N, so splitting one local into N frees a register.
+The mirror image is just as usable and came up three times in one batch: **a
+value the original left as a repeated INLINE EXPRESSION becomes one long-lived
+pseudo the moment you name it, and that single change moves registers, spills
+and instruction counts.** Write the expression out at each use and agbcc's CSE
+folds the reads that are cheap to fold and re-emits the ones that are not —
+which is what the ROM does.
+
+Three distinct diffs in `sub_0805A388`, each fixed by deleting a local:
+
+- **A named local suppresses a reload the ROM has.** `n = *cell;` then using
+  `n` three times keeps the byte in one pseudo. Writing `*cell` three times
+  lets CSE fold the first two (same block) and RELOAD the third after the
+  register is needed for a pool address — the ROM's second `ldrb`. Naming it is
+  2 bytes short and no allocation lever recovers them.
+- **A named local dies at its last use, so agbcc masks IN PLACE.** `terrain`
+  as a local gives `ands r2,r0` (2-operand, dest = the dying local). Written
+  inline it stays a CSE temp that must survive, so each mask goes to a fresh
+  register: `ands r0,r2`. Same length, different bytes.
+- **Both together are what set the FRAME SIZE.** Keeping the two values inline
+  raised pressure enough to spill `flag` to the stack (frame 0xc, not 0x8) and
+  to push the out-pointer behind the cell pointer in the register order. With
+  either one bound the function is size-exact with r5/r6 swapped throughout.
+
+**The converse still holds and must not be over-applied: a base-plus-constant
+POINTER must be bound.** `q + 0x12 + off` as one expression reassociates to
+`(off + 0x12) + q`; `props = q + 0x12; props[off]` does not. Same for
+`rows = q + 0x417a` and `cells = q + 0x1432`. And binding an array base
+early is still the way to order its pool word (`tbl = gUnknown_0857685A;`
+ahead of the 0x1432 constant). **So the rule is by KIND: bind addresses, do not
+bind values.**
+
+One more, from `sub_0805A0EC`: **an intermediate that the ROM RECOMPUTES from a
+kept pointer must stay inline at the recompute site even when it is bound
+elsewhere.** There `off` is bound (that is what orders the 0x1432 load after
+the `ldrh`), but the late use is written longhand as `props[*(u16 *)rowp + x]`,
+and agbcc rebuilds it from the `ip`-resident row pointer exactly as the ROM
+does. Binding it at both sites keeps it live and deletes the recompute.
+
+## Two disjoint counters in one function are usually ONE local, and it is worth a register (wave 49, W49-K)
+
+A function with a setup loop, a nested map walk and a wrap-up loop reads as
+three counters, and declaring three is the obvious thing. It is wrong twice in
+one batch, and both times the whole residual was the same shape: the counter and
+some other pseudo swap hard registers, costing 2--4 bytes in `mov rLO, ip` /
+`mov ip, rLO` copies while every instruction stays otherwise identical.
+
+- `sub_08021810`: declared `u8 i, x, y` with `i` running the 6-byte clear loop
+  and the 5-element max loop and `x` the inner map loop. +4 bytes: the ROM keeps
+  `x` in `r3` and the `y * 2` temp in `r4`, the candidate had them swapped, and
+  the pool address needed an extra `mov r0, ip` to be loaded through. Deleting
+  `i` and running all three loops on `x` matched byte-for-byte.
+- `sub_080219AC`: declared `int i, n, x, y` with `i` running the 5-army reset
+  loop. +4 bytes: `x` landed in `ip` and `&gUnknown_08499590`'s pool address in
+  `r6`, the ROM has them the other way round. Same fix, same result.
+
+The mechanism is the tie-break the register chapter already describes. Locals
+get their pseudos at `expand_decl` time in DECLARATION order, so every local
+outranks every later temporary; between two locals the priority is roughly
+frequency over live length. Folding the setup loop's counter into the map
+loop's variable does not lengthen its live range (the ranges are disjoint) but
+it does add the setup loop's references to the same allocno, and that is enough
+to move it ahead of the address constant it was tying with.
+
+Read backwards this is a cheap diagnostic. **If your only residual is one pseudo
+in `ip` where the ROM has it in a low register (or the reverse), and the
+function has more counted loops than it has counters in the ROM's register file,
+merge the counters before you touch anything else.** It is the exact inverse of
+the wave-17 "binding locals are punctuation, one per statement" rule, which
+splits a local into N: that rule is about a value recomputed inside each
+statement, this one about a counter whose loops never overlap.
+
+## A wrap-around `(x + n - 1) % n` must BIND its delta, and the two `movs rD,#0` before a loop guard read out the comma init (wave 49, W49-L)
+
+Two independent readouts off one function, `sub_080660BC` — a cursor that steps
+`gUnknown_08580934->unk11[]` up or down with the usual no-negative-modulo idiom.
+
+**1. `fold` reassociates the delta out of existence, so the CSE never forms.**
+The ROM is `subs rD, rN, #1` (the delta, computed once) then
+`adds r0, rOLD, rD`, and it keeps that delta live across a whole loop to reuse
+it in a second modulo. Every inline spelling loses it:
+
+```c
+(x + (n - 1)) % n      ->  subs rX,#1 ; adds rX,rX,rN     /* (x - 1) + n */
+(x + n - 1) % n        ->  same -- the parse differs, fold does not
+```
+
+`fold`'s `split_tree`/`associate_trees` pulls the constant out of the inner
+`MINUS_EXPR` and re-attaches it to the *other* operand, so what reaches RTL is
+`(x + (-1)) + n` and there is no `n - 1` value for CSE to share with the second
+site. Binding it — `step = n - 1;` as its own statement, then `(x + step) % n`
+at both sites — restores the ROM's shape exactly, and is worth 1 instruction
+plus the register assignment of `n` itself (`n` moved from `r5` to the ROM's
+`r6` the moment the binding appeared). This is the general `fold` reassociation
+rule already in this file, but the *symptom* is unusual and worth naming: a
+delta that the ROM computes once and you compute twice, in a function where
+your instruction count is otherwise exact.
+
+**2. Two `movs rD, #0` immediately before a loop guard are the loop counter and
+an accumulator, and their ORDER is the comma init.** The ROM:
+
+```
+movs r2, #0          @ i
+movs r3, #0          @ same
+cmp  r3, r6          @ guard 0 < n, reusing the accumulator's zero
+bge  .Lafter
+```
+
+Counter first, accumulator second. `acc = 0;` written as its own statement
+before `for (i = 0; ...)` emits them the other way round — accumulator, then
+counter — because gcc emits in source order and the `for` init comes last.
+`for (i = 0, acc = 0; i < n; i++)` reverses it and matches. Both spellings are
+size-identical and semantically identical, so this only shows up as a byte
+diff; it is the cheapest possible readout of a comma init and it is the first
+place to look when a loop preamble is two instructions out of order.
+
+Note the guard itself is not a third statement: agbcc CSEs the accumulator's
+freshly-stored zero and compares *that* register against the bound, which is
+why the guard reads `cmp acc, n` rather than `cmp i, n`. Do not read the
+register in the guard as the loop variable.
+
+## `ldrsb` vs `ldrb; lsl #24; asr #24` is about the ADDRESS, not the signedness (wave 49, W49-A)
+
+Wave 37 settled the halfword case: `sign_extend (mem:HI)` always folds to
+`ldrsh`, so `ldrh; lsls; asrs` is never an `(s16)` cast. **The byte case is
+different and the discriminator is the addressing mode, because THUMB `ldrsb`
+has only a register-offset form.**
+
+The same global, `gUnknown_03003340`, produces both spellings:
+
+- `c_0805AD90.c` reads `(s8)gUnknown_03003340[y][x]` where the address is built
+  and dies at the load — agbcc emits `ldrb r0,[r0]; lsls #24; asrs #24`,
+  because using `ldrsb` would cost a materialised zero register it cannot
+  amortise.
+- `c_0805A744.c` binds the address (`cell = gUnknown_03003340[y] + x;`) and
+  reads `*(s8 *)cell` twice — agbcc emits `movs r0,#0; ldrsb r0,[cell,r0]`,
+  materialising the zero once and reusing the live pointer.
+
+**Do not read an `ldrsb` as evidence that the array is signed.** In
+`sub_0805A744` the `ldrsb` sits two instructions from a plain `ldrb` of the
+SAME address supplying the stored value; the array is `u8` and the source has
+an explicit `(s8 *)` cast on a bound pointer. If you meet `ldrsb` where a
+sibling function has `ldrb; lsl; asr`, the sibling did not bind the address —
+that is the whole difference.
+
+## A `/ 8` with NO round-toward-zero bias is still SIGNED — `lsrs` is the only unsigned tell (wave 49, W49-J)
+
+`x / 8` on a signed `int` is normally three instructions, the wave-31 reading
+c_080468D4.c records: `cmp #0; bge; adds #7` to bias the dividend, then one
+shift. The standing shortcut has been "no bias, therefore unsigned". **It is
+wrong**, and it cost an attempt on sub_08046778.
+
+Controlled probe, one function, one operand changed:
+
+```c
+sub_08014B0C((a + gUnknown_084C211C[n * 2] * 8) / 8, ...)   /* a, table: u8 */
+```
+
+agbcc emits `adds r0, r3, r0` then **`asrs r0, r0, #3`** — the bias is gone but
+the shift is arithmetic. Both operands are `u8`, so combine's `nonzero_bits`
+proves the sum non-negative and `expand_divmod` drops the correction; it does
+NOT change the expression's type, so the shift stays signed. The ROM has
+`lsrs r0, r0, #3`, and only `(u32)(a + gUnknown_084C211C[n * 2] * 8) / 8`
+produces it.
+
+So there are THREE distinguishable spellings, not two:
+
+| emitted | source |
+| --- | --- |
+| `cmp #0; bge; adds #7; asrs #3` | signed `/ 8`, range unknown (a plain `int` parameter) |
+| `asrs #3` alone | signed `/ 8` on a provably non-negative expression |
+| `lsrs #3` alone | the expression is UNSIGNED |
+
+Read the SHIFT, not the bias. The bias only tells you whether combine had range
+information, which is a property of how the operands were declared, not of the
+divide. The same three-way split applies to the fused forms: sub_08046914's
+`lsls #0xd; asrs #0x10` is `(s16)(v / 8)` and c_080468D4's `lsls #0xd;
+lsrs #0x10` is `v / 8` truncated to u16 — the second shift carries the sign of
+the *cast*, the first carries the divide.
+
 ## Two identical `i * K` in one call's arguments: agbcc CSEs them, the ROM often does not (wave 48, W48-I)
 
 `sub_0801BD00(0x60, i * 16 + 16, blob, i * 16 | flag << 12)` compiles to ONE
@@ -2531,6 +2714,37 @@ that.
 bge` on its own still proves nothing (see the `check_dbra_loop` rule below) —
 the discriminator is the rebuilt constants, not the branch.
 
+### A goto loop also decides whether the `-fforce-addr` `.rodata` WORD SURVIVES (wave 49, W49-B)
+
+A third consequence, and the one that is hardest to attribute because the
+symptom appears in the literal pool rather than in the loop. **Writing the loop
+as `while (1)` can delete an `-fforce-addr` `.rodata` address constant that the
+ROM has.** Two passes acting in series do it:
+
+1. LICM hoists the pool load `(set r (mem (symbol .LC0)))` into the preheader,
+   because it is loop-invariant and `RTX_UNCHANGING_P`;
+2. CSE-after-loop then sees a hoisted load from a constant-pool entry whose
+   contents it knows, and const-propagates it back into a bare `symbol_ref`.
+
+The `.LC0` entry is left unreferenced and never emitted, so the honest
+`gUnknown_X->member` spelling — the one the `-fforce-addr` chapter tells you to
+write — silently produces a **two-deep** `ldr; ldr` where the ROM has a
+**three-deep** `ldr; ldr; ldr`. Nothing about the diff points at the loop.
+
+`sub_080309AC` and `sub_08030B00` are the measurement. As `while (1)` they lose
+the word and hoist `0x1AAE`, `&gUnknown_0202575C` and the constant `0` into
+callee-saved registers; as goto loops both match byte-for-byte with the pool
+word intact and nothing hoisted. The confirming read is the one this chapter
+already prescribes — **the ROM re-materialises `0x1AAE` at THREE separate
+sites**, which no LICM would ever leave.
+
+**So the `-fforce-addr` chapter's "write the honest spelling and let the build
+place the word" needs a rider: if the honest spelling does not produce the word
+at all, suspect the LOOP FORM before you suspect the spelling.** Diagnose it by
+probing a known-matched neighbour — `c_08030930.c`'s promoted body emits the
+`.rodata` word under `compile_probe`, which proves the flag is on and moves the
+question back into your own C in one free call.
+
 ### The goto loop's hidden SECOND cost: in-loop refs stop being weighted (wave 48, W48-K)
 
 The chapter above prices a goto loop in codegen (no LICM, no giv, no dbra).
@@ -2603,6 +2817,44 @@ BOTH wrong here and wrong in different directions, which is the useful half:
 So the counter-sharing question is decided by the LOOP BODIES' register
 assignment, and the constant's placement is a separate problem that the counter
 choice cannot fix.
+
+## CSE beats CROSS-JUMPING to it: a known-zero register kills a shared `movs rD,#0` (wave 49, W49-B)
+
+Two arms of a select that both assign the same constant normally end up sharing
+one block — `jump.c`'s cross-jumping merges identical tails. **But CSE runs
+first, and if one of those arms sits on a path where some variable is provably
+equal to that constant, CSE rewrites the arm to copy the register instead.** The
+two blocks are then no longer identical and the merge never happens.
+
+`sub_08030234`'s three-way select is the measurement. The ROM has one
+`movs r0,#0` reached from both arms:
+
+```
+    mov r1, sl ; cmp r1, #0 ; bne  L_else     @ nBad
+    mov r2, r8 ; cmp r2, #0 ; bne  L_zero     @ nSplit  -> the SHARED zero
+    <value>    ; b L_store
+L_else:  mov r0, r8 ; cmp r0, #0 ; beq L_other
+L_zero:  movs r0, #0
+         b L_store
+```
+
+Written as two ordinary `buf[i] = 0;` statements, `record_jump_equiv` records
+`nBad == 0` on the fall-through of the `bne`, and CSE emits `mov r0, rNBAD` for
+that arm — same size, same cost, and fatal. The fix is to give the zero block
+**two predecessors in the SOURCE**, with a `goto` into it, so it is already
+shared before CSE gets there.
+
+**The second-order symptom is what makes this expensive to diagnose: the extra
+reference to `nBad` changes its `REG_N_REFS`, which flips which callee-saved
+register it wins.** The diff therefore shows a whole-function `sl`/`sb` swap
+alongside the two-instruction block difference, and reads like two independent
+problems. It is one. **A register-assignment swap that appears together with a
+duplicated constant is a consequence, not a second bug — fix the block and
+re-measure before touching the allocation.**
+
+The same reasoning says a `?:` will not help: it expands to the same
+preset-then-conditionally-overwrite shape (`mov r0,#0; cmp; bne; ldrh r0,…`),
+measured, and that is a *third* spelling that cannot cross-jump either.
 
 ## Control flow
 
@@ -17686,6 +17938,40 @@ are named once each and get ordinary direct pool words — in the same function,
 in the same pool. So the presence or absence of the extra `ldr` is a READOUT of
 how many times the source names the symbol.
 
+## A `-fforce-addr` `.rodata` word is a REGISTER-PRESSURE symptom, not a naming count — and swapping the operands of one `+` removed it (wave 49, W49-M)
+
+The wave-33 (W33-G) corollary above says "the force-addr level appears only on an
+address the function names MORE THAN ONCE", and reads as a property of the
+source. `sub_0805634C` refutes that in both directions and the counter-example is
+cheap to check:
+
+- In the ROM, `gUnknown_030045A0` is named FOUR times and gets one ordinary pool
+  word; `gUnknown_0300450C` is named twice and also gets an ordinary pool word.
+- A candidate spelling the same two loops emitted `.LC2: .word gUnknown_0300450C`
+  in its own `.rodata` plus a second, direct pool word for the same symbol — the
+  extra `ldr r0, [r1]` level — for the FIRST of the two namings only.
+
+Four probes on the same loop, changing nothing about how often the symbol is
+named:
+
+| change | `.LC` for `gUnknown_0300450C`? |
+|---|---|
+| baseline `D2A[..][0] + p[E7C[b*2 + g0300450C]*5 + i]` | yes |
+| drop the unrelated `gUnknown_08551D2A` term | **no** |
+| hoist the `gUnknown_08551D2A` term into a local before the loop | **no** |
+| **swap the two operands of the `+`** | **no** |
+
+The last one is the useful result: `p[...] + D2A[...]` and `D2A[...] + p[...]`
+compute the same value and name the same symbols the same number of times, and
+only the second needs the extra indirection. Swapping them also put the pool
+words in the ROM's order (`08551E64, 030045A0, 0300450C, 02029822, 08551E7C,
+08551D2A`) and took the loop body from a register permutation to byte-exact.
+
+**So read a `.rodata` address word in YOUR output as "this statement is holding
+one value too many at this point", and try re-ordering the operands of the
+enclosing binary operator before anything structural.** It is the cheapest lever
+on the list and it was not on the list.
+
 ## Wave 33 (W33-G): `x & C1 & C2` folds — an assignment between them does not
 
 `sub_0801ECE8` masks two bits off a `long long` and the ROM carries two pool
@@ -30120,6 +30406,45 @@ reads exactly like a dead CSE. Consequences:
   a shared tail is evidence the tail was DUPLICATED in the source**, not
   evidence of a `?:`.
 
+## The volatile dead-load NEEDS A DECL-ROOTED LVALUE — it never fires through a pointer (wave 49, W49-F)
+
+The W47-E chapter above is right about *what* the dead load is and silent about
+*when* it appears, and the missing half is sharp enough to be worth a chapter:
+**agbcc emits the dead load only when the destination lvalue is rooted in a
+declaration — an array subscript on a decl, or an aggregate member. A store of
+the same width to the same address through a POINTER VARIABLE emits the bare
+`strh` and nothing else.**
+
+Measured with `compile_probe`, three spellings, all with `extern volatile u16
+*const p;` and all emitting exactly `lsl; add; strh` with no load:
+
+    p[i] = 0x4fff;                                   /* INDIRECT_REF        */
+    (*(volatile u16 (*)[512])p)[i] = 0x4fff;         /* ARRAY_REF on an
+                                                        INDIRECT_REF -- also
+                                                        no load             */
+    { volatile u16 *q = p; *(q + i) = 0x4fff; }      /* local copy, no load */
+
+against `extern volatile u16 g[]; g[i] = 0;`, which does emit it. One function
+carries both controls: sub_0802F03C and sub_0802F588 store to the *same* ring,
+0x02025818, and the stores that name `gUnknown_02025818` directly get the dead
+load while the ones reaching it through the ROM pointer `gUnknown_08090C84` do
+not.
+
+Two consequences, and the second is the useful one:
+
+- **Do not read "no dead load" as "not volatile" when the base came out of a
+  pointer.** The qualifier question is simply not being asked at that site, and
+  a candidate short by 2 bytes per pointer-based store has a *spelling* problem,
+  not a type problem.
+- **Read it backwards as a spelling oracle.** A dead load in the ROM at an
+  address the ROM itself loaded from a pointer proves the ORIGINAL SOURCE did
+  not go through that pointer at that statement — it named an array or reached a
+  struct member. That is a hard constraint on the source shape from two bytes of
+  output, and it is what work/sub_0802F588 is parked on: two stores whose
+  addresses come from a pointer table yet carry the load, so the untried
+  candidate there is a COMPONENT_REF (a struct with a `volatile u16 [512]`
+  member) rather than any pointer spelling.
+
 ## agbcc's LICM hoists a two-instruction invariant and leaves a one-instruction one (wave 47, W47-E)
 
 A negative result, from sub_080607E8, which is parked on exactly this. The
@@ -31144,3 +31469,260 @@ Two consequences for how to use it:
   what you wrote afterwards. This is the same class as the two wave-17 harness
   bugs: it manufactures a wrong artefact that passes every downstream check
   because nothing downstream reads that file until the next agent does.
+
+## One inline plane read gives TWO different shapes depending on whether the loop variable is the ROW or the COLUMN (wave 49, W49-C)
+
+`src/decomp/c_0803E764.c` records three spellings of a guarded map-plane read and
+what each emits:
+
+* bound once before the test -> local-alloc coalesces the load into the third
+  argument register, `ldrb r2,[r1]`;
+* named twice, tested directly and re-bound to a `t` local inside the branch ->
+  `ldrb r0,[r1]` plus `adds r2,r0,#0`;
+* the second mention written inline in the call -> CSE gives up, two `ldrb`s.
+
+sub_0803E594 has FOUR copies of that loop over one plane and its ROM shows the
+second and third shapes two apiece, which reads like two different source
+spellings in one function. It is not. **All four loops are the INLINE spelling,
+and which shape comes out is decided by whether the loop variable is the row or
+the column.**
+
+The call is `sub_0803E560(x, y, plane[rowOffset[y] + x], a3)` with `u16`
+parameters, so each of x and y needs a `(u16)` narrowing at the call, and the
+narrowing of the LOOP VARIABLE cannot be hoisted while the other one's can.
+
+* Loops whose variable is the ROW (`y`): the invariant `x << 16` sits in a low
+  register from the preheader, so argument 1 is just `lsrs r0, r7, #0x10`. gcc
+  emits argument 2 first, then copies the still-live loaded byte out of r0
+  (`adds r2, r0, #0`) and only then clobbers r0. One `ldrb`, and the address
+  keeps a register of its own (`adds r2, r1, r0` / `ldrb r0, [r2]`).
+* Loops whose variable is the COLUMN (`x`): argument 1 is the loop variable's own
+  `lsls r0, r5, #0x10; lsrs r0, r0, #0x10`, which lands in r0 and destroys the
+  loaded byte before any copy can be made -- so the second mention is re-loaded,
+  `ldrb r2, [r1]`, and the address stays coalesced into r1.
+
+Measured both ways: binding `t` in all four loops is size-exact and 92.1%, with
+the two column loops wrong; binding it in the two row loops only (i.e. writing
+what the ROM's shapes look like) is still 92.1%, with the two ROW loops wrong.
+The uniform inline spelling matched. **So the two shapes are not a source
+difference to be reproduced -- do not spell a function's loops differently
+because its ROM shapes differ.**
+
+## Which of a parameter and its saved copy gets SPILLED is decided by which one the source MUTATES (wave 49, W49-C)
+
+sub_0803E594 walks four rays out of one (x, y) origin, so each loop destroys one
+of the two coordinates and the next loop needs the original back. The ROM's
+prologue is
+
+    str r0, [sp]        @ a1 -> its stack home
+    str r1, [sp, #4]    @ a2 -> its stack home
+    mov sl, r2
+    adds r5, r0, #0
+    adds r4, r1, #0
+
+and each loop preheader reloads exactly the one the previous loop destroyed.
+Three spellings, all size-exact at 304 bytes:
+
+* **locals are the loop variables, parameters are the saved copies** (`x = a1;
+  y = a2;` then `for (; y >= 0; y--)`, `y = a2;`, ...) -- MATCHES. The two stores
+  come from the incoming argument registers, before the pseudo copies, because
+  they are prologue spills of the parameters themselves.
+* **parameters are the loop variables, locals are the saved copies** (`x0 = a1;`
+  then `for (; a2 >= 0; a2--)`, `a2 = y0;`, ...) -- 92.1%: identical control
+  flow, but the two stores move AFTER the copies and are sourced `str r5,[sp]` /
+  `str r4,[sp,#4]`, because now it is the locals being spilled.
+* **four independent locals, one per loop** (`for (i = a2; i >= 0; i--)`, ...) --
+  worse: a1 and a2 keep registers of their own, every loop variable takes a copy
+  (`adds r4, r6, #0`) the ROM does not have, and a3 gets spilled where the ROM
+  keeps it in sl for the whole function.
+
+Read backwards this is a cheap diagnostic: **a `str rN, [sp, #k]` sourced from an
+INCOMING ARGUMENT REGISTER, ahead of that argument's pseudo copy, means the
+parameter itself is spilled and something else is the mutated variable.** A store
+sourced from a callee-saved register after the copies means the opposite.
+
+## A loop-leading `break` gets its exit test DUPLICATED to the loop bottom; a `return` does not (wave 49, W49-C)
+
+A loop whose body opens with a conditional exit —
+
+    for (i = 0; i < N; i++)
+    {
+        if (g[i].flags == 0xff)
+            break;
+        ...
+    }
+
+— comes out of agbcc with that test emitted TWICE: once at the top of the body
+where it was written, and again after the counter test at the bottom, where it
+recomputes the whole address (`ldr rB,=g; lsls rI,#2; adds; ldrb; cmp #0xff;
+beq`) before branching back. That is `loop.c`'s `duplicate_loop_exit_test`,
+which copies the loop's first exit test to the end so the back edge can skip it.
+It costs about seven instructions and, because it re-materialises the array
+base, a SECOND literal-pool word for a global the loop already had in a register.
+
+**Writing the same exit as `return` suppresses it entirely.** The pass needs the
+test's jump to target the loop's exit label so it can redirect the copy; a
+`return` jumps to the function epilogue instead and the pass declines. Measured
+on sub_0803F990, where the two spellings are otherwise identical source and the
+ROM has no duplicate: changing one `break` to `return` deleted the duplicated
+block, the extra pool word, and the surplus `mov`/`lsls` the extra register
+pressure had forced into the loop's induction-variable update — the loop tail
+went from six wrong instructions to byte-exact.
+
+The two spellings mean the same thing whenever nothing follows the loop, which
+is the common case for a scan-and-dispatch function. **So a ROM that exits a
+counted loop early with NO duplicated test at the bottom is telling you the
+original wrote `return`, not `break`** — and conversely, a duplicated test in
+the ROM is evidence for `break`. This is one of the few places where two
+source spellings with identical semantics are byte-distinguishable.
+
+## A `switch`'s CASE BODIES are laid out in SOURCE ORDER — read it off the ROM before you write the switch (wave 49, W49-H)
+
+`sub_0801FAC4` is a four-way `switch (dir)` over cases 0..3, 540 bytes, four
+near-identical loop bodies. Written with the cases in numeric order it came out
+**size-exact at 34.8% identical**, with the first difference at +0xa and every
+branch target wrong from the dispatch onwards. The score is pure positional
+noise: the ROM emits **case 1's body first**, then case 0, then 2, then 3.
+Reordering the source to `case 1: case 0: case 2: case 3:` moved every block to
+its ROM offset and took the whole function to a 4-byte residual in one attempt.
+
+- **The dispatch decision tree tells you NOTHING about body order.** agbcc builds
+  the `cmp/beq/bgt` tree (or the jump table) from the case *values*, so it looks
+  the same whichever order the arms were written in. The order is only visible
+  in **where each body lands**: take the branch/jump-table targets in the ROM
+  and sort them, and that sequence IS the source order of the arms.
+- This is worth doing **before** writing the switch, not after. It costs one
+  reading of the dispatch block and it is the difference between a first-attempt
+  match and a diff that looks like a total shape failure.
+- Same family as the wave-39 rule that byte-identity is positional. A
+  size-exact candidate in the 20-40% band whose first difference is a branch
+  offset is almost always a **layout** error, not a codegen one — check block
+  order before you touch any expression.
+
+## `a + 1 - k` REASSOCIATES to `a - (k - 1)`; a statement boundary restores it, a shared temp costs 28 bytes (wave 49, W49-H)
+
+The ROM computes the span start of each `sub_0801FAC4` arm as
+`mov r0, sl; adds r0, #1; subs r1, r0, r5` — literally `(a + 1) - k`. Spelled
+`s = a + 1 - k;` agbcc emits `subs r0, r5, #1; mov r3, sl; subs r2, r3, r0`,
+i.e. `a - (k - 1)`. **Both are three instructions and six bytes**, so this never
+shows up in a size comparison — it shows up as every register downstream being
+different, because the two forms have different pressure at the point where the
+loop's other live values are allocated.
+
+- **The fix is a statement boundary and it is free:** `s = a + 1; s -= k;`
+  reproduces the ROM's association exactly, with no new pseudo, because `s` is a
+  variable that already exists. (Same lever as the wave-46 "statement boundary
+  is a fold barrier" chapter, applied to reassociation rather than to folding.)
+- **The fix that looks equivalent and is not:** introducing `int t; t = a + 1;
+  s = t - k;` at function scope, used in all four switch arms, measured
+  **+28 bytes**. One declaration used in four mutually exclusive blocks is ONE
+  pseudo with a live range spanning all four, so it parks in a callee-saved
+  register and every arm pays for it. This is the wave-17 "binding locals are
+  punctuation, not storage" rule biting from the other direction: reuse an
+  EXISTING variable, do not introduce a shared one.
+
+## `shorten_compare` makes a `u8` counter against a `u16` bound an UNSIGNED test (wave 49, W49-H)
+
+`for (x = 0; x < *(u16 *)map; x++)` compiles to `blo`/`bhs` when `x` is `u8` and
+to `blt`/`bge` when `x` is `int`, over the identical bound expression. Both
+operands promote to `int` in C89, so the naive reading says the compare must be
+signed; the C front end's `shorten_compare` then narrows the comparison back to
+a common type of the two originals, and because both are unsigned narrow types
+the comparison itself becomes unsigned.
+
+**So the branch condition at a loop bottom is a direct read-out of the counter's
+declared width**, and it is free: `blo` says `u8`/`u16` counter, `blt` says
+`int`. `sub_0801FE68` and `sub_0801F98C` loop over the same two map bounds in
+the same block and differ only in this. `src/decomp/c_0801F6F0.c` records the
+same fact for its `x`/`y` locals.
+
+## `= -1` into a `u8` element folds to 255 — the ROM's `movs #1; rsbs` needs a SIGNED lvalue (wave 49, W49-H)
+
+`sub_0801FE68` clears cells of the `u8 *gUnknown_03003340[]` plane. Written
+`gUnknown_03003340[y][x] = -1;` the C front end converts the constant to
+`(unsigned char)255` at tree level and agbcc emits `movs rN, #0xff`, two bytes.
+The ROM has `movs r0, #1; rsbs r0, r0, #0; adds r5, r0, #0` — a SImode `-1`
+materialised the long way, six bytes, because `-1` is not an 8-bit `mov`
+immediate.
+
+The discriminator is the **tree type of the store**, not the value: writing
+`((s8 *)gUnknown_03003340[y])[x] = -1;` keeps the constant at `-1` and
+reproduces the ROM. So a `movs #1; rsbs` feeding a `strb` is positive evidence
+that the original source stored through a **signed** view of the byte, even when
+the object's own declared type is `u8` — and, read the other way, `movs #0xff`
+before a `strb` says the lvalue was unsigned. It is one of the few places where
+a byte store discriminates signedness at all.
+
+## `?:` into a stack array vs `if`/`else`: one merged store shares the array base, two stores rematerialise it (wave 49, W49-I)
+
+sub_0802042C fills four `s16 nb[4]` slots at sp+8, each with an off-map guard.
+Written as `nb[k] = cond ? 0xff : cell;` the two arms converge on ONE store, so
+agbcc keeps a single `&nb[0]` pseudo alive and reaches every element with a
+displacement:
+
+    mov r1, r8          @ r8 == sp + 8, materialised once
+    strh r0, [r1, #2]
+
+Written as `if (cond) nb[k] = 0xff; else nb[k] = cell;` each arm has its OWN
+store, and every store materialises its own address from `sp`:
+
+    mov r1, sp
+    adds r1, #0xa
+    strh r0, [r1]
+
+The ROM does the second. THUMB `strh` cannot use an sp-relative form and cannot
+use a high register as a base, so the shared-base spelling has to add a
+`mov rLOW, rHIGH` per store while still saving the `mov sp; adds #imm` pair --
+net **28 bytes across four neighbours on a 520-byte function, the entire
+residual**. This is the store-address twin of the "one local where the original
+had N" rule: a merged store is one address expression, split stores are two.
+
+Read it off the ROM directly. Count the `strh`/`strb` instructions per
+assignment: one means `?:`, two means `if`/`else`. Both spellings produce the
+same branch structure, so the branches tell you nothing.
+
+## An equality test that keeps `lsls #0x18; asrs #0x18` is a SIGNED-CHAR LOCAL, never a written-out `(s8)` cast (wave 49, W49-I)
+
+sub_0802042C's loop test is
+
+    ldrb r0, [r0]
+    lsls r0, r0, #0x18
+    asrs r0, r0, #0x18
+    cmp  r0, #0
+    bne  ...
+
+`(s8)gUnknown_03003340[y][x] != 0` cannot produce this. `fold` strips a
+same-width sign change out of an equality test (`(signed char)u8val != 0` is
+`u8val != 0`), so the shifts never reach RTL and the candidate emits a bare
+`cmp r0, #0` -- 4 bytes short per site. Assigning the cell to an `s8` LOCAL and
+testing the local does produce it: PROMOTE_MODE parks the local zero-extended,
+`fold` has no conversion to remove because the tree is just `c != 0`, and
+expand re-extends at every signed read.
+
+This is the equality-test companion to wave 37's rule that `ldrh; lsls; asrs` is
+not an `(s16)` cast (`sign_extend (mem)` folds to `ldrsh`/`ldrsb`). Both say the
+same thing from opposite ends: **shifts after a plain load never come from a
+cast written on the load. They come from a narrow LOCAL.**
+
+## A value read once by the ROM and used twice is usually written TWICE, not bound to a local (wave 49, W49-I)
+
+sub_08020EDC reads a map plane byte, tests it against 0, and then uses it as an
+array subscript. The ROM has ONE `ldrb`, which reads like a local:
+
+    ldrb r0, [r1]
+    cmp  r0, #0
+    beq  ...
+    ldr  r2, =gUnknown_08499594
+    adds r1, r0, #0
+
+Binding it (`m = ids[off]; if (m == 0) ...; ... g[m] ...`) scored **60.2%**.
+Writing `ids[off]` out at both sites scored **86.8%** on the same draft, size
+exact both ways -- CSE collapses the two reads into the single `ldrb` anyway,
+and the local was costing 26 points of allocation across the whole function.
+
+**One `ldrb`/`ldrh` in the ROM is not evidence of a source local.** It is the
+default: CSE gets there on its own whenever nothing between the two reads can
+write the location. Reach for the local only when the ROM keeps the value live
+across something that WOULD invalidate it (a call, a store through an aliasing
+pointer) -- that is the wave-48 W48-F rule about control-flow merges, and it is
+narrower than it looks.
