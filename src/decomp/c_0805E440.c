@@ -1,0 +1,139 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0805E440.
+ * sub_0805E440 @ 0x0805E440, sub_0805E5AC @ 0x0805E5AC
+ */
+
+/* Wave 52, W52-D.  MATCHED (364/364, relocs resolve to the same addresses).
+ *
+ * gUnknown_0816DA6C / _0816DA70 are NOT globals -- the ROM words there hold
+ * 0x030040D8 and 0x08499590, so they are agbcc's own -fforce-addr constants for
+ * gUnknown_030040D8 and gUnknown_08499590.  Promotion must carry them:
+ *   "rodata": ["0x0816DA6C", "0x0816DA70"]
+ *
+ * Both `unk04` reads are 7-BIT BITFIELDS and the ROM reads each of them TWICE
+ * off one `ldrb` with two different extractions -- `movs r0,#0x7f; ands` where
+ * it is only tested against zero, and `lsls #0x19; lsrs #0x19` where the value
+ * reaches Div.  That is exactly the discriminating evidence recorded on
+ * struct Unk030040D8's unk04 and struct Unk08499594's unk04_0, and both already
+ * carry it, so nothing needed declaring.
+ *
+ * THE ONE THING THAT COST ANYTHING: `n + 1 + Div(...)`.  agbcc's fold()
+ * reassociates it to `n + (Div(...) + 1)` and emits `add rQ,rQ,#1; add rQ,rN,rQ`
+ * where the ROM has `adds r1,r5,#1; adds r1,r1,r0`, i.e. `(n + 1) + Div(...)`.
+ * Measured on four spellings in one probe: `n + 1 + q`, `q + (n + 1)` and
+ * `q = Div(...); n + 1 + q` ALL fold to `n + (q + 1)`; only a STATEMENT BOUNDARY
+ * around `n + 1`, placed AFTER the Div statement, keeps the ROM's grouping.
+ * This is the wave-35 (W35-A) `A - (B - K)` finding on a PLUS: parentheses do
+ * not stop fold's associate, and neither does binding the call's result -- only
+ * splitting the constant's addition into its own statement does.
+ *
+ * The `x << 16` in r8 is strength_reduce's giv for the `(s16)x` that
+ * sub_0804236C's declared parameters force; it is not authored. */
+
+struct Map
+{
+    /* 0x0000 */ u16 unk00;
+    /* 0x0002 */ u16 unk02;
+    /* 0x0004 */ u16 unk04;
+    /* 0x0006 */ u16 unk06;
+    /* 0x0008 */ u8 filler_0008[0x0A];
+    /* 0x0012 */ u8 unk0012[0x0508];
+    /* 0x051A */ u8 unk051A[0x0F18];
+    /* 0x1432 */ u8 unk1432[0x0A10];
+    /* 0x1E42 */ u8 unk1E42[0x0508];
+    /* 0x234A */ u8 unk234A[0x0508];
+    /* 0x2852 */ u8 unk2852[0x1928];
+    /* 0x417A */ u16 unk417A[0x100];
+};
+
+void sub_0805E440(void)
+{
+    int x;
+    int y;
+    int id;
+    int n;
+    struct Unk08499594 *u;
+
+    sub_080202A4(gUnknown_030040D8);
+
+    for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+    {
+        for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+        {
+            if ((s8)gUnknown_03003340[y][x] < 0)
+                continue;
+            id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x];
+            if (id == 0)
+                continue;
+            if ((id & 0xc0) != gUnknown_03003F2C)
+                continue;
+            if (sub_0804236C(x, y) == 0)
+                continue;
+            u = gUnknown_08499594 + id;
+            if (u->unk04_0 != 0)
+            {
+                if (Div(u->unk04_0 - 1, 10) == 9)
+                    continue;
+            }
+            if (u->unk00 != gUnknown_030040D8->unk00)
+                continue;
+            if (u->unk04_0 != 0)
+                n = Div(u->unk04_0 - 1, 10) + 1;
+            else
+                n = 0;
+            if (gUnknown_030040D8->unk04 != 0)
+            {
+                int q;
+                int t;
+
+                q = Div(gUnknown_030040D8->unk04 - 1, 10);
+                t = n + 1;
+                if (t + q > 10)
+                    continue;
+            }
+            else
+            {
+                if (n > 10)
+                    continue;
+            }
+            sub_0805D648(x, y, 10, 0, 0);
+        }
+    }
+}
+
+void sub_0805E5AC(void)
+{
+    s16 x;
+    s16 y;
+    int id;
+    struct Unk08499594 *u;
+
+    if ((((struct Map *)gUnknown_08499590)->unk1432[((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] & 0xe0) != gUnknown_03004084)
+        return;
+    if (gUnknown_085767B8[((struct Map *)gUnknown_08499590)->unk1432[((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] & 0x1f] != 0)
+        return;
+
+    gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, 1, 3, 0);
+
+    for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+    {
+        for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+        {
+            if ((s8)gUnknown_03003340[y][x] < 0)
+                continue;
+            if (((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x] != 0)
+            {
+                u = gUnknown_08499594 + (id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x]);
+                if (sub_08026F9C(gUnknown_03003F38, u - gUnknown_08499594) == 0)
+                {
+                    if (u->unk00 == 1)
+                        sub_0805D648(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, 2, 0, 0);
+                }
+            }
+        }
+    }
+}

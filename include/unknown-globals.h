@@ -17006,7 +17006,18 @@ extern void (*const gUnknown_085768E0[])(void);
  * gUnknown_08499598[gUnknown_030033EC].unk2c, with `ldr; adds; str` each time.
  * `int` because that is sub_08061DA8's declared return type; nothing compares
  * it, so the signedness is inherited rather than proved. */
-extern int gUnknown_03004788;
+/* Wave 52, W52-B ADDS the volatile, and it is a byte-exact measurement rather
+ * than a style choice. sub_08059B4C's `if (a2 > gUnknown_03004788) a2 =
+ * gUnknown_03004788;` compiles, non-volatile, to one `ldr` plus `adds r1,r0,#0`
+ * -- CSE reuses the compared value for the assignment, and no spelling of that
+ * statement (plain `if`, `?:`, a temporary, two divides) stops it. The ROM
+ * holds the ADDRESS in r2 and issues a SECOND `ldr r1,[r2]`, which only a
+ * volatile read produces. With the volatile the function is byte-for-byte
+ * identical; without it, 97.8% with those 4 bytes as the entire residual.
+ * Byte-neutral at the only other reader, sub_08061CF8 (src/decomp/c_08061CF8.c),
+ * whose `= 0` and four `+= sub_08061DA8(n)` already emit ldr/add/str around a
+ * call -- re-verified with trymatch after this edit. */
+extern volatile int gUnknown_03004788;
 
 
 /* Wave 37, W37-O2. The gUnknown_0200C528 script-command DISPATCH TABLE.

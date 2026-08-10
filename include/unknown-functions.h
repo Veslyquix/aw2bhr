@@ -10117,6 +10117,31 @@ u8 sub_0805ACA8(int, int, u16 *);
 void sub_0805C128(int, int, u16 *);
 int sub_0805A854(u16 *);
 void sub_0805A5E0(int *);
+/* Wave 52, W52-D. sub_0805A268, sub_0805A388 and sub_0805A514 are DELIBERATELY
+ * NOT DECLARED HERE, and the reason is worth recording because two waves have
+ * now been tempted to add them. All three are already DEFINED, in
+ * src/decomp/c_0805A268.c and c_0805A514.c, taking `struct Unk5A514Cell *` --
+ * a FILE-LOCAL tag repeated verbatim in three promoted files
+ * (c_0805A268.c, c_0805A514.c, c_0805A744.c) and therefore unnameable from a
+ * shared header. Declaring them here with any other pointer type is a real
+ * cross-unit disagreement that `try_match` cannot see; `tools/proto_check.py`
+ * catches it and did. A caller repeats the tag body and casts at the call
+ * site instead -- see work/sub_0805E160 and work/sub_0805E87C.
+ *   The caller-side evidence, for whoever eventually merges the types: all
+ * three take the dereferenced gUnknown_03003F20 in r0, which
+ * include/unknown-globals.h declares `struct Unk03003338 *`. So
+ * struct Unk03003338 and struct Unk5A514Cell describe the same object and the
+ * cast is not a coincidence.
+ *
+ * Wave 52, W52-D. NULLARY on a BARE PROLOGUE: sub_0805E2AC pushes, saves the
+ * high registers and adjusts sp without copying r0 anywhere, and sub_0805E160's
+ * only call to it sets up no arguments at all. W21-B's rule says a bare prologue
+ * is evidence for a WIDE parameter rather than for none, so this is the weaker
+ * of the two readings and is UNPROVEN -- sub_0805E160 matched byte-for-byte
+ * either way, because r0 happens to hold the cell's x at that call and a
+ * forwarded argument costs no instruction. Settle it from sub_0805E2AC's own
+ * body when that function is derived. */
+void sub_0805E2AC(void);
 /* Wave 49, W49-G. CORRECTED from (s16, s16, int, u8, int): parameters 3 and 5
  * are u8, not int. sub_0805D648's own prologue narrows all five --
  * `lsls #0x10 / lsrs #0x10` on the first two and `lsls #0x18 / lsrs #0x18` on
@@ -10300,6 +10325,14 @@ void sub_0805C0AC(void *);
  *   sub_0805EB58 and sub_0805F914 are called with no argument set-up and their
  * results are unused. */
 void sub_0805A9AC(int, void *);
+/* Wave 52, W52-B. No prototype existed; this one is read off the MATCHED body
+ * (work/sub_0805A6DC). One argument: the output cursor for the same
+ * {u8 x; u8 y; s16 v;} 4-byte record c_0805A514.c produces, spelled `u8 *`
+ * because the plain scalar-pointer stores are what the byte match needs -- a
+ * `struct Unk5A514Cell *` cursor is 4 bytes short. The result is the record
+ * COUNT, formed as `(out - (u8 *)gUnknown_03003F20) >> 2`. Its one caller,
+ * sub_0805F4F8, is still asm, so nothing else constrains this yet. */
+int sub_0805A6DC(u8 *);
 void sub_08059B4C(int, int, int, void *, void *);
 void sub_0805EB58(void);
 void sub_0805F914(void);
