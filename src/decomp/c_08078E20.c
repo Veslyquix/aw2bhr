@@ -40,9 +40,13 @@ u8 sub_08078E20(void)
  * sub_0807A908's result is re-narrowed `lsls #0x10; lsrs #0x10` and consumed
  * by sub_0801A5B0(u16), so it is a nest and the callee returns u16. */
 
-void sub_08078E48(void)
+/* WAVE 53, W53-D: the ProcPtr parameter is forced by sub_0807898C gaining one
+ * (see include/unknown-functions.h) and costs nothing -- r0 already holds it at
+ * the call. Nothing in C calls sub_08078E48; it is reached as a proc-script
+ * function pointer, so no caller needed updating. Re-verified byte-for-byte. */
+void sub_08078E48(ProcPtr proc)
 {
-    sub_0807898C();
+    sub_0807898C(proc);
     sub_08078AF0();
     gDispIo.disp_ct.bg1_enable = 0;
     sub_08013B0C();

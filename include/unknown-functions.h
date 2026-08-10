@@ -3990,7 +3990,20 @@ int sub_08071908(void *);
  * the widths are `int` because every argument arrives as a bare register or a
  * shifted immediate with no narrowing. sub_0807898C is called for effect with
  * no argument register read and ends `pop {r0}; bx r0`. */
-void sub_0807898C(void);
+/* WAVE 53, W53-D: sub_0807898C TAKES ONE ARGUMENT after all, and the `(void)`
+ * above was the invisible-arity case the wave-51 arity rule describes -- the
+ * body never reads r0, so every caller that already had its own proc in r0 cost
+ * zero instructions and the parameter left no trace. sub_0808A6CC is the
+ * differently-shaped caller that exposes it: it SPILLS its proc to [sp] for the
+ * loops, and then reloads it purely to make this call --
+ *   `str r0,[sp]; movs r0,#9; bl sub_0803B3D4; ldr r0,[sp]; bl sub_0807898C`
+ * -- with nothing else consuming r0. A `(void)` callee emits no such reload.
+ * ProcPtr because all three known callers (sub_08078E48, sub_08080498,
+ * sub_0808A6CC) are proc callbacks forwarding their own proc; the parameter is
+ * unused in the body, so the type is unconstrained by the callee and this is the
+ * weakest model that fits the call sites. c_0807898C.c, c_08080498.c and
+ * c_08078E20.c were re-verified byte-for-byte after the change. */
+void sub_0807898C(ProcPtr);
 /* Wave 39 (W39-A): sub_08012B70's last THREE arguments retyped int -> u16, and
  * the second void * -> u16 *, off the callee's own prologue. c_080399F8.c had
  * predicted the fifth and deferred the retype for want of caller re-verification;
@@ -6325,6 +6338,17 @@ void sub_0803D238(u8 *);
 /* Wave 43 (W43-G). Copied verbatim from the promoted definition in
  * src/decomp/c_080215FC.c so sub_0803D2F8 can call it. */
 void sub_080215FC(void);
+/* Wave 53, W53-B. The save/restore pair for whatever lives at
+ * gUnknown_02000000 + 0xDA8: sub_08016F38 ends `sub_08045700(&blk[0xDA8])` and
+ * its mirror sub_08017208 ends `sub_080456B8(&blk[0xDA8])`, each with the
+ * address as the only argument and the result discarded. W53-B proposed
+ * `void *` on the grounds that nothing at either call site settles a pointee
+ * type -- true, but it did not look for a body, and both are already PROMOTED
+ * in src/decomp/c_080455CC.c as `u8 *`. The definition is the stronger witness
+ * and the two spellings are byte-identical at the call, so these are copied
+ * from it rather than guessed. */
+void sub_08045700(u8 *);
+void sub_080456B8(u8 *);
 
 /* Wave 43 (W43-G). The parameter is `u8`: the prologue narrows r0 in place
  * (`lsls #0x18; lsrs #0x18`) and every later use reads the narrowed value.
@@ -10336,6 +10360,18 @@ int sub_0805A6DC(u8 *);
 void sub_08059B4C(int, int, int, void *, void *);
 void sub_0805EB58(void);
 void sub_0805F914(void);
+/* Wave 53, W53-E. Both signatures are COPIED FROM the promoted definitions in
+ * src/decomp/c_08059674.c and src/decomp/c_0805F6D4.c, which win over any
+ * reading here; neither had a declaration anywhere, so every caller in the
+ * 0x08059/0x0805F battle-cursor block was carrying its own. sub_08059674's
+ * `u8` return is why its callers all test the result with a bare
+ * `lsls r0,#0x18` truth test rather than `cmp r0,#0`, and its `s16` parameters
+ * are why callers holding `int` coordinates sign-extend (`lsls #0x10;
+ * asrs #0x10`) in front of the `bl` while callers holding `s16` ones do not.
+ * NOTE the c_08059674.c comment: that file also carries its own K&R
+ * declaration of sub_0805A8C0, which must NOT be moved here. */
+u8 sub_08059674(s16, s16);
+void sub_0805F6D4(void);
 /* Wave 51, W51-E. The 0x0805ED70/0x0805EE40/0x0805EF00/0x0805F074 quartet is
  * the same battle-animation entry-point shape W51-C documents just above, and
  * these declarations come out of matching all four.
@@ -10810,5 +10846,43 @@ void sub_0805A0EC(void *);
 u16 *sub_0808488C(int);
 int sub_0807F8E4(void);
 void sub_08087B20(int, int, int, int);
+
+/* Wave 53, W53-A. Three callees of sub_0804A260 that had no declaration here.
+ * sub_08013034 takes the NUL-terminated byte buffer sub_0804A260 has just
+ * filled at gUnknown_030044E0 + 0x41 (one argument; the pointer is already in
+ * r0 and nothing else is set up), and its result is discarded.
+ * sub_0804A6A4 is nullary -- no argument register is written before the call
+ * and its result is discarded.
+ * sub_080741C4 takes THREE arguments: r0, r1 and r2 each get their own
+ * `movs #0` at the only call site and r3 is left alone, which is the one arity
+ * readout that is not a guess (an argument already in the right register would
+ * have cost zero instructions, but a literal 0 never is). */
+void sub_08013034(u8 *);
+void sub_0804A6A4(void);
+void sub_080741C4(int, int, int);
+
+/* Wave 53, W53-C. Callees of the sub_0807C614 / sub_08081060 / sub_08085B30
+ * screen-setup cluster that had no declaration here. Where a promoted
+ * definition exists it wins and the signature is copied from it:
+ * src/decomp/c_08078D40.c (sub_08078D80), src/decomp/c_08037750.c,
+ * src/decomp/c_08084804.c, src/decomp/c_080878A8.c (sub_08087938).
+ *
+ * sub_080845C4 and sub_080845E8 are the exception, and they are the reason the
+ * arity rule reads in BOTH directions. src/decomp/c_08084580.c defines them as
+ * `(int i)` and `(void)`, but sub_08081060 -- their only caller in the ROM --
+ * sets up r1 at all ten call sites. An argument the callee never reads costs
+ * zero instructions in the callee, so a promoted definition cannot see it; the
+ * caller is the only witness to the true arity. Both definitions were widened
+ * to match and re-verified byte-identical. */
+void sub_08078D80(ProcPtr);
+void sub_08037750(int);
+void sub_08084804(void);
+void sub_08087938(void);
+void sub_080845C4(int, int);
+void sub_080845E8(int, int);
+/* sub_08085B30 hands it `gUnknown_03005900 + gUnknown_03005930` (a u8 widened
+ * into an int plus a u16) with the sum built in an int register and no
+ * re-narrowing, and the result is unused. */
+void sub_08086F3C(int);
 
 #endif // UNKNOWN_FUNCS_H

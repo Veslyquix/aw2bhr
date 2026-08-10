@@ -37,8 +37,14 @@
  * byte 0 keeps chr_block before color_depth and byte 1 keeps tm_block before
  * size, and tm_block sits between them.
  *
- * MATCHED first draft. */
-void sub_0807898C(void)
+ * MATCHED first draft.
+ *
+ * WAVE 53, W53-D: the parameter was added here, not discovered here -- this
+ * body never reads r0 and is byte-identical either way. See the note on the
+ * declaration in include/unknown-functions.h: sub_0808A6CC reloads its spilled
+ * proc into r0 immediately before the `bl`, which only a callee with an
+ * argument can explain. Re-verified byte-for-byte after the change. */
+void sub_0807898C(ProcPtr proc)
 {
     gDispIo.disp_ct.mode = 0;
     SetDispEnable(1, 1, 1, 1, 1);

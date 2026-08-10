@@ -1,0 +1,76 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0806938C.
+ * sub_0806938C @ 0x0806938C
+ */
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0806938C.
+ * sub_0806938C @ 0x0806938C
+ */
+
+#include "proc.h"
+#include "hardware.h"
+struct Unk6938CProc
+{
+    /* 0x00 */ u8 filler_00[0x2c];
+    /* 0x2c */ int unk2c;
+};
+
+/* Wave 53, W53-D. MATCHED first attempt; the whole function reads off
+ * c_080691BC.c / c_080694EC.c, which are the same subsystem's already-promoted
+ * neighbours and carry the identical `for (i = 0; i < 0x400; i++)
+ * gUnknown_08499578[i] += 0x140;` loop and the same 10-argument sub_080679D8
+ * call.
+ *
+ * gUnknown_08499578 and gUnknown_08499580 are REAL ROM pointer variables, not
+ * -fforce-addr pool words: the ROM words at 0x08499578 / 0x08499580 hold two
+ * different VRAM-bound addresses and both are already declared `u16 *`. The
+ * single `ldr =sym; ldr [sym]` indirection is the honest spelling. (Contrast
+ * gUnknown_0816E170 in c_0806B1A8.c and gUnknown_081D9450 in c_08087C94.c,
+ * which ARE pool words -- checked by dereferencing baserom.gba.)
+ *
+ * `gUnknown_0202F204++` supplies the OLD value; the `lsls #0x18; lsrs #0x18`
+ * pair is agbcc's u8 re-truncation of it, not a separate cast. */
+void sub_0806938C(struct Unk6938CProc *proc)
+{
+    int i;
+
+    proc->unk2c = sub_080674F4(gUnknown_0202F204++);
+
+    SetDispEnable(1, 1, 0, 0, 1);
+
+    gUnknown_030030B4.bits.priority = 0;
+    gUnknown_03001FE8.bits.priority = 1;
+    gUnknown_03002B6C.bits.priority = 2;
+    gUnknown_0300251C.bits.priority = 3;
+
+    sub_08012358();
+    sub_08063994();
+    sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 2);
+
+    Decompress(gUnknown_08183B14, gUnknown_08499580);
+    ApplyPaletteExt(gUnknown_08183C28, 0, 0x80);
+    ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
+    Decompress(gUnknown_0823A3D4, (void *)0x06002800);
+    Decompress(gUnknown_08239FA4, gUnknown_08499578);
+
+    for (i = 0; i < 0x400; i++)
+        gUnknown_08499578[i] += 0x140;
+
+    sub_08013AEC();
+    sub_08013B0C();
+    sub_08013B1C();
+
+    sub_08072C40(0, 0, 0);
+    sub_08072C40(1, 0, 0);
+    sub_08072C40(2, 0, 0);
+
+    sub_080677BC(0, 0, -5, proc);
+    sub_080679D8(2, 1, 0, 0x88, 0x3800, 0, 0xc0, 0x100, 0xc, proc);
+}

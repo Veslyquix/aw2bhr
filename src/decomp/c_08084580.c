@@ -55,12 +55,19 @@ void sub_080845A8(int i)
  * displacement in the `ldr` is what the record type buys -- a flat pointer
  * array indexed `i * 2 + 1` reassociates and is three instructions longer. */
 
-void sub_080845C4(int i)
+/* WAVE 53 (W53-C): both of these gained a SECOND parameter that neither body
+ * reads. sub_08081060 is the only caller of either, and it sets up r1 at every
+ * one of its ten call sites (`movs r1, #0x88; lsls r1, r1, #1` and friends) --
+ * an argument the callee ignores costs zero instructions in the callee, so the
+ * promoted definitions could not see it and the CALLER is the only witness.
+ * Both functions still match byte-for-byte with the parameter added. */
+
+void sub_080845C4(int i, int a2)
 {
     Decompress(gUnknown_08616AC0[i][1], (void *)(0x06013B00 + (i << 0xa)));
 }
 
-void sub_080845E8(void)
+void sub_080845E8(int a1, int a2)
 {
     Decompress(gUnknown_0823D980, (void *)0x06015300);
 }

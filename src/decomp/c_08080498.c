@@ -17,7 +17,7 @@ struct Unk08080498
 
 void sub_08080498(struct Unk08080498 *proc)
 {
-    sub_0807898C();
+    sub_0807898C(proc);
     sub_08013AEC();
     sub_08013AFC();
     sub_08013B0C();

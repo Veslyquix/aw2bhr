@@ -15,8 +15,18 @@
  * 0x06008000 where this computes the char base out of the BG3 control shadow.
  * `ldr` + `lsls #0x1c; lsrs #0x1e` is the bitfield read of `bits.chr_block`
  * whatever the container, and `<< 0xe` scales it by the 16 KB char block.
+ *
+ * Wave 53 (W53-A) RETYPES this from `void sub_080741C4(void)`. The body reads
+ * no argument register, so nullary was the honest body-side reading, but the
+ * caller-side evidence is decisive the other way: sub_0804A260 sets r0, r1 and
+ * r2 to 0 with three separate `movs #0` immediately before the `bl`. An
+ * argument already in the right register costs nothing, but a literal 0 never
+ * does, so there are three parameters and this body ignores all three. The
+ * three unused ints change nothing here -- re-verified byte-for-byte with
+ * trymatch, 72 bytes, relocs match -- and sub_0807420C in this file is
+ * untouched.
  */
-void sub_080741C4(void)
+void sub_080741C4(int a1, int a2, int a3)
 {
     Decompress(gUnknown_0823A3D4,
                (void *)(0x06000000 + (gUnknown_0300251C.bits.chr_block << 14)));

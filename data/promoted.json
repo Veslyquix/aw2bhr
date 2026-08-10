@@ -16704,6 +16704,15 @@
   "size": 108
  },
  {
+  "file": "src/decomp/c_08047C04.c",
+  "obj": "src/decomp/c_08047C04.o",
+  "addr_hex": "0x08047C04",
+  "functions": [
+   "sub_08047C04"
+  ],
+  "size": 832
+ },
+ {
   "file": "src/decomp/c_08047F44.c",
   "obj": "src/decomp/c_08047F44.o",
   "addr_hex": "0x08047F44",
@@ -17176,6 +17185,20 @@
    "sub_0804A1E4"
   ],
   "size": 212
+ },
+ {
+  "file": "src/decomp/c_0804A260.c",
+  "obj": "src/decomp/c_0804A260.o",
+  "addr_hex": "0x0804A260",
+  "functions": [
+   "sub_0804A260"
+  ],
+  "size": 1004,
+  "rodata": [
+   "0x0812A274",
+   "0x0812A278",
+   "0x0812A27C"
+  ]
  },
  {
   "file": "src/decomp/c_0804A64C.c",
@@ -19002,6 +19025,24 @@
   "size": 140
  },
  {
+  "file": "src/decomp/c_080591E4.c",
+  "obj": "src/decomp/c_080591E4.o",
+  "addr_hex": "0x080591E4",
+  "functions": [
+   "sub_080591E4",
+   "sub_08059464"
+  ],
+  "size": 1168,
+  "rodata": [
+   "0x0816D950",
+   "0x0816D954",
+   "0x0816D958",
+   "0x0816D95C",
+   "0x0816D960",
+   "0x0816D964"
+  ]
+ },
+ {
   "file": "src/decomp/c_08059674.c",
   "obj": "src/decomp/c_08059674.o",
   "addr_hex": "0x08059674",
@@ -19834,6 +19875,18 @@
   "size": 44
  },
  {
+  "file": "src/decomp/c_0805F4F8.c",
+  "obj": "src/decomp/c_0805F4F8.o",
+  "addr_hex": "0x0805F4F8",
+  "functions": [
+   "sub_0805F4F8"
+  ],
+  "size": 476,
+  "rodata": [
+   "0x0816DAAC"
+  ]
+ },
+ {
   "file": "src/decomp/c_0805F6D4.c",
   "obj": "src/decomp/c_0805F6D4.o",
   "addr_hex": "0x0805F6D4",
@@ -19841,6 +19894,18 @@
    "sub_0805F6D4"
   ],
   "size": 228
+ },
+ {
+  "file": "src/decomp/c_0805F7B8.c",
+  "obj": "src/decomp/c_0805F7B8.o",
+  "addr_hex": "0x0805F7B8",
+  "functions": [
+   "sub_0805F7B8"
+  ],
+  "size": 348,
+  "rodata": [
+   "0x0816DAB0"
+  ]
  },
  {
   "file": "src/decomp/c_0805FB70.c",
@@ -22107,6 +22172,15 @@
   "size": 464
  },
  {
+  "file": "src/decomp/c_0806938C.c",
+  "obj": "src/decomp/c_0806938C.o",
+  "addr_hex": "0x0806938C",
+  "functions": [
+   "sub_0806938C"
+  ],
+  "size": 352
+ },
+ {
   "file": "src/decomp/c_080694EC.c",
   "obj": "src/decomp/c_080694EC.o",
   "addr_hex": "0x080694EC",
@@ -22509,6 +22583,18 @@
    "sub_0806B0F4"
   ],
   "size": 132
+ },
+ {
+  "file": "src/decomp/c_0806B1A8.c",
+  "obj": "src/decomp/c_0806B1A8.o",
+  "addr_hex": "0x0806B1A8",
+  "functions": [
+   "sub_0806B1A8"
+  ],
+  "size": 576,
+  "rodata": [
+   "0x0816E170"
+  ]
  },
  {
   "file": "src/decomp/c_0806B610.c",
@@ -26272,6 +26358,18 @@
   ]
  },
  {
+  "file": "src/decomp/c_0807C614.c",
+  "obj": "src/decomp/c_0807C614.o",
+  "addr_hex": "0x0807C614",
+  "functions": [
+   "sub_0807C614"
+  ],
+  "size": 868,
+  "rodata": [
+   "0x081D933C"
+  ]
+ },
+ {
   "file": "src/decomp/c_0807C978.c",
   "obj": "src/decomp/c_0807C978.o",
   "addr_hex": "0x0807C978",
@@ -26642,6 +26740,19 @@
   "size": 128,
   "rodata": [
    "0x081D9394"
+  ]
+ },
+ {
+  "file": "src/decomp/c_08081060.c",
+  "obj": "src/decomp/c_08081060.o",
+  "addr_hex": "0x08081060",
+  "functions": [
+   "sub_08081060"
+  ],
+  "size": 724,
+  "rodata": [
+   "0x081D9398",
+   "0x081D939C"
   ]
  },
  {
@@ -27110,6 +27221,15 @@
   "size": 232
  },
  {
+  "file": "src/decomp/c_08086F3C.c",
+  "obj": "src/decomp/c_08086F3C.o",
+  "addr_hex": "0x08086F3C",
+  "functions": [
+   "sub_08086F3C"
+  ],
+  "size": 260
+ },
+ {
   "file": "src/decomp/c_080870B8.c",
   "obj": "src/decomp/c_080870B8.o",
   "addr_hex": "0x080870B8",
@@ -27286,6 +27406,18 @@
   "size": 24
  },
  {
+  "file": "src/decomp/c_08087C94.c",
+  "obj": "src/decomp/c_08087C94.o",
+  "addr_hex": "0x08087C94",
+  "functions": [
+   "sub_08087C94"
+  ],
+  "size": 880,
+  "rodata": [
+   "0x081D9450"
+  ]
+ },
+ {
   "file": "src/decomp/c_08088004.c",
   "obj": "src/decomp/c_08088004.o",
   "addr_hex": "0x08088004",
@@ -27414,6 +27546,15 @@
    "sub_0808A6A0"
   ],
   "size": 104
+ },
+ {
+  "file": "src/decomp/c_0808A6CC.c",
+  "obj": "src/decomp/c_0808A6CC.o",
+  "addr_hex": "0x0808A6CC",
+  "functions": [
+   "sub_0808A6CC"
+  ],
+  "size": 340
  },
  {
   "file": "src/decomp/c_0808A820.c",
