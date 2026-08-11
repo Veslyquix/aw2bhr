@@ -4100,6 +4100,12 @@ int sub_08071908(void *);
  * weakest model that fits the call sites. c_0807898C.c, c_08080498.c and
  * c_08078E20.c were re-verified byte-for-byte after the change. */
 void sub_0807898C(ProcPtr);
+/* Wave 55 (W55-B). Copied verbatim from the PROMOTED definition in
+ * src/decomp/c_08071B88.c rather than inferred from a call site: sub_080791B0
+ * is its first caller and calls it with the proc still sitting in r0, which
+ * (the arity rule) is byte-identical whether it takes that argument or none.
+ * The definition is the stronger witness and it takes none. */
+void sub_08071B88(void);
 /* Wave 39 (W39-A): sub_08012B70's last THREE arguments retyped int -> u16, and
  * the second void * -> u16 *, off the callee's own prologue. c_080399F8.c had
  * predicted the fifth and deferred the retype for want of caller re-verification;
@@ -5036,7 +5042,27 @@ void sub_080455CC(void);
 /* Wave 37, W37-P2. Never declared when it was promoted; the signature is
  * copied verbatim from the definition in src/decomp/c_080452C0.c. */
 void sub_080452C0(int, int, int);
-void sub_0804C0FC(int);
+/* Wave 55, W55-H: retyped from `int` to `u16`. The body opens
+ * `lsls r0,#0x10; lsrs r7,r0,#0x10` and uses r7 for every one of its fourteen
+ * uses, which is the PROMOTE_MODE entry pattern for a u16 parameter, not an
+ * `int` with a cast at each use. Same reading as sub_0804B850 two waves back.
+ * The only caller, src/decomp/c_08057138.c, passes the literals 0 and 1, so the
+ * change is byte-neutral there; re-verified by exit code after the edit. */
+void sub_0804C0FC(u16);
+/* Wave 55, W55-H: sub_0804C0FC's callees, all copied from their PROMOTED
+ * definitions (src/decomp/c_0804BD20.c, c_0804C098.c, c_0804C488.c,
+ * c_0804C498.c, c_0804C4A8.c, c_0804C578.c, c_0804C8C8.c, c_0804CEF8.c,
+ * c_0804DB14.c), not inferred. sub_0804C0FC is the first C caller of any
+ * of them, which is why none had a declaration before. */
+void sub_0804BD20(u16, u16, void *, void *);
+void sub_0804C098(u16);
+void sub_0804C488(u16);
+void sub_0804C498(u16);
+void sub_0804C4A8(u16);
+void sub_0804C578(u16);
+void sub_0804C99C(u16);
+void sub_0804CEF8(u16);
+void sub_0804DB14(u16);
 void sub_080566C8(int);
 void sub_08057138(void);
 void *sub_08057D58(int, int, int);
@@ -7969,6 +7995,35 @@ void sub_08042650(void);
 void sub_08042864(void);
 void sub_08060684(void);
 void sub_080606A0(void);
+/* Wave 55, W55-C. The last two entries of sub_0805FFA0's 20-way jump table
+ * (cases 0xd and 0xe) that had no declaration and no promoted body -- every
+ * other arm of that dispatcher is either declared above or defined in
+ * src/decomp (c_080600F0.c, c_080601C8.c, c_080601F0.c, c_080606BC.c,
+ * c_0802C16C.c, c_08042B70.c), and all of those are `void (void)`.
+ * sub_0805FFA0 reaches both through `mov pc, r0` with no argument setup on
+ * any path into the table and discards the result, and the two globals notes
+ * on struct Unk08499594.unk09 (W32-A) and gUnknown_030046C0 (W49-E) describe
+ * both as reading their operands out of globals. */
+void sub_08060110(void);
+void sub_08060170(void);
+/* The other nine arms of that table. Each of these ALREADY HAS A PROMOTED
+ * BODY and every one of them is defined `void f(void)`; the declarations below
+ * are copied from those definitions rather than inferred from the call site.
+ *   sub_080600F0            src/decomp/c_080600F0.c
+ *   sub_080601C8/080601DC   src/decomp/c_080601C8.c
+ *   sub_080601F0/08060264/080602C4  src/decomp/c_080601F0.c
+ *   sub_080606BC            src/decomp/c_080606BC.c
+ *   sub_0802C16C            src/decomp/c_0802C16C.c
+ *   sub_08042B84            src/decomp/c_08042B70.c */
+void sub_080600F0(void);
+void sub_080601C8(void);
+void sub_080601DC(void);
+void sub_080601F0(void);
+void sub_08060264(void);
+void sub_080602C4(void);
+void sub_080606BC(void);
+void sub_0802C16C(void);
+void sub_08042B84(void);
 void sub_0802428C(void);
 void sub_08035810(void);
 /* Wave 34 (W34-I). All three are called argument-free by the block-0x08042
@@ -8972,6 +9027,20 @@ void sub_08063DDC(struct Vec3 *, struct Mtx43 *, struct Vec3 *);
  * sub_08085410 / sub_08085638 / sub_080856A0's first argument, so `int`.
  * `pop {r4,r5,r6,r7}; pop {r0}` makes it void. */
 void sub_08085708(s16 *, int);
+/* Wave 55 (W55-D). Both already have PROMOTED, byte-matching bodies in
+ * src/decomp and neither had ever been declared, because sub_08085708 is their
+ * only caller and it was still asm. Types copied from the definitions, which
+ * are the stronger witness: src/decomp/c_080859A0.c and src/decomp/c_08085410.c.
+ * sub_080859A0's first two parameters really are narrow -- sub_08085708 emits
+ * an `lsls #16; lsrs #16` pair on each of them at the call and on nothing else
+ * it passes, which is the re-narrowing a u16 parameter forces and an `int` one
+ * cannot produce. */
+void sub_080859A0(u16, u16, int, int, int, int);
+int sub_08085410(int, int);
+/* Same wave, same reason: promoted and matching in src/decomp/c_08085638.c,
+ * never declared because sub_08085708 is the only caller. */
+int sub_08085638(int, int);
+int sub_080856A0(int, int);
 /* Already MATCHED (32 bytes, never promoted or declared): returns
  * `&gUnknown_0810E6E0[(gUnknown_08499598[i].unk1a - 1) * 0x20]`, the stride-0x20
  * palette row that table's note describes. `u16 *` rather than `u8 *` because
@@ -9436,7 +9505,21 @@ void sub_08071948(u16 *, int, int, const void *, u16);
 struct Unk3D6FC;
 void sub_0803D6FC(struct Unk3D6FC *);
 void sub_080376DC(void *, int, int, int, int, int);
-void sub_0803CFA4(const void *, u8 *, int);
+/* Wave 55 (W55-E): declared to match the PROMOTED definition in
+ * src/decomp/c_0803D990.c exactly (`int sub_0803D990(int, int, int, int, u8)`),
+ * not inferred from call sites -- the definition is the stronger witness. It is
+ * a clamp/step helper: (value, delta, min, max, wrap). sub_0803D9FC is its
+ * first cross-unit caller, which is why nothing declared it until now. */
+int sub_0803D990(int, int, int, int, u8);
+
+/* Wave 55 (W55-E): third parameter retyped `int` -> `u8` from the DEFINITION.
+ * sub_0803CFA4 opens `lsls r2,r2,#0x18; lsrs r2,r2,#0x18; str r2,[sp,#0x10]`
+ * -- PROMOTE_MODE's entry zero-extension of a sub-word parameter, before the
+ * first `bl`, which an `int` parameter cannot produce (the only use is
+ * `cmp r0, #1`, so a cast at the use would sit after the call). Byte-neutral
+ * at both callers: c_0803CDBC.c passes the constant 1 and c_0803CF54.c passes
+ * its own `u8 a3`. */
+void sub_0803CFA4(const void *, u8 *, u8);
 void sub_0803D6D0(void);
 void sub_08026040(int, int, int, int);
 /* wave 49: corrected (int x5) -> (u16, u16, u16, u16, u8), read straight off
@@ -9525,6 +9608,17 @@ void sub_0804B850(u16, u16, void *, void *, void *, void *, void *);
  * sub_0804A6D8 is the first C caller of either. */
 void sub_0804A1E4(u8);
 void sub_0804AE10(void);
+/* Wave 55, W55-H. All three copied from their PROMOTED definitions, not
+ * inferred: src/decomp/c_0804A64C.c, c_0804A68C.c, and -- note the filename --
+ * c_0804A6A4.c for sub_0804A6D8, which is why grepping for a c_0804A6D8.c finds
+ * nothing. sub_0804A6D8 returns `int`, not void; sub_0804A760 discards it.
+ * sub_0804A760 is the first C caller of all three. */
+void sub_0804A64C(void);
+void sub_0804A68C(void);
+int sub_0804A6D8(void);
+/* Wave 55, W55-H: copied from the PROMOTED definition in
+ * src/decomp/c_0804BA64.c, not inferred. sub_0804B8BC is its first C caller. */
+void sub_0804BA64(u16, u16);
 void sub_0804BB28(int, void *, int);
 void sub_0804BB44(int, void *, int);
 void sub_0804BB74(int, void *, u32, int);
@@ -9596,7 +9690,21 @@ void sub_080484CC(struct Unk0804769C *);
 /* Declared from sub_080484CC's call site only: one argument, the same record
  * pointer forwarded unchanged, result discarded. `void *` is the weakest type
  * that fits; widen it when the definition is matched. */
-void sub_080482D8(void *);
+/* Wave 55, W55-H: retyped from `void *`. The only caller, src/decomp/c_080484CC.c,
+ * already passes a `struct Unk0804769C *`, so the change is byte-neutral there
+ * and was re-verified by exit code. The body reads unk1f/unk20/unk21 off it.
+ *
+ * sub_08048158 takes the SAME object through c_08047B98.c's file-local
+ * `struct Unk08047B98` (unknown-globals.h's note on Unk0804769C already records
+ * that they are one object seen at different offsets). That tag is forward-
+ * declared below rather than moved, so both promoted definitions still complete
+ * it themselves and neither file needed editing; sub_080482D8 casts at the call.
+ * sub_08047F70 is NOT promoted -- its parameter is read off this call site
+ * alone (r0 = the same pointer, result unused), so treat it as unproved. */
+struct Unk08047B98;
+void sub_080482D8(struct Unk0804769C *);
+void sub_08047F70(struct Unk0804769C *);
+void sub_08048158(struct Unk08047B98 *);
 void sub_080488E0(void);
 /* Wave 43, W43-L. Already DEFINED in src/decomp/c_08048F10.c; it had no
  * declaration here because nothing outside its own unit called it until
@@ -10408,6 +10516,11 @@ void sub_0805E2AC(void);
  * gUnknown_030040D8->unk02/unk03. Every caller is still in asm/, so this
  * costs nothing in the tree. */
 void sub_0805D648(s16, s16, u8, u8, u8);
+/* Wave 55, W55-C. Copied VERBATIM from the promoted definition in
+ * src/decomp/c_08058BB4.c (`int sub_08058DEC(int x, int y, u16 *out)`), which
+ * had no declaration anywhere; sub_0805DCD4 calls it from another unit and
+ * passes x and y with no narrowing at either call site, which agrees. */
+int sub_08058DEC(int, int, u16 *);
 /* Wave 49, W49-G. sub_0805D5EC is DEFINED in src/decomp/c_0805D5EC.c and had no
  * declaration; this publishes it unchanged so sub_0805D648 can call it. */
 void sub_0805D5EC(void);
