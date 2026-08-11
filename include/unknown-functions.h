@@ -503,6 +503,56 @@ int sub_08029A48(struct Unk08499594 *, u8);
 void sub_08029088(s16, s16);
 
 void sub_0801BD00(s32, s32, void *, s32);
+/* Wave 54, W54-G. PROMOTED-but-undeclared: the body has been in
+ * src/decomp/c_0802BAFC.c since it was matched, and the definition is copied
+ * here verbatim rather than re-derived from the call site -- the definition is
+ * the stronger witness. Its caller sub_0802B4D4 corroborates it: both halfword
+ * arguments are narrowed `lsls #0x10; lsrs #0x10` immediately before the `bl`,
+ * which is what a prototyped `u16` parameter costs a caller, and the third
+ * arrives as a bare `subs r2, r2, r1` with no re-narrowing at all. */
+void sub_0802BAFC(u16, u16, int);
+/* Wave 54, W54-G. MATCHED, and the signature is settled by the match rather
+ * than guessed: all three parameters carry the prologue `lsls #16; lsrs #16`
+ * that a declared narrow parameter costs, and each is then sign-extended again
+ * at its uses (`lsls #16; asrs #16`) -- the PROMOTE_MODE-plus-extend-at-use
+ * shape of an `s16`, not of a `u16`. a1 is an x offset, a2 a y offset and a3
+ * the row index into gUnknown_0849A2A6. Void: sub_0802AA78 discards nothing and
+ * the epilogue is `pop {r0}`. */
+void sub_0802B4D4(s16, s16, s16);
+/* Wave 54, W54-G. The 0x08055/0x08057 cutscene-player helpers sub_080553C8
+ * drives, none of which had a declaration even though two of them have bodies.
+ * sub_080555F0 is copied verbatim from its PROMOTED definition in
+ * src/decomp/c_080555F0.c; sub_08055654, sub_08055940 and sub_08057164 are
+ * copied from the unpromoted drafts in work/, which are the shared model for
+ * them. sub_080553C8 is the only caller of any of the five in the whole tree
+ * (src/, include/ and work/ all swept), so adding these regresses nothing.
+ *   sub_08055D4C has neither a body nor a draft: its signature is read off
+ * sub_080553C8's call site, which builds the identical two-`ldrh` argument list
+ * from gUnknown_02029BE8[0] and [1] that the sub_08055654 and sub_08055940
+ * calls on the two lines above it build, and discards the result. Weakest type
+ * that fits the pair; the return being void is from the discard alone. */
+/* Wave 54, W54-G. Three more PROMOTED-but-undeclared callees, all reached from
+ * sub_0801E508 and copied verbatim from their definitions -- sub_0801E3B4 from
+ * src/decomp/c_0801E3B4.c and sub_0808B710 (the ROM's sinf) from
+ * src/decomp/c_0808B710.c. sub_0808B91C has no promoted body; its `float
+ * sub_0808B91C(float)` comes from the draft in work/sub_0808B91C, which the
+ * call site corroborates exactly -- sub_0801E508 hands it a `__floatsisf`
+ * result and feeds the return straight into `__mulsf3`, and it is the cosf to
+ * sub_0808B710's sinf (the two are called in matched pairs on the same angle).
+ * sub_0801E508 is the only caller of any of the three outside their own files,
+ * so declaring them regresses nothing. */
+int sub_0801E3B4(int);
+float sub_0808B710(float);
+float sub_0808B91C(float);
+/* Wave 54, W54-G. PROMOTED-but-undeclared, copied verbatim from the definition
+ * in src/decomp/c_08016944.c. sub_0801E9B0 is its only caller anywhere in the
+ * tree (src/, include/ and work/ swept), so declaring it regresses nothing. */
+void sub_080169A4(s16, void *);
+void sub_080555F0(u16, u16);
+void sub_08055654(u16, u16);
+void sub_08055940(u16, u16);
+void sub_08055D4C(u16, u16);
+void sub_08057164(int, int, u16);
 /* Wave 40 (W40-H). sub_0801BF2C's other arm, and it takes the SAME four
  * arguments as sub_0801BD00 above -- both calls in that function build an
  * identical argument list off one SpriteEntry and differ only in the callee.
@@ -713,20 +763,27 @@ u8 sub_0803CA70(u32);
  * sub_080831FC / sub_08083484 / sub_08083738 each narrow the result with a bare
  * `lsls r0, r0, #0x18` before `cmp r0, #0`, which an `int` return would not
  * emit. Declared to match the promoted definitions, not against them. */
-/* Two more of the 0x08079xxx proc helpers, both void and both taking TWO
- * arguments with the FIRST unused in the body: sub_080795A8 opens
- * `adds r4, r1, #0` and then writes r0 before reading it, so the proc pointer
- * its caller leaves sitting in r0 costs nothing and is not evidence of arity --
- * the `movs r1, #0` is. sub_08079EA4 is the caller for both.
+/* Two more of the 0x08079xxx proc helpers, both void, both taking TWO
+ * arguments and both taking the scroll offset second as `u32` (the guards are
+ * `cmp rN, #imm; bhi`, an unsigned ordering an `int` cannot produce).
+ * sub_080795A8 opens `adds r4, r1, #0` and then writes r0 before reading it,
+ * so its proc pointer is genuinely unused and the `movs r1, #0` at the call is
+ * the arity evidence, not the pointer. sub_08079EA4 is a caller of both.
  *
- * sub_08079B38 IS NOT A REAL SYMBOL YET, and nothing may be promoted against it
- * until it is. 0x08079B38 is a genuine function entry that tools/split_asm.py
- * merged into sub_08079B04 -- see "bl to a mid-function local label is NOT a
- * tell" in docs/agbcc-codegen.md -- so `asm/` defines it only as the LOCAL label
- * `_08079B38` and no global symbol exists at that address in either build. A C
- * caller therefore cannot link against it. Declared here so the blocker is
- * recorded next to the thing that trips over it; see data/parked.json for
- * sub_08079EA4. */
+ * sub_08079B04 WAS `sub_08079B38` UNTIL WAVE 54 (W54-E), AND THE RENAME IS THE
+ * FIX, not a workaround. 0x08079B38 is the entry; the 52 bytes in front of it
+ * are sub_0807974C's literal pool, which agbcc emits past that function's
+ * `bx r0` behind a `b` -- so the pool is stored inside the address range the
+ * splitter assigned to the NEXT function and tools/split_asm.py read the `b`
+ * as a function start. Compiled as ONE translation unit with sub_0807974C in
+ * address order (which is how it must be promoted anyway), agbcc puts the pool
+ * exactly there and the label `sub_08079B04` lands on 0x08079B38 by itself. No
+ * splitter change and no lds symbol are needed. The three callers'
+ * `bl _08079B38` then assembles as a local, unrelocated branch, which was the
+ * entire 2-byte residual of sub_08079EA4, sub_08079FAC and sub_0807A0C4.
+ * `trymatch --unit sub_08079B04` is the oracle; the per-function oracle cannot
+ * pass either half and its percentage is not evidence about the source. First
+ * argument IS used here, unlike sub_080795A8's. */
 /* sub_08072B54 copies BOTH arguments to callee-saved registers and then narrows
  * the first with `lsls #16; asrs #16` before handing it to sub_0803B4DC -- which
  * is copy-then-narrow, i.e. an `int` parameter with a cast at a use, not an s16
@@ -762,7 +819,13 @@ void sub_08075AC4(int, int);
  * either. `u32` is chosen because it is one declaration against two redundant
  * casts; every call site is byte-identical under both. */
 void sub_080795A8(ProcPtr, u32);
-void sub_08079B38(ProcPtr, int);
+/* sub_08079B04 IS DELIBERATELY NOT DECLARED HERE. It is `static` inside its
+ * own unit -- see the paragraph above and src/decomp/c_08036B34.c's
+ * sub_08036B48 for the same construction. A non-static declaration would both
+ * clash with the definition and, worse, make the assembler keep an
+ * R_ARM_THM_CALL on each of the three `bl`s (a global symbol is preemptible),
+ * which is 6 bytes wrong. Its three callers carry their own `static` prototype
+ * and are all inside the same unit. */
 /* Wave 37, W37-Q2: NOW DECLARED, copied verbatim from the definition in
  * src/decomp/c_0803BD14.c, which had been promoted with no declaration
  * anywhere. Its caller sub_0803BCDC keeps the result in a register and
@@ -1828,12 +1891,45 @@ void sub_0808A47C(void);
  * (the same struct they were called with) straight to this.  Typed `void *`
  * because the struct is only described locally in those two files. */
 void sub_08089464(void *);
+/* Wave 54 (W54-B). One pointer argument and nothing else: sub_08089A04's only
+ * call site is `adds r0, r6, #0; bl sub_08088ECC` passing the same proc it was
+ * itself called with, and sub_08088ECC's own prologue reads r0 before writing
+ * it (`adds r7, r0, #0`) and no other argument register at all. `void *` for
+ * the same reason as sub_08089464 above -- the proc struct is described only
+ * locally in the files that use it. Nothing consumes a return value at either
+ * call site. */
+void sub_08088ECC(void *);
 /* src/decomp/c_080895E4.c already DEFINES this one and its tag is TU-local
  * there, so the tag is forward-declared here the way struct Unk4E334 is: the
  * definition wins, and sub_08089C14's caller casts to the incomplete type
  * rather than restating the body. */
 struct Unk080895E4Proc;
 void sub_080895E4(struct Unk080895E4Proc *);
+
+/* Wave 54 (W54-B). The rest of sub_0808844C's dispatch table, declared the same
+ * way as sub_080895E4 above: each already has a promoted definition whose proc
+ * tag is TU-local, so the tag is forward-declared here and sub_0808844C casts
+ * to the incomplete type instead of restating a layout it does not own. The
+ * definitions are the witnesses -- src/decomp/c_08088CDC.c for the first two,
+ * c_08089C14.c for the next two, c_0808A2F4.c for the last -- and every one of
+ * them takes exactly one proc pointer and returns void, which is also what
+ * sub_0808844C's call sites show (`adds r0, r7, #0; bl ...`, nothing consumed
+ * afterwards). sub_080897C8 and sub_08089A04 are wave-54 drafts in
+ * work/, not yet promoted; their tags follow the same convention. */
+struct Unk08088CDC;
+void sub_08088CDC(struct Unk08088CDC *);
+struct Unk08088DA4;
+void sub_08088DA4(struct Unk08088DA4 *);
+struct Unk08089C14;
+void sub_08089C14(struct Unk08089C14 *);
+struct Unk08089F90;
+void sub_08089F90(struct Unk08089F90 *);
+struct Unk8A2F4Proc;
+void sub_0808A2F4(struct Unk8A2F4Proc *);
+struct Unk080897C8;
+void sub_080897C8(struct Unk080897C8 *);
+struct Unk08089A04;
+void sub_08089A04(struct Unk08089A04 *);
 
 /* Two EMPTY functions -- each is a lone `bx lr`, four bytes, nothing else.
  * `void(void)` and not `void(int)`: their only call sites are inside
@@ -4496,13 +4592,85 @@ struct Unk8606CProc;
 void sub_0808606C(struct Unk8606CProc *);
 void sub_08086688(ProcPtr);
 void sub_08087C14(int);
+/* Wave 54 (W54-D). sub_08086688 is the first C caller any of these six ever
+ * had, and -Werror makes an implicit declaration fatal, so they are published
+ * here rather than left implicit. Four of them already have a body and the
+ * DEFINITION is what is copied, not a caller-side guess:
+ *   sub_080870B8  src/decomp/c_080870B8.c   void(int,int,int,int)
+ *   sub_08087168  src/decomp/c_08087104.c   void(int)
+ *   sub_08087220  src/decomp/c_08087220.c   void(int,int)
+ *   sub_080867BC  src/decomp/c_080867BC.c   void(struct Unk080867BCProc *)
+ * sub_080867BC's parameter struct is file-local to c_080867BC.c by the
+ * parameter-struct rule, so only a forward declaration of the tag lives here --
+ * the same shape as sub_0808606C above. ProcPtr is `void *`, so sub_08086688
+ * passes its own parameter straight through with no cast and no instruction.
+ * sub_08087040 has no promoted body yet; the ROM sets up no argument register
+ * before the `bl` and it `pop {r0}`s, so `void(void)`, which is also what
+ * work/sub_08087040 drafts. sub_080872D0 is caller-side only: one whole-word
+ * `ldr` of the proc's +0x5c and nothing after the `bl`, i.e. void(int) -- the
+ * same argument sub_08087168 takes at the immediately preceding call. */
+struct Unk080867BCProc;
+void sub_080867BC(struct Unk080867BCProc *);
+void sub_08087040(void);
+void sub_080870B8(int, int, int, int);
+void sub_08087168(int);
+void sub_08087220(int, int);
+void sub_080872D0(int);
 /* Wave 44 (W44-C), read off its two call sites in sub_0808606C (now matched).
  * Three 32-bit arguments and no narrowing at either call: argument 1 is a
  * whole-word `ldr` of the proc's +0x5c (or that minus one), argument 2 is
  * `gUnknown_03005928` (declared `u32`) plus zero or one, argument 3 is the
  * literal -1 or 0. Both call sites discard the result, so `void` is the
  * weakest model; the definition at 0x08086A58 is still asm. */
-void sub_08086A58(int, u32, int);
+/* Wave 54 (W54-D) RETYPED argument 2 from `u32` to `int`, from BODY evidence
+ * the caller side could not have: 0x08086A58 tests it three times and every
+ * one of the three is a SIGNED branch -- `cmp r7,#0; ble` on each loop guard
+ * and `cmp r1,r7; bge` against gUnknown_02027F74.unk37. A `u32` parameter turns
+ * all three into `bcs`/`bcc` and also blocks check_dbra_loop, so both counted
+ * loops keep an ascending index and an extra live register instead of the ROM's
+ * down-counter. W44-C's "gUnknown_03005928 is declared u32" was the only
+ * evidence for the old type and it is caller-side and byte-neutral: u32 -> int
+ * converts with no instruction, so nothing at a call site changes.
+ * Callers chased and re-verified by exit code: src/decomp/c_0808606C.c
+ * (sub_0808606C, three call sites) and the work draft work/sub_08085B30 (two
+ * call sites). */
+void sub_08086A58(int, int, int);
+/* Wave 54 (W54-D). Defined in src/decomp/c_08087548.c as void(int,int,int) and
+ * never declared until sub_08086A58 became its first C caller; the DEFINITION
+ * is what is published here. sub_08086A58 forwards its own three parameters
+ * unchanged (`mov r0,sl; adds r1,r7,#0; mov r2,sb`). */
+void sub_08087548(int, int, int);
+/* Wave 54 (W54-D). Both DEFINED in src/decomp (c_08085950.c, c_080858C0.c) and
+ * never declared until sub_080849C8 and sub_08084C14 became their first C
+ * callers; the DEFINITIONS are what is published. */
+void sub_08085950(int, int);
+void sub_080858C0(void);
+/* Wave 54 (W54-D). The 0x08085 tree's per-mode redraw quartet plus two more,
+ * all first called from C by sub_08084C14 this wave. The four `s16 *` are the
+ * DEFINITIONS in src/decomp/c_08085168.c, c_080851CC.c, c_08085208.c and
+ * c_08085244.c -- that family reaches the proc as a halfword array (`p[0x33]`
+ * is +0x66), and sub_08084C14 does the same, so no cast is needed at any of
+ * the four call sites. sub_08085908 is `void(void)` from c_08085908.c.
+ * sub_08084F44 and sub_08085044 keep their file-local parameter structs per
+ * the parameter-struct rule, so only the tags are forward-declared here;
+ * sub_08085044's body is work/sub_08085044 (matched this wave, not yet
+ * promoted) and its tag is `struct Unk8085044`. */
+void sub_08085168(s16 *);
+void sub_080851CC(s16 *);
+void sub_08085208(s16 *);
+void sub_08085244(s16 *);
+void sub_08085908(void);
+struct Unk8084F44;
+void sub_08084F44(struct Unk8084F44 *);
+struct Unk8085044;
+void sub_08085044(struct Unk8085044 *);
+/* Wave 54 (W54-D), sub_080860DC's callees. All four already have a promoted
+ * body and the DEFINITIONS are what is published here: c_08037780.c,
+ * c_0803BCD0.c, c_080876B4.c, c_08087B60.c. */
+void sub_08037780(void);
+void sub_0803BCD0(u8);
+void sub_080876B4(void);
+void sub_08087B60(int);
 
 /* ---- wave 15 (B): callees of families F046, F049, F057, F060, F061, F063 ----
  *
@@ -6828,6 +6996,17 @@ u8 sub_080759A0(int, int, u8 *);
 int sub_08076CAC(s16);
 int sub_08076D68(s16);
 
+/* Wave 54 (W54-F). Both already have promoted bodies -- these declarations only
+ * publish them, and both bodies were retyped in this wave from their single
+ * caller sub_08076F34 (see the notes in src/decomp/c_08076F14.c and
+ * src/decomp/c_08075298.c). sub_08076F14 is "is (x, y) inside a radius-16
+ * circle": the caller truth-tests its result after `lsls #0x18`, so the return
+ * is a byte, not the `int` the body used to carry. sub_08075298's a3/a4 are
+ * SIGNED halfwords because that caller narrows both with `lsls #0x10; asrs
+ * #0x10`; a5 is undiscriminated (its one call site passes 0). */
+u8 sub_08076F14(s16, s16);
+void sub_08075298(ProcPtr, int, s16, s16, u16);
+
 /* Starts gUnknown_086143B8 under `parent`. WAVE 34 (W34-G) SETTLED THE FIRST
  * TWO AS s16, retyping them from `int` -- the note here previously said the
  * width was undecided and that `int` was the weakest model, and the body
@@ -8091,6 +8270,12 @@ void sub_08044B28(int, int, ProcPtr);
 /* Same third-parameter proof from sub_08039650, where it additionally forces
  * the r2/r3 split between the proc pointer and the gUnknown_08499598 base. */
 void sub_08080E74(int, int, ProcPtr);
+/* Wave 54, W54-C. Already promoted as `void sub_08080E40(ProcPtr proc)` in
+ * src/decomp/c_08080DFC.c but never declared here; sub_08080BF0 is its only
+ * caller and the first outside that unit. The promoted definition is the
+ * stronger witness, so this agrees with it rather than re-deriving from the
+ * call site. */
+void sub_08080E40(ProcPtr);
 /* sub_08039820's predicate. `lsls r0,r0,#0x18` on the result before the `cmp`
  * is a narrow return being re-narrowed, so it is u8/bool8 and not int. */
 u8 sub_08039850(ProcPtr);
@@ -8634,6 +8819,23 @@ void sub_08062C94(void);
  * narrows the `int` return to u8 itself. */
 int sub_08062730(struct Unk08499594 *, struct Unk08499594 *);
 void sub_08077620(int, int);      /* (0, 0xA8 - gUnknown_0300064C), twice */
+
+/* Wave 54 (W54-F). sub_08077140 already has a promoted body in
+ * src/decomp/c_08077140.c as `void sub_08077140(u16 *dest, u16 base, int pal)`
+ * and this declaration only publishes it. sub_08077180 is its twin: the same
+ * call in sub_08077304's other arm, `(gUnknown_08551A00 + 0x41, 0x46, 1)`
+ * against sub_08077140's `(gUnknown_08551A00 + 1, 0x46, 1)`, so the same three
+ * parameter types.
+ * sub_080772B8 ALSO already has a promoted body, in src/decomp/c_0807728C.c,
+ * and that definition wins: its parameter is `struct Unk080772B8 *`, a tag
+ * defined inside that file. Declared here through an incomplete tag so the
+ * declaration cannot disagree with it -- the caller (sub_08077304) passes
+ * `gUnknown_08499578 + 0x280`, which is where that struct's +0x92 halfword
+ * grid lives. Do NOT retype this to `u16 *` from the call site. */
+struct Unk080772B8;
+void sub_08077140(u16 *, u16, int);
+void sub_08077180(u16 *, u16, int);
+void sub_080772B8(struct Unk080772B8 *);
 void sub_080758BC(int, int, int, ProcPtr);
                                   /* FOUR arguments: sub_08077E9C sets r0, r1
                                    * and r2 and leaves its own r0 sitting in r3
@@ -9974,6 +10176,37 @@ void sub_0801820C(struct Unk0200C528 *);
  * `lsls #0x18; asrs #0x18`, and its one caller sub_08038C98 reads the first
  * with a bare `ldrsb` and sign-extends the second. */
 void sub_08038848(s8, s8);
+
+/* Wave 54, W54-H. Already DEFINED in src/decomp/c_08055F68.c with exactly this
+ * signature -- copied from the definition rather than inferred. sub_08055D4C
+ * is its first cross-unit caller. */
+u16 sub_08055F68(u16);
+
+/* Wave 54, W54-H. All four are already DEFINED in src/decomp/c_0805521C.c with
+ * exactly these signatures -- copied from the definitions rather than inferred,
+ * so the declarations cannot drift. sub_08054C5C is their first cross-unit
+ * caller, and it chains all four: each result is re-narrowed
+ * `lsls #0x10; lsrs #0x10` and handed to the next as the trailing `tile`
+ * argument, which corroborates the u16 return the definitions already carry. */
+u16 sub_0805521C(u16, u16, u16, u16);
+u16 sub_08055288(u16, u16, u16, u16, u16);
+u16 sub_0805530C(u16, u16, u16, u16);
+u16 sub_08055374(u16, u16);
+/* Wave 54, W54-H. Matched this wave; no promoted body yet, so this is read off
+ * the definition in work/sub_08055058/. Parameters 1 and 2 are UNREAD by the
+ * body -- they are positional, and the count comes from sub_08054C5C's call
+ * site, which sets all four. Parameter 3 is the one tested `== 2` and
+ * parameter 4 subscripts gUnknown_08552D80; the u16 return is the tile
+ * cursor sub_08054C5C re-narrows and chains into sub_08055374. */
+u16 sub_08055058(u16, u16, u16, u16);
+/* Wave 54, W54-H. Matched this wave. Both parameters are 16 bits (`lsls #0x10;
+ * lsrs #0x10` at entry) and it is void -- nothing is left in r0 and it ends
+ * `pop {r0}; bx r0`. Parameter 1 is the side (it scales gUnknown_020298E0 by
+ * 0x90 and indexes gUnknown_08552148 and gUnknown_03004580) and parameter 2 is
+ * the slot, which subscripts gUnknown_02029A10[side].entries; both are
+ * forwarded UNCHANGED to sub_08050F24 as the last statement, which is where
+ * the pairing is confirmed rather than guessed. */
+void sub_08054598(u16, u16);
 
 /* Promoted in src/decomp/c_080386DC.c as void(int, int); this only adds the
  * prototype its caller sub_08038C98 needs (wave 37, W37-H). */

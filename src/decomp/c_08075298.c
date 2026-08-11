@@ -18,7 +18,15 @@ struct Unk08075298
     /* 0x38 */ u16 unk38;
 };
 
-void sub_08075298(ProcPtr parent, int a2, u16 a3, u16 a4, u16 a5)
+/* Wave 54 (W54-F): a3 and a4 retyped u16 -> s16, settled from the only caller
+ * in the ROM. sub_08076F34 narrows both arguments with `lsls #0x10; asrs #0x10`
+ * -- a SIGNED narrowing, which a `u16` parameter cannot produce (it would emit
+ * `lsls; lsrs`). Byte-neutral here: PROMOTE_MODE zero-extends every sub-word
+ * parameter at entry regardless of signedness, and both are only ever `strh`-ed
+ * into u16 members. a5 stays u16 -- its only call site passes a literal 0, so
+ * nothing discriminates it. */
+
+void sub_08075298(ProcPtr parent, int a2, s16 a3, s16 a4, u16 a5)
 {
     struct Unk08075298 *proc = Proc_Start(gUnknown_08614390, parent);
 

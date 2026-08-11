@@ -1,0 +1,100 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0807B884.
+ * sub_0807B884 @ 0x0807B884
+ */
+
+#include "proc.h"
+#include "hardware.h"
+
+/* VERIFIED MATCH (wave 54, W54-A) -- try_match reports matched, 440/440 bytes,
+ * "relocs: match", byte-for-byte identical. No rodata placement needed: both
+ * jump tables are ordinary in-unit .text tables and neither of this function's
+ * globals goes through the 081D93xx pool.
+ *
+ * Two things worth keeping if this ever regresses:
+ *
+ * 1. THE CASE ORDER IS 1, 2, 4, 3, 5 -- not sorted. agbcc emits case bodies in
+ *    SOURCE order and builds the jump table separately, so the table reads
+ *    1,2,3,4,5 while the bodies sit at ascending addresses in the order
+ *    1,2,4,3,5. Writing the cases sorted puts case 3's and case 4's bodies the
+ *    wrong way round. Read the body order off the jump-table TARGETS, not off
+ *    the table's index order.
+ *
+ * 2. Case 5 is `if (sub_08078E14() == 0x22) song = 0x19f; else song = 0x198;`,
+ *    with the CALL first. agbcc presets 0x198 and reaches 0x19f with
+ *    `adds r4, #7`; writing `song = 0x198;` before the `if` instead puts the
+ *    constant ahead of the `bl`, which the ROM does not.
+ *
+ * `song` is 0x198 on entry and every path that does not reassign it falls
+ * through to sub_0803B524(0x198) -- that initial assignment is a real source
+ * statement placed BEFORE sub_0807898C(proc), which is where the ROM's
+ * `movs r4, #0xcc; lsls r4, r4, #1` sits.
+ */
+
+void sub_0807B884(ProcPtr proc)
+{
+    int song;
+
+    song = 0x198;
+
+    sub_0807898C(proc);
+
+    Decompress(gUnknown_0822FEF0, (void *)((gUnknown_03001FE8.bits.chr_block << 14) + 0x06000000));
+    Decompress(gUnknown_0822F9AC, gUnknown_0849957C);
+
+    sub_08013AFC();
+
+    ApplyPaletteExt(gUnknown_0822FE50, 0x20, 0xa0);
+
+    Proc_Start(gUnknown_086165B0, proc);
+
+    switch (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk58)
+    {
+    case 1:
+        song = 0x194;
+        ApplyPaletteExt(gUnknown_0822DB88, 0, 0x20);
+        break;
+
+    case 2:
+        song = 0x197;
+        ApplyPaletteExt(gUnknown_0822DBA8, 0, 0x20);
+        break;
+
+    case 4:
+        song = 0x196;
+        ApplyPaletteExt(gUnknown_0822DBC8, 0, 0x20);
+        break;
+
+    case 3:
+        song = 0x195;
+        ApplyPaletteExt(gUnknown_0822DBE8, 0, 0x20);
+        break;
+
+    case 5:
+        if (sub_08078E14() == 0x22)
+            song = 0x19f;
+        else
+            song = 0x198;
+
+        ApplyPaletteExt(gUnknown_0822DB88, 0, 0x20);
+        break;
+    }
+
+    switch (sub_08078E14())
+    {
+    case 8:
+    case 16:
+    case 24:
+    case 32:
+    case 42:
+        song = 0x198;
+        break;
+    }
+
+    sub_0803B524(song);
+    Proc_Start(gUnknown_08616508, proc);
+}
