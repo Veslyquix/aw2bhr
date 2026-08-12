@@ -954,16 +954,18 @@ extern const u8 gUnknown_08488900[];
  * pool-load-plus-`adds` splitting of `symbol + constant` W50-I documents for
  * gUnknown_08488900 -- so gUnknown_084888B0 / D0 / F0 and these bases are two
  * spellings of one block, and both are honest.
- *   NOT `const`, and that is a measurement rather than a preference:
- * sub_0800CB30 reads `gUnknown_084888A0[a1 * 0x10 + k]`, stores a byte into
- * the gUnknown_08499590 +0x1432 terrain plane, and then READS THE SAME ELEMENT
- * AGAIN. A `const` extern sets RTX_UNCHANGING_P, CSE keeps the first value
- * across the aliasing store, and the second `ldrb` -- plus the reload of the
- * -fforce-addr base word feeding it -- disappears. The values live in ROM and
- * cannot change; `const` still does not reproduce this code. */
-extern u8 gUnknown_084888A0[];
-extern u8 gUnknown_084888C0[];
-extern u8 gUnknown_084888E0[];
+ *   `const`, agreeing with the siblings above. I first declared these
+ * non-const on the theory that RTX_UNCHANGING_P would let CSE keep the row
+ * byte across sub_0800CB30's intervening `strb` into the +0x1432 terrain
+ * plane and delete the second `ldrb`. THAT WAS WRONG, and the controlled
+ * probe is worth recording: sub_0800CB30 matches byte-for-byte with these
+ * declared BOTH ways, so const-ness is neutral here. Contrast the s16 tables
+ * below, where the same probe genuinely breaks the match -- the difference is
+ * that their reload straddles a `bl`, not a store. See docs/agbcc-codegen.md,
+ * "const on a ROM table" (wave 56, W56-J). */
+extern const u8 gUnknown_084888A0[];
+extern const u8 gUnknown_084888C0[];
+extern const u8 gUnknown_084888E0[];
 /* Wave 56 (W56-J). Five parallel 4-entry u16 tables at stride 8, selected by
  * the terrain cell's low five bits and indexed by `(rowbyte - 2) >> 1` --
  * `ldrh` off a `lsls #1`, so 2-byte elements, and exactly 8 bytes apart, so
@@ -973,12 +975,12 @@ extern u8 gUnknown_084888E0[];
  * gUnknown_08488948 is the u8 partner read as `[(rowbyte >> 1) - 1]` -- the
  * LOGICAL shift, against the ARITHMETIC one above, is the pair of readings
  * that fixes both as plain `>>` on the int-promoted byte. */
-extern u16 gUnknown_08488920[];
-extern u16 gUnknown_08488928[];
-extern u16 gUnknown_08488930[];
-extern u16 gUnknown_08488938[];
-extern u16 gUnknown_08488940[];
-extern u8 gUnknown_08488948[];
+extern const u16 gUnknown_08488920[];
+extern const u16 gUnknown_08488928[];
+extern const u16 gUnknown_08488930[];
+extern const u16 gUnknown_08488938[];
+extern const u16 gUnknown_08488940[];
+extern const u8 gUnknown_08488948[];
 
 /* Wave 56 (W56-J). The four-direction dx/dy delta pair, read out of
  * baserom.gba: gUnknown_0848895C is {-1, 1, 0, 0} and gUnknown_08488964 is
@@ -994,7 +996,10 @@ extern u8 gUnknown_08488948[];
  * register. A `const` extern sets RTX_UNCHANGING_P and CSE keeps the value
  * across the call, which is one instruction short at four separate sites. The
  * arrays live in ROM so they cannot actually change; `const` is nonetheless the
- * wrong declaration for reproducing this code. */
+ * wrong declaration for reproducing this code. MEASURED, not argued: declaring
+ * these four const takes sub_0800F77C and sub_08010664 from exit 0 to exit 1,
+ * while the same change leaves sub_0800CB30 byte-exact. A store does not need
+ * const to force a reload; a CALL does. */
 extern s16 gUnknown_0848895C[];
 extern s16 gUnknown_08488964[];
 /* Wave 56 (W56-J). A SECOND dx/dy pair with the same contents and the same

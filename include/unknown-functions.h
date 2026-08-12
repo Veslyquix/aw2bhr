@@ -10514,6 +10514,14 @@ int sub_0800F3B8(int, int);
  * returns 0, the same bool8 (u8) shape as its sub_080161B4 neighbours. */
 void sub_0800C574(int, int, int);
 int sub_0800F564(int, int, int);
+/* Wave 56 (W56-J). NEW -- sub_0800F77C had no declaration anywhere in the tree.
+ * Three plain ints: (x, y, dir). x and y arrive unnarrowed and are added to a
+ * signed s16 delta before a signed `blt 0` range check; dir is scaled `lsls #1`
+ * to index the gUnknown_0848895C / gUnknown_08488964 tables and is also handed
+ * straight to sub_0800F564's int third parameter. The return is an int taking
+ * 0, 2, or a count of 0..4, reached through three distinct `movs r0` sites, so
+ * it is a value and not a bool. Matched byte-for-byte with this signature. */
+int sub_0800F77C(int, int, int);
 int sub_0800F8D4(int, int);
 int sub_0800FD44(int, int, int);
 int sub_08010604(int, int);

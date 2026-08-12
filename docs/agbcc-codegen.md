@@ -39943,3 +39943,201 @@ different question (the wave-25 six-function regression).
 Cheap generalisation: **the set of promoted functions a wave put at risk is the
 set of promoted FILES the wave modified.** Read it off git, not off your own
 memory of what the agents said they did.
+
+## An `||` LADDER OF `==` CONSTANTS FOLDS EXACTLY ONE RANGE TEST, THEN STOPS (wave 56, W56-J)
+
+`sub_08010664` tests one map tile against **fourteen** constants, twice over.
+Emitted, that is ONE range test followed by TWELVE individual `cmp`s:
+
+```
+adds r0, r1, #-0x142 ; lsls #16 ; lsrs #16 ; cmp r0,#1 ; bls hit   <- 0x142,0x143
+movs r0,#0xa0 ; lsls r0,#1 ; cmp r1,r0 ; beq hit                   <- 0x140
+adds r0,#1 ; cmp r1,r0 ; beq hit                                   <- 0x141
+adds r0,#0x1f ; ...  0x160,0x161,0x162,0x163,0x122,0x123,0x121,0x120,0x103,0x102
+```
+
+**0x140 and 0x141 are adjacent and did NOT merge, and neither did 0x160-0x163
+or 0x120-0x123.** That looks like evidence the source is not a plain `||`
+chain. It is not. The chain is left-associated, so after the first pair folds,
+the tree is `LE_EXPR || ==`; that pair fails to merge (the ranges are not
+contiguous), and from then on **the lhs is a `TRUTH_ORIF_EXPR`, which
+`fold_truthop` rejects outright — it requires both operands to be comparison
+class.** Every later merge is blocked no matter how adjacent the constants are.
+
+So: **write the constants in the ROM's emitted order and let exactly one merge
+happen.** The naive reading — "adjacent constants merge, so the source order
+must have interleaved them" — is wrong and would cost the function. Verified
+byte-exact on both fourteen-way copies.
+
+Corollary for reading a diff: a lone `lsls #16 ; lsrs #16 ; cmp #N` at the head
+of a comparison ladder is the FIRST TWO source terms, not a hand-written mask.
+
+## THREE SPELLINGS OF `symbol + CONSTANT` AS AN ARRAY BASE, ALL DIFFERENT CODE (wave 56, W56-J)
+
+`sub_0800CB30` reads row 1 of four 0x20-byte ROM tables. The ROM does this four
+times, with only the pool word changing:
+
+```
+ldr r0, =gUnknown_084888A0
+adds r0, #0x10
+adds r0, r7, r0          @ r7 is the index
+```
+
+Measured on this function, all three spellings, all three distinct:
+
+| source | code |
+|---|---|
+| `base[k + 0x10]` | hoists `k + 0x10` into ONE pseudo that CSE shares across all four bases; the `adds #0x10` vanishes and the index add reverses to `adds r0, r2, r0` |
+| `(base + 0x10)[k]` | folds the whole thing into ONE pool word holding `base+0x10`; **the `adds #0x10` disappears entirely** (-8 bytes over 4 sites) |
+| `((struct Rows *)base)->row1[k]` | `ldr =base ; adds #0x10 ; adds k, base` — the ROM |
+
+**This CORRECTS an unverified claim in `include/unknown-globals.h`.** W50-I
+wrote there that "agbcc splits a `symbol + constant` address constant into a
+pool load plus an `adds` on Thumb rather than putting the addend in the pool
+word", and concluded the honest spelling was `gUnknown_08488900[i + 0x10]`.
+That was inferred from unmatched assembly and **neither half survives a probe**:
+agbcc DOES put the addend in the pool word when you write the pointer sum, and
+the subscript form produces different code again. Only a **COMPONENT_REF pins
+`base + K` as its own value** — the same mechanism W34-F documented for the
+gUnknown_08499590 map planes, which is where the worked example lives. The
+header note has been corrected in place.
+
+## A `u16` LOCAL AND THE SAME MEMORY READ INLINE ARE DIFFERENT COMPARISONS (wave 56, W56-J)
+
+Wave 15 recorded that a straight-line probe cannot separate `u16 v` from an
+`int` with casts. Here is a real function where they are **two bytes and one
+match apart**, and it is a clean read-out of `PROMOTE_MODE`.
+
+`sub_0800F77C` compares one map tile against 0x163 in one arm and 0x162 in the
+other. The ROM:
+
+```
+arm A:  ldr r0, =0x163 ; cmp r1, r0                                   @ SImode
+arm B:  lsls r1, r1, #16 ; movs r0, #0xb1 ; lsls r0, #17 ; cmp r1, r0 @ HImode
+```
+
+- Bound to a **`u16` local**, the value is a PROMOTE_MODE'd **SImode** pseudo,
+  so BOTH arms compare in SImode and arm B comes out `movs #0xb1 ; lsls #1 ;
+  cmp` — two bytes short, and that was the entire residual on an otherwise
+  size-exact 344-byte function.
+- Written **inline as the array read**, the operand is a `mem:HI`, both
+  comparisons are HImode trees, and agbcc then picks the encoding **per
+  constant**: `0x162 << 16 == 0xB1 << 17` is synthesizable so it takes the shift
+  form; `0x163 << 16` is not, so it falls back to comparing the
+  already-zero-extended value against a pooled `0x163`. **One source spelling,
+  two encodings — do not read the asymmetry as two different source shapes.**
+
+The range test is unaffected either way: `(u16)(v - K)` is a truncation and
+emits `lsls #16 ; lsrs #16` from both spellings. **The range test is NOT the
+discriminator; the equality comparisons are.**
+
+## NESTING A CALL IN ANOTHER CALL'S ARGUMENT LIST KEEPS THE SHARED ARGUMENTS LIVE (wave 56, W56-J)
+
+Worth **44 bytes over six sites** in `sub_08010664`, and the two spellings look
+equivalent:
+
+```c
+sub_08001158(A, B, sub_0800FD44(A, B, 0));     /* WRONG: A and B evaluated ONCE */
+
+t = sub_0800FD44(A, B, 0);                     /* RIGHT: A and B recomputed */
+sub_08001158(A, B, t);
+```
+
+Nested, agbcc evaluates the outer call's `A` and `B` into pseudos and keeps them
+live across the inner `bl`. As two statements the intervening call kills the CSE
+on the ROM tables inside `A` and `B`, and both operands are rebuilt — which is
+what the ROM does. **The tell is a pair of callee-saved registers holding
+argument values across a `bl` where the ROM re-derives them from a base
+pointer.**
+
+Related, same function: `rowOffset[..] + x + dx` and `rowOffset[..] + (x + dx)`
+are different code. Left-associated, `x` folds in first and `x + dx` never
+exists as a value; parenthesised, it becomes a CSE the following call reuses
+(`adds r0, r3, #0` instead of rebuilding it). +4 bytes.
+
+## `const` ON A ROM TABLE: A STORE DOES NOT FORCE A RELOAD, A CALL DOES (wave 56, W56-J)
+
+A three-function controlled probe, run both ways with nothing else changed:
+
+| reader | what sits between the two reads | `const` | non-`const` |
+|---|---|---|---|
+| `sub_0800CB30` | a `strb` into the map's +0x1432 plane | exit 0 | exit 0 |
+| `sub_0800F77C` | `bl sub_0800F564` | **exit 1** | exit 0 |
+| `sub_08010664` | `bl sub_0800FD44` | **exit 1** | exit 0 |
+
+`const` sets `RTX_UNCHANGING_P`, and CSE then keeps the value **across a call**,
+deleting the second load and the reload of the `-fforce-addr` base word feeding
+it. Across an aliasing **store** it makes no difference — the reload happens for
+other reasons and both declarations are byte-identical.
+
+**So `const` on a ROM table is neither a free accuracy improvement nor always a
+defect. Decide it from what separates the two reads.** I got this backwards
+first and wrote the wrong justification into `include/unknown-globals.h`; it is
+corrected there now. The practical consequence: a table whose only reader has a
+call between its reads must be declared non-`const` even though it demonstrably
+lives in ROM.
+
+## A LOOP COUNTER SHARED WITH A LATER LOOP OUTRANKS A FRESH ONE (wave 56, W56-J)
+
+`sub_08003C48` opens with a row-offset loop and then a nested x/y sweep. A
+**dedicated** counter for the first loop:
+
+```c
+for (i = 0; i < MAP->height; i++) MAP->rowOffset[i] = i * MAP->width;
+```
+
+is size-exact at 96.3% — the first loop's counter and its scratch swap r3/r4,
+14 bytes, and nothing else in 380 bytes differs. Reusing the variable that is
+also the inner counter of the following nest:
+
+```c
+for (x = 0; x < MAP->height; x++) MAP->rowOffset[x] = x * MAP->width;
+```
+
+**matches.** The wider live range lifts the counter's allocation priority past
+the scratch it had been losing to. The same function reads the lever from the
+other end too: splitting the row-offset loop off the sweep's `y` is what freed
+the register the inner loop's `y * 2` giv had been spilling to the stack. Both
+directions mattered in one function.
+
+**Declaration order is NOT the lever, and that is worth saying because it is the
+obvious thing to try.** Three orders were tested here and four on
+`sub_08010664`; all byte-identical. Priority is live range and reference count,
+not `expand_decl` order.
+
+Where none of that reaches: `sub_08010664`'s last 48 bytes were a pure
+`r6`<->`r7` / `r8`<->`sl` permutation at size-exact 95.8%, and decomp-permuter
+closed it in ~1,960 iterations. Its lever was a **dead store inside a condition**
+(`&& (v = y + tab[i] >= 0)`) in the second of three identical sweeps. That is
+byte-correct and is flagged in the draft as NOT the original source — something
+in the real source made one more value live across that sweep, and the permuter
+reproduced the effect without recovering the cause.
+
+### Two confirmations of other agents' wave-56 findings
+
+**Case bodies emit in SOURCE order** (W56-P rule 1, W56-D's 22-case table),
+independently re-measured on `sub_08003C48`: a 4-case tree on {1,3,4,7} lays its
+bodies out 7, 1, 3, 4, and writing them in ascending order costs the match.
+Cross-jumping then merges the identical tails of cases 4 and 7, keeping the
+LATER copy and branching the earlier one forward into it.
+
+**W56-P's `movs #k; lsls #1` reading is right and the constants recur.**
+`sub_0800FD44` builds 0x142 / 0x160 / 0x140 / 0x122 that way; `sub_08010664`
+compares against that same family, which is corroboration from a second
+function that they are literals and not shifts.
+
+### `start_function`'s stub sometimes carries a whole body — read it before writing one (wave 56, W56-J)
+
+The brief and the tool's own docstring both describe the `start_function` stub
+as a signature guess that "is often wrong". For `sub_08009F10` (392 B, 14
+callees, never drafted) the `stub` field came back with a **complete candidate
+body** — control flow, the `goto fail` shared return, the `(a & 0xfe00)` arms
+and the map read — and it **matched byte-for-byte on the first `try_match`**,
+with the only edit being the struct tag renamed from `MapScreen` to the
+`Unk3F44Map` its promoted neighbours use. Cost: one probe.
+
+Not a general claim that the stub is trustworthy — it is one function. But it is
+free to read, and nobody in twenty waves seems to have looked at it for anything
+but the signature. **Read the whole stub field before deriving a body from
+scratch.** (Rename any `struct MapScreen` it hands you: wave 37 found that tag
+defined 17 different ways across drafts.)

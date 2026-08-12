@@ -1703,6 +1703,22 @@
   "size": 556
  },
  {
+  "file": "src/decomp/c_0800CB30.c",
+  "obj": "src/decomp/c_0800CB30.o",
+  "addr_hex": "0x0800CB30",
+  "functions": [
+   "sub_0800CB30"
+  ],
+  "size": 968,
+  "rodata": [
+   "0x0808D878",
+   "0x0808D87C",
+   "0x0808D880",
+   "0x0808D884",
+   "0x0808D888"
+  ]
+ },
+ {
   "file": "src/decomp/c_0800CEF8.c",
   "obj": "src/decomp/c_0800CEF8.o",
   "addr_hex": "0x0800CEF8",
@@ -1798,6 +1814,18 @@
    "sub_08010604"
   ],
   "size": 96
+ },
+ {
+  "file": "src/decomp/c_08010664.c",
+  "obj": "src/decomp/c_08010664.o",
+  "addr_hex": "0x08010664",
+  "functions": [
+   "sub_08010664"
+  ],
+  "size": 1144,
+  "rodata": [
+   "0x0808D89C"
+  ]
  },
  {
   "file": "src/decomp/c_08010ADC.c",
