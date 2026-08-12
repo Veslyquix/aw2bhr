@@ -41160,24 +41160,26 @@ Authoring `next = str + 1; ... str = next;` on top of that made it **worse**:
 (r8/sb/sl) and caller-saves one value; the draft spends TWO and caller-saves
 two. Same eight live values either way.
 
-**The discriminator between the compiler's hoist and a source variable is
-COALESCING, not position.** Both put the add at the top of the outer body. The
-compiler's hoist coalesces the incremented value back into the counter's own
-register and needs no copy at the loop bottom:
+**The discriminator is whether the COUNTER IS STILL LIVE inside the inner loop,
+and it has to be checked before the copy-back means anything.** Both the
+compiler's hoist and a source variable put the add at the top of the outer body.
+What differs is whether agbcc can coalesce the incremented value back into the
+counter's own register -- and it can only do that when the counter is DEAD after
+its last use above the inner loop:
 
-    add r2, r2, #0x1                     <- agbcc's hoist of `i++`
-    ...                                     (no copy-back)
+| counter after its last use above the inner loop | agbcc's hoist emits | so a copy-back at the bottom means |
+|---|---|---|
+| dead (`sub_08054B14`: `i` feeds only the address) | `add r2, r2, #1`, coalesced, **no copy-back** | a second SOURCE variable — author it |
+| live inside the inner loop (`sub_0807B7BC`: `*str` re-read every inner iteration; `sub_08068038`: `str[i]` likewise) | `add r0, r5, #1` + `mov r8, r0` … `mov r5, r8`, **copy-back and all** | **nothing.** The hoist already produced it |
 
-A distinct source variable cannot coalesce, so it costs a second register and a
-copy at the bottom:
-
-    add r2, r1, #0x1                     <- `next = i + 1;`
-    ...
-    add r1, r2, #0                       <- `i = next;`
-
-So: **if the ROM has the add at the top AND a copy-back at the bottom, the
-source has a second variable. If it has the add at the top and no copy-back, it
-does not** -- and authoring one will cost you a register.
+**This is the correction that matters, and it refutes the shorter rule this
+chapter was first written with.** "Add at the top plus a copy-back at the bottom
+implies a second source variable" is only true in the first row. In the second
+row the unmodified draft emits the identical shape from a plain `i++`, and
+authoring the variable on top of it buys a redundant pseudo — which is exactly
+what cost `sub_0807B7BC` two bytes and five points. Read the counter's liveness
+inside the inner loop FIRST; the byte delta and the copy-back both lie without
+it.
 
 ## `i * 16` has to be its OWN source statement to split the giv init -- sub_08054B14, matched after four waves (wave 58, W58-C)
 
@@ -41363,3 +41365,46 @@ work:
   stacked on top of that function's pointer-bound body it is byte-identical to
   it. Stacking two independently-measured levers is worth exactly one probe
   before you believe it.
+
+## SCREENING RULE: inside a size-exact batch, a HIGH byte-identity score predicts the UNREACHABLE residual kinds (wave 58, W58-D)
+
+Six size-exact loop functions, every one already drafted and parked by an
+earlier wave, worked in one batch. **2 of 6 matched.** The distribution is the
+useful part, and it inverts how this project has always read a percentage:
+
+| function | draft | result | residual kind |
+| --- | --- | --- | --- |
+| `sub_08056638` | 95.8% | parked | **order** — which invariant LICM hoists to the callee-saved register |
+| `sub_08055940` | 93.5% -> 96.4% | parked | **order** — where `move_movables` places a deferred hoist in the preheader |
+| `sub_08060170` | 93.2% | parked | **loop optimiser** — giv reduction coupled to `check_dbra_loop`'s direction flip |
+| `sub_0802D67C` | 87.9% | **MATCHED** | allocation — a pointer local's SCOPE |
+| `sub_08062330` | 66.9% | **MATCHED** | RTL operand order — one cast |
+| `sub_08045FC8` | 32.7% | parked | CSE substitution, one instruction — **and not actually size-exact** |
+
+**Both matches came from the two LOWEST-scoring genuinely size-exact drafts.
+All three at 93% or above were instruction-ORDER decisions, and not one of them
+moved.** That is the mechanism the positional-score rule already predicts, seen
+from the other end: an order-only difference leaves the prologue, the body and
+the tail intact and therefore reads high, while a wrong register or a wrong
+operand order early reads low and is often one edit.
+
+**So do not deprioritise size-exact as a class — deprioritise HIGH-SCORING
+size-exact.** A size-exact candidate at 60–90% is a normal allocation
+near-miss and worth a batch slot; a size-exact candidate at 93%+ that has
+already been parked once should be screened OUT unless the diff shows something
+other than order. Combined with W58-A's 1 of 5 on the first size-exact batch
+this wave, size-exact overall converts at 3 of 11 (27%) — above the 13.6%
+drafted-pool baseline, so the class is worth working; it is the top of the
+score range inside it that is not.
+
+**Two screening hygiene points from the same batch:**
+
+- **Verify size-exactness before believing it.** `sub_08045FC8` reports
+  `size: match` at 104 bytes because the candidate is 2 bytes of CODE shorter
+  and gets exactly 2 bytes back as literal-pool alignment padding. It is a
+  one-extra-instruction residual wearing a size-exact costume, and any screen
+  built on the reported size will keep re-selecting it.
+- **Read the residual kind, not the score, when ordering work.** Three of these
+  six are the same family as `sub_080373F0`'s basic-block layout — no permuter
+  case, no declaration case — and all three were diagnosable from the first
+  `try_match` diff in one turn.
