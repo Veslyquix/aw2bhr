@@ -3729,6 +3729,39 @@ The same reasoning says a `?:` will not help: it expands to the same
 preset-then-conditionally-overwrite shape (`mov r0,#0; cmp; bne; ldrh r0,…`),
 measured, and that is a *third* spelling that cannot cross-jump either.
 
+## `while (c) B` and `if (c) do B while (c)` are BYTE-IDENTICAL — loop rotation is NOT source-reachable (wave 59, W59-G)
+
+Two shapes appear in the ROM for a top-tested loop:
+
+- **jump-to-test** — `b .Lbottom`, body, `.Lbottom:` test, `bne .Ltop`. Two bytes
+  of entry cost, one copy of the test.
+- **rotated** — the test duplicated inline at entry as a guard (`ldrb; cmp; beq
+  end`), body, then the test again at the bottom. Six bytes of entry cost.
+
+It is tempting to read the rotated form as a source-level `if (c) do { } while
+(c);` and the other as a plain `while`. **It is not.** Measured on
+`sub_0807B7BC`, whose ROM rotates its outer loop and whose draft does not:
+
+```c
+while (*str != 0) { ... str++; }                        /* 144 bytes, 9.0% */
+if (*str != 0) { do { ... str++; } while (*str != 0); } /* 144 bytes, 9.0% */
+```
+
+**Byte-for-byte identical output** — same size, same registers, same spill
+slots, same rotation choice, same 130 differing bytes. The front end folds the
+source guard away and a later pass re-decides the rotation on its own, so the
+source cannot express which form you get.
+
+**The readout that IS available.** `sub_0807B7BC` has two nested loops and
+**exactly one of them is rotated in each version — and it is the other one.**
+The ROM rotates the outer loop and leaves the inner one jump-to-test; the draft
+rotates the inner and leaves the outer jump-to-test. So the choice is made
+once per function and is a consequence of something else (here, of the register
+allocation: the two versions use a different number of call-saved registers).
+**Do not spend an attempt spelling a loop guard.** If the rotation is wrong,
+look for the allocation difference that moved it, and if the allocation is the
+residual, park it.
+
 ## Control flow
 
 **Branch polarity.** For `if (C) return A; return B;` agbcc branches to the A
@@ -9955,6 +9988,54 @@ extern u8 *gUnknown_08499590;
 
 ---
 
+## PRE-COMMITTED: does TIGHT exemplar proximity earn a cheap match? No — and the reason kills the axis (wave 59, W59-G)
+
+Wave 59 ran this as a controlled batch. The hypothesis under test came from
+W59-D, which went 0 of 6 on functions picked the standard way (`undeclared
+callees: 0` plus a nearest matched neighbour as exemplar) and 2 of 2 on two
+picked differently — one whose exemplar sits **8 bytes** away, one scoring
+**J=1.000** on callee-set overlap. The proposed rule was that *tight* proximity
+or near-perfect callee overlap, not the block screen, is what earns a cheap
+match. W59-G's five functions were selected on exactly that: exemplars 24, 28
+and 32 bytes away, and two at J=0.857.
+
+**Result: 0 of 5.** And the failure is not noise, because all five residuals
+were classified from the diff before anything was edited:
+
+| function | size | residual kind |
+|---|---|---|
+| `sub_080723DC` | 120 B, size-exact 88.3% | 3 — one constant's position |
+| `sub_0804C5A4` | 312 B, size-exact 86.9% | 3 — one `ldr` twelve insns early |
+| `sub_0807F434` | 240 B, +8 | 3 — one hoisted `i + 1`, cascading |
+| `sub_0807B7BC` | 156 B, −12 | 3 + 4 — one call-saved register, and loop rotation |
+| `sub_08086A58` | 416 B, −24 | 3 — one `strength_reduce` giv selection |
+
+**Not one is a shape, a type, a missing statement or a misread idiom.** That is
+wave 57's 11-of-11 replicated at 5 of 5, on a batch selected by an axis that was
+supposed to be different.
+
+**Why proximity cannot help, stated mechanically.** The documented payoff of a
+near exemplar is that it fixes vocabulary, types and shape — "no new struct,
+global or prototype to derive, only statement order". **A draft already does
+all of that.** Since wave 57 the undrafted pool is empty, so every target
+already carries a settled type model, and the thing proximity supplies is the
+thing that is never missing. All five exemplars here were read first, per the
+measured ordering rule, and not one of them could have addressed its target's
+residual: `sub_080723DC`'s exemplar, 28 bytes away, is a four-line `Proc_Find`
+wrapper sharing **zero** globals with its target. Proximity was a real axis
+while undrafted work existed. Against a 100%-drafted pool it selects on a
+property that is already satisfied.
+
+**On the two W59-D successes, do not read them as proximity.** J=1.000 is the
+callee-set **duplicate** detector documented above, not a point on a
+proximity scale — and 8 bytes away means the literally adjacent function, not a
+threshold anyone can widen. Weakening either (24–32 bytes, J=0.857) converts
+nothing. **n=2 stayed a hint and did not survive its first test.**
+
+**What to screen on instead:** nothing about the exemplar. Order the batch by
+residual kind, read from the existing draft's diff, and spend the budget on
+kind 3. That is the only axis in front of this pool.
+
 ## Shape families — what clusters, what does not, and the tool that finds them
 
 `tools/families.py` clusters every function by normalised instruction shape and
@@ -10642,6 +10723,38 @@ independently on `sub_0804FA2C` (648 → 640 bytes). When a near-miss is
 size-exact with correct registers and the only diff is a hoisted `ldr` of a
 global's address, drop the dead `if` in to confirm the class, then replace it
 with a comma at the right depth.
+
+### Two negative transfers, both measured on `sub_0804C5A4` (wave 59, W59-G)
+
+`sub_0804C5A4` is size-exact at 86.9% and its entire residual is this rule's
+signature: one `ldr` of `&gUnknown_085D6C94` emitted twelve instructions early
+into the callee-saved r5 that has just died, where the ROM rematerialises it
+into the scratch r2 at the point of use, with the 0x12c/0x130 pool pair swapped
+as the same fact. The wave-37 park named the anchor as the one axis never
+tried. It was tried, in both forms, and **neither works**:
+
+- **A comma operand that is only a VALUE is dead-code-eliminated before
+  allocnos exist.** `gUnknown_085D6C94[a][b][(gUnknown_03004580[side][1],
+  <index>)]` is **byte-identical** to no anchor at all — same 41 differing
+  bytes, same pool order. The reference never creates a pseudo, so it cannot
+  affect allocno numbering. **Wave 17's lever works because it ASSIGNS to a
+  local** (`meta = gUnknown_03004580`); the assignment is what keeps the address
+  pseudo alive to be numbered. Do not paraphrase the anchor as a bare
+  expression.
+- **The true assignment form is WORSE here, not neutral.**
+  `sub_0803B48C((meta = gUnknown_03004580, <expr>))` with `void *meta` fails to
+  flip the 12c/130 pair at all and instead costs 8 bytes: it forces an extra
+  `.rodata` word plus two more pool words (`gUnknown_03001470+0x34` and
+  `gUnknown_03004580+2` each get their own), and it breaks the `adds r0,#4` /
+  `adds r2,#2` reuse of one base register for the `[1]` and `[2]` reads that
+  both the ROM and the un-anchored draft get right.
+
+This is the **second measured instance** of this rule's own caveat that the
+anchor does not transfer to a function carrying more live values —
+`sub_0804C5A4` already has `ip`, `r8` and `r9` in use, and the anchor's new
+pseudo evicts a global that was correctly placed. The caveat should now be read
+as the default expectation: **the anchor is a two-tied-pseudos lever, and a
+function under register pressure does not have two tied pseudos.**
 
 ## The wave-16 "evaluation order" cost axis: right phenomenon, wrong counter (wave 17, W17-A)
 
@@ -28975,6 +29088,120 @@ basic block**. The untried axis on `sub_08049944` is therefore a source shape
 that separates them — a second reader for `a2 - 5`, or computing it on a path
 the masking does not share — not a seventh way of writing the adjacent pair.
 
+### REFUTED (wave 59, W59-D): the seventh spelling is `(u16)a2 - 5`, and the six above were measured in the WRONG CONTEXT
+
+It **is** a front-end question after all, and `sub_08049944` went 21.1% ->
+70.0% AND SIZE-EXACT on this one edit, with the ROM's `subs r1,r7,#5` emitted
+exactly. The winning spelling puts the cast on the **OPERAND**, not on the
+result and not on the parameter's declaration:
+
+```c
+    sub_08012BC8(gUnknown_0849957C, (u16)a2 - 5, a3, 6, 2, 0);   /* a2 stays s16 */
+```
+
+The mechanism, and why the six earlier spellings could not see it. The
+prologue narrows `a2` once (`lsls #0x10; lsrs r7,#0x10`) because it is live
+across basic blocks, so **the pseudo already holds the zero-extended value**.
+`(u16)a2` is therefore FREE — nothing to emit — and the subtraction is a plain
+SImode `subs` on a register combine has no shift to distribute into. Cast the
+RESULT (`(u16)(a2 - 5)`) and you are back to a sign-extension that combine
+merges with the truncating shift, which is the reassociated form.
+
+**The six spellings above are byte-identical to each other only inside a
+standalone `compile_probe`, and that is the whole error.** In a probe the
+parameter is used once, in one block, so it is NOT pre-narrowed; the
+zero-extension has to be materialised at the use and merges into the shift, and
+every spelling collapses to the same thing — including spelling 6 (`u16 a2`),
+which in the real function would also have worked. Re-measuring spellings
+1-6 as a probe in wave 59 reproduces the wave-43 result exactly, so the
+measurement was sound and the *inference* from it was not.
+
+This is the wave-15 blind spot on the parameter side: **a probe cannot tell you
+anything about an idiom whose behaviour depends on the operand already being
+materialised, because a probe is the one context where it never is.** Before
+believing "all spellings are identical", ask whether the value under test is
+live across a block boundary in the target and dead in the probe. If it is,
+the probe answered a different question.
+
+Read backwards, this is a type oracle: **a plain `subs`/`adds` on a
+prologue-narrowed parameter, followed by a narrowing pair, means the source
+read that parameter through its UNSIGNED type at that use** — it does not mean
+the parameter is declared unsigned. `sub_08049944`'s `a2` is `s16` and
+sign-extends (`lsls #0x10; asrs #0x10`) at its two other uses in the same
+function.
+
+## TWO constants reassociate where ONE cannot: a member offset PLUS an index bias is what puts the variable index first (wave 59, W59-D)
+
+`sub_0803BF10` MATCHED on this after five waves parked, and the four spellings
+that failed are the useful half of the record. The wanted shape is the variable
+index added to the base FIRST and the constant second, with the **base register
+winning the add's destination**:
+
+```
+    ldr r1,=gUnknown_03003FC0 ; ldrb r0,[..,#1] ; adds r1,r1,r0 ; adds r1,#0x3e
+```
+
+Every attempt to reach it by controlling the address arithmetic directly failed,
+and each failed in a different way:
+
+| spelling | result |
+|---|---|
+| `u8 *p = (u8 *)&g; p[i + 0x3e]` | order right, but the INDEX wins the destination |
+| `q->unk3e[i]` (member array, one constant) | registers right, but `q + 0x3e` is materialised as the array address and the index is added SECOND |
+| `u8 *r = g.unk3e; r[i]` | fold sinks `g+0x3e` into the pool word — a word the ROM does not have |
+| `u8 *r = (u8 *)&g + i; r[0x3e]` | order right, index still wins the destination |
+
+What produces it is **having two constants to fold rather than one**. The array
+is at member offset `0x3d` and the source's cursor is biased by one, so the
+access is `q->unk3d[i + 1]`, and fold reassociates
+
+```
+    (q + 0x3d) + (i + 1)   ->   (q + i) + 0x3e
+```
+
+The constant is now the *sum* of the member offset and the bias, and it can only
+be applied after the variable index has been added — which is the ROM's shape,
+and it falls out of `fold` rather than out of any allocator behaviour. With a
+single constant there is nothing to reassociate and the address folds the other
+way.
+
+**Read backwards, this is a struct-layout diagnostic.** If the ROM adds a
+variable index to a base and *then* adds a constant, and your member-array
+spelling insists on folding the constant into the base, the constant is
+probably not one offset but a member offset plus a literal index bias — look for
+an array starting just below it. Here `0x3e` is `0x3d + 1`, and the header's own
+comment on `unk3d` had recorded the bias years earlier from the same assembly.
+
+### The reason it took five waves is worth more than the rule
+
+The draft **did not compile**. Wave 37 re-carved `struct Unk03003FC0`'s tail into
+four parallel slot arrays and deleted the member `unk3e` the draft was written
+against. That wave re-verified the promoted `src/decomp/` files that used the old
+names — and nothing else, because **nothing ever recompiles a parked draft.** The
+draft sat for 22 waves in a state where every `try_match` would have errored out,
+and the "still 93.8%" in its park note was a stale number copied forward by
+agents who, correctly following the brief, read the note instead of re-measuring.
+
+- **A park note's percentage is only as fresh as the last time someone compiled
+  it.** `try_match` on the existing draft as your first move — which the brief
+  already tells you to do — catches this in one call, and it is the only thing
+  that does.
+- **When you re-shape a shared struct, `work/*/` drafts referencing the old
+  members rot silently.** They are outside the re-verification net that covers
+  `src/decomp/`. Grepping `work/` for the old member names costs one command.
+  (Checked repo-wide in wave 59: `sub_0803BF10` was the only casualty of the
+  W37-Q1 rename — every other `unk3e` in the tree is a different struct. The
+  matched `src/decomp/c_0803BCDC.c` already carried the biased-cursor idiom in a
+  comment, so the answer was promoted and readable the whole time.)
+- **`try_match` WRITES `work/<fn>/<fn>.c` with exactly the `c_code` you pass**,
+  same as `permute` does on an abnormal exit. The brief warns about the permuter
+  and not about this. If you re-measure an inherited draft by pasting only its
+  BODY — dropping the park comment to save context — you silently destroy the
+  ruled-out-axis list, which is the most valuable part of the draft, and the
+  next wave re-measures everything from zero. Pass the whole file including its
+  comments, or restore the note immediately afterwards. Wave 59 did this to five
+  drafts in one message and had to rebuild all five from context.
+
 ## `i * 2 + 2` and `(i + 1) * 2` are different code when `i` is a loop counter (wave 43, W43-L)
 
 `sub_08048850`, worth 4 bytes and one attempt. The argument's value is the same
@@ -33924,6 +34151,59 @@ an ascending address is a reversed ascending loop, and a descending counter with
 a descending address is genuinely descending in the source. Both readings are
 free and neither needs a probe.
 
+**REFUTED IN WAVE 59 (W59-E), ON THIS CHAPTER'S OWN SECOND EXAMPLE. A DESCENDING
+ADDRESS DOES NOT ESTABLISH A DESCENDING SOURCE, AND THE READING IS NOT FREE.**
+
+`sub_08054B14` matches BOTH WAYS. Both of these compile to the same 64 bytes,
+and both were confirmed by exit status from `try_match`, not by eye:
+
+```c
+i = 0;                                    for (i = 0; i < 2; i++)
+do {                                          for (j = 0; j < 8; j++)
+    o = i * 16;  next = i + 1;                    row[i * 8 + j] = 0;
+    for (j = 7; j >= 0; j--)
+        row[i * 8 + j] = 0;
+    i = next;
+} while (i < 2);
+```
+
+(`row[i * 8 + j]` is shorthand — the literal subscript expression both spellings
+use is in `work/sub_08054B14/sub_08054B14.c`, which holds the matched ascending
+version. Copy it from there rather than from this block.)
+
+The right-hand spelling ASCENDS and still produces the ROM's descending counter
+(`movs r1,#7 ... subs r1,#1; cmp r1,#0; bge`) AND its descending store address
+(`strh r3,[r0]; subs r0,#2`, starting at row+0xe). `compile_probe` on it emits a
+byte-identical instruction stream to the descending draft, and `try_match`
+returns MATCH on both. So `check_dbra_loop` did not merely flip the exit test
+here -- when it reversed the counter it RE-BASED the address giv to walk down
+with it, which is exactly the thing the paragraph above says it never does.
+
+Caveat on how the measurement was taken, stated so it is not over-read: the two
+spellings differ in the outer loop form and in two helper locals as well as in
+the inner direction, so this is two matching POINTS rather than a single-variable
+ablation. That does not weaken the refutation -- one of the two matching
+spellings ascends, which is all it takes -- but it does mean the *cause* is not
+isolated. A side result from the same pair: the wave-36 draft's `o = i * 16` and
+`next = i + 1` binding locals are NOT load-bearing either; the early
+`adds r2, r1, #1` is allocation (r1 is reused as the inner counter), not a source
+`next`.
+
+What survives, what does not, and what is now open:
+
+- **Survives:** W37-Q4's rule that a descending COUNTER proves nothing.
+- **Does not survive:** "a descending counter with a descending address is
+  genuinely descending in the source", at least for a subscripted walk over a
+  small constant-trip inner loop. Do not use it as a discriminator.
+- **Open:** `sub_08052F3C`'s ASCENDING addresses are still a real difference from
+  `sub_08054B14`'s descending ones, and it was not re-tested this wave. Whatever
+  separates the twins, it is not source direction, because both source directions
+  give `sub_08054B14`'s descending form. Do not read the difference as one.
+- **Practical:** when the direction matters, PROBE it rather than arguing from
+  the address. At this size that is one `try_match` per direction. Where both
+  match, prefer the ascending spelling: it is the more plausible original and it
+  needs no helper locals.
+
 ### `check_dbra_loop` can DELETE the counter entirely and compare the pointer against the base (wave 51, W51-A)
 
 A third dbra outcome the chapter above does not cover, and it changes the
@@ -34812,6 +35092,16 @@ sinks the pool `ldr` below the `ands`), and `(u8)(0xe0 & cell)`, which is the
 wave-15 probe trap already recorded in `work/sub_0805C128/`.
 
 ## A store through a POINTER PARAMETER does not kill a global pointer's load
+
+> **SOLVED IN WAVE 59 — read "ONE untraceable store anywhere in a loop is the
+> LICM barrier" at the end of this file before spending anything here.** Every
+> measurement below is correct and none of it is retracted. What was wrong was
+> this chapter's closing question, which asks what makes the CURSOR opaque; the
+> cursor is the wrong object. One untraceable store *anywhere* in the loop is
+> enough, and `gUnknown_03003340[y][x] += 0;` — a store through a row pointer
+> loaded from memory, dead, deleted before output, zero bytes — took
+> `sub_08059F24` from 31.6% / +4 to 87.3% / size-exact by itself.
+> `sub_08059F24` and `sub_0805A008` are MATCHED; `sub_08059E3C` is at 98.3%.
 
 Wave 52, W52-C. Two eight-line probes, identical but for the store target,
 compiled side by side:
@@ -41408,3 +41698,603 @@ score range inside it that is not.
   six are the same family as `sub_080373F0`'s basic-block layout — no permuter
   case, no declaration case — and all three were diagnosable from the first
   `try_match` diff in one turn.
+
+## Loop rotation is decided by the LEADING exit test, and `goto` switches it off (wave 59)
+
+Two functions in wave 59 turned on the same fact, in opposite directions. agbcc's
+`expand_end_loop` rolls a loop's FIRST conditional exit down to the bottom and
+enters the loop with a `b` to it. Whether it fires is a source-level decision,
+and it decides register allocation and hoisting for the whole loop -- not just
+block order.
+
+**Reading it off the ROM.** Test at the TOP of the loop with the increment block
+placed BEFORE it and an entry `b` past the increment = NOT rolled. Body first
+with the test at the bottom = rolled. The literal pool follows the first
+unconditional branch, so the two layouts also put the pool in different places,
+and every register difference after that point is downstream of the pool
+position rather than an independent fact.
+
+- **To STOP the roll, exit with `goto <label after the loop>` instead of
+  `break`.** `expand_end_loop` looks for a jump to the loop's own `end_label`; a
+  user `goto` targets a different label and is not recognised, so the leading
+  guard stays at the top. The loop construct itself survives, so LICM still
+  runs. `sub_08029AF8` went from 232 bytes / 4.8% to 240 / 62.1% on this one
+  edit, and it brought with it the ROM's LICM hoist of a mask constant, the
+  third hi-register save, and the `mov sl,rN` that goes with it. **A hoist you
+  cannot reproduce may be a rotation you cannot reproduce.**
+- **To CREATE an entry `b` that agbcc deleted, jump into the loop.** A counted
+  loop whose first test is provably true (`for (i = 1; i <= 4; i++)`) loses its
+  entry jump after rotation. Writing it as `i = 1; goto _test; for (;;) { i++;
+  _test: if (i > 4) break; ... }` restores the ROM's layout exactly.
+- **This is the axis behind a "mutually exclusive halves" park.** `sub_08035080`
+  was parked for three waves on the finding that the array spelling
+  `g[3 + i]` gave the ROM's two-level force-addr word and its per-iteration
+  reload but put the `+3` on the index, while the struct-cast spelling
+  `((struct T *)g)->m[i]` put the `+3` on the base but produced a one-level pool
+  word and let LICM hoist `base + 3` (-8 bytes). **That trade-off exists only in
+  the ROLLED loop.** In the unrolled layout `base + 3` is no longer
+  invariant-hoistable and the cast spelling delivers both halves at once. Before
+  concluding that two codegen properties cannot coexist, check whether the loop
+  shape is what couples them.
+
+### The counter's decrement domain is not reachable from its spelling (wave 59)
+
+`sub_08029AF8`'s ROM decrements a `u16` counter in the SHIFTED domain --
+`lsls r0,rV,#0x10 ; ldr r1,=0xFFFF0000 ; adds r0,r0,r1 ; lsrs rV,r0,#0x10 ;
+cmp r0,#0` -- because its exit test reads the PRE-NARROWED temp, which lets
+combine distribute the `<< 16` over the `- 1` and costs a pool word. When the
+exit test reads the stored counter instead, combine leaves the `subs` alone and
+the whole thing is 8 bytes shorter. Six spellings were probed and every one
+produced the narrow-domain form: `--a2 != 0`, `--a2`, `a2--` as a body
+statement, `a2 = a2 - 1` in a `while`, `a2--` in a `for`-increment slot, and a
+`u16 n = a2;` copy. An ascending `for (i = 0; i < a2; i++)` with either `u16 i`
+or `int i` is also refuted -- it burns a register on `i` and does not produce
+the shifted form -- so `check_dbra_loop` reversing an ascending loop is NOT the
+mechanism here. Which value the exit test reads is not settled by the
+decrement's source spelling; do not spend a budget sweeping it.
+
+## A DEAD COMPUTATION THAT THE ROM EMITS: keep it with a loop whose BODY is dead (wave 59, W59-A)
+
+`sub_080079B8` and `sub_080077EC` each emit a five-instruction chain whose
+result is overwritten before it is read:
+
+```
+adds r0, #0x36 ; ldrb r0,[r0] ; lsls r0,#0x18 ; asrs r0,#0x18 ; adds r0,#4
+b   _join
+_alt:
+adds r0, #0x38 ; ldrb r0,[r0] ; lsls r0,#0x18 ; asrs r0,#0x18 ; adds r0,#3
+_join:
+lsls r0, r2, #3            <- r0 clobbered here
+```
+
+Waves 52 and 57 ruled out the two obvious vehicles: a plain dead local (flow
+deletes it and jump.c then deletes the emptied if/else and the frame), and
+`volatile` (keeps the MEM reference, the branch and both address adds, but flow
+still deletes the sign extension and the addition, because those are separate
+RTL insns with a dead destination). Wave 59 solved it.
+
+**THE MECHANISM. agbcc runs its only dead-code elimination inside `flow`, which
+sits BEFORE combine and before the post-reload jump pass, and it never runs
+again.** So a computation reaches the output iff BOTH of these hold:
+
+1. it still has a live use at the time `flow` runs, and
+2. that use is destroyed by a LATER pass, which then has no DCE to collect it.
+
+This is the same mechanism the toolchain chapter already records from the other
+end ("both compilers delete both arms and leave the condition's load as three
+dead instructions") — that note was describing a use that died after flow, and
+it generalises.
+
+**THE VEHICLE: a loop whose body is dead.**
+
+```c
+m = (s8)p->unk36 + 4;
+while (m == 0)
+    m = 1;
+```
+
+loop.c has already built the loop before flow runs; flow deletes only the dead
+body `m = 1`; the loop is provably one-trip so no trace of it survives; and the
+post-reload jump pass drops the now-pointless branch, orphaning the chain that
+fed it. Nothing but the chain is emitted.
+
+**It must be a LOOP.** `if (m == 0) dummy = 1;` deletes the whole thing, chain
+included — flow removes the arm and the `if` goes with it. Measured.
+
+### The comparand is decided by whether the addend is an IMMEDIATE
+
+This is the trap, and it points in opposite directions in the two functions
+that share the idiom. **Thumb has `cmn rn, rm` but no `cmn rn, #imm`.**
+
+- **Immediate addend (`+ 4`, `+ 3` — `sub_080079B8`): the comparand MUST be 0.**
+  combine cannot form a compare against a negated immediate, so it is forced to
+  use the flag-setting `adds` pattern, which HAS a destination and therefore
+  survives the branch's deletion. That is precisely why each ROM arm ends in a
+  bare `adds r0,#4` and carries no `cmp` at all.
+- **Register addend (`adds r0,r0,r3` — `sub_080077EC`): the comparand must be
+  NON-zero.** With `== 0`, combine folds the add and the compare into a single
+  destination-less `cmn`, and the add is then deleted along with the branch:
+  measured, the `ldrb`/`lsls`/`asrs` survive and `adds r0,r0,r3` does not. Any
+  non-zero comparand keeps them apart; `== 1` and `== 5` are byte-identical.
+- **Either way the comparand must fit `cmp #imm8`.** 0x7FFFFFFF leaves the
+  constant's own `ldr` and a pool word behind.
+
+`sub_080079B8` matched byte-for-byte on the first `try_match` after this, and
+`sub_080077EC` went from -20 bytes to -8.
+
+**The `while` is a VEHICLE, not a reconstruction of the original source.** Any
+construct whose use dies between flow and reload emits the same code, and the
+bytes cannot distinguish them.
+
+## `insn_count` is NOT a lever on strength reduction — dead code in a loop body does not suppress giv reduction (wave 59, W59-A)
+
+Tempting corollary of the chapter above, and it is false. Since `flow` runs
+after `loop`, dead code in a loop body IS present at `strength_reduce` time,
+where it raises `insn_count` and should therefore make gcc reduce fewer givs —
+and it would then vanish without trace, a mechanism invisible in the ROM. This
+was the best remaining theory for `sub_080077EC`'s first loop, whose ROM keeps
+`i` as a real ascending biv and reduces only one of its three candidate givs.
+
+Refuted by controlled probe. A dead `z = p->unk3a + i;`, a dead
+`z = gUnknown_084887AC[i] + a1;`, and even a genuinely LIVE extra store inside
+the loop (`gUnknown_0200B0B0->unk2e = a2;`, three real insns that appear in the
+output) ALL still reduce both givs and still let `check_dbra_loop` reverse the
+loop. **Loop-body volume is not the axis; do not spend a wave on it.**
+
+## `case` bodies are laid out in SOURCE order, so a jump table's block order reads the source's case order back (wave 59, W59-A)
+
+`sub_080077EC` dispatches `(a1 & 0x1F)` through a jump table over 6..14. The
+table itself is indexed, so it is identical for any ordering of the `case`
+labels and tells you nothing. **The case BODIES do carry the information:** gcc
+emits them in source order, so their address order is the source's order.
+
+The ROM lays them out `movs r3,#4`, `#3`, `#2`, `#1`, `#0` — which means the
+original listed them DESCENDING BY RESULT (`case 8, case 6, case 14, case 10,
+case 11`), not ascending by case label as every draft had assumed. Getting this
+wrong costs no bytes in the table and no bytes in the bodies, but it changes
+which block falls through to the join and it moves the register assignment of
+everything downstream.
+
+### Scope test: the rule ALSO holds for a DECISION-TREE switch (wave 59, W59-E)
+
+W59-A's rule above was derived on a jump table, where the dispatch is
+order-blind by construction. `sub_08068A00` is the other kind — nine sparse
+values (0, 0x26, 0x4e, 0x58, 0x60, 0x62, 0x80, 0xb4, 0xc7) that agbcc dispatches
+as a BINARY TREE OF COMPARES, so unlike a jump table the dispatch itself is
+value-sorted and might have been expected to drag the bodies with it. It does
+not. Two `compile_probe` runs of the same nine arms, differing ONLY in the order
+the `case` labels are written:
+
+    source order 0xc7,0xb4,0x80,...,0    bodies emit 0xc7, 0xb4, 0x80, 0x60, 0
+    source order 0,...,0x80,0xb4,0xc7    bodies emit 0, 0x60, 0x80, 0xb4, 0xc7
+
+The comparison tree is IDENTICAL in both — same pivots, same shape, same
+branches. Only the body blocks move, and they move to exactly the source order.
+So the rule is about `case` bodies as such, not about jump tables, and the ROM's
+block order reads the source's case order back for either dispatch kind.
+A second, independent confirmation in the same function: the ROM's literal pool
+(`=gDispIo`, `=gUnknown_0817DE24`, `=0x06009400`) sits immediately AFTER the
+0xc7 body, which is where agbcc drops a pool only for the FIRST body emitted.
+`sub_08068A00`'s original therefore listed its cases DESCENDING.
+
+### The tree's ROOT is a function of the case-node COUNT alone — measured (wave 59, W59-E)
+
+W29-C and W40-D record that the case COUNT decides the pivot. Here is the
+measured mapping for agbcc, from four probes on one function, as
+(nodes in the sorted list) -> (0-based index of the node the tree roots at):
+
+    2 -> 0 (a chain, first node is the parent)    6 -> 2
+    3 -> 0                                        9 -> 4
+    4 -> 1
+
+It is deterministic in the count and NOTHING else — not the values, not their
+spacing, not the source order, not which arms are empty. That makes it a
+falsifier, and it falsifies the obvious reading of `sub_08068A00`: the ROM emits
+NINE pivots but roots the tree at index 2 (0x4e), and nine live nodes root at
+index 4 (0x60) every time. Its right sub-tree (6 nodes -> 0x62) and left
+(2 nodes -> 0x26 over 0) both obey the table exactly; only the top split does
+not. **So no flat nine-case `switch` compiled by this toolchain can produce that
+tree**, however the empty arms are spelled — which is a stronger and cheaper
+result than the byte diff, and it retires the whole family of "find the spelling
+that keeps the four dead case nodes alive" attempts. Probes that confirmed the
+count is the only input: four empty `break;` arms (6 nodes), the same four
+grouped as consecutive labels on one `break;` (6 nodes, identical output), and
+four arms carrying `unk2c--; return;` so that none is deletable (9 nodes, root
+0x60, all nine pivots present). See also W36-K on empty arms being deleted.
+
+**`old_agbcc` is not the missing axis and was measured, not assumed** — a
+throwaway `data/compiler-overrides.json` entry produces the SAME six-pivot tree,
+and additionally gets the `gDispIo` chain wrong (`movs r0,#1` before
+`ldrb r1,[r2,#1]`, where the ROM and default agbcc both load first). Entry
+reverted.
+
+## In a LOOP, the COMPONENT_REF spelling of a row offset stops discriminating (wave 59, W59-A)
+
+`src/decomp/c_0800CB30.c` records, correctly for straight-line code, that row 1
+of the 0x0848_88xx tables must be reached as
+`((struct Unk88Rows *)sym)->row1[k]`: `base[k + 0x10]` hoists `k + 0x10` into a
+giv, `(base + 0x10)[k]` folds the whole address into one pool word, and only the
+member reference pins `base + 0x10` as its own value.
+
+**That rule does not transfer into a loop.** In `sub_0800CAA0` the member
+reference folds the addend into the pool word (`.word 0x10` with the
+`R_ARM_ABS32`, where the ROM's addend is 0) AND lets LICM hoist the result — it
+is strictly worse than the plain `p[i + 0x10]` on both counts. The exemplar's
+rule is about which RTL the address expression BUILDS; inside a loop, LICM then
+hoists whatever was built, and the distinction the rule draws collapses. Read
+that chapter as scoped to straight-line code.
+
+### The entry-`goto` shape and `duplicate_loop_exit_test` are mutually exclusive (wave 59)
+
+Writing the entry jump by hand buys the layout but costs the peel, and on a loop
+whose ROM carries a peel that is a 32-byte loss. `sub_08026290`'s inner loop in
+the ROM is a full COPY of the body specialised to `j == 1` (`cmp r5,#1` where the
+general copy has `cmp r5,r1`, and literal member offsets `+0x39` / `+0x3e` where
+the general copy indexes by the counter) ending in a `b` that cross-jumps into
+the general copy's tail. That is `duplicate_loop_exit_test`: it fires only when
+the loop's entry is a jump to an exit test sitting at the TOP of the loop, and it
+copies the test and what follows into the preheader, dropping the entry jump.
+
+Spelling the same layout as `j = 1; goto _test; for (;;) { j++; _test: ... }`
+leaves `loop_start` immediately before the INCREMENT instead of before the exit
+test, so the transform no longer applies and the peeled copy never appears --
+144 bytes against 176, from a draft that was 184. **So before reaching for the
+entry-`goto` trick, check whether the ROM's loop entry is a `b` (use it) or a
+duplicated first iteration (do not).** Both come from a top exit test; they are
+the two possible endings of the same optimiser path.
+
+### The member-reference rule is conditional on loop ROTATION, not on being in a loop (wave 59)
+
+`src/decomp/c_0800CB30.c` states that only a member reference pins `base + K` as a
+runtime add. Wave 59's W59-A refined that to "true in straight-line code, false
+inside a loop -- in a loop the member reference folds the addend into the pool
+word AND lets LICM hoist the result, i.e. worse on both counts."
+
+**The refinement is half right and the qualifier is wrong.** `sub_08035080` is a
+member reference (`((struct T *)g)->m[i]`) used INSIDE a loop, it MATCHED
+byte-for-byte, and in it the addend is NOT folded into the pool word (the
+.rodata word holds the bare symbol, checked against `baserom.gba`: 0x08090E34 ->
+0x03004490) and `base + 3` is NOT hoisted -- the ROM's own `ldr r0,[r6] ; adds
+r0,#3 ; adds r0,r4,r0` is reproduced exactly. The same spelling in the same
+function DOES fold and DOES hoist when the loop is bottom-tested.
+
+So the discriminator is the loop's ROTATION, not its existence: in a rolled loop
+the force-addr word is reached once in the preheader, so `base + K` is invariant
+and both the fold and the hoist follow; with the exit test at the top and the
+entry `b` in place, the word is re-read every iteration, nothing is invariant,
+and the member reference behaves exactly as it does in straight-line code.
+Before concluding that an address-expression rule fails "in a loop", check which
+of the two layouts you measured it in.
+
+## Reading the residual-size DELTA: what the drafted pool splits into, and how to rank it (wave 59, W59-C)
+
+`tools/overlap_screen.py` grew a `--delta` section this wave. It is the first
+screen in this project that ranks a function by **what its draft's residual is**
+rather than by where the function sits, and this chapter is how to read its
+output. The screen exists because every other axis is address- or callee-based
+and they are all spent: wave 57 emptied the never-attempted pool, so all 300
+remaining functions carry a draft and are all equally "near something matched".
+
+### What it measures
+
+For every unmatched draft it reads `work/<fn>/_cand.bin` and `_target.bin` --
+what `trymatch` wrote on its **last run** -- and reports two deltas plus the
+score. Nothing is recompiled; a full-corpus pass costs one walk of `work/` and
+one of `asm/`.
+
+    size delta   len(_cand.bin) - rec["size"]              what trymatch prints
+    code delta   candidate CODE bytes - ROM CODE bytes     what actually matters
+
+**THE TWO ARE DIFFERENT, AND `size` LIES ON ONE DRAFT IN SEVEN.** 42 of the 284
+measurable drafts have a size delta that disagrees with their code delta.
+`.text` is *code + alignment padding + literal pool*, and there are two
+independent ways for a shortfall in the code to come straight back as padding:
+
+* An explicit `.align 2` before the literal pool. `sub_08045FC8` is 2 bytes of
+  code short, gets exactly 2 bytes back before its one pool word, and reports
+  `size: match` at 104 bytes. Wave 58 named this one; it is not a one-off.
+* The **section's own** 4-byte alignment. `_cand.bin` is objcopy's dump of the
+  whole `.text` section, which the assembler rounds up, so a candidate 2 bytes
+  short of a 2-mod-4 ROM function also reports `size: match`, with no `.align`
+  involved at all. This second mechanism was not previously recorded and is the
+  commoner of the two.
+
+A screen keyed on the reported size re-selects the same functions every wave and
+calls a one-extra-instruction residual "size-exact". Compare CODE bytes.
+
+### The distribution, and what each group means
+
+On the 167 loop-carrying drafts the screen measures:
+
+    small       107   |code delta| 1..16,  60% of them at |delta| <= 4
+    size-exact   47   code delta 0
+    large        13   |code delta| > 16
+
+That reproduces the shape wave 58 found by hand on 37 drafts (23 / 13 / 1). The
+straight-line pool splits the same way (61 / 38 / 18), which is worth knowing
+because 60 of those sit above `--block-max` and had no screen at all before now.
+
+* **small** -- one to eight THUMB instructions. In a loop this is the
+  **induction-variable signature**: either the ROM has a second source IV the
+  draft is missing (`sub_080200EC`, +12, open seventeen waves, matched on the
+  first attempt once written) or the draft carries a `strength_reduce` pointer
+  giv the ROM does not (`sub_0800CAA0`, also +12, opposite direction). **Read
+  the ORDER, never the byte count, to tell which way it points.**
+* **size-exact** -- the right length rules out missing statements and wrong loop
+  structure. What is left is allocation, constant placement, and cross-jumping
+  block selection. It converted 3 of 11 in wave 58, **above** the 13.6% drafted
+  baseline, so it is not a bad class.
+* **large** -- probably a shape, and wave 57 measured 11 of 11 drafted residuals
+  as *not* shapes. In practice a large delta more often means the draft is old
+  than that its shape is wrong.
+
+### How the screen ranks, and why it is not by score
+
+Groups sort small, then size-exact, then large. Within a group, work nobody has
+spent a slot on sorts first, matching this project's existing rule that a parked
+function was deliberately not handed out again.
+
+**"Spent" is not the same as "parked", and this screen's first outing proved
+it.** `sub_08045FC8` came out near the top of the small group — 104 bytes, one
+loop, `|code delta| 2`, status `asm` — and it is one of the most exhausted
+functions in the tree: three decomp-permuter runs (22,157 iterations in wave 43
+alone), ten measured source shapes, four ruled-out axes, two waves of park
+notes. All of that lives in the draft's comment; none of it is in `status`.
+**43 further `asm`-status drafts are in the same position.** A
+`work/<fn>/permuter/` directory is the cheap durable evidence — a park note can
+be deleted or rewritten by the next agent, that tree survives — so it demotes a
+row the same way `parked` does, and rows carrying one are tagged `+permuted`.
+Any future screen that ranks the drafted pool needs this term; without it the
+tool confidently offers ground-out functions as fresh work.
+
+Within **small**: loop-carrying first, then `|code delta|` ascending. Not by
+score -- the score is POSITIONAL, so ranking on it would contradict the rule the
+rest of this file is built on. (The loops term is measured; the `|code delta|`
+term is reasoned, and is flagged as such in `delta_key()` so nobody cites it
+back as a finding.)
+
+Within **size-exact**: score **ASCENDING**, and a draft at 93%+ that has already
+been parked once sinks to the bottom of its group with a `parked-high` tag.
+Wave 58 measured six size-exact loop functions: both matches came from the
+lowest-scoring drafts (87.9%, 66.9%) and all three at 93%+ were instruction-ORDER
+decisions of which not one moved. They are ranked last rather than filtered out,
+because the documented exception is a diff showing something other than order.
+
+### What it will not tell you, and the three gates
+
+The screen reads cached artefacts, so it says out loud what it could not
+measure rather than quietly showing a smaller corpus:
+
+* **stale draft** -- `<fn>.c` newer than `_cand.bin`; the measurement describes
+  code that no longer exists.
+* **stale `.s`** -- `<fn>.s` newer than `_cand.bin`. `compile_probe` and
+  `permute.py` both write into `work/<fn>/`, so the assembly listing is not
+  always the compile the `.bin` came from. `sub_0803BF10` has a `.s` from eight
+  days after its `.bin` and the two disagree by 24 bytes.
+* **unaccounted** -- the parsed code/pad/pool split does not add up to the bytes
+  that exist. This is the check that makes the code delta evidence rather than a
+  plausible number, and `--self-test` re-derives it for every reported row.
+
+A function in that list is an **unmeasured** function, not a hard one. Re-run
+`tools/trymatch.py` on it and it reappears.
+
+### VERDICT ON THE `|code delta|` TERM — it predicts SMALL, not REACHABLE (wave 59, W59-F)
+
+W59-C flagged the `|code delta|` term as *reasoned, not measured*, and asked for
+it not to be cited back as a finding. This is the measurement. **W59-F took the
+five top-ranked NEW rows of `--delta-only` as an independent test, re-ran
+`trymatch` on every draft and read every diff before touching anything.**
+
+Result: **1 of 5 matched** (`sub_0803AFA0`), 4 parked with evidence. 20% against
+the 13.6% drafted-pool baseline, so the screen is not worse than picking at
+random — but *the term did not do the work*, and the four parks say why:
+
+| function | `code delta` | what the residual actually is |
+|---|---|---|
+| `sub_0802E7C8` | −2 | **kind 4, basic-block layout.** 292 of 344 bytes differ |
+| `sub_08064288` | +2 | one extra live value; the allocator's decision |
+| `sub_080790D0` | +4 | HOLD/REMATERIALISE inversion, axis exhausted in wave 51 |
+| `sub_0807F57C` | +4 | **kind 5, cross-TU prototype contract**, one instruction |
+| `sub_0803AFA0` | −2 | one indirection level — **MATCHED** |
+
+**A code delta of ±2 is not "one or two THUMB instructions of work".** It is one
+or two instructions of *size*, and the four parks are a layout decision, an
+allocator decision, an exhausted register axis and a prototype that no spelling
+of this function can reach. `sub_0802E7C8` is the clean refutation: `code −2`,
+and 85% of its bytes differ because a basic block sits somewhere else.
+`sub_0807F57C` is the other end — `code +4`, and the residual really is one
+instruction, but it is a **kind 5**, the least reachable class in the brief.
+**Delta size and residual reachability are independent.**
+
+**The second axis that DOES separate them, and it is nearly free:** ask whether
+the draft's own notes name an **untried spelling**. All four parks had their
+axis explicitly exhausted by earlier measured probes recorded in the draft
+(five reference-count probes on `sub_080790D0`, four test spellings on
+`sub_0807F57C`, three binding placements on `sub_0802E7C8`, two attempts on
+`sub_08064288`). `sub_0803AFA0` — the one that matched — was the only row in the
+batch whose notes ended with a **named, cheap, untried idea**, and that idea is
+what closed it. That is a term a screen can compute today: `_cand.bin` age
+already tells it whether a draft has been re-measured, and a draft carrying a
+"Not yet tried" line is a different object from one carrying four ruled-out
+axes. It is the same insight as the `+permuted` tag above, generalised —
+**rank on how exhausted the search is, not on how small the residual looks.**
+
+Two corrections to how the batch was read before the diffs were opened, both of
+which the delta term invited:
+
+* `sub_0807F57C` was read as a literal-pool residual because **every** `ldr
+  [pc,#N]` is off by exactly 4. The pool is identical — same five words, same
+  order, same relocations. A **uniform** shift on every pc-relative load is a
+  downstream symptom of an insertion earlier in the function and is never
+  evidence about the pool. A *non-uniform* one would be.
+* `sub_0802E7C8` was read as a register-assignment residual from its first
+  difference (`adds r5,r2,#0` vs `adds r7,r2,#0` at +0xc). Per this file's own
+  positional rule, the first difference is the last symptom to appear; the
+  cause was 300 bytes later.
+
+**Cost, for the wave-37 sizing rule:** this batch averaged 286 B/function and
+the wave-37 band table predicts ~258 B/attempt there. Measured here: 10
+`trymatch` runs across 1,428 bytes = **143 B/attempt**, and the single match
+took 5 attempts for 312 bytes = **62 B/attempt**. Both are *worse* than the
+drafting band predicts, and the reason is structural: on drafted work the first
+`trymatch` per function buys no progress at all, it only re-measures. **The
+wave-37 bytes/function rule does not transfer to residual-hunting** — the cost
+of a residual is the number of *spellings* left in its axis, which is unrelated
+to the function's size. `sub_0803AFA0` at 312 bytes cost 5 attempts; the 156-byte
+`sub_0807F57C` is unreachable at any budget.
+
+## A pool word's THREE readings have a FOURTH: a real pointer VARIABLE, and the reload discriminates (wave 59, W59-F)
+
+**This matched `sub_0803AFA0`, drafted at 77.9% since wave 50, and it corrects a
+claim that stood in `include/unknown-globals.h` for nine waves.**
+
+The literal-pool chapter says a ROM word whose contents look like an address has
+three readings: an address constant, an oversized scalar, or an
+aggregate-initialiser template. There is a fourth, and it is the one that is
+invisible to every content-based test: **a real global pointer variable**. Its
+value is an address, it sits in `.rodata` next to genuine `-fforce-addr` words,
+and dereferencing the ROM tells you nothing.
+
+`0x080910E0` holds `0x0809106C` (a table of `const char *`). Wave 50 read it as
+`&gUnknown_0809106C`, a force-addr word, and recorded it in the header as one.
+It is not — it is a `const char **` variable, and `sub_0803AFA0` reads
+`(*tbl)[i]` through it.
+
+**The discriminator is the RELOAD, not the contents.** A `-fforce-addr` address
+constant is loop-invariant: LICM hoists its load into the preheader and it is
+read once. The ROM reads this word **inside** a loop that contains a `bl`:
+
+    ldr r2, [r7]        @ r7 = 0x080910E0, hoisted; r2 = the table base, EVERY ITERATION
+    lsls r0, r4, #2
+    adds r0, r0, r2
+    ldr r2, [r0]
+
+A non-`const` global pointer must be re-read across a call, because the callee
+may store to it. **A word re-loaded inside a loop containing a call is a
+variable; a word loaded once in the preheader is an address constant.** Read the
+loop, not the value.
+
+**Four spellings, measured, one indirection level apart:**
+
+| C | levels | result |
+|---|---|---|
+| `gUnknown_0809106C[i]` (as an array) | 2 | too shallow |
+| `gUnknown_080910E0[i]` (bare pointer global) | **4** | too deep |
+| `tbl = gUnknown_0809106C; tbl[i]` (`c_local`) | 2 | LICM hoists it |
+| `tbl = &gUnknown_080910E0; (*tbl)[i]` | **3** | **the ROM** |
+
+The middle row is the trap and it is why wave 50 could not get there from the
+pointer reading either: on a **bare-symbol deref**, `-fforce-addr` fires and
+writes the *variable's own address* into this unit's `.rodata`, adding a level.
+**Binding the variable's ADDRESS to a local suppresses it** — the address then
+reaches the MEM through a register loaded from the THUMB text pool, so no
+`.rodata` word is created, and the load through it is still not hoisted because
+the global is not `const`. This is the `c_local` workaround applied one level
+up: bind `&variable`, not `variable`.
+
+**Do not `const`-qualify the declaration.** The reload is the whole point and
+`const` licenses the hoist.
+
+The last 4 bytes were *where* the bind lands, which is a three-way readout of
+the preheader boundary and worth keeping as a worked example:
+
+* as a statement **before** the loop → `ldr r7` emits before `movs r4,#0`
+* **inside** the loop body → LICM hoists it to the right place, but the pseudo
+  is created later, so the other pool word (a `gpKeySt` force-addr) is emitted
+  first and the pool order flips
+* in the **for-init, after `i = 0`** → exact
+
+So it is source, not a hoist: it sits after the counter's init because a comma
+operator puts it there. That is the reverse direction of the wave-58
+`sub_080200EC` rule — *an init that must land after the counter and cannot be
+authored anywhere else is still source*, and the comma is how you place it.
+
+## ONE untraceable store anywhere in a loop is the LICM barrier -- it does not have to be the cursor (wave 59, W59-C)
+
+This closes `sub_08059F24` and `sub_0805A008`, drafted since wave 44 and
+diagnosed but unsolved since wave 52. **The diagnosis was right and the framing
+of the open question was wrong.**
+
+The chapter "A store through a POINTER PARAMETER does not kill a global
+pointer's load" ends by saying what is left to test is "something that makes the
+cursor's base untraceable to an argument". That treats the **cursor** as the
+only candidate barrier, and the cursor is the wrong object to be looking at.
+`prescan_loop`'s `note_addr_stored` is not a per-object fact: **one** store the
+compiler cannot trace makes `invariant_p` return 0 for **every** MEM in that
+loop. The barrier can be any store in the loop, through anything opaque.
+
+    gUnknown_03003340[y][x] += 0;      /* a row pointer LOADED FROM MEMORY */
+
+That single line, added to a draft that had sat at 31.6% and +4 bytes for three
+waves, takes `sub_08059F24` to **87.3% and size-exact** on its own, at **zero
+bytes** -- the store is dead and is deleted before output. Everything the wave-52
+chapter attributed to the cache goes at once: the duplicated loop guard
+collapses to the ROM's `ldr r1,[pc,#4]; ldr r0,[r1]; b _08059FD4` (including the
+ROM's *dead* load, which is the guard's remains after `jump.c` folded the
+duplicated test into the bottom one), `gUnknown_08499590` is re-read at all four
+use sites, and `ip` goes back to holding the loop-invariant `y * 2` instead of
+spilling it to a stack slot -- which was the whole +4.
+
+**Diagnostically this inverts the earlier reading.** W52-C's `t1`/`t2` pair and
+W57-B's five probes are all still correct, and they all vary the *cursor*, which
+is exactly why five waves of work on cursor spellings found nothing: the cursor
+was never going to be the lever. When a candidate hoists a global that the ROM
+re-reads, do not ask "what makes my out-pointer opaque?" -- ask "**which store in
+this loop did the original make through something the compiler cannot see**",
+and look at every store in the body, not just the one that writes the result.
+
+### The three allocation levers that finished it, in the order they applied
+
+Worth recording as a sequence, because each was a separately verified step and
+the last two are this file's existing rules landing on a real function:
+
+    31.6% +4   ->  87.3% exact   the LICM barrier above
+    87.3%      ->  94.3%         `do { } while (0)` around the LAST test and
+                                 the stores. This is what swaps the cursor into
+                                 r3 and the inner counter into r4.
+    94.3%      ->  98.2%         bind `u = &gUnknown_08499594[cell]` in its OWN
+                                 statement. Fixes the evaluation ORDER inside
+                                 the test: the ROM computes `cell * 12` FIRST
+                                 and loads the pointer SECOND, so the
+                                 destination register is the operand computed
+                                 LAST (`adds r1,r1,r0`, not `adds r0,r0,r1`).
+    98.2%      ->  MATCH         `(off = cell)` inside the next subscript.
+
+**Note what the third step is NOT.** Writing `(&gUnknown_08499594[cell])->unk00`
+*inline* is byte-identical to `gUnknown_08499594[cell].unk00` here -- measured by
+probe. The W52-B ARRAY_REF-of-address form is real on `sub_08059B4C` and does
+nothing on this function. It is the separate **statement** that matters, not the
+`&`.
+
+The last 4 bytes were which of two address constants, each referenced once in
+the loop, wins the callee-saved register: the ROM hoists `&gUnknown_08499594`
+into `sl` and rematerialises `gUnknown_03004730` from the pool, and the draft did
+the opposite. The swapped pool-word order that came with it is the SAME fact, not
+a second one (the wave-17 rule). `(off = cell)` is the wave-17 lever in its
+purest form -- a reference created at a point no statement boundary can reach.
+
+### Run the permuter REPEATEDLY, each time from the previous best
+
+`sub_08059F24` took three runs: 87.3 -> 94.3 -> 98.2 -> match at iteration 119.
+Each run started from the `best.c` the previous one left, and each found a lever
+that a hand rewrite had not. A single 300 s run from the 87.3% draft found
+nothing. The tool's own hint says it -- "a different starting point usually helps
+more" -- and a permuter win IS a different starting point. This is a cheaper
+pattern than one long run and it should be the default on any size-exact
+allocation residual.
+
+**And do not tidy the result.** Folding the permuter's `new_var = expr; off =
+new_var;` back into one statement drops the matched `sub_08059F24` straight back
+to 98.2%. That is the wave-52 warning, reproduced on a matched file in this
+wave. Re-run `try_match` after any cosmetic edit.
+
+### Where it stops
+
+`sub_08059E3C` -- the third member of the group, and the one wave 57 called the
+cleanest instrument for this bug -- takes the same barrier and the same
+`do { } while (0)` to **98.3%, size-exact, 4 bytes**, and then stops. Its
+residual is two scratch register picks (`ldr r1,[sp,#0]` against
+`ldr r6,[sp,#0]`, and `mov r6,ip` against `mov r0,ip`). decomp-permuter ran
+**23,543 iterations** from that draft and nothing scored better than the
+starting point, printing `score = 20` over and over. That is the "ceiling
+unmoved" signature. It is parked with this note rather than ground further.

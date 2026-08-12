@@ -11197,8 +11197,9 @@ extern const char gUnknown_08090FA4[];
  *
  * -fforce-addr POOL WORDS -- NOT declared, they hold another ADDRESS:
  *   0x08091068 -> 0x03002EE0   &gpKeySt              (sub_0803AD48)
- *   0x080910E0 -> 0x0809106C   &gUnknown_0809106C    (the table above)
  *   0x080910E4 -> 0x03002EE0   &gpKeySt              (sub_0803AFA0)
+ * 0x080910E0 WAS LISTED HERE AND IT IS NOT A POOL WORD -- corrected wave 59
+ * (W59-F), and correcting it is what matched sub_0803AFA0. See below.
  * Declaring a gUnknown_03002EE0 for the &gpKeySt pair would not link --
  * aw2bhr.lds already binds 0x002EE0 as gpKeySt. Write `gpKeySt->held` and let
  * agbcc emit the word into the unit's own .rodata. */
@@ -11208,6 +11209,18 @@ extern const u16 gUnknown_0809104A[];
 extern const char gUnknown_0809105C[];
 extern const char gUnknown_08091064[];
 extern const char *const gUnknown_0809106C[];
+/* Wave 59, W59-F. A REAL POINTER VARIABLE, not a -fforce-addr address constant,
+ * and the comment above said the opposite from wave 50 to wave 59. Its value is
+ * 0x0809106C, so it is indistinguishable from a pool word by content alone --
+ * exactly the ambiguity this header warns about elsewhere. What settles it is
+ * that sub_0803AFA0 RELOADS it (`ldr r2,[r7]`) on every iteration of a loop
+ * containing a `bl`: a force-addr address constant is loop-invariant and would
+ * be hoisted, whereas a non-const global pointer must be re-read across a call.
+ * Reaching it as `tbl = &gUnknown_080910E0; (*tbl)[i]` matched sub_0803AFA0
+ * byte-for-byte; `gUnknown_080910E0[i]` on a bare deref does NOT -- that emits
+ * a second force-addr word and one indirection too many. NOT const-qualified:
+ * the reload is the whole point, and `const` would license the hoist. */
+extern const char **gUnknown_080910E0;
 extern const char gUnknown_080910D4[];
 /* Wave 29, W29-B. A REAL ROM POINTER WORD, not a -fforce-addr address constant:
  * it holds 0x0200FC50 in baserom.gba, and THREE separate functions

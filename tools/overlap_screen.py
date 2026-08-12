@@ -24,8 +24,15 @@ assembly itself:
              unmatched function that is itself close to one of them. That is
              the unit a wave can be batched on.
 
+  delta      WAVE 59. The residual's KIND, measured off the DRAFT rather than
+             off the address map. Every axis above is address- or callee-based
+             and they are all spent -- the clean pool ended in wave 57, so what
+             is left is 300 functions that each already carry a draft, and what
+             separates them is what their draft's residual IS. See delta_rows().
+
     python tools/overlap_screen.py                 # the standard report
     python tools/overlap_screen.py --min-size 96 --min-shared 4 --min-j 0.6
+    python tools/overlap_screen.py --delta-only    # just the wave-59 screen
     python tools/overlap_screen.py --self-test     # the wave-20 acceptance test
 
 `--self-test` re-derives the 0x08052 cluster with no knowledge of it: it
@@ -377,6 +384,432 @@ def near_misses(recs, floor):
     return out
 
 
+# ---------------------------------------------------------------------------
+# THE DELTA SCREEN (wave 59)
+# ---------------------------------------------------------------------------
+#
+# Everything above this line ranks a function by WHERE IT SITS -- which globals
+# it names, which callees it shares, which 4KB block it lives in. That family of
+# axis is finished. Wave 57 emptied the never-attempted pool, so every function
+# left carries a draft, drafted work converts at 13.6% against 83-86% for
+# undrafted work, and the overlap axis now returns 39 blocks holding one
+# candidate each. Address locality cannot separate 300 functions that are all
+# equally close to something already matched.
+#
+# What still separates them is the DRAFT: how far its compiled output is from
+# the ROM, and in which direction. Wave 58's orchestrator probed 37 loop-carrying
+# drafts by hand and got a distribution nothing in tools/ could produce --
+#
+#     small non-zero delta (induction-variable signature)   23   16 at +/-4
+#     size-exact (allocation / block layout)                13
+#     large delta (likely shape)                             1
+#
+# -- and found sub_080200EC, open for seventeen waves, on the first run from
+# exactly the small-delta signature. It lived in a scratchpad and the scratchpad
+# is gone. This is that probe, made into a maintained tool with a self-test.
+
+DELTA_WIDTH = {"word": 4, "4byte": 4, "long": 4, "2byte": 2, "short": 2,
+               "hword": 2, "byte": 1}
+DIRECTIVE_RE = re.compile(r"^\.(\w+)")
+LABELLED_RE = re.compile(r"^\S+:")
+
+
+def accumulate(stmts, arm):
+    """(code, pad, data) bytes emitted by a sequence of assembler statements.
+
+    THE POINT OF SPLITTING THESE THREE IS THAT trymatch REPORTS ONLY THEIR SUM,
+    and the sum is a different quantity from any of them. `sub_08045FC8` reports
+    `size: match` at 104 bytes with a candidate whose CODE is 2 bytes shorter:
+    the literal pool must start on a 4-byte boundary, so the shortfall comes
+    straight back as alignment padding and the totals agree. It is a
+    one-extra-instruction residual wearing a size-exact costume, and every
+    screen keyed on the reported size will keep re-selecting it forever.
+
+    There is a second way the same lie is told, and it is invisible from the
+    other side: `_cand.bin` is objcopy's dump of the whole `.text` SECTION,
+    which the assembler rounds up to its 4-byte alignment. So a candidate whose
+    code is 2 bytes short of a 2-mod-4 ROM function also reports `size: match`,
+    with no `.align` involved at all. 42 of the 283 measurable drafts in the
+    tree -- one in seven -- have a reported size that disagrees with their code
+    length, in one direction or the other.
+
+    `.align n` is GAS's 2**n form, which is what both agbcc and the disassembly
+    in asm/ emit.
+    """
+    code = pad = data = total = 0
+    for s in stmts:
+        if s.startswith("."):
+            m = DIRECTIVE_RE.match(s)
+            d = m.group(1) if m else ""
+            if d == "align":
+                arg = s.split(None, 1)
+                n = int(arg[1].split(",")[0].strip(), 0) if len(arg) > 1 else 2
+                need = (-total) % (1 << n)
+                pad += need
+                total += need
+            elif d in DELTA_WIDTH:
+                w = DELTA_WIDTH[d] * (s.count(",") + 1)
+                data += w
+                total += w
+            continue
+        mn = s.split()[0].lower()
+        w = 4 if (arm or mn in ("bl", "blx")) else 2
+        code += w
+        total += w
+    return code, pad, data
+
+
+def cand_statements(path, name):
+    """Statements of `name`'s .text in an agbcc-emitted work/<fn>/<fn>.s."""
+    out = []
+    seen = False
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for raw in fh:
+            s = raw.split("@")[0].strip()
+            if not s:
+                continue
+            if not seen:
+                seen = (s == name + ":")
+                continue
+            # `.size` closes the function; `.section` starts .debug_line, which
+            # is 200KB of `.byte` in a typical draft and would swamp everything.
+            if s.startswith(".size") or s.startswith(".section"):
+                break
+            if LABELLED_RE.match(s):
+                s = s.partition(":")[2].strip()
+                if not s:
+                    continue
+            out.append(s)
+    return out
+
+
+def rom_statements(fn):
+    """Statements of one asm/ function, from an awlib.Function."""
+    out = []
+    for raw in fn.lines:
+        s = raw.split("@")[0].strip()
+        if not s:
+            continue
+        if awlib.MACRO_RE.match(s):
+            continue
+        if LABELLED_RE.match(s):
+            # `sub_08059F24: @ 0x08059F24` leaves nothing; `_0805A0F0: .4byte g`
+            # leaves the pool word, which is exactly the line that must be
+            # counted as DATA and not as an instruction.
+            s = s.partition(":")[2].strip()
+            if not s:
+                continue
+        out.append(s)
+    return out
+
+
+def rom_layouts():
+    """{name: (code, pad, data)} for every function in asm/."""
+    out = {}
+    for f in awlib.load_all():
+        for fn in f.funcs:
+            out[fn.name] = accumulate(rom_statements(fn), fn.mode == "ARM")
+    return out
+
+
+def delta_rows(recs, args):
+    """Measure every unmatched draft's residual. Returns (rows, excluded).
+
+    NOTHING HERE COMPILES ANYTHING. `work/<fn>/_cand.bin` and `_target.bin` are
+    what trymatch wrote on its last run -- the same two files apply_pending()
+    already reads to spot an unpromoted match -- so a full-corpus delta screen
+    costs one pass over work/ and one over asm/, not 300 invocations of agbcc.
+
+    THE SCORE IS RECOMPUTED FROM THE BINS, NOT READ FROM best.json. best.json
+    tracks `best.c`, which is a DIFFERENT FILE from the draft on disk, and the
+    gap between them has misled two waves: wave 56 had best.json reading 33.99%
+    at the moment trymatch returned exit 0 on the draft beside it, and wave 57
+    had 56.9% quoted for a draft that was 18.5%. The arithmetic below is
+    trymatch's own, on trymatch's own output bytes, so it describes the draft.
+
+    THREE INTEGRITY GATES, each reported by name rather than silently dropped.
+    A screen whose inputs can go stale without saying so is how this project
+    loses screens.
+
+      stale draft      <fn>.c is NEWER than _cand.bin -- somebody edited the
+                       draft after the last trymatch run, so the measurement
+                       describes code that no longer exists.
+      stale .s         <fn>.s is NEWER than _cand.bin. compile_probe and
+                       permute.py both write into work/<fn>/, so the assembly
+                       listing is not always the compile the .bin came from.
+                       sub_0803BF10 has a .s from eight days after its .bin and
+                       the two disagree by 24 bytes.
+      unaccounted      the parsed layout does not add up to the bytes that
+                       actually exist (rounded up to .text's 4-byte alignment on
+                       the candidate side, exact on the ROM side). This is the
+                       check that makes the code/pool split evidence rather than
+                       a plausible-looking number -- if a line cannot be
+                       classified, the totals disagree and the row is dropped
+                       instead of reported with a wrong split.
+    """
+    units_path = os.path.join(awlib.REPO, "build", "functions", "units.json")
+    base = {}
+    if os.path.exists(units_path):
+        with open(units_path, encoding="utf-8") as fh:
+            for u in json.load(fh):
+                for fn in u["functions"]:
+                    base[fn] = int(u["addr_hex"], 16)
+    roms = rom_layouts()
+
+    rows = []
+    excluded = collections.defaultdict(list)
+    for r in recs:
+        if r["status"] not in ("asm", "parked"):
+            continue
+        if r["mode"] != "THUMB" or r["trivial"]:
+            continue
+        d = os.path.join(awlib.REPO, "work", r["name"])
+        cb = os.path.join(d, "_cand.bin")
+        tb = os.path.join(d, "_target.bin")
+        cs = os.path.join(d, r["name"] + ".c")
+        sf = os.path.join(d, r["name"] + ".s")
+        if not (os.path.exists(cb) and os.path.exists(tb)
+                and os.path.exists(cs)):
+            excluded["never compiled by trymatch"].append(r)
+            continue
+        if r["name"] not in base:
+            excluded["in no split unit"].append(r)
+            continue
+        cand = open(cb, "rb").read()
+        tgt = open(tb, "rb").read()
+        off = r["addr"] - base[r["name"]]
+        if off < 0 or off + r["size"] > len(tgt):
+            excluded["target slice out of range"].append(r)
+            continue
+        bin_mtime = os.path.getmtime(cb)
+        if os.path.getmtime(cs) > bin_mtime:
+            excluded["draft edited since the last trymatch run"].append(r)
+            continue
+        if not os.path.exists(sf) or os.path.getmtime(sf) > bin_mtime:
+            excluded["<fn>.s is not the compile _cand.bin came from"].append(r)
+            continue
+
+        cl = accumulate(cand_statements(sf, r["name"]), False)
+        rl = roms.get(r["name"])
+        if rl is None:
+            excluded["not in asm/"].append(r)
+            continue
+        if -(-sum(cl) // 4) * 4 != len(cand) or sum(rl) != r["size"]:
+            excluded["layout does not account for every byte"].append(r)
+            continue
+
+        tgt_fn = tgt[off:off + r["size"]]
+        cand_fn = cand[:r["size"]]
+        n_diff = sum(1 for a, b in zip(tgt_fn, cand_fn) if a != b)
+        common = min(len(tgt_fn), len(cand_fn))
+        pct = (common - n_diff) / r["size"] * 100 if r["size"] else 0.0
+        code_delta = cl[0] - rl[0]
+        rows.append({
+            "rec": r, "name": r["name"], "size": r["size"],
+            "cand": len(cand), "size_delta": len(cand) - r["size"],
+            "code_delta": code_delta, "cand_code": cl[0], "rom_code": rl[0],
+            "cand_pool": cl[2], "rom_pool": rl[2], "pct": pct,
+            "loops": r["backward_branches"], "status": r["status"],
+            # WAVE 59, and it came straight out of testing this screen's own
+            # ranking. `status == "parked"` is NOT the whole "a slot has been
+            # spent here" signal: sub_08045FC8 ranked near the top of the small
+            # group -- 104 bytes, one loop, |code delta| 2, status `asm` -- and
+            # it carries three recorded decomp-permuter runs (22,157 iterations
+            # in wave 43 alone), ten measured source shapes and four explicitly
+            # ruled-out axes. It is one of the most thoroughly exhausted
+            # functions in the tree and the screen offered it as fresh work.
+            # 43 further `asm`-status drafts are in the same position. The
+            # permuter directory is the cheap durable evidence of it -- a park
+            # note can be deleted or rewritten by the next agent, a
+            # work/<fn>/permuter/ tree survives.
+            "permuted": os.path.isdir(os.path.join(d, "permuter")),
+            "kind": ("size-exact" if code_delta == 0
+                     else "small" if abs(code_delta) <= args.delta_small
+                     else "large"),
+        })
+    return rows, excluded
+
+
+# The rank keys, in one place, because the whole claim of this screen is that
+# ORDER BY RESIDUAL KIND beats order by score and wave 58 measured it twice.
+KIND_RANK = {"small": 0, "size-exact": 1, "large": 2}
+
+
+def delta_key(row, parked_floor):
+    """Sort key. Read the comment -- every term in it was measured.
+
+    GROUP ORDER: small-delta above size-exact above large.
+
+      small       A residual of one or two THUMB instructions inside a loop is
+                  the induction-variable signature. sub_080200EC was open for
+                  seventeen waves and fell on the first attempt once it was
+                  read as "the candidate is missing a second source variable";
+                  sub_0800CAA0 is the same axis pointing the other way, the
+                  candidate carrying a giv the ROM does not. Both are the same
+                  small delta. This is the group with a known lever.
+      size-exact  Being the right length rules out missing statements and wrong
+                  loop structure, but what is left -- allocation, constant
+                  placement, cross-jump block selection -- includes two kinds
+                  no spelling reaches. It still converted 3 of 11 in wave 58,
+                  above the 13.6% drafted baseline, so it is not a bad class;
+                  it is a worse class than small.
+      large       Probably a shape, and wave 57 measured 11 of 11 drafted
+                  residuals as NOT shapes. A large delta here more often means
+                  the draft is old than that the shape is wrong.
+
+    WITHIN EVERY KIND, work nobody has spent a slot on sorts first. That is this
+    file's existing convention -- report() already builds `targets` from `asm`
+    only, because a parked function has had a slot spent on it and was
+    deliberately not handed out again -- and the delta screen must not quietly
+    reverse it. Such rows are still LISTED, because parked.json's ruled-out axes
+    are the most valuable part of a draft and a delta the parker never measured
+    is new information; they are just not offered ahead of untouched work.
+
+    "SPENT" IS NOT THE SAME AS "PARKED", and this screen's own first outing
+    proved it. sub_08045FC8 came out near the top of the small group and is
+    among the most exhausted functions in the tree: three decomp-permuter runs,
+    ten measured source shapes, four ruled-out axes, two waves of park notes --
+    all of it recorded in the draft, none of it in `status`, which is `asm`. A
+    `work/<fn>/permuter/` directory is the durable evidence, so it demotes too;
+    43 `asm`-status drafts carry one.
+
+    WITHIN small: loop-carrying first, then |code delta| ascending. NOT by
+    score, and that is deliberate rather than an oversight -- this project's
+    score is POSITIONAL, so it records where the divergence starts and not how
+    much is left, and ranking on it would contradict the rule the rest of this
+    file is built on.
+
+      The loops term is the measured one. Wave 58's probe was on loop-carrying
+      drafts specifically, and both functions it names -- sub_080200EC, missing
+      a second source induction variable, and sub_0800CAA0, carrying a pointer
+      giv the ROM does not -- are loop functions whose residual IS the induction
+      variable. A small delta with no loop is a different mechanism.
+
+      The |code delta| term is REASONED, NOT MEASURED, and is flagged as such
+      so nobody cites it back as a finding: a residual of one THUMB instruction
+      is fewer decisions than one of four, and wave 58's data (16 of 23 at
+      +/-4) says only that the group is tight, not that +/-2 beats +/-4.
+
+    WITHIN size-exact: score ASCENDING, and 93%+ drafts that have ALREADY BEEN
+    PARKED ONCE sink to the bottom of the group. Wave 58 measured six size-exact
+    loop functions: both matches came from the lowest-scoring drafts (87.9% and
+    66.9%) and all three at 93%+ were instruction-ORDER decisions of which not
+    one moved. An order-only difference leaves prologue, body and tail intact so
+    it reads HIGH; a wrong register or operand order early reads low and is
+    often one edit. The 93%+ drafts are not filtered out -- they are listed with
+    a `parked-high` tag, because "screened out" and "ranked last" differ exactly
+    when the diff shows something other than order, which is the documented
+    exception.
+    """
+    demote = int(row["kind"] == "size-exact" and row["pct"] >= parked_floor
+                 and row["status"] == "parked")
+    spent = int(row["status"] == "parked" or row["permuted"])
+    if row["kind"] == "small":
+        secondary = (spent, 0 if row["loops"] else 1, abs(row["code_delta"]))
+    elif row["kind"] == "size-exact":
+        secondary = (spent, row["pct"])
+    else:
+        secondary = (spent, abs(row["code_delta"]))
+    return (KIND_RANK[row["kind"]], demote) + secondary + (row["name"],)
+
+
+def delta_report(recs, args):
+    """The wave-59 section. Returns (rows, excluded) for the self-test."""
+    rows, excluded = delta_rows(recs, args)
+    loopy = [x for x in rows if x["loops"] > 0]
+    straight = [x for x in rows if x["loops"] == 0]
+
+    print("\n== RESIDUAL DELTA on the DRAFTED pool (wave 59) ==")
+    print("measured: %d drafts, %d bytes  -- from work/<fn>/_cand.bin, written "
+          "by the\n          last trymatch run. Nothing here recompiles; the "
+          "score is recomputed\n          from the bins, NOT read from "
+          "best.json (which tracks best.c)."
+          % (len(rows), sum(x["size"] for x in rows)))
+
+    # WHAT THIS SCREEN DOES NOT SEE. Same discipline as --min-size and
+    # --block-max above: three floor artifacts in this file have each hidden
+    # most of the corpus for multiple waves, and each was found by a wave
+    # stumbling on it rather than by the tool saying so.
+    total_ex = sum(len(v) for v in excluded.values())
+    if total_ex:
+        print("NOT MEASURED: %d unmatched non-trivial THUMB function(s), %d "
+              "bytes." % (total_ex, sum(r["size"] for v in excluded.values()
+                                        for r in v)))
+        for reason in sorted(excluded):
+            v = excluded[reason]
+            print("    %-46s %3d  %s"
+                  % (reason, len(v),
+                     " ".join(r["name"] for r in v[:6])
+                     + (" ..." if len(v) > 6 else "")))
+        print("  A draft in that list is NOT a hard function -- it is an "
+              "unmeasured one.\n  Re-run tools/trymatch.py on it and it "
+              "reappears here.")
+    print("  NOTE: this screen ignores --min-size %d entirely. It reads the "
+          "whole\n        unmatched pool, including the %d straight-line "
+          "function(s) that sit\n        above --block-max %d with no other "
+          "screen at all."
+          % (args.min_size,
+             sum(1 for x in straight if x["size"] > args.block_max),
+             args.block_max))
+
+    for label, pool in (("loop-carrying", loopy), ("straight-line", straight)):
+        n = collections.Counter(x["kind"] for x in pool)
+        print("\n  %s drafts: %d   small %d / size-exact %d / large %d "
+              "(|code delta| > %d)"
+              % (label, len(pool), n["small"], n["size-exact"], n["large"],
+                 args.delta_small))
+        near = [x for x in pool
+                if x["kind"] == "small" and abs(x["code_delta"]) <= 4]
+        if n["small"]:
+            print("      of the small group, %d (%.0f%%) sit at |code delta| "
+                  "<= 4 -- one or two THUMB\n      instructions, which is the "
+                  "induction-variable signature."
+                  % (len(near), 100.0 * len(near) / n["small"]))
+
+    # The single most useful number this screen produces, and the reason the
+    # code/pool split exists at all.
+    liars = [x for x in rows
+             if (x["size_delta"] == 0) != (x["code_delta"] == 0)]
+    print("\n  REPORTED SIZE DISAGREES WITH CODE LENGTH on %d of %d drafts "
+          "(%.0f%%)." % (len(liars), len(rows),
+                         100.0 * len(liars) / len(rows) if rows else 0))
+    print("      trymatch's `size: match` counts the .text SECTION, which is "
+          "code +\n      alignment padding + literal pool, rounded up to 4. Two "
+          "bytes lost from\n      the code come straight back as padding. Every "
+          "one of these is\n      classified by its CODE length here, so "
+          "sub_08045FC8 is small, not exact.")
+
+    print("\n  Ranked by RESIDUAL KIND, not by score -- see delta_key(). "
+          "`parked-high`\n  marks a size-exact draft at %.0f%%+ that has "
+          "already been parked once:\n  wave 58 measured three of those as "
+          "instruction-ORDER decisions and not\n  one moved." % args.delta_parked_floor)
+    shown = 0
+    order = sorted(rows, key=lambda x: delta_key(x, args.delta_parked_floor))
+    if args.delta_loops_only:
+        order = [x for x in order if x["loops"] > 0]
+    for x in order[:args.delta_top]:
+        demote = (x["kind"] == "size-exact"
+                  and x["pct"] >= args.delta_parked_floor
+                  and x["status"] == "parked")
+        print("    %-14s %5dB  %-10s code %+4d  size %+4d  %5.1f%%  "
+              "loops=%-2d pool %d/%d  %s%s%s"
+              % (x["name"], x["size"], x["kind"], x["code_delta"],
+                 x["size_delta"], x["pct"], x["loops"],
+                 x["cand_pool"] // 4, x["rom_pool"] // 4, x["status"],
+                 "+permuted" if x["permuted"] else "",
+                 "  parked-high" if demote else ""))
+        shown += 1
+    # NO SILENT CAPS -- the lesson of waves 26 and 28, which each read a header
+    # count above a shorter listing and concluded the axis was nearly dry.
+    if len(order) > shown:
+        rest = order[shown:]
+        print("    (+%d more NOT SHOWN, %d bytes. Re-run with --delta-top %d. "
+              "The counts\n     above cover ALL rows and will not agree with "
+              "this listing until you do.)"
+              % (len(rest), sum(x["size"] for x in rest), len(order)))
+    return rows, excluded
+
+
 def clusters(pairs, targets, min_shared, min_j):
     """Group unmatched functions that share an exemplar, then merge on
     target-to-target overlap so a sibling with no exemplar of its own still
@@ -635,14 +1068,21 @@ def report(args):
             print("           %-14s %4dB  |shared|=%d J=%.3f  vs %s"
                   % (name, t["size"], best[1], best[2], best[3]))
 
-    # Runs LAST on purpose. Every axis above is shape-based and they go dry
-    # together; when they do, this is the one that still has work in it, and it
-    # should be the last thing on screen when you sit down to write the brief.
+    # Every axis above is shape-based and they go dry together; when they did,
+    # this was the one that still had work in it. As of wave 59 it is going the
+    # same way -- 39 blocks holding ONE candidate each -- so the delta screen
+    # below it is now the last thing on screen, on the same reasoning.
     block_offered = []
     if not args.no_blocks:
         _, block_offered = blocks(recs, args)
 
-    return pairs, covered, strict, loose, targets, block_offered
+    # Runs LAST on purpose (wave 59). Address locality cannot separate a pool
+    # in which every member already carries a draft; what the residual IS can.
+    delta = ([], {})
+    if not args.no_delta:
+        delta = delta_report(recs, args)
+
+    return pairs, covered, strict, loose, targets, block_offered, delta
 
 
 def blocks(recs, args):
@@ -872,11 +1312,172 @@ def blocks(recs, args):
     return rows, offered
 
 
+def delta_self_test(args, delta):
+    """The wave-59 acceptance test for the delta screen.
+
+    Three criteria, set by the wave brief before the screen was written, plus
+    two structural ones. The point of writing them down before the tool is that
+    a screen which produces plausible-looking output it cannot validate is worse
+    than no screen -- that sentence is why families.py has a self-test and why
+    the ad-hoc wave-58 probe this replaces was worth nothing once its scratchpad
+    was deleted.
+
+    ANCHORS RETIRE GRACEFULLY. Criteria 2 and 3 name three specific functions,
+    and the moment one is matched and promoted it leaves the drafted pool and
+    the check can never pass again. Wave 20 wrote two anchors that wave 21
+    parked, and from wave 21 to wave 33 this file's self-test carried two
+    permanently-red checks -- which hides the regression the test exists to
+    catch. So an anchor that is no longer unmatched PASSES with a loud note
+    saying it has retired, and only a REPORTED-BUT-WRONG anchor fails.
+
+    TWO WAYS TO STOP BEING UNMATCHED, AND THE SECOND ONE BIT WITHIN AN HOUR OF
+    THIS TEST BEING WRITTEN. "Gone from the pool" only catches PROMOTION, which
+    happens at wave end. sub_08059F24 and sub_0805A008 were matched by
+    try_match later in the same wave that wrote this check, so they were still
+    `status: asm` in data/functions.json -- still measured, still listed, now
+    reporting +0 and 100.0% -- and criterion 2 went red for the best possible
+    reason. A row whose candidate reproduces the ROM bytes is a MATCH pending
+    promotion (this is what apply_pending() reads the same files for), and it
+    retires the anchor exactly as promotion would.
+    """
+    rows, excluded = delta
+    if not rows:
+        print("\n[self-test] delta screen produced NO rows: FAIL (nothing to "
+              "check -- run tools/trymatch.py on at least one draft)")
+        return False
+    ok = True
+    by_name = {x["name"]: x for x in rows}
+    loopy = [x for x in rows if x["loops"] > 0]
+    n = collections.Counter(x["kind"] for x in loopy)
+
+    # (1) The wave-58 distribution SHAPE on the loop-carrying drafted pool.
+    # Asserted as ratios, not counts: wave 58's absolute numbers (23/13/1) came
+    # from 37 hand-probed drafts and this screen reads the whole pool, so any
+    # hardcoded count would be wrong on the first run and rot on every later
+    # one. The three claims that are actually the finding: small is the biggest
+    # group, size-exact is a real second group rather than a rounding artifact,
+    # large is nearly empty, and the small group piles up at one or two THUMB
+    # instructions.
+    near = [x for x in loopy
+            if x["kind"] == "small" and abs(x["code_delta"]) <= 4]
+    tests = [
+        ("small is the largest group", n["small"] > n["size-exact"]),
+        ("size-exact is a real group (>= 10%)",
+         n["size-exact"] >= 0.10 * len(loopy)),
+        ("large is nearly empty (<= 20%)", n["large"] <= 0.20 * len(loopy)),
+        ("the small group clusters at |code delta| <= 4 (>= 40%)",
+         n["small"] and len(near) >= 0.40 * n["small"]),
+    ]
+    shape_ok = all(t[1] for t in tests)
+    print("\n[self-test] (1) wave-58 distribution shape reproduced on %d "
+          "loop-carrying drafts\n            (small %d / size-exact %d / large "
+          "%d; %d of the small at |delta| <= 4): %s"
+          % (len(loopy), n["small"], n["size-exact"], n["large"], len(near),
+             "PASS" if shape_ok else "FAIL"))
+    for label, good in tests:
+        if not good:
+            print("              FAILED: %s" % label)
+    ok &= shape_ok
+
+    # (2) The wave-57-verified pair. They differ in ONE compare, so one
+    # derivation gives both -- which is only usable if the screen puts them
+    # together, and no address- or callee-based axis does.
+    def solved(name):
+        """Matched by trymatch, whether or not it has been promoted yet."""
+        x = by_name.get(name)
+        return x is None or (x["size_delta"] == 0 and x["pct"] >= 99.999)
+
+    pair = ("sub_08059F24", "sub_0805A008")
+    have = [p for p in pair if not solved(p)]
+    if not have:
+        print("[self-test] (2) pair %s: PASS (ANCHOR RETIRED -- both now "
+              "reproduce the ROM\n            bytes. Replace this anchor with "
+              "another verified twin pair.)" % "/".join(pair))
+    else:
+        got = [by_name[p] for p in have]
+        good = (len(have) == 2
+                and len({(x["kind"], x["size_delta"]) for x in got}) == 1
+                and got[0]["size_delta"] == 4
+                and all(abs(x["pct"] - 31.6) < 0.5 for x in got))
+        print("[self-test] (2) %s reported TOGETHER at size %+d, %s: %s"
+              % ("/".join(p[4:] for p in have), got[0]["size_delta"],
+                 ", ".join("%.1f%%" % x["pct"] for x in got),
+                 "PASS" if good else "FAIL"))
+        if not good and len(have) == 1:
+            print("              only one of the two is in the pool")
+        ok &= good
+
+    # (3) The size-exact costume. This is the check the whole code/pool split
+    # exists for, and it is the one that would silently rot a screen keyed on
+    # trymatch's reported size into re-selecting the same function every wave.
+    liar = "sub_08045FC8"
+    if solved(liar):
+        print("[self-test] (3) %s: PASS (ANCHOR RETIRED -- it now reproduces "
+              "the ROM bytes)" % liar)
+    else:
+        x = by_name[liar]
+        good = x["kind"] != "size-exact" and x["size_delta"] == 0
+        print("[self-test] (3) %s reports size %+d but code %+d, so it is "
+              "classified `%s`\n            and NOT size-exact: %s"
+              % (liar, x["size_delta"], x["code_delta"], x["kind"],
+                 "PASS" if good else "FAIL"))
+        ok &= good
+
+    # (4) Every reported row's layout accounts for every byte that exists. This
+    # is what separates a measurement from a plausible number: if a line of
+    # assembly cannot be classified as code, padding or data, the totals
+    # disagree and delta_rows() drops the row into `excluded` rather than
+    # reporting a wrong split. Re-derive it here independently of the filter.
+    bad = []
+    roms = rom_layouts()
+    for x in rows:
+        d = os.path.join(awlib.REPO, "work", x["name"])
+        cl = accumulate(cand_statements(
+            os.path.join(d, x["name"] + ".s"), x["name"]), False)
+        n_bytes = os.path.getsize(os.path.join(d, "_cand.bin"))
+        if -(-sum(cl) // 4) * 4 != n_bytes or sum(roms[x["name"]]) != x["size"]:
+            bad.append(x["name"])
+    print("[self-test] (4) every reported row's code+pad+pool accounts for "
+          "every byte: %s"
+          % ("PASS (%d rows)" % len(rows) if not bad
+             else "FAIL (%d bad: %s)" % (len(bad), " ".join(bad[:4]))))
+    ok &= not bad
+
+    # (5) No silent truncation, the lesson of waves 26 and 28. The listing is a
+    # batching list; a clipped one looks like an exhausted axis.
+    full = argparse.Namespace(**{**vars(args), "delta_top": 10 ** 6})
+    deep = delta_rows(load_index(), full)[0]
+    good = len(deep) == len(rows)
+    print("[self-test] (5) every counted row is reachable via --delta-top: %s"
+          % ("PASS (%d)" % len(deep) if good
+             else "FAIL (%d counted, %d reachable)" % (len(rows), len(deep))))
+    ok &= good
+
+    # (6) The exclusion list must be REPORTED, not silent -- and it must be
+    # accurate, which means a function is in exactly one of the two.
+    measured = set(x["name"] for x in rows)
+    skipped = set(r["name"] for v in excluded.values() for r in v)
+    pool = set(r["name"] for r in load_index()
+               if r["status"] in ("asm", "parked") and r["mode"] == "THUMB"
+               and not r["trivial"])
+    good = (measured | skipped) == pool and not (measured & skipped)
+    print("[self-test] (6) measured + excluded partitions the unmatched pool "
+          "exactly: %s"
+          % ("PASS (%d + %d = %d)" % (len(measured), len(skipped), len(pool))
+             if good else
+             "FAIL (%d + %d vs %d; %d in both, %d in neither)"
+             % (len(measured), len(skipped), len(pool),
+                len(measured & skipped), len(pool - measured - skipped))))
+    ok &= good
+    return ok
+
+
 def self_test(args):
     """The wave-20 acceptance test -- the screen must rediscover a cluster we
     already know is real, with no knowledge of it."""
-    pairs, covered, strict, loose, targets, block_offered = report(args)
+    pairs, covered, strict, loose, targets, block_offered, delta = report(args)
     ok = True
+    ok &= delta_self_test(args, delta)
 
     dup = [g for g in list(strict.values()) + list(loose.values())
            if set(r["name"] for r in g) >= {"sub_08052650", "sub_08052AF4"}]
@@ -1085,11 +1686,38 @@ def main():
                         "loop functions / 227,912 bytes sit behind this filter "
                         "against 244 / 41,078 in front of it -- the fourth "
                         "screen artifact in this tool and by far the largest")
+    p.add_argument("--no-delta", action="store_true",
+                   help="skip the wave-59 residual-delta screen")
+    p.add_argument("--delta-only", action="store_true",
+                   help="run ONLY the residual-delta screen (implies "
+                        "--no-blocks and skips the shape axes' output)")
+    p.add_argument("--delta-small", type=int, default=16,
+                   help="|candidate code bytes - ROM code bytes| at or below "
+                        "this is a `small` residual; above it is `large`. 16 "
+                        "is EIGHT THUMB instructions -- past that a residual "
+                        "stops being an allocation or induction-variable "
+                        "difference and starts being a shape. Nothing is "
+                        "hidden by this threshold: it splits the listing, it "
+                        "does not filter it")
+    p.add_argument("--delta-parked-floor", type=float, default=93.0,
+                   help="a SIZE-EXACT draft at or above this percentage that "
+                        "has already been parked once sinks to the bottom of "
+                        "its group. Wave 58: all three size-exact drafts at "
+                        "93%%+ were instruction-ORDER decisions and not one "
+                        "moved, while both matches came from 87.9%% and 66.9%%")
+    p.add_argument("--delta-top", type=int, default=40,
+                   help="rows listed by the delta screen")
+    p.add_argument("--delta-loops-only", action="store_true",
+                   help="list only loop-carrying drafts. The counts still "
+                        "cover both pools")
     p.add_argument("--self-test", action="store_true")
     p.add_argument("--include-parked", action="store_true",
                    help="also screen parked functions as targets; implied by "
                         "--self-test, whose anchors are parked")
     args = p.parse_args()
+    if args.delta_only:
+        delta_report(load_index(), args)
+        return
     if args.self_test:
         args.include_parked = True
         print("[self-test] --include-parked is ON (the anchors are parked), so "
