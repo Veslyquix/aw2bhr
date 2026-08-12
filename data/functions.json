@@ -8835,9 +8835,24 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 64,
+   "best": "79.7% identical, SIZE-EXACT, 13 differing bytes",
+   "remaining_diff": "One instruction's POSITION, across a loop boundary. The ROM keeps `ldr r6,<pool>` in the preheader and re-reads BOTH levels inside the loop (`ldr r1,[r6]; ldrh r1,[r1]`); every candidate hoists the middle `ldr` into the preheader and leaves only the `ldrh` in the body. Same instruction count, hence the exact size.",
+   "why_it_is_close": "The body is not in question -- prologue, the `dest + x + 0x20` start cell, both libgcc calls, the digit arithmetic, the u16 re-narrowing and the exit test are byte-exact, and wave 51 re-derived the same body independently from the assembly.",
+   "axes_ruled_out": [
+    "TEN declaration spellings across waves 42, 51 and 58: honest `gUnknown_0300308C[0]`; volatile array; sized array [2]; base bound to a local inside the loop; variable index `g[value % 10]`; `u16 *const` scalar; `u16 *`; `u16 *volatile`; `u16 *const volatile`; and (wave 58) `u16 *g[]` and `u16 *const g[]` measured side by side in one probe. The last two are byte-identical to each other AND to the scalar draft, which closes the wave-51 row that called the non-const array 'one LICM decision away'.",
+    "Wave 58: call-clobbering and store aliasing as explanations. This loop contains TWO calls (__umodsi3, __udivsi3) and a store through a pointer parameter, and agbcc hoists a non-const, non-volatile global load out of it regardless. The two compilations differ in neither, so neither can be the mechanism.",
+    "Not a permuter case: the difference is instruction ORDER across a loop boundary, not a register assignment."
+   ],
+   "settled_by_this_attempt": [
+    "Classification: constant placement realised as an LICM decision -- instruction ORDER across a loop boundary. This is the same unreachable family as sub_080373F0's basic-block layout: a choice made inside a compiler pass with no source-level handle, and no spelling of the declaration reaches it.",
+    "`const`ness and `volatile`ness do not decide the hoist; all ten spellings hoist. The question was never how to spell the global."
+   ],
+   "reason": "Wave 58 (W58-A), carried from waves 42 and 51. Ten spellings measured; the residual is an LICM hoist, which is instruction order across a loop boundary and has no source lever."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -22703,9 +22718,25 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 132,
+   "best": "59.1% identical, SIZE-EXACT",
+   "remaining_diff": "A MISSING LINKER SYMBOL, not a residual in this function's C. The ROM's third pool word must contain 0x0200C618 -- the list-head sentinel record sitting immediately before the gUnknown_0200C624 node array -- and aw2bhr.lds jumps 0x00C528 straight to 0x00C624, so no symbol exists at that address to name. The draft uses the pointer-object workaround `gUnknown_0808E5D0->unk04`, which costs ONE EXTRA `ldr`: agbcc adds its own force-addr level on top, giving `ldr r0,[r6]; ldr r0,[r0]; ldr r0,[r0,#4]` where the ROM has two loads.",
+   "why_it_is_close": "The shape is solved and verified against the listing, including the double `node->unk04 = cur` on the mid-insert path (the store through `prev` may alias `node`) and the loop's rotation into the middle, which is agbcc's and not source.",
+   "axes_ruled_out": [
+    "`gUnknown_0200C624 - 1` for the tail -- produces no second address constant; agbcc keeps the base in a register and CSE folds the two uses, leaving `ldr; sub #8; ldr`.",
+    "Inventing the symbol in include/unknown-globals.h alone -- fails the split build with `undefined reference` (the wave-32 lesson).",
+    "Wave 58: qualifying the pointer-object workaround `const` (`struct Unk0808E5C8 *const gUnknown_0808E5D0`) -- does NOT remove the force-addr level, still three loads. Wave 42's `u16 *const` row, which reaches the right level count for a scalar in sub_08010EF8, does not generalise to a pointer-to-struct object. No declaration of a ROM word reaches two loads; only naming the RAM object does."
+   ],
+   "settled_by_this_attempt": [
+    "THE FIX IS VERIFIED BY PROBE, not proposed. With `extern struct Unk0808E5C8 gUnknown_0200C618;` declared and the tail written `gUnknown_030020A8.unk04 = gUnknown_0200C618.unk04;`, agbcc emits its own `.rodata` address constant, `ldr r6,=.LC` in the preheader and exactly `ldr r0,[r6]; ldr r0,[r0,#4]` at the tail -- the ROM's two loads. The extra indirection is gone.",
+    "The one-line edit is: aw2bhr.lds, EWRAM section, between the 0x00C528 and 0x00C624 lines, `. = 0x00C618; gUnknown_0200C618 = .;`. NOT applied: aw2bhr.lds is upstream's file, tools/gen_lds.py consumes it, and try_match compiles one unit and cannot gate a link error, so the edit is unverifiable without one full split build.",
+    "A residual of one instruction would remain after the symbol exists, and it is localised: `cur = gUnknown_0200C624 - 1` applies the -0xc to the base pseudo in place (`sub r2,r2,#0xc`) where the ROM copies first (`adds r3,r0,#0; subs r3,#0xc` -- THUMB's `subs rD,#imm8` is two-operand, so the copy is exactly the allocator declining to coalesce cur with the base). `cur = &gUnknown_0200C618` restores the count but substitutes `ldr r0,.LC; ldr r3,[r0]`. One try_match decides it."
+   ],
+   "reason": "Wave 58 (W58-A), carried from wave 41. Blocked on a linker symbol at 0x0200C618, not on C. The fix is verified by probe and is one line of aw2bhr.lds plus one declaration; it needs a full split build to confirm, which an agent cannot run."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -24014,7 +24045,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -26645,9 +26676,26 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 152,
+   "best": "58.6% identical, SIZE-EXACT",
+   "remaining_diff": "ONE CONSTANT. The two DImode masks against negative `int` constants materialise 0xFFFFFFFF for the HIGH word. The AND itself is correctly optimised away -- the high word is stored unmasked, as in the ROM -- but the constant survives as a live pseudo and CSE then spends it on the `== -1` comparison, giving `ldr rN,.LC; adds rM,rN,#0; cmp r0,rM` where the ROM builds -1 the long way with `movs r1,#1; rsbs r1,r1,#0`. That is a fifth pool word the ROM does not have; it is size-neutral only because it saves the two-instruction build, and it drags the allocation with it (a5's halves land in r4/r5 where the ROM uses r5/r6, the index temp in r6 where the ROM uses r4).",
+   "why_it_is_close": "The wave-33-to-41 blocker is solved: the sixth parameter is `volatile` AND read into a local, which is what stops copy propagation deleting the local and gives the ROM's full-word `ldr [sp,#0x2c]` in assign_parms. In-place `v &= ~0x1000` rather than the comma form took it from +4 bytes to size-exact.",
+   "axes_ruled_out": [
+    "`a5 & ~0x2000 & ~0x1000` in one expression -- folds to a single `& 0xFFFFCFFF` before any RTL exists, one pool word, -12 bytes.",
+    "`a5 &= ~0x2000; a5 &= ~0x1000;` -- modifying the parameter gives it a stack home (`sub sp,#8` plus a str/ldr pair of both halves) and hoists the masking to the top.",
+    "Two u32 pointer casts on the member -- DOES fix the constants completely and restores `movs #1; rsbs #0`, but each cast starts its own address expression, so the element address is rebuilt three times and gUnknown_03002510 is re-read: +20 bytes.",
+    "A pointer local for the element -- changes the unk04 address arithmetic away from what both ROMs show."
+   ],
+   "settled_by_this_attempt": [
+    "Wave 58 CONFIRMS THE TYPE MODEL against the matched twin. src/decomp/c_0801E338.c is promoted with the identical signature `(int, int, int, int, long long a5, volatile int a6)` and `unk0c = a5`, and it builds -1 the ROM's way precisely because it does no masking and never creates the high-word constant. The residual is the two masks and nothing else.",
+    "The twin does NOT discriminate one `long long` member from two `u32` members -- both emit two `str`s -- but the two masks do: as SImode statements `combine` merges them into one `& 0xFFFFCFFF`, and the ROM has two distinct pool constants. DImode is the only reading that survives, so the type model is not the way out.",
+    "The whole residual disappears if the high-word constant is never created, and every spelling that avoids creating it also loses the single element-address expression. That is the shape of the remaining problem."
+   ],
+   "reason": "Wave 58 (W58-A), carried from waves 33/36/40/42. Constant placement: a DImode mask's high-word all-ones constant that CSE re-spends on the `== -1` compare. Type model confirmed against a matched twin, so allocation and typing are both excluded."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -27992,7 +28040,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -28304,9 +28352,29 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 208,
+   "best": "220 bytes against 208 (+12), 27.9% identical, first difference at +0xc. Re-measured wave 58 (W58-B) and identical to wave 41's number to the byte.",
+   "remaining_diff": "WHICH ARM CSE RECOMPUTES THE INDEX ON, and nothing else. Everything outside the two store arms is byte-exact: prologue, both loop guards, the `sub sp,#4` spill of `y + 1`, the three hoisted bases (rowOffset[y] at +0x417A, cell at +0x1432, unit at +0x51A), the whole predicate, and both loop bottoms. The ROM recomputes `MAP->rowOffset[y] + x` from scratch -- reloading gUnknown_08499590 and re-adding 0x417A and y*2 -- in the `= 0` arm and reuses the loop-top value in the `= 1` arm. The candidate does the exact opposite. Two consequences, both mechanical: (1) the recomputing arm then sits AFTER the literal pool instead of before it, so a SECOND gUnknown_08499590 word AND a second 0x417a word are emitted at the tail, +8 bytes -- read it straight off try_match's relocation list, the ROM has one of each and the candidate has two; (2) the address and the value land in swapped hard registers in the two arms, which blocks the final jump pass from cross-jumping the common `strb r1,[r0]`, +2 bytes and +2 for alignment. 8 + 2 + 2 = the whole +12.",
+   "why_it_is_close": "gcc's cse_end_of_basic_block follows a conditional jump only when the target label has ONE use and is preceded by a barrier. Here the `= 1` label has TWO uses (`bne` off the 0x13 test and `bls` off the range test), so CSE cannot follow it, stays on the fall-through, and the `= 0` arm keeps the value. The ROM's CSE clearly DID follow into the `= 1` arm, which means that at CSE time its label had a single use -- i.e. the original source had two SEPARATE `= 1` blocks that only merged later. The type model is settled and shared with sub_080206E4 (matched): width/height u16 at +0/+2, the u8 unit-id plane at +0x51A, the u8 terrain plane at +0x1432, the u16 row-offset table at +0x417A, all indexed `rowOffset[y] + x`.",
+   "axes_ruled_out": [
+    "`int i` bound at the top of the x loop: NO spill and gUnknown_08499594 hoisted, both wrong -- the bound local removes a whole register's worth of pressure.",
+    "The condition negated with the arms swapped (`... != 4 && ... != 0x13 || ...`, `= 1` first): cross-jumps correctly but then recomputes in BOTH arms and spills 8 bytes.",
+    "`int y, x;` versus `int x, y;` declaration order: byte-identical.",
+    "NESTED ifs with the `= 1` store duplicated in the outer else -- the shape that SHOULD give the `= 1` label a single use at CSE time. Gets the cross-jumped `strb` AND dst in a low register, both right, but the two `= 1` blocks are merged by the FIRST jump pass, before CSE ever runs, so the label has two uses again and neither arm recomputes. 186 bytes, 22 short. This is the closest anything has come and it is why the residual is classified as basic-block layout rather than as a spelling.",
+    "The two `= 1` arms as an `else if` chain: puts `= 1` first in the layout, and the ROM's `= 0` arm is first.",
+    "`continue` in the `= 0` arm: gives that arm its own `strb` plus a branch to the loop increment, where the ROM shares one `strb` with the `= 1` arm.",
+    "`(u32)(unk00 - 0x10) > 4` in place of the `(u8)` cast: drops the two shifts the ROM has. The `(u8)` spelling is settled."
+   ],
+   "settled_by_this_attempt": [
+    "THIS IS THE THIRD BASIC-BLOCK-LAYOUT PARK, after sub_080373F0 (which of N identical blocks survives cross-jumping) and this one (which arm CSE follows into). Both are decided by the jump/CSE pass interaction and neither is reachable from any statement-level spelling measured so far. The permuter cannot reach either -- it permutes register allocation and statement order, not which basic block a label's use count lets CSE walk into.",
+    "The +12 here is a COINCIDENCE, not a family. Wave 58's brief batched it with sub_0800CAA0 and sub_080200EC on the theory that three drafts at exactly +12 shared a cause. They do not: sub_080200EC was missing a SOURCE induction variable and matched on one attempt once that was seen, sub_0800CAA0 has a strength_reduce giv the ROM does NOT have (opposite direction), and this one is a CSE/cross-jump decision. Do not batch on a byte delta.",
+    "The wave-41 reading was confirmed instruction-for-instruction by an independent re-measurement in wave 58. Nothing in the diff is unexplained."
+   ],
+   "reason": "Parked wave 58 (W58-B) after wave 41 (W41-B) measured six source spellings and wave 58 re-measured and confirmed the diagnosis. The open question is NAMED and narrow: find a source shape that keeps the two `= 1` blocks distinct through gcc's FIRST jump pass, so that the `= 1` label still has a single use when cse_end_of_basic_block runs. Every shape tried so far is merged before CSE. Do NOT hand this back as a generic near-miss and do NOT re-run the six axes above; full analysis is in work/sub_08020754/sub_08020754.c."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -35892,9 +35960,27 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 148,
+   "best": "92.6% identical, SIZE-EXACT and instruction-order exact, 11 differing bytes",
+   "remaining_diff": "Allocation, caused by a REFERENCE-COUNT difference the allocator only reports. The ROM's second ABS block is `adds r2,r0,#0; cmp r0,#0; bge; rsbs r2,r0,#0` -- it compares and negates the ORIGINAL. The candidate emits `add r1,r0,#0; cmp r1,#0; bge; neg r1,r1` -- it compares and negates the COPY. That gives abs_b five references where the ROM gives it three; global_alloc orders allocnos by refs/live-length, so abs_b outranks `a`, the two swap hard registers (ROM a=r1/abs_b=r2, candidate a=r2/abs_b=r1) and the second ldrsh's offset scratch follows whichever is free. The first ABS is already the ROM's form in both.",
+   "why_it_is_close": "Every opcode, displacement, branch, pool word and instruction ORDER is the ROM's. Only the two register assignments differ, and they differ because of one RTL-level choice upstream of allocation.",
+   "axes_ruled_out": [
+    "decomp-permuter, EXHAUSTED from BOTH starting points -- wave 42: 21,155 iterations from the 96.6% draft; wave 52: ~18,935 iterations from this instruction-exact draft, the documented best case for the tool. ~40,000 iterations total, nothing. The reusable finding: a swap of two registers between two values whose live ranges INTERLEAVE is not reachable by source permutation, unlike sub_08022428's r9/sl swap which the same tool closed in 553 iterations.",
+    "if/else instead of the ternary (wave 52) -- byte-identical, copy-compared second ABS included.",
+    "Binding the ABS RESULTS to locals first -- byte-identical.",
+    "`t = p->unk28; if (ABS(p->unk26) > ABS(t)) ...` -- WORSE, hoists the +0x28 ldrsh above the first ABS.",
+    "`s16 t` instead of `int t` -- WORSE by five instructions.",
+    "Wave 58: ABS spelled `((v) < 0 ? -(v) : (v))` instead of global.h's `((v) >= 0 ? (v) : -(v))` -- byte-identical. Inverting which arm is the bare operand does not change gcc's singleton-op expansion here."
+   ],
+   "settled_by_this_attempt": [
+    "The register swap is a SYMPTOM. The cause is that the candidate's second ABS references the copy where the ROM references the original, which is decided before allocation exists -- which is exactly why the permuter, a register-level tool, cannot reach it however good the starting point looks.",
+    "A sixth thing to check before spending a budget on an allocation lever: count the REFERENCES to each value in both listings, not the registers. Equal instructions with unequal reference counts is an RTL difference wearing an allocation costume."
+   ],
+   "reason": "Wave 58 (W58-A), carried from waves 38/42/52. Allocation residual whose cause is an RTL reference-count difference in the ABS expansion; the permuter is exhausted and six spellings are measured."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -41661,7 +41747,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -52703,9 +52789,25 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 88,
+   "best": "73.9% identical, SIZE-EXACT and instruction MULTISET exact",
+   "remaining_diff": "Basic-block layout only. Three source-level `return 0`s compile to three identical `movs r0,#0; b <epilogue>` blocks; cross-jumping keeps exactly ONE and redirects the other two. The residual is entirely WHICH copy it keeps. The ROM keeps the MIDDLE one. Register allocation, pool contents and instruction order within every block are already correct, so there is nothing for a one-register or one-constant lever to move.",
+   "why_it_is_close": "Nothing about the C is wrong in the ordinary sense -- no wrong shape, no wrong type, no missing statement, no misread idiom. Size is exact and the multiset of emitted instructions is exact. Only the surviving cross-jump target differs.",
+   "axes_ruled_out": [
+    "decomp-permuter -- 300 s, 19,619 iterations from the 73.9% draft: ceiling 73.9%, no byte match, best three candidates 73.9 / 40.9 / 61.4. Wave 37's 'order-wrong and slot-wrong are precisely its cases' means INSTRUCTION order within a block, not which block survives cross-jumping. This was the ideal case on paper (size-exact, multiset-exact, permuter never previously tried) and it produced nothing.",
+    "Nine wave-43 spellings -- all put the surviving copy LAST.",
+    "One wave-51 spelling -- put it FIRST.",
+    "Register-allocation levers generally -- allocation is already byte-correct; there is no residual for them to act on."
+   ],
+   "settled_by_this_attempt": [
+    "The surviving copy is the one entered by FALL-THROUGH; the other two are branch-only and therefore deletable outright. No spelling found so far makes the MIDDLE site the fall-through-entered one, and that -- not the number or order of the returns -- is the thing a candidate has to control.",
+    "A size-exact, multiset-exact near-miss can still be unreachable by every allocation lever. Classify the residual before spending a budget: this is a fourth residual kind (basic-block layout), alongside shape, type and allocation/constant-placement."
+   ],
+   "reason": "Wave 57 (W57-E). Residual is cross-jumping block selection, not source shape, types or allocation. Needs a spelling that makes the middle `return 0` the fall-through-entered block; the permuter provably cannot reach it."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -54774,9 +54876,24 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 220,
+   "best": "31.8% identical, +4 bytes",
+   "remaining_diff": "A conflict between two translation units, not a residual in this function's C. sub_08039188 needs its callee sub_08039140 declared one way at the call site and another at the definition; no spelling of the caller can reach it. Also carries a register-pressure `ldrsb` fold (see the codegen doc: `ldrsb` vs `ldrb; lsls #24; asrs #24` is register pressure, not an idiom).",
+   "why_it_is_close": "The shape, types and statement order are derived; the 4-byte loss is structural to the declaration visible at the call site and simply moves between translation units depending on how sub_08039140 is declared.",
+   "axes_ruled_out": [
+    "Retyping either parameter of sub_08039140 to `int` -- only MOVES the 4-byte loss into src/decomp/c_08039140.c. Net zero across the ROM.",
+    "An UNPROTOTYPED declaration (`u8 sub_08039140();`) to get C89 default argument promotion at the call site -- probed: the escape hatch does not exist in agbcc. See the codegen doc section.",
+    "Spellings of the caller generally -- the contract is cross-TU, so no caller-side C reaches it."
+   ],
+   "settled_by_this_attempt": [
+    "CORRECTS A WAVE-43 CONCLUSION recorded in include/unknown-functions.h. The refinement 'ONE unnarrowed argument is ambiguous but TWO of different signedness in one call can only mean no declaration in scope' was built on a miscount. Compiled against the existing `u8 sub_08039140(u16, s16, u8, u8)`, the `s16` argument already emits a bare `lsls r2,r1,#4` and nothing else, because the value is `s8 * 16` and combine deletes a sign-extension it can prove redundant (num_sign_bit_copies >= 17). Only the `u16` argument costs a shift pair. So the count was ONE -- the case the refinement itself calls ambiguous.",
+    "A narrowing that combine can prove redundant is INVISIBLE at the call site. Any argument narrow enough for its declared type -- an s8-derived value into an s16, a masked value into a u16 -- looks like a promoted argument in the listing while its declaration is perfectly ordinary. COUNT UNNARROWED ARGUMENTS BY COMPILING, not by reading the ROM."
+   ],
+   "reason": "Wave 57 (W57-E). Cross-TU prototype conflict: cannot be matched while sub_08039140 is declared as it is, and retyping only relocates the loss. Fifth residual kind, alongside shape, type, allocation/constant-placement and block layout."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -91609,7 +91726,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
