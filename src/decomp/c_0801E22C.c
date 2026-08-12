@@ -30,7 +30,13 @@ void sub_0801E22C(int index, u16 a, u16 b, u16 c)
  * its three-member sibling pushes r4 and r5. That descending register pattern
  * across the three writers is the readout that r0 stays live for
  * sub_0801E18C's argument. */
-void sub_0801E248(int index, u16 a, u16 b)
+/* Wave 56, W56-H. The value parameters of these four were retyped `u16` ->
+ * `s16`. Their only caller is sub_0801D390, which reads each argument with
+ * `ldrsh` off the script stream or narrows a computed one with
+ * `lsls #0x10; asrs #0x10`; a `u16` parameter forces `ldrh` / `lsrs` at the
+ * caller instead. These bodies are byte-identical either way (the members they
+ * store into are u16) and were re-verified by trymatch after the change. */
+void sub_0801E248(int index, s16 a, s16 b)
 {
     gUnknown_0200F720[index].unk00 = a;
     gUnknown_0200F720[index].unk02 = b;
@@ -40,7 +46,7 @@ void sub_0801E248(int index, u16 a, u16 b)
 /* The third member alone. Two parameters leave r2 and r3 free, so nothing is
  * saved at all and the prologue is a bare `push {lr}` -- the bottom of the
  * descending pattern its two siblings sit above. */
-void sub_0801E264(int index, u16 a)
+void sub_0801E264(int index, s16 a)
 {
     gUnknown_0200F720[index].unk04 = a;
     sub_0801E18C(index);

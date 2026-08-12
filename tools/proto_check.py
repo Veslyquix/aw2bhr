@@ -127,6 +127,16 @@ def norm_type(t):
     """A single type, typedefs resolved. `s32` == `int`, `u8` == unsigned char."""
     t = re.sub(r'\bstatic\b|\binline\b', '', t)
     t = re.sub(r'\s*\*\s*', ' *', ' '.join(t.split())).strip()
+    # A TOP-LEVEL qualifier on a parameter is ignored when C compares function
+    # types: `f(volatile int)` and `f(int)` are the same type and both compilers
+    # agree, so reporting them as a mismatch is noise. Only strip it when the
+    # type has no `*` -- in `volatile int *` the qualifier is on the POINTEE and
+    # is significant, and stripping it there would hide a real conflict.
+    # Wave 56: sub_0801E338's `volatile int a6` was the single mismatch standing
+    # between `--all` and a usable gate, and a permanently-red acceptance test
+    # hides the regression it exists to catch (see wave 21, overlap_screen).
+    if '*' not in t:
+        t = re.sub(r'^(?:volatile|const)\s+', '', t)
     return ' '.join(TYPEDEFS.get(x, x) for x in t.split())
 
 
@@ -176,6 +186,14 @@ def norm(sig):
         if drop:
             p = re.sub(r'\b%s\s*$' % re.escape(toks[-1]), '', p)
         p = re.sub(r'\s*\*\s*', ' *', ' '.join(p.split())).strip()
+        # A TOP-LEVEL qualifier on a parameter is ignored when C compares
+        # function types -- `f(volatile int)` and `f(int)` ARE the same type and
+        # both compilers agree -- so reporting it is noise. Only strip it when
+        # the parameter has no `*`: in `volatile int *` the qualifier is on the
+        # POINTEE and IS significant, and stripping it there would hide a real
+        # conflict. See norm_type(), which applies the same rule to returns.
+        if '*' not in p:
+            p = re.sub(r'^(?:volatile|const)\s+', '', p)
         p = ' '.join(TYPEDEFS.get(t, t) for t in p.split())
         parts.append(p)
     return ','.join(parts)

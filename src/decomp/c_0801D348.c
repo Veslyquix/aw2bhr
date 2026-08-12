@@ -11,7 +11,15 @@
  * is not a guess: the pair of adjacent word loads carries agbcc's own "created
  * by thumb_load_double_from_address" note and lands in sub_0801E338's declared
  * 64-bit slot, which forces the 8-byte alignment that puts it at +0x24. */
-void sub_0801D348(int a, int b, int c, int d, int e, int f, long long g, u16 h)
+/* Wave 56, W56-H. The last parameter was retyped `u16` -> `s16`. The witness is
+ * the ONE caller, sub_0801D390: it loads gUnknown_0200E438[i].unk38 with
+ * `movs r6,#0x38; ldrsh r0,[r1,r6]` before both `str r0,[sp,#0x10]` stack pushes.
+ * A `u16` parameter makes agbcc zero-extend, which is the encodable
+ * `ldrh r0,[r1,#0x38]` -- 2 bytes shorter at each of the two call sites and 4
+ * bytes short overall. This body stays byte-for-byte identical either way
+ * (PROMOTE_MODE zero-extends the stack slot regardless of signedness and the
+ * `(s16)` cast at the use is unchanged), re-verified by trymatch. */
+void sub_0801D348(int a, int b, int c, int d, int e, int f, long long g, s16 h)
 {
     if (a & 1)
         sub_0801E4B0(e, b, c, d, f);

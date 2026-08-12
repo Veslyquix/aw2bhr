@@ -244,26 +244,6 @@
    ],
    "reason": "register allocation"
   },
-  "sub_08079EA4": {
-   "bytes": 264,
-   "best": "size-exact (264 bytes), 99.2% identical, exactly 2 bytes differ",
-   "remaining_diff": "The two bytes are the immediate field of ONE `bl` at +0x16, and nothing else in the function differs -- every other instruction, register and constant matches, and the only other diff lines are branch/reloc ADDRESSES that differ because the candidate sits at offset 0 while the original sits at +0x766 inside its unit. The original's instruction is `bl 3ec <_08079B38>`, an intra-file branch to a LOCAL label with the offset already assembled in and NO relocation. Any C caller necessarily emits `bl 0` plus an `R_ARM_THM_CALL` against an external name, so the bytes cannot agree. This is NOT a codegen difference and there is no source spelling that fixes it.",
-   "why_it_is_close": "0x08079B38 is a genuine function entry that tools/split_asm.py merged into sub_08079B04, which is two bytes of `b _08079B38` sitting in front of the PREVIOUS function's 13-word literal pool and has zero callers. docs/agbcc-codegen.md already classifies this exact site under 'bl to a mid-function local label is NOT a tell' (the split-artefact row, `_08079B38` x3). The consequence for CALLERS had not been noticed: because `asm/` names the entry only as the local label `_08079B38` and no global symbol exists at 0x08079B38 in either build, a promoted C caller has nothing to link against. sub_08079EA4 is the first caller of such an entry that anyone has tried to match -- the only other site is `_08036B48`, whose two callers are both inside AgbMain, which is still assembly.",
-   "axes_ruled_out": [
-    "the source axis for everything except the call -- the draft is instruction-for-instruction the ROM, so there is nothing left to derive",
-    "naming the callee `_08079B38` in C -- this WOULD make trymatch report a match, because both relocations would then name the identical symbol. It is a FALSE match and must not be used: `_08079B38` is a local (non-global) label in asm/code-0806CFC8.s, so the promoted unit would fail to link. This is exactly the class of error the brief warns trymatch cannot see, and it is the tempting wrong fix here.",
-    "an lds symbol (`sub_08079B38 = 0x08079B38;` from gen_lds.py) -- would make the split build LINK correctly and produce identical ROM bytes, but trymatch still rejects it: reloc_equivalent resolves ABS32 through the symbol table and requires a non-ABS32 relocation to name the IDENTICAL symbol, so `_08079B38` vs `sub_08079B38` is a mismatch regardless of both resolving to one address.",
-    "a function-pointer cast to the literal address -- emits a pool word and `bl _call_via_rN`, not a `bl`, so it is a different instruction stream"
-   ],
-   "settled_by_this_attempt": [
-    "the whole function's source is settled; the draft in work/sub_08079EA4/ is the deliverable the moment the symbol exists",
-    "the affine denominator is `proc->unk34 == 0x200 ? 2 : 0x200 - proc->unk34` and NOT the `d != 0 ? d : 2` form the promoted c_08027B68.c uses. Both are the same predicate; they are different code. The ROM presets `movs r1, #2` and conditionally overwrites it with `subs r1, r4, r2`, so the arm that gcc computes UNCONDITIONALLY is the `2`, which means `2` must be the TRUE arm in the source. The `!= 0` spelling put `0x200 - x` first and cost +4 bytes across the four call sites (two extra `adds r0, r2, #0` shuffles), scoring 28.8%. This is the general rule: in `c ? A : B` compiled to one branch, A is the arm emitted unconditionally -- read the presetting `movs` to recover which arm the source wrote first.",
-    "sub_080795A8 and sub_08079B38 both take TWO arguments with the first unused in the body; the proc pointer left sitting in r0 costs no instruction and is not evidence of arity, the `movs r1, #0` is",
-    "gUnknown_08615E40 is a real 12-byte u8 ROM table read `base + index; ldrb`, NOT a .LC pool word -- tools/lc_screen.py misclassifies it (fanin 1, density 4). Dereferenced against baserom.gba: 02 03 04 05 x3, with address-shaped words starting at +0x0c.",
-    "proc offsets: +0x30 int, +0x34 int, +0x40 int, +0x4c u16, +0x52 u16"
-   ],
-   "reason": "TOOLING, not decompilation, and the fix is one line in the right place: tools/split_asm.py should treat a label that is the target of a `bl` from outside its own unit as a function boundary (there are 4 such sites, all listed in docs/agbcc-codegen.md), or failing that gen_lds.py should emit an absolute symbol at 0x08079B38 AND trymatch's reloc_equivalent should resolve R_ARM_THM_CALL through the symbol table the way it already does for R_ARM_ABS32. Either change unparks this immediately with no change to the draft. Deliberately NOT put in asm-resident.json: this is ordinary compiler output and the C is already right. WAVE 28 (W28-B), unit-level oracle checked: `--unit` EXITS 2 without comparing anything. Its unit is sub_0807974C.s and holds FIVE functions -- sub_0807974C, sub_08079B04, sub_08079EA4, sub_08079FAC, sub_0807A0C4 -- of which only sub_08079EA4 has a draft. The 99.2% per-function score is therefore not evidence of anything about the source: the per-function oracle is the wrong oracle for a five-member unit and the unit oracle has nothing to run on. THIS IS THE ONE ACTIONABLE ENTRY OF THE FIVE. Unblocking it is a defined, bounded job with no unknowns: draft sub_0807974C, sub_08079B04, sub_08079FAC and sub_0807A0C4, then re-run `--unit`. Do not spend another attempt on sub_08079EA4's own C until those four exist."
-  },
   "sub_0804F18C": {
    "bytes": 572,
    "best": "34.4% -- 552 of 572, 20 bytes SHORT (wave 19, W19-B)",
@@ -1137,6 +1117,26 @@
     "gUnknown_0816E16C is NOT a global: the ROM word at 0x0816E16C holds 0x0202F214, an ordinary -fforce-addr address constant that gen_lds.py invented a symbol for. Its neighbour 0x0816E170 holds 0x08499578, same thing. Do not declare either. Dereferencing the word in baserom.gba rather than trusting the symbol name is what identified the producer/consumer pair at all. CONFIRMED A SECOND TIME in wave 48: the word at 0x0816D93C holds 0x08499590, so gUnknown_0816D93C is the same artefact -- sub_080585D4 reads the map header's width through gUnknown_08499590 and its height through the -fforce-addr spelling of the SAME object."
    ],
    "reason": "NOT a source problem -- a coupled retype over TWO functions. Next attempt must respell sub_0806AD04's two reads through byte/halfword views, switch the header to bitfields, and RE-RUN try_match on sub_0806AD04, which is matched today and must stay so. Budget it as ONE job over both functions, not as a 136-byte single. Full analysis and the two spellings to try are in work/sub_0806B120/sub_0806B120.c."
+  },
+  "sub_0807E980": {
+   "bytes": 1040,
+   "best": "size-exact (1040 bytes), 99.0% identical, 10 of 1040 bytes differ, first difference at +0x370",
+   "remaining_diff": "Entirely inside the CpuFastSet double loop at the tail; everything outside it is byte-exact. The ROM initialises src, then the loop COUNTER, then dst -- but increments dst before src. So the giv init order (src,dst) and the giv increment order (dst,src) disagree, and the counter init sits BETWEEN the two giv inits.",
+   "why_it_is_close": "The whole function body, both jump-free arms and every call sequence are exact. The residual is loop-preheader instruction ORDER, not instruction selection: the size is exact and the multiset is right.",
+   "axes_ruled_out": [
+    "old_agbcc -- MEASURED BY THE ORCHESTRATOR, wave 56, and it is WORSE: 98.7% (14 bytes) against the default's 99.0% (10 bytes), and the first difference moves EARLIER, +0x78 against +0x370. Tested because the wave-38 discriminator says the two allocators diverge exactly where a loop body contains a CALL, and this loop body calls CpuFastSet -- so the hypothesis was specific and well-founded. It is still negative.",
+    "-fforce-addr removal -- inert in this address range. data/compiler-overrides.json's own measurement: no promoted file above 0x08063A3C differs without the flag, and this function is at 0x0807E980.",
+    "Both src and dst as loop givs -- when both are givs, agbcc always emits the init order and the increment order the SAME way. Measured both directions: writing dst as a hoisted statement gives src,dst / src,dst; writing neither gives dst,src / dst,src. Neither reproduces the ROM's disagreeing pair.",
+    "check_dbra_loop always emits the counter init LAST, after every giv init -- so the counter cannot be made to land between the two giv inits while both remain givs.",
+    "`gUnknown_0200FC50 + i*0x100 + j*0x400` (plain pointer arithmetic) -- makes agbcc force the symbol into a .rodata address constant and do a DOUBLE load inside the loop, which blocks the src strength reduction entirely. `&gUnknown_0200FC50[...]` does not. Documented in docs/agbcc-codegen.md (wave 56, W56-C).",
+    "decomp-permuter, 12,480 iterations / 300 s from the 98.65% draft. It found the new_var hoist that fixed the src/dst REGISTER assignment (98.65% -> 99.0%) and found nothing for the remaining order."
+   ],
+   "settled_by_this_attempt": [
+    "Source-level `u8 *` locals incremented in the loop body DO reproduce the ROM's instruction order exactly -- verified, a descending `for (j = 7, dst = ...; j >= 0; j--)` matches the ROM instruction for instruction in that loop. It costs a register: `proc` is evicted from r7, the base address stops living in sl, and that is +12 bytes spread over the rest of the function. Binding the base to its own local to buy sl back made it worse. So the loop shape is SOLVED and the open question is purely the register budget.",
+    "The struct is derived and in the draft (struct Unk807E980, fields at 0x2c/0x30/0x34/0x48/0x4c/0x52/0x58/0x5c/0x60/0x64).",
+    "Everything outside the tail loop is byte-exact and must not be re-derived."
+   ],
+   "reason": "Wave 56 (W56-C, one agent on this one function; toolchain axis added by the orchestrator). The open question is narrow and named: what source shape gives source-level ordering in that inner loop WITHOUT spending the extra register. Do NOT hand this back as a generic near-miss -- wave 55 measured rework at 2/10 and both wins carried a correct specific diagnosis. This one has a correct specific diagnosis, so it qualifies, but only with a NEW idea about the register budget, not a repeat of the axes above."
   }
  }
 }

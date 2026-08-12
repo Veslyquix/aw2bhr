@@ -14,7 +14,13 @@
  * sub_0801E27C @ 0x0801E27C
  */
 
-void sub_0801E27C(int index, u16 a, u16 b, u16 c)
+/* Wave 56, W56-H. The value parameters of these four were retyped `u16` ->
+ * `s16`. Their only caller is sub_0801D390, which reads each argument with
+ * `ldrsh` off the script stream or narrows a computed one with
+ * `lsls #0x10; asrs #0x10`; a `u16` parameter forces `ldrh` / `lsrs` at the
+ * caller instead. These bodies are byte-identical either way (the members they
+ * store into are u16) and were re-verified by trymatch after the change. */
+void sub_0801E27C(int index, s16 a, s16 b, s16 c)
 {
     gUnknown_0200F720[index].unk06 = a;
     gUnknown_0200F720[index].unk08 = b;
