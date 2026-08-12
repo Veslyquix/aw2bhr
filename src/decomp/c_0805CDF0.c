@@ -9,8 +9,8 @@
 
 void sub_0805CDF0(void)
 {
-    u8 **pp;
-    u8 *p;
+    volatile u8 **pp;
+    volatile u8 *p;
 
     /* Both locals are load-bearing. Binding &gUnknown_030046B0 first is what
      * puts its pool word ahead of gUnknown_030045F0's and keeps the address
@@ -29,8 +29,8 @@ void sub_0805CDF0(void)
 
 void sub_0805CE20(void)
 {
-    u8 **pp;
-    u8 *p;
+    volatile u8 **pp;
+    volatile u8 *p;
 
     /* Twin of sub_0805CDF0, differing only in the callback stored into
      * gUnknown_03004778; see that function for why the two locals are needed. */

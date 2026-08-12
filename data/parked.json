@@ -70,6 +70,39 @@
   "FORMATTING: this file is written with json.dump(..., indent=1). Dump it with any other indent and every line churns in the diff, which buries the one entry you added -- wave 26 did exactly that and had to redo it. LINE ENDINGS TOO, and the two data files DISAGREE: this file is CRLF, data/asm-resident.json is LF. json.dump writes '\n', so open this one with newline='\r\n' -- writing LF here churns all 394 lines exactly the way a wrong indent does, and hides the one entry you changed. Wave 28 hit it and caught it only by running `git diff --ignore-all-space --stat` when the diff looked absurd. Do that check before committing either file."
  ],
  "functions": {
+  "sub_080373F0": {
+   "bytes": 88,
+   "best": "73.9% identical, SIZE-EXACT and instruction MULTISET exact",
+   "remaining_diff": "Basic-block layout only. Three source-level `return 0`s compile to three identical `movs r0,#0; b <epilogue>` blocks; cross-jumping keeps exactly ONE and redirects the other two. The residual is entirely WHICH copy it keeps. The ROM keeps the MIDDLE one. Register allocation, pool contents and instruction order within every block are already correct, so there is nothing for a one-register or one-constant lever to move.",
+   "why_it_is_close": "Nothing about the C is wrong in the ordinary sense -- no wrong shape, no wrong type, no missing statement, no misread idiom. Size is exact and the multiset of emitted instructions is exact. Only the surviving cross-jump target differs.",
+   "axes_ruled_out": [
+    "decomp-permuter -- 300 s, 19,619 iterations from the 73.9% draft: ceiling 73.9%, no byte match, best three candidates 73.9 / 40.9 / 61.4. Wave 37's 'order-wrong and slot-wrong are precisely its cases' means INSTRUCTION order within a block, not which block survives cross-jumping. This was the ideal case on paper (size-exact, multiset-exact, permuter never previously tried) and it produced nothing.",
+    "Nine wave-43 spellings -- all put the surviving copy LAST.",
+    "One wave-51 spelling -- put it FIRST.",
+    "Register-allocation levers generally -- allocation is already byte-correct; there is no residual for them to act on."
+   ],
+   "settled_by_this_attempt": [
+    "The surviving copy is the one entered by FALL-THROUGH; the other two are branch-only and therefore deletable outright. No spelling found so far makes the MIDDLE site the fall-through-entered one, and that -- not the number or order of the returns -- is the thing a candidate has to control.",
+    "A size-exact, multiset-exact near-miss can still be unreachable by every allocation lever. Classify the residual before spending a budget: this is a fourth residual kind (basic-block layout), alongside shape, type and allocation/constant-placement."
+   ],
+   "reason": "Wave 57 (W57-E). Residual is cross-jumping block selection, not source shape, types or allocation. Needs a spelling that makes the middle `return 0` the fall-through-entered block; the permuter provably cannot reach it."
+  },
+  "sub_08039188": {
+   "bytes": 220,
+   "best": "31.8% identical, +4 bytes",
+   "remaining_diff": "A conflict between two translation units, not a residual in this function's C. sub_08039188 needs its callee sub_08039140 declared one way at the call site and another at the definition; no spelling of the caller can reach it. Also carries a register-pressure `ldrsb` fold (see the codegen doc: `ldrsb` vs `ldrb; lsls #24; asrs #24` is register pressure, not an idiom).",
+   "why_it_is_close": "The shape, types and statement order are derived; the 4-byte loss is structural to the declaration visible at the call site and simply moves between translation units depending on how sub_08039140 is declared.",
+   "axes_ruled_out": [
+    "Retyping either parameter of sub_08039140 to `int` -- only MOVES the 4-byte loss into src/decomp/c_08039140.c. Net zero across the ROM.",
+    "An UNPROTOTYPED declaration (`u8 sub_08039140();`) to get C89 default argument promotion at the call site -- probed: the escape hatch does not exist in agbcc. See the codegen doc section.",
+    "Spellings of the caller generally -- the contract is cross-TU, so no caller-side C reaches it."
+   ],
+   "settled_by_this_attempt": [
+    "CORRECTS A WAVE-43 CONCLUSION recorded in include/unknown-functions.h. The refinement 'ONE unnarrowed argument is ambiguous but TWO of different signedness in one call can only mean no declaration in scope' was built on a miscount. Compiled against the existing `u8 sub_08039140(u16, s16, u8, u8)`, the `s16` argument already emits a bare `lsls r2,r1,#4` and nothing else, because the value is `s8 * 16` and combine deletes a sign-extension it can prove redundant (num_sign_bit_copies >= 17). Only the `u16` argument costs a shift pair. So the count was ONE -- the case the refinement itself calls ambiguous.",
+    "A narrowing that combine can prove redundant is INVISIBLE at the call site. Any argument narrow enough for its declared type -- an s8-derived value into an s16, a masked value into a u16 -- looks like a promoted argument in the listing while its declaration is perfectly ordinary. COUNT UNNARROWED ARGUMENTS BY COMPILING, not by reading the ROM."
+   ],
+   "reason": "Wave 57 (W57-E). Cross-TU prototype conflict: cannot be matched while sub_08039140 is declared as it is, and retyping only relocates the loss. Fifth residual kind, alongside shape, type, allocation/constant-placement and block layout."
+  },
   "sub_0802E010": {
    "bytes": 288,
    "best": "284 bytes (-4), 24.3% identical",

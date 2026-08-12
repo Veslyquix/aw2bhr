@@ -968,14 +968,36 @@ u8 sub_080390CC(u8);
  * promotion passed both as `int`. The callee's own PROMOTE_MODE prologue
  * re-normalises them, which is why the ROM is correct in spite of it.
  *
- * A single shared header cannot express "declared in one TU, undeclared in
- * another", so sub_08039188 CANNOT be matched here, and retyping either
- * parameter to `int` only moves the 4-byte loss into c_08039140.c. See
- * work/sub_08039188/ -- it is parked for this reason and not for want of
- * spellings. The general lesson: an argument the caller does not narrow is
- * evidence about the DECLARATION VISIBLE TO THE CALLER, which may be no
- * declaration at all, and a second unnarrowed argument in the same call is
- * what tells the two apart. */
+ * WAVE 57 (W57-E) -- THE "TWO UNNARROWED ARGUMENTS" PREMISE IS WRONG, THOUGH
+ * THE CONCLUSION SURVIVES. Compile sub_08039188 against THIS declaration and
+ * arg1 already comes out unnarrowed -- a bare `lsls r2,r1,#4`, nothing else --
+ * because `s8 * 16` provably fits in s16 and combine deletes the redundant
+ * sign-extension. Only arg0's `u16` costs a narrowing. So the count is ONE
+ * unexplained argument, i.e. exactly the ambiguous case the paragraph above
+ * dismisses, and "no prototype in scope" is not forced by the evidence.
+ *   The conclusion holds anyway on a plainer conflict: the caller needs arg0 to
+ * cost no narrowing (`s16` or `int` would both do it) and c_08039140.c needs
+ * `u16`, since its prologue zero-extends and its single use casts back with
+ * `(s16)` -- drop the `u16` and that file is 4 bytes short.
+ *   AND THE ESCAPE HATCH IS NOW CLOSED BY PROBE, not by assertion. An
+ * UNPROTOTYPED declaration (`u8 sub_08039140();`) would give the caller default
+ * argument promotion while leaving the definition's narrow parameters alone --
+ * the exact split the ROM shows, and the one thing a shared header might have
+ * expressed. agbcc rejects it as a hard error, not a -Werror warning:
+ *   "An argument type that has a default promotion can't match an empty
+ *    parameter name list declaration."
+ * (C89 6.5.4.3.) sub_08039140 has exactly one caller, so there was no wider
+ * blast radius to weigh -- the route simply does not exist.
+ *
+ * So sub_08039188 CANNOT be matched here, and retyping either parameter to
+ * `int` only moves the 4-byte loss into c_08039140.c. See work/sub_08039188/ --
+ * it is parked for this reason and not for want of spellings. The general
+ * lesson: an argument the caller does not narrow is evidence about the
+ * DECLARATION VISIBLE TO THE CALLER, which may be no declaration at all. But
+ * COUNT the unnarrowed arguments by compiling, never by reading the ROM: a
+ * parameter whose narrowing combine can prove redundant looks unnarrowed at the
+ * call site while its declaration is perfectly ordinary, and that is how one
+ * ambiguous argument was read as two. */
 u8 sub_08039140(u16, s16, u8, u8);
 void sub_0803941C(int, int);
 void sub_08039544(u8 *);
@@ -2910,6 +2932,44 @@ void sub_080202A4(struct Unk030040D8 *);
 void sub_08022990(int, int, u16);
 void sub_08038C98(void);
 
+/* Wave 57, W57-A. NOTHING IS DECLARED HERE ON PURPOSE -- read this before you
+ * add prototypes for sub_0802E2D0's callees, because I added seven and every
+ * one of them was wrong.
+ *
+ * Grepping include/ for these names returns nothing, which reads exactly like
+ * "undeclared". It is not: all seven are ALREADY DEFINED in src/decomp/, and a
+ * promoted definition beats anything written here (the wave-14 SPLIT=1 break).
+ * The real signatures, and how badly a call-site reading misses them:
+ *
+ *   void sub_08024404(void);                        c_08024404.c   (guessed right)
+ *   void sub_0802E2BC(void);                        c_0802E2BC.c   (guessed right)
+ *   void sub_080201E0(s16, s16, struct Unk08499594 *);  c_080201E0.c
+ *   int  sub_0803E9F8(struct Unk0803E9F8 *, u8 *, u8, u8);  c_0803E9F8.c
+ *   int  sub_08041FE0(struct Unk08499594 *);        c_08041F38.c
+ *   int  sub_0804203C(struct Unk08499594 *);        c_0804203C.c
+ *
+ * sub_080201E0 is the sharp one: sub_0802E2D0's call site sets only r0 and r1
+ * (`ldrb r0,[r2,#2]; ldrb r1,[r2,#3]`) and reads as two arguments, but r2 still
+ * holds gUnknown_030040D8 from the `ldr r2,[r4]` above it -- that is the THIRD
+ * argument, costing zero instructions exactly as the "arity is invisible in a
+ * pass-through" rule predicts. The three `int` returns likewise look narrow
+ * from the call site (`lsls #0x18; lsrs #0x18`), and are not.
+ *   The two 0x08042xxx functions take `struct Unk08499594 *`, not
+ * `struct Unk030040D8 *`, so sub_0802E2D0 must hand them
+ * `&gUnknown_08499594[*sel]` (or a cast) rather than gUnknown_030040D8.
+ *
+ * RULE: before declaring any prototype, grep src/decomp/ for a DEFINITION, not
+ * just include/ for a declaration. `trymatch` compiles one unit and cannot see
+ * this class of error at all.
+ *
+ * One thing this did turn up that is worth chasing: c_0801FE68.c defines
+ * `void sub_0801FE68(void)`, but sub_0802E2D0 calls it as
+ * `movs r0,#0x40; bl sub_0801FE68`. A dead argument set-up is not something
+ * agbcc emits, so that promoted prototype is one of the wrong-but-invisible
+ * ones this file warns about, and sub_0802E2D0 is the differently-shaped caller
+ * that exposes it. Settle it from c_0801FE68.c's own body before promoting
+ * sub_0802E2D0; it will force an edit to that file. */
+
 /* ---- wave 13 (A2): sub_080345C8's gUnknown_030032D8 state-machine table ----
  * All eighteen are void(void): not one reads r0-r3 before writing it (every
  * body opens with a `bl`, a pool `ldr` or a `movs` into r0) and every one ends
@@ -3625,6 +3685,10 @@ void sub_080733C8(int, const void *, void *);
 void sub_0807728C(u16 *, int);
 /* The HBlank window-line generator that sub_08073B00 drives: five s32-shaped
  * arguments, the fifth on the stack and only ever 0 or 1. */
+/* Wave 57 (W57-D). The HBlank handler sub_08073A00 installs through
+ * sub_08063928; taken as an argument, never called directly, so the arity is
+ * read off the definition's own prologue (it takes none and returns none). */
+void sub_08073930(void);
 void sub_08073998(int, int, int, int, int);
 /* Swaps the gUnknown_0202FDE0 / gUnknown_0202FDE4 double buffer. */
 void sub_08073AE8(void);
@@ -6628,6 +6692,21 @@ bool8 sub_080051EC(const char *);
  * sub_08005AA0 tail-calls it. */
 void sub_080059E4(void);
 
+/* Wave 57, W57-A. The same case for four more of this block: all four were
+ * already promoted or matched and none was ever declared, because until now
+ * their only caller was still in asm/. sub_080059FC and sub_08005AA0 are
+ * defined `void (void)` in src/decomp/c_080059FC.c and sub_08005F1C in
+ * src/decomp/c_08005F1C.c -- those definitions are what these declarations
+ * have to agree with, not a reading of the call sites.
+ *   sub_08005B24 is the caller in question, matched this wave. It has NO
+ * callers anywhere in the tree (fan_in 0, so it is reached through a proc
+ * script's function-pointer table) and ends `pop {r0}; bx r0` with nothing
+ * setting r0, so `void` is the weakest fit and nothing constrains it. */
+void sub_080059FC(void);
+void sub_08005AA0(void);
+void sub_08005B24(void);
+void sub_08005F1C(void);
+
 /* Wave 37, W37-A: the two three-slot screen builders, matched in this wave and
  * called by sub_080057EC / sub_08005964 respectively. Both end
  * `pop {rN}; pop {r0}; bx r0` and neither caller looks at r0. */
@@ -7125,11 +7204,21 @@ void sub_080752D8(int);
 void sub_080763B0(void);
 /* Wave 35 (W35-B). sub_0807703C's two remaining callees in the 0x08076 block.
  * sub_08076E20 takes the raw gpKeySt->unk00 key mask and eases the camera one
- * frame; `int` and not `u16` because its own body opens `lsls #0x10; lsrs #0x14`
- * -- a u16 parameter would have narrowed to 16 in the prologue and then shifted
- * by 4, which is a different pair. sub_08076F34 receives the caller's proc in
- * r0 unchanged and drops its result. */
-void sub_08076E20(int);
+ * frame. sub_08076F34 receives the caller's proc in r0 unchanged and drops its
+ * result.
+ *
+ * Wave 57 (W57-D): retyped `int` -> `u16`, and the old comment's reasoning here
+ * was backwards. It claimed a u16 parameter "would have narrowed to 16 in the
+ * prologue and then shifted by 4, which is a different pair" -- combine folds
+ * exactly that pair into the single `lsrs #0x14` the ROM has. Probed both
+ * spellings against this ROM (see docs/agbcc-codegen.md, wave 57):
+ *   u16 param, `k = 4;` first  -> lsls #0x10 / mov #4 / lsr #0x14   == ROM
+ *   int param + (u16) cast     -> mov #4 / lsls #0x10 / lsr #0x14   != ROM
+ * The prologue's PROMOTE_MODE conversion is a separate insn group that the
+ * first statement's constant is emitted AFTER; with the cast there is no
+ * prologue group and the constant has nowhere to sit but in front. This is the
+ * wave-15 `u16 v` vs `int v`-with-a-cast blind spot, and it decided 2 bytes. */
+void sub_08076E20(u16);
 void sub_08076F34(ProcPtr);
 
 /* Returns 1, 0 or -1 with `bx lr` and reads no argument register. The return is

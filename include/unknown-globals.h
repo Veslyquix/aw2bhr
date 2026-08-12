@@ -650,7 +650,18 @@ struct Unk0200B0B0 /* >= 0x76 */
                            * records the 0xFD80..0x11A0 range for the same
                            * easing pair; nothing reads it under a load form
                            * that would settle the sign independently. */
-    /* 0x62 */ u8 filler_62[0x03];
+    /* 0x62 */ u8 filler_62[0x02];
+    /* 0x64 */ u8 unk64; /* Wave 57 (W57-A), carved out of filler_62 -- the
+                          * remaining two bytes stay filler, so the layout is
+                          * unchanged, and nothing outside this header ever
+                          * named filler_62. sub_08002298's state byte: the same
+                          * 0 -> 0xA -> 0x14 -> 0x1E -> 0x32 -> 0x3C -> 0x46 ->
+                          * 0x50 ladder split across two switches that
+                          * sub_08002510 (src/decomp/c_08002510.c) runs on
+                          * unk5a, with unk60 as this lane's eased companion in
+                          * place of unk5c. Plain `ldrb`/`strb`, reached as
+                          * `adds rN,#0x64` because THUMB's ldrb immediate stops
+                          * at 31. */
     /* 0x65 */ u8 unk65; /* Wave 37 (W37-E): a one-shot "cursor moved" flag.
                           * sub_08000BF8 sets it to 1 with a bare `strb` when the
                           * terrain or unit under (unk08, unk0a) differs from the
@@ -3267,7 +3278,20 @@ struct Unk0849BD20 /* 0x08 */
 /* 0x0849D5F8 -- ROM pointer to a >= 0x46 byte record, ~12 callers, reloaded
  * at every use (so not const). unk20 is indexed by unk45, which is signed:
  * every reader of +0x45 and of the +0x20 array either uses `ldrsb` or the
- * `ldrb; lsls #24; asrs #24` byte-twin, so both are s8 objects. */
+ * `ldrb; lsls #24; asrs #24` byte-twin, so both are s8 objects.
+ *
+ * WAVE 57 (W57-E) -- WHICH OF THE TWO FORMS YOU GET IS REGISTER PRESSURE, NOT
+ * SPELLING, and it is worth knowing because it looks like a type error. Probed
+ * on this struct: a SINGLE array-indexed read of unk20 folds to `movs rN,#0;
+ * ldrsb` under every spelling tried (bound to an `int` local, reached through a
+ * bound `s8 *`, indexed by an `int` instead of the `s8`, or multiplied inline).
+ * Reading BOTH parallel tables off the same base in one statement group emits
+ * `ldrb; lsls #24; asrs #24` for BOTH, with a byte-identical address
+ * computation. agbcc's THUMB `extendqisi2` needs a spare low register to
+ * materialise the zero index, and with the second table's index and the first
+ * table's result both live it takes the shift path instead. So the shift-pair
+ * twin is not evidence of a `u8` member or of a cast in the source -- do not
+ * retype anything on the strength of seeing it. See work/sub_08039188/. */
 struct Unk0849D5F8 /* >= 0x46 */
 {
     /* 0x00 */ u8 filler_00[0x1e];
@@ -7059,15 +7083,27 @@ extern u8 gUnknown_030046AC;
  * folds the element pair onto one base with a `#1` displacement and emits four
  * accesses. So the qualifier belongs on the array type, not on a pointer to it.
  *
- * The reason it is not applied: TWELVE promoted builders (c_0805CA60.c and
- * every sibling) do `gUnknown_030046B0 = gUnknown_030045F0;`, and a volatile
- * array decays to `volatile u8 *`, which discards a qualifier into the plain
- * `u8 *` gUnknown_030046B0 below -- a warning, and -Werror is on, so all twelve
- * break at once. Retyping this REQUIRES retyping gUnknown_030046B0 with it, and
- * then re-running trymatch on all twelve. They are all matched, so that check
- * is cheap and decisive -- but it is one edit, not two, and it belongs to
- * whoever closes sub_0805D344. See work/sub_0805D344/sub_0805D344.c. */
-extern u8 gUnknown_030045F0[];
+ * Wave 57, W57-B: APPLIED, and it is confirmed. Both this array and
+ * gUnknown_030046B0 below are now volatile, which is the one edit W44-E said had
+ * to be made together. With it, sub_0805D344's whole sort half -- BOTH swaps
+ * including all four dead loads, the `?:` and the inner loop -- comes out
+ * byte-exact; without it that half cannot be spelled at all. So the volatile is
+ * real and is now load-bearing evidence, not a guess.
+ *
+ * THE FEARED BREAKAGE DID NOT HAPPEN, checked rather than assumed. The twelve
+ * builders' `gUnknown_030046B0 = gUnknown_030045F0;` is volatile-to-volatile now
+ * and warns about nothing, and their `*gUnknown_030046B0++ = i;` /
+ * `*gUnknown_030046B0 = 0;` are single stores, so the qualifier adds no access.
+ * Re-verified byte-for-byte after the change: sub_0805CA60 (the plain `&&`
+ * builder), sub_0805D2A0 (the nested-if builder), sub_0805CDF0 and sub_0805CE20
+ * (the `pp`/`p` local-binding pair) -- all four still MATCH. The remaining eight
+ * builders are line-for-line copies of the first two shapes.
+ *
+ * ONE SOURCE EDIT WAS REQUIRED and is done: src/decomp/c_0805CDF0.c binds
+ * `u8 **pp; u8 *p;`, which would discard the qualifier, so both locals are now
+ * `volatile`. That file still matches. No other reader of either symbol exists
+ * in src/ -- grepped. */
+extern volatile u8 gUnknown_030045F0[];
 /* Wave 44, W44-E: NOT YET DECLARED anywhere before this wave, and a real object
  * rather than a pool word -- aw2bhr.lds binds gUnknown_030046E0 at 0x030046E0
  * in its own right and aw2bhr.map agrees, checked before declaring. It is
@@ -7086,7 +7122,7 @@ extern volatile u8 gUnknown_030046E0[];
 extern u8 gUnknown_030044B0[];
 /* Read cursor into gUnknown_030045F0 -- sub_0805D438 dereferences it with
  * `ldrb`, compares against the 0x40 sentinel and bumps it by 1. */
-extern u8 *gUnknown_030046B0;
+extern volatile u8 *gUnknown_030046B0;
 /* A word slot four bytes past gUnknown_030046B0 and unrelated to it: wave 26's
  * sub_08077F30 publishes gUnknown_08615194[i].unk24 or .unk28 into it, picked
  * by sub_0803866C(). Plain `str`, so a word; `void *` follows the source
@@ -7201,7 +7237,13 @@ extern u32 gUnknown_03005920;
  * -fforce-addr reroute plus the pointer's own deref, so the address only ever
  * appears as pool-word CONTENT. Three words of the 0x0816E180-0x0816E1CC run
  * hold it (0x0816E1B0, 0x0816E1B4, 0x0816E1C8) and so does 0x081D93B8,
- * sub_08082660's slot.
+ * sub_08082660's slot. Wave 57 (W57-A) adds 0x0808D7CC, sub_08005B24's slot,
+ * dereferenced in baserom.gba; its immediate neighbour 0x0808D7C8 holds
+ * &gUnknown_0200B0B0 for the same function. Note that BOTH look exactly like
+ * globals to an address-decoder screen and neither is one -- and that
+ * `#include "hardware.h"` is needed to reach gpKeySt at all, since global.h
+ * does not pull it in (src/decomp/c_08004970.c and c_08005B24.c both carry
+ * that line).
  *   The type analysis behind the wrong name was right and is now redundant:
  * `struct KeySt` already declares the u16 at +0x02, and sub_08082660 testing
  * bits 0x40 / 0x80 of it is the same D-pad idiom c_0802966C.c uses at 0x50 /
