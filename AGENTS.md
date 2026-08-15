@@ -62,11 +62,13 @@ Use this priority order:
 6. Sweep trivial return stubs as a bulk, signature-aware task rather than one
    agent per stub.
 
-Run `python tools/overlap_screen.py --delta-only` for the current residual
-queue. When using locality screening, explicitly lower stale floors and include
-loops; the command defaults retain historical filters that can hide most of the
-remaining corpus. Treat `best.json` percentages as leads only and re-test by
-exit status.
+`python tools/preflight.py` now prints the current residual queue automatically.
+Run `python tools/overlap_screen.py` for the full locality/shape view; its
+post-wave-61 defaults are `--min-size 24`, loop-inclusive,
+`--block-min-matched 1`, and `--top-blocks 12`. Use `--no-loops` only to
+reproduce a historical straight-line screen. Treat `best.json` percentages as
+leads only and re-test by exit status; preflight labels nonzero size deltas so a
+100% prefix with an extra helper body is not mistaken for a match.
 
 Before parking a source-level miss, inspect `data/compiler-overrides.json` and
 the surrounding block. Wave 60 found whole groups whose source was already
@@ -81,6 +83,12 @@ correct under a different compiler or optimization level.
 - Read the named promoted exemplar before the target assembly when one exists.
 - Use the project MCP tools for independent lookups, `compile_probe`, and
   `try_match`; batch independent lookups into parallel calls.
+- Both compile tools accept temporary compiler profiles: `default`, `no-force`,
+  `o1`, `o1-no-force`, `old-agbcc`, and `old-agbcc-no-force`. These
+  experiments write profile-specific artifacts and do not update canonical
+  residuals or `best.c`. A profile match is provisional: report the mechanism
+  to the coordinator, record an evidence-backed override, regenerate
+  `build/compiler-overrides.mk`, and re-run the `configured` verdict.
 - Start from the existing draft. Run it once, read the current diff, and
   classify the residual before editing. Do not discard prior measurements.
 - Budget about ten tool-call turns per function. At the budget, record the
@@ -89,9 +97,11 @@ correct under a different compiler or optimization level.
   match; only an independently observed zero exit status is.
 - Record durable code-generation discoveries in `docs/agbcc-codegen.md` and
   evidence-backed type/prototype corrections in the appropriate header.
-- The MCP `permute` wrapper is known to mishandle timeout results. Until fixed,
-  use `tools/permute.py`, preserve the starting draft, and re-run `trymatch.py`
-  on any reported result.
+- Preserve the starting draft before any permuter run and re-run `trymatch.py`
+  on any reported result. The MCP wrapper's missing-`exit_code` timeout crash
+  was fixed after Wave 61; a server-side timeout is now an ordinary exit 124
+  failure. The Codex MCP client timeout in `../.codex/config.toml` must also be
+  at least 600 seconds for a normal 300-second run.
 
 ## Shared-file coordination
 
@@ -135,3 +145,8 @@ be silently normalized or discarded.
 The checked-in README progress can lag the machine tracker. Use
 `data/functions.json`, the generated progress page, and the latest wave commit
 when briefing agents.
+
+The progress page's headline is the same decomp-index metric used above. Its
+larger memory map separately classifies pre-existing upstream C, active asm,
+parked drafts, asm-resident code, and FE-identified active assembly; do not add
+upstream C to the decomp numerator.

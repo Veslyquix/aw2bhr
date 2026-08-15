@@ -497,8 +497,20 @@ def _run(args: list[str], timeout: int = 300) -> dict:
         proc = subprocess.run(
             [sys.executable, *args], cwd=awlib.REPO, capture_output=True,
             text=True, timeout=timeout, stdin=subprocess.DEVNULL)
-    except subprocess.TimeoutExpired:
-        return {"ok": False, "error": f"timed out after {timeout}s"}
+    except subprocess.TimeoutExpired as exc:
+        def tail(value, n):
+            if value is None:
+                return ""
+            if isinstance(value, bytes):
+                value = value.decode("utf-8", errors="replace")
+            return value[-n:]
+        return {
+            "ok": False,
+            "exit_code": 124,
+            "stdout": tail(exc.stdout, 4000),
+            "stderr": tail(exc.stderr, 2000),
+            "error": f"timed out after {timeout}s",
+        }
     return {
         "ok": proc.returncode == 0,
         "exit_code": proc.returncode,
@@ -545,22 +557,32 @@ def start_function(name_or_addr: str) -> dict:
 
 
 @mcp.tool()
-def try_match(name_or_addr: str, c_code: str, show_diff: bool = True) -> dict:
+def try_match(name_or_addr: str, c_code: str, show_diff: bool = True,
+              compiler_profile: str = "configured") -> dict:
     """Compile candidate C for one function and report whether it matches.
 
     This is the verdict the whole pipeline exists to produce. `matched` is true
-    only when the compiled bytes and relocations are identical to the original,
-    so it cannot be talked into a false positive -- if it says matched, the ROM
-    still builds.
+    only when the compiled bytes and relocations are identical to the original
+    under the selected profile. Only the default `configured` profile proves
+    the integrated build is ready; temporary-profile matches are also marked
+    `provisional`.
 
     On a miss you get the byte counts, where the first difference is, and an
     instruction-level diff. Rewrite and call again. If three attempts have not
     converged, the benchmark says a fourth rarely helps -- change approach or
     move on rather than resubmitting a near-identical body.
+
+    compiler_profile defaults to `configured`, the only canonical verdict.
+    The other named profiles are temporary experiments. A match under one is
+    provisional until the coordinator records an evidence-backed override and
+    re-runs the configured profile.
     """
     rec = _resolve(name_or_addr)
     if rec is None:
         return {"error": f"no function matching {name_or_addr!r}"}
+    if compiler_profile not in agbenv.compiler_profiles():
+        return {"error": "unknown compiler_profile %r; choose %s" %
+                (compiler_profile, ", ".join(agbenv.compiler_profiles()))}
 
     name = rec["name"]
     work = os.path.join(awlib.REPO, "work", name)
@@ -572,19 +594,32 @@ def try_match(name_or_addr: str, c_code: str, show_diff: bool = True) -> dict:
     awlib.write_text(os.path.join(work, name + ".c"), c_code)
 
     args = ["tools/trymatch.py", name]
+    if compiler_profile != "configured":
+        args.extend(["--profile", compiler_profile])
     if show_diff:
         args.append("--diff")
     res = _run(args)
 
+    byte_match = res["exit_code"] == 0
+    provisional = byte_match and compiler_profile != "configured"
     out = {
         "name": name,
         "size": rec["size"],
-        "matched": res["exit_code"] == 0,
+        "compiler_profile": compiler_profile,
+        "matched": byte_match,
+        "provisional": provisional,
         "report": res["stdout"][-6000:],
     }
     if res["stderr"].strip():
         out["stderr"] = res["stderr"][-1500:]
-    if out["matched"]:
+    if provisional:
+        out["suggested_override"] = agbenv.profile_override(compiler_profile)
+        out["next"] = ("The bytes match only under a temporary profile. "
+                       "Give the coordinator the profile and mechanism; do not "
+                       "promote. The coordinator must record an evidence-backed "
+                       "override, regenerate build/compiler-overrides.mk, and "
+                       "re-run the configured verdict.")
+    elif out["matched"]:
         out["next"] = ("Done -- nothing further is needed for this function. "
                        "Getting it into the ROM is a separate step run by "
                        "tools/promote.py, which re-verifies the match first; "
@@ -635,7 +670,8 @@ def permute(name_or_addr: str, seconds: int = 300, threads: int = 4) -> dict:
 
 
 @mcp.tool()
-def compile_probe(c_code: str, name_or_addr: str | None = None) -> dict:
+def compile_probe(c_code: str, name_or_addr: str | None = None,
+                  compiler_profile: str = "configured") -> dict:
     """Compile candidate C and return the assembly agbcc produced. No verdict.
 
     Use this to test a hypothesis. It does not count as an attempt and does not
@@ -650,13 +686,20 @@ def compile_probe(c_code: str, name_or_addr: str | None = None) -> dict:
     # rather than inside _resolve, which is entitled to assume a string: without
     # it, omitting the argument -- exactly what "optional" invites -- failed with
     # an AttributeError on None that pointed nowhere near the cause.
+    if compiler_profile not in agbenv.compiler_profiles():
+        return {"ok": False,
+                "error": "unknown compiler_profile %r; choose %s" %
+                         (compiler_profile,
+                          ", ".join(agbenv.compiler_profiles()))}
     stem = (_resolve(name_or_addr) or {}).get("name") if name_or_addr else None
     stem = stem or "probe"
-    rel = "build/probe/%s.c" % stem
+    suffix = "" if compiler_profile == "configured" else "." + compiler_profile
+    rel = "build/probe/%s%s.c" % (stem, suffix)
     awlib.write_text(os.path.join(awlib.REPO, rel.replace("/", os.sep)), c_code)
 
-    f = agbenv.flags()
-    out_s = "build/probe/%s.s" % stem
+    f = agbenv.flags(stem if name_or_addr else None,
+                     profile=compiler_profile)
+    out_s = "build/probe/%s%s.s" % (stem, suffix)
     rc, so, se = agbenv.run(
         'mkdir -p build/probe\n'
         '%s %s %s | iconv -f UTF-8 -t CP932 | %s %s -o %s'
@@ -673,6 +716,8 @@ def compile_probe(c_code: str, name_or_addr: str | None = None) -> dict:
     body = [ln.rstrip() for ln in text.splitlines()
             if ln.strip() and not ln.strip().startswith((".file", ".loc", ".ident"))]
     return {"ok": True, "asm": "\n".join(body[:400]),
+            "compiler_profile": compiler_profile,
+            "provisional": compiler_profile != "configured",
             "lines": len(body),
             "note": "Assembly only -- run try_match for a byte-level verdict."}
 

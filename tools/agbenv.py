@@ -140,6 +140,32 @@ def makefile_var(name):
 _OVERRIDES = None
 
 
+# Temporary compiler configurations for investigating a draft. `configured`
+# is the only profile that consults compiler-overrides.json and is therefore
+# the only one suitable for canonical verification and promotion.
+COMPILER_PROFILES = {
+    "configured": None,
+    "default": {},
+    "no-force": {"cflags_remove": ["-fforce-addr"]},
+    "o1": {
+        "cflags_remove": ["-O2"],
+        "cflags_add": ["-O1"],
+    },
+    "o1-no-force": {
+        "cflags_remove": ["-O2", "-fforce-addr"],
+        "cflags_add": ["-O1"],
+    },
+    "old-agbcc": {
+        "cc1": "old_agbcc",
+        "cflags_remove": ["-fprologue-bugfix"],
+    },
+    "old-agbcc-no-force": {
+        "cc1": "old_agbcc",
+        "cflags_remove": ["-fprologue-bugfix", "-fforce-addr"],
+    },
+}
+
+
 def compiler_overrides():
     """data/compiler-overrides.json, or {} if it is absent."""
     global _OVERRIDES
@@ -153,7 +179,40 @@ def compiler_overrides():
     return _OVERRIDES
 
 
-def flags(fn=None):
+def compiler_profiles():
+    return tuple(COMPILER_PROFILES)
+
+
+def profile_override(profile):
+    """Return a copy of a temporary profile's override-shaped definition."""
+    if profile not in COMPILER_PROFILES:
+        raise ValueError("unknown compiler profile %r (choose %s)" %
+                         (profile, ", ".join(compiler_profiles())))
+    spec = COMPILER_PROFILES[profile]
+    if spec is None:
+        return None
+    return {k: list(v) if isinstance(v, list) else v
+            for k, v in spec.items()}
+
+
+def _apply_override(f, ov):
+    if not ov:
+        return
+    if ov.get("cc1"):
+        # Forward slashes deliberately: this string is handed to a POSIX shell,
+        # and os.path.join would emit backslashes on Windows that bash discards.
+        f["CC1"] = "%s/bin/%s" % (makefile_var("AGBCC_HOME") or "tools/agbcc",
+                                    ov["cc1"])
+    remove = set(ov.get("cflags_remove", ()))
+    if remove:
+        f["CFLAGS"] = " ".join(x for x in f["CFLAGS"].split()
+                                if x not in remove)
+    for opt in ov.get("cflags_add", ()):
+        if opt not in f["CFLAGS"].split():
+            f["CFLAGS"] += " " + opt
+
+
+def flags(fn=None, profile="configured"):
     """Build flags, with `fn`'s per-function override applied if it has one.
 
     Parts of the ROM were not built with the default toolchain -- the sound and
@@ -161,7 +220,9 @@ def flags(fn=None):
     is what keeps trymatch.py and compile_probe judging a candidate the way the
     ROM was actually built. Without it they contradict the Makefile, report an
     already-solved function as a failure, and every later wave re-attempts it.
-    See data/compiler-overrides.json.
+    See data/compiler-overrides.json. A non-configured `profile` deliberately
+    ignores that file and applies one temporary experiment to the Makefile
+    defaults; callers must not treat such a result as promotion-ready.
     """
     f = {
         "CPPFLAGS": makefile_var("CPPFLAGS"),
@@ -172,29 +233,24 @@ def flags(fn=None):
         "STRIP": makefile_var("STRIP") or "arm-none-eabi-strip",
         "CC1": makefile_var("CC1") or "tools/agbcc/bin/agbcc",
     }
-    ov = compiler_overrides().get(fn) if fn else None
-    if not ov:
-        return f
-    if ov.get("cc1"):
-        # Forward slashes deliberately: this string is handed to a POSIX shell,
-        # and os.path.join would emit backslashes on Windows that bash discards.
-        f["CC1"] = "%s/bin/%s" % (makefile_var("AGBCC_HOME") or "tools/agbcc",
-                                  ov["cc1"])
-    for opt in ov.get("cflags_remove", ()):
-        f["CFLAGS"] = f["CFLAGS"].replace(" " + opt, "")
-    for opt in ov.get("cflags_add", ()):
-        f["CFLAGS"] += " " + opt
+    if profile not in COMPILER_PROFILES:
+        raise ValueError("unknown compiler profile %r (choose %s)" %
+                         (profile, ", ".join(compiler_profiles())))
+    ov = ((compiler_overrides().get(fn) if fn else None)
+          if profile == "configured" else COMPILER_PROFILES[profile])
+    _apply_override(f, ov)
     return f
 
 
-def compile_c(src, out_o, out_s=None, extra_cflags="", fn=None):
+def compile_c(src, out_o, out_s=None, extra_cflags="", fn=None,
+              profile="configured"):
     """Compile one C file exactly as the Makefile's `$(BUILD_DIR)/%.o: %.c` does.
 
     The `.text/.align` line appended after agbcc and the `.gcc2_compiled.` strip
     are part of that recipe, not incidental -- omitting either changes the
     object and so changes whether a candidate is judged to match.
     """
-    f = flags(fn)
+    f = flags(fn, profile=profile)
     out_s = out_s or (os.path.splitext(out_o)[0] + ".s")
     script = (
         'set -e\n'

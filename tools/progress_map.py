@@ -5,20 +5,22 @@ Every function in the ROM's code region is one rectangle, sized by its byte
 count and placed in the address band it lives in, so the picture is literally a
 map of the cartridge rather than a bar chart.
 
-Three states, reported separately and never added together:
+Six exclusive states keep the linker map distinct from decomp progress:
 
-  matched     compiled from C in src/ and proven by `make compare`
-  identified  named by shape-matching the Fire Emblem decomps, still assembly
-  unstarted   still assembly, still anonymous
+  promoted     decompiled into src/decomp and proven by `make compare`
+  upstream     pre-existing C in src/proc.c or src/title-screen.c
+  active       unmatched assembly still in the live queue
+  parked       compiler output with a settled near-miss draft
+  asm-resident hand-written assembly/padding that C should not reproduce
+  identified   active assembly named from the Fire Emblem decomps
 
-`identified` is deliberately not counted as progress. Knowing a function is
-m4aSoundInit is worth having, but the assembly has not become C and the ROM does
-not depend on it -- rolling it into a single percentage would overstate the work
-done, which is the one thing a progress page must not do.
+The headline percentage uses only data/functions.json, so upstream C cannot
+inflate decomp progress. The map still includes it because omitting real code
+would make the address visualization incomplete.
 
-Functions already decompiled are no longer in asm/, so their addresses come from
-the linker map instead. Without it the map would show only what is left and
-would silently omit everything finished.
+Promoted addresses and sizes come from the function index. The linker map adds
+the pre-existing C functions that were never part of the assembly index; without
+it the address view would silently omit real code.
 
 Usage:
     python tools/progress_map.py [--out progress/index.html]
@@ -38,8 +40,16 @@ OUT = os.path.join("progress", "index.html")
 BAND = 32 * 1024                      # address band per treemap module
 WIDTH, HEIGHT = 1240, 780
 
-COLOUR = {"matched": "#0ca30c", "identified": "#fab219"}
-CLS = {"matched": "m", "identified": "p", "unstarted": "u"}
+CLS = {
+    "promoted": "m",
+    "upstream": "c",
+    "active": "u",
+    "parked": "k",
+    "asm-resident": "r",
+    "identified": "p",
+}
+STATUS_ORDER = ("promoted", "upstream", "active", "parked",
+                "asm-resident", "identified")
 
 
 # ---------------------------------------------------------------- data
@@ -59,6 +69,15 @@ def load_fe_names():
         return {}
     with open(path, encoding="utf-8") as fh:
         return {h["name"]: h["fe_name"] for h in json.load(fh)["matches"]}
+
+
+def load_status_names(filename):
+    path = os.path.join(awlib.DATA_DIR, filename)
+    if not os.path.exists(path):
+        return set()
+    with open(path, encoding="utf-8") as fh:
+        payload = json.load(fh).get("functions", {})
+    return set(payload if isinstance(payload, dict) else payload)
 
 
 MAP_OBJ_RE = re.compile(r'^\s\.text\s+0x([0-9a-f]{8})\s+0x([0-9a-f]+)\s+(\S+)')
@@ -85,12 +104,12 @@ def c_objects():
     return out
 
 
-def load_matched_from_map(known):
-    """Functions built from C, recovered from the linker map.
+def load_upstream_from_map(known):
+    """Pre-existing C functions recovered from the linker map.
 
-    They are no longer in asm/, so the map is the only place their addresses
-    survive. Anything already in the assembly index is skipped, so a function
-    cannot be counted twice.
+    Anything already in the assembly index is skipped, leaving src/proc.c and
+    src/title-screen.c. Promoted decomp functions stay in the index and are
+    classified there, so these rows cannot inflate the primary metric.
     """
     path = os.path.join(awlib.REPO, "aw2bhr.map")
     if not os.path.exists(path):
@@ -133,6 +152,8 @@ def collect():
     if asm is None:
         return None
     fe = load_fe_names()
+    parked = load_status_names("parked.json")
+    resident = load_status_names("asm-resident.json")
     known = {r["name"] for r in asm}
 
     items = []
@@ -141,20 +162,29 @@ def collect():
         # nothing; the index's status does. Taking it from the index also keeps
         # the page honest regardless of which build wrote aw2bhr.map last -- the
         # upstream build deliberately excludes src/decomp.
+        fe_note = fe.get(r["name"])
         if r.get("status") == "matched":
-            status, note = "matched", "promoted from assembly"
+            status, note = "promoted", "decompiled from assembly"
+        elif r["name"] in resident:
+            status, note = "asm-resident", "not compiler-generated"
+            if fe_note:
+                note += "; FE shape: " + fe_note
+        elif r["name"] in parked:
+            status, note = "parked", "settled compiler-output near-miss"
+            if fe_note:
+                note += "; FE shape: " + fe_note
         elif r["name"] in fe:
             status, note = "identified", fe[r["name"]]
         else:
-            status, note = "unstarted", ""
+            status, note = "active", "unmatched assembly in the live queue"
         items.append({
             "name": r["name"], "addr": r["addr"], "size": max(2, r["size"]),
             "status": status, "note": note,
         })
-    for r in load_matched_from_map(known):
+    for r in load_upstream_from_map(known):
         items.append({"name": r["name"], "addr": r["addr"],
-                      "size": max(2, r["size"]), "status": "matched",
-                      "note": os.path.basename(r["obj"])})
+                      "size": max(2, r["size"]), "status": "upstream",
+                      "note": "pre-existing C: " + r["obj"]})
     items.sort(key=lambda r: r["addr"])
     return items
 
@@ -231,7 +261,8 @@ def render_svg(items):
     parts = []
     for base, (bx, by, bw, bh) in zip(order, outer):
         group = sorted(bands[base], key=lambda i: -i["size"])
-        done = sum(i["size"] for i in group if i["status"] == "matched")
+        done = sum(i["size"] for i in group
+                   if i["status"] in ("promoted", "upstream"))
         total = sum(i["size"] for i in group)
         pct = done / total * 100 if total else 0
 
@@ -273,19 +304,19 @@ CSS = """
 :root {
   color-scheme: light dark;
   --surface:#fcfcfb; --panel:#f2f1ee; --ink:#0b0b0b; --ink-2:#52514e;
-  --frame:#d8d7d2; --cell-unstarted:#e4e3df;
+  --frame:#d8d7d2; --cell-active:#e4e3df;
 }
 @media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) {
   --surface:#1a1a19; --panel:#232322; --ink:#fff; --ink-2:#c3c2b7;
-  --frame:#3d3d3b; --cell-unstarted:#33332f;
+  --frame:#3d3d3b; --cell-active:#33332f;
 } }
 :root[data-theme="dark"] {
   --surface:#1a1a19; --panel:#232322; --ink:#fff; --ink-2:#c3c2b7;
-  --frame:#3d3d3b; --cell-unstarted:#33332f;
+  --frame:#3d3d3b; --cell-active:#33332f;
 }
 :root[data-theme="light"] {
   --surface:#fcfcfb; --panel:#f2f1ee; --ink:#0b0b0b; --ink-2:#52514e;
-  --frame:#d8d7d2; --cell-unstarted:#e4e3df;
+  --frame:#d8d7d2; --cell-active:#e4e3df;
 }
 body { background:var(--surface); color:var(--ink);
   font:14px/1.5 ui-sans-serif, system-ui, sans-serif;
@@ -296,7 +327,11 @@ h1 { font-size:20px; margin:0 0 2px; }
 .tile { background:var(--panel); border:1px solid var(--frame);
   border-radius:8px; padding:10px 16px 12px; min-width:210px;
   border-top:3px solid var(--frame); }
-.tile.matched { border-top-color:#0ca30c; }
+.tile.promoted { border-top-color:#0ca30c; }
+.tile.upstream { border-top-color:#3182ce; }
+.tile.active { border-top-color:var(--frame); }
+.tile.parked { border-top-color:#ed8936; }
+.tile.asm-resident { border-top-color:#9f7aea; }
 .tile.identified { border-top-color:#fab219; }
 .tile-label { font-size:12px; text-transform:uppercase; letter-spacing:.06em;
   color:var(--ink-2); }
@@ -313,8 +348,11 @@ svg { display:block; border-radius:6px; }
 .mlabel { font:600 10.5px ui-monospace, monospace; fill:var(--ink); }
 .mpct { font-weight:400; fill:var(--ink-2); }
 .c { shape-rendering:crispEdges; }
-.c.u { fill:var(--cell-unstarted); }
+.c.u { fill:var(--cell-active); }
 .c.m { fill:#0ca30c; }
+.c.c { fill:#3182ce; }
+.c.k { fill:#ed8936; }
+.c.r { fill:#9f7aea; }
 .c.p { fill:#fab219; }
 .c:hover { stroke:var(--ink); stroke-width:1; }
 #tip { position:fixed; pointer-events:none; background:var(--panel);
@@ -365,6 +403,12 @@ def build(out_rel):
         by[i["status"]][0] += 1
         by[i["status"]][1] += i["size"]
 
+    tracked_n = sum(by[k][0] for k in STATUS_ORDER if k != "upstream")
+    tracked_b = sum(by[k][1] for k in STATUS_ORDER if k != "upstream")
+    promoted_n, promoted_b = by["promoted"]
+    decomp_fn_pct = promoted_n / tracked_n * 100 if tracked_n else 0
+    decomp_byte_pct = promoted_b / tracked_b * 100 if tracked_b else 0
+
     svg_body, order, bands = render_svg(items)
 
     rows = []
@@ -372,16 +416,23 @@ def build(out_rel):
         group = bands[base]
         n = len(group)
         b = sum(i["size"] for i in group)
-        m = sum(1 for i in group if i["status"] == "matched")
-        mb = sum(i["size"] for i in group if i["status"] == "matched")
+        m = sum(1 for i in group if i["status"] == "promoted")
+        mb = sum(i["size"] for i in group if i["status"] == "promoted")
+        upstream = sum(1 for i in group if i["status"] == "upstream")
+        parked = sum(1 for i in group if i["status"] == "parked")
+        resident = sum(1 for i in group if i["status"] == "asm-resident")
         ident = sum(1 for i in group if i["status"] == "identified")
         rows.append(
             "<tr><td class='mono'>0x%08X</td><td class='num'>%s</td>"
             "<td class='num'>%s</td><td class='num'>%s</td>"
-            "<td class='num'>%.2f%%</td><td class='num'>%.2f%%</td>"
+            "<td class='num'>%.2f%%</td><td class='num'>%s</td>"
+            "<td class='num'>%s</td><td class='num'>%s</td>"
             "<td class='num'>%s</td></tr>"
             % (base, "{:,}".format(n), "{:,}".format(b), "{:,}".format(m),
-               m / n * 100 if n else 0, mb / b * 100 if b else 0,
+               mb / b * 100 if b else 0,
+               "{:,}".format(upstream) if upstream else "",
+               "{:,}".format(parked) if parked else "",
+               "{:,}".format(resident) if resident else "",
                "{:,}".format(ident) if ident else ""))
 
     doc = """<!doctype html>
@@ -391,18 +442,21 @@ def build(out_rel):
 <style>%s</style></head><body>
 
 <h1>Advance Wars 2: Black Hole Rising &mdash; decompilation progress</h1>
-<p class="sub">%s functions &middot; %s bytes of code &middot; %d address bands
-&middot; each rectangle is one function, sized by bytes and placed where it
-lives in the cartridge. Band labels show the share matched by bytes.
-Matched and identified are reported separately &mdash; deliberately no combined
-figure, because an identified function is still assembly.</p>
+<p class="sub"><strong>Decomp progress: %s / %s functions (%.2f%%) &middot;
+%s / %s indexed bytes (%.2f%%).</strong><br>%s functions &middot; %s mapped bytes
+&middot; %d address bands. The larger map also includes pre-existing upstream C;
+band labels show all C-built bytes, while the headline never counts upstream C
+as decompilation progress.</p>
 
-<div class="tiles">%s%s%s</div>
+<div class="tiles">%s%s%s%s%s%s</div>
 
 <div class="legend">
-  <span><span class="sw" style="background:#0ca30c"></span>matched &mdash; built from C in src/, proven by <span class="mono">make compare</span></span>
-  <span><span class="sw" style="background:#fab219"></span>identified &mdash; named from the Fire Emblem decomps, still assembly</span>
-  <span><span class="sw" style="background:var(--cell-unstarted);border:1px solid var(--frame)"></span>unstarted</span>
+  <span><span class="sw" style="background:#0ca30c"></span>promoted decomp C</span>
+  <span><span class="sw" style="background:#3182ce"></span>pre-existing upstream C</span>
+  <span><span class="sw" style="background:var(--cell-active);border:1px solid var(--frame)"></span>active unmatched assembly</span>
+  <span><span class="sw" style="background:#ed8936"></span>parked near-miss</span>
+  <span><span class="sw" style="background:#9f7aea"></span>asm-resident</span>
+  <span><span class="sw" style="background:#fab219"></span>FE-identified active assembly</span>
 </div>
 
 <div class="map-wrap">
@@ -412,28 +466,38 @@ figure, because an identified function is still assembly.</p>
 <div id="tip"></div>
 
 <table>
-<thead><tr><th>address band</th><th>funcs</th><th>bytes</th><th>matched</th>
-<th>%% of funcs</th><th>%% of bytes</th><th>identified</th></tr></thead>
+<thead><tr><th>address band</th><th>funcs</th><th>bytes</th><th>promoted</th>
+<th>%% bytes promoted</th><th>upstream C</th><th>parked</th>
+<th>asm-resident</th><th>identified</th></tr></thead>
 <tbody>%s</tbody></table>
 
 <p class="foot">Generated by <span class="mono">tools/progress_map.py</span> &mdash;
 do not edit by hand. Regenerate after
-<span class="mono">tools/index_functions.py</span> and a build, since completed
-functions are read from <span class="mono">aw2bhr.map</span> rather than from
-<span class="mono">asm/</span>, which no longer contains them.
+<span class="mono">tools/index_functions.py</span> and a build. Decomp status
+comes from <span class="mono">data/functions.json</span>; pre-existing upstream
+C addresses come from <span class="mono">aw2bhr.map</span>.
 The ROM is %s bytes; only the %s-byte code region is mapped here. The remaining
 data is still <span class="mono">.incbin</span> and is a separate problem.</p>
 
 <script>%s</script>
 </body></html>
 """ % (CSS,
+       "{:,}".format(promoted_n), "{:,}".format(tracked_n), decomp_fn_pct,
+       "{:,}".format(promoted_b), "{:,}".format(tracked_b), decomp_byte_pct,
        "{:,}".format(tot_n), "{:,}".format(tot_b), len(bands),
-       tile("matched", by["matched"][0], by["matched"][1], tot_n, tot_b,
-            "byte-for-byte; the ROM depends on these"),
+       tile("promoted", by["promoted"][0], by["promoted"][1], tot_n, tot_b,
+            "byte-for-byte decomp C; primary progress numerator"),
+       tile("upstream", by["upstream"][0], by["upstream"][1], tot_n, tot_b,
+            "pre-existing C; mapped but excluded from decomp progress"),
+       tile("active", by["active"][0], by["active"][1], tot_n, tot_b,
+            "unmatched assembly in the live queue"),
+       tile("parked", by["parked"][0], by["parked"][1], tot_n, tot_b,
+            "compiler output with a settled near-miss draft"),
+       tile("asm-resident", by["asm-resident"][0],
+            by["asm-resident"][1], tot_n, tot_b,
+            "hand-written assembly or upstream-labelled padding"),
        tile("identified", by["identified"][0], by["identified"][1], tot_n, tot_b,
-            "named, not yet decompiled"),
-       tile("unstarted", by["unstarted"][0], by["unstarted"][1], tot_n, tot_b,
-            "still anonymous assembly"),
+            "FE-named active assembly; not counted as progress"),
        WIDTH, HEIGHT, WIDTH, HEIGHT, svg_body,
        "".join(rows),
        "{:,}".format(8388608), "{:,}".format(tot_b),
@@ -456,7 +520,11 @@ data is still <span class="mono">.incbin</span> and is a separate problem.</p>
         print("mirrored to %s" % mirror)
     except OSError as exc:
         print("note: could not mirror to the workspace root (%s)" % exc)
-    for k in ("matched", "identified", "unstarted"):
+    print("  decomp      %5s / %s functions  %9s / %s bytes  %.2f%%"
+          % ("{:,}".format(promoted_n), "{:,}".format(tracked_n),
+             "{:,}".format(promoted_b), "{:,}".format(tracked_b),
+             decomp_byte_pct))
+    for k in STATUS_ORDER:
         print("  %-11s %5s functions  %9s bytes"
               % (k, "{:,}".format(by[k][0]), "{:,}".format(by[k][1])))
     return 0

@@ -597,7 +597,7 @@ def disassemble(obj_rel, lo, hi):
     return keep
 
 
-def record_best(workdir, name, pct):
+def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None):
     """Keep the highest-scoring candidate seen, beside the current one.
 
     An iteration that scores worse overwrites the source that scored better, so
@@ -620,7 +620,15 @@ def record_best(workdir, name, pct):
     src = os.path.join(workdir, name + ".c")
     awlib.write_text(os.path.join(workdir, "best.c"),
                      "".join(awlib.read_lines(src)))
-    awlib.write_text(meta, json.dumps({"percent": round(pct, 2)}) + "\n")
+    payload = {"percent": round(pct, 2)}
+    if candidate_bytes is not None and target_bytes is not None:
+        payload.update({
+            "candidate_bytes": candidate_bytes,
+            "target_bytes": target_bytes,
+            "size_delta": candidate_bytes - target_bytes,
+            "exact_size": candidate_bytes == target_bytes,
+        })
+    awlib.write_text(meta, json.dumps(payload, sort_keys=True) + "\n")
     print("  new best: %.1f%% (saved to best.c)" % pct)
 
 
@@ -637,7 +645,7 @@ def _looks_like_torn_header(text):
         text))
 
 
-def check(name, want_diff=False, keep_going=False):
+def check(name, want_diff=False, keep_going=False, profile="configured"):
     rec, unit = resolve(name)
     if rec is None or unit is None:
         return 2
@@ -670,8 +678,10 @@ def check(name, want_diff=False, keep_going=False):
         return 2
 
     # Candidate.
-    cand_o = "work/%s/%s.o" % (fn, fn)
-    rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o, fn=fn)
+    profile_suffix = "" if profile == "configured" else "." + profile
+    cand_o = "work/%s/%s%s.o" % (fn, fn, profile_suffix)
+    rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o, fn=fn,
+                                  profile=profile)
     if rc != 0 and _looks_like_torn_header(se or so):
         # Mid-wave, several agents append to include/unknown-globals.h and
         # include/unknown-functions.h concurrently, and a compile that starts
@@ -680,7 +690,8 @@ def check(name, want_diff=False, keep_going=False):
         # plain re-run -- and the same noise HID two real failures, so the
         # retry has to live here, once, not in every caller's shell loop.
         time.sleep(0.5)
-        rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o, fn=fn)
+        rc, so, se = agbenv.compile_c(
+            "work/%s/%s.c" % (fn, fn), cand_o, fn=fn, profile=profile)
         if rc == 0:
             print("note: first compile hit a torn header read "
                   "(concurrent include/ edit); clean on retry")
@@ -702,7 +713,8 @@ def check(name, want_diff=False, keep_going=False):
     if tgt is None:
         print("error: could not read target .text: %s" % err)
         return 2
-    cand, err = section_bytes(cand_o, "work/%s/_cand.bin" % fn)
+    cand_bin = "work/%s/_cand%s.bin" % (fn, profile_suffix)
+    cand, err = section_bytes(cand_o, cand_bin)
     if cand is None:
         print("error: could not read candidate .text: %s" % err)
         return 2
@@ -711,6 +723,9 @@ def check(name, want_diff=False, keep_going=False):
     cand_fn = cand[:size]
 
     print("%s   %d bytes expected" % (fn, size))
+    if profile != "configured":
+        print("  compiler profile: %s (TEMPORARY; canonical artifacts and "
+              "best.c are untouched)" % profile)
     if len(cand) != size:
         print("  size:  candidate is %d bytes, original is %d  (%+d)"
               % (len(cand), size, len(cand) - size))
@@ -796,13 +811,21 @@ def check(name, want_diff=False, keep_going=False):
                   " the literal the ROM already holds.")
         else:
             print("\nMATCH -- byte-for-byte identical to the original")
+        if profile != "configured":
+            print("\nPROVISIONAL PROFILE MATCH -- not promotion-ready.")
+            print("  Record an evidence-backed compiler override, regenerate "
+                  "the build override file, then re-run with --profile "
+                  "configured.")
         return 0
 
     n_diff = sum(1 for a, b in zip(tgt_fn, cand_fn) if a != b)
     common = min(len(tgt_fn), len(cand_fn))
     pct = (common - n_diff) / size * 100 if size else 0
     print("  bytes: %d of %d differ  (%.1f%% identical)" % (n_diff, common, pct))
-    record_best(workdir, name, pct)
+    if profile == "configured":
+        record_best(workdir, fn, pct, len(cand), size)
+    else:
+        print("  temporary profile result: best.c/best.json not updated")
     first = next((i for i, (a, b) in enumerate(zip(tgt_fn, cand_fn)) if a != b), common)
     print("  first difference at +0x%x" % first)
 
@@ -1138,6 +1161,10 @@ def main():
                     help="verify the whole linker unit at once, merging every "
                          "draft in it -- the only way to verify a function "
                          "that calls a static helper defined beside it")
+    ap.add_argument("--profile", choices=agbenv.compiler_profiles(),
+                    default="configured",
+                    help="temporary compiler experiment; only 'configured' "
+                         "uses data/compiler-overrides.json and is canonical")
     ap.add_argument("--self-test", action="store_true",
                     help="check the unit oracle still accepts AgbMain's unit "
                          "and still rejects sub_08071918's")
@@ -1147,8 +1174,11 @@ def main():
     if not args.name:
         ap.error("give a function name or address")
     if args.unit:
+        if args.profile != "configured":
+            ap.error("--profile is currently a per-function experiment; "
+                     "unit verification must use configured integration flags")
         return check_unit(args.name, want_diff=args.diff)
-    return check(args.name, want_diff=args.diff)
+    return check(args.name, want_diff=args.diff, profile=args.profile)
 
 
 if __name__ == "__main__":

@@ -71,7 +71,7 @@ they don't match each other. As of **wave 61**:
 |---|---|---|
 | **index** | **4,123 / 4,554 functions · 447,988 / 567,548 code bytes (78.93%)** | Functions that existed as assembly in `asm/` and are now matched C. The conservative figure, and the one the map above draws. |
 | **C definitions** | **4,230** | Function definitions across `src/`. Higher, because `src/proc.c` and `src/title-screen.c` were already C upstream and were never in `asm/`. Commit titles use this one. |
-| **linker map** | **4,228 / 4,659 functions · 452,312 / 571,872 bytes (79.09%)** | What `tools/progress_map.py` reports, reading addresses out of `aw2bhr.map`. Also includes the pre-existing C, so its byte total is the largest of the three. |
+| **all C-built code on the linker map** | **4,228 / 4,659 functions · 452,312 / 571,872 bytes (79.09%)** | Promoted decomp C plus 105 functions that were already C upstream. The detailed page shows this complete address map, but keeps the upstream category separate and uses the index metric as its headline. |
 
 The index metric is the one to quote as decompilation progress. Two other
 states are tracked but not counted, because those functions are still assembly:
@@ -91,9 +91,11 @@ straight from `baserom.gba`.
 * `progress/memory-map.svg` — the image above. Regenerate with
   `python3 tools/memory_map.py`.
 * `progress/index.html` — the detailed version: one rectangle per function,
-  hover for name, address, size and state. Open it locally; GitHub will not
-  render it in place. Regenerate with `python3 tools/progress_map.py` after a
-  build, since completed functions are read out of `aw2bhr.map`.
+  hover for name, address, size and state. It distinguishes promoted, upstream
+  C, active, parked, asm-resident and identified functions. Open it locally;
+  GitHub will not render it in place. Regenerate with
+  `python3 tools/progress_map.py` after a build; the index supplies decomp
+  status and `aw2bhr.map` supplies pre-existing C addresses.
 
 ## Layout
 

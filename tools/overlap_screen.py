@@ -30,8 +30,8 @@ assembly itself:
              is left is 300 functions that each already carry a draft, and what
              separates them is what their draft's residual IS. See delta_rows().
 
-    python tools/overlap_screen.py                 # the standard report
-    python tools/overlap_screen.py --min-size 96 --min-shared 4 --min-j 0.6
+    python tools/overlap_screen.py                 # current small/loop-inclusive report
+    python tools/overlap_screen.py --min-size 96 --no-loops  # historical view
     python tools/overlap_screen.py --delta-only    # just the wave-59 screen
     python tools/overlap_screen.py --self-test     # the wave-20 acceptance test
 
@@ -1641,7 +1641,9 @@ def self_test(args):
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--min-size", type=int, default=96)
+    p.add_argument("--min-size", type=int, default=24,
+                   help="smallest target for shape screens (24 is the measured "
+                        "post-wave-60 floor; delta screening ignores it)")
     p.add_argument("--min-shared", type=int, default=4)
     p.add_argument("--min-j", type=float, default=0.6)
     p.add_argument("--top", type=int, default=15)
@@ -1666,16 +1668,18 @@ def main():
                         "promoted block are still exemplar-cheap (wave 33 "
                         "measured 115 bytes/attempt); they just need batches "
                         "sized by BYTES, ~2-5KB per agent, not by count")
-    p.add_argument("--block-min-matched", type=int, default=20,
+    p.add_argument("--block-min-matched", type=int, default=1,
                    help="skip blocks with fewer matched functions than this -- "
                         "the axis is only cheap where the vocabulary is ALREADY "
                         "written down, and a cold block behaves nothing like it")
-    p.add_argument("--top-blocks", type=int, default=6)
+    p.add_argument("--top-blocks", type=int, default=12)
     p.add_argument("--per-block", type=int, default=14,
                    help="targets listed per block; ~13 is one agent's batch")
     p.add_argument("--no-blocks", action="store_true",
                    help="skip the address-locality screen")
-    p.add_argument("--allow-loops", action="store_true",
+    loops = p.add_mutually_exclusive_group()
+    loops.add_argument("--allow-loops", dest="allow_loops",
+                       action="store_true", default=True,
                    help="also offer functions with backward branches. Every "
                         "band screen since wave 16 hard-filtered "
                         "backward_branches == 0 on the theory that a loop is "
@@ -1685,7 +1689,10 @@ def main():
                         "rate, with every miss pointing at itself. 869 clean "
                         "loop functions / 227,912 bytes sit behind this filter "
                         "against 244 / 41,078 in front of it -- the fourth "
-                        "screen artifact in this tool and by far the largest")
+                        "screen artifact in this tool and by far the largest; "
+                        "this is now the default")
+    loops.add_argument("--no-loops", dest="allow_loops", action="store_false",
+                       help="restore the historical straight-line-only screen")
     p.add_argument("--no-delta", action="store_true",
                    help="skip the wave-59 residual-delta screen")
     p.add_argument("--delta-only", action="store_true",
