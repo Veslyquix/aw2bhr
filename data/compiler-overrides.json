@@ -255,6 +255,26 @@
    ],
    "reason": "m4a m4aMPlayLFOSpeedSet -- structurally identical to sub_08071584 (same 116 bytes, same loop, differing only in the member written: lfoSpeed at +0x19 rather than mod at +0x17). Default agbcc produces the SAME two 3-byte deltas at the same offsets, 94.8%. Matches byte-for-byte under old_agbcc."
   },
+  "sub_0808AF00": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Wave 61. Flash-library copy routine. The unchanged settled source is byte-and-relocation exact only at -O1 without -fforce-addr; default -O2 uses the wrong allocation and address materialisation."
+  },
+  "sub_0808AF74": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Wave 61. Flash-library copy routine and structural companion to sub_0808AF00. The unchanged settled source is byte-and-relocation exact only at -O1 without -fforce-addr."
+  },
   "sub_0808AD6C": {
    "cflags_remove": [
     "-fforce-addr"

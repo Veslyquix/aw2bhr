@@ -65,18 +65,18 @@ routes is what makes the C trustworthy.
 ## Progress
 
 Three numbers get quoted for this project. They measure different things, so
-they don't match each other. As of **wave 50**:
+they don't match each other. As of **wave 61**:
 
 | metric | value | what it counts |
 |---|---|---|
-| **index** | **3,898 / 4,554 functions · 359,424 / 567,548 code bytes (63.33%)** | Functions that existed as assembly in `asm/` and are now matched C. The conservative figure, and the one the map above draws. |
-| **C definitions** | **4,004** | Function definitions across `src/`. Higher, because `src/proc.c` and `src/title-screen.c` were already C upstream and were never in `asm/`. Commit titles use this one. |
-| **linker map** | **4,003 / 4,659 functions · 363,748 / 571,872 bytes (63.61%)** | What `tools/progress_map.py` reports, reading addresses out of `aw2bhr.map`. Also includes the pre-existing C, so its byte total is the largest of the three. |
+| **index** | **4,123 / 4,554 functions · 447,988 / 567,548 code bytes (78.93%)** | Functions that existed as assembly in `asm/` and are now matched C. The conservative figure, and the one the map above draws. |
+| **C definitions** | **4,230** | Function definitions across `src/`. Higher, because `src/proc.c` and `src/title-screen.c` were already C upstream and were never in `asm/`. Commit titles use this one. |
+| **linker map** | **4,228 / 4,659 functions · 452,312 / 571,872 bytes (79.09%)** | What `tools/progress_map.py` reports, reading addresses out of `aw2bhr.map`. Also includes the pre-existing C, so its byte total is the largest of the three. |
 
 The index metric is the one to quote as decompilation progress. Two other
 states are tracked but not counted, because those functions are still assembly:
 
-* **parked** (93 functions, 24,188 bytes) — compiler output that hasn't been
+* **parked** (109 functions, 30,828 bytes) — compiler output that hasn't been
   matched yet, set aside so it doesn't keep coming back up as new work.
 * **asm-resident** (76 functions, 4,060 bytes) — hand-written assembly that was
   never compiled from C, so it won't become C.

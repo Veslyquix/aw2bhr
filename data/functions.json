@@ -27494,9 +27494,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": "100.0% -- 160 bytes. THE SCORE IS NOT A ROUNDING ARTEFACT: every instruction is correct and only REGISTER FIELDS differ, which is precisely the case wave 37 restored to decomp-permuter after refuting 'the permuter gets nothing on allocation'. Two agents (W38-D, W38-G); W38-G was told explicitly to permute best.c rather than rewrite, and it still did not close. NOTE FOR THE NEXT WAVE: work/sub_0801F2AC/sub_0801F2AC.c is a LATER, WORSE attempt (164 bytes, 30.6%) -- the 100% candidate is in best.c beside it, and confusing the two wastes the lead. Ruled out: rewriting the C from the exemplar. WAVE 38.",
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -127898,30 +127898,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0806CFC8.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 116,
-   "best": "116 bytes (size-exact), 23.3% identical at +0x0",
-   "remaining_diff": "ONE CAUSE, THREE FUNCTIONS -- do not work these separately. `mov r3, sp; adds r3, #1` (the entry address of the relocated copy) is emitted AFTER the copy loop in the ROM and BEFORE it by every candidate: agbcc hoists it into the loop preheader, under the `while`'s own line note immediately ahead of the guard, which is where LICM writes. The value is then live across the loop and the whole function is allocated one register to the left -- a1 lands in r5 instead of r4 and the last parameter is pushed out to `ip`. Symptom 2 (loop entry): the ROM `b`s to a bottom test SHARED by the entry path and the back edge with one `lsrs r1, r0, #0x10` serving both; candidates get `duplicate_loop_exit_test` instead. Explicit `goto`s DO suppress the duplication and produce the `b`, but the two `lsr`s then fail to cross-jump because the hoisted `mov rN, sp; adds rN, #1` sits between the entry path's `lsr` and its `b` and breaks the common tail -- so symptom 2 is DOWNSTREAM of the hoist. Symptom 3: the ROM loads the copied function's pool word TWICE (once for the THUMB-bit XOR, once for the size subtraction) and XORs in place; candidates load once and keep it live. Same family -- one value fewer live in the ROM.",
-   "siblings": [
-    "sub_0808AE54",
-    "sub_0808AF74"
-   ],
-   "ruled_out": [
-    "`for (n = k; n != 0; n--)` vs `while (n != 0) { ...; n--; }`: byte-identical output. The loop spelling is not the lever.",
-    "a nested `{ }` block around the loop: block notes do not reach the region `duplicate_loop_exit_test` scans.",
-    "`while (n--)`: materialises the 0xFFFF sentinel in its own pool word and costs a register. Visibly wrong.",
-    "a `volatile` destination pointer in the copy loop: identical output, so the hoist is NOT blocked by a volatile store inside the loop.",
-    "reusing the source-pointer local as the call target instead of a fresh name: agbcc splits the live range and hoists anyway.",
-    "binding the call target to a declared `void (*fp)(...)` local: same.",
-    "CONTROL: with NO loop at all, a probe puts `sp + 1` at the call exactly where the ROM has it -- so the hoist is caused by the LOOP, not by how the call is spelled."
-   ],
-   "next": "1. Anything that stops agbcc hoisting a FRAME-ADDRESS constant into a loop preheader. Everything else falls out of it. 2. The permuter -- order-wrong and slot-wrong are precisely its cases and this residual is instruction placement plus register slots, not a missing instruction. Read the 'Self-relocating code' chapter in docs/agbcc-codegen.md (wave 44, W44-G) first: the idiom itself (THUMB-bit XOR, inter-function size arithmetic, the (u16)(size/2) halfword counter) is FULLY DERIVED and is NOT the open question.",
-   "wave": 44,
-   "agent": "W44-G",
-   "wave60_o1": "WAVE 60: MEASURED AT -O1, WHICH IS THE CORRECT CONFIGURATION FOR THIS BLOCK. The flash library is -O1, established this wave by nine byte-for-byte matches across 0x0808A3DC-0x0808B91C with no source change (see data/compiler-overrides.json). EVERY SCORE AND EVERY RULED-OUT AXIS RECORDED HERE BEFORE WAVE 60 WAS MEASURED AT -O2 AND IS THEREFORE INVERTED EVIDENCE, NOT WEAK EVIDENCE -- do not trust the axes above. This function has NO override entry, because the project's standard for that file is a byte-for-byte match under the named configuration and this is not one yet. To work it, add a throwaway entry {\"cflags_remove\": [\"-O2\"], \"cflags_add\": [\"-O1\"]} and remove it if it does not close. -O1 score at the end of wave 60: 92.2%, size-exact, 9 of 116 bytes, first difference at +0x1a. LEAD, NOT VERIFIED: sub_0808AF74 is the same size (116 B), the same differing-byte count (9) and nearly the same first difference, so the two are probably one shape -- diff the instruction streams before assuming it."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -127947,30 +127926,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0806CFC8.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 116,
-   "best": "120 bytes (+4), 24.1% identical at +0x0 -- the +4 is the last parameter displaced to a fifth callee-saved register by the same hoist",
-   "remaining_diff": "ONE CAUSE, THREE FUNCTIONS -- do not work these separately. `mov r3, sp; adds r3, #1` (the entry address of the relocated copy) is emitted AFTER the copy loop in the ROM and BEFORE it by every candidate: agbcc hoists it into the loop preheader, under the `while`'s own line note immediately ahead of the guard, which is where LICM writes. The value is then live across the loop and the whole function is allocated one register to the left -- a1 lands in r5 instead of r4 and the last parameter is pushed out to `ip`. Symptom 2 (loop entry): the ROM `b`s to a bottom test SHARED by the entry path and the back edge with one `lsrs r1, r0, #0x10` serving both; candidates get `duplicate_loop_exit_test` instead. Explicit `goto`s DO suppress the duplication and produce the `b`, but the two `lsr`s then fail to cross-jump because the hoisted `mov rN, sp; adds rN, #1` sits between the entry path's `lsr` and its `b` and breaks the common tail -- so symptom 2 is DOWNSTREAM of the hoist. Symptom 3: the ROM loads the copied function's pool word TWICE (once for the THUMB-bit XOR, once for the size subtraction) and XORs in place; candidates load once and keep it live. Same family -- one value fewer live in the ROM.",
-   "siblings": [
-    "sub_0808AE54",
-    "sub_0808AF00"
-   ],
-   "ruled_out": [
-    "`for (n = k; n != 0; n--)` vs `while (n != 0) { ...; n--; }`: byte-identical output. The loop spelling is not the lever.",
-    "a nested `{ }` block around the loop: block notes do not reach the region `duplicate_loop_exit_test` scans.",
-    "`while (n--)`: materialises the 0xFFFF sentinel in its own pool word and costs a register. Visibly wrong.",
-    "a `volatile` destination pointer in the copy loop: identical output, so the hoist is NOT blocked by a volatile store inside the loop.",
-    "reusing the source-pointer local as the call target instead of a fresh name: agbcc splits the live range and hoists anyway.",
-    "binding the call target to a declared `void (*fp)(...)` local: same.",
-    "CONTROL: with NO loop at all, a probe puts `sp + 1` at the call exactly where the ROM has it -- so the hoist is caused by the LOOP, not by how the call is spelled."
-   ],
-   "next": "1. Anything that stops agbcc hoisting a FRAME-ADDRESS constant into a loop preheader. Everything else falls out of it. 2. The permuter -- order-wrong and slot-wrong are precisely its cases and this residual is instruction placement plus register slots, not a missing instruction. Read the 'Self-relocating code' chapter in docs/agbcc-codegen.md (wave 44, W44-G) first: the idiom itself (THUMB-bit XOR, inter-function size arithmetic, the (u16)(size/2) halfword counter) is FULLY DERIVED and is NOT the open question.",
-   "wave": 44,
-   "agent": "W44-G",
-   "wave60_o1": "WAVE 60: MEASURED AT -O1, WHICH IS THE CORRECT CONFIGURATION FOR THIS BLOCK. The flash library is -O1, established this wave by nine byte-for-byte matches across 0x0808A3DC-0x0808B91C with no source change (see data/compiler-overrides.json). EVERY SCORE AND EVERY RULED-OUT AXIS RECORDED HERE BEFORE WAVE 60 WAS MEASURED AT -O2 AND IS THEREFORE INVERTED EVIDENCE, NOT WEAK EVIDENCE -- do not trust the axes above. This function has NO override entry, because the project's standard for that file is a byte-for-byte match under the named configuration and this is not one yet. To work it, add a throwaway entry {\"cflags_remove\": [\"-O2\"], \"cflags_add\": [\"-O1\"]} and remove it if it does not close. -O1 score at the end of wave 60: 92.2%, size-exact, 9 of 116 bytes, first difference at +0x1c. LEAD, NOT VERIFIED: sub_0808AF00 is the same size (116 B), the same differing-byte count (9) and nearly the same first difference, so the two are probably one shape -- diff the instruction streams before assuming it."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
