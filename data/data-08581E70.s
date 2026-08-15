@@ -478,7 +478,11 @@ gUnknown_08614588:  @ 0x08614588
 
 	.global gUnknown_086145C8
 gUnknown_086145C8:  @ 0x086145C8
-	.incbin "baserom.gba", 0x6145C8, 0x10    @ 0x6145D8 - 0x6145C8
+	.incbin "baserom.gba", 0x6145C8, 0x6    @ 0x6145CE - 0x6145C8
+
+	.global gUnknown_086145CE
+gUnknown_086145CE:  @ 0x086145CE
+	.incbin "baserom.gba", 0x6145CE, 0xA    @ 0x6145D8 - 0x6145CE
 
 	.global gUnknown_086145D8
 gUnknown_086145D8:  @ 0x086145D8

@@ -4092,6 +4092,26 @@ GCC folds a pair of `!=` against adjacent constants into the range test
 the `&&`-versus-two-`if`s distinction two rules below ever applies, so no
 spelling of the conjunction recovers the two compares.
 
+### A dynamic boolean subscript keeps shared address arithmetic outside the branch (wave 66, W66-E)
+
+When two adjacent table rows differ only by a constant member offset, selecting
+two complete elements with `if/else` or `?:` duplicates the row and phase
+scalings into both arms. Index the two-row member with the comparison itself:
+
+```c
+v = table[row].pair[field == 2][phase & 1];
+```
+
+agbcc computes `row * sizeof(*table)` and `(phase & 1) * 2` before the compare,
+then branches around only an `adds #4`; the final base add and load cross-jump
+below the merge. `sub_08053FBC` needed the same expression twice, once for an
+unsigned test load and once for the signed call argument, and matched exactly.
+
+The enclosing exclusions needed a separate but related spelling: nested
+`if (row != 0) { if (row != 1) { ... } }`. A single `row != 0 && row != 1`
+condition invokes `fold_range_test`, emitting one `cmp #1; bls` and making the
+function four bytes short. Nesting preserves the ROM's two `cmp`/`beq` pairs.
+
 **In the same pair: `*p += v` puts a *narrow* `v` first and a *word* `v`
 second.** `adds rD, rV, rLoaded` versus `adds rD, rLoaded, rV` — the value's
 own register leads when the parameter is `u16`, the loaded halfword leads when
@@ -40212,8 +40232,9 @@ raw ADDRESS as well as for `gUnknown_<addr>`.** Three words of the
 
 ## CgbSound: three source-shape readings worth ~50 bytes (wave 56, W56-N)
 
-From `sub_08070FAC` (1100 B, MP2K `CgbSound`, parked at 69.5%). Each of these
-was measured by flipping only that spelling:
+From `sub_08070FAC` (1100 B, MP2K `CgbSound`; matched in wave 66 with its
+historical old_agbcc profile). Each of these was measured by flipping only
+that spelling:
 
 - **The envelope-phase dispatch is an if/else-if CHAIN, not a `switch`.** With
   `switch (channels->sf & 3)` over cases 0/1/2/default agbcc balances the tree
@@ -40236,27 +40257,30 @@ was measured by flipping only that spelling:
   block then lined up. On a function with six shared entry points, block
   PLACEMENT is worth more than any individual statement.
 
-## THE m4a old_agbcc RULE HAS A COUNTER-EXAMPLE INSIDE ITS OWN SPAN (wave 56, W56-N)
+## CORRECTION: CgbSound IS an old_agbcc positive; fix the source before comparing profiles (wave 66, W66-H)
 
-`data/compiler-overrides.json` says old_agbcc is a strict superset in
-0x0806F710-0x080745C0 and is "the better first guess for anything new there".
-Two functions from that span were measured against it this wave and BOTH say no:
+Wave 56 called `sub_08070FAC` a counter-example because its then-current draft
+scored 65.9% under old_agbcc against 69.5% under default. That conclusion was
+contextual and wrong: the draft was eight bytes short and still had four wrong
+MP2K source spellings. Once those were restored -- the byte-pointer read of
+`fr`'s high byte, the masked/narrow NRx4 store, `envelopeGoal * echoVolume`
+operand order, and separate signed `ev`/`goal` locals in the decay arm -- the
+same source measured:
 
-    sub_080706B0 (0x080706B0)   old_agbcc byte-identical to default, both 93.6%
-    sub_08070FAC (0x08070FAC)   old_agbcc 65.9%, default 69.5%  <-- WORSE
+    sub_08070FAC default       1096/1100, 70.0%
+    sub_08070FAC old_agbcc     1100/1100, bytes and relocations exact
 
-The second is the interesting one: it is the first measured case in the span
-where old_agbcc is strictly worse, so "superset" is a statement about the five
-functions wave 38 tested and not a property of the region. **The wave-38
-discriminator still holds and should be applied instead of the region rule: the
-functions that need old_agbcc are the ones with a CALL INSIDE A LOOP BODY.**
-`sub_080706B0` is straight-line and `sub_08070FAC`'s two calls sit in a loop
-whose body is otherwise pure stores -- neither has the r0-is-both-argument-and-
-scratch collision the override exists for.
+The function now carries the evidence-backed `old_agbcc` override. The earlier
+text also said its calls did not qualify because the surrounding loop body was
+"otherwise pure stores". That was not the wave-38 discriminator: CgbSound's
+main four-channel loop contains calls to both `sub_08070F44` and
+`sub_08070EF4`, so it is a direct positive for **CALL INSIDE A LOOP BODY**.
 
-Costed the probe at two runs. It is cheap and worth doing, but **run it as a
-measurement, not as an assumption, and record a negative result** -- both of
-these came back negative and neither was previously written down.
+**Do not compare compiler profiles while a known structural/size residual is
+still present and treat the higher score as a compiler verdict.** Allocation
+effects are contextual; fixing source changed old_agbcc from apparently worse
+to exact. Temporary profile probes remain cheap and decisive only when they
+compile the same semantically settled source.
 
 ### THE m4a-REGION `old_agbcc` HEURISTIC: THREE PROBES THIS WAVE, ZERO POSITIVE (wave 56, orchestrator)
 
@@ -44082,3 +44106,28 @@ honest references to the array reuse the same base without the extra copy. The
 configured score moved from 95.7% to 97.5%; the remaining bytes are unrelated
 register-slot choices. This is a first-use placement lever, distinct from both
 a standalone binding statement and changing the pointer/int operand order.
+
+## A fixed-register local can preserve a call argument that copy propagation otherwise collapses (wave 66, W66-I)
+
+`sub_08077304` was four code bytes short at two independent calls. At each
+site the ROM loaded a table byte into r2, built the pointer-valued second
+argument, then copied r2 to ABI argument register r0. Direct expressions and
+ordinary `u8`, `u16`, `u32`, or `int` binding locals all coalesced the byte
+straight into r0 and lost the `adds r0, r2, #0`; self-assignment, `|= 0`, and a
+comma use were also deleted.
+
+The full-function controlled probe that reproduces the ROM is a local fixed to
+r2:
+
+```c
+register int arg asm("r2");
+
+arg = table[index];
+callee(arg, pointer_expression, 1);
+```
+
+Using the same local at both sites supplied both missing copies and also fixed
+the downstream r9/sl allocation, taking the configured draft from 792/796 to
+an exact 796/796 match. This is a last-mile allocation workaround, not evidence
+that fixed-register syntax appeared in the original source; use it only after
+the statement shape and argument types are independently settled.

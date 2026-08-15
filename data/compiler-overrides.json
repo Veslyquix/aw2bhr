@@ -227,6 +227,13 @@
    ],
    "reason": "Wave 47 (orchestrator). NOT an independent measurement of this function -- it matched under DEFAULT agbcc too. It is here because COMPILER FLAGS APPLY TO THE WHOLE OBJECT FILE and this function shares src/decomp/c_08070B34.c with sub_08070BAC, which genuinely requires old_agbcc (see its entry). The SPLIT build refuses a file whose members carry different overrides -- 'error: sub_08070BAC needs a compiler override but shares ... which carry a DIFFERENT override (or none)' -- so the choice was to split the file or to make the whole file old_agbcc. Verified by exit status that this function is byte-identical under old_agbcc as well, so the file is consistent and nothing is lost. That it matches under BOTH compilers is the expected case rather than a surprise: the two differ only where register allocation or prologue handling diverges, and this function has neither. Historically it is also the more accurate configuration -- the whole m4a span 0x0806F710-0x080745xx is old_agbcc, and five of its functions already carry this override. IF YOU EVER SPLIT c_08070B34.c INTO SEPARATE FILES, this entry and the one for sub_08070C90 can be deleted; they are file-consistency entries, not findings."
   },
+  "sub_08070FAC": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a CgbSound, 1100 bytes. Wave 66 (W66-H + orchestrator). After restoring canonical MP2K spellings -- eg * echoVolume, explicit ev/goal decay locals, the high-byte read through (u8 *)&fr + 1, and a masked s8 n4 store -- the unchanged source is 1096/1100 and 69.8% under default agbcc but byte-and-relocation exact under old_agbcc. This is an evidence-backed compiler difference rather than a source residual: the coordinator independently compiled the identical draft under both profiles before recording the override. Consistent with the surrounding m4a SDK block and this file's measured rule that old_agbcc is the historically correct first axis in 0x0806F710-0x080745C0, while still retaining a per-function verdict because not every function in the span changes. old_agbcc rejects -fprologue-bugfix."
+  },
   "sub_080713F8": {
    "cc1": "old_agbcc",
    "cflags_remove": [

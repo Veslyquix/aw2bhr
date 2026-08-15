@@ -1332,7 +1332,7 @@ def delta_self_test(args, delta):
 
     TWO WAYS TO STOP BEING UNMATCHED, AND THE SECOND ONE BIT WITHIN AN HOUR OF
     THIS TEST BEING WRITTEN. "Gone from the pool" only catches PROMOTION, which
-    happens at wave end. sub_08059F24 and sub_0805A008 were matched by
+    happens at wave end. The former sub_08059F24/sub_0805A008 anchor matched by
     try_match later in the same wave that wrote this check, so they were still
     `status: asm` in data/functions.json -- still measured, still listed, now
     reporting +0 and 100.0% -- and criterion 2 went red for the best possible
@@ -1379,15 +1379,15 @@ def delta_self_test(args, delta):
             print("              FAILED: %s" % label)
     ok &= shape_ok
 
-    # (2) The wave-57-verified pair. They differ in ONE compare, so one
-    # derivation gives both -- which is only usable if the screen puts them
-    # together, and no address- or callee-based axis does.
+    # (2) The active callee-normalised pair. Their instruction streams differ
+    # only at the bl target and their configured drafts have the same exact-size
+    # residual, so the delta screen must continue to classify them together.
     def solved(name):
         """Matched by trymatch, whether or not it has been promoted yet."""
         x = by_name.get(name)
         return x is None or (x["size_delta"] == 0 and x["pct"] >= 99.999)
 
-    pair = ("sub_08059F24", "sub_0805A008")
+    pair = ("sub_0802E010", "sub_0802E130")
     have = [p for p in pair if not solved(p)]
     if not have:
         print("[self-test] (2) pair %s: PASS (ANCHOR RETIRED -- both now "
@@ -1397,8 +1397,9 @@ def delta_self_test(args, delta):
         got = [by_name[p] for p in have]
         good = (len(have) == 2
                 and len({(x["kind"], x["size_delta"]) for x in got}) == 1
-                and got[0]["size_delta"] == 4
-                and all(abs(x["pct"] - 31.6) < 0.5 for x in got))
+                and got[0]["kind"] == "size-exact"
+                and got[0]["size_delta"] == 0
+                and all(abs(x["pct"] - 93.75) < 0.5 for x in got))
         print("[self-test] (2) %s reported TOGETHER at size %+d, %s: %s"
               % ("/".join(p[4:] for p in have), got[0]["size_delta"],
                  ", ".join("%.1f%%" % x["pct"] for x in got),

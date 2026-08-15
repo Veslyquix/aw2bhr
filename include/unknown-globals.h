@@ -4647,10 +4647,13 @@ struct CgbChannel /* 0x40 */
      *   mo           the "what changed this frame" bitmask: 1 = re-emit the
      *                envelope and panning, 2 = re-emit the frequency.
      *   le/sw        NRx1's length and channel 1's sweep byte.
-     *   fr           the 11-bit frequency. It is a WORD, and the proof that it
-     *                is not two halfwords is that CgbSound reads `fr >> 8` as a
-     *                bare `ldrb` at +0x21 -- agbcc folding a shift of a SImode
-     *                member into a byte load of its second byte.
+     *   fr           the 11-bit frequency. It is a WORD, proved by CgbSound's
+     *                full-width `ldr`/`str` updates at +0x20. WAVE 66 (W66-H)
+     *                corrected the old claim that agbcc folds `fr >> 8` into
+     *                the bare `ldrb` at +0x21: under the configured/default
+     *                compiler that spelling is `ldr; lsrs`. The matching MP2K
+     *                source explicitly reads `*((u8 *)&fr + 1)`; this pointer
+     *                pun, not the member declaration, is the byte-load cause.
      *   wp/cp        the wave-RAM pattern pointer and the copy of it that is
      *                currently loaded. Compared with `!=`, and wp's four words
      *                are pushed to 0x04000090..0x0400009c. For channels 1 and 2
