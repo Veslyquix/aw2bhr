@@ -323,7 +323,8 @@ def next_work(count: int = 5, max_difficulty: float | None = None,
 def stub_sweep(limit: int = 200) -> dict:
     """Every remaining return stub, grouped by mode and instruction shape.
 
-    These are the `bx lr` / `movs r0, #N; bx lr` functions the main queue skips.
+    These are the `bx lr`, `movs r0, #N; bx lr`, and one-instruction SVC
+    wrappers the main queue skips.
     One agent can clear the whole set in a single pass: each group shares one
     body, so the work is writing the same line N times, not N separate matching
     problems. Signatures are still unknown -- `void f(void)` vs a return type
@@ -355,6 +356,10 @@ def stub_sweep(limit: int = 200) -> dict:
             m = re.match(r'^movs r0, #(\S+) ; bx lr$', shape)
             if m:
                 body = "int %s(void)\n{\n    return %s;\n}" % ("FUNC", m.group(1))
+            m = re.match(r'^svc #(\S+) ; bx lr$', shape)
+            if m:
+                body = ('void %s(void)\n{\n    asm("svc #%s");\n}'
+                        % ("FUNC", m.group(1)))
         group = {
             "mode": mode,
             "asm": shape,

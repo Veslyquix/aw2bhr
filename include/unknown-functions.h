@@ -8482,9 +8482,13 @@ void sub_08026584(u8, u16);
  * `ldrb` of gUnknown_03003FC0.unk02, `ldrh` of gUnknown_08499598[n].unk38 and
  * `ldrh` of gUnknown_03004080, where n is sub_0807A908() evaluated separately
  * for the first and third.  Result discarded (`bl sub_08030574` follows).
- * Same caveat: the widths are the loads', so they are a floor. */
+ * Same caveat: the widths are the loads', so they are a floor.  Wave 65 then
+ * compiled the complete callee body: declaring the four formals narrow adds
+ * entry conversions, a spill and 68 bytes, while four `int` formals reproduce
+ * the ROM's untouched r0-r3 values.  The body therefore settles all four as
+ * wide; the caller's already-promoted loads remain compatible. */
 void sub_080265D0(u8, u8);
-void sub_08017720(u8, u8, u16, u16);
+void sub_08017720(int, int, int, int);
 /* Wave 56, W56-I. Four more of sub_08037FD0's callees, all four copied VERBATIM
  * from their promoted definitions -- src/decomp/c_08026520.c,
  * src/decomp/c_08030574.c and src/decomp/c_08037F94.c (which carries both

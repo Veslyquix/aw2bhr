@@ -3012,7 +3012,17 @@ changes nothing. A `?:` also keeps the pool word and the truncation, but pays a
 **The inverse case is not the same lever.** A *redundant* mask —
 `u8_array[i] & 0xff` — is deleted by `nonzero_bits` on the QImode load, and an
 intermediate `u32` local does NOT save it; on `sub_0801B2FC`'s tail loop it also
-flipped the loop into a `check_dbra_loop` countdown. That one is still open.
+flipped the loop into a `check_dbra_loop` countdown. Wave 65 measured that
+candidate at exact total size (444/444) and 84.01%, but the AND was still gone:
+the regained bytes were the changed loop form and pool/alignment, not the
+desired `movs #0xff; adds; ands`. That one is still open; it needs a load whose
+TREE mode is not known-byte while instruction selection still chooses `ldrb`.
+
+The same wave tested the direct liveness hypothesis on `sub_0801C090`: binding
+`src[1]` and `src[0]` to `u16` locals in each arm moved the candidate from -16
+to -12 bytes, but did not spill the loop count and scored only 22.22%, below the
+45.83% permuter best. A pair of source-halfword bindings is therefore not the
+missing register-pressure lever.
 
 **A third variant: the destination is a STRUCT MEMBER STORE, and the cause can
 be a change in a CALLEE'S RETURN TYPE (wave 60, W60-D).** Same mechanism, new
@@ -37255,6 +37265,15 @@ cross-jump, and you need an allocation difference between the arms, not more
 code.* Duplicated pool words across two adjacent arms are the tell; they are the
 same thing W53-B records for `?:`-versus-if/else on a single store, one level up.
 
+Wave 65 confirmed the lever on a two-dimensional `const s16` table and also
+measured its limit. In `sub_0801E9B0`, binding the width-table base in only one
+of two scaling arms changed no source-level operation but desynchronised reload
+allocation enough to recover eight bytes of an over-merged tail (804 -> 812 of
+824). It did **not** split the last twelve bytes: the signed coordinate update
+still used identical hard registers in both arms. Treat one-arm base binding as
+a way to move the post-reload register tie, not as a guarantee that every
+cross-jump in that tail will break.
+
 ---
 
 ## `x = -1` and `*(u16 *)&x = 0xFFFF` are DIFFERENT CODE for a halfword lvalue (wave 54, W54-D)
@@ -39058,7 +39077,7 @@ immediate, and the values were placed by PRE  =>  hand it to decomp-permuter
 immediately. Do not rewrite the expression that looks wrong, and do not read the
 percentage -- that residual scored 95.4%, which told us nothing.
 
-## `(g | 8 | v) & ~bit` with a zero-valued third operand -- UNSOLVED, eight spellings refuted (wave 56, W56-F)
+## `(g | 8 | v) & ~bit`: one live shifted index and one MODE-sensitive zero (waves 56/65)
 
 Two functions in the 0x0801Axxx save-slot block write a flag byte as
 
@@ -39069,13 +39088,29 @@ Two functions in the 0x0801Axxx save-slot block write a flag byte as
     ands r0, r1
     strb r0, [p]
 
--- `(*p | 8 | v) & 0xef` in `sub_0801ADC8` and `(*p | 8 | v) & 0xfb` in
-`sub_0801A7D8`, where `v` is a register holding **zero**. It is the same source
-construct twice, so it is not noise, and in `sub_0801ADC8` it is the ONLY
-remaining defect: that candidate is exactly 4 bytes short and those 4 bytes are
-this `movs`/`orrs` pair.
+The old wave-56 claim that `v` is zero in BOTH functions was wrong. Wave 65
+traced the defining instruction in `sub_0801A7D8`: `r7` is `idx << 4`, created
+before the buffer-fill loop and also used in `BUF[0xc] = idx * 16 + nc - 1`.
+Only `sub_0801ADC8` has a genuinely zero third operand. This is a useful warning
+against classifying a register from the local diff hunk without tracing its
+definition across the whole function.
 
-**Every spelling of a zero-valued local folds the operand away.** Probed and
+Writing `| (idx << 4)` directly in `sub_0801A7D8` is semantically right but is
+not byte-right: the `int` operand widens the combined OR/mask to SImode, turning
+`movs #0xfb; ands` into `movs #5; negs; ands` and moving the draft from +16 /
+18.56% to +24 / 17.71%. The likely remaining lever is a narrow binding that
+reuses the already-created shifted-index pseudo; the direct spelling was not
+retained as the best draft.
+
+In `sub_0801ADC8`, changing only `u8 v = 0` to `int v = 0` is a positive
+controlled result: it restores the missing `movs #0` / `orrs` pair and moves
+the draft from 552/556 bytes at 34.53% to exact-size 556/556 at 64.57%. Thus
+"every zero-valued local folds the operand away" was too broad. The local's
+declared MODE can keep the zero insertion alive even though its value is known;
+the remaining difference is allocation/layout in the duplicated retry loops.
+
+**Every previously tested *narrow* spelling of a zero-valued local folded the
+operand away.** Probed and
 refuted: a `u8` local assigned 0 immediately before the loop; assigned 0 before
 an intervening `bl`; assigned 0 in both arms of an `if` (two reaching defs);
 assigned 0 inside a preceding loop; `0 & <global>`; and the sub-expression forms
@@ -39096,8 +39131,9 @@ The nearest promoted relative is `src/decomp/c_0801AC58.c`, which preserves bit
 4 across a call as `unk20[i] = (unk20[i] & 0xef) | tmp[i]` with `tmp[]` a local
 `u8[0x10]` -- mask-then-or, the opposite order. Whatever `v` is, it is probably
 that same "preserved bits" value seen at a site where it happens to be zero.
-Next thing to try: a value that reaches the loop from two different NON-constant
-definitions.
+The old proposed next step (two non-constant reaching definitions) is now lower
+priority than finishing the register allocation from the exact-size `int v`
+draft.
 
 ## asm/ symbol names inside an already-declared object are not globals -- SIX in one function (wave 56, W56-F)
 
@@ -41593,6 +41629,13 @@ holding 0, not a literal. Nothing in three waves accounts for it. This function
 is NOT a wrong shape (it was flagged as the batch's likely shape error); the
 call, the argument setup, `y`, `z` and the epilogue are byte-exact.
 
+Wave 65 also tested the semantically tempting `struct OamData` view suggested
+by the promoted caller: cast the by-value `a4`, OR-assign its x/y fields, then
+pass its three halfwords. It emits 88 bytes (-28, 4.31%) with memory RMWs and
+two mask pool words, rather than the ROM's 116-byte register expression. The
+OAM interpretation is valid context, but it is not this function's source
+shape; do not replace the scalar derivation with that view again.
+
 ## A redundant global write-back is deleted by DEAD-STORE ELIMINATION, and only `volatile` on that store reaches it (wave 58, W58-A)
 
 `sub_0801BC3C` (**matched**, 108 bytes) spent waves 40 and 42 parked on one
@@ -43935,3 +43978,107 @@ remains function-scoped leaves the earlier rotation. Thus a deleted
 self-assignment is not reliably inert for allocation, and the indices it names
 are the lever. Treat permuter self-assignments as hypotheses: delete and
 re-measure them, but also test which subset of their indices must remain live.
+
+## A volatile HALFWORD overlay can preserve repeated bitfield reads without losing a walking pointer (wave 65, W65-J)
+
+`sub_08017720` (**matched**) needs one pointer induction variable and three
+separate reads of the upper 12-bit field in a 32-bit bitfield word. The obvious
+spellings each satisfy only one side:
+
+- Full global-array expressions preserve three `ldrh; lsrs #4` reads, but gcc
+  carries base, row offset and element offset separately: 24 bytes too long.
+- A walking struct pointer gives the one-register address, but its word read for
+  the neighbouring bitfield lets CSE merge the halfword reads: 8 bytes short.
+- Making the whole pointed-to struct volatile selects `ldr; lsrs #20`, not the
+  ROM's halfword access.
+
+Keep the walking struct pointer, but spell only the upper-field reads as
+`*(volatile u16 *)((u8 *)p + 2) >> 4`. That gives the single `adds p, #4`
+induction variable and independently preserves every HImode reload.
+
+The loop labels are a second lever. Structured `for`, `while` and `do/while`
+probes cross-jumped the initial and back-edge comparisons into one `cmp; blt`
+block. An explicit labeled loop puts a label between them, stopping
+cross-jumping and emitting the ROM's separate leading `blt` and trailing `bge`.
+Together these moved the draft from 344/320 bytes to an exact configured match;
+`try_match` also verified the `.rodata` word at 0x0808E55C.
+
+## Six negative micro-levers from the 0x08020-0x08023 allocation parks (wave 65, W65-M)
+
+One final controlled hand probe on each of six established drafts settled six
+tempting follow-ups without changing their source shapes:
+
+- On `sub_08020DBC`, binding `&gUnknown_08499590` to a pointer-to-pointer local
+  does escape `-fforce-addr`: the candidate improves from +18 code bytes / +16
+  section bytes to +4 bytes and carries the ROM's ordinary `.text` relocation.
+  It does **not** settle allocation; the ROM creates the y*2 and 0x417A pseudos
+  before the first row lookup, while the c_local draft delays/rematerialises
+  them. The workaround fixes the relocation mechanism, not pseudo timing.
+- On looped `sub_08020EDC`, making the permuter's otherwise-illegal y copy legal
+  by assigning it after the radius-zero early return enlarges both frame and
+  function by eight bytes. An allocation win obtained from an uninitialised
+  path is not made source-reachable merely by moving the assignment to the
+  nearest dominating block.
+- On `sub_0802216C`, replacing three `0x400` uses with one named `int` local is
+  folded completely back into the original immediates and literal. A scalar
+  constant local does not necessarily create a pseudo even when it has three
+  uses; the ROM's long-lived r8 constant needs a different lifetime lever.
+- On `sub_08022BB8`, explicit shifted-coordinate locals improve a 508-byte
+  candidate to 516 bytes against 540. gcc coalesces each local into its dead
+  parameter register, while the ROM preserves a separate `adds rD,r0,#0` copy
+  for each coordinate in each switch arm. Binding the value is insufficient
+  when the source parameter has no surviving later use.
+- The successful volatile-halfword-overlay rule above is width-sensitive.
+  Casting repeated reads of a declared `const s16[][2]` to `volatile const s16`
+  in `sub_08023518` does force reloads, but selects `ldrh; lsls #16` instead of
+  `ldrsh` and emits direct symbol relocations at addends 0 and 2. It cannot
+  reproduce reload + signed load + force-addr simultaneously.
+- On `sub_080236E8`, splitting `next = (u16)low | ((u16)high << 16)` into an
+  assignment followed by `next |= ...` is byte-identical. Statement separation
+  does not delay the low half's `lsrs #16`; a different RTL object/lifetime is
+  required.
+
+## Bind a loop-held value AFTER the entry guard to choose which compare load CSE reuses (wave 65, W65-N)
+
+`sub_080265D0` was +4 code bytes because the candidate kept the record's `Y`
+value but reloaded RAM global `X` after an `X < Y` test. The ROM does the
+opposite: it reloads `Y`, reuses `X` from r0 in `Y - X`, then copies that new
+`Y` into the loop-held register only after the entry guard.
+
+Writing `n = Y; while (i < n - X) ...` binds Y before the guard and forces the
+wrong CSE choice. The matching shape is an explicit entry guard followed by the
+binding inside it:
+
+```c
+if (i < Y - X)
+{
+    n = Y;
+    while (1)
+    {
+        /* body with the repeated bottom test using n - X */
+    }
+}
+```
+
+This is not merely statement scheduling. Moving the binding changes which of
+the two loads survives the compare, kills the X-address live range before the
+loop, and removes both the `mov ip, r0` and later `mov rN, ip`. It took the
+configured candidate from 264/260 to an exact 260-byte match.
+
+## An assignment embedded in the first subscript moves a direct array base early without extending its live range (wave 65, W65-N)
+
+On `sub_0802DA18`, a plain struct-cast subscript expanded the slot index before
+`ldr =gUnknown_02023830`. Binding the base in its own preceding statement moved
+the load early but added four bytes elsewhere because the named pointer gained
+a stronger live range. Embedding the same binding in the first read is the
+middle spelling:
+
+```c
+(tbl = (struct T *)gUnknown_02023830)[i].member
+```
+
+It emits the pool load before the index scale, stays size-exact, and lets later
+honest references to the array reuse the same base without the extra copy. The
+configured score moved from 95.7% to 97.5%; the remaining bytes are unrelated
+register-slot choices. This is a first-use placement lever, distinct from both
+a standalone binding statement and changing the pointer/int operand order.
