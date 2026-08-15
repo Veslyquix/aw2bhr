@@ -321,21 +321,23 @@ def next_work(count: int = 5, max_difficulty: float | None = None,
 
 @mcp.tool()
 def stub_sweep(limit: int = 200) -> dict:
-    """Every remaining return stub, grouped by the C body that matches it.
+    """Every remaining return stub, grouped by mode and instruction shape.
 
     These are the `bx lr` / `movs r0, #N; bx lr` functions the main queue skips.
     One agent can clear the whole set in a single pass: each group shares one
     body, so the work is writing the same line N times, not N separate matching
     problems. Signatures are still unknown -- `void f(void)` vs a return type
     that happens to be ignored -- so treat the bodies as a starting point that
-    the objdiff score confirms.
+    the objdiff score confirms. ARM stubs are reported separately with no
+    suggested C body: this project's agbcc emits THUMB only, so identical
+    mnemonic text does not make an ARM `bx lr` C-matchable.
     """
     records = _functions()
     if records is None:
         return {"error": _need_index()}
 
     asm = _asm_index()
-    groups: dict[str, list] = {}
+    groups: dict[tuple[str, str], list] = {}
     for r in records:
         if not r.get("trivial") or r["status"] != "asm" or r["kind"] == "bios":
             continue
@@ -343,20 +345,28 @@ def stub_sweep(limit: int = 200) -> dict:
         if fn is None:
             continue
         shape = " ; ".join(awlib.instructions(fn))
-        groups.setdefault(shape, []).append(r)
+        groups.setdefault((fn.mode, shape), []).append(r)
 
     out = []
-    for shape, rows in sorted(groups.items(), key=lambda kv: -len(kv[1])):
-        body = "void %s(void)\n{\n}" % "FUNC"
-        m = re.match(r'^movs r0, #(\S+) ; bx lr$', shape)
-        if m:
-            body = "int %s(void)\n{\n    return %s;\n}" % ("FUNC", m.group(1))
-        out.append({
+    for (mode, shape), rows in sorted(groups.items(), key=lambda kv: -len(kv[1])):
+        body = None
+        if mode == "THUMB":
+            body = "void %s(void)\n{\n}" % "FUNC"
+            m = re.match(r'^movs r0, #(\S+) ; bx lr$', shape)
+            if m:
+                body = "int %s(void)\n{\n    return %s;\n}" % ("FUNC", m.group(1))
+        group = {
+            "mode": mode,
             "asm": shape,
             "count": len(rows),
             "suggested_body": body,
+            "c_matchable": mode == "THUMB",
             "functions": [r["name"] for r in rows[:limit]],
-        })
+        }
+        if mode != "THUMB":
+            group["note"] = ("agbcc emits THUMB only; retain these ARM stubs "
+                             "as assembly unless an ARM compiler route is added")
+        out.append(group)
 
     total = sum(g["count"] for g in out)
     return {"total_stubs": total, "shapes": len(out), "groups": out}
