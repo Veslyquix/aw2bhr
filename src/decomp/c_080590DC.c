@@ -1,0 +1,78 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080590DC.
+ * sub_080590DC @ 0x080590DC
+ */
+
+/* MATCHED in Wave 63 under the configured profile (264/264 bytes and
+ * relocations exact). The allocation lever is reusing `j` to materialize the
+ * packed 0x270F sentinel before assigning it to v.raw. That keeps the later
+ * outer/inner loop counters in the ROM's r2/r3 order. Found by the bounded
+ * permuter pass at iteration 28; do not simplify the sentinel assignment
+ * without re-running try_match. */
+
+struct Unk590DCMap
+{
+    /* 0x0000 */ u16 width;
+    /* 0x0002 */ u16 height;
+    /* 0x0004 */ u8 filler_04[0x12 - 0x04];
+    /* 0x0012 */ u8 unit[0x1420];
+    /* 0x1432 */ u8 terrain[0x2d48];
+    /* 0x417a */ u16 rows[1];
+};
+
+void sub_080590DC(void *a1)
+{
+  union Unk802C57CBuf v;
+  union Unk802C57CBuf *in;
+  int best;
+  s8 t;
+  int i;
+  int j;
+  in = a1;
+  best = 0x78;
+  j = (v.raw & 0xFFFF0000) | 0x270F;
+  v.raw = j;
+  gUnknown_030013EC(in->pos.unk00, in->pos.unk02, 0x10, 7, 0);
+  for (i = 0; i < ((struct Unk590DCMap *) gUnknown_08499590)->height; i++)
+  {
+    for (j = 0; j < ((struct Unk590DCMap *) gUnknown_08499590)->width; j++)
+    {
+      if (((s8) gUnknown_03003340[i][j]) < 0)
+      {
+        continue;
+      }
+      if (((s8) gUnknown_03003340[i][j]) >= best)
+      {
+        continue;
+      }
+      switch (((struct Unk590DCMap *) gUnknown_08499590)->terrain[((struct Unk590DCMap *) gUnknown_08499590)->rows[i] + j] & 0x1f)
+      {
+        case 7:
+
+        case 0xb:
+
+        case 0xd:
+          t = gUnknown_03003340[i][j];
+          best = t;
+          v.raw = (i << 16) | ((u16) j);
+          break;
+
+      }
+
+    }
+
+  }
+
+  if (v.pos.unk00 != 0x270F)
+  {
+    sub_080591E4(&v);
+  }
+  else
+  {
+    sub_0805F7B8();
+  }
+}

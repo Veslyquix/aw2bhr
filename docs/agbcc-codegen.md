@@ -2317,6 +2317,40 @@ not hoist at all and re-loaded the pool word every iteration. Read backwards:
 **an invariant load sitting after a loop guard was hoisted, so it must be
 authored INSIDE the loop, not before it.**
 
+### A comma on a store's RHS can place an instruction between address evaluation and the store (wave 63, W63-C)
+
+`sub_0805E778` was size-exact with one real instruction-order residual.  The
+ROM evaluated the two-level lvalue address, created a long-lived zero, then
+copied the RHS and stored it.  Separate `new_var = 0;` statements could put the
+`movs` only before or after the whole assignment.  This matched:
+
+```c
+gUnknown_03004784[1] = (new_var = 0, save);
+```
+
+agbcc expands the lvalue address before the comma expression on the RHS, so the
+assignment expression is a source-reachable slot *inside* a store.  This is a
+narrower lever than an ordinary statement boundary and is useful when the ROM
+interleaves one instruction between an address chain and its final value/store.
+
+The same wave closed two packed-store parks by splitting arithmetic into real
+statements.  `sub_0805EB58` needed `x << 16`, then `y << 16`, then `x >> 16`;
+one expression kept the two halves of the zero-extension adjacent.  Two
+temporaries made the scheduler preserve the required interleaving:
+
+```c
+xp = (u32)x << 16;
+yp = (u32)y << 16;
+v.raw = (xp >> 16) | yp;
+```
+
+`sub_0805E2AC` independently needed the two byte loads made volatile and the
+masked word carried in a local across two stores.  That kept each byte load
+ahead of its mask while making the masked word, rather than the byte/shift, the
+`orrs` destination.  The configured matcher proved all three `.text` results;
+their already-understood force-address `.rodata` relocations were independently
+accepted as equivalent and are not part of these scheduling findings.
+
 ### Two negative results from the same batch, both worth having
 
 - **`ADDS Rd, Rn, Rm` encodes its two source registers in different fields, so
@@ -3594,6 +3628,14 @@ readable:
 - no `strength_reduce`, so there is **no giv** — any stride has to be an
   explicit source variable;
 - no `check_dbra_loop`, so an **ascending counter stays ascending**.
+
+`sub_08060170` adds the useful combined readout (wave 63, W63-D): a label/goto
+loop can carry **two explicit walking pointers and an explicit ascending
+counter at once**.  The equivalent `for`/`do` spellings either left one address
+as `base + i`, or strength-reduced both addresses and let `check_dbra_loop`
+reverse the now-exit-only counter.  Writing the byte copy as a label/goto loop
+emitted `ldrb; strb; inc source; inc destination; inc counter; cmp; ble`
+exactly, because none of those three source variables passed through loop.c.
 
 **Read the loop body for rebuilt constants first.** One constant materialised
 inside a loop is an allocation accident; *several* is this. `sub_08063698`'s
@@ -24368,7 +24410,7 @@ So **`lsl` BEFORE the `neg` means the local is `s16`**; `lsl` after it means
 `s16` case has to sign-extend first and combine folds the resulting
 `lsl/asr` pair's `asr` into the trailing truncation.
 
-**The unresolved corollary** (sub_08051454, sub_080506B0): with `s16 dx`, a
+**The corollary is partly resolved** (wave 63, W63-F): with `s16 dx`, a
 later `dx + <u16 expr>` assigned to a `u16` local drops the sign extension
 entirely, because a promoted `s16` pseudo's conversion is a single
 `(sign_extend:SI (subreg:HI reg))` rtx that `force_to_mode` deletes in one
@@ -24378,6 +24420,23 @@ combine step. An `int` local keeps the extension -- ARMv4T has no `SXTH`, so
 BOTH shapes in one function and no spelling found so far gives both. The
 extension does survive a `s16` local when it is the LAST of THREE terms, since
 combine cannot fold across two adds.
+
+For the three `s16 local + u16 memory` sites in `sub_08050E08`, the missing
+spelling is an **assignment to an `int` local INSIDE the addition**:
+
+```c
+int mem_x;
+x = x + (mem_x = table[i]);
+```
+
+The assignment is both a source-order barrier and a mode barrier: the load
+stays `ldrh`, `mem_x` has SImode precision, and the promoted `s16 x` keeps its
+separate `lsls #16; asrs #16` before the add. A previous-statement binding is
+not equivalent because it moves the load ahead of the sign extension. Three
+such inline assignments made the draft size-exact and moved it from 52.8% / 12
+bytes short to 94.4% / 16 differing bytes. This does not settle
+`sub_08051454` / `sub_080506B0`; their expression and allocation contexts are
+different.
 
 ## `gUnknown_085D6A48` column reads need the struct row (wave 37, W37-J)
 
@@ -37604,6 +37663,19 @@ in 300 s on either. Levers refuted: the wave-17 struct-row spelling (hoists
 neither), inlining a one-use local, and reordering the addends. Recorded so the
 next agent does not re-derive the decompositions, which are correct.
 
+**Wave 63 correction: the first `sub_08055768` fixpoint is reachable with the
+wave-59 opaque-store LICM barrier.** Adding the zero-code
+`gUnknown_08551E64[0][0] += 0` inside each scan loop takes the draft from
+464/472 to 468/472 and makes loop 1 instruction-for-instruction exact: both
+address constants remain in its body, and the ROM's pool order and register
+allocation follow. It does not close loop 2: that loop still cross-jumps a
+two-instruction shared tail the ROM keeps separate. Moving the barrier within
+the loop or spelling the opaque address through `x`, `out`, or `side` is
+byte-identical; a zero-trip `do/while` around the conditional and block-scoping
+`x` both regress allocation. Thus "not reachable from source" was too broad:
+the first LICM decision is reachable, while the second allocation/cross-jump
+decision remains open.
+
 ## `p + K` as a value: the bound-pointer spelling (wave 55, W55-C)
 
 `ldrb rD, [rB]` where the address was built as `adds rA, rB, #K` / `adds rA, rA, rI`
@@ -42506,6 +42578,15 @@ residual is two scratch register picks (`ldr r1,[sp,#0]` against
 starting point, printing `score = 20` over and over. That is the "ceiling
 unmoved" signature. It is parked with this note rather than ground further.
 
+Wave 63 localized one more boundary of the mechanism. Moving the same
+zero-byte barrier from before the negative-value guard to immediately after
+it fixes both scratch-register picks, but changes the signed load from the
+ROM's `ldrb; lsl; asr` sequence to `ldrsb`. The resulting body is two code
+bytes short and allocation then cascades. Thus a deleted barrier's exact
+source position remains an input to both combine and allocation even when the
+barrier emits no instructions; do not move this one merely to repair the two
+scratch registers.
+
 ## ABSOLUTE SYMBOLS AND POOLED SMALL INTEGERS (wave 60, W60-B)
 
 **The rule, and it is a read-out rule with no exceptions found in this ROM: a
@@ -43833,3 +43914,24 @@ trymatch.check("sub_0808AF00", want_diff=True)
 Note that appending `-fno-force-addr` via `extra_cflags` does NOT work -- agbcc
 ignores it, and the run looks like a clean negative. Only removal from CFLAGS
 changes the output.
+
+## A deleted self-assignment can extend ONE loop counter's allocation lifetime (wave 63, W63-A)
+
+`sub_08055654` matched only after a self-assignment that emits no instructions
+was kept after its nested loops:
+
+```c
+gUnknown_02029A10[i].entries[0].unk00 =
+    gUnknown_02029A10[i].entries[0].unk00;
+```
+
+The store disappears, but late enough that `i` remains live past the loop for
+allocation. Together with block-scoping the inner `j` and leaving the two
+branch-specific entry tests duplicated for cross-jumping, this gives the ROM's
+outer `i = r5`, inner `j = r2`, row offset `r4`, and column address `r3`.
+Using `entries[j]` in the same deleted self-assignment extends BOTH counters and
+rotates r2/r3/r4, leaving 19 of 276 bytes different; using only `i` while `j`
+remains function-scoped leaves the earlier rotation. Thus a deleted
+self-assignment is not reliably inert for allocation, and the indices it names
+are the lever. Treat permuter self-assignments as hypotheses: delete and
+re-measure them, but also test which subset of their indices must remain live.

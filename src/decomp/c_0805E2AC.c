@@ -1,0 +1,58 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0805E2AC.
+ * sub_0805E2AC @ 0x0805E2AC
+ */
+
+void sub_0805E2AC(void)
+{
+  union Unk802C57CBuf v;
+  u16 best;
+  int t;
+  int n;
+  int i;
+  int nextBest;
+  int hi;
+  u32 lo;
+  int xv;
+  void (**fn)(int, int, int, int, int);
+  best = 0x7FFF;
+  v.raw = 0x270F | (v.raw & 0xFFFF0000);
+  n = sub_08060DAC();
+  for (i = 0; i < n; i++)
+  {
+    if (gUnknown_085766E4[i].unk02 != 6)
+    {
+      continue;
+    }
+    fn = &gUnknown_030013EC;
+    (*fn)(gUnknown_085766E4[i].unk00, gUnknown_085766E4[i].unk01, 0x17, 0x78, 0);
+    t = (s8) gUnknown_03003340[gUnknown_030040D8->unk03][gUnknown_030040D8->unk02];
+    nextBest = t << 16;
+    if (t >= ((s16) best))
+    {
+      continue;
+    }
+    best = ((u32) nextBest) >> 16;
+    xv = *((volatile u8 *) (&gUnknown_085766E4[i].unk00));
+    lo = v.raw & 0xFFFF0000;
+    lo |= xv;
+    v.raw = lo;
+    hi = (*((volatile u8 *) (&gUnknown_085766E4[i].unk01))) << 16;
+    lo &= 0x0000FFFF;
+    lo |= hi;
+    v.raw = lo;
+  }
+
+  if (v.pos.unk00 == 0x270F)
+  {
+    sub_0805F7B8();
+  }
+  sub_0801F92C(gUnknown_08499590 + 0x2D5A);
+  fn = &gUnknown_030013EC;
+  (*(&gUnknown_030013EC))(v.pos.unk00, v.raw >> 16, 0x17, 0x78, 0);
+  sub_08059464(&v);
+}
