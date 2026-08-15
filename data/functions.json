@@ -44781,7 +44781,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,

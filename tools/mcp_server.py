@@ -734,6 +734,62 @@ def verify_split() -> dict:
 
 
 @mcp.tool()
+def rom_compare() -> dict:
+    """Run both mandatory ROM comparisons inside WSL.
+
+    This is the integration gate after promotion. It removes the shared ROM
+    and ELF outputs before each route, runs the split/C and upstream-assembly
+    builds independently, and reports each real exit status. Both results must
+    be successful and print the canonical SHA1 check before a wave may commit.
+
+    The command is deliberately fixed: callers cannot supply a shell fragment,
+    target, path, or cleanup scope.
+    """
+    repo = "/mnt/d/Codes and Projects/awbh-port/aw2bhr"
+
+    def run_route(make_args: str) -> dict:
+        command = (
+            'cd "' + repo + '" && '
+            'rm -f -- aw2bhr.gba aw2bhr.elf && '
+            'make ' + make_args + ' 2>&1'
+        )
+        try:
+            proc = subprocess.run(
+                ["wsl", "-d", "Ubuntu", "-e", "bash", "-c", command],
+                cwd=awlib.REPO, capture_output=True, text=True, timeout=1200,
+                stdin=subprocess.DEVNULL)
+        except subprocess.TimeoutExpired as exc:
+            value = exc.stdout or ""
+            if isinstance(value, bytes):
+                value = value.decode("utf-8", errors="replace")
+            return {
+                "ok": False,
+                "exit_code": 124,
+                "output": value[-8000:],
+                "error": "timed out after 1200s",
+            }
+        output = (proc.stdout or "") + (proc.stderr or "")
+        return {
+            "ok": proc.returncode == 0,
+            "exit_code": proc.returncode,
+            "output": output[-8000:],
+        }
+
+    split = run_route("SPLIT=1 compare")
+    assembly = run_route("compare")
+    expected = "aw2bhr.gba: OK"
+    split["sha1_ok"] = expected in split["output"]
+    assembly["sha1_ok"] = expected in assembly["output"]
+    return {
+        "ok": (split["ok"] and split["sha1_ok"] and
+               assembly["ok"] and assembly["sha1_ok"]),
+        "canonical_sha1": "14dd0b22c894865867aff89e8116b2dffae25605",
+        "split": split,
+        "assembly": assembly,
+    }
+
+
+@mcp.tool()
 def reindex() -> dict:
     """Rebuild data/functions.json and data/callgraph.json from asm/*.s.
 

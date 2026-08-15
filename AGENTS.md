@@ -139,6 +139,9 @@ be silently normalized or discarded.
 6. In WSL, delete `aw2bhr.gba` and `aw2bhr.elf` between routes. Run both
    `make SPLIT=1 compare` and `make compare` with independent exit codes and
    pipe failure propagation. Both must report the canonical ROM SHA1.
+   In a Codex sandbox that denies direct WSL access, use the project MCP
+   `rom_compare` tool instead; it runs those same two fixed routes, deletes the
+   shared outputs before each, and reports the exit/SHA1 result separately.
 7. Only after both builds pass, run `index_functions.py`, `families.py`, and
    `progress_map.py`; reconcile parked entries and inspect the final diff.
 
