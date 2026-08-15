@@ -492,29 +492,72 @@
    ],
    "reason": "Register allocation and one instruction position, not source semantics. Nine spellings probed byte-for-byte plus a permuter run; the draft at work/sub_08052BBC/sub_08052BBC.c carries the whole list in its header. Take this one WITH sub_08052718 -- they are near-twins and they share hoist (a), so whatever produces it produces both."
   },
-  "sub_0800CFDC": {
-   "bytes": 6384,
-   "best": "0.0% -- NOTHING WAS SUBMITTED. 0 try_match attempts spent. The head (first 72 instructions) was verified EXACT with compile_probe; the remaining ~90% is untranscribed, so the draft in work/ is deliberately #if 0'd and scores zero. Do not read 0.0% as a near-miss in the usual sense -- it is an absence, not a failure.",
-   "park_kind": "VOLUME, NOT CODEGEN -- read this field before anything else",
-   "remaining_diff": "There is no remaining diff, because there is no complete candidate. What remains is TRANSCRIPTION: ~20 further pattern tests after the two switch statements, each of the form (bounds guards on x/y against WIDTH/HEIGHT) + (a run of the cell predicate at neighbour offsets) + (one call to sub_0800EAF4 or sub_0800EB5C). 159 predicate instances, 187 basic blocks, 466 branches, 254 labels.",
-   "why_it_is_close": "Every DERIVATION is done and none of it needs redoing. The function is one idiom -- src/decomp/c_08001158.c's map-descriptor access (p = gUnknown_08499590; t = y*2; rows = p+0x417A; off = (*(u16*)(rows+t)+x)*2; tiles = p+0xA22) -- evaluated 159 times over neighbour offsets, with the predicate (u16)(cell - 0x86) <= 1 and a handful of exact tile compares. Ten distinct expression shapes were predicted from the listing before drafting and exactly ten were found. The head reproduced 72 of 72 instructions from the FIRST draft, including the -fforce-addr reroute, which comes free from naming gUnknown_08499590 honestly. The whole function is readable in work/sub_0800CFDC/_symtrace.txt, produced by tools/symtrace.py, which renders the 3,239-line listing as 1,190 lines with every index expression already resolved to ro[y-1] / cell[(ro[y]+2)+x] / BRIDGE(...) / WIDTH / HEIGHT. A fresh agent resumes at roughly 80%.",
+  "sub_0800E8CC": {
+   "bytes": 296,
+   "best": "83.11% identical, exact 296/296 bytes, 50 differing bytes, first difference at +0x1E. The active readable draft is the strongest semantic candidate; explicit `off` locals restored four missing call-argument copies.",
+   "park_kind": "EXACT-SIZE REGISTER-ALLOCATION NEAR-MISS",
+   "remaining_diff": "Instruction order and size are settled. The residual is one coupled allocation cycle: candidate r0/r2 and r9 correspond to the ROM's opposite r0/r2 choice and sb. Moving any one pseudo changes the others; no semantic or control-flow block is missing.",
+   "why_it_is_close": "All calls, branches, map accesses, pool words and argument copies are present in the ROM's order. The configured candidate is size-exact and the disagreement is confined to register fields.",
    "axes_ruled_out": [
-    "NOT APPLICABLE IN THE USUAL SENSE, and this is the entry's whole point: no codegen axis was ruled out because no codegen axis was ever the obstacle. Nothing was tried and rejected. Do not read the short list below as an exhausted search.",
-    "The two casesi jump tables assemble byte-for-byte and need no work -- confirmed by the doc's existing 'jump tables match' result; case bodies are in SOURCE order, which for switch 1 is 28..31, then 7/23, then 12/13, then 6/22, then default.",
-    "The -fforce-addr head reroute is settled: the honest `gUnknown_08499590` spelling produces the ROM's three-level `ldr rN,=<word>; ldr r0,[rN]; ldr r1,[r0]`. Do NOT declare the pool word 0x0808D88C as `u8 **const` -- measured on the neighbouring sub_0800F8D4, that adds a fourth level.",
-    "The four `bl _0800E8BA` are agbcc FAR JUMPS to the epilogue, not calls and not a second entry point -- THUMB `b` reaches only +/-2KB and this function is 6KB. Likewise `_0800D080` and `_0800D40C` appear in data_refs and are the two jump tables, not globals."
+    "Declaration order, commuted row addressing, a split load temporary, pointer advance, separate row/off scheduling and the first struct view -- all retained or worsened the same r0/r2/r9-to-sb cycle.",
+    "Aggregate-member and wrapper-bound row pointers -- byte-identical to the readable 83.11% draft.",
+    "Direct aggregate indexing -- adds map-base copies and regresses both size and shape.",
+    "A 300-second decomp-permuter run in wave 65 -- no match; do not repeat it from this same allocation state.",
+    "No compiler override is configured or evidenced for this function; the residual occurs under the canonical configured profile."
    ],
    "settled_by_this_attempt": [
-    "The parameter pair is (int x, int y) -- a map column and row.",
-    "All four callees are declared and typed from their own entry narrowing, now in include/unknown-functions.h: int sub_0800E8CC(int,int), int sub_0800E9F4(int,int), void sub_0800EAF4(int,int), void sub_0800EB5C(int,int).",
-    "Top-level control flow: guard on the centre cell; drew = 0; a = x>0 ? sub_0800E8CC(x-1,y) : 0; b = sub_0800E8CC(x,y); c = x < width-1 ? sub_0800E8CC(x+1,y) : 0; a &= b; b &= c; switch(a); if (drew && a == b) return; switch(b); then the ~20 pattern tests.",
-    "`drew` (r10) is a REAL variable, not a jump-threading artefact -- it is read nine more times further down, which is why only one switch arm materialises the assignment.",
-    "The four `?rN` spots in _symtrace.txt are not unknowns: `?r8` is always y*2 (set at _0800D3E4), so H[(ROWS)+?r8] reads ro[y]; `?r0` at _0800D2BC / _0800D8B8 / _0800DDAE / _0800E10A / _0800E4B8 is a cross-jumped tail whose two predecessors pass x and x-1, so the SOURCE has two separate calls there.",
-    "tools/symtrace.py itself, and specifically its predecessor-state JOIN: without the join 44 of 187 blocks render with poisoned register state and transcribing from them silently produces wrong constants."
+    "The four call-argument copies are source-visible and come from explicit per-block `off` locals.",
+    "The remaining cycle is allocation, not a hidden map-layout or source-CFG question."
    ],
-   "open_question": "The one thing genuinely undecided: how many local bindings the original used per pattern region. The ROM reloads `=gUnknown_08499590` 21 times, once per region, so the binding is per-region rather than once for the function -- but whether each region binds p/rows/tiles as three locals (the c_08001158.c shape) or fewer is ~20 independent register-allocation decisions, and that is where any attempts would go.",
-   "budget_unit": "Budget this in BLOCKS TRANSCRIBED, not in try_match attempts. Attempts is the wrong unit above ~2KB -- this function cost zero attempts and still did not finish. It is 187 blocks; sub_08083EE0, which closed in one attempt, was 24. A fresh agent starting from _symtrace.txt should expect the cost to be reading and writing, with attempts spent only on the per-region binding question above.",
-   "reason": "Volume, not codegen. It is the largest straight-line function left in the tree at 6,384 bytes -- 8.5% of the remaining straight-line band in one function -- and it is larger than a single agent-session, which is a different claim from being hard. Nothing about the C or the compiler blocks it: zero backward branches, four already-typed callees, one idiom, ten expression shapes, head verified exact. It is parked so waves stop rediscovering the derivation, NOT because the search space is exhausted. See docs/agbcc-codegen.md, 'ACTUALS for sub_0800CFDC', for the measurement this produced: shape count governs whether you can work a function out, byte count governs how long it takes to write down."
+   "reason": "Two focused waves and a permuter run leave a size-exact, instruction-order-correct candidate with one coupled register-allocation cycle. Resume only with a new allocator-priority mechanism, not another spelling sweep."
+  },
+  "sub_0800E9F4": {
+   "bytes": 256,
+   "best": "86.7% readable configured candidate, exact 256/256 bytes, 34 differing bytes; the historical permuter-mutated best records 87.11% but is not the readable source of truth.",
+   "park_kind": "EXACT-SIZE REGISTER-ALLOCATION NEAR-MISS",
+   "remaining_diff": "The instruction stream is in the ROM's order. The residual is the x/rows/cells three-register cycle; changing one lifetime rotates the other two rather than converging.",
+   "why_it_is_close": "The readable draft is size-exact with all row reads, cell tests and control flow present. Only register operands differ across the coupled map-address lifetime.",
+   "axes_ruled_out": [
+    "Struct and zero-trip wrapper spellings -- same three-register cycle.",
+    "Full-map locals -- move `result` to ip rather than fixing x/rows/cells.",
+    "Direct aggregate cell access -- adds address instructions and regresses.",
+    "Typed u16 indexing -- CSEs adjacent row reads and shrinks the function away from the ROM.",
+    "Unsigned local types, split result initialisation and deleting the self-assignment lifetime probe -- byte-neutral.",
+    "The prior decomp-permuter run -- no match; do not repeat it from the same draft.",
+    "No compiler override is configured or evidenced for this function; the residual occurs under the canonical configured profile."
+   ],
+   "settled_by_this_attempt": [
+    "The residual is allocation-only; aggregate layout and loop/control-flow models have both been tested.",
+    "The mutated 87.11% best.c is an exploration artefact, not a maintainable replacement for the active readable draft."
+   ],
+   "reason": "Two focused waves and the permuter leave an exact-size candidate blocked on one three-register allocation cycle. Resume only with a new allocator-priority mechanism."
+  },
+  "sub_0800CFDC": {
+   "bytes": 6384,
+   "best": "13.78% positional identity, 6532 bytes against 6384 (+148). The full 731-line candidate transcribes both switches and every traced pattern region; the entry through +0x34 is exact and the first difference is +0x36.",
+   "park_kind": "VOLUME AND PER-REGION BINDING, NOT MISSING SEMANTICS",
+   "remaining_diff": "The candidate over-materialises per-cell row bindings: 353 ldrh against target 325 (+28), 721 add against 663 (+58), and 464 lsl against 432 (+32). Fully inline CSE collapses too far (5208 bytes, -1176), so the remaining axis is the middle granularity: repeated ro[y+K] bindings per complete cross-jump family. It also emits sub_0800EAF4 5/6 times, sub_0800EB5C 20/21 times, and 157/159 bridge sequences.",
+   "why_it_is_close": "Every semantic region is now written and compiles. The strongest complete candidate is only 148 bytes (2.3%) over the target, its entry is exact, all four callees are typed, and work/sub_0800CFDC carries the rebuilt 1,190-line _symtrace plus NOTES.md and checkpoint_6532.{c,bin,s}. The task is no longer transcription; it is selecting binding granularity across about twenty repeated regions.",
+   "axes_ruled_out": [
+    "The two casesi jump tables and their source order -- already exact.",
+    "The -fforce-addr head route -- the honest gUnknown_08499590 spelling produces the ROM's three-level load and is exact through +0x34.",
+    "Fully inline access: 5056 bytes (-1328); it CSEs far more row/cell arithmetic than the ROM.",
+    "Conditional row macro: 7356 bytes (+972); it materialises too much.",
+    "Persistent y*2 inline form: 5208 bytes (-1176); still over-CSE'd.",
+    "Statement-local cell offset: 6060 bytes (-324); closer but still collapses too many row loads.",
+    "Row-index plus row-offset locals: 6532 bytes (+148), the strongest complete checkpoint.",
+    "A bounded _0800D0F4 CELL_ROW experiment: 6544 bytes (+160), 13.50%. It restored the local EAF4 call (6/6) and improved add count by one, but applying the shape to one region alone broke a cross-jump family and regressed twelve bytes.",
+    "The four `bl _0800E8BA` sites are agbcc far jumps to the epilogue, not calls or a second entry point."
+   ],
+   "settled_by_this_attempt": [
+    "The complete top-level and all roughly twenty pattern regions are transcribed; there are no #if 0 blocks or placeholders.",
+    "The parameter pair is (int x, int y), and the four callees are int sub_0800E8CC(int,int), int sub_0800E9F4(int,int), void sub_0800EAF4(int,int), and void sub_0800EB5C(int,int).",
+    "The ten expression shapes and all neighbour constants come from the rebuilt predecessor-joined _symtrace rather than guesswork.",
+    "Binding granularity must be changed for a complete cross-jump family at a time; a single-region experiment is not a valid global score."
+   ],
+   "open_question": "Which complete cross-jump families bind ro[y+K] once per region and which let CSE share it across cell expressions. Start with the _0800D0F4 family preserved as experiment_D0F4.{c,bin,s,o}, expand that shape through every member of the family, then take one configured verdict.",
+   "budget_unit": "Budget the next pass in complete cross-jump families converted, not individual cells or try_match attempts. Preserve checkpoint_6532 before each family experiment and compile only after the whole family is internally consistent.",
+   "reason": "Wave 67 removed the original volume blocker by producing a complete candidate. It remains parked because the final 148 bytes are distributed across repeated per-region binding choices; the semantic derivation is finished, but isolated edits perturb global cross-jumping and give misleading scores."
   },
   "sub_0800F8D4": {
    "bytes": 1136,

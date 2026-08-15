@@ -8500,6 +8500,19 @@ spend on the wrong axis.** Practical order:
 3. When a lever helps, re-test it after the next type change. If it stops
    helping, it was never the lever.
 
+Wave 67 supplied two more direct instances from the same map descriptor.
+`sub_08008E3C` matched only when the +0x417A row table was exposed as a struct
+member: member indexing expanded `y * 2` before forming the constant base, yet
+a separate pointer kept the later reuse. `sub_08009DFC` likewise changed from
+a whole-register cascade to a match when width, height, terrain and row offsets
+became one aggregate; its x-neighbour arithmetic then needed a block-scoped
+index adjusted by separate `--`/`++` and `+= x` statements. `sub_0800ABD0`
+confirms the diagnostic: the aggregate header fixed the old force-address
+pool/rematerialisation problem outright, and fixed `r4`/`r5` lifetimes then
+supplied the last two allocator copies for a full match. Treat a register-wide
+residual around constant-offset map fields as a type-layout question before
+sweeping lifetimes.
+
 **A subscript expands its base FIRST and an explicit byte sum expands it LAST,
 and on a register-tight function that is a whole `mov ip, rN`.** The 3-D
 subscript `g[B][A-1][b&1]` gets the index arithmetic exactly right — each term
