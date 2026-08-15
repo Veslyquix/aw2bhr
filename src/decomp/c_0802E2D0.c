@@ -1,0 +1,152 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802E2D0.
+ * sub_0802E2D0 @ 0x0802E2D0
+ */
+
+/* Wave 60 (W60-C). First derivation ever attempted on this function -- the
+ * previous .c was start_function's `return 0;` stub, which the delta screen
+ * scored 0.0% / pool 0/15 and which read like a catastrophic miss.
+ *
+ * PROMOTION NEEDS THE POOL WORDS PLACED:
+ *     "rodata": ["0x08090C30", "0x08090C34"]
+ * Both are agbcc's own -fforce-addr address-constant words (0x08090C30 holds
+ * &gUnknown_03003F38, 0x08090C34 holds &gUnknown_030040D8), not globals; the
+ * honest spelling reproduces the ROM's load chains exactly. This is the wave-21
+ * same-address case, not a park reason.
+ *
+ * TWO facts settled here that were not in any note before:
+ *
+ * 1. gUnknown_03003340's rows are written through an `(s8 *)` view. The store
+ *    at +0x40C is `movs r2,#1; rsbs r2,r2,#0; adds r1,r2,#0; strb r1,[r0]` --
+ *    THREE instructions plus a copy to build -1 in SImode. Spelled on the
+ *    declared `u8 *` row type, `= -1` folds at tree level to the byte constant
+ *    255 and agbcc emits one `movs r1,#0xff`. src/decomp/c_0801FE68.c found
+ *    this first and its header states it exactly; the same `((s8 *)row)[x] = -1`
+ *    spelling is used here. The shared declaration is NOT changed.
+ *      What IS new is the size of the lever. That one constant was worth EIGHT
+ *    register assignments: before the s8 cast, eight separate `mov rLow, rHigh`
+ *    scratch picks disagreed with the ROM and NOTHING else in 484 bytes did;
+ *    every one of them snapped into place when the -1 became three
+ *    instructions. One extra live value re-seeds the whole allocation, so a
+ *    diff that is "one constant plus a scatter of register names" is ONE fact
+ *    -- do not chase the scratch picks individually.
+ *
+ * 2. sub_0801FE68's CALLER passes an argument its CALLEE ignores, and this does
+ *    NOT need an edit to c_0801FE68.c. That file is byte-matched as
+ *    `void sub_0801FE68(void)` and its body reads nothing from r0; the
+ *    unknown-functions.h note asking for its signature to be "fixed" is wrong
+ *    and has been corrected there. This call site really is
+ *    `movs r0,#0x40; bl sub_0801FE68`, so sub_0802E2D0's own translation unit
+ *    saw a declaration taking an argument -- a cross-TU prototype disagreement
+ *    that agbcc cannot see and that costs nothing at either end. The file-local
+ *    `void sub_0801FE68(int);` below reproduces it. LEAVE c_0801FE68.c ALONE.
+ *
+ * The rest is the wave-57 (W57-A) callee survey in unknown-functions.h, which
+ * was right about all six signatures; they are declared file-locally rather
+ * than in the header because the promoted definitions in src/decomp/ own them.
+ * The casts on gUnknown_030040D8 are because struct Unk030040D8 and
+ * struct Unk08499594 are the same object under two names (see the note on
+ * Unk030040D8.unk01 in unknown-globals.h); they cost nothing.
+ *
+ * The map planes are reached as MEMBERS of a struct cast onto
+ * gUnknown_08499590 and INLINE rather than through a `map` local, which is the
+ * W34-F rule that c_08003DC4.c records; that is what gives `(p + K) + idx`
+ * rather than `(p + idx) + K`. */
+
+struct Unk0803E9F8;
+void sub_08024404(void);
+void sub_0802E2BC(void);
+void sub_080201E0(s16, s16, struct Unk08499594 *);
+int sub_0803E9F8(struct Unk0803E9F8 *, u8 *, u8, u8);
+int sub_08041FE0(struct Unk08499594 *);
+int sub_0804203C(struct Unk08499594 *);
+void sub_0801FE68(int);
+struct Map
+{
+    /* 0x0000 */ u16 unk00;
+    /* 0x0002 */ u16 unk02;
+    /* 0x0004 */ u8 filler_0004[0x000E];
+    /* 0x0012 */ u8 unk0012[0x0508];
+    /* 0x051A */ u8 filler_051A[0x417A - 0x051A];
+    /* 0x417A */ u16 unk417A[0x100];
+};
+
+u8 sub_0802E2D0(s16 x, s16 y)
+{
+    struct Unk02028360 *unit;
+    u8 a;
+    u8 b;
+
+    unit = sub_0803DE94(x, y);
+
+    if (unit != NULL
+     && (u8)sub_0803E9F8((struct Unk0803E9F8 *)unit,
+                         gUnknown_08499590 + 0x2852, 0xFF, 0))
+    {
+        sub_08024404();
+    }
+    else
+    {
+        gUnknown_03003F38 = ((struct Map *)gUnknown_08499590)->unk0012[
+            ((struct Map *)gUnknown_08499590)->unk417A[y] + x];
+        gUnknown_030040D8 =
+            (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+
+        if (((struct Map *)gUnknown_08499590)->unk0012[
+                ((struct Map *)gUnknown_08499590)->unk417A[y] + x] == 0)
+        {
+            sub_0802E2BC();
+            return 1;
+        }
+
+        a = sub_08041FE0((struct Unk08499594 *)gUnknown_030040D8);
+        b = sub_0804203C((struct Unk08499594 *)gUnknown_030040D8);
+
+        if (a == 0 && b == 0)
+        {
+            sub_0803B4DC(0x68);
+            return 0;
+        }
+
+        sub_0801F92C(gUnknown_08499590 + 0x2852);
+        sub_08035584(gUnknown_030040D8);
+        sub_08024404();
+        sub_080258CC();
+
+        if (a)
+        {
+            gUnknown_03004480 = (gUnknown_03003F38 >> 6) + 1;
+            sub_080202A4(gUnknown_030040D8);
+            gUnknown_03004480 = gUnknown_030033EC;
+            ((s8 *)gUnknown_03003340[y])[x] = 0;
+            sub_0801FE68(0x40);
+            ((s8 *)gUnknown_03003340[y])[x] = -1;
+        }
+
+        if (b)
+        {
+            if (a == 0)
+                sub_0801F838(0xFF);
+
+            sub_080201E0(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
+                         (struct Unk08499594 *)gUnknown_030040D8);
+
+            if (a)
+            {
+                ((s8 *)gUnknown_03003340[y])[x - 1] = 0;
+                ((s8 *)gUnknown_03003340[y])[x + 1] = 0;
+                ((s8 *)gUnknown_03003340[y - 1])[x] = 0;
+                ((s8 *)gUnknown_03003340[y + 1])[x] = 0;
+            }
+        }
+    }
+
+    sub_08022990((u16)x, (u16)y, 1);
+    gUnknown_03003334 = 6;
+    sub_0803B4DC(0x69);
+    return 1;
+}

@@ -2968,7 +2968,23 @@ void sub_08038C98(void);
  * agbcc emits, so that promoted prototype is one of the wrong-but-invisible
  * ones this file warns about, and sub_0802E2D0 is the differently-shaped caller
  * that exposes it. Settle it from c_0801FE68.c's own body before promoting
- * sub_0802E2D0; it will force an edit to that file. */
+ * sub_0802E2D0; it will force an edit to that file.
+ *
+ * WAVE 60, W60-C: SETTLED, and the last sentence above is WRONG -- it forces no
+ * edit at all. c_0801FE68.c is byte-matched as `void sub_0801FE68(void)` and its
+ * body reads nothing from r0, so the CALLEE is right. The caller really does set
+ * r0 to 0x40. Both are true at once because they are different translation
+ * units: sub_0802E2D0's TU saw a declaration taking an argument, the callee's TU
+ * did not, and agbcc checks agreement BETWEEN FILES only through a shared
+ * header -- of which there is none here, since neither is declared in include/.
+ * A file-local `void sub_0801FE68(int);` in c_0802E2D0.c reproduces the call
+ * site exactly and costs nothing at either end. sub_0802E2D0 MATCHED with it.
+ *   Generalise it: a caller setting up an argument the callee ignores is NOT
+ * proof that the callee's prototype is wrong. It is proof that the two TUs
+ * disagreed, which is the ordinary state of affairs in this ROM and is exactly
+ * what the "prototypes are a contract, not ground truth" rule predicts. Fix the
+ * CALLER's file-local declaration; never retype a byte-matched callee to suit
+ * a call site. */
 
 /* ---- wave 13 (A2): sub_080345C8's gUnknown_030032D8 state-machine table ----
  * All eighteen are void(void): not one reads r0-r3 before writing it (every
@@ -5283,6 +5299,20 @@ void sub_08038B84(void);
 void sub_080389D8(void);
 void sub_0803832C(void);
 void sub_08038BE0(void);
+/* Wave 60, W60-E. Never declared when they were promoted; both signatures are
+ * copied VERBATIM from the definitions in src/decomp/c_08038960.c and
+ * src/decomp/c_08038C08.c rather than re-derived, so they cannot disagree with
+ * a promoted definition. sub_08038D7C is the first C caller of either.
+ *   sub_08038C08's `int` is worth a note: its one C call site narrows the
+ * result to a byte before testing it (`lsls r0,r0,#0x18; cmp r0,#0`), which is
+ * the tell for a `u8`/`bool8` return in the ORIGINAL header -- the body only
+ * ever returns 0 or 1, so `int` is byte-neutral at the definition and the
+ * narrowing is invisible there. I did NOT retype it: the promoted definition
+ * already says `int`, and the caller reproduces the ROM exactly with a `(u8)`
+ * cast at the call. If a later wave wants the narrow return, c_08038C08.c must
+ * change with it and be re-verified. */
+int sub_08038960(s8, s8);
+int sub_08038C08(void);
 void sub_08026768(void);
 void sub_08026924(void);
 void sub_08026BAC(void);
@@ -5314,6 +5344,10 @@ void sub_0804C99C(u16);
 void sub_0804CEF8(u16);
 void sub_0804DB14(u16);
 void sub_080566C8(int);
+/* Wave 60, W60-H. Already promoted in src/decomp/c_08056D70.c as
+ * `u16 sub_08056D70(u16, u16, u16)` but never declared here; sub_080566C8 is
+ * its only caller and stores the result with a bare `strh`, which agrees. */
+u16 sub_08056D70(u16, u16, u16);
 void sub_08057138(void);
 void *sub_08057D58(int, int, int);
 int sub_08042D1C(int, int);

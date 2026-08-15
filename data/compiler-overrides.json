@@ -64,6 +64,148 @@
   "exact, try old_agbcc BEFORE touching the C -- but do not assume you need it."
  ],
  "functions": {
+  "sub_0808B1BC": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 292 bytes. Parked at 8.2% under the DEFAULT -O2 configuration, which is the wrong one for this block; W60-I closed it at -O1 in one session. Wave 60 (orchestrator + W60-I). See the nine sibling entries for the measurement that established the flash library is -O1: nine byte-for-byte matches across 0x0808A3DC-0x0808B91C with no source change. This one needed source work on top of the flag, which is why it is credited to the agent and not to the sweep. NOT uniformly true across the span -- sub_0808AAF4, sub_0808AC7C and sub_0808B91C get LONGER under -O1, so each function still needs its own verdict."
+  },
+  "sub_0808AB8C": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 148 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808ADA4": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 140 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808B074": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 116 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808B0E8": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 156 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808B31C": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 164 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808B3C0": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 112 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808B430": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 132 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808B4B4": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 140 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_0808B540": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 120 bytes. Parked before this wave. Wave 60 (orchestrator). THE FLASH LIBRARY IS -O1, and this is the first direct measurement of it. data/compiler-overrides.json's own header already said so in passing -- 'the m4a library is old_agbcc at -O2 while the flash library is -O1, and they are different configurations' -- but that sentence was written as an aside while ruling -O1 OUT for an m4a function, no entry ever used it, and every function in 0x0808A3DC-0x0808B91C was parked against the SOURCE axis instead. Probing all 18 unmatched non-asm-resident functions in that span with -O2 removed and -O1 added produced NINE byte-for-byte matches with not one character of C changed, and moved four more a long way (sub_0808B1BC 8.2%->98.3% at 5 of 292 bytes, sub_0808AF00 and sub_0808AF74 both ->92.2%, sub_0808AE54 ->87.9%). The residuals the default configuration left behind were register-allocation shaped -- two globals exchanging r5/r6, `ands` where the ROM has `adds` -- which is what a different optimisation level looks like, not what a wrong source looks like. Same lesson as this wave's m4a sweep: a whole block parked on the source axis when the axis was the toolchain. Each of the nine is its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split. NOT uniformly true across the span: sub_0808AAF4, sub_0808AC7C and sub_0808B91C all get LONGER under -O1 (+8/+4/+8 bytes), so -O1 is not a blanket answer for the block and each function still needs its own verdict."
+  },
+  "sub_080705AC": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a m4aMPlayAllStop. Wave 60 (orchestrator). NOT an independent measurement -- this function matches under DEFAULT agbcc too, and it is what W60-B closed by correcting gNumMusicPlayers from 9 to 11 in aw2bhr.lds and teaching relocs_equivalent() about absolute symbols. It is here purely for FILE CONSISTENCY: COMPILER FLAGS APPLY TO THE WHOLE OBJECT FILE, and promote.py merged it into src/decomp/c_08070478.c alongside the five m4aSongNum* functions that genuinely require old_agbcc. The split build refuses a file whose members carry different overrides, so the choice was to split the file or make the whole file old_agbcc. Verified by exit status that this function is byte-identical under old_agbcc as well, so the file is consistent and nothing is lost -- exactly the same situation as sub_08070B34 and sub_08070C90 above. IF c_08070478.c IS EVER SPLIT INTO SEPARATE FILES, this entry can be deleted; it is a file-consistency entry, not a finding."
+  },
+  "sub_08070478": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4aSongNumStart. Parked at 88.6%/44 bytes. Wave 60 (orchestrator). The five m4aSongNum* entry points at 0x08070478-0x080705AC. ALL FIVE were parked in wave 32 with the IDENTICAL residual, size already exact: the ROM keeps &gUnknown_08242308 (the mplay table) in r2 and song->ms in r3, and every candidate under default agbcc produces them the other way round. Instruction stream, literal-pool order and size were otherwise the ROM's in each case. Wave 32 then measured the gcc-2.9 local-alloc priority formula floor_log2(n_refs)*n_refs*size/(death-birth) against them and found THE RULE PREDICTS THE CANDIDATE, NOT THE ROM -- ms has priority 1.50 against the table address's 0.25, so ms is allocated first and takes the lower register, which is exactly what default agbcc emits. That is not a source question and no spelling reaches it: it is the two allocators disagreeing, which is precisely what this file exists for. Byte-for-byte identical under old_agbcc with NOT ONE CHARACTER of the C changed. Consistent with the file's own note that old_agbcc is a strict superset across 0x0806F710-0x080745C0 and is the better first guess there, and with sub_08070BAC, whose park recorded the same 'value lands in r1 where agbcc puts it in r0' shape. Wave 60 also probed EVERY other non-asm-resident unmatched function in that span the same way and none of them moved; two got materially worse (sub_080723DC 88.3%->77.5%, sub_08073930 85.3% size-exact -> 14.7% at +8 bytes), so the region is NOT uniformly old_agbcc and this sweep should not be repeated. Each of the five is already its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split."
+  },
+  "sub_08070544": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4aSongNumStop. Parked at 90.4%/52 bytes. Wave 60 (orchestrator). The five m4aSongNum* entry points at 0x08070478-0x080705AC. ALL FIVE were parked in wave 32 with the IDENTICAL residual, size already exact: the ROM keeps &gUnknown_08242308 (the mplay table) in r2 and song->ms in r3, and every candidate under default agbcc produces them the other way round. Instruction stream, literal-pool order and size were otherwise the ROM's in each case. Wave 32 then measured the gcc-2.9 local-alloc priority formula floor_log2(n_refs)*n_refs*size/(death-birth) against them and found THE RULE PREDICTS THE CANDIDATE, NOT THE ROM -- ms has priority 1.50 against the table address's 0.25, so ms is allocated first and takes the lower register, which is exactly what default agbcc emits. That is not a source question and no spelling reaches it: it is the two allocators disagreeing, which is precisely what this file exists for. Byte-for-byte identical under old_agbcc with NOT ONE CHARACTER of the C changed. Consistent with the file's own note that old_agbcc is a strict superset across 0x0806F710-0x080745C0 and is the better first guess there, and with sub_08070BAC, whose park recorded the same 'value lands in r1 where agbcc puts it in r0' shape. Wave 60 also probed EVERY other non-asm-resident unmatched function in that span the same way and none of them moved; two got materially worse (sub_080723DC 88.3%->77.5%, sub_08073930 85.3% size-exact -> 14.7% at +8 bytes), so the region is NOT uniformly old_agbcc and this sweep should not be repeated. Each of the five is already its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split."
+  },
+  "sub_08070578": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4aSongNumContinue. Parked at 90.4%/52 bytes. Verified one shape with sub_08070544 by instruction-stream diff: 22 instructions each, one differing bl. Wave 60 (orchestrator). The five m4aSongNum* entry points at 0x08070478-0x080705AC. ALL FIVE were parked in wave 32 with the IDENTICAL residual, size already exact: the ROM keeps &gUnknown_08242308 (the mplay table) in r2 and song->ms in r3, and every candidate under default agbcc produces them the other way round. Instruction stream, literal-pool order and size were otherwise the ROM's in each case. Wave 32 then measured the gcc-2.9 local-alloc priority formula floor_log2(n_refs)*n_refs*size/(death-birth) against them and found THE RULE PREDICTS THE CANDIDATE, NOT THE ROM -- ms has priority 1.50 against the table address's 0.25, so ms is allocated first and takes the lower register, which is exactly what default agbcc emits. That is not a source question and no spelling reaches it: it is the two allocators disagreeing, which is precisely what this file exists for. Byte-for-byte identical under old_agbcc with NOT ONE CHARACTER of the C changed. Consistent with the file's own note that old_agbcc is a strict superset across 0x0806F710-0x080745C0 and is the better first guess there, and with sub_08070BAC, whose park recorded the same 'value lands in r1 where agbcc puts it in r0' shape. Wave 60 also probed EVERY other non-asm-resident unmatched function in that span the same way and none of them moved; two got materially worse (sub_080723DC 88.3%->77.5%, sub_08073930 85.3% size-exact -> 14.7% at +8 bytes), so the region is NOT uniformly old_agbcc and this sweep should not be repeated. Each of the five is already its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split."
+  },
+  "sub_080704A4": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4aSongNumStartOrChange. Parked at 93.4%/76 bytes, only five bytes differing. Wave 60 (orchestrator). The five m4aSongNum* entry points at 0x08070478-0x080705AC. ALL FIVE were parked in wave 32 with the IDENTICAL residual, size already exact: the ROM keeps &gUnknown_08242308 (the mplay table) in r2 and song->ms in r3, and every candidate under default agbcc produces them the other way round. Instruction stream, literal-pool order and size were otherwise the ROM's in each case. Wave 32 then measured the gcc-2.9 local-alloc priority formula floor_log2(n_refs)*n_refs*size/(death-birth) against them and found THE RULE PREDICTS THE CANDIDATE, NOT THE ROM -- ms has priority 1.50 against the table address's 0.25, so ms is allocated first and takes the lower register, which is exactly what default agbcc emits. That is not a source question and no spelling reaches it: it is the two allocators disagreeing, which is precisely what this file exists for. Byte-for-byte identical under old_agbcc with NOT ONE CHARACTER of the C changed. Consistent with the file's own note that old_agbcc is a strict superset across 0x0806F710-0x080745C0 and is the better first guess there, and with sub_08070BAC, whose park recorded the same 'value lands in r1 where agbcc puts it in r0' shape. Wave 60 also probed EVERY other non-asm-resident unmatched function in that span the same way and none of them moved; two got materially worse (sub_080723DC 88.3%->77.5%, sub_08073930 85.3% size-exact -> 14.7% at +8 bytes), so the region is NOT uniformly old_agbcc and this sweep should not be repeated. Each of the five is already its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split."
+  },
+  "sub_080704F0": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4aSongNumStartOrContinue. Parked at 94.0%/84 bytes, only five bytes differing. Wave 60 (orchestrator). The five m4aSongNum* entry points at 0x08070478-0x080705AC. ALL FIVE were parked in wave 32 with the IDENTICAL residual, size already exact: the ROM keeps &gUnknown_08242308 (the mplay table) in r2 and song->ms in r3, and every candidate under default agbcc produces them the other way round. Instruction stream, literal-pool order and size were otherwise the ROM's in each case. Wave 32 then measured the gcc-2.9 local-alloc priority formula floor_log2(n_refs)*n_refs*size/(death-birth) against them and found THE RULE PREDICTS THE CANDIDATE, NOT THE ROM -- ms has priority 1.50 against the table address's 0.25, so ms is allocated first and takes the lower register, which is exactly what default agbcc emits. That is not a source question and no spelling reaches it: it is the two allocators disagreeing, which is precisely what this file exists for. Byte-for-byte identical under old_agbcc with NOT ONE CHARACTER of the C changed. Consistent with the file's own note that old_agbcc is a strict superset across 0x0806F710-0x080745C0 and is the better first guess there, and with sub_08070BAC, whose park recorded the same 'value lands in r1 where agbcc puts it in r0' shape. Wave 60 also probed EVERY other non-asm-resident unmatched function in that span the same way and none of them moved; two got materially worse (sub_080723DC 88.3%->77.5%, sub_08073930 85.3% size-exact -> 14.7% at +8 bytes), so the region is NOT uniformly old_agbcc and this sweep should not be repeated. Each of the five is already its own single-function split unit, so gen_overrides_mk.py's one-function-per-.c constraint is satisfied with no file split."
+  },
   "sub_08070B34": {
    "cc1": "old_agbcc",
    "cflags_remove": [

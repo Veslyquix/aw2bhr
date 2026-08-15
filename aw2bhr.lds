@@ -1,7 +1,23 @@
 OUTPUT_ARCH(arm)
 ENTRY(Init)
 
-gNumMusicPlayers = 9;
+/* MP2K's two link-time constants. m4a's C reads them as `extern` symbols with
+ * no storage, so the compiler cannot see their values and POOLS them -- which
+ * is why four m4a functions load a small integer from the literal pool where a
+ * `movs rN, #imm8` would have done. See the "Absolute symbols" chapter of
+ * docs/agbcc-codegen.md and the declarations in include/unknown-globals.h.
+ *
+ * WAVE 60 (W60-B): gNumMusicPlayers was 9 here and that is WRONG for this ROM;
+ * it is 11. Upstream never referenced either symbol -- all of m4a is still asm
+ * with the value baked in as a literal -- so the value was dormant and no build
+ * could contradict it. Two independent readings give 11: the player table
+ * gUnknown_08242308 runs to gUnknown_0824238C, which is 0x84 = 132 bytes = 11
+ * entries of the 12-byte struct MusicPlayer; and the ROM's own pool word in
+ * m4aSoundInit (sub_080703F4 +0x6c), m4aMPlayAllStop (sub_080705AC +0x24) and
+ * sub_080705E4 +0x24 is 0x0000000B. Correcting it does not move a byte of the
+ * upstream ROM, because nothing links against it there; it is what lets the
+ * promoted C for those functions link to the bytes the ROM already has. */
+gNumMusicPlayers = 11;
 gMaxLines = 0;
 
 SECTIONS

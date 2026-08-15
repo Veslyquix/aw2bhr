@@ -130,6 +130,61 @@ def relocations(obj_rel, lo, hi):
 MAP_SYM = re.compile(r"^\s+0x0*([0-9a-fA-F]{8})\s+([A-Za-z_][A-Za-z0-9_]*)\s*(=\s*\.)?\s*$")
 
 
+LDS_ABS_SYM = re.compile(r"^([A-Za-z_]\w*)\s*=\s*(0[xX][0-9A-Fa-f]+|\d+)\s*;")
+
+
+def lds_absolute_symbols():
+    """name -> value for symbols the LINKER SCRIPT defines outright.
+
+    aw2bhr.lds opens with two of these -- upstream's own, and passed through
+    into aw2bhr.split.lds verbatim by tools/gen_lds.py, which rewrites only the
+    `asm/*.o(.text);` lines:
+
+        gNumMusicPlayers = 11;
+        gMaxLines = 0;
+
+    They are MP2K's two link-time constants and they are the reason four m4a
+    functions POOL a small integer that agbcc would otherwise have emitted as
+    `movs rN, #imm8`: the value is not known to the compiler, only to the
+    linker. See the "Absolute symbols" chapter of docs/agbcc-codegen.md.
+
+    Read from the script rather than from the ELF because the script is the
+    DEFINITION and the ELF is a snapshot of the last link. Editing one of these
+    values and then asking trymatch about it before a rebuild would otherwise
+    be answered from the stale value -- which is precisely the moment the
+    answer matters. Only column-0 assignments to a numeric constant are taken;
+    every assignment inside SECTIONS sets a symbol from `.` and is a placement,
+    not a constant.
+    """
+    if lds_absolute_symbols.cache is None:
+        out = {}
+        try:
+            with open(os.path.join(awlib.REPO, "aw2bhr.lds"),
+                      encoding="utf-8", errors="replace") as fh:
+                for ln in fh:
+                    m = LDS_ABS_SYM.match(ln)
+                    if not m:
+                        continue
+                    text = m.group(2)
+                    try:
+                        # ld reads a leading 0 as octal; Python needs `0o` for
+                        # that and raises on a bare `011`. Skip anything this
+                        # cannot read rather than letting one odd line take
+                        # every match in the repo down with it.
+                        out[m.group(1)] = (int(text, 16) if text[:2] in ("0x", "0X")
+                                           else int(text, 8) if text[:1] == "0"
+                                           and len(text) > 1 else int(text, 10))
+                    except ValueError:
+                        pass
+        except OSError:
+            pass
+        lds_absolute_symbols.cache = out
+    return lds_absolute_symbols.cache
+
+
+lds_absolute_symbols.cache = None
+
+
 def symbol_addresses():
     """name -> final linked address, read from the last built ELF or the map.
 
@@ -182,6 +237,11 @@ def symbol_addresses():
             "  pool word will be reported as a differing byte even when it\n"
             "  matches. Put the ARM toolchain on PATH, or wait for a\n"
             "  concurrent build to finish, before believing a near-miss.\n")
+    # After the warning, never before it: an lds constant is not a substitute
+    # for the symbol table and must not suppress the "no symbol table" notice.
+    # The script's value WINS over the ELF's, because a stale ELF is exactly
+    # what this overlay exists to correct.
+    syms.update(lds_absolute_symbols())
     symbol_addresses.cache = syms
     return syms
 
@@ -362,16 +422,67 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o=None):
 
     Deliberately strict: same offsets, same types, ABS32 only, both symbols
     known, and every differing byte must fall inside a relocation site.
+
+    ONE ASYMMETRY, added in wave 60 -- the candidate may carry an ABS32 at an
+    offset where the TARGET HAS NO RELOCATION AT ALL. That is an ABSOLUTE
+    SYMBOL: `asm/` is disassembled ROM, so a pool word holding a link-time
+    constant appears there as a bare `.4byte 0x0000000B` with nothing to
+    relocate, while the C that produced it names the symbol and emits `.word 0`
+    plus `R_ARM_ABS32 gNumMusicPlayers`. Pairing by POSITION made those
+    functions unreachable twice over: the length gate rejected them outright,
+    and even past it the offsets slipped by one. Four m4a functions sat at one
+    differing byte for thirteen waves on this.
+
+    It is accepted only when the symbol is in the real symbol table -- the
+    linker script or the last ELF -- and the value the linker will store
+    (S + A, T bit for a THUMB function) equals the ROM word exactly. THE
+    NAME FALLBACK IN sym_addr() IS DELIBERATELY NOT USED HERE. It invents an
+    address for any `gUnknown_<addr>` spelling, so honouring it would accept a
+    word that NOTHING DEFINES and hand back a MATCH that cannot be linked --
+    converting a visible near-miss into a build break blaming another file.
+    Requiring a real definition is what welds this to aw2bhr.lds: the only way
+    to make the check pass is to make the link work.
+
+    The reverse shape stays rejected. A relocation on the TARGET side that the
+    candidate lacks means the draft baked a ROM address in as a literal, which
+    links to the right bytes only by luck and only at this layout.
     """
     if t_rel is None or c_rel is None or len(tgt_fn) != len(cand_fn):
         return False
-    if len(t_rel) != len(c_rel) or not t_rel:
+    if not t_rel and not c_rel:
+        return False
+
+    t_by_off, c_by_off = {}, {}
+    for side, rels in ((t_by_off, t_rel), (c_by_off, c_rel)):
+        for r in rels:
+            if r[0] in side:
+                return False        # two relocations on one word: not our shape
+            side[r[0]] = r
+    if set(t_by_off) - set(c_by_off):
         return False
 
     syms = symbol_addresses()
     sites = []
-    for (t_off, t_typ, t_sym), (c_off, c_typ, c_sym) in zip(t_rel, c_rel):
-        if t_off != c_off or t_typ != c_typ:
+    for c_off in sorted(c_by_off):
+        _, c_typ, c_sym = c_by_off[c_off]
+        if c_off not in t_by_off:
+            # Candidate-only: an absolute symbol against a bare ROM literal.
+            if c_typ != "R_ARM_ABS32" or c_off + 4 > len(tgt_fn):
+                return False
+            c_name, c_extra = _split_sym(c_sym)
+            if c_name not in syms:
+                return False
+            value = syms[c_name] + c_extra + int.from_bytes(
+                cand_fn[c_off:c_off + 4], "little")
+            if c_name in _thumb_functions():
+                value |= 1
+            if value != int.from_bytes(tgt_fn[c_off:c_off + 4], "little"):
+                return False
+            reloc_equivalent.absolute_syms.append((c_off, c_name, syms[c_name]))
+            sites.append(c_off)
+            continue
+        t_off, t_typ, t_sym = t_by_off[c_off]
+        if t_typ != c_typ:
             return False
         if t_typ != "R_ARM_ABS32":
             # Only a literal-pool word can carry an addend difference. Anything
@@ -449,6 +560,9 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o=None):
         if a != b and not any(off <= i < off + 4 for off in sites):
             return False
     return True
+
+
+reloc_equivalent.absolute_syms = []
 
 
 def _split_sym(field):
@@ -605,6 +719,7 @@ def check(name, want_diff=False, keep_going=False):
 
     same = tgt_fn == cand_fn and len(cand) == size
     pool_word_equivalent.needed = []
+    reloc_equivalent.absolute_syms = []
     t_rel = relocations(unit_o, offset, offset + size)
     c_rel = relocations(cand_o, 0, size)
     equivalent = False
@@ -628,14 +743,41 @@ def check(name, want_diff=False, keep_going=False):
         if equivalent:
             print("  relocs: name different symbols that resolve to the same"
                   " address")
-            for (t_off, _, t_sym), (_, _, c_sym) in zip(t_rel, c_rel):
-                if t_sym != c_sym:
+            # Keyed by OFFSET, not zipped: since wave 60 the candidate may hold
+            # one relocation MORE than the target (an absolute symbol against a
+            # bare ROM literal), and a positional zip would print every later
+            # row against the wrong pair.
+            t_by = {r[0]: r[2] for r in t_rel}
+            for c_off, _, c_sym in c_rel:
+                t_sym = t_by.get(c_off)
+                if t_sym is None:
+                    print("    +0x%03x  original .4byte 0x%08x (no relocation)"
+                          "  candidate %s"
+                          % (c_off, int.from_bytes(tgt_fn[c_off:c_off + 4],
+                                                   "little"), c_sym))
+                elif t_sym != c_sym:
                     print("    +0x%03x  original %s  candidate %s"
-                          % (t_off, t_sym, c_sym))
+                          % (c_off, t_sym, c_sym))
         # A match resting on a `-fforce-addr` pool word is conditional on the
         # build PLACING that word, and the verdict must say so: promoting
         # without the `rodata` entry drops the word or shifts every address
         # after it, and the failure would land in the build rather than here.
+        # An ABSOLUTE SYMBOL is the one class where the object's bytes are NOT
+        # the ROM's and the match is still exact: the ROM holds a bare literal
+        # because the value is a link-time constant, and the object holds a
+        # relocation the linker resolves to that same literal. Say which symbol
+        # and which value, because the match is conditional on the linker script
+        # continuing to define it -- it needs no data/promoted.json entry, but
+        # it does need aw2bhr.lds.
+        if reloc_equivalent.absolute_syms:
+            print("  NOTE: this match resolves an ABSOLUTE SYMBOL defined by "
+                  "the linker script.")
+            for off, nm, val in reloc_equivalent.absolute_syms:
+                print("          +0x%03x  %s = %d  (aw2bhr.lds); the ROM has "
+                      "the bare literal" % (off, nm, val))
+            print("        Nothing to add to data/promoted.json -- but the "
+                  "promotion is correct\n"
+                  "        only while aw2bhr.lds defines it at that value.")
         if pool_word_equivalent.needed:
             words = sorted({a for a, _ in pool_word_equivalent.needed})
             print("  NOTE: this match needs its .rodata pool word(s) PLACED.")
@@ -647,6 +789,11 @@ def check(name, want_diff=False, keep_going=False):
             print("\nMATCH -- links to identical bytes. The pool word is the"
                   " same address\n  spelled against a different symbol, which"
                   " is a disassembly artefact,\n  not a difference in the ROM.")
+        elif reloc_equivalent.absolute_syms:
+            print("\nMATCH -- links to identical bytes. The differing word is a"
+                  " LINK-TIME\n  constant: the compiler could not know its value"
+                  " so it pooled a relocation,\n  and the linker stores exactly"
+                  " the literal the ROM already holds.")
         else:
             print("\nMATCH -- byte-for-byte identical to the original")
         return 0
@@ -800,9 +947,10 @@ def check_unit(name, want_diff=False):
 
     same = (cand == tgt)
     pool_word_equivalent.needed = []
+    reloc_equivalent.absolute_syms = []
+    t_rel = relocations(unit_o, 0, len(tgt))
+    c_rel = relocations(obj_rel, 0, len(cand))
     if same:
-        t_rel = relocations(unit_o, 0, len(tgt))
-        c_rel = relocations(obj_rel, 0, len(cand))
         if t_rel is not None and c_rel is not None and t_rel != c_rel:
             pool_word_equivalent.needed = []
             if reloc_equivalent(tgt, cand, t_rel, c_rel, obj_rel):
@@ -816,8 +964,28 @@ def check_unit(name, want_diff=False):
                         print("    %s +0x%03x %-18s %s" % (side, r[0], r[1], r[2]))
         else:
             print("  relocs: match")
+    # WAVE 60 (W60-B). This `elif` is the unit-level twin of the one in check(),
+    # and its absence was a half-fixed oracle: an ABSOLUTE SYMBOL whose value is
+    # not zero leaves the object's bytes DIFFERENT from the ROM's (the ROM holds
+    # the resolved literal, the object holds `.word 0` plus the relocation), so
+    # `cand == tgt` is False and the relocation logic above never ran. check()
+    # would return MATCH for such a function and check_unit -- which is what
+    # promotion gates on -- would reject the very same object. The three
+    # gNumMusicPlayers readers are exactly that shape; gMaxLines is not, because
+    # its value is 0 and the bytes coincide, which is how the gap stayed hidden.
+    elif (len(cand) == len(tgt)
+          and reloc_equivalent(tgt, cand, t_rel, c_rel, obj_rel)):
+        same = True
+        print("  relocs: name different symbols that resolve to the same"
+              " address")
 
     if same:
+        if reloc_equivalent.absolute_syms:
+            print("  NOTE: this match resolves an ABSOLUTE SYMBOL defined by "
+                  "the linker script.")
+            for off, nm, val in reloc_equivalent.absolute_syms:
+                print("          +0x%03x  %s = %d  (aw2bhr.lds); the ROM has "
+                      "the bare literal" % (off, nm, val))
         # Same conditional-match rule as check(): a unit resting on a
         # `-fforce-addr` pool word is only correct once the build PLACES that
         # word, and promote.py parses this NOTE to record it.

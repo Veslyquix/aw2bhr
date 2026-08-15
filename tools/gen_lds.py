@@ -85,6 +85,44 @@ def load_blob_manifest():
         return json.load(fh)
 
 
+def o1_dead_rodata_objects(by_src):
+    """Promoted objects whose functions carry an -O1 override.
+
+    WAVE 60. agbcc at -O1 emits its address-constant pool as `.LC` words in
+    .rodata AND builds the .text minipools it actually uses, leaving the
+    .rodata copy with ZERO references -- measured on sub_0808AB8C: seven `.LC`
+    labels defined, none referenced, the body loading from .text pools `.L8`
+    and `.L10` instead. Nothing carves that section, so it gets no placement
+    from this script and the linker drops it just past the end of the image.
+
+    The symptom is a ROM that is byte-identical everywhere and 108 bytes LONG,
+    which reads exactly like the wave-20 "forgot to run split_rodata.py"
+    failure and is NOT that -- there, every differing word pointed at
+    0x08800000+N; here nothing differs at all.
+
+    Scoped to -O1 units on purpose. A blanket `/DISCARD/ { *(.rodata) }` would
+    also swallow a future promoted file with LIVE .rodata that nobody recorded,
+    turning a loud build failure into a silently wrong ROM.
+    """
+    try:
+        import agbenv
+        ov = agbenv.compiler_overrides()
+    except Exception:
+        return []
+    objs = set()
+    for entries in by_src.values():
+        for e in entries:
+            obj = e.get("promoted")
+            if not obj:
+                continue
+            for fn in e.get("functions", ()):
+                o = ov.get(fn)
+                if o and "-O1" in (o.get("cflags_add") or ()):
+                    objs.add(obj)
+                    break
+    return sorted(objs)
+
+
 def generate():
     by_src = load_units()
     if by_src is None:
@@ -144,7 +182,21 @@ def generate():
               f"linker script never references them")
         return None, 0
 
-    return "".join(out), expanded
+    text = "".join(out)
+
+    dead = o1_dead_rodata_objects(by_src)
+    if dead:
+        cut = text.rstrip().rfind("}")
+        block = ["\n\t/* -O1 dead .LC pools -- unreferenced; see"
+                 " o1_dead_rodata_objects() */\n",
+                 "\t/DISCARD/ :\n\t{\n"]
+        block += ["\t\t%s(.rodata)\n" % o for o in dead]
+        block.append("\t}\n")
+        text = text[:cut] + "".join(block) + text[cut:]
+        print("      discarding dead -O1 .rodata from %d object(s): %s"
+              % (len(dead), ", ".join(os.path.basename(o) for o in dead)))
+
+    return text, expanded
 
 
 def main():
