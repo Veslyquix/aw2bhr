@@ -12,7 +12,7 @@ sub_08086E2C: @ 0x08086E2C
 	lsls r1, r1, #0xe
 	ldr r2, _08086E50 @ =0x06004000
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	pop {r0}
 	bx r0
 	.align 2, 0

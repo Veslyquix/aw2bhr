@@ -12,11 +12,11 @@ sub_080453CC: @ 0x080453CC
 	lsls r1, r1, #0xe
 	ldr r2, _08045418 @ =0x06005600
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0804541C @ =gUnknown_0811315C
 	ldr r4, _08045420 @ =gUnknown_08499578
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, [r4]
 	movs r1, #0x80
 	lsls r1, r1, #4
@@ -26,7 +26,7 @@ sub_080453CC: @ 0x080453CC
 	movs r1, #0x80
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013AEC
 	pop {r4}
 	pop {r0}

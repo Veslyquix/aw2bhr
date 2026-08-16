@@ -29,7 +29,7 @@ sub_0801C3EC: @ 0x0801C3EC
 	mov r8, r0
 	cmp r8, r2
 	bge _0801C4BC
-	ldr r1, _0801C4D0 @ =gUnknown_0808F100
+	ldr r1, _0801C4D0 @ =gSinLut
 	mov sb, r1
 	movs r2, #0xff
 	mov sl, r2
@@ -97,7 +97,7 @@ _0801C426:
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	adds r7, #6
 	movs r0, #1
 	add r8, r0
@@ -115,5 +115,5 @@ _0801C4BC:
 	bx r0
 	.align 2, 0
 _0801C4CC: .4byte 0x00007FFF
-_0801C4D0: .4byte gUnknown_0808F100
+_0801C4D0: .4byte gSinLut
 

@@ -13,7 +13,7 @@ sub_0807B738: @ 0x0807B738
 	str r0, [sp]
 	movs r0, #0
 	movs r1, #0x71
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r0}
 	bx r0

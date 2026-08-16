@@ -18,7 +18,7 @@ sub_080859E8: @ 0x080859E8
 	movs r0, #4
 	movs r1, #0xf0
 	movs r2, #0x38
-	bl sub_08074234
+	bl Interpolate
 	ldr r1, _08085A34 @ =0x000001FF
 	ands r1, r0
 	movs r5, #0

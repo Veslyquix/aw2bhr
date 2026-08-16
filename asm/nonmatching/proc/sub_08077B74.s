@@ -16,7 +16,7 @@ sub_08077B74: @ 0x08077B74
 	str r0, [sp]
 	movs r0, #4
 	movs r1, #0x1e
-	bl sub_08074234
+	bl Interpolate
 	adds r7, r0, #0
 	adds r0, r5, #0
 	adds r0, #0x4c

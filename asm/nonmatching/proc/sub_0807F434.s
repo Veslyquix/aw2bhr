@@ -70,7 +70,7 @@ _0807F4B2:
 	ldr r0, [r7]
 	ldr r4, [r6]
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r5, #0
 	mov r8, r4
 _0807F4C8:
@@ -105,7 +105,7 @@ _0807F4D8:
 	movs r1, #0xa0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	mov r2, sb
 	strh r4, [r2]
 	pop {r3, r4, r5}

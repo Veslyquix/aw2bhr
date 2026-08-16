@@ -61,7 +61,7 @@ _0803F956:
 	adds r1, r4, #0
 	adds r2, r5, #0
 	mov r3, ip
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r4, r5, r6, r7}
 	pop {r0}

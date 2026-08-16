@@ -20,11 +20,11 @@ sub_08033FFC: @ 0x08033FFC
 	str r1, [sp]
 	movs r0, #0
 	movs r1, #0x60
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	ldr r2, [r4, #0x4c]
 	cmp r2, #0x78
 	bhi _08034036
-	ldr r0, _0803404C @ =gUnknown_03002EE0
+	ldr r0, _0803404C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #1
@@ -40,7 +40,7 @@ _08034036:
 	.align 2, 0
 _08034044: .4byte gUnknown_0849BC38
 _08034048: .4byte gUnknown_0849BC18
-_0803404C: .4byte gUnknown_03002EE0
+_0803404C: .4byte gpKeySt
 _08034050:
 	adds r0, r2, #1
 	str r0, [r4, #0x4c]

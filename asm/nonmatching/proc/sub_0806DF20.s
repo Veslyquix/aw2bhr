@@ -12,7 +12,7 @@ sub_0806DF20: @ 0x0806DF20
 	ble _0806DF30
 	subs r0, r1, r0
 _0806DF30:
-	ldr r3, _0806DF54 @ =gUnknown_030020C0
+	ldr r3, _0806DF54 @ =gPal
 	adds r1, r0, #0
 	adds r1, #0xa
 	lsls r0, r1, #0xa
@@ -28,5 +28,5 @@ _0806DF30:
 	bx r0
 	.align 2, 0
 _0806DF50: .4byte gUnknown_03004008
-_0806DF54: .4byte gUnknown_030020C0
+_0806DF54: .4byte gPal
 

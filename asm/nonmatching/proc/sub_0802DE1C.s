@@ -45,7 +45,7 @@ _0802DE72:
 	lsls r0, r0, #0x18
 	cmp r0, #0
 	beq _0802DEE6
-	ldr r0, _0802DEA0 @ =gUnknown_03002EE0
+	ldr r0, _0802DEA0 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r4, #1
@@ -60,7 +60,7 @@ _0802DE72:
 	bl sub_0802E60C
 	b _0802DEE6
 	.align 2, 0
-_0802DEA0: .4byte gUnknown_03002EE0
+_0802DEA0: .4byte gpKeySt
 _0802DEA4:
 	movs r0, #2
 	ands r0, r1

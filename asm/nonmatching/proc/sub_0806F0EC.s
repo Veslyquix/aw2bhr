@@ -5,7 +5,7 @@
 sub_0806F0EC: @ 0x0806F0EC
 	push {r4, r5, lr}
 	adds r5, r0, #0
-	ldr r0, _0806F11C @ =gUnknown_03002EE0
+	ldr r0, _0806F11C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r2, [r0, #4]
 	ldrh r3, [r0, #2]
@@ -25,7 +25,7 @@ sub_0806F0EC: @ 0x0806F0EC
 	bl Proc_Goto
 	b _0806F146
 	.align 2, 0
-_0806F11C: .4byte gUnknown_03002EE0
+_0806F11C: .4byte gpKeySt
 _0806F120:
 	movs r0, #4
 	ands r0, r2

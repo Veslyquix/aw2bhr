@@ -56,7 +56,7 @@ sub_0806B9CC: @ 0x0806B9CC
 	ldrb r0, [r5, #1]
 	orrs r0, r1
 	strb r0, [r5, #1]
-	ldr r2, _0806BA68 @ =gUnknown_030030CC
+	ldr r2, _0806BA68 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #0x40
 	orrs r0, r1
@@ -75,5 +75,5 @@ _0806BA58: .4byte gUnknown_03002B68
 _0806BA5C: .4byte gUnknown_03002B30
 _0806BA60: .4byte gUnknown_030024E4
 _0806BA64: .4byte gUnknown_030020B8
-_0806BA68: .4byte gUnknown_030030CC
+_0806BA68: .4byte gDispIo
 

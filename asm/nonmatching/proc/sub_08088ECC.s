@@ -157,7 +157,7 @@ _08088FF0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	movs r2, #0x4c
 	adds r2, r2, r7
@@ -168,7 +168,7 @@ _08088FF0:
 	mov r8, r2
 	str r2, [sp]
 	movs r0, #4
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	movs r1, #0
@@ -180,7 +180,7 @@ _08088FF0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	mov r2, sb
 	movs r0, #0
@@ -189,7 +189,7 @@ _08088FF0:
 	str r2, [sp]
 	movs r0, #4
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	movs r0, #0
@@ -207,7 +207,7 @@ _08088FF0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	movs r1, #0
@@ -219,7 +219,7 @@ _08088FF0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0x2c
 	subs r2, r2, r0
 	mov r0, r8
@@ -241,7 +241,7 @@ _080890C0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	movs r1, #0
@@ -253,7 +253,7 @@ _080890C0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	movs r0, #0
@@ -271,7 +271,7 @@ _080890C0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	movs r2, #0x4c
 	adds r2, r2, r7
@@ -282,7 +282,7 @@ _080890C0:
 	mov r8, r2
 	str r2, [sp]
 	movs r0, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	movs r1, #0
@@ -294,7 +294,7 @@ _080890C0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	mov r2, sb
 	movs r0, #0
@@ -303,7 +303,7 @@ _080890C0:
 	str r2, [sp]
 	movs r0, #4
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0x2c
 	subs r2, r2, r0
 	mov r0, sl
@@ -390,7 +390,7 @@ _08089202:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	movs r2, #0
@@ -413,7 +413,7 @@ _08089240:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	movs r1, #0
@@ -426,7 +426,7 @@ _08089264:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	mov r0, sb
@@ -443,7 +443,7 @@ _08089264:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	movs r1, #0
@@ -455,7 +455,7 @@ _08089264:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0x2c
 	subs r2, r2, r0
 	mov r0, sb
@@ -523,7 +523,7 @@ _08089336:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	ldrh r0, [r6]
@@ -534,7 +534,7 @@ _08089336:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	mov r1, r8
@@ -551,7 +551,7 @@ _08089336:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	ldrh r0, [r6]
@@ -562,7 +562,7 @@ _08089336:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0x2c
 	subs r2, r2, r0
 	mov r0, r8
@@ -605,7 +605,7 @@ _080893E6:
 	movs r0, #1
 	movs r1, #0x20
 	movs r2, #0x1c
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r1, _0808945C @ =gUnknown_03005958
 	ldr r0, [r7, #0x58]
 	adds r0, r0, r1

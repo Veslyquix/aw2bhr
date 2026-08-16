@@ -18,7 +18,7 @@ sub_0807BE90: @ 0x0807BE90
 	lsls r0, r0, #0x11
 	cmp r1, r0
 	beq _0807BEC0
-	ldr r0, _0807BED0 @ =gUnknown_03002EE0
+	ldr r0, _0807BED0 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #1
@@ -34,6 +34,6 @@ _0807BEC8:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0807BED0: .4byte gUnknown_03002EE0
+_0807BED0: .4byte gpKeySt
 _0807BED4: .4byte gUnknown_08616570
 

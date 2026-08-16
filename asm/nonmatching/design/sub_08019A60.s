@@ -6,7 +6,7 @@
 sub_08019A60: @ 0x08019A60
 	push {r4, r5, r6, r7, lr}
 	adds r6, r0, #0
-	ldr r0, _08019A94 @ =gUnknown_03002EE0
+	ldr r0, _08019A94 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #4
@@ -30,7 +30,7 @@ sub_08019A60: @ 0x08019A60
 	adds r0, r0, r3
 	b _08019AFC
 	.align 2, 0
-_08019A94: .4byte gUnknown_03002EE0
+_08019A94: .4byte gpKeySt
 _08019A98:
 	movs r0, #1
 	ands r0, r1

@@ -11,7 +11,7 @@ sub_08077C70: @ 0x08077C70
 	subs r1, r1, r0
 	movs r0, #0
 	bl sub_08077620
-	ldr r0, _08077CA8 @ =gUnknown_03002EE0
+	ldr r0, _08077CA8 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r0, [r0, #4]
 	cmp r0, #0
@@ -28,5 +28,5 @@ _08077C9C:
 	bx r0
 	.align 2, 0
 _08077CA4: .4byte gUnknown_0300064C
-_08077CA8: .4byte gUnknown_03002EE0
+_08077CA8: .4byte gpKeySt
 

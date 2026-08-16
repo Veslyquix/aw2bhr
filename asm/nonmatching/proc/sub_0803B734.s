@@ -26,7 +26,7 @@ _0803B74C:
 	movs r0, #0x14
 	str r0, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	bl sub_0803B35C
 	add sp, #4
 	pop {r4, r5}

@@ -98,7 +98,7 @@ _08043A3E:
 	str r0, [sp]
 	movs r0, #0
 	mov r3, sl
-	bl sub_0801BEBC
+	bl PutSprite
 	mov r7, sb
 	ldr r0, [r7]
 	adds r0, #6

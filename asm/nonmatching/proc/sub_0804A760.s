@@ -465,7 +465,7 @@ _0804AAC6:
 	lsls r1, r1, #0x15
 	lsrs r1, r1, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0804AAD6:
 	ldr r0, [r7]
 	ldr r1, [r0]

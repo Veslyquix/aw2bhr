@@ -6,7 +6,7 @@
 sub_08019510: @ 0x08019510
 	push {r4, r5, lr}
 	adds r4, r0, #0
-	ldr r5, _08019558 @ =gUnknown_03002EE0
+	ldr r5, _08019558 @ =gpKeySt
 	ldr r0, [r5]
 	ldrh r1, [r0, #0xc]
 	movs r0, #9
@@ -39,6 +39,6 @@ _0801954E:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08019558: .4byte gUnknown_03002EE0
+_08019558: .4byte gpKeySt
 _0801955C: .4byte gUnknown_03002514
 

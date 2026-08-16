@@ -53,7 +53,7 @@ sub_08012C58: @ 0x08012C58
 	ldr r1, [r7, #0x3c]
 	mov r0, sl
 	bl sub_08012C48
-	ldr r3, _08012E30 @ =gUnknown_030030CC
+	ldr r3, _08012E30 @ =gDispIo
 	ldrb r0, [r3]
 	movs r2, #8
 	rsbs r2, r2, #0
@@ -221,7 +221,7 @@ _08012E20: .4byte gUnknown_03002B6C
 _08012E24: .4byte gUnknown_03001FE8
 _08012E28: .4byte gUnknown_030030B4
 _08012E2C: .4byte gUnknown_0300251C
-_08012E30: .4byte gUnknown_030030CC
+_08012E30: .4byte gDispIo
 _08012E34: .4byte gUnknown_08499580
 _08012E38: .4byte 0x000003FF
 _08012E3C: .4byte gUnknown_08499584

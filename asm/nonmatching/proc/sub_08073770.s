@@ -21,7 +21,7 @@ _08073780:
 	ble _08073780
 	movs r2, #0
 	str r2, [r5, #0x58]
-	ldr r3, _080737D0 @ =gUnknown_030030CC
+	ldr r3, _080737D0 @ =gDispIo
 	ldrb r1, [r3, #1]
 	movs r0, #0x21
 	rsbs r0, r0, #0
@@ -51,7 +51,7 @@ _08073780:
 	.align 2, 0
 _080737C8: .4byte gUnknown_0202FDE4
 _080737CC: .4byte gUnknown_0202F8DC
-_080737D0: .4byte gUnknown_030030CC
+_080737D0: .4byte gDispIo
 _080737D4: .4byte gUnknown_03002B68
 _080737D8: .4byte gUnknown_03002B30
 _080737DC: .4byte gUnknown_030024E4

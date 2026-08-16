@@ -35,7 +35,7 @@ _0807A9BE:
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r7, #4
 	adds r0, r6, r0
 	ldr r0, [r0]
@@ -45,7 +45,7 @@ _0807A9BE:
 	lsls r1, r1, #0xe
 	ldr r2, _0807AA44 @ =0x06001B00
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r7, #0
 	adds r0, #8
 	adds r0, r6, r0
@@ -56,14 +56,14 @@ _0807A9BE:
 	lsls r1, r1, #0xe
 	ldr r2, _0807AA48 @ =0x06003600
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r7, #0
 	adds r0, #0xc
 	adds r0, r6, r0
 	ldr r0, [r0]
 	ldr r1, _0807AA4C @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B1C
 	cmp r5, #7
 	bne _0807AA50
@@ -73,7 +73,7 @@ _0807A9BE:
 	mov r2, r8
 	lsls r1, r2, #5
 	movs r2, #0xe0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	b _0807AA62
 	.align 2, 0
 _0807AA38: .4byte gUnknown_03004008
@@ -90,7 +90,7 @@ _0807AA50:
 	mov r2, r8
 	lsls r1, r2, #5
 	movs r2, #0xc0
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0807AA62:
 	pop {r3}
 	mov r8, r3

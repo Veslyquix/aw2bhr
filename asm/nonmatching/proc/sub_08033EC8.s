@@ -33,7 +33,7 @@ _08033EDC:
 	str r0, [sp]
 	movs r0, #0
 	movs r1, #0x60
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	cmp r4, #2
 	ble _08033EDC
 	add sp, #4

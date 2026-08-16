@@ -5,7 +5,7 @@
 sub_0806E7FC: @ 0x0806E7FC
 	push {lr}
 	ldr r3, _0806E824 @ =gUnknown_081A47E4
-	ldr r2, _0806E828 @ =gUnknown_030020C0
+	ldr r2, _0806E828 @ =gPal
 	ldr r0, _0806E82C @ =gUnknown_03004008
 	ldr r0, [r0]
 	movs r1, #0x1f
@@ -23,6 +23,6 @@ sub_0806E7FC: @ 0x0806E7FC
 	bx r0
 	.align 2, 0
 _0806E824: .4byte gUnknown_081A47E4
-_0806E828: .4byte gUnknown_030020C0
+_0806E828: .4byte gPal
 _0806E82C: .4byte gUnknown_03004008
 

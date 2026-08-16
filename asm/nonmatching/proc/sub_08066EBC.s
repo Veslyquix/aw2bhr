@@ -13,7 +13,7 @@ sub_08066EBC: @ 0x08066EBC
 	ble _08066ECE
 	subs r1, r0, r1
 _08066ECE:
-	ldr r3, _08066F10 @ =gUnknown_030020C0
+	ldr r3, _08066F10 @ =gPal
 	adds r1, #0xa
 	lsls r0, r1, #0xa
 	lsls r2, r1, #5
@@ -44,7 +44,7 @@ _08066ECE:
 	bx r0
 	.align 2, 0
 _08066F0C: .4byte gUnknown_03004008
-_08066F10: .4byte gUnknown_030020C0
+_08066F10: .4byte gPal
 _08066F14: .4byte gUnknown_0817AF18
 _08066F18: .4byte 0x000003B2
 _08066F1C: .4byte 0x000003BE

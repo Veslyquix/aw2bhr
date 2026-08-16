@@ -95,12 +95,12 @@ _08040060:
 _0804006A:
 	ldr r1, _08040084 @ =0x06013940
 	adds r0, r6, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r1, #0xa8
 	lsls r1, r1, #2
 	adds r0, r5, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4, r5, r6}
 	pop {r0}
 	bx r0

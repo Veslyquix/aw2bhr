@@ -65,7 +65,7 @@ _080680A4:
 _080680AA:
 	mov r2, sb
 	adds r1, r2, r6
-	bl sub_08011CAC
+	bl Decompress
 	mov ip, r7
 	movs r0, #0
 	mov r3, r8

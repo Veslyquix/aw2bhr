@@ -22,7 +22,7 @@ sub_08080254: @ 0x08080254
 	movs r0, #1
 	mov r1, sb
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	ldr r6, _080802F4 @ =0xFFFFFF00
 	movs r2, #0
@@ -31,7 +31,7 @@ sub_08080254: @ 0x08080254
 	movs r0, #0
 	movs r1, #0
 	adds r2, r6, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r4, r0
 	ldr r0, _080802F8 @ =gUnknown_03001FF8
 	strh r4, [r0]
@@ -43,7 +43,7 @@ sub_08080254: @ 0x08080254
 	movs r0, #1
 	adds r1, r6, #0
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	movs r0, #0
 	ldrsh r3, [r7, r0]
@@ -51,7 +51,7 @@ sub_08080254: @ 0x08080254
 	movs r0, #0
 	movs r1, #0
 	mov r2, sb
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r4, r0
 	mov r1, r8
 	strh r4, [r1]

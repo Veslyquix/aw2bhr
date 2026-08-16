@@ -28,7 +28,7 @@ _0807B530:
 	adds r1, r5, #0
 	adds r2, r7, #0
 	ldr r3, _0807B570 @ =gUnknown_0848B690
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r0, r4, #0
 	movs r1, #0xa
 	bl Div

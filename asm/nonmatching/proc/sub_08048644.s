@@ -51,7 +51,7 @@ sub_08048644: @ 0x08048644
 	lsrs r2, r2, #0x10
 	adds r0, r5, #0
 	mov r1, sl
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r7]
 	movs r1, #0x40
 	bl DivRem
@@ -82,7 +82,7 @@ sub_08048644: @ 0x08048644
 	lsrs r2, r2, #0x10
 	ldr r0, _08048794 @ =gUnknown_0823E550
 	adds r1, r4, #0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	adds r6, #8
 	ldr r0, _08048798 @ =0x000001FF
 	ands r6, r0
@@ -95,7 +95,7 @@ sub_08048644: @ 0x08048644
 	str r0, [sp]
 	movs r0, #0
 	adds r1, r6, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r4, _080487A4 @ =gUnknown_084C30F8
 	ldr r1, [r4]
 	ldr r2, _080487A8 @ =0x00000836
@@ -141,7 +141,7 @@ _08048760:
 	movs r1, #0xa6
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0804877E:
 	add sp, #4
 	pop {r3, r4, r5}

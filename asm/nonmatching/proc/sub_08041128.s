@@ -22,7 +22,7 @@ sub_08041128: @ 0x08041128
 	adds r0, r0, r1
 	ldr r0, [r0]
 	ldr r1, _08041178 @ =0x06014940
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0804117C @ =gUnknown_081213F4
 	lsls r4, r4, #5
 	adds r4, r4, r0
@@ -32,7 +32,7 @@ sub_08041128: @ 0x08041128
 	adds r0, r4, #0
 	adds r1, r5, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4, r5}
 	pop {r0}
 	bx r0

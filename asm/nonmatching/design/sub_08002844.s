@@ -63,7 +63,7 @@ _080028A0:
 	movs r1, #0xb0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	b _080028FA
 	.align 2, 0
 _080028C4: .4byte gUnknown_0200B0B0
@@ -84,7 +84,7 @@ _080028DC:
 	movs r1, #0xf0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	adds r6, r4, #0
 _080028FA:
 	movs r0, #8

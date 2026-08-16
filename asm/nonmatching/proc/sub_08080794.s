@@ -58,7 +58,7 @@ _080807E0:
 	movs r0, #0
 	movs r1, #0xf0
 	subs r2, #0x2c
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	movs r0, #0
 	ldrsh r3, [r7, r0]
@@ -69,7 +69,7 @@ _080807E0:
 	movs r0, #1
 	movs r1, #0xf0
 	subs r2, #0x2c
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #1
 	adds r4, r4, r0
 	adds r0, r4, #0
@@ -120,7 +120,7 @@ _08080850:
 	movs r1, #0x20
 	rsbs r1, r1, #0
 	movs r2, #0xa0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	movs r0, #0
 	ldrsh r3, [r7, r0]
@@ -132,7 +132,7 @@ _08080850:
 	movs r1, #0x20
 	rsbs r1, r1, #0
 	movs r2, #0xa0
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #1
 	adds r4, r4, r0
 	adds r0, r4, #0
@@ -167,7 +167,7 @@ _080808C8:
 	movs r1, #0x20
 	rsbs r1, r1, #0
 	movs r2, #0xf0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	movs r1, #0
 	ldrsh r3, [r7, r1]
@@ -179,7 +179,7 @@ _080808C8:
 	movs r1, #0x20
 	rsbs r1, r1, #0
 	movs r2, #0xf0
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #1
 	adds r4, r4, r0
 	adds r0, r4, #0
@@ -202,7 +202,7 @@ _08080928:
 	movs r0, #0
 	movs r2, #0x40
 	ldr r3, _08080940 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 	b _080809BA
 	.align 2, 0
 _08080938: .4byte gUnknown_030059A0
@@ -233,7 +233,7 @@ _08080944:
 	movs r0, #0
 	movs r1, #0xa0
 	subs r2, #0x2c
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	movs r0, #0
 	ldrsh r3, [r7, r0]
@@ -244,7 +244,7 @@ _08080944:
 	movs r0, #0
 	movs r1, #0xa0
 	subs r2, #0x2c
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #1
 	adds r4, r4, r0
 	adds r0, r4, #0
@@ -262,7 +262,7 @@ _08080944:
 	movs r0, #0
 	movs r2, #0x40
 	ldr r3, _080809D4 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 _080809BA:
 	ldr r1, [r5, #0x34]
 	ldr r2, [r5, #0x38]
@@ -270,7 +270,7 @@ _080809BA:
 	str r3, [sp]
 	movs r0, #0
 	ldr r3, _080809D4 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 	b _08080A0A
 	.align 2, 0
 _080809CC: .4byte gUnknown_030058D0
@@ -301,7 +301,7 @@ _080809EE:
 	movs r0, #0
 	movs r2, #0x40
 	ldr r3, _08080A50 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 _08080A0A:
 	ldr r3, [sp, #4]
 	adds r3, #8

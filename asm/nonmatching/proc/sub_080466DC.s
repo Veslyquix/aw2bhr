@@ -13,7 +13,7 @@ sub_080466DC: @ 0x080466DC
 	adds r5, r0, #0
 	cmp r1, #0
 	bne _08046738
-	ldr r4, _0804672C @ =gUnknown_03002EE0
+	ldr r4, _0804672C @ =gpKeySt
 	ldr r0, [r4]
 	ldrh r1, [r0, #4]
 	movs r0, #3
@@ -38,7 +38,7 @@ sub_080466DC: @ 0x080466DC
 	b _0804675C
 	.align 2, 0
 _08046728: .4byte gUnknown_0812A10C
-_0804672C: .4byte gUnknown_03002EE0
+_0804672C: .4byte gpKeySt
 _08046730: .4byte gUnknown_03001FBC
 _08046734: .4byte gUnknown_03002F1C
 _08046738:

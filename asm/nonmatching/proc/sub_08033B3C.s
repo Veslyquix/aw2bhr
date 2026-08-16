@@ -46,7 +46,7 @@ _08033B7A:
 	str r0, [sp]
 	movs r0, #0
 	movs r2, #0x38
-	bl sub_08074234
+	bl Interpolate
 	movs r6, #0
 	movs r0, #0x38
 	adds r0, r0, r7
@@ -81,7 +81,7 @@ _08033BB8:
 	movs r0, #5
 	movs r1, #0xf0
 	movs r2, #0x60
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r0, [r4]
 	adds r0, #1
@@ -103,7 +103,7 @@ _08033BD6:
 	lsls r0, r4, #0xc
 	str r0, [sp]
 	movs r0, #0
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	adds r6, r4, #0
 	cmp r6, #2
 	ble _08033B98

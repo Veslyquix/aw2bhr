@@ -49,7 +49,7 @@ _080002CC:
 _080002D8:
 	add r0, r0, r1, lsl #5
 	add r0, r0, r2, lsl #10
-	ldr r1, _08000228 @ =gUnknown_030020C0
+	ldr r1, _08000228 @ =gPal
 	add r1, r1, r6
 	strh r0, [r1, r7]
 	subs r6, r6, #2

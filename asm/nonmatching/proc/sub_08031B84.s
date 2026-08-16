@@ -9,7 +9,7 @@ sub_08031B84: @ 0x08031B84
 	ldrh r0, [r1, #6]
 	ldr r0, _08031BB8 @ =0x00009ABC
 	strh r0, [r1, #6]
-	ldr r0, _08031BBC @ =gUnknown_03002EE0
+	ldr r0, _08031BBC @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -30,7 +30,7 @@ _08031BA4:
 	.align 2, 0
 _08031BB4: .4byte gUnknown_0849B01C
 _08031BB8: .4byte 0x00009ABC
-_08031BBC: .4byte gUnknown_03002EE0
+_08031BBC: .4byte gpKeySt
 _08031BC0: .4byte 0x00000212
 _08031BC4:
 	ldr r1, _08031BD8 @ =gUnknown_0300410C

@@ -41,7 +41,7 @@ _08069084:
 	bl sub_08067A24
 	b _08069134
 _0806908A:
-	ldr r0, _080690A8 @ =gUnknown_030020C0
+	ldr r0, _080690A8 @ =gPal
 	ldr r2, _080690AC @ =0x00007FFF
 	adds r0, #2
 	movs r1, #0xe
@@ -55,13 +55,13 @@ _08069092:
 	bl sub_080677E8
 	b _08069134
 	.align 2, 0
-_080690A8: .4byte gUnknown_030020C0
+_080690A8: .4byte gPal
 _080690AC: .4byte 0x00007FFF
 _080690B0:
 	ldr r0, _080690F0 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0
 	movs r1, #0
 	movs r2, #0xe
@@ -90,7 +90,7 @@ _080690B0:
 _080690F0: .4byte gUnknown_0823BDE0
 _080690F4: .4byte 0xFFFFC000
 _080690F8:
-	ldr r0, _08069110 @ =gUnknown_030020C0
+	ldr r0, _08069110 @ =gPal
 	ldr r2, _08069114 @ =0x00007FFF
 	adds r0, #2
 	movs r1, #0xe
@@ -103,13 +103,13 @@ _08069100:
 	bl sub_080135A4
 	b _08069134
 	.align 2, 0
-_08069110: .4byte gUnknown_030020C0
+_08069110: .4byte gPal
 _08069114: .4byte 0x00007FFF
 _08069118:
 	ldr r0, _08069140 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0x32
 	bl sub_08067C7C
 	bl sub_0806780C

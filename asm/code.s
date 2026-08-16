@@ -454,7 +454,7 @@ _08000750:
 	bl sub_08023518
 	movs r0, #8
 	bl sub_08023908
-	ldr r0, _08000778 @ =gUnknown_03002EE0
+	ldr r0, _08000778 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #0xb
@@ -468,7 +468,7 @@ _08000750:
 	str r1, [r0, #0xc]
 	b _08000812
 	.align 2, 0
-_08000778: .4byte gUnknown_03002EE0
+_08000778: .4byte gpKeySt
 _0800077C:
 	ldr r0, [r2, #0xc]
 	subs r0, #1
@@ -1573,7 +1573,7 @@ sub_0800105C: @ 0x0800105C
 	.align 2, 0
 _08001080: .4byte gUnknown_0808D700
 _08001084:
-	ldr r0, _08001114 @ =gUnknown_03002EE0
+	ldr r0, _08001114 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r0, [r0, #2]
 	lsrs r5, r0, #4
@@ -1648,7 +1648,7 @@ _08001106:
 	pop {r1}
 	bx r1
 	.align 2, 0
-_08001114: .4byte gUnknown_03002EE0
+_08001114: .4byte gpKeySt
 _08001118: .4byte gUnknown_0808D704
 _0800111C: .4byte gUnknown_0808D708
 _08001120: .4byte gUnknown_030032C4

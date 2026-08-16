@@ -1,8 +1,8 @@
 	.include "macro.inc"
 	.syntax unified
 
-	thumb_func_start sub_08074234
-sub_08074234: @ 0x08074234
+	thumb_func_start Interpolate
+Interpolate: @ 0x08074234
 	push {r4, r5, r6, lr}
 	adds r6, r1, #0
 	ldr r5, [sp, #0x10]

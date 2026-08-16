@@ -26,7 +26,7 @@ _080438B6:
 	str r0, [sp]
 	movs r0, #0
 	adds r1, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	b _080438EA
 	.align 2, 0
 _080438CC: .4byte gUnknown_08499598
@@ -40,7 +40,7 @@ _080438D8:
 	str r0, [sp]
 	movs r0, #0
 	adds r1, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 _080438EA:
 	add sp, #4
 	pop {r4}

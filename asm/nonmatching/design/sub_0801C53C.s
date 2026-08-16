@@ -40,7 +40,7 @@ sub_0801C53C: @ 0x0801C53C
 	lsls r3, r3, #8
 	mov sb, r3
 _0801C582:
-	ldr r0, _0801C634 @ =gUnknown_030030CC
+	ldr r0, _0801C634 @ =gDispIo
 	ldrb r1, [r0]
 	movs r0, #0x40
 	ands r0, r1
@@ -130,7 +130,7 @@ _0801C61E:
 	bx r0
 	.align 2, 0
 _0801C630: .4byte gUnknown_0848B5C4
-_0801C634: .4byte gUnknown_030030CC
+_0801C634: .4byte gDispIo
 _0801C638: .4byte 0x000003FF
 _0801C63C: .4byte 0x06010000
 

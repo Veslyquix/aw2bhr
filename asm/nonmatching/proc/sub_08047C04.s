@@ -24,7 +24,7 @@ sub_08047C04: @ 0x08047C04
 	ldr r0, _08047E34 @ =gUnknown_0823E140
 	ldr r4, _08047E38 @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08047E3C @ =0x06013A40
 	mov r8, r0
 	movs r1, #0xa0
@@ -133,12 +133,12 @@ _08047CBC:
 	movs r1, #0xa8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08047E78 @ =gUnknown_0823FFA8
 	ldr r2, _08047E7C @ =0xFFFFF800
 	adds r4, r4, r2
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, _08047E80 @ =0x06014100
 	adds r0, r4, #0
 	movs r2, #0x10

@@ -44,7 +44,7 @@ _08043C68:
 	mov r0, r8
 	adds r1, r7, #0
 	adds r2, r5, #0
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	add sp, #4
 	pop {r3}
 	mov r8, r3

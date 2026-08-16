@@ -7,7 +7,7 @@ sub_08012420: @ 0x08012420
 	push {r4, lr}
 	movs r1, #0x80
 	lsls r1, r1, #0x13
-	ldr r0, _0801251C @ =gUnknown_030030CC
+	ldr r0, _0801251C @ =gDispIo
 	ldrh r0, [r0]
 	strh r0, [r1]
 	adds r1, #4
@@ -130,7 +130,7 @@ sub_08012420: @ 0x08012420
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0801251C: .4byte gUnknown_030030CC
+_0801251C: .4byte gDispIo
 _08012520: .4byte gUnknown_030020B4
 _08012524: .4byte 0x04000010
 _08012528: .4byte gUnknown_03001FF8

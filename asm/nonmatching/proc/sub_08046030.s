@@ -54,7 +54,7 @@ sub_08046030: @ 0x08046030
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08046168 @ =gUnknown_0812B49C
 	ldr r1, _0804616C @ =0x060146A0
 	movs r2, #0xc0

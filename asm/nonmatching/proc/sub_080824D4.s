@@ -75,7 +75,7 @@ _08082540:
 	str r0, [sp]
 	movs r0, #2
 	ldr r3, _08082578 @ =gUnknown_08615C76
-	bl sub_0801BEBC
+	bl PutSprite
 	movs r4, #3
 	b _080825D0
 	.align 2, 0
@@ -123,7 +123,7 @@ _0808257C:
 	str r3, [sp]
 	movs r0, #2
 	ldr r3, _08082658 @ =gUnknown_08615C84
-	bl sub_0801BEBC
+	bl PutSprite
 _080825D0:
 	adds r5, r4, #0
 	cmp r5, #4

@@ -23,13 +23,13 @@ sub_0808A3DC: @ 0x0808A3DC
 	lsls r1, r1, #0xe
 	ldr r2, _0808A46C @ =0x06000400
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0808A470 @ =gUnknown_0823E684
 	ldr r1, [r4]
 	movs r2, #0x80
 	lsls r2, r2, #3
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	movs r2, #0
 	ldr r3, _0808A474 @ =0x000003FF
 _0808A41C:

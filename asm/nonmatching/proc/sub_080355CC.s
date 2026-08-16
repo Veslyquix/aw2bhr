@@ -157,13 +157,13 @@ _08035682:
 	lsrs r1, r1, #0x10
 	adds r0, r4, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	adds r0, r6, #0
 	bl sub_080359A4
 	adds r0, r6, #0
 	bl sub_08035B3C
 	ldr r1, [r6, #0x48]
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r6, #0
 _08035724:
 	add sp, #8

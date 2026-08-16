@@ -33,7 +33,7 @@ _0801DB36:
 	bne _0801DB3C
 	movs r4, #2
 _0801DB3C:
-	ldr r0, _0801DC00 @ =gUnknown_0808F100
+	ldr r0, _0801DC00 @ =gSinLut
 	mov sb, r0
 	mov r7, r8
 	adds r7, #0x40
@@ -119,7 +119,7 @@ _0801DBD0:
 	ldr r1, [sp, #4]
 	mov r2, sl
 	adds r3, r5, #0
-	bl sub_0801E108
+	bl SetObjAffine
 _0801DBEC:
 	add sp, #8
 	pop {r3, r4, r5}
@@ -131,5 +131,5 @@ _0801DBEC:
 	bx r0
 	.align 2, 0
 _0801DBFC: .4byte gUnknown_0200E438
-_0801DC00: .4byte gUnknown_0808F100
+_0801DC00: .4byte gSinLut
 

@@ -14,7 +14,7 @@ sub_0802DEFC: @ 0x0802DEFC
 	lsls r0, r0, #0x18
 	cmp r0, #0
 	beq _0802DFA8
-	ldr r0, _0802DF38 @ =gUnknown_03002EE0
+	ldr r0, _0802DF38 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r5, [r0, #4]
 	movs r0, #2
@@ -28,7 +28,7 @@ sub_0802DEFC: @ 0x0802DEFC
 	strh r0, [r1]
 	b _0802DFA8
 	.align 2, 0
-_0802DF38: .4byte gUnknown_03002EE0
+_0802DF38: .4byte gpKeySt
 _0802DF3C: .4byte gUnknown_03003334
 _0802DF40:
 	ldr r0, _0802DFB0 @ =gUnknown_08499590

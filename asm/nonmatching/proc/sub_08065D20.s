@@ -15,7 +15,7 @@ sub_08065D20: @ 0x08065D20
 	lsrs r1, r0, #0x1f
 	adds r0, r0, r1
 	asrs r4, r0, #1
-	ldr r0, _08065D5C @ =gUnknown_03002EE0
+	ldr r0, _08065D5C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0xc0
@@ -33,7 +33,7 @@ sub_08065D20: @ 0x08065D20
 	b _08065D62
 	.align 2, 0
 _08065D58: .4byte gUnknown_0816E11C
-_08065D5C: .4byte gUnknown_03002EE0
+_08065D5C: .4byte gpKeySt
 _08065D60:
 	movs r0, #1
 _08065D62:

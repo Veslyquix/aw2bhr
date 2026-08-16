@@ -100,7 +100,7 @@ sub_0804DB14: @ 0x0804DB14
 	ldr r2, [sp, #8]
 	adds r1, r2, r1
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	movs r0, #8
 	add sl, r0
 	add sl, r5

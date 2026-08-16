@@ -17,7 +17,7 @@ sub_08067C94: @ 0x08067C94
 	movs r0, #4
 	movs r1, #0xf0
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	str r1, [r4, #0x2c]
 	subs r0, #0x80
@@ -34,7 +34,7 @@ _08067CC6:
 	str r2, [sp]
 	movs r0, #4
 	movs r2, #0x70
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r4, #0x2c]
 	cmp r0, #0
 	bge _08067CDC
@@ -54,7 +54,7 @@ _08067CEA:
 	ldr r3, _08067D00 @ =gUnknown_085810A8
 	movs r0, #0
 	str r0, [sp]
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r4}
 	pop {r0}

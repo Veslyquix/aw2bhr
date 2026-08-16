@@ -53,7 +53,7 @@ _080194BA:
 	ldrsh r0, [r0, r2]
 	cmp r0, #0
 	beq _080194EE
-	ldr r0, _08019504 @ =gUnknown_03002EE0
+	ldr r0, _08019504 @ =gpKeySt
 	ldr r1, [r0]
 	mov r2, r8
 	ldr r0, [r2]
@@ -77,7 +77,7 @@ _080194EE:
 _080194F8: .4byte gUnknown_0808E5A4
 _080194FC: .4byte gUnknown_0200C528
 _08019500: .4byte gUnknown_03001404
-_08019504: .4byte gUnknown_03002EE0
+_08019504: .4byte gpKeySt
 _08019508: .4byte gUnknown_03004538
 _0801950C: .4byte gUnknown_03004518
 

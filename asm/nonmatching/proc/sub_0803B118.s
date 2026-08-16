@@ -5,7 +5,7 @@
 sub_0803B118: @ 0x0803B118
 	push {lr}
 	adds r2, r0, #0
-	ldr r0, _0803B148 @ =gUnknown_03002EE0
+	ldr r0, _0803B148 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0]
 	movs r0, #4
@@ -25,7 +25,7 @@ sub_0803B118: @ 0x0803B118
 	bl sub_08015C30
 	b _0803B156
 	.align 2, 0
-_0803B148: .4byte gUnknown_03002EE0
+_0803B148: .4byte gpKeySt
 _0803B14C: .4byte gUnknown_03001FBC
 _0803B150:
 	adds r0, r2, #0

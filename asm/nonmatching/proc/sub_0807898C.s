@@ -8,12 +8,12 @@ sub_0807898C: @ 0x0807898C
 	mov r6, sb
 	mov r5, r8
 	push {r5, r6, r7}
-	ldr r0, _08078ABC @ =gUnknown_030030CC
+	ldr r0, _08078ABC @ =gDispIo
 	ldrb r1, [r0]
 	movs r0, #8
 	rsbs r0, r0, #0
 	ands r0, r1
-	ldr r1, _08078ABC @ =gUnknown_030030CC
+	ldr r1, _08078ABC @ =gDispIo
 	strb r0, [r1]
 	ldrb r0, [r1, #1]
 	movs r6, #1
@@ -33,7 +33,7 @@ sub_0807898C: @ 0x0807898C
 	ands r0, r1
 	movs r1, #0x7f
 	ands r0, r1
-	ldr r1, _08078ABC @ =gUnknown_030030CC
+	ldr r1, _08078ABC @ =gDispIo
 	strb r0, [r1, #1]
 	ldr r0, _08078AC0 @ =gUnknown_03002B6C
 	mov r8, r0
@@ -137,11 +137,11 @@ sub_0807898C: @ 0x0807898C
 	bl sub_08013C54
 	bl sub_08013CA8
 	bl sub_080616F0
-	ldr r1, _08078ABC @ =gUnknown_030030CC
+	ldr r1, _08078ABC @ =gDispIo
 	ldrb r0, [r1]
 	movs r1, #0x40
 	orrs r0, r1
-	ldr r1, _08078ABC @ =gUnknown_030030CC
+	ldr r1, _08078ABC @ =gDispIo
 	strb r0, [r1]
 	pop {r3, r4, r5}
 	mov r8, r3
@@ -151,7 +151,7 @@ sub_0807898C: @ 0x0807898C
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08078ABC: .4byte gUnknown_030030CC
+_08078ABC: .4byte gDispIo
 _08078AC0: .4byte gUnknown_03002B6C
 _08078AC4: .4byte gUnknown_03001FE8
 _08078AC8: .4byte gUnknown_030030B4

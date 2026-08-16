@@ -17,7 +17,7 @@ sub_08073B00: @ 0x08073B00
 	str r0, [sp]
 	movs r0, #4
 	movs r1, #0
-	bl sub_08074234
+	bl Interpolate
 	mov r8, r0
 	ldr r3, [r7, #0x58]
 	ldr r0, [r7, #0x5c]
@@ -25,7 +25,7 @@ sub_08073B00: @ 0x08073B00
 	movs r0, #4
 	movs r1, #0
 	movs r2, #0xf0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [sp, #4]
 	ldr r3, [r7, #0x58]
 	ldr r0, [r7, #0x5c]
@@ -33,9 +33,9 @@ sub_08073B00: @ 0x08073B00
 	movs r0, #4
 	movs r1, #0x50
 	movs r2, #0xa0
-	bl sub_08074234
+	bl Interpolate
 	mov sb, r0
-	ldr r1, _08073C68 @ =gUnknown_030030CC
+	ldr r1, _08073C68 @ =gDispIo
 	ldrb r0, [r1, #1]
 	movs r1, #0x20
 	orrs r0, r1
@@ -43,7 +43,7 @@ sub_08073B00: @ 0x08073B00
 	orrs r0, r1
 	movs r1, #0x7f
 	ands r0, r1
-	ldr r1, _08073C68 @ =gUnknown_030030CC
+	ldr r1, _08073C68 @ =gDispIo
 	strb r0, [r1, #1]
 	ldr r3, _08073C6C @ =gUnknown_030030A4
 	ldrb r0, [r3]
@@ -152,7 +152,7 @@ sub_08073B00: @ 0x08073B00
 	str r6, [r1]
 	mov r0, r8
 	strh r6, [r0]
-	ldr r1, _08073C68 @ =gUnknown_030030CC
+	ldr r1, _08073C68 @ =gDispIo
 	ldrb r0, [r1, #1]
 	movs r1, #0x21
 	rsbs r1, r1, #0
@@ -162,7 +162,7 @@ sub_08073B00: @ 0x08073B00
 	ands r1, r0
 	movs r0, #0x7f
 	ands r1, r0
-	ldr r0, _08073C68 @ =gUnknown_030030CC
+	ldr r0, _08073C68 @ =gDispIo
 	strb r1, [r0, #1]
 	adds r0, r7, #0
 	bl Proc_Break
@@ -176,7 +176,7 @@ _08073C58:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08073C68: .4byte gUnknown_030030CC
+_08073C68: .4byte gDispIo
 _08073C6C: .4byte gUnknown_030030A4
 _08073C70: .4byte gUnknown_030030DC
 _08073C74: .4byte 0x040000BA

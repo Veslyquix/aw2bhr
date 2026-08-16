@@ -11,7 +11,7 @@ sub_08065F88: @ 0x08065F88
 	bl sub_08065C9C
 	bl sub_08065EB4
 	bl sub_08065EF4
-	ldr r0, _08065FE0 @ =gUnknown_03002EE0
+	ldr r0, _08065FE0 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -38,7 +38,7 @@ sub_08065F88: @ 0x08065F88
 	b _08066066
 	.align 2, 0
 _08065FDC: .4byte gUnknown_08580934
-_08065FE0: .4byte gUnknown_03002EE0
+_08065FE0: .4byte gpKeySt
 _08065FE4: .4byte gUnknown_08580D90
 _08065FE8: .4byte gUnknown_08580AF0
 _08065FEC: .4byte sub_08065F68

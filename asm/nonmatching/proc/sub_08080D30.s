@@ -68,7 +68,7 @@ sub_08080D30: @ 0x08080D30
 	movs r1, #1
 	orrs r2, r1
 	strb r2, [r3]
-	ldr r2, _08080DF8 @ =gUnknown_030030CC
+	ldr r2, _08080DF8 @ =gDispIo
 	ldrb r0, [r2, #1]
 	orrs r0, r1
 	orrs r0, r4
@@ -93,5 +93,5 @@ _08080DE8: .4byte gUnknown_03002B6C
 _08080DEC: .4byte gUnknown_03001FE8
 _08080DF0: .4byte gUnknown_030030B4
 _08080DF4: .4byte gUnknown_0300251C
-_08080DF8: .4byte gUnknown_030030CC
+_08080DF8: .4byte gDispIo
 

@@ -7,7 +7,7 @@ sub_0802C2B4: @ 0x0802C2B4
 	ldr r0, _0802C2D0 @ =gUnknown_0849A990
 	movs r1, #0
 	bl sub_080152EC
-	ldr r2, _0802C2D4 @ =gUnknown_030030CC
+	ldr r2, _0802C2D4 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -17,5 +17,5 @@ sub_0802C2B4: @ 0x0802C2B4
 	bx r0
 	.align 2, 0
 _0802C2D0: .4byte gUnknown_0849A990
-_0802C2D4: .4byte gUnknown_030030CC
+_0802C2D4: .4byte gDispIo
 

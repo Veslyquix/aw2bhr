@@ -12,7 +12,7 @@ sub_08067A4C: @ 0x08067A4C
 	str r0, [sp]
 	movs r0, #1
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	ldr r3, [r5, #0x3c]
 	ldr r0, [r5, #0x38]
@@ -20,7 +20,7 @@ sub_08067A4C: @ 0x08067A4C
 	movs r0, #0
 	movs r1, #0
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	ldr r3, _08067AC4 @ =gUnknown_030030E0
 	ldrb r2, [r3]
 	movs r1, #0x3f

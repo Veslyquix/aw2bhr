@@ -67,7 +67,7 @@ _08028E72:
 	str r0, [sp]
 	movs r0, #0
 	ldr r3, _08028ECC @ =gUnknown_08499FE4
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r4, #1
 	lsls r4, r4, #0x10
 	lsrs r2, r4, #0x10

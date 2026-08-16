@@ -21,7 +21,7 @@ sub_0801A57C: @ 0x0801A57C
 	movs r1, #0xb0
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r0}
 	bx r0
 	.align 2, 0

@@ -31,7 +31,7 @@ sub_08043FD8: @ 0x08043FD8
 	ldr r3, _08044028 @ =gUnknown_084A0790
 	str r5, [sp]
 	adds r0, r6, #0
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	add sp, #4
 	pop {r4, r5, r6, r7}
 	pop {r0}

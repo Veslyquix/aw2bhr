@@ -24,7 +24,7 @@ sub_0807CAFC: @ 0x0807CAFC
 	str r0, [sp]
 	movs r0, #5
 	movs r2, #0x24
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x30]
 	ldr r5, _0807CBC4 @ =gUnknown_03002F18
 	ldr r0, [r6, #0x3c]
@@ -62,7 +62,7 @@ _0807CB6C:
 	movs r0, #5
 	movs r1, #0x78
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x34]
 	ldrh r1, [r7]
 	adds r0, r1, #0
@@ -136,7 +136,7 @@ _0807CBF4:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807CC40
 	mov r1, sl
@@ -147,7 +147,7 @@ _0807CBF4:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807CC42
 	.align 2, 0
@@ -161,7 +161,7 @@ _0807CC42:
 	lsls r0, r0, #0x10
 	asrs r0, r0, #0x10
 	mov sb, r0
-	ldr r0, _0807CC9C @ =gUnknown_0808F100
+	ldr r0, _0807CC9C @ =gSinLut
 	movs r1, #0
 	ldrsh r4, [r0, r1]
 	rsbs r0, r4, #0
@@ -183,7 +183,7 @@ _0807CC42:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r5, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807CCA0
 	mov r1, sl
@@ -194,11 +194,11 @@ _0807CC42:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r5, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807CCA2
 	.align 2, 0
-_0807CC9C: .4byte gUnknown_0808F100
+_0807CC9C: .4byte gSinLut
 _0807CCA0:
 	movs r1, #2
 _0807CCA2:
@@ -207,7 +207,7 @@ _0807CCA2:
 	adds r4, r0, #0
 	lsls r4, r4, #0x10
 	asrs r4, r4, #0x10
-	ldr r0, _0807CD2C @ =gUnknown_0808F100
+	ldr r0, _0807CD2C @ =gSinLut
 	adds r0, #0x80
 	movs r1, #0
 	ldrsh r0, [r0, r1]
@@ -222,7 +222,7 @@ _0807CCA2:
 	mov r1, sb
 	mov r2, r8
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	movs r4, #0
 	adds r0, r6, #0
 	adds r0, #0x64
@@ -268,7 +268,7 @@ _0807CCF0:
 	bl sub_0801F34C
 	b _0807CD52
 	.align 2, 0
-_0807CD2C: .4byte gUnknown_0808F100
+_0807CD2C: .4byte gSinLut
 _0807CD30: .4byte gUnknown_03005958
 _0807CD34: .4byte gUnknown_030059C0
 _0807CD38: .4byte gUnknown_0300599C
@@ -386,7 +386,7 @@ _0807CE08:
 	movs r0, #0
 	str r0, [sp]
 	movs r1, #0x20
-	bl sub_0801BEBC
+	bl PutSprite
 _0807CE26:
 	ldr r0, [r6, #0x34]
 	adds r0, #0xb0

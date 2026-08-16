@@ -89,7 +89,7 @@ sub_08040EF4: @ 0x08040EF4
 	adds r1, r6, #0
 	adds r2, r4, #0
 	bl sub_0801C254
-	ldr r4, _08041038 @ =gUnknown_0808F100
+	ldr r4, _08041038 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -133,7 +133,7 @@ _08040FF2:
 	adds r1, r7, #0
 	adds r2, r6, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r1, [sp, #8]
 	lsrs r0, r1, #0x10
 	mov r1, r8
@@ -155,5 +155,5 @@ _08040FF2:
 	bx r0
 	.align 2, 0
 _08041034: .4byte 0x000001FF
-_08041038: .4byte gUnknown_0808F100
+_08041038: .4byte gSinLut
 

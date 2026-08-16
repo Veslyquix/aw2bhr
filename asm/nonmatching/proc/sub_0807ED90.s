@@ -21,7 +21,7 @@ sub_0807ED90: @ 0x0807ED90
 	movs r0, #1
 	movs r1, #0xf8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x2c]
 	movs r7, #0
 	ldrsh r0, [r4, r7]
@@ -101,7 +101,7 @@ _0807EE34:
 _0807EE46:
 	movs r2, #0
 _0807EE48:
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x2c]
 _0807EE4E:
 	movs r4, #0
@@ -127,7 +127,7 @@ _0807EE5E:
 	movs r2, #0x30
 	mov r7, r8
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #0x40
 	adds r4, #1
 	cmp r4, #1

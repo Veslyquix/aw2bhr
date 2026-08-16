@@ -33,7 +33,7 @@ sub_0804C99C: @ 0x0804C99C
 	adds r1, r6, r1
 	ldr r1, [r1]
 	str r3, [sp, #4]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0804CA38 @ =gUnknown_08552178
 	adds r6, r6, r4
 	lsls r6, r6, #1

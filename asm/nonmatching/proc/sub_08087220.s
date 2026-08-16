@@ -14,7 +14,7 @@ sub_08087220: @ 0x08087220
 	ldr r0, _08087244 @ =0x00005470
 	str r0, [sp]
 	movs r0, #1
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r0}
 	bx r0

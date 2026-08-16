@@ -324,7 +324,7 @@ SECTIONS
 		. = 0x0020B0; gUnknown_030020B0 = .;
 		. = 0x0020B4; gUnknown_030020B4 = .;
 		. = 0x0020B8; gUnknown_030020B8 = .;
-		. = 0x0020C0; gUnknown_030020C0 = .;
+		. = 0x0020C0; gPal = .;
 		. = 0x0024C0; gUnknown_030024C0 = .;
 		. = 0x0024C4; gUnknown_030024C4 = .;
 		. = 0x0024C8; gUnknown_030024C8 = .;
@@ -362,7 +362,7 @@ SECTIONS
 		. = 0x002B70; gUnknown_03002B70 = .;
 		. = 0x002B80; gUnknown_03002B80 = .;
 		. = 0x002EDC; gUnknown_03002EDC = .;
-		. = 0x002EE0; gUnknown_03002EE0 = .;
+		. = 0x002EE0; gpKeySt = .;
 		. = 0x002EE4; gUnknown_03002EE4 = .;
 		. = 0x002EE8; gUnknown_03002EE8 = .;
 		. = 0x002EEC; gUnknown_03002EEC = .;
@@ -414,7 +414,7 @@ SECTIONS
 		. = 0x0030C0; gUnknown_030030C0 = .;
 		. = 0x0030C4; gUnknown_030030C4 = .;
 		. = 0x0030C8; gUnknown_030030C8 = .;
-		. = 0x0030CC; gUnknown_030030CC = .;
+		. = 0x0030CC; gDispIo = .;
 		. = 0x0030D0; gUnknown_030030D0 = .;
 		. = 0x0030D4; gUnknown_030030D4 = .;
 		. = 0x0030D8; gUnknown_030030D8 = .;
@@ -981,7 +981,7 @@ SECTIONS
 		asm/nonmatching/design/sub_08011C68.o(.text);
 		asm/nonmatching/design/sub_08011C90.o(.text);
 		asm/nonmatching/design/sub_08011CA0.o(.text);
-		asm/nonmatching/design/sub_08011CAC.o(.text);
+		asm/nonmatching/design/Decompress.o(.text);
 		asm/nonmatching/design/sub_08011D10.o(.text);
 		asm/nonmatching/design/sub_08011D7C.o(.text);
 		asm/nonmatching/design/sub_08011DE8.o(.text);
@@ -1062,7 +1062,7 @@ SECTIONS
 		asm/nonmatching/design/sub_08013580.o(.text);
 		asm/nonmatching/design/sub_080135A4.o(.text);
 		asm/nonmatching/design/sub_080135F4.o(.text);
-		asm/nonmatching/design/sub_08013618.o(.text);
+		asm/nonmatching/design/ApplyPaletteExt.o(.text);
 		asm/nonmatching/design/sub_08013640.o(.text);
 		asm/nonmatching/design/sub_08013664.o(.text);
 		asm/nonmatching/design/sub_0801368C.o(.text);
@@ -1506,8 +1506,8 @@ SECTIONS
 		asm/nonmatching/design/sub_0801BDB4.o(.text);
 		asm/nonmatching/design/sub_0801BE44.o(.text);
 		asm/nonmatching/design/sub_0801BE78.o(.text);
-		asm/nonmatching/design/sub_0801BEBC.o(.text);
-		asm/nonmatching/design/sub_0801BEFC.o(.text);
+		asm/nonmatching/design/PutSprite.o(.text);
+		asm/nonmatching/design/PutSpriteExt.o(.text);
 		asm/nonmatching/design/sub_0801BF2C.o(.text);
 		asm/nonmatching/design/sub_0801BF90.o(.text);
 		asm/nonmatching/design/sub_0801BFB8.o(.text);
@@ -1579,7 +1579,7 @@ SECTIONS
 		asm/nonmatching/proc/sub_0801E0BC.o(.text);
 		asm/nonmatching/proc/sub_0801E0C8.o(.text);
 		asm/nonmatching/proc/sub_0801E0F0.o(.text);
-		asm/nonmatching/proc/sub_0801E108.o(.text);
+		asm/nonmatching/proc/SetObjAffine.o(.text);
 		asm/nonmatching/proc/sub_0801E13C.o(.text);
 		asm/nonmatching/proc/sub_0801E17C.o(.text);
 		asm/nonmatching/proc/sub_0801E18C.o(.text);
@@ -4228,26 +4228,7 @@ SECTIONS
 		asm/nonmatching/proc/sub_0806C8D4.o(.text);
 		asm/nonmatching/proc/sub_0806C8DC.o(.text);
 		asm/nonmatching/proc/sub_0806C95C.o(.text);
-		asm/nonmatching/proc/sub_0806C9B4.o(.text);
-		asm/nonmatching/proc/sub_0806C9C0.o(.text);
-		asm/nonmatching/proc/sub_0806CA38.o(.text);
-		asm/nonmatching/proc/sub_0806CA50.o(.text);
-		asm/nonmatching/proc/sub_0806CA84.o(.text);
-		asm/nonmatching/proc/sub_0806CA98.o(.text);
-		asm/nonmatching/proc/sub_0806CB5C.o(.text);
-		asm/nonmatching/proc/sub_0806CB88.o(.text);
-		asm/nonmatching/proc/sub_0806CBA8.o(.text);
-		asm/nonmatching/proc/sub_0806CC00.o(.text);
-		asm/nonmatching/proc/sub_0806CC34.o(.text);
-		asm/nonmatching/proc/sub_0806CC4C.o(.text);
-		asm/nonmatching/proc/sub_0806CC64.o(.text);
-		asm/nonmatching/proc/sub_0806CC7C.o(.text);
-		asm/nonmatching/proc/sub_0806CCE4.o(.text);
-		asm/nonmatching/proc/sub_0806CD7C.o(.text);
-		asm/nonmatching/proc/sub_0806CDA4.o(.text);
-		asm/nonmatching/proc/sub_0806CE5C.o(.text);
-		asm/nonmatching/proc/sub_0806CF04.o(.text);
-		asm/nonmatching/proc/sub_0806CF28.o(.text);
+		src/title-screen.o(.text);
 		asm/nonmatching/proc/sub_0806CFC8.o(.text);
 		asm/nonmatching/proc/sub_0806D050.o(.text);
 		asm/nonmatching/proc/sub_0806D0D8.o(.text);
@@ -4576,7 +4557,7 @@ SECTIONS
 		asm/nonmatching/proc/sub_080741C4.o(.text);
 		asm/nonmatching/proc/sub_0807420C.o(.text);
 		asm/nonmatching/proc/sub_08074230.o(.text);
-		asm/nonmatching/proc/sub_08074234.o(.text);
+		asm/nonmatching/proc/Interpolate.o(.text);
 		asm/nonmatching/proc/sub_080742FC.o(.text);
 		asm/nonmatching/proc/sub_08074320.o(.text);
 		asm/nonmatching/proc/sub_08074384.o(.text);
@@ -5158,5 +5139,7 @@ SECTIONS
 		. = ALIGN(4); data/data.o(.data)
 		. = ALIGN(4); src/proc.o(.data)
 		. = ALIGN(4); data/data-0848B688.o(.data)
+		. = ALIGN(4); src/title-screen.o(.data)
+		. = ALIGN(4); data/data-08581E70.o(.data)
 	}
 }

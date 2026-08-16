@@ -34,7 +34,7 @@ _08003BB2:
 	ldrh r2, [r2, #2]
 	cmp r5, r2
 	blt _08003BB2
-	ldr r0, _08003BF0 @ =gUnknown_03002EE0
+	ldr r0, _08003BF0 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0]
 	movs r0, #0xc0
@@ -50,7 +50,7 @@ _08003BB2:
 _08003BE4: .4byte gUnknown_0808D788
 _08003BE8: .4byte gUnknown_08499590
 _08003BEC: .4byte 0x0000417A
-_08003BF0: .4byte gUnknown_03002EE0
+_08003BF0: .4byte gpKeySt
 _08003BF4:
 	movs r0, #0x80
 	lsls r0, r0, #2

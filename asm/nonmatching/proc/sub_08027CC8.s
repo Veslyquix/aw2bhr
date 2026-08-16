@@ -22,7 +22,7 @@ sub_08027CC8: @ 0x08027CC8
 	bl Proc_End
 	b _08027DBC
 _08027CF0:
-	ldr r7, _08027DCC @ =gUnknown_0808F100
+	ldr r7, _08027DCC @ =gSinLut
 	adds r5, r4, #0
 	adds r5, #0x48
 	movs r6, #0xff
@@ -102,7 +102,7 @@ _08027D76:
 	mov r1, sl
 	mov r2, sb
 	mov r3, r8
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r1, [r4, #0x2c]
 	ldr r0, _08027DD0 @ =0x000001FF
 	ands r1, r0
@@ -121,7 +121,7 @@ _08027D76:
 	ldrh r0, [r0]
 	str r0, [sp]
 	movs r0, #0
-	bl sub_0801BEFC
+	bl PutSpriteExt
 _08027DBC:
 	add sp, #4
 	pop {r3, r4, r5}
@@ -132,7 +132,7 @@ _08027DBC:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08027DCC: .4byte gUnknown_0808F100
+_08027DCC: .4byte gSinLut
 _08027DD0: .4byte 0x000001FF
 _08027DD4: .4byte gUnknown_08499E10
 

@@ -38,7 +38,7 @@ _0806F314:
 	movs r0, #0
 	movs r1, #0x48
 	movs r2, #0x38
-	bl sub_0801BEBC
+	bl PutSprite
 _0806F328:
 	add sp, #4
 	pop {r0}

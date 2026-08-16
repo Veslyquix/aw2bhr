@@ -1274,7 +1274,7 @@ _080068F0:
 	movs r7, #0x10
 _08006904:
 	strh r7, [r0]
-	ldr r4, _08006998 @ =gUnknown_0808F100
+	ldr r4, _08006998 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -1320,7 +1320,7 @@ _08006952:
 	ldr r1, [sp, #8]
 	adds r2, r6, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	cmp r7, #0x10
 	ble _08006970
 	b _08006A82
@@ -1346,7 +1346,7 @@ _08006978:
 	strb r2, [r1, #7]
 	b _08006A82
 	.align 2, 0
-_08006998: .4byte gUnknown_0808F100
+_08006998: .4byte gSinLut
 _0800699C: .4byte gUnknown_0200B0D0
 _080069A0:
 	bl sub_08007B74
@@ -1394,7 +1394,7 @@ _080069E0:
 	movs r7, #0x10
 _080069F4:
 	strh r7, [r0]
-	ldr r4, _08006A98 @ =gUnknown_0808F100
+	ldr r4, _08006A98 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r1, #0
@@ -1440,7 +1440,7 @@ _08006A42:
 	ldr r1, [sp, #0xc]
 	adds r2, r6, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	cmp r7, #0x10
 	bgt _08006A82
 	movs r2, #0x32
@@ -1475,7 +1475,7 @@ _08006A82:
 	beq _08006AA6
 	b _08006B6E
 	.align 2, 0
-_08006A98: .4byte gUnknown_0808F100
+_08006A98: .4byte gSinLut
 _08006A9C: .4byte gUnknown_0200B0D0
 _08006AA0:
 	cmp r0, #0x66
@@ -1651,7 +1651,7 @@ _08006BF8:
 	adds r0, #0x2e
 	movs r4, #0
 	ldrsb r4, [r0, r4]
-	ldr r0, _08006C20 @ =gUnknown_03002EE0
+	ldr r0, _08006C20 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0x40
@@ -1667,7 +1667,7 @@ _08006C16:
 	bl sub_0803B4DC
 	b _08006C3A
 	.align 2, 0
-_08006C20: .4byte gUnknown_03002EE0
+_08006C20: .4byte gpKeySt
 _08006C24:
 	movs r0, #0x80
 	ands r0, r1
@@ -1741,7 +1741,7 @@ _08006CA8:
 	adds r0, #0x2f
 	movs r4, #0
 	ldrsb r4, [r0, r4]
-	ldr r0, _08006CD0 @ =gUnknown_03002EE0
+	ldr r0, _08006CD0 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0x40
@@ -1757,7 +1757,7 @@ _08006CC6:
 	bl sub_0803B4DC
 	b _08006CEA
 	.align 2, 0
-_08006CD0: .4byte gUnknown_03002EE0
+_08006CD0: .4byte gpKeySt
 _08006CD4:
 	movs r0, #0x80
 	ands r0, r1
@@ -1859,7 +1859,7 @@ _08006D14:
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	mov r2, sl
 	ldr r1, [r2]
 	movs r0, #0x2a
@@ -1996,7 +1996,7 @@ _08006E90:
 	bne _08006EA0
 	b _08007312
 _08006EA0:
-	ldr r4, _08006F00 @ =gUnknown_0808F100
+	ldr r4, _08006F00 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -2039,7 +2039,7 @@ _08006EA0:
 	b _080072CC
 	.align 2, 0
 _08006EFC: .4byte gUnknown_0200B0D0
-_08006F00: .4byte gUnknown_0808F100
+_08006F00: .4byte gSinLut
 _08006F04:
 	ldr r4, _08006F6C @ =gUnknown_084886DC
 	mov r2, sl
@@ -2496,7 +2496,7 @@ _08007268:
 	ldr r0, [r3]
 	adds r0, #0x56
 	strh r7, [r0]
-	ldr r4, _080072DC @ =gUnknown_0808F100
+	ldr r4, _080072DC @ =gSinLut
 _08007270:
 	adds r0, r4, #0
 	adds r0, #0x80
@@ -2544,12 +2544,12 @@ _080072AE:
 	adds r2, r6, #0
 _080072CC:
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	b _08007312
 	.align 2, 0
 _080072D4: .4byte gUnknown_0200B0D0
 _080072D8: .4byte gUnknown_084886DC
-_080072DC: .4byte gUnknown_0808F100
+_080072DC: .4byte gSinLut
 _080072E0:
 	mov r2, sl
 	ldr r0, [r2]

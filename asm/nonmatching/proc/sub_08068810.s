@@ -32,7 +32,7 @@ sub_08068810: @ 0x08068810
 	lsls r4, r4, #5
 	adds r1, r4, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r2, _080688A0 @ =gUnknown_08610A38
 	ldr r1, _080688A4 @ =gUnknown_085D3DD0
 	lsls r0, r6, #6

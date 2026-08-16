@@ -27,7 +27,7 @@ _08043680:
 	movs r0, #0
 	adds r1, r5, #0
 	adds r2, r6, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	cmp r4, #9
 	ble _080436BC
 	adds r0, r5, #0

@@ -48,7 +48,7 @@ sub_0801C01C: @ 0x0801C01C
 	str r3, [sp]
 	mov r1, r8
 	mov r3, sl
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	add sp, #4
 	pop {r3, r4, r5}
 	mov r8, r3

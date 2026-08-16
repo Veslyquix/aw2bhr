@@ -7,7 +7,7 @@ sub_08004970: @ 0x08004970
 	push {r4, lr}
 	sub sp, #8
 	bl sub_08002F1C
-	ldr r4, _080049CC @ =gUnknown_03002EE0
+	ldr r4, _080049CC @ =gpKeySt
 	ldr r0, [r4]
 	ldrh r1, [r0, #4]
 	movs r0, #7
@@ -46,7 +46,7 @@ _080049C4:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080049CC: .4byte gUnknown_03002EE0
+_080049CC: .4byte gpKeySt
 _080049D0: .4byte gUnknown_08499580
 _080049D4: .4byte gUnknown_03001FBC
 _080049D8: .4byte gUnknown_03002F1C

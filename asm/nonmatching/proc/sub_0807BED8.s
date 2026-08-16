@@ -15,7 +15,7 @@ sub_0807BED8: @ 0x0807BED8
 	str r4, [sp]
 	movs r0, #4
 	movs r2, #0x50
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r5, #0x2c]
 	movs r2, #0x80
 	lsls r2, r2, #1
@@ -23,7 +23,7 @@ sub_0807BED8: @ 0x0807BED8
 	str r4, [sp]
 	movs r0, #4
 	movs r1, #0x6a
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r5, #0x5c]
 	movs r1, #0x80
 	lsls r1, r1, #4
@@ -32,7 +32,7 @@ sub_0807BED8: @ 0x0807BED8
 	ldr r3, [r5, #0x34]
 	str r4, [sp]
 	movs r0, #5
-	bl sub_08074234
+	bl Interpolate
 	ldr r1, [r5, #0x58]
 	subs r1, r1, r0
 	str r1, [r5, #0x58]

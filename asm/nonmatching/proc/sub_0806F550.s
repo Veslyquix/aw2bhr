@@ -5,7 +5,7 @@
 sub_0806F550: @ 0x0806F550
 	push {r4, lr}
 	adds r4, r0, #0
-	ldr r0, _0806F580 @ =gUnknown_03002EE0
+	ldr r0, _0806F580 @ =gpKeySt
 	ldr r2, [r0]
 	ldrh r1, [r2, #4]
 	movs r0, #2
@@ -25,7 +25,7 @@ sub_0806F550: @ 0x0806F550
 	bl Proc_Break
 	b _0806F5E4
 	.align 2, 0
-_0806F580: .4byte gUnknown_03002EE0
+_0806F580: .4byte gpKeySt
 _0806F584: .4byte gUnknown_0202F2D8
 _0806F588:
 	ldrh r1, [r2, #2]

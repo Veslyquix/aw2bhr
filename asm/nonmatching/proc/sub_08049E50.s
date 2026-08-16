@@ -21,7 +21,7 @@ sub_08049E50: @ 0x08049E50
 	bls _08049E72
 	movs r2, #1
 _08049E72:
-	ldr r0, _08049E98 @ =gUnknown_03002EE0
+	ldr r0, _08049E98 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #1
@@ -40,5 +40,5 @@ _08049E8C:
 	.align 2, 0
 _08049E90: .4byte gUnknown_02028E3C
 _08049E94: .4byte gUnknown_084C3240
-_08049E98: .4byte gUnknown_03002EE0
+_08049E98: .4byte gpKeySt
 

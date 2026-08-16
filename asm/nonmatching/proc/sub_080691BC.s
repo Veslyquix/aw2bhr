@@ -60,7 +60,7 @@ _0806921A:
 	bl sub_08067A24
 	b _0806936C
 _08069220:
-	ldr r0, _0806923C @ =gUnknown_030020C0
+	ldr r0, _0806923C @ =gPal
 	ldr r2, _08069240 @ =0x00007FFF
 	adds r0, #2
 	movs r1, #0xe
@@ -74,13 +74,13 @@ _08069228:
 	bl sub_080677E8
 	b _0806936C
 	.align 2, 0
-_0806923C: .4byte gUnknown_030020C0
+_0806923C: .4byte gPal
 _08069240: .4byte 0x00007FFF
 _08069244:
 	ldr r0, _08069284 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #1
 	movs r1, #1
 	movs r2, #0xc
@@ -109,7 +109,7 @@ _08069244:
 	.align 2, 0
 _08069284: .4byte gUnknown_0823BDE0
 _08069288:
-	ldr r0, _080692A0 @ =gUnknown_030020C0
+	ldr r0, _080692A0 @ =gPal
 	ldr r2, _080692A4 @ =0x00007FFF
 	adds r0, #2
 	movs r1, #0xe
@@ -122,13 +122,13 @@ _08069290:
 	bl sub_080135A4
 	b _0806936C
 	.align 2, 0
-_080692A0: .4byte gUnknown_030020C0
+_080692A0: .4byte gPal
 _080692A4: .4byte 0x00007FFF
 _080692A8:
 	ldr r0, _080692C8 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0x28
 	bl sub_08067C7C
 	bl sub_0806780C
@@ -138,7 +138,7 @@ _080692A8:
 	.align 2, 0
 _080692C8: .4byte gUnknown_0823BDE0
 _080692CC:
-	ldr r2, _08069300 @ =gUnknown_030030CC
+	ldr r2, _08069300 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -162,12 +162,12 @@ _080692CC:
 	bl sub_080673D0
 	b _0806936C
 	.align 2, 0
-_08069300: .4byte gUnknown_030030CC
+_08069300: .4byte gDispIo
 _08069304: .4byte gUnknown_030030B4
 _08069308:
 	ldr r0, _08069314 @ =gUnknown_0817DA38
 	ldr r1, _08069318 @ =0x06008000
-	bl sub_08011CAC
+	bl Decompress
 	b _0806936C
 	.align 2, 0
 _08069314: .4byte gUnknown_0817DA38
@@ -176,11 +176,11 @@ _0806931C:
 	ldr r0, _08069338 @ =gUnknown_0817E208
 	ldr r1, _0806933C @ =gUnknown_08499580
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08069340 @ =gUnknown_0817DA18
 	movs r1, #0x20
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013B0C
 	b _0806936C
 	.align 2, 0
@@ -189,7 +189,7 @@ _0806933C: .4byte gUnknown_08499580
 _08069340: .4byte gUnknown_0817DA18
 _08069344:
 	bl sub_08012358
-	ldr r2, _08069378 @ =gUnknown_030030CC
+	ldr r2, _08069378 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -214,7 +214,7 @@ _0806936C:
 	str r0, [r4, #0x2c]
 	b _08069382
 	.align 2, 0
-_08069378: .4byte gUnknown_030030CC
+_08069378: .4byte gDispIo
 _0806937C:
 	adds r0, r4, #0
 	bl Proc_Break

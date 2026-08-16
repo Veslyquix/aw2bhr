@@ -83,7 +83,7 @@ _0801C850:
 	ldr r0, [sp, #0x20]
 	adds r1, r7, #0
 	ldr r2, [sp, #0x18]
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	lsrs r0, r5, #0x18
 _0801C86E:
 	add sp, #4

@@ -16,7 +16,7 @@ sub_080138B0: @ 0x080138B0
 	ldr r7, _08013920 @ =gUnknown_0200B614
 	lsls r0, r0, #4
 	mov ip, r0
-	ldr r0, _08013924 @ =gUnknown_030020C0
+	ldr r0, _08013924 @ =gPal
 	mov r8, r0
 	movs r6, #0x1f
 _080138CE:
@@ -61,5 +61,5 @@ _080138CE:
 	.align 2, 0
 _0801391C: .4byte gUnknown_0200B5F4
 _08013920: .4byte gUnknown_0200B614
-_08013924: .4byte gUnknown_030020C0
+_08013924: .4byte gPal
 

@@ -26,7 +26,7 @@ sub_080859A0: @ 0x080859A0
 	adds r0, r7, #0
 	adds r1, r5, #0
 	adds r2, r6, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r4, r5, r6, r7}
 	pop {r0}

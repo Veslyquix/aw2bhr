@@ -15,7 +15,7 @@ sub_0806E658: @ 0x0806E658
 	movs r0, #4
 	str r0, [sp]
 	movs r2, #0xb4
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r4, #0x2c]
 	ldr r0, [r5, #0x58]
 	cmp r0, #3

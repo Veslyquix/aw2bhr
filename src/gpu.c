@@ -2,10 +2,10 @@
 
 // 32 palette banks (BG + OBJ) of 16 colors each. gUnknown_0200B5F4 holds a per-bank signed
 // brightness delta; gUnknown_0200B614 the running (bias +0x20) R/G/B accumulator bytes per
-// color; gUnknown_030020C0 the resulting packed 15-bit colors ready for the real palette RAM.
+// color; gPal the resulting packed 15-bit colors ready for the real palette RAM.
 extern s8 gUnknown_0200B5F4[0x20];
 extern u8 gUnknown_0200B614[0x600];
-extern u8 gUnknown_030020C0[0x400];
+extern u8 gPal[0x400];
 
 #ifdef NONMATCHING
 
@@ -56,7 +56,7 @@ void sub_08000234(void)
                 if (b > 0x1F)
                     b = 0x1F;
 
-                *(u16 *) (gUnknown_030020C0 + i + group) = r | (g << 5) | (b << 10);
+                *(u16 *) (gPal + i + group) = r | (g << 5) | (b << 10);
             }
         }
     }
@@ -68,7 +68,7 @@ void sub_08000234(void)
 // it -- it has to be emitted here, at file scope, rather than as part of the naked
 // function's own body, or the compiler's function-start label (what callers actually
 // branch to) would point at this data instead of the real code that follows it.
-asm("_08000228: .4byte gUnknown_030020C0\n"
+asm("_08000228: .4byte gPal\n"
     "_0800022C: .4byte gUnknown_0200B614\n"
     "_08000230: .4byte gUnknown_0200B5F4\n");
 

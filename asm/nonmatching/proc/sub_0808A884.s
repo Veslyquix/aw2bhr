@@ -13,7 +13,7 @@ sub_0808A884: @ 0x0808A884
 	adds r1, r4, #0
 	bl Proc_Start
 _0808A89A:
-	ldr r0, _0808A8BC @ =gUnknown_03002EE0
+	ldr r0, _0808A8BC @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #8
@@ -29,5 +29,5 @@ _0808A8B0:
 	bx r0
 	.align 2, 0
 _0808A8B8: .4byte gUnknown_08617094
-_0808A8BC: .4byte gUnknown_03002EE0
+_0808A8BC: .4byte gpKeySt
 

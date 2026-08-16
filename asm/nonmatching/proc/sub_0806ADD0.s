@@ -13,7 +13,7 @@ sub_0806ADD0: @ 0x0806ADD0
 	adds r0, r0, r2
 	ldr r0, [r0]
 	ldr r1, [r3, #0x30]
-	bl sub_08011CAC
+	bl Decompress
 	pop {r0}
 	bx r0
 	.align 2, 0

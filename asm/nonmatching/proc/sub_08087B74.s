@@ -55,7 +55,7 @@ _08087BAA:
 	lsrs r1, r1, #0x10
 	ldr r0, _08087C10 @ =gUnknown_08614238
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 _08087BE6:
 	movs r0, #0xc
 	add r8, r0

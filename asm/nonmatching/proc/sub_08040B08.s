@@ -23,7 +23,7 @@ sub_08040B08: @ 0x08040B08
 	movs r7, #0
 	ldr r0, _08040BB0 @ =0x000031CA
 	strh r0, [r1, #0x22]
-	ldr r4, _08040BB4 @ =gUnknown_0808F100
+	ldr r4, _08040BB4 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -65,7 +65,7 @@ sub_08040B08: @ 0x08040B08
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	movs r2, #0x4c
 	add sl, r2
 	mov r0, sl
@@ -81,5 +81,5 @@ sub_08040B08: @ 0x08040B08
 	.align 2, 0
 _08040BAC: .4byte gUnknown_08121870
 _08040BB0: .4byte 0x000031CA
-_08040BB4: .4byte gUnknown_0808F100
+_08040BB4: .4byte gSinLut
 

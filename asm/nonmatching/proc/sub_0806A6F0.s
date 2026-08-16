@@ -16,8 +16,8 @@ sub_0806A6F0: @ 0x0806A6F0
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
-	ldr r0, _0806A7A4 @ =gUnknown_030020C0
+	bl ApplyPaletteExt
+	ldr r0, _0806A7A4 @ =gPal
 	movs r2, #0
 	movs r1, #0xf
 	ldr r3, _0806A7A8 @ =0x0000029E
@@ -86,7 +86,7 @@ _0806A71A:
 _0806A798: .4byte gUnknown_0817B150
 _0806A79C: .4byte 0x06013940
 _0806A7A0: .4byte gUnknown_0817B950
-_0806A7A4: .4byte gUnknown_030020C0
+_0806A7A4: .4byte gPal
 _0806A7A8: .4byte 0x0000029E
 _0806A7AC: .4byte gUnknown_085815D0
 _0806A7B0: .4byte gUnknown_08499590

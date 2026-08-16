@@ -9,7 +9,7 @@ sub_0806A5B8: @ 0x0806A5B8
 	mov r5, r8
 	push {r5, r6, r7}
 	movs r1, #0x1f
-	ldr r0, _0806A65C @ =gUnknown_030020C0
+	ldr r0, _0806A65C @ =gPal
 	mov sl, r0
 _0806A5C8:
 	ldr r2, _0806A660 @ =gUnknown_0200B5F4
@@ -89,7 +89,7 @@ _0806A642:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0806A65C: .4byte gUnknown_030020C0
+_0806A65C: .4byte gPal
 _0806A660: .4byte gUnknown_0200B5F4
 _0806A664: .4byte gUnknown_0200B614
 

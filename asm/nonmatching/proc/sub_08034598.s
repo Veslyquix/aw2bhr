@@ -8,7 +8,7 @@ sub_08034598: @ 0x08034598
 	bl sub_08023518
 	movs r0, #4
 	bl sub_08023908
-	ldr r0, _080345C4 @ =gUnknown_03002EE0
+	ldr r0, _080345C4 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -22,5 +22,5 @@ _080345BA:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080345C4: .4byte gUnknown_03002EE0
+_080345C4: .4byte gpKeySt
 

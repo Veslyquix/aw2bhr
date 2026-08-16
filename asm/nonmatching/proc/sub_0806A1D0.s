@@ -13,7 +13,7 @@ sub_0806A1D0: @ 0x0806A1D0
 	str r0, [sp]
 	movs r0, #0
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	ldr r1, _0806A214 @ =gUnknown_0202F20C
 	str r0, [r1]
 	ldr r0, [r4, #0x58]

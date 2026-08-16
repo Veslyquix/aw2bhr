@@ -31,7 +31,7 @@ _08080FF6:
 	add r0, r8
 	lsrs r1, r6, #0x10
 	movs r2, #0x10
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0808101C:
 	movs r0, #0x80
 	lsls r0, r0, #0xe
@@ -50,7 +50,7 @@ _0808101C:
 	adds r0, r0, r2
 	ldr r1, _0808105C @ =0x0000030A
 	movs r2, #0x10
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldrh r0, [r5]
 	adds r0, #1
 	strh r0, [r5]

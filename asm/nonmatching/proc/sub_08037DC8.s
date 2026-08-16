@@ -38,7 +38,7 @@ sub_08037DC8: @ 0x08037DC8
 	ldr r0, _08037E60 @ =gUnknown_080A1138
 	movs r1, #0x20
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08022A34
 	movs r0, #0
 	bl sub_0801A5B0

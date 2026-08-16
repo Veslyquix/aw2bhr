@@ -17,7 +17,7 @@ sub_08069154: @ 0x08069154
 	ldr r0, _080691B0 @ =gUnknown_08183A00
 	ldr r1, _080691B4 @ =gUnknown_08499580
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B0C
 	bl sub_08013B1C
 	movs r1, #1

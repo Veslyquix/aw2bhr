@@ -11,7 +11,7 @@ sub_08067B90: @ 0x08067B90
 	adds r0, r0, r1
 	ldr r0, [r0]
 	ldr r1, _08067BC4 @ =0x06001400
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, _08067BC8 @ =gUnknown_0858105C
 	ldr r0, [r4, #0x2c]
 	lsls r0, r0, #2
@@ -19,7 +19,7 @@ sub_08067B90: @ 0x08067B90
 	ldr r0, [r0]
 	ldr r1, _08067BCC @ =gUnknown_0849957C
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013AFC
 	pop {r4}
 	pop {r0}

@@ -36,7 +36,7 @@ _080819C0:
 	str r0, [sp]
 	movs r0, #2
 	ldr r3, _080819FC @ =gUnknown_08615C76
-	bl sub_0801BEBC
+	bl PutSprite
 	movs r4, #3
 	b _08081A56
 	.align 2, 0
@@ -86,7 +86,7 @@ _08081A00:
 	str r3, [sp]
 	movs r0, #2
 	ldr r3, _08081AB0 @ =gUnknown_08615C84
-	bl sub_0801BEBC
+	bl PutSprite
 _08081A56:
 	adds r5, r4, #0
 	cmp r5, #4
@@ -100,7 +100,7 @@ _08081A56:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #0x30
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	mov r2, sl
 	ldr r6, [r2]
@@ -126,7 +126,7 @@ _08081A56:
 	str r0, [sp]
 	movs r0, #3
 	movs r2, #0x48
-	bl sub_0801BEBC
+	bl PutSprite
 	b _08081AE8
 	.align 2, 0
 _08081AB0: .4byte gUnknown_08615C84
@@ -151,7 +151,7 @@ _08081AC0:
 	str r0, [sp]
 	movs r0, #3
 	movs r2, #0x48
-	bl sub_0801BEBC
+	bl PutSprite
 _08081AE8:
 	ldr r0, _08081B04 @ =gUnknown_03005934
 	ldr r0, [r0]
@@ -186,7 +186,7 @@ _08081B08:
 	str r0, [sp]
 	movs r0, #3
 	movs r2, #0x48
-	bl sub_0801BEBC
+	bl PutSprite
 	b _08081B6C
 	.align 2, 0
 _08081B3C: .4byte gUnknown_081D93A8
@@ -209,7 +209,7 @@ _08081B44:
 	str r0, [sp]
 	movs r0, #3
 	movs r2, #0x48
-	bl sub_0801BEBC
+	bl PutSprite
 _08081B6C:
 	ldr r0, _08081B88 @ =gUnknown_03005934
 	ldr r0, [r0]
@@ -244,7 +244,7 @@ _08081B8C:
 	str r0, [sp]
 	movs r0, #3
 	movs r2, #0x48
-	bl sub_0801BEBC
+	bl PutSprite
 	b _08081BF0
 	.align 2, 0
 _08081BC0: .4byte gUnknown_081D93A8
@@ -267,7 +267,7 @@ _08081BC8:
 	str r0, [sp]
 	movs r0, #3
 	movs r2, #0x48
-	bl sub_0801BEBC
+	bl PutSprite
 _08081BF0:
 	ldr r0, _08081C28 @ =gUnknown_03005934
 	ldr r0, [r0]
@@ -289,7 +289,7 @@ _08081C00:
 	str r0, [sp]
 	movs r0, #3
 	movs r2, #0x58
-	bl sub_0801BEBC
+	bl PutSprite
 	b _08081C92
 	.align 2, 0
 _08081C20: .4byte 0x00000A98
@@ -323,7 +323,7 @@ _08081C30:
 	movs r0, #3
 	movs r2, #0x48
 	adds r3, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, [r5]
 	adds r0, #2
 	movs r1, #6
@@ -340,7 +340,7 @@ _08081C30:
 	movs r0, #3
 	movs r2, #0x58
 	adds r3, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 _08081C92:
 	mov r3, sl
 	ldr r4, [r3]
@@ -355,7 +355,7 @@ _08081C92:
 	movs r1, #0xc0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	mov r4, r8
 	movs r5, #0
 	ldrsh r3, [r4, r5]
@@ -364,7 +364,7 @@ _08081C92:
 	movs r0, #4
 	movs r1, #0x78
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r0, #0xb0
 	movs r2, #0xc0
 	lsls r2, r2, #5

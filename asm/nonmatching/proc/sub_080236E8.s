@@ -16,7 +16,7 @@ sub_080236E8: @ 0x080236E8
 	ands r0, r1
 	cmp r0, #0
 	bne _080237F6
-	ldr r0, _08023808 @ =gUnknown_03002EE0
+	ldr r0, _08023808 @ =gpKeySt
 	ldr r0, [r0]
 	mov ip, r0
 	ldrh r0, [r0, #2]
@@ -148,7 +148,7 @@ _080237F6:
 	bx r0
 	.align 2, 0
 _08023804: .4byte gUnknown_08090A08
-_08023808: .4byte gUnknown_03002EE0
+_08023808: .4byte gpKeySt
 _0802380C: .4byte gUnknown_08090A0C
 _08023810: .4byte gUnknown_08090A10
 _08023814: .4byte 0x0000417A

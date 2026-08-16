@@ -15,7 +15,7 @@ sub_08024830: @ 0x08024830
 	movs r1, #0xc0
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r4]
 	adds r0, #0x92
 	ldrb r0, [r0]
@@ -25,7 +25,7 @@ sub_08024830: @ 0x08024830
 	movs r1, #0xd0
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r4]
 	adds r0, #0xce
 	ldrb r0, [r0]
@@ -35,7 +35,7 @@ sub_08024830: @ 0x08024830
 	movs r1, #0xe0
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r4]
 	movs r1, #0x85
 	lsls r1, r1, #1
@@ -46,7 +46,7 @@ sub_08024830: @ 0x08024830
 	adds r0, r0, r5
 	adds r1, #0xd6
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #8
 	bl sub_0803F80C
 	bl sub_0802D2EC
@@ -54,7 +54,7 @@ sub_08024830: @ 0x08024830
 	movs r1, #0x90
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _080248DC @ =gUnknown_03003FC0
 	adds r0, #0x2c
 	ldrb r0, [r0]

@@ -6,7 +6,7 @@ sub_0806F41C: @ 0x0806F41C
 	push {r4, r5, r6, r7, lr}
 	sub sp, #4
 	adds r5, r0, #0
-	ldr r2, _0806F47C @ =gUnknown_030030CC
+	ldr r2, _0806F47C @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #0x21
 	rsbs r0, r0, #0
@@ -48,7 +48,7 @@ sub_0806F41C: @ 0x0806F41C
 	strb r1, [r0]
 	b _0806F496
 	.align 2, 0
-_0806F47C: .4byte gUnknown_030030CC
+_0806F47C: .4byte gDispIo
 _0806F480: .4byte gUnknown_08582AF4
 _0806F484: .4byte gUnknown_0816E808
 _0806F488: .4byte gUnknown_03002B6C
@@ -90,7 +90,7 @@ _0806F4D0: .4byte gUnknown_08582CAC
 _0806F4D4:
 	movs r1, #0xc0
 	lsls r1, r1, #0x13
-	bl sub_08011CAC
+	bl Decompress
 _0806F4DC:
 	movs r0, #0
 	ldrsb r0, [r4, r0]
@@ -100,7 +100,7 @@ _0806F4DC:
 	ldr r0, [r0]
 	ldr r1, _0806F50C @ =gUnknown_08499578
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	movs r1, #0
 	ldrsb r1, [r4, r1]
 	lsls r1, r1, #4
@@ -112,7 +112,7 @@ _0806F4DC:
 	ldrb r2, [r1, #0xc]
 	lsls r2, r2, #5
 	movs r1, #0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	b _0806F53A
 	.align 2, 0
 _0806F50C: .4byte gUnknown_08499578

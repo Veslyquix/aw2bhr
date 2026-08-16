@@ -33,7 +33,7 @@ sub_0806C154: @ 0x0806C154
 	movs r0, #0
 	str r0, [sp]
 	movs r0, #1
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	ldr r0, [r4, #0x58]
 	cmp r0, #0x1f
 	ble _0806C1BC

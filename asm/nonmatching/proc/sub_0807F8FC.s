@@ -95,7 +95,7 @@ _0807F990:
 	str r0, [r2]
 	ldr r0, _0807FA20 @ =gUnknown_08239228
 	ldr r1, _0807FA24 @ =gUnknown_0200FC50
-	bl sub_08011CAC
+	bl Decompress
 	movs r2, #0
 	mov r3, sb
 	lsls r3, r3, #0x10

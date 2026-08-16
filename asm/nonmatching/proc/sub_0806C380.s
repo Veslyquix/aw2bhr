@@ -12,7 +12,7 @@ sub_0806C380: @ 0x0806C380
 	movs r0, #5
 	movs r1, #0xf0
 	movs r2, #0xa4
-	bl sub_08074234
+	bl Interpolate
 	adds r5, r0, #0
 	ldr r0, _0806C3F0 @ =gUnknown_0202F2C0
 	ldr r0, [r0]
@@ -39,7 +39,7 @@ _0806C3A4:
 	str r0, [sp]
 	movs r0, #0
 	movs r1, #0xa4
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	ldr r1, _0806C3FC @ =0x000001FF
 	ands r1, r5
 	ldr r3, _0806C400 @ =gUnknown_08581A98
@@ -47,7 +47,7 @@ _0806C3A4:
 	str r0, [sp]
 	movs r0, #0
 	movs r2, #0x40
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	ldr r0, [r4, #0x5c]
 	cmp r0, #0xf
 	ble _0806C404

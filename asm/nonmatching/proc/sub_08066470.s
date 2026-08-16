@@ -20,7 +20,7 @@ sub_08066470: @ 0x08066470
 	movs r1, #0x80
 	lsls r1, r1, #1
 	adds r7, r0, r1
-	ldr r6, _0806656C @ =gUnknown_0808F100
+	ldr r6, _0806656C @ =gSinLut
 	adds r0, r6, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -74,7 +74,7 @@ _080664E8:
 	mov r1, sl
 	mov r2, sb
 	adds r3, r5, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	movs r1, #0x28
 	ldrsh r0, [r4, r1]
 	movs r2, #0x80
@@ -128,7 +128,7 @@ _0806655C:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0806656C: .4byte gUnknown_0808F100
+_0806656C: .4byte gSinLut
 _08066570: .4byte 0x000001FF
 _08066574: .4byte gUnknown_08580CFC
 _08066578: .4byte gUnknown_08580934

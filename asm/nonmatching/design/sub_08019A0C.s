@@ -5,7 +5,7 @@
 	thumb_func_start sub_08019A0C
 sub_08019A0C: @ 0x08019A0C
 	push {r4, r5, r6, lr}
-	ldr r6, _08019A50 @ =gUnknown_030030CC
+	ldr r6, _08019A50 @ =gDispIo
 	ldrb r4, [r6, #1]
 	movs r5, #0x20
 	orrs r4, r5
@@ -38,7 +38,7 @@ sub_08019A0C: @ 0x08019A0C
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08019A50: .4byte gUnknown_030030CC
+_08019A50: .4byte gDispIo
 _08019A54: .4byte 0x04000040
 _08019A58: .4byte 0x04000044
 _08019A5C: .4byte 0x04000048

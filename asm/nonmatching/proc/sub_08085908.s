@@ -10,7 +10,7 @@ sub_08085908: @ 0x08085908
 	ldr r0, _08085944 @ =gUnknown_0823DF48
 	ldr r4, _08085948 @ =gUnknown_08499580
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	movs r2, #0
 	ldr r5, _0808594C @ =0x000003FF
 	movs r0, #0xd8

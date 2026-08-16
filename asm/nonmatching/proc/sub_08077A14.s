@@ -36,7 +36,7 @@ sub_08077A14: @ 0x08077A14
 	ldr r0, _08077B60 @ =gUnknown_080A1138
 	movs r1, #0x80
 	movs r2, #0x40
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #4
 	bl sub_08037750
 	movs r2, #0

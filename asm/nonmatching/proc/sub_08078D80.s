@@ -14,16 +14,16 @@ sub_08078D80: @ 0x08078D80
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08078DC8 @ =gUnknown_0822F9AC
 	ldr r1, _08078DCC @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B1C
 	ldr r0, _08078DD0 @ =gUnknown_082344CC
 	movs r1, #0x20
 	movs r2, #0xa0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08078DD4 @ =gUnknown_08615CA0
 	adds r1, r4, #0
 	bl Proc_Start

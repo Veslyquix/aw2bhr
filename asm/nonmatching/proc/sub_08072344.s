@@ -28,7 +28,7 @@ _08072368:
 	cmp r1, r0
 	bgt _0807238C
 	bl sub_080718F0
-	ldr r1, _08072388 @ =gUnknown_030020C0
+	ldr r1, _08072388 @ =gPal
 	movs r0, #0
 	strh r0, [r1]
 	bl sub_080135A4
@@ -36,7 +36,7 @@ _08072368:
 	b _0807238E
 	.align 2, 0
 _08072384: .4byte 0x000001FF
-_08072388: .4byte gUnknown_030020C0
+_08072388: .4byte gPal
 _0807238C:
 	movs r0, #0
 _0807238E:

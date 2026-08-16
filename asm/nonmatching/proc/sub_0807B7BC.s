@@ -37,7 +37,7 @@ _0807B7E8:
 	ldr r3, _0807B824 @ =0x06010000
 	adds r1, r1, r3
 	str r2, [sp]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, [r5, #8]
 	mov r3, sb
 	adds r0, r3, r1

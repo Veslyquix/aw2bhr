@@ -12,7 +12,7 @@ sub_080791B0: @ 0x080791B0
 	movs r1, #0xa0
 	lsls r1, r1, #2
 	movs r2, #0xc0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_0807A908
 	ldr r1, _080793EC @ =gUnknown_08499598
 	ldr r2, [r1]

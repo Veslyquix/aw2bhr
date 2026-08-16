@@ -22,7 +22,7 @@ sub_08067358: @ 0x08067358
 	ldr r0, [r4, #0x2c]
 	str r0, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	ldr r1, _080673AC @ =gUnknown_03001FFC
 	strh r0, [r1]
 	ldr r1, [r4, #0x2c]

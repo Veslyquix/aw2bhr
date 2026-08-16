@@ -516,7 +516,7 @@ _08088872:
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0x78
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	mov r1, sb
 	movs r2, #0
@@ -525,7 +525,7 @@ _08088872:
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0xc
-	bl sub_08074234
+	bl Interpolate
 	ldr r3, [sp, #4]
 	movs r2, #0
 	ldrsh r1, [r3, r2]
@@ -549,7 +549,7 @@ _080888C4:
 	movs r0, #4
 	movs r1, #0x78
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	mov r1, sb
 	movs r2, #0
@@ -559,7 +559,7 @@ _080888C4:
 	movs r0, #4
 	movs r1, #0xc
 	movs r2, #0x18
-	bl sub_08074234
+	bl Interpolate
 	ldr r3, [sp, #4]
 	movs r2, #0
 	ldrsh r1, [r3, r2]
@@ -574,7 +574,7 @@ _080888C4:
 	movs r1, #0xf
 	movs r2, #0x1d
 _0808890A:
-	bl sub_08074234
+	bl Interpolate
 	ldr r2, [sp, #4]
 	movs r3, #0
 	ldrsh r1, [r2, r3]
@@ -607,7 +607,7 @@ _08088936:
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0x78
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	movs r0, #0
 	ldrsh r3, [r5, r0]
@@ -626,7 +626,7 @@ _08088960:
 	movs r0, #4
 	movs r1, #0x78
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	mov r0, sb
 	movs r1, #0
@@ -637,7 +637,7 @@ _08088960:
 	movs r1, #0x78
 	movs r2, #0xff
 _08088988:
-	bl sub_08074234
+	bl Interpolate
 	ldr r1, [r7, #0x60]
 	muls r0, r1, r0
 	str r0, [r7, #0x30]
@@ -660,7 +660,7 @@ _080889AC:
 	beq _080889B4
 	b _08088B58
 _080889B4:
-	ldr r0, _080889D8 @ =gUnknown_03002EE0
+	ldr r0, _080889D8 @ =gpKeySt
 	ldr r2, [r0]
 	ldrh r1, [r2, #2]
 	movs r0, #0x20
@@ -678,7 +678,7 @@ _080889B4:
 	movs r0, #7
 	b _080889E2
 	.align 2, 0
-_080889D8: .4byte gUnknown_03002EE0
+_080889D8: .4byte gpKeySt
 _080889DC: .4byte gUnknown_081D9468
 _080889E0:
 	subs r0, r2, #1
@@ -866,7 +866,7 @@ _08088B58:
 	mov r0, sl
 	cmp r0, #2
 	bne _08088BF2
-	ldr r0, _08088BC4 @ =gUnknown_03002EE0
+	ldr r0, _08088BC4 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r0, [r0, #4]
 	movs r2, #1
@@ -912,7 +912,7 @@ _08088B58:
 	bl Proc_Start
 	b _08088BF2
 	.align 2, 0
-_08088BC4: .4byte gUnknown_03002EE0
+_08088BC4: .4byte gpKeySt
 _08088BC8: .4byte gUnknown_030058E0
 _08088BCC: .4byte gUnknown_03005948
 _08088BD0: .4byte gUnknown_03005964
@@ -1015,7 +1015,7 @@ _08088C72:
 	movs r1, #0x86
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldrh r0, [r7, #0x3c]
 	movs r1, #4
 	bl Div
@@ -1027,7 +1027,7 @@ _08088C72:
 	movs r1, #0xe6
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 _08088CC0:
 	add sp, #8
 	pop {r3, r4, r5}

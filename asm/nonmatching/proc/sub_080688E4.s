@@ -18,7 +18,7 @@ sub_080688E4: @ 0x080688E4
 	bl sub_080674F4
 	mov r1, sb
 	str r0, [r1, #0x2c]
-	ldr r2, _080689D4 @ =gUnknown_030030CC
+	ldr r2, _080689D4 @ =gDispIo
 	ldrb r1, [r2]
 	movs r0, #8
 	rsbs r0, r0, #0
@@ -87,11 +87,11 @@ sub_080688E4: @ 0x080688E4
 	strb r0, [r4, #1]
 	ldr r0, _080689F4 @ =gUnknown_0817DA38
 	mov r1, r8
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _080689F8 @ =gUnknown_0817E208
 	ldr r1, _080689FC @ =gUnknown_08499580
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B0C
 	movs r0, #0xc0
 	lsls r0, r0, #4
@@ -112,7 +112,7 @@ sub_080688E4: @ 0x080688E4
 	bx r0
 	.align 2, 0
 _080689D0: .4byte gUnknown_0202F204
-_080689D4: .4byte gUnknown_030030CC
+_080689D4: .4byte gDispIo
 _080689D8: .4byte gUnknown_030030B4
 _080689DC: .4byte gUnknown_03001FE8
 _080689E0: .4byte gUnknown_03002B6C

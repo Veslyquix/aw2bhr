@@ -18,13 +18,13 @@ sub_08077620: @ 0x08077620
 	movs r0, #1
 	adds r1, r6, #0
 	movs r2, #0x80
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r3, _08077684 @ =gUnknown_081CC5DE
 	str r4, [sp]
 	movs r0, #1
 	adds r1, r6, #0
 	movs r2, #0x78
-	bl sub_0801BEBC
+	bl PutSprite
 _08077650:
 	adds r0, r5, #0
 	adds r0, #0xf
@@ -43,7 +43,7 @@ _08077650:
 	movs r0, #0
 	str r0, [sp]
 	movs r1, #0x50
-	bl sub_0801BEBC
+	bl PutSprite
 _08077678:
 	add sp, #4
 	pop {r4, r5, r6, r7}

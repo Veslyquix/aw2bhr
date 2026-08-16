@@ -17,16 +17,16 @@ sub_0807B884: @ 0x0807B884
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0807B8F0 @ =gUnknown_0822F9AC
 	ldr r1, _0807B8F4 @ =gUnknown_0849957C
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013AFC
 	ldr r0, _0807B8F8 @ =gUnknown_0822FE50
 	movs r1, #0x20
 	movs r2, #0xa0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0807B8FC @ =gUnknown_086165B0
 	adds r1, r5, #0
 	bl Proc_Start
@@ -89,7 +89,7 @@ _0807B948:
 _0807B94C:
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	b _0807B978
 	.align 2, 0
 _0807B958: .4byte 0x00000195
@@ -105,7 +105,7 @@ _0807B96E:
 	ldr r0, _0807B98C @ =gUnknown_0822DB88
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0807B978:
 	bl sub_08078E14
 	subs r0, #8

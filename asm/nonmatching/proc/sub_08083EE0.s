@@ -56,7 +56,7 @@ _08083F26:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	mov r0, r8
 	movs r2, #0
@@ -65,7 +65,7 @@ _08083F26:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0x80
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -75,7 +75,7 @@ _08083F26:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x64
 	subs r4, r4, r0
 	movs r0, #0x66
@@ -94,7 +94,7 @@ _08083F26:
 	str r6, [sp]
 	movs r0, #4
 	adds r1, r4, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x30]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -104,7 +104,7 @@ _08083F26:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r1, #0xa0
 	subs r1, r1, r0
 	mov r2, r8
@@ -113,7 +113,7 @@ _08083F26:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0xd0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x3c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -134,7 +134,7 @@ _08083FE2:
 	movs r0, #1
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	mov r2, r8
 	movs r0, #0
@@ -143,7 +143,7 @@ _08083FE2:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0x80
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -153,7 +153,7 @@ _08083FE2:
 	movs r0, #1
 	movs r1, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x64
 	subs r4, r4, r0
 	movs r1, #0x66
@@ -172,7 +172,7 @@ _08083FE2:
 	str r6, [sp]
 	movs r0, #4
 	adds r1, r4, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x30]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -182,7 +182,7 @@ _08083FE2:
 	movs r0, #1
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	movs r1, #0xa0
 	subs r1, r1, r0
 	mov r2, r8
@@ -191,7 +191,7 @@ _08083FE2:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0xd0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x3c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -202,7 +202,7 @@ _08083FE2:
 	movs r1, #4
 	movs r2, #0
 _08084090:
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x3c
 	mov r1, sb
@@ -219,7 +219,7 @@ _08084090:
 	str r6, [sp]
 	movs r0, #4
 	adds r1, r4, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x40]
 	b _080842E0
 _080840BE:
@@ -268,7 +268,7 @@ _080840FC:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	adds r1, #0x80
 	mov r0, r8
@@ -278,7 +278,7 @@ _080840FC:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	movs r0, #0x66
 	adds r0, r0, r7
@@ -296,7 +296,7 @@ _080840FC:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	lsls r4, r4, #4
 	subs r0, #0x54
 	subs r4, r4, r0
@@ -307,7 +307,7 @@ _080840FC:
 	movs r0, #4
 	adds r1, r4, #0
 	movs r2, #0x64
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x30]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -317,7 +317,7 @@ _080840FC:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r1, #0xd0
 	subs r1, r1, r0
 	mov r2, r8
@@ -326,7 +326,7 @@ _080840FC:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0xa0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x3c]
 	mov r1, sb
 	movs r2, #0
@@ -342,7 +342,7 @@ _080840FC:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	lsls r4, r4, #4
 	adds r0, #0x3c
 	adds r4, r4, r0
@@ -353,7 +353,7 @@ _080840FC:
 	movs r0, #4
 	adds r1, r4, #0
 	movs r2, #0x3c
-	bl sub_08074234
+	bl Interpolate
 	b _080842CE
 _080841E4:
 	ldr r0, [r7, #0x58]
@@ -365,7 +365,7 @@ _080841E4:
 	movs r0, #1
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	adds r1, #0x80
 	mov r2, r8
@@ -375,7 +375,7 @@ _080841E4:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	movs r1, #0x66
 	adds r1, r1, r7
@@ -393,7 +393,7 @@ _080841E4:
 	movs r0, #1
 	movs r1, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	lsls r4, r4, #4
 	subs r0, #0x54
 	subs r4, r4, r0
@@ -404,7 +404,7 @@ _080841E4:
 	movs r0, #4
 	adds r1, r4, #0
 	movs r2, #0x64
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x30]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -414,7 +414,7 @@ _080841E4:
 	movs r0, #1
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	movs r1, #0xd0
 	subs r1, r1, r0
 	mov r2, r8
@@ -423,7 +423,7 @@ _080841E4:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0xa0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x3c]
 	mov r1, sb
 	movs r2, #0
@@ -439,7 +439,7 @@ _080841E4:
 	movs r0, #1
 	movs r1, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	lsls r4, r4, #4
 	adds r0, #0x3c
 	adds r4, r4, r0
@@ -450,7 +450,7 @@ _080841E4:
 	movs r0, #4
 	adds r1, r4, #0
 	movs r2, #0x3c
-	bl sub_08074234
+	bl Interpolate
 	b _080842CE
 _080842C0:
 	movs r0, #0
@@ -529,7 +529,7 @@ _0808432C:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	movs r2, #0
 	ldrsh r3, [r6, r2]
@@ -537,7 +537,7 @@ _0808432C:
 	str r4, [sp]
 	movs r0, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -558,7 +558,7 @@ _08084384:
 	movs r0, #1
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	movs r2, #0
 	ldrsh r3, [r6, r2]
@@ -566,7 +566,7 @@ _08084384:
 	str r4, [sp]
 	movs r0, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -577,14 +577,14 @@ _08084384:
 	movs r1, #4
 	movs r2, #0
 _080843C2:
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	movs r0, #0
 	ldrsh r3, [r6, r0]
 	str r4, [sp]
 	movs r0, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x30]
 	b _080843E0
 _080843DA:
@@ -634,7 +634,7 @@ _08084418:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -655,7 +655,7 @@ _08084452:
 	movs r0, #1
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	ldr r0, [r7, #0x58]
 	movs r1, #0x10
@@ -666,7 +666,7 @@ _08084452:
 	movs r1, #4
 	movs r2, #0
 _0808447E:
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x30]
 	adds r0, r7, #0
 	adds r0, #0x64

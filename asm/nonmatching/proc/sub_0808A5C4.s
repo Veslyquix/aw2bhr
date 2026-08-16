@@ -11,7 +11,7 @@ sub_0808A5C4: @ 0x0808A5C4
 	ldr r0, _0808A5FC @ =gUnknown_081320AC
 	movs r1, #0x60
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0808A600 @ =gUnknown_03005908
 	ldr r1, [r0]
 	cmp r1, #0

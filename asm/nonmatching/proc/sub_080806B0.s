@@ -18,7 +18,7 @@ sub_080806B0: @ 0x080806B0
 	movs r0, #4
 	movs r1, #0x38
 	movs r2, #0xa8
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	ldr r5, _08080710 @ =gUnknown_03002020
 	movs r1, #0
@@ -27,7 +27,7 @@ sub_080806B0: @ 0x080806B0
 	movs r0, #0
 	movs r1, #0
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r5, _08080714 @ =gUnknown_03002B28
 	movs r0, #0
@@ -36,7 +36,7 @@ sub_080806B0: @ 0x080806B0
 	movs r0, #0
 	movs r1, #0x10
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r0, [r7, #0x2c]
 	ldr r1, _08080718 @ =0x000001FF

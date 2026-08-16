@@ -17,7 +17,7 @@ sub_0801BF90: @ 0x0801BF90
 	ldrh r0, [r0]
 	str r0, [sp]
 	adds r0, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r4}
 	pop {r0}

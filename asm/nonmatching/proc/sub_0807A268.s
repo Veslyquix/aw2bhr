@@ -18,7 +18,7 @@ sub_0807A268: @ 0x0807A268
 	movs r0, #4
 	movs r1, #0
 	movs r2, #0xf0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x34]
 	ldr r2, _0807A35C @ =gUnknown_081D9300
 	mov r8, r2
@@ -48,7 +48,7 @@ _0807A2A4:
 	movs r0, #0
 	mov r7, sb
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	movs r0, #0x40
 	add sl, r0
 	adds r5, #0x40
@@ -68,7 +68,7 @@ _0807A2D2:
 	rsbs r1, r1, #0
 	cmp r0, r1
 	ble _0807A2F4
-	ldr r0, _0807A368 @ =gUnknown_030030CC
+	ldr r0, _0807A368 @ =gDispIo
 	ldrb r1, [r0, #1]
 	movs r2, #4
 	orrs r1, r2
@@ -92,7 +92,7 @@ _0807A2F4:
 	str r0, [sp]
 	movs r0, #4
 	movs r2, #0x40
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x3c]
 _0807A31E:
 	ldr r0, [r6, #0x3c]
@@ -129,5 +129,5 @@ _0807A346:
 _0807A35C: .4byte gUnknown_081D9300
 _0807A360: .4byte gUnknown_081D92FC
 _0807A364: .4byte 0x000001FF
-_0807A368: .4byte gUnknown_030030CC
+_0807A368: .4byte gDispIo
 

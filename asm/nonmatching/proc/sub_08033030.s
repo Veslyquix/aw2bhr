@@ -6,7 +6,7 @@ sub_08033030: @ 0x08033030
 	push {r4, r5, lr}
 	sub sp, #0x34
 	adds r5, r0, #0
-	ldr r4, _0803309C @ =gUnknown_03002EE0
+	ldr r4, _0803309C @ =gpKeySt
 	ldr r0, [r4]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -54,7 +54,7 @@ _0803308E:
 	bl Proc_Goto
 	b _080330B6
 	.align 2, 0
-_0803309C: .4byte gUnknown_03002EE0
+_0803309C: .4byte gpKeySt
 _080330A0: .4byte gUnknown_0849B688
 _080330A4: .4byte gUnknown_0849B670
 _080330A8: .4byte gUnknown_0849B060

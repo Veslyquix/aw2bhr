@@ -11,7 +11,7 @@ sub_08081060: @ 0x08081060
 	adds r7, r0, #0
 	bl sub_0807898C
 	bl sub_08078AF0
-	ldr r0, _080812B0 @ =gUnknown_030030CC
+	ldr r0, _080812B0 @ =gDispIo
 	mov sl, r0
 	ldrb r2, [r0, #1]
 	movs r4, #1
@@ -98,15 +98,15 @@ sub_08081060: @ 0x08081060
 	movs r4, #0xc0
 	lsls r4, r4, #0x13
 	adds r1, r1, r4
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _080812EC @ =gUnknown_08239FA4
 	ldr r1, _080812F0 @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _080812F4 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013B1C
 	ldr r0, _080812F8 @ =gUnknown_0823BF28
 	ldr r1, _080812FC @ =gUnknown_030030B4
@@ -115,15 +115,15 @@ sub_08081060: @ 0x08081060
 	lsrs r1, r1, #0x1e
 	lsls r1, r1, #0xe
 	adds r1, r1, r4
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08081300 @ =gUnknown_0823BE40
 	ldr r1, _08081304 @ =gUnknown_08499580
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08081308 @ =gUnknown_0823BFD4
 	movs r1, #0x20
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013B0C
 	bl sub_08013AEC
 	bl sub_08013AFC
@@ -199,7 +199,7 @@ _080811D8:
 	movs r1, #0xe8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0808121A:
 	bl sub_08084804
 	movs r4, #0
@@ -210,7 +210,7 @@ _08081224:
 	bl sub_08084864
 	lsrs r1, r5, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0x80
 	lsls r0, r0, #0xe
 	adds r5, r5, r0
@@ -221,7 +221,7 @@ _08081224:
 	movs r1, #0xd0
 	lsls r1, r1, #2
 	movs r2, #0x60
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0
 	movs r1, #0
 	movs r2, #1
@@ -232,7 +232,7 @@ _08081224:
 	movs r1, #0x80
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08081328 @ =gUnknown_08616A58
 	adds r1, r7, #0
 	bl Proc_Start
@@ -253,7 +253,7 @@ _08081224:
 	movs r1, #0xc0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08081330 @ =gUnknown_08616A40
 	adds r1, r7, #0
 	bl Proc_Start
@@ -266,7 +266,7 @@ _080812A0:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080812B0: .4byte gUnknown_030030CC
+_080812B0: .4byte gDispIo
 _080812B4: .4byte gUnknown_030030A4
 _080812B8: .4byte gUnknown_030030DC
 _080812BC: .4byte gUnknown_03002B68

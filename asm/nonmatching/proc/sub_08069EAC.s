@@ -16,7 +16,7 @@ sub_08069EAC: @ 0x08069EAC
 	str r0, [sp]
 	movs r0, #0
 	movs r1, #0xe8
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r4, #0x2a]
 	ldrh r0, [r4, #0x2e]
 	subs r0, #2
@@ -71,7 +71,7 @@ _08069F26:
 	ldr r0, [r4, #0x3c]
 	str r0, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	movs r5, #0
 	strh r0, [r4, #0x2a]
 	ldrh r0, [r4, #0x2e]

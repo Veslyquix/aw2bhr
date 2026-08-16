@@ -21,7 +21,7 @@ sub_08080BF0: @ 0x08080BF0
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0x60
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x2c]
 	movs r0, #0
 	ldrsh r3, [r7, r0]
@@ -29,7 +29,7 @@ sub_08080BF0: @ 0x08080BF0
 	movs r0, #1
 	movs r1, #0x1e
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x30]
 _08080C2C:
 	ldr r2, _08080D0C @ =0x000011CA
@@ -55,7 +55,7 @@ _08080C4C:
 	movs r2, #0x88
 	lsls r2, r2, #3
 	mov r3, r8
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	movs r1, #0xe8
 	subs r1, r1, r4
 	str r7, [sp]
@@ -63,7 +63,7 @@ _08080C4C:
 	movs r2, #0x8b
 	lsls r2, r2, #3
 	mov r3, r8
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	adds r5, #1
 	ldr r0, [r6, #0x30]
 	cmp r5, r0
@@ -110,7 +110,7 @@ _08080C82:
 	movs r0, #0
 	adds r1, r4, #0
 	ldr r3, _08080D2C @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #1
 	ldr r0, [r6, #0x58]
 	cmp r5, r0

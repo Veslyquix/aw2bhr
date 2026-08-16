@@ -68,7 +68,7 @@ _0806A94A:
 	strh r0, [r1, #6]
 	bl sub_08023860
 	bl sub_0801237C
-	ldr r1, _0806A9AC @ =gUnknown_030030CC
+	ldr r1, _0806A9AC @ =gDispIo
 	ldrb r0, [r1, #1]
 	movs r3, #0x20
 	orrs r0, r3
@@ -101,7 +101,7 @@ _0806A99E:
 	b _0806A9CC
 	.align 2, 0
 _0806A9A8: .4byte gUnknown_08499590
-_0806A9AC: .4byte gUnknown_030030CC
+_0806A9AC: .4byte gDispIo
 _0806A9B0: .4byte gUnknown_030030A4
 _0806A9B4: .4byte gUnknown_03002B40
 _0806A9B8: .4byte gUnknown_03002B4C

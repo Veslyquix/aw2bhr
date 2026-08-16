@@ -51,7 +51,7 @@ _080687B6:
 	adds r1, r5, #0
 	adds r2, r7, #0
 	ldr r3, _0806880C @ =gUnknown_0858125C
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #0x22
 	adds r4, #1
 	adds r0, r6, #0

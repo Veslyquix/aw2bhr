@@ -89,15 +89,15 @@ _08048A56:
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08048D74 @ =gUnknown_08239FA4
 	ldr r1, _08048D78 @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08048D7C @ =gUnknown_0823BE00
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013B1C
 	movs r0, #0
 	movs r1, #3
@@ -105,7 +105,7 @@ _08048A56:
 	ldr r0, _08048D80 @ =gUnknown_0823E7D4
 	ldr r4, _08048D84 @ =gUnknown_08499580
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	movs r7, #0
 	movs r0, #0x9b
 	lsls r0, r0, #5
@@ -145,7 +145,7 @@ _08048ABE:
 	bl sub_08043E3C
 	ldr r0, _08048DA0 @ =gUnknown_0823EA40
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r7, #0
 	mov sb, r4
 	ldr r6, _08048D88 @ =0x000003FF
@@ -216,7 +216,7 @@ _08048B14:
 	movs r1, #0xb0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	mov r3, sl
 	ldr r0, [r3]
 	ldr r0, [r0]
@@ -265,7 +265,7 @@ _08048B14:
 	ldr r0, _08048DC0 @ =gUnknown_0823E8E8
 	ldr r4, _08048D98 @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, _08048DC4 @ =0x06011360
 	adds r0, r4, #0
 	movs r2, #0x20
@@ -292,7 +292,7 @@ _08048B14:
 	bl sub_0802D5CC
 	ldr r0, _08048DD4 @ =gUnknown_0823E140
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r7, #0
 	mov r8, r4
 	adds r6, r5, #0
@@ -340,7 +340,7 @@ _08048C68:
 	movs r1, #0xb8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r3, _08048DBC @ =gUnknown_03002B6C
 	ldrb r1, [r3]
 	movs r2, #4
@@ -366,7 +366,7 @@ _08048C68:
 	movs r1, #3
 	orrs r0, r1
 	strb r0, [r2]
-	ldr r2, _08048DF0 @ =gUnknown_030030CC
+	ldr r2, _08048DF0 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #0x21
 	rsbs r0, r0, #0
@@ -445,7 +445,7 @@ _08048DE0: .4byte 0x06010DE0
 _08048DE4: .4byte gUnknown_0823E550
 _08048DE8: .4byte gUnknown_03001FE8
 _08048DEC: .4byte gUnknown_030030B4
-_08048DF0: .4byte gUnknown_030030CC
+_08048DF0: .4byte gDispIo
 _08048DF4: .4byte gUnknown_030030E0
 _08048DF8: .4byte gUnknown_03001418
 _08048DFC: .4byte gUnknown_03001FF8

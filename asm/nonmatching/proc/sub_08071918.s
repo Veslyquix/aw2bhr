@@ -8,7 +8,7 @@ sub_08071918: @ 0x08071918
 	movs r0, r0
 	movs r0, r0
 	push {lr}
-	ldr r0, _08071944 @ =gUnknown_03002EE0
+	ldr r0, _08071944 @ =gpKeySt
 	ldr r2, [r0]
 	ldrh r1, [r2]
 	movs r0, #0x80
@@ -26,5 +26,5 @@ _08071940:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08071944: .4byte gUnknown_03002EE0
+_08071944: .4byte gpKeySt
 

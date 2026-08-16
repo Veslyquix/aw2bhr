@@ -47,7 +47,7 @@ sub_08003A80: @ 0x08003A80
 	strh r0, [r1]
 	ldr r0, _08003B4C @ =gUnknown_03002B28
 	strh r4, [r0]
-	ldr r1, _08003B50 @ =gUnknown_030030CC
+	ldr r1, _08003B50 @ =gDispIo
 	ldrb r0, [r1, #1]
 	movs r2, #0x20
 	orrs r0, r2
@@ -103,7 +103,7 @@ _08003B40: .4byte gUnknown_030030E0
 _08003B44: .4byte gUnknown_03001FFC
 _08003B48: .4byte gUnknown_03002020
 _08003B4C: .4byte gUnknown_03002B28
-_08003B50: .4byte gUnknown_030030CC
+_08003B50: .4byte gDispIo
 _08003B54: .4byte gUnknown_03002B40
 _08003B58: .4byte gUnknown_03002B4C
 _08003B5C: .4byte gUnknown_03002EFC

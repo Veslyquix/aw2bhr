@@ -63,7 +63,7 @@ sub_0801E18C: @ 0x0801E18C
 	mov r1, r8
 	adds r2, r6, #0
 	adds r3, r5, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	add sp, #4
 	pop {r3, r4}
 	mov r8, r3

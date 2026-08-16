@@ -105,7 +105,7 @@ _080316FC:
 	bl Proc_Break
 	b _08031818
 _08031704:
-	ldr r4, _0803177C @ =gUnknown_03002EE0
+	ldr r4, _0803177C @ =gpKeySt
 	ldr r0, [r4]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -163,7 +163,7 @@ _08031752:
 	bl Proc_EndEach
 	b _080317FE
 	.align 2, 0
-_0803177C: .4byte gUnknown_03002EE0
+_0803177C: .4byte gpKeySt
 _08031780: .4byte gUnknown_0300410C
 _08031784: .4byte gUnknown_030040CC
 _08031788: .4byte gUnknown_03004400

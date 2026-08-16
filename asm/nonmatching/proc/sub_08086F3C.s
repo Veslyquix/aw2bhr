@@ -68,7 +68,7 @@ _08086FC6:
 	lsls r1, r1, #0xe
 	ldr r2, _08087030 @ =0x06004000
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	movs r4, #0
 	movs r1, #0
 	ldr r0, _08087034 @ =gUnknown_0849957C

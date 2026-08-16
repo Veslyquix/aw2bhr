@@ -11,7 +11,7 @@ sub_08048F4C: @ 0x08048F4C
 	ldrb r0, [r3]
 	cmp r0, #0
 	bne _08048FCA
-	ldr r0, _08048F94 @ =gUnknown_03002EE0
+	ldr r0, _08048F94 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0xc0
@@ -39,7 +39,7 @@ sub_08048F4C: @ 0x08048F4C
 	b _08048FC2
 	.align 2, 0
 _08048F90: .4byte gUnknown_084C30F8
-_08048F94: .4byte gUnknown_03002EE0
+_08048F94: .4byte gpKeySt
 _08048F98:
 	ldr r4, _08048FD4 @ =gUnknown_02028E1C
 	ldrh r0, [r2, #0x1e]

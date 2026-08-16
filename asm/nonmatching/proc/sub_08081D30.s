@@ -38,7 +38,7 @@ sub_08081D30: @ 0x08081D30
 	ldrsh r0, [r6, r1]
 	cmp r0, #0x1b
 	ble _08081D94
-	ldr r0, _08081DFC @ =gUnknown_03002EE0
+	ldr r0, _08081DFC @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0xc0
@@ -93,7 +93,7 @@ _08081DCA:
 	beq _08081DDC
 	b _08082044
 _08081DDC:
-	ldr r2, _08081DFC @ =gUnknown_03002EE0
+	ldr r2, _08081DFC @ =gpKeySt
 	ldr r3, [r2]
 	ldrh r2, [r3, #2]
 	movs r0, #0x40
@@ -109,7 +109,7 @@ _08081DDC:
 	strh r3, [r1]
 	b _08081E08
 	.align 2, 0
-_08081DFC: .4byte gUnknown_03002EE0
+_08081DFC: .4byte gpKeySt
 _08081E00: .4byte gUnknown_084892C4
 _08081E04:
 	adds r0, #1
@@ -190,7 +190,7 @@ _08081E68:
 	cmp r0, #4
 	bne _08081F2C
 _08081E98:
-	ldr r3, _08081ED4 @ =gUnknown_03002EE0
+	ldr r3, _08081ED4 @ =gpKeySt
 	ldr r0, [r3]
 	ldrh r1, [r0, #4]
 	movs r2, #1
@@ -218,7 +218,7 @@ _08081EAA:
 	.align 2, 0
 _08081ECC: .4byte gUnknown_081D93AC
 _08081ED0: .4byte gUnknown_0861696C
-_08081ED4: .4byte gUnknown_03002EE0
+_08081ED4: .4byte gpKeySt
 _08081ED8: .4byte gUnknown_030033FC
 _08081EDC:
 	mov r3, sb
@@ -326,7 +326,7 @@ _08081F98:
 	mov r2, r8
 	strh r0, [r2]
 _08081FBE:
-	ldr r0, _08081FD8 @ =gUnknown_03002EE0
+	ldr r0, _08081FD8 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #1
@@ -338,7 +338,7 @@ _08081FBE:
 	b _080823D2
 	.align 2, 0
 _08081FD4: .4byte gUnknown_0861696C
-_08081FD8: .4byte gUnknown_03002EE0
+_08081FD8: .4byte gpKeySt
 _08081FDC:
 	movs r0, #0x10
 	ands r0, r1
@@ -392,7 +392,7 @@ _08082044:
 	bgt _0808204C
 	b _080823D2
 _0808204C:
-	ldr r0, _08082074 @ =gUnknown_03002EE0
+	ldr r0, _08082074 @ =gpKeySt
 	ldr r3, [r0]
 	ldrh r1, [r3, #4]
 	movs r0, #0x40
@@ -412,7 +412,7 @@ _0808204C:
 	strh r0, [r1]
 	b _0808207E
 	.align 2, 0
-_08082074: .4byte gUnknown_03002EE0
+_08082074: .4byte gpKeySt
 _08082078:
 	subs r0, r2, #1
 	mov r2, r8
@@ -825,7 +825,7 @@ _080823C4:
 	movs r0, #0x67
 	bl sub_0803B4DC
 _080823D2:
-	ldr r0, _0808245C @ =gUnknown_03002EE0
+	ldr r0, _0808245C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #4
@@ -856,7 +856,7 @@ _080823D2:
 	str r2, [r7, #0x60]
 	strh r3, [r6]
 _08082412:
-	ldr r0, _0808245C @ =gUnknown_03002EE0
+	ldr r0, _0808245C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #4
@@ -890,7 +890,7 @@ _08082412:
 	bl sub_080845A8
 	b _08082472
 	.align 2, 0
-_0808245C: .4byte gUnknown_03002EE0
+_0808245C: .4byte gpKeySt
 _08082460: .4byte gUnknown_0861696C
 _08082464: .4byte gUnknown_03005968
 _08082468: .4byte gUnknown_03005920

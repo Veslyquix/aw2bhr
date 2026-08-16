@@ -50,7 +50,7 @@ _0801F380:
 	ldr r0, [sp, #0x1c]
 	adds r1, r7, #0
 	mov r2, r8
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	b _0801F3C6
 	.align 2, 0
 _0801F3B0: .4byte gUnknown_0200F920

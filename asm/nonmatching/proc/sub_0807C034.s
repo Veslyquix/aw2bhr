@@ -152,7 +152,7 @@ _0807C154:
 	ldr r1, [sp, #4]
 	mov r2, sl
 	adds r3, r7, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	movs r2, #0
 	mov sb, r2
 	mov r0, r8
@@ -200,7 +200,7 @@ _0807C18A:
 	movs r2, #0xc2
 	lsls r2, r2, #2
 	ldr r3, _0807C1F8 @ =gUnknown_0848B6E6
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	mov r1, sl
 	movs r2, #0
 	ldrsh r0, [r1, r2]
@@ -245,7 +245,7 @@ _0807C208:
 	movs r0, #0
 	movs r2, #0x18
 	ldr r3, _0807C274 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 _0807C238:
 	movs r0, #8
 	add r8, r0

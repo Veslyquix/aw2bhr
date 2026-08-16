@@ -11,7 +11,7 @@ sub_08077790: @ 0x08077790
 	subs r1, r1, r0
 	movs r0, #0
 	bl sub_08077620
-	ldr r5, _080777CC @ =gUnknown_03002EE0
+	ldr r5, _080777CC @ =gpKeySt
 	ldr r0, [r5]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -28,7 +28,7 @@ sub_08077790: @ 0x08077790
 	b _08077810
 	.align 2, 0
 _080777C8: .4byte gUnknown_0300064C
-_080777CC: .4byte gUnknown_03002EE0
+_080777CC: .4byte gpKeySt
 _080777D0:
 	bl sub_08014824
 	cmp r0, #0

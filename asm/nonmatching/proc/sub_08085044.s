@@ -20,7 +20,7 @@ sub_08085044: @ 0x08085044
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r5, #0x2c]
 	ldr r0, [r5, #0x58]
 	movs r1, #0x10
@@ -41,7 +41,7 @@ _08085084:
 	movs r0, #1
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r5, #0x2c]
 	ldr r0, [r5, #0x58]
 	movs r1, #0x10
@@ -52,7 +52,7 @@ _08085084:
 	movs r1, #4
 	movs r2, #0
 _080850B0:
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r5, #0x30]
 	adds r0, r5, #0
 	adds r0, #0x66
@@ -128,7 +128,7 @@ _08085126:
 	movs r1, #0xa6
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 _08085156:
 	ldr r0, [r5, #0x58]
 	adds r0, #1

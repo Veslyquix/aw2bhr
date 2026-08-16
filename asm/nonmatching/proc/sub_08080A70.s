@@ -29,7 +29,7 @@ _08080A92:
 	movs r0, #0
 	movs r2, #0x40
 	ldr r3, _08080AE0 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #8
 	adds r4, #1
 	ldr r0, [r6, #0x58]

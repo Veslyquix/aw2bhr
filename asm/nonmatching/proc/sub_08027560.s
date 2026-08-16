@@ -17,12 +17,12 @@ _08027572:
 _08027578:
 	ldr r0, _08027590 @ =gUnknown_081121D0
 	ldr r1, _08027594 @ =0x06013940
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08027598 @ =gUnknown_081126E4
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r0}
 	bx r0
 	.align 2, 0

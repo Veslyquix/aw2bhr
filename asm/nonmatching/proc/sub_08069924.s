@@ -8,7 +8,7 @@ sub_08069924: @ 0x08069924
 	adds r6, r0, #0
 	lsls r6, r6, #0x18
 	lsrs r6, r6, #0x18
-	ldr r2, _080699BC @ =gUnknown_030030CC
+	ldr r2, _080699BC @ =gDispIo
 	ldrb r1, [r2]
 	movs r0, #8
 	rsbs r0, r0, #0
@@ -58,23 +58,23 @@ sub_08069924: @ 0x08069924
 	ldr r0, _080699D8 @ =gUnknown_0817DA18
 	movs r1, #0x20
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	cmp r6, #0
 	beq _080699A8
 	ldr r0, _080699DC @ =gUnknown_0817DA38
 	ldr r1, _080699E0 @ =0x06008000
-	bl sub_08011CAC
+	bl Decompress
 _080699A8:
 	ldr r0, _080699E4 @ =gUnknown_0817E208
 	ldr r1, [r5]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B0C
 	add sp, #4
 	pop {r4, r5, r6}
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080699BC: .4byte gUnknown_030030CC
+_080699BC: .4byte gDispIo
 _080699C0: .4byte gUnknown_03002B6C
 _080699C4: .4byte gUnknown_030030B4
 _080699C8: .4byte gUnknown_03001FE8

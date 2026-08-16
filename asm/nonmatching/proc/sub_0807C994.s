@@ -17,7 +17,7 @@ sub_0807C994: @ 0x0807C994
 	movs r1, #0x86
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldrh r0, [r4]
 	movs r1, #4
 	bl Div
@@ -29,7 +29,7 @@ sub_0807C994: @ 0x0807C994
 	movs r1, #0xee
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldrh r0, [r4]
 	adds r0, #1
 	strh r0, [r4]

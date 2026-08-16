@@ -148,7 +148,7 @@ _080483F4:
 	adds r1, r5, #0
 	adds r2, r4, #0
 	mov r3, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r2, r4, #0
 	adds r2, #8
 	ldr r0, _08048434 @ =0x00008208
@@ -157,7 +157,7 @@ _080483F4:
 	adds r1, r5, #0
 _0804841A:
 	mov r3, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r4, #4
 	ldr r0, _08048438 @ =0x00008209
 	str r0, [sp]
@@ -165,7 +165,7 @@ _0804841A:
 	adds r1, r5, #0
 	adds r2, r4, #0
 	mov r3, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	b _0804848E
 	.align 2, 0
 _08048434: .4byte 0x00008208
@@ -182,7 +182,7 @@ _0804843C:
 	adds r1, r5, #0
 	adds r2, r4, #0
 	mov r3, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r2, r4, #0
 	adds r2, #8
 	ldr r1, _080484C0 @ =0x00008208
@@ -190,7 +190,7 @@ _0804843C:
 	movs r0, #0
 	adds r1, r5, #0
 	mov r3, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, r6, #2
 	lsls r5, r5, #3
 	ldr r0, _080484C0 @ =0x00008208
@@ -199,7 +199,7 @@ _0804843C:
 	adds r1, r5, #0
 	adds r2, r4, #0
 	mov r3, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r4, #4
 	ldr r0, _080484C4 @ =0x00008209
 	str r0, [sp]
@@ -207,7 +207,7 @@ _0804843C:
 	adds r1, r5, #0
 	adds r2, r4, #0
 	mov r3, r8
-	bl sub_0801BEBC
+	bl PutSprite
 _0804848E:
 	mov r0, sb
 	adds r0, #1

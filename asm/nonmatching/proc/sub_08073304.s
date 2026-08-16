@@ -25,14 +25,14 @@ sub_08073304: @ 0x08073304
 	lsrs r0, r0, #0x18
 	mov sl, r0
 	ldr r0, _08073394 @ =gUnknown_081CC038
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08073398 @ =gUnknown_081D2224
 	adds r1, r5, #0
 	adds r1, #0x10
 	lsls r1, r1, #0x15
 	lsrs r1, r1, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0807339C @ =gUnknown_086140D4
 	adds r1, r7, #0
 	bl Proc_Start

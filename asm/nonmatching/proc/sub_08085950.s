@@ -27,7 +27,7 @@ sub_08085950: @ 0x08085950
 	lsrs r4, r4, #0x10
 	adds r1, r4, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r3}
 	mov r8, r3
 	pop {r4, r5, r6}

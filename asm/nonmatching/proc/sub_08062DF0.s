@@ -21,7 +21,7 @@ sub_08062DF0: @ 0x08062DF0
 	beq _08062E1A
 	b _08062F7A
 _08062E1A:
-	ldr r0, _08062E40 @ =gUnknown_03002EE0
+	ldr r0, _08062E40 @ =gpKeySt
 	ldr r1, [r0]
 	ldrh r0, [r1, #4]
 	cmp r0, #1
@@ -36,7 +36,7 @@ _08062E1A:
 	b _08062F84
 	.align 2, 0
 _08062E3C: .4byte gUnknown_08499590
-_08062E40: .4byte gUnknown_03002EE0
+_08062E40: .4byte gpKeySt
 _08062E44: .4byte gUnknown_03004780
 _08062E48: .4byte gUnknown_030045DC
 _08062E4C:

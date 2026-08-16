@@ -202,7 +202,7 @@ _08030550:
 	movs r0, #0
 	strb r0, [r1, #0x1b]
 _0803055C:
-	ldr r0, _08030570 @ =gUnknown_03002EE0
+	ldr r0, _08030570 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r0, [r0, #6]
 _08030562:
@@ -214,5 +214,5 @@ _08030562:
 	pop {r1}
 	bx r1
 	.align 2, 0
-_08030570: .4byte gUnknown_03002EE0
+_08030570: .4byte gpKeySt
 

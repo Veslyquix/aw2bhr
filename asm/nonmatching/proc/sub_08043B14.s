@@ -17,7 +17,7 @@ sub_08043B14: @ 0x08043B14
 	lsls r1, r1, #5
 	ldr r2, _08043B40 @ =0x06010000
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	pop {r0}
 	bx r0
 	.align 2, 0

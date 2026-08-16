@@ -12,7 +12,7 @@ sub_08067564: @ 0x08067564
 	str r0, [r4, #0x60]
 	b _08067594
 _08067574:
-	ldr r0, _0806759C @ =gUnknown_03002EE0
+	ldr r0, _0806759C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #9
@@ -31,5 +31,5 @@ _08067594:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0806759C: .4byte gUnknown_03002EE0
+_0806759C: .4byte gpKeySt
 

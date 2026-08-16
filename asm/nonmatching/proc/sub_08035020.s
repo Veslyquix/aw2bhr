@@ -17,7 +17,7 @@ sub_08035020: @ 0x08035020
 	movs r2, #0x80
 	lsls r2, r2, #1
 	movs r1, #0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4}
 	pop {r0}
 	bx r0

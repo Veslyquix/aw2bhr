@@ -23,7 +23,7 @@ sub_0806E830: @ 0x0806E830
 	movs r0, #4
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	ldr r0, [r5, #0x58]
 	subs r0, #1
@@ -38,7 +38,7 @@ _0806E866:
 	movs r0, #4
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	mov r8, r0
 	ldr r0, [r5, #0x5c]
 	subs r0, #1
@@ -55,7 +55,7 @@ _0806E884:
 	movs r0, #0
 	str r0, [sp]
 	adds r3, r6, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r0, r7, #1
 	adds r0, r0, r5
 	ldrb r1, [r0]
@@ -65,7 +65,7 @@ _0806E884:
 	str r0, [sp]
 	movs r0, #0
 	adds r3, r6, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r3}
 	mov r8, r3

@@ -68,7 +68,7 @@ _080866EE:
 	movs r1, #0xa6
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r3, #0
 	ldrsh r0, [r7, r3]
 	movs r1, #4
@@ -95,7 +95,7 @@ _080866EE:
 	lsrs r2, r2, #0x10
 	adds r0, r5, #0
 	adds r1, r6, #0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r2, #0
 	ldrsh r0, [r7, r2]
 	movs r1, #4
@@ -118,7 +118,7 @@ _080866EE:
 	lsrs r2, r2, #0x10
 	mov r0, r8
 	adds r1, r4, #0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldrh r0, [r7]
 	subs r0, #1
 	strh r0, [r7]

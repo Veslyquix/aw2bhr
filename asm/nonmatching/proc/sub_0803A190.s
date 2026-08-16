@@ -39,7 +39,7 @@ sub_0803A190: @ 0x0803A190
 	adds r1, r1, r3
 	ldr r0, [r1]
 	ldr r1, _0803A2AC @ =gUnknown_0200FD50
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0803A2B0 @ =sub_0803A174
 	bl sub_08011AAC
 	ldr r2, _0803A2B4 @ =gUnknown_08555D30
@@ -55,7 +55,7 @@ sub_0803A190: @ 0x0803A190
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x40
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r2, #0
 	mov sb, r6
 	ldr r1, [sp, #8]

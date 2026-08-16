@@ -32,7 +32,7 @@ sub_08008A8C: @ 0x08008A8C
 	adds r7, r1, r0
 	cmp r5, #0
 	beq _08008B58
-	ldr r2, _08008B3C @ =gUnknown_030030CC
+	ldr r2, _08008B3C @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r3, #0x20
 	orrs r0, r3
@@ -88,7 +88,7 @@ sub_08008A8C: @ 0x08008A8C
 _08008B30: .4byte gUnknown_08499590
 _08008B34: .4byte 0x0000417A
 _08008B38: .4byte gUnknown_08499594
-_08008B3C: .4byte gUnknown_030030CC
+_08008B3C: .4byte gDispIo
 _08008B40: .4byte gUnknown_03002B40
 _08008B44: .4byte gUnknown_03002EFC
 _08008B48: .4byte gUnknown_03002B4C

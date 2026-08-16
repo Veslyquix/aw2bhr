@@ -118,7 +118,7 @@ sub_0808A47C: @ 0x0808A47C
 	ldr r1, _0808A5BC @ =gUnknown_030020B8
 	movs r0, #0xa0
 	strb r0, [r1]
-	ldr r1, _0808A5C0 @ =gUnknown_030030CC
+	ldr r1, _0808A5C0 @ =gDispIo
 	ldrb r0, [r1, #1]
 	ands r4, r0
 	mov r2, sb
@@ -149,5 +149,5 @@ _0808A5B0: .4byte gUnknown_03002B68
 _0808A5B4: .4byte gUnknown_03002B30
 _0808A5B8: .4byte gUnknown_030024E4
 _0808A5BC: .4byte gUnknown_030020B8
-_0808A5C0: .4byte gUnknown_030030CC
+_0808A5C0: .4byte gDispIo
 

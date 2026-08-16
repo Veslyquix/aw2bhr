@@ -36,7 +36,7 @@ _08014438:
 	lsls r0, r0, #0x18
 	cmp r0, #0
 	beq _08014490
-	ldr r0, _08014484 @ =gUnknown_03002EE0
+	ldr r0, _08014484 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #0xc]
 	movs r0, #8
@@ -63,7 +63,7 @@ _08014438:
 _08014478: .4byte gUnknown_08489518
 _0801447C: .4byte gUnknown_0848A398
 _08014480: .4byte gUnknown_0848A3C4
-_08014484: .4byte gUnknown_03002EE0
+_08014484: .4byte gpKeySt
 _08014488: .4byte gUnknown_03002514
 _0801448C: .4byte gUnknown_03001FBC
 _08014490:
@@ -74,7 +74,7 @@ _08014490:
 	adds r5, r0, #0
 	cmp r1, #1
 	ble _080144B2
-	ldr r0, _080144FC @ =gUnknown_03002EE0
+	ldr r0, _080144FC @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #0xc]
 	movs r0, #1
@@ -121,7 +121,7 @@ _080144DC:
 	beq _0801450A
 	b _0801451C
 	.align 2, 0
-_080144FC: .4byte gUnknown_03002EE0
+_080144FC: .4byte gpKeySt
 _08014500:
 	cmp r0, #2
 	beq _080145B0

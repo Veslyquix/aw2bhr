@@ -10,7 +10,7 @@ sub_08037150: @ 0x08037150
 	lsrs r1, r1, #0x11
 	ldr r2, _0803716C @ =0x06010000
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	pop {r0}
 	bx r0
 	.align 2, 0

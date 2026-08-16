@@ -240,7 +240,7 @@ _0802AC48:
 	movs r1, #0xf8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r1, _0802AD20 @ =gUnknown_0849A2A6
 	lsls r0, r4, #1
 	adds r0, r0, r4
@@ -763,7 +763,7 @@ _0802B0AC:
 	adds r1, r5, #0
 	adds r2, r6, #0
 	bl sub_0802B3AC
-	ldr r2, _0802B114 @ =gUnknown_030030CC
+	ldr r2, _0802B114 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #0x20
 	orrs r0, r1
@@ -798,7 +798,7 @@ _0802B0AC:
 	.align 2, 0
 _0802B10C: .4byte gUnknown_08499594
 _0802B110: .4byte 0x000001FF
-_0802B114: .4byte gUnknown_030030CC
+_0802B114: .4byte gDispIo
 _0802B118: .4byte gUnknown_03002B40
 _0802B11C: .4byte gUnknown_08090BAC
 _0802B120: .4byte gUnknown_08090BB0

@@ -20,7 +20,7 @@ sub_08040BB8: @ 0x08040BB8
 	movs r0, #1
 	movs r1, #0
 	adds r2, r5, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r6, r0, #0
 	ldrh r0, [r4, #0x3c]
 	ldr r1, _08040C80 @ =0x000001FF
@@ -33,7 +33,7 @@ sub_08040BB8: @ 0x08040BB8
 	ldr r0, [r4, #0x30]
 	orrs r2, r5
 	bl sub_0801C254
-	ldr r4, _08040C84 @ =gUnknown_0808F100
+	ldr r4, _08040C84 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r1, #0
@@ -85,7 +85,7 @@ _08040C4C:
 	mov r1, sb
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldrh r1, [r7]
 	movs r2, #0
 	ldrsh r0, [r7, r2]
@@ -103,5 +103,5 @@ _08040C72:
 	bx r0
 	.align 2, 0
 _08040C80: .4byte 0x000001FF
-_08040C84: .4byte gUnknown_0808F100
+_08040C84: .4byte gSinLut
 

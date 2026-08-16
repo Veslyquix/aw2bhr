@@ -6,7 +6,7 @@ sub_08036E70: @ 0x08036E70
 	push {r4, lr}
 	ldr r0, _08036EEC @ =gUnknown_0849D16C
 	bl sub_08012C58
-	ldr r2, _08036EF0 @ =gUnknown_030030CC
+	ldr r2, _08036EF0 @ =gDispIo
 	ldrb r1, [r2]
 	movs r0, #0x7f
 	ands r0, r1
@@ -42,7 +42,7 @@ sub_08036E70: @ 0x08036E70
 	movs r1, #0xa0
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08011B18
 	ldr r0, _08036F18 @ =sub_080368E8
 	bl sub_080366C4
@@ -53,7 +53,7 @@ sub_08036E70: @ 0x08036E70
 	bx r0
 	.align 2, 0
 _08036EEC: .4byte gUnknown_0849D16C
-_08036EF0: .4byte gUnknown_030030CC
+_08036EF0: .4byte gDispIo
 _08036EF4: .4byte gUnknown_08499578
 _08036EF8: .4byte 0x06007000
 _08036EFC: .4byte gUnknown_0849957C

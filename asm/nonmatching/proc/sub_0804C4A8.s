@@ -43,7 +43,7 @@ sub_0804C4A8: @ 0x0804C4A8
 	lsls r6, r5, #2
 	adds r1, r6, r1
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0804C56C @ =gUnknown_08552178
 	adds r6, r6, r5
 	lsls r6, r6, #1

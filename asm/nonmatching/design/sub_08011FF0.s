@@ -133,7 +133,7 @@ _080120D2:
 	adds r3, #4
 	adds r1, r1, r3
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	b _0801216E
 _080120FE:
 	mov r1, sp

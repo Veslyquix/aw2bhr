@@ -3,7 +3,7 @@
 
 	thumb_func_start sub_0803B1CC
 sub_0803B1CC: @ 0x0803B1CC
-	ldr r0, _0803B1E4 @ =gUnknown_03002EE0
+	ldr r0, _0803B1E4 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0]
 	movs r0, #0x80
@@ -17,6 +17,6 @@ sub_0803B1CC: @ 0x0803B1CC
 _0803B1E2:
 	bx lr
 	.align 2, 0
-_0803B1E4: .4byte gUnknown_03002EE0
+_0803B1E4: .4byte gpKeySt
 _0803B1E8: .4byte gUnknown_03002F1C
 

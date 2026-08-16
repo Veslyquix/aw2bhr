@@ -16,9 +16,9 @@ sub_080311D8: @ 0x080311D8
 	str r0, [sp]
 	movs r0, #5
 	movs r1, #0x10
-	bl sub_08074234
+	bl Interpolate
 	mov sb, r0
-	ldr r4, _08031274 @ =gUnknown_0808F100
+	ldr r4, _08031274 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -57,7 +57,7 @@ sub_080311D8: @ 0x080311D8
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r1, _08031278 @ =0x0000188C
 	movs r2, #0xb8
 	lsls r2, r2, #1
@@ -73,7 +73,7 @@ sub_080311D8: @ 0x080311D8
 	bl Proc_Break
 	b _08031280
 	.align 2, 0
-_08031274: .4byte gUnknown_0808F100
+_08031274: .4byte gSinLut
 _08031278: .4byte 0x0000188C
 _0803127C:
 	adds r0, #1

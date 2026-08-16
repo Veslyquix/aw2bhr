@@ -10,7 +10,7 @@ sub_08057AE8: @ 0x08057AE8
 	push {r5, r6, r7}
 	ldr r0, _08057B9C @ =gUnknown_0816CABC
 	ldr r1, _08057BA0 @ =0x06004000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r5, _08057BA4 @ =gUnknown_0816D498
 	ldr r4, _08057BA8 @ =gUnknown_03004500
 	ldrb r0, [r4]

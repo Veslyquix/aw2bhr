@@ -39,7 +39,7 @@ _08013226:
 	movs r0, #0
 	movs r1, #0
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r4]
 	movs r0, #0
 	ldrsh r1, [r6, r0]

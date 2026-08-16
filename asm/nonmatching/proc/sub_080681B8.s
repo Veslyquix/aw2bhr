@@ -22,7 +22,7 @@ sub_080681B8: @ 0x080681B8
 	ldrb r0, [r7]
 	str r0, [sp]
 	movs r0, #5
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r0, r6, #0
 	adds r0, #0x4d
@@ -65,7 +65,7 @@ _0806820A:
 	adds r1, r7, #0
 	movs r2, #0x40
 	ldr r3, _08068250 @ =gUnknown_08581208
-	bl sub_0801BEBC
+	bl PutSprite
 _0806823A:
 	movs r1, #0x24
 	rsbs r1, r1, #0
@@ -116,7 +116,7 @@ _08068268:
 	adds r1, r7, #0
 	movs r2, #0x40
 	ldr r3, _080682E4 @ =gUnknown_08581208
-	bl sub_0801BEBC
+	bl PutSprite
 _080682A2:
 	movs r2, #0x24
 	add r8, r2

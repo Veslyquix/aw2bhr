@@ -9,7 +9,7 @@ sub_0802966C: @ 0x0802966C
 	mov r5, r8
 	push {r5, r6, r7}
 	sub sp, #8
-	ldr r7, _08029724 @ =gUnknown_03002EE0
+	ldr r7, _08029724 @ =gpKeySt
 	ldr r0, [r7]
 	ldrh r1, [r0, #2]
 	movs r0, #0x50
@@ -92,7 +92,7 @@ _0802969A:
 	strh r0, [r6, #2]
 	b _08029840
 	.align 2, 0
-_08029724: .4byte gUnknown_03002EE0
+_08029724: .4byte gpKeySt
 _08029728: .4byte gUnknown_030033E4
 _0802972C: .4byte gUnknown_03003100
 _08029730: .4byte gUnknown_0849A06C

@@ -21,7 +21,7 @@ sub_0802C3D0: @ 0x0802C3D0
 	ands r0, r1
 	cmp r0, #0
 	bne _0802C416
-	ldr r0, _0802C428 @ =gUnknown_03002EE0
+	ldr r0, _0802C428 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #0xb
@@ -40,6 +40,6 @@ _0802C416:
 _0802C41C: .4byte gUnknown_08499590
 _0802C420: .4byte gUnknown_030033E0
 _0802C424: .4byte 0x00070007
-_0802C428: .4byte gUnknown_03002EE0
+_0802C428: .4byte gpKeySt
 _0802C42C: .4byte gUnknown_03001FBC
 

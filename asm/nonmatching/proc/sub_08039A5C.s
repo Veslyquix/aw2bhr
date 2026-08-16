@@ -25,14 +25,14 @@ sub_08039A5C: @ 0x08039A5C
 	lsls r1, r1, #5
 	ldr r6, _08039AC4 @ =0x06010000
 	adds r1, r1, r6
-	bl sub_08011CAC
+	bl Decompress
 	adds r4, #0x10
 	lsls r4, r4, #0x15
 	lsrs r4, r4, #0x10
 	mov r0, sb
 	adds r1, r4, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08039AC8 @ =gUnknown_080A534C
 	adds r5, #0xc0
 	mov r1, r8
@@ -40,7 +40,7 @@ sub_08039A5C: @ 0x08039A5C
 	lsls r5, r5, #5
 	adds r5, r5, r6
 	adds r1, r5, #0
-	bl sub_08011CAC
+	bl Decompress
 	pop {r3, r4}
 	mov r8, r3
 	mov sb, r4

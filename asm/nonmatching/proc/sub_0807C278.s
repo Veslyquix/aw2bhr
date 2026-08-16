@@ -32,7 +32,7 @@ _0807C294:
 	movs r0, #0
 	movs r2, #0x18
 	ldr r3, _0807C2D0 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r7, #8
 	adds r5, #1
 	movs r1, #0

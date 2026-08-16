@@ -92,7 +92,7 @@ _0807AF22:
 _0807AF34:
 	movs r2, #0xf0
 _0807AF36:
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	b _0807AFAE
 _0807AF3E:
@@ -104,7 +104,7 @@ _0807AF3E:
 	ldr r0, _0807AF54 @ =gUnknown_0822B944
 	ldr r1, _0807AF58 @ =gUnknown_0849957C
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	b _0807AF66
 	.align 2, 0
 _0807AF54: .4byte gUnknown_0822B944
@@ -113,7 +113,7 @@ _0807AF5C:
 	ldr r0, _0807B09C @ =gUnknown_0822BCF0
 	ldr r1, _0807B0A0 @ =gUnknown_0849957C
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 _0807AF66:
 	bl sub_08013AFC
 	ldr r0, _0807B0A4 @ =gUnknown_08616034

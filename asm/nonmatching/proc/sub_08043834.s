@@ -27,7 +27,7 @@ sub_08043834: @ 0x08043834
 	movs r1, #0xb8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08043890 @ =gUnknown_081259CC
 	ldr r1, _08043894 @ =0x06010840
 	movs r2, #0xc0

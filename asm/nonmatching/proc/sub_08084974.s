@@ -4,7 +4,7 @@
 	thumb_func_start sub_08084974
 sub_08084974: @ 0x08084974
 	push {lr}
-	ldr r2, _080849B8 @ =gUnknown_030030CC
+	ldr r2, _080849B8 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -35,5 +35,5 @@ sub_08084974: @ 0x08084974
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080849B8: .4byte gUnknown_030030CC
+_080849B8: .4byte gDispIo
 

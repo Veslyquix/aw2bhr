@@ -13,7 +13,7 @@ sub_0802C390: @ 0x0802C390
 	strh r1, [r0]
 	cmp r2, #0xb
 	ble _0802C3C4
-	ldr r2, _0802C3BC @ =gUnknown_030030CC
+	ldr r2, _0802C3BC @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -24,7 +24,7 @@ sub_0802C390: @ 0x0802C390
 	b _0802C3C8
 	.align 2, 0
 _0802C3B8: .4byte gUnknown_03001FFC
-_0802C3BC: .4byte gUnknown_030030CC
+_0802C3BC: .4byte gDispIo
 _0802C3C0: .4byte gUnknown_03001FBC
 _0802C3C4:
 	adds r0, r3, #1

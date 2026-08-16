@@ -58,7 +58,7 @@ _08082696:
 	str r3, [sp]
 	movs r0, #2
 	ldr r3, _080826E8 @ =gUnknown_08615C76
-	bl sub_0801BEBC
+	bl PutSprite
 	movs r4, #3
 	b _08082752
 	.align 2, 0
@@ -115,7 +115,7 @@ _080826EC:
 	str r3, [sp]
 	movs r0, #2
 	ldr r3, _08082768 @ =gUnknown_08615C84
-	bl sub_0801BEBC
+	bl PutSprite
 _08082752:
 	adds r5, r4, #0
 	cmp r5, #5
@@ -406,7 +406,7 @@ _08082948:
 	movs r1, #0xc0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 _08082986:
 	movs r3, #0
 	ldrsh r0, [r6, r3]

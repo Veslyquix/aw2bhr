@@ -6,7 +6,7 @@ sub_08078E48: @ 0x08078E48
 	push {lr}
 	bl sub_0807898C
 	bl sub_08078AF0
-	ldr r2, _08078E88 @ =gUnknown_030030CC
+	ldr r2, _08078E88 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #3
 	rsbs r0, r0, #0
@@ -29,7 +29,7 @@ sub_08078E48: @ 0x08078E48
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08078E88: .4byte gUnknown_030030CC
+_08078E88: .4byte gDispIo
 _08078E8C: .4byte gUnknown_085C77A0
 _08078E90: .4byte gUnknown_03003FC0
 

@@ -7,17 +7,17 @@ sub_08067638: @ 0x08067638
 	ldr r0, _08067678 @ =gUnknown_0817B970
 	movs r1, #0xc0
 	lsls r1, r1, #0x13
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806767C @ =gUnknown_0817BE90
 	ldr r1, _08067680 @ =0x0600D800
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08067684 @ =gUnknown_0817C138
 	ldr r1, _08067688 @ =0x0600E000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806768C @ =gUnknown_0817C3E8
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0
 	movs r1, #0
 	movs r2, #0

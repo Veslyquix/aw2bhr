@@ -21,7 +21,7 @@ sub_08080AF8: @ 0x08080AF8
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0x1e
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x2c]
 _08080B22:
 	ldr r2, _08080BB0 @ =0x000011CA
@@ -48,14 +48,14 @@ _08080B42:
 	movs r2, #0x88
 	lsls r2, r2, #3
 	mov r3, r8
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	str r7, [sp]
 	movs r0, #0
 	adds r1, r4, #0
 	movs r2, #0x8b
 	lsls r2, r2, #3
 	mov r3, r8
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	adds r5, #1
 	ldr r0, [r6, #0x2c]
 	cmp r5, r0
@@ -77,7 +77,7 @@ _08080B7A:
 	movs r0, #0
 	movs r2, #0x40
 	ldr r3, _08080BC8 @ =gUnknown_0848B6E6
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r4, #8
 	adds r5, #1
 	ldr r0, [r6, #0x58]

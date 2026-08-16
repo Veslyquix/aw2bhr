@@ -180,7 +180,7 @@ _0803DB6E:
 	cmp r0, #0
 	beq _0803DB5E
 _0803DB82:
-	ldr r0, _0803DC7C @ =gUnknown_03002EE0
+	ldr r0, _0803DC7C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #0x80
@@ -210,7 +210,7 @@ _0803DBA4:
 	cmp r0, #0
 	beq _0803DB96
 _0803DBB8:
-	ldr r0, _0803DC7C @ =gUnknown_03002EE0
+	ldr r0, _0803DC7C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0x40
@@ -225,7 +225,7 @@ _0803DBB8:
 	subs r0, r1, #1
 	strh r0, [r7, #0x20]
 _0803DBD4:
-	ldr r0, _0803DC7C @ =gUnknown_03002EE0
+	ldr r0, _0803DC7C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0x80
@@ -240,7 +240,7 @@ _0803DBD4:
 	adds r0, r1, #1
 	strh r0, [r7, #0x20]
 _0803DBF0:
-	ldr r0, _0803DC7C @ =gUnknown_03002EE0
+	ldr r0, _0803DC7C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #2]
 	movs r0, #0x20
@@ -296,7 +296,7 @@ _0803DC6C: .4byte gUnknown_08091164
 _0803DC70: .4byte gUnknown_080912E4
 _0803DC74: .4byte gUnknown_080912F4
 _0803DC78: .4byte gUnknown_080912EC
-_0803DC7C: .4byte gUnknown_03002EE0
+_0803DC7C: .4byte gpKeySt
 _0803DC80: .4byte _0803DC84
 _0803DC84: @ jump table
 	.4byte _0803DCA0 @ case 0
@@ -447,7 +447,7 @@ _0803DDA6:
 	bl sub_0803D990
 	strh r0, [r4]
 _0803DDBE:
-	ldr r0, _0803DDEC @ =gUnknown_03002EE0
+	ldr r0, _0803DDEC @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #3
@@ -469,6 +469,6 @@ _0803DDD8:
 	bx r0
 	.align 2, 0
 _0803DDE8: .4byte 0x000003E7
-_0803DDEC: .4byte gUnknown_03002EE0
+_0803DDEC: .4byte gpKeySt
 _0803DDF0: .4byte gUnknown_03001FBC
 

@@ -15,7 +15,7 @@ sub_080737EC: @ 0x080737EC
 	str r0, [sp]
 	movs r0, #4
 	movs r1, #1
-	bl sub_08074234
+	bl Interpolate
 	adds r3, r0, #0
 	ldr r5, _080738CC @ =gUnknown_0202FDE4
 	ldr r0, _080738D0 @ =gUnknown_0202F8DC
@@ -35,7 +35,7 @@ _0807381E:
 	ldr r1, _080738D8 @ =gUnknown_030024E4
 	lsls r0, r2, #1
 	strb r0, [r1]
-	ldr r0, _080738DC @ =gUnknown_030030CC
+	ldr r0, _080738DC @ =gDispIo
 	mov r8, r0
 	ldrb r0, [r0, #1]
 	movs r1, #0x40
@@ -120,7 +120,7 @@ _080738CC: .4byte gUnknown_0202FDE4
 _080738D0: .4byte gUnknown_0202F8DC
 _080738D4: .4byte gUnknown_03002B68
 _080738D8: .4byte gUnknown_030024E4
-_080738DC: .4byte gUnknown_030030CC
+_080738DC: .4byte gDispIo
 _080738E0: .4byte gUnknown_030030A4
 _080738E4: .4byte gUnknown_030030DC
 _080738E8: .4byte 0x040000BA

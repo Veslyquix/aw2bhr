@@ -9,17 +9,17 @@ sub_080763F4: @ 0x080763F4
 	movs r1, #0xa8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r4, _0807646C @ =gUnknown_086144DC
 	ldr r0, [r5, #0x58]
 	lsls r0, r0, #3
 	adds r0, r0, r4
 	ldr r0, [r0]
 	ldr r1, _08076470 @ =0x06012000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08076474 @ =gUnknown_081D33BC
 	ldr r1, _08076478 @ =0x06012600
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, [r5, #0x58]
 	lsls r0, r0, #3
 	adds r4, #4

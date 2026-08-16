@@ -10,7 +10,7 @@ sub_08027308: @ 0x08027308
 	push {r5, r6, r7}
 	sub sp, #4
 	adds r6, r0, #0
-	ldr r4, _080273D8 @ =gUnknown_0808F100
+	ldr r4, _080273D8 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r1, #0
@@ -77,7 +77,7 @@ _08027388:
 	mov r1, sl
 	mov r2, r8
 	adds r3, r5, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r0, [r6, #0x50]
 	ldr r1, [r6, #0x2c]
 	ldr r2, _080273DC @ =0x000001FF
@@ -105,7 +105,7 @@ _08027388:
 	bl Proc_Break
 	b _08027400
 	.align 2, 0
-_080273D8: .4byte gUnknown_0808F100
+_080273D8: .4byte gSinLut
 _080273DC: .4byte 0x000001FF
 _080273E0:
 	movs r0, #0

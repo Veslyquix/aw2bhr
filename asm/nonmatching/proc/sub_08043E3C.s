@@ -26,7 +26,7 @@ sub_08043E3C: @ 0x08043E3C
 	adds r4, r4, r5
 	ldr r0, [r4]
 	mov r1, r8
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r6, #0
 	mov r1, sb
 	bl sub_08043AA0

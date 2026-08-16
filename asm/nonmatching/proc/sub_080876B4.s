@@ -8,7 +8,7 @@ sub_080876B4: @ 0x080876B4
 	mov r6, sb
 	mov r5, r8
 	push {r5, r6, r7}
-	ldr r1, _08087760 @ =gUnknown_030030CC
+	ldr r1, _08087760 @ =gDispIo
 	ldrb r0, [r1, #1]
 	movs r2, #1
 	mov sb, r2
@@ -26,7 +26,7 @@ sub_080876B4: @ 0x080876B4
 	orrs r4, r7
 	movs r6, #0x10
 	orrs r4, r6
-	ldr r1, _08087760 @ =gUnknown_030030CC
+	ldr r1, _08087760 @ =gDispIo
 	strb r4, [r1, #1]
 	ldr r5, _08087764 @ =gUnknown_030030A4
 	ldrb r1, [r5, #1]
@@ -85,11 +85,11 @@ sub_080876B4: @ 0x080876B4
 	orrs r4, r0
 	movs r0, #0x7f
 	ands r4, r0
-	ldr r1, _08087760 @ =gUnknown_030030CC
+	ldr r1, _08087760 @ =gDispIo
 	strb r4, [r1, #1]
 	b _08087820
 	.align 2, 0
-_08087760: .4byte gUnknown_030030CC
+_08087760: .4byte gDispIo
 _08087764: .4byte gUnknown_030030A4
 _08087768: .4byte gUnknown_030030DC
 _0808776C: .4byte gUnknown_03003FC0
@@ -99,7 +99,7 @@ _08087778: .4byte gUnknown_030024E4
 _0808777C: .4byte gUnknown_030020B8
 _08087780: .4byte gUnknown_03005928
 _08087784:
-	ldr r0, _080877B8 @ =gUnknown_03002EE0
+	ldr r0, _080877B8 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r0, [r0, #4]
 	movs r3, #0xcc
@@ -126,7 +126,7 @@ _08087784:
 	ands r4, r0
 	b _08087814
 	.align 2, 0
-_080877B8: .4byte gUnknown_03002EE0
+_080877B8: .4byte gpKeySt
 _080877BC: .4byte gUnknown_03002B68
 _080877C0: .4byte gUnknown_03002B30
 _080877C4: .4byte gUnknown_030024E4
@@ -172,7 +172,7 @@ _08087814:
 	orrs r4, r0
 	movs r0, #0x7f
 	ands r4, r0
-	ldr r2, _08087854 @ =gUnknown_030030CC
+	ldr r2, _08087854 @ =gDispIo
 	strb r4, [r2, #1]
 _08087820:
 	pop {r3, r4, r5}
@@ -192,5 +192,5 @@ _08087844: .4byte gUnknown_03002B30
 _08087848: .4byte gUnknown_030024E4
 _0808784C: .4byte gUnknown_030020B8
 _08087850: .4byte gUnknown_03005928
-_08087854: .4byte gUnknown_030030CC
+_08087854: .4byte gDispIo
 

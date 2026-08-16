@@ -27,7 +27,7 @@ _0807948A:
 	movs r2, #0x30
 	mov r7, r8
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r6, #0x40
 	adds r5, #0x40
 	subs r4, #1

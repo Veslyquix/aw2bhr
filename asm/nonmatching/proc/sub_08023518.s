@@ -16,7 +16,7 @@ sub_08023518: @ 0x08023518
 	mov sb, r2
 	cmp r0, #0
 	bne _080235FA
-	ldr r0, _0802360C @ =gUnknown_03002EE0
+	ldr r0, _0802360C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r0, [r0]
 	lsrs r4, r0, #4
@@ -130,7 +130,7 @@ _080235FA:
 	bx r0
 	.align 2, 0
 _08023608: .4byte gUnknown_080909F0
-_0802360C: .4byte gUnknown_03002EE0
+_0802360C: .4byte gpKeySt
 _08023610: .4byte gUnknown_080909F4
 _08023614: .4byte gUnknown_080909F8
 _08023618: .4byte gUnknown_030032C4

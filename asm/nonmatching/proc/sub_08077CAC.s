@@ -16,7 +16,7 @@ sub_08077CAC: @ 0x08077CAC
 	str r0, [sp]
 	movs r0, #0
 	movs r2, #0x1e
-	bl sub_08074234
+	bl Interpolate
 	adds r7, r0, #0
 	adds r0, r5, #0
 	adds r0, #0x4c

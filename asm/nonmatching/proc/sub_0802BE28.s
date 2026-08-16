@@ -18,7 +18,7 @@ sub_0802BE28: @ 0x0802BE28
 	lsls r1, r1, #0xe
 	ldr r2, _0802BE7C @ =0x06005600
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	movs r4, #0
 _0802BE4C:
 	adds r0, r4, #0

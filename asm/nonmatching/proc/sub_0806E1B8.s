@@ -11,7 +11,7 @@ sub_0806E1B8: @ 0x0806E1B8
 	str r0, [sp]
 	movs r1, #8
 	movs r2, #0x10
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, [r5, #0x58]
 	movs r1, #0xa
 	bl DivRem
@@ -26,14 +26,14 @@ sub_0806E1B8: @ 0x0806E1B8
 	movs r1, #0x18
 	movs r2, #8
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	lsls r4, r4, #1
 	str r4, [sp]
 	movs r0, #0
 	movs r1, #0x20
 	movs r2, #8
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r4, r5}
 	pop {r0}

@@ -24,7 +24,7 @@ _0807A1CE:
 	movs r0, #0
 	movs r2, #0x30
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r6, #0x40
 	adds r5, #0x40
 	subs r4, #1
@@ -42,7 +42,7 @@ _0807A1CE:
 	movs r0, #0x30
 	strh r0, [r2]
 _0807A204:
-	ldr r0, _0807A258 @ =gUnknown_03002EE0
+	ldr r0, _0807A258 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #9
@@ -59,7 +59,7 @@ _0807A204:
 	ldr r2, _0807A260 @ =0x0000FF10
 	adds r0, r2, #0
 	strh r0, [r1]
-	ldr r2, _0807A264 @ =gUnknown_030030CC
+	ldr r2, _0807A264 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #5
 	rsbs r0, r0, #0
@@ -82,8 +82,8 @@ _0807A244:
 	.align 2, 0
 _0807A250: .4byte gUnknown_081D92F8
 _0807A254: .4byte 0x000001FF
-_0807A258: .4byte gUnknown_03002EE0
+_0807A258: .4byte gpKeySt
 _0807A25C: .4byte gUnknown_03001400
 _0807A260: .4byte 0x0000FF10
-_0807A264: .4byte gUnknown_030030CC
+_0807A264: .4byte gDispIo
 

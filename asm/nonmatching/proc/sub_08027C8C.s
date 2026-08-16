@@ -13,7 +13,7 @@ sub_08027C8C: @ 0x08027C8C
 	ldrh r0, [r0]
 	str r0, [sp]
 	movs r0, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r1, r4, #0
 	adds r1, #0x64
 	ldrh r0, [r1]

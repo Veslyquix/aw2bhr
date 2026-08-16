@@ -6,7 +6,7 @@ sub_08032AFC: @ 0x08032AFC
 	push {r4, r5, r6, lr}
 	mov r6, r8
 	push {r6}
-	ldr r1, _08032B68 @ =gUnknown_030030CC
+	ldr r1, _08032B68 @ =gDispIo
 	ldrb r0, [r1, #1]
 	movs r5, #0x20
 	orrs r0, r5
@@ -58,7 +58,7 @@ sub_08032AFC: @ 0x08032AFC
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08032B68: .4byte gUnknown_030030CC
+_08032B68: .4byte gDispIo
 _08032B6C: .4byte gUnknown_03002B40
 _08032B70: .4byte gUnknown_03002B4C
 _08032B74: .4byte gUnknown_03002EFC

@@ -34,7 +34,7 @@ _08075AE6:
 	movs r0, #0
 	movs r2, #0x1f
 	adds r3, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #0x10
 	lsrs r5, r0, #0x10
 	mov r0, r8
@@ -44,7 +44,7 @@ _08075AE6:
 	movs r0, #0
 	movs r2, #0x1f
 	adds r3, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #0x10
 	lsrs r4, r0, #0x10
 	mov r0, r8
@@ -65,7 +65,7 @@ _08075B34:
 	movs r0, #0
 	movs r1, #0x1f
 	adds r3, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #0x10
 	lsrs r5, r0, #0x10
 	mov r0, r8
@@ -75,7 +75,7 @@ _08075B34:
 	movs r0, #0
 	movs r1, #0x1f
 	adds r3, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #0x10
 	lsrs r4, r0, #0x10
 	mov r1, r8
@@ -86,7 +86,7 @@ _08075B34:
 	movs r1, #0x1f
 _08075B6C:
 	adds r3, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	lsls r0, r0, #0x10
 	lsrs r1, r0, #0x10
 	lsls r0, r5, #0x10
@@ -122,7 +122,7 @@ _08075BA4:
 	bge _08075BAC
 	movs r1, #0
 _08075BAC:
-	ldr r2, _08075BF0 @ =gUnknown_030020C0
+	ldr r2, _08075BF0 @ =gPal
 	add r2, sb
 	lsls r1, r1, #0x10
 	asrs r1, r1, #6
@@ -156,5 +156,5 @@ _08075BDA:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08075BF0: .4byte gUnknown_030020C0
+_08075BF0: .4byte gPal
 

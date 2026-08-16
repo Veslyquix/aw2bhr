@@ -14,7 +14,7 @@ _0807F37E:
 	adds r4, #1
 	cmp r4, #0xf
 	ble _0807F37E
-	ldr r2, _0807F3F4 @ =gUnknown_030030CC
+	ldr r2, _0807F3F4 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -66,7 +66,7 @@ _0807F37E:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0807F3F4: .4byte gUnknown_030030CC
+_0807F3F4: .4byte gDispIo
 _0807F3F8: .4byte gUnknown_030030E0
 _0807F3FC: .4byte gUnknown_03002020
 _0807F400: .4byte gUnknown_03002B28

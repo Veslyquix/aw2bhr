@@ -14,7 +14,7 @@ sub_08076888: @ 0x08076888
 	bl sub_080366C4
 	ldr r0, _0807698C @ =gUnknown_08614548
 	bl sub_08012C58
-	ldr r2, _08076990 @ =gUnknown_030030CC
+	ldr r2, _08076990 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r4, #1
 	orrs r0, r4
@@ -78,27 +78,27 @@ sub_08076888: @ 0x08076888
 	bl sub_08013B0C
 	ldr r0, _080769B4 @ =gUnknown_081CC5F0
 	ldr r1, _080769B8 @ =0x06008000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _080769BC @ =gUnknown_081D1504
 	movs r2, #0x90
 	lsls r2, r2, #1
 	movs r1, #0xc0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _080769C0 @ =gUnknown_081D1644
 	ldr r1, _080769C4 @ =0x06010900
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _080769C8 @ =gUnknown_081D17A4
 	ldr r1, _080769CC @ =0x06010B00
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _080769D0 @ =gUnknown_081D2A54
 	ldr r1, _080769D4 @ =0x06010000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r4, _080769D8 @ =gUnknown_081D208C
 	movs r1, #0x80
 	lsls r1, r1, #2
 	adds r0, r4, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_0803866C
 	mov r5, r8
 	cmp r0, #0
@@ -107,14 +107,14 @@ sub_08076888: @ 0x08076888
 	lsls r1, r1, #2
 	adds r0, r4, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	b _080769E8
 	.align 2, 0
 _08076980: .4byte gUnknown_0202FE38
 _08076984: .4byte sub_08036884
 _08076988: .4byte sub_080368E8
 _0807698C: .4byte gUnknown_08614548
-_08076990: .4byte gUnknown_030030CC
+_08076990: .4byte gDispIo
 _08076994: .4byte gUnknown_081CC588
 _08076998: .4byte gUnknown_081CC58C
 _0807699C: .4byte gUnknown_03001FE8
@@ -138,7 +138,7 @@ _080769DC:
 	movs r1, #0x88
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 _080769E8:
 	ldr r0, [r6]
 	ldr r0, [r0]

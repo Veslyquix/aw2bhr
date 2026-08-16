@@ -70,7 +70,7 @@ sub_08087C94: @ 0x08087C94
 	ldr r1, _08087F9C @ =gUnknown_030020B8
 	movs r0, #0xa0
 	strb r0, [r1]
-	ldr r2, _08087FA0 @ =gUnknown_030030CC
+	ldr r2, _08087FA0 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #0x21
 	rsbs r0, r0, #0
@@ -89,11 +89,11 @@ sub_08087C94: @ 0x08087C94
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08087FA8 @ =gUnknown_08239FA4
 	ldr r4, _08087FAC @ =gUnknown_08499584
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	movs r5, #0
 	ldr r3, _08087FB0 @ =0x000003FF
 	mov r8, r6
@@ -113,7 +113,7 @@ _08087D60:
 	ldr r0, _08087FB4 @ =gUnknown_0823BE20
 	movs r1, #0x40
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013B1C
 	ldr r1, _08087FB8 @ =gUnknown_03002F18
 	ldr r2, _08087FBC @ =0x0000FF28
@@ -140,11 +140,11 @@ _08087D60:
 	lsrs r1, r1, #0x1e
 	lsls r1, r1, #0xe
 	adds r1, r1, r4
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08087FC8 @ =gUnknown_0823456C
 	ldr r1, _08087FCC @ =gUnknown_0849957C
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013AFC
 	movs r0, #0
 	movs r1, #0
@@ -152,7 +152,7 @@ _08087D60:
 	ldr r0, _08087FD0 @ =gUnknown_082346D0
 	ldr r4, _08087FD4 @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r6, _08087FD8 @ =0x06010000
 	movs r5, #7
 _08087DDC:
@@ -173,7 +173,7 @@ _08087DDC:
 	movs r1, #0x80
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0
 	str r0, [r7, #0x58]
 	str r0, [r7, #0x5c]
@@ -334,7 +334,7 @@ _08087F90: .4byte gUnknown_03002B68
 _08087F94: .4byte gUnknown_03002B30
 _08087F98: .4byte gUnknown_030024E4
 _08087F9C: .4byte gUnknown_030020B8
-_08087FA0: .4byte gUnknown_030030CC
+_08087FA0: .4byte gDispIo
 _08087FA4: .4byte gUnknown_0823A3D4
 _08087FA8: .4byte gUnknown_08239FA4
 _08087FAC: .4byte gUnknown_08499584

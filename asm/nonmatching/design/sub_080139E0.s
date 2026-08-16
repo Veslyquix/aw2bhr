@@ -25,7 +25,7 @@ _080139EC:
 	ldr r4, _08013AC0 @ =gUnknown_0200B614
 	mov ip, r4
 	adds r6, r2, #0
-	ldr r0, _08013AC4 @ =gUnknown_030020C0
+	ldr r0, _08013AC4 @ =gPal
 	mov sl, r0
 _08013A0C:
 	mov r3, r8
@@ -124,5 +124,5 @@ _08013AA2:
 	.align 2, 0
 _08013ABC: .4byte gUnknown_0200B5F4
 _08013AC0: .4byte gUnknown_0200B614
-_08013AC4: .4byte gUnknown_030020C0
+_08013AC4: .4byte gPal
 

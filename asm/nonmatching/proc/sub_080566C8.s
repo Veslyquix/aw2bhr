@@ -278,7 +278,7 @@ _08056848:
 	lsls r4, r2, #2
 	adds r4, r4, r1
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, [sp, #0x24]
 	adds r0, #0x18
 	adds r0, r5, r0

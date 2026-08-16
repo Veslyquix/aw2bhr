@@ -17,7 +17,7 @@ sub_0806AE18: @ 0x0806AE18
 	movs r2, #0xd8
 	lsls r2, r2, #6
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	pop {r0}
 	bx r0
 	.align 2, 0

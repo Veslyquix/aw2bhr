@@ -23,7 +23,7 @@ _08072E7A:
 	movs r0, #8
 	str r0, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	adds r0, r4, #0
 	adds r0, #0x54
@@ -40,7 +40,7 @@ _08072E7A:
 	str r3, [sp]
 	movs r0, #1
 	ldr r3, _08072F00 @ =gUnknown_081CC01C
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #1
 _08072EC0:
 	ldr r0, [r4, #0x58]

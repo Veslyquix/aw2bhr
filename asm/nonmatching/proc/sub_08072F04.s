@@ -46,7 +46,7 @@ _08072F28:
 	str r3, [sp]
 	movs r0, #1
 	ldr r3, _08072F6C @ =gUnknown_081CC01C
-	bl sub_0801BEBC
+	bl PutSprite
 _08072F5C:
 	adds r5, #1
 	ldr r0, [r4, #0x58]

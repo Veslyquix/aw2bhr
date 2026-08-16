@@ -28,12 +28,12 @@ sub_08040CA4: @ 0x08040CA4
 	bl sub_08041128
 	ldr r0, _08040DD4 @ =gUnknown_081214B4
 	ldr r1, _08040DD8 @ =0x06013940
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08040DDC @ =gUnknown_0812189C
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08040DE0 @ =gUnknown_08121344
 	movs r1, #0
 	movs r2, #1
@@ -64,7 +64,7 @@ sub_08040CA4: @ 0x08040CA4
 	ldr r1, [r7, #0x2c]
 	ldr r0, _08040DF4 @ =0x000031CA
 	strh r0, [r1, #0x22]
-	ldr r4, _08040DF8 @ =gUnknown_0808F100
+	ldr r4, _08040DF8 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -108,7 +108,7 @@ sub_08040CA4: @ 0x08040CA4
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	mov r0, sb
 	mov r1, r8
 	bl Div
@@ -145,7 +145,7 @@ _08040DE8: .4byte gUnknown_081240BC
 _08040DEC: .4byte 0x0000522A
 _08040DF0: .4byte gUnknown_08121870
 _08040DF4: .4byte 0x000031CA
-_08040DF8: .4byte gUnknown_0808F100
+_08040DF8: .4byte gSinLut
 _08040DFC:
 	movs r1, #2
 _08040DFE:
@@ -154,7 +154,7 @@ _08040DFE:
 	lsls r0, r0, #0x10
 	asrs r0, r0, #0x10
 	mov sb, r0
-	ldr r4, _08040E50 @ =gUnknown_0808F100
+	ldr r4, _08040E50 @ =gSinLut
 	movs r1, #0
 	ldrsh r0, [r4, r1]
 	lsls r0, r0, #4
@@ -187,7 +187,7 @@ _08040DFE:
 	adds r1, r0, #0
 	b _08040E56
 	.align 2, 0
-_08040E50: .4byte gUnknown_0808F100
+_08040E50: .4byte gSinLut
 _08040E54:
 	movs r1, #2
 _08040E56:
@@ -200,8 +200,8 @@ _08040E56:
 	ldr r1, [sp, #4]
 	mov r2, sb
 	mov r3, r8
-	bl sub_0801E108
-	ldr r4, _08040EF0 @ =gUnknown_0808F100
+	bl SetObjAffine
+	ldr r4, _08040EF0 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -243,7 +243,7 @@ _08040E56:
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	mov r2, sl
 	ldrb r0, [r2]
 	adds r2, r7, #0
@@ -262,5 +262,5 @@ _08040E56:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08040EF0: .4byte gUnknown_0808F100
+_08040EF0: .4byte gSinLut
 

@@ -15,7 +15,7 @@ sub_08069864: @ 0x08069864
 	str r0, [r4, #0x2c]
 	ldr r0, _0806990C @ =gUnknown_08581438
 	bl sub_080670F8
-	ldr r2, _08069910 @ =gUnknown_030030CC
+	ldr r2, _08069910 @ =gDispIo
 	ldrb r1, [r2]
 	movs r0, #8
 	rsbs r0, r0, #0
@@ -80,7 +80,7 @@ sub_08069864: @ 0x08069864
 	.align 2, 0
 _08069908: .4byte gUnknown_0202F204
 _0806990C: .4byte gUnknown_08581438
-_08069910: .4byte gUnknown_030030CC
+_08069910: .4byte gDispIo
 _08069914: .4byte gUnknown_03002B6C
 _08069918: .4byte gUnknown_03001FE8
 _0806991C: .4byte gUnknown_0300251C

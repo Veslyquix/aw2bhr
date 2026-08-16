@@ -12,7 +12,7 @@ sub_0806EA28: @ 0x0806EA28
 	movs r0, #0
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	ldr r3, _0806EA6C @ =gUnknown_030030E0
 	ldrb r2, [r3]
 	movs r1, #0x3f

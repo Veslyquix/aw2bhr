@@ -18,7 +18,7 @@ sub_08031440: @ 0x08031440
 	movs r1, #0
 	bl Proc_Goto
 _08031460:
-	ldr r0, _0803149C @ =gUnknown_03002EE0
+	ldr r0, _0803149C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -45,6 +45,6 @@ _08031480:
 	bx r0
 	.align 2, 0
 _08031498: .4byte gUnknown_0849B048
-_0803149C: .4byte gUnknown_03002EE0
+_0803149C: .4byte gpKeySt
 _080314A0: .4byte gUnknown_0849B060
 

@@ -4,7 +4,7 @@
 	thumb_func_start sub_08072BCC
 sub_08072BCC: @ 0x08072BCC
 	push {r4, r5, r6, r7, lr}
-	ldr r1, _08072C20 @ =gUnknown_030020C0
+	ldr r1, _08072C20 @ =gPal
 	lsls r0, r0, #5
 	movs r2, #0x1f
 	mov ip, r2
@@ -46,5 +46,5 @@ _08072BE2:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08072C20: .4byte gUnknown_030020C0
+_08072C20: .4byte gPal
 

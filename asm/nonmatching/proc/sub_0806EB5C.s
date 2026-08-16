@@ -12,7 +12,7 @@ sub_0806EB5C: @ 0x0806EB5C
 	bl sub_08012358
 	ldr r0, _0806ECFC @ =gUnknown_0849D16C
 	bl sub_08012C58
-	ldr r2, _0806ED00 @ =gUnknown_030030CC
+	ldr r2, _0806ED00 @ =gDispIo
 	ldrb r0, [r2]
 	movs r1, #0x40
 	mov r8, r1
@@ -60,20 +60,20 @@ sub_0806EB5C: @ 0x0806EB5C
 	ldr r0, _0806ED14 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0
 	movs r1, #3
 	bl sub_0802D5CC
 	ldr r0, _0806ED18 @ =gUnknown_0823A3D4
 	ldr r1, _0806ED1C @ =0x06008000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806ED20 @ =gUnknown_08239FA4
 	ldr r1, _0806ED24 @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806ED28 @ =gUnknown_081A3E28
 	ldr r1, _0806ED2C @ =0x06000400
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806ED30 @ =gUnknown_0849957C
 	ldr r0, [r0]
 	ldr r1, _0806ED34 @ =gUnknown_081A3E3C
@@ -82,10 +82,10 @@ sub_0806EB5C: @ 0x0806EB5C
 	bl sub_080718F8
 	ldr r0, _0806ED38 @ =gUnknown_081A4000
 	ldr r1, _0806ED3C @ =0x06010000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806ED40 @ =gUnknown_081A4450
 	ldr r1, _0806ED44 @ =0x06016000
-	bl sub_08011CAC
+	bl Decompress
 	movs r0, #0
 	bl sub_0801A5B0
 	movs r0, #6
@@ -182,7 +182,7 @@ sub_0806EB5C: @ 0x0806EB5C
 	bx r0
 	.align 2, 0
 _0806ECFC: .4byte gUnknown_0849D16C
-_0806ED00: .4byte gUnknown_030030CC
+_0806ED00: .4byte gDispIo
 _0806ED04: .4byte gUnknown_03002B6C
 _0806ED08: .4byte gUnknown_030030B4
 _0806ED0C: .4byte gUnknown_03001FE8

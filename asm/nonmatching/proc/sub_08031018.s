@@ -27,7 +27,7 @@ sub_08031018: @ 0x08031018
 	bl sub_080135F4
 	ldr r0, _080310BC @ =gUnknown_081D3810
 	ldr r1, _080310C0 @ =0x060114A0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, _080310C4 @ =0x06010000
 	movs r0, #2
 	movs r2, #0
@@ -48,11 +48,11 @@ sub_08031018: @ 0x08031018
 	ldr r0, _080310C8 @ =gUnknown_081320AC
 	movs r1, #0x60
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _080310CC @ =gUnknown_0849B0A0
 	movs r1, #0xe0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0
 	bl sub_0801A5B0
 	ldr r0, _080310D0 @ =gUnknown_0849B018

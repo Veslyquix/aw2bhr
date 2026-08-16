@@ -10,7 +10,7 @@ sub_0801258C: @ 0x0801258C
 	mov r4, r8
 	push {r4, r5, r6}
 	ldr r1, _08012764 @ =gUnknown_03002F38
-	ldr r0, _08012768 @ =gUnknown_030030CC
+	ldr r0, _08012768 @ =gDispIo
 	ldrh r0, [r0]
 	strh r0, [r1]
 	ldr r1, _0801276C @ =gUnknown_03001FCC
@@ -241,7 +241,7 @@ sub_0801258C: @ 0x0801258C
 	bx r0
 	.align 2, 0
 _08012764: .4byte gUnknown_03002F38
-_08012768: .4byte gUnknown_030030CC
+_08012768: .4byte gDispIo
 _0801276C: .4byte gUnknown_03001FCC
 _08012770: .4byte gUnknown_030020B4
 _08012774: .4byte gUnknown_03003030

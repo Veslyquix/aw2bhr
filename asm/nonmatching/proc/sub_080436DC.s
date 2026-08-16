@@ -76,14 +76,14 @@ _08043768:
 	movs r0, #0
 	adds r1, r7, #0
 	mov r2, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r3, _080437E0 @ =gUnknown_084A003A
 	ldr r0, _080437E4 @ =0x0000E03A
 	str r0, [sp]
 	movs r0, #0
 	adds r1, r7, #0
 	mov r2, r8
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r6, [r6]
 	ldr r0, [r6]
 	subs r1, r4, r5

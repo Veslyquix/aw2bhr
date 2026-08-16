@@ -6,7 +6,7 @@ sub_08027DD8: @ 0x08027DD8
 	push {r4, r5, lr}
 	sub sp, #4
 	adds r5, r0, #0
-	ldr r0, _08027E04 @ =gUnknown_03002EE0
+	ldr r0, _08027E04 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #0xb
@@ -24,7 +24,7 @@ sub_08027DD8: @ 0x08027DD8
 	str r0, [r5, #8]
 	b _08027FB4
 	.align 2, 0
-_08027E04: .4byte gUnknown_03002EE0
+_08027E04: .4byte gpKeySt
 _08027E08: .4byte gUnknown_08499E18
 _08027E0C: .4byte gUnknown_08499D90
 _08027E10: .4byte gUnknown_03002F1C

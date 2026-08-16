@@ -20,7 +20,7 @@ sub_080684E0: @ 0x080684E0
 	str r0, [sp]
 	movs r0, #0
 	adds r1, r4, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [sp, #4]
 	ldrh r0, [r7, #0x2c]
 	subs r0, #1
@@ -44,7 +44,7 @@ _0806851C:
 	bls _0806852E
 	b _08068692
 _0806852E:
-	ldr r4, _0806863C @ =gUnknown_0808F100
+	ldr r4, _0806863C @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r1, #0
@@ -88,7 +88,7 @@ _0806852E:
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	adds r0, r7, #0
 	adds r0, #0x38
 	add r0, r8
@@ -128,7 +128,7 @@ _0806852E:
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 _080685EC:
 	adds r0, r7, #0
 	adds r0, #0x4d
@@ -163,11 +163,11 @@ _080685EC:
 	movs r2, #0xcc
 	lsls r2, r2, #2
 	ldr r3, _08068644 @ =gUnknown_08581208
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	b _08068692
 	.align 2, 0
 _08068638: .4byte 0x0000010F
-_0806863C: .4byte gUnknown_0808F100
+_0806863C: .4byte gSinLut
 _08068640: .4byte 0x000001FF
 _08068644: .4byte gUnknown_08581208
 _08068648:
@@ -205,7 +205,7 @@ _08068648:
 	movs r2, #0xcc
 	lsls r2, r2, #2
 	ldr r3, _080686E4 @ =gUnknown_08581208
-	bl sub_0801BEFC
+	bl PutSpriteExt
 _08068692:
 	ldr r1, [sp, #0xc]
 	subs r1, #0x24

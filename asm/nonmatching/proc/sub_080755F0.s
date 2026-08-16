@@ -8,10 +8,10 @@ sub_080755F0: @ 0x080755F0
 	movs r1, #0xb0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08075658 @ =gUnknown_081D18E8
 	ldr r1, _0807565C @ =0x06011480
-	bl sub_08011CAC
+	bl Decompress
 	ldr r2, _08075660 @ =gUnknown_030030E0
 	ldrb r1, [r2]
 	movs r0, #0x3f

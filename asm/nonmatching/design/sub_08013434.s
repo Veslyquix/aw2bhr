@@ -35,7 +35,7 @@ _08013446:
 	asrs r1, r1, #0x10
 	cmp r1, #4
 	ble _08013446
-	ldr r1, _08013484 @ =gUnknown_03002EE0
+	ldr r1, _08013484 @ =gpKeySt
 	ldr r0, _08013488 @ =gUnknown_03002090
 	str r0, [r1]
 	bx lr
@@ -43,6 +43,6 @@ _08013446:
 _08013478: .4byte gUnknown_030030C8
 _0801347C: .4byte gUnknown_03002F94
 _08013480: .4byte gUnknown_03002040
-_08013484: .4byte gUnknown_03002EE0
+_08013484: .4byte gpKeySt
 _08013488: .4byte gUnknown_03002090
 

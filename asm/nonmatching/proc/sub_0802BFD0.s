@@ -70,12 +70,12 @@ _0802C046:
 _0802C050:
 	ldr r0, _0802C0B4 @ =gUnknown_081248F8
 	ldr r1, _0802C0B8 @ =0x06013940
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0802C0BC @ =gUnknown_08125190
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0802C0C0 @ =gUnknown_08124FB8
 	ldrh r1, [r4]
 	lsls r1, r1, #4

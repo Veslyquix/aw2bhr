@@ -86,7 +86,7 @@ _080391B4:
 	str r3, [sp]
 	movs r0, #3
 	ldr r3, _08039260 @ =gUnknown_0848B690
-	bl sub_0801BEBC
+	bl PutSprite
 _08039236:
 	subs r0, r6, #1
 	lsls r5, r0, #0x18

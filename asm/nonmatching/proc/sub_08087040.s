@@ -31,7 +31,7 @@ _08087064:
 	movs r2, #0
 	mov r7, sl
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, [sp, #4]
 	mov r1, r8
 	orrs r0, r1
@@ -41,7 +41,7 @@ _08087064:
 	movs r2, #0x10
 	mov r7, sb
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, [sp, #4]
 	adds r0, #8
 	str r0, [sp, #4]

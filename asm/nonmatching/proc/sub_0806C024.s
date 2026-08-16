@@ -12,7 +12,7 @@ sub_0806C024: @ 0x0806C024
 	movs r0, #0
 	movs r1, #0x48
 	movs r2, #0xf0
-	bl sub_08074234
+	bl Interpolate
 	movs r1, #0
 	movs r2, #0xf0
 	movs r3, #0xa0
@@ -22,7 +22,7 @@ sub_0806C024: @ 0x0806C024
 	str r0, [r4, #0x30]
 	cmp r0, #0x20
 	bls _0806C060
-	ldr r2, _0806C068 @ =gUnknown_030030CC
+	ldr r2, _0806C068 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #0x41
 	rsbs r0, r0, #0
@@ -36,5 +36,5 @@ _0806C060:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0806C068: .4byte gUnknown_030030CC
+_0806C068: .4byte gDispIo
 

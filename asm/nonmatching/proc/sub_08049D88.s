@@ -10,7 +10,7 @@ sub_08049D88: @ 0x08049D88
 	bl sub_0801F494
 	ldr r4, _08049DDC @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r4, #0
 	movs r1, #0
 	movs r2, #0
@@ -31,7 +31,7 @@ sub_08049D88: @ 0x08049D88
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4}
 	pop {r0}
 	bx r0

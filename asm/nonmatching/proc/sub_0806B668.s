@@ -12,7 +12,7 @@ sub_0806B668: @ 0x0806B668
 	movs r0, #0
 	movs r1, #0xc
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r5, r0, #0
 	movs r1, #2
 	rsbs r1, r1, #0
@@ -21,7 +21,7 @@ sub_0806B668: @ 0x0806B668
 	ldr r3, [r6, #0x5c]
 	str r4, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	movs r0, #3
 	movs r1, #0

@@ -206,7 +206,7 @@ _08003466:
 	bne _0800347A
 	b _080035AE
 _0800347A:
-	ldr r5, _080035C0 @ =gUnknown_0808F100
+	ldr r5, _080035C0 @ =gSinLut
 	mov r0, r8
 	lsls r1, r0, #1
 	adds r0, r2, #0
@@ -326,7 +326,7 @@ _08003550:
 	ldr r1, [sp, #0x24]
 	mov r2, sl
 	adds r3, r6, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	movs r3, #0xc0
 	lsls r3, r3, #2
 	mov r0, r8
@@ -368,6 +368,6 @@ _080035AE:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080035C0: .4byte gUnknown_0808F100
+_080035C0: .4byte gSinLut
 _080035C4: .4byte 0x000001FF
 

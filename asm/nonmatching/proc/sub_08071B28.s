@@ -19,7 +19,7 @@ sub_08071B28: @ 0x08071B28
 	ldr r0, _08071B80 @ =gUnknown_08613E54
 	bl Proc_Start
 	mov r8, r0
-	ldr r0, _08071B84 @ =gUnknown_030020C0
+	ldr r0, _08071B84 @ =gPal
 	lsls r5, r5, #5
 	adds r5, r5, r0
 	adds r0, r5, #0
@@ -46,5 +46,5 @@ sub_08071B28: @ 0x08071B28
 	.align 2, 0
 _08071B7C: .4byte gUnknown_0202F2DC
 _08071B80: .4byte gUnknown_08613E54
-_08071B84: .4byte gUnknown_030020C0
+_08071B84: .4byte gPal
 

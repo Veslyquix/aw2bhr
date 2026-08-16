@@ -78,7 +78,7 @@ _0804AB80:
 	beq _0804AB9C
 	ldr r0, _0804AB94 @ =gUnknown_0813593C
 	ldr r1, _0804AB98 @ =0x060103E0
-	bl sub_08011CAC
+	bl Decompress
 	b _0804ABA4
 	.align 2, 0
 _0804AB94: .4byte gUnknown_0813593C
@@ -86,7 +86,7 @@ _0804AB98: .4byte 0x060103E0
 _0804AB9C:
 	ldr r0, _0804ABBC @ =gUnknown_081358A0
 	ldr r1, _0804ABC0 @ =0x060103E0
-	bl sub_08011CAC
+	bl Decompress
 _0804ABA4:
 	movs r0, #0xb0
 	bl sub_0801B768

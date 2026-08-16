@@ -172,7 +172,7 @@ _08033364:
 	ldrsh r0, [r0, r1]
 	cmp r0, #0
 	bne _08033386
-	ldr r0, _080333EC @ =gUnknown_03002EE0
+	ldr r0, _080333EC @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #2
@@ -183,7 +183,7 @@ _08033364:
 	mov r0, r8
 	bl Proc_GotoScript
 _08033386:
-	ldr r0, _080333EC @ =gUnknown_03002EE0
+	ldr r0, _080333EC @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #9
@@ -233,7 +233,7 @@ _080333DC:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_080333EC: .4byte gUnknown_03002EE0
+_080333EC: .4byte gpKeySt
 _080333F0: .4byte gUnknown_0849BA68
 _080333F4: .4byte gUnknown_03003F70
 _080333F8: .4byte gUnknown_0861429C

@@ -22,7 +22,7 @@ _08039C8C:
 	lsrs r0, r0, #0x10
 	adds r0, r0, r1
 	strh r0, [r5, #0x2e]
-	ldr r4, _08039D28 @ =gUnknown_0808F100
+	ldr r4, _08039D28 @ =gSinLut
 	adds r1, r4, #0
 	adds r1, #0x80
 	movs r2, #0
@@ -81,7 +81,7 @@ _08039CF2:
 	mov r1, r8
 	adds r2, r6, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldrh r0, [r5, #0x2e]
 	cmp r0, #0xf9
 	bls _08039D2C
@@ -94,7 +94,7 @@ _08039CF2:
 	bl Proc_Break
 	b _08039D84
 	.align 2, 0
-_08039D28: .4byte gUnknown_0808F100
+_08039D28: .4byte gSinLut
 _08039D2C:
 	adds r0, r5, #0
 	adds r0, #0x29

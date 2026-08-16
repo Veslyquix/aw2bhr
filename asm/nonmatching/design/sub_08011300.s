@@ -4,7 +4,7 @@
 
 	thumb_func_start sub_08011300
 sub_08011300: @ 0x08011300
-	ldr r1, _08011348 @ =gUnknown_030030CC
+	ldr r1, _08011348 @ =gDispIo
 	ldrb r0, [r1, #1]
 	movs r3, #0x20
 	orrs r0, r3
@@ -40,7 +40,7 @@ sub_08011300: @ 0x08011300
 	strb r0, [r2]
 	bx lr
 	.align 2, 0
-_08011348: .4byte gUnknown_030030CC
+_08011348: .4byte gDispIo
 _0801134C: .4byte gUnknown_030030A4
 _08011350: .4byte gUnknown_030030DC
 

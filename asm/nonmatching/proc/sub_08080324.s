@@ -19,7 +19,7 @@ sub_08080324: @ 0x08080324
 	movs r0, #0
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r5, _08080360 @ =gUnknown_030030A0
 	movs r2, #8
@@ -45,7 +45,7 @@ _08080364:
 	movs r0, #0
 	movs r1, #8
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r5, _08080394 @ =gUnknown_030030A0
 	movs r1, #8
@@ -69,7 +69,7 @@ _08080398:
 	movs r0, #0
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r5, _080803CC @ =gUnknown_030030A0
 	movs r2, #4
@@ -96,7 +96,7 @@ _080803D0:
 	movs r0, #0
 	movs r1, #4
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r5, _08080400 @ =gUnknown_030030A0
 	movs r1, #4
@@ -120,7 +120,7 @@ _08080404:
 	movs r0, #0
 	movs r1, #0
 	movs r2, #2
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r5, _08080438 @ =gUnknown_030030A0
 	movs r2, #2
@@ -147,7 +147,7 @@ _0808043C:
 	movs r0, #0
 	movs r1, #2
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r5, _08080478 @ =gUnknown_030030A0
 	movs r1, #2
@@ -160,7 +160,7 @@ _08080464:
 	movs r0, #0
 	movs r2, #0
 _0808046A:
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	b _08080486
 	.align 2, 0

@@ -10,7 +10,7 @@ sub_0807C46C: @ 0x0807C46C
 	str r0, [sp]
 	movs r1, #0x68
 	movs r2, #8
-	bl sub_0801BEBC
+	bl PutSprite
 	bl sub_0803840C
 	adds r4, r0, #0
 	cmp r4, #9
@@ -22,7 +22,7 @@ sub_0807C46C: @ 0x0807C46C
 	movs r0, #0
 	movs r1, #0xca
 	movs r2, #8
-	bl sub_0801BEBC
+	bl PutSprite
 	b _0807C526
 	.align 2, 0
 _0807C49C: .4byte gUnknown_08615C62
@@ -39,7 +39,7 @@ _0807C4A4:
 	movs r1, #0xc8
 	movs r2, #8
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r0, r4, #0
 	movs r1, #0xa
 	bl Div
@@ -73,7 +73,7 @@ _0807C4E4:
 _0807C502:
 	movs r2, #8
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	b _0807C526
 _0807C50C:
 	adds r0, r4, #0
@@ -86,7 +86,7 @@ _0807C50C:
 	movs r1, #0xd6
 	movs r2, #8
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 _0807C526:
 	movs r5, #0
 	ldr r7, _0807C558 @ =gUnknown_0848B6BE
@@ -98,13 +98,13 @@ _0807C52C:
 	adds r1, r4, #0
 	movs r2, #0x30
 	adds r3, r7, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	str r6, [sp]
 	movs r0, #0
 	adds r1, r4, #0
 	movs r2, #0x32
 	adds r3, r7, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #1
 	cmp r5, #7
 	ble _0807C52C

@@ -37,7 +37,7 @@ _0807E998:
 	movs r0, #0
 	str r0, [sp]
 	movs r1, #0x20
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	movs r5, #0
 	adds r0, r7, #0
 	adds r0, #0x64
@@ -303,7 +303,7 @@ _0807EBD6:
 	movs r0, #1
 	movs r1, #0x2a
 	movs r2, #0x75
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	mov r2, sb
 	movs r0, #0
@@ -329,7 +329,7 @@ _0807EC2C:
 	movs r0, #4
 	movs r1, #0x75
 	movs r2, #0xc0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x2c]
 	bl sub_0803BD14
 	adds r2, r0, #0
@@ -344,7 +344,7 @@ _0807EC2C:
 	movs r0, #4
 	adds r1, r5, #0
 _0807EC5E:
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x30]
 	mov r2, sb
 	movs r3, #0
@@ -357,7 +357,7 @@ _0807EC5E:
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0x78
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	adds r0, #0xb0
 	movs r2, #0x82
@@ -401,7 +401,7 @@ _0807EC9A:
 	ldr r0, _0807ED80 @ =gUnknown_08234B10
 	ldr r4, _0807ED84 @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r5, #0
 	mov sl, r4
 _0807ECE4:
@@ -435,7 +435,7 @@ _0807ECF6:
 	movs r1, #0xa0
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0
 	mov r2, sb
 	strh r0, [r2]

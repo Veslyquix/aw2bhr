@@ -13,7 +13,7 @@ sub_08085A8C: @ 0x08085A8C
 	movs r2, #0x38
 	movs r3, #0
 	bl sub_0801F34C
-	ldr r0, _08085AC0 @ =gUnknown_03002EE0
+	ldr r0, _08085AC0 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	ldr r0, _08085AC4 @ =0x00000103
@@ -28,6 +28,6 @@ _08085AB6:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08085AC0: .4byte gUnknown_03002EE0
+_08085AC0: .4byte gpKeySt
 _08085AC4: .4byte 0x00000103
 

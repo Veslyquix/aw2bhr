@@ -13,7 +13,7 @@ sub_080531D4: @ 0x080531D4
 	ands r1, r0
 	cmp r1, #0
 	bne _080531F0
-	ldr r0, _08053250 @ =gUnknown_030030CC
+	ldr r0, _08053250 @ =gDispIo
 	strh r1, [r0]
 _080531F0:
 	bl sub_08012420
@@ -57,7 +57,7 @@ _08053240:
 	bx r0
 	.align 2, 0
 _0805324C: .4byte gUnknown_03004504
-_08053250: .4byte gUnknown_030030CC
+_08053250: .4byte gDispIo
 _08053254: .4byte gUnknown_08553820
 _08053258: .4byte gUnknown_0300453C
 _0805325C: .4byte gUnknown_0300451C

@@ -19,12 +19,12 @@ sub_08067D04: @ 0x08067D04
 	adds r4, r4, r0
 	ldr r0, [r4]
 	ldr r1, _08067D44 @ =0x06010000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08067D48 @ =gUnknown_0817D9F8
 	movs r1, #0x88
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4, r5, r6}
 	pop {r0}
 	bx r0

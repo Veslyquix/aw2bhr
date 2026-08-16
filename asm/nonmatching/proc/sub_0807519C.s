@@ -18,7 +18,7 @@ sub_0807519C: @ 0x0807519C
 	ldrh r0, [r0]
 	str r0, [sp]
 	movs r0, #1
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, [r5, #0x2c]
 	ldr r2, [r5, #0x30]
 	cmp r0, r2

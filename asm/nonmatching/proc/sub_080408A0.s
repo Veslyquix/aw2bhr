@@ -21,7 +21,7 @@ sub_080408A0: @ 0x080408A0
 	lsls r0, r0, #0x18
 	cmp r0, #0
 	beq _0804095A
-	ldr r0, _08040918 @ =gUnknown_03002EE0
+	ldr r0, _08040918 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #1
@@ -54,7 +54,7 @@ _0804090E:
 	bl Proc_Break
 	b _0804095A
 	.align 2, 0
-_08040918: .4byte gUnknown_03002EE0
+_08040918: .4byte gpKeySt
 _0804091C: .4byte gUnknown_03003100
 _08040920: .4byte gUnknown_030033E4
 _08040924: .4byte gUnknown_03003FC0

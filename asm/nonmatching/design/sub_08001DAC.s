@@ -403,7 +403,7 @@ _0800208C:
 	lsls r7, r7, #1
 	subs r0, r7, r2
 	asrs r4, r0, #4
-	ldr r0, _0800217C @ =gUnknown_0808F100
+	ldr r0, _0800217C @ =gSinLut
 	mov r8, r0
 	movs r0, #0xff
 	ands r4, r0
@@ -464,7 +464,7 @@ _080020FA:
 	ldr r1, [sp, #0x14]
 	mov r2, r8
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	mov r2, sb
 	ldr r1, [r2]
 	adds r1, #0x67
@@ -511,7 +511,7 @@ _0800214C:
 	b _080021C6
 	.align 2, 0
 _08002178: .4byte gUnknown_0200B0B0
-_0800217C: .4byte gUnknown_0808F100
+_0800217C: .4byte gSinLut
 _08002180:
 	adds r1, r6, #0
 	adds r1, #0xb
@@ -622,7 +622,7 @@ _080021F0:
 	str r0, [sp]
 	movs r0, #5
 	adds r1, r6, #0
-	bl sub_0801BEBC
+	bl PutSprite
 _08002264:
 	ldr r0, [r5]
 	ldrh r0, [r0, #4]
@@ -632,7 +632,7 @@ _08002264:
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 _08002278:
 	add sp, #0x18
 	pop {r3, r4, r5}

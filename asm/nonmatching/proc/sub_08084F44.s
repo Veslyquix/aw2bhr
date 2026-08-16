@@ -42,7 +42,7 @@ _08084F80:
 	movs r1, #0x90
 	movs r2, #0
 _08084F8E:
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r4, #0x2c]
 	ldr r0, [r4, #0x2c]
 	adds r0, #0xb0

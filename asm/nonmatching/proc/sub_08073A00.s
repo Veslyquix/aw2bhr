@@ -42,7 +42,7 @@ _08073A26:
 	lsls r2, r2, #2
 	adds r0, r0, r2
 	str r0, [r1]
-	ldr r2, _08073AB8 @ =gUnknown_030030CC
+	ldr r2, _08073AB8 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r3, #0x20
 	orrs r0, r3
@@ -91,7 +91,7 @@ _08073AA8: .4byte gUnknown_0202F8DC
 _08073AAC: .4byte gUnknown_0202FDDC
 _08073AB0: .4byte gUnknown_0202FDE4
 _08073AB4: .4byte gUnknown_0202FDE0
-_08073AB8: .4byte gUnknown_030030CC
+_08073AB8: .4byte gDispIo
 _08073ABC: .4byte gUnknown_03002B40
 _08073AC0: .4byte gUnknown_03002EFC
 _08073AC4: .4byte gUnknown_03002B4C

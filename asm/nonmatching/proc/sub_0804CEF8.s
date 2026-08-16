@@ -186,7 +186,7 @@ _0804D068:
 	ldr r1, _0804D0F4 @ =gUnknown_08552FB0
 	adds r1, r7, r1
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0804D0D8 @ =gUnknown_08552178
 	add r7, sl
 	mov r8, r7

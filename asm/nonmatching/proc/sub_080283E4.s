@@ -4,7 +4,7 @@
 	thumb_func_start sub_080283E4
 sub_080283E4: @ 0x080283E4
 	push {r4, r5, r6, r7, lr}
-	ldr r4, _08028488 @ =gUnknown_03002EE0
+	ldr r4, _08028488 @ =gpKeySt
 	ldr r0, [r4]
 	ldrh r1, [r0, #4]
 	movs r0, #9
@@ -88,7 +88,7 @@ _08028458:
 	movs r0, #2
 	b _0802849E
 	.align 2, 0
-_08028488: .4byte gUnknown_03002EE0
+_08028488: .4byte gpKeySt
 _0802848C: .4byte gUnknown_08090B44
 _08028490: .4byte gUnknown_08090B48
 _08028494: .4byte gUnknown_08499598

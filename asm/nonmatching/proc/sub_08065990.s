@@ -82,15 +82,15 @@ sub_08065990: @ 0x08065990
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08065C6C @ =gUnknown_0822F9AC
 	ldr r1, _08065C70 @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08065C74 @ =gUnknown_082344CC
 	movs r1, #0x20
 	movs r2, #0xa0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013B1C
 	ldr r0, _08065C78 @ =gUnknown_030030B4
 	ldr r0, [r0]
@@ -112,7 +112,7 @@ sub_08065990: @ 0x08065990
 	bl sub_0802D5CC
 	bl sub_0801F49C
 	ldr r1, _08065C80 @ =0x06015200
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_0806574C
 	ldr r0, _08065C84 @ =gUnknown_08580CB4
 	movs r1, #3
@@ -244,7 +244,7 @@ sub_08065990: @ 0x08065990
 	adds r0, #0x30
 	movs r6, #0
 	strb r4, [r0]
-	ldr r4, _08065C98 @ =gUnknown_03002EE0
+	ldr r4, _08065C98 @ =gpKeySt
 	ldr r1, [r4]
 	movs r0, #0x80
 	lsls r0, r0, #2
@@ -287,5 +287,5 @@ _08065C88: .4byte 0x06010000
 _08065C8C: .4byte 0x000002D2
 _08065C90: .4byte gUnknown_08580CC4
 _08065C94: .4byte gUnknown_08580934
-_08065C98: .4byte gUnknown_03002EE0
+_08065C98: .4byte gpKeySt
 

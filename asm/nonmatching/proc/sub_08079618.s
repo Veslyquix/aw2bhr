@@ -21,7 +21,7 @@ sub_08079618: @ 0x08079618
 	movs r1, #0xae
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r5, #0x38]
 	adds r0, #1
 	str r0, [r5, #0x38]
@@ -31,7 +31,7 @@ sub_08079618: @ 0x08079618
 	movs r0, #4
 	movs r1, #0
 	movs r2, #0xb4
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	str r1, [r5, #0x34]
 	subs r1, #0xac
@@ -42,7 +42,7 @@ sub_08079618: @ 0x08079618
 	movs r0, #0
 	movs r2, #0x50
 	adds r3, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r1, [r5, #0x34]
 	subs r1, #0xac
 	ldr r0, _08079720 @ =0x00005310
@@ -50,7 +50,7 @@ sub_08079618: @ 0x08079618
 	movs r0, #0
 	movs r2, #0x60
 	adds r3, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r1, [r5, #0x34]
 	subs r1, #0xac
 	ldr r0, _08079724 @ =0x00005320
@@ -58,7 +58,7 @@ sub_08079618: @ 0x08079618
 	movs r0, #0
 	movs r2, #0x70
 	adds r3, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r1, [r5, #0x34]
 	subs r1, #0xac
 	ldr r3, _08079728 @ =gUnknown_08615C2E
@@ -66,7 +66,7 @@ sub_08079618: @ 0x08079618
 	str r0, [sp]
 	movs r0, #0
 	movs r2, #0x80
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r1, [r5, #0x34]
 	subs r1, #0xac
 	ldr r0, _08079730 @ =0x00005330
@@ -74,7 +74,7 @@ sub_08079618: @ 0x08079618
 	movs r0, #0
 	movs r2, #0x88
 	adds r3, r4, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r7, _08079734 @ =gUnknown_081D92F0
 	movs r6, #0x50
 	ldr r0, _08079738 @ =0x000052D0
@@ -88,7 +88,7 @@ _080796C6:
 	movs r0, #0
 	adds r2, r6, #0
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r6, #0x10
 	subs r4, #1
 	cmp r4, #0
@@ -100,7 +100,7 @@ _080796C6:
 	str r0, [sp]
 	movs r0, #0
 	movs r2, #0x88
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, [r5, #0x2c]
 	cmp r0, #0x27
 	ble _0807973C

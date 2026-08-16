@@ -113,12 +113,12 @@ _08046F40:
 _08046F52:
 	ldr r1, _08046FAC @ =0x060148E0
 	adds r0, r3, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r1, #0x98
 	lsls r1, r1, #2
 	adds r0, r4, #0
 	movs r2, #0x60
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r4, _08046FB0 @ =gUnknown_0812C024
 	ldr r1, _08046FB4 @ =0x06014EE0
 	adds r0, r4, #0

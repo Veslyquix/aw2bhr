@@ -1,8 +1,8 @@
 	.include "macro.inc"
 	.syntax unified
 
-	thumb_func_start sub_0801E108
-sub_0801E108: @ 0x0801E108
+	thumb_func_start SetObjAffine
+SetObjAffine: @ 0x0801E108
 	push {r4, r5, r6, lr}
 	ldr r6, [sp, #0x10]
 	ldr r5, _0801E138 @ =gUnknown_03002520

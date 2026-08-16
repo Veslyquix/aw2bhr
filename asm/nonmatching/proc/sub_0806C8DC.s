@@ -13,7 +13,7 @@ sub_0806C8DC: @ 0x0806C8DC
 	str r0, [sp]
 	movs r0, #1
 	movs r1, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	ldr r0, _0806C940 @ =gUnknown_03001FF8
 	strh r4, [r0]
@@ -39,7 +39,7 @@ sub_0806C8DC: @ 0x0806C8DC
 	movs r0, #0
 	str r0, [r5, #0x58]
 	bl sub_0806C8A0
-	ldr r2, _0806C94C @ =gUnknown_030030CC
+	ldr r2, _0806C94C @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #0x41
 	rsbs r0, r0, #0
@@ -52,7 +52,7 @@ sub_0806C8DC: @ 0x0806C8DC
 _0806C940: .4byte gUnknown_03001FF8
 _0806C944: .4byte gUnknown_03002B34
 _0806C948: .4byte gUnknown_030030A0
-_0806C94C: .4byte gUnknown_030030CC
+_0806C94C: .4byte gDispIo
 _0806C950:
 	adds r0, #1
 	str r0, [r5, #0x58]

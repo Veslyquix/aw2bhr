@@ -9,12 +9,12 @@ sub_0803F2F4: @ 0x0803F2F4
 	ldr r0, _0803F358 @ =gUnknown_08115A78
 	ldr r5, _0803F35C @ =gUnknown_0200FC50
 	adds r1, r5, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0803F360 @ =gUnknown_081169B0
 	movs r1, #0xa8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0xec
 	lsls r0, r0, #1
 	bl sub_0803B4DC

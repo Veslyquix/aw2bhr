@@ -31,14 +31,14 @@ _0806C422:
 	str r0, [sp]
 	movs r0, #0
 	movs r1, #0xa4
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	ldr r3, _0806C470 @ =gUnknown_08581A98
 	movs r0, #0xd0
 	str r0, [sp]
 	movs r0, #0
 	movs r1, #0xa4
 	movs r2, #0x40
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r4}
 	pop {r0}

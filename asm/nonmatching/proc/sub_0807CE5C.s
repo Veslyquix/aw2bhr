@@ -1051,7 +1051,7 @@ _0807D6C6:
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0x78
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	movs r0, #0
 	ldrsh r3, [r6, r0]
@@ -1059,7 +1059,7 @@ _0807D6C6:
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0xc
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0
 	ldrsh r1, [r5, r2]
 	muls r0, r1, r0
@@ -1080,7 +1080,7 @@ _0807D714:
 	movs r0, #4
 	movs r1, #0x78
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	movs r0, #0
 	ldrsh r3, [r6, r0]
@@ -1089,7 +1089,7 @@ _0807D714:
 	movs r0, #4
 	movs r1, #0xc
 	movs r2, #0x18
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0
 	ldrsh r1, [r5, r2]
 	muls r0, r1, r0
@@ -1102,7 +1102,7 @@ _0807D714:
 	movs r1, #0xf
 	movs r2, #0x1d
 _0807D752:
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0
 	ldrsh r1, [r5, r2]
 	muls r0, r1, r0
@@ -1129,7 +1129,7 @@ _0807D770:
 	movs r0, #1
 	movs r1, #0
 	movs r2, #0x78
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	movs r1, #0
 	ldrsh r3, [r6, r1]
@@ -1147,7 +1147,7 @@ _0807D79E:
 	movs r0, #4
 	movs r1, #0x78
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r7, #0x34]
 	movs r0, #0
 	ldrsh r3, [r6, r0]
@@ -1157,7 +1157,7 @@ _0807D79E:
 	movs r1, #0x78
 	movs r2, #0xff
 _0807D7C2:
-	bl sub_08074234
+	bl Interpolate
 	ldr r1, [r7, #0x60]
 	muls r0, r1, r0
 	str r0, [r7, #0x30]

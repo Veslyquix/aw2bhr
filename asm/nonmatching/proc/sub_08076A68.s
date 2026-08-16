@@ -22,7 +22,7 @@ sub_08076A68: @ 0x08076A68
 	ldr r0, _08076AD0 @ =gUnknown_081D0BAC
 	ldr r4, _08076AD4 @ =gUnknown_08614280
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, [r4]
 	ldr r1, _08076AD8 @ =0x0600F000
 	movs r2, #0x80

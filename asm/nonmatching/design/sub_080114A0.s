@@ -54,7 +54,7 @@ _080114F0:
 	movs r0, #1
 _08011502:
 	movs r2, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r4, [r4]
 	ldrh r0, [r4]
@@ -63,7 +63,7 @@ _08011502:
 	bgt _0801152A
 	movs r0, #0
 	strh r0, [r4]
-	ldr r2, _08011538 @ =gUnknown_030030CC
+	ldr r2, _08011538 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #0x21
 	rsbs r0, r0, #0
@@ -78,5 +78,5 @@ _0801152A:
 	bx r0
 	.align 2, 0
 _08011534: .4byte gUnknown_0808DF94
-_08011538: .4byte gUnknown_030030CC
+_08011538: .4byte gDispIo
 

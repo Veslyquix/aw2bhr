@@ -21,11 +21,11 @@ sub_0807BA90: @ 0x0807BA90
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0807BC1C @ =gUnknown_0822D888
 	ldr r1, _0807BC20 @ =gUnknown_08499580
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B0C
 	ldr r5, _0807BC24 @ =gUnknown_081D9330
 	ldr r6, [r5]
@@ -78,8 +78,8 @@ _0807BB08:
 	lsls r1, r1, #2
 	mov sb, r1
 	movs r2, #0x20
-	bl sub_08013618
-	ldr r2, _0807BC34 @ =gUnknown_030030CC
+	bl ApplyPaletteExt
+	ldr r2, _0807BC34 @ =gDispIo
 	ldrb r1, [r2]
 	movs r0, #8
 	rsbs r0, r0, #0
@@ -103,7 +103,7 @@ _0807BB08:
 	movs r1, #0x40
 	orrs r0, r1
 	strb r0, [r2, #1]
-	ldr r4, _0807BC38 @ =gUnknown_0808F100
+	ldr r4, _0807BC38 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r1, #0
@@ -142,7 +142,7 @@ _0807BB08:
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	movs r0, #0xf0
 	lsls r0, r0, #1
 	str r0, [r7, #0x2c]
@@ -195,7 +195,7 @@ _0807BC24: .4byte gUnknown_081D9330
 _0807BC28: .4byte gUnknown_03003FC0
 _0807BC2C: .4byte gUnknown_0202FF78
 _0807BC30: .4byte gUnknown_0822DE80
-_0807BC34: .4byte gUnknown_030030CC
-_0807BC38: .4byte gUnknown_0808F100
+_0807BC34: .4byte gDispIo
+_0807BC38: .4byte gSinLut
 _0807BC3C: .4byte gUnknown_030024D0
 

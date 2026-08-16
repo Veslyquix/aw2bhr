@@ -83,15 +83,15 @@ sub_0806D944: @ 0x0806D944
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806DC28 @ =gUnknown_0822F9AC
 	ldr r1, _0806DC2C @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806DC30 @ =gUnknown_082344CC
 	movs r1, #0x20
 	movs r2, #0xa0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013B1C
 	ldr r0, _0806DC34 @ =gUnknown_030030B4
 	ldr r0, [r0]

@@ -70,7 +70,7 @@ _080334E4:
 	ldr r0, [r0]
 	ldr r4, _0803353C @ =gUnknown_0203C000
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, _08033540 @ =0x485153CD
 	ldr r0, _08033544 @ =gUnknown_0203BFFC
 	str r1, [r0]

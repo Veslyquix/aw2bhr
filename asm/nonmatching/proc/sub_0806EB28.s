@@ -21,7 +21,7 @@ _0806EB3C:
 	ldr r0, [r1]
 	movs r1, #0x20
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r0}
 	bx r0
 	.align 2, 0

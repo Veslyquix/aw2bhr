@@ -12,7 +12,7 @@ sub_0802E278: @ 0x0802E278
 	lsls r0, r0, #0x18
 	cmp r0, #0
 	beq _0802E2AC
-	ldr r0, _0802E2B4 @ =gUnknown_03002EE0
+	ldr r0, _0802E2B4 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0]
 	movs r0, #2
@@ -29,6 +29,6 @@ _0802E2AC:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0802E2B4: .4byte gUnknown_03002EE0
+_0802E2B4: .4byte gpKeySt
 _0802E2B8: .4byte gUnknown_03003334
 

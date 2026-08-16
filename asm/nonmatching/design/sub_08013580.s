@@ -9,7 +9,7 @@ sub_08013580: @ 0x08013580
 	ldrb r0, [r0]
 	cmp r0, #1
 	bne _08013598
-	ldr r0, _080135A0 @ =gUnknown_030020C0
+	ldr r0, _080135A0 @ =gPal
 	movs r1, #0xa0
 	lsls r1, r1, #0x13
 	movs r2, #0x80
@@ -20,5 +20,5 @@ _08013598:
 	bx r0
 	.align 2, 0
 _0801359C: .4byte gUnknown_03000048
-_080135A0: .4byte gUnknown_030020C0
+_080135A0: .4byte gPal
 

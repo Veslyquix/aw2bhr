@@ -54,7 +54,7 @@ _0801143C:
 	movs r0, #4
 _0801144E:
 	movs r1, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5]
 	ldr r4, [r4]
 	ldrh r0, [r4]

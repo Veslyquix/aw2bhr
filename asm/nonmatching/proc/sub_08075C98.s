@@ -37,7 +37,7 @@ sub_08075C98: @ 0x08075C98
 	str r5, [sp]
 	movs r0, #0
 	movs r1, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	movs r1, #0
 	ldrsh r3, [r6, r1]
@@ -45,7 +45,7 @@ sub_08075C98: @ 0x08075C98
 	movs r0, #0
 	mov r1, r8
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	mov sl, r0
 	movs r2, #0
 	ldrsh r3, [r6, r2]
@@ -53,9 +53,9 @@ sub_08075C98: @ 0x08075C98
 	movs r0, #0
 	mov r1, r8
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	mov sb, r0
-	ldr r5, _08075DB4 @ =gUnknown_0808F100
+	ldr r5, _08075DB4 @ =gSinLut
 	movs r3, #0xff
 	ands r4, r3
 	adds r0, r4, #0
@@ -100,7 +100,7 @@ sub_08075C98: @ 0x08075C98
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r0, [r7, #0x54]
 	ldr r1, [r7, #0x2c]
 	subs r1, #8
@@ -136,6 +136,6 @@ _08075DA4:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08075DB4: .4byte gUnknown_0808F100
+_08075DB4: .4byte gSinLut
 _08075DB8: .4byte 0x000001FF
 

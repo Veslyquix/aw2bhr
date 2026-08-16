@@ -60,7 +60,7 @@ _080312F8:
 	str r0, [sp]
 	movs r0, #0
 	movs r2, #0x40
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	movs r1, #1
 	add sl, r1
 	ldr r0, _08031400 @ =gUnknown_0849B018
@@ -83,7 +83,7 @@ _080312F8:
 	adds r1, r7, #0
 	movs r3, #0
 	bl sub_0801F34C
-	ldr r2, _08031408 @ =gUnknown_030020C0
+	ldr r2, _08031408 @ =gPal
 	add r2, r8
 	movs r1, #0xf
 	adds r0, r6, #0
@@ -116,7 +116,7 @@ _08031376:
 	movs r0, #0
 	movs r1, #0x58
 	movs r2, #0x38
-	bl sub_0801BEFC
+	bl PutSpriteExt
 _08031394:
 	ldr r0, _08031400 @ =gUnknown_0849B018
 	ldr r0, [r0]
@@ -169,7 +169,7 @@ _080313F8: .4byte 0x000001FF
 _080313FC: .4byte gUnknown_0849B258
 _08031400: .4byte gUnknown_0849B018
 _08031404: .4byte gUnknown_0849B27C
-_08031408: .4byte gUnknown_030020C0
+_08031408: .4byte gPal
 _0803140C: .4byte gUnknown_081D3E68
 _08031410: .4byte gUnknown_0849B268
 _08031414: .4byte gUnknown_0849B1A0

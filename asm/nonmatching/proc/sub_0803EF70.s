@@ -14,15 +14,15 @@ sub_0803EF70: @ 0x0803EF70
 	bl sub_0803B4DC
 	ldr r0, _0803F070 @ =gUnknown_08113BE0
 	ldr r1, _0803F074 @ =0x06013940
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0803F078 @ =gUnknown_081143D0
 	ldr r1, _0803F07C @ =0x06014940
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0803F080 @ =gUnknown_08114E34
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x40
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r5, [r4, #0x2c]
 	lsls r5, r5, #4
 	ldr r0, _0803F084 @ =gUnknown_08499590

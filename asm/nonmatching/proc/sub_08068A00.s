@@ -38,7 +38,7 @@ _08068A2E:
 _08068A3C:
 	cmp r0, #0xc7
 	bne _08068AB0
-	ldr r2, _08068A68 @ =gUnknown_030030CC
+	ldr r2, _08068A68 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -54,16 +54,16 @@ _08068A3C:
 	strb r0, [r2, #1]
 	ldr r0, _08068A6C @ =gUnknown_0817DE24
 	ldr r1, _08068A70 @ =0x06009400
-	bl sub_08011CAC
+	bl Decompress
 	b _08068AB0
 	.align 2, 0
-_08068A68: .4byte gUnknown_030030CC
+_08068A68: .4byte gDispIo
 _08068A6C: .4byte gUnknown_0817DE24
 _08068A70: .4byte 0x06009400
 _08068A74:
 	ldr r0, _08068A80 @ =gUnknown_0818E364
 	ldr r1, _08068A84 @ =0x06010000
-	bl sub_08011CAC
+	bl Decompress
 	b _08068AB0
 	.align 2, 0
 _08068A80: .4byte gUnknown_0818E364

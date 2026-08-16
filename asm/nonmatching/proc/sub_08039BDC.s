@@ -19,7 +19,7 @@ sub_08039BDC: @ 0x08039BDC
 	adds r0, r7, #0
 	bl Proc_End
 _08039BFE:
-	ldr r4, _08039C6C @ =gUnknown_0808F100
+	ldr r4, _08039C6C @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r2, #0
@@ -60,7 +60,7 @@ _08039BFE:
 	adds r1, r6, #0
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	movs r0, #0
 	strh r0, [r7, #0x2e]
 	add sp, #4
@@ -70,5 +70,5 @@ _08039BFE:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08039C6C: .4byte gUnknown_0808F100
+_08039C6C: .4byte gSinLut
 

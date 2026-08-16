@@ -32,7 +32,7 @@ _0801C2A6:
 	str r1, [sp]
 	adds r1, r2, #0
 	adds r2, r6, #0
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	ldr r0, [r4, #0x24]
 	cmp r0, #0
 	beq _0801C2D2

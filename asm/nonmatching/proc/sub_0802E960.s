@@ -9,7 +9,7 @@ sub_0802E960: @ 0x0802E960
 	bl sub_0803B37C
 	bl Proc_Init
 	bl sub_08015184
-	ldr r2, _0802E9F4 @ =gUnknown_030030CC
+	ldr r2, _0802E9F4 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -51,11 +51,11 @@ sub_0802E960: @ 0x0802E960
 	ldr r0, [r0]
 	movs r1, #0xc0
 	lsls r1, r1, #0x13
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0802EA10 @ =gUnknown_0849B024
 	ldr r0, [r0]
 	ldr r1, _0802EA14 @ =0x06007000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0802EA18 @ =gUnknown_03001FF8
 	strh r4, [r0]
 	ldr r0, _0802EA1C @ =gUnknown_03001418
@@ -68,7 +68,7 @@ sub_0802E960: @ 0x0802E960
 	bx r0
 	.align 2, 0
 _0802E9F0: .4byte gUnknown_0849D16C
-_0802E9F4: .4byte gUnknown_030030CC
+_0802E9F4: .4byte gDispIo
 _0802E9F8: .4byte gUnknown_030030E0
 _0802E9FC: .4byte gUnknown_03002020
 _0802EA00: .4byte gUnknown_03002B28

@@ -23,21 +23,21 @@ _0806C22E:
 	movs r1, #0x88
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806C278 @ =gUnknown_081A3D24
 	movs r1, #0x90
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r5, #0x58]
 	lsls r0, r0, #4
 	adds r0, r0, r4
 	ldr r0, [r0]
 	ldr r1, _0806C27C @ =0x06011200
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806C280 @ =gUnknown_081A3BD4
 	ldr r1, _0806C284 @ =0x06011A00
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, _0806C288 @ =gUnknown_0202F2C0
 	movs r0, #0
 	str r0, [r1]

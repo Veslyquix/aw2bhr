@@ -21,7 +21,7 @@ sub_08089A04: @ 0x08089A04
 	str r0, [sp]
 	movs r0, #1
 	movs r1, #0
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x30]
 	ldr r1, _08089AAC @ =gUnknown_03002F18
 	movs r2, #0xb0
@@ -126,7 +126,7 @@ _08089AE8:
 	movs r0, #4
 	movs r1, #0xc2
 	movs r2, #0x24
-	bl sub_08074234
+	bl Interpolate
 	str r0, [r6, #0x30]
 	ldr r5, _08089BCC @ =gUnknown_03002F18
 	ldr r0, [r6, #0x3c]
@@ -223,7 +223,7 @@ _08089BAA:
 	str r0, [sp]
 	movs r0, #1
 	movs r1, #0x20
-	bl sub_0801BEBC
+	bl PutSprite
 	b _08089BFE
 	.align 2, 0
 _08089BCC: .4byte gUnknown_03002F18

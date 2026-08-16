@@ -9,7 +9,7 @@ sub_08034130: @ 0x08034130
 	adds r0, r6, #0
 	adds r0, #0x36
 	ldrb r4, [r0]
-	ldr r0, _08034160 @ =gUnknown_03002EE0
+	ldr r0, _08034160 @ =gpKeySt
 	ldr r3, [r0]
 	ldrh r2, [r3, #4]
 	movs r0, #2
@@ -24,7 +24,7 @@ sub_08034130: @ 0x08034130
 	bl Proc_Goto
 	b _08034202
 	.align 2, 0
-_08034160: .4byte gUnknown_03002EE0
+_08034160: .4byte gpKeySt
 _08034164:
 	adds r0, r6, #0
 	adds r0, #0x37

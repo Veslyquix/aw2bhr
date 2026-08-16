@@ -25,7 +25,7 @@ sub_08073480: @ 0x08073480
 	movs r5, #0
 	movs r0, #0xff
 	mov r8, r0
-	ldr r1, _08073554 @ =gUnknown_0808F100
+	ldr r1, _08073554 @ =gSinLut
 	mov ip, r1
 	ldr r2, [r4, #0x34]
 	str r2, [sp]
@@ -109,7 +109,7 @@ _080734BE:
 	.align 2, 0
 _0807354C: .4byte gUnknown_081CC024
 _08073550: .4byte gUnknown_0202F8DC
-_08073554: .4byte gUnknown_0808F100
+_08073554: .4byte gSinLut
 _08073558: .4byte gUnknown_0202FDE4
 _0807355C: .4byte gUnknown_0300200C
 _08073560: .4byte gUnknown_03002000

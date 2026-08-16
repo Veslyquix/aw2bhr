@@ -13,19 +13,19 @@ sub_0806B708: @ 0x0806B708
 	bl sub_08012358
 	ldr r0, _0806B7EC @ =gUnknown_0849D16C
 	bl sub_08012C58
-	ldr r5, _0806B7F0 @ =gUnknown_030030CC
+	ldr r5, _0806B7F0 @ =gDispIo
 	ldrb r0, [r5]
 	movs r1, #0x40
 	orrs r0, r1
 	strb r0, [r5]
-	ldr r0, _0806B7F4 @ =gUnknown_030020C0
+	ldr r0, _0806B7F4 @ =gPal
 	movs r6, #0
 	strh r6, [r0, #2]
 	ldr r0, _0806B7F8 @ =gUnknown_0822DE80
 	movs r1, #0x80
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806B7FC @ =0x11111111
 	str r0, [sp]
 	ldr r4, _0806B800 @ =gUnknown_03001FE8
@@ -47,7 +47,7 @@ sub_0806B708: @ 0x0806B708
 	bl sub_08072C28
 	ldr r0, _0806B810 @ =gUnknown_081918A4
 	ldr r1, _0806B814 @ =0x06016000
-	bl sub_08011CAC
+	bl Decompress
 	ldrb r1, [r5, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -108,8 +108,8 @@ sub_0806B708: @ 0x0806B708
 	bx r0
 	.align 2, 0
 _0806B7EC: .4byte gUnknown_0849D16C
-_0806B7F0: .4byte gUnknown_030030CC
-_0806B7F4: .4byte gUnknown_030020C0
+_0806B7F0: .4byte gDispIo
+_0806B7F4: .4byte gPal
 _0806B7F8: .4byte gUnknown_0822DE80
 _0806B7FC: .4byte 0x11111111
 _0806B800: .4byte gUnknown_03001FE8

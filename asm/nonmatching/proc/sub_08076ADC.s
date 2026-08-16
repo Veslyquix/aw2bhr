@@ -9,7 +9,7 @@ sub_08076ADC: @ 0x08076ADC
 	ldr r0, _08076B14 @ =gUnknown_081D0BAC
 	ldr r4, _08076B18 @ =gUnknown_08614280
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08076858
 	bl sub_0807681C
 	ldr r0, [r4]

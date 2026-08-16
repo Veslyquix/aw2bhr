@@ -66,7 +66,7 @@ _08063D3C:
 _08063D4A:
 	lsrs r0, r0, #0x10
 	str r0, [sp, #8]
-	ldr r4, _08063DD8 @ =gUnknown_0808F100
+	ldr r4, _08063DD8 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r1, #0
@@ -117,7 +117,7 @@ _08063DA0:
 	ldr r1, [sp, #0xc]
 	adds r2, r5, #0
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	mov r0, r8
 	mov r1, sb
 	ldr r2, [sp, #4]
@@ -134,5 +134,5 @@ _08063DC4:
 	bx r0
 	.align 2, 0
 _08063DD4: .4byte gUnknown_0858085C
-_08063DD8: .4byte gUnknown_0808F100
+_08063DD8: .4byte gSinLut
 

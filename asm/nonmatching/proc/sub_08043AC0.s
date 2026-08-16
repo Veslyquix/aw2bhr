@@ -23,7 +23,7 @@ sub_08043AC0: @ 0x08043AC0
 	lsrs r5, r5, #0x10
 	adds r1, r5, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4, r5, r6}
 	pop {r0}
 	bx r0

@@ -67,7 +67,7 @@ _0808734A:
 	movs r1, #0x58
 	adds r2, r5, #0
 	mov r3, sb
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #8
 	adds r4, #1
 	cmp r4, #0xd
@@ -103,7 +103,7 @@ _0808738A:
 	movs r1, #0x58
 	mov r4, sl
 	ldr r3, [r4]
-	bl sub_0801BEBC
+	bl PutSprite
 _080873A0:
 	adds r4, r5, #0
 	cmp r4, r6
@@ -138,7 +138,7 @@ _080873D2:
 	movs r1, #0x58
 	mov r4, sl
 	ldr r3, [r4]
-	bl sub_0801BEBC
+	bl PutSprite
 _080873E8:
 	adds r4, r5, #0
 	cmp r4, r6
@@ -203,7 +203,7 @@ _0808745E:
 	movs r1, #0x48
 	adds r2, r5, #0
 	mov r3, sb
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #8
 	adds r4, #1
 	cmp r4, #9
@@ -239,7 +239,7 @@ _0808749E:
 	movs r1, #0x48
 	mov r4, sl
 	ldr r3, [r4]
-	bl sub_0801BEBC
+	bl PutSprite
 _080874B4:
 	adds r4, r5, #0
 	cmp r4, r6
@@ -273,7 +273,7 @@ _080874E4:
 	movs r1, #0x48
 	mov r4, sl
 	ldr r3, [r4]
-	bl sub_0801BEBC
+	bl PutSprite
 _080874FA:
 	adds r4, r5, #0
 	cmp r4, r6

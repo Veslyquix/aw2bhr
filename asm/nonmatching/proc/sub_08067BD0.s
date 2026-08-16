@@ -24,14 +24,14 @@ sub_08067BD0: @ 0x08067BD0
 	ldr r0, _08067C5C @ =gUnknown_08183780
 	movs r1, #0xa0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08067C60 @ =gUnknown_08581044
 	lsls r4, r4, #2
 	adds r4, r4, r0
 	ldr r0, [r4]
 	movs r1, #0xc0
 	lsls r1, r1, #0x13
-	bl sub_08011CAC
+	bl Decompress
 	ldr r2, _08067C64 @ =gUnknown_030030E0
 	ldrb r1, [r2]
 	movs r0, #0x3f

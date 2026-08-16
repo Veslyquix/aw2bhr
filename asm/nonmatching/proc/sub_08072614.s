@@ -34,7 +34,7 @@ _08072642:
 	subs r2, r2, r5
 	lsls r2, r2, #0x11
 	lsrs r2, r2, #0x10
-	bl sub_08013618
+	bl ApplyPaletteExt
 	cmp r5, #0
 	ble _08072672
 	ldr r0, [r4, #0x2c]
@@ -47,7 +47,7 @@ _08072642:
 	lsrs r1, r1, #0x10
 	lsls r2, r5, #0x11
 	lsrs r2, r2, #0x10
-	bl sub_08013618
+	bl ApplyPaletteExt
 _08072672:
 	ldrh r0, [r4, #0x38]
 	adds r0, #1

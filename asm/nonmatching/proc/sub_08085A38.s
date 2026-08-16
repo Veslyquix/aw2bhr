@@ -19,7 +19,7 @@ sub_08085A38: @ 0x08085A38
 	str r0, [sp]
 	movs r0, #1
 	movs r1, #0x38
-	bl sub_08074234
+	bl Interpolate
 	ldr r1, _08085A88 @ =0x000001FF
 	ands r1, r0
 	movs r5, #0

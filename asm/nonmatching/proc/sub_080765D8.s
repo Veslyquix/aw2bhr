@@ -12,7 +12,7 @@ sub_080765D8: @ 0x080765D8
 	movs r5, #0
 	str r5, [sp]
 	movs r0, #1
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r1, [r4, #0x2c]
 	ldr r0, [r4, #0x60]
 	adds r1, r1, r0
@@ -21,7 +21,7 @@ sub_080765D8: @ 0x080765D8
 	ldr r3, _08076628 @ =gUnknown_086144D4
 	str r5, [sp]
 	movs r0, #1
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	bl sub_080763C0
 	adds r0, r4, #0
 	adds r0, #0x64

@@ -2,8 +2,8 @@
 	.syntax unified
     
 
-	thumb_func_start sub_08011CAC
-sub_08011CAC: @ 0x08011CAC
+	thumb_func_start Decompress
+Decompress: @ 0x08011CAC
 	push {r4, r5, lr}
 	adds r3, r0, #0
 	adds r4, r1, #0

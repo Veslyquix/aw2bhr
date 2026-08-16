@@ -42,7 +42,7 @@ sub_080039E4: @ 0x080039E4
 	strh r0, [r1]
 	ldr r0, _08003A68 @ =gUnknown_03002B28
 	strh r2, [r0]
-	ldr r3, _08003A6C @ =gUnknown_030030CC
+	ldr r3, _08003A6C @ =gDispIo
 	ldrb r1, [r3, #1]
 	movs r0, #0x21
 	rsbs r0, r0, #0
@@ -67,7 +67,7 @@ _08003A5C: .4byte gUnknown_030030E0
 _08003A60: .4byte gUnknown_03001FFC
 _08003A64: .4byte gUnknown_03002020
 _08003A68: .4byte gUnknown_03002B28
-_08003A6C: .4byte gUnknown_030030CC
+_08003A6C: .4byte gDispIo
 _08003A70: .4byte gUnknown_03002B40
 _08003A74: .4byte gUnknown_03002B4C
 _08003A78: .4byte gUnknown_03002EFC

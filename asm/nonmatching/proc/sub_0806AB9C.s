@@ -47,7 +47,7 @@ _0806ABCE:
 	movs r0, #0
 	asrs r2, r2, #0x10
 	ldr r3, _0806ACF0 @ =gUnknown_08581730
-	bl sub_0801BEFC
+	bl PutSpriteExt
 _0806ABF6:
 	adds r4, #1
 	ldr r0, [r6, #0x48]
@@ -70,7 +70,7 @@ _0806ABFE:
 	movs r0, #0
 	str r0, [sp]
 	movs r1, #0x3a
-	bl sub_0801BEBC
+	bl PutSprite
 _0806AC22:
 	movs r1, #0x6a
 	movs r4, #0
@@ -112,7 +112,7 @@ _0806AC3E:
 	str r0, [sp]
 	movs r0, #0
 	ldr r3, _0806ACFC @ =gUnknown_08581752
-	bl sub_0801BEFC
+	bl PutSpriteExt
 _0806AC74:
 	movs r1, #0x80
 	lsls r1, r1, #0xd
@@ -152,7 +152,7 @@ _0806AC74:
 	str r1, [sp]
 	movs r0, #0
 	movs r1, #0x58
-	bl sub_0801BEBC
+	bl PutSprite
 _0806ACC4:
 	ldr r1, [sp, #4]
 	ldrh r0, [r1]

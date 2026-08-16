@@ -23,23 +23,23 @@ sub_0808A6CC: @ 0x0808A6CC
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0808A7EC @ =gUnknown_0822F9AC
 	ldr r1, _0808A7F0 @ =gUnknown_08499584
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B1C
 	ldr r0, _0808A7F4 @ =gUnknown_0822FE50
 	movs r1, #0x20
 	movs r2, #0xa0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0808A7F8 @ =gUnknown_086170D4
 	ldr r1, [sp]
 	bl Proc_Start
 	ldr r0, _0808A7FC @ =gUnknown_0823FFBC
 	ldr r4, _0808A800 @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r5, #0
 	adds r6, r4, #0
 	ldr r4, _0808A804 @ =0x000003FF
@@ -108,7 +108,7 @@ _0808A75E:
 	movs r1, #0x80
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0808A818 @ =gUnknown_0861707C
 	ldr r1, [sp]
 	bl Proc_Start
@@ -118,7 +118,7 @@ _0808A75E:
 	movs r1, #0x80
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013AEC
 	add sp, #4
 	pop {r3, r4, r5}

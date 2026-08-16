@@ -18,7 +18,7 @@ sub_0806AADC: @ 0x0806AADC
 	lsls r1, r1, #0x15
 	lsrs r1, r1, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r4, #0x4c]
 	lsls r0, r0, #4
 	adds r0, r0, r5
@@ -28,7 +28,7 @@ sub_0806AADC: @ 0x0806AADC
 	lsls r1, r1, #5
 	ldr r2, _0806AB20 @ =0x06011200
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	pop {r4, r5}
 	pop {r0}
 	bx r0

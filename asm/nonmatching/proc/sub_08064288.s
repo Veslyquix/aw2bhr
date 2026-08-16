@@ -126,7 +126,7 @@ _0806429C:
 	adds r0, r1, #0
 	mov r1, r8
 	adds r2, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	subs r6, #0x20
 	ldr r0, [sp, #0x14]
 	adds r6, r0, r6

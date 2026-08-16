@@ -19,7 +19,7 @@ sub_080603D4: @ 0x080603D4
 	ldr r0, [r1]
 	cmp r0, #0x1e
 	bgt _08060404
-	ldr r0, _0806041C @ =gUnknown_03002EE0
+	ldr r0, _0806041C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0]
 	movs r0, #1
@@ -37,6 +37,6 @@ _0806040A:
 _08060410: .4byte gUnknown_030033E4
 _08060414: .4byte gUnknown_030046C0
 _08060418: .4byte gUnknown_030046D4
-_0806041C: .4byte gUnknown_03002EE0
+_0806041C: .4byte gpKeySt
 _08060420: .4byte gUnknown_030045D4
 

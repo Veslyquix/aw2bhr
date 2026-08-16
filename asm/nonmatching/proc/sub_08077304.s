@@ -90,11 +90,11 @@ _080773B4:
 	lsls r1, r1, #0xe
 	ldr r2, _0807754C @ =0x060008C0
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08077550 @ =gUnknown_081D208C
 	movs r1, #0x20
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	mov r0, r8
 	ldr r1, [r0, #0xc]
 	lsls r0, r1, #1
@@ -147,12 +147,12 @@ _0807742A:
 _08077432:
 	ldr r0, _08077560 @ =gUnknown_081D35A8
 	ldr r1, _08077564 @ =0x06012000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08077568 @ =gUnknown_081D2264
 	movs r1, #0xa8
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0807756C @ =gUnknown_081D20EC
 	ldr r3, _08077570 @ =gUnknown_03002B6C
 	ldr r1, [r3]
@@ -161,7 +161,7 @@ _08077432:
 	lsls r1, r1, #0xe
 	ldr r2, _08077574 @ =0x06000520
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	movs r4, #0
 	str r4, [sp]
 	ldr r0, _08077578 @ =gUnknown_08551A00

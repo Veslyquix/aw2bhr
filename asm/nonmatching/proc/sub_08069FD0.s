@@ -14,21 +14,21 @@ sub_08069FD0: @ 0x08069FD0
 	bl CpuFastSet
 	ldr r0, _0806A030 @ =gUnknown_08184FF4
 	ldr r1, _0806A034 @ =0x06008000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806A038 @ =gUnknown_08185F0C
 	ldr r1, _0806A03C @ =0x0600C000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806A040 @ =gUnknown_081866D8
 	movs r1, #0xc0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806A044 @ =gUnknown_0818633C
 	ldr r1, _0806A048 @ =gUnknown_08499580
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806A04C @ =gUnknown_08186460
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013B0C
 	ldr r0, [r4]
 	ldr r1, _0806A050 @ =0x0600F000

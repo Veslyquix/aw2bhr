@@ -57,26 +57,26 @@ _08049A4E:
 	movs r1, #0
 	movs r2, #0x1c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	str r4, [sp]
 	movs r0, #1
 	movs r1, #0x20
 	movs r2, #0x1c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	str r4, [sp]
 	movs r0, #1
 	movs r1, #0x40
 	movs r2, #0x1c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, _08049B08 @ =0x00008CA3
 	str r0, [sp]
 	movs r0, #1
 	movs r1, #0x60
 	movs r2, #0x1c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r5, _08049B0C @ =gUnknown_0848B6BE
 	adds r4, #4
 	str r4, [sp]
@@ -84,26 +84,26 @@ _08049A4E:
 	movs r1, #0
 	movs r2, #0x2c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	str r4, [sp]
 	movs r0, #1
 	movs r1, #0x20
 	movs r2, #0x2c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	str r4, [sp]
 	movs r0, #1
 	movs r1, #0x40
 	movs r2, #0x2c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r0, _08049B10 @ =0x00008CA7
 	str r0, [sp]
 	movs r0, #1
 	movs r1, #0x60
 	movs r2, #0x2c
 	adds r3, r5, #0
-	bl sub_0801BEBC
+	bl PutSprite
 	add sp, #4
 	pop {r4, r5}
 	pop {r0}

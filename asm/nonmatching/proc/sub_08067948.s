@@ -24,7 +24,7 @@ _08067962:
 	str r0, [sp]
 	movs r0, #1
 _0806796E:
-	bl sub_08074234
+	bl Interpolate
 	adds r5, r0, #0
 	ldr r1, [r4, #0x40]
 	ldr r2, [r4, #0x44]
@@ -32,7 +32,7 @@ _0806796E:
 	ldr r0, [r4, #0x48]
 	str r0, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	ldr r2, [r4, #0x30]
 	lsls r1, r2, #8
 	str r1, [sp, #4]

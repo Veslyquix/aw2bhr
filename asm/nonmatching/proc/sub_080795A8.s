@@ -28,7 +28,7 @@ _080795C0:
 	mov r3, r8
 	subs r2, r3, r4
 	ldr r3, _0807960C @ =gUnknown_0848B6A0
-	bl sub_0801BEBC
+	bl PutSprite
 _080795DC:
 	adds r7, #0x40
 	adds r6, #0x40
@@ -44,7 +44,7 @@ _080795DC:
 	str r0, [sp]
 	movs r0, #0
 	movs r1, #0x32
-	bl sub_0801BEBC
+	bl PutSprite
 _080795FC:
 	add sp, #4
 	pop {r3}

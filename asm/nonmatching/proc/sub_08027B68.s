@@ -21,7 +21,7 @@ sub_08027B68: @ 0x08027B68
 	ldrh r0, [r6]
 	subs r0, #2
 	strh r0, [r6]
-	ldr r5, _08027C80 @ =gUnknown_0808F100
+	ldr r5, _08027C80 @ =gSinLut
 	movs r1, #0xff
 	mov r8, r1
 	ands r0, r1
@@ -100,7 +100,7 @@ _08027C10:
 	mov r1, sl
 	mov r2, sb
 	adds r3, r7, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r1, [r4, #0x2c]
 	ldr r0, _08027C84 @ =0x000001FF
 	ands r1, r0
@@ -120,7 +120,7 @@ _08027C10:
 	ldrh r0, [r0]
 	str r0, [sp]
 	movs r0, #0
-	bl sub_0801BEFC
+	bl PutSpriteExt
 	movs r1, #0
 	ldrsh r0, [r6, r1]
 	cmp r0, #0
@@ -141,7 +141,7 @@ _08027C6E:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08027C80: .4byte gUnknown_0808F100
+_08027C80: .4byte gSinLut
 _08027C84: .4byte 0x000001FF
 _08027C88: .4byte gUnknown_08499E10
 

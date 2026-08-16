@@ -41,7 +41,7 @@ _0807BFC2:
 	movs r2, #0xcc
 	lsls r2, r2, #2
 	ldr r3, _0807C030 @ =gUnknown_0848B6E6
-	bl sub_0801BEFC
+	bl PutSpriteExt
 _0807C006:
 	adds r3, r5, #0
 	adds r0, r4, #0

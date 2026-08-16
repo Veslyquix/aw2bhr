@@ -6,7 +6,7 @@ sub_080675A0: @ 0x080675A0
 	push {r4, lr}
 	adds r4, r0, #0
 	ldr r1, _08067610 @ =0x000001FF
-	ldr r0, _08067614 @ =gUnknown_030020C0
+	ldr r0, _08067614 @ =gPal
 	ldr r2, _08067618 @ =0x00007FFF
 	ldr r3, _0806761C @ =0x000003FE
 	adds r0, r0, r3
@@ -19,7 +19,7 @@ _080675AE:
 	bl sub_080135A4
 	bl sub_08012358
 	bl sub_0801237C
-	ldr r2, _08067620 @ =gUnknown_030030CC
+	ldr r2, _08067620 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -55,9 +55,9 @@ _08067602:
 	bx r0
 	.align 2, 0
 _08067610: .4byte 0x000001FF
-_08067614: .4byte gUnknown_030020C0
+_08067614: .4byte gPal
 _08067618: .4byte 0x00007FFF
 _0806761C: .4byte 0x000003FE
-_08067620: .4byte gUnknown_030030CC
+_08067620: .4byte gDispIo
 _08067624: .4byte gUnknown_08581500
 

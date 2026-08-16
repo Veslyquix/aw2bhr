@@ -20,12 +20,12 @@ sub_0803F140: @ 0x0803F140
 	ldrsh r0, [r5, r1]
 	bl sub_0803F110
 	ldr r1, _0803F1C8 @ =0x06013940
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0803F1CC @ =gUnknown_08109564
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x40
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r7, #0
 	ldrsh r0, [r5, r7]
 	bl sub_0803F128

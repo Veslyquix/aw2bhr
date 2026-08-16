@@ -15,25 +15,25 @@ sub_080697CC: @ 0x080697CC
 	ldr r0, _0806983C @ =gUnknown_08184FF4
 	movs r1, #0xc0
 	lsls r1, r1, #0x13
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08069840 @ =gUnknown_08185F0C
 	ldr r1, _08069844 @ =0x0600C000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08069848 @ =gUnknown_081866D8
 	movs r1, #0xc0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806984C @ =gUnknown_0818616C
 	ldr r1, _08069850 @ =gUnknown_0849957C
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08069854 @ =gUnknown_0818633C
 	ldr r1, _08069858 @ =gUnknown_08499580
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806985C @ =gUnknown_08186460
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013AFC
 	bl sub_08013B0C
 	ldr r0, [r4]

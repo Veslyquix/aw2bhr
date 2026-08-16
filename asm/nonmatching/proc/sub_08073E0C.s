@@ -13,7 +13,7 @@ sub_08073E0C: @ 0x08073E0C
 	ldr r4, [r3]
 	ldr r0, _08073EFC @ =gUnknown_0202F8DC
 	str r0, [r4]
-	ldr r2, _08073F00 @ =gUnknown_030030CC
+	ldr r2, _08073F00 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #0x40
 	orrs r0, r1
@@ -130,7 +130,7 @@ _08073ED4:
 	.align 2, 0
 _08073EF8: .4byte gUnknown_081CC034
 _08073EFC: .4byte gUnknown_0202F8DC
-_08073F00: .4byte gUnknown_030030CC
+_08073F00: .4byte gDispIo
 _08073F04: .4byte gUnknown_03002B68
 _08073F08: .4byte gUnknown_03002B30
 _08073F0C: .4byte gUnknown_030024E4

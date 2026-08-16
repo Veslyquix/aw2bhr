@@ -7,7 +7,7 @@ sub_08032D70: @ 0x08032D70
 	adds r4, r0, #0
 	ldr r0, _08032D94 @ =gUnknown_081D3C34
 	ldr r1, _08032D98 @ =0x06015780
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08032D9C @ =gUnknown_0849B6B0
 	bl Proc_Find
 	movs r1, #1

@@ -28,7 +28,7 @@ sub_08075248: @ 0x08075248
 	ldrh r0, [r0]
 	str r0, [sp]
 	movs r0, #1
-	bl sub_0801BEBC
+	bl PutSprite
 	ldrh r0, [r5, #0x3a]
 	adds r0, #1
 	strh r0, [r5, #0x3a]

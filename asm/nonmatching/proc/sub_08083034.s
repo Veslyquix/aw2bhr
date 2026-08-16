@@ -43,7 +43,7 @@ _0808305C:
 	str r0, [sp]
 	movs r0, #4
 	mov r3, sb
-	bl sub_08074234
+	bl Interpolate
 	mov r1, r8
 	str r0, [r1, #0x2c]
 	ldr r2, [sp, #4]
@@ -64,7 +64,7 @@ _0808305C:
 	str r3, [sp]
 	movs r0, #4
 	mov r3, sb
-	bl sub_08074234
+	bl Interpolate
 	mov r1, r8
 	str r0, [r1, #0x30]
 	mov r2, sl
@@ -104,7 +104,7 @@ _0808305C:
 	str r3, [sp]
 	movs r0, #2
 	ldr r3, _08083120 @ =gUnknown_08615C84
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r7, r6, #0
 	cmp r7, #4
 	ble _0808305C
@@ -140,7 +140,7 @@ _0808312E:
 	str r0, [sp]
 	movs r0, #4
 	mov r3, sb
-	bl sub_08074234
+	bl Interpolate
 	mov r1, r8
 	str r0, [r1, #0x2c]
 	movs r2, #0
@@ -159,7 +159,7 @@ _0808312E:
 	str r0, [sp]
 	movs r0, #4
 	mov r3, sb
-	bl sub_08074234
+	bl Interpolate
 	mov r1, r8
 	str r0, [r1, #0x30]
 	mov r2, sl
@@ -198,7 +198,7 @@ _0808312E:
 	str r3, [sp]
 	movs r0, #2
 	ldr r3, _080831F8 @ =gUnknown_08615C84
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r7, r5, #0
 	cmp r7, #5
 	ble _0808312E

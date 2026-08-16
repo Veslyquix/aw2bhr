@@ -97,7 +97,7 @@ _080410EA:
 	lsls r1, r1, #0x15
 	lsrs r1, r1, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4, r5, r6, r7}
 	pop {r0}
 	bx r0

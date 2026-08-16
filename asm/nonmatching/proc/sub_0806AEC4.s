@@ -13,25 +13,25 @@ sub_0806AEC4: @ 0x0806AEC4
 	ldr r0, [r0]
 	movs r1, #0xc0
 	lsls r1, r1, #0x13
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r6, #4
 	adds r0, r5, r0
 	ldr r0, [r0]
 	ldr r1, _0806AF20 @ =0x06001B00
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r6, #0
 	adds r0, #8
 	adds r0, r5, r0
 	ldr r0, [r0]
 	ldr r1, _0806AF24 @ =0x06003600
-	bl sub_08011CAC
+	bl Decompress
 	adds r0, r6, #0
 	adds r0, #0xc
 	adds r0, r5, r0
 	ldr r0, [r0]
 	ldr r1, _0806AF28 @ =gUnknown_08499578
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	cmp r4, #7
 	bne _0806AF2C
 	adds r0, r6, #0
@@ -39,7 +39,7 @@ sub_0806AEC4: @ 0x0806AEC4
 	ldr r0, [r0]
 	movs r1, #0
 	movs r2, #0xe0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	b _0806AF3C
 	.align 2, 0
 _0806AF1C: .4byte gUnknown_0858178C
@@ -53,7 +53,7 @@ _0806AF2C:
 	ldr r0, [r0]
 	movs r1, #0
 	movs r2, #0xc0
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0806AF3C:
 	pop {r4, r5, r6}
 	pop {r0}

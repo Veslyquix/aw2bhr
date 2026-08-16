@@ -5,7 +5,7 @@
 sub_0808A844: @ 0x0808A844
 	push {r4, lr}
 	adds r4, r0, #0
-	ldr r0, _0808A87C @ =gUnknown_03002EE0
+	ldr r0, _0808A87C @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #1
@@ -27,6 +27,6 @@ _0808A876:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0808A87C: .4byte gUnknown_03002EE0
+_0808A87C: .4byte gpKeySt
 _0808A880: .4byte gUnknown_084A0D58
 

@@ -41,7 +41,7 @@ sub_08084700: @ 0x08084700
 	adds r0, r0, r2
 	ldr r1, _080847F0 @ =0x0000030A
 	movs r2, #0x10
-	bl sub_08013618
+	bl ApplyPaletteExt
 _08084754:
 	ldrh r0, [r4]
 	adds r0, #2
@@ -61,7 +61,7 @@ _08084754:
 	adds r0, r0, r1
 	ldr r1, _080847F4 @ =0x0000031E
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0x20
 	bl sub_0803CBD8
 	cmp r0, #0
@@ -76,7 +76,7 @@ _08084754:
 	adds r0, r0, r1
 	ldr r1, _080847FC @ =0x000003BE
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 _080847A6:
 	movs r4, #0
 	adds r5, #0x4a
@@ -97,7 +97,7 @@ _080847AE:
 	adds r0, r0, r7
 	lsrs r1, r6, #0x10
 	movs r2, #0x10
-	bl sub_08013618
+	bl ApplyPaletteExt
 _080847D0:
 	movs r0, #0x80
 	lsls r0, r0, #0xe

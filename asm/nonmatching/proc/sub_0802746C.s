@@ -10,7 +10,7 @@ sub_0802746C: @ 0x0802746C
 	push {r5, r6, r7}
 	sub sp, #4
 	adds r7, r0, #0
-	ldr r4, _08027548 @ =gUnknown_0808F100
+	ldr r4, _08027548 @ =gSinLut
 	adds r0, r4, #0
 	adds r0, #0x80
 	movs r1, #0
@@ -77,7 +77,7 @@ _080274EC:
 	mov r1, sl
 	mov r2, r8
 	adds r3, r5, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r0, [r7, #0x50]
 	ldr r1, [r7, #0x2c]
 	ldr r2, _0802754C @ =0x000001FF
@@ -113,7 +113,7 @@ _08027536:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08027548: .4byte gUnknown_0808F100
+_08027548: .4byte gSinLut
 _0802754C: .4byte 0x000001FF
 _08027550: .4byte 0xFFFFFF00
 

@@ -15,7 +15,7 @@ sub_0806AE40: @ 0x0806AE40
 	adds r0, r0, r1
 	ldr r0, [r0]
 	ldr r1, [r5, #0x34]
-	bl sub_08011CAC
+	bl Decompress
 	ldr r1, [r5, #0x2c]
 	cmp r1, #7
 	bne _0806AE7C
@@ -27,7 +27,7 @@ sub_0806AE40: @ 0x0806AE40
 	ldrb r1, [r4]
 	lsls r1, r1, #5
 	movs r2, #0xe0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	b _0806AE98
 	.align 2, 0
 _0806AE78: .4byte gUnknown_0858178C
@@ -44,7 +44,7 @@ _0806AE7C:
 	ldrb r1, [r4]
 	lsls r1, r1, #5
 	movs r2, #0xc0
-	bl sub_08013618
+	bl ApplyPaletteExt
 _0806AE98:
 	adds r3, r5, #0
 	adds r3, #0x39

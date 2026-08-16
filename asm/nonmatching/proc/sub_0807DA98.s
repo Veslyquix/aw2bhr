@@ -457,7 +457,7 @@ _0807DE1A:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	ldr r2, [sp, #8]
 	movs r0, #0
@@ -466,7 +466,7 @@ _0807DE1A:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	ldr r1, [sp, #4]
@@ -479,7 +479,7 @@ _0807DE1A:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	ldr r0, [sp, #8]
 	movs r2, #0
@@ -487,7 +487,7 @@ _0807DE1A:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	movs r6, #0
@@ -505,7 +505,7 @@ _0807DE1A:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	ldr r1, [sp, #4]
@@ -530,7 +530,7 @@ _0807DED0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	ldr r1, [sp, #4]
@@ -543,7 +543,7 @@ _0807DED0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	movs r3, #0
@@ -561,7 +561,7 @@ _0807DED0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	ldr r2, [sp, #8]
 	movs r0, #0
@@ -570,7 +570,7 @@ _0807DED0:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	ldr r1, [sp, #4]
@@ -583,7 +583,7 @@ _0807DED0:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	ldr r0, [sp, #8]
 	movs r2, #0
@@ -591,7 +591,7 @@ _0807DED0:
 	str r6, [sp]
 	movs r0, #4
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0x2c
 	subs r2, r2, r0
 	mov r3, r8
@@ -805,7 +805,7 @@ _0807E118:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	ldr r2, [sp, #4]
@@ -818,7 +818,7 @@ _0807E118:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	movs r6, #0
@@ -836,7 +836,7 @@ _0807E118:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	ldr r2, [sp, #4]
@@ -850,7 +850,7 @@ _0807E188:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0x2c
 	subs r2, r2, r0
 	str r6, [sp]
@@ -991,7 +991,7 @@ _0807E2AE:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	movs r4, #0x18
 	subs r4, r4, r0
 	ldr r2, [sp, #4]
@@ -1003,7 +1003,7 @@ _0807E2AE:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	adds r2, r0, #0
 	adds r2, #0x3c
 	movs r6, #0
@@ -1021,7 +1021,7 @@ _0807E2AE:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #8
-	bl sub_08074234
+	bl Interpolate
 	adds r4, r0, #0
 	adds r4, #0x58
 	ldr r1, [sp, #4]
@@ -1033,7 +1033,7 @@ _0807E2AE:
 	movs r0, #4
 	movs r1, #0
 	movs r2, #4
-	bl sub_08074234
+	bl Interpolate
 	movs r2, #0x2c
 	subs r2, r2, r0
 	str r6, [sp]
@@ -1112,7 +1112,7 @@ _0807E3BE:
 	movs r0, #1
 	movs r1, #0x20
 	movs r2, #0x1c
-	bl sub_0801BEBC
+	bl PutSprite
 	str r4, [sp]
 	movs r0, #0x67
 	movs r1, #0xb9
@@ -1195,7 +1195,7 @@ _0807E450:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E4C4
 	ldr r1, [sp, #8]
@@ -1205,7 +1205,7 @@ _0807E450:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E4C6
 	.align 2, 0
@@ -1230,7 +1230,7 @@ _0807E4C6:
 	lsls r0, r0, #0x10
 	asrs r0, r0, #0x10
 	mov sl, r0
-	ldr r0, _0807E51C @ =gUnknown_0808F100
+	ldr r0, _0807E51C @ =gSinLut
 	movs r3, #0
 	ldrsh r4, [r0, r3]
 	rsbs r0, r4, #0
@@ -1251,7 +1251,7 @@ _0807E4C6:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r5, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E520
 	ldr r2, [sp, #8]
@@ -1261,11 +1261,11 @@ _0807E4C6:
 	movs r0, #0
 	movs r1, #0x10
 	adds r2, r5, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E522
 	.align 2, 0
-_0807E51C: .4byte gUnknown_0808F100
+_0807E51C: .4byte gSinLut
 _0807E520:
 	movs r1, #2
 _0807E522:
@@ -1274,7 +1274,7 @@ _0807E522:
 	adds r4, r0, #0
 	lsls r4, r4, #0x10
 	asrs r4, r4, #0x10
-	ldr r0, _0807E578 @ =gUnknown_0808F100
+	ldr r0, _0807E578 @ =gSinLut
 	adds r0, #0x80
 	movs r1, #0
 	ldrsh r0, [r0, r1]
@@ -1290,7 +1290,7 @@ _0807E522:
 	mov r1, sl
 	mov r2, r8
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	lsls r1, r6, #4
 	adds r1, #0x68
 	orrs r1, r5
@@ -1308,7 +1308,7 @@ _0807E522:
 	bl sub_08043B60
 	b _0807E59A
 	.align 2, 0
-_0807E578: .4byte gUnknown_0808F100
+_0807E578: .4byte gSinLut
 _0807E57C:
 	lsls r1, r6, #4
 	adds r1, #0x68
@@ -1376,7 +1376,7 @@ _0807E5D8:
 	movs r0, #0
 	adds r1, r6, #0
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E620
 	ldr r1, [sp, #8]
@@ -1386,7 +1386,7 @@ _0807E5D8:
 	movs r0, #0
 	adds r1, r6, #0
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E622
 	.align 2, 0
@@ -1400,7 +1400,7 @@ _0807E622:
 	lsls r0, r0, #0x10
 	asrs r0, r0, #0x10
 	mov sl, r0
-	ldr r0, _0807E678 @ =gUnknown_0808F100
+	ldr r0, _0807E678 @ =gSinLut
 	movs r3, #0
 	ldrsh r4, [r0, r3]
 	rsbs r0, r4, #0
@@ -1421,7 +1421,7 @@ _0807E622:
 	movs r0, #0
 	adds r1, r5, #0
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E67C
 	ldr r2, [sp, #8]
@@ -1431,11 +1431,11 @@ _0807E622:
 	movs r0, #0
 	adds r1, r5, #0
 	movs r2, #0x10
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E67E
 	.align 2, 0
-_0807E678: .4byte gUnknown_0808F100
+_0807E678: .4byte gSinLut
 _0807E67C:
 	movs r1, #2
 _0807E67E:
@@ -1444,7 +1444,7 @@ _0807E67E:
 	adds r4, r0, #0
 	lsls r4, r4, #0x10
 	asrs r4, r4, #0x10
-	ldr r0, _0807E754 @ =gUnknown_0808F100
+	ldr r0, _0807E754 @ =gSinLut
 	adds r0, #0x80
 	movs r1, #0
 	ldrsh r0, [r0, r1]
@@ -1460,7 +1460,7 @@ _0807E67E:
 	mov r1, sl
 	mov r2, r8
 	adds r3, r4, #0
-	bl sub_0801E108
+	bl SetObjAffine
 	lsls r1, r7, #4
 	adds r1, #0x68
 	orrs r1, r5
@@ -1544,7 +1544,7 @@ _0807E72E:
 	bl sub_0801F34C
 	b _0807E78C
 	.align 2, 0
-_0807E754: .4byte gUnknown_0808F100
+_0807E754: .4byte gSinLut
 _0807E758: .4byte gUnknown_030059C0
 _0807E75C: .4byte gUnknown_03005958
 _0807E760: .4byte gUnknown_0300599C
@@ -1611,7 +1611,7 @@ _0807E7B2:
 	movs r0, #1
 	adds r1, r6, #0
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E800
 	ldr r1, [sp, #8]
@@ -1621,7 +1621,7 @@ _0807E7B2:
 	movs r0, #1
 	adds r1, r6, #0
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E802
 	.align 2, 0
@@ -1635,7 +1635,7 @@ _0807E802:
 	lsls r0, r0, #0x10
 	asrs r0, r0, #0x10
 	mov sl, r0
-	ldr r0, _0807E850 @ =gUnknown_0808F100
+	ldr r0, _0807E850 @ =gSinLut
 	movs r3, #0
 	ldrsh r0, [r0, r3]
 	rsbs r0, r0, #0
@@ -1652,7 +1652,7 @@ _0807E802:
 	movs r0, #1
 	adds r1, r5, #0
 	adds r2, r6, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E854
 	ldr r2, [sp, #8]
@@ -1662,11 +1662,11 @@ _0807E802:
 	movs r0, #1
 	adds r1, r5, #0
 	adds r2, r6, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E856
 	.align 2, 0
-_0807E850: .4byte gUnknown_0808F100
+_0807E850: .4byte gSinLut
 _0807E854:
 	movs r1, #2
 _0807E856:
@@ -1675,7 +1675,7 @@ _0807E856:
 	lsls r0, r0, #0x10
 	asrs r0, r0, #0x10
 	mov sb, r0
-	ldr r0, _0807E8A0 @ =gUnknown_0808F100
+	ldr r0, _0807E8A0 @ =gSinLut
 	movs r1, #0
 	ldrsh r0, [r0, r1]
 	lsls r7, r0, #4
@@ -1691,7 +1691,7 @@ _0807E856:
 	movs r0, #1
 	adds r1, r5, #0
 	adds r2, r6, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E8A4
 	ldr r1, [sp, #8]
@@ -1701,11 +1701,11 @@ _0807E856:
 	movs r0, #1
 	adds r1, r5, #0
 	adds r2, r6, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E8A6
 	.align 2, 0
-_0807E8A0: .4byte gUnknown_0808F100
+_0807E8A0: .4byte gSinLut
 _0807E8A4:
 	movs r1, #2
 _0807E8A6:
@@ -1714,7 +1714,7 @@ _0807E8A6:
 	lsls r0, r0, #0x10
 	asrs r0, r0, #0x10
 	mov r8, r0
-	ldr r0, _0807E8F4 @ =gUnknown_0808F100
+	ldr r0, _0807E8F4 @ =gSinLut
 	adds r0, #0x80
 	movs r3, #0
 	ldrsh r0, [r0, r3]
@@ -1731,7 +1731,7 @@ _0807E8A6:
 	movs r0, #1
 	adds r1, r6, #0
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	cmp r0, #0
 	beq _0807E8F8
 	ldr r2, [sp, #8]
@@ -1741,11 +1741,11 @@ _0807E8A6:
 	movs r0, #1
 	adds r1, r6, #0
 	adds r2, r7, #0
-	bl sub_08074234
+	bl Interpolate
 	adds r1, r0, #0
 	b _0807E8FA
 	.align 2, 0
-_0807E8F4: .4byte gUnknown_0808F100
+_0807E8F4: .4byte gSinLut
 _0807E8F8:
 	movs r1, #2
 _0807E8FA:
@@ -1758,7 +1758,7 @@ _0807E8FA:
 	mov r1, sl
 	mov r2, sb
 	mov r3, r8
-	bl sub_0801E108
+	bl SetObjAffine
 	ldr r1, _0807E920 @ =0x0000024A
 	movs r2, #0xd8
 	lsls r2, r2, #2

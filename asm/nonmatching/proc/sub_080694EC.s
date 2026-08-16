@@ -41,7 +41,7 @@ _08069522:
 _0806952C:
 	b _08069682
 _0806952E:
-	ldr r2, _08069554 @ =gUnknown_030030CC
+	ldr r2, _08069554 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -57,10 +57,10 @@ _0806952E:
 	strb r0, [r2, #1]
 	ldr r0, _08069558 @ =gUnknown_081837A0
 	ldr r1, _0806955C @ =0x06008000
-	bl sub_08011CAC
+	bl Decompress
 	b _08069682
 	.align 2, 0
-_08069554: .4byte gUnknown_030030CC
+_08069554: .4byte gDispIo
 _08069558: .4byte gUnknown_081837A0
 _0806955C: .4byte 0x06008000
 _08069560:
@@ -74,7 +74,7 @@ _0806956E:
 	bl sub_08067A24
 	b _08069682
 _08069574:
-	ldr r0, _08069590 @ =gUnknown_030020C0
+	ldr r0, _08069590 @ =gPal
 	ldr r1, _08069594 @ =0x00007FFF
 	adds r0, #2
 	movs r2, #0xe
@@ -88,13 +88,13 @@ _0806957C:
 	bl sub_08067820
 	b _08069682
 	.align 2, 0
-_08069590: .4byte gUnknown_030020C0
+_08069590: .4byte gPal
 _08069594: .4byte 0x00007FFF
 _08069598:
 	ldr r0, _080695D8 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #2
 	movs r1, #0
 	movs r2, #0xc
@@ -123,7 +123,7 @@ _08069598:
 _080695D8: .4byte gUnknown_0823BDE0
 _080695DC: .4byte 0xFFFFC000
 _080695E0:
-	ldr r0, _080695F8 @ =gUnknown_030020C0
+	ldr r0, _080695F8 @ =gPal
 	ldr r1, _080695FC @ =0x00007FFF
 	adds r0, #2
 	movs r2, #0xe
@@ -136,7 +136,7 @@ _080695E8:
 	bl sub_080135A4
 	b _08069682
 	.align 2, 0
-_080695F8: .4byte gUnknown_030020C0
+_080695F8: .4byte gPal
 _080695FC: .4byte 0x00007FFF
 _08069600:
 	ldr r4, _08069648 @ =gUnknown_03002B6C
@@ -148,11 +148,11 @@ _08069600:
 	bl sub_08012C1C
 	ldr r0, _08069650 @ =gUnknown_08183CA8
 	ldr r1, _08069654 @ =0x06004800
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08069658 @ =gUnknown_08184A74
 	ldr r4, _0806965C @ =gUnknown_08499578
 	ldr r1, [r4]
-	bl sub_08011CAC
+	bl Decompress
 	movs r2, #0
 	ldr r6, _08069660 @ =0x000003FF
 	movs r0, #0xa0
@@ -182,7 +182,7 @@ _08069664:
 	ldr r0, _08069690 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	movs r0, #0x32
 	bl sub_08067C7C
 	bl sub_08067A24

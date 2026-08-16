@@ -48,7 +48,7 @@ _080753B4:
 	movs r4, #0x10
 	str r4, [sp]
 	movs r0, #4
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5, #0x2a]
 	movs r0, #0x30
 	ldrsh r1, [r5, r0]
@@ -57,7 +57,7 @@ _080753B4:
 	ldr r3, [r5, #0x3c]
 	str r4, [sp]
 	movs r0, #4
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5, #0x2c]
 	ldrh r1, [r5, #0x2a]
 	ldrh r2, [r5, #0x2c]
@@ -99,7 +99,7 @@ _08075422:
 	movs r4, #8
 	str r4, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5, #0x2a]
 	movs r0, #0x30
 	ldrsh r1, [r5, r0]
@@ -108,7 +108,7 @@ _08075422:
 	ldr r3, [r5, #0x3c]
 	str r4, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r5, #0x2c]
 	ldrh r1, [r5, #0x2a]
 	ldrh r2, [r5, #0x2c]

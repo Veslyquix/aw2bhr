@@ -19,7 +19,7 @@ sub_0803F80C: @ 0x0803F80C
 	lsls r1, r1, #0x15
 	lsrs r1, r1, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	adds r0, r7, #0
 	adds r0, #0xc0
 	adds r1, r4, #0
@@ -27,7 +27,7 @@ sub_0803F80C: @ 0x0803F80C
 	lsls r1, r1, #0x15
 	lsrs r1, r1, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	mov r8, r5
 	adds r4, #0x11
 	movs r6, #0x3c
@@ -43,7 +43,7 @@ _0803F84A:
 	lsls r1, r4, #0x15
 	lsrs r1, r1, #0x10
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	adds r4, #1
 	adds r6, #0x3c
 	subs r5, #1

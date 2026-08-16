@@ -2,8 +2,8 @@
 	.syntax unified
     
 
-	thumb_func_start sub_0801BEBC
-sub_0801BEBC: @ 0x0801BEBC
+	thumb_func_start PutSprite
+PutSprite: @ 0x0801BEBC
 	push {r4, r5, r6, r7, lr}
 	ldr r6, _0801BEF0 @ =gUnknown_03002B24
 	ldr r5, [r6]

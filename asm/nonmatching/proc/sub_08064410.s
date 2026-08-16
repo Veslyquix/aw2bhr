@@ -4,7 +4,7 @@
 	thumb_func_start sub_08064410
 sub_08064410: @ 0x08064410
 	push {r4, r5, lr}
-	ldr r3, _0806446C @ =gUnknown_03002EE0
+	ldr r3, _0806446C @ =gpKeySt
 	ldr r2, [r3]
 	ldrh r1, [r2]
 	movs r0, #0x80
@@ -53,6 +53,6 @@ _08064466:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0806446C: .4byte gUnknown_03002EE0
+_0806446C: .4byte gpKeySt
 _08064470: .4byte gUnknown_03002040
 

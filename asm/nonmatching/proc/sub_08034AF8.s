@@ -131,7 +131,7 @@ _08034C04:
 	ldr r1, _08034C80 @ =gUnknown_08090E14
 	bl sub_08034A58
 _08034C2C:
-	ldr r0, _08034C84 @ =gUnknown_03002EE0
+	ldr r0, _08034C84 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #1
@@ -166,6 +166,6 @@ _08034C74: .4byte gUnknown_08090E04
 _08034C78: .4byte gUnknown_08090D90
 _08034C7C: .4byte gUnknown_03004008
 _08034C80: .4byte gUnknown_08090E14
-_08034C84: .4byte gUnknown_03002EE0
+_08034C84: .4byte gpKeySt
 _08034C88: .4byte gUnknown_030032D8
 

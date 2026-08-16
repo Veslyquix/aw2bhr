@@ -9,7 +9,7 @@ sub_0804A048: @ 0x0804A048
 	bl sub_08012C58
 	bl sub_0801295C
 	bl sub_080128D0
-	ldr r2, _0804A098 @ =gUnknown_030030CC
+	ldr r2, _0804A098 @ =gDispIo
 	ldrb r1, [r2]
 	movs r0, #0x7f
 	ands r0, r1
@@ -29,6 +29,6 @@ sub_0804A048: @ 0x0804A048
 	bx r0
 	.align 2, 0
 _0804A094: .4byte gUnknown_0849D16C
-_0804A098: .4byte gUnknown_030030CC
+_0804A098: .4byte gDispIo
 _0804A09C: .4byte gUnknown_084C3814
 

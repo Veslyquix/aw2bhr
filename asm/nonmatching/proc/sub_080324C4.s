@@ -45,7 +45,7 @@ _0803252A:
 	ldr r0, _08032558 @ =gUnknown_081D8A14
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0803255C @ =gUnknown_081D3EE8
 	ldr r4, _08032560 @ =gUnknown_08090D28
 	ldr r1, [r4]
@@ -56,7 +56,7 @@ _0803252A:
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	b _08032586
 	.align 2, 0
 _08032550: .4byte 0x0000FFD0
@@ -68,7 +68,7 @@ _08032564:
 	ldr r0, _08032620 @ =gUnknown_081D8A34
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08032624 @ =gUnknown_081D6458
 	ldr r4, _08032628 @ =gUnknown_08090D28
 	ldr r1, [r4]
@@ -79,7 +79,7 @@ _08032564:
 	movs r2, #0xc0
 	lsls r2, r2, #0x13
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 _08032586:
 	movs r0, #0
 	str r0, [sp, #0xc]
@@ -146,7 +146,7 @@ _080325C6:
 	bl sub_0802D5CC
 	ldr r0, _08032644 @ =gUnknown_081D2660
 	ldr r1, _08032648 @ =0x06006280
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0803264C @ =gUnknown_08499578
 	ldr r0, [r0]
 	ldr r1, _08032650 @ =0x00000442
@@ -171,7 +171,7 @@ _08032654:
 	ldr r0, _08032680 @ =gUnknown_081320AC
 	movs r1, #0x60
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r4, _08032684 @ =gUnknown_0849B060
 	ldr r0, [r4]
 	ldrh r0, [r0]

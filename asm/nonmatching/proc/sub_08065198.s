@@ -23,7 +23,7 @@ _080651AE:
 	str r0, [sp]
 	movs r0, #1
 	movs r1, #0x34
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r4, #0x2a]
 	adds r0, r4, #0
 	bl sub_08064E5C

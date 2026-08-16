@@ -44,7 +44,7 @@ sub_0807FE90: @ 0x0807FE90
 	ldrb r0, [r3, #1]
 	ands r2, r0
 	strb r2, [r3, #1]
-	ldr r2, _0807FF58 @ =gUnknown_030030CC
+	ldr r2, _0807FF58 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -80,7 +80,7 @@ sub_0807FE90: @ 0x0807FE90
 	movs r1, #0x80
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	bl sub_08013AEC
 	add sp, #4
 	pop {r4}
@@ -93,7 +93,7 @@ _0807FF48: .4byte gUnknown_03002B28
 _0807FF4C: .4byte gUnknown_03001FFC
 _0807FF50: .4byte 0x0000FFE0
 _0807FF54: .4byte 0x0000E0FF
-_0807FF58: .4byte gUnknown_030030CC
+_0807FF58: .4byte gDispIo
 _0807FF5C: .4byte gUnknown_080A29A4
 _0807FF60: .4byte gUnknown_03002B6C
 _0807FF64: .4byte 0x06005600

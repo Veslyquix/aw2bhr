@@ -13,7 +13,7 @@ sub_0806B1A8: @ 0x0806B1A8
 	bl sub_08012358
 	ldr r0, _0806B368 @ =gUnknown_0849D16C
 	bl sub_08012C58
-	ldr r2, _0806B36C @ =gUnknown_030030CC
+	ldr r2, _0806B36C @ =gDispIo
 	ldrb r0, [r2]
 	movs r1, #0x40
 	orrs r0, r1
@@ -67,7 +67,7 @@ sub_0806B1A8: @ 0x0806B1A8
 	bl CpuFastSet
 	movs r5, #1
 	mov sb, r4
-	ldr r0, _0806B388 @ =gUnknown_030020C0
+	ldr r0, _0806B388 @ =gPal
 	movs r7, #0x88
 	lsls r7, r7, #2
 	movs r6, #0x88
@@ -101,7 +101,7 @@ _0806B24E:
 	ble _0806B246
 	ldr r0, _0806B38C @ =gUnknown_081A3DA4
 	ldr r1, _0806B390 @ =0x06005000
-	bl sub_08011CAC
+	bl Decompress
 	movs r5, #0
 	ldr r6, _0806B394 @ =gUnknown_08581984
 	ldr r4, _0806B398 @ =gUnknown_0849957C
@@ -135,30 +135,30 @@ _0806B29E:
 	ldr r0, _0806B3A4 @ =gUnknown_0823BDE0
 	movs r1, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806B3A8 @ =gUnknown_08194280
 	movs r1, #0x80
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806B3AC @ =gUnknown_081320AC
 	movs r1, #0x60
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806B3B0 @ =gUnknown_0823A3D4
 	ldr r1, _0806B3B4 @ =0x06008000
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806B3B8 @ =gUnknown_081933F4
 	ldr r1, _0806B3BC @ =0x0600CC00
-	bl sub_08011CAC
+	bl Decompress
 	ldr r4, _0806B3C0 @ =gUnknown_081942A0
 	ldr r0, _0806B3C4 @ =gUnknown_08499584
 	ldr r1, [r0]
 	adds r0, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806B3C8 @ =gUnknown_08499580
 	ldr r1, [r0]
 	adds r0, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	mov r2, sb
 	ldr r0, [r2]
 	ldr r2, [r0]
@@ -214,14 +214,14 @@ _0806B29E:
 	bx r0
 	.align 2, 0
 _0806B368: .4byte gUnknown_0849D16C
-_0806B36C: .4byte gUnknown_030030CC
+_0806B36C: .4byte gDispIo
 _0806B370: .4byte gUnknown_03002B6C
 _0806B374: .4byte gUnknown_030030B4
 _0806B378: .4byte gUnknown_0300251C
 _0806B37C: .4byte gUnknown_03001FE8
 _0806B380: .4byte gUnknown_0816E170
 _0806B384: .4byte 0x01000200
-_0806B388: .4byte gUnknown_030020C0
+_0806B388: .4byte gPal
 _0806B38C: .4byte gUnknown_081A3DA4
 _0806B390: .4byte 0x06005000
 _0806B394: .4byte gUnknown_08581984

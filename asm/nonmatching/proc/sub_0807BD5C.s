@@ -9,7 +9,7 @@ sub_0807BD5C: @ 0x0807BD5C
 	ldr r0, _0807BDF8 @ =gUnknown_0822DC08
 	ldr r4, _0807BDFC @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0807BE00 @ =0x06010080
 	mov r8, r0
 	movs r0, #0x80
@@ -69,7 +69,7 @@ _0807BDBC:
 	movs r1, #0x80
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r3}
 	mov r8, r3
 	pop {r4, r5, r6, r7}

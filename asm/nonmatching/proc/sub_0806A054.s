@@ -15,7 +15,7 @@ sub_0806A054: @ 0x0806A054
 	str r0, [r5, #0x2c]
 	ldr r0, _0806A130 @ =gUnknown_085814A8
 	bl sub_080670F8
-	ldr r2, _0806A134 @ =gUnknown_030030CC
+	ldr r2, _0806A134 @ =gDispIo
 	ldrb r1, [r2]
 	movs r0, #8
 	rsbs r0, r0, #0
@@ -62,15 +62,15 @@ sub_0806A054: @ 0x0806A054
 	ldr r0, _0806A148 @ =gUnknown_0822FE50
 	movs r1, #0x20
 	movs r2, #0xa0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _0806A14C @ =gUnknown_0822FEF0
 	movs r1, #0xc0
 	lsls r1, r1, #0x13
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _0806A150 @ =gUnknown_0822F9AC
 	ldr r1, _0806A154 @ =gUnknown_0849957C
 	ldr r1, [r1]
-	bl sub_08011CAC
+	bl Decompress
 	bl sub_08013AFC
 	bl sub_08069FD0
 	movs r0, #0
@@ -100,7 +100,7 @@ sub_0806A054: @ 0x0806A054
 	.align 2, 0
 _0806A12C: .4byte gUnknown_0202F204
 _0806A130: .4byte gUnknown_085814A8
-_0806A134: .4byte gUnknown_030030CC
+_0806A134: .4byte gDispIo
 _0806A138: .4byte gUnknown_03002B6C
 _0806A13C: .4byte gUnknown_0300251C
 _0806A140: .4byte gUnknown_030030B4

@@ -23,7 +23,7 @@ _08065ED4:
 	lsrs r1, r0, #0x1f
 	adds r0, r0, r1
 	asrs r0, r0, #1
-	ldr r1, _08065EF0 @ =gUnknown_03002EE0
+	ldr r1, _08065EF0 @ =gpKeySt
 	ldr r1, [r1]
 	ldrh r1, [r1, #2]
 	movs r2, #1
@@ -32,5 +32,5 @@ _08065EEA:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_08065EF0: .4byte gUnknown_03002EE0
+_08065EF0: .4byte gpKeySt
 

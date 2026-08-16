@@ -10,7 +10,7 @@ sub_080763C0: @ 0x080763C0
 	ands r0, r1
 	lsrs r0, r0, #2
 	ldr r2, _080763E8 @ =gUnknown_081D22A4
-	ldr r1, _080763EC @ =gUnknown_030020C0
+	ldr r1, _080763EC @ =gPal
 	lsls r0, r0, #1
 	adds r0, r0, r2
 	ldrh r0, [r0]
@@ -23,6 +23,6 @@ sub_080763C0: @ 0x080763C0
 	.align 2, 0
 _080763E4: .4byte gUnknown_03004008
 _080763E8: .4byte gUnknown_081D22A4
-_080763EC: .4byte gUnknown_030020C0
+_080763EC: .4byte gPal
 _080763F0: .4byte 0x000002AE
 

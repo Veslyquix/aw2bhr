@@ -63,7 +63,7 @@ _080481BC:
 	movs r1, #0x88
 _080481C6:
 	movs r2, #0x28
-	bl sub_0801BEBC
+	bl PutSprite
 	b _080481E8
 	.align 2, 0
 _080481D0: .4byte gUnknown_08615C20
@@ -75,7 +75,7 @@ _080481D8:
 	movs r0, #0
 	movs r1, #0xbb
 	movs r2, #0x28
-	bl sub_0801BEBC
+	bl PutSprite
 _080481E8:
 	adds r4, r5, #0
 	adds r4, #0x20
@@ -136,7 +136,7 @@ _08048218:
 	lsrs r2, r2, #0x10
 	adds r0, r5, #0
 	mov r1, sb
-	bl sub_08013618
+	bl ApplyPaletteExt
 	mov r1, r8
 	ldr r0, [r1]
 	movs r1, #0x40
@@ -166,7 +166,7 @@ _08048218:
 	lsrs r2, r2, #0x10
 	mov r0, sl
 	adds r1, r4, #0
-	bl sub_08013618
+	bl ApplyPaletteExt
 	add sp, #4
 	pop {r3, r4, r5}
 	mov r8, r3

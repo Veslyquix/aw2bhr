@@ -50,11 +50,11 @@ sub_080800B0: @ 0x080800B0
 	lsls r1, r1, #0xe
 	ldr r2, _0808017C @ =0x06000020
 	adds r1, r1, r2
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08080180 @ =gUnknown_082352FC
 	ldr r4, _08080184 @ =gUnknown_0200FC50
 	adds r1, r4, #0
-	bl sub_08011CAC
+	bl Decompress
 	movs r1, #0x80
 	lsls r1, r1, #4
 	ldr r2, _08080188 @ =0x00009001
@@ -64,7 +64,7 @@ sub_080800B0: @ 0x080800B0
 	movs r1, #0x90
 	lsls r1, r1, #1
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08080190 @ =sub_080801A8
 	bl sub_08011AAC
 	ldr r1, _08080194 @ =gUnknown_03001FF8

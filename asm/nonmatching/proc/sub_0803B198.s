@@ -4,7 +4,7 @@
 	thumb_func_start sub_0803B198
 sub_0803B198: @ 0x0803B198
 	push {lr}
-	ldr r0, _0803B1C4 @ =gUnknown_03002EE0
+	ldr r0, _0803B1C4 @ =gpKeySt
 	ldr r0, [r0]
 	ldrh r1, [r0, #4]
 	movs r0, #9
@@ -22,6 +22,6 @@ _0803B1B6:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0803B1C4: .4byte gUnknown_03002EE0
+_0803B1C4: .4byte gpKeySt
 _0803B1C8: .4byte gUnknown_03001FBC
 

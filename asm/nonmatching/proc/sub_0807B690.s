@@ -17,7 +17,7 @@ sub_0807B690: @ 0x0807B690
 	movs r1, #0x8e
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, [r6, #0x38]
 	adds r0, #1
 	str r0, [r6, #0x38]
@@ -37,7 +37,7 @@ sub_0807B690: @ 0x0807B690
 	movs r0, #0
 	movs r1, #0x14
 	movs r2, #0x54
-	bl sub_0801BEBC
+	bl PutSprite
 	ldr r4, _0807B72C @ =gUnknown_081D9328
 	ldr r3, [r4]
 	ldr r0, _0807B730 @ =0x0000105C
@@ -45,7 +45,7 @@ sub_0807B690: @ 0x0807B690
 	movs r0, #0
 	movs r1, #0xa
 	movs r2, #0x67
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r7, r4, #0
 	movs r5, #0x54
 	movs r4, #1
@@ -56,7 +56,7 @@ _0807B6FA:
 	movs r1, #0x6c
 	adds r2, r5, #0
 	ldr r3, [r7]
-	bl sub_0801BEBC
+	bl PutSprite
 	adds r5, #0x13
 	subs r4, #1
 	cmp r4, #0

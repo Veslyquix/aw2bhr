@@ -263,7 +263,7 @@ _080869D8:
 	movs r0, #4
 	movs r2, #0
 _080869F0:
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r4]
 	b _08086A06
 	.align 2, 0

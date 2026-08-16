@@ -86,7 +86,7 @@ sub_0808135C: @ 0x0808135C
 	ldrb r0, [r1]
 	ands r4, r0
 	strb r4, [r1]
-	ldr r2, _080814D8 @ =gUnknown_030030CC
+	ldr r2, _080814D8 @ =gDispIo
 	ldrb r0, [r2, #1]
 	orrs r0, r5
 	orrs r0, r3
@@ -176,7 +176,7 @@ _080814C8: .4byte gUnknown_030030B4
 _080814CC: .4byte gUnknown_0300251C
 _080814D0: .4byte gUnknown_030030DC
 _080814D4: .4byte gUnknown_030030A4
-_080814D8: .4byte gUnknown_030030CC
+_080814D8: .4byte gDispIo
 _080814DC: .4byte 0x06010000
 _080814E0: .4byte gUnknown_03005934
 _080814E4: .4byte gUnknown_030058FC

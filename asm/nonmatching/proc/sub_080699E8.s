@@ -47,7 +47,7 @@ _08069A2C:
 _08069A32:
 	b _08069B4C
 _08069A34:
-	ldr r2, _08069A58 @ =gUnknown_030030CC
+	ldr r2, _08069A58 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -65,7 +65,7 @@ _08069A34:
 	bl sub_0806974C
 	b _08069B4C
 	.align 2, 0
-_08069A58: .4byte gUnknown_030030CC
+_08069A58: .4byte gDispIo
 _08069A5C:
 	movs r0, #0xa
 	str r0, [sp]
@@ -89,7 +89,7 @@ _08069A7A:
 	bl sub_08068014
 	b _08069B4C
 _08069A88:
-	ldr r2, _08069AA4 @ =gUnknown_030030CC
+	ldr r2, _08069AA4 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -103,9 +103,9 @@ _08069A88:
 	orrs r0, r1
 	b _08069AEA
 	.align 2, 0
-_08069AA4: .4byte gUnknown_030030CC
+_08069AA4: .4byte gDispIo
 _08069AA8:
-	ldr r2, _08069ACC @ =gUnknown_030030CC
+	ldr r2, _08069ACC @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -123,9 +123,9 @@ _08069AC4:
 	bl sub_080697A4
 	b _08069B4C
 	.align 2, 0
-_08069ACC: .4byte gUnknown_030030CC
+_08069ACC: .4byte gDispIo
 _08069AD0:
-	ldr r2, _08069AF4 @ =gUnknown_030030CC
+	ldr r2, _08069AF4 @ =gDispIo
 	ldrb r0, [r2, #1]
 	movs r1, #1
 	orrs r0, r1
@@ -143,9 +143,9 @@ _08069AEA:
 	bl sub_0806978C
 	b _08069B4C
 	.align 2, 0
-_08069AF4: .4byte gUnknown_030030CC
+_08069AF4: .4byte gDispIo
 _08069AF8:
-	ldr r2, _08069B30 @ =gUnknown_030030CC
+	ldr r2, _08069B30 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -172,7 +172,7 @@ _08069AF8:
 	bl sub_08067898
 	b _08069B4C
 	.align 2, 0
-_08069B30: .4byte gUnknown_030030CC
+_08069B30: .4byte gDispIo
 _08069B34:
 	movs r0, #0
 	bl sub_08069924

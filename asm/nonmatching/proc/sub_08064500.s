@@ -65,7 +65,7 @@ _08064542:
 	movs r1, #0xd6
 	lsls r1, r1, #2
 	movs r2, #2
-	bl sub_08013618
+	bl ApplyPaletteExt
 	add sp, #4
 	pop {r3, r4}
 	mov r8, r3

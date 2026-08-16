@@ -3,7 +3,7 @@
 
 	thumb_func_start sub_08049EE4
 sub_08049EE4: @ 0x08049EE4
-	ldr r2, _08049F04 @ =gUnknown_030030CC
+	ldr r2, _08049F04 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -20,5 +20,5 @@ sub_08049EE4: @ 0x08049EE4
 	strb r0, [r2, #1]
 	bx lr
 	.align 2, 0
-_08049F04: .4byte gUnknown_030030CC
+_08049F04: .4byte gDispIo
 

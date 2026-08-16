@@ -12,7 +12,7 @@ sub_08067E1C: @ 0x08067E1C
 	ldr r0, [r4, #0x34]
 	str r0, [sp]
 	movs r0, #0
-	bl sub_08074234
+	bl Interpolate
 	ldr r3, _08067E80 @ =0x000001FF
 	ands r3, r0
 	movs r1, #0x94

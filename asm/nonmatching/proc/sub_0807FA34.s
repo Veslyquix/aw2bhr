@@ -15,7 +15,7 @@ sub_0807FA34: @ 0x0807FA34
 	movs r1, #0x98
 	lsls r1, r1, #2
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	adds r1, r4, #0
 	adds r1, #0x4c
 	movs r0, #0

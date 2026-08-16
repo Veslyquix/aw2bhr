@@ -71,7 +71,7 @@ _08069C60:
 	.align 2, 0
 _08069C68: .4byte gUnknown_08581108
 _08069C6C:
-	ldr r2, _08069C90 @ =gUnknown_030030CC
+	ldr r2, _08069C90 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -89,9 +89,9 @@ _08069C6C:
 	strb r0, [r2, #1]
 	b _08069CE6
 	.align 2, 0
-_08069C90: .4byte gUnknown_030030CC
+_08069C90: .4byte gDispIo
 _08069C94:
-	ldr r2, _08069CBC @ =gUnknown_030030CC
+	ldr r2, _08069CBC @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -112,9 +112,9 @@ _08069CB4:
 	bl sub_080678BC
 	b _08069CE6
 	.align 2, 0
-_08069CBC: .4byte gUnknown_030030CC
+_08069CBC: .4byte gDispIo
 _08069CC0:
-	ldr r2, _08069CF4 @ =gUnknown_030030CC
+	ldr r2, _08069CF4 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -140,7 +140,7 @@ _08069CE6:
 	str r0, [r4, #0x2c]
 	b _08069D28
 	.align 2, 0
-_08069CF4: .4byte gUnknown_030030CC
+_08069CF4: .4byte gDispIo
 _08069CF8:
 	adds r0, r4, #0
 	bl Proc_Break
@@ -148,7 +148,7 @@ _08069CF8:
 	bl Proc_EndEach
 	ldr r0, _08069D34 @ =gUnknown_08580FF4
 	bl Proc_EndEach
-	ldr r2, _08069D38 @ =gUnknown_030030CC
+	ldr r2, _08069D38 @ =gDispIo
 	ldrb r1, [r2, #1]
 	movs r0, #2
 	rsbs r0, r0, #0
@@ -170,5 +170,5 @@ _08069D28:
 	.align 2, 0
 _08069D30: .4byte gUnknown_08581108
 _08069D34: .4byte gUnknown_08580FF4
-_08069D38: .4byte gUnknown_030030CC
+_08069D38: .4byte gDispIo
 

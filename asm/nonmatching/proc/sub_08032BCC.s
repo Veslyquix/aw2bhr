@@ -42,10 +42,10 @@ _08032BE6:
 	ldr r0, _08032C6C @ =gUnknown_081D2224
 	movs r1, #0xc0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	ldr r0, _08032C70 @ =gUnknown_081D2554
 	ldr r1, _08032C74 @ =0x06006000
-	bl sub_08011CAC
+	bl Decompress
 	movs r5, #0
 	ldr r6, _08032C78 @ =gUnknown_02027C2C
 	ldr r0, _08032C7C @ =gUnknown_08613CDC

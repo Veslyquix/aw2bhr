@@ -16,7 +16,7 @@ sub_08064EF8: @ 0x08064EF8
 	movs r0, #1
 	movs r1, #0x20
 	movs r2, #0x34
-	bl sub_08074234
+	bl Interpolate
 	strh r0, [r4, #0x2a]
 	adds r0, r4, #0
 	bl sub_08064E5C

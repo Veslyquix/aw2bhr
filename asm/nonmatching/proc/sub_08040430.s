@@ -12,14 +12,14 @@ sub_08040430: @ 0x08040430
 	ldr r0, _08040464 @ =0x06010000
 	adds r1, r1, r0
 	adds r0, r2, #0
-	bl sub_08011CAC
+	bl Decompress
 	ldr r0, _08040468 @ =gUnknown_08111D74
 	adds r4, #0x10
 	lsls r4, r4, #0x15
 	lsrs r4, r4, #0x10
 	adds r1, r4, #0
 	movs r2, #0x20
-	bl sub_08013618
+	bl ApplyPaletteExt
 	pop {r4}
 	pop {r0}
 	bx r0
