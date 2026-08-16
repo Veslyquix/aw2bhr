@@ -13086,21 +13086,30 @@ struct Unk0202F214 /* 0x04 */
                            * one halfword: the low 2 bits are a mode it stores
                            * into its child proc's `int` +0x4c, and `unk02 >> 2`
                            * is a count it renders as three decimal digits.
-                           *   TYPE DELIBERATELY UNCHANGED, and this is the
-                           * finding rather than an omission. The two reads are
-                           * `ldrb [.,#2]; lsls #0x1e; lsrs #0x1e` and
-                           * `ldrh [.,#2]; lsrs #2`, which is exactly what a
-                           * `u16 lo : 2; u16 hi : 14;` pair looks like -- and a
-                           * bitfield is RULED OUT, not merely unproved. agbcc
-                           * gives any struct containing a bitfield 4-byte size
-                           * and alignment, which would take this element from 4
-                           * bytes to 8 and every index from `lsls #2` to
-                           * `lsls #3`; the one layout that keeps the stride (an
-                           * all-bitfield element) loads the enclosing word and
-                           * emits `ldr`, never `ldrb [.,#2]`. The two
-                           * constraints cannot both hold. See the Bitfields
-                           * chapter of docs/agbcc-codegen.md for the five
-                           * layouts measured.
+                           *   TYPE DELIBERATELY UNCHANGED HERE, but wave 73
+                           * (W73-C) corrected WHY, and the old wording was
+                           * wrong. The two reads are `ldrb [.,#2]; lsls #0x1e;
+                           * lsrs #0x1e` and `ldrh [.,#2]; lsrs #2`, which is
+                           * exactly what a `u16 lo : 2; u16 hi : 14;` pair
+                           * looks like -- and the field split REALLY IS that
+                           * pair. sub_0806B120, the writer, MATCHED in wave 73
+                           * with those bitfields; its two stores are textbook
+                           * `store_bit_field`, and nothing else reproduces
+                           * either the full-word `~3` mask (`movs #4; rsbs #0`)
+                           * or the register pressure that mask creates.
+                           *   What is ruled out is only putting the bitfields
+                           * in THIS SHARED DECLARATION, because a bitfield READ
+                           * widens to the enclosing word (`ldr`) and would
+                           * break sub_0806AD04's `ldrb [.,#2]`. The resolution
+                           * is that a bitfield view can be LOCAL TO THE WRITER:
+                           * sub_0806B120 declares its own
+                           * `struct Unk0202F214Rec` and reaches it by a cast,
+                           * so this type is untouched and both functions match.
+                           * Same 4-byte size and alignment either way, so the
+                           * `lsls #2` index is unaffected -- the 4-to-8-byte
+                           * inflation applies to a UNION carrying a bitfield
+                           * struct, not to a plain local view. See the
+                           * Bitfields chapter of docs/agbcc-codegen.md.
                            *   So the halfword is genuine and the narrowing
                            * lives at the USE: sub_0806AD04 spells the 2-bit
                            * read `(u32)(u8)e->unk02 << 30 >> 30`, which is

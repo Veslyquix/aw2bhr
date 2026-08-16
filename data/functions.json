@@ -8167,7 +8167,7 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 296,
-   "best": "83.11% identical, exact 296/296 bytes, 50 differing bytes, first difference at +0x1E. The active readable draft is the strongest semantic candidate; explicit `off` locals restored four missing call-argument copies.",
+   "best": "92.23% identical, exact 296/296 bytes, 23 differing bytes, first difference at +0x4e (wave 73, W73-E). Was 83.11%. The active draft work/sub_0800E8CC/sub_0800E8CC.c IS the permuter result and must not be tidied; its header lists every kept mutation.",
    "park_kind": "EXACT-SIZE REGISTER-ALLOCATION NEAR-MISS",
    "remaining_diff": "Instruction order and size are settled. The residual is one coupled allocation cycle: candidate r0/r2 and r9 correspond to the ROM's opposite r0/r2 choice and sb. Moving any one pseudo changes the others; no semantic or control-flow block is missing.",
    "why_it_is_close": "All calls, branches, map accesses, pool words and argument copies are present in the ROM's order. The configured candidate is size-exact and the disagreement is confined to register fields.",
@@ -8175,12 +8175,13 @@
     "Declaration order, commuted row addressing, a split load temporary, pointer advance, separate row/off scheduling and the first struct view -- all retained or worsened the same r0/r2/r9-to-sb cycle.",
     "Aggregate-member and wrapper-bound row pointers -- byte-identical to the readable 83.11% draft.",
     "Direct aggregate indexing -- adds map-base copies and regresses both size and shape.",
-    "A 300-second decomp-permuter run in wave 65 -- no match; do not repeat it from this same allocation state.",
+    "Wave 73 (W73-E): THE WAVE-65 INSTRUCTION `do not repeat it from this same allocation state` IS REFUTED, and this is the single largest gain in the batch. Two chained decomp-permuter runs, each started from the previous best.c per the wave-59 method, went 83.11% -> 91.22% -> 92.23%, all size-exact. The wave-65 run was ONE run; a permuter run is a property of the STARTING POINT, not of the function. The kept mutations are all semantically inert: a DEAD `(cells = rows)` assignment inside the second block's index expression, `new_var2 = t * 2` bound out of that same expression, and `new_var = sub_0800119C(x, t, 4); r |= new_var << 1;` splitting the call result off the shift in the y+1 block. Unlike its sibling sub_0800E9F4's mutated best.c, this one is semantically CLEAN and has been installed as the draft. Chained run 3 from the 92.23% best.c was FLAT (`no candidate scored better than the starting point`, 8,391 iterations), so this function is now genuinely sampled out on this axis at three runs -- which is what an honest `permuter exhausted` note looks like, as against the wave-65 one that was written after a single run.",
     "No compiler override is configured or evidenced for this function; the residual occurs under the canonical configured profile."
    ],
    "settled_by_this_attempt": [
     "The four call-argument copies are source-visible and come from explicit per-block `off` locals.",
-    "The remaining cycle is allocation, not a hidden map-layout or source-CFG question."
+    "The remaining cycle is allocation, not a hidden map-layout or source-CFG question.",
+    "Wave 73 (W73-E): the residual after two permuter runs is still a register-allocation cycle -- the ROM uses sb for the 0x417A constant and keeps t*2 in r2 with the row address/index in r0 in the first two blocks, where the draft has them swapped. 23 bytes, first difference at +0x4e. Chained run 3 is the obvious next move and it costs nothing."
    ],
    "reason": "Two focused waves and a permuter run leave a size-exact, instruction-order-correct candidate with one coupled register-allocation cycle. Resume only with a new allocator-priority mechanism, not another spelling sweep."
   },
@@ -8211,7 +8212,7 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 256,
-   "best": "86.7% readable configured candidate, exact 256/256 bytes, 34 differing bytes; the historical permuter-mutated best records 87.11% but is not the readable source of truth.",
+   "best": "86.7% readable configured candidate, exact 256/256 bytes, 34 differing bytes, first difference at +0x2 -- re-measured wave 73 (W73-E) on the draft itself. THE DRAFT IS DELIBERATELY NOT best.c: best.c reads 89.84% but is SEMANTICALLY WRONG (see settled_by_this_attempt), so the higher number must not be quoted as this function's score or installed as the draft.",
    "park_kind": "EXACT-SIZE REGISTER-ALLOCATION NEAR-MISS",
    "remaining_diff": "The instruction stream is in the ROM's order. The residual is the x/rows/cells three-register cycle; changing one lifetime rotates the other two rather than converging.",
    "why_it_is_close": "The readable draft is size-exact with all row reads, cell tests and control flow present. Only register operands differ across the coupled map-address lifetime.",
@@ -8221,12 +8222,13 @@
     "Direct aggregate cell access -- adds address instructions and regresses.",
     "Typed u16 indexing -- CSEs adjacent row reads and shrinks the function away from the ROM.",
     "Unsigned local types, split result initialisation and deleting the self-assignment lifetime probe -- byte-neutral.",
-    "The prior decomp-permuter run -- no match; do not repeat it from the same draft.",
+    "Wave 73 (W73-E): REFUTED as written. This entry said `do not repeat it from the same draft`; a single 300 s run repeated from best.c took best.c from 87.11% to 89.84%, size-exact. Run 2 chained from that new best.c was flat. Run 3 used `--current` to start from the readable 86.7% draft (a starting point the MCP permute tool cannot select), base score 195, 420 s / ~3,000 iterations -- its harvested candidates re-measured at 86.7%, no gain. So all three neighbourhoods are now sampled and only run 1 moved, invalidly. A permuter run is a property of the STARTING POINT, not of the function -- contrast the sibling sub_0800E8CC, where the identical chained method went 83.11% -> 91.22% -> 92.23% with semantically clean mutations.",
     "No compiler override is configured or evidenced for this function; the residual occurs under the canonical configured profile."
    ],
    "settled_by_this_attempt": [
     "The residual is allocation-only; aggregate layout and loop/control-flow models have both been tested.",
-    "The mutated 87.11% best.c is an exploration artefact, not a maintainable replacement for the active readable draft."
+    "The mutated 87.11% best.c is an exploration artefact, not a maintainable replacement for the active readable draft.",
+    "Wave 73 (W73-E): THE MUTATED best.c IS NOT MERELY UNREADABLE, IT IS SEMANTICALLY WRONG, and that is why it must never be installed as the draft. The 89.84% body saves the row offset into `new_var3` for the guard and then reassigns `ro2 = x`, but the guarded block still reads `ro2`, so `i` becomes `x + 1` where the original computes `rowOffset + 1` and `t` becomes `(2x + 1) * 2` instead of `(rowOffset + 1 + x) * 2`. decomp-permuter's `reuse a dead variable` transform is not always semantics-preserving. Chaining runs from such a best.c is still fine -- a byte MATCH cannot be semantically wrong -- but adopting a non-matching best.c as work/<fn>/<fn>.c poisons every later measurement. Contrast the sibling sub_0800E8CC, whose 91.22% permuter gain in the same wave IS clean and IS adoptable. AND THE REPAIR WAS TRIED AND FAILED (W73-E): the old row offset is still live in `new_var3`, so `i = new_var3 + 1; t = (i + ro2) * 2;` is the exact semantic repair, keeping every other mutation of the 89.84% body including the `p - (-t)` address form. It measures 86.7% -- identical to the un-mutated readable draft. THE ENTIRE GAIN CAME FROM THE INVALID READ. Contrast sub_08014DCC, where the same repair technique on an invalid 68.33% body yielded 70.0% and a new best because three of its four mutations were sound. So repairing an invalid gain is worth exactly one attempt, and an invalid gain is NOT evidence that a valid version of it exists. W73-B replicated the failed repair on sub_08045C18 the same wave (reverting only the invalid reassignment collapsed 97.1% -> 89.4%, back to baseline) and supplied the mechanism, which is what makes this predictive: once the local carries a CONSTANT instead of a loaded value, CSE const-propagates it and the pseudo vanishes, so the extra live range the permuter was buying disappears with it. A repair recovers the gain only when the invalid part was INCIDENTAL to the live range -- which is the minority case, since a live range is exactly what the permuter searches for. FORM-CHECKED (W73-E, after W73-D showed the hazard): permute.py judges BOTH the spliced and the RAW header-expanded form of each candidate and either can set best.c/best.json, so a best score may be unreproducible from an ordinary draft. This function's 89.84% was set by the SPLICED form (the raw form only tied it), so it IS directly comparable to the 86.7% repair and to the readable draft. Grep -B1 'new best:' in the run log before quoting any permuter score. Repairs recovered 1 of 4 across three batches."
    ],
    "reason": "Two focused waves and the permuter leave an exact-size candidate blocked on one three-register allocation cycle. Resume only with a new allocator-priority mechanism."
   },
@@ -11545,7 +11547,7 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 88,
-   "best": "87.5% -- 11 of 88 bytes differ, size EXACT (wave 39, W39-A)",
+   "best": "87.5% -- 11 of 88 bytes differ, size EXACT (wave 39, W39-A; RE-MEASURED and unchanged in wave 73 by W73-B and again by W73-G)",
    "remaining_diff": "The 43-instruction stream is 1:1 with the ROM: same opcodes, same order, same immediates, same branch structure, same `mov ip, r0`. EVERY differing byte is a register NUMBER, in two linked pairs. (1) dst and src are swapped -- draft r5/r4, ROM r4/r5. (2) the row base and the row pointer are swapped -- the draft keeps the base in callee-saved r5 (it is the SAME pseudo as dst, which is reassigned) and puts p in scratch r2, where the ROM puts the base in scratch r2 and recycles dst's now-dead r4 for p. w->r6, h->r7, i->r1, j->r3 and add->ip already match exactly, as does everything from `lsrs r7, r0, #8` onward apart from the register numbers.",
    "why_it_is_close": "The type model and the statement order are settled and independently corroborated rather than guessed: the split PROMOTE_MODE pair fixes the parameter widths (and the retype was confirmed by re-verifying all three callers byte-for-byte), and the position of the src prologue copy fixes parameter 2 as a directly-walked pointer. No statement-order or type error remains to find.",
    "axes_ruled_out": [
@@ -11554,7 +11556,10 @@
     "A `void *` second parameter with a `u16 *s = src;` local -- puts the src prologue copy seven instructions later, after the stack argument's narrowing, instead of at instruction 3. Not reachable by statement reordering, because parameter setup always precedes a body statement.",
     "`int` parameters 3-5 with explicit `(u16)` casts at the uses -- loses both prologue `lsls`, because the narrowing is then emitted whole at the use.",
     "decomp-permuter, FOUR runs totalling roughly 43,000 iterations: 60.2 -> 72.7 -> 86.4 -> 87.5%, and then a full 600 s run starting from 87.5% produced nothing better at all. It has CONVERGED; do not simply re-run it longer. Its two surviving edits are already in the draft and are worth keeping -- a zero-trip `do { } while (0)` around the second offset add plus `src++`, and `y * 0x20` bound to an `int` local -- together worth 14.8 points.",
-    "`*p = add + *src` operand order, and the `p++` / `src++` order inside the inner loop -- byte-neutral."
+    "`*p = add + *src` operand order, and the `p++` / `src++` order inside the inner loop -- byte-neutral.",
+    "Toolchain axis re-measured across all seven profiles, confirming and extending the old_agbcc note: configured/default/no-force all 87.5% (identical); o1 and o1-no-force 8.0% at -4 bytes; old-agbcc and old-agbcc-no-force 85.2%. Nothing beats the configured profile.",
+    "SUBTRACTION OF A NEGATION (`dst - (-x)`, `p = dst - (-(i * 0x20))`), the spelling that matched sub_0802FA64 this wave by making a symbolic base operand 1: NEGATIVE here, and it makes things worse in the exact direction the entry's 'core tension' predicts. Both the row-pointer-only and the both-sites variants compile identically to each other and LOSE the `adds r4, r1, #0` src prologue copy -- src stays in r1 and is walked from there, i is promoted to callee-saved r4. Measured by compile_probe.",
+    "decomp-permuter re-confirmed CONVERGED: two further runs this wave (300 s from the draft with --current, 300 s from best.c) both reported base score 70 and no candidate better than the starting point."
    ],
    "settled_by_this_attempt": [
     "Parameters 3, 4 and 5 are u16, NOT the `int` they were declared with. A prologue `lsls rN, rN, #0x10` whose matching `lsrs` is MISSING -- it reappears at the use fused with the scale, `lsrs #0xf` for `dst + x` (*2) and `lsrs #0xa` for `y * 0x20` (*0x40) -- is a sub-word PARAMETER, whereas an `int` with an explicit `(u16)` cast emits the narrowing whole at the use and leaves no prologue `lsls`. Retyped in include/unknown-functions.h; sub_080399F8, sub_0807FE90 and sub_08080498 were all re-run through try_match and are still byte-identical.",
@@ -11564,7 +11569,7 @@
     "The destination offset is `dst + x` plus `y * 0x20` in u16 units (a 0x40-byte row stride), and the row pointer is `p = dst + i * 0x20` -- a MULTIPLY per outer iteration, not an accumulate: the ROM has `lsls r0, r1, #6; adds r4, r2, r0` every time round.",
     "Both loop counters are u16 tested unsigned; the outer counter's increment being hoisted above the inner loop is the compiler's doing, not the source's."
    ],
-   "reason": "Register allocation, not source semantics. The instruction stream, the type model and every read form are settled; what remains is which hard register the row base and the row pointer land in, and that is coupled to whether dst survives as a pseudo of its own. Both sides of that coupling have been probed to exhaustion from source, the toolchain axis is measured and worse, and the permuter has converged. Unparking needs a construct that keeps dst alive across the stack-parameter load WITHOUT making it the row base."
+   "reason": "Register allocation, not source semantics. The instruction stream, the type model and every read form are settled; what remains is which hard register the row base and the row pointer land in, and that is coupled to whether dst survives as a pseudo of its own. Both sides of that coupling have been probed to exhaustion from source, the toolchain axis is measured and worse, and the permuter has converged. Unparking needs a construct that keeps dst alive across the stack-parameter load WITHOUT making it the row base. WAVE 73: still the correct diagnosis. This was the ONE function in the wave-73 pure-register-name batch that no lever moved, and it is also the only one of the six that had ALREADY had the permuter run on it before this wave."
   },
   "named": false,
   "kind": "game",
@@ -14253,9 +14258,28 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 120,
+   "best": "SIZE-EXACT (120/120) at 70.0%, 36 of 120 differing bytes, first difference at +0x6 (wave 73, W73-E). W73-C's hand-written size-exact draft measured 10.0%. The active draft IS the permuter body with one hand correction and MUST NOT BE TIDIED; its file header lists every kept mutation. best.c holds the same 70.0% body.",
+   "remaining_diff": "A PURE REGISTER-NAME residual: same size, same instruction count, same branch structure. The ROM keeps p and next in the SCRATCH pair r2/r3 and spends r4-r7 on size, bestSize, total, best and bestNext; the candidate keeps p in r1, size in r2 and bestSize in r3, so it needs one callee-saved register fewer and its push mask is {r4,r5,r6,lr} against the ROM's {r4,r5,r6,r7,lr}. That is why first difference is +0x0 -- the prologue is the LAST symptom, not evidence about the frame.",
+   "why_it_is_close": "Every statement of the body, the 16-byte header {next,size,used,filler}, the tail layout and the loop's basic-block structure are the ROM's. The two missing instructions wave 42 recorded are gone.",
+   "axes_ruled_out": [
+    "Wave 42 (W42-D): four loop shapes that all COALESCE `p = next` -- `while (1) { body; next = p->next; if (!next) break; p = next; }`; `for (;; p = next) { body; next = p->next; if (!next) break; }` (gcc canonicalises these two together); the same with an explicit `goto` INTO the loop past the copy (optimised away, no effect); `do { body; next = p->next; p = next; } while (next != NULL);`.",
+    "Wave 42 (W42-D): the fixpoint it shipped -- `next` seeded before the loop with `p = next` as the first body statement. Keeps p and next apart but runs the copy on the first iteration too, which IS the -4. Superseded by the wave-73 draft.",
+    "Wave 73 (W73-C): basic-block PLACEMENT is not what is left. The ROM places the latch physically AHEAD of the header so the back edge falls through, and pays `bne <header>; b <ret0>` at the guard; the candidate falls into the header and pays a `b` at the loop bottom. Seven instructions either way -- the two layouts cost the same.",
+    "Wave 73 (W73-E): THE HANDOFF WORKED AND IT IS THE BATCH'S CLEAREST RESULT. W73-C predicted that making the function size-exact moved it out of the permuter's provably-useless class (one extra instruction) into its documented sweet spot, and that chained runs had never been tried from that state. Run 1, `--current` from the 10.0% draft: 10.0% -> 63.33%, size-exact, semantically clean, INSTALLED AS THE DRAFT. Runs 2 and 3, chained: 65.83% and 68.33%, BOTH SEMANTICALLY WRONG. Run 2 -- it moved `new_var = p->size;` inside the if-body while the guard still reads `new_var`, so the guard reads an uninitialised value; run 3 ended the function `return (void *) total;`, where `total` is `size + 0x10` on both NULL-returning paths, not 0. NEITHER was adopted as written -- but run 3 was worth READING: correcting that one return to `return (void *) 0;` and keeping its other three mutations (`total = size; total = total + 0x10;` split, the hoisted load reverted, `total = 0; q->used = total;`) gives 70.0%, which is the current draft and the final state. 10.0% -> 70.0% in one wave. Wave 42's negative was against a MISSING-INSTRUCTION residual, exactly as W73-C said. NOTE THE TOOLING TRAP: best.c held the wave-42 body 4 bytes short, so the MCP `permute` tool -- which always starts from best.c and cannot pass `--current` -- would have searched the wrong starting point. Shell out to `python tools/permute.py <fn> --current` whenever the draft beats best.c. ALSO MEASURED AND NOT TO BE REPEATED: deleting `new_var2` and using `size` directly at all three sites costs FOUR BYTES (120 -> 116, 13.3%) and drops r7 from the push mask -- that local is buying a register, not redundant. THE NEXT PROBE is `q->used = (u32)next;`: the ROM writes that field with `str r3,[r2,#8]` where r3 still holds `next`, which is provably NULL at _scan_done since the label is only reached by the `next == NULL` goto. Wave 42 called that reload_cse and not something to author, but it reuses `next`, not a zero constant, so the probe is semantically valid and has never been run. DO NOT GENERALISE THE REPAIR FROM THIS FUNCTION: it is the 1 of 3 that worked. The same technique returned the baseline score on sub_0800E9F4 and on W73-B's sub_08045C18. It works here only because the invalid part -- a wrong return value -- was INCIDENTAL to the live ranges the other three mutations created."
+   ],
+   "settled_by_this_attempt": [
+    "Wave 73 (W73-C): THE LEVER IS `goto` INSTEAD OF `break` FOR A TRAILING EXIT TEST. `while (1) { body; next = p->next; if (next == NULL) goto _scan_done; p = next; }` puts the copy in a real latch block AND does not coalesce. This is the wave-59 sub_08029AF8 lever (a user goto is not a jump to the loop's own end_label, so expand_end_loop does not roll the exit) applied to a TRAILING rather than a LEADING exit test. Wave 42 asked whether 'copy only on the back edge' and 'p/next still conflict' were coupled: they are NOT.",
+    "Wave 73 (W73-C): REFUTES wave 42's claim that a 4-callee-saved push proves coalescing. This candidate saves only r4/r5/r6 and does not coalesce.",
+    "Wave 42 (W42-D): `q->used = 0` is a LITERAL zero; the ROM's register reuse there is reload_cse, not something to author -- sub_08014EF4 writes the same field with a plain `movs r0, #0`.",
+    "Wave 42 (W42-D): a single trailing `return NULL` is what puts the shared `movs r0,#0` block AFTER the `adds r0,r5,#0; adds r0,#0x10` tail; two early `return NULL;` statements put it in the middle.",
+    "Wave 42 (W42-D): the round-up is on the `size` PARAMETER in place, `total = size + 0x10` is a real local, and the compares are unsigned so size and bestSize are u32."
+   ],
+   "note": "Wave 73 (W73-C). The residual CHANGED CLASS this wave, from missing-instruction to size-exact register allocation, and that is the point of the entry. NEXT: run decomp-permuter REPEATEDLY, each run starting from the previous best.c (wave 59's 87.3 -> 94.3 -> 98.2 -> match pattern). This is now precisely the permuter's documented case and it has never been tried from a size-exact draft here."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -20575,21 +20599,14 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 100,
-   "best": "87.0%",
-   "remaining_diff": "SIZE-EXACT, and every one of the thirteen bytes is a register name. Two independent swaps: the parameter takes r5 and the CSEd table base r4 where the ROM has them the other way round, and `w` takes r1 with `v` in r0 where the ROM has `w` in r0 and `v` in r2. No instruction is added, removed or reordered.",
-   "why_it_is_close": "The instruction stream is exact; best.json scores register fields, which is why a purely nominal difference reads as 87%.",
-   "axes_ruled_out": [
-    "`w` and `v` in either declaration order",
-    "a bound `struct Unk0200C528Node *p` declared first -- the shape that matched sub_080188D0",
-    "naming the node inline with no `p` at all",
-    "a ternary for the fallback: WORSE, agbcc folds the `- 1` into both arms (`movs r2, #4`) and loses the shared `subs`"
-   ],
-   "settled_by_this_attempt": "Wave 31's three-question sort was run in full and ends at question 3. (1) The parameter and the table base BOTH have three references, so there is no power-of-two crossing to reach and no fourth reference exists. (2) They are not tied: the base is born later and dies at the same point, so it has the shorter live range and the higher priority -- which is what the formula predicts and what THIS candidate produces. The ROM is the one that disagrees with the formula. (3) Neither feeds an index add whose operands would have to move; the base is already operand 2 of `adds r0, r0, r2` in both. That is a type-model question, not a source-spelling one.",
-   "reason": "wave 32 (W32-A)"
+   "status": "MATCHED wave 73 (W73-B). Needs rodata placement: \"rodata\": [\"0x0808E5A0\"].",
+   "resolved_by": "decomp-permuter, ONE 300 s run started from the parked draft (--current). The entry's 'settled_by_this_attempt' concluded the two swaps were a type-model question and not a source-spelling one; that was wrong. Note the permuter had never been run on this function across two prior waves.",
+   "measurements": "Wave 73 (W73-B) toolchain sweep, all seven compiler profiles run against this exact draft: configured/default 87.0%, no-force 20.0% (-4 bytes), o1 20.0% (-4 bytes), o1-no-force 20.0% (-4 bytes), old-agbcc 84.0%, old-agbcc-no-force 20.0% (-4 bytes). No profile beats the configured one.",
+   "wave": "32 (W32-A) parked; 73 (W73-B) matched"
   },
   "named": false,
   "kind": "game",
@@ -28682,7 +28699,21 @@
   "src": "code-0801D390.s",
   "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": "PARKED Wave 71 at exact size 492/492, 89.6%. An embedded element-address binding reproduces the ROM's sunk global-pointer dereference. Remaining difference is legal register allocation; the historical 91.1% source is uninitialised/illegal, and legal y copies enlarge the frame.",
+  "parked_reason": {
+   "bytes": 492,
+   "best": "90.7% identical, SIZE-EXACT (492/492), 46 differing bytes, first difference at +0x1a. Waves 49, 65, 71, 73.",
+   "remaining_diff": "Allocation only. The ROM parks y in r5 and emits delta's narrowing group whole before flags'; the draft leaves y in r1 and hoists one lsls a slot early. Instruction sequence is aligned end to end.",
+   "why_it_is_close": "Every shape and type question is settled -- see the long header comment in work/sub_08020EDC/sub_08020EDC.c, which is this function's real write-up. Wave 71 settled the sunk-deref spelling; wave 73 added a live-range split worth 1.1 points.",
+   "axes_ruled_out": [
+    "Splitting the r == 0 block's row base into two statements (`rows = p; rows = rows + 0x417a;`) on its own: 90.2%, first difference at +0x1e -- WORSE than 90.7%. It only helps in combination with the parameter widening above.",
+    "THE REMAINING 0.8 POINTS ARE A CROSS-TU PROTOTYPE CONTRACT -- STOP HERE (wave 73, W73-F). The only thing decomp-permuter found past 90.7% is 91.5% size-exact, and it depends on widening the 6th parameter from u8 to unsigned int (the permuter rewrites the prototype block, so it never compiles against the real header). include/unknown-functions.h declares `void sub_08020EDC(s16, s16, s16, u8 *, int, u8)` and the MATCHED caller src/decomp/c_080210C8.c passes an `int a6` through `lsls #0x18; lsrs #0x18`, which is exactly the int->u8 narrowing that prototype's 6th parameter requires. Widening it here deletes that narrowing there and costs the caller 4 bytes. NOTE the header's own prose above that declaration asserts arguments 5 AND 6 are int, contradicting the declaration on the same lines; the declaration is the one the caller agrees with, so the prose is what is stale.",
+    "Binding the unit id to a local (m = ids[off]) instead of writing ids[off] twice: 60.2%, 26 points WORSE.",
+    "Copying y into its own s16 local before the r == 0 test: 84.8%. The permuter's 91.1% variant places that copy INSIDE the r == 0 block where it is uninitialised on the loop path -- illegal, and legalising it (wave 65) costs 8 bytes (492 -> 500).",
+    "Chaining decomp-permuter from best.c: USELESS HERE and the reason is generalisable. best.c holds a 496-byte (+4) 93.9% variant, because trymatch moves best.c forward on byte-identity percentage alone with no regard for size, so on a size-exact target a non-size-exact variant can own best.c forever. permute.py prefers best.c, so a 300 s chained run returned candidates that were ALL +4 bytes. Pass --current to search from the size-exact draft instead (wave 73, W73-F)."
+   ],
+   "improved_by_wave_73": "SPLITTING THE TERRAIN-TYPE VALUE'S LIVE RANGE, found by decomp-permuter run --current from the draft and semantics-checked afterwards: `ty = cells[off] & 0x1f; t = ty;` in place of `t = cells[off] & 0x1f;`. ty is dead across the split and is reassigned at its next use, so the program is unchanged. 89.6% -> 90.7%, still size-exact. Note this candidate was DISCARDED by trymatch's own best.c rule (90.7% < best.c's 93.9%) even though it is the better starting point; it had to be lifted out of work/sub_08020EDC/permuter/output-670-1/source.c by hand.",
+   "reason": "Residual kind 3 (allocation)."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -31238,7 +31269,11 @@
     "binding the array base to a local before the loop -- strictly worse, hoists base AND shift and costs a third register.",
     "`(j = idx) >= 0` inside the `&&`, placing the copy exactly where the ROM has it -- gcc coalesces j into idx and the copy vanishes; bit-identical to no copy at all.",
     "a nested `if (sub_0804415C(i) != 0) { j = idx; if (j >= 0) ... }` -- cross-jumping merges the two calls' argument setup into one shared tail, which the ROM does not have.",
-    "passing the bare symbol in the else (fixes ordering (2) but restores the +8 LICM hoist), and assigning p AFTER the call in the else (keeps the dead store AND still hoists: 21.2%)."
+    "passing the bare symbol in the else (fixes ordering (2) but restores the +8 LICM hoist), and assigning p AFTER the call in the else (keeps the dead store AND still hoists: 21.2%).",
+    "WAVE 73: '(j = idx) >= 0' inside the '&&' TOGETHER WITH the two-arm pointer binding -- the exact combination the wave-39 note called 'the single highest-value thing to try next' and could not reach inside its cap. It emits code BIT-IDENTICAL to the kept draft: 'cmp r5,#0 / blt / ldr r1,=sym / lsl r0,r5,#1', no copy. Blocking the LICM hoist does NOT protect the copy from copy propagation; the two mechanisms are independent and the wave-39 hypothesis is REFUTED.",
+    "WAVE 73: 'j = idx;' as a statement in a nested 'if (sub_0804415C(i))' with the else duplicated -- the copy still vanishes AND cross-jumping merges the two 'bl sub_0801368C' sites into one shared tail that the ROM does not have.",
+    "WAVE 73: no 'idx' variable at all, index expression written inside the '&&' so LICM would have to hoist it -- LICM DOES NOT HOIST IT. The whole 'ldr / ldr / lsr / and' chain stays in the loop body, four instructions the ROM computes once in the preheader. Being inside a short-circuit '&&' is what stops scan_loop recording it as a movable.",
+    "WAVE 73: 'short j' -- this entry's own 'make the copy a CONVERSION rather than a copy' suggestion. It is the only spelling measured that keeps a second live value, but it keeps the wrong one in the wrong place: agbcc hoists the conversion into the preheader as 'lsl r5,r0,#0x10 / asr r6,r5,#0x10', the guard reads r6 and the subscript re-derives from r5, and it costs r7 AND r8 -- the exact frame the two-arm binding exists to avoid."
    ],
    "settled_by_this_attempt": [
     "THE FRAME IS SOLVED, and the lever is a new codegen rule -- see the 'LICM hoists a conditionally-executed loop invariant' chapter added to docs/agbcc-codegen.md. The natural spelling costs EIGHT BYTES because LICM hoists `idx * 2` and the array base into the preheader, needing two more callee-saved registers. Being guarded by two conditionals AND preceded by a call does not protect an invariant -- `maybe_never` and `call_passed` are both set and agbcc hoists anyway. What blocks it is assigning the SAME pointer local in BOTH arms of the if/else: two sets of one pseudo inside the loop means scan_loop never records the address computation as a movable at all.",
@@ -31246,7 +31281,7 @@
     "`for (i = 1; i <= 4; i++)` with a u16 counter, and `gUnknown_08499598[i].unk1b` reached by the honest subscript, which reproduces the ROM's three-level chain through the -fforce-addr word 0x08090A30 with no help.",
     "Second argument `(i + 0xb) * 32 + 0x1e`, truncated to u16 at the call by sub_0801368C's declared `u16` parameter."
    ],
-   "reason": "One register copy. docs/agbcc-codegen.md already carries the pattern: 'An unexplained `adds rD, rS, #0` that survives to a LATER use is a SECOND LOCAL -- and it must be a copy of the first, not of the expression' (wave 27, W27-A). The obvious spellings of that second local are ruled out above because gcc coalesces the copy away once the value is provably the same pseudo. What has NOT been tried is making the second local survive coalescing -- a different TYPE (so the copy is a conversion rather than a copy), or a use of idx after the loop that keeps both live. Draft at work/sub_08024720/sub_08024720.c."
+   "reason": "One register copy. docs/agbcc-codegen.md already carries the pattern: 'An unexplained `adds rD, rS, #0` that survives to a LATER use is a SECOND LOCAL -- and it must be a copy of the first, not of the expression' (wave 27, W27-A). The obvious spellings of that second local are ruled out above because gcc coalesces the copy away once the value is provably the same pseudo. What has NOT been tried is making the second local survive coalescing -- a different TYPE (so the copy is a conversion rather than a copy), or a use of idx after the loop that keeps both live. Draft at work/sub_08024720/sub_08024720.c. WAVE 73 (W73-A): the four spellings above say the copy cannot be created by anything that makes 'j' provably equal to 'idx' -- copy propagation folds it before allocation, and the only measured way to stop that (a narrowing type) changes the value and is therefore hoisted and paid for in registers. The remaining untested idea is a second local that is NOT equal to idx on every path, i.e. one with two reaching definitions; every two-arm shape tried so far is cross-jumped back into one."
   },
   "named": false,
   "kind": "game",
@@ -35383,7 +35418,22 @@
   "src": "code-0801D390.s",
   "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": "PARKED Wave 71 at exact size 388/388, 87.6%. Real residual is register target reuse in two input blocks; rodata addends and string-table relocations are benign. Bound-entry timing, register hints and existing sized-string layouts do not resolve the allocation.",
+  "parked_reason": {
+   "bytes": 388,
+   "best": "90.7% identical, SIZE-EXACT (388/388), 36 differing bytes, first difference at +0x16. Waves 36, 71, 73 (W73-F took it from 87.6%).",
+   "remaining_diff": "Pure register names in the `& 0x30` and `& 0xc0` blocks and their downstream renaming. Every instruction is the ROM's instruction, in the ROM's order. The .rodata addends and the nine string-table relocations are benign.",
+   "why_it_is_close": "This is the SEVENTH member of the pure register-name residual class (see the wave-73 chapter in docs/agbcc-codegen.md). Three of the other six closed in wave 73.",
+   "axes_ruled_out": [
+    "Writing the 0xc0 block's offset as three inline `*(q + 0x39)` reads instead of `q += 0x39; *q`: 88.9%, size-exact -- an improvement over the old 87.6% draft but SUPERSEDED by the inline-subscript fix above, and the two do not combine (the 90.7% draft keeps `q += 0x39;`).",
+    "IMPROVED, not an axis to rule out (wave 73, W73-F): the `& 0x30` block must NOT bind `ent`. Writing `gUnknown_03001470[gUnknown_03001FBC].unk38 = 1 - gUnknown_03001470[gUnknown_03001FBC].unk38;` with the subscript inline on both sides takes it 87.6% -> 90.7%, size-exact, 36 of 388 bytes, first difference at +0x16. This is the OPPOSITE of the `--` line at the tail, where binding `ent` is required, so the binding rule here is per-statement and not per-function. Lifted from decomp-permuter output-535-1, which reached 89.9% with the same inline spelling plus a self-assignment; dropping the self-assignment scores BETTER than the permuter's own candidate.",
+    "Bound-entry timing, `register` hints on `ent`, and existing sized-string layouts (wave 71).",
+    "Binding `ent` before the `--` line is REQUIRED, not optional: written inline as `*(s16 *)&gUnknown_03001470[i].unk38` the +0x38 folds into the relocation addend and the ldrsh reads offset 0.",
+    "gpKeySt getting an ORDINARY inline pool word while the other three globals get force-addr words, in the same function, is the reference-count trigger and not something to spell differently.",
+    "LEVER 2, `base - (-index)` (wave 73, W73-F): NEGATIVE, and the reason generalises. Writing the 0xc0 block's address as `q = (u8 *)&gUnknown_03003FC0 - (-*(s16 *)&ent->unk38);` forces `ent` to be computed before `q`, which MOVES the force-addr pool load for gUnknown_03003FC0 from the head of the block (where the ROM has it, `ldr r2,[r5]` is the block's first instruction) to after the element-address computation. And it buys nothing, because the additive spelling ALREADY has the symbolic base as operand 1 and as the destination: the ROM is `adds r2, r2, r0` and the draft reproduces that. THE GENERAL RULE: read the ROM's address add before reaching for lever 2 -- it is indicated only when the ROM has the symbolic base as operand 1 AND your candidate has it as operand 2. Here the operand order was never the residual.",
+    "decomp-permuter, first ever runs on this function (wave 73, W73-F): 300 s and 600 s, both chained from best.c. Internal score 610 -> 460, but NO byte-level improvement -- every verified candidate came back at 87.6% or 87.1%. Unlike the other three never-permuted members of this class, the permuter does not move this one."
+   ],
+   "reason": "Residual kind 3 (allocation), pure register-name class."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -36685,14 +36735,17 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 248,
-   "best": "62.1% identical, candidate 240 bytes (-8), first difference at +0xe. Measured wave 59 (W59-B). The draft inherited from earlier waves was 232 bytes (-16) at 4.8%.",
+   "best": "MATCHED in wave 73 (W73-H), 248/248 bytes, exit 0. THE LEVER: write the SUBTRACTION in the shifted domain -- `t = (int)(((u32)a2 << 16) - 0x10000); a2 = (u32)t >> 16; } while (t != 0);` -- rather than varying the exit test. Nineteen prior spellings all kept the subtract narrow and asked combine to distribute the << 16 over the - 1, which it never does; written already-shifted nothing needs distributing and final output materialises -65536 as `ldr rN,=0xFFFF0000` in the loop. The a2/v register swap was downstream and needed no work. Previously: 64.5% identical, candidate 240 bytes (-8), first difference at +0xe. Re-measured wave 73 (W73-C), which raised it from wave 59's 62.1% by fixing the counter register assignment. The draft inherited before wave 59 was 232 bytes (-16) at 4.8%.",
    "remaining_diff": "THE LOOP COUNTER'S DECREMENT DOMAIN, and nothing else. The ROM decrements the u16 counter in the SHIFTED domain -- `lsls r0,r7,#0x10 ; ldr r1,=0xFFFF0000 ; adds r0,r0,r1 ; lsrs r7,r0,#0x10 ; cmp r0,#0 ; bne <top>` -- because its exit test reads the PRE-NARROWED temp, which lets combine distribute the << 16 over the - 1 and costs a third pool word. The candidate's exit test reads the stored counter, so combine leaves the subs alone: `subs r0,r6,#1 ; lsls r0,r0,#0x10 ; lsrs r6,r0,#0x10 ; cmp r6,#0 ; bne <top>`. That is exactly the 8 bytes: 2 for the extra instruction, 4 for the pool word, 2 for the .short 0 alignment the ROM's odd pool word count needs. The a2/v register swap (ROM a2=r7 v=r6, draft a2=r6 v=r7) is the only other difference and is almost certainly downstream of it.",
    "why_it_is_close": "Everything except the decrement is byte-exact: the top guard, the bitfield reads and writes, both Div calls, the a3 branch, the 60-byte table walk, the tail ternary, the three saved hi registers and the epilogue.",
    "axes_ruled_out": [
+    "Wave 73 (W73-C): THE EXIT TEST'S OPERAND IS NOT THE LEVER, AND THIS REFUTES THE STANDING DIAGNOSIS. Waves 59/60 held that the ROM distributes the `<< 16` over the `- 1` BECAUSE its exit test reads the pre-narrowed temp. The test has now been moved onto the pre-narrowed temp -- `t = (a2 - 1) << 16; a2 = (u32)t >> 16; } while (t != 0);` emits `sub r0,r7,#1 ; lsl r0,r0,#0x10 ; lsr r7,r0,#0x10 ; cmp r0,#0 ; bne`, which tests r0, the shifted temp, exactly as the ROM does -- and combine STILL emits `sub` before `lsl` rather than `lsl` before an add of 0xFFFF0000. The brief's rule (a non-coalesced `lsr rTMP,rV,#k ; mov rV,rTMP` means the exit test reads the temp) is a correct READ-OUT of the ROM but does not identify what to write.",
+    "Wave 73 (W73-C): the plain int-temp form `t = a2 - 1; a2 = t; } while (t != 0);` -- same narrow-domain tail, still -8. This is the current draft, kept because of what it DOES fix (see settled_by_this_attempt).",
+    "WAVE 60'S 'USEFUL NEGATIVE' IS WRONG AND SHOULD NOT STOP ANYONE (corrected wave 73, W73-C). It argued combine cannot have produced the ROM's form because 'combine has no way to emit a pool load', and that the `ldr` sitting inside the loop rather than hoisted proves the constant was created after loop.c and so is unreachable from C. Both halves are mistaken: `ldr rN,=0xFFFF0000` is not an RTL memory load at all, it is how FINAL OUTPUT materialises any SImode immediate that is not an 8-bit THUMB constant, so combine producing `(plus (ashift x 16) (const_int -65536))` yields exactly those two instructions -- and a constant created after loop.c is precisely what LICM cannot have hoisted. The residual is an ordinary combine cost decision and the axis is OPEN, not closed.",
     "Wave 59 (W59-B): eight spellings of the counter, ALL of which emit the identical narrow-domain `subs ; lsls ; lsrs ; cmp` tail -- `} while (--a2 != 0);`, `} while (--a2);`, `a2--;` as a body statement with `} while (a2 != 0);`, `while (a2 != 0) { ... a2 = a2 - 1; }`, `for (; a2 != 0; a2--)`, and a `u16 n = a2;` copy looped on instead of the parameter (identical tail AND an extra add r4,r1,#0 in the prologue -- worse).",
     "Wave 59 (W59-B): `while (a2-- != 0)` -- pre-decrements before the loop and compares against a pool constant. Worse.",
     "Wave 59 (W59-B): AN ASCENDING COUNTER, `for (i = 0; i < a2; i++)`, with both `u16 i` and `int i`. This REFUTES the check_dbra_loop-reversed-an-ascending-loop theory for this function: it burns a whole register on i, moves a2 to r8, loses the force-addr word entirely (ldrh r2,[gUnknown_030033EC] direct) and does not produce the shifted-domain decrement either.",
@@ -36702,6 +36755,7 @@
     "Wave 60 (W60-D): the exit test written in the SHIFTED domain -- `} while ((n = n - 1) << 16);` and `n = n - 1; } while (n << 16);`. combine folds the `<< 16` truth test straight back to `cmp rN,#0` on the stored counter."
    ],
    "settled_by_this_attempt": [
+    "Wave 73 (W73-C): the COUNTER REGISTER SWAP is downstream of the decrement's shape, as waves 59/60 suspected but did not confirm. Introducing an `int t` temp between the decrement and the store moves a2 into r7 and v into r6, which is the ROM's assignment; the old `} while (--a2 != 0);` draft had them the other way round. Score 62.1% -> 64.5%. One fact, not two.",
     "Wave 59 (W59-B): THE WHOLE 4.8% -> 62.1% MOVE WAS ONE EDIT -- `goto <label after the loop>` instead of `break` for the loop's LEADING exit test. agbcc's expand_end_loop rolls a loop's first conditional exit to the bottom and enters with a b to it; a user goto targets a label that is not the loop's end_label, so the roll does not fire and the guard stays at the top where the ROM has it. Everything else followed with no further work: the top guard cmp a2,#0 / beq, the LICM hoist of the bitfield mask (movs r4,#0x7f in the preheader), and hence mov sl,r4 / mov r1,sl -- the THIRD hi register the ROM saves. The hoist is what costs r4 and forces the force-addr word into sl; it is one fact, not three. A HOIST YOU CANNOT REPRODUCE MAY BE A ROTATION YOU CANNOT REPRODUCE. Written up in docs/agbcc-codegen.md.",
     "Wave 59 (W59-B): gUnknown_08499598 is a POINTER to an array of 60-byte elements (ldr r1,[r0] then index*60) and .unk00 is a 32-bit member.",
     "Wave 59 (W59-B): [r5,#4] is a 7-bit count plus a preserved top bit (the header's unk04_0). The != 0 test compiles to `movs #0x7f ; ands` while the VALUE read compiles to `lsls #0x19 ; lsrs #0x19`, and agbcc does not spell one & 0x7f two different ways, so the bitfield model is right and not a shifts-and-masks source.",
@@ -42434,9 +42488,9 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 288,
-   "best": "284 bytes (-4), 64.2% identical (wave 60, W60-C -- up from 24.3%). The CODE delta is only -2: the ROM's last 2 bytes are literal-pool ALIGNMENT PADDING that the shorter candidate does not need, so read this as ONE missing instruction, not two.",
-   "remaining_diff": "ONE INSTRUCTION plus a register permutation. Wave 60 CLOSED both residuals the wave-39 note called the hard part. (1) SOLVED -- the fill loop's `lsls r0,r6,#0x10; lsrs r0,r0,#0x10` at the use is reproduced; see docs/agbcc-codegen.md, 'A (u16) cast at a USE survives only if the pseudo has TWO OR MORE SETS'. (2) SOLVED -- the ROM's `movs r3,#0` BEFORE the `lsrs` is a COMMA IN THE for-INIT, `for (i = 0, half = n >> 1; i <= 0x3FF; i++)`, which no statement order can reach. (3) OPEN, and it is the whole remaining job: block 4's inner loop keeps 0x100 in a HIGH register (`mov r9,r1` in the preheader, `mov r7,r9` per iteration -- the one instruction the candidate does not emit) because the ROM loads the array base BETWEEN `lsls r1,r2,#1` and `adds r1,r3,r1`, so r1 is busy and reload needs r7 as a second scratch; the candidate loads the base first and uses r1 for it. (4) OPEN, but a CONSEQUENCE of where the second set was spelled: putting it in block 4's guard makes half's allocno span the function, so it takes r2 and rotates the clear loop's three constants (candidate r2/r6/r5/r4 where the ROM has r6/r5/r4/r2) and gives the guard's `subs` a destination the ROM does not spend. Also expected and NOT a difference: the .text pool word relocates against `.rodata` rather than gUnknown_08090C28, which is the wave-21 same-address case and needs rodata: [\"0x08090C28\"] at promotion.",
-   "why_it_is_close": "The wave-39 note's 'genuine contradiction' is RETIRED and was a wrong reading, kept here because the correction is the useful part. It argued that the u8 clamp and the ROM's logical `lsrs` prove the shifted value fits in 16 bits, so nonzero_bits should fold the truncation, and concluded the ROM contradicted itself. combine never looks at the value: it reaches it through get_last_value, which is gated on REG_N_SETS == 1 whenever the set is in a different basic block from the use -- and the clear loop sits between them. Two sets and the pair survives, whatever the value is; one set and it collapses to `adds r0, r6, #0`. Probed both ways. The note's OTHER half is still right and is now the sharpest thing in this entry: r6 is reused for 0x5000 inside block 4, one allocno is one hard register, so the ROM's second set of `half` CANNOT be anywhere inside block 4. The next wave's whole job is to find the second set that lives BEFORE the clear loop, is not deleted by flow as a dead store, and does not lengthen the live range. That should also drop item (3) for free: the wave-60 sub_0802E2D0 match measured that ONE extra live value re-seeds every scratch pick in a function at once, so 'one instruction plus a scatter of register names' is normally ONE fact.",
+   "best": "97.2% identical, SIZE-EXACT at 288 bytes, 8 of 288 bytes differ (wave 73, W73-D; was 95.5% / 13 bytes after W73-A).",
+   "remaining_diff": "8 bytes, and every one is a register NAME on an instruction stream that is otherwise 1:1 with the ROM. It is a three-way ROTATION, not a swap: ROM half=r6 / zero=r4 / bound(0x3FF)=r2, candidate half=r4 / zero=r2 / bound=r6, plus block 4's `subs r0,r0,r7` / `asrs r0,r0,#1` computing in place where the candidate uses r4 as the intermediate. Pool words, branch structure, immediates and size all match. The `R_ARM_ABS32 .rodata` line is EXPECTED (wave-21 same-address case) and is not one of the 8 bytes.",
+   "why_it_is_close": "THE CONSTRAINT PAIR IS RESOLVED -- this is what changed in wave 73 and the entry should no longer be read as blocked on it. It had stood as a contradiction: (a) the (u16) truncation at loop 2's guard survives only if `half` has a WIDE second SET, and the only wide value is block 4's `p[0] - n`; (b) but the ROM makes no live assignment in block 4. Both are true, and the resolution is that THE SET DOES NOT HAVE TO BE ITS OWN STATEMENT. Written in the for-INIT beside the counter -- `for (i = 0, half = p[0] - n; i < ((p[0] - n) >> 1); i++)` -- the two `p[0] - n` are ONE value to cse, so the set costs no register, and `movs r3,#0` keeps its place at the head of the block because it is the first element of the init. That single edit fixed BOTH remaining block-4 defects at once (the `ldr r2,[r1,#0]` register AND the guard's instruction order) and took 13 differing bytes to 8. Written up as its own chapter in docs/agbcc-codegen.md. What is left is a pure register-name rotation.",
    "axes_ruled_out": [
     "`u16 half` local -- folds the narrowing entirely AND finalises the bound into its register before the intervening clear loop; 14.6%, -4",
     "`int half` + `(u16)half` at the use -- leaves the bare copy `adds r0, r6, #0`, one insn short; 24.3%, -4. This is the kept draft and it REFUTES docs/agbcc-codegen.md's 'int local + cast at the use holds the shift pair' for a COMPARISON use (true only for an arithmetic use); the chapter has been amended",
@@ -42447,7 +42501,15 @@
     "declaring gUnknown_08090C28 as a real `u8 **` global (wave-39 lead's hypothesis) -- probed and REFUTED BY CONSTRUCTION: it emits FOUR loads (`ldr/ldr/ldr/ldrb`) where the ROM has three, because agbcc adds its own `.LC` force-addr level on top of the declared global. It is bigger, not smaller",
     "WAVE 60: `int half; half = n; half >>= 1;` as a way to get the second set -- it gives ONE set, not two (cse propagates and flow deletes the dead store before combine runs), AND it silently turns `lsrs` into `asrs`, because an in-place shift on a signed int is arithmetic where `n >> 1` on a `u8 n` is logical. Probed",
     "WAVE 60: the second set placed inside block 4 (`(half = p[0] - n) >> 1`, and the `(half = (p[0] - n) >> 1)` variant) -- it DOES keep the truncation alive and is the measured 64.2% draft now in work/, but it cannot be what the ROM did: half's allocno then spans the whole function and conflicts with the 0x5000 pseudo that owns r6 inside block 4. The `half = p[0] - n` form is the better of the two (one differing register in the guard and the loop bottom, against two)",
-    "WAVE 60: the wave-39 entry 'all three groupings of block 4's index compile BYTE-IDENTICALLY' was measured in the OLD allocation context and has NOT been re-measured since the two levers landed. Treat it as unverified rather than settled -- fold puts the MULT first for all three spellings, which is why they tie, so if the operand order is ever to move it will be by pressure, not by grouping"
+    "WAVE 60: the wave-39 entry 'all three groupings of block 4's index compile BYTE-IDENTICALLY' was measured in the OLD allocation context and has NOT been re-measured since the two levers landed. Treat it as unverified rather than settled -- fold puts the MULT first for all three spellings, which is why they tie, so if the operand order is ever to move it will be by pressure, not by grouping",
+    "WAVE 73: decomp-permuter, TWO 300 s runs, each restarted from the previous best.c per the wave-59 method. It had NEVER been run on this function despite the residual being a textbook swapped pair. 93.8% -> 95.1% -> 95.5% (18 -> 14 -> 13 differing bytes). It does not close it and the gains decelerate sharply, but the axis is no longer untried.",
+    "WAVE 73: the winning permuter mutation is a do/while(0) WRAPPER on the clear-loop body, and a second NESTED one is worth 1 byte more. Both are now in the draft. DO NOT TIDY THEM -- folding them back costs the 4 bytes. They change the clear loop's register assignment with no semantic change; there is no aggregate type involved, so wave 18's 'a do/while(0) may be paying for a wrong aggregate type' caveat does not apply here.",
+    "WAVE 73 (W73-G): THE REMAINING 8 BYTES ARE ONE FACT, SHOWN BY CONSTRUCTION. compile_probe of the draft against itself with ONLY the block-4 assignment removed: with `half = p[0] - n` in the for-init, half lands in r4 and the (u16) truncation SURVIVES; without it, half lands in r6 -- THE ROM'S REGISTER -- and the truncation folds to a bare `adds r0, r6, #0`. The ROM has both. So the block-4 set is simultaneously the only thing keeping the truncation alive and the only thing costing half its register: the extra live range extends half's allocno conflicts and pushes it off r6, and the preheader's other two pseudos rotate with it (ROM half=r6/zero=r4/bound=r2 against the candidate's r4/r2/r6). The 6 bytes of rotation and the 2 bytes of the block-4 subs/asrs destination are ONE decision, not two. Full write-up in docs/agbcc-codegen.md.",
+    "WAVE 73 (W73-G): WHERE THE WIDE SET CANNOT GO, narrowing the search for the next wave. Loop 1's body and the whole region between loop 1 and loop 2's guard are excluded on SEMANTICS (they clobber half before its read); loop 2's body is excluded because the ROM holds &gUnknown_0849957C in r6 there, so a set of half there conflicts exactly as block 4's does; block 4 is excluded by the measurement above. A wide set must ALSO have its value consumed in the same expression or flow deletes it before combine runs (this is why `half = n; half >>= 1;` gives one set). Those constraints leave no position in the current statement set, which is why the next idea has to be a different wide VALUE, not a different position.",
+    "WAVE 73 (W73-G): decomp-permuter ROUND 4, 300 s / 4 threads, started from W73-D's fresh 97.2% best.c -- no candidate scored better than the starting point. This is the first round run from a genuinely new starting point since the gains stopped, which is what the wave-73 rule about `exhausted` claims requires, so the negative is now properly earned: the swapped pair here is not permuter-reachable.",
+    "WAVE 73 (W73-D): A THIRD 300 s permuter round from W73-A's 95.5% best.c -- no candidate scored better than the starting point. Combined with W73-A's two rounds (93.8 -> 95.1 -> 95.5), the wave-59 repeat-from-best.c method is now exhausted on this function at three rounds with the gains having gone to zero. The swapped pair in the clear loop is NOT permuter-reachable here. Draft verified unchanged against a pre-run snapshot afterwards.",
+    "WAVE 73 (W73-D): `half = (p[0]-n) >> 1` inside the loop CONDITION scores 92.7% because the bottom test then also writes half -- the for-INIT is the right place for the set, the condition is not. Recorded because the two are easy to confuse and only one works.",
+    "WAVE 73 (W73-D): a FOURTH 300 s permuter round, from the new 97.2% best.c. Found nothing. Four runs across two agents (93.8 -> 95.1 -> 95.5, then two empty ones) close the axis: the remaining three-way register rotation is not permuter-reachable. Worth noting that the 95.5 -> 97.2 came from reading the ALLOCATION, not from the tool."
    ],
    "settled_by_this_attempt": [
     "WAVE 60: the >= 2-SETS rule for a cast at a use, and the comma-in-for-init rule for the preheader's emission order -- both measured by controlled probe and written up as chapters in docs/agbcc-codegen.md",
@@ -42456,7 +42518,8 @@
     "`u8 n` is settled: it is the only width giving all three of the ROM's readouts at once -- unsigned clamp (`bls`), logical `lsrs` for n >> 1, and arithmetic `asrs` for (m - n) >> 1",
     "the whole of block 3 is settled, including the re-read of ((u8 *)gUnknown_03003F68)[1] on every inner iteration for both the guard and the bound, and the `j * 2 + i` operand order",
     "the +0x20 store displacement, the two separately-materialised constants 0x100 and 0x5000, and the value expression `i + (j + 0x100) + 0x5000` are all byte-exact",
-    "'first difference at +0x8' is NOT an opening error: +0x8 is a pc-relative `ldr`, and EVERY pc-relative load in the function differs by exactly 4 because the candidate is 4 bytes short. The three opening loads, `mov r8, r1` and `mov sb, r0` are unchanged context in the diff"
+    "'first difference at +0x8' is NOT an opening error: +0x8 is a pc-relative `ldr`, and EVERY pc-relative load in the function differs by exactly 4 because the candidate is 4 bytes short. The three opening loads, `mov r8, r1` and `mov sb, r0` are unchanged context in the diff",
+    "WAVE 73 (W73-D): gUnknown_0849957C is a POINTER global, not an array -- the clear loop shows `ldr r5,[pc,#240]` followed by `ldr r0,[r5,#0]`. Its two use sites want DIFFERENT spellings: the clear loop wants address-early/deref-late (plain `g[i]` gives that here) while block 4 wants the value bound to a local (settled item 1). The spelling is a property of the USE SITE, not of the global -- relevant to W73-E's three-spellings chapter, which measures one site per function."
    ],
    "reason": "One shape, two functions. sub_0802E130 is this function with gUnknown_08499578 for gUnknown_0849957C and sub_08013AEC for sub_08013AFC; its trymatch diff is character-for-character identical apart from those symbols. A future wave gets BOTH from one derivation -- do not work them separately."
   },
@@ -42489,15 +42552,19 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 288,
-   "best": "284 bytes (-4), 64.2% identical (wave 60, W60-C -- up from 24.3%, moved by substitution alone). 99 of 284 bytes differ, exactly as for sub_0802E010.",
-   "remaining_diff": "Character-for-character the same diff as sub_0802E010, apart from the three substituted symbols (gUnknown_08499578, sub_08013AEC, and its own force-addr .rodata word at 0x08090C2C). See that entry for the one remaining instruction. Wave 60 re-confirmed the pair reading the hard way: the two drafts moved 24.3% -> 64.2% together and both report 99 of 284 differing bytes.",
+   "best": "97.2% identical, SIZE-EXACT at 288 bytes, 8 of 288 bytes differ (wave 73, W73-D), moved by substitution alone.",
+   "remaining_diff": "Character-for-character the same diff as sub_0802E010 apart from the three substituted symbols (gUnknown_08499578, sub_08013AEC, and its own force-addr .rodata word at 0x08090C2C). See that entry.",
    "why_it_is_close": "It is sub_0802E010 with three substitutions and no other difference; the identical diffs are the confirmation that the pair is one shape. It cannot fall until the first one does, and it falls automatically when it does.",
    "axes_ruled_out": [
     "everything listed under sub_0802E010 -- the two functions compile to the same instruction stream, so no axis is worth re-testing here"
    ],
    "settled_by_this_attempt": [
     "the pair reading itself: 139 = 139 instructions, and the two candidates' diffs match character-for-character apart from the substituted symbols",
-    "0x08090C2C is this function's own -fforce-addr copy of &gUnknown_03003F68, not a second global; promotion needs rodata: [\"0x08090C2C\"]"
+    "0x08090C2C is this function's own -fforce-addr copy of &gUnknown_03003F68, not a second global; promotion needs rodata: [\"0x08090C2C\"]",
+    "WAVE 73: FOURTH confirmation of the pair reading. The two drafts moved 93.8% -> 95.1% -> 95.5% together and reported the IDENTICAL differing-byte count (13 of 288) at every step, including after a permuter mutation derived on sub_0802E010 alone and transcribed here unchanged.",
+    "WAVE 73 (W73-G): FIFTH confirmation of the pair reading, and the first at the new score. Measured directly: 8 of 288 differ, 97.2%, and the --diff output is character-for-character identical to sub_0802E010's apart from the three substituted symbols (gUnknown_08499578, sub_08013AEC, and the force-addr .rodata word at 0x08090C2C against 0x08090C28). The draft needed no edit -- W73-D had already transcribed the for-init comma.",
+    "WAVE 73 (W73-D): the pair reading holds through a third permuter round on sub_0802E010 that produced no change; this draft remains its exact transcription at 13 of 288 differing bytes. Nothing was attempted on this function directly, by design -- it falls by substitution when sub_0802E010 falls.",
+    "WAVE 73 (W73-D): FIFTH confirmation of the pair reading. sub_0802E010's for-init fix was transcribed here unchanged and this function moved 95.5% -> 97.2% with the IDENTICAL differing-byte count (8 of 288) and a character-for-character identical diff apart from the substituted symbols. This is the self-check the wave brief prescribes: had it not moved, sub_0802E010's derivation would have been wrong."
    ],
    "reason": "Derived from sub_0802E010 by substitution, as intended. Re-run it unchanged when that function closes."
   },
@@ -43702,26 +43769,14 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 56,
-   "best": "56 bytes (exact size), 87.5% identical -- 7 of 56 bytes differ, first at +0xa",
-   "remaining_diff": "The instruction SEQUENCE is exact and so are the three pool words and their order (gUnknown_0202575C, gUnknown_0849B018, gUnknown_03003FC0). Two quantities have each other's hard register: the ROM keeps the gUnknown_0849B018 dereference in r3 and the gUnknown_03003FC0 address in r2, ours keeps them in r2 and r3. The one consequence is the tied operand of the index add -- ROM `adds r2, r2, r1` then `adds r2, #0x3e` (result in the BASE register), ours `add r1, r1, r3` then `add r1, r1, #0x3e` (result in the INDEX register). Nothing else in the function differs.",
-   "why_it_is_close": "Everything about the address expression is already settled by the listing. The 0x3e is added to the address AFTER the index and the pool word is the bare `gUnknown_03003FC0`, which rules out every member-array spelling: `g.field[i]` folds `&g + 0x3e` into the pool word (measured, three ways). So the source is an address constant offset by a runtime index and then displaced by 0x3e, which is exactly what the parked draft writes. This is the same failure as sub_0801C4D4 and sub_0801C640 -- see 'OPEN: two simultaneously-live pointers can swap registers with no source lever' in docs/agbcc-codegen.md -- and it is a THIRD instance, which makes the minimal-probe experiment that section asks for worth more than another rewrite here.",
-   "axes_ruled_out": [
-    "member array `gUnknown_03003FC0.unk3e[i]` and every equivalent (`((u8 *)&g + 0x3e)[i]`, `((u8 *)&g)[i + 0x3e]`) -- all fold &g+0x3e into the literal pool, which the ROM does not do",
-    "pointer local declared and assigned BEFORE the unk00/unk01 stores -- moves gUnknown_03003FC0's pool word to slot 0; the ROM has it in slot 2",
-    "pointer local assigned after the unk01 store, as one statement (`p = (u8 *)&g + i; p[0x3E]`) -- correct pool order, wrong registers",
-    "the same split into two statements (`p = (u8 *)&g; p += i;` and `p = p + i + 0x3E;`) -- identical output to the one-statement form",
-    "binding the index to its own `int` or `s8` local first, so the add's operands are two plain pseudos -- identical",
-    "writing the sum index-first (`*(g0849B018->unk06 + (u8 *)&g + 0x3E)`) to flip the tied operand -- gcc canonicalises, identical",
-    "binding gUnknown_0849B018 to a local `struct Unk0849B018 *` -- moves ITS pool word to slot 0, still r2 for the deref",
-    "binding gUnknown_0202575C to a local `struct Unk0202575C *` -- same, pool order breaks",
-    "reaching the byte through a cast struct pointer with a member at 0x3e (`((struct S *)((u8 *)&g + i))->unk3e`), both inline and via a local -- identical",
-    "the volatile double read of gUnknown_0849B018->unk06 is NOT the issue: the ROM's two `ldrb [r3,#6]` are reproduced exactly, and unk06 is already volatile in unknown-globals.h"
-   ],
-   "wave": "31 (W31-A)"
+   "status": "MATCHED wave 73 (W73-B), relocs: match, no rodata placement needed.",
+   "resolved_by": "SUBTRACTION OF A NEGATION, found by decomp-permuter and understood afterwards. The draft's fourteen additive spellings all emitted `add r1, r1, r3` (index operand 1, symbolic base operand 2); the entry's rule 'in `pointer + runtime` a SYMBOLIC base is ALWAYS operand 2' is correct for every ADDITIVE spelling and is escaped by writing the add as a subtraction: `p = (u8 *)&gUnknown_03003FC0 - (-gUnknown_0849B018->unk06);` puts the base in operand 1 and yields the ROM's `adds r2, r2, r1`. The entry's conclusion that this was unreachable from source was wrong, and the 'open TYPE-MODEL question' it pointed at was a false lead -- the type model was already right.",
+   "measurements": "Wave 73 (W73-B) toolchain sweep, all seven compiler profiles run against this exact draft: configured/default 87.5%, no-force 78.6%, o1 87.5%, o1-no-force 78.6%, old-agbcc 87.5%, old-agbcc-no-force 78.6%. No profile beats the configured one. Comma operator measured and NEGATIVE here: four comma spellings (base bound first, the ruled-out `p = base; p += i` pair folded into one statement, and index bound first) all emit the identical `add r1, r1, r3`. Permuter: run 1 from the draft, base score 45, MATCH.",
+   "wave": "31 (W31-A) parked; 73 (W73-B) matched"
   },
   "named": false,
   "kind": "game",
@@ -48574,38 +48629,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 68,
-   "best": "68 bytes (size EXACT), 80.9% identical, relocations correct",
-   "remaining_diff": "13 bytes, and every one of them is the copy loop's counter running BACKWARDS plus the r3/r4 renumbering that follows. Original: `movs r4,#0` / `adds r4,#1` / `cmp r4,#3` / `ble`. Candidate: `movs r3,#3` / `subs r3,#1` / `cmp r3,#0` / `bge`. Identical instruction count and identical size, so `size: match` is not evidence the loop is right. Everything else -- the five straight-line stores, their offsets (+0/+6/+7/+0xc/+0xd), both literal pool words, both relocations, the `adds r1,#4` / `adds r2,#0xe` setup, the loop body's `ldrb`/`strb`/two `adds`, and the reload of the block pointer after the loop -- is byte-identical.",
-   "why_it_is_close": "This is agbcc's check_dbra_loop. It reverses a counted loop once the index is dead, which happens as soon as every giv derived from it has been strength-reduced. The ROM has BOTH pointers reduced to bivs AND a live ascending counter, and no spelling tried produces both at once: every spelling that reduces both pointers kills the index and reverses, and the only spellings that keep the index alive do so precisely BECAUSE agbcc declined to reduce the destination, which then costs an `add` in the loop body the ROM does not have. sub_0803442C, parked beside this one last round, was the same mechanism seen from the other side and is now MATCHED: there a second address expression `dst[j + 1]` off a separately-bound `j = i * 2` stayed unreduced and kept the index alive on its own. The equivalent lever does not exist here -- 44F0's loop body is a bare byte copy with no second use of the index to hang it on.",
-   "axes_ruled_out": [
-    "`for (i = 0; i < 4; i++)` indexing both arrays off their bases -- reverses",
-    "`for (i = 0; i <= 3; i++)` -- reverses, identical output to `< 4`",
-    "`i = 0; do { ... } while (i <= 3);` with array indexing -- reverses",
-    "`i = 0; do { ... } while (i <= 3);` with the pointer walk -- reverses",
-    "explicit `*d = *s; s++; d++;` pointer bivs with a separate counter -- reverses (this is the kept draft)",
-    "the same with a `u8 v;` temp carrying the copied byte -- bit-identical to the above, so the temp is not a lever",
-    "`blk += 0xe;` advancing the block pointer in place instead of a separate `d` -- bit-identical, reverses",
-    "`d[i] = gUnknown_03004490[4 + i]` (destination through a local, source indexed) -- does NOT reverse, but agbcc then leaves the destination unreduced (`add r1, r4, r3` in the body) and spends an extra `add` plus a third callee-saved register",
-    "`blk[0xe + i] = s[i]` (source through a local, destination indexed) -- leaves BOTH unreduced, two `add`s in the body",
-    "`(*p)[0xe + i]` with the block reached through the pointer-to-pointer at every use -- does not reverse, for the same reason as above, and additionally reloads `*p` before each of the five straight-line stores",
-    "naming gUnknown_030044B0 directly instead of going through gUnknown_08090D84 -- also size-exact and scores 82.3%, but relocates against this unit's own .rodata instead of gUnknown_08090D84. HIGHER PERCENTAGE, WRONG RELOCATION; work/sub_080344F0/best.c holds that draft and should not be preferred over the kept one",
-    "unsigned counter -- excluded without compiling: the ROM's exit test is `ble`, a SIGNED compare, so the index is a plain int"
-   ],
-   "settled_by_this_attempt": [
-    "gUnknown_08090D84 is agbcc's -fforce-addr address constant for gUnknown_030044B0, not a global. The ROM word there is 0x030044B0 and the .text pool word relocates against gUnknown_08090D84 itself, so the block must be reached through a `u8 *const *` local -- the same idiom as c_080345C8.c's gUnknown_08090D88. Now declared in include/unknown-globals.h with this evidence.",
-    "gUnknown_03004490 is a u8 array at least 8 long, not a scalar or a struct: the loop indexes it with a variable from [4].",
-    "The five straight-line stores and their offsets are byte-exact, and their order is the source's -- +0, +6, +7, +0xc, +0xd.",
-    "The parameter is `int`: the prologue is bare and r0 reaches `strb r0,[r2,#6]` with no masking.",
-    "The loop is FOUR iterations copying gUnknown_03004490[4..7] to block[0x0e..0x11], and both pointers are strength-reduced bivs in the ROM.",
-    "Loop-direction differences are SIZE-NEUTRAL. This cost a wave: the function reports `size: match` at 68 bytes while 13 bytes differ, and reads exactly like a missing statement.",
-    "The fall-through / negated-condition axis does NOT apply here -- sub_080344F0 contains no `if` at all, so there are no two constants in two blocks to swap."
-   ],
-   "reason": "One optimiser decision, not source semantics. The type model, the relocation, the statement order and the loop body are all settled and recorded in the draft header. What remains is making agbcc keep the loop counter ascending while still strength-reducing both pointers, and eleven spellings say those two outcomes are mutually exclusive through the source. Worth one look from anyone who finds a third lever on check_dbra_loop -- or a permuter run, which has not been tried here."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -55410,13 +55436,23 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 172,
-   "best": "43.0% identical, first difference at +0x20. Position only, from the orchestrator's wave-59 verification sweep.",
-   "remaining_diff": "NOT CHARACTERISED. W59-B did not open this function.",
-   "why_it_is_close": "Not assessed.",
+   "best": "87.2% identical, SIZE-EXACT at 172 bytes, 22 of 172 bytes differ (wave 73, W73-D). Was 43.0% at 164 bytes (-8).",
+   "remaining_diff": "22 bytes, TWO facts, and they are one cause. (a) POSITION: the ROM computes `dst` as an LICM HOIST in the inner loop's preheader -- AFTER the zero-trip guard (ldrb/cmp/beq) and AFTER the table-base hoist `ldr r3,[pc,#36]`. The draft computes it as a source statement in the outer loop body, so the three instructions (`lsls r0,rJ,#8`, `ldr r1,=0x6140`, `adds r4,r0,r1`) land BEFORE the guard. (b) SLOTS: the ROM shares r4 between `j` and `dst` -- `adds r6,r4,#1` saves j+1 before the reuse -- so `movs r4,#0`, `lsls r0,r4,#8` and `lsrs r4,r0,#16` all name r4; the draft has j in r3 and dst in r4, which also shifts both `ldr [pc,#N]` displacements. (b) FOLLOWS FROM (a): while `dst` is a source statement its live range starts before the guard and cannot overlap j's. IGNORE the branch lines in --diff -- `<_08039620>` against `<sub_08039588+0x98>` is the same encoding.",
+   "why_it_is_close": "THE CONSTANT MERGE, which was the whole park for four waves, IS SOLVED. cse merges `dst + 0x06010000` into `dst = (j << 8) + 0x6140` whenever both sit in the same extended basic block, collapsing the ROM's two pool words into one `=0x06016140` and costing 8 bytes. Assigning `dst` in the OUTER loop body, before the inner `for`, puts the definition behind the inner loop's back edge where cse cannot reach it, and both pool words survive: 164 bytes (-8) at 43.0% becomes size-exact at 87.2%. The open question has MOVED and is now a positioning question: what source form keeps the definition out of the use's extended basic block (which the pool words require) while still presenting it to loop.c as an invariant OF THE INNER LOOP (which the hoist position requires)? Those are the two ends of one span and every spelling measured so far sits at one end or the other.",
    "axes_ruled_out": [
-    "NOTHING WAS RULED OUT IN WAVE 59. This entry records position only. It was offered to W59-B as an optional extension after its six assigned functions and was never picked up, so no probe, no try_match and no assembly read was spent on it this wave. Any prior evidence lives in work/sub_08039588/sub_08039588.c and in the git history, not here."
+    "the expression inline, `(void *)(0x06010000 + j * 0x100 + 0x6140)`, and `(u8 *)0x06010000 + (j * 0x100 + 0x6140)`: fold/cse merge the two literals, 164 bytes",
+    "`dst = ...` as the first statement of the inner loop body: still merged, and it also hoists BEFORE the table base, reversing the preheader",
+    "`dst = ...` inside the `if`, i.e. at the use: merged. THIS WAS THE KEPT DRAFT FOR FOUR WAVES at 43.0% / -8 bytes",
+    "hand-rotating the inner loop into `k = 0; if (tbl[k]) do {...} while;` so the assignment sits in the preheader: much worse -- it spills the table base to a -fforce-addr .rodata word and moves str into r9",
+    "WAVE 73 (W73-G): DEFINING `dst` IN THE OUTER BODY *AND* REDUNDANTLY AT THE END OF THE INNER BODY -- the one spelling that looked like it reached both ends of the span. It reaches neither. The two pool words survive, but the inner def is NEITHER HOISTED NOR DELETED (it sits at the loop bottom costing two instructions an iteration) and the outer def still lands ahead of the zero-trip guard. The reason is a precondition of gcc's move_movables this project had not recorded: A MOVABLE'S REGISTER MUST NOT BE LIVE ON ENTRY TO THE LOOP. Defining dst anywhere outside the inner loop makes it live at entry and FORECLOSES THE HOIST BY CONSTRUCTION, so no outer position can ever work and the whole `where outside` axis is closed. What remains is to split the def and the use into different extended basic blocks with BOTH inside the loop, without adding control flow. See the new chapter in docs/agbcc-codegen.md.",
+    "WAVE 73 (W73-D): decomp-permuter, 300 s / 4 threads, from the new 87.2% best.c. No match, and every candidate it scored regressed TOWARDS the merged -8 spelling (best 40.7% at 164 bytes) -- the tool confirming from the other side that the size-exact spelling is the right branch. Wave 57 had closed this axis BY ARGUMENT ('the residual is a missing INSTRUCTION, wave 37's one useless case for the permuter'); that was correct for the OLD draft and does not apply to this one, which is size-exact. Now measured rather than reasoned about."
    ],
-   "note": "Wave 59 (W59-B) -- POSITION-ONLY ENTRY, NOT AN INVESTIGATED PARK. Read this as 'a draft exists and fails', not as 'the axes are exhausted'. Its named exemplar is src/decomp/c_080394B4.c and it reports undeclared callees: 0. NOTE FOR WHOEVER MAINTAINS THIS FILE: parked.json holds its entries OUT of the work queue, so an uninvestigated entry hides an unworked function. If that is not wanted, delete this entry rather than leaving it to be read as evidence."
+   "settled_by_this_attempt": [
+    "WAVE 43 (W43-I), still valid: THE DEF/USE SPLIT IS STRUCTURAL. Both `dst` and `dst + 0x06010000` are invariant in the inner loop, yet the ROM hoists only the first -- the second's destination is r1, set immediately before the `bl`, and loop.c will not move an invariant whose register is call-clobbered out past the call. `dst` lands in callee-saved r4 and hoists freely. A non-trapping invariant inside a conditional still hoists, so both may legitimately be written inside the `if`.",
+    "WAVE 73: the merge is an EXTENDED-BASIC-BLOCK property of cse, not a tree-level fold. `dst` is a VAR_DECL, so `0x06010000 + dst` cannot be folded at tree level at all; what merges the literals is cse propagating the definition into the use, and it can only do that while the two are in one EBB. Putting the definition behind a back edge is what stops it. This is the general lever for a 'two pool words became one' residual.",
+    "WAVE 73 PROCEDURAL: this entry previously read 'NOT CHARACTERISED', 'W59-B did not open this function' and 'NOTHING WAS RULED OUT IN WAVE 59'. All three were misleading -- work/sub_08039588/sub_08039588.c carried three waves of measured evidence (W43-I, W57-E) the whole time. A position-only entry written as though the function were unexamined cost this function two waves of being read as either exhausted or untouched, and it was neither. If an entry records position only, say where the evidence actually lives."
+   ],
+   "reason": "One loop-optimiser positioning decision. The type model, the statement order, the loop shapes and now the literal-pool split are all settled and recorded in the draft header; what remains is getting the `dst` computation hoisted by LICM into the inner loop's preheader rather than emitted as a source statement ahead of the zero-trip guard, without putting it back into the use's extended basic block where cse re-merges the two constants."
   },
   "named": false,
   "kind": "game",
@@ -60400,9 +60436,23 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 536,
+   "best": "65.7% identical, SIZE-EXACT (536/536). Waves 50, 62, 66, 73.",
+   "remaining_diff": "Allocation and preheader scheduling, plus one instruction-content difference in the unk2f decision tree. Instruction COUNTS are 258 candidate vs 259 ROM on a mnemonic-level diff of work/sub_0803BFBC/sub_0803BFBC.s against target.s.",
+   "why_it_is_close": "Every type, symbol and control-flow shape is settled -- see work/sub_0803BFBC/NOTES.md, which is the real write-up for this function. The current draft is a wave-62 permuter variant that introduced `new_var = d` and routes some stores through it; that is worth 17 points (48.3 -> 65.7) and is why the candidate spends an early `adds r6, r5, #0` the ROM does not.",
+   "axes_ruled_out": [
+    "decomp-permuter, 900 s chained from best.c (wave 73, W73-F): reached 67.7% size-exact but the candidate is SEMANTICALLY INVALID -- it executes `new_var->unk03 = ...` BEFORE `new_var = d;`, i.e. through an uninitialised pointer. Not adopted; the draft stays at 65.7%. Same family as sub_08020EDC's illegal 91.1% variant, and it is not legalisable, because putting `new_var = d;` back in front of that store IS the 65.7% draft. **WARNING FOR THE NEXT AGENT: work/sub_0803BFBC/best.c now HOLDS that invalid 67.7% variant, so any chained permuter run will search from it. Use `--current`.**",
+    "The three benign relocation differences are NOT differences: gUnknown_03004002 = gUnknown_03003FC0+0x42, gUnknown_03003FFD = gUnknown_03003FC0+0x3d, gUnknown_085C77E0 = gUnknown_085C77DC+4. trymatch reports different symbols resolving to the same address.",
+    "Adding `case 0: v = 1; break;` to the unk2f switch to buy the ROM's low-bound `cmp r0,#1 / ble`: 544 bytes (+8), 8.0%, first difference at +0xe (wave 73, W73-F).",
+    "The same with case 0 sharing default's label (`case 0: default: v = 1; break;`): identical result, 544 bytes (+8), 8.0%. So the ROM's low-bound test is NOT bought by a third case node in either spelling, and the axis is closed.",
+    "Writing the loop invariant `k` inline instead of in the for-init (wave 50): fixes the preheader ORDER but breaks the loop body, because fold reassociates `[i + (K*28 + 1)]` and folds the +1 into the biv's own update. The two requirements are in direct tension; that tension is the open problem."
+   ],
+   "settled_by_wave_73": "Two content differences located by diffing the candidate .s against target.s, neither previously recorded. (1) THE `?:` ARMS ARE SWAPPED. For `new_var->unk02 = unk32 ? 1 : gUnknown_0200C420.unk0e` the ROM emits `cmp r0,#0 / beq -> the ldrb arm` with `movs r0,#1` on the FALL-THROUGH; the candidate emits `bne` with the ldrb arm falling through. Same instruction count, opposite arm order. (2) THE ROM'S unk2f DECISION TREE CARRIES AN EXTRA LOW-BOUND TEST: `cmp #1/beq; cmp #1/ble; cmp #2/beq; movs #1; b; movs #3` where the candidate has `cmp #1/beq; cmp #2/beq; movs #1; b; movs #3; b; movs #2`. gcc's emit_case_nodes omits the low-bound branch when the node's right child is a single leaf ('costs too much space to save so little time'), which is the candidate; the ROM's version is what you get when the right child is not a leaf. Adding a third case node is refuted above, so the extra node must come from somewhere else -- a case RANGE, or a switch subject whose type defeats node_has_low_bound.",
+   "reason": "Residual kind 3 (allocation) plus one unresolved instruction-content difference in the switch tree. The permuter is documented as useless on the latter, so run it only after the switch tree is right."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -73220,22 +73270,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 208,
-   "best": "89.4% identical, SIZE-EXACT (208/208), 22 differing bytes, first difference at +0x12. Waves 35, 45 and 59.",
-   "remaining_diff": "A two-register inversion: ROM keeps `terrain` in r3 and the constant 0xe0 in r2; the candidate is the other way round. Everything else -- 208/208 bytes, instruction order, the `ip` parking of both row offsets, the `push {r4, lr}` list -- is byte-exact.",
-   "why_it_is_close": "The C is almost certainly the original source; wave 45 re-cut it from scratch off the MATCHED sibling sub_08045B30 and reproduced wave 35's result exactly. The allocno-priority model that closed that sibling cannot produce the ROM's order here, and the gap is structural rather than marginal: terrain is 11 refs against the constant's 10 (combine DELETES the first test's AND as redundant under the `>> 5` on a zero-extended byte, so it contributes no ref), and the live lengths differ by exactly 1, giving terrain the win by a wide margin. The ROM needs terrain at <=10 refs or the constant at >=11 -- both a whole test away. The model is INCOMPLETE, not mis-parameterised.",
-   "axes_ruled_out": [
-    "`return A && B && ...;` as one expression: builds an r5 accumulator, `push {r4,r5,lr}`, and no `movs r0,#1`/`b` pair. Wrong shape, not a register question.",
-    "the row offsets as declared locals, one or two of them: 81.25%, puts them in a LOW register and loses ip.",
-    "`(x & 0xe0) == 0x40` as the FIRST test (14.1%). The first test must carry the mask AND the shift, or the constant is not materialised in the first basic block at all, which moves the `movs`. The first predicate really does compile differently from the other nine and that is a fact about the source.",
-    "reordering the AND operands (`0xe0 & x`): expand_binop force_regs the constant after both operands are expanded, so the address pseudo is still created first. Byte-neutral.",
-    "`int mask = 0xe0;` bound before the tests: moves the `movs` into the prologue."
-   ],
-   "reason": "Residual kind 3 (allocation). Straight-line, not a loop -- the ten terms are written out in the source. Remaining candidates are find_reg's copy preferences (the constant is the source of nine `adds r0,rC,#0` copies; terrain of none) and REG_ALLOC_ORDER interaction."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -73657,9 +73694,28 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 104,
+   "best": "Reports `size: match` at 104 bytes and 32.7% identical, first difference at +0x6. Re-verified wave 73 (W73-C), unchanged since wave 37.",
+   "remaining_diff": "ONE INSTRUCTION. The ROM computes `i << 4` TWICE because its first copy is clobbered in place by its own `subs r0, r0, r4`, while agbcc's 3-operand `sub r0, r2, r4` leaves the shift alive in r2 for cse_insn to substitute. cse_insn fired in BOTH builds; the original's copy simply had nothing to substitute. So this is a register-allocation difference, not a CSE-failure and not a statement-shape one.",
+   "why_it_is_close": "Everything else matches: the loop shape, the *0x3c synthesis, the argument grouping and both trailing calls.",
+   "axes_ruled_out": [
+    "IT IS NOT SIZE-EXACT, AND ANY SCREEN KEYED ON `size: match` IS MIS-INCLUDING IT. The candidate is 2 bytes of CODE shorter and gets exactly 2 bytes back as literal-pool alignment padding. Wave 58 (W58-D) flagged this and wave 73 re-confirmed it. Treat it as a missing-instruction case, never as an allocation case.",
+    "Wave 37 (W37-P3): TEN source shapes, all byte-identical -- `i * 16 + 0x30`, `i << 4`, `0x30 + i * 16`, `(i - 1) * 16 + 0x40`, `y = i * 16; ... y + 0x30`, `if (...) call;`, `if (... != 0) continue; call;`, if/else both ways, `switch (unk14) { case 0: }`, and the element bound as `p = &gUnknown_08499598[i]` or `p = gUnknown_08499598`. None puts a CODE_LABEL between the two shifts, which is the only thing that would end the CSE extended basic block.",
+    "Wave 37 (W37-P3): the `(u16)` forms -- `(u16)(i * 16 + 0x30)` and a `u16 y` temporary. These DO break the CSE because HImode arithmetic is a different RTL expression, but they pay `lsl #16; lsr #16` for it: +4 bytes for a 2-byte problem. This also settles that the third parameter of sub_0801F34C is NOT narrow.",
+    "Wave 37 (W37-P3): `u16 i` is right -- the bottom `bls` needs shorten_compare on two unsigned narrow operands; `int i` gives `ble` and `u8 i` truncates the increment at 24 bits rather than the ROM's 16.",
+    "Wave 43 (W43-H): decomp-permuter, 22,157 iterations, 4 threads, 300 s -- nothing. The candidate is a strictly BETTER allocation than the ROM's and the permuter's variants are all well-allocated too, so the search space does not contain the original's answer.",
+    "Wave 43 (W43-J): the zero-cost-pressure lever (`int zero = 0;` bound before the loop and passed as arguments 4 and 5) costs a register rather than nothing -- r5 is burned for the whole function and the push list grows to {r4, r5, lr}. Strictly worse.",
+    "Wave 43 (W43-J): reading unk14 into a local and passing it as the fifth argument -- neutral on the residual. Worth recording that it reproduces the ROM's `str r1,[sp]` EXPLICITLY where the shipped body gets the same bytes only via gcc's knowledge that r1 == 0 on that path, so it is the likelier original spelling; not shipped because it is not an improvement.",
+    "Wave 43 (W43-J): adding a live range cannot UN-SUBSTITUTE a CSE. That lever closed three slot-wrong siblings in the same batch and cannot reach this one, which is one instruction the ROM has and the candidate does not. Do not try it again."
+   ],
+   "settled_by_this_attempt": [
+    "Wave 43 (W43-H) re-framed wave 37's diagnosis and the re-framing is the durable part: this is NOT 'why did cse_insn not fire', it is 'which register did the shift land in'. That is why all ten source shapes produced identical code -- they were the wrong axis."
+   ],
+   "note": "Wave 73 (W73-C). DOCUMENTED DEAD END, and the class is the doc's own: the permuter is useless on a residual of one extra instruction, and so is the live-range lever. Three waves (37, 43 W43-H, 43 W43-J) have each concluded the same thing by different routes. The only untested reading is a WIDER SOURCE CONTEXT -- this function sharing a translation unit or an inline boundary with a neighbour -- which is not reachable from inside the function. Do not spend a wave's budget re-measuring in-function spellings."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -73879,7 +73935,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -75463,16 +75519,22 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 180,
-   "best": "70.0% identical, SIZE-EXACT (180/180), 54 differing bytes, first difference at +0xc. Wave 59 (W59-D) took it from 21.1% and +8 bytes.",
-   "remaining_diff": "ONE allocation decision: a1 and a4 have swapped hard registers (ROM a1->r6, a4->r5; candidate a1->r5, a4->r6). The only other difference follows from it -- at the sub_08012BC8 call the ROM spends r2 on the two stack-slot constants and pays `mov r2,r8` to reload a3, where the candidate routes them through r3 and finds a3 still in r2 from the prologue. That saves 2 bytes, which come back as a `.short 0x0000` pad, so the size stays exact. All 54 differing bytes are register NAMES; opcode stream, instruction order, both pool words, both branch structures and the whole digit-count loop are the ROM's. The other three live values agree: a5->r4, a2->r7, a3->r8.",
+   "best": "92.2% identical, SIZE-EXACT (180/180), 14 differing bytes, first difference at +0x22. Wave 73 (W73-B) took it from 70.0%/54 bytes.",
+   "remaining_diff": "Still the a1/a4 hard-register swap, but now confined: 14 bytes from +0x22 rather than 54 from +0xc.",
    "why_it_is_close": "The priority model does not explain the ROM and the mismatch is not marginal. a1 has 6 refs to a4's 4, one of a1's refs is INSIDE the loop (global.c weights by freq, ~10x per loop level) and a1's live range is the longer -- every term of floor_log2(n_refs)*n_refs*freq/live_length puts a1 ABOVE a4, which is the candidate's order, not the ROM's. A plain REG_ALLOC_ORDER readout is inconsistent in both directions too: ascending would give r4 to the highest-priority allocno (a5, the lowest by refs), descending would give r7 to a2 over a1's loop-weighted refs. So find_reg is deciding on conflicts and copy preferences, not priority order. This is the SECOND independent failure of that model in this region -- sub_08045C18, two functions away, fails it the same way.",
    "axes_ruled_out": [
+    "decomp-permuter CONFIRMED PLATEAUED at 92.2% for the third time: wave 73 (W73-F) ran a further 600 s from this best.c and it reported 'no candidate scored better than the starting point' -- the internal base score 225 was never beaten. Four runs now (300 s, 300 s, 600 s, 600 s). This one is converged and further permuter time on it is waste.",
     "The two sub_08014B0C call sites as DIFFERENT source. The ROM's first arm passes 0 in r3 and a1 at [sp,#4], the second passes a1 in r3 and 0 at [sp,#4]; writing that asymmetry is BYTE-NEUTRAL, because cse knows a1 == 0 on the first arm (the branch just proved it) and substitutes the register for the immediate freely. Both spellings compile to the identical 180 bytes, so the swap cannot be evidenced in either direction.",
     "All six wave-43 spellings of the `a2 - 5` argument -- see settled_by_this_attempt; they are the reassociated form and are now understood, not open.",
-    "decomp-permuter: 180 bytes is below the 256-byte floor, and wave 17 measured that a permuter run returns nothing on a pure allocation residual whose instruction order is already correct, which is exactly this one."
+    "decomp-permuter: 180 bytes is below the 256-byte floor, and wave 17 measured that a permuter run returns nothing on a pure allocation residual whose instruction order is already correct, which is exactly this one.",
+    "decomp-permuter is NOT ruled out here, and the previous entry's reasoning was wrong. It claimed the 180-byte size is 'below the 256-byte floor' and cited wave 17. Wave 73 ran it three times (300 s from the draft, then 300 s and 600 s from best.c): run 1 found the live-range split worth 40 points. The 256-byte figure is a 'run it before hand-rewriting' threshold, not a floor below which the permuter does nothing.",
+    "Toolchain axis: all SEVEN compiler profiles produce BYTE-IDENTICAL output on the old draft -- configured, default, no-force, o1, o1-no-force, old-agbcc and old-agbcc-no-force all give exactly 70.0%, 54 of 180, size-exact. This function's register assignment is invariant to every flag the harness can set, which is the strongest such result in the batch.",
+    "decomp-permuter has now PLATEAUED at 92.2%: two further runs (300 s and 600 s) starting from this best.c found no candidate better than the starting point.",
+    "W73-E's row-3 pointer-global spelling (`u16 **t = &gUnknown_0849957C;` passing `*t` at the three call sites): NEGATIVE and much worse -- 184 bytes (+4), 8.9% identical, first difference at +0x2. Consistent with W73-E's own diagnostic, which indicates row 3 only when the ROM loads the pool word EARLIER than the candidate; both of this function's pool words already match the ROM."
    ],
    "settled_by_this_attempt": "THE ARGUMENT IS `(u16)a2 - 5`, WITH THE CAST ON THE OPERAND -- worth 8 bytes and the whole size error, and it REFUTES the docs chapter '(u16)(narrow - K): SIX spellings all reassociate, and only a basic-block boundary blocks it' (wave 43, W43-L), which declared this unreachable from the source. a2 is live across basic blocks, so the prologue has already materialised it zero-extended in r7; `(u16)a2` therefore costs nothing and the subtraction is a plain SImode `subs r1,r7,#5` with no shift for combine to distribute into. `(u16)(a2 - 5)` -- the cast on the RESULT -- is the reassociated form and is NOT the same code. a2 stays s16 and still sign-extends at its two sub_08014B0C uses. Wave 43's six spellings were measured in a standalone compile_probe, where the parameter is used once, in one block, and is NOT pre-narrowed; every spelling collapses there. Re-measured in wave 59: the probe reproduces wave 43 exactly, so the measurement was sound and the inference from it was not. This is the wave-15 probe blind spot on the parameter side. The doc chapter now carries the refutation.",
-   "reason": "Residual kind 3 (allocation). Diagnosed, not converted."
+   "reason": "Residual kind 3 (allocation), improved but not converted. The remaining 14 bytes are still the a1/a4 swap.",
+   "improved_by_this_attempt": "SPLITTING THE PARAMETER'S LIVE RANGE, found by decomp-permuter run 1 and semantics-checked afterwards. `if ((new_var = a1) == 0)` with the loop testing `new_var >= n` instead of `a1 >= n`, `u16 new_var` declared FIRST of the three locals. new_var is a pure copy of a1 that is never reassigned, so this is semantically identical to the old draft -- it only splits a1's live range so the calls read a1 and the loop reads new_var. Worth 40 points. This is the brief's 'binding locals are punctuation' lever applied to a PARAMETER, which the docs had only ever stated for address-arithmetic locals."
   },
   "named": false,
   "kind": "game",
@@ -78161,14 +78223,17 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 312,
-   "best": "86.9% identical, SIZE-EXACT (312/312), 41 differing bytes, relocation set correct",
+   "best": "86.9% identical, SIZE-EXACT (312/312), 41 differing bytes, first difference at +0x8e, relocation set correct -- RE-MEASURED on the draft in wave 73 (W73-H) with trymatch.py, unchanged",
    "remaining_diff": "ONE `ldr` TWELVE INSTRUCTIONS EARLY. The draft emits `ldr r5,[pc,#156]` (=gUnknown_085D6C94) immediately after the `strh r0,[r1,#30]` of the unk1e++ statement, into the callee-saved r5 that has just died; the ROM emits `ldr r2,[pc,#120]` at the point of use, right before `adds r1,r1,r2`, into a scratch. The pool words at 0x12c/0x130 swap as a consequence (ROM: gUnknown_03004580 then gUnknown_085D6C94) -- that is ONE fact, not two. READING THE DIFF: the `bne.n cc <_0804C670>` versus `bne.n cc <sub_0804C5A4+0xcc>` and `beq.n c6 <_0804C66A>` versus `<sub_0804C5A4+0xc6>` lines are the SAME instructions with the same encodings and the same targets; only the symbolisation differs. Ignore them.",
    "why_it_is_close": "Size exact and every relocation right. The evaluation order of the gUnknown_03004508 compare, the u8 binding of the gUnknown_08553C14 byte, the row symbol for gUnknown_085D6C94 and the whole tail are settled; only the position of one address load is left.",
    "axes_ruled_out": [
     "Wave 37: three spellings of the gUnknown_03004508 compare. `03004508 == 08553318[..] + C14[..]` and `03004508 == C14[..] + 08553318[..]` both give 81.1%; binding the C14 byte to its own `u8 k` first is what matches the ROM's order and the `adds r08553318, rk` operand order, and is what moved the score to 86.9%. SETTLED.",
     "Wave 37: gUnknown_085D6C94 versus the gUnknown_085D6C88[..].unk0c member view. The relocation confirms the row symbol is correct here; the member view is what the twin sub_0804DF00 needed, and that one matched with it, so the two spellings are not interchangeable.",
     "Wave 37: decomp-permuter, 300 s / ~20k iterations / 4 threads, nothing better than the starting point. Fourth replication of `a pure register-allocation residual with the instruction order already correct gets nothing from the permuter`.",
-    "Wave 59 (W59-G): THE ALLOCNO-ORDER COMMA ANCHOR, which the wave-37 park named as the ONE remaining axis, TRIED IN BOTH FORMS AND BOTH REFUTED. (a) A comma operand that is only a VALUE -- `[(gUnknown_03004580[side][1], gUnknown_020296B0[side].unk1a & 1)]` -- is BYTE-IDENTICAL to no anchor at all, same 41 differing bytes and same pool order: a dead value expression is eliminated before allocnos exist, so it never creates a pseudo and cannot affect allocno numbering. (b) The true wave-17 assignment form, `sub_0803B48C((meta = gUnknown_03004580, <expr>))` with `void *meta`, is WORSE not neutral -- it fails to flip the 0x12c/0x130 pair at all and costs 8 bytes, forcing an extra .rodata word plus two more pool words (gUnknown_03001470+0x34 and gUnknown_03004580+2 each get their own) and breaking the `adds r0,#4` / `adds r2,#2` reuse of one base register for the [1] and [2] reads that both the ROM and the un-anchored draft get right."
+    "Wave 59 (W59-G): THE ALLOCNO-ORDER COMMA ANCHOR, which the wave-37 park named as the ONE remaining axis, TRIED IN BOTH FORMS AND BOTH REFUTED. (a) A comma operand that is only a VALUE -- `[(gUnknown_03004580[side][1], gUnknown_020296B0[side].unk1a & 1)]` -- is BYTE-IDENTICAL to no anchor at all, same 41 differing bytes and same pool order: a dead value expression is eliminated before allocnos exist, so it never creates a pseudo and cannot affect allocno numbering. (b) The true wave-17 assignment form, `sub_0803B48C((meta = gUnknown_03004580, <expr>))` with `void *meta`, is WORSE not neutral -- it fails to flip the 0x12c/0x130 pair at all and costs 8 bytes, forcing an extra .rodata word plus two more pool words (gUnknown_03001470+0x34 and gUnknown_03004580+2 each get their own) and breaking the `adds r0,#4` / `adds r2,#2` reuse of one base register for the [1] and [2] reads that both the ROM and the un-anchored draft get right.",
+    "Wave 73 (W73-E): THE BYTE-OFFSET-FIRST SPELLING, `*(s16 *)(A * 24 + (B - 1) * 4 + (C & 1) * 2 + (u8 *)gUnknown_085D6C94)`, which puts the base address constant LAST in the expression and is the documented inverse lever (it closed sub_0804F0D8 and sub_0804F8BC on gUnknown_084C3F78). REFUTED HERE and badly: 86.9% -> +8 bytes, a `str r0,[sp,#0]` spill with `add sp,#4`, one extra .rodata pool word, and `muls`-free but reassociated index arithmetic. It does move the base `ldr` later, but it also destroys the ROM's `lsls r3,r6,#4` / `adds r0,r2,#4` / `adds r2,#2` reuse of ONE gUnknown_03004580 base register for the [1] and [2] reads -- the same collateral the wave-59 comma anchor caused. WHAT THIS MEASURED THAT IS WORTH KEEPING: the ROM's evaluation order inside the argument is C, then B, then A, then the base -- `lsls r1,r1,#1` (C*2), `subs r0,#1; lsls r0,r0,#2` (B*4), `adds r1,r1,r0`, then `lsls r0,r2,#1; adds r0,r0,r2; lsls r0,r0,#3` (A*24), `adds r1,r1,r0`, then `ldr r2,[pc,#120]` and `adds r1,r1,r2`. The 86.9% draft ALREADY produces C, B, A in that order; the base is the only term out of place. So the residual is one term's position in an otherwise correct sequence, not the whole address expression.",
+    "Wave 73 (W73-E): decomp-permuter run 2, started with `--current` from the 86.9% draft itself (base score 220), 420 s / 3,369 iterations / 2 threads -- `no candidate scored better than the starting point`, not one improvement of any size. THIS IS THE SECOND INDEPENDENT PERMUTER NEGATIVE ON THIS FUNCTION and it is a genuine one: in the same wave the same chained method moved sub_0800E8CC 83.11% -> 91.22%, sub_0800E9F4 87.11% -> 89.84% and sub_08014DCC 52.5% -> 63.3%, all size-exact allocation residuals, so the method is not the problem here. Whatever sub_0804C5A4's residual is, it is not in the permuter's reachable neighbourhood of this draft.",
+    "Wave 73 (W73-H): NO NEW PROBE RUN, and the reason is a finding in itself. Sorting this document's allocno levers by DIRECTION shows five of six (comma operator, dead in-expression assignment, live-range splitting, binding a base to a local before the loop, assignment in the first subscript) move a reference EARLIER, and only byte-offset-first moves one LATER. This function's residual is a base address constant loaded TWELVE INSTRUCTIONS TOO EARLY while its index terms are ALREADY in the ROM's C-B-A order, so what it needs is a DELAY lever -- and the only delay lever we have is welded to an index reassociation this function cannot afford (W73-E measured the collateral: +8 bytes and a spill). Waves 37, 59 and 73-E each applied an EARLIER lever to a LATER problem, which is why three waves of correct-looking probes all regressed. Written up as its own chapter in docs/agbcc-codegen.md. Resume only with a lever that delays an address constant WITHOUT reassociating the index expression."
    ],
    "note": "This function's axis list is now EMPTY. The wave-59 result is the second measured instance of wave 17's own caveat that the anchor does not transfer to a function carrying more live values: sub_0804C5A4 already has ip, r8 and sb in use, so there is no pair of TIED pseudos for the anchor to reorder -- it evicts a correctly-placed global instead. Both negatives are written up as a subsection of the wave-17 chapter in docs/agbcc-codegen.md, including the correction that the lever requires an ASSIGNMENT and that a bare expression comma is a no-op."
   },
@@ -79580,9 +79645,30 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 564,
+   "best": "80.1% identical, 112 of 564 differing bytes, first difference at +0xa. Re-measured wave 73 (W73-E) with `trymatch.py` on the DRAFT itself (`new best: 80.1%`), not on best.c.",
+   "park_kind": "EXTRA SPILL SLOT IN A SIZE-EXACT COSTUME -- not a pure register-name residual",
+   "remaining_diff": "THE SIZE-EXACTNESS IS FAKE and this is the wave-73 brief's `sub_08045FC8` warning realised at 564 bytes. `size: match (564 bytes)` and `size_delta: 0`, but the candidate's frame is FOUR BYTES LARGER than the ROM's -- the tail reads `add sp, #48` against the ROM's `add sp, #44`, and every spill displacement is shifted by 4 ([sp,#20]/[sp,#24]/[sp,#44] against the ROM's [sp,#16]/[sp,#20]/[sp,#40]). The candidate carries ONE MORE SIMULTANEOUSLY LIVE VALUE than the original and spills it; the section still measures 564 because the extra code bytes are absorbed by literal-pool alignment padding. So the residual is an EXTRA STORE/RELOAD PAIR, i.e. wave 37's `one extra instruction` class -- the one class the permuter is documented as unable to reach -- and NOT the pure register-name class it superficially resembles. VERIFY THE FRAME SIZE, NOT `size: match`, before treating this function as size-exact.",
+   "why_it_is_close": "Every call, every branch, the whole `req` block, the 180-byte group stride, the *36 entry stride and the three `-fforce-addr` .rodata address constants are present and in the ROM's order. The 80.1% is positional: the first difference at +0xa is downstream of the frame being 4 bytes wider.",
+   "axes_ruled_out": [
+    "Wave 37 (W37-J), recorded in the draft header: `gUnknown_085534C4[(c * 5 + f) * 2]` is WRONG and `[c * 10 + f * 2]` is right -- the factored spelling creates `c * 5` as the CSE'd subexpression and drags gUnknown_02029B94[c][e] into `(c * 5 + e) * 2` as well.",
+    "Wave 37 (W37-J): the final sub_080155C0 entry MUST be `(e3 = <expr>)->x` inside argument 1. As its own statement the entry is computed BEFORE gUnknown_03001FBC is loaded; inlined twice in arguments 1 and 2 the multiply comes out as `adds r2,r7,#0; muls r2,r1` instead of `movs r1,#0xb4; muls r1,r7`.",
+    "Wave 37 (W37-J): `p = *(u16 **)(c * sizeof(u16 *) + (u8 *)gUnknown_084C3F78)` rather than `gUnknown_084C3F78[c]` -- the byte-offset-first spelling puts `lsls #2` before the pool `ldr`, which is what the ROM does. This one closed sub_0804F0D8 and sub_0804F8BC outright.",
+    "Wave 37 (W37-J): `(row = gUnknown_02028E5C[c])[1]` rather than `gUnknown_02028E5C[c][1]` -- the `[][2]` subscript reassociates to `base + 2 + c * 4` and hoists the +2 out of the load displacement.",
+    "Wave 37 (W37-J): `volatile u16 unk20` on the struct member, probed directly -- it emits a THIRD `ldrh` before the store, which the ROM does not have.",
+    "Wave 66 (W66-D): a read-site-only volatile cast restores exactly the missing post-store `ldrh` without the third load a volatile member causes, and replacing the entry pointer arithmetic with array syntax adds a spill. Neither closes the function.",
+    "Wave 73 (W73-E): DELETING THE `volatile unsigned int new_var2` LOCAL AND THE `unsigned long new_var = sizeof(...)` ALIAS, writing `gUnknown_08552148[c]` plainly at both use sites. This was the obvious read of the extra stack slot and it is WRONG: 80.1% -> 60.6%. The plain re-read DOES restore the ROM's reload of gUnknown_08552148[c] (`ldrh r2,[r5,#0]` twice, the *36 shift chain re-expanded each time, no [sp,#16] slot for that value), but the frame stays at 48 and the whole r8/r9 assignment inverts, so the value cached in that slot is NOT the source of the extra slot. The volatile local is buying something real; do not tidy it away.",
+    "Wave 73 (W73-E): reading `164/168/16c: R_ARM_ABS32 .rodata +4/+8/+0` against the ROM's `gUnknown_08136094/98/9C` as a residual. It is a SYMBOLISATION difference of the same kind as the branch-label case -- these are agbcc's own `-fforce-addr` address constants for &gUnknown_03001FBC, &gUnknown_02029A10 and &gUnknown_02029B94, verified against baserom.gba in wave 37, and split_rodata carves them at promotion. Do not chase them."
+   ],
+   "settled_by_this_attempt": [
+    "Wave 73 (W73-E): the residual is +4 bytes of FRAME, not a register permutation. Measure `add sp, #N` in both streams before classifying any large parked function as a pure register-name near-miss -- `best.json`'s `exact_size: true` and trymatch's `size: match` both report the SECTION size and are blind to pool-padding compensation.",
+    "Wave 73 (W73-E): this function had NO parked.json entry at all before this wave despite two waves of measured work; the whole ruled-out list above was living only in the draft's file header. Grep the draft header before concluding an axis is untried."
+   ],
+   "reason": "wave 37 (W37-J), wave 66 (W66-D), first parked entry written wave 73 (W73-E). Do not spend a permuter run here: the residual is an extra spill, which is wave 37's documented permuter-proof class. The open axis is finding which value the ROM keeps in a register that this candidate spills -- attack the live set, not the register names."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -81379,9 +81465,27 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 216,
+   "best": "220 bytes against 216 (+4), 27.8% identical, first difference at +0x1a. Re-verified wave 73 (W73-C) and identical to waves 33/51/66 to the byte.",
+   "remaining_diff": "ONE INSTRUCTION'S PLACEMENT. The ROM takes `b * 2` while b is still in r1, BEFORE any argument setup for sub_08015410, keeps it live across the call in callee-saved r5 and then accumulates the rest of &unk24[b] into that same register (`adds r5,r5,r6; adds r4,#0x24; adds r5,r5,r4`). The candidate keeps only `b` live and rebuilds the index after the call, fetching b back out of the hi register it was parked in. +4 bytes.",
+   "why_it_is_close": "Every relocation, every call in order, the push list, the stack slot, the prologue hi-register parking and the whole gUnknown_02029808 address chain are already byte-identical. The 156 differing bytes are the tail shifted by two instructions -- READ THE SCORE AS POSITIONAL.",
+   "axes_ruled_out": [
+    "THE CANDIDATE IS ONE LIVE VALUE CHEAPER THAN THE ROM, which is why agbcc prefers it and why no rewrite of the statement reaches the ROM's form. The lever has to make the reference to the index EXIST before the RHS call; it cannot reorder the statement.",
+    "Wave 33 (W33-E): `s16 *slot = &gUnknown_02029808[a].unk24[b];` as its own statement before the assignment. Moves `b * 2` to the top but takes the whole address with it -- agbcc folds +0x24 into the table base and reaches unk2e / unk44 / unk58 at displacements 10 / 32 / 52 instead of 46 / 68 / 88, dropping a callee-saved register. -8 bytes, 10.6%.",
+    "Wave 36: `(gUnknown_02029808 + a)->unk24[b]`. The theory was that get_inner_reference stops at an INDIRECT_REF so the variable offset handed to expand_assignment would be `b * 2` alone. It is not what happens: +12 bytes, 12.0%, first difference at +0x2 -- it changed the live-value count and hence the push list.",
+    "Wave 51 (W51-A): `row = gUnknown_02029808[a].unk24; row[b] = ...`. Same failure as the wave-33 lever by a different route -- the member offset sinks into the pool word as `.word gUnknown_02029808+0x24` and every displacement moves.",
+    "Wave 66: the comma / embedded-assignment version. An offset assignment in the LVALUE still schedules `b * 2` after the call; assigning it in the FIRST CALL ARGUMENT schedules it at the ROM's early point, but makes the named offset a separate high-register pseudo and adds the compensating moves. So the comma lever reaches the PLACEMENT but not the ROM's single-expression allocation. This is the closest anything has come.",
+    "Wave 51 (W51-A): the third parameter is BYTE-NEUTRAL and this function cannot settle it. `(u16, u16)` and `(u16, u16, int)` both give exactly +4 bytes / 27.8% with an identical instruction stream, because an unused trailing parameter costs nothing."
+   ],
+   "settled_by_this_attempt": [
+    "The two u16 parameters are confirmed by the `lsls #0x10; lsrs #0x10` pair on each. The assembly reads ONLY r0 and r1 -- r2 is written before it is ever read -- so the ARITY claim rests entirely on caller evidence: sub_080536D8 calls this through a 0x50-byte pointer table in data/data-0848B688.s whose other member sub_08052E04 is declared void (u16, u16, int), and every routine reached through one table must share a signature. Good evidence, but caller evidence, not something this body confirms.",
+    "struct Unk02029808's unk24 / unk2e / unk44 / unk58 all came from the header already; sub_08015410 returns a value narrowed with `lsls #0x18; asrs #0x18` (s8); gUnknown_085536EC is passed BY ADDRESS as the void * first parameter with no dereference."
+   ],
+   "note": "Wave 73 (W73-C), carried from waves 33/36/51/66. The residual is a wave-17-style 'create the reference earlier than a statement boundary can reach' problem, and wave 66 showed the comma operator gets the placement but costs the allocation. What has NOT been tried is a comma at a DIFFERENT DEPTH -- wave 17 bracketed this axis exactly on another function (no anchor = twelve instructions late, anchor as its own statement = one instruction early at 99.7%, comma inside another argument's index = exact) and only the lvalue and first-argument positions have been tested here."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -90029,19 +90133,20 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 96,
-   "best": "68.8%",
-   "remaining_diff": "Size-exact. The ROM loads `ldr r3, =gUnknown_08499594` IMMEDIATELY after the `bl sub_08025E08`, ahead of gUnknown_08499590, and derefs it (`ldr r1, [r3]`) only after the `* 12`; the candidate loads that pool word just before the deref instead. Same instruction count, but it changes which register holds the 0x417A constant (the ROM needs r5, hence `push {r4, r5, lr}` against the candidate's `push {r4, lr}`) and renames the tail.",
-   "why_it_is_close": "Every instruction is present and in the right order; only the placement of one pool load and the allocation that follows from it differ.",
+   "status": "MATCHED wave 73 (W73-E), byte-for-byte, configured profile, relocs match.",
+   "resolved_by": "THE THIRD SPELLING OF A POINTER-GLOBAL ACCESS. gUnknown_08499594 is a POINTER global, not an array (the tell is the `ldr r1,[r3,#0]` deref that follows its pool `ldr`). The ROM loads its ADDRESS CONSTANT early -- immediately after the `bl sub_08025E08`, ahead of gUnknown_08499590 -- but DEREFS it late, only after the `* 12`. Neither spelling anyone had tried can do that: `gUnknown_08499594[i]` in place puts BOTH late, and `struct Unk08499594 *tbl; tbl = gUnknown_08499594;` (which this entry previously recommended, copied from the sibling sub_080601F0) pulls BOTH forward and is a REGRESSION here, 68.8% -> 60.4%, emitting `ldr r0,[pc]; ldr r3,[r0,#0]` back to back. The spelling that matches binds the pointer global's ADDRESS to a double pointer as its own statement and derefs at the use: `struct Unk08499594 **tbl; ... tbl = &gUnknown_08499594; ... u = *tbl + cells[off];`.",
+   "why_this_is_general": "The whole 30-byte residual was downstream of that ONE address constant's creation point. With it created early it occupies the scratch r3 across the index arithmetic, which forces the 0x417A literal into r5 and therefore the ROM's `push {r4, r5, lr}` instead of the candidate's `push {r4, lr}`; the swapped r0/r1 operand pair in the offset computation and the 0x50/0x54 pool word order came back at the same time. Push mask, operand order and pool order were ONE fact, exactly as the wave-17 rule predicts, and one edit fixed all of them. Written up as the last chapter of docs/agbcc-codegen.md: 'A pointer global has THREE spellings, not two'. CONDITION, measured by W73-B the same wave and now in the chapter: row 3 is indicated ONLY when there is a gap to close -- the ROM loading the pool word EARLIER than the candidate while derefing in the same place. On sub_08045C18 all three rows TIE at 89.4% (the map pointer is loaded once and used in all ten tests), and on sub_08049944 both pool words already matched the ROM and row 3 costs 4 bytes. And per W73-D the row is a property of the USE SITE, not the global: sub_0802E010 wants row 3 in its clear loop and row 2 in block 4, same global, same function.",
    "axes_ruled_out": [
-    "the three stores written as `gUnknown_08499594[cell].unkNN` with no bound element pointer -- agbcc then RELOADS the table pointer for each store, because a `strb` through a `struct Unk08499594 *` may alias the pointer global; 8 bytes worse",
-    "splitting `cell` into its own statement ahead of the `u = &...` binding -- moves nothing"
+    "wave 32 (W32-A): the three stores written as `gUnknown_08499594[cell].unkNN` with no bound element pointer -- agbcc then RELOADS the table pointer for each store, because a `strb` through a `struct Unk08499594 *` may alias the pointer global; 8 bytes worse",
+    "wave 32 (W32-A): splitting `cell` into its own statement ahead of the `u = &...` binding -- moves nothing",
+    "wave 73 (W73-E): `struct Unk08499594 *tbl; tbl = gUnknown_08499594;` as its own statement -- REGRESSES to 60.4%. This is the axis the wave-32 entry recommended trying next and it is the wrong one of the two; see resolved_by."
    ],
-   "settled_by_this_attempt": "The cell plane here is +0x12 (c_08008B70.c's idiom), not the +0x1432 one; the gUnknown_08499594 stride is 12; and unk09/unk0a/unk0b are three u8 members sharing ONE element address, now declared. The `u` binding is required and must stay. Its sibling sub_080601F0 wants the OPPOSITE lever -- an explicit `tbl = gUnknown_08499594;` statement to pull the deref FORWARD -- so try that here next.",
-   "reason": "wave 32 (W32-A)"
+   "settled_by_this_attempt": "The cell plane here is +0x12 (c_08008B70.c's idiom), not the +0x1432 one; the gUnknown_08499594 stride is 12; unk09/unk0a/unk0b are three u8 members sharing ONE element address. The `u` binding is required and must stay.",
+   "wave": "32 (W32-A) parked; 73 (W73-E) matched"
   },
   "named": false,
   "kind": "game",
@@ -93645,7 +93750,10 @@
     "LOOP FORM does not move the reversal: `for (i = 0; i <= 7; i++)`, `for (i = 0; i < 8; i++)` and `do { } while (++i <= 7);` all reverse, with the inner loop written ascending or descending, and with `i = 0` placed before or after the v7/v8 statements",
     "writing the outer loop as a GOTO loop DOES keep the counter ascending -- loop.c never sees it -- but it also loses strength reduction, so the 0x18 stride must be an explicit source variable, and agbcc then hoists that variable's increment ABOVE the inner loop where the ROM has it at the bottom next to the counter. The ROM needs BOTH the giv and the un-reversed counter and nothing tried gives both.",
     "binding gUnknown_0202F110's base to a `u8 *` local to force the ROM's two-instruction preheader is much WORSE, not better: agbcc emits a `.LC` rodata word holding the address and loads through it indirectly at every use, costing four instructions and a rodata entry",
-    "wave 46 (W46-K) re-confirmed W46-B by probe: hoisting `i = 0` into a statement of its own placed BEFORE the v7/v8 statements, with the loop written `for (; i <= 7; i++)`, still reverses; so does the same init with `do { ... i++; } while (i <= 7);`. The ROM's `movs r1,#0` sitting ahead of the v7/v8 insns is NOT reachable by moving the source init."
+    "wave 46 (W46-K) re-confirmed W46-B by probe: hoisting `i = 0` into a statement of its own placed BEFORE the v7/v8 statements, with the loop written `for (; i <= 7; i++)`, still reverses; so does the same init with `do { ... i++; } while (i <= 7);`. The ROM's `movs r1,#0` sitting ahead of the v7/v8 insns is NOT reachable by moving the source init.",
+    "WAVE 73 (W73-G): THE ENTRY'S LAST UNTESTED IDEA IS REFUTED. `A SURVIVING USE OF THE INDEX` does NOT block check_dbra_loop when the use is AFTER the loop: adding `gUnknown_030005F4 = i;` immediately after the first loop still reverses it (`movs r3,#7` / `subs r3,#1` / `cmp r3,#0` / `bge`) and satisfies the added use with a constant, `mov r3,#8` -- gcc knows the biv's final value, so a use after the loop costs the transformation nothing. Measured by compile_probe.",
+    "WAVE 73 (W73-G): THE DISCRIMINATOR IS AN IN-BODY USE THAT SURVIVES STRENGTH REDUCTION, and this function contains its own control: the SECOND loop does not reverse (`mov r3,#0` / `add r3,r3,#1` / `cmp r3,#5` / `ble`) because its address arithmetic is `lsl r0,r3,#3` -- `i * 8` is a single shift, which strength_reduce does not find profitable, so `i` keeps a live in-body use. The first loop's `i * 0x18` IS profitable, is reduced to the accumulating giv, and leaves `i` used only by the exit test, which is exactly check_dbra_loop's precondition. So the ROM's source must contain an in-body use of `i` that is not itself reducible; nothing in the settled statement set supplies one, and that -- not the loop form, not the init position, not the goto -- is the one question left.",
+    "WAVE 73 (W73-D): THE GOTO LEVER IS CONFIRMED NON-TRANSFERABLE, and the reason is now a documented rule rather than an observation. sub_080344F0 was blocked on the IDENTICAL check_dbra_loop reversal and MATCHED this wave on the goto form -- but only because its loop body is a bare byte copy already written with explicit `s++`/`d++` source bivs, so switching loop.c off cost it nothing. This function's outer loop needs the 0x18-stride giv that only strength_reduce produces, so the goto form trades the reversal for the giv and cannot win. See the new chapter 'A GOTO loop is the lever on check_dbra_loop when the body's pointers are ALREADY explicit source bivs' in docs/agbcc-codegen.md -- the test to apply before reaching for the lever is whether the body needs a giv at all. Do not re-probe the goto form here; W46-B's result stands and is now explained."
    ],
    "settled_by_this_attempt": [
     "BINDING `a7 * 0x1000` AND `a8 * 0x1000` TO LOCALS IS LOAD-BEARING and was the whole first half of the fix. Written inline at their two stores, the address of gUnknown_0202F140 wins ip, a7 spills to a fifth frame slot (`sub sp,#0x14` instead of `#0x10`, every stack argument +4) and the address is LICM-hoisted out of the first loop -- where the ROM rematerialises it every iteration. With v7/v8 bound, ip and r8 hold them, the frame is 0x10 and the hoist is gone. This is the wave-17 'two address constants tie and the loser is rematerialised' rule seen from the winning side.",
@@ -93654,7 +93762,7 @@
     "gUnknown_0202F140 is eight 0x18-byte entries of two three-word vectors, and gUnknown_0202F110 is six 8-byte rows of `u16 + u8[4]`. Both layouts are corroborated independently by sub_08064214, which is MATCHED.",
     "wave 46 (W46-K): the counter reversal is the SOLE cause of the first loop's diff -- the giv itself is already correct. The candidate emits `adds rD, r5, r2` with the same operand order as the ROM's `adds r3, r5, r2` and differs only in the destination register, which follows from r3 being consumed by the reversed counter. Fixing the reversal is expected to fix the second loop's `adds r3,r1,#1` / `adds r1,r3,#0` shuffle with it. Defect (b), the `gUnknown_0202F110+0x2` pool word, is worth ONE pool word and is independent of (a). The draft is SIZE-EXACT; its 52.2% is positional and must not be read as a wrong shape."
    ],
-   "reason": "Two loop-optimiser facts, not source semantics. The type model, the statement order and the size are settled; what remains is one check_dbra_loop reversal that no loop form reaches and one address-constant biasing. Re-test whenever a rule about suppressing check_dbra_loop lands in docs/agbcc-codegen.md."
+   "reason": "Two loop-optimiser facts, not source semantics. The type model, the statement order and the size are settled; what remains is one check_dbra_loop reversal that no loop form reaches and one address-constant biasing. Re-test whenever a rule about suppressing check_dbra_loop lands in docs/agbcc-codegen.md. WAVE 73: still the same one question -- suppress check_dbra_loop on the first loop while KEEPING strength reduction. The goto lever, which closed the twin park sub_080344F0 this wave, is ruled out here by construction (it is mutually exclusive with the giv). The remaining untested idea is wave 25's rule read forwards: what blocks the reversal is a SURVIVING USE of the index, so the question is what use of `i` the ROM's source had that outlives strength reduction of the 0x18 giv. Nobody has attacked it from that side."
   },
   "named": false,
   "kind": "game",
@@ -100876,23 +100984,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 136,
-   "best": "Not scored -- NOT parked for lack of a source model. The C is believed correct and complete; what blocks it is a TYPE conflict with an already-matched sibling, not a decompilation gap.",
-   "remaining_diff": "Blocked before a meaningful diff: matching requires gUnknown_0202F214's field at +0x02 to be declared as bitfields, and sub_0806AD04 (MATCHED and promoted in wave 48) reads the same field and cannot use that declaration.",
-   "why_it_is_close": "sub_0806B120 is the WRITER of gUnknown_0202F214 and sub_0806AD04 is the READER. Offset +0x02 holds a 2-bit field at bit 0 and a 14-bit field at bit 2. The writer's two stores are textbook store_bit_field -- QImode for the byte-contained 2-bit field, HImode for the spanning 14-bit one -- and want the bitfield declaration. The reader's loads are `ldrb [.,#2]` + shift pair and `ldrh [.,#2]; lsrs #2`, and bitfield READS widen to the enclosing word, so the reader cannot use it.",
-   "axes_ruled_out": [
-    "A union view carrying both spellings. Any union containing a bitfield struct inflates the element from 4 bytes to 8 (agbcc gives ANY struct containing a bitfield 4-byte size AND alignment), which moves the index shift from `lsls #2` to `lsls #3` and breaks the stride at every access site. Measured in wave 48; the five-layout table is in the Bitfields chapter of docs/agbcc-codegen.md.",
-    "Reshaping the struct unilaterally to suit the writer. This is the 'never widen or reshape a shared struct member' case that has broken the build in five separate waves; W48-C declined it deliberately rather than regress a function matched the same wave."
-   ],
-   "settled_by_this_attempt": [
-    "gUnknown_0202F214.unk02 is two packed fields, not one scalar; documented with the bitfield reading ruled out and the type left unchanged in include/unknown-globals.h.",
-    "gUnknown_0816E16C is NOT a global: the ROM word at 0x0816E16C holds 0x0202F214, an ordinary -fforce-addr address constant that gen_lds.py invented a symbol for. Its neighbour 0x0816E170 holds 0x08499578, same thing. Do not declare either. Dereferencing the word in baserom.gba rather than trusting the symbol name is what identified the producer/consumer pair at all. CONFIRMED A SECOND TIME in wave 48: the word at 0x0816D93C holds 0x08499590, so gUnknown_0816D93C is the same artefact -- sub_080585D4 reads the map header's width through gUnknown_08499590 and its height through the -fforce-addr spelling of the SAME object."
-   ],
-   "reason": "NOT a source problem -- a coupled retype over TWO functions. Next attempt must respell sub_0806AD04's two reads through byte/halfword views, switch the header to bitfields, and RE-RUN try_match on sub_0806AD04, which is matched today and must stay so. Budget it as ONE job over both functions, not as a 136-byte single. Full analysis and the two spellings to try are in work/sub_0806B120/sub_0806B120.c."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -110187,9 +110281,30 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0806CFC8.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 216,
+   "best": "228 bytes against 216 (+12), 18.5% identical, first difference at +0xa. Re-verified wave 73 (W73-C). THE DRAFT SCORES 18.5%; the 56.9% trymatch prints as 'best so far' is best.c's score and is NOT the draft -- best.c is 142KB of permuter output and is not a readable draft.",
+   "remaining_diff": "ONE FACT: agbcc strength-reduces both pointers in the FLIPPED arm -- `subs r2,#2` walking the source backwards and `adds r3,#2` walking the destination forwards, plus two extra frame slots for their hoisted initial values, which is where the +12 bytes and the spill of `x` out of r7 come from -- where the ROM recomputes BOTH addresses from scratch every iteration and reduces nothing. The ROM's flipped inner loop hoists only `lsls r3,r5,#6` (iy*64) and the 0x400 constant, and its only induction variable is `ix` itself.",
+   "why_it_is_close": "Everything else is byte-exact and must be kept: the UNFLIPPED arm (which the ROM DOES reduce, and which this reproduces instruction for instruction), the prologue, the frame holding map at [sp] and p at [sp,#4], both clip tests, and the register map (ip = w, sl = y, base in sb).",
+   "axes_ruled_out": [
+    "THE ROM'S OWN TWO ARMS ARE THE PROOF THAT SPELLING IS NOT THE VARIABLE: they index the same map with the same clip tests and differ only in whether the compiler reduced. Do not spend attempts on index spellings.",
+    "Source index spelling: `src[iy*0x20 + (w-ix-1)]`, `*(src + (w-ix-1) + iy*0x20)`, `src[iy*0x20 + w - ix - 1]` and `*(p + (w - (ix+1)))` all strength-reduce identically.",
+    "Destination spelling: `map[(y+iy)*0x20 + (x+ix)]` folds the index and scales it once (`lsl #5; add; lsl #1`) and is wrong for BOTH arms; `*(map + (x+ix) + (y+iy)*0x20)` gives the ROM's two separate scalings (`lsls #6` for the row, `lsls #1` for the column). This one WAS worth bytes and is kept.",
+    "`p` as a separate local seeded from `src` versus reassigning the `src` parameter. The local is right: it puts p's ldr/str after the promoted-mode conversion group, exactly where the ROM has it, and the same change closed the siblings sub_080727C0 and sub_0807286C.",
+    "`u8 flip` versus `int flip`. The lone `lsls r0,r0,#0x18` in the conversion group is the u8 parameter's PROMOTE_MODE extension with the `lsr` dropped by combine, so u8 is right.",
+    "Two separate loop nests versus one nest with the flip test inside. The ROM has two nests (the `beq` is above both).",
+    "Wave 57 (W57-D): `w - (ix + 1)` spelled explicitly in place of `w - ix - 1`. Still reduces both pointers AND additionally spills `x` out of r7 into [sp,#0xc], so strictly worse. Note what this means for READING the ROM: its `adds r4,r2,#1` at the top of the flipped inner body, shared between the source index and the loop increment, is a CONSEQUENCE of the giv not being reduced, not a cause of it. Do not try to reproduce that sharing from the source.",
+    "Wave 72 (W72-F): CROSS-ARM POINTER LIVENESS. Keeping the original src parameter live for the unflipped arm is byte-neutral -- the flipped arm still reduces both pointer GIVs and keeps the 16-byte frame. Distinct q/out locals used only by the later arm increase the frame to 20 bytes WITHOUT suppressing either giv.",
+    "decomp-permuter: 300 s, 4 threads, no byte match."
+   ],
+   "settled_by_this_attempt": [
+    "The function blits a w-by-h block of tilemap entries into a 32-wide BG tilemap at (x,y), adding `base` to each entry and clipping to the 32x32 screen block; `flip` mirrors horizontally, which also toggles each entry's HFLIP bit (0x400).",
+    "loop.c discards a giv when `lifetime * threshold * benefit < insn_count`. Nothing reachable from C addresses that comparison directly, and no spelling probed has moved it."
+   ],
+   "note": "Wave 73 (W73-C). The open lever is register PRESSURE, not spelling -- the ROM's flipped arm reads like a loop strength_reduce declined to reduce because too much was already live. Wave 72 ruled out the cross-arm form of that; what remains untried is pressure INSIDE the flipped inner loop itself. Compare sub_0806B120, matched in wave 73, where switching two stores to bitfields added exactly one live constant and that alone stopped strength_reduce from making an element address a pointer giv -- the same mechanism, in the direction this function needs."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -111070,21 +111185,31 @@
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 244,
-   "best": "76.2% (wave 46, W46-H permuter run; was 50.4%)",
-   "remaining_diff": "First difference now at +0x52, inside the per-scanline loop. The ROM keeps the `sin * unkNN >> 20` chain in a FRESH register -- hence an `adds rD, r0, #0` copy before each `muls`, since the THUMB multiply ties its destination to operand 1 -- and loads gUnknown_0300200C / gUnknown_03002000 into r0. The candidate coalesces the multiply into the sin value's register and puts the globals in the scratch instead. NEXT LEVER: re-run the permuter from the new 76.2% best.c. The first run was still improving when its 300 s expired, and a better starting point is what the tool itself says helps most.",
-   "why_it_is_close": "Size-exact at 244 bytes with the instruction order already correct.",
+   "best": "87.3% identical, SIZE-EXACT at 244 bytes, 31 of 244 bytes differ (wave 73, W73-D). NOTE: the draft and best.c now AGREE. Until this wave the draft held the 50.4% / -4 byte pre-permuter version while best.c held the 76.2% size-exact one, from wave 46 to wave 73, and this field reported best.c's score the whole time.",
+   "remaining_diff": "31 bytes, and every one is a register NAME on an instruction stream that is otherwise 1:1 with the ROM -- the pure register-name class. The ROM holds the `sin * unkNN >> 20` chain in r1 and reloads gUnknown_0300200C / gUnknown_03002000 into r0 inside the loop; the candidate uses r3 for the chain and r1 for the row pointer. First difference at +0x52.",
+   "why_it_is_close": "Size-exact with the instruction order correct and both of the ROM's `adds rD, r0, #0` copies now present. The mechanism that produces them: the THUMB multiply ties its destination to operand 1, so `x * y` compiles into whichever register holds x unless the PRODUCT is given its own set. Assigning the product to an already-dead variable inside the consuming expression (`(b = sin * unk34) >> 20`) forces the copy. A named local does NOT work -- agbcc coalesces it straight back.",
    "axes_ruled_out": [
     "Binding the sin value to a named local (`s = gSinLut[...]`) -- byte-identical, agbcc coalesces it anyway.",
     "TOOLCHAIN. data/compiler-overrides.json has no entry in 0x08073 and sub_08073714 matched on the default toolchain this wave.",
-    "'The permuter cannot fix this' -- REFUTED, see settled_by_this_attempt."
+    "'The permuter cannot fix this' -- REFUTED, see settled_by_this_attempt.",
+    "WAVE 73 (W73-D): SECOND PERMUTER ROUND, 300 s / 4 threads, started from the 76.2% best.c exactly as the wave-59 repeat-from-best.c method prescribes. It found NOTHING -- best candidate 58.2%, well below the starting point, draft restored unchanged. The wave-46 note 'the first run was still improving when its 300 s expired' did not survive a second round, so the repeat-from-best.c method is not automatic: it worked on sub_080344F0 this wave and did not work here.",
+    "WAVE 73 (W73-G): A FRESH VARIABLE FOR THE PRODUCT IS NOT THE LEVER, which sharpens W73-D's own chapter. Declaring `int c;` and assigning the product to it in exactly the position W73-D used for `b`, in both stores, LOSES BOTH `adds rD, r0, #0` copies and comes out 4 bytes SHORT -- the same failure as binding the sin value to a named local. The dead in-expression assignment only works when the target pseudo ALREADY CONFLICTS with the multiplicand's; `b` carries an earlier live range in the same iteration, `c` carries none, so regmove coalesces it away. Measured by compile_probe. The chapter in docs/agbcc-codegen.md has been amended.",
+    "WAVE 73 (W73-G): THE RESIDUAL IS NOW A PURE REGISTER-NAME ONE and should be read as a member of that class. With W73-D's lever in the draft the instruction stream is 1:1 with the ROM -- same opcodes, same order, both copies present -- and all 31 bytes are register numbers: ROM b=r0 / product=r1 / dst=r3 against the draft's b=product=r3 / dst=r1. The draft's `b` reuse buys the copies but FUSES b and the product into one pseudo, and that is what pushes dst out of r3. The lever wanted is one that gives the product its own pseudo while still blocking coalescing.",
+    "WAVE 73 (W73-G): `dst = (u16 *)(i * 4 + (int)dst)` to force the index into operand 1 of the address add (the ROM has `adds r3, r3, r1` with the index first, the draft `adds r1, r1, r0` with the base first) -- BYTE-IDENTICAL to the draft. c's pointer_int_sum canonicalises every pointer/integer addition to PLUS(ptr, int) regardless of source order, so source operand order is not reachable this way. And `dst -= -(i * 2)` (W73-B's subtraction-of-a-negation) is much WORSE: it spills the negated index to a stack slot (`sub sp,#0x8`, `ldr r7,[sp,#0x4]`, `sub r1,r1,r7`) inside the loop. Both measured by compile_probe.",
+    "WAVE 73 (W73-G): THE 91.4% IN best.json IS NOT REACHABLE FROM ANY DRAFT, and this cost two agents time. best.c's function body is BYTE-IDENTICAL to the 87.3% draft, yet scores higher, because best.c holds permute.py's RAW cpp-EXPANDED output and the expanded unit compiles differently from the same text behind `#include \"global.h\"`. A permuter run this wave printed both numbers for one candidate: 87.7% spliced onto the original preamble, 91.8% raw expanded. Always compare on the SPLICED number. Full write-up in docs/agbcc-codegen.md; the harness discrepancy itself is unexplained and is worth a coordinator's attention.",
+    "WAVE 73 (W73-G): decomp-permuter THIRD round, 300 s / 4 threads, from best.c. Its one candidate is worth +0.4 points spliced (87.3 -> 87.7) and its mutation is SEMANTICALLY WRONG in the W73-E sense: it assigns the store value to `i`, the loop counter, which is then incremented -- `i = (((b = sin * unk34) >> 20) + (unk34 >> 16)) + g; dst[0] = i;`. Not adopted. The readable half of it is that forcing the SUM into a pseudo that is live elsewhere splits it from the chain register, which is the same mechanism as the `b` trick and points at the same open question.",
+    "WAVE 73 (W73-D): REORDERING THE THREE ADDENDS of each store so the global comes FIRST (`gUnknown_0300200C + (unk34 >> 16) + (sin * unk34 >> 20)`), on the theory that referencing the global earlier would make its pseudo win r0 and push the multiply chain into a fresh register. MUCH WORSE: 46.7%, first difference moved BACKWARDS from +0x52 to +0x28. It hoists the global's ADDRESS into sl in the preheader, where the ROM rematerialises `ldr r7,[pc,#104]` inside the loop every iteration, and it reorders the literal pool (gUnknown_03002000 and gUnknown_0300200C swap slots). The addend order is NOT the lever on which register the multiply chain lands in. Draft restored from snapshot.",
+    "WAVE 73 (W73-D): a fresh `int t; t = <dst[0] expression>; dst[0] = t;` is BYTE-IDENTICAL to writing it inline -- same coalescing as the named-local case. Only an assignment to a variable that already exists and is dead moves it.",
+    "WAVE 73 (W73-D): THIRD PERMUTER RUN, from the new 87.3% best.c. It reported 91.4% and then 91.8% AND BOTH BODIES ARE SEMANTICALLY INVALID: the permuter reused `i`, THE LOOP COUNTER, as the temporary for dst[0]'s value (`i = <expr>; dst[0] = i;`), destroying the induction variable so the loop no longer runs 0..0x9f. Corrected honestly with a fresh temp it is byte-identical to the 87.3% draft, so the mutation was worth nothing either way. CORRECTED BY W73-G SAME WAVE: the 4.5 points were NOT the corruption -- the same candidate scored 87.3% SPLICED onto the preamble and 91.4% as RAW EXPANDED output, so the gap is the header-expansion artefact W73-G characterises, not the invalid body. Two independent defects: the body was invalid AND the score was unreachable from any draft. Compare permuter candidates on the SPLICED number. best.c and best.json have been overwritten with the valid draft (they read 91.8% and would have propagated a false score into the next wave); the invalid sources are preserved under work/sub_08073480/permuter/. This independently corroborates W73-E's wave-73 finding that the randomizer is not always semantics-preserving and that the invalid results tend to be the HIGHER-scoring ones. Audit any non-matching best.c before installing it as a draft; a byte MATCH needs no audit."
    ],
    "settled_by_this_attempt": [
     "THE PERMUTER DOES HELP HERE. The previous attempt parked this as 'two instructions SHORT rather than slot-wrong, which the brief says the permuter cannot fix' and never ran it. One 300 s / 4-thread run took it from 50.4% to 76.2% and moved the first difference from +0xe to +0x52. A register-allocation residual that manifests as MISSING COPIES is still a register-allocation residual; the brief's exclusion is for a residual of one EXTRA instruction, which this is not.",
     "The head reaches gUnknown_0202FDE4 through agbcc's own -fforce-addr .rodata word at 0x081CC024 while the loop and the DMA tail use a plain inline pool word; the honest spelling reproduces both levels. PROMOTION MUST CARRY \"rodata\": [\"0x081CC024\"].",
     "`dst = gUnknown_0202FDE4; dst += i * 2;` as two separate statements is required -- one expression sinks the `ldr` past the index computation.",
-    "`*((b & 0xff) + gSinLut)` rather than `gSinLut[b & 0xff]`: the index-first spelling creates the 0xff pseudo before gSinLut's, which is what decides that 0xff wins r8 and gSinLut gets ip."
+    "`*((b & 0xff) + gSinLut)` rather than `gSinLut[b & 0xff]`: the index-first spelling creates the 0xff pseudo before gSinLut's, which is what decides that 0xff wins r8 and gSinLut gets ip.",
+    "WAVE 73 (W73-D): READ A PERMUTER WIN AS A MECHANISM, DO NOT JUST KEEP IT. The wave-46 run produced TWO mutations and they are not equal. The `b = ...` assignment inside dst[1]'s expression is the real mechanism, and applying the same trick to dst[0] BY HAND -- which nobody had done because the mutation looked like noise -- is worth 76.2% -> 87.3%. The other mutation, `(i + 1) <= 0xa0` for `i < 0xa0`, is a pure REGRESSION costing `adds r0,r5,#1; cmp r0,#160` where the ROM has a bare `cmp r5,#159`; it was padding a candidate that was 4 bytes SHORT, so the earlier size-exactness was partly fake. 'Do not tidy a permuter win' does not mean the whole diff is load-bearing."
    ],
-   "reason": "Permuter run improved it substantially but did not close it; W46-H's single round ended."
+   "reason": "A pure register-name residual on a 1:1 instruction stream. The type model, the statement order, the -fforce-addr two-level access to gUnknown_0202FDE4 and now both multiply copies are settled. Three permuter runs have not reached the register naming and the third produced only invalid code."
   },
   "named": false,
   "kind": "game",
@@ -111464,16 +111589,14 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0806CFC8.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": {
    "bytes": 68,
-   "best": "68 bytes (exact), 85.3% identical -- 10 of 68 bytes",
-   "remaining_diff": "Size and relocations are exact and the instruction sequence matches. The ROM holds a pool word in r2 where ours holds it in r3, first visible at +0xb (`ldr r2, [pc, #44]` vs `ldr r3, [pc, #44]`); the choice then propagates through every instruction naming either register.",
-   "why_it_is_close": "Everything except the register assignment is already right, so this is the same local-alloc tie-break axis as sub_0801C4D4 and sub_0801C640 parked this wave -- but unlike those two it has had NO attempt on that axis yet, because the wave ran out of budget here.",
-   "axes_ruled_out": [],
-   "read_this_first": "include/unknown-globals.h already records two facts about this function that a fresh attempt will otherwise re-derive wrongly. (1) It reaches its slot through agbcc's own -fforce-addr word at 0x081CC02C, whose ROM contents are 0x0202FDE4, so the three-level load here is ONE indirection of compiler bookkeeping and NOT a pointer to a pointer -- a draft modelling it as the latter looks structurally right and allocates differently. (2) gUnknown_0202F8DC is read at stride FOUR with the halfword at +2 (two entries per scanline), which contradicts an older note above it claiming a one-halfword table; that reconciliation is still open and is the most likely source-level lever here. Settle the type model before touching allocation.",
-   "wave": "30 (W30-A)"
+   "status": "MATCHED wave 73 (W73-B). Needs rodata placement: \"rodata\": [\"0x081CC02C\"].",
+   "resolved_by": "COMMA OPERATOR. The ROM evaluates the SUBTRAHEND of `row[0].unk02 - row[line].unk02` first. A statement boundary (`t = row[line].unk02;` on its own line) gives the ROM's operand order and registers but sinks the 0x04000014 pool `ldr` between the two loads; the single-statement form is the mirror image. `REG_BG1HOFS = (t = row[line].unk02, row[0].unk02 - t + 0x100);` satisfies both at once. The comma at depth inside operand 0's own index (`row[(t = row[line].unk02, 0)].unk02`) gives IDENTICAL assembly, so the lever is the comma, not the depth.",
+   "measurements": "Wave 73 (W73-B) toolchain sweep, all seven compiler profiles run against this exact draft: configured/default 85.3%, no-force 29.4% (-4 bytes), o1 41.2%, o1-no-force 41.2%, old-agbcc 14.7% (+8 bytes), old-agbcc-no-force 27.9% (-4 bytes). No profile beats the configured one.",
+   "wave": "30 (W30-A) parked; 73 (W73-B) matched"
   },
   "named": false,
   "kind": "game",
@@ -112862,7 +112985,7 @@
   "src": "code-0806CFC8.s",
   "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": "53.5% -- 144 bytes, candidate 140 (-4). TWO agents this wave (W38-B, W38-E), W38-E starting from scratch as the wave-37 inherited-draft rule requires. The residual is one source-level fact and all three symptoms follow from it: the original loads the gUnknown_081CC4D4 base ONCE into r5 and reuses it in both arms (`ldr r5,[r7,#0]` then `adds r0,r4,r5`), the candidate reloads it at the bottom; the original's pool word sits MID-FUNCTION at +0x54 with the code branching over it (`ldr r0,[r7,#0]; b.n 7e`) where the candidate dumps it after the epilogue -- that IS the -4 bytes; and allocation is shifted by one register throughout (r6 vs r5). Ruled out: binding the array base to a local before the loop, which is the wave-37 chapter that predicts exactly this pool movement -- it was tried and does not reproduce the mid-function dump. Not tried: the toolchain axis. WAVE 38.",
+  "parked_reason": "53.5% -- 144 bytes, candidate 140 (-4). TWO agents this wave (W38-B, W38-E), W38-E starting from scratch as the wave-37 inherited-draft rule requires. The residual is one source-level fact and all three symptoms follow from it: the original loads the gUnknown_081CC4D4 base ONCE into r5 and reuses it in both arms (`ldr r5,[r7,#0]` then `adds r0,r4,r5`), the candidate reloads it at the bottom; the original's pool word sits MID-FUNCTION at +0x54 with the code branching over it (`ldr r0,[r7,#0]; b.n 7e`) where the candidate dumps it after the epilogue -- that IS the -4 bytes; and allocation is shifted by one register throughout (r6 vs r5). Ruled out: binding the array base to a local before the loop, which is the wave-37 chapter that predicts exactly this pool movement -- it was tried and does not reproduce the mid-function dump. Not tried: the toolchain axis. WAVE 38. ---- WAVE 73 (W73-A): THE TOOLCHAIN AXIS IS RULED OUT, and without spending a probe. This entry listed 'Not tried: the toolchain axis' as the one remaining lead. It is not a lead. Wave 38's measurement was never about the 0x0807xxxx address range: the two functions that genuinely needed old_agbcc were the two WHOSE LOOP BODY CONTAINS A CALL. This loop body is 'dist -= step >> 1; gUnknown_0202FEF8[i] = step >> 1; if (step <= 0xf) step = step + 1; i++;' -- four statements, no 'bl' of any kind. The trigger mechanism is absent, so old-agbcc / old-agbcc-no-force were deliberately NOT probed; wave 56 already ran four such profile probes on mechanism-free candidates for zero positives, including one that met the documented address-range trigger exactly and changed not one byte. The ONLY open lever remains W38-E's: make r7 (the force-addr pool pointer) live BEFORE the guard without collapsing the indirection, so the zero-trip edge reaches the table through the same register instead of const-folding to its own direct pool word. Verified unchanged at 140/144 bytes this wave.",
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -121162,7 +121285,8 @@
    "why_it_is_close": "Everything else matches, including the shared [sp] / [sp,#4] caller-save pair around the call, both 0xFF sentinel tests and the gUnknown_03005944 cursor writes.",
    "axes_ruled_out": [
     "Wave 4: four spellings of the test, all producing the identical shift -- if (sub_0803CAB8(x)), if (sub_0803CAB8(x) != 0), if (sub_0803CAB8(x) > 0), and u8 t = sub_0803CAB8(x); if (t). The last is the interesting negative: a promoted-unsigned u8 local does NOT absorb a callee's return narrowing the way it absorbs a load's.",
-    "Wave 59 (W59-F): NOT ATTEMPTED, and the wave-59 batch note's reading of it is WRONG. It was ranked as an extra or mis-ordered literal-pool word because every ldr [pc,#N] is off by exactly 4. The pool is not the residual -- its contents and order are identical and the offsets shift because of the one extra instruction ahead of them. A uniform +4 on every pc-relative load is a downstream symptom of an insertion, never evidence about the pool itself."
+    "Wave 59 (W59-F): NOT ATTEMPTED, and the wave-59 batch note's reading of it is WRONG. It was ranked as an extra or mis-ordered literal-pool word because every ldr [pc,#N] is off by exactly 4. The pool is not the residual -- its contents and order are identical and the offsets shift because of the one extra instruction ahead of them. A uniform +4 on every pc-relative load is a downstream symptom of an insertion, never evidence about the pool itself.",
+    "WAVE 73 (W73-A): re-verified unchanged at 48.7% / +4 bytes and re-classified. NO new spelling was attempted and none should be. This is RESIDUAL KIND 5 (cross-TU prototype contract) under the wave-73 taxonomy, which says explicitly to stop and add the documented example rather than spend attempts. The single 'lsls r0,r0,#24' is agbcc re-narrowing a u8-returning callee's result at a call site, and no spelling of THIS caller reaches it -- the fix is to retype sub_0803CAB8 as int in this translation unit only, which a single shared include/unknown-functions.h cannot express. ORCHESTRATOR DECISION, not an agent one."
    ],
    "note": "Wave 59 (W59-F). RESIDUAL KIND 5 -- CROSS-TU PROTOTYPE CONTRACT, and only the second one documented after sub_08039188. The shift is agbcc re-narrowing a u8-returning callee's result. sub_0803CAB8 is not the suspect: TEN of its eleven callers DO narrow, including the promoted, matched src/decomp/c_0803C354.c (nine sites) and c_08043CA0.c, and c_0803CA9C.c defines it u8. This one caller is the outlier, so the original source declared sub_0803CAB8 int in THIS translation unit and u8 in the others -- a per-file prototype divergence that a single shared include/unknown-functions.h cannot express. Retyping it to int and casting (u8) at the ten other sites would match all eleven and is an ORCHESTRATOR decision, not an agent one: it reshapes a settled, high-fan-in declaration to suit one function."
   },

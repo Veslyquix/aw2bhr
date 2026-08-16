@@ -10428,6 +10428,15 @@ void sub_080200EC(s16, s16, s16, s16);
  * as `movs #1; rsbs` -- so signed. Byte-neutral there; c_08020D50 re-verified
  * by try_match exit code after the change. */
 void sub_08020B88(s16, s16, s16, s16);
+/* Wave 73, W73-F: the prose above says arguments 5 AND 6 are `int`, which
+ * CONTRADICTS this declaration and is the stale half. The 6th is `u8` and the
+ * caller settles it: src/decomp/c_080210C8.c is matched, holds its own sixth
+ * parameter as `int a6`, and passes it through `lsls #0x18; lsrs #0x18` -- that
+ * truncation is the int->u8 conversion this declaration's 6th parameter
+ * requires, and it disappears if the parameter is widened, costing the matched
+ * caller 4 bytes. decomp-permuter reaches 91.5% on the definition (against
+ * 90.7%) with `unsigned int` here; it rewrites the prototype block and so never
+ * compiles that against this header. Do not widen it. */
 void sub_08020EDC(s16, s16, s16, u8 *, int, u8);
 
 /* Wave 36, W36-M. Every signature below is COPIED VERBATIM from a byte-verified

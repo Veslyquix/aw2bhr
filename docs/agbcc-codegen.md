@@ -43448,6 +43448,15 @@ of my exemplars produces it".
 
 ## The u16 loop counter's DECREMENT DOMAIN is not reachable by spelling the loop — eleven spellings, one answer (wave 60, W60-D, extending wave 59)
 
+**REFUTED IN WAVE 73 (W73-H) — `sub_08029AF8` MATCHED. The title of this
+chapter is wrong and its closing instruction ("Do not sweep decrement spellings
+again") should not be followed. All nineteen spellings below varied the TEST and
+the counter while keeping the subtraction in the NARROW domain; writing the
+subtraction itself in the shifted domain, `t = (int)(((u32)a2 << 16) - 0x10000);`,
+matches on the first attempt. See the wave-73 chapter of the same name at the end
+of this file. The measurements below remain valid as negatives — only the
+conclusion drawn from them was wrong.**
+
 `sub_08029AF8` is 8 bytes short with everything else byte-exact. The ROM
 decrements its `u16` counter in the SHIFTED domain and its exit test reads the
 PRE-NARROWED temp:
@@ -44262,3 +44271,1409 @@ k &= f;
 emits `ldrb r1; movs r0,#1; mov r8,r0; ands r0,r1` and matched the configured
 632-byte function exactly.  An expression-form `f & (k = 1, m = k, k)` still
 targets r1; the compound assignment is load-bearing.
+
+## A bitfield view can be LOCAL TO THE WRITER — a reader and a writer of the same field need not share a declaration (wave 73, W73-C)
+
+`sub_0806B120` sat parked since wave 48 as a "cross-TU type conflict", the
+documented dead-end class. It was not one, and the reasoning that parked it
+contains a gap worth generalising.
+
+`gUnknown_0202F214`'s halfword at +0x02 is two packed fields (2 bits at bit 0,
+14 bits at bit 2). `sub_0806B120` WRITES both; `sub_0806AD04` (matched and
+promoted in wave 48) READS both. The writer's stores are `store_bit_field` and
+want `u16 lo : 2; u16 hi : 14;`. The reader's loads are `ldrb [.,#2]` plus a
+shift pair and `ldrh [.,#2]; lsrs #2`, and a bitfield READ widens to the
+enclosing word (`ldr`), so the reader cannot use that declaration. Wave 48
+concluded the two constraints could not both hold and declined to reshape the
+shared struct — correctly, per the "never reshape a shared member" rule.
+
+**The missing move: put the bitfields in a view type declared in the WRITER's
+own `.c` and reach it by a cast.** The shared declaration stays `u16 unk02`, the
+reader is untouched, and both functions match. A plain local `struct` containing
+bitfields has the same 4-byte size and alignment as the scalar version, so the
+`lsls #2` index is unaffected. The 4-to-8-byte inflation recorded in the
+Bitfields chapter applies to a UNION carrying a bitfield struct, which is a
+different layout — do not read that measurement as covering a local view.
+
+So the brief's rule reads forwards as well as backwards: when your diff demands
+a different width for a member someone else already typed, that is evidence
+about YOUR ACCESS. The access can be a cast, a different member at the same
+offset, a union — **or a whole local view type**. Before parking anything as a
+cross-TU prototype/type contract, check whether the conflicting view can be made
+private to one side.
+
+### The second half: the bitfields were worth 24 bytes, not 4
+
+A `u8 *` masked read-modify-write gets both stores' WIDTHS right (`ldrb`/`strb`
+for the byte-contained field, `ldrh`/`strh` for the spanning one) and still
+misses by 24 bytes, for two reasons that are one fact:
+
+- `store_bit_field` builds its inverse mask as a FULL-WORD constant, so `~3` is
+  `movs r3,#4; rsbs r3,r3,#0; adds r1,r3,#0` where a QImode `& ~3` narrows to a
+  single `movs #0xfc`. (Compare the wave-47 entry at `mov r0,#0xc7` vs
+  `movs r0,#0x39; rsbs r0,r0,#0` — same tell, opposite direction.)
+- that extra live constant is exactly the register pressure that stops
+  `strength_reduce` from making the element address a pointer giv. With the
+  bitfields agbcc keeps `i * 4` as the giv, re-loads the base from the
+  force-addr pool word every iteration (`mov r3,r8; ldr r4,[r3]`) and needs r8
+  — which is the ROM's `mov r7,r8; push {r7}` prologue. Without them it hoists
+  the base into a pointer giv and drops r8 entirely.
+
+**A 4-byte mask sequence and a 20-byte allocation difference were ONE decision.**
+This is the "a misplaced `ldr` and a swapped register pair are one fact" rule
+seen through register pressure, and it is the reason the function read as a
+20-byte shape problem when it was a type problem.
+
+### And the tail: use the view ONLY where a bitfield is needed
+
+The same element's `unk00` is written through the plain shared type, not the
+view. Both spellings emit the same six tail instructions, but through the cast
+the index shift is emitted BEFORE the base load, and through the array symbol
+the base load comes first — which is the ROM's order. Casting the whole access
+because one field needs it costs the tail's instruction order.
+
+## A short-circuit `&&` is itself an LICM barrier — correcting "the ONLY thing that blocks it is a second assignment" (wave 73, W73-A)
+
+The wave-39 chapter above, "LICM hoists a conditionally-executed loop invariant,
+and the ONLY thing that blocks it is a second assignment (W39-C)", is right about
+its mechanism and wrong about the word ONLY. There is a second barrier, and it is
+cheaper than the one that chapter documents.
+
+Measured on the same function, `sub_08024720`, by `compile_probe`. Writing the
+invariant expression *inside the short-circuit operand itself*:
+
+    if (sub_0804415C(i) && (j = ((u32)gUnknown_03004008 >> 2) & 0xf) >= 0)
+
+does not hoist at all. The whole `ldr / ldr / lsr / and` chain stays in the loop
+body. The wave-39 chapter's own probe set had established that being guarded by
+two conditionals and preceded by a call does NOT protect an invariant —
+`maybe_never` and `call_passed` are both set and agbcc hoists anyway — so the
+natural reading was that nothing short of a second assignment blocks it. That
+reading is wrong: a conditional *statement* does not protect the invariant, but
+the right-hand operand of `&&` does, because it is not on the loop's main path at
+all and `scan_loop` never records it as a movable.
+
+So the two barriers are different in kind and they are not interchangeable:
+
+- **second assignment to the pseudo** (W39-C) — blocks the hoist and keeps the
+  value where the ROM computes it, at the cost of nothing. This is the lever.
+- **inside the `&&` operand** (W73-A) — blocks the hoist *and* stops the
+  expression being computed once in the preheader, so you pay for it on every
+  iteration. This is usually a REGRESSION, not a lever. On `sub_08024720` it cost
+  four instructions the ROM computes once.
+
+Read it as a diagnostic rather than a tool: if your candidate recomputes
+something in a loop body that the ROM hoists, check whether you have written it
+inside a `&&` or `||` operand.
+
+## A `do { ... } while (0)` wrapper is a register-allocation lever the permuter finds and you would not (wave 73, W73-A)
+
+`sub_0802E010` (288 bytes, size-exact) sat at 93.8% for two waves on a residual
+that was purely a rotation of four registers in a clear loop. Two decomp-permuter
+runs, each restarted from the previous `best.c` per the wave-59 method, took it to
+95.5%, and the entire winning mutation was wrapping the clear loop's single-statement
+body in `do { ... } while (0)` — with a second, NESTED wrapper worth one byte more:
+
+    for (i = 0, half = n >> 1; i <= 0x3FF; i++)
+    {
+        do { do { gUnknown_0849957C[i] = 0; } while (0); } while (0);
+    }
+
+It is semantically inert and changes which hard registers the loop's base, zero
+and bound constants land in. Two consequences:
+
+- **Do not tidy it away.** This is the same rule as "do not tidy a permuter win"
+  and it has now cost bytes in both directions.
+- **Do not reach for it by hand as a first move.** Wave 18 spent a round on a
+  `do { } while (0)` that turned out to be compensating for a table declared flat
+  where it needed a struct, and the wrapper looked like a genuine allocation lever
+  right up until the type was fixed. It is a lever only once the types and the
+  instruction stream are already settled — which on `sub_0802E010` they provably
+  were, the function being size-exact with every differing byte a register number.
+
+The wider point is about tool selection, and it was worth 576 bytes of progress
+across a pair: **the permuter had never been run on this function**, because its
+`parked.json` entry was a whole wave stale (it recorded 64.2% and -4 bytes while
+the draft was already 93.8% and size-exact) and nothing in the entry advertised
+the residual as a swapped pair. Check the draft's own header against the parked
+entry before deciding an axis is untried or unavailable.
+
+## A pointer global has THREE spellings, not two — bind its ADDRESS to a `T **` local to load the address EARLY and deref LATE (wave 73, W73-E)
+
+`sub_08060110` sat parked since wave 32 at 68.8%, size-exact, on a residual the
+entry called "ONE pool load's position". It **matched on the third attempt** with
+this lever, and the lever is general.
+
+For a pointer global `T *g`, an access `g[i]` has three source spellings and they
+emit three DIFFERENT schedules of the two loads involved (the address constant
+`ldr rA, =g`, and the deref `ldr rV, [rA]`):
+
+| spelling | address constant | deref |
+|---|---|---|
+| `g[i]` in place | **late** (at the use) | late |
+| `T *t; t = g;` own statement | early | **early** — pulled forward with it |
+| `T **t; t = &g;` own statement, use `*t + i` | **early** | **late** (at the use) |
+
+The ROM wanted address-early / deref-late, which is the third row and the only
+one nobody had tried: wave 32 ruled out row 1, and row 2 (the "explicit
+`tbl = gUnknown_08499594;`" the entry recommended trying next, taken from the
+sibling `sub_080601F0`) is a real regression here — it emits
+`ldr r0,[pc]; ldr r3,[r0]` back-to-back and drops the function from 68.8% to
+60.4%. Row 3 is exact.
+
+Why it matters beyond one function: **this is a lever for the pure register-name
+class.** In `sub_08060110` the whole 30-byte residual was downstream of one
+address constant being created late — with it created early, the constant lives
+in the scratch `r3` across the index arithmetic, which forces the `0x417A`
+literal into `r5` and therefore the ROM's `push {r4, r5, lr}` instead of the
+candidate's `push {r4, lr}`. **The push mask, the swapped `r0`/`r1` operand pair
+in the offset computation and the pool word order were ONE fact**, exactly as the
+brief's "a misplaced `ldr` and a swapped register pair are ONE fact" rule
+predicts — and the single edit that fixed the `ldr`'s position fixed all of them
+at once. Nothing else in the function changed.
+
+**THE ROW IS A PROPERTY OF THE USE SITE, NOT OF THE GLOBAL, AND NOT OF THE
+FUNCTION.** W73-D found the cleanest possible demonstration inside a single
+function: in `sub_0802E010`, `gUnknown_0849957C`'s clear loop wants row 3 (the
+ROM holds the address in r5 across the loop and re-derefs `ldr r0,[r5,#0]` every
+iteration -- and rows 1 and 3 happen to coincide there), while block 4 of the
+same function wants row 2, where `row = gUnknown_0849957C;` as its own statement
+is measured load-bearing (it forces `lsl; ldr; add; lsl; add` against the inline
+form's `lsl; add; ldr; lsl; add`). Same global, same function, two sites, two
+rows. So row 2 being a regression at one site is NOT evidence against row 2
+anywhere else -- which is the same trap this chapter is warning about, pointing
+the other way.
+
+Read it as a diagnostic, per USE SITE, in both directions:
+
+- If the ROM loads a pool word **earlier than your candidate** and derefs it at
+  the same place your candidate does, you want row 3 -- `&g` bound to a `T **`.
+- If the ROM loads **and** derefs earlier, you want row 2.
+- **If the address constant is ALREADY where the ROM puts it, none of this is
+  your residual, and forcing a row costs bytes.** W73-B cross-checked row 3 on
+  the two functions in its batch that reach a genuine pointer global and got a
+  tie and a regression: on `sub_08045C18` (`u8 *gUnknown_08499590`) all three
+  rows measure 89.4%, 22 of 208 bytes, first difference at +0x12 -- the map
+  pointer is loaded once and used in all ten tests, so *when* the address
+  constant is created cannot be the residual; on `sub_08049944`
+  (`u16 *gUnknown_0849957C`) both pool words already matched the ROM and row 3
+  costs 4 bytes (184 bytes, 8.9%, first difference at +0x2). **So "try row 3
+  first" is conditional on there being a GAP to close.** Read the ROM's load
+  position against your candidate's before reaching for any row; that check is
+  free and it is what the diagnostic above was always asking for.
+- Row 2 is NOT a way to reach row 3's effect. The two are different levers and
+  the parked entry that conflated them cost `sub_08060110` four waves.
+
+This is the same mechanism as the wave-43 chapter "A pointer global inside an
+ADDRESS expression is loaded LATE -- give it its own statement", but that chapter
+only describes row 2 and therefore reads as though row 2 is the fix whenever the
+load is late. It is not; it is the fix only when the deref is late too.
+
+## The PURE REGISTER-NAME residual HAS levers — 5 of 7 closed in wave 73 (W73-B, then W73-F)
+
+The class: an instruction stream 1:1 with the ROM — same opcodes, same order,
+same immediates, same branch structure, same pool words in the same order, size
+exact — where **every differing byte is a register NUMBER**. Wave 73 attacked all
+six known instances as one controlled batch, because six instances of one
+mechanism is enough to tell whether it has a lever. It does.
+
+| function | before | after | what moved it |
+|---|---|---|---|
+| `sub_08073930` | 85.3% | **MATCH** | comma operator (by hand) |
+| `sub_0801914C` | 87.0% | **MATCH** | permuter, one 300 s run |
+| `sub_0802FA64` | 87.5% | **MATCH** | permuter → subtraction of a negation |
+| `sub_08049944` | 70.0% | 92.2% | parameter live-range split |
+| `sub_08045C18` | 89.4% | **MATCH** (W73-F) | permuter run with `--current`; binding the comparison constant |
+| `sub_08012B70` | 87.5% | 87.5% | nothing; the one genuine park |
+
+**The single most useful fact: the permuter had never been run on five of the
+six.** Only `sub_08012B70` had seen it, and that is the one function nothing
+moved. Three of the five first-time runs paid, two of them immediately. Before
+declaring a pure-register-name residual unreachable, check the entry for an
+actual permuter measurement — several entries reasoned it away without running
+it, and `sub_08049944`'s did so from a misread of the 256-byte figure, which is
+a "run it before hand-rewriting" threshold and not a floor below which the
+permuter does nothing.
+
+### Lever 1 — the comma operator, for an evaluation order a statement cannot buy
+
+`sub_08073930`. The ROM evaluates the SUBTRAHEND of `a - b` first. Hoisting `b`
+into its own statement gives the ROM's operand order and registers but sinks the
+destination's address-constant `ldr` down between the two loads, because an
+address constant's `ldr` lands at the head of the statement that first
+references it. The single-statement form is the exact mirror image: right pool
+position, wrong operand order. Four spellings measured side by side in one
+`compile_probe`:
+
+- single statement → 85.3% (pool right, operands wrong)
+- separate statement → operands right, pool `ldr` sinks
+- **comma in the RHS → EXACT**
+- **comma inside operand 0's own index → EXACT, byte-identical to the above**
+
+Both comma depths give identical assembly, so **the lever is the comma itself,
+not the depth at which it sits.** That narrows the wave-17 result, which had only
+ever been demonstrated at one specific depth inside another argument's index.
+
+### Lever 2 — `base - (-index)` makes a SYMBOLIC base operand 1 (new rule)
+
+`sub_0802FA64`, found by the permuter and understood afterwards. Its entry had
+recorded a measured rule over fourteen spellings across two waves: *in
+`pointer + runtime` a SYMBOLIC base is ALWAYS operand 2; only a base loaded from
+memory is ever operand 1* — and concluded the ROM's `adds r2, r2, r1` was
+unreachable and that the real problem must be an open type-model question.
+
+The rule is correct for every ADDITIVE spelling and is escaped by writing the
+add as a subtraction:
+
+    p = (u8 *)&gUnknown_03003FC0 - (-gUnknown_0849B018->unk06);
+
+That puts the symbolic base in operand 1 and matches. **When operand order in an
+address add is the residual and every additive spelling has failed, negate the
+index and subtract.** The type model was already right; the "open type-model
+question" was a false lead generated by trusting a rule that had only been
+tested on one side of the operator.
+
+### Lever 3 — splitting a PARAMETER's live range
+
+`sub_08049944`, 70.0% → 92.2% (54 → 14 differing bytes), found by the permuter
+and semantics-checked afterwards. The whole edit is
+
+    if ((new_var = a1) == 0)      /* was: if (a1 == 0) */
+    ... i <= 9 && new_var >= n    /* was: a1 >= n */
+
+with `u16 new_var` declared first of the locals. `new_var` is a pure copy of
+`a1` that is never reassigned, so the program is unchanged; it only splits the
+parameter's live range so the calls read `a1` and the loop reads `new_var`.
+The docs had stated "binding locals are punctuation" only for address-arithmetic
+locals. **It applies to parameters, and it is worth 40 points.**
+
+### What the class does NOT respond to
+
+- **The toolchain axis, measured exhaustively: 42 runs, 6 functions × 7 profiles**
+  (`configured`, `default`, `no-force`, `o1`, `o1-no-force`, `old-agbcc`,
+  `old-agbcc-no-force`). **No profile improved any of the six.** `sub_08049944` is
+  byte-identical under all seven — its register assignment is invariant to every
+  flag the harness can set. Do not spend another wave here.
+- **A lever does not transfer just because the residual class does.** The comma
+  is negative on `sub_0802FA64` (four spellings, all emit the identical
+  `add r1, r1, r3`); `base - (-index)` is negative on `sub_08012B70`, where it
+  drops the src prologue copy entirely. Six instances, and no lever moved more
+  than one of them. **Work the mechanism out per function; the class predicts
+  that a lever EXISTS, not which one.**
+
+### `sub_08045C18` — the inversion was reachable, and W73-F found the spelling (MATCHED)
+
+The section below is W73-B's mid-wave state, kept because its two measured
+negatives are still worth having. The outcome is in the two subsections that
+follow it: the function MATCHED for W73-F, and the "next wave's first task"
+posed at the end of this section was the wrong question — the extra allocno did
+not have to carry a loaded value, it had to be an operand the `ands` never
+reads.
+
+Its entry concluded the allocno-priority model was "INCOMPLETE, not
+mis-parameterised", with arithmetic showing the ROM needed terrain at <= 10 refs
+or the constant at >= 11, "both a whole test away". **That conclusion is refuted.**
+A permuter run reached 97.1% (6 of 208 bytes) and that variant has the ROM's
+assignment — `movs r2, #224` with terrain in r3. One extra allocno flips it; the
+gap is not structural in the ref counts.
+
+The caveat matters: **the permuter's 97.1% variant is semantically WRONG** (it
+reassigns the index local from a loaded byte in test 7 and reuses it as test
+10's index), so it is kept in `best.c` and deliberately not adopted as the
+draft. Two semantically-valid reconstructions were measured and both fail:
+
+- binding the `0x19` index constant to a local used in tests 5 and 10 → 89.4%,
+  first difference back at +0x12, i.e. exactly the old draft. CSE
+  const-propagates the constant and the pseudo vanishes. **What moves the
+  inversion is a pseudo carrying a LOADED value across the middle blocks, not
+  merely an extra name.**
+- binding each test's loaded byte to a `u8 t` local → 192 bytes (-16) / 19.7%
+  for all ten, 200 bytes (-8) / 45.2% for tests 6-10 only. Naming the load lets
+  combine drop the nine `adds r0, r2, #0` constant copies the ROM spends, so the
+  candidate comes out SHORTER. The ROM's copies require the load to feed the AND
+  inline.
+
+**Next wave's first task on this one:** find a semantically-valid source
+construct that keeps a loaded byte live across tests 5-10 without naming the
+load in a way that lets combine drop the constant copies.
+
+#### An `adds rD, rC, #0` copy before an `ands` proves the mask is a LITERAL, not a named local (wave 73, W73-F)
+
+W73-F closed the other half of that search. B had measured that naming the
+*load* drops the nine `adds r0, r2, #0` copies the ROM spends (-16 bytes). The
+mirror image was untried and is just as strong: naming the *mask* drops them
+too. Declaring `int c;` and creating the constant's pseudo through a comma
+inside the first test — `(((c = 0xe0), m->terrain[...] & c) >> 5) != 2`, with
+`c` as the mask in all ten tests — gives **192 bytes (-16), 18.3% identical,
+first difference at +0x2**: the identical -16 that naming the load produces.
+
+The mechanism is the same in both directions. THUMB `ands` is two-operand and
+destructive, so one of its inputs must die in the destination register. When
+BOTH inputs are anonymous — an inline load and a bare `CONST_INT` — expand
+materialises the constant into a fresh scratch at every site and that scratch is
+the `adds rD, rC, #0`. As soon as either input has a name, the named pseudo is
+the one that survives, the other operand is destroyed in place, and the copy is
+gone. **So a run of `adds rD, rC, #0` immediately before an `ands` is positive
+evidence that neither operand of that AND is a source variable** — read it that
+way before proposing a binding local anywhere near one.
+
+#### …and `sub_08045C18` then MATCHED, on the one operand that enumeration left out
+
+The enumeration is what solved it, by elimination. Every operand of the ten
+tests had been measured as a named local:
+
+| named operand | result |
+|---|---|
+| the loaded byte | 192 B (-16) / 19.7%, or 200 B (-8) / 45.2% for tests 6-10 (W73-B) |
+| the mask `0xe0` | 192 B (-16) / 18.3% (W73-F, above) |
+| the index `0x19` | 208 B, 89.4% — CSE const-propagates it and the pseudo vanishes (W73-B) |
+| the row offsets | 81.25% — they leave `ip` for a low register (wave 45) |
+| the map pointer | 89.4%, all three of W73-E's pointer-global rows tie (W73-B) |
+| **the comparison constant `0x40`** | **MATCH (W73-F)** |
+
+**The comparison constant is the only operand of the ten tests that is not an
+input to the `ands`**, which is exactly why it is the only one that can be named
+without letting combine drop the nine `adds r0, r2, #0` copies. The whole edit
+is
+
+    if ((m->terrain[m->rowOffset[0] + 0x18] & 0xe0) != (new_var = 0x40))
+
+with `unsigned short new_var;` declared first and tests 5–10 comparing against
+`new_var`. It is semantically exact — tests 5–10 are reachable only after test
+4's condition has been evaluated — and that one extra allocno inverts the two
+registers. **Wave 45's conclusion that the priority model here was "INCOMPLETE,
+not mis-parameterised", with arithmetic showing the ROM needed terrain at ≤10
+refs or the constant at ≥11, "both a whole test away", is refuted.** Position
+matters as much as the binding: bound at test 1, or declared with an
+initialiser, CSE const-propagates it away.
+
+**And what found it was `--current`, not chaining.** The 97.1% variant sitting
+in `best.c` is semantically wrong and cannot be reconstructed validly by
+construction, not merely by search: its extra allocno is a `u8` with TWO sets
+(`0x19` in block 1, a loaded byte in block 7) and it is precisely those two
+reaching definitions at test 10 that stop CSE const-propagating the `0x19`;
+making it correct forces the block-7 definition onto test 7's `return 0` path,
+where nothing uses it, so flow deletes the store and the pseudo collapses back
+to 89.4%. Three runs chained from that `best.c` plateaued. One 600 s run from
+the 89.4% DRAFT went 110 → 15 → 0 and matched. **A wrong-but-high-scoring
+`best.c` is not merely useless for chaining, it is a trap: it holds the search
+in a basin the source language cannot reach.** Together with `sub_08020EDC`'s
+non-size-exact `best.c`, that is two distinct ways `best.c` misdirects a chained
+run in one wave — check it before every chain.
+
+### The one genuine park
+
+`sub_08012B70` is the only one of the six that no lever moved, and the only one
+the permuter had already been run on before this wave (it re-confirmed
+converged: two more runs, base score 70, nothing better). Its entry's diagnosis
+stands — it needs a construct that keeps `dst` alive across the stack-parameter
+load WITHOUT making it the row base.
+
+### Verdict on the class question
+
+**The pure register-name residual is NOT a park class.** It is a class of
+one-decision misses with a small toolbox — comma operator, subtraction of a
+negation, live-range splitting, and above all the permuter run repeatedly from
+its own `best.c`. What made it look like a park class is that its entries
+accumulate confident "unreachable" conclusions: three of the six carried one,
+and all three were wrong. **A parked entry's ruled-out list is evidence; its
+concluding paragraph is a hypothesis.** `sub_080283E4` (wave 71) is the seventh
+known instance and has not been attacked.
+
+### Chaining the permuter: check `best.json`'s `size_delta` before you chain, and run them in parallel (wave 73, W73-F)
+
+Two operational facts that decide whether the "run it repeatedly from the
+previous `best.c`" technique actually works.
+
+**`permute.py` starts from `best.c`, and `best.c` can be in the wrong basin.**
+`trymatch` moves `best.c` forward on byte-identity percentage alone, with no
+regard for size. On a size-exact target that lets a NON-size-exact variant own
+`best.c` forever, and every chained run then searches around it.
+`sub_08020EDC` is the live case: its draft is size-exact at 492 bytes, its
+`best.c` is a permuter-expanded 496-byte variant scoring 93.9%, and a 300 s run
+from that `best.c` returned candidates that were **all +4 bytes**. Re-running
+with `--current` (start from `work/<fn>/<fn>.c`, not `best.c`) put the search
+back on the size-exact side. **Read `work/<fn>/best.json`'s `size_delta` before
+every chained run; when it is nonzero and the draft is size-exact, pass
+`--current`.** This is the same trap as "do not trust `best.json`'s score",
+one level down: the score is not stale here, it is measuring a different
+function shape than the one you want.
+
+**A third reason to reach for `--current`, and it applies even when `best.c` is
+fine.** Once the permuter has won once, `best.c` holds its raw
+header-expanded output — thousands of lines of `cpp -P` with every prototype
+rewritten. That text compiles to the same bytes as your clean draft but it is
+not the same text, and the permuter randomises over SOURCE, so the two are
+genuinely different starting points even at an identical score. When a chained
+run stalls, re-run it with `--current` before concluding the function has
+converged. (`--current` also keeps the permuter away from the rewritten
+prototype block, which is what let a `sub_08020EDC` candidate "win" by widening
+a parameter its real header forbids.)
+
+**Run them in parallel, in the background, from the shell.**
+`python tools/permute.py <fn> --seconds N --threads 3` is a Windows-side driver
+that shells into WSL, so several can be backgrounded at once and worked around
+while they run; three concurrent runs at 3 threads each showed no interference.
+The MCP `permute` tool blocks the whole agent for the duration, which is what
+makes a wave spend its budget serialised behind one search. W73-F got four
+chained runs across four functions inside one function's turn budget this way.
+
+**And the chaining does pay — this is how `sub_08046778` MATCHED.** It had
+never been permuted, and three chained runs took it
+**91.67% -> 95.11% -> 99.43% -> byte-for-byte match**, size-exact throughout
+(725 -> 480 -> 205 -> 0 on the permuter's own scale). No single run from the
+91.67% draft found any of it. It had no parked entry at all and its draft
+comment concluded "the lever is NOT the local", which was right about the local
+wave 49 had tried and wrong about the four the permuter found.
+
+Every step was a semantically-neutral live-range split, and all of them are
+readable as ordinary C once you look at what the permuter did:
+
+1. bind the ROW POINTER used by the guard — `s8 *p = ...unk18[idx];` — while
+   leaving the call argument's copy of the same chain spelled out in full. The
+   asymmetry is the point: the earlier hand attempt bound BOTH occurrences to
+   one local, which collapses the two address chains the ROM recomputes and
+   costs 8 bytes.
+2. bind the call argument's copy IN PLACE, inside the argument —
+   `(q = ...unk18[idx])[index]` — which is the same trick applied to the
+   occurrence the first step deliberately left alone.
+3. split the divide's two u8 inputs into their own locals.
+4. bind the dividend to a `short` — `short t = base + row * 8;` then `t / 8` —
+   in place of the draft's `(u32)(...) / 8`. **A `short` dividend is a second
+   way to spell an unsigned shift**, and it is the one that matched: the value
+   is `u8 + u8 * 8`, so 0..2295, `nonzero_bits` proves it non-negative, and
+   `/ 8` comes out as the ROM's `lsrs #3` with no `(u32)` cast and no
+   round-toward-zero bias. The old draft's note "only the (u32) cast gives the
+   ROM's `lsrs #3`" was therefore too strong — the cast is *a* way, not *the*
+   way, and the two differ in what else they do to the surrounding allocation.
+
+**The generalisable part: on a size-exact residual, the permuter's whole
+vocabulary is live-range splitting, and every win it produces reads back as a
+named temporary you could have written.** That is why re-deriving its output is
+worth doing and why "do not tidy it" matters — the names ARE the edit.
+
+### Three more things wave 73 learned from reading permuter output rather than adopting it
+
+**A permuter candidate is often BEATABLE by the clean version of its own idea.**
+`sub_080283E4`'s best permuter candidate scored 89.9% by writing one block's
+subscript inline on both sides of an assignment AND adding a self-assignment
+(`p->m = p->m;` — legal, behaviour-preserving, and obviously not what anyone
+wrote). Keeping the inline subscript and dropping the self-assignment scores
+**90.7%**, better than the permuter's own candidate and up from an 87.6% draft
+that four waves had left alone. Read the candidate, separate the idea from the
+noise, and measure the idea by itself.
+
+**"Bind this address to a local" is a PER-STATEMENT question, not a
+per-function one.** The same `sub_080283E4` requires `ent = &arr[i];` to be
+bound before the `--` line at its tail — written inline there, the `+0x38`
+folds into the relocation addend and the `ldrsh` reads offset 0 — while the
+`& 0x30` block twelve lines earlier requires the opposite, the subscript spelled
+out on both sides. Both facts are measured on the same function in the same
+compile. A ruled-out list that records "binding is/is not the lever" without
+naming the statement is under-specified.
+
+**An `adds rD, rC, #0` copy before an `ands` proves the mask is a literal.**
+See the `sub_08045C18` note earlier in this chapter — it is the mirror of
+"naming the load drops the copies", and together the two close the whole
+family of "add an allocno by naming an operand" levers on any two-operand
+destructive ALU op.
+
+**And when the only measured way forward changes a parameter's width, check the
+CALLER before you spend anything on it.** `sub_08020EDC` has a 91.5% size-exact
+permuter candidate that widens its 6th parameter from `u8` to `unsigned int`.
+The permuter rewrites the prototype block, so it never compiles that against the
+real header — and the matched caller `src/decomp/c_080210C8.c` passes an
+`int a6` through `lsls #0x18; lsrs #0x18`, which IS the `int`->`u8` narrowing
+the current prototype requires. Taking the callee's 0.8 points costs the caller
+4 bytes. That is the brief's cross-TU prototype dead end, and it is worth
+noticing that the header's own prose above that declaration asserts arguments 5
+**and** 6 are `int`, contradicting the declaration on the same lines. **Where a
+header's evidence comment and its declaration disagree, the caller settles it** —
+here the declaration was right and the prose was stale.
+
+## A GOTO loop is the lever on `check_dbra_loop` when the body's pointers are ALREADY explicit source bivs (wave 73, W73-D)
+
+`sub_080344F0` had been parked for four waves as a `check_dbra_loop` reversal:
+the ROM runs its four-iteration byte copy with `movs r4,#0` / `adds r4,#1` /
+`cmp r4,#3` / `ble`, and every draft came out `movs r3,#3` / `subs r3,#1` /
+`cmp r3,#0` / `bge`. Twelve `for` / `do-while` spellings were measured across
+waves 25, 46, 54 and 73 and **every single one reversed**. The parked entry
+concluded that keeping the counter ascending and strength-reducing both
+pointers were mutually exclusive through the source.
+
+They are not. Writing the loop with an explicit `goto`:
+
+```c
+    i = 0;
+_copy:
+    *d = *s;
+    s++;
+    d++;
+    i++;
+    if (i <= 3)
+        goto _copy;
+```
+
+emits the ROM's ascending counter directly. The mechanism is already in this
+doc twice (W46-B, W51-G): loop.c only processes a loop it has a
+`NOTE_INSN_LOOP_BEG` for, and a goto loop never gets one, so
+`check_dbra_loop` never runs on it. **What was missing was the rule for when
+that is affordable**, and it is this:
+
+> A goto loop costs you every loop optimisation, LICM and strength reduction
+> included. So it is the right lever exactly when the loop body needs NO giv —
+> when the walking pointers are already explicit `s++` / `d++` source bivs and
+> strength reduction had nothing to contribute in the first place.
+
+`sub_080344F0`'s body is a bare byte copy through two explicit pointer
+increments, so switching it off is free: 80.9% -> 83.8% on the goto form
+alone. `sub_0806412C` is the same reversal and the goto form does NOT help
+there, for exactly this reason — its outer loop needs a 0x18-stride giv that
+only `strength_reduce` produces, so it needs both the giv and the un-reversed
+counter and the goto form cannot give both. That contrast is the test to
+apply before reaching for this.
+
+**Read the two ruled-out lists together before spending a probe.** The
+sub_0806412C entry in `data/parked.json` recorded "writing the outer loop as
+a GOTO loop DOES keep the counter ascending" from wave 46, and
+`sub_080344F0`'s entry — a 68-byte function blocked on the identical
+mechanism — never tried it, because its entry predated that finding and
+nothing linked the two.
+
+### The counter's INIT position is a separate fact from the loop form
+
+The goto form alone left `movs #0` emitted AFTER the `adds r1,#4` /
+`adds r2,#0xe` pointer setup, where the ROM has it before. Moving `i = 0;`
+ahead of the two pointer assignments in the source moved it: 83.8% -> 91.2%,
+and the instruction stream is then 1:1 with the ROM.
+
+### `expand_decl` order is NOT the register tie-break — first REFERENCE order is
+
+The residual left on `sub_080344F0` is one swapped pair: the ROM puts the
+block pointer in r3 and the counter in r4, the candidate the other way round.
+The natural guess is that declaration order sets the pseudo numbers, since
+`expand_decl` assigns `DECL_RTL` at block entry. **Probed and refuted:**
+moving `int i;` to the head of the declaration list compiles BYTE-IDENTICALLY.
+The creation order that breaks `allocno_compare`'s tie is first-reference
+order in the emitted RTL, not declaration order, so a declaration shuffle is
+never the lever on a swapped pair. Do not spend a probe on it.
+
+### Cross-check: the three pointer-global spellings against the pure register-name batch (wave 73, W73-B)
+
+W73-E's chapter above closed `sub_08060110` by moving one address constant with
+row 3 (`T **t; t = &g;` → address EARLY, deref LATE). Wave 73's pure
+register-name batch (the chapter on that class, earlier in this file) has two
+functions that reach a genuine pointer global, so the lever was tested on both.
+**Both negative** — recorded so the next wave does not re-measure them:
+
+- `sub_08045C18` (`extern u8 *gUnknown_08499590`): **all three rows tie.** Row 1
+  (deref in place), row 2 (`struct Unk45CMap *m = ...`, which the draft already
+  used) and row 3 (via `u8 **` and via `struct Unk45CMap **`) every one reports
+  89.4%, 22 of 208 bytes, first difference at +0x12. The map pointer is loaded
+  once and used in all ten tests, so *when* the address constant is created is
+  not this function's residual.
+- `sub_08049944` (`extern u16 *gUnknown_0849957C`): row 3 is much **worse** —
+  184 bytes (+4), 8.9%, first difference at +0x2.
+
+That second result is what W73-E's own diagnostic predicts, and it is worth
+stating as the general rule: **row 3 is indicated only when the ROM loads the
+pool word EARLIER than your candidate while derefing in the same place.** Both
+of `sub_08049944`'s pool words already match the ROM, so there was no gap for
+the lever to close and forcing it cost four bytes. Check the pool-word position
+before reaching for row 3 — the three spellings are a fix for a diagnosed
+address-constant placement gap, not a general allocation lever, and on a
+function whose address constant is already placed correctly they either tie
+(`sub_08045C18`) or regress (`sub_08049944`).
+
+## A DEAD in-expression assignment is the lever that forces an uncoalesced `adds rD, r0, #0` before a `muls` (wave 73, W73-D)
+
+The THUMB multiply `muls rD, rM` ties its destination to operand 1, so
+`x * y` normally compiles into whichever register already holds `x`. When the
+ROM instead emits a **copy first** —
+
+    adds r1, r0, #0
+    muls r1, r7
+
+— the natural reading is that the multiplicand stays live afterwards, and the
+natural fix is to bind it to a named local. **That fix does not work**: on
+`sub_08073480`, `s = gSinLut[...]; ... s * proc->unk34 ...` is BYTE-IDENTICAL
+to the inline form, because agbcc coalesces the local straight back into the
+multiply. A named local is not a second live value; it is the same value with
+a name.
+
+What does work is assigning the PRODUCT to a variable that is already dead,
+inside the expression that consumes it:
+
+    /* b is recomputed at the top of every iteration, so this store is inert */
+    dst[0] = (((b = sinval * proc->unk34) >> 20) + (proc->unk34 >> 16)) + g;
+
+The assignment gives the product its own pseudo with a set that combine and
+the register allocator both see, so the multiply can no longer be coalesced
+into the multiplicand's register and the copy appears. On `sub_08073480` this
+is worth 11 points per occurrence: 76.2% -> 87.3%, size-exact, with both of
+the ROM's `adds rD, r0, #0` copies restored and the instruction stream 1:1.
+
+**Provenance, and the reason this is worth recording as a rule.** The permuter
+found ONE instance of this mutation on its own at wave 46 and it was the whole
+of that run's 50.4% -> 76.2%, but nobody read it as a rule — it sat in
+`best.c` looking like noise, alongside a second mutation (`(i + 1) <= 0xa0`
+for `i < 0xa0`) that is a pure REGRESSION, costing `adds r0,r5,#1; cmp r0,#160`
+where the ROM has a bare `cmp r5,#159`. Reading the permuter's win as a
+mechanism rather than as a blob is what let it be applied to the second
+multiply by hand and the bogus half thrown away.
+
+Two general points follow:
+
+- **Read a permuter win, do not just keep it.** "Do not tidy a permuter win"
+  is still right, but it does not mean the whole diff is load-bearing. A run
+  can pair a real mechanism with a compensating regression that keeps the byte
+  count looking right — here the two mutations were +2 bytes each against a
+  candidate that was 4 bytes SHORT, so the size-exactness was partly fake.
+  Separate them and re-measure.
+- **`best.c` is not the deliverable and the gap can persist for waves.**
+  `sub_08073480`'s draft held the 50.4% / -4 byte pre-permuter version while
+  the 76.2% size-exact one sat in `best.c` from wave 46 to wave 73.
+  `data/parked.json`'s `best` field reports `best.c`, so it read 76.2% the
+  whole time and nothing pointed at the discrepancy. If a parked function's
+  `best` looks better than you can reproduce, diff the draft against `best.c`
+  before doing anything else.
+
+## "The permuter is exhausted on this function" is a claim about ONE RUN, and three parked entries asserting it were wrong in the same wave (wave 73, W73-E)
+
+Three of the six entries in this batch carried an explicit instruction not to run
+decomp-permuter again:
+
+- `sub_0800E9F4`: *"The prior decomp-permuter run -- no match; do not repeat it
+  from the same draft."*
+- `sub_0800E8CC`: *"A prior 300-second permuter campaign already exhausted this
+  exact-size allocation species; do not repeat it without a genuinely new
+  allocator lever."*
+- `sub_0804C5A4`: *"decomp-permuter, 300 s / ~20k iterations / 4 threads: nothing
+  scored better than the starting point. That is the fourth replication of 'a
+  pure register-allocation residual with the instruction order already correct
+  gets nothing from the permuter'."*
+
+**`sub_0800E9F4` moved on the first re-run: 87.11% -> 89.84%, size-exact, one
+300 s run.** In the same wave W73-B matched `sub_0801914C` outright with a single
+run started from the parked draft, on an entry whose own conclusion was that the
+residual was a type-model question and not a source-spelling one.
+
+The error in all three is the same and it is worth stating as a rule:
+
+- **A permuter run is not a property of the function, it is a property of the
+  starting point.** `permute.py` starts from `work/<fn>/best.c` and every win
+  moves `best.c`, so run N+1 begins somewhere run N could not reach. Wave 59's
+  87.3 -> 94.3 -> 98.2 -> match is the same observation; these entries predate it
+  and were never revisited.
+- **Check what `best.c` actually holds before believing "exhausted".** On
+  `sub_08014DCC` the draft had become size-exact this wave while `best.c` still
+  held a wave-42 draft that was 4 bytes short; `permute.py --current` (start from
+  `<fn>.c` rather than `best.c`, a flag the MCP `permute` tool does not expose)
+  took it from 52.5% to 63.3% in one run. **The MCP tool cannot start from the
+  draft. If the draft is better than `best.c`, you must shell out to
+  `python tools/permute.py <fn> --current`.**
+- The claim these entries were replicating — wave 17's "a pure register-allocation
+  residual with the instruction order already correct gets nothing from the
+  permuter" — **is not what wave 37 measured.** Wave 37 refuted it by controlled
+  probe and narrowed the permuter's dead zone to a residual of one extra
+  INSTRUCTION. Order-wrong and slot-wrong are its cases. An entry that cites
+  wave 17's negative against a size-exact allocation residual is citing a
+  superseded result.
+
+Write "permuter run N from a draft scoring X%" in a parked entry, never "the
+permuter is exhausted".
+
+## To give a local a SECOND SET without a live assignment, put it in the for-INIT beside the loop's own bound (wave 73, W73-D)
+
+`sub_0802E010` / `sub_0802E130` were blocked for four waves on a constraint
+pair that read as a contradiction:
+
+- the `(u16)` truncation at the second loop's guard survives only if `half`
+  has a second SET that is WIDE. combine falls back to `reg_nonzero_bits` —
+  the OR over all sets — whenever `REG_N_SETS != 1` and the set is in another
+  block, and only a MINUS contributes the full mask. The one wide value in
+  the function is `p[0] - n` in the last `if`.
+- **but the ROM makes no live assignment in that block at all.** It computes
+  `p[0] - n` entirely into scratch: `movs r3,#0` / `mov r7,r8` /
+  `subs r0,r0,r7` / `asrs r0,r0,#1` / `cmp r3,r0`.
+
+Both are true, and the resolution is that **the set does not have to be its
+own statement.** Written as one, `half = p[0] - n;` takes `half`'s hard
+register and pushes the loop's `movs r3,#0` init after it. Written in the
+for-init, beside the counter and sharing cse with the loop's own bound —
+
+```c
+    for (i = 0, half = p[0] - n; i < ((p[0] - n) >> 1); i++)
+```
+
+— the two `p[0] - n` expressions are ONE value to cse, so no separate
+register is needed, and the counter's `movs r3,#0` keeps its place at the
+head of the block because it is the first element of the init. That single
+edit fixed BOTH remaining block-4 defects at once (the `ldr r2,[r1,#0]` /
+`adds r5,r2,#0` register and the guard's instruction ORDER) and took the pair
+from 95.5% to 97.2%, 13 differing bytes to 8.
+
+**This is the same for-init comma already documented at W60-C** ("A COMMA in
+the for-INIT is the only way to emit a value AFTER the loop variable's init
+and BEFORE the hoists") — the addition here is that it also serves as a way
+to CREATE A SET for `nonzero_bits` purposes that costs no register, because
+the loop bound was going to compute the same expression anyway. Read it as a
+general move: **when you need a second set of a local purely to keep a
+truncation alive, look for an expression the function already evaluates and
+attach the assignment to that, rather than adding a statement.**
+
+Ruled out on the way (do not re-probe): the same assignment in the loop
+CONDITION is worse (92.7%) because the bottom test then writes `half` too;
+`half = n; half >>= 1;` gives ONE set, not two, since flow deletes the dead
+store; and declaration order does not move the allocno tie-break.
+
+## A permuter GAIN is not a permuter WIN — read the mutated function before adopting `best.c` as the draft (wave 73, W73-E)
+
+decomp-permuter's randomizer is **not** guaranteed semantics-preserving, and on
+`sub_0800E9F4` it produced a higher-scoring body that is simply wrong code. The
+mutation that took the function from 86.7% to 89.84% includes:
+
+    ro2 = *((u16 *) (rows + t));
+    new_var3 = ro2;
+    t = (new_var3 + x) * 2;
+    ro2 = x;                                   /* <-- ro2 reused as a copy of x */
+    if (... == 0x64 || ... == 0x65)
+    {
+        do { i = ro2 + 1; t = (i + ro2) * 2; } while (0);
+    }
+
+The "reuse a dead variable" transform saved the old `ro2` into `new_var3` for the
+guard, then reassigned `ro2 = x` — but the body still reads `ro2`, so `i` becomes
+`x + 1` where the original computes `rowOffset + 1`. `t` is then `(2x + 1) * 2`
+instead of `(rowOffset + 1 + x) * 2`. Different code, higher byte score.
+
+The distinction that matters:
+
+- **Chaining runs from `best.c` is still correct**, and a genuine byte MATCH from
+  a mutated source is still a genuine match — identical bytes cannot be
+  semantically different. Keep doing what wave 59 says.
+- **Adopting a non-matching `best.c` as `work/<fn>/<fn>.c` is not.** A score is
+  not a verdict, and a wrong-semantics draft handed to the next wave poisons every
+  measurement taken from it and can be promoted by accident if it later matches
+  for the wrong reason. **Read the function at the end of `best.c` before
+  installing it** (`grep -n "^<type> <fn>" best.c` and `sed` from there — the file
+  is the whole header expansion, ~7,000 lines, do not open it whole).
+- The same wave's `sub_0800E8CC` gain, 83.11% -> 91.22%, IS clean: a dead
+  `(cells = rows)` assignment inside an index expression and a
+  `new_var = sub_0800119C(...); r |= new_var << 1;` split. That one is adoptable
+  verbatim — and **must not be tidied**, per the existing rule.
+
+**A second instance in the same batch, and this one is uglier.** `sub_08014DCC`
+run 1 produced a clean, adoptable body at 63.33%. Chained run 2 reached 65.83%
+by moving the loop's hoisted load INSIDE the block that its own guard tests:
+
+    while (1)
+    {
+        if ((p->used == 0) && (new_var >= (u32) new_var2))   /* reads new_var */
+        {
+            new_var = p->size;                               /* ...set here */
+
+`new_var` is read before it is ever assigned. The permuter's scorer never
+executes the code, so an uninitialised read costs it nothing.
+
+So the tally for one batch is **four gains, two of them invalid** - and the two
+invalid ones are the *higher*-scoring results on their functions, which is
+exactly the direction that gets them adopted. The check is per-RUN, not
+per-function and not per-tool:
+
+1. `grep -n "^<rettype> <fn>" work/<fn>/best.c | tail -1`, then `sed` from that
+   line. Never open `best.c` whole - it is the entire header expansion.
+2. Read it against your draft for the three transforms that can break: a
+   variable **reused as a copy of something else** while its old value is still
+   read later; a definition **sunk past a use**; a store **removed**.
+3. If it is invalid, leave `best.c` alone - chaining from it is still fine - but
+   keep the last clean body as `work/<fn>/<fn>.c` and **say so in the draft
+   header and in the parked entry**, because `best.json` will go on advertising
+   the invalid number to everyone after you.
+
+**THE RATE — and W73-D caught me resting part of it on an artefact, so read the
+qualifier before quoting the number.** The permuter's harvest loop calls
+`trymatch.check` on BOTH forms of each candidate (`permute.py` lines 313-321):
+the body spliced onto your original preamble, and the RAW header-expanded output.
+Either can set `best.c` and `best.json`. A raw-form best is a score no normal
+translation unit reproduces — W73-D's `sub_08073480` scored **87.3% spliced and
+91.4% raw for the same candidate**, and reading the raw line is what made a
+4.5-point "gain" out of nothing. There is a second live instance in the same
+wave: `sub_08020EDC`'s 93.9% best was set by the raw form only, and at +4 bytes.
+
+**So before quoting any permuter score, check which form set it:**
+
+    grep -B1 "new best:" work/<fn>/permuter/permuter.log   # or your run log
+
+If the `checking:` line above it says `raw permuter output (headers expanded)`,
+the number is not comparable to anything you measure from a `#include`-based
+draft.
+
+Against that check, across three batches:
+
+| claim | status |
+|---|---|
+| invalid permuter bodies are common | **holds** — 6 confirmed across 3 batches |
+| the invalid ones tend to score HIGHER | **only where the score is spliced-verified** |
+
+W73-E audited all six of its own gains this way and every one was set by the
+SPLICED form, with the raw form merely tying it (63.3/63.3, 65.8/65.8, 68.3/68.3,
+89.8/89.8) — so those three invalid-and-higher instances stand:
+`sub_08014DCC` 65.8 > 63.3 and 68.3 > 65.8, `sub_0800E9F4` 89.8 > 86.7. W73-B's
+`sub_08045C18` 89.4 -> 97.1 has not been form-checked. **W73-D's two
+`sub_08073480` entries are REFUTED as evidence for the "higher" half**: the
+bodies really are invalid (the `i` reuse was read directly), but on the
+comparable spliced number that candidate scored exactly what the valid draft
+scores. An invalid body is not thereby a higher-scoring one.
+
+So the defensible form of the rule is the narrow one: **a permuter MATCH is free;
+a permuter GAIN is a hypothesis you must read before adopting; and a gain you
+have not form-checked is not even a number yet.** Do not compress this to "the
+permuter is unreliable" — W73-B found first-time runs the highest-yield lever on
+the pure register-name class (3 of 5 paid, 2 as outright matches), and W73-E took
+`sub_08014DCC` from 10.0% to 70.0% and `sub_0800E8CC` from 83.1% to 92.2% with
+it, both spliced-verified and both reproducible from an ordinary draft. W73-D
+states the boundary in the form worth memorising: *the main way an invalid body
+reaches a deliverable is a human adopting a NON-matching one by hand.*
+
+**Repairing an invalid gain is worth exactly one attempt, and across the three
+batches it recovered something 1 time in 4.** Correct only the unsound part, keep
+mutation, re-measure:
+
+- `sub_08014DCC` run 3 was 68.33% and invalid only in its final
+  `return (void *) total;`. Changing that one return to `return (void *) 0;` and
+  keeping its other three mutations gave **70.0%, a new best** — three of its
+  four mutations were sound and the invalid one was incidental.
+- `sub_0800E9F4` run 1 was 89.84% and invalid only in `i = ro2 + 1` reading the
+  reassigned `ro2`. The old row offset is still live in `new_var3`, so
+  `i = new_var3 + 1; t = (i + ro2) * 2;` is the exact semantic repair — and it
+  measures **86.7%, identical to the un-mutated readable draft.**
+- `sub_08045C18` (W73-B) reverted ONLY the invalid reassignment and collapsed
+  **97.1% -> 89.4%**, all the way back to the baseline draft with the first
+  difference back at +0x12. W73-B identified the mechanism, and it generalises:
+  once the local carries a CONSTANT instead of a loaded value, CSE
+  const-propagates it and the pseudo vanishes. What bought the 7.7 points was
+  specifically that the local held a **loaded** value across the middle blocks.
+- `sub_08073480` (W73-D) is the strongest form of the negative, because it is
+  measured in BYTES rather than in score: rewriting the same mutation honestly
+  with a fresh `int t` is **byte-identical to the 87.3% draft**. agbcc coalesces
+  the temp, so the entire 4.5-point gain was the corruption and there was
+  provably no salvageable mechanism in it at all.
+
+That mechanism is the rule for predicting which repairs are worth trying. **The
+repair recovers the gain only when the invalid part was INCIDENTAL to it.** When
+the invalid read IS what created the extra live range — which is most of the
+time, because a live range is exactly what the permuter is searching for — the
+repair returns to the draft's own score, the score was the bug, and the honest
+record is that the function did not move.
+
+**THE PROPAGATION PROBLEM HAS THREE HOPS, AND THE LAST TWO ARE THE BAD ONES.**
+ONE.** `trymatch` advances `best.c` and `best.json` on percentage alone, so after
+an invalid gain `best.json` permanently advertises a score for a body no
+promotion could reproduce — 97.1% on `sub_08045C18`, 91.8% on `sub_08073480`,
+89.84% on `sub_0800E9F4`, 68.33% on `sub_08014DCC`. **Then `parked.json`'s
+`best` field is written from `best.json`** (W73-D), which is how `sub_08073480`
+spent waves 46-73 advertising a 76.2% its draft did not have — the number
+outlived the run that produced it by twenty-seven waves and was quoted into
+briefs. Discarding `best.c` would throw away a legitimately useful permuter
+STARTING POINT, so W73-E and W73-B documented it in the parked entry instead and
+W73-D overwrote both files with the valid draft while preserving the invalid
+sources under `work/<fn>/permuter/`. Either is defensible; doing neither is not.
+
+**Hop zero, found by W73-D:** the harvest loop judges the RAW header-expanded
+form as well as the spliced one, so `best.json` can record a score that no
+`#include`-based draft reproduces. That is upstream of everything below — an
+unreproducible number then flows into `best.c`, into `best.json`, and on into
+`parked.json`'s `best` field.
+
+W73-B's proposal fixes the class rather than the instance and it is the right
+one: **write a `"best_c_valid": false` flag into `best.json` at harvest time.**
+It only ever needs to fire on a NON-MATCHING best, since a match is valid by
+construction — which makes it a good deal cheaper to implement than the general
+problem sounds. Until it exists, **treat any `best.json` score, and any
+`parked.json` `best` field derived from one, as unverified unless a parked entry
+says someone read the body.**
+
+**What `permute.py` does to your draft, exactly** — worth knowing precisely,
+because "the draft is never at risk from a run" is *almost* true and the gap is
+where the wave brief's stranding warning lives. The harvest loop writes each
+candidate into `work/<fn>/<fn>.c` to let `trymatch` judge it, and a `finally:`
+restores the original unless a candidate matched. So:
+
+- **normal exit, no match — safe.** The draft is restored and the run says so
+  (`... restored unchanged.`).
+- **an exception out of `trymatch` — also safe**, because of the `finally`.
+- **a MATCH — the draft is overwritten deliberately**, and if the matching form
+  was the raw permuter output it is the header-expanded one, which the tool tells
+  you to reduce to an include plus externs before promoting.
+- **a hard kill or a client cancellation during harvest — STRANDED.** The
+  `finally` never runs and the draft keeps the last candidate written. The
+  function's own source comment says this in as many words. W73-E watched a draft
+  hold a mutated body mid-harvest and briefly mistook it for corruption.
+
+So: snapshot `work/<fn>/<fn>.c` before every run regardless, and after any
+cancellation restore and re-verify rather than assuming the tool cleaned up.
+
+
+## A DEAD in-expression assignment needs a variable with a CONFLICTING live range — a FRESH variable is coalesced exactly like a named local (wave 73, W73-G)
+
+W73-D's chapter above ("A DEAD in-expression assignment is the lever that
+forces an uncoalesced `adds rD, r0, #0` before a `muls`") is correct and worth
+11 points per occurrence on `sub_08073480`, but it does not say WHICH variable
+may carry the assignment, and the obvious reading — "any variable that is dead
+there" — is wrong.
+
+Measured by `compile_probe` on `sub_08073480`. The draft assigns the product
+to `b`, the variable whose `>> 8` value was consumed two instructions earlier:
+
+    dst[0] = (((b = sin * proc->unk34) >> 20) + (proc->unk34 >> 16)) + g;
+
+Declaring a fresh `int c;` — used for nothing else, assigned in exactly the
+same in-expression position in both stores — **loses both copies**:
+
+    mul  r0, r0, r7         /* fresh `c`: coalesced, no copy  */
+
+    adds r1, r0, #0         /* `b`:       copy survives (ROM) */
+    muls r1, r7
+
+The candidate comes out **4 bytes SHORT**, the same failure mode as binding
+the sin value to a named local. So the mechanism is not "give the product a
+name", and it is not "give the product a dead name" — it is **give the product
+a pseudo that already conflicts with the multiplicand's**. `b` works because
+it carries an earlier live range in the same iteration; `c` has no live range
+at all, so regmove coalesces the copy away exactly as it does for a plain
+local.
+
+**Read this together with the sibling rule** that a run of `adds rD, rC, #0`
+before an `ands` proves neither operand is a source variable (W73-F). Both say
+the same thing from opposite sides: agbcc's copies appear and disappear on
+whether the pseudos CONFLICT, never on whether they are named.
+
+Still open on `sub_08073480`: the ROM has `b` in r0, the product in r1 and
+`dst` in r3 — b and the product are DISTINCT pseudos that were nevertheless
+not coalesced. The draft's `b` reuse buys the copies but fuses b and the
+product into one register (r3), which is what pushes `dst` into r1. A
+construct that gives the product its own pseudo AND blocks coalescing is the
+remaining lever; a fresh variable is not it.
+
+## LICM will not hoist a pseudo that is LIVE AT LOOP ENTRY — so "define it in the outer body" forecloses the preheader hoist by construction (wave 73, W73-G)
+
+`sub_08039588`'s parked entry poses its residual as a span with two ends: the
+`dst` definition must be OUT of the use's extended basic block (or cse merges
+`0x6140` and `0x06010000` into one pool word, −8 bytes) while still being
+presented to loop.c as an invariant OF THE INNER LOOP (or it is not hoisted
+into the preheader after the zero-trip guard). The entry asks which source
+form reaches both ends.
+
+**One form is now measured and it reaches neither: defining `dst` in the outer
+loop body AND redundantly again at the END of the inner loop body.** The idea
+was that the outer def keeps the two pool words (it does), the inner def gets
+hoisted by LICM into the inner preheader, and the outer def then dies and is
+deleted. What actually happens:
+
+- the two pool words DO survive — `ldr r0, =0x6140` / `add r3, r5, r0` at the
+  loop bottom, `ldr r2, =0x6010000` / `add r1, r3, r2` at the call site;
+- the inner def is **not hoisted and not deleted**. It stays at the bottom of
+  the loop body, costing two instructions per iteration;
+- the outer def still lands BEFORE the zero-trip guard, exactly as before.
+
+The reason is a precondition of gcc's `move_movables` that this doc had not
+recorded: **a movable's register must not be live on entry to the loop.** An
+invariant whose pseudo already holds a value coming into the loop cannot be
+hoisted, because hoisting would not remove the in-loop set. Defining `dst`
+outside the inner loop makes it live at entry, so **every "define it outside"
+spelling forecloses the hoist by construction** — it is not a matter of
+finding the right outer position.
+
+That collapses the entry's span to a single question. `dst` must be defined
+ONLY inside the inner loop (the entry already measured that this DOES hoist,
+and that it then merges and lands before the table base). So the remaining
+lever must break the def and the use into different extended basic blocks
+**while both are inside the loop**, without adding control flow — the loop
+header itself is the join that separates a hoisted preheader def from a body
+use, but cse runs BEFORE loop.c and merges the constants first. Do not spend
+another probe on where to put the definition outside the loop.
+
+## `check_dbra_loop` is NOT blocked by a use of the index AFTER the loop — gcc substitutes the final value (wave 73, W73-G)
+
+`sub_0806412C`'s parked entry closed with one untested idea: wave 25's rule
+read forwards, that what blocks the reversal is a SURVIVING USE of the index,
+so the question was what use of `i` the ROM's source had that outlives
+strength reduction of the 0x18 giv.
+
+**Probed and refuted.** Adding `gUnknown_030005F4 = i;` immediately after the
+first loop does not stop the reversal: the loop still comes out `movs r3,#7` /
+`subs r3,#1` / `cmp r3,#0` / `bge`, and the added use is satisfied with a
+constant, `mov r3,#8`. `check_dbra_loop` knows the biv's final value, so a use
+after the loop costs it nothing — it is not a blocker in either direction.
+
+The same probe shows where the real discriminator lives, because the function
+contains a controlled comparison of its own. Its SECOND loop
+(`for (i = 0; i <= 5; i++)` over `gUnknown_0202F110[i].unk02`) does **not**
+reverse — it emits `mov r3,#0` / `add r3,r3,#1` / `cmp r3,#5` / `ble`,
+ascending, in the same function under the same flags. The difference is that
+the second loop's address arithmetic is `lsl r0, r3, #3`: `i * 8` is a single
+shift, which `strength_reduce` does not find profitable to reduce, so `i`
+keeps a live in-body use. The first loop's `i * 0x18` IS profitable, is
+reduced to the accumulating giv, and leaves `i` used only by the exit test —
+precisely `check_dbra_loop`'s precondition.
+
+**So the blocking use must be INSIDE the loop body and must survive strength
+reduction; a use after the loop is worthless.** That is a stronger and more
+useful statement of wave 25's rule, and it also explains why this function is
+hard: the ROM has BOTH the reduced 0x18 giv AND the ascending counter, so the
+ROM's source must contain an in-body use of `i` that is not itself reducible.
+Nothing in the known statement set supplies one.
+
+## The `sub_0802E010` constraint pair, demonstrated by construction in one probe (wave 73, W73-G)
+
+The pair's entry has argued for four waves that `half` needs a WIDE second set
+to keep the `(u16)` truncation at loop 2's guard alive, while the ROM makes no
+live assignment in block 4. W73-D's for-init comma resolved half of it and
+took the pair to 97.2%. The remaining 8 bytes have now been shown to be ONE
+fact, by compiling the draft against itself with the block-4 assignment
+removed and nothing else changed:
+
+| spelling | `half` lands in | truncation at loop 2's guard |
+|---|---|---|
+| `for (i = 0, half = p[0] - n; i < ((p[0] - n) >> 1); i++)` | **r4** | survives (`lsls #16` / `lsrs #16`) |
+| `for (i = 0; i < ((p[0] - n) >> 1); i++)` | **r6 — the ROM's register** | folds to a bare `adds r0, r6, #0` |
+
+The ROM has `half` in r6 AND the truncation. So the block-4 set is
+simultaneously the only thing keeping the truncation alive and the only thing
+costing `half` its register: giving `half` a second live range in block 4
+extends its allocno's conflicts and pushes it off r6, and the preheader's
+other two pseudos rotate with it (ROM `half`=r6 / zero=r4 / bound=r2 against
+the candidate's r4 / r2 / r6). **The remaining 8 bytes are 6 bytes of that
+rotation plus the 2 bytes of the block-4 `subs`/`asrs` destination, and they
+are one decision, not two.**
+
+What this rules out, and it is most of the search space: the wide set cannot
+live anywhere that gives `half` a live range overlapping a value the ROM keeps
+in r6. Loop 1's body and the region between loop 1 and loop 2's guard are
+excluded on semantics (they would clobber `half` before its read); loop 2's
+body is excluded because the ROM holds `&gUnknown_0849957C` in r6 there; block
+4 is excluded by the measurement above. A wide set that survives `flow` must
+also have its value consumed in the same expression — a plain dead store is
+deleted before combine ever runs, which is why `half = n; half >>= 1;` gives
+one set and not two.
+
+**Permuter, round 4, from W73-D's fresh 97.2% `best.c`: no candidate scored
+better than the starting point.** That is four rounds now (93.8 → 95.1 → 95.5
+by permuter, → 97.2 by hand, → no further gain), and unlike the earlier
+"exhausted" claims this one was re-measured from a genuinely new starting
+point, as the wave-73 rule requires. The swapped pair here is not
+permuter-reachable.
+
+## A permuter score from RAW EXPANDED output is not reproducible from a draft — `best.c` can hold a score no source spelling reaches (wave 73, W73-G)
+
+`sub_08073480` carried `best: "76.2%"` in `data/parked.json` while `best.json`
+reported 91.4%, and the function body in `best.c` is **byte-identical to the
+draft**, which measures 87.3%. That looked like an ordinary stale-field
+problem. It is not.
+
+A permuter run checks each candidate twice and prints both results, and on
+this function they disagree by four points for the SAME function text:
+
+      checking: spliced onto the original preamble     -> 87.7%  (30 of 244)
+      checking: raw permuter output (headers expanded) -> 91.8%  (20 of 244)
+                                                          new best -> best.c
+
+The only difference between the two is whether the unit reaches its
+declarations through `#include "global.h"` or through `permute.py`'s `cpp -P`
+expansion of the same headers. The expanded form compiles to different code,
+scores higher, and is what lands in `best.c` — so **the score recorded for
+this function has never been reachable from any draft anyone could write.**
+Both the entry's 76.2% and the 91.4% in `best.json` are artefacts of that
+path.
+
+Three consequences:
+
+- **Compare a permuter candidate on the SPLICED number, not the raw one.** The
+  spliced number is the one a real draft can reproduce. Here the winning
+  mutation is worth +0.4 points spliced, not +4.5.
+- **`best.c` is not a source of truth about what is achievable** on any
+  function where it holds raw expanded output. Check whether `best.c` begins
+  `typedef signed char int8_t;` — if it does, it is expanded permuter output
+  and its score is not comparable to a draft's.
+- This is a harness discrepancy worth a coordinator's attention: a permuter
+  "win" can be recorded that no promotion could ever reproduce. The mechanism
+  (which header declaration differs after expansion) has not been
+  characterised.
+
+### Corroboration: an invalid permuter body on sub_08073480 (wave 73, W73-D)
+
+Independent second instance of W73-E's finding that decomp-permuter's
+randomizer is not always semantics-preserving, and that **the invalid bodies
+tend to be the higher-scoring ones**.
+
+A third run on `sub_08073480`, started from a valid 87.3% draft, reported
+91.4% and then 91.8%. Both bodies reuse `i` — **the loop counter** — as the
+temporary for the first store:
+
+    i = (((b = ...) >> 20) + (proc->unk34 >> 16)) + gUnknown_0300200C;
+    dst[0] = i;
+
+which destroys the induction variable, so the loop no longer runs 0..0x9f.
+Written honestly with a fresh `int t`, the same mutation is **byte-identical
+to the 87.3% draft** — agbcc coalesces the temp — so the mutation was worth
+nothing whether or not it was valid.
+
+**CORRECTION (W73-G, same wave, and their reading is the right one).** This
+subsection originally said "the entire 4.5-point gain was the corruption".
+That is wrong, and my own run log shows it: the SAME candidate scored 87.3%
+spliced onto the preamble and 91.4% as raw expanded output. The four points
+are the header-expansion artefact W73-G characterises in the chapter directly
+above, not the corrupted body. The two findings are independent and both
+hold — **the body was invalid AND the score was unreachable** — but they are
+different defects and only one of them is about the randomizer. Reading the
+score as evidence about the mutation was my error, and it is exactly the
+mistake the chapter above exists to prevent: I compared the raw number.
+The lesson stands in a narrower form: the invalid body scored no better than
+the valid draft once measured on the spliced number, so nothing was lost by
+rejecting it.
+
+`best.c` and `best.json` had already recorded 91.8%. Both were overwritten
+with the valid draft; the invalid sources are preserved under
+`work/<fn>/permuter/`. Left alone, that number propagates to every later wave
+through `parked.json`'s `best` field, which reads `best.c`.
+
+**The rule, stated once:** a byte MATCH needs no audit — identical bytes are
+identical behaviour, so `permute.py` installing a match into the draft is
+always safe, and chaining a further run from a bad `best.c` is harmless too.
+What needs an audit is **adopting a non-matching body by hand**, which is the
+main way an invalid one reaches a deliverable.
+
+**CORRECTION (W73-E), verified against `tools/permute.py` rather than
+inferred.** This originally read "the only way". It is not. The harvest loop
+writes EACH candidate into `work/<fn>/<fn>.c` so `trymatch` can judge it
+(line 320, `awlib.write_text(csrc, ...)`), and a `finally:` restores the
+original when nothing matched (line 331). So a normal no-match is safe and an
+exception out of `trymatch` is safe, but a **hard kill or client cancellation
+mid-harvest strands the last candidate in the draft**, because the `finally:`
+never runs. That is the second path, and it is the one the wave brief's
+stranding warning is about — which is why the snapshot-before-every-run rule
+earns its keep even though the window is narrow.
+
+Check the specific things the
+randomizer does: a variable reused as a copy of something else while its old
+value is still live (a loop counter is the worst case and the easiest to
+miss), a definition sunk past a use, a store deleted.
+
+## Every documented allocno lever creates a reference EARLIER — a base address constant loaded TOO EARLY needs the inverse, and there is only one of those (wave 73, W73-H)
+
+`sub_0804C5A4` has now cost parts of waves 37, 59 and 73 (W73-E, W73-H), and the
+reason is visible only once the levers are sorted by DIRECTION rather than by
+mechanism.
+
+Its residual is a single address constant emitted twelve instructions early: the
+draft loads `gUnknown_085D6C94` into a callee-saved `r5` at the head of the
+statement that first references it, where the ROM loads it into a scratch `r2`
+at the point of use, immediately before the `adds r1,r1,r2` that applies it.
+W73-E established the other half of the picture — **the index terms are already
+in the ROM's order.** The ROM evaluates C, then B, then A, then the base, and the
+draft's nested-subscript spelling already produces C, B, A in exactly that
+sequence. The base is the only term out of place.
+
+Now sort this chapter's levers by what they do to the reference they target:
+
+| lever | direction |
+|---|---|
+| comma operator (wave 17, wave 73 W73-B) | **earlier** |
+| dead in-expression assignment (wave 73, W73-D/G) | **earlier** |
+| splitting a binding local / a parameter's live range (waves 17, 73 W73-B) | **earlier** |
+| binding an array base to a local before the loop | **earlier** |
+| assignment embedded in the first subscript (wave 65, W65-N) | **earlier** |
+| byte-offset-first, base last in the expression | *later* |
+
+**Five of the six move a reference earlier, and only one moves it later.** A
+residual whose entire content is "this `ldr` happens too early" is therefore
+outside the reach of almost everything this document has learned, and applying
+one of the five to it does not merely fail — it evicts a reference that was
+already correctly placed. That is precisely what all three refuted attempts on
+this function did:
+
+- Wave 59, the comma anchor in both forms. The value-only comma is a no-op (a
+  dead value expression is eliminated before allocnos exist). The true wave-17
+  assignment form is an *earlier* lever and it costs 8 bytes, splitting the
+  `gUnknown_03004580` base that the ROM and the draft both reuse for the `[1]`
+  and `[2]` reads.
+- Wave 73 W73-E, byte-offset-first — the one *later* lever. It does move the
+  base `ldr` later, which confirms the direction is right, but it reassociates
+  the index arithmetic into a flat byte sum as a side effect, destroying the
+  same shared-base reuse and spilling (+8 bytes, a `str r0,[sp,#0]`).
+
+So the lever this function needs is one that **delays an address constant's
+materialisation without touching the index expression's association**, and no
+such lever is documented. The one delay lever we have is welded to a
+reassociation that this function cannot afford.
+
+**The transferable rules:**
+
+1. **Read the DIRECTION of a residual before choosing a lever.** "The address
+   constant is in the wrong place" is two opposite problems, and this chapter is
+   heavily biased toward one of them. If the ROM materialises a constant LATER
+   than your candidate, do not reach for the comma operator — it is the wrong
+   sign, and wave 59 spent an attempt proving it on this function.
+2. **A lever with collateral is refuted by the collateral, not by the score.**
+   Byte-offset-first got the base's position right here and still lost, because
+   it also reassociated an index expression that was already correct. When a
+   spelling fixes the diagnosed term and regresses, check whether it moved
+   anything that was already right before concluding the diagnosis is wrong.
+3. `sub_0804C5A4` has two independent permuter negatives (wave 37, ~20k
+   iterations from the draft; W73-E, 3,369 iterations `--current` from the
+   86.9% draft) in a wave where the identical chained method moved three
+   sibling functions. That is a real exhaustion result, not a single-run claim
+   of the kind wave 73 refuted three times elsewhere. **Do not spend a fourth
+   wave here without a delay lever in hand.**
+
+## THE u16 DECREMENT DOMAIN IS REACHABLE FROM C — put the SUBTRACTION in the shifted domain, not the test (wave 73, W73-H) — `sub_08029AF8` MATCHED
+
+**This refutes the wave-60 chapter "The u16 loop counter's DECREMENT DOMAIN is
+not reachable by spelling the loop", which closed with "Whatever produces it is
+downstream of expand and not addressable from the C. Do not sweep decrement
+spellings again."** It is addressable from the C. `sub_08029AF8` matched on the
+first attempt once the axis was read correctly, after resisting waves 59, 60 and
+73-C.
+
+The ROM's loop tail, 8 bytes larger than every candidate:
+
+    lsls r0,r7,#0x10 ; ldr r1,=0xFFFF0000 ; adds r0,r0,r1
+    lsrs r7,r0,#0x10 ; cmp r0,#0 ; bne <top>
+
+**The whole answer:**
+
+    t = (int)(((u32)a2 << 16) - 0x10000);
+    a2 = (u32)t >> 16;
+    } while (t != 0);
+
+### Why nineteen previous spellings missed it
+
+Waves 59, 60 and 73-C measured nineteen spellings between them. Sorting them
+shows every single one kept the SUBTRACTION in the narrow domain — `a2 - 1`,
+`--a2`, `a2--`, `a2 -= 1`, `a2 += 0xFFFF`, an ascending counter — and varied
+only **where the shift and the test went**:
+
+- the test on the stored counter, on an int temp, on a `(u16)` cast, inside an
+  assignment expression;
+- the test in the shifted domain, `while ((a2 = a2 - 1) << 16)` and
+  `} while (a2 << 16);` — combine folds a `<< 16` truth test back to
+  `cmp rN,#0`;
+- W73-C's `t = (a2 - 1) << 16; a2 = (u32)t >> 16; } while (t != 0);` — the
+  closest miss, and the one that shows the mechanism. It still writes the
+  subtract narrow and asks `combine` to DISTRIBUTE the `<< 16` over it.
+  combine declines, every time.
+
+**So the axis was never the exit test and never the counter's spelling — it was
+the DOMAIN OF THE SUBTRACTION ITSELF.** Write `(a2 << 16) - 0x10000` and no
+distribution is required of any pass: expand emits the shift, the constant
+`-65536` is not an 8-bit THUMB immediate so final output materialises it as
+`ldr rN,=0xFFFF0000` inside the loop, and the ROM's six instructions fall out
+directly.
+
+### The two refuted claims that kept this closed
+
+1. **"combine has no way to emit a pool load, so it cannot have produced this."**
+   W73-C already corrected this: `ldr rN,=0xFFFF0000` is not an RTL memory load,
+   it is how final output materialises any SImode immediate that is not an 8-bit
+   THUMB constant. W73-H adds the constructive proof — the C above produces it.
+2. **"The ROM's form is strictly LARGER (6 insns plus a pool word against 5 and
+   none), so it cannot be something combine chose on cost."** Correct, and it was
+   read as evidence of unreachability. It is the opposite: **nothing needed to
+   choose it on cost, because nothing transformed anything.** The larger form is
+   what the source says, emitted literally. When a ROM sequence is BIGGER than
+   every candidate, stop looking for an optimisation that produced it and ask
+   what source spells it directly.
+
+### The transferable rule
+
+**When a value is computed in one domain and stored in another, the lever is
+which domain the ARITHMETIC is written in — not where the test reads.** A test
+can only select between values that already exist; it cannot cause an operation
+to be performed in a wider domain. Nineteen spellings varied the reader and none
+varied the writer. If a sweep has covered every position of a test and every
+spelling of a counter and none moved, the thing you have not varied is the
+domain of the operation, and that is a cast on the OPERAND, not on the result.
+
+Corollary for reading a park: `sub_08029AF8`'s entry recorded the a2/v register
+swap as "almost certainly downstream" of the decrement. That was right — the
+match came with no register work at all.
+
+### `data/parked.json` and `data/asm-resident.json` need OPPOSITE handling (wave 73, W73-D)
+
+The standing warning "any `json.dump` round-trip deletes content silently"
+is about **`data/asm-resident.json`**, which really does contain duplicate
+keys (`sub_0807004C`, `sub_080702C0`) that `json.load` silently collapses —
+194 lines in, 192 out. Edit that file by text insertion.
+
+**`data/parked.json` has no duplicate keys, and the same advice inverts
+there.** Measured this wave: `json.dumps(d, indent=1, ensure_ascii=True)`
+with `'\n'` replaced by `'\r\n'`, written with `newline=''`, reproduces the
+file **byte-for-byte**. A round-trip is lossless and is the only thing that
+keeps the line endings uniform.
+
+Applying the asm-resident advice to parked.json is what actually damaged it:
+raw string replacement inserting text containing bare `'\n'` left 107 bare-LF
+lines in an otherwise CRLF file. Normalised by a single round-trip, 154
+entries in and 154 out, content asserted identical before writing.
+
+**So: text-insert `asm-resident.json`, round-trip `parked.json`.** If you do
+edit `parked.json` by raw replacement, terminate inserted lines with `\r\n`.
+And guard any rewrite of either file the same way — serialise, assert the
+result matches the original except for line endings, and only then write:
+
+    assert out.replace('\r\n','\n') == raw.replace('\r\n','\n')
+
+A dropped entry in `parked.json` silently returns a function to the work
+queue, which is how a wave rediscovers something that was already parked with
+five waves of ruled-out axes.
+
+## `parked.json` and `asm-resident.json` need OPPOSITE editing methods, and the brief tells you to use the wrong one on `parked.json` (wave 73, W73-E + W73-D)
+
+Every wave-73 brief carries this instruction for `data/parked.json`: *"CRLF,
+`indent=1`, edit by text insertion, or the whole file re-serialises."* **That rule
+is correct for `data/asm-resident.json` and wrong for `data/parked.json`, and
+following it is what damaged `parked.json` this wave.**
+
+Measured on both files:
+
+| file | duplicate keys within one object | lines in / out of a round-trip | safe to `json.load` + `json.dump`? |
+|---|---|---|---|
+| `data/asm-resident.json` | **2** (`sub_0807004C`, `sub_080702C0`) | 200 / **197** | **NO - silently deletes half of each pair** |
+| `data/parked.json` | **0** | 1745 / 1744 (trailing newline only) | **YES - content-identical** |
+
+So on `parked.json` a `json` round-trip is not the hazard, it is the *cure*: it
+emits uniform line endings and reproduces the content exactly. What actually
+introduced 107 bare-LF lines into an otherwise-CRLF file was hand text
+manipulation - raw string replacement inserting text containing a newline, and
+line-splitting on CRLF, which silently *preserves* any bare LF already embedded
+inside a "line" rather than normalising it. W73-D measured the round-trip as
+byte-identical at the start of the wave, diagnosed the damage, and normalised the
+file (154 entries in, 154 out, 0 bare LFs, asserted content-identical first).
+
+**Get the duplicate-key test right, because the obvious version of it lies.**
+Counting repeated key names across the whole file reports 19 "duplicates" in
+`parked.json` - `bytes`, `best`, `axes_ruled_out` and friends - which are just
+field names recurring in different entries and are entirely normal. The test that
+matters is duplicate keys **within a single object**, via
+`json.loads(raw, object_pairs_hook=...)` checking each `pairs` list on its own.
+W73-E ran the across-the-file version first and got a misleading answer.
+
+Rules of thumb:
+
+- `parked.json`: load and dump freely with `indent=1`, `ensure_ascii=False`,
+  `newline=''`, writing CRLF back. Assert the parsed content is unchanged before
+  writing.
+- `asm-resident.json`: text insertion only, until someone merges the two
+  duplicate pairs by hand.
+- If you hand-edit a file with CRLF endings, terminate every inserted line with a
+  CR-LF pair and afterwards assert
+  `raw.count('\n') - raw.count('\r\n') == 0`.
+
+**And this chapter's own first draft got it wrong in the same family**, which is
+worth one line because it is the failure mode generalised: the script that wrote
+it detected the target file's dominant line ending, but `docs/agbcc-codegen.md`
+is LF while `data/parked.json` is CRLF, and escape sequences intended as literal
+text became real control characters - putting 3 real CRLFs into an LF file. **Do
+not infer a file's line ending from another file you were just editing, and after
+any scripted write, re-read the file and count.**
