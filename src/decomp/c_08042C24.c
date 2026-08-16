@@ -5,6 +5,18 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08042C24.
  * sub_08042C24 @ 0x08042C24, sub_08042C68 @ 0x08042C68, sub_08042C9C @ 0x08042C9C, sub_08042CD4 @ 0x08042CD4, sub_08042CF8 @ 0x08042CF8, sub_08042D1C @ 0x08042D1C, sub_08042D50 @ 0x08042D50, sub_08042D84 @ 0x08042D84
+ *
+ * sub_08042C9C, sub_08042D1C, sub_08042D50 and sub_08042D84 are named per
+ * Xenesis's AW2 Subroutine List: "Gathers Price multipliers of CO",
+ * "Collects Mov Range + CO Boosts", "Collects Max Firing Range + CO Boosts"
+ * and "Gathers Vision Total of CO" respectively. sub_08042CD4/sub_08042CF8
+ * aren't separately cited there, but they're structurally identical to the
+ * cited Mov/Range/Vision trio one function over (base stat + CO bonus, same
+ * `+ 0x64` bias), so they're named by that analogy: attack and defence are
+ * the two stats the cited trio's family (GetCoAttackBonus.../GetCoRangeBonus
+ * in src/decomp/c_080430B0.c) doesn't already cover. The old sub_XXXXXXXX
+ * symbols are kept as linker aliases below so every other unit keeps
+ * resolving them unchanged.
  */
 
 #include "proc.h"
@@ -78,42 +90,42 @@ int sub_08042C68(int a, int b)
  * declared with -- see the note in unknown-functions.h. The prologue is a bare
  * `adds r4, r0, #0; adds r5, r1, #0` and both values live across two calls; the
  * narrow declaration adds four PROMOTE_MODE narrowing instructions. */
-int sub_08042C9C(int a, int b)
+int GetCoPriceMultiplier(int a, int b)
 {
-    return Div(sub_080433D8(b)
-        * (sub_08043270(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
+    return Div(GetUnitBaseCost(b)
+        * (GetCoCostBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
             + 0x64), 100);
 }
 
 /* The `lsls #4; subs; lsls #2` triple is the 0x3c stride of
  * struct Unk08499598, and gUnknown_08499598 is a pointer to it, so the pool
  * word is dereferenced once before the index is added. */
-int sub_08042CD4(int a, int b)
+int GetUnitAttackWithCoBonus(int a, int b)
 {
-    return sub_080430B0(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
+    return GetCoAttackBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
         + 0x64;
 }
 
-/* sub_08042CD4's twin over sub_08043120. */
-int sub_08042CF8(int a, int b)
+/* GetUnitAttackWithCoBonus's twin over GetCoDefenceBonus. */
+int GetUnitDefenceWithCoBonus(int a, int b)
 {
-    return sub_08043120(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
+    return GetCoDefenceBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
         + 0x64;
 }
 
 /* The one-argument call is the LEFT operand of the `+`: agbcc evaluates it
  * first and parks the result in r4, then builds the three-argument call. */
-int sub_08042D1C(int a, int b)
+int GetUnitMovementWithCoBonus(int a, int b)
 {
-    return sub_080433B8(b)
-        + sub_08043190(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b);
+    return GetUnitBaseMovement(b)
+        + GetCoMovementBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b);
 }
 
-/* sub_08042D1C's twin over sub_080433C8 / sub_08043200. */
-int sub_08042D50(int a, int b)
+/* GetUnitMovementWithCoBonus's twin over GetUnitBaseFiringRange / GetCoRangeBonus. */
+int GetUnitFiringRangeWithCoBonus(int a, int b)
 {
-    return sub_080433C8(b)
-        + sub_08043200(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b);
+    return GetUnitBaseFiringRange(b)
+        + GetCoRangeBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b);
 }
 
 /* The floor is written `if (n > 1) return n; else return 1;` and not the other
@@ -124,12 +136,12 @@ int sub_08042D50(int a, int b)
  * gUnknown_03003FC0.unk2c is reached with `adds r0, #0x2c` on the base rather
  * than an `ldrb` displacement because 0x2c is past `ldrb`'s 5-bit field -- that
  * is addressing, not a member-array tell. */
-int sub_08042D84(int a, int b)
+int GetUnitVisionWithCoBonus(int a, int b)
 {
     int n;
 
-    n = sub_080433E8(b)
-        + sub_080432A8(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e);
+    n = GetUnitBaseVision(b)
+        + GetCoVisionBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e);
 
     if (gUnknown_03003FC0.unk2c == 2)
         n--;
@@ -139,3 +151,10 @@ int sub_08042D84(int a, int b)
     else
         return 1;
 }
+
+asm(".global sub_08042C9C\n.thumb_set sub_08042C9C, GetCoPriceMultiplier\n"
+    ".global sub_08042CD4\n.thumb_set sub_08042CD4, GetUnitAttackWithCoBonus\n"
+    ".global sub_08042CF8\n.thumb_set sub_08042CF8, GetUnitDefenceWithCoBonus\n"
+    ".global sub_08042D1C\n.thumb_set sub_08042D1C, GetUnitMovementWithCoBonus\n"
+    ".global sub_08042D50\n.thumb_set sub_08042D50, GetUnitFiringRangeWithCoBonus\n"
+    ".global sub_08042D84\n.thumb_set sub_08042D84, GetUnitVisionWithCoBonus\n");

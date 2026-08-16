@@ -20,10 +20,15 @@
  * inserts at every call site of a sub-word-returning callee. Two instructions
  * earlier the same function calls sub_080416A4 and tests it with a bare
  * `cmp r0,#0`, so the shift is not decoration. */
-bool8 sub_08042084(u8 *p)
+/* Named per Xenesis's AW2 Subroutine List: "Gathers a unit's Supplying
+ * ability". The old sub_08042084 symbol is kept as a linker alias below so
+ * every other unit keeps resolving it unchanged. */
+bool8 HasSupplyAbility(u8 *p)
 {
     if (gUnknown_084995C1[*p] != 0)
         return TRUE;
 
     return FALSE;
 }
+
+asm(".global sub_08042084\n.thumb_set sub_08042084, HasSupplyAbility\n");

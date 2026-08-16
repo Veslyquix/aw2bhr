@@ -49,7 +49,11 @@ struct Unk40380Map
     /* 0x417A */ u16 rowOffset[1];
 };
 
-void sub_080402B4(int x, int y, ProcPtr parent)
+/* Named per Xenesis's AW2 Subroutine List: "Subroutine that changes Tile
+ * Type Map (0201F882) after a pipe seam is destroyed. Input: r0 = x-coord,
+ * r1 = y-coord". The old sub_080402B4 symbol is kept as a linker alias
+ * below so every other unit keeps resolving it unchanged. */
+void DestroyPipeSeam(int x, int y, ProcPtr parent)
 {
     u16 v = ((struct Unk402B4Map *)gUnknown_08499590)->unkA22[
         ((struct Unk402B4Map *)gUnknown_08499590)->rowOffset[y] + x];
@@ -75,6 +79,8 @@ void sub_080402B4(int x, int y, ProcPtr parent)
     sub_08024268();
     sub_080219AC();
 }
+
+asm(".global sub_080402B4\n.thumb_set sub_080402B4, DestroyPipeSeam\n");
 
 void sub_08040380(int x, int y, ProcPtr parent)
 {

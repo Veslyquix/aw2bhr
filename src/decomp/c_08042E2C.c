@@ -29,13 +29,18 @@
  * sub_08042E2C @ 0x08042E2C
  */
 
-int sub_08042E2C(int a, int b)
+/* Named per Xenesis's AW2 Subroutine List: "Gathers Luck Total of CO". The
+ * old sub_08042E2C symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
+int GetCoLuckBonus(int a, int b)
 {
     if (gUnknown_03003FC0.unk08 == 0)
         return 10;
 
     return gUnknown_085D3DD0[a].unk38[b].unk0e;
 }
+
+asm(".global sub_08042E2C\n.thumb_set sub_08042E2C, GetCoLuckBonus\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -44,10 +49,15 @@ int sub_08042E2C(int a, int b)
  * sub_08042E64 @ 0x08042E64
  */
 
-int sub_08042E64(int a1)
+/* Player-level wrapper for GetCoLuckBonus. The old sub_08042E64 symbol is
+ * kept as a linker alias below so every other unit keeps resolving it
+ * unchanged. */
+int GetPlayerCoLuckBonus(int a1)
 {
-    return sub_08042E2C(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return GetCoLuckBonus(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
 }
+
+asm(".global sub_08042E64\n.thumb_set sub_08042E64, GetPlayerCoLuckBonus\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -56,13 +66,18 @@ int sub_08042E64(int a1)
  * sub_08042E84 @ 0x08042E84
  */
 
-int sub_08042E84(int a, int b)
+/* Named per Xenesis's AW2 Subroutine List: "Gathers Negative Luck Total of
+ * CO". The old sub_08042E84 symbol is kept as a linker alias below so every
+ * other unit keeps resolving it unchanged. */
+int GetCoNegativeLuckBonus(int a, int b)
 {
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk10;
 }
+
+asm(".global sub_08042E84\n.thumb_set sub_08042E84, GetCoNegativeLuckBonus\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -71,10 +86,15 @@ int sub_08042E84(int a, int b)
  * sub_08042EBC @ 0x08042EBC
  */
 
-int sub_08042EBC(int a1)
+/* Player-level wrapper for GetCoNegativeLuckBonus. The old sub_08042EBC
+ * symbol is kept as a linker alias below so every other unit keeps
+ * resolving it unchanged. */
+int GetPlayerCoNegativeLuckBonus(int a1)
 {
-    return sub_08042E84(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return GetCoNegativeLuckBonus(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
 }
+
+asm(".global sub_08042EBC\n.thumb_set sub_08042EBC, GetPlayerCoNegativeLuckBonus\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -156,13 +176,18 @@ int sub_08042FA4(int a1)
  * sub_08042FC4 @ 0x08042FC4
  */
 
-int sub_08042FC4(int a, int b)
+/* Named per Xenesis's AW2 Subroutine List: "Gathers Counterattack Bonus
+ * Total of CO". The old sub_08042FC4 symbol is kept as a linker alias below
+ * so every other unit keeps resolving it unchanged. */
+int GetCoCounterattackBonus(int a, int b)
 {
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk12;
 }
+
+asm(".global sub_08042FC4\n.thumb_set sub_08042FC4, GetCoCounterattackBonus\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -171,10 +196,15 @@ int sub_08042FC4(int a, int b)
  * sub_08042FFC @ 0x08042FFC
  */
 
-int sub_08042FFC(int a1)
+/* Player-level wrapper for GetCoCounterattackBonus. The old sub_08042FFC
+ * symbol is kept as a linker alias below so every other unit keeps
+ * resolving it unchanged. */
+int GetPlayerCoCounterattackBonus(int a1)
 {
-    return sub_08042FC4(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return GetCoCounterattackBonus(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
 }
+
+asm(".global sub_08042FFC\n.thumb_set sub_08042FFC, GetPlayerCoCounterattackBonus\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must

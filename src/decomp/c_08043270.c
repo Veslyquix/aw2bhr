@@ -5,6 +5,12 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08043270.
  * sub_08043270 @ 0x08043270, sub_080432A8 @ 0x080432A8
+ *
+ * Named per Xenesis's AW2 Subroutine List: sub_08043270 = "Gathers Cost
+ * Bonus of CO. Input of CO ID, Power Status and Unit ID. Outputs cost
+ * bonuses in r0", sub_080432A8 = "Gathers vision bonus of CO". The old
+ * sub_XXXXXXXX symbols are kept as linker aliases below so every other unit
+ * keeps resolving them unchanged.
  */
 
 /* Family F038, the shape of the dozen accessors in src/decomp/c_08042E2C.c.
@@ -25,7 +31,7 @@
  * sibling sub_08043200 takes and uses the same three. An unused trailing
  * parameter is byte-neutral here; re-verified with trymatch after the change. */
 
-int sub_08043270(int a, int b, int c)
+int GetCoCostBonus(int a, int b, int c)
 {
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
@@ -33,13 +39,16 @@ int sub_08043270(int a, int b, int c)
     return gUnknown_085D3DD0[a].unk38[b].unk14;
 }
 
-/* Family F038, the twin of sub_08043270 one member down: the ROM's
- * `adds r0, #0x44` is 0x38 + 0x0c, i.e. unk0c. See the note on sub_08043270. */
+/* Family F038, the twin of GetCoCostBonus one member down: the ROM's
+ * `adds r0, #0x44` is 0x38 + 0x0c, i.e. unk0c. See the note on GetCoCostBonus. */
 
-int sub_080432A8(int a, int b)
+int GetCoVisionBonus(int a, int b)
 {
     if (gUnknown_03003FC0.unk08 == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk0c;
 }
+
+asm(".global sub_08043270\n.thumb_set sub_08043270, GetCoCostBonus\n"
+    ".global sub_080432A8\n.thumb_set sub_080432A8, GetCoVisionBonus\n");

@@ -54,5 +54,25 @@ int GetCampaignScoreRank(int score);
 int IsHardCampaignMode(void);
 void PlayMusicOrSfx(s16 soundId);
 void ActivateMusicOrSoundId(u16 songId);
+bool8 HasSupplyAbility(u8 *p);
+void DestroyPipeSeam(int x, int y, ProcPtr parent);
+int GetUnitBaseMovement(int a);
+int GetUnitBaseFiringRange(int a);
+int GetUnitBaseCost(int a);
+int GetUnitBaseVision(int a);
+int GetCoCostBonus(int coId, int coPowerState, int unitType);
+int GetCoVisionBonus(int coId, int coPowerState);
+int GetCoLuckBonus(int coId, int coPowerState);
+int GetPlayerCoLuckBonus(int player);
+int GetCoNegativeLuckBonus(int coId, int coPowerState);
+int GetPlayerCoNegativeLuckBonus(int player);
+int GetCoCounterattackBonus(int coId, int coPowerState);
+int GetPlayerCoCounterattackBonus(int player);
+int GetCoPriceMultiplier(int player, int unitType);
+int GetUnitAttackWithCoBonus(int player, int unitType);
+int GetUnitDefenceWithCoBonus(int player, int unitType);
+int GetUnitMovementWithCoBonus(int player, int unitType);
+int GetUnitFiringRangeWithCoBonus(int player, int unitType);
+int GetUnitVisionWithCoBonus(int player, int unitType);
 
 #endif // GUARD_XENESIS_NAMES_H
