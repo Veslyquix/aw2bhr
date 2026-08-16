@@ -40,7 +40,7 @@ struct Unk_0201E450 {
 
 extern struct Unk_0201E450 * gUnknown_08499590;
 
-extern void sub_08008BB8(int x, int y);
+extern void EnsureValidTile(int x, int y);
 extern int sub_080094EC(int x, int y);
 extern int sub_08008C34(int x, int y);
 int GetTileWithShadow(int x, int y, int tile); 
@@ -113,10 +113,8 @@ struct activeMap {
   u8 unk3[0x28-0x13]; 
   u16 unk4; 
   u16 SelectedTile; // press B in design room on tile 
-  u16 unk2C; 
-  u8 factionProperties; // Army for properties
-  u8 factionUnits; // Which army the menu units belong to
-  u8 unk5[0x36-0x30]; 
+  u16 unk2C;
+  u8 unk5[0x36-0x2E];
   u16 unk36; 
   u16 unk38; 
   u16 unk3a;
@@ -127,10 +125,22 @@ struct activeMap {
 
 // clang-format on
 
-extern s16 gUnknown_0200B224[]; 
-extern struct activeMap *gUnknown_0200B0B0; // gActiveMap 
+extern s16 gUnknown_0200B224[];
+extern struct activeMap *gUnknown_0200B0B0; // gActiveMap
 extern struct playSt gPlaySt;
 extern u8 gUnknown_084859E0[];
+
+// Xenesis's docs list these two at 0x0200B02E/0x0200B02F, which is inside
+// gUnknown_0200B000 (0x0200B000-0x0200B0AF), not an offset into activeMap
+// (gUnknown_0200B0B0) -- a past pass at this struct mislabeled them at
+// offset 0x2E/0x2F of activeMap by reusing the raw doc offset against the
+// wrong base. Not yet used by any matched code.
+struct Unk_0200B000 {
+  u8 unk[0x2E];
+  u8 factionProperties; // Army for properties
+  u8 factionUnits;      // Which army the menu units belong to
+};
+extern struct Unk_0200B000 gUnknown_0200B000;
 
 
 

@@ -1236,3 +1236,28 @@ void sub_0801D344(void)
 {
     do { } while (1);
 }
+
+extern void sub_0801E4B0(s32 a, s32 b, s32 c, u32 d, s32 e);
+
+struct Sub0801E338Extra
+{
+    s32 arg7;
+    u32 arg8;
+};
+
+extern void sub_0801E338(s32 a, s32 b, s32 c, u32 d, struct Sub0801E338Extra e, s32 g);
+
+void sub_0801D348(u32 flag, s32 arg2, s32 arg3, u32 arg4, s32 arg5, s32 arg6, s32 arg7, u32 arg8, u16 arg9)
+{
+    s16 arg9s = (s16) arg9;
+
+    if (flag & 1)
+    {
+        sub_0801E4B0(arg5, arg2, arg3, arg4, arg6);
+    }
+    else
+    {
+        struct Sub0801E338Extra extra = { arg7, arg8 };
+        sub_0801E338(arg5, arg2, arg3, arg4, extra, arg9s);
+    }
+}

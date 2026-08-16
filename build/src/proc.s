@@ -3582,6 +3582,73 @@ sub_0801D344:
 .LFE85:
 .Lfe85:
 	.size	 sub_0801D344,.Lfe85-sub_0801D344
+	.align	2, 0
+	.globl	sub_0801D348
+	.type	 sub_0801D348,function
+	.thumb_func
+sub_0801D348:
+.LFB86:
+.LM607:
+
+	push	{r4, r5, r6, lr}
+	add	sp, sp, #-0xc
+	add	r4, r1, #0
+	add	r5, r2, #0
+	ldr	r6, [sp, #0x1c]
+	ldr	r1, [sp, #0x2c]
+.LM608:
+
+.LBB71:
+	lsl	r1, r1, #0x10
+	lsr	r2, r1, #0x10
+.LM609:
+
+	mov	r1, #0x1
+	and	r1, r1, r0
+	cmp	r1, #0
+	beq	.L293	@cond_branch
+.LM610:
+
+	ldr	r0, [sp, #0x20]
+	str	r0, [sp]
+	add	r0, r6, #0
+	add	r1, r4, #0
+	add	r2, r5, #0
+	bl	sub_0801E4B0
+.LM611:
+
+	b	.L294
+.L293:
+.LM612:
+
+.LBB72:
+	ldr	r0, [sp, #0x24]
+	ldr	r1, [sp, #0x28]
+.LM613:
+
+	str	r0, [sp]
+	str	r1, [sp, #0x4]
+	lsl	r0, r2, #0x10
+	asr	r0, r0, #0x10
+	str	r0, [sp, #0x8]
+	add	r0, r6, #0
+	add	r1, r4, #0
+	add	r2, r5, #0
+	bl	sub_0801E338
+.LM614:
+
+.LBE72:
+.L294:
+.LM615:
+
+.LBE71:
+	add	sp, sp, #0xc
+	pop	{r4, r5, r6}
+	pop	{r0}
+	bx	r0
+.LFE86:
+.Lfe86:
+	.size	 sub_0801D348,.Lfe86-sub_0801D348
 	.globl	gUnknown_03001FDC
 .bss
 	.align	2, 0
@@ -6691,6 +6758,51 @@ gUnknown_03001FDC:
 	.byte	0x0
 	.byte	0x5
 	.byte	0x2
+	.4byte	.LM607
+	.byte	0x21
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM608
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM609
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM610
+	.byte	0x16
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM611
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM612
+	.byte	0x17
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM613
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM614
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
+	.4byte	.LM615
+	.byte	0x15
+	.byte	0x0
+	.byte	0x5
+	.byte	0x2
 	.4byte	.Letext0
 	.byte	0x0
 	.byte	0x1
@@ -7039,6 +7151,34 @@ gUnknown_03001FDC:
 	.byte	0xa
 	.byte	0,0
 	.byte	0x1c
+	.byte	0x13
+	.byte	0x1
+	.byte	0x1
+	.byte	0x13
+	.byte	0x3
+	.byte	0x8
+	.byte	0xb
+	.byte	0xb
+	.byte	0x3a
+	.byte	0xb
+	.byte	0x3b
+	.byte	0x5
+	.byte	0,0
+	.byte	0x1d
+	.byte	0xd
+	.byte	0x0
+	.byte	0x3
+	.byte	0x8
+	.byte	0x3a
+	.byte	0xb
+	.byte	0x3b
+	.byte	0x5
+	.byte	0x49
+	.byte	0x13
+	.byte	0x38
+	.byte	0xa
+	.byte	0,0
+	.byte	0x1e
 	.byte	0x16
 	.byte	0x0
 	.byte	0x3
@@ -7050,13 +7190,13 @@ gUnknown_03001FDC:
 	.byte	0x49
 	.byte	0x13
 	.byte	0,0
-	.byte	0x1d
+	.byte	0x1f
 	.byte	0x35
 	.byte	0x0
 	.byte	0x49
 	.byte	0x13
 	.byte	0,0
-	.byte	0x1e
+	.byte	0x20
 	.byte	0x4
 	.byte	0x1
 	.byte	0x1
@@ -7068,7 +7208,7 @@ gUnknown_03001FDC:
 	.byte	0x3b
 	.byte	0xb
 	.byte	0,0
-	.byte	0x1f
+	.byte	0x21
 	.byte	0x28
 	.byte	0x0
 	.byte	0x3
@@ -7076,7 +7216,7 @@ gUnknown_03001FDC:
 	.byte	0x1c
 	.byte	0xb
 	.byte	0,0
-	.byte	0x20
+	.byte	0x22
 	.byte	0x34
 	.byte	0x0
 	.byte	0x3
@@ -7092,7 +7232,7 @@ gUnknown_03001FDC:
 	.byte	0x2
 	.byte	0xa
 	.byte	0,0
-	.byte	0x21
+	.byte	0x23
 	.byte	0x34
 	.byte	0x0
 	.byte	0x3
@@ -7110,7 +7250,7 @@ gUnknown_03001FDC:
 	.byte	0,0
 
 	.section	.debug_info
-	.4byte	0x22bd
+	.4byte	0x23dd
 	.2byte	0x2
 	.4byte	.debug_abbrev
 	.byte	0x4
@@ -10047,654 +10187,796 @@ gUnknown_03001FDC:
 	.4byte	.LFE85
 	.byte	0x1
 	.byte	0x5d
+	.byte	0x13
+	.4byte	0x1b2e
+	.byte	0x1
+	.ascii	"sub_0801D348\000"
+
+	.byte	0x1
+	.2byte	0x4e3
+	.byte	0x1
+	.4byte	.LFB86
+	.4byte	.LFE86
+	.byte	0x1
+	.byte	0x5d
+	.byte	0x14
+	.ascii	"flag\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x1b2e
+	.byte	0x1
+	.byte	0x50
+	.byte	0x14
+	.ascii	"arg2\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x8d
+	.byte	0x1
+	.byte	0x54
+	.byte	0x14
+	.ascii	"arg3\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x8d
+	.byte	0x1
+	.byte	0x55
+	.byte	0x14
+	.ascii	"arg4\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x1b2e
+	.byte	0x1
+	.byte	0x53
+	.byte	0x14
+	.ascii	"arg5\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x8d
+	.byte	0x1
+	.byte	0x56
+	.byte	0x14
+	.ascii	"arg6\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x8d
+	.byte	0x1
+	.byte	0x50
+	.byte	0x14
+	.ascii	"arg7\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x8d
+	.byte	0x2
+	.byte	0x91
+	.byte	0x24
+	.byte	0x14
+	.ascii	"arg8\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x1b2e
+	.byte	0x2
+	.byte	0x91
+	.byte	0x28
+	.byte	0x18
+	.ascii	"arg9\000"
+
+	.byte	0x1
+	.2byte	0x4e2
+	.4byte	0x1b35
+	.byte	0x16
+	.ascii	"arg9s\000"
+
+	.byte	0x1
+	.2byte	0x4e4
+	.4byte	0x23a
+	.byte	0x1
+	.byte	0x52
+	.byte	0x4
+	.4byte	0x1b2d
+	.4byte	.LBB72
+	.4byte	.LBE72
+	.byte	0x16
+	.ascii	"extra\000"
+
+	.byte	0x1
+	.2byte	0x4ec
+	.4byte	0x1b3c
+	.byte	0x1
+	.byte	0x50
+	.byte	0x0
+	.byte	0x0
+	.byte	0x5
+	.ascii	"u32\000"
+
+	.byte	0x4
+	.byte	0x7
+	.byte	0x5
+	.ascii	"u16\000"
+
+	.byte	0x2
+	.byte	0x7
 	.byte	0x1c
+	.4byte	0x1b77
+	.ascii	"Sub0801E338Extra\000"
+
+	.byte	0x8
+	.byte	0x1
+	.2byte	0x4db
+	.byte	0x1d
+	.ascii	"arg7\000"
+
+	.byte	0x1
+	.2byte	0x4dc
+	.4byte	0x8d
+	.byte	0x2
+	.byte	0x23
+	.byte	0x0
+	.byte	0x1d
+	.ascii	"arg8\000"
+
+	.byte	0x1
+	.2byte	0x4dd
+	.4byte	0x1b2e
+	.byte	0x2
+	.byte	0x23
+	.byte	0x4
+	.byte	0x0
+	.byte	0x1e
 	.ascii	"int8_t\000"
 
 	.byte	0x4
 	.byte	0x23
-	.4byte	0x1a65
+	.4byte	0x1b85
 	.byte	0x5
 	.ascii	"signed char\000"
 
 	.byte	0x1
 	.byte	0x6
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"int16_t\000"
 
 	.byte	0x4
 	.byte	0x24
-	.4byte	0x1a83
+	.4byte	0x1ba3
 	.byte	0x5
 	.ascii	"short int\000"
 
 	.byte	0x2
 	.byte	0x5
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"int32_t\000"
 
 	.byte	0x4
 	.byte	0x25
-	.4byte	0x1a9f
+	.4byte	0x1bbf
 	.byte	0x5
 	.ascii	"int\000"
 
 	.byte	0x4
 	.byte	0x5
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"int64_t\000"
 
 	.byte	0x4
 	.byte	0x26
-	.4byte	0x1ab5
+	.4byte	0x1bd5
 	.byte	0x5
 	.ascii	"long long int\000"
 
 	.byte	0x8
 	.byte	0x5
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"uint8_t\000"
 
 	.byte	0x4
 	.byte	0x27
 	.4byte	0x253
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"uint16_t\000"
 
 	.byte	0x4
 	.byte	0x28
-	.4byte	0x1ae5
+	.4byte	0x1c05
 	.byte	0x5
 	.ascii	"short unsigned int\000"
 
 	.byte	0x2
 	.byte	0x7
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"uint32_t\000"
 
 	.byte	0x4
 	.byte	0x29
-	.4byte	0x1b0b
+	.4byte	0x1c2b
 	.byte	0x5
 	.ascii	"unsigned int\000"
 
 	.byte	0x4
 	.byte	0x7
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"uint64_t\000"
 
 	.byte	0x4
 	.byte	0x2a
-	.4byte	0x1b2b
+	.4byte	0x1c4b
 	.byte	0x5
 	.ascii	"long long unsigned int\000"
 
 	.byte	0x8
 	.byte	0x7
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"int_least8_t\000"
 
 	.byte	0x4
 	.byte	0x2e
-	.4byte	0x1a65
-	.byte	0x1c
+	.4byte	0x1b85
+	.byte	0x1e
 	.ascii	"int_least16_t\000"
 
 	.byte	0x4
 	.byte	0x2f
-	.4byte	0x1a83
-	.byte	0x1c
+	.4byte	0x1ba3
+	.byte	0x1e
 	.ascii	"int_least32_t\000"
 
 	.byte	0x4
 	.byte	0x30
-	.4byte	0x1a9f
-	.byte	0x1c
+	.4byte	0x1bbf
+	.byte	0x1e
 	.ascii	"int_least64_t\000"
 
 	.byte	0x4
 	.byte	0x31
-	.4byte	0x1ab5
-	.byte	0x1c
+	.4byte	0x1bd5
+	.byte	0x1e
 	.ascii	"uint_least8_t\000"
 
 	.byte	0x4
 	.byte	0x32
 	.4byte	0x253
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"uint_least16_t\000"
 
 	.byte	0x4
 	.byte	0x33
-	.4byte	0x1ae5
-	.byte	0x1c
+	.4byte	0x1c05
+	.byte	0x1e
 	.ascii	"uint_least32_t\000"
 
 	.byte	0x4
 	.byte	0x34
-	.4byte	0x1b0b
-	.byte	0x1c
+	.4byte	0x1c2b
+	.byte	0x1e
 	.ascii	"uint_least64_t\000"
 
 	.byte	0x4
 	.byte	0x35
-	.4byte	0x1b2b
-	.byte	0x1c
+	.4byte	0x1c4b
+	.byte	0x1e
 	.ascii	"int_fast8_t\000"
 
 	.byte	0x4
 	.byte	0x39
-	.4byte	0x1a9f
-	.byte	0x1c
+	.4byte	0x1bbf
+	.byte	0x1e
 	.ascii	"int_fast16_t\000"
 
 	.byte	0x4
 	.byte	0x3a
-	.4byte	0x1a9f
-	.byte	0x1c
+	.4byte	0x1bbf
+	.byte	0x1e
 	.ascii	"int_fast32_t\000"
 
 	.byte	0x4
 	.byte	0x3b
-	.4byte	0x1a9f
-	.byte	0x1c
+	.4byte	0x1bbf
+	.byte	0x1e
 	.ascii	"int_fast64_t\000"
 
 	.byte	0x4
 	.byte	0x3c
-	.4byte	0x1ab5
-	.byte	0x1c
+	.4byte	0x1bd5
+	.byte	0x1e
 	.ascii	"uint_fast8_t\000"
 
 	.byte	0x4
 	.byte	0x3d
-	.4byte	0x1b0b
-	.byte	0x1c
+	.4byte	0x1c2b
+	.byte	0x1e
 	.ascii	"uint_fast16_t\000"
 
 	.byte	0x4
 	.byte	0x3e
-	.4byte	0x1b0b
-	.byte	0x1c
+	.4byte	0x1c2b
+	.byte	0x1e
 	.ascii	"uint_fast32_t\000"
 
 	.byte	0x4
 	.byte	0x3f
-	.4byte	0x1b0b
-	.byte	0x1c
+	.4byte	0x1c2b
+	.byte	0x1e
 	.ascii	"uint_fast64_t\000"
 
 	.byte	0x4
 	.byte	0x40
-	.4byte	0x1b2b
-	.byte	0x1c
+	.4byte	0x1c4b
+	.byte	0x1e
 	.ascii	"intptr_t\000"
 
 	.byte	0x4
 	.byte	0x44
-	.4byte	0x1a9f
-	.byte	0x1c
+	.4byte	0x1bbf
+	.byte	0x1e
 	.ascii	"uintptr_t\000"
 
 	.byte	0x4
 	.byte	0x45
-	.4byte	0x1b0b
-	.byte	0x1c
+	.4byte	0x1c2b
+	.byte	0x1e
 	.ascii	"intmax_t\000"
 
 	.byte	0x4
 	.byte	0x49
-	.4byte	0x1ab5
-	.byte	0x1c
+	.4byte	0x1bd5
+	.byte	0x1e
 	.ascii	"uintmax_t\000"
 
 	.byte	0x4
 	.byte	0x4a
-	.4byte	0x1b2b
-	.byte	0x1c
+	.4byte	0x1c4b
+	.byte	0x1e
 	.ascii	"u8\000"
 
 	.byte	0x5
 	.byte	0x6
-	.4byte	0x1ac6
-	.byte	0x1c
+	.4byte	0x1be6
+	.byte	0x1e
 	.ascii	"u16\000"
 
 	.byte	0x5
 	.byte	0x7
-	.4byte	0x1ad5
-	.byte	0x1c
+	.4byte	0x1bf5
+	.byte	0x1e
 	.ascii	"u32\000"
 
 	.byte	0x5
 	.byte	0x8
-	.4byte	0x1afb
-	.byte	0x1c
+	.4byte	0x1c1b
+	.byte	0x1e
 	.ascii	"u64\000"
 
 	.byte	0x5
 	.byte	0x9
-	.4byte	0x1b1b
-	.byte	0x1c
+	.4byte	0x1c3b
+	.byte	0x1e
 	.ascii	"s8\000"
 
 	.byte	0x5
 	.byte	0xa
-	.4byte	0x1a57
-	.byte	0x1c
+	.4byte	0x1b77
+	.byte	0x1e
 	.ascii	"s16\000"
 
 	.byte	0x5
 	.byte	0xb
-	.4byte	0x1a74
-	.byte	0x1c
+	.4byte	0x1b94
+	.byte	0x1e
 	.ascii	"s32\000"
 
 	.byte	0x5
 	.byte	0xc
-	.4byte	0x1a90
-	.byte	0x1c
+	.4byte	0x1bb0
+	.byte	0x1e
 	.ascii	"s64\000"
 
 	.byte	0x5
 	.byte	0xd
-	.4byte	0x1aa6
-	.byte	0x1c
+	.4byte	0x1bc6
+	.byte	0x1e
 	.ascii	"vu8\000"
 
 	.byte	0x5
 	.byte	0xf
-	.4byte	0x1d34
-	.byte	0x1d
-	.4byte	0x1cd3
-	.byte	0x1c
+	.4byte	0x1e54
+	.byte	0x1f
+	.4byte	0x1df3
+	.byte	0x1e
 	.ascii	"vu16\000"
 
 	.byte	0x5
 	.byte	0x10
-	.4byte	0x1d45
-	.byte	0x1d
-	.4byte	0x1cdd
-	.byte	0x1c
+	.4byte	0x1e65
+	.byte	0x1f
+	.4byte	0x1dfd
+	.byte	0x1e
 	.ascii	"vu32\000"
 
 	.byte	0x5
 	.byte	0x11
-	.4byte	0x1d56
-	.byte	0x1d
-	.4byte	0x1ce8
-	.byte	0x1c
+	.4byte	0x1e76
+	.byte	0x1f
+	.4byte	0x1e08
+	.byte	0x1e
 	.ascii	"vu64\000"
 
 	.byte	0x5
 	.byte	0x12
-	.4byte	0x1d67
-	.byte	0x1d
-	.4byte	0x1cf3
-	.byte	0x1c
+	.4byte	0x1e87
+	.byte	0x1f
+	.4byte	0x1e13
+	.byte	0x1e
 	.ascii	"vs8\000"
 
 	.byte	0x5
 	.byte	0x13
-	.4byte	0x1d77
-	.byte	0x1d
-	.4byte	0x1cfe
-	.byte	0x1c
+	.4byte	0x1e97
+	.byte	0x1f
+	.4byte	0x1e1e
+	.byte	0x1e
 	.ascii	"vs16\000"
 
 	.byte	0x5
 	.byte	0x14
-	.4byte	0x1d88
-	.byte	0x1d
-	.4byte	0x1d08
-	.byte	0x1c
+	.4byte	0x1ea8
+	.byte	0x1f
+	.4byte	0x1e28
+	.byte	0x1e
 	.ascii	"vs32\000"
 
 	.byte	0x5
 	.byte	0x15
-	.4byte	0x1d99
-	.byte	0x1d
-	.4byte	0x1d13
-	.byte	0x1c
+	.4byte	0x1eb9
+	.byte	0x1f
+	.4byte	0x1e33
+	.byte	0x1e
 	.ascii	"vs64\000"
 
 	.byte	0x5
 	.byte	0x16
-	.4byte	0x1daa
-	.byte	0x1d
-	.4byte	0x1d1e
-	.byte	0x1c
+	.4byte	0x1eca
+	.byte	0x1f
+	.4byte	0x1e3e
+	.byte	0x1e
 	.ascii	"f32\000"
 
 	.byte	0x5
 	.byte	0x18
-	.4byte	0x1dba
+	.4byte	0x1eda
 	.byte	0x5
 	.ascii	"float\000"
 
 	.byte	0x4
 	.byte	0x4
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"f64\000"
 
 	.byte	0x5
 	.byte	0x19
-	.4byte	0x1dce
+	.4byte	0x1eee
 	.byte	0x5
 	.ascii	"double\000"
 
 	.byte	0x8
 	.byte	0x4
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"bool8\000"
 
 	.byte	0x5
 	.byte	0x1b
-	.4byte	0x1cd3
-	.byte	0x1c
+	.4byte	0x1df3
+	.byte	0x1e
 	.ascii	"bool16\000"
 
 	.byte	0x5
 	.byte	0x1c
-	.4byte	0x1cdd
-	.byte	0x1c
+	.4byte	0x1dfd
+	.byte	0x1e
 	.ascii	"bool32\000"
 
 	.byte	0x5
 	.byte	0x1d
-	.4byte	0x1ce8
-	.byte	0x1c
+	.4byte	0x1e08
+	.byte	0x1e
 	.ascii	"ptrdiff_t\000"
 
 	.byte	0x6
 	.byte	0x6
-	.4byte	0x1e12
+	.4byte	0x1f32
 	.byte	0x5
 	.ascii	"long int\000"
 
 	.byte	0x4
 	.byte	0x5
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"size_t\000"
 
 	.byte	0x6
 	.byte	0xa
-	.4byte	0x1e2c
+	.4byte	0x1f4c
 	.byte	0x5
 	.ascii	"long unsigned int\000"
 
 	.byte	0x4
 	.byte	0x7
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"wchar_t\000"
 
 	.byte	0x6
 	.byte	0x11
-	.4byte	0x1a9f
-	.byte	0x1c
+	.4byte	0x1bbf
+	.byte	0x1e
 	.ascii	"ProcPtr\000"
 
 	.byte	0x3
 	.byte	0x7
-	.4byte	0x1e5f
+	.4byte	0x1f7f
 	.byte	0xc
 	.byte	0x4
-	.byte	0x1c
+	.byte	0x1e
 	.ascii	"ProcFunc\000"
 
 	.byte	0x3
 	.byte	0x8
-	.4byte	0x1e71
+	.4byte	0x1f91
 	.byte	0x8
 	.byte	0x4
 	.4byte	0x226
-	.byte	0x1e
-	.4byte	0x2169
+	.byte	0x20
+	.4byte	0x2289
 	.byte	0x4
 	.byte	0x2
 	.byte	0xe
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_END\000"
 
 	.byte	0x0
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_01\000"
 
 	.byte	0x1
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_CALL\000"
 
 	.byte	0x2
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_REPEAT\000"
 
 	.byte	0x3
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_ONEND\000"
 
 	.byte	0x4
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_START_CHILD\000"
 
 	.byte	0x5
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_START_CHILD_BLOCKING\000"
 
 	.byte	0x6
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_START_BUGGED\000"
 
 	.byte	0x7
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_WHILE_EXISTS\000"
 
 	.byte	0x8
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_END_EACH\000"
 
 	.byte	0x9
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_BREAK_EACH\000"
 
 	.byte	0xa
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_LABEL\000"
 
 	.byte	0xb
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_GOTO\000"
 
 	.byte	0xc
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_GOTO_SCR\000"
 
 	.byte	0xd
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_SLEEP\000"
 
 	.byte	0xe
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_MARK\000"
 
 	.byte	0xf
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_BLOCK\000"
 
 	.byte	0x10
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_END_IF_DUP\000"
 
 	.byte	0x11
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_SET_FLAG2\000"
 
 	.byte	0x12
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_13\000"
 
 	.byte	0x13
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_WHILE\000"
 
 	.byte	0x14
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_15\000"
 
 	.byte	0x15
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_CALL_RET\000"
 
 	.byte	0x16
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_END_DUPS\000"
 
 	.byte	0x17
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_CALL_ARG\000"
 
 	.byte	0x18
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_19\000"
 
 	.byte	0x19
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_1A\000"
 
 	.byte	0x1a
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_1B\000"
 
 	.byte	0x1b
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_1C\000"
 
 	.byte	0x1c
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_1D\000"
 
 	.byte	0x1d
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_1E\000"
 
 	.byte	0x1e
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_1F\000"
 
 	.byte	0x1f
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_20\000"
 
 	.byte	0x20
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_21\000"
 
 	.byte	0x21
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_22\000"
 
 	.byte	0x22
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_23\000"
 
 	.byte	0x23
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_24\000"
 
 	.byte	0x24
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_25\000"
 
 	.byte	0x25
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_26\000"
 
 	.byte	0x26
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_GOTO_IF_YES\000"
 
 	.byte	0x27
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_GOTO_IF_NO\000"
 
 	.byte	0x28
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_29\000"
 
 	.byte	0x29
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_CMD_2A\000"
 
 	.byte	0x2a
 	.byte	0x0
-	.byte	0x1e
-	.4byte	0x217f
+	.byte	0x20
+	.4byte	0x229f
 	.byte	0x4
 	.byte	0x1
 	.byte	0x6
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_COUNT\000"
 
 	.byte	0x20
 	.byte	0x0
-	.byte	0x1e
-	.4byte	0x21d5
+	.byte	0x20
+	.4byte	0x22f5
 	.byte	0x4
 	.byte	0x1
 	.byte	0xb
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_FLAG_ENDED\000"
 
 	.byte	0x1
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_FLAG_BLOCKING\000"
 
 	.byte	0x2
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_FLAG_UNK2\000"
 
 	.byte	0x4
-	.byte	0x1f
+	.byte	0x21
 	.ascii	"PROC_FLAG_STARTING\000"
 
 	.byte	0x8
 	.byte	0x0
 	.byte	0xd
-	.4byte	0x21e1
+	.4byte	0x2301
 	.4byte	0x94
 	.byte	0xe
 	.byte	0x1f
 	.byte	0x0
-	.byte	0x20
+	.byte	0x22
 	.ascii	"sProcArray\000"
 
 	.byte	0x1
 	.byte	0x12
-	.4byte	0x21d5
+	.4byte	0x22f5
 	.byte	0x1
 	.byte	0x5
 	.byte	0x3
 	.4byte	sProcArray
 	.byte	0xd
-	.4byte	0x2206
+	.4byte	0x2326
 	.4byte	0x1cf
 	.byte	0xe
 	.byte	0x20
 	.byte	0x0
-	.byte	0x20
+	.byte	0x22
 	.ascii	"sProcAllocList\000"
 
 	.byte	0x1
 	.byte	0x13
-	.4byte	0x21fa
+	.4byte	0x231a
 	.byte	0x1
 	.byte	0x5
 	.byte	0x3
 	.4byte	sProcAllocList
-	.byte	0x20
+	.byte	0x22
 	.ascii	"sProcAllocListHead\000"
 
 	.byte	0x1
 	.byte	0x14
-	.4byte	0x2244
+	.4byte	0x2364
 	.byte	0x1
 	.byte	0x5
 	.byte	0x3
@@ -10703,43 +10985,43 @@ gUnknown_03001FDC:
 	.byte	0x4
 	.4byte	0x1cf
 	.byte	0xd
-	.4byte	0x2256
+	.4byte	0x2376
 	.4byte	0x1cf
 	.byte	0xe
 	.byte	0x7
 	.byte	0x0
-	.byte	0x20
+	.byte	0x22
 	.ascii	"gProcTreeRootArray\000"
 
 	.byte	0x1
 	.byte	0x15
-	.4byte	0x224a
+	.4byte	0x236a
 	.byte	0x1
 	.byte	0x5
 	.byte	0x3
 	.4byte	gProcTreeRootArray
-	.byte	0x20
+	.byte	0x22
 	.ascii	"gUnknown_03001FDC\000"
 
 	.byte	0x1
 	.byte	0x17
-	.4byte	0x1d13
+	.4byte	0x1e33
 	.byte	0x1
 	.byte	0x5
 	.byte	0x3
 	.4byte	gUnknown_03001FDC
 	.byte	0xd
-	.4byte	0x22a3
+	.4byte	0x23c3
 	.4byte	0xc4d
 	.byte	0xe
 	.byte	0x2a
 	.byte	0x0
-	.byte	0x21
+	.byte	0x23
 	.ascii	"gProcCmdTable\000"
 
 	.byte	0x1
 	.2byte	0x44c
-	.4byte	0x2297
+	.4byte	0x23b7
 	.byte	0x1
 	.byte	0x5
 	.byte	0x3
@@ -10747,10 +11029,10 @@ gUnknown_03001FDC:
 	.byte	0x0
 
 	.section	.debug_pubnames
-	.4byte	0x749
+	.4byte	0x75a
 	.2byte	0x2
 	.4byte	.debug_info
-	.4byte	0x22c1
+	.4byte	0x23e1
 	.4byte	0x4c
 	.ascii	"Proc_Init\000"
 
@@ -11006,22 +11288,25 @@ gUnknown_03001FDC:
 	.4byte	0x1a3a
 	.ascii	"sub_0801D344\000"
 
-	.4byte	0x21e1
+	.4byte	0x1a57
+	.ascii	"sub_0801D348\000"
+
+	.4byte	0x2301
 	.ascii	"sProcArray\000"
 
-	.4byte	0x2206
+	.4byte	0x2326
 	.ascii	"sProcAllocList\000"
 
-	.4byte	0x2223
+	.4byte	0x2343
 	.ascii	"sProcAllocListHead\000"
 
-	.4byte	0x2256
+	.4byte	0x2376
 	.ascii	"gProcTreeRootArray\000"
 
-	.4byte	0x2277
+	.4byte	0x2397
 	.ascii	"gUnknown_03001FDC\000"
 
-	.4byte	0x22a3
+	.4byte	0x23c3
 	.ascii	"gProcCmdTable\000"
 
 	.4byte	0x0

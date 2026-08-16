@@ -31,7 +31,7 @@ void SetTerrainAt(int x, int y, int terrainID) {
   gUnknown_08499590->terrainMap_1432[gUnknown_08499590->tileMap_417A[y] + x] =
       terrainID;
   if (terrainID == _Sea) {
-    sub_08008BB8(x, y);
+    EnsureValidTile(x, y);
   }
 }
 
