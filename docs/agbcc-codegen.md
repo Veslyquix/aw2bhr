@@ -38874,8 +38874,33 @@ three reductions, including one where the variable is redefined inside a
 jump-table `switch` and one where it is redefined inside a loop -- agbcc deletes
 it every time.
 
-So the original source must contain a USE of that value that costs zero net
-instructions, and I could not find a spelling that does. Ruled out: storing it
+Wave 72 found a spelling that does retain the value for zero net instructions:
+
+```c
+if (i)
+    q = expression;
+else
+    q = expression;
+use(q);
+```
+
+In a controlled reduction, `flow` retains the complete conditional producer of
+`i`; the later jump pass merges the identical definitions of `q` and removes the
+test of `i`, with no dead-code pass rerun afterward.  Final assembly contains
+one copy of `expression` and no emitted consumer of `i`.  Applied to
+`sub_08005F4C` with `expression = gpKeySt->unk02 | gpKeySt->held`, it restored
+the ROM's entire 24-byte block at `_08006326` without the artificial `strh` and
+raised the configured draft from 13.7% / +8 bytes to 25.1% / +28 bytes.
+
+This does not yet match the function: the use ends too early, so the candidate
+still has a 16-byte frame rather than 20, assigns the retained value to r6
+rather than r5, and keeps the downstream 0x28..0x2E allocation residual.  Moving
+the same mechanism into case 0x28 by selecting identical recomputations kept the
+producer but made the candidate materially larger; it did not recover the
+frame.  The remaining question is therefore the original lifetime placement,
+not whether agbcc can retain a provably dead producer without emitted use code.
+
+Previously ruled out: storing it
 to any `gUnknown_0200B0B0` member (emits a `strh`/`strb` the ROM does not have;
 `flow.c`'s dead-store elimination is per-block and the killing store would have
 to be in the SAME block, which it is not); reading it later in `case 0x41` or
