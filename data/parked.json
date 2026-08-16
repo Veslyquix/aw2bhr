@@ -534,10 +534,10 @@
   },
   "sub_0800CFDC": {
    "bytes": 6384,
-   "best": "14.29% positional identity, 6360 bytes against 6384 (-24). The complete candidate has exact EAF4 (6), EB5C (21), and bridge-predicate (159) counts; configured verification and the final reconciled sweep both return a real source mismatch, first byte +0x23.",
+   "best": "14.3% positional identity, 6368 bytes against 6384 (-16). The complete candidate has exact EAF4 (6), EB5C (21), total-call (36), and bridge-predicate (159) counts; configured verification and the Wave 69 reconciled sweep both return a real source mismatch, first byte +0x23.",
    "park_kind": "TYPE/CSE AND BASIC-BLOCK LAYOUT RESIDUAL, NOT MISSING SEMANTICS",
-   "remaining_diff": "Aggregate rowOffset[] indexing removed the old over-materialisation and fixed the first E8CC allocation. The active candidate now has 327 ldrh against target 325 (+2), 673 add/adds against 663 (+10), and 436 lsl against 432 (+4), while all call and bridge counts are exact. The first structural mismatch is the entry zero temporary in r3 versus ROM r0. Region accounting localises the rest to D0F4's high-register address add, two DC32 row-reload chains, DFB4's +2 add/+2 lsl, and cross-jump/layout coupling around D9D4/E336.",
-   "why_it_is_close": "Every semantic region is written, all cases and neighbours are traced, and Wave 68 reduced the complete draft by 172 net bytes from 6532 to 6360. Aggregate typing, DC32's flat exception, and E336's sparse-switch order now explain the dominant compiler mechanisms. work/sub_0800CFDC carries the active draft, the original checkpoint_6532 snapshot, exact region-alignment findings, and all bounded experiment artifacts.",
+   "remaining_diff": "Aggregate rowOffset[] indexing removed the old over-materialisation and fixed the first E8CC allocation. The active candidate now has 327 ldrh against target 325 (+2), 672 add/adds against 663 (+9), and 436 lsl against 432 (+4), while all call and bridge counts are exact. The first structural mismatch is the entry zero temporary in r3 versus ROM r0. D0F4 is 120/124 bytes: only the ROM's allocator-generated high-register add/post-load copy chain remains. A DC32 rewrite removes its two duplicated ldrh/add/lsl chains exactly, but its whole-function composition changes cross-jump layout and becomes 36 bytes short.",
+   "why_it_is_close": "Every semantic region is written, all cases and neighbours are traced, and Waves 68-69 reduced the complete draft by 180 net bytes from 6532 to 6368. Aggregate typing, DC32's flat exception, E336's sparse-switch order, and D0F4's u32 lifetime now explain the dominant compiler mechanisms. work/sub_0800CFDC carries the active draft, the original checkpoint_6532 and Wave 69 6360 snapshots, exact region findings, and bounded experiment artifacts.",
    "axes_ruled_out": [
     "The two casesi jump tables and their source order -- already exact.",
     "The -fforce-addr head route -- the honest gUnknown_08499590 spelling produces the ROM's three-level load and is exact through +0x34.",
@@ -553,6 +553,9 @@
     "E336 source case order 0x27, 0x67, then 0x24/0x25 restores the ROM's sparse decision tree and grows the 6336 checkpoint by exactly 24 bytes. Other measured case orders ranged from 6340 to 6364 and emitted different trees/pools.",
     "A volatile two-step E336 y+1 row reload emits exactly +1 ldrh/+2 adds with no lsl, call, or bridge changes, but combining it with the remaining sparse switches is still globally short because cross-jumping is non-additive.",
     "Sparse switches at five DAC6/DC32/DE3A range sites remove exactly six adds and five shifts with calls/bridges unchanged. The 6352 structurally faithful artifact scored lower positionally than the active 6360 checkpoint, so both are preserved.",
+    "D0F4 statement-local u32 staging improves the retained candidate from 6360 to 6368 and reproduces the ROM's ip/sb/r9 setup. Embedded compound assignment, byte-pointer, volatile, and fixed-register forms did not recover the remaining four-byte high-register add/post-load chain without regressing entry allocation.",
+    "The Wave 69 DC32 rows-2/rows-3 binding removes exactly two ldrh/add/lsl reload chains with EB5C and bridges unchanged. Combined with the faithful sparse-switch and D0F4 shapes it reaches exact ldrh count at 6348, but non-additive cross-jumping removes three extra shifts and twelve bytes.",
+    "DFB4 row-plus-one binding is byte-neutral, and configured/default/no-force/old-agbcc profiles are identical; O1 is substantially larger.",
     "The four `bl _0800E8BA` sites are agbcc far jumps to the epilogue, not calls or a second entry point."
    ],
    "settled_by_this_attempt": [
@@ -563,9 +566,9 @@
     "The map's row table is an aggregate member, DC32 is the one measured flat-index exception, and E336 is a sparse switch ordered 0x27, 0x67, then 0x24/0x25.",
     "All EAF4, EB5C, and bridge predicates are now present in the emitted candidate; the residual is compiler allocation, arithmetic spelling, and block layout rather than missing source semantics."
    ],
-   "open_question": "Find one source spelling that gives D0F4's high-register address add and the entry r0 zero lifetime, then resolve the two DC32 reload chains and DFB4 arithmetic without changing the now-exact call/bridge counts. Re-test the preserved 6352 sparse-switch artifact after each lifetime change because its lower positional score reflects shifted block layout, not weaker semantics.",
-   "budget_unit": "Budget the next pass by the four localized residual families (D0F4, DC32, DFB4, entry allocation), not by whole-function score or individual predicates. Preserve both the active 6360 checkpoint and the structurally faithful 6352 switch artifact before probing.",
-   "reason": "Wave 68 removed the broad row-binding blocker and reduced the complete candidate from +148 to -24 while making every call and bridge count exact. It remains parked because the last 24 bytes are coupled register-allocation and cross-jump/layout decisions distributed across four measured regions; no semantic transcription remains."
+   "open_question": "Find one lifetime spelling that gives D0F4's target-only high-register add/post-load copy chain and the entry r0 zero lifetime. Then compose the already-proven DC32 reload removal with a compensating block-layout lever so its three lost shifts remain emitted; do not revisit call or bridge transcription.",
+   "budget_unit": "Budget the next pass by the two coupled allocation/layout seams (entry plus D0F4, then DC32 cross-jump compensation), not by whole-function score or individual predicates. Preserve the active 6368 checkpoint, Wave 69's 6360 snapshot, and the structurally faithful 6352 switch artifact before probing.",
+   "reason": "Waves 68-69 removed the broad row-binding blocker and reduced the complete candidate from +148 to -16 while making every call and bridge count exact. It remains parked because the final bytes are coupled compiler allocation and cross-jump/layout decisions; no semantic transcription remains."
   },
   "sub_0800F8D4": {
    "bytes": 1136,

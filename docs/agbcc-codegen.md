@@ -8525,6 +8525,25 @@ three source arms.  The practical rule is therefore **aggregate first, then
 measure exceptions by complete cross-jump family**; a globally uniform access
 macro can be just as wrong as globally flat typing.
 
+Wave 69 sharpened the exception rule: **local instruction-count deltas do not
+compose linearly across cross-jumped families.**  A DC32-only row binding
+removed exactly two `ldrh`, two `add` and two `lsl` reload chains while keeping
+21 EB5C calls and 159 bridge predicates.  Yet combining that proven local
+change with the structurally faithful switch draft and a better D0F4 lifetime
+made the whole function lose three additional shifts and twelve bytes through
+different tail merging.  Keep locally exact artifacts, but take a configured
+whole-function verdict after every composition; opcode totals alone cannot
+certify layout in a multi-kilobyte function.
+
+The D0F4 experiment also gives a useful boundary for fixed-register probing.
+A statement-local `u32` reproduced the ROM's `ip`, `sb` and `r9` staging and
+improved the complete candidate from 6,360 to 6,368 bytes, but the remaining
+four-byte chain is allocator-generated (`add sb,r1` followed by a post-load
+copy).  Fixed-register, volatile, byte-pointer and embedded-assignment variants
+either folded back or changed the prologue.  Once those forms have been
+measured, treat the residual as allocator evidence rather than repeatedly
+restating the same address computation.
+
 The same pass exposed a related control-flow tell.  In long neighbour-pattern
 chains, `(u16)(v - K) <= 1` emits a folded subtract/shift range test, while the
 ROM's repeated direct `cmp #K` / `cmp #(K+1)` tree came from grouped cases in a
