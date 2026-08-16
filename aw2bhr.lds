@@ -1007,7 +1007,7 @@ SECTIONS
 		asm/nonmatching/design/sub_0801298C.o(.text);
 		asm/nonmatching/design/sub_080129B4.o(.text);
 		asm/nonmatching/design/sub_080129D4.o(.text);
-		asm/nonmatching/design/sub_080129E0.o(.text);
+		src/rng.o(.text);
 		asm/nonmatching/design/sub_080129F8.o(.text);
 		asm/nonmatching/design/sub_08012A24.o(.text);
 		asm/nonmatching/design/sub_08012A34.o(.text);
@@ -2403,8 +2403,7 @@ SECTIONS
 		asm/nonmatching/proc/sub_08034F54.o(.text);
 		asm/nonmatching/proc/sub_08034F60.o(.text);
 		asm/nonmatching/proc/sub_08034F6C.o(.text);
-		asm/nonmatching/proc/sub_08034F7C.o(.text);
-		asm/nonmatching/proc/sub_08034F8C.o(.text);
+		src/co_power.o(.text);
 		asm/nonmatching/proc/sub_08034FA4.o(.text);
 		asm/nonmatching/proc/sub_08034FB0.o(.text);
 		asm/nonmatching/proc/sub_08034FC0.o(.text);
