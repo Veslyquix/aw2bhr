@@ -24,8 +24,13 @@
  * is the same instructions, so this is a spelling choice, not evidence.
  *
  * `int` parameter: the prologue is a bare `adds r2, r0, #0` with no
- * PROMOTE_MODE narrowing at all. */
-bool8 sub_080261E8(int a)
+ * PROMOTE_MODE narrowing at all.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Checks whether Neotanks are
+ * unlocked. Checks game mode + state bits (input r0 = Army)". The old
+ * sub_080261E8 symbol is kept as a linker alias below so every other unit
+ * keeps resolving it unchanged. */
+bool8 IsNeotanksUnlocked(int a)
 {
     int v;
 
@@ -59,3 +64,5 @@ bool8 sub_080261E8(int a)
 
     return FALSE;
 }
+
+asm(".global sub_080261E8\n.thumb_set sub_080261E8, IsNeotanksUnlocked\n");

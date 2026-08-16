@@ -13,9 +13,14 @@ void sub_08035124(u8 a)
         sub_080350E4();
 }
 
-void sub_08035144(u8 a)
+/* Named per Xenesis's AW2 Subroutine List: "Changes current game weather.
+ * r0 = Weather ID". The old sub_08035144 symbol is kept as a linker alias
+ * below so every other unit keeps resolving it unchanged. */
+void ChangeGameWeather(u8 a)
 {
     sub_080350E4();
     gUnknown_03004490[0] = 0x32;
     sub_080152EC(gUnknown_0849BD38, 0)->unk20 = a;
 }
+
+asm(".global sub_08035144\n.thumb_set sub_08035144, ChangeGameWeather\n");

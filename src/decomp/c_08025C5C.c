@@ -66,8 +66,13 @@ void *sub_08025C98(s16 a1, s16 a2, s16 a3)
  * declared `struct Unk08499594 *` right here -- the `void *` was the weakest
  * type that fit when nothing read the result. sub_08045564, promoted this
  * wave, writes `->unk04_0 = 0x5a` through it, which is the discriminating use.
- * Byte-neutral; re-verified. */
-struct Unk08499594 *sub_08025CC8(s16 a1, s16 a2, s16 a3)
+ * Byte-neutral; re-verified.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Attempts to create a unit at the
+ * input grid co-ordinates (r0 = x, r1 = y, r2 = UID)". The old sub_08025CC8
+ * symbol is kept as a linker alias below so every other unit keeps
+ * resolving it unchanged. */
+struct Unk08499594 *CreateUnitAt(s16 a1, s16 a2, s16 a3)
 {
     struct Unk08499594 *u = sub_08025C5C(a1, a2, a3);
 
@@ -78,3 +83,5 @@ struct Unk08499594 *sub_08025CC8(s16 a1, s16 a2, s16 a3)
 
     return u;
 }
+
+asm(".global sub_08025CC8\n.thumb_set sub_08025CC8, CreateUnitAt\n");

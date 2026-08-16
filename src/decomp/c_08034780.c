@@ -7,7 +7,11 @@
  * sub_08034780 @ 0x08034780
  */
 
-void sub_08034780(void)
+/* Named per Xenesis's AW2 Subroutine List: "Sets the default rules (Used
+ * for War Room, used to clear after a campaign map)". The old sub_08034780
+ * symbol is kept as a linker alias below so every other unit keeps
+ * resolving it unchanged. */
+void SetDefaultRules(void)
 {
     gUnknown_030040F0 = 0;
     gUnknown_030044A0 = 0;
@@ -48,3 +52,5 @@ void sub_08034780(void)
     gUnknown_03003FC0.unk09 = gUnknown_0200C420.unk0e;
     gUnknown_03003FC0.unk0c = (gUnknown_0200C420.unk14 == 0);
 }
+
+asm(".global sub_08034780\n.thumb_set sub_08034780, SetDefaultRules\n");

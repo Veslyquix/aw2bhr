@@ -19,7 +19,12 @@ void sub_0803504C(struct Unk03001470 *p)
     sub_08035020(gUnknown_03003FC0.unk2c);
 }
 
-void sub_08035064(struct Unk03001470 *p)
+/* Named per Xenesis's AW2 Subroutine List: "Code that retrieves the Sound
+ * Effects for weather change IDs". The old sub_08035064 symbol is kept as a
+ * linker alias below so every other unit keeps resolving it unchanged. */
+void PlayWeatherChangeSound(struct Unk03001470 *p)
 {
     sub_0803B4DC(gUnknown_0849BD20[p->unk20].unk04);
 }
+
+asm(".global sub_08035064\n.thumb_set sub_08035064, PlayWeatherChangeSound\n");

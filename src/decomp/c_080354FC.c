@@ -24,8 +24,13 @@
  * would be byte-identical only if `g` had a parameter, and none of the 19
  * second callees does -- see the F005 block in unknown-functions.h. */
 
-void sub_080354FC(void)
+/* Named per Xenesis's AW2 Subroutine List: "Loads weather data (OBJ Tile,
+ * XY positioning, etc)". The old sub_080354FC symbol is kept as a linker
+ * alias below so every other unit keeps resolving it unchanged. */
+void LoadWeatherData(void)
 {
     sub_08035224();
     sub_08035354();
 }
+
+asm(".global sub_080354FC\n.thumb_set sub_080354FC, LoadWeatherData\n");

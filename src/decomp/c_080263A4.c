@@ -18,8 +18,12 @@
  * The first compare is `bhi` and the second `bge` -- unsigned then signed --
  * from ONE u16 global against a u16 member and then against `t * 4`. Nothing is
  * declared unsigned here: agbcc knows a zero-extended value is non-negative and
- * takes the unsigned condition, and the multiply destroys that knowledge. */
-u8 sub_080263A4(u8 a)
+ * takes the unsigned condition, and the multiply destroys that knowledge.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Speed Scoring Subroutine". The
+ * old sub_080263A4 symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
+u8 GetSpeedScore(u8 a)
 {
     u16 t;
 
@@ -36,3 +40,5 @@ u8 sub_080263A4(u8 a)
     }
     return 0;
 }
+
+asm(".global sub_080263A4\n.thumb_set sub_080263A4, GetSpeedScore\n");

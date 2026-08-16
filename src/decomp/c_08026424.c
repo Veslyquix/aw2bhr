@@ -18,8 +18,12 @@
  *
  * `sum` is UNSIGNED and the Div result is assigned back INTO it. Both are
  * load-bearing: a fresh local puts the clamp in r0 and costs the
- * `adds r5, r0, #0`, and a signed `sum` turns the ROM's `bls` into `ble`. */
-u8 sub_08026424(u8 a)
+ * `adds r5, r0, #0`, and a signed `sum` turns the ROM's `bls` into `ble`.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Power Scoring Subroutine". The
+ * old sub_08026424 symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
+u8 GetPowerScore(u8 a)
 {
     u32 sum;
     u16 i;
@@ -43,3 +47,5 @@ u8 sub_08026424(u8 a)
         sum = 100;
     return sum;
 }
+
+asm(".global sub_08026424\n.thumb_set sub_08026424, GetPowerScore\n");

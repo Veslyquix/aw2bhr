@@ -37,13 +37,19 @@
  * constant, which trymatch reports as resolving to the same address.
  * gUnknown_03003FC0.unk02 is reloaded every iteration rather than hoisted
  * because the loop stores into unk38 of the same struct and agbcc cannot
- * prove the two do not alias. */
+ * prove the two do not alias.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Clears RAM after a campaign map
+ * completion" -- calls SetDefaultRules (the actual reset) and then applies
+ * mode-specific overrides on top, rather than clearing memory directly. The
+ * old sub_080346FC symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
 
-void sub_080346FC(void)
+void ResetRulesAfterCampaignMap(void)
 {
     int i;
 
-    sub_08034780();
+    SetDefaultRules();
 
     switch (gUnknown_03003FC0.unk01)
     {
@@ -68,3 +74,5 @@ void sub_080346FC(void)
         break;
     }
 }
+
+asm(".global sub_080346FC\n.thumb_set sub_080346FC, ResetRulesAfterCampaignMap\n");

@@ -59,7 +59,12 @@ void sub_08029C38(struct Unk29C38Proc *proc)
     sub_0803B4DC(0x6c);
 }
 
-void sub_08029CB8(struct Unk802C57C *a1, u8 a2, int a3, u8 a4)
+/* Named per Xenesis's AW2 Subroutine List: "Animates Supply? (0802A182)" --
+ * sets up the proc sub_08029C38 ticks each frame (funds delta, screen
+ * position, whether to actually deduct funds). The old sub_08029CB8 symbol
+ * is kept as a linker alias below so every other unit keeps resolving it
+ * unchanged. */
+void StartSupplyAnimation(struct Unk802C57C *a1, u8 a2, int a3, u8 a4)
 {
     struct Unk29CB8Proc *proc;
 
@@ -74,3 +79,5 @@ void sub_08029CB8(struct Unk802C57C *a1, u8 a2, int a3, u8 a4)
     else
         proc->unk30 = a4;
 }
+
+asm(".global sub_08029CB8\n.thumb_set sub_08029CB8, StartSupplyAnimation\n");

@@ -59,7 +59,13 @@ void sub_08027608(void)
     }
 }
 
-void sub_08027658(void)
+/* Named per Xenesis's AW2 Subroutine List: "Draws the CO/CO Power/Funds
+ * Combobox in the Main Game Window". Chooses which screen side the box
+ * slides to (via sub_080275B4/sub_08027608, whichever eases the box's x
+ * position away from the cursor) before the actual draw call. The old
+ * sub_08027658 symbol is kept as a linker alias below so every other unit
+ * keeps resolving it unchanged. */
+void DrawInfoBoxCombobox(void)
 {
     u16 x;
     u16 y;
@@ -84,3 +90,5 @@ void sub_08027658(void)
 
     sub_0804360C(gUnknown_03003130.unk04);
 }
+
+asm(".global sub_08027658\n.thumb_set sub_08027658, DrawInfoBoxCombobox\n");

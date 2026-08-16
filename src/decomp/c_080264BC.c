@@ -20,8 +20,12 @@
  * subtracts 100 from the quotient and only then negates against n.
  *
  * The result is assigned back into `x`, not to a fresh local. That is what puts
- * it in r4 -- x's own register, dead by then -- rather than r0. */
-u8 sub_080264BC(u8 a)
+ * it in r4 -- x's own register, dead by then -- rather than r0.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Tech Scoring Subroutine". The
+ * old sub_080264BC symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
+u8 GetTechScore(u8 a)
 {
     int n;
     int x;
@@ -46,3 +50,5 @@ u8 sub_080264BC(u8 a)
     }
     return 0;
 }
+
+asm(".global sub_080264BC\n.thumb_set sub_080264BC, GetTechScore\n");

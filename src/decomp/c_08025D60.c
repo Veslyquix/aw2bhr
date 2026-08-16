@@ -47,7 +47,10 @@ void sub_08025D60(int a1)
     p->unk00 = 0;
 }
 
-void *sub_08025E08(int a1, int a2, int a3)
+/* Named per Xenesis's AW2 Subroutine List: "Costs for unit bought". The old
+ * sub_08025E08 symbol is kept as a linker alias below so every other unit
+ * keeps resolving it unchanged. */
+void *BuyUnit(int a1, int a2, int a3)
 {
     int cost;
     void *r;
@@ -66,3 +69,5 @@ void *sub_08025E08(int a1, int a2, int a3)
 
     return r;
 }
+
+asm(".global sub_08025E08\n.thumb_set sub_08025E08, BuyUnit\n");
