@@ -74,5 +74,9 @@ int GetUnitDefenceWithCoBonus(int player, int unitType);
 int GetUnitMovementWithCoBonus(int player, int unitType);
 int GetUnitFiringRangeWithCoBonus(int player, int unitType);
 int GetUnitVisionWithCoBonus(int player, int unitType);
+int IsUnitDirectForCoPowerAnim(struct Unk030040D8 *p);
+int HasMaxRangeGreaterThanOne(struct Unk030040D8 *p);
+void HealUnitHyperRepair(void *unit);
+void HealUnitHyperUpgrade(void *unit);
 
 #endif // GUARD_XENESIS_NAMES_H

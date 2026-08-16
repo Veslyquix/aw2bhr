@@ -31,10 +31,15 @@
  * agbcc's argument setup grouped by operand class -- every `mov #imm8`
  * together -- not source order.
  */
-void sub_080444EC(void * a)
+/* Named per Xenesis's AW2 Subroutine List: "COP Animation - Heals unit 2 HP
+ * (Hyper Repair)". The old sub_080444EC symbol is kept as a linker alias
+ * below so every other unit keeps resolving it unchanged. */
+void HealUnitHyperRepair(void * a)
 {
     sub_08029AF8(a, 2, 0);
 }
+
+asm(".global sub_080444EC\n.thumb_set sub_080444EC, HealUnitHyperRepair\n");
 
 /* F079 -- a three-argument forwarder that passes its own argument through
  * untouched and supplies the other two as literals.
@@ -45,7 +50,12 @@ void sub_080444EC(void * a)
  * agbcc's argument setup grouped by operand class -- every `mov #imm8`
  * together -- not source order.
  */
-void sub_080444FC(void * a)
+/* Named per Xenesis's AW2 Subroutine List: "COP Animation - Heals unit 5 HP
+ * (Hyper Upgrade)". The old sub_080444FC symbol is kept as a linker alias
+ * below so every other unit keeps resolving it unchanged. */
+void HealUnitHyperUpgrade(void * a)
 {
     sub_08029AF8(a, 5, 0);
 }
+
+asm(".global sub_080444FC\n.thumb_set sub_080444FC, HealUnitHyperUpgrade\n");
