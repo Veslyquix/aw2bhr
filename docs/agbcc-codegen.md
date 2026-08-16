@@ -8513,6 +8513,29 @@ supplied the last two allocator copies for a full match. Treat a register-wide
 residual around constant-offset map fields as a type-layout question before
 sweeping lifetimes.
 
+Wave 68 tested that rule at 6,384-byte scale on `sub_0800CFDC`.  Changing only
+the repeated row lookup from flat byte arithmetic to an aggregate
+`rowOffset[index]` member moved a complete candidate from 6,532 bytes to 6,328,
+removed 30 redundant row loads, fixed the first `sub_0800E8CC` result from r9
+to r8, and restored both missing bridge predicates.  This is direct evidence
+that aggregate typing can select CSE granularity across an entire large
+function, not merely reorder one address expression.  One family, DC32, then
+had to retain the flat spelling so cross-jumping kept two emitted calls from
+three source arms.  The practical rule is therefore **aggregate first, then
+measure exceptions by complete cross-jump family**; a globally uniform access
+macro can be just as wrong as globally flat typing.
+
+The same pass exposed a related control-flow tell.  In long neighbour-pattern
+chains, `(u16)(v - K) <= 1` emits a folded subtract/shift range test, while the
+ROM's repeated direct `cmp #K` / `cmp #(K+1)` tree came from grouped cases in a
+sparse `switch`.  Source case order remained visible: E336 required `0x27`,
+then `0x67`, then grouped `0x24/0x25`, and that one ordering restored its
+missing 24-byte decision tree.  Five analogous switch conversions removed six
+adds and five shifts without changing any call or bridge count.  When the
+candidate has the right predicate values but the ROM compares each literal
+directly, test a sparse switch before treating the arithmetic as an allocation
+problem.
+
 **A subscript expands its base FIRST and an explicit byte sum expands it LAST,
 and on a register-tight function that is a whole `mov ip, rN`.** The 3-D
 subscript `g[B][A-1][b&1]` gets the index arithmetic exactly right — each term

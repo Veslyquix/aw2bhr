@@ -534,10 +534,10 @@
   },
   "sub_0800CFDC": {
    "bytes": 6384,
-   "best": "13.78% positional identity, 6532 bytes against 6384 (+148). The full 731-line candidate transcribes both switches and every traced pattern region; the entry through +0x34 is exact and the first difference is +0x36.",
-   "park_kind": "VOLUME AND PER-REGION BINDING, NOT MISSING SEMANTICS",
-   "remaining_diff": "The candidate over-materialises per-cell row bindings: 353 ldrh against target 325 (+28), 721 add against 663 (+58), and 464 lsl against 432 (+32). Fully inline CSE collapses too far (5208 bytes, -1176), so the remaining axis is the middle granularity: repeated ro[y+K] bindings per complete cross-jump family. It also emits sub_0800EAF4 5/6 times, sub_0800EB5C 20/21 times, and 157/159 bridge sequences.",
-   "why_it_is_close": "Every semantic region is now written and compiles. The strongest complete candidate is only 148 bytes (2.3%) over the target, its entry is exact, all four callees are typed, and work/sub_0800CFDC carries the rebuilt 1,190-line _symtrace plus NOTES.md and checkpoint_6532.{c,bin,s}. The task is no longer transcription; it is selecting binding granularity across about twenty repeated regions.",
+   "best": "14.29% positional identity, 6360 bytes against 6384 (-24). The complete candidate has exact EAF4 (6), EB5C (21), and bridge-predicate (159) counts; configured verification and the final reconciled sweep both return a real source mismatch, first byte +0x23.",
+   "park_kind": "TYPE/CSE AND BASIC-BLOCK LAYOUT RESIDUAL, NOT MISSING SEMANTICS",
+   "remaining_diff": "Aggregate rowOffset[] indexing removed the old over-materialisation and fixed the first E8CC allocation. The active candidate now has 327 ldrh against target 325 (+2), 673 add/adds against 663 (+10), and 436 lsl against 432 (+4), while all call and bridge counts are exact. The first structural mismatch is the entry zero temporary in r3 versus ROM r0. Region accounting localises the rest to D0F4's high-register address add, two DC32 row-reload chains, DFB4's +2 add/+2 lsl, and cross-jump/layout coupling around D9D4/E336.",
+   "why_it_is_close": "Every semantic region is written, all cases and neighbours are traced, and Wave 68 reduced the complete draft by 172 net bytes from 6532 to 6360. Aggregate typing, DC32's flat exception, and E336's sparse-switch order now explain the dominant compiler mechanisms. work/sub_0800CFDC carries the active draft, the original checkpoint_6532 snapshot, exact region-alignment findings, and all bounded experiment artifacts.",
    "axes_ruled_out": [
     "The two casesi jump tables and their source order -- already exact.",
     "The -fforce-addr head route -- the honest gUnknown_08499590 spelling produces the ROM's three-level load and is exact through +0x34.",
@@ -547,17 +547,25 @@
     "Statement-local cell offset: 6060 bytes (-324); closer but still collapses too many row loads.",
     "Row-index plus row-offset locals: 6532 bytes (+148), the strongest complete checkpoint.",
     "A bounded _0800D0F4 CELL_ROW experiment: 6544 bytes (+160), 13.50%. It restored the local EAF4 call (6/6) and improved add count by one, but applying the shape to one region alone broke a cross-jump family and regressed twelve bytes.",
+    "Aggregate rowOffset[] member indexing is load-bearing, not a cosmetic type: the pure aggregate probe compiled to 6328 (-56), fixed the initial r8 allocation, and restored 159/159 bridges, but over-unmerged EB5C to 22/21.",
+    "DC32-only flat row arithmetic is the exact cross-jump exception. It reduces the aggregate candidate to EB5C 21/21 while retaining all 159 bridges; broad flat fallbacks over-merge to EB5C 20 and lose a bridge.",
+    "Five entry/first-switch declaration, scope, zero-temporary, assignment-placement, and branch-inversion probes could not produce movs r0; mov sl,r0. Lexical forms were byte-neutral and CFG forms regressed allocation.",
+    "E336 source case order 0x27, 0x67, then 0x24/0x25 restores the ROM's sparse decision tree and grows the 6336 checkpoint by exactly 24 bytes. Other measured case orders ranged from 6340 to 6364 and emitted different trees/pools.",
+    "A volatile two-step E336 y+1 row reload emits exactly +1 ldrh/+2 adds with no lsl, call, or bridge changes, but combining it with the remaining sparse switches is still globally short because cross-jumping is non-additive.",
+    "Sparse switches at five DAC6/DC32/DE3A range sites remove exactly six adds and five shifts with calls/bridges unchanged. The 6352 structurally faithful artifact scored lower positionally than the active 6360 checkpoint, so both are preserved.",
     "The four `bl _0800E8BA` sites are agbcc far jumps to the epilogue, not calls or a second entry point."
    ],
    "settled_by_this_attempt": [
     "The complete top-level and all roughly twenty pattern regions are transcribed; there are no #if 0 blocks or placeholders.",
     "The parameter pair is (int x, int y), and the four callees are int sub_0800E8CC(int,int), int sub_0800E9F4(int,int), void sub_0800EAF4(int,int), and void sub_0800EB5C(int,int).",
     "The ten expression shapes and all neighbour constants come from the rebuilt predecessor-joined _symtrace rather than guesswork.",
-    "Binding granularity must be changed for a complete cross-jump family at a time; a single-region experiment is not a valid global score."
+    "Binding granularity must be changed for a complete cross-jump family at a time; a single-region experiment is not a valid global score.",
+    "The map's row table is an aggregate member, DC32 is the one measured flat-index exception, and E336 is a sparse switch ordered 0x27, 0x67, then 0x24/0x25.",
+    "All EAF4, EB5C, and bridge predicates are now present in the emitted candidate; the residual is compiler allocation, arithmetic spelling, and block layout rather than missing source semantics."
    ],
-   "open_question": "Which complete cross-jump families bind ro[y+K] once per region and which let CSE share it across cell expressions. Start with the _0800D0F4 family preserved as experiment_D0F4.{c,bin,s,o}, expand that shape through every member of the family, then take one configured verdict.",
-   "budget_unit": "Budget the next pass in complete cross-jump families converted, not individual cells or try_match attempts. Preserve checkpoint_6532 before each family experiment and compile only after the whole family is internally consistent.",
-   "reason": "Wave 67 removed the original volume blocker by producing a complete candidate. It remains parked because the final 148 bytes are distributed across repeated per-region binding choices; the semantic derivation is finished, but isolated edits perturb global cross-jumping and give misleading scores."
+   "open_question": "Find one source spelling that gives D0F4's high-register address add and the entry r0 zero lifetime, then resolve the two DC32 reload chains and DFB4 arithmetic without changing the now-exact call/bridge counts. Re-test the preserved 6352 sparse-switch artifact after each lifetime change because its lower positional score reflects shifted block layout, not weaker semantics.",
+   "budget_unit": "Budget the next pass by the four localized residual families (D0F4, DC32, DFB4, entry allocation), not by whole-function score or individual predicates. Preserve both the active 6360 checkpoint and the structurally faithful 6352 switch artifact before probing.",
+   "reason": "Wave 68 removed the broad row-binding blocker and reduced the complete candidate from +148 to -24 while making every call and bridge count exact. It remains parked because the last 24 bytes are coupled register-allocation and cross-jump/layout decisions distributed across four measured regions; no semantic transcription remains."
   },
   "sub_0800F8D4": {
    "bytes": 1136,
