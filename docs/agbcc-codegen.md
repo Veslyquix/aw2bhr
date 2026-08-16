@@ -45670,6 +45670,143 @@ Rules of thumb:
   CR-LF pair and afterwards assert
   `raw.count('\n') - raw.count('\r\n') == 0`.
 
+## A PROVABLY DEAD EARLY ASSIGNMENT CAN ORDER GCSE/PRE HOISTS (wave 74) — `sub_08012C58` MATCHED
+
+`sub_08012C58` had been size-exact with one otherwise inexplicable preheader
+ordering residual.  The ROM and candidate hoisted the same seven values into
+the same seven registers; only `s->unk38` appeared third in the ROM and last in
+the candidate.  All 24 declaration orders of the four later pointer locals
+were byte-identical, because declaration order was not the order GCSE used.
+
+The match came from an early assignment to the already-declared `p3`, between
+two calls, before `p3` is overwritten with the value that is actually used:
+
+    sub_08012C30(..., s->unk20);
+    p3 = (u16 *)(s->unk30 + (s->unk38 << 5));
+    sub_08012C1C(..., s->unk24);
+    ...
+    p3 = (u16 *)(s->unk30 + (s->unk38 << 5));
+
+The first value is dead in C semantics.  Its tree still creates the expression
+early enough to change PRE discovery order, moving the `unk38` load to the
+ROM's preheader position without changing the settled post-loop pointer order.
+
+**Transferable rule:** when a residual is only the order of values inserted by
+GCSE/PRE, declaration order can be completely inert.  A semantically dead
+FIRST REFERENCE to the exact expression can be the lever.  This is safe only
+when the local is unconditionally overwritten before every read; document that
+proof and re-run the byte oracle.  A random dead assignment is not padding.
+
+## THE COMMA OPERATOR CAN CREATE A DEAD PSEUDO AT ONE ARGUMENT WITHOUT MOVING THE ARGUMENT (wave 74) — `sub_08033C68` MATCHED
+
+`sub_08033C68` differed only in a three-cycle rotation of stack-slot owners.
+The needed `i + 0xc` pseudo had to be created after the forced `gSinLut`
+address pseudo but before two LICM-created member-address pseudos.  A named
+`oam = i + 0xc` local was too early: `expand_decl` created it at block entry,
+moved every slot and disturbed register pressure.
+
+This matched:
+
+    u16 *const *p;
+    SetObjAffine((p = 0, i + 0xc), ...);
+
+`p` is overwritten before any read in both later arms.  The comma's left
+operand therefore changes pseudo creation at precisely the first call
+argument, while its value remains the right operand `i + 0xc`.  Every opcode
+and register already matched; this changed only the three stack immediates.
+
+This is narrower than “try a dead assignment.”  The useful properties are:
+
+- the assigned local already exists for a real later purpose, so no new
+  block-entry declaration pseudo is introduced;
+- the comma pins the reference inside the argument's expansion point;
+- the assigned value is dead by a simple overwrite-before-read proof.
+
+## REUSING A LATER LOOP COUNTER CAN SELECT THE EARLY COUNTER REGISTER (wave 74) — `sub_0801B2FC` MATCHED
+
+The first clear loop in `sub_0801B2FC` used `i` in the candidate and received
+r4; the ROM used r2.  A fresh single-use counter was worse, rotating the zero
+and counter into r2/r1.  The winning spelling reused the function's existing
+`j`, which was already needed by a later copy loop:
+
+    for (j = 0; j < 0x10; j++)
+        gUnknown_0200CC88[0x10 + j] = 0;
+
+The later `i` loops were left unchanged.  Reusing a pseudo whose later
+lifetime already exists changed the early allocation without increasing the
+function's pseudo set; a newly declared counter could not do that.
+
+**Transferable rule:** for a one-loop counter-register residual, test reuse of
+an existing, non-overlapping counter before introducing another local.  The
+lever is pseudo identity across disjoint lifetimes, not source neatness or
+declaration order.
+
+## SPLIT BOTH PACKED-WORD HALVES BEFORE NARROWING ONE OF THEM (wave 74) — `sub_080587FC` MATCHED
+
+The ROM scheduled the zero-extension of `x` between the two instructions that
+form `y << 16`; ordinary `(u16)x | (y << 16)` and even
+`((u32)x << 16) >> 16` put the `lsrs` immediately after x's `lsls`.  Reversing
+the OR moved other already-correct operands.
+
+The exact scheduling came from giving both halves SImode values first:
+
+    xp = (u32)x << 16;
+    yp = (u32)y << 16;
+    *(int *)&pos = (xp >> 16) | yp;
+
+Now `xp >> 16` is the narrowing operation and `yp` is already the packed high
+half.  Scheduling can interleave the `xp` right shift with `yp` construction
+without reversing the OR or store operands.
+
+**Transferable rule:** when a packed-word residual has the right operations
+but one narrowing instruction is scheduled too early, split BOTH halves into
+same-width temporaries.  Splitting only the narrowed half need not alter the
+dependency graph seen by the scheduler.
+
+## A BYTE-SIZED BINDING CAN PRESERVE AN UNSIGNED CALL SHIFT WITHOUT CHANGING THE AUTHORITATIVE PROTOTYPE (wave 74) — `sub_0803A190` MATCHED
+
+`sub_0803A190` was one byte from exact: agbcc emitted `asrs` where the ROM used
+`lsrs`.  Changing a callee prototype or broadly making the arithmetic unsigned
+destroyed an allocation recovered by earlier permuter work.  The match instead
+bound the table byte at its source and cast only the two call arguments:
+
+    u8 new_var2 = table[index].unk1a;
+    n = new_var2;
+    ...
+    sub_08014B0C((u8)((v + 0x60) / 8), ...);
+
+The authoritative callee signature remains unchanged.  The byte binding pins
+the promotion mode of the table load; the call-site casts constrain only the
+two division results whose final shift must be logical.
+
+**Transferable rule:** for a final `asrs`/`lsrs` mismatch in a function whose
+allocation is otherwise exact, prefer a narrow binding at the true byte source
+plus casts at the affected call edges.  Do not widen the change to a shared
+prototype or all arithmetic of the local.
+
+## IDENTICAL BRANCH ARMS MAY NEED DISTINCT BLOCK-SCOPED VALUE PSEUDOS (wave 74) — `sub_0802DA18` MATCHED
+
+The two key-repeat arms in `sub_0802DA18` both read `ent->unk20`, compare it,
+update it and call the same helpers.  One function-scope temporary encouraged
+the compiler to share a pseudo across the arms and produced the wrong late
+allocation.  Declaring a separate `int v` inside each arm matched:
+
+    if (key_up) {
+        int v;
+        v = (u16)ent->unk20;
+        ...
+    }
+    if (key_down) {
+        int v;
+        v = (u16)ent->unk20;
+        ...
+    }
+
+The names are the same but the block scopes create distinct non-overlapping
+pseudos.  **Transferable rule:** source-level symmetry does not imply one local
+should span symmetric arms.  If the ROM allocates the arms independently,
+duplicate the block-scoped binding rather than sharing a function-scope value.
+
 **And this chapter's own first draft got it wrong in the same family**, which is
 worth one line because it is the failure mode generalised: the script that wrote
 it detected the target file's dominant line ending, but `docs/agbcc-codegen.md`

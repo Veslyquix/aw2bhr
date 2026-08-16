@@ -5192,9 +5192,22 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 5084,
+   "best": "Wave 74 semantic draft: 5116/5084 (+32), 29.2% identical, 3598 differing bytes, first difference +0xf8.",
+   "remaining_diff": "The two-level state-machine body is transcribed, but case-4 allocation begins with ROM ip/r9 versus candidate r9/r7 and the final switch still differs in address placement; the candidate also emits a spurious force-address word for gUnknown_0200B0D0.",
+   "why_it_is_close": "Wave 74 recovered the ROM's 20-byte frame, sl entry allocation, caller-save spill around sub_0800C7E8, and an exact case-2 element loop.",
+   "axes_ruled_out": [
+    "Re-transcribing the six switches: their structure and the 0x46..0x5b / 0x28..0x30 ranges are settled.",
+    "The fixed-d probe that scored 29.3% was semantically invalid and was reverted; alternate compiler profiles were worse."
+   ],
+   "settled_by_this_attempt": [
+    "Block-scoped final-switch pointer temporaries are the frame lever; preserve the dead conditional assignment and identical-q spelling."
+   ],
+   "reason": "Wave 74 W74-A. Resume at the case-4 ip/r9 allocation and final-switch address lifetimes, not semantics."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -11678,7 +11691,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -17496,9 +17509,23 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 720,
+   "best": "Wave 74 strongest semantic draft: exact 720/720, 99.3%, 5 differing bytes, first difference +0x48.",
+   "remaining_diff": "The early gUnknown_030033EC copy uses r5 instead of ROM scratch r0, and the RHS comparison address/load uses r0 instead of r1; the 0x0808E550 force-address relocation is equivalent.",
+   "why_it_is_close": "Wave 74 removed the prior +4 reload artifacts and recovered exact size while preserving the authoritative sub_08045700(u8 *) prototype.",
+   "axes_ruled_out": [
+    "Historical best.json was stale and best.c initially violated the authoritative prototype.",
+    "Two clean --current runs found no usable result; their nominal score-35 candidate independently regressed to seven differing bytes.",
+    "Split-copy, first-reference, comma, map-base lifetime and reg-sourced-zero probes are documented in NOTES."
+   ],
+   "settled_by_this_attempt": [
+    "Use the active 5-byte semantic draft, not the stale historical best artifact."
+   ],
+   "reason": "Wave 74 W74-H. Resume at the two scratch-register picks only."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -20601,13 +20628,7 @@
   "src": "code.s",
   "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 100,
-   "status": "MATCHED wave 73 (W73-B). Needs rodata placement: \"rodata\": [\"0x0808E5A0\"].",
-   "resolved_by": "decomp-permuter, ONE 300 s run started from the parked draft (--current). The entry's 'settled_by_this_attempt' concluded the two swaps were a type-model question and not a source-spelling one; that was wrong. Note the permuter had never been run on this function across two prior waves.",
-   "measurements": "Wave 73 (W73-B) toolchain sweep, all seven compiler profiles run against this exact draft: configured/default 87.0%, no-force 20.0% (-4 bytes), o1 20.0% (-4 bytes), o1-no-force 20.0% (-4 bytes), old-agbcc 84.0%, old-agbcc-no-force 20.0% (-4 bytes). No profile beats the configured one.",
-   "wave": "32 (W32-A) parked; 73 (W73-B) matched"
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -23203,7 +23224,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -36737,32 +36758,7 @@
   "src": "code-0801D390.s",
   "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 248,
-   "best": "MATCHED in wave 73 (W73-H), 248/248 bytes, exit 0. THE LEVER: write the SUBTRACTION in the shifted domain -- `t = (int)(((u32)a2 << 16) - 0x10000); a2 = (u32)t >> 16; } while (t != 0);` -- rather than varying the exit test. Nineteen prior spellings all kept the subtract narrow and asked combine to distribute the << 16 over the - 1, which it never does; written already-shifted nothing needs distributing and final output materialises -65536 as `ldr rN,=0xFFFF0000` in the loop. The a2/v register swap was downstream and needed no work. Previously: 64.5% identical, candidate 240 bytes (-8), first difference at +0xe. Re-measured wave 73 (W73-C), which raised it from wave 59's 62.1% by fixing the counter register assignment. The draft inherited before wave 59 was 232 bytes (-16) at 4.8%.",
-   "remaining_diff": "THE LOOP COUNTER'S DECREMENT DOMAIN, and nothing else. The ROM decrements the u16 counter in the SHIFTED domain -- `lsls r0,r7,#0x10 ; ldr r1,=0xFFFF0000 ; adds r0,r0,r1 ; lsrs r7,r0,#0x10 ; cmp r0,#0 ; bne <top>` -- because its exit test reads the PRE-NARROWED temp, which lets combine distribute the << 16 over the - 1 and costs a third pool word. The candidate's exit test reads the stored counter, so combine leaves the subs alone: `subs r0,r6,#1 ; lsls r0,r0,#0x10 ; lsrs r6,r0,#0x10 ; cmp r6,#0 ; bne <top>`. That is exactly the 8 bytes: 2 for the extra instruction, 4 for the pool word, 2 for the .short 0 alignment the ROM's odd pool word count needs. The a2/v register swap (ROM a2=r7 v=r6, draft a2=r6 v=r7) is the only other difference and is almost certainly downstream of it.",
-   "why_it_is_close": "Everything except the decrement is byte-exact: the top guard, the bitfield reads and writes, both Div calls, the a3 branch, the 60-byte table walk, the tail ternary, the three saved hi registers and the epilogue.",
-   "axes_ruled_out": [
-    "Wave 73 (W73-C): THE EXIT TEST'S OPERAND IS NOT THE LEVER, AND THIS REFUTES THE STANDING DIAGNOSIS. Waves 59/60 held that the ROM distributes the `<< 16` over the `- 1` BECAUSE its exit test reads the pre-narrowed temp. The test has now been moved onto the pre-narrowed temp -- `t = (a2 - 1) << 16; a2 = (u32)t >> 16; } while (t != 0);` emits `sub r0,r7,#1 ; lsl r0,r0,#0x10 ; lsr r7,r0,#0x10 ; cmp r0,#0 ; bne`, which tests r0, the shifted temp, exactly as the ROM does -- and combine STILL emits `sub` before `lsl` rather than `lsl` before an add of 0xFFFF0000. The brief's rule (a non-coalesced `lsr rTMP,rV,#k ; mov rV,rTMP` means the exit test reads the temp) is a correct READ-OUT of the ROM but does not identify what to write.",
-    "Wave 73 (W73-C): the plain int-temp form `t = a2 - 1; a2 = t; } while (t != 0);` -- same narrow-domain tail, still -8. This is the current draft, kept because of what it DOES fix (see settled_by_this_attempt).",
-    "WAVE 60'S 'USEFUL NEGATIVE' IS WRONG AND SHOULD NOT STOP ANYONE (corrected wave 73, W73-C). It argued combine cannot have produced the ROM's form because 'combine has no way to emit a pool load', and that the `ldr` sitting inside the loop rather than hoisted proves the constant was created after loop.c and so is unreachable from C. Both halves are mistaken: `ldr rN,=0xFFFF0000` is not an RTL memory load at all, it is how FINAL OUTPUT materialises any SImode immediate that is not an 8-bit THUMB constant, so combine producing `(plus (ashift x 16) (const_int -65536))` yields exactly those two instructions -- and a constant created after loop.c is precisely what LICM cannot have hoisted. The residual is an ordinary combine cost decision and the axis is OPEN, not closed.",
-    "Wave 59 (W59-B): eight spellings of the counter, ALL of which emit the identical narrow-domain `subs ; lsls ; lsrs ; cmp` tail -- `} while (--a2 != 0);`, `} while (--a2);`, `a2--;` as a body statement with `} while (a2 != 0);`, `while (a2 != 0) { ... a2 = a2 - 1; }`, `for (; a2 != 0; a2--)`, and a `u16 n = a2;` copy looped on instead of the parameter (identical tail AND an extra add r4,r1,#0 in the prologue -- worse).",
-    "Wave 59 (W59-B): `while (a2-- != 0)` -- pre-decrements before the loop and compares against a pool constant. Worse.",
-    "Wave 59 (W59-B): AN ASCENDING COUNTER, `for (i = 0; i < a2; i++)`, with both `u16 i` and `int i`. This REFUTES the check_dbra_loop-reversed-an-ascending-loop theory for this function: it burns a whole register on i, moves a2 to r8, loses the force-addr word entirely (ldrh r2,[gUnknown_030033EC] direct) and does not produce the shifted-domain decrement either.",
-    "Wave 59 (W59-B): decomp-permuter NOT run, on purpose -- the residual is one extra instruction plus a pool word, which wave 37 lists as precisely the case the permuter cannot reach.",
-    "Wave 60 (W60-D): THE DECREMENT AS AN ASSIGNMENT EXPRESSION IN THE CONDITION -- `while ((n = n - 1) != 0)`, `while ((n -= 1) != 0)`, `while ((u16)(n = n - 1) != 0)`, `while ((n = n - 1))`. This was the obvious gap left by wave 59 (which swept only STATEMENT forms), because an assignment expression is the one place the tested value could differ from the stored one. It does not: gcc re-reads the narrowed variable. All four emit the identical narrow-domain `subs ; lsls ; lsrs ; cmp` tail.",
-    "Wave 60 (W60-D): `n += 0xFFFF` / `n = n + 0xFFFF` instead of `n - 1`. The reasoning was that 0xFFFF is not a THUMB 8-bit immediate so a pool word is needed either way, which would make combine's shift-over-plus distribution cost-neutral. Refuted: LICM hoists the constant into a register in the preheader (`ldr r0,.L8 ; add r6,r0,#0`) and the tail is unchanged.",
-    "Wave 60 (W60-D): the exit test written in the SHIFTED domain -- `} while ((n = n - 1) << 16);` and `n = n - 1; } while (n << 16);`. combine folds the `<< 16` truth test straight back to `cmp rN,#0` on the stored counter."
-   ],
-   "settled_by_this_attempt": [
-    "Wave 73 (W73-C): the COUNTER REGISTER SWAP is downstream of the decrement's shape, as waves 59/60 suspected but did not confirm. Introducing an `int t` temp between the decrement and the store moves a2 into r7 and v into r6, which is the ROM's assignment; the old `} while (--a2 != 0);` draft had them the other way round. Score 62.1% -> 64.5%. One fact, not two.",
-    "Wave 59 (W59-B): THE WHOLE 4.8% -> 62.1% MOVE WAS ONE EDIT -- `goto <label after the loop>` instead of `break` for the loop's LEADING exit test. agbcc's expand_end_loop rolls a loop's first conditional exit to the bottom and enters with a b to it; a user goto targets a label that is not the loop's end_label, so the roll does not fire and the guard stays at the top where the ROM has it. Everything else followed with no further work: the top guard cmp a2,#0 / beq, the LICM hoist of the bitfield mask (movs r4,#0x7f in the preheader), and hence mov sl,r4 / mov r1,sl -- the THIRD hi register the ROM saves. The hoist is what costs r4 and forces the force-addr word into sl; it is one fact, not three. A HOIST YOU CANNOT REPRODUCE MAY BE A ROTATION YOU CANNOT REPRODUCE. Written up in docs/agbcc-codegen.md.",
-    "Wave 59 (W59-B): gUnknown_08499598 is a POINTER to an array of 60-byte elements (ldr r1,[r0] then index*60) and .unk00 is a 32-bit member.",
-    "Wave 59 (W59-B): [r5,#4] is a 7-bit count plus a preserved top bit (the header's unk04_0). The != 0 test compiles to `movs #0x7f ; ands` while the VALUE read compiles to `lsls #0x19 ; lsrs #0x19`, and agbcc does not spell one & 0x7f two different ways, so the bitfield model is right and not a shifts-and-masks source.",
-    "Wave 59 (W59-B): which value a u16 exit test reads is NOT settled by the decrement's source spelling -- eight spellings, one answer. Do not sweep it again."
-   ],
-   "note": "Wave 60 (W60-D), extending wave 59. ELEVEN spellings now refuted across two waves and the answer has never varied. THE USEFUL NEGATIVE: the ROM's form is strictly LARGER than the candidate's -- 6 insns plus a pool word against 5 insns and none -- so it is not something combine chose on cost, and combine cannot have created it at all, because it would have to materialise 0xFFFF0000 and combine has no way to emit a pool load. That the `ldr` sits INSIDE the loop rather than hoisted says the constant was created after loop.c ran. So whatever produces the shifted-domain decrement is downstream of expand and is not addressable from the C. DO NOT SWEEP DECREMENT SPELLINGS AGAIN. Everything else in this function is byte-exact; the residual is exactly 8 bytes (2 for the extra instruction, 4 for the pool word, 2 for the .short 0 alignment the ROM's odd pool-word count needs)."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -37776,9 +37772,23 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 2356,
+   "best": "Wave 74 strongest semantic draft: exact 2356/2356, 89.3%, 253 differing bytes, first difference +0x90.",
+   "remaining_diff": "A coupled GCSE/pool-order and q-allocation residual remains around the sub_0802BB74/sub_0802BAFC branch and later merge. The historical 92.53%/176 and apparent 93.9%/144 records came from expanded-header contamination, not a reproducible ordinary draft.",
+   "why_it_is_close": "Control flow, canonical Map view, call sequence and total size are settled; Wave 74 improved the honest 87.9%/286 baseline to 89.3%/253.",
+   "axes_ruled_out": [
+    "Both-arm reassociation shrinks to 2352; then-arm-only association is retained.",
+    "Two clean chained --current permuter runs, over 11000 iterations total, found no match.",
+    "Do not seed from the contaminated ~198KB best.c or reshape Map/Tbl49A2A6."
+   ],
+   "settled_by_this_attempt": [
+    "Retain the then-arm `(cx + tbl) + gUnknown_0849A284[6]`, unit->unk07 binding, and zero-lifetime accv compare temporary."
+   ],
+   "reason": "Wave 74 W74-B. Resume with a new GCSE/merge-allocation mechanism from the include-based active draft."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -42115,7 +42125,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -43341,9 +43351,22 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 512,
+   "best": "Wave 74: exact 512/512, 93.2%, 35 differing bytes, first difference +0x57.",
+   "remaining_diff": "The repeated loop stream is settled; the residual is a pure r4/r5 allocation swap.",
+   "why_it_is_close": "All ten loops and total size match; Wave 74 reproduced the strongest valid candidate.",
+   "axes_ruled_out": [
+    "Declaration, scope, signedness and loop-counter ownership probes did not close the swap.",
+    "Clean chained --current permuter searches were drained with no match."
+   ],
+   "settled_by_this_attempt": [
+    "The Wave-72 fourth-loop counter fix is load-bearing; do not rework loop structure."
+   ],
+   "reason": "Wave 74 W74-C. Resume only with a new register-priority lever."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -43653,9 +43676,22 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 280,
+   "best": "Wave 74 strongest semantic draft: exact 280/280, 40.4%, 167 differing bytes, first difference +0xe.",
+   "remaining_diff": "The ring-writer shape is correct but allocation remains broadly rotated across its three loops.",
+   "why_it_is_close": "Size and loop count are exact; the retained split-sum and reversed second-pointer equality are semantic and independently verified.",
+   "axes_ruled_out": [
+    "Two clean permuter runs were drained.",
+    "The apparent exact 45.7%/152-difference candidate used prod before initialization and was rejected."
+   ],
+   "settled_by_this_attempt": [
+    "Do not prefer best.json's stale 55.4% record over the verified semantic active draft."
+   ],
+   "reason": "Wave 74 W74-C. Requires a new allocation mechanism, not another unconstrained permuter adoption."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -43682,9 +43718,22 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 604,
+   "best": "Wave 74 strongest semantic draft: exact 604/604, 45.9%, 327 differing bytes, first difference +0xc.",
+   "remaining_diff": "The three-loop ring reader remains blocked on the dst/expSum register-versus-stack inversion.",
+   "why_it_is_close": "The retained nested cursor binding is the strongest independently verified semantic source and is size-exact.",
+   "axes_ruled_out": [
+    "Two clean permuter runs were drained.",
+    "The apparent 49.7/49.8% candidates assign locals after an unconditional return while earlier goto paths read them; both were rejected."
+   ],
+   "settled_by_this_attempt": [
+    "Do not quote or install the semantically invalid best.c candidates."
+   ],
+   "reason": "Wave 74 W74-C. Resume at the dst/expSum live-set inversion."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -43771,13 +43820,7 @@
   "src": "code-0801D390.s",
   "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 56,
-   "status": "MATCHED wave 73 (W73-B), relocs: match, no rodata placement needed.",
-   "resolved_by": "SUBTRACTION OF A NEGATION, found by decomp-permuter and understood afterwards. The draft's fourteen additive spellings all emitted `add r1, r1, r3` (index operand 1, symbolic base operand 2); the entry's rule 'in `pointer + runtime` a SYMBOLIC base is ALWAYS operand 2' is correct for every ADDITIVE spelling and is escaped by writing the add as a subtraction: `p = (u8 *)&gUnknown_03003FC0 - (-gUnknown_0849B018->unk06);` puts the base in operand 1 and yields the ROM's `adds r2, r2, r1`. The entry's conclusion that this was unreachable from source was wrong, and the 'open TYPE-MODEL question' it pointed at was a false lead -- the type model was already right.",
-   "measurements": "Wave 73 (W73-B) toolchain sweep, all seven compiler profiles run against this exact draft: configured/default 87.5%, no-force 78.6%, o1 87.5%, o1-no-force 78.6%, old-agbcc 87.5%, old-agbcc-no-force 78.6%. No profile beats the configured one. Comma operator measured and NEGATIVE here: four comma spellings (base bound first, the ruled-out `p = base; p += i` pair folded into one statement, and index bound first) all emit the identical `add r1, r1, r3`. Permuter: run 1 from the draft, base score 45, MATCH.",
-   "wave": "31 (W31-A) parked; 73 (W73-B) matched"
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -44008,9 +44051,23 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 428,
+   "best": "Wave 74 semantic baseline: 420/428 (-8), 18.0%, 343 of 420 candidate bytes differ, first difference +0xe.",
+   "remaining_diff": "The key/state scan still needs the ROM's distinct volatile RMW/dead-read behavior at two sites plus its OR-chain allocation.",
+   "why_it_is_close": "All known faithful volatile pointer forms and both site contexts are now measured and documented.",
+   "axes_ruled_out": [
+    "Faithful volatile pointer forms measured 416/412 bytes.",
+    "A first-site overlay/barrier reached 424 but worsened allocation; applying it to the second site regressed.",
+    "High-half OR grouping remained 420 bytes with 342 differences."
+   ],
+   "settled_by_this_attempt": [
+    "The two volatile sites are not interchangeable; preserve their distinct source contexts."
+   ],
+   "reason": "Wave 74 W74-C. Needs a new faithful volatile-C model."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -47945,7 +48002,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -56425,7 +56482,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -85408,7 +85465,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": null,
   "named": false,
@@ -90135,19 +90192,7 @@
   "src": "code-0801D390.s",
   "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 96,
-   "status": "MATCHED wave 73 (W73-E), byte-for-byte, configured profile, relocs match.",
-   "resolved_by": "THE THIRD SPELLING OF A POINTER-GLOBAL ACCESS. gUnknown_08499594 is a POINTER global, not an array (the tell is the `ldr r1,[r3,#0]` deref that follows its pool `ldr`). The ROM loads its ADDRESS CONSTANT early -- immediately after the `bl sub_08025E08`, ahead of gUnknown_08499590 -- but DEREFS it late, only after the `* 12`. Neither spelling anyone had tried can do that: `gUnknown_08499594[i]` in place puts BOTH late, and `struct Unk08499594 *tbl; tbl = gUnknown_08499594;` (which this entry previously recommended, copied from the sibling sub_080601F0) pulls BOTH forward and is a REGRESSION here, 68.8% -> 60.4%, emitting `ldr r0,[pc]; ldr r3,[r0,#0]` back to back. The spelling that matches binds the pointer global's ADDRESS to a double pointer as its own statement and derefs at the use: `struct Unk08499594 **tbl; ... tbl = &gUnknown_08499594; ... u = *tbl + cells[off];`.",
-   "why_this_is_general": "The whole 30-byte residual was downstream of that ONE address constant's creation point. With it created early it occupies the scratch r3 across the index arithmetic, which forces the 0x417A literal into r5 and therefore the ROM's `push {r4, r5, lr}` instead of the candidate's `push {r4, lr}`; the swapped r0/r1 operand pair in the offset computation and the 0x50/0x54 pool word order came back at the same time. Push mask, operand order and pool order were ONE fact, exactly as the wave-17 rule predicts, and one edit fixed all of them. Written up as the last chapter of docs/agbcc-codegen.md: 'A pointer global has THREE spellings, not two'. CONDITION, measured by W73-B the same wave and now in the chapter: row 3 is indicated ONLY when there is a gap to close -- the ROM loading the pool word EARLIER than the candidate while derefing in the same place. On sub_08045C18 all three rows TIE at 89.4% (the map pointer is loaded once and used in all ten tests), and on sub_08049944 both pool words already matched the ROM and row 3 costs 4 bytes. And per W73-D the row is a property of the USE SITE, not the global: sub_0802E010 wants row 3 in its clear loop and row 2 in block 4, same global, same function.",
-   "axes_ruled_out": [
-    "wave 32 (W32-A): the three stores written as `gUnknown_08499594[cell].unkNN` with no bound element pointer -- agbcc then RELOADS the table pointer for each store, because a `strb` through a `struct Unk08499594 *` may alias the pointer global; 8 bytes worse",
-    "wave 32 (W32-A): splitting `cell` into its own statement ahead of the `u = &...` binding -- moves nothing",
-    "wave 73 (W73-E): `struct Unk08499594 *tbl; tbl = gUnknown_08499594;` as its own statement -- REGRESSES to 60.4%. This is the axis the wave-32 entry recommended trying next and it is the wrong one of the two; see resolved_by."
-   ],
-   "settled_by_this_attempt": "The cell plane here is +0x12 (c_08008B70.c's idiom), not the +0x1432 one; the gUnknown_08499594 stride is 12; unk09/unk0a/unk0b are three u8 members sharing ONE element address. The `u` binding is required and must stay.",
-   "wave": "32 (W32-A) parked; 73 (W73-E) matched"
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -92309,9 +92354,22 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 752,
+   "best": "Wave 74: exact 752/752, 99.2%, 6 differing bytes, first difference +0x3e.",
+   "remaining_diff": "Only two stack-slot numbers are swapped: ROM t at sp+24 and t*0x40 at sp+16; candidate has the reverse.",
+   "why_it_is_close": "Every opcode, register, branch, relocation and frame size otherwise matches.",
+   "axes_ruled_out": [
+    "First-reference order, parameter/counter split, comma association, inner end bound, scoped bases, lockstep counters and dead assignments were measured without closing the swap.",
+    "The generic permuter normalizes stack offsets and cannot score this residual."
+   ],
+   "settled_by_this_attempt": [
+    "Declaration order and explicit/implicit base forms remain byte-neutral; target spill pseudo creation instead."
+   ],
+   "reason": "Wave 74 W74-G. Pure spill-slot-order fixpoint."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -111591,13 +111649,7 @@
   "src": "code-0806CFC8.s",
   "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 68,
-   "status": "MATCHED wave 73 (W73-B). Needs rodata placement: \"rodata\": [\"0x081CC02C\"].",
-   "resolved_by": "COMMA OPERATOR. The ROM evaluates the SUBTRAHEND of `row[0].unk02 - row[line].unk02` first. A statement boundary (`t = row[line].unk02;` on its own line) gives the ROM's operand order and registers but sinks the 0x04000014 pool `ldr` between the two loads; the single-statement form is the mirror image. `REG_BG1HOFS = (t = row[line].unk02, row[0].unk02 - t + 0x100);` satisfies both at once. The comma at depth inside operand 0's own index (`row[(t = row[line].unk02, 0)].unk02`) gives IDENTICAL assembly, so the lever is the comma, not the depth.",
-   "measurements": "Wave 73 (W73-B) toolchain sweep, all seven compiler profiles run against this exact draft: configured/default 85.3%, no-force 29.4% (-4 bytes), o1 41.2%, o1-no-force 41.2%, old-agbcc 14.7% (+8 bytes), old-agbcc-no-force 27.9% (-4 bytes). No profile beats the configured one.",
-   "wave": "30 (W30-A) parked; 73 (W73-B) matched"
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -124989,9 +125041,22 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0806CFC8.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 1452,
+   "best": "Wave 74: exact 1452/1452, 98.8%, 18 differing bytes, first difference +0x298.",
+   "remaining_diff": "Five force-address words are relocation-equivalent; the true residual is the duplicated six-instruction array-byte/unk37 register allocation window.",
+   "why_it_is_close": "Wave 74 improved 19 to 18 differences with a valid second-arm live-range split; every structural choice is settled.",
+   "axes_ruled_out": [
+    "Narrow byte bindings and first-reference/scope probes did not close the allocation.",
+    "A clean 3344-iteration --current permuter run found nothing better."
+   ],
+   "settled_by_this_attempt": [
+    "Preserve multiplication for the narrow member, u16 store spelling, duplicated tails and the retained second-arm split."
+   ],
+   "reason": "Wave 74 W74-E. Resume only with a new allocator-priority mechanism."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -125695,9 +125760,22 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0806CFC8.s",
-  "status": "asm",
+  "status": "parked",
   "asm_resident_reason": null,
-  "parked_reason": null,
+  "parked_reason": {
+   "bytes": 580,
+   "best": "Wave 74: exact 580/580, 99.3%, 4 differing bytes, first difference +0x70.",
+   "remaining_diff": "Only the final PutSprite setup register differs: ROM loads/stores the palette pointer through r0 while agbcc uses r4. Two force-address relocations are equivalent.",
+   "why_it_is_close": "All loops, calls, pool length and instruction order are exact.",
+   "axes_ruled_out": [
+    "Narrow final-call lifetime, block scope, first-reference and comma probes did not move the four bytes.",
+    "Two additional chained --current runs totaling 8708 iterations found no improvement."
+   ],
+   "settled_by_this_attempt": [
+    "Keep the dead `i = 0x608F` assignment; it is the load-bearing 99.3% lever."
+   ],
+   "reason": "Wave 74 W74-E. Exact-size allocator fixpoint."
+  },
   "named": false,
   "kind": "game",
   "trivial": false,
