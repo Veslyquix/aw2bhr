@@ -8544,6 +8544,33 @@ either folded back or changed the prologue.  Once those forms have been
 measured, treat the residual as allocator evidence rather than repeatedly
 restating the same address computation.
 
+Wave 70 supplied a useful rejection test for that same large-function class.
+An explicit shared DC32 `goto` tail moved `sub_0800CFDC` to 6,380/6,384 and
+raised positional identity to 19.1%, with every call count exact.  It was still
+the wrong source: the rewrite emitted 160 bridge predicates against the ROM's
+159.  **A closer size/score with one duplicated semantic predicate is not a
+stronger checkpoint.** Count repeated predicates as well as calls before
+accepting a cross-jump rewrite; the exact-count 6,368 candidate remains the
+honest fixpoint.
+
+**Split a symbol adjustment into `p = base; p += K;` to force a bare pool
+symbol plus a runtime add, but placement decides whether it survives.**  On
+`sub_0805634C` this spelling produced the ROM's bare symbol and separate
+`adds #0x1a` / `adds #6` at both sites.  Placed before the loop it extended the
+adjusted pointers' lifetimes and spilled them; placed in the body, constant
+propagation folded each back into `base+K`.  This is therefore an address-tree
+lever, not a complete solution by itself: choose the spelling first, then tune
+its lifetime boundary.
+
+**A fixed low-register selector can split an allocno that otherwise coalesces
+with a long-lived result.**  `sub_0805F2B4` was size-exact but allocation-wrong
+after its twin's statement shape had transferred.  Pinning the short-lived
+selector to r1, binding the table, and binding the derived tag before assigning
+the result kept selector and result as distinct pseudos and scheduled the copy
+after the table load.  The configured draft then matched all 536 bytes.  Use
+this only after the selector's value and the surrounding order are settled;
+fixed registers are a last-mile allocation control, not type evidence.
+
 The same pass exposed a related control-flow tell.  In long neighbour-pattern
 chains, `(u16)(v - K) <= 1` emits a folded subtract/shift range test, while the
 ROM's repeated direct `cmp #K` / `cmp #(K+1)` tree came from grouped cases in a
