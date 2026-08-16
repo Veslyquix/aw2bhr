@@ -41728,12 +41728,19 @@ this wave:
   place (`a1 &= 0x1FF;`) makes `nonzero_bits` untrackable and recovers 8 bytes
   (best score 10.3%), but leaves the mask in low-half form.
 
-**Still unexplained, and it is the whole remaining gap:** the ROM materialises a
-zero and ORs it in — `movs r6,#0; lsls r3,r6,#0x10`, an OR with `0 << 16` that
-combine did not fold. `x`'s OR therefore has a THIRD operand which is a variable
-holding 0, not a literal. Nothing in three waves accounts for it. This function
-is NOT a wrong shape (it was flagged as the batch's likely shape error); the
-call, the argument setup, `y`, `z` and the epilogue are byte-exact.
+Wave 71 found the zero's mechanism: **a mutable DImode local shifted in place
+preserves gcc's two-word shift expansion where a cast is folded away.**
+`pair = value; pair >>= 16;` emits the low output as
+`(zero << 16) | (value >> 16)`.  A direct `(u64)value >> 16` and a DImode
+temporary assigned only after the shift both collapse to the ordinary 32-bit
+`lsr`; the in-place DImode assignment is the discriminator.  Combining that
+with a 32-bit `0xFFFF0000` mask and writing x through distributed high-half
+shifts moved `sub_0801C01C` from 76/116 (-40) to 108/116 (-8), and recovered
+the ROM's pool word, zero shift, and `a1` high-half expression in one controlled
+probe.  The remaining eight bytes are allocation/lifetime: the ROM keeps a1,
+a3, and the shifted low half in r8/sl/r9 while the 108-byte spelling uses only
+r8.  The function is still not a shape error; the call and other two OAM words
+remain settled.
 
 Wave 65 also tested the semantically tempting `struct OamData` view suggested
 by the promoted caller: cast the by-value `a4`, OR-assign its x/y fields, then
@@ -44213,3 +44220,20 @@ the downstream r9/sl allocation, taking the configured draft from 792/796 to
 an exact 796/796 match. This is a last-mile allocation workaround, not evidence
 that fixed-register syntax appeared in the original source; use it only after
 the statement shape and argument types are independently settled.
+
+Wave 71 found the tied-binop version of the same lever.  `sub_08047920` needed
+one mask value preserved in r8 across calls, but also needed its first `ands`
+to target the mask's r0 copy rather than the field byte in r1.  Binding the byte
+first and writing
+
+```c
+register int k asm("r0");
+f = field;
+k = 1;
+m = k;
+k &= f;
+```
+
+emits `ldrb r1; movs r0,#1; mov r8,r0; ands r0,r1` and matched the configured
+632-byte function exactly.  An expression-form `f & (k = 1, m = k, k)` still
+targets r1; the compound assignment is load-bearing.

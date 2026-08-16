@@ -854,7 +854,11 @@ gUnknown_08616B4A:  @ 0x08616B4A
 
 	.global gUnknown_08616B74
 gUnknown_08616B74:  @ 0x08616B74
-	.incbin "baserom.gba", 0x616B74, 0x88    @ 0x616BFC - 0x616B74
+	.incbin "baserom.gba", 0x616B74, 0x70    @ 0x616BE4 - 0x616B74
+
+	.global gUnknown_08616BE4
+gUnknown_08616BE4:  @ 0x08616BE4
+	.incbin "baserom.gba", 0x616BE4, 0x18    @ 0x616BFC - 0x616BE4
 
 	.global gUnknown_08616BFC
 gUnknown_08616BFC:  @ 0x08616BFC
