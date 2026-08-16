@@ -20,8 +20,13 @@
  * for this register in src/decomp/c_08036B34.c.
  *
  * The `||` is a real short-circuit: `bne` on the first byte jumps straight to
- * the call, `beq` on the second skips it. */
-void sub_08036E18(void)
+ * the call, `beq` on the second skips it.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Subroutine that checks whether
+ * A, B Start Select is pressed and performs a soft reset." The old
+ * sub_08036E18 symbol is kept as a linker alias below so every other unit
+ * keeps resolving it unchanged. */
+void CheckSoftResetCombo(void)
 {
     u16 keys;
 
@@ -35,6 +40,8 @@ void sub_08036E18(void)
         sub_08036CB4();
     }
 }
+
+asm(".global sub_08036E18\n.thumb_set sub_08036E18, CheckSoftResetCombo\n");
 
 void sub_08036E54(void)
 {

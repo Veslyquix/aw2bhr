@@ -86,7 +86,11 @@
  */
 
 
-void sub_08070478(u16 n)
+/* Named per Xenesis's AW2 Subroutine List: "Routine that takes Music/Sound
+ * ID and activates it?" -- m4aSongNumStart, per the note above. The old
+ * sub_08070478 symbol is kept as a linker alias below so every other unit
+ * keeps resolving it unchanged. */
+void ActivateMusicOrSoundId(u16 n)
 {
     const struct MusicPlayer *mplayTable = gUnknown_08242308;
     const struct Song *songTable = gUnknown_0824238C;
@@ -95,6 +99,8 @@ void sub_08070478(u16 n)
 
     sub_08070BAC(mplay->info, song->header);
 }
+
+asm(".global sub_08070478\n.thumb_set sub_08070478, ActivateMusicOrSoundId\n");
 
 /* PARKED -- wave 32, W32-B. m4aSongNumStartOrChange.
  *

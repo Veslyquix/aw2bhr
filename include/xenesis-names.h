@@ -47,5 +47,12 @@ void ResetRulesAfterCampaignMap(void);
 void PlayWeatherChangeSound(struct Unk03001470 *p);
 void ChangeGameWeather(u8 weatherId);
 void LoadWeatherData(void);
+void UpdateFuelAmmoGraphics(void);
+void CheckSoftResetCombo(void);
+int GetRankFromScore(int score);
+int GetCampaignScoreRank(int score);
+int IsHardCampaignMode(void);
+void PlayMusicOrSfx(s16 soundId);
+void ActivateMusicOrSoundId(u16 songId);
 
 #endif // GUARD_XENESIS_NAMES_H

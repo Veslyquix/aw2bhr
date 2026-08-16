@@ -38,7 +38,11 @@ void sub_0803670C(void)
                  0x40);
 }
 
-void sub_0803678C(void)
+/* Named per Xenesis's AW2 Subroutine List: "Subroutine for fuel/ammo
+ * graphics updates. Updates on Frame 0, 20, 40" -- matches the switch below
+ * exactly (0x14=20, 0x28=40). The old sub_0803678C symbol is kept as a
+ * linker alias below so every other unit keeps resolving it unchanged. */
+void UpdateFuelAmmoGraphics(void)
 {
     u32 v;
 
@@ -77,6 +81,8 @@ void sub_0803678C(void)
         break;
     }
 }
+
+asm(".global sub_0803678C\n.thumb_set sub_0803678C, UpdateFuelAmmoGraphics\n");
 
 void sub_08036884(void)
 {
