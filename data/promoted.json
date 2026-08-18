@@ -1311,6 +1311,18 @@
   "size": 96
  },
  {
+  "file": "src/decomp/c_08007DD0.c",
+  "obj": "src/decomp/c_08007DD0.o",
+  "addr_hex": "0x08007DD0",
+  "functions": [
+   "sub_08007DD0"
+  ],
+  "size": 324,
+  "rodata": [
+   "0x0808D7F0"
+  ]
+ },
+ {
   "file": "src/decomp/c_08007F14.c",
   "obj": "src/decomp/c_08007F14.o",
   "addr_hex": "0x08007F14",
@@ -26462,6 +26474,18 @@
   "size": 116
  },
  {
+  "file": "src/decomp/c_08073E0C.c",
+  "obj": "src/decomp/c_08073E0C.o",
+  "addr_hex": "0x08073E0C",
+  "functions": [
+   "sub_08073E0C"
+  ],
+  "size": 388,
+  "rodata": [
+   "0x081CC034"
+  ]
+ },
+ {
   "file": "src/decomp/c_08073F90.c",
   "obj": "src/decomp/c_08073F90.o",
   "addr_hex": "0x08073F90",
@@ -30030,6 +30054,27 @@
    "sub_0808AA88"
   ],
   "size": 44
+ },
+ {
+  "file": "src/decomp/c_0808AAA0.c",
+  "obj": "src/decomp/c_0808AAA0.o",
+  "addr_hex": "0x0808AAA0",
+  "functions": [
+   "BgAffineSet",
+   "CpuFastSet",
+   "CpuSet",
+   "Div",
+   "DivRem",
+   "HuffUnComp",
+   "LZ77UnCompVram",
+   "LZ77UnCompWram",
+   "MultiBoot",
+   "RLUnCompVram",
+   "RLUnCompWram",
+   "SoftReset",
+   "VBlankIntrWait"
+  ],
+  "size": 84
  },
  {
   "file": "src/decomp/c_0808AB8C.c",

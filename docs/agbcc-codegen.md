@@ -45814,3 +45814,47 @@ is LF while `data/parked.json` is CRLF, and escape sequences intended as literal
 text became real control characters - putting 3 real CRLFs into an LF file. **Do
 not infer a file's line ending from another file you were just editing, and after
 any scripted write, re-read the file and count.**
+
+## FIX THE ADDRESS PSEUDO, NOT THE INDEX EXPRESSION, FOR A FINAL POOL-LOAD ORDER RESIDUAL (wave 75) — `sub_08007DD0` MATCHED
+
+Both terminal table-return arms in `sub_08007DD0` had the correct operations,
+size and control flow, but agbcc emitted the index shift before loading the
+table address. Reassociating the subscript and binding an ordinary pointer did
+not move the pair. A block-local pointer fixed to the ROM's address register did:
+
+    register s16 *table asm("r1");
+    table = gUnknown_08485DC4;
+    return table[mask];
+
+The two arms use separate block-scoped bindings so neither pseudo's lifetime
+crosses the other arm. This produces `ldr r1, =table; lsls r0, mask, #1` in
+both places and leaves the returned halfword in r0.
+
+**Transferable rule:** when a terminal indexed load differs only in whether
+the pool load or index scale comes first, constrain the short-lived address
+pseudo to the ROM register. Do not reshape the index arithmetic after its
+operations and size are already exact.
+
+## AN EMPTY READ/WRITE CONSTRAINT CAN PRESERVE A FIXED-REGISTER COPY WITHOUT EMITTING CODE (wave 75) — `sub_08073E0C` MATCHED
+
+`sub_08073E0C` needed several value copies in specific registers before min/max
+comparisons and before the final DMA-control store. Fixed-register locals alone
+were insufficient: copy propagation coalesced the source and destination and
+deleted the required `adds`. Putting an empty read/write constraint between the
+definition and copy made the source pseudo observably distinct:
+
+    register u32 control asm("r3");
+    register u32 output asm("r0");
+    control = 0xA240;
+    asm("" : "+r" (control));
+    output = control;
+    REG_DMA0CNT_H = output;
+
+The constraint emits no instruction. It prevents the fixed r3 definition from
+being coalesced into the fixed r0 consumer, recovering the ROM's `ldr r3` then
+`adds r0, r3, #0`. The same pattern, in narrow block scopes, preserves the
+result copies that must precede the independent r2/r1 comparison copies.
+
+**Transferable rule:** use this only after source operations, branch senses and
+types are settled. A fixed register chooses the home; the empty `+r` constraint
+creates the pseudo boundary that makes an otherwise redundant copy survive.
