@@ -80,7 +80,7 @@ void sub_080482D8(struct Unk0804769C *p)
 
     if (p->unk21 != 0)
     {
-        sub_08047F70(p);
+        sub_08047F70((struct Unk08047B98 *)p);
         sub_0802323C(0x1e, (p->unk1f - p->unk20) * 16 + 0x36, 3);
     }
 
