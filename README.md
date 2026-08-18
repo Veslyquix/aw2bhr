@@ -65,20 +65,20 @@ routes is what makes the C trustworthy.
 ## Progress
 
 Three numbers get quoted for this project. They measure different things, so
-they don't match each other. As of **wave 62**:
+they don't match each other. As of **wave 76**:
 
 | metric | value | what it counts |
 |---|---|---|
-| **index** | **4,124 / 4,554 functions · 448,352 / 567,548 code bytes (79.00%)** | Functions that existed as assembly in `asm/` and are now matched C. The conservative figure, and the one the map above draws. |
-| **C definitions** | **4,231** | Function definitions across `src/`. Higher, because `src/proc.c` and `src/title-screen.c` were already C upstream and were never in `asm/`. Commit titles use this one. |
-| **all C-built code on the linker map** | **4,229 / 4,659 functions · 452,676 / 571,872 bytes (79.16%)** | Promoted decomp C plus 105 functions that were already C upstream. The detailed page shows this complete address map, but keeps the upstream category separate and uses the index metric as its headline. |
+| **index** | **4,284 / 4,554 functions · 476,824 / 567,548 code bytes (84.01%)** | Functions that existed as assembly in `asm/` and are now matched C. The conservative figure, and the one the map above draws. |
+| **C definitions** | **4,395** | Function definitions across `src/`. Higher, because `src/proc.c` and `src/title-screen.c` were already C upstream and were never in `asm/`. Commit titles use this one. |
+| **all C-built code on the linker map** | **4,389 / 4,659 functions · 481,148 / 571,872 bytes (84.14%)** | Promoted decomp C plus 105 functions that were already C upstream. The detailed page shows this complete address map, but keeps the upstream category separate and uses the index metric as its headline. |
 
 The index metric is the one to quote as decompilation progress. Two other
 states are tracked but not counted, because those functions are still assembly:
 
-* **parked** (109 functions, 30,828 bytes) — compiler output that hasn't been
+* **parked** (150 functions, 64,616 bytes) — compiler output that hasn't been
   matched yet, set aside so it doesn't keep coming back up as new work.
-* **asm-resident** (76 functions, 4,060 bytes) — hand-written assembly that was
+* **asm-resident** (85 functions, 4,388 bytes) — hand-written assembly that was
   never compiled from C, so it won't become C.
 
 A third label, **identified**, marks functions that have been given a name by
