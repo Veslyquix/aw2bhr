@@ -227,6 +227,33 @@
    ],
    "reason": "Wave 47 (orchestrator). NOT an independent measurement of this function -- it matched under DEFAULT agbcc too. It is here because COMPILER FLAGS APPLY TO THE WHOLE OBJECT FILE and this function shares src/decomp/c_08070B34.c with sub_08070BAC, which genuinely requires old_agbcc (see its entry). The SPLIT build refuses a file whose members carry different overrides -- 'error: sub_08070BAC needs a compiler override but shares ... which carry a DIFFERENT override (or none)' -- so the choice was to split the file or to make the whole file old_agbcc. Verified by exit status that this function is byte-identical under old_agbcc as well, so the file is consistent and nothing is lost. That it matches under BOTH compilers is the expected case rather than a surprise: the two differ only where register allocation or prologue handling diverges, and this function has neither. Historically it is also the more accurate configuration -- the whole m4a span 0x0806F710-0x080745xx is old_agbcc, and five of its functions already carry this override. IF YOU EVER SPLIT c_08070B34.c INTO SEPARATE FILES, this entry and the one for sub_08070C90 can be deleted; they are file-consistency entries, not findings."
   },
+  "sub_0808AC7C": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 168 bytes. Wave 79 (W79-D). Parked since wave 46 at 47.0% with the note 'TOOLCHAIN AXIS RULED OUT ... do not re-run it'. THAT SWEEP NEVER TESTED -O1. W46-I compiled this function under five configurations -- default, -fprologue-bugfix off, -fforce-addr off, old_agbcc, and old_agbcc + no force-addr -- and every one of them holds -O2. The wave-60 flash sweep then recorded that this function 'gets LONGER under -O1', but that was measured with -fforce-addr still on. With BOTH -O2 and -fforce-addr removed and -O1 added -- the exact override its thirteen neighbours sub_0808AB8C..sub_0808B540 already carry -- the unchanged wave-46 source is byte-and-relocation exact. No source change at all. The 47.0% residual was two globals exchanging r1/r2 and an extra ip-held address, i.e. an optimisation-level difference, exactly as the wave-60 sweep described for the rest of this block. old_agbcc is byte-IDENTICAL to default here and is still not the axis; the OPTIMISATION LEVEL is."
+  },
+  "sub_0808B5B8": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Flash library, 192 bytes. Wave 79 (W79-D). THE MISSING MEMBER OF THE FLASH RUN. Its parked entry has asserted since wave 47 that this override was recorded, and it never was -- wave 77 verified the key is absent while both immediate neighbours sub_0808B540 and sub_0808B074 carry it, inside a 13-function run that all share it. Worse, every measurement taken on this function for thirty waves used --profile o1, which removes -O2 but KEEPS -fforce-addr, while the override its neighbours actually carry removes -fforce-addr as well. Under the neighbours' real configuration the wave-47 source is 99.0% (2 of 192 bytes), not the 40.1% the entry records; the residual it spent four waves on -- a duplicated loop exit test, agbcc's guard + do/while against the ROM's jump-into-the-loop -- DOES NOT EXIST at this optimisation level and was an artefact of -fforce-addr. The remaining two bytes were a swapped pool-word pair (gUnknown_03005C7C vs gUnknown_08485678) fixed by making the store's destination address materialise first, i.e. spelling the slotInfo assignment as a comma inside the store's RHS so expand_assignment expands the LHS before it. Byte-and-relocation exact."
+  },
+  "sub_08070D98": {
+   "cc1": "old_agbcc",
+   "cflags_remove": [
+    "-fprologue-bugfix"
+   ],
+   "reason": "m4a TrkVolPitSet, 180 bytes. Wave 79 (W79-D). Parked since wave 35 at 10.6% with the diagnosis 'allocno-priority tie, the ROM puts track in r2 and the accumulator in r3, no source lever in three waves'. THAT DIAGNOSIS WAS MEASURED UNDER THE WRONG COMPILER. The same parked source under old_agbcc is 92.2% (14 of 180 bytes), not 10.0%, and the whole residual is two evaluation-order facts, not register allocation: (1) the ROM computes bend*bendRange BEFORE it loads tune, which a temporary `s32 t = track->bend * track->bendRange;` reproduces, and (2) the ROM loads volX (+0x13) before vol (+0x12), which is spelled `track->vol * track->volX` -- gcc expands the SECOND multiply operand first here, so the wave-35 note 'volX FIRST in the source' had the spelling backwards even though it read the ROM correctly. With those two source changes old_agbcc is byte-and-relocation exact and default agbcc is not. Same block and same override as its neighbours sub_08070CD0/sub_08070BAC/sub_08070FAC. old_agbcc rejects -fprologue-bugfix."
+  },
   "sub_08070CD0": {
    "cc1": "old_agbcc",
    "cflags_remove": [
@@ -268,6 +295,16 @@
     "-fprologue-bugfix"
    ],
    "reason": "m4a m4aMPlayLFOSpeedSet -- structurally identical to sub_08071584 (same 116 bytes, same loop, differing only in the member written: lfoSpeed at +0x19 rather than mod at +0x17). Default agbcc produces the SAME two 3-byte deltas at the same offsets, 94.8%. Matches byte-for-byte under old_agbcc."
+  },
+  "sub_0808AE54": {
+   "cflags_remove": [
+    "-O2",
+    "-fforce-addr"
+   ],
+   "cflags_add": [
+    "-O1"
+   ],
+   "reason": "Wave 79 (W79-B). Flash-library SRAM-read trampoline, 124 bytes -- the third member of the sub_0808AF00 / sub_0808AF74 group and the last one open. Same configuration as those two, and the same mechanism: at -O2 agbcc hoists the relocated copy's entry address (mov r3,sp; adds r3,#1) into the copy loop's preheader, which keeps it live across the loop, shifts the whole allocation one register left and drags two further symptoms with it (a duplicated loop exit test instead of the ROM's shared bottom test, and one load of the copied function's pool word instead of two). At -O1 without -fforce-addr none of that happens and the settled source is byte-and-relocation exact. Parked at 26.6% under the default profile, which is inverted evidence for this block, not weak evidence."
   },
   "sub_0808AF00": {
    "cflags_remove": [
