@@ -19797,6 +19797,15 @@
   "size": 184
  },
  {
+  "file": "src/decomp/c_08050D44.c",
+  "obj": "src/decomp/c_08050D44.o",
+  "addr_hex": "0x08050D44",
+  "functions": [
+   "sub_08050D44"
+  ],
+  "size": 196
+ },
+ {
   "file": "src/decomp/c_08050E08.c",
   "obj": "src/decomp/c_08050E08.o",
   "addr_hex": "0x08050E08",

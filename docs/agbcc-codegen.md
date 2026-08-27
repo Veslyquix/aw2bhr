@@ -49388,3 +49388,43 @@ equal to idx and therefore missed; the disagreeing-value spelling produced the
 copy on the first attempt (42.4% -> 90.2%, size-exact). When a loop pool looks
 like it needs an instruction nobody authored, ask what second value flows to
 that use.
+
+## THE do_store_flag PRESET: its polarity follows the SOURCE SHAPE, and the preset lands wherever the value's production does (wave 85, W85 + orchestrator)
+
+For `f = (call() == 0)` into a local, every FOLDED spelling -- the plain comparison, `(x == 0) ? 1 : 0`,
+and `(x != 0) ? 0 : 1` -- emits the SAME preset-0 / bne-over-true-store shape. The wave-54 claim that
+"agbcc presets the ELSE arm" was measured wrong: the ?: folds before the polarity is chosen. The ROM's
+reversed shape -- preset-1 AFTER the call, then cmp / beq-over-false-store -- comes from the STATEMENT
+form with the call result bound to a local first:
+
+    u8 c = sub_0803CB24(q[a + i]);
+    f = 1;
+    if (c != 0)
+        f = 0;
+
+Two independent facts, both measured on sub_08086A58 (13.9 -> 97.6 over the wave): (1) the preset store
+is scheduled ABOVE the call unless something pins the call first -- `f = 1; if ((u8)call(...) != 0)` puts
+`movs r5,#1` before the `bl` and loses; the local `c` is the pin. (2) `f = 1`-then-`if` keeps the
+do_store_flag expansion with the true value preset. When a comparison's preset appears on the wrong side
+of a call in your diff, look for a missing local binding the call, not for a different comparison.
+
+## HOISTING A POINTER INIT BEFORE A LOOP TO FIX THE PREHEADER ORDER FLIPS THE GIV REGISTER ASSIGNMENT (wave 85, sub_08086A58)
+
+The ROM preheader read `ldr =pool; movs r1,#0; mov r8,r1; adds r0,#4` -- pointer load before the counter
+init. Hoisting `q = base; q += 4;` above the for DOES reproduce that order -- and simultaneously flips the
+k-giv from r8 to r7 and displaces n, because the extra pre-loop pseudos shift allocno numbering for
+everything strength_reduce creates later. Measured twice with two different f-spellings (41.6% at worst;
+the unhoisted draft was 95.2%). The two orders trade against each other: matching the preheader byte order
+and keeping the loop-body register assignment were not reachable together from this spelling set. When a
+preheader ORDER residual sits next to a correct loop body, expect this trade before believing a spelling
+fixes both.
+
+## A DESCENDING SOURCE COUNTER WITH ASCENDING ADDRESSES IS NOT REACHABLE BY REINDEXING (wave 85, sub_0807E980)
+
+The ROM's tail loop keeps `movs r6,#7` (a source descending counter, init before every giv init) while
+both address givs step POSITIVE (dst +0x100 before src +0x400 in the latch). Three spellings measured:
+`for (j = 7; j >= 0; j--)` with j-indexed addresses fixes the counter position but folds +7*0x100 into
+the inits and steps negative via pool words (+8); `(7 - j)` indexing breaks the pre-loop region; explicit
+body-stepped pointer locals cost the frame (+12, first diff moves to the prologue). The implied original
+shape is the pointer-variable form without the pseudo cost -- if you attempt it, the open question is
+where the pointers live without adding allocnos.

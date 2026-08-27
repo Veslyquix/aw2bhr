@@ -14269,6 +14269,21 @@ extern const u8 gUnknown_0816DB20[5];
 extern s16 *const gUnknown_081360A0;
 extern u16 *const gUnknown_081360A4;
 extern u16 *const gUnknown_081360A8;
+/* Wave 85, W85-C (sub_08050FF8). Four more cells from the 0x08136050-0x081360E0
+ * run, read with a genuine DOUBLE load in the ROM -- `ldr r4,=gUnknown_081360E0
+ * ; ldr r2,[r4] ; ... adds r0,r0,r2 ; ldrh r0,[r0,#4]` -- the loaded value is
+ * used as a BASE, which a -fforce-addr word never is (force-addr words are used
+ * directly as the address). The wave-37 note in work/sub_08050FF8 called all
+ * four force-addr constants and the draft built on that; it missed by -20
+ * bytes. Contents confirmed by the strides the ROM applies after each chase:
+ *   0x081360D8 -> 0x020298E0  (+ side*0x90, .unk8c at 0x8c)
+ *   0x081360DC -> 0x0300453C  (plain u16)
+ *   0x081360E0 -> 0x085D6A48  (+ row*24, columns 4 and 8)
+ *   0x081360E4 -> 0x03004580  (+ row*16, columns 1 and 2) */
+extern struct Unk020298E0 *const gUnknown_081360D8;
+extern u16 *const gUnknown_081360DC;
+extern u16 (*const gUnknown_081360E0)[12];
+extern u16 (*const gUnknown_081360E4)[8];
 /* TWO halfwords, not one. sub_0804F18C writes [0] with a bare `strh` (it
  * stores OamData.priority into it straight after setting that field), and
  * sub_08050958 writes BOTH -- `strh r3,[r6]` and `strh r0,[r6,#2]` off a
