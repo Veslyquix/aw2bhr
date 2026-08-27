@@ -7368,6 +7368,20 @@
   "size": 440
  },
  {
+  "file": "src/decomp/c_08023518.c",
+  "obj": "src/decomp/c_08023518.o",
+  "addr_hex": "0x08023518",
+  "functions": [
+   "sub_08023518"
+  ],
+  "size": 260,
+  "rodata": [
+   "0x080909F0",
+   "0x080909F4",
+   "0x080909F8"
+  ]
+ },
+ {
   "file": "src/decomp/c_0802361C.c",
   "obj": "src/decomp/c_0802361C.o",
   "addr_hex": "0x0802361C",

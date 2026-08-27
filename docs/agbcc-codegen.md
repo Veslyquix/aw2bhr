@@ -49127,3 +49127,264 @@ guarantee an explicit-register local stays put outside asm statements, and
 happens to fit. First measured pin failure after W79-A's three successes:
 after any pin, grep the .s for writes to the pinned register before
 believing the score.
+
+## Toolchain profile sweep survey, wave 81 (W81-E) -- complete measurement of the open drafted pool
+**What ran.** Every function in the open drafted pool -- all 138 `data/parked.json` entries
+(every one has a draft) plus the 17 drafted unmatched non-parked functions, 155 total,
+superseding preflight's "148" -- was compiled under **all six non-configured profiles plus
+`configured`, 1,085 `tools/trymatch.py` shell runs** (exit code and `% identical` recorded;
+single-run cost ~0.7 s). The match detector was validated before trusting its negatives:
+the wave-79 closures reproduce as exit 0 under their mechanisms (`sub_0808AC7C` under
+`o1-no-force`, `sub_08070D98` under `old-agbcc`), so a hit would have been caught.
+
+**Outcome counts (measured, not recorded):**
+
+- Outcome (a), exit 0 under ANY non-default profile: **0 of 155** (0 of 930 pairs).
+  No open drafted function is matchable off the default toolchain.
+- Outcome (b), best off-default score >15 points above configured ("JUMP"): **7**.
+  Between 4 and 15 points ("move"): **15**. Within 4 points either way ("flat"): **133**.
+- Direction asymmetry: 22 of 155 improve >4 points somewhere; **120 of 155 DEGRADE >4
+  points somewhere**. The default configuration is already at or near each draft's
+  maximum; a low configured score is normally *not* the pool hiding behind a wrong
+  profile. Where it is, see the mechanisms below.
+
+**The seven jumps, attributed flag by flag** (all numbers today's drafts, measured):
+
+| fn | size | cfg | mechanism | evidence |
+|---|---|---|---|---|
+| sub_08018100 | 92 | 22.8 | removing `-fforce-addr` at -O2 ALONE | no-force 82.6, old-agbcc-no-force 82.6 identical; old-agbcc alone 25.0 |
+| sub_08058A2C | 392 | 24.5 | `-O1` ALONE | o1 = o1-no-force = 77.6; force-addr inert here |
+| sub_0805D438 | 436 | 17.9 | plain `-fforce-addr` removal at -O2 | no-force 65.6 beats o1/o1-no-force 41.7 and old-agbcc-no-force 56.2 |
+| sub_0804F658 | 612 | 31.4 | old compiler WITH `-fforce-addr` kept | old-agbcc 52.6, old-agbcc-no-force 15.8, no-force 18.0 |
+| sub_0801DCD4 | 516 | 12.0 | needs BOTH -O1 and no-force | o1-no-force 33.3 vs o1 15.3, no-force 9.9, cfg 12.0 |
+| sub_080077EC | 232 | 25.9 | `-O1` | o1 = o1-no-force = 43.1 |
+| sub_08028D28 | 240 | 27.1 | `-O1`, partially cancelled by force-addr removal | o1 43.3 vs o1-no-force 27.5 |
+
+Winner-profile census over movers+jumps (22): o1-no-force 9, old-agbcc-no-force 5,
+old-agbcc 4, o1 3, no-force 1, default 0. Three different single-flag mechanisms operate
+(`-O1` vs `-O2`, `-fforce-addr` on/off, cc1 version) and two functions need a specific
+*combination* -- confirming W79's "o1 and o1-no-force are DIFFERENT" as a general rule,
+not a flash-block special case.
+
+**Clustering answer: there is none.** The nearest override entry to any of the seven jumps
+is +0x13174 away (+0x17b80, +0x20f54, +0x47884, +0x528d8, +0x584ac, +0x68dc0 for the rest)
+-- every one far outside both known override blocks and unreachable by wave-79's "within
+0x600 of an overridden function" screen. Profile sensitivity is a PER-FUNCTION property,
+which matches W38's original finding (the discriminator was a call inside a loop body, not
+an address range) and refutes any hope of localising it by address. Wave 79 closed three
+latent partial-sweep cases; this survey certifies that **no further latent ones remain**: every parked toolchain claim testable against these runs agreed within 3 points, including
+sub_08012B70 (87.5/8.0/85.2), sub_08070F44 (56.7/19.2/68.3), sub_080620FC (old-agbcc 42.7),
+sub_080029F4 and sub_08068A00 (old_agbcc byte-neutral, unchanged), sub_0808AAF4 (-O1 worse:
+34.2 vs 59.9), and the flat verdicts on sub_08074AD0, sub_0803D558, sub_0804A760,
+sub_0804F18C, sub_08073228, sub_08073480 whose notes assert toolchain negativity. The four
+apparent numeric mismatches are all explained inside their own entries or by draft drift:
+sub_080620FC "configured 72.7" is the divergent permuter best.c the entry itself disowns;
+sub_0808AAF4 "no-force 28.3" was marked STALE by W79-D (today 59.9); sub_0808A3DC "-O1
+60.0" (W60) vs 55.6 today and sub_08049944's superseded figures reflect drafts that moved
+after recording -- exactly the wave-60 stale-score warning operating. **No parked.json edit
+was needed:** the wave-46 "TOOLCHAIN AXIS RULED OUT ... do not re-run it" text on
+sub_0808A3DC was already corrected by that same entry's wave-60 note, and nothing else in
+parked.json contradicts measurement.
+
+**Practical consequence.** The sweep is now cheap enough to be routine: ~0.7 s per pair,
+the whole pool inside a few minutes. Before spending a wave's probes on any source
+residual, re-run the six profiles mechanically instead of reasoning from an older note.
+A better off-default score is diagnostic about where allocation diverges and is worth a
+coordinator override ONLY with a byte-exact match under that configuration -- outcome (a)
+above says no such case exists today. And remember the direction asymmetry: most profile
+changes make a draft worse, so a failed profile probe does not mean the axis never fires.
+
+**Harness note.** Parallel sweeping across FUNCTIONS collides: trymatch.py writes fixed
+shared comparison artefacts `build/unitcheck/_target.bin` / `_cand.bin`, so eight workers
+produced five exit-code-2 failures with empty output among 930 pairs. Re-run sequentially;
+they then all parse cleanly. Per-function `--profile` artefacts (_cand.<prof>.bin/.o/.s)
+are collision-free by construction.
+
+**Full table -- 155 functions x 7 profiles, % identical (verdict: JUMP >+15, move +4..15,
+flat <=+4 over configured; all exits non-zero everywhere):**
+
+| fn | bytes | cfg | default | no-force | o1 | o1-nf | old-agbcc | old-agbcc-nf | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| sub_08000550 | 4 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | flat |
+| sub_08000568 | 4 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | flat |
+| sub_080029F4 | 188 | 51.6 | 51.6 | 51.6 | 50.5 | 50.5 | 51.6 | 51.6 | flat |
+| sub_0800401C | 172 | 19.8 | 19.8 | 19.8 | 29.1 | 29.1 | 19.8 | 19.8 | move |
+| sub_08004D90 | 68 | 19.1 | 19.1 | 19.1 | 20.6 | 20.6 | 19.1 | 19.1 | flat |
+| sub_08005F4C | 5084 | 29.2 | 29.2 | 8.0 | 5.4 | 6.6 | 25.8 | 7.8 | flat |
+| sub_080073F8 | 1012 | 69.7 | 69.7 | 66.4 | 70.2 | 47.2 | 69.7 | 66.4 | flat |
+| sub_080077EC | 232 | 25.9 | 25.9 | 26.7 | 43.1 | 43.1 | 25.9 | 26.7 | JUMP |
+| sub_08009310 | 476 | 92.4 | 92.4 | 29.2 | 39.1 | 39.1 | 91.2 | 28.8 | flat |
+| sub_08009538 | 488 | 17.4 | 17.4 | 12.1 | 10.7 | 10.7 | 17.2 | 12.1 | flat |
+| sub_08009918 | 544 | 61.2 | 61.2 | 22.6 | 6.6 | 6.6 | 60.7 | 22.6 | flat |
+| sub_0800CAA0 | 144 | 15.3 | 15.3 | 18.8 | 5.6 | 26.4 | 14.6 | 19.4 | move |
+| sub_0800CFDC | 6384 | 14.3 | 14.3 | 13.6 | 11.1 | 11.1 | 14.3 | 13.6 | flat |
+| sub_0800E8CC | 296 | 92.2 | 92.2 | 5.1 | 2.0 | 2.0 | 90.2 | 5.1 | flat |
+| sub_0800E9F4 | 256 | 86.7 | 86.7 | 67.6 | 67.6 | 67.6 | 86.7 | 67.6 | flat |
+| sub_0800F8D4 | 1136 | 11.3 | 11.3 | 17.3 | 7.9 | 7.9 | 11.3 | 17.3 | move |
+| sub_08010EF8 | 64 | 79.7 | 79.7 | 79.7 | 79.7 | 79.7 | 76.6 | 76.6 | flat |
+| sub_08012B70 | 88 | 87.5 | 87.5 | 87.5 | 8.0 | 8.0 | 85.2 | 85.2 | flat |
+| sub_08013D7C | 628 | 73.1 | 73.1 | 73.1 | 18.2 | 18.2 | 54.3 | 54.3 | flat |
+| sub_08014DCC | 120 | 71.7 | 71.7 | 71.7 | 20.8 | 20.8 | 71.7 | 71.7 | flat |
+| sub_08014FF8 | 352 | 32.4 | 32.4 | 9.7 | 10.2 | 9.1 | 32.4 | 9.7 | flat |
+| sub_08016F38 | 720 | 99.6 | 99.6 | 13.1 | 19.0 | 30.7 | 99.6 | 13.1 | flat |
+| sub_08018100 | 92 | 22.8 | 22.8 | 82.6 | 21.7 | 21.7 | 25.0 | 82.6 | JUMP |
+| sub_080193B0 | 84 | 33.3 | 33.3 | 33.3 | 32.1 | 32.1 | 33.3 | 33.3 | flat |
+| sub_0801A718 | 132 | 59.1 | 59.1 | 37.1 | 15.2 | 12.1 | 34.1 | 34.1 | flat |
+| sub_0801A7D8 | 1056 | 20.0 | 20.0 | 23.9 | 9.4 | 12.0 | 19.8 | 23.7 | flat |
+| sub_0801ADC8 | 556 | 64.6 | 64.6 | 25.0 | 11.9 | 11.0 | 29.9 | 25.0 | flat |
+| sub_0801B120 | 476 | 47.3 | 47.3 | 18.9 | 8.6 | 9.0 | 19.3 | 12.2 | flat |
+| sub_0801C01C | 116 | 27.6 | 27.6 | 27.6 | 28.4 | 28.4 | 27.6 | 27.6 | flat |
+| sub_0801C090 | 360 | 14.2 | 14.2 | 10.6 | 8.9 | 11.9 | 14.2 | 10.6 | flat |
+| sub_0801D390 | 856 | 8.8 | 8.8 | 15.5 | 6.8 | 6.9 | 8.8 | 15.5 | move |
+| sub_0801DCD4 | 516 | 12.0 | 12.0 | 9.9 | 15.3 | 33.3 | 12.4 | 9.9 | JUMP |
+| sub_0801E508 | 976 | 22.6 | 22.6 | 22.5 | 18.2 | 18.1 | 16.7 | 16.5 | flat |
+| sub_0801E9B0 | 824 | 27.8 | 27.8 | 17.7 | 9.3 | 9.3 | 27.3 | 17.8 | flat |
+| sub_0801ECE8 | 152 | 58.6 | 58.6 | 58.6 | 44.7 | 44.7 | 58.6 | 58.6 | flat |
+| sub_0801F19C | 80 | 45.0 | 45.0 | 45.0 | 38.8 | 38.8 | 37.5 | 37.5 | flat |
+| sub_0801F234 | 120 | 31.7 | 31.7 | 30.8 | 10.0 | 9.2 | 28.3 | 27.5 | flat |
+| sub_0801F4B4 | 572 | 58.6 | 58.6 | 9.6 | 41.1 | 15.7 | 46.0 | 14.9 | flat |
+| sub_0801FAC4 | 540 | 36.3 | 36.3 | 35.7 | 6.3 | 6.1 | 36.3 | 35.7 | flat |
+| sub_08020754 | 208 | 27.9 | 27.9 | 22.1 | 9.1 | 13.9 | 35.1 | 21.6 | move |
+| sub_08020DBC | 288 | 70.5 | 70.5 | 70.5 | 65.6 | 65.6 | 68.8 | 68.8 | flat |
+| sub_08020EDC | 492 | 90.7 | 90.7 | 40.7 | 14.8 | 14.8 | 83.9 | 42.3 | flat |
+| sub_0802216C | 560 | 39.5 | 39.5 | 39.5 | 0.0 | 23.8 | 39.6 | 39.6 | flat |
+| sub_08022618 | 400 | 11.8 | 11.8 | 11.8 | 7.5 | 7.5 | 14.0 | 14.0 | flat |
+| sub_08022BB8 | 540 | 21.1 | 21.1 | 21.1 | 22.6 | 22.6 | 28.1 | 28.1 | move |
+| sub_08023518 | 260 | 43.5 | 43.5 | 5.0 | 11.5 | 11.5 | 32.3 | 5.8 | flat |
+| sub_080236E8 | 316 | 68.0 | 68.0 | 5.7 | 5.1 | 5.1 | 30.4 | 6.6 | flat |
+| sub_08024720 | 132 | 42.4 | 42.4 | 21.2 | 20.5 | 21.2 | 42.4 | 21.2 | flat |
+| sub_08026290 | 176 | 30.1 | 30.1 | 18.2 | 6.2 | 6.2 | 30.1 | 18.2 | flat |
+| sub_080283E4 | 388 | 90.7 | 90.7 | 20.9 | 26.8 | 24.5 | 79.9 | 20.4 | flat |
+| sub_08028D28 | 240 | 27.1 | 27.1 | 24.2 | 43.3 | 27.5 | 27.1 | 24.2 | JUMP |
+| sub_0802AA78 | 2356 | 89.3 | 89.3 | 9.0 | 8.8 | 8.8 | 25.8 | 8.8 | flat |
+| sub_0802F03C | 512 | 93.2 | 93.2 | 32.4 | 12.1 | 10.9 | 42.8 | 29.7 | flat |
+| sub_0802F588 | 280 | 40.4 | 40.4 | 15.7 | 10.7 | 15.4 | 40.0 | 16.4 | flat |
+| sub_0802F6A0 | 604 | 45.9 | 45.9 | 11.4 | 8.9 | 13.2 | 45.9 | 11.4 | flat |
+| sub_0802FACC | 1388 | 6.3 | 6.3 | 8.7 | 5.8 | 5.8 | 6.3 | 8.8 | flat |
+| sub_080303C8 | 428 | 18.0 | 18.0 | 13.3 | 4.7 | 4.7 | 18.0 | 13.3 | flat |
+| sub_08031824 | 292 | 68.8 | 68.8 | 33.6 | 4.8 | 4.8 | 68.8 | 33.6 | flat |
+| sub_08035170 | 128 | 50.8 | 50.8 | 4.7 | 7.8 | 7.8 | 50.8 | 4.7 | flat |
+| sub_080359A4 | 324 | 45.1 | 45.1 | 45.1 | 21.6 | 21.6 | 40.7 | 40.7 | flat |
+| sub_080363F8 | 132 | 22.7 | 22.7 | 22.7 | 29.5 | 29.5 | 22.7 | 22.7 | move |
+| sub_080364F4 | 296 | 9.5 | 9.5 | 8.4 | 5.1 | 0.0 | 19.9 | 14.9 | move |
+| sub_080373F0 | 88 | 73.9 | 73.9 | 73.9 | 28.4 | 28.4 | 71.6 | 71.6 | flat |
+| sub_08037A78 | 268 | 27.6 | 27.6 | 21.3 | 21.3 | 10.1 | 27.2 | 28.4 | flat |
+| sub_08037FD0 | 496 | 96.8 | 96.8 | 22.2 | 20.0 | 27.4 | 96.8 | 22.2 | flat |
+| sub_08038D7C | 744 | 19.4 | 19.4 | 4.6 | 5.2 | 5.4 | 18.8 | 4.6 | flat |
+| sub_08039188 | 220 | 31.8 | 31.8 | 12.7 | 25.9 | 25.9 | 30.0 | 13.2 | flat |
+| sub_08039588 | 172 | 87.2 | 87.2 | 5.8 | 5.8 | 5.8 | 16.9 | 4.7 | flat |
+| sub_0803A2BC | 124 | 23.4 | 23.4 | 23.4 | 23.4 | 23.4 | 15.3 | 15.3 | flat |
+| sub_0803BFBC | 536 | 94.8 | 94.8 | 44.4 | 6.7 | 7.3 | 55.4 | 24.8 | flat |
+| sub_0803CFA4 | 660 | 54.5 | 54.5 | 16.7 | 18.2 | 16.2 | 39.7 | 16.8 | flat |
+| sub_0803D558 | 352 | 94.3 | 94.3 | 9.7 | 5.7 | 7.4 | 57.4 | 11.4 | flat |
+| sub_0803E6C4 | 160 | 16.9 | 16.9 | 16.9 | 20.0 | 20.0 | 16.9 | 16.9 | flat |
+| sub_0803F990 | 664 | 99.5 | 99.5 | 70.5 | 9.8 | 9.8 | 99.5 | 70.5 | flat |
+| sub_08040EF4 | 328 | 97.0 | 97.0 | 97.0 | 10.1 | 10.1 | 74.1 | 74.1 | flat |
+| sub_08042998 | 472 | 14.2 | 14.2 | 13.6 | 28.8 | 22.5 | 14.4 | 13.1 | move |
+| sub_08045FC8 | 104 | 32.7 | 32.7 | 32.7 | 32.7 | 32.7 | 32.7 | 32.7 | flat |
+| sub_08046030 | 1556 | 41.6 | 41.6 | 18.9 | 26.0 | 24.2 | 41.2 | 19.5 | flat |
+| sub_08046914 | 368 | 14.9 | 14.9 | 7.3 | 13.9 | 13.9 | 14.9 | 7.3 | flat |
+| sub_08046A84 | 672 | 40.2 | 40.2 | 40.2 | 30.5 | 14.9 | 38.1 | 38.1 | flat |
+| sub_08047190 | 1292 | 77.3 | 77.3 | 8.6 | 8.7 | 5.3 | 55.0 | 8.6 | flat |
+| sub_08049944 | 180 | 92.2 | 92.2 | 92.2 | 57.8 | 57.8 | 92.2 | 92.2 | flat |
+| sub_0804A760 | 920 | 59.3 | 59.3 | 6.5 | 6.2 | 6.2 | 52.1 | 8.8 | flat |
+| sub_0804BB74 | 324 | 30.6 | 30.6 | 8.6 | 5.6 | 5.6 | 30.6 | 8.6 | flat |
+| sub_0804C5A4 | 312 | 86.9 | 86.9 | 17.3 | 27.9 | 27.9 | 70.8 | 17.6 | flat |
+| sub_0804CA98 | 416 | 17.1 | 17.1 | 17.3 | 17.3 | 11.5 | 17.3 | 17.3 | flat |
+| sub_0804DA40 | 212 | 21.2 | 21.2 | 21.2 | 7.5 | 7.5 | 18.9 | 18.9 | flat |
+| sub_0804E7A8 | 328 | 91.2 | 91.2 | 85.7 | 15.2 | 15.2 | 83.5 | 78.0 | flat |
+| sub_0804F18C | 572 | 34.4 | 34.4 | 7.2 | 5.9 | 5.9 | 17.8 | 8.9 | flat |
+| sub_0804F658 | 612 | 31.4 | 31.4 | 18.0 | 11.4 | 11.4 | 52.6 | 15.8 | JUMP |
+| sub_0804FA2C | 632 | 46.2 | 46.2 | 46.2 | 20.1 | 20.1 | 20.7 | 20.7 | flat |
+| sub_080506B0 | 680 | 38.7 | 38.7 | 28.1 | 24.6 | 24.6 | 37.1 | 26.0 | flat |
+| sub_08050D44 | 196 | 66.8 | 66.8 | 66.8 | 14.8 | 14.8 | 19.4 | 19.4 | flat |
+| sub_08050FF8 | 804 | 21.1 | 21.1 | 17.9 | 8.7 | 8.7 | 13.2 | 11.1 | flat |
+| sub_08053520 | 192 | 84.9 | 84.9 | 84.9 | 27.6 | 27.6 | 63.0 | 63.0 | flat |
+| sub_080546F0 | 1060 | 26.8 | 26.8 | 20.4 | 18.6 | 12.5 | 25.8 | 19.3 | flat |
+| sub_08054C5C | 560 | 92.5 | 92.5 | 13.0 | 16.1 | 12.3 | 31.4 | 13.8 | flat |
+| sub_08055768 | 472 | 31.8 | 31.8 | 34.3 | 27.3 | 19.9 | 19.1 | 25.0 | flat |
+| sub_08055940 | 248 | 96.4 | 96.4 | 8.1 | 12.9 | 5.2 | 0.0 | 8.1 | flat |
+| sub_080560A4 | 680 | 25.4 | 25.4 | 15.3 | 12.1 | 12.2 | 22.2 | 10.4 | flat |
+| sub_0805634C | 364 | 38.2 | 38.2 | 23.4 | 30.5 | 23.1 | 20.9 | 31.6 | flat |
+| sub_08056638 | 144 | 95.8 | 95.8 | 95.8 | 7.6 | 0.0 | 95.8 | 95.8 | flat |
+| sub_08057164 | 268 | 20.9 | 20.9 | 19.0 | 16.8 | 12.3 | 18.3 | 16.8 | flat |
+| sub_08057BDC | 360 | 58.1 | 58.1 | 56.7 | 40.6 | 38.9 | 38.3 | 39.2 | flat |
+| sub_08058A2C | 392 | 24.5 | 24.5 | 24.5 | 77.6 | 77.6 | 24.2 | 24.2 | JUMP |
+| sub_08059E3C | 232 | 98.3 | 98.3 | 17.2 | 16.4 | 19.0 | 98.3 | 17.2 | flat |
+| sub_0805A0EC | 380 | 98.9 | 98.9 | 11.8 | 18.9 | 39.7 | 89.2 | 18.7 | flat |
+| sub_0805A9AC | 732 | 37.6 | 37.6 | 13.8 | 19.4 | 16.1 | 26.4 | 12.6 | flat |
+| sub_0805B6A0 | 164 | 25.6 | 25.6 | 6.7 | 15.2 | 15.2 | 6.7 | 13.4 | flat |
+| sub_0805D344 | 244 | 13.5 | 13.5 | 13.1 | 15.2 | 21.3 | 13.5 | 13.1 | move |
+| sub_0805D438 | 436 | 17.9 | 17.9 | 65.6 | 41.7 | 41.7 | 18.8 | 56.2 | JUMP |
+| sub_0805D888 | 508 | 52.2 | 52.2 | 33.3 | 43.9 | 27.2 | 50.4 | 32.5 | flat |
+| sub_0805DCD4 | 740 | 47.6 | 47.6 | 10.7 | 8.8 | 8.6 | 22.3 | 10.7 | flat |
+| sub_0805FC1C | 328 | 42.4 | 42.4 | 20.7 | 30.8 | 18.3 | 17.7 | 36.9 | flat |
+| sub_080607E8 | 172 | 54.7 | 54.7 | 54.7 | 15.7 | 15.7 | 14.0 | 14.0 | flat |
+| sub_08060DAC | 296 | 50.0 | 50.0 | 28.7 | 15.2 | 13.9 | 38.2 | 25.7 | flat |
+| sub_080611D8 | 304 | 75.0 | 75.0 | 55.6 | 17.1 | 18.4 | 71.4 | 53.3 | flat |
+| sub_08061308 | 864 | 13.5 | 13.5 | 11.1 | 23.8 | 16.6 | 14.1 | 11.5 | move |
+| sub_08061DCC | 136 | 15.4 | 15.4 | 15.4 | 11.8 | 11.8 | 16.9 | 16.9 | flat |
+| sub_080620FC | 564 | 29.3 | 29.3 | 26.2 | 13.1 | 11.0 | 42.7 | 36.2 | move |
+| sub_080627F4 | 752 | 99.2 | 99.2 | 99.2 | 17.7 | 17.7 | 66.9 | 66.9 | flat |
+| sub_08062C94 | 348 | 93.7 | 93.7 | 7.5 | 4.0 | 2.0 | 14.7 | 27.9 | flat |
+| sub_08062FF4 | 1008 | 14.4 | 14.4 | 14.4 | 3.7 | 3.7 | 10.1 | 10.1 | flat |
+| sub_0806412C | 232 | 56.9 | 56.9 | 48.3 | 44.0 | 44.0 | 56.9 | 48.3 | flat |
+| sub_08064288 | 392 | 28.6 | 28.6 | 27.3 | 17.9 | 16.8 | 7.1 | 6.6 | flat |
+| sub_08066874 | 428 | 93.9 | 93.9 | 30.6 | 16.1 | 14.7 | 34.8 | 30.8 | flat |
+| sub_08068038 | 172 | 36.6 | 36.6 | 18.0 | 4.7 | 4.7 | 24.4 | 19.2 | flat |
+| sub_08068A00 | 196 | 25.5 | 25.5 | 25.5 | 21.9 | 21.9 | 25.5 | 25.5 | flat |
+| sub_0806AB9C | 360 | 41.9 | 41.9 | 41.9 | 3.1 | 3.1 | 41.4 | 41.4 | flat |
+| sub_0806F41C | 308 | 15.6 | 15.6 | 18.5 | 17.5 | 17.5 | 14.6 | 6.8 | flat |
+| sub_0806F7C8 | 12 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | flat |
+| sub_0806FB48 | 30 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | flat |
+| sub_0806FD98 | 76 | 9.2 | 9.2 | 9.2 | 9.2 | 9.2 | 9.2 | 9.2 | flat |
+| sub_0807004C | 68 | 14.7 | 14.7 | 14.7 | 11.8 | 11.8 | 10.3 | 10.3 | flat |
+| sub_080702C0 | 64 | 12.5 | 12.5 | 12.5 | 9.4 | 9.4 | 12.5 | 12.5 | flat |
+| sub_08070F44 | 104 | 56.7 | 56.7 | 56.7 | 19.2 | 19.2 | 68.3 | 68.3 | move |
+| sub_08071918 | 48 | 2.1 | 2.1 | 2.1 | 2.1 | 2.1 | 2.1 | 2.1 | flat |
+| sub_08071B9C | 232 | 15.1 | 15.1 | 15.1 | 9.5 | 9.5 | 15.1 | 15.1 | flat |
+| sub_080726E8 | 216 | 18.5 | 18.5 | 18.5 | 9.3 | 9.3 | 18.5 | 18.5 | flat |
+| sub_08073228 | 220 | 29.1 | 29.1 | 28.2 | 10.0 | 8.2 | 20.0 | 20.9 | flat |
+| sub_08073480 | 244 | 87.3 | 87.3 | 43.9 | 5.7 | 3.7 | 87.7 | 43.9 | flat |
+| sub_08074AD0 | 144 | 51.4 | 51.4 | 51.4 | 21.5 | 21.5 | 38.2 | 38.2 | flat |
+| sub_080790D0 | 224 | 50.0 | 50.0 | 50.0 | 7.6 | 7.6 | 50.0 | 50.0 | flat |
+| sub_0807B7BC | 156 | 9.0 | 9.0 | 9.0 | 9.6 | 9.6 | 9.0 | 9.0 | flat |
+| sub_0807E980 | 1040 | 99.0 | 99.0 | 81.2 | 15.8 | 14.6 | 98.7 | 80.8 | flat |
+| sub_0807F434 | 240 | 18.3 | 18.3 | 3.8 | 0.0 | 7.9 | 18.3 | 3.8 | flat |
+| sub_0807F57C | 156 | 48.7 | 48.7 | 44.2 | 7.7 | 22.4 | 48.7 | 44.2 | flat |
+| sub_08084C14 | 816 | 75.9 | 75.9 | 12.9 | 12.9 | 12.9 | 41.7 | 16.1 | flat |
+| sub_08085B30 | 1040 | 99.1 | 99.1 | 19.1 | 12.4 | 12.3 | 96.2 | 19.0 | flat |
+| sub_080860DC | 1452 | 98.8 | 98.8 | 7.0 | 9.0 | 9.0 | 94.6 | 6.7 | flat |
+| sub_08086A58 | 416 | 13.9 | 13.9 | 13.9 | 18.5 | 18.5 | 15.6 | 13.9 | move |
+| sub_08087040 | 120 | 23.3 | 23.3 | 23.3 | 14.2 | 14.2 | 23.3 | 23.3 | flat |
+| sub_0808A3DC | 160 | 49.4 | 49.4 | 31.2 | 55.6 | 55.6 | 48.1 | 30.0 | move |
+| sub_0808AAF4 | 152 | 59.9 | 59.9 | 59.9 | 34.2 | 34.2 | 59.9 | 59.9 | flat |
+| sub_0808BBA4 | 24 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | flat |
+
+## WHICH SIDE OF THE try_match DIFF IS WHICH: `-` lines are the ROM (TARGET), `+` lines are your CANDIDATE (wave 81, W81-B)
+
+`-` lines carry absolute labels (`_08086xxx`); `+` lines carry `<fn+off>` labels.
+Misreading this direction inverts every measurement you take from the diff --
+it cost W81-B two attempts on sub_0807E980 before being caught. Read one known
+line and check which side it is on before reasoning about any hunk.
+
+## SNAPSHOT BEFORE *EVERY* try_match CALL, NOT ONLY BEFORE RISKY ONES (waves 63/81, re-confirmed twice)
+
+try_match persists whatever C it was handed into work/<fn>/<fn>.c even when
+compilation fails outright -- W81-A hit this twice with a stub body, W81-D once
+with a guessed draft before reading the file. A "confirmation" run of the
+source you THINK is active can silently replace it with something else. Copy
+the draft to work/<fn>/wNN-snapshot.c first, every time.
+
+## THE WAVE-58 REVERSE RULE GENERALISES: what must be authored is a second local whose DEFINITIONS DISAGREE BY VALUE (wave 81, W81-C)
+
+The measured statement "an IV initialising before the counter cannot be a giv"
+is the special case. The general mechanism: if the source has a second local
+that reaches a use via definitions of DIFFERENT VALUES on different paths
+(e.g. `(j = idx) >= 0` else `j = -1`), copy-prop coalescing cannot remove it,
+so the guard/subscript read a reload-materialised copy and the ROM shows an
+extra `adds rN,rM,#0`. Every prior spelling of sub_08024720 had j provably
+equal to idx and therefore missed; the disagreeing-value spelling produced the
+copy on the first attempt (42.4% -> 90.2%, size-exact). When a loop pool looks
+like it needs an instruction nobody authored, ask what second value flows to
+that use.

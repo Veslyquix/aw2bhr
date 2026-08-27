@@ -8813,8 +8813,16 @@ extern void (*gUnknown_08576890[])(void);
  * nibble of gpKeySt->unk02's low byte, i.e. a direction table: sub_0800105C
  * adds [i][0] to the cursor x and [i][1] to the cursor y. `[][2]` and not flat
  * -- the second read is emitted `base + 2` then `+ i*4`, the reassociated array
- * form. SIGNED from the `movs rI,#0; ldrsh` register-offset reads. */
-extern const s16 gUnknown_08499C7C[][2];
+ * form. SIGNED from the `movs rI,#0; ldrsh` register-offset reads.
+ * WAVE 81 (W81-D): NOT const in the original source. With the const removed,
+ * sub_08023518 -- parked since wave 36 with "CSE vs reload + force-addr are
+ * coupled" -- matches outright at 260/260, because the ROM reloads
+ * gUnknown_08499C7C[dir][N] after every intervening strh, which only a
+ * non-RTX_UNCHANGING read does, while KEEPING the -fforce-addr .rodata words.
+ * Verified under the de-const header: promoted sub_0802361C, sub_08023860 and
+ * sub_0800105C all still byte-match (exit 0 each); sub_080236E8 improves
+ * 68.0% -> 76.3% without matching. */
+extern s16 gUnknown_08499C7C[][2];
 /* Wave 33, W33-D. The cursor cell the direction table above steps, and the
  * partner of the pixel-space gUnknown_030032C4 (which moves by four times the
  * same delta). Plain `ldrh`/`strh` at +0 and +2. */
