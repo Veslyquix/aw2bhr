@@ -12575,6 +12575,13 @@ extern u16 gUnknown_020296BC[][20];
  * not distribute the `* 2` over `i + 9`, so that one emits `(i + 9) * 2`. The
  * 20-column row IS the 40-byte stride, not a proved extent. */
 extern u16 gUnknown_020296CE[][20];
+/* Wave 83, W83-B. Linker alias `= .` at 0x020296e4 sitting on *fill* in
+ * aw2bhr.map -- i.e. column-row view of gUnknown_020296BC row 1 (base+0x28),
+ * same family as gUnknown_020296CE above. Evidence: ROM sub_08055940 hoists
+ * ONE pool word R_ARM_ABS32 gUnknown_020296E4 and derives row 0 with
+ * `adds r6,r5,#0; subs r6,#0x28` (parked.json, waves 70/77/80/82), so the
+ * original read BOTH counted rows through this symbol. */
+extern u16 gUnknown_020296E4[][20];
 /* A pair of five-per-side u16 counters, read and written only as
  * `[i][j]` with the same (side, slot) index pair every other table in this
  * subsystem uses. sub_080501DC does `B94[i][j] += B80[i][j];` and zeroes BOTH
