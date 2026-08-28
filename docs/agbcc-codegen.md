@@ -49428,3 +49428,889 @@ the inits and steps negative via pool words (+8); `(7 - j)` indexing breaks the 
 body-stepped pointer locals cost the frame (+12, first diff moves to the prologue). The implied original
 shape is the pointer-variable form without the pseudo cost -- if you attempt it, the open question is
 where the pointers live without adding allocnos.
+
+## THE W83 LIVE-RANGE-SPLIT LEVER TRANSFERS TO 0 OF 5 BARE ALLOCNO TIES -- the discriminator is whether the ORIGINAL PSEUDO DIES AT THE COPY, and the tie-break is NOT the allocno number (wave 86, W86-B)
+
+Wave 83 closed `sub_08040EF4` with a narrow copy local (`short new_var; ... new_var = y;`)
+bound between two `Div` calls and used at every later y-site: it re-ranked a tied allocno
+pair (y->r8, s->r9) without rotating the other three values. `src/decomp/c_08040EF4.c` is
+the promoted proof. Wave 86 ran it as a controlled transfer test against five bare
+allocno ties, with the mechanism pre-registered. **It transferred to none of them.**
+With W84-C's earlier negative on `sub_0805A0EC` the lever now stands at 0 for 6 as a
+transfer, positive only in the function it was found in.
+
+| function | tie | placements tried | best result | baseline |
+|---|---|---|---|---|
+| `sub_0803F990` | force-addr base vs `(s16)i*4` | 3 | 40/664 differ, 94.0%, size-exact | 3/664, 99.5% |
+| `sub_0805B6A0` | two -fforce-addr address constants | 1 | 118/160, 25.6% -- **byte-identical to baseline** | 118/160, 25.6% |
+| `sub_08062C94` | r3/r4 and an r5-r7-r6 rotation | 2 | 129/348, 62.9%, size-exact | 22/348, 93.7% |
+| `sub_08066874` | `cnt` vs a LICM-hoisted `2` | 1 (declaration order) | 26/428, 93.9% -- **byte-identical to baseline** | 26/428, 93.9% |
+| `sub_0804DA40` | -- | n/a | **MATCHED by a TYPE change; it was never a tie** | 208/212, 21.2% |
+
+### The mechanism in the wave-86 brief was wrong in its second half
+
+The brief stated it as: "splitting one long-lived pseudo into two shorter ones changes
+each half's priority (refs / live length) in global-alloc, **and the new pseudo's allocno
+NUMBER (creation order) becomes the tie-break**", predicting that the split must be placed
+so the new pseudo is created before or after the competitor's, depending on which side
+must win.
+
+The first half is right. **The second half does not reach any of these ties, and two
+independent measurements say so:**
+
+- **Declaration order of locals is byte-neutral** (`sub_08066874`). agbcc's `expand_decl`
+  gives every non-addressable scalar local its pseudo at block entry, in DECLARATION
+  order, before any statement is expanded. So for a source local, statement position
+  cannot change its allocno number at all -- only its live range -- and declaration
+  position is the only thing that can. Moving `int cnt;` ahead of `struct Unk08580934
+  *state;`, nothing else changed, is byte-identical in every figure: 26 of 428, 93.9%,
+  first difference +0x7.
+- **Promoting a compiler temp to a source local is byte-neutral** (`sub_0805B6A0`). This
+  is the strongest available form of the number lever: a local declared at block top is
+  numbered ahead of EVERY temp in the function, both -fforce-addr address pseudos
+  included. Binding `*a1 * 0x20` to `int n;` and using it at both index sites gives 160
+  bytes, 118 differing, 25.6%, first difference +0xe -- identical to the baseline in
+  every figure. The two address constants did not budge.
+
+So `allocno_compare`'s `return v1 - v2;` tie-break is real, but by the time these ties are
+decided the competitors are not separated by it. Do not spend a probe on declaration
+order or on temp-to-local promotion expecting a register to move.
+
+### What the lever actually needs: THE ORIGINAL MUST DIE AT THE COPY
+
+Re-read the proof. In `c_08040EF4.c`, `y` is assigned once (`y = proc->unk3e & 0xff;`),
+copied once (`new_var = y;`), and **never read again** -- every later site reads
+`new_var`. `y` is DEAD from the copy onward, so its live range is genuinely CUT IN TWO:
+one short range before the copy, one short range after. Both halves get a shorter
+`live_length`, both priorities rise, and the pair re-ranks. Total live values across the
+region is UNCHANGED.
+
+In all five wave-86 attempts the copy source was still live afterwards, so nothing was
+split -- a pseudo was ADDED:
+
+- `sub_0803F990` (`j = i;`), `sub_08062C94` (`kk = k;`, `ii = i;`): the source is a LOOP
+  COUNTER, which the for-increment and the exit test keep live to the bottom of the body.
+  The copy cannot shorten it. Register pressure inside the loop goes up by one and
+  global-alloc re-runs for the whole region.
+- `sub_0805B6A0` (`n = *a1 * 0x20;`): the source is an expression, not a variable, and the
+  local occupies exactly the live range the temp already had. Nothing changed at all,
+  which is why this one is byte-neutral rather than worse.
+
+**A LOOP COUNTER IS THE ONE VALUE THE SPLIT LEVER CAN NEVER BE APPLIED TO.** So is any
+value read after the copy point. Before spending a probe, check that every later read of
+the value goes through the copy; if the original is read again anywhere downstream, you
+are adding an allocno, not splitting one, and on a loop body that is the same failure
+mode as W77-B's `register asm` pin (an extra fixed register inside the loop reran global
+allocation for the whole body, 664 bytes at 26.4%).
+
+### Two ties in one function are ONE allocation, not two
+
+`sub_08062C94` was chosen because it carries two independent-looking ties. A narrow copy
+placed in the THIRD loop moved the first difference from +0x11 to +0xe -- i.e. it
+perturbed the FIRST loop, upstream of the edit. The second placement, in the first loop,
+took the function from 93.7% to 9.5%. Both stayed size-exact, so this is pure allocation
+churn. **You cannot aim a split at one tie in a multi-tie function; global-alloc reruns
+for the whole function and every tie re-rolls.**
+
+### Corollary measured on the way: POOL ORDER AND REGISTER ASSIGNMENT ARE TWO FACTS, NOT ONE
+
+This doc says "of two address constants used the same number of times in the same
+statements, the pseudo created FIRST wins the callee-saved register ... so a misplaced
+`ldr` and a swapped pair of pool words are ONE fact, not two -- never chase the pool order
+directly."
+
+On `sub_0805B6A0` they came apart. Binding `&gUnknown_030033EC` to a pointer local ahead
+of the array base **did** swap the pool words into the ROM's order -- the swap that
+function has wanted since wave 48 -- while the base stayed in `ip` exactly as before.
+Pool order follows reference-creation order; the register follows allocno priority; they
+moved independently. The "one fact" claim holds only where the two constants really do
+tie on priority. Keep the advice not to chase pool order, but do not read a corrected
+pool order as evidence that the register will follow.
+
+(That spelling is otherwise a dead end there: the pointer local lets agbcc CSE
+`*zp * 0xc00` and hoist it out of the loop, killing the ROM's per-iteration re-read that
+W59-E proved must survive. On that function, "bind the other address first" and "keep the
+re-reads" are mutually exclusive, so the axis is CLOSED, not untried.)
+
+### And the wave's one match came from none of this: RE-DERIVE A PARK'S TWIN LIST FROM THE CONSTANTS
+
+`sub_0804DA40` had been parked since wave 34 and was classified in wave 79 as the
+canonical hopeless case: "NO SOURCE CONSTRUCT -- three values with identical reference
+counts tie on allocno priority, register numbers with nothing behind them; do not give it
+another budget without a NEW mechanism." It matched on the first attempt of wave 86, with
+no allocation lever at all. The residual was a declared TYPE: `u32 d` had to be `u16 d`.
+
+Two things went wrong in that park, and both are general:
+
+1. **The oracle that pinned the wrong type was inverted.** The park argued that a u16 `d`
+   promotes to signed `int` and would emit `__divsi3/__modsi3` against the ROM's
+   `__udivsi3/__umodsi3`. It does not. c-typeck's `build_binary_op` sets `shorten` for
+   `TRUNC_DIV_EXPR`/`TRUNC_MOD_EXPR` when operand 0 is a `NOP_EXPR` off an unsigned type
+   AND operand 1 is an `INTEGER_CST` that is not all-ones -- both hold for `d / 0x38`.
+   `shorten_binary_op` then performs the division in the shortened UNSIGNED type, so u16
+   emits `__udivsi3` exactly as u32 does. **Both widths emit the same call, which is
+   precisely why the wrong width was invisible to that oracle**: it was byte-neutral at
+   the call and cost one register in the high bank. A byte-neutral difference at the place
+   you are using as an oracle is not evidence about the type.
+2. **The park's twin list was a record of what had been looked at, not of what is
+   nearest.** It named the two address-adjacent functions and recorded that nothing in
+   either transferred. The actual nearest matched relative is `sub_0804CE24`
+   (`src/decomp/c_0804CE24.c`): same prototype, same `sub_0801566C` readout, the same
+   `0x38` divisor and the same `0x700` stride, differing only in the `gUnknown_02029668`
+   column and the VRAM base -- and matched with `u16 d` the whole time. It sits 0xC1C
+   bytes away, so no adjacency screen finds it.
+
+**Re-derive a park's twin list from the CONSTANTS -- divisor, stride, destination base,
+callee -- not from the address neighbourhood, and not from the list the park wrote down.**
+This is the wave-77 grep-the-tree rule with a sharper handle on it: the older the park,
+the more likely the answer arrived in a promoted file after the twin list was written.
+
+## The W56-F insn-count lever: only SAME-DIRECTION shift-of-shift survives to gcse, and the reachable set is tiny (wave 86, W86-A)
+
+W56-F established that spill-slot ORDER is set by gcse PRE's expression hash
+table, whose size is `max_cuid / 4`, so **the lever is the pre-allocation insn
+count** and `(w >> 2) >> 1` works by adding one insn that `combine` folds back.
+Wave 86 ran that lever to exhaustion on `sub_080627F4` -- 38 spellings, three
+sweeps -- and the result is two rules, one enabling and one limiting.
+
+**Which fold-backs actually reach gcse.** `cse_main` finishes with
+`delete_trivially_dead_insns`, and `fold` collapses most reassociation at parse
+time, so nearly every "add one insn" trick is gone before `max_cuid` is taken.
+Measured on one function, all byte-identical to the control:
+
+- `(a << 1) >> 1` and `((a << 1) >> 1 >> 1) >> 1` -- **fold before gcse**
+- `(t * 0x20) << 1`, `(t << 5) << 1` -- MULT/LSHIFT reassociation, folded
+- `t * 0x40 + 0x20 + 0x20`, `0x40 + t * 0x40`, `t * 0x40 + 0x3f + 1` -- folded
+- `((g >> t) & 3) & 1` -- mask merging, folded
+- every address-scaling respelling of `&g[u]` (`g + u`, `&g[0] + u`,
+  `(T *)((u8 *)g + u * sizeof (T))`) -- folded
+- a DEAD statement of any form -- deleted by `delete_trivially_dead_insns`,
+  which is why wave 74's six dead-assignment variants were all byte-identical
+
+**What survives is a right-shift of a right-shift -- shift-of-shift in the SAME
+direction.** `(a >> 1) >> 1` for `a >> 2` is the only reliable +1. W84-B had
+guessed the discriminator was signed-vs-unsigned (its `u32 v >> 2` split folded
+while the `int` ones did not); it is not. The discriminator is **direction**:
+same-direction pairs survive, opposite-direction pairs (`<<` then `>>`) fold.
+
+**The limiting rule, and it is the important one.** The number of foldable
+sites bounds the number of insn counts you can reach, and therefore the number
+of slot layouts. `sub_080627F4` has exactly TWO `>> 2` sites, giving counts
++0, +1, +2 -- and +0 and +1 produce the same layout, so the whole lever reaches
+**two of the six** permutations of its three spilled pseudos. Neither is the
+ROM's. So before spending a wave on this lever, **count the same-direction
+shift sites in the function**: with fewer than three you cannot sweep the table
+size, and a negative result is a property of the source, not of the hypothesis.
+
+**Read the residual as an ORDER, not as a set of swaps.** Slot offsets rise in
+allocation order, so `{0x10, 0x14, 0x18}` is a permutation. On `sub_080627F4`
+the ROM's order is RTL creation order (loop init, counter, loop test), the
+0/1-split candidate is that order exactly REVERSED, and the 2-split candidate
+is a transposition of the last two. Three parked notes on this function had
+each described the residual as "a pair swap" and two of the three named the
+wrong pair; decoding it as a permutation of an ordered list settles it in one
+reading.
+
+## Cheap harness: N spellings as N functions in ONE unit, scored off the `.s` (wave 86, W86-A)
+
+`tools/permute.py` normalises `[sp, #N]` immediates away, so a residual made
+entirely of stack slots scores 0 and the search never runs (wave 60 found this
+on `sub_080627F4`). The same is nearly true of a residual made of two register
+numbers. Both are cheap to sweep by hand with this pattern, which wave 86 used
+for 53 spellings across three functions at a cost of five compiles and **zero**
+`try_match` attempts:
+
+1. Wrap the function body in a `#define BODY(NAME, ...)` macro, or textually
+   rename the function N times, so one translation unit holds N variants under
+   N different names. gcse and reload run per function, so the variants do not
+   interfere.
+2. Compile it with `agbenv.flags(<the real function name>)` so the unit gets
+   the function's own configured profile and any override.
+3. Parse the `.s` per function label and extract the signature that
+   discriminates the residual -- for a stack-slot residual the ordered list of
+   `[sp, #N]` operands; for a register residual the instruction neighbourhood
+   of the differing site; for a pressure residual the frame directive, the
+   `mov ip/sl/sb, rN` set and the count of a rematerialised immediate.
+4. Compare against the same signature extracted from `work/<fn>/target.s`.
+
+Two practical notes. `compile_probe` writes the same `.s` to
+`build/probe/<stem>.s`, so its output can be read from disk instead of being
+returned -- what it returns is capped at 400 lines and on a large function
+those 400 lines are `.debug_abbrev`, not code. And when calibrating offsets
+against `target.s`, do not assume 2 bytes per THUMB instruction: anchor the
+listing on a known differing byte instead. Wave 86's first calibration on
+`sub_0805A0EC` was 4 bytes out and made `r3` look live where it was dead.
+
+## A constant local pins a register by its live-range START, not by existing (wave 86, W86-A)
+
+On `sub_0805A0EC` the residual is two bytes: the ROM stores the zero from `r0`,
+the draft from `r3`. The draft binds `int new_var3 = 0;` before the guards.
+Four spellings, one unit, read off the `.s`:
+
+    ROM        : ldr r1,[r0] | movs r0,#0 | strh r0,[r5,#2] | mov r2, ip | ldrh r0,[r2]
+    zero local bound BEFORE the guards : mov r3,#0 | strh r3 | mov r2, ip
+    literal `0`                        : mov r0,#0 | strh r0 | mov r3, ip
+    zero local bound just BEFORE the store : mov r0,#0 | strh r0 | mov r3, ip
+    literal + a later-dead extra local     : mov r0,#0 | strh r0 | mov r3, ip
+
+**A zero local assigned immediately before its use compiles byte-identically to
+the literal.** Only a live range that starts early enough to span other
+computation gets an allocno that holds a hard register. So "literal" and
+"late-bound local" are the SAME experiment, not two axes -- several parked
+entries in this tree list them separately and thereby double-count one
+measurement.
+
+The second half is a warning about reading these residuals. The park had
+recorded "the ROM has the zero in r0 AND something live in r3 across the
+store". Tracing r3 on the calibrated listing refutes it: r3 holds `props + off`
+and dies two guards earlier, and is next *written* 0x24 bytes after the store.
+Both r2 and r3 are free in the ROM at that point. The real structure is a
+**two-way trade** -- occupying r3 with the zero buys the correct `mov r2, ip`
+scratch and loses the zero's register, and freeing r3 buys the zero's register
+and loses the scratch. Both spellings are two bytes. **When two spellings of
+one construct give equal-sized residuals at different offsets, write it down as
+a trade; a park that names only one of the two halves reads like an unfinished
+search when the search is actually complete.**
+
+## CONSTANT-DERIVED TWINS SUPPLIED A NEW CONSTRUCT FOR 1 OF 5 PARKS, AND THE ONE THAT LANDED WAS A MIRROR FUNCTION — SCREEN ON INVERSE SHAPE, NOT ON OVERLAP SCORE (wave 86, W86-D)
+
+W86-B proposed an axis mid-wave: **re-derive a park's twin list from the
+CONSTANTS and CALLEES, not from the address neighbourhood.** Per the wave-59
+rule it was tested in the same wave. The orchestrator ran an IDF-weighted
+screen over `asm/*.s` (rare callees + rare immediates + non-address pool
+words) and handed five parked functions their top matched relative. Result:
+
+| target | twin | screen basis | verdict | outcome |
+|---|---|---|---|---|
+| `sub_08016F38` | `sub_08017208` | 2 callees, imm 0xba/0xbb/0xc4 | YES | **MATCHED, first probe** |
+| `sub_0804A760` | `sub_0804A260` | 2 callees, imm 0x5d/0x5f/0x63 | no (already cited) | refuted, +4 -> +10 |
+| `sub_08084C14` | `sub_080849C8` | **SIX** callees + imm 0xab | YES | refuted, size-exact -> +32 |
+| `sub_0805DCD4` | `sub_0805E87C` | 3 callees, imm 0x79 | YES | refuted, -4 -> -8 |
+| `sub_0805D888` | `sub_0805E440` | 3 callees | NO | clean NO, no probe |
+
+**1 of 5. The axis works, but the screen's own score does not rank it.** The
+pair with the STRONGEST overlap on the list — six shared callees, a
+character-for-character shared `unk01 == 2 ? sub_0802490C(...) :
+sub_080248F8()` idiom — produced the worst regression of the batch. The pair
+that converted shared only two callees.
+
+### What actually predicted the hit: the twin was the INVERSE function
+
+`sub_08016F38` is the SAVE routine and `sub_08017208` the LOAD routine for one
+`struct SaveBlk` / `struct Map`. Same plane loop, same `unk417a[x] + y` index,
+same `gUnknown_03003F68 + 2` access, same sentinel `unk0bb8[]` replay, same
+three trailing copy loops — with source and destination exchanged. The load
+side had been matched in wave 80 by the W77-K offset lever, and the save side
+had been parked at 3 bytes since wave 74 with **five separate agents (W74,
+W77-M, W81-A, W82-A, W84) classifying the residual as a bare commutation tie
+with no source lever.** It had a source lever. It was written down in the
+mirror, and the whole transplant was one statement:
+
+    idx = ...unk417a[x] + y;
+    off = idx * 2;                                     /* <-- the lever */
+    ...unk0a22[idx] != *(u16 *)((u8 *)gUnknown_03003F68 + off + 2)
+
+Binding the byte offset as its own statement creates the index chain's pseudo
+BEFORE the pool constant and the base load, so the chain takes r1 and the
+constants r0 — the exact r0/r1 exchange that was the residual.
+
+**And the near-miss is the trap.** `sub_08016F38`'s park had explicitly ruled
+out `*(u16 *)((u8 *)g + idx*2 + 2)` — the INLINE form — as byte-neutral. That
+is precisely the spelling wave 53 measured on the twin and called "not
+reachable from the source here" before wave 80 overturned it with the
+statement split. **A park that rules out the inline form of a lever has not
+tested the lever.** Grep your park's ruled-out list for the inline sibling of
+any statement-split construct before believing the axis is closed.
+
+### So: screen on INVERSE / MIRROR shape, not on shared-callee count
+
+Save/load, serialise/deserialise, install/remove, push/pop, encode/decode.
+A mirror pair shares the whole statement skeleton, so a lever found on one
+side transplants literally. A vocabulary neighbour shares callees and
+immediates and nothing else, and the four misses here were all of that kind:
+same subsystem, same globals, different shape (352B and 364B single scans
+against a 740B two-scan search; a 520B straight-line init against an 816B
+jump-table key handler). **Classify the pair before spending the probe** —
+"true shape twin / same-vocabulary neighbour / unrelated" is a cheap call and
+it was 5-for-5 predictive here.
+
+### Three mechanism results from the refutations, each worth keeping
+
+1. **The `*(T *)&p->m` alias lever is FUNCTION-SCOPE and all-or-nothing.**
+   c_0804A260.c documents that a bare pointer-cast MEM is not
+   `MEM_IN_STRUCT_P`, aliases the global pointer, and forces a reload where a
+   cast through a struct does not. Read backwards on `sub_0804A760` — whose
+   ROM reloads where the draft hoists — it is true but unusable: introducing
+   the alias in a do-while body killed PRE's hoist for the POST-loop switch as
+   well, and those four arms each paid a reload. +4 became +10. **There is no
+   way to scope this lever to one loop.** Corrected reading of that park: the
+   ROM has no hoist at all, reloading per arm and once more after the loop.
+
+2. **A `register asm` pin is not a neutral experiment when the parameter is
+   competing for callee-saved registers.** On `sub_08084C14`, pinning the
+   shared constant 1 to r8 (copying c_080849C8.c's `savedParent asm("r9")`,
+   which was that function's whole match) forced a `mov rLOW, r8` at EVERY
+   store where the ROM spends ONE, and reserving r8 displaced the parameter
+   from r7 to r6. Size-exact 816/816 became +32. It also refutes the wave-54
+   park's wording: **"the shared constant 1 ... out of r8" does not mean the
+   ROM holds 1 in r8 across the arms** — if it did, the pin would have
+   reproduced the single `mov`.
+
+3. **Binding a base to a local REDUCES register pressure — stop using it to
+   add pressure.** `sub_0805DCD4`'s header asks for "one more value live
+   across the second loop so that sl is not free". Binding the 0x376A plane
+   base took -4 to -8 and 47.6% to 41.9%, because the bound pointer collapses
+   two re-spelled member accesses into one register. Second independent
+   measurement of the direction (W66-M got it on the +0x12 base). An extra
+   live value has to come from a value genuinely USED twice, never from an
+   alias of one used once.
+
+### One process finding
+
+The wave-86 prompts asserted, per function, that the screen's top relative was
+"NOT named anywhere in their park entry or draft". **That was false for 1 of
+5**: `sub_0804A760`'s active draft cites `c_0804A260.c` by name at its own
+struct definition and had already imported that file's view struct. A screen
+that reports novelty should diff against the draft text, not only against
+`parked.json`.
+
+## TWO EXTENSIONS OF ONE VALUE OFF ONE `lsls` MEANS TWO SOURCE LOCALS, NOT ONE LOCAL WITH AN EXOTIC WIDTH (wave 86, W86-C)
+
+`sub_080193B0` sat parked for 54 waves on this shape, and the whole park was a
+search in the wrong space.
+
+The ROM keeps two extensions of a narrow-returning call's result off a
+**single** `lsls`:
+
+```
+lsls r0, r0, #0x10
+lsrs r2, r0, #0x10      <- zero-extended home
+asrs r0, r0, #0x10      <- sign-extended home
+```
+
+and then re-derives the array subscript by SIGN-extending the zero-extended
+copy (`lsls r0,r2,#0x10 ; asrs r0,r0,#0x10`). The `== -1` test reads the
+sign-extended home; every subscript reads the other.
+
+**That is two locals:**
+
+```c
+s16 r;
+u16 idx;
+r = sub_08019290(NULL);   /* asrs -- read by the test        */
+idx = r;                  /* lsrs -- read by every subscript */
+if (r == -1) return NULL;
+gUnknown_0200C528[(s16)idx]. ...
+```
+
+Both narrowings apply to the SAME SImode call result, so cse shares the one
+`x << 16` between them -- which is why there is one `lsls` and two extensions
+rather than two shift pairs. `idx = r` is enough on its own: combine folds
+`zero_extend (truncate (sign_extend x))` back to `zero_extend (truncate x)`,
+so the second `lsls` the naive reading expects never appears.
+
+**Why the one-variable search could never work.** Wave 32 tried `s16 i`, then
+`u16 i` with `(s16)i` at both uses, then retyping the callee's return to
+defeat gcc's knowledge that the value is already narrow. One variable has
+exactly one home, so no spelling of it can produce two, and combine is right
+to delete whichever extension is redundant. Nothing had to be defeated: with
+two locals the two values are genuinely different and neither is redundant.
+
+**This also refutes a plausible wave-86 hypothesis, so do not re-run it:** the
+surviving zero-extension is NOT `nonzero_bits` failing on a multi-set pseudo
+(wave 57). `idx` is single-set in the matching source.
+
+**Read it as the general diagnostic.** W80-F gave "same register, different
+block = ONE variable". The converse holds too and is worth as much: **two
+registers holding differently-extended views of one computed value, live at
+the same time, means two source locals.** Before spending a wave on widths and
+casts, count the homes.
+
+## AN ARRAY BASE AND A SCALAR-STRUCT BASE PUT A CONSTANT MEMBER OFFSET IN DIFFERENT PLACES (wave 86, W86-C)
+
+Controlled probe, identical address arithmetic in both arms -- a constant 4
+plus a variable `m * 2`, feeding a THUMB `ldrsh` (which has no immediate form,
+so it needs an index register either way):
+
+```
+ARRAY   gUnknown_085643B0[0][1][m]
+        ldr r2,=sym / ... / lsl r0,r0,#1 / adds r2,#4 / adds r0,r0,r2 /
+        movs r1,#0 / ldrsh r0,[r0,r1]                       (4 insns)
+
+STRUCT  gUnknown_085643A8.unk04[m]
+        ldr r3,=sym / ... / lsl r0,r0,#1 / adds r0,r0,r3 /
+        movs r1,#4 / ldrsh r0,[r0,r1]                       (3 insns)
+```
+
+**Mechanism.** `-fforce-addr` FORCE_REGs an ARRAY's address **bare** at the
+subscript, so any constant offset applied afterwards has to be a runtime add
+on that register and the `ldrsh` indexes with zero. A scalar struct is never
+subscripted, nothing forces its address first, so the address of a member
+stays a link-time constant and folds -- into the `ldrsh` index (the plain and
+pointer spellings) or into the pool word's relocation (a `const s16 *p =
+g.unk04;` local, and a cast of the symbol's address to a pointer-to-array).
+Those are the only two places agbcc will put it.
+
+**So `adds rBASE,#k` with a zero `ldrsh` index is a TYPE tell, not an
+expression-shape tell.** If the ROM has it and your candidate does not, the
+global is declared as a struct and it is an array. `sub_08053520` was parked
+at 84.9% for four waves on exactly this: its first half already matched
+because that base (`gUnknown_085D6C88`) is an array, and its second half was
+one instruction short because that base was modelled as a struct. Retyping
+`gUnknown_085643A8` to `const s16 [][2]` and writing `g[1][m]` matched it
+byte-for-byte with no other change.
+
+**Two corrections that come with it:**
+
+- The `unknown-globals.h` comment on that symbol asserted the exact opposite
+  ("which only a struct member array gives") and three waves of probes were
+  run against it. It had generalised from a `const s16 *p = g.unk04;` local --
+  a POINTER TO THE MEMBER, a different construct from a 2-D array with a
+  constant outer index, and one that really does sink the 4 into the
+  relocation. **A type comment that reasons from a pointer-to-member is not
+  evidence about an array subscript.**
+- Wave 51's note that cse const-propagates a `struct T *q = &g;` local back to
+  the symbol is WRONG as stated. Declared at function top, `q` survives cse
+  intact: the pool word stays the bare symbol and the pointer lives in a
+  callee-saved register across the merge. Two definitions change nothing,
+  because there was nothing to defeat. What is true is only the conclusion --
+  the member offset still folds into the `ldrsh` index, so a pointer is not
+  the lever either.
+
+## A GOTO LOOP REPRODUCES AN UNROTATED SEARCH LOOP, AND ITS STRIDES MUST BE EXPLICIT SOURCE VARIABLES (wave 86, W86-C)
+
+W46-B's chapter says a goto loop is invisible to loop.c. `sub_08073228`'s
+inner search is the worked confirmation, and it settles three parked facts at
+once.
+
+The park listed three defects and predicted they would move together: the ROM
+was UNROTATED (exit test at the top, unconditional `b` at the bottom), it
+compared with the searched-for character on the LEFT, and it strength-reduced
+`j * 8` to `adds r4,#8`. Wave 46 tried `while (tbl[j].unk00 != c) j++;`, a
+`for (;;)` with an `if (...) break;`, and the same `for (;;)` with a leading
+`k = j * 8;`. **All three rotate**, because every `for`/`while` emits
+`NOTE_INSN_LOOP_BEG` and jump.c's `duplicate_loop_exit_test` then moves the
+test to the bottom.
+
+```c
+k = j * 8;
+p = (const u8 *)gUnknown_08614024 + k;
+_search:
+    if (c == *p) goto _found;
+    k += 8; p += 8; j++;
+    goto _search;
+_found:
+```
+
+emits the ROM's body instruction for instruction: unrotated, `cmp` with `c`
+on the left, three explicit `+8`/`+8`/`+1` steps, `b` at the bottom. **One
+construct, three parked facts.**
+
+**The cost, and it is the thing to plan for.** loop.c is not there to invent
+the element-pointer giv, so the pointer must be an explicit source local --
+one more pseudo than the for-loop version hands the allocator. On
+`sub_08073228` that is exactly what the residual became: the first parameter
+takes the callee-saved `sl` instead of spilling to `[sp,#0]`, and the frame
+comes out 0x1c against the ROM's 0x20. **Expect a goto loop to buy the loop's
+shape and spend a register doing it.**
+
+**And the dead copy at the ROM's loop top cannot be authored.** The ROM has a
+dead `adds r0,r4,#0` ahead of the exit test, which reads like a source
+statement. It is not reachable from C: written as `m = k;` with `m` unused,
+flow deletes it (W80-F: a dead copy is a no-op); written as `m = k;` with `m`
+used after the loop, `m` coalesces with `k` and the copy is deleted again --
+byte-identical output in both cases, measured.
+
+## THE SECOND DELAY LEVER: BIND THE WHOLE INDEX TO ITS OWN LOCAL BEFORE THE REFERENCE (wave 86, W86-C)
+
+W73-H sorted this project's allocno levers by DIRECTION and concluded that
+five of six move a reference EARLIER, that only byte-offset-first moves one
+LATER, and that that one is welded to an index reassociation. On the strength
+of it `sub_0804C5A4` was recorded as CONFIRMED IMMOVABLE with an empty axis
+list. **The conclusion was wrong; there is a second delay lever.**
+
+`-fforce-addr` emits the FORCE_REG of an array's address when the ARRAY_REF is
+expanded, which is BEFORE its index subtree. That is why a base address
+constant can be loaded a dozen instructions ahead of its use. So:
+
+> **Bind the whole index expression to its own local, in the ROM's own term
+> order, in a statement BEFORE the reference, then write the access with the
+> base added to that local.**
+
+Once the index is a live pseudo from an earlier statement, the only thing left
+to expand at the reference is the base load and one add, so the load lands at
+the point of use.
+
+```c
+off = (g[side].unk1a & 1) * 2 + (h[side][2] - 1) * 4 + h[side][1] * 24;
+f(*(const s16 *)((const u8 *)gUnknown_085D6C94 + off));
+```
+
+`sub_0804C5A4`: 86.9% -> 99.4%, size-exact, twelve instructions of
+displacement gone, the 0x12c/0x130 pool pair now in the ROM's order with no
+anchor. W73-E's byte-offset-first spelling had failed at this same function
+because it reassociated the index INLINE, costing +8 bytes and a spill;
+**doing the identical reassociation as its own STATEMENT costs nothing** --
+the `adds r0,#4` / `adds r2,#2` reuse of one base register survives.
+
+**But position and register TRADE, so read this before spending probes on the
+remainder.** The same function's last two bytes are one register, and the two
+halves of the answer live in different spellings:
+
+- **index local DEAD** (the array spelling kept, the sum written only as a
+  dead statement -- W80-B's form): the base load takes the ROM's register
+  (r2), but lands ONE instruction early, because the index's final add then
+  belongs to the array-ref expansion rather than to the dead statement.
+- **index local LIVE**: the final add belongs to the index statement, so the
+  load lands in the ROM's position -- but takes r0.
+
+Neither `u32` for the local, nor putting the base as operand 1, nor a comma
+assignment binding the base to a pointer first, nor materialising the pointer
+in its own statement, nor binding the loaded value to a local before the call,
+nor spelling the base as the address of its first element moves the register.
+Same family as wave 85's "hoisting a pointer init before a loop FLIPS the giv
+register assignment -- the two orders trade, they do not compose."
+
+## A SHAPE TWIN ONLY TRANSPLANTS A LEVER IF IT CONTAINS THE RESIDUAL'S CONSTRUCT, SOLVED — SHARING A SKELETON IS NOT ENOUGH (wave 86, W86-E)
+
+Second half of the twin axis W86-B proposed and W86-D opened (see the previous
+chapter). W86-E was handed five more parks screened a different way: **Jaccard
+over `data_refs` union non-hub callees**, constrained to comparable size
+(0.5–2x) and the same loop count (±2), taking the top-ranked matched relative
+that is named nowhere in the park or the draft.
+
+| target | twin | pair class | untried construct? | outcome |
+|---|---|---|---|---|
+| `sub_08020EDC` | `sub_08020DBC` | true shape twin | YES — `int rowOff = 0x417a` + `int new_var2 = 0x13` | 90.7% -> **89.4%**, first difference unmoved |
+| `sub_0801ECE8` | `sub_0801E8D8` | true shape twin (J=1.00) | YES (weak) — constant-first operand order | refuted, output unchanged (0 `try_match`) |
+| `sub_08045FC8` | `sub_080853B0` | same-vocabulary neighbour | NO — killed by the target's own ROM | clean NO, 0 probes |
+| `sub_0804F18C` | `sub_0804EEFC` | true shape twin | YES — `<< 3` / `* 0x100` **both inverted** | 34.4% -> 14.0%, -20 -> -12 bytes |
+| `sub_0804F658` | `sub_0804EEFC` | true shape twin | YES — same | 31.4% -> **38.2%**, -8 -> +12 bytes |
+
+**0 of 5 converted; 4 of 5 yielded a genuinely untried construct.** Across both
+halves of the wave the axis stands at **1 of 10**. The screen is good at
+finding untried source constructs and poor at converting parks, which is a
+different result from "the screen does not work" and should be read as such.
+
+### The refinement: same-direction twins supply constructs, not levers
+
+W86-D's rule was "screen on INVERSE / MIRROR shape, not on shared-callee
+count", from one save/load pair that converted. W86-E's four true shape twins
+were all **same-direction** twins — a smaller, simpler sibling doing the same
+job in the same direction, not an inverse — and none converted. The mechanism
+is visible in every one of them, and it sharpens the rule:
+
+- `sub_0801E8D8` is `sub_0801ECE8`'s skeleton with four field writes instead of
+  six. It has **no `long long` member and no mask**, so it contains no instance
+  of the DImode-constant residual at all.
+- `sub_080853B0`'s two scaled indices derive from **different** values (`i + 1`
+  for the 0x3c record, `i` for the position), so its build never had the shared
+  `i << 4` that is `sub_08045FC8`'s entire residual.
+- `sub_0804EEFC` has no second `pos` reference and none of the callee-saved
+  contention that is F18C/F658's residual.
+
+**So: a twin transplants a lever only when it contains the same residual
+construct in a SOLVED state.** A mirror pair passes this test structurally —
+save/load, encode/decode, install/remove share every statement, so every
+construct on one side has its solved counterpart on the other. A same-direction
+smaller sibling usually fails it, because "smaller" almost always means it
+dropped exactly the construct that is hard. Classify on that question — *does
+the twin contain this residual's construct, matched?* — not on skeleton
+similarity, which all five of these passed.
+
+### Three mechanism results worth keeping
+
+**1. The DImode high-word constant is `thumb_load_double_from_address`, and
+that closes the axis.** `sub_0801ECE8` has been parked since wave 33 on "a
+DImode mask's high-word all-ones constant that CSE re-spends on the `== -1`
+compare". agbcc names the real culprit in its own emitted comment:
+
+    ldr r1, .L5+0x8   @ created by thumb_load_double_from_address
+    ldr r2, .L5+0xc   @ created by thumb_load_double_from_address
+
+The `0xFFFFFFFF` is not created by expanding the AND and not created by CSE.
+`thumb_load_double_from_address` pulls **both** words of the `CONST_DOUBLE` out
+of the literal pool into a register pair *before any AND rtx exists*; the
+high-half AND then folds away, but its operand register is already live, and
+CSE only re-spends the pseudo it is handed. **No source-level respelling of a
+DImode AND against a negative `int` constant can avoid the high-word pool
+constant** — one `CONST_DOUBLE` rtx, one unconditional loader. One-expression
+folding (wave 58), parameter self-assignment (wave 58), statement interleaving
+(W81-D), statement split (W81-D) and source operand order (W86-E) have now all
+measured identically, exactly as the mechanism predicts. This is a residual
+kind 3 with a *named and closed* mechanism and should be stopped on the way
+kinds 4 and 5 are.
+
+**2. `g * 8` and `g << 3` are byte-identical; `g * 0x100` and `g << 8` are
+not.** The doc's long-standing rule — `shorten_binary_op` applies to
+`MULT_EXPR` and not to shifts, so `g * 0x100` is not `g << 8` for a narrow
+global — does **not** generalise to every power of two. Measured on two sibling
+functions independently: swapping `unk28 = gUnknown_0300451C * 8` to `<< 3`
+returned reports identical to the byte, while swapping
+`oam.tileNum = gUnknown_0300453C << 8` to `* 0x100` was the whole effect in
+both. The rule is about the *width the product fits in*, not about `MULT_EXPR`
+versus shift as such: `* 8` on a narrow global does not widen the result out of
+HImode, so there is nothing for `shorten_binary_op` to shorten and the two
+spellings converge.
+
+**3. The same one-statement change costs different byte counts in sibling
+functions, in opposite score directions.** `oam.tileNum` from `<< 8` to
+`* 0x100` is +8 bytes and -20 points on `sub_0804F18C`, and +20 bytes and
++6.8 points on `sub_0804F658` — two functions instantiated from one another,
+differing by five substitutions. A width/spelling lever measured on one member
+of a pair is **not** evidence about the other, even when the pair shares its
+draft's ancestry. Same family as wave 16's inverted width sweep and wave 17's
+comma anchor that "does not transfer to a function carrying one more live
+value".
+
+### Process notes
+
+- W86-D found the "top relative is named nowhere in the park or draft" claim
+  false for 1 of 5. It held for all 5 here, so the screen's novelty check is
+  usable once it diffs against the draft text as W86-D asked.
+- `sub_0804F658` and `sub_0804F18C` are the two oldest parks touched this wave
+  (waves 13–19, profile sweeps only since). Neither carries **any** permuter
+  measurement. `sub_0804F658` now has a legitimate 38.2% / +12 variant
+  (`oam.tileNum = gUnknown_0300453C * 0x100`, everything else the parked draft)
+  that has never been permuted, and chained runs are the obvious untried move
+  there — not more hand spellings.
+
+## A SAME-DIRECTION TWIN DID TRANSPLANT A LEVER — THE DISCRIMINATOR IS WHETHER THE TWIN'S OWN MATCH SOLVED THIS RESIDUAL, NOT MIRROR VS SAME-DIRECTION (wave 86, W86-F)
+
+Third and last batch of the twin axis (W86-B proposed it, W86-D and W86-E are
+the two previous chapters). Same screen as W86-E — Jaccard over `data_refs`
+union non-hub callees, comparable size, same loop count — five more parks,
+scored J 0.50–0.75, i.e. further down the list than either earlier batch.
+
+| target | twin | pair class | untried construct? | outcome |
+|---|---|---|---|---|
+| `sub_0801C090` | `sub_0801BD00` | true shape twin | YES — three of them | all three byte-neutral or ROM-refuted, 0 `try_match` |
+| `sub_0807F57C` | `sub_080786F0` | same-vocabulary neighbour | NO | clean NO, 0 probes |
+| `sub_080790D0` | `sub_0807B360` | true shape twin | YES — scale `i`, never the symbol | **50.0% / +4 -> 92.0% / size-exact 224 of 224** |
+| `sub_0801F234` | `sub_0801F34C` | true shape twin (producer/consumer) | YES — but no host in the target | nearest transplant refuted, 0 `try_match` |
+| `sub_0805FC1C` | `sub_0805A008` | same-vocabulary neighbour | NO | clean NO, 0 probes |
+
+3 true shape twins, 2 same-vocabulary neighbours, 3 untried constructs, **0 byte
+matches but one park effectively dismantled.** Across all three batches the axis
+is 1 byte match in 15, with roughly two thirds of pairs yielding a genuinely
+untried construct. The screen finds constructs reliably and converts parks
+rarely; both earlier chapters say the same and this one replicates it.
+
+### W86-E's refinement is too strong as written, and `sub_080790D0` is the counter-example
+
+W86-E concluded: *"same-direction twins supply constructs, not levers"* — four
+same-direction true shape twins, none converted, against W86-D's one converting
+inverse pair. `sub_0807B360` is a **same-direction** twin of `sub_080790D0` —
+a bigger sibling doing the same job the same way for a different screen, no
+inversion anywhere — and its lever transplanted literally and took the target
+from +4 bytes and a four-place register inversion to size-exact with an 18-byte
+allocation tie left.
+
+What distinguishes it is neither direction nor overlap score. It is that
+**`sub_0807B360`'s promoted header names the construct as the whole diff of its
+own match.** W54-A wrote there: *"LOAD-BEARING SPELLING, and it was the whole
+diff: the three copy loops must scale `i`, not the symbol —
+`gUnknown_0200FC50 + (i + 0x80) * 0x40`, NOT `gUnknown_0200FC50 + 0x2000 +
+i * 0x40`."* The twin had met this exact residual, on this exact global, and
+recorded how it fell. Read against W86-E's own chapter title — *"a shape twin
+only transplants a lever if it contains the residual's construct, **solved**"* —
+that title is the correct rule and the same-direction refinement under it is
+not. Restate it as:
+
+> **Screen the twin's promoted HEADER, not its shape.** A twin converts when its
+> own match record names the residual you are holding. Mirror pairs score well
+> on this because a save/load pair shares residuals by construction, but so does
+> any sibling that hit the same wall. A twin whose header records no comparable
+> difficulty has nothing to give however perfectly its skeleton matches — which
+> is exactly what `sub_0801C090`'s twin, half the size with four fewer live
+> values and no spill, turned out to be.
+
+The cheap version of the check: **grep the twin's promoted `.c` for the words
+"the whole diff", "LOAD-BEARING", "was the entire", before reading its body.**
+
+### `sub_080790D0`: two park conclusions refuted, and a corrected `.rodata` rule
+
+That park had been closed on this axis since wave 51 with an explicit
+exhaustion claim: *"all FIVE arrangements of how many times the C names
+`gUnknown_0200FC50` ... There is no third option in the reference-count axis and
+that axis is exhausted."*
+
+1. **There is a third option.** `gUnknown_0200FC50 + (i * 2 + 0xa5) * 0x40`
+   emits the ROM's bare-symbol reload plus `movs r1,#0xa5; lsls r1,#6`, where
+   `gUnknown_0200FC50 + 0x2940 + i * 0x80` folds the constant into the
+   relocation. 0x2940 = 0xa5 << 6 and 0x2D40 = 0xb5 << 6, and the ROM writes
+   both as `movs #K; lsls #6` — the same tell W54-A read off the twin. This one
+   change removed the entire HOLD / REMATERIALISE INVERSION the park was built
+   on: prologue down to the ROM's single hi register, epilogue exact, pool order
+   exact, loop 2 instruction-for-instruction identical. **The park's residual
+   classification was wrong, not merely unsolved.** This is W86-D's headline in
+   a new place — a park that ruled out the neighbouring spellings of a lever had
+   not tested the lever.
+
+2. **THE `-fforce-addr` `.rodata` ADDRESS WORD IS TRIGGERED BY REFERENCE
+   POSITION, NOT REFERENCE COUNT.** The park (and the doc, and the brief, in
+   both the "four uses" and the wave-51 "two is too many" forms) states the
+   trigger as a count. Measured both ways here: **three** bare references — one
+   call argument and two `sym + (expr)` loop bases — emit **no** `.rodata` word
+   at all, while naming the symbol **once** inside a loop BODY emits
+   `.LC1: .word gUnknown_0200FC50` plus a reload of the address through it on
+   every iteration. Bind a local for a symbol you dereference inside a loop
+   body; name the symbol directly as many times as you like outside one, and in
+   `sym + (expr)` bases that strength-reduce out of the body.
+
+The residual left there is a bare hoist-order tie: loop 1's two invariant bases
+are emitted in the opposite order and trade registers, same instruction count,
+same operands. agbcc expands call arguments right-to-left, so arg2 is
+discovered and hoisted first; the ROM needs arg1's base first. Binding it to
+its own outer-loop variable is **byte-identical** — cse folds the bind away.
+
+### THE BIND-A-BASE-TO-A-LOCAL LEVER IS DEAD ON LOOP-INVARIANT ADDRESSES — THIRD INDEPENDENT MEASUREMENT
+
+Three functions now, none of them related:
+
+- `sub_0805FC1C` (W55-F, measurement 3): binding the base as the first statement
+  of the loop body compiles byte-for-byte identically; cse folds the bind away.
+- `sub_080790D0` (here): binding the invariant to its own outer-loop variable,
+  byte-identical, same cause.
+- `sub_0805A008` (`src/decomp/c_08059F24.c`, matched): binds
+  `q = gUnknown_08499590` inside its loop body and derives both planes from it
+  — and its ROM does not hoist that base either, so the matched side agrees.
+
+Stop spending probes on it. W50-L's lever does not transfer from a pointer
+global's LOAD to an ADDRESS CONSTANT, in either direction.
+
+### STATEMENT ORDER OF TWO INDEPENDENT COMPUTED LOCALS IS ALSO BYTE-NEUTRAL
+
+W77-K measured DECLARATION order byte-neutral in agbcc (all four permutations
+on `sub_0801F234`, replicated on `sub_08052BBC`) and the natural objection is
+that declarations create no RTL, so the measurement is weak evidence about
+allocno numbering. Closed here: swapping the two independent computed
+statements `tile = e->unk08[e->unk05].unk00;` and
+`n = gUnknown_0848B780[a].unk00 * ...unk01;` on `sub_0801F234` — which DO create
+RTL, and whose ROM/draft register assignment (`n -> r6, tile -> r7` against
+`tile -> r5, n -> r8`) is exactly what a creation-order tie-break would
+predict — is **byte-identical**. Emitted allocation unchanged, r8 round trip
+intact. **Do not spend a probe permuting independent statements to move a
+register.** The "pseudo created FIRST wins the callee-saved register" rule is
+about references created inside another expression (wave 17's comma operator),
+not about statement sequence.
+
+### READ THE ROM'S OWN SHIFT BEFORE COPYING A TWIN'S DECLARATION
+
+`sub_0801BD00` declares its loop counter `s16 n` and `sub_0801C090`'s draft
+declares it `u16 count`, which reads like an obvious transplant on a pair whose
+loop bodies are otherwise the same statements. It is wrong, and the ROM says so
+in one line: the decrement ends `lsrs r1,r0,#0x10`, not `asrs`. The mirror-twin
+method invites copying a twin's declarations wholesale; signedness is settled by
+the target's own shift in ten seconds and never by the twin.
+
+### Process, second instance
+
+W86-D found the screen's "the twin is named nowhere in the park or draft" claim
+false for 1 of 5. The companion failure appeared here: for `sub_0807F57C` the
+prompt asserted "both call `sub_0803CAB8`" and built the whole probe plan on how
+the twin consumes that result. **`sub_080786F0` contains no `bl` at all.** A
+screen over shared GLOBALS will rank a neighbour that shares the data and not
+the operation, and score it highly — 4 of 7 vocabulary items here, 0 of the
+mechanism. Check the twin's text for the shared CALL before planning a probe
+around it, the same way W86-D asked for the novelty claim to be checked against
+the draft text.
+
+### AN EARLY ADDRESS BINDING AND A LATE INDEX BINDING ARE INDEPENDENT LEVERS, AND THEY COMPOSE
+
+Wave 86, W86-C and W86-G, on `sub_0804C5A4` — parked since wave 43, declared
+"CONFIRMED IMMOVABLE, there is no delay lever" in wave 77, **matched**.
+
+Two separate levers act on one `-fforce-addr` array reference, and the reason
+twelve waves failed is that everyone assumed there was one.
+
+- **Binding the INDEX to its own local, in a statement before the reference,
+  decides WHERE the base load lands.** `-fforce-addr` emits the FORCE_REG of an
+  array's address when the ARRAY_REF is expanded, which is *before* its index
+  subtree — that is what put the base twelve instructions early. Once the index
+  is already a live pseudo from an earlier statement, the only thing left to
+  expand at the reference is the base load and one add, so the load lands at
+  the point of use. (W73-E's byte-offset-first spelling failed only because it
+  reassociated the index INLINE; the identical reassociation as its own
+  STATEMENT costs nothing.)
+- **Binding the base's ADDRESS to a local, in its own statement, EARLY, decides
+  WHICH REGISTER it lands in.** `s16 (*new_var)[6][2]; ... new_var = g;` with
+  the access written through `new_var`.
+
+W86-C measured NINE hand spellings of the index statement, all giving `ldr r0`
+where the ROM has `ldr r2`, and concluded that position and register TRADE —
+the wave-85 "the two orders do not compose" pattern. **That conclusion was
+right about the index statement and wrong as a general fact.** Nine spellings
+moved ONE allocno nine ways. The address binding creates a SECOND allocno; the
+pair is then created in the ROM's order and the base wins `r2` with the
+position preserved. The trade was an artefact of there being only one pseudo to
+move.
+
+**Diagnostic:** when N respellings of one statement all move a reference to the
+same wrong place, stop respelling it — the answer is a second binding, not a
+better spelling of the first.
+
+### A PERMUTER RUN AGAINST A SUPERSEDED DRAFT IS NOT A NEGATIVE ABOUT THE CURRENT ONE
+
+Same function. Two independent permuter negatives stood in its park, both taken
+against the 86.9% draft. The chained run from the 99.4% draft found a zero-score
+candidate in **1,080 iterations** — about a minute. Wave 83 (94.8 -> 99.3 ->
+match) and wave 59 (87.3 -> 94.3 -> 98.2 -> match) said the same thing; this is
+the case where ignoring the recorded negatives was worth a match. A permuter
+negative should always be recorded WITH the score of the draft it was taken
+against, and read as evidence about that draft only.
+
+### `volatile` SPLITS VALUE CSE AND A STATEMENT BOUNDARY SPLITS cse's TABLE; NEITHER TOUCHES gcse
+
+Wave 86, W86-G, on `sub_08035170` — held, but the mechanism is now named after
+eighteen failed spellings across waves 45/51/57/59/79/86.
+
+The ROM keeps the `.rodata` force-addr word's ADDRESS in a callee-saved
+register and re-derives the whole access after a call; every candidate keeps
+the finished `base + 0x2f` and reloads only the value. The ROM re-derives in
+exactly the two blocks that are control-flow JOINS, because a join starts a new
+extended basic block and empties cse's table — and a candidate can reproduce
+the first join's reload easily.
+
+**The second one is not cse.** At a join, `base + 0x2f` is not an expression
+being looked up in a table; it is a live PSEUDO the RTL already names. What
+unifies the pre-call and post-call occurrences across the join AND across the
+call is **gcse**, which is global and which no EBB boundary constrains. So:
+
+- `volatile` at a use site splits the LOAD and not the ADDRESS (already known).
+- A statement boundary, a fresh local before the call, a fresh local after the
+  call, a pointer local at the top, plain-global versus pointer spelling — all
+  five produce the identical tail. They move cse's table; gcse does not care.
+- An address unified by gcse is reachable from the C text **only** if the two
+  occurrences have genuinely different base pseudos. Where the base is a memory
+  load that the call kills, that requires gcc to want the base again after the
+  call — and it never does, because it still holds the finished address. The
+  residual is circular by construction. **Classify and stop.**
+
+One boundary worth keeping from the same probe: **binding a force-addr'd
+struct's address to a pointer local and using that local for EVERY reference
+COLLAPSES the two-level pool word to a one-level inline `.word`.** The
+two-level word survives only while at least one reference is still spelled as
+the plain global. Mixing the two spellings in one body is the documented
+"one object, two spellings" pattern (W48-J, W50-A, W51-I) and is what the
+original source does.
+
+### gcc ALREADY HOISTS `i + 1` TO THE TOP OF A LOOP BODY — DO NOT AUTHOR IT AS A SECOND COUNTER
+
+Wave 86, W86-G, on `sub_08073228`. The ROM's loop body opens with
+`adds r3,r5,#1 / mov sl,r3` and closes with `mov r5,sl`, which reads exactly
+like the wave-58 reverse rule's "a second source variable you must write".
+It is not. A plain `i++` at the end of the body already emits
+`adds r2,r5,#1 / mov r9,r2` at the top and `mov r5,r9` at the bottom, because
+the increment's pseudo is live across the call and gets a callee-saved high
+register. Authoring `int inext = i + 1;` is **size-neutral and marginally
+worse** (169 of 216 differing bytes against 168). Before invoking the wave-58
+reverse rule on an increment, check whether the plain increment already
+produces the shape.
+
+Also measured there, against a pre-registered orchestrator hypothesis: the
+ROM's inner search carries BOTH strides — the byte offset `r4` and the pointer
+`r2` are each initialised once and each stepped by 8, and the compare reads
+through the pointer. Neither is re-derived from a base per iteration. A goto
+loop's explicit strides are the ROM's own; do not "simplify" one away to save
+a pseudo.

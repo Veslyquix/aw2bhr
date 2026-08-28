@@ -14328,19 +14328,29 @@ extern const u16 gUnknown_0855380A[];
  * SIGNED on the `ldrsh`, which is also the only evidence of the width. */
 /* Wave 36, W36-C. The 8 bytes immediately before gUnknown_085643B0, holding two
  * halfword pairs on the same "alternating phase bit" index gUnknown_085643B0's
- * innermost subscript uses. sub_08053520 reads unk04[phase & 1] with a bare
+ * innermost subscript uses. sub_08053520 reads [1][phase & 1] with a bare
  * `movs r1,#0; ldrsh r0,[r0,r1]` into sub_0803B48C's s16 parameter, which is
- * what signs it. A STRUCT and not `s16 [][2]` with a constant outer index: the
- * ROM adds the 4 to the BASE register at run time (`adds r1,#4`) and leaves the
- * `ldrsh` index at zero, which only a struct member array gives -- the flat
- * spelling sinks the same constant into the pool word's relocation. Same
- * distinction struct Unk085D6C88 records. unk00 has no reader yet. */
-struct Unk085643A8 /* 0x08 */
-{
-    /* 0x00 */ const s16 unk00[2];
-    /* 0x04 */ const s16 unk04[2];
-};
-extern struct Unk085643A8 gUnknown_085643A8;
+ * what signs it. c_08051454.c reads [0][phase & 1].
+ * WAVE 86 (W86-C): THIS WAS `struct Unk085643A8 { const s16 unk00[2]; const
+ * s16 unk04[2]; }` AND THE COMMENT HERE HAD ITS MEASUREMENT BACKWARDS. It
+ * said "A STRUCT and not `s16 [][2]` with a constant outer index ... which
+ * only a struct member array gives". A controlled probe of the two spellings
+ * over identical address arithmetic (constant 4 plus a variable m*2) says the
+ * exact opposite:
+ *   ARRAY  gUnknown_085643B0[0][1][m] -> ldr r2,=sym / adds r2,#4 /
+ *                                       adds r0,r0,r2 / movs r1,#0 / ldrsh
+ *   STRUCT gUnknown_085643A8.unk04[m] -> ldr r3,=sym / adds r0,r0,r3 /
+ *                                       movs r1,#4 / ldrsh
+ * -fforce-addr FORCE_REGs an ARRAY's address BARE at the subscript, so a
+ * later constant offset has to be a runtime add on that register and the
+ * ldrsh indexes with zero; a scalar struct's member offset stays a link-time
+ * constant and folds into the ldrsh index instead. The ROM has the FIRST
+ * form, so this object is an array. The 'the flat spelling sinks it into the
+ * relocation' observation the old comment rested on was measured on
+ * `const s16 *p = g.unk04;` -- a POINTER TO THE MEMBER, which is a different
+ * construct from a 2-D array with a constant outer index. Extent unproved;
+ * only rows 0 and 1 are reached. */
+extern const s16 gUnknown_085643A8[][2];
 extern const s16 gUnknown_085643B0[][3][2];
 /* A ROM halfword per side, indexed [gUnknown_0300453C]. Two readers,
  * sub_0804F658 and sub_0804E584, and both do nothing but pass it as
