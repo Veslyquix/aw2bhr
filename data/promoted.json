@@ -29333,6 +29333,15 @@
   "size": 88
  },
  {
+  "file": "src/decomp/c_0807F57C.c",
+  "obj": "src/decomp/c_0807F57C.o",
+  "addr_hex": "0x0807F57C",
+  "functions": [
+   "sub_0807F57C"
+  ],
+  "size": 156
+ },
+ {
   "file": "src/decomp/c_0807F618.c",
   "obj": "src/decomp/c_0807F618.o",
   "addr_hex": "0x0807F618",

@@ -770,9 +770,33 @@ bool8 sub_080261E8(int);
  * everywhere else, which one shared header cannot express. Retyping to `int`
  * plus an explicit `(u8)` at the ten narrowing sites would match all eleven;
  * that is a fan-in-11 reshape and is left as an orchestrator decision. See
- * docs/agbcc-codegen.md. */
+ * docs/agbcc-codegen.md.
+ *
+ * WAVE 88 (W88-A) DID IT, AND IT COST NOTHING. sub_0803CAB8 alone is now
+ * declared `int`, the ten narrowing sites say `(u8)sub_0803CAB8(...)`, and the
+ * definition in c_0803CA9C.c is `int`. ALL THIRTEEN affected functions verify
+ * byte-for-byte by exit code -- the nine c_0803C354.c predicates
+ * (sub_0803C474/C48C/C4B4/C4DC/C504/C52C/C598/C5C0/C5E8), sub_08043CA0,
+ * sub_0803CA9C, sub_0803CAB8 itself, and sub_0807F57C, which MATCHED on the
+ * first attempt after 44 waves parked at one instruction. proto_check clean.
+ *
+ * So the "per-file prototype divergence a shared header cannot express" was
+ * never the obstacle: an explicit cast at the narrowing sites expresses it
+ * exactly, because `(u8)f(x)` and an implicit u8 return emit the same
+ * narrowing. THE RULE THIS SETTLES: when N callers narrow and one does not,
+ * the wide declaration plus explicit casts is byte-neutral in BOTH directions
+ * and is strictly more expressive than the narrow one -- prefer it, and do not
+ * park a residual as "cross-TU contract, orchestrator decision" without first
+ * measuring the cast form. sub_0803CA9C and the rest of the family are left
+ * `u8` because nothing has asked them to be otherwise. */
 u8 sub_0803CA9C(u32);
-u8 sub_0803CAB8(u32);
+/* WAVE 88 (W88-A): RETYPED u8 -> int, and the ten narrowing callers now say
+ * `(u8)sub_0803CAB8(...)` explicitly. See the wave-88 block appended to the
+ * note above. The definition in src/decomp/c_0803CA9C.c is `int` for the same
+ * reason and is byte-unchanged: it returns `(1 << (id & 7)) & *p`, whose
+ * nonzero_bits are provably <= 0xff, so no narrowing is emitted at either
+ * width. */
+int sub_0803CAB8(u32);
 u8 sub_0803CAD4(u32);
 /* Same family, same `lsls #24` evidence: sub_0803C658 narrows its result before
  * testing it. The definition in src/decomp/c_0803CAF0.c was re-typed from `int`
@@ -998,6 +1022,41 @@ u8 sub_080390CC(u8);
  * parameter whose narrowing combine can prove redundant looks unnarrowed at the
  * call site while its declaration is perfectly ordinary, and that is how one
  * ambiguous argument was read as two. */
+/* WAVE 88 (W88-D): THE RETYPE-PLUS-COMPENSATING-CAST FORM WAS TESTED HERE AND
+ * IS REFUTED, BY EXIT CODE ON BOTH SIDES. It is the form that closed
+ * sub_0807F57C in this same wave, so its failure here is a fact about the
+ * mechanism, not about effort. `u16` STAYS. Both halves were measured:
+ *
+ *   Caller, with parameter 0 widened to `int`: the narrowing DOES disappear --
+ *   sub_08039188 emits the ROM's bare `lsls r7, r2, #4`, and its score goes
+ *   31.8% -> 33.6%. So the wave-43/57 claim that arg0's `u16` costs the caller
+ *   2 bytes is CONFIRMED and the widening does buy exactly that.
+ *
+ *   Definition, `int x` plus `u16 a = (u16)x;` as the first statement (also
+ *   tested: `a = x;` plain, and the double cast `(s16)(u16)x` inline at the
+ *   use): size-exact at 72 bytes, 10 of 72 differ, and the entire residual is
+ *   a FOUR-INSTRUCTION BLOCK SWAP. The ROM converts x FIRST, then w, then h;
+ *   the compensated source converts w and h first and x third.
+ *
+ * THE MECHANISM, and the general rule: a sub-word PARAMETER's conversion is
+ * emitted in the prologue insn group, ahead of every source statement, while
+ * an explicit compensating cast IS a source statement. So the cast can
+ * reproduce the conversion's INSTRUCTIONS but never its POSITION when other
+ * narrow parameters exist to be converted ahead of it. That bounds the
+ * sub_0807F57C lever: it reaches a RETURN value (no prologue group to be
+ * ordered against) and it does not reach a PARAMETER of a function whose
+ * other parameters are also narrow.
+ *
+ * `s16` for parameter 0 is refuted too, without a probe: the ROM converts x
+ * with `lsls #0x10; lsrs #0x10` (zero-extend) at entry and re-signs it with
+ * `lsls #0x10; asrs #0x10` at the single use -- two pairs. A signed narrow
+ * parameter gets ONE pair, the sign-extending one (that is exactly what
+ * parameter y does here). Only `u16` produces both.
+ *
+ * So the cross-TU conflict on parameter 0 is REAL and irreducible under one
+ * shared prototype. But it is NOT what blocks sub_08039188: with the caller's
+ * narrowing removed the caller is still +4, and the whole of that is the
+ * `ldrsb` fold on the two parallel s8 tables. See work/sub_08039188/. */
 u8 sub_08039140(u16, s16, u8, u8);
 void sub_0803941C(int, int);
 void sub_08039544(u8 *);
