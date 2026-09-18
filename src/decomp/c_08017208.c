@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -76,23 +77,6 @@
 
 extern u8 gUnknown_02023284[];
 void sub_080456B8(u8 *);
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ s16 unk04;
-    /* 0x0006 */ s16 unk06;
-    /* 0x0008 */ s16 unk08;
-    /* 0x000a */ s16 unk0a;
-    /* 0x000c */ s16 unk0c;
-    /* 0x000e */ s16 unk0e;
-    /* 0x0010 */ u16 unk10;
-    /* 0x0012 */ u8 filler_12[0xa22 - 0x12];
-    /* 0x0a22 */ u16 unk0a22[(0x417a - 0xa22) / 2];
-    /* 0x417a */ u16 unk417a[(0x421a - 0x417a) / 2];
-    /* 0x421a */ u8 unk421a[0x4233 - 0x421a];
-    /* 0x4233 */ u8 unk4233;
-};
 struct SaveBlkRec
 {
     /* 0x00 */ u8 unk00;

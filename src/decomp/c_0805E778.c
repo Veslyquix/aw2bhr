@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,12 +7,6 @@
  * contiguous block at 0x0805E778.
  * sub_0805E778 @ 0x0805E778
  */
-
-struct Map
-{
-    /* 0x0000 */ u8 filler_0000[0x2852];
-    /* 0x2852 */ u8 unk2852[0x1928];
-};
 
 void sub_0805E778(void)
 {

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,14 +7,6 @@
  * contiguous block at 0x0801F888.
  * sub_0801F888 @ 0x0801F888, sub_0801F92C @ 0x0801F92C, sub_0801F98C @ 0x0801F98C
  */
-
-struct Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 pad04[0x417A - 4];
-    /* 0x417A */ u16 rowOffset[1];
-};
 
 /* Loads the terrain movement-cost row for unit type a1 into the flood fill's
  * 0x20-byte cost table at gUnknown_084999C8->unk00 -- the table sub_0801F6F0

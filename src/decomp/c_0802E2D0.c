@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -65,15 +66,6 @@ int sub_0803E9F8(struct Unk0803E9F8 *, u8 *, u8, u8);
 int sub_08041FE0(struct Unk08499594 *);
 int sub_0804203C(struct Unk08499594 *);
 void sub_0801FE68(int);
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_0004[0x000E];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 filler_051A[0x417A - 0x051A];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 
 u8 sub_0802E2D0(s16 x, s16 y)
 {

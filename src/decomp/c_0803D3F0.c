@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -18,17 +19,6 @@
  *
  * The member set is written to match sub_0803D2F8's copy of this declaration
  * exactly, so the two survive being promoted into one translation unit. */
-struct Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_04[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 tile[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[(0x4232 - 0x417A) / 2];
-    /* 0x4232 */ u8 filler_4232[1];
-    /* 0x4233 */ u8 unk4233;
-};
 /* The 0x02000000 staging record. Declared locally and cast onto the `u8 []`
  * global for the same reason src/decomp's `struct Map` files do it: the ROM
  * computes the copy loop's source as `(rec + 0x4C4) + i`, and only a

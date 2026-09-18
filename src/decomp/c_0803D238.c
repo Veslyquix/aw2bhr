@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -18,17 +19,6 @@ struct Rec
     /* 0x04C9 */ u8 unk4C9;
     /* 0x04CA */ u8 unk4CA;
     /* 0x04CB */ u8 cell[1];
-};
-struct Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_04[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 tile[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[(0x4232 - 0x417A) / 2];
-    /* 0x4232 */ u8 filler_4232[1];
-    /* 0x4233 */ u8 unk4233;
 };
 
 /* The cell byte is read from the array at each use rather than bound to a

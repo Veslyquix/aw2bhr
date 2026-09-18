@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -67,15 +68,6 @@
  * planes must be members (else 0x12 folds into ldrb's displacement) and the
  * first write to `pos` really is one word store of `(u16)x | (y << 16)`, which
  * is why it is spelled through the `int *` cast rather than as two `strh`. */
-
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x0e];
-    /* 0x0012 */ u8 unk0012[0x4168];
-    /* 0x417a */ u16 unk417A[0x100];
-};
 
 int sub_080587FC(int flag)
 {

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -12,15 +13,6 @@
  * (which sits inside that file's unk2852) because that is the constant this
  * function's pool word carries. Only a member's START offset enters the address
  * arithmetic, so the split is byte-neutral. */
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x0e];
-    /* 0x0012 */ u8 unk0012[0x2d48];
-    /* 0x2d5a */ u8 unk2D5A[0x1420];
-    /* 0x417a */ u16 unk417A[0x100];
-};
 
 /* Scans the whole map for the reachable cell with the lowest cost byte and
  * writes its (x, y) back through the two out-parameters, after running two
