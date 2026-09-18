@@ -4647,10 +4647,13 @@ struct CgbChannel /* 0x40 */
      *   mo           the "what changed this frame" bitmask: 1 = re-emit the
      *                envelope and panning, 2 = re-emit the frequency.
      *   le/sw        NRx1's length and channel 1's sweep byte.
-     *   fr           the 11-bit frequency. It is a WORD, and the proof that it
-     *                is not two halfwords is that CgbSound reads `fr >> 8` as a
-     *                bare `ldrb` at +0x21 -- agbcc folding a shift of a SImode
-     *                member into a byte load of its second byte.
+     *   fr           the 11-bit frequency. It is a WORD, proved by CgbSound's
+     *                full-width `ldr`/`str` updates at +0x20. WAVE 66 (W66-H)
+     *                corrected the old claim that agbcc folds `fr >> 8` into
+     *                the bare `ldrb` at +0x21: under the configured/default
+     *                compiler that spelling is `ldr; lsrs`. The matching MP2K
+     *                source explicitly reads `*((u8 *)&fr + 1)`; this pointer
+     *                pun, not the member declaration, is the byte-load cause.
      *   wp/cp        the wave-RAM pattern pointer and the copy of it that is
      *                currently loaded. Compared with `!=`, and wp's four words
      *                are pushed to 0x04000090..0x0400009c. For channels 1 and 2
@@ -8810,8 +8813,16 @@ extern void (*gUnknown_08576890[])(void);
  * nibble of gpKeySt->unk02's low byte, i.e. a direction table: sub_0800105C
  * adds [i][0] to the cursor x and [i][1] to the cursor y. `[][2]` and not flat
  * -- the second read is emitted `base + 2` then `+ i*4`, the reassociated array
- * form. SIGNED from the `movs rI,#0; ldrsh` register-offset reads. */
-extern const s16 gUnknown_08499C7C[][2];
+ * form. SIGNED from the `movs rI,#0; ldrsh` register-offset reads.
+ * WAVE 81 (W81-D): NOT const in the original source. With the const removed,
+ * sub_08023518 -- parked since wave 36 with "CSE vs reload + force-addr are
+ * coupled" -- matches outright at 260/260, because the ROM reloads
+ * gUnknown_08499C7C[dir][N] after every intervening strh, which only a
+ * non-RTX_UNCHANGING read does, while KEEPING the -fforce-addr .rodata words.
+ * Verified under the de-const header: promoted sub_0802361C, sub_08023860 and
+ * sub_0800105C all still byte-match (exit 0 each); sub_080236E8 improves
+ * 68.0% -> 76.3% without matching. */
+extern s16 gUnknown_08499C7C[][2];
 /* Wave 33, W33-D. The cursor cell the direction table above steps, and the
  * partner of the pixel-space gUnknown_030032C4 (which moves by four times the
  * same delta). Plain `ldrh`/`strh` at +0 and +2. */
@@ -12564,6 +12575,13 @@ extern u16 gUnknown_020296BC[][20];
  * not distribute the `* 2` over `i + 9`, so that one emits `(i + 9) * 2`. The
  * 20-column row IS the 40-byte stride, not a proved extent. */
 extern u16 gUnknown_020296CE[][20];
+/* Wave 83, W83-B. Linker alias `= .` at 0x020296e4 sitting on *fill* in
+ * aw2bhr.map -- i.e. column-row view of gUnknown_020296BC row 1 (base+0x28),
+ * same family as gUnknown_020296CE above. Evidence: ROM sub_08055940 hoists
+ * ONE pool word R_ARM_ABS32 gUnknown_020296E4 and derives row 0 with
+ * `adds r6,r5,#0; subs r6,#0x28` (parked.json, waves 70/77/80/82), so the
+ * original read BOTH counted rows through this symbol. */
+extern u16 gUnknown_020296E4[][20];
 /* A pair of five-per-side u16 counters, read and written only as
  * `[i][j]` with the same (side, slot) index pair every other table in this
  * subsystem uses. sub_080501DC does `B94[i][j] += B80[i][j];` and zeroes BOTH
@@ -13083,21 +13101,30 @@ struct Unk0202F214 /* 0x04 */
                            * one halfword: the low 2 bits are a mode it stores
                            * into its child proc's `int` +0x4c, and `unk02 >> 2`
                            * is a count it renders as three decimal digits.
-                           *   TYPE DELIBERATELY UNCHANGED, and this is the
-                           * finding rather than an omission. The two reads are
-                           * `ldrb [.,#2]; lsls #0x1e; lsrs #0x1e` and
-                           * `ldrh [.,#2]; lsrs #2`, which is exactly what a
-                           * `u16 lo : 2; u16 hi : 14;` pair looks like -- and a
-                           * bitfield is RULED OUT, not merely unproved. agbcc
-                           * gives any struct containing a bitfield 4-byte size
-                           * and alignment, which would take this element from 4
-                           * bytes to 8 and every index from `lsls #2` to
-                           * `lsls #3`; the one layout that keeps the stride (an
-                           * all-bitfield element) loads the enclosing word and
-                           * emits `ldr`, never `ldrb [.,#2]`. The two
-                           * constraints cannot both hold. See the Bitfields
-                           * chapter of docs/agbcc-codegen.md for the five
-                           * layouts measured.
+                           *   TYPE DELIBERATELY UNCHANGED HERE, but wave 73
+                           * (W73-C) corrected WHY, and the old wording was
+                           * wrong. The two reads are `ldrb [.,#2]; lsls #0x1e;
+                           * lsrs #0x1e` and `ldrh [.,#2]; lsrs #2`, which is
+                           * exactly what a `u16 lo : 2; u16 hi : 14;` pair
+                           * looks like -- and the field split REALLY IS that
+                           * pair. sub_0806B120, the writer, MATCHED in wave 73
+                           * with those bitfields; its two stores are textbook
+                           * `store_bit_field`, and nothing else reproduces
+                           * either the full-word `~3` mask (`movs #4; rsbs #0`)
+                           * or the register pressure that mask creates.
+                           *   What is ruled out is only putting the bitfields
+                           * in THIS SHARED DECLARATION, because a bitfield READ
+                           * widens to the enclosing word (`ldr`) and would
+                           * break sub_0806AD04's `ldrb [.,#2]`. The resolution
+                           * is that a bitfield view can be LOCAL TO THE WRITER:
+                           * sub_0806B120 declares its own
+                           * `struct Unk0202F214Rec` and reaches it by a cast,
+                           * so this type is untouched and both functions match.
+                           * Same 4-byte size and alignment either way, so the
+                           * `lsls #2` index is unaffected -- the 4-to-8-byte
+                           * inflation applies to a UNION carrying a bitfield
+                           * struct, not to a plain local view. See the
+                           * Bitfields chapter of docs/agbcc-codegen.md.
                            *   So the halfword is genuine and the narrowing
                            * lives at the USE: sub_0806AD04 spells the 2-bit
                            * read `(u32)(u8)e->unk02 << 30 >> 30`, which is

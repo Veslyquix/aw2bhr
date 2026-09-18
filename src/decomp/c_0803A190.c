@@ -1,0 +1,49 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0803A190.
+ * sub_0803A190 @ 0x0803A190
+ */
+
+/* MATCHED in Wave 74: 300/300 bytes under the configured profile.
+ * The recovered allocation needs the byte-sized new_var2 binding below.  The
+ * final signed-shift residual is fixed by narrowing only the two call
+ * arguments; sub_08014B0C keeps its authoritative int first parameter.  Do
+ * not tidy this spelling.  See NOTES.md for the measured progression. */
+struct Unk0803A190Tbl
+{
+    void *filler_00[5];
+    void *unk14[1];
+};
+
+void sub_0803A190(int a1, struct Unk08499594 *a2)
+{
+  u8 v;
+  u8 new_var2;
+  int n;
+  void *new_var;
+  int k;
+  s16 x;
+  s16 y;
+  v = a1;
+  new_var2 = gUnknown_08499598[gUnknown_0849D89C->unk08].unk1a;
+  n = new_var2;
+  n = n - 1;
+  k = sub_08042DE0(gUnknown_0849D89C->unk08) - 1;
+  new_var = ((struct Unk0803A190Tbl *) gUnknown_0849DC18)->unk14[(a2->unk00 * 15) + k];
+  Decompress(new_var, gUnknown_0200FD50);
+  sub_08011AAC((void *) sub_0803A174);
+  ApplyPaletteExt(gUnknown_08555D30[a2->unk00 - 1][n], 0x260, 0x40);
+  for (y = 0; y < 20; y++)
+  {
+    for (x = 0; x < 15; x++)
+    {
+      gUnknown_08499578[((y * 32) + (v / 8)) + x] = 0;
+    }
+  }
+
+  sub_08014B0C((u8)((v + 0x60) / 8), 1, gUnknown_08499578, sub_08042D1C(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
+  sub_08014B0C((u8)((v + 0x60) / 8), 3, gUnknown_08499578, sub_08042D84(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
+}

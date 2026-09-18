@@ -2140,10 +2140,30 @@ void sub_080703D4(struct MusicPlayerInfo *, u16);
  * cast agrees with anything. */
 void sub_08070328(void);
 void sub_0807033C(void);
-void sub_08070CD0(void);
-void sub_08070D98(void);
+/* Wave 77, W77-E. Was `void sub_08070CD0(void);` -- an argument-less
+ * placeholder generated for the sub_080706B0 jump table, whose entry is
+ * explicitly cast `(void (*)(void *, void *))` and so never constrained it.
+ * The DEFINITION wins: work/sub_08070CD0's body dereferences the parameter
+ * throughout (fadeOI, fadeOC, fadeOV, trackCount, tracks, status). A `(void)`
+ * prototype carries no information at all, so there is nothing here for the
+ * weakest-model rule to prefer. This conflict made the draft fail to COMPILE,
+ * so no oracle had ever judged it. */
+void sub_08070CD0(struct MusicPlayerInfo *);
+/* Wave 77, W77-E. Same placeholder fix as sub_08070CD0 above -- cast jump
+ * table entry, definition wins. Both parameters are dereferenced in the body;
+ * the FIRST is dead (arrives in r0, never read) but is still a real parameter,
+ * as wave 35 settled from the epilogue. */
+void sub_08070D98(struct MusicPlayerInfo *, struct MusicPlayerTrack *);
 void sub_08070FAC(void);
-void sub_0807166C(void);
+/* Wave 77, W77-E. Same placeholder fix as sub_08070CD0 above. The two
+ * parameter structs describe only pointer parameters and so live in
+ * work/sub_0807166C/sub_0807166C.c per the house rule; the tags are
+ * forward-declared here so the prototype's parameter scope is the file's and
+ * not the prototype's. a->unk18 is a data page, b->unk40 the bytecode
+ * cursor. */
+struct Unk0807166C_A;
+struct Unk0807166C_B;
+void sub_0807166C(struct Unk0807166C_A *, struct Unk0807166C_B *);
 /* Wave 56 (W56-N): the three m4a hooks sub_080706B0 parks in SoundInfo's
  * +0x28/+0x2c/+0x30 (MP2K's CgbSound / CgbOscOff / MidiKeyToCgbFreq). All three
  * already have PROMOTED BODIES, so these are transcribed from the definitions
@@ -7220,7 +7240,31 @@ void sub_08071900(void *, void *, int, int);
  * NOT MATCHABLE FROM C, and it is in data/parked.json: its `thumb_func_start`
  * label sits 8 bytes early and swallows the trailing alignment of an ARM/THUMB
  * interworking veneer table, so the ROM carries four leading `movs r0, r0` that
- * no C emits. Declare it and call it; do not try to decompile it. */
+ * no C emits. Declare it and call it; do not try to decompile it.
+ *
+ * WAVE 77, W77-E -- THE FOUR NOPS ARE CONFIRMED, BUT THE PARAGRAPH ABOVE
+ * DESCRIBES THE WRONG FUNCTION AND THAT MATTERS. It was "declared from the call
+ * sites only", and nobody read the body. sub_08071918 is NOT a blit and NOT
+ * sub_08071900's sibling: after the four nops it is
+ *     push {lr}; ldr =gpKeySt; ldrh [r2]; movs #0x80; lsls #2; ands; beq
+ *     ldrh [r2,#4]; movs #2; ands; beq; bl sub_0803DDF4; pop; bx
+ * -- a nine-line keypad hook that runs sub_0803DDF4 when L is held and B is
+ * newly down. It reads NONE of r0-r3.
+ *
+ * THE PROTOTYPE IS STILL RIGHT AND MUST NOT BE CHANGED. All four call sites
+ * (asm/code-0806CFC8.s, in sub_08077690 and sub_08077DF0) really do materialise
+ * four register arguments -- `adds r0,r0,r4; movs r1,#0x1e; movs r2,#7;
+ * movs r3,#0` -- before the `bl`, and those two callers are promoted and
+ * matched against exactly this declaration. So the original source declared
+ * four parameters at the call sites while the definition took none: a genuine
+ * cross-TU prototype mismatch in the game's own code, invisible to a K&R-era
+ * compiler. This is residual kind 5, on top of the nops.
+ *
+ * The draft therefore carries four UNUSED parameters to satisfy this contract
+ * (byte-neutral -- word-width parameters need no prologue conversion and an
+ * unread one is never spilled). Do not "fix" the draft to `(void)`: it stops
+ * compiling, and do not fix the header to `(void)` either: it breaks two
+ * matched files. */
 void sub_08071918(void *, int, int, int);
 /* Wave 35 (W35-B), all three declared from call sites in the 0x08077 block.
  * sub_080733A0 and sub_08074EEC are ALREADY PROMOTED (src/decomp/c_080733A0.c,
@@ -7759,7 +7803,33 @@ struct Unk02028360 *sub_0803F5C8(int);
  * bare `adds r3, r0, #0` with nothing re-narrowing it, and the same argument is
  * a plain -1 at the case-2 site, so the parameter and the return are both
  * `int`. */
-void sub_0803F908(int, int, const u8 *, int, int);
+/* Wave 77, W77-E: FIFTH PARAMETER CORRECTED int -> u8, on the function's own
+ * prologue. sub_0803F908 loads its stack argument and immediately zero-extends
+ * a BYTE out of it:
+ *     ldr  r0, [sp, #0x18]
+ *     lsls r0, r0, #0x18
+ *     lsrs r1, r0, #0x18
+ * That pair IS the sub-word parameter's prologue conversion (PROMOTE_MODE
+ * zero-extends every sub-word parameter, so u8 and s8 are identical here); an
+ * `int` parameter tested `!= 0` emits the `ldr` and nothing else. Wave 49 read
+ * "five whole words, the fifth on the stack" and inferred `int`, but the ABI
+ * slot is a word for every sub-word type, so that observation does not
+ * discriminate -- and the only caller, now promoted in src/decomp/c_0803FC28.c,
+ * passes a literal 0 at all five sites, which is byte-neutral between the two.
+ * The own-body conversion is the only hard fact and it says u8.
+ *
+ * THIRD PARAMETER LEFT AS `const u8 *` -- but read this before trusting it.
+ * The parameter is a pure pass-through (`mov ip, r2` and back out to
+ * PutSprite), so it is byte-neutral here, and the promoted caller plus
+ * include/unknown-globals.h have already settled the 0x0849FAxx blobs as
+ * `const u8 []`; agreeing costs nothing and reshaping them unilaterally is
+ * exactly what the house rule forbids. HOWEVER the value's discriminating use
+ * is PutSprite's fourth parameter, which is `u16 *`, and the blob lengths fit
+ * u16 sprite-object data exactly (0x1a = a count word plus four attr triplets,
+ * 0x08 = count plus one). They are very likely `const u16 []`. Retyping them is
+ * a globals-header job touching a matched file, not a side effect of this
+ * function; the draft casts at the call instead. */
+void sub_0803F908(int, int, const u8 *, int, u8);
 int sub_08027198(int);
 void sub_0803FC28(int, int, int, int);
 /* Wave 33, W33-B: matched. Two int parameters; the first is a dead parameter
@@ -10097,7 +10167,7 @@ void sub_080484CC(struct Unk0804769C *);
  * alone (r0 = the same pointer, result unused), so treat it as unproved. */
 struct Unk08047B98;
 void sub_080482D8(struct Unk0804769C *);
-void sub_08047F70(struct Unk0804769C *);
+void sub_08047F70(struct Unk08047B98 *);
 void sub_08048158(struct Unk08047B98 *);
 void sub_080488E0(void);
 /* Wave 43, W43-L. Already DEFINED in src/decomp/c_08048F10.c; it had no
@@ -10428,6 +10498,15 @@ void sub_080200EC(s16, s16, s16, s16);
  * as `movs #1; rsbs` -- so signed. Byte-neutral there; c_08020D50 re-verified
  * by try_match exit code after the change. */
 void sub_08020B88(s16, s16, s16, s16);
+/* Wave 73, W73-F: the prose above says arguments 5 AND 6 are `int`, which
+ * CONTRADICTS this declaration and is the stale half. The 6th is `u8` and the
+ * caller settles it: src/decomp/c_080210C8.c is matched, holds its own sixth
+ * parameter as `int a6`, and passes it through `lsls #0x18; lsrs #0x18` -- that
+ * truncation is the int->u8 conversion this declaration's 6th parameter
+ * requires, and it disappears if the parameter is widened, costing the matched
+ * caller 4 bytes. decomp-permuter reaches 91.5% on the definition (against
+ * 90.7%) with `unsigned int` here; it rewrites the prototype block and so never
+ * compiles that against this header. Do not widen it. */
 void sub_08020EDC(s16, s16, s16, u8 *, int, u8);
 
 /* Wave 36, W36-M. Every signature below is COPIED VERBATIM from a byte-verified
@@ -11353,7 +11432,14 @@ void sub_08043E8C(int, u16 *, int);
  * three `int`s. sub_08087548 discards the result and is itself void
  * (`pop {r0}; bx r0`), so nothing constrains a return value -- `void` is the
  * weakest type that fits. */
-void sub_08087514(int, int, int);
+/* Wave 77, W77-E: FIRST PARAMETER CORRECTED int -> u32, on the function's own
+ * clamp. The body is `cmp r3, #1; bhi` -- an UNSIGNED compare, which an `int`
+ * parameter cannot produce (it would be `bgt`). Wave 30 measured the same thing
+ * from the other side. The only caller, promoted in src/decomp/c_08087548.c,
+ * passes sub_08037D80's `int` result; int -> u32 is a byte-neutral implicit
+ * conversion, so the call site does not discriminate and the own-body compare
+ * is the hard fact. This conflict made the draft fail to COMPILE. */
+void sub_08087514(u32, int, int);
 
 /* Wave 44, W44-D. Already MATCHED and promoted as
  * `void sub_08043FA8(int a, void *b, int c)` in src/decomp/c_08043FA8.c but

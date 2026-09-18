@@ -1332,7 +1332,7 @@ def delta_self_test(args, delta):
 
     TWO WAYS TO STOP BEING UNMATCHED, AND THE SECOND ONE BIT WITHIN AN HOUR OF
     THIS TEST BEING WRITTEN. "Gone from the pool" only catches PROMOTION, which
-    happens at wave end. sub_08059F24 and sub_0805A008 were matched by
+    happens at wave end. The former sub_08059F24/sub_0805A008 anchor matched by
     try_match later in the same wave that wrote this check, so they were still
     `status: asm` in data/functions.json -- still measured, still listed, now
     reporting +0 and 100.0% -- and criterion 2 went red for the best possible
@@ -1379,15 +1379,15 @@ def delta_self_test(args, delta):
             print("              FAILED: %s" % label)
     ok &= shape_ok
 
-    # (2) The wave-57-verified pair. They differ in ONE compare, so one
-    # derivation gives both -- which is only usable if the screen puts them
-    # together, and no address- or callee-based axis does.
+    # (2) The active callee-normalised pair. Their instruction streams differ
+    # only at the bl target and their configured drafts have the same exact-size
+    # residual, so the delta screen must continue to classify them together.
     def solved(name):
         """Matched by trymatch, whether or not it has been promoted yet."""
         x = by_name.get(name)
         return x is None or (x["size_delta"] == 0 and x["pct"] >= 99.999)
 
-    pair = ("sub_08059F24", "sub_0805A008")
+    pair = ("sub_0802E010", "sub_0802E130")
     have = [p for p in pair if not solved(p)]
     if not have:
         print("[self-test] (2) pair %s: PASS (ANCHOR RETIRED -- both now "
@@ -1395,10 +1395,15 @@ def delta_self_test(args, delta):
               "another verified twin pair.)" % "/".join(pair))
     else:
         got = [by_name[p] for p in have]
+        # The absolute score is not the invariant: both drafts have improved
+        # together several times since this anchor was introduced.  What makes
+        # the pair a useful acceptance test is that one derivation continues
+        # to give the same exact-size residual in both functions.
         good = (len(have) == 2
                 and len({(x["kind"], x["size_delta"]) for x in got}) == 1
-                and got[0]["size_delta"] == 4
-                and all(abs(x["pct"] - 31.6) < 0.5 for x in got))
+                and got[0]["kind"] == "size-exact"
+                and got[0]["size_delta"] == 0
+                and abs(got[0]["pct"] - got[1]["pct"]) < 0.1)
         print("[self-test] (2) %s reported TOGETHER at size %+d, %s: %s"
               % ("/".join(p[4:] for p in have), got[0]["size_delta"],
                  ", ".join("%.1f%%" % x["pct"] for x in got),
@@ -1511,10 +1516,10 @@ def self_test(args):
     # An EMPTY block screen is a legitimate state -- wave 27 promoted the last
     # of the twelve blocks -- but it is also exactly what a broken screen looks
     # like, so it may not simply pass. Distinguish the two the way the project
-    # distinguishes every other dry axis: drop the floor and see whether the
-    # work reappears. If it does, the screen works and the axis is exhausted AT
-    # THIS THRESHOLD; if nothing appears even at --block-min-matched 1, the
-    # screen itself is suspect.
+    # distinguishes every other dry axis: drop the matched-neighbour floor,
+    # then raise the size ceiling. If either probe finds work, the screen works
+    # and only the configured band is exhausted. The second probe matters once
+    # the corpus has no non-trivial functions left at or below --block-max.
     #
     # This assertion used to be `ok &= ... and bool(block_offered)` while the
     # label above only tested `bad_status`, so the moment wave 27 emptied the
@@ -1525,13 +1530,19 @@ def self_test(args):
         probe = argparse.Namespace(**vars(args))
         probe.block_min_matched = 1
         deep = blocks(load_index(), probe)[1]
+        wide_probe = argparse.Namespace(**vars(probe))
+        wide_probe.block_max = max(args.block_max * 2, 512)
+        wide_probe.top_blocks = 10 ** 6
+        wide = blocks(load_index(), wide_probe)[1]
+        healthy = bool(deep or wide)
         print("[self-test] block screen is EMPTY -- lowering the floor to "
-              "--block-min-matched 1 finds %d: %s"
-              % (len(deep),
-                 "PASS (screen works; the axis is exhausted at the default "
-                 "threshold, not broken)" if deep
-                 else "FAIL (nothing at any threshold -- suspect the screen)"))
-        ok &= bool(deep)
+              "--block-min-matched 1 finds %d; raising --block-max to %d "
+              "finds %d: %s"
+              % (len(deep), wide_probe.block_max, len(wide),
+                 "PASS (screen works; the configured band is exhausted, not "
+                 "broken)" if healthy
+                 else "FAIL (nothing at either boundary -- suspect the screen)"))
+        ok &= healthy
 
     # Wave 28: the block LIST itself was silently truncated to --top-blocks
     # (default 6). The header counted all 28 blocks while six were listed, so a

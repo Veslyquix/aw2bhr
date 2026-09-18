@@ -1,0 +1,138 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802DA18.
+ * sub_0802DA18 @ 0x0802DA18
+ */
+
+/* MATCHED in wave 74 (W74-C): giving each directional key block its own
+ * block-scoped `int v` shortens the two independent live ranges and produces
+ * the ROM's late r1/r2/r3/r4 allocation exactly.  Configured verdict is
+ * 440/440 with only the two accepted relocation-equivalent pool words:
+ * 0x08090C18 and 0x08090C1C.
+ *
+ * Previously parked at 440/440 bytes, 97.5% identical (wave 65, W65-N).
+ * SIZE-EXACT.
+ * 11 differing bytes remain, in two allocation groups plus benign pool relocs:
+ *   - the two `.rodata` force-addr words (0x08090C18 -> &gUnknown_03001FBC,
+ *     0x08090C1C -> &gpKeySt). Benign; carry them at promotion.
+ *   - the second `unk20` block picks r2/r3 where the ROM picks r1/r2, and the
+ *     tail picks `movs r4,#30` where the ROM picks `movs r3,#30`. Downstream of
+ *     the same allocation.
+ * FIXED: embedding the table binding in the first indexed read,
+ * `(tbl = (struct Unk2023830 *)gUnknown_02023830)[...].unk01`, moves the pool
+ * `ldr` before the index scale without changing size and improves 95.7 -> 97.5%.
+ * Binding
+ * `tbl = (struct Unk2023830 *)gUnknown_02023830;` as its own statement at the
+ * top of the block, which is the obvious fix -- it emits the `ldr` in the right
+ * place but costs 4 bytes elsewhere and scores worse. The embedded assignment
+ * is load-bearing and should remain.
+ * SETTLED, do not re-derive: the struct-cast index
+ * `((struct Unk2023830 *)gUnknown_02023830)[i].unk01` is required -- it is the
+ * only spelling that puts the +1 in the load displacement instead of an extra
+ * `adds` or a relocation addend (see docs/agbcc-codegen.md). The `(u16)` casts
+ * on unk20/unk1e are also required and measured. */
+#include "hardware.h"
+struct Unk2023830
+{
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u8 filler_02[0x02];
+};
+
+void sub_0802DA18(void)
+{
+    struct Unk03001470 *ent;
+    void *p;
+    int t;
+    struct Unk2023830 *tbl;
+
+    sub_0802776C(1);
+
+    if (sub_08019850())
+        return;
+
+    ent = &gUnknown_03001470[gUnknown_03001FBC];
+
+    if (gpKeySt->held & 1)
+    {
+        if ((tbl = (struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk01 == 2)
+        {
+            sub_0803B4DC(0x68);
+            return;
+        }
+
+        sub_0803B4DC(0x65);
+
+        if (sub_08025AEC() == NULL)
+        {
+            sub_0802DBE4();
+            return;
+        }
+
+        p = sub_08025E08(gUnknown_030040A4.unk00, gUnknown_030040A4.unk02,
+                         ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00);
+
+        gUnknown_03003100.pos.unk00 = gUnknown_030040A4.unk00;
+        gUnknown_03003100.pos.unk02 = gUnknown_030040A4.unk02;
+
+        if (gUnknown_03003FC0.unk32 != 0)
+            sub_08034534(1, ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00,
+                         0, 0);
+
+        sub_08074410(0xe, p);
+    }
+
+    if (gpKeySt->held & 2)
+        sub_0803B4DC(0x66);
+
+    if (gpKeySt->held & 3)
+    {
+        sub_08015C30(gUnknown_03001FBC);
+        sub_0802D76C();
+        sub_0803A59C();
+        return;
+    }
+
+    if (gpKeySt->unk02 & 0x80)
+    {
+        int v;
+
+        v = (u16)ent->unk20;
+
+        if (ent->unk20 < ent->unk22)
+        {
+            ent->unk20 = v + 1;
+            sub_0802D9B8(ent);
+            sub_0803B4DC(0x67);
+        }
+    }
+
+    if (gpKeySt->unk02 & 0x40)
+    {
+        int v;
+
+        v = (u16)ent->unk20;
+
+        if (ent->unk20 > 0)
+        {
+            ent->unk20 = v - 1;
+            sub_0802D9B8(ent);
+            sub_0803B4DC(0x67);
+        }
+    }
+
+    gUnknown_030033E4.unk00 = 1;
+
+    t = (u16)ent->unk20 - (u16)ent->unk1e + 2;
+    gUnknown_030033E4.unk02 = t;
+    sub_0802323C(0x10, t * 16 + 8, 3);
+
+    if (ent->unk1e != 0)
+        sub_08043418(0x44, 0x2a, 0xe);
+
+    if (ent->unk1e + 7 < *(s16 *)&gUnknown_0300055A)
+        sub_08043418(0x44, 0x96, 0xf);
+}

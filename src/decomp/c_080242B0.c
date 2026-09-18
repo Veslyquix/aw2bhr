@@ -1,0 +1,65 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x080242B0.
+ * sub_080242B0 @ 0x080242B0
+ */
+
+/* Wave 80 (W80-A): MATCHED by writing the `return TRUE` body FIRST in the
+ * switch. The wave-35/39/77 residual was the case-14 leaf's branch polarity
+ * (`beq true; b default` vs the ROM's `bne default; b true`). gcc 2.95's
+ * expand_end_case emits the decision tree and reorder_insns it to the START of
+ * the switch, so the block that follows the tree's last test (the right leaf,
+ * {14}) is the FIRST case body in SOURCE order. When that body is the shared
+ * `return TRUE`, jump.c inverts the leaf's `beq L; b default; L:` into
+ * `bne default; L:` because L is the next block, and cross-jumping then folds
+ * the `movs r0,#1; b end` into case 6's identical tail, leaving `bne default;
+ * b <tail>` -- the ROM. Case-LABEL order within a group is irrelevant (W39-C
+ * measured it); case-BODY order is the lever. See the wave-80 chapter in
+ * docs/agbcc-codegen.md. */
+
+struct Unk242B0Map
+{
+    /* 0x0000 */ u8 filler_0000[0x12];
+    /* 0x0012 */ u8 unit[0x1432 - 0x12];
+    /* 0x1432 */ u8 plane[0x417A - 0x1432];
+    /* 0x417A */ u16 rowOffset[1];
+};
+
+u8 sub_080242B0(s16 a1, s16 a2)
+{
+    struct Unk242B0Map *map;
+    int idx;
+    int cell;
+    int hi;
+    int lo;
+
+    map = (struct Unk242B0Map *)gUnknown_08499590;
+    idx = map->rowOffset[a2] + a1;
+    cell = map->plane[idx];
+    hi = cell & 0xe0;
+    lo = cell & 0x1f;
+
+    if (map->unit[idx] != 0)
+        return FALSE;
+
+    if (hi != gUnknown_03004084)
+        return FALSE;
+
+    switch (lo)
+    {
+    case 10:
+    case 11:
+    case 14:
+        return TRUE;
+
+    case 6:
+        if (sub_08043050(gUnknown_030033EC) & 2)
+            return TRUE;
+        break;
+    }
+
+    return FALSE;
+}

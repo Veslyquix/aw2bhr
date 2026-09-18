@@ -1,0 +1,111 @@
+#include "global.h"
+
+/* Promoted from assembly; each function below is byte-for-byte
+ * identical to the original. Order is address order and must
+ * stay that way -- the linker places this file's .text as one
+ * contiguous block at 0x0802B3AC.
+ * sub_0802B3AC @ 0x0802B3AC
+ */
+
+/* MATCHED, wave 77 (W77-L). 296/296 bytes, relocs match, trymatch exit 0.
+ *
+ * Parked since wave 65 and reduced to four bytes at +0xD8 in wave 71:
+ *   ROM        lsls index,#1; adds table,#2; adds index,table
+ *   candidate  adds index,#1; lsls index,#1; adds index,table
+ * i.e. the second table element's +2 had to ride on the BASE, applied to the
+ * -fforce-addr pseudo AFTER the index is scaled, not on the index before it.
+ *
+ * THE LEVER WAS ALREADY IN THE TREE. src/decomp/c_0802AA14.c -- a promoted,
+ * byte-matched file reading THIS SAME TABLE -- carries the derivation and the
+ * spelling in its own header comment, and it names the two failure modes this
+ * entry had recorded as dead ends without recognising them:
+ *   `gUnknown_0849A2A6[a4 * 3 + 1]` folds the element into the index, and
+ *   `gUnknown_0849A2A6 + 1` folds it into the relocation.
+ * Only reaching the array THROUGH a struct member gives the ROM's add on the
+ * loaded base. So arm 2 is
+ *   ((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[c * 3]
+ * while arm 1 stays flat `gUnknown_0849A2A6[c * 3]` -- the ROM has two pool
+ * words for the same clean symbol and only the second one gets `adds r2,#2`.
+ * The struct is a leading `s16 unk00;` plus `s16 unk02[0x100];`. The extent
+ * matters and a struct of three s16 does NOT work: ARM's
+ * STRUCTURE_SIZE_BOUNDARY is 32, so a 6-byte struct rounds to 8 and the index
+ * would scale by 8. Wave 71's "local struct with a leading halfword" negative
+ * was this lever with the wrong member shape.
+ *
+ * A 2D row view -- `((const s16 (*)[3])gUnknown_0849A2A6)[c][1]` -- is NOT a
+ * substitute: it regresses to 84 differing bytes from +0x28 (71.6%).
+ *
+ * THE THREE asm CONSTRUCTS BELOW ARE ALL LOAD-BEARING; each was removed and
+ * re-measured against this matching body:
+ *   drop `asm("" : "+r" (tmp))` and the u8 temp   -> -4 bytes, 22.6%
+ *   drop the two `register ... asm("rN")` pins    -> +4 bytes, 39.9%
+ *   drop both                                     -> size-exact, 56.4%
+ * The empty read/write constraint is the wave-75 lever (see the chapter in
+ * docs/agbcc-codegen.md; it closed sub_08073E0C). The register pins are a
+ * measured COUNTEREXAMPLE to wave 77's "pinning is catastrophic" claim: here
+ * they are worth the match. None of the three emits an instruction, so the
+ * recorded residual was never fake in the W77-A sense -- but this body is not
+ * plausible original source, and promotion should be a coordinator decision.
+ *
+ * Keep the clean-symbol Unk30013D0 member access and the `||` guard shape;
+ * both remain required. */
+#include "proc.h"
+struct Map
+{
+    /* 0x0000 */ u16 unk00;
+    /* 0x0002 */ u16 unk02;
+    /* 0x0004 */ u16 unk04;
+    /* 0x0006 */ u16 unk06;
+    /* 0x0008 */ u8 filler_0008[0x0A];
+    /* 0x0012 */ u8 unk0012[0x0508];
+    /* 0x051A */ u8 unk051A[0x0F18];
+    /* 0x1432 */ u8 unk1432[0x0A10];
+    /* 0x1E42 */ u8 unk1E42[0x0508];
+    /* 0x234A */ u8 unk234A[0x0508];
+    /* 0x2852 */ u8 unk2852[0x1928];
+    /* 0x417A */ u16 unk417A[0x100];
+};
+struct Tbl49A2A6
+{
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02[0x100];
+};
+struct Unk30013D0
+{
+    /* 0x00 */ u8 filler_00[0x14];
+    /* 0x14 */ u16 unk14;
+};
+
+void sub_0802B3AC(s16 a, s16 b, s16 c)
+{
+    u8 tmp;
+    register int d asm("r8");
+    int idx;
+    register int x asm("r0");
+
+    tmp = sub_08012E4C();
+    asm("" : "+r" (tmp));
+    d = tmp;
+
+    if (Proc_Find(gUnknown_0849A02C) == NULL)
+        return;
+
+    if (sub_0803DE94(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02) != NULL
+        || gUnknown_020288B4[idx =
+               ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030033E4.unk02]
+               + gUnknown_030033E4.unk00] != 0)
+    {
+        sub_080251D8(gUnknown_03003F38);
+        x = (u16)gUnknown_0849A2A6[c * 3] + a + 0x18;
+        sub_08037200(x, b - 0x14 - (s8)d,
+                     ((struct Unk30013D0 *)gUnknown_030013D0)->unk14, 0x1a6);
+        return;
+    }
+
+    sub_080251BC(gUnknown_03003F38,
+                 ((struct Map *)gUnknown_08499590)->unk0012[idx],
+                 &gUnknown_03003100.pos);
+    x = (u16)((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[c * 3] + a + 0x1b;
+    sub_08037200(x, b - 0x14 - (s8)d,
+                 ((struct Unk30013D0 *)gUnknown_030013D0)->unk14, 0x1a6);
+}
