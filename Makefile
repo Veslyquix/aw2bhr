@@ -66,25 +66,16 @@ ASFLAGS := -mcpu=arm7tdmi -I asm/include -I include
 LDFLAGS :=
 
 LDS := $(BUILD_NAME).lds
-# src/decomp holds functions promoted out of assembly on this branch. They are
-# excluded from the default build on purpose: that build is upstream's, still
-# assembles the same functions from asm/*.s, and linking both would be a
-# duplicate definition. Keeping it buildable means the ROM stays reproducible
-# from upstream sources alone -- a second, independent check on our C.
-#
-# The `-name` patterns are quoted deliberately. Unquoted, the shell expands them
-# against the repo root before find ever sees them, so a single stray .c file
-# there turns `-name *.c` into `-name thatfile.c` and C_SRCS comes out EMPTY.
-# Nothing errors: make just links whatever objects already exist in build/, so
-# the ROM silently builds from stale code. This happened -- decomp-permuter's
-# --debug mode drops a debug_source.c in the working directory.
-#
-# src/design.c is excluded here for the same reason as src/decomp: it is a
-# promoted, address-pinned run of matched functions (see data/promoted.json),
-# just filed directly under src/ instead of src/decomp/ at the user's request.
-# Linking it into the default build alongside asm/*.s -- which still defines
-# the same symbols -- would be the identical duplicate-definition failure.
-C_SRCS := $(shell find $(SRC_DIR) -name '*.c' -not -path '*/decomp/*' -not -name 'design.c')
+# Every src/*.c file is a promoted, address-pinned decompilation (see
+# data/promoted.json) -- src/decomp/ for machine-promoted drafts, src/ itself
+# for human-organized ones (design.c, proc.c, title-screen.c, ...), but both
+# get identical treatment. The default build is upstream's: it still
+# assembles every one of those functions from asm/*.s (and their data from
+# data/*.s), so linking any src/*.c here too would be a duplicate definition.
+# Excluding the whole directory -- rather than naming files one at a time --
+# means promoting a new file, or moving one from src/decomp/ to src/, never
+# requires a Makefile edit.
+C_SRCS :=
 ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s') $(shell find $(ASM_DIR) -name '*.s')
 DATA_SRCS := $(shell find data -name '*.s')
 
@@ -104,8 +95,13 @@ RODATA_DIR := $(BUILD_DIR)/rodata
 ifeq ($(SPLIT),1)
   FUNC_SRCS := $(shell find $(FUNC_DIR) -name '*.s')
   ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s')
-  C_SRCS += $(shell find $(SRC_DIR)/decomp -name '*.c' 2>/dev/null)
-  C_SRCS += $(SRC_DIR)/design.c
+  # The `-name` pattern is quoted deliberately. Unquoted, the shell expands it
+  # against the repo root before find ever sees it, so a single stray .c file
+  # there turns `-name *.c` into `-name thatfile.c` and C_SRCS comes out EMPTY.
+  # Nothing errors: make just links whatever objects already exist in build/,
+  # so the ROM silently builds from stale code. This happened -- decomp-
+  # permuter's --debug mode drops a debug_source.c in the working directory.
+  C_SRCS := $(shell find $(SRC_DIR) -name '*.c')
   LDS := $(BUILD_NAME).split.lds
 
   # data/rodata.s holds agbcc's -fforce-addr pool words as incbin'd ROM bytes.
@@ -164,8 +160,13 @@ endif
 
 # Source discovery failing silently is worse than any build error: make would
 # link the objects already in build/ and `compare` would pass on stale code.
-ifeq ($(strip $(C_SRCS)),)
-  $(error C_SRCS is empty -- source discovery failed, see the note above it)
+# The default (non-SPLIT) build has no C sources at all by design -- see the
+# note above C_SRCS's first assignment -- so this only guards SPLIT=1, where
+# an empty C_SRCS means the src/*.c glob itself came back empty.
+ifeq ($(SPLIT),1)
+  ifeq ($(strip $(C_SRCS)),)
+    $(error C_SRCS is empty -- source discovery failed, see the note above it)
+  endif
 endif
 
 C_OBJS := $(C_SRCS:%.c=$(BUILD_DIR)/%.o)

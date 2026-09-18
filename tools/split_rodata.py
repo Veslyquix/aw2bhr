@@ -55,7 +55,7 @@ import awlib
 # entry here as a replaced blob whether it was carved or not, and the failure
 # mode for over-listing is megabytes silently dropped from the image.
 SOURCES = [("rodata.s", ".rodata"), ("data.s", ".data"),
-           ("rodata-0808F098.s", ".rodata")]
+           ("rodata-0808F098.s", ".rodata"), ("data-0848B688.s", ".data")]
 OUT_DIR = os.path.join(awlib.REPO, "build", "rodata")
 MANIFEST = os.path.join(OUT_DIR, "units.json")
 PROMOTED = os.path.join(awlib.DATA_DIR, "promoted.json")
@@ -98,7 +98,7 @@ def read_chunks(src):
     return header, chunks
 
 
-def split_for_carves(carve, chunks):
+def split_for_carves(carve, chunks, meta=None):
     """Split any chunk that CONTAINS a carve address so the word stands alone.
 
     agbcc's -fforce-addr pool word does not have to sit at a label boundary in
@@ -114,11 +114,13 @@ def split_for_carves(carve, chunks):
     first thing in the chunk, which is the case that prompted this. The tail is
     anonymous data nobody references by name.
     """
+    meta = meta or {}
     out = []
     for c in chunks:
         hits = sorted(a for a in carve
                       if c["addr"] <= a < c["addr"] + c["size"])
-        if not hits or c["size"] == 4:
+        word_size = meta.get(hits[0], {}).get("size", 4) if hits else 4
+        if not hits or (c["size"] == word_size and c["addr"] == hits[0]):
             out.append(c)
             continue
         indent = re.match(r'(\s*)', c["lines"][-1]).group(1)
@@ -130,13 +132,14 @@ def split_for_carves(carve, chunks):
         pos = c["addr"]
         pre = c["lines"][:-1]           # labels/.global, minus the incbin line
         for a in hits:
+            size = meta.get(a, {}).get("size", 4)
             if a > pos:
                 out.append({"addr": pos, "size": a - pos,
                             "lines": pre + [incbin(pos, a - pos)]})
                 pre = []
-            out.append({"addr": a, "size": 4, "lines": pre + [incbin(a, 4)]})
+            out.append({"addr": a, "size": size, "lines": pre + [incbin(a, size)]})
             pre = []
-            pos = a + 4
+            pos = a + size
         end = c["addr"] + c["size"]
         if pos < end:
             out.append({"addr": pos, "size": end - pos,
@@ -145,7 +148,17 @@ def split_for_carves(carve, chunks):
 
 
 def load_carveouts():
-    """{addr: obj} for every promoted unit that declares pool words."""
+    """{addr: obj} for every promoted unit that declares pool words.
+
+    A `rodata` list entry is usually a bare address string: a single 4-byte
+    `-fforce-addr` pool word, always agbcc's own `.rodata` section regardless
+    of which blob it is carved from (see the module docstring). A promoted
+    unit can instead claim a WHOLE named range it defines with an explicit
+    section -- e.g. a `CONST_DATA` (`SECTION(".data")`) table -- by giving an
+    object `{"addr", "size", "sect"}` instead of a bare string; `load_meta()`
+    exposes that per-address size/section so the rest of this file does not
+    have to assume 4 bytes of `.rodata` everywhere.
+    """
     if not os.path.exists(PROMOTED):
         return {}
     with open(PROMOTED, encoding="utf-8") as fh:
@@ -153,7 +166,7 @@ def load_carveouts():
     out = {}
     for e in entries:
         for a in e.get("rodata", []):
-            addr = int(a, 16) if isinstance(a, str) else a
+            addr = int(a, 16) if isinstance(a, str) else int(a["addr"], 16)
             if addr in out:
                 raise SystemExit("error: 0x%08X claimed by both %s and %s"
                                  % (addr, out[addr], e["obj"]))
@@ -161,13 +174,45 @@ def load_carveouts():
     return out
 
 
-def verify(carve, chunks, strict):
+def load_meta():
+    """{addr: {"size": int, "sect": str}} for dict-form `rodata` entries.
+
+    Bare-string entries carry no meta; callers default to size 4 and
+    `.rodata`, which reproduces every carve this tool supported before this
+    function existed.
+    """
+    if not os.path.exists(PROMOTED):
+        return {}
+    with open(PROMOTED, encoding="utf-8") as fh:
+        entries = json.load(fh)
+    meta = {}
+    for e in entries:
+        for a in e.get("rodata", []):
+            if isinstance(a, str):
+                continue
+            addr = int(a["addr"], 16)
+            meta[addr] = {
+                "size": int(a["size"], 16) if isinstance(a["size"], str) else a["size"],
+                "sect": a.get("sect", ".rodata"),
+            }
+    return meta
+
+
+def verify(carve, chunks, strict, meta=None):
     """Each carved word must be 4 bytes and hold a plausible ROM address.
 
     Cheap, but it is the check that matters: if the word we are removing from
     the data blob is not the address constant the C unit re-emits, the ROM
     changes and the only symptom is a SHA mismatch 4,500 objects later.
+
+    A dict-form `rodata` entry (see `load_meta`) opts a carve into an explicit
+    size instead of the default 4 bytes -- for a promoted unit's own named,
+    non-force-addr range (e.g. a `CONST_DATA` table) rather than a pool word.
+    The "holds a plausible ROM address" check below is specific to a 4-byte
+    force-addr constant and does not apply to an arbitrary-sized range, so it
+    is skipped whenever an explicit size opts out of the default.
     """
+    meta = meta or {}
     by_addr = {c["addr"]: c for c in chunks}
     rom = open(BASEROM, "rb").read()
     for addr, obj in sorted(carve.items()):
@@ -177,9 +222,12 @@ def verify(carve, chunks, strict):
                 raise SystemExit("error: 0x%08X (%s) is not a chunk boundary in "
                                  "any data blob" % (addr, obj))
             continue
-        if c["size"] != 4:
-            raise SystemExit("error: 0x%08X (%s) is %d bytes, expected a "
-                             "4-byte pool word" % (addr, obj, c["size"]))
+        expected = meta.get(addr, {}).get("size", 4)
+        if c["size"] != expected:
+            raise SystemExit("error: 0x%08X (%s) is %d bytes, expected %d"
+                             % (addr, obj, c["size"], expected))
+        if addr in meta:
+            continue
         val = int.from_bytes(rom[addr - ROM_BASE:addr - ROM_BASE + 4], "little")
         if not (0x02000000 <= val < 0x0A000000):
             # Wave 42: a unit's .rodata is not only address words. The wave-39
@@ -201,8 +249,9 @@ def verify(carve, chunks, strict):
                                  % (addr, obj, val))
 
 
-def build(header, chunks, carve, stem):
+def build(header, chunks, carve, stem, meta=None):
     """Interleave: rodata pieces and promoted objects, in address order."""
+    meta = meta or {}
     seq, piece, pieces = [], [], []
 
     def flush():
@@ -238,7 +287,8 @@ def build(header, chunks, carve, stem):
                     % (obj, claimed, len(run), c["addr"]))
             seq.append({"kind": "c", "obj": obj,
                         "addr_hex": "0x%08X" % c["addr"],
-                        "size": sum(x["size"] for x in run)})
+                        "size": sum(x["size"] for x in run),
+                        "sect": meta.get(c["addr"], {}).get("sect", ".rodata")})
         else:
             piece.append(c)
         i += 1
@@ -261,17 +311,18 @@ def main():
     args = ap.parse_args()
 
     carve = load_carveouts()
+    meta = load_meta()
     claimed, manifest, files, totals = set(), {}, {}, []
 
     for src, sect in SOURCES:
         stem = src[:-2]
         header, chunks = read_chunks(src)
-        chunks = split_for_carves(carve, chunks)
+        chunks = split_for_carves(carve, chunks, meta)
         mine = {a: o for a, o in carve.items()
                 if any(c["addr"] == a for c in chunks)}
-        verify(mine, chunks, strict=True)
+        verify(mine, chunks, strict=True, meta=meta)
         claimed |= set(mine)
-        seq, fs = build(header, chunks, mine, stem)
+        seq, fs = build(header, chunks, mine, stem, meta)
         manifest[src] = {"sect": sect, "seq": seq}
         files.update(fs)
         placed = sum(e["size"] for e in seq)

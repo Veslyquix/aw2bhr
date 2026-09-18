@@ -2816,3 +2816,59 @@ gUnknown_08581AC8:  @ 0x08581AC8
 	.global gUnknown_08581C48
 gUnknown_08581C48:  @ 0x08581C48
 	.incbin "baserom.gba", 0x581C48, 0x20    @ 0x581C68 - 0x581C48
+
+	.global ProcScr_Unk_08581C68
+ProcScr_Unk_08581C68:  @ 0x08581C68
+	.incbin "baserom.gba", 0x581C68, 0x28    @ 0x581C90 - 0x581C68
+
+	.global ProcScr_TitleToMainMenu
+ProcScr_TitleToMainMenu:  @ 0x08581C90
+	.incbin "baserom.gba", 0x581C90, 0x28    @ 0x581CB8 - 0x581C90
+
+	.global gUnknown_08581CB8
+gUnknown_08581CB8:  @ 0x08581CB8
+	.incbin "baserom.gba", 0x581CB8, 0x40    @ 0x581CF8 - 0x581CB8
+
+	.global ProcScr_TitleScreen
+ProcScr_TitleScreen:  @ 0x08581CF8
+	.incbin "baserom.gba", 0x581CF8, 0x40    @ 0x581D38 - 0x581CF8
+
+	.global Sprite_Title_Number2
+Sprite_Title_Number2:  @ 0x08581D38
+	.incbin "baserom.gba", 0x581D38, 0x8    @ 0x581D40 - 0x581D38
+
+	.global Sprite_08581D40
+Sprite_08581D40:  @ 0x08581D40
+	.incbin "baserom.gba", 0x581D40, 0x20    @ 0x581D60 - 0x581D40
+
+	.global Sprite_Title_BlackHoleRising
+Sprite_Title_BlackHoleRising:  @ 0x08581D60
+	.incbin "baserom.gba", 0x581D60, 0x44    @ 0x581DA4 - 0x581D60
+
+	.global Sprite_Title_AdvanceWars
+Sprite_Title_AdvanceWars:  @ 0x08581DA4
+	.incbin "baserom.gba", 0x581DA4, 0x14    @ 0x581DB8 - 0x581DA4
+
+	.global Padding_08581DB8
+Padding_08581DB8:  @ 0x08581DB8
+	.incbin "baserom.gba", 0x581DB8, 0x2    @ 0x581DBA - 0x581DB8
+
+	.global gUnknown_08581DBA
+gUnknown_08581DBA:  @ 0x08581DBA
+	.incbin "baserom.gba", 0x581DBA, 0x32    @ 0x581DEC - 0x581DBA
+
+	.global Sprite_Title_PressStart
+Sprite_Title_PressStart:  @ 0x08581DEC
+	.incbin "baserom.gba", 0x581DEC, 0x1A    @ 0x581E06 - 0x581DEC
+
+	.global Sprite_Title_Trademark
+Sprite_Title_Trademark:  @ 0x08581E06
+	.incbin "baserom.gba", 0x581E06, 0xA    @ 0x581E10 - 0x581E06
+
+	.global ProcScr_TitlePressStartDraw
+ProcScr_TitlePressStartDraw:  @ 0x08581E10
+	.incbin "baserom.gba", 0x581E10, 0x18    @ 0x581E28 - 0x581E10
+
+	.global ProcScr_TitleScreenSpriteDraw
+ProcScr_TitleScreenSpriteDraw:  @ 0x08581E28
+	.incbin "baserom.gba", 0x581E28, 0x48    @ 0x581E70 - 0x581E28
