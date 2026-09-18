@@ -5,9 +5,14 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08008BB8.
  * sub_08008BB8 @ 0x08008BB8
+ *
+ * Named per aw2bhr-main's src/design.c/design.h ("EnsureValidTile"), called
+ * from SetTerrainAt (src/decomp/c_080011F4.c) whenever a cell is set to
+ * TERRAIN_SEA. The old sub_XXXXXXXX symbol is kept as a linker alias below
+ * so every other unit keeps resolving it unchanged.
  */
 
-void sub_08008BB8(int x, int y)
+void EnsureValidTile(int x, int y)
 {
     int v;
 
@@ -30,12 +35,14 @@ void sub_08008BB8(int x, int y)
 
         p = gUnknown_08499590;
         t = y * 2;
-        rows = p + 0x417A;
+        rows = p + tileMap_417A;
         idx = *(u16 *)(rows + t) + x;
-        cells = p + 0x1432;
+        cells = p + terrainMap_1432;
         c = (*(cells + idx) & 0x1f) + gUnknown_085D5ABC[v & 0x3f].unk19 * 32;
 
         if (costs[c] == -1)
             sub_08008A8C(0, x, y);
     }
 }
+
+asm(".global sub_08008BB8\n.thumb_set sub_08008BB8, EnsureValidTile\n");

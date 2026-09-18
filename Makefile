@@ -78,7 +78,13 @@ LDS := $(BUILD_NAME).lds
 # Nothing errors: make just links whatever objects already exist in build/, so
 # the ROM silently builds from stale code. This happened -- decomp-permuter's
 # --debug mode drops a debug_source.c in the working directory.
-C_SRCS := $(shell find $(SRC_DIR) -name '*.c' -not -path '*/decomp/*')
+#
+# src/design.c is excluded here for the same reason as src/decomp: it is a
+# promoted, address-pinned run of matched functions (see data/promoted.json),
+# just filed directly under src/ instead of src/decomp/ at the user's request.
+# Linking it into the default build alongside asm/*.s -- which still defines
+# the same symbols -- would be the identical duplicate-definition failure.
+C_SRCS := $(shell find $(SRC_DIR) -name '*.c' -not -path '*/decomp/*' -not -name 'design.c')
 ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s') $(shell find $(ASM_DIR) -name '*.s')
 DATA_SRCS := $(shell find data -name '*.s')
 
@@ -99,6 +105,7 @@ ifeq ($(SPLIT),1)
   FUNC_SRCS := $(shell find $(FUNC_DIR) -name '*.s')
   ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s')
   C_SRCS += $(shell find $(SRC_DIR)/decomp -name '*.c' 2>/dev/null)
+  C_SRCS += $(SRC_DIR)/design.c
   LDS := $(BUILD_NAME).split.lds
 
   # data/rodata.s holds agbcc's -fforce-addr pool words as incbin'd ROM bytes.

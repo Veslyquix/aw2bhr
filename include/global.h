@@ -9,6 +9,7 @@
 #include "unknown-globals.h"
 #include "unknown-functions.h"
 #include "xenesis-names.h"
+#include "design-names.h"
 
 #define SECTION(name) __attribute__((section(name)))
 

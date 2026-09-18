@@ -201,79 +201,23 @@
   "size": 16
  },
  {
-  "file": "src/decomp/c_08001158.c",
-  "obj": "src/decomp/c_08001158.o",
+  "file": "src/design.c",
+  "obj": "src/design.o",
   "addr_hex": "0x08001158",
   "functions": [
-   "sub_08001158"
-  ],
-  "size": 68
- },
- {
-  "file": "src/decomp/c_0800119C.c",
-  "obj": "src/decomp/c_0800119C.o",
-  "addr_hex": "0x0800119C",
-  "functions": [
-   "sub_0800119C"
-  ],
-  "size": 88
- },
- {
-  "file": "src/decomp/c_080011F4.c",
-  "obj": "src/decomp/c_080011F4.o",
-  "addr_hex": "0x080011F4",
-  "functions": [
-   "sub_080011F4"
-  ],
-  "size": 60
- },
- {
-  "file": "src/decomp/c_08001230.c",
-  "obj": "src/decomp/c_08001230.o",
-  "addr_hex": "0x08001230",
-  "functions": [
-   "sub_08001230"
-  ],
-  "size": 172
- },
- {
-  "file": "src/decomp/c_080012DC.c",
-  "obj": "src/decomp/c_080012DC.o",
-  "addr_hex": "0x080012DC",
-  "functions": [
-   "sub_080012DC"
-  ],
-  "size": 776
- },
- {
-  "file": "src/decomp/c_080015E4.c",
-  "obj": "src/decomp/c_080015E4.o",
-  "addr_hex": "0x080015E4",
-  "functions": [
-   "sub_080015E4"
-  ],
-  "size": 104
- },
- {
-  "file": "src/decomp/c_0800164C.c",
-  "obj": "src/decomp/c_0800164C.o",
-  "addr_hex": "0x0800164C",
-  "functions": [
+   "sub_08001158",
+   "sub_0800119C",
+   "sub_080011F4",
+   "sub_08001230",
+   "sub_080012DC",
+   "sub_080015E4",
    "sub_0800164C",
    "sub_0800168C",
-   "sub_080016D0"
-  ],
-  "size": 184
- },
- {
-  "file": "src/decomp/c_08001704.c",
-  "obj": "src/decomp/c_08001704.o",
-  "addr_hex": "0x08001704",
-  "functions": [
+   "sub_080016D0",
    "sub_08001704",
    "sub_08001A04"
   ],
-  "size": 1508
+  "size": 2960
  },
  {
   "file": "src/decomp/c_08001CE8.c",
