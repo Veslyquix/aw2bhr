@@ -457,7 +457,11 @@ s8 sub_08015BD0(s32);
  * gUnknown_030040EC;` and that global is a `void (*)(void)`. Declared here in
  * wave 33 (W33-D) for sub_08014BE8, whose last test compares the result
  * against sub_080369BC. Only that symbol's ADDRESS is used anywhere, so
- * `void(void)` is what the comparison needs and nothing else constrains it. */
+ * `void(void)` is what the comparison needs and nothing else constrains it.
+ * The named alias below reflects AgbMain's permanent loop at 0x08036D1C:
+ * gUnknown_030040EC is called once per loop iteration before the soft-reset
+ * poll. */
+void (*GetMainLoopCallback(void))(void);
 void (*sub_080366DC(void))(void);
 void sub_080369BC(void);
 /* Three whole-list sweeps over gUnknown_0200E438, each reached only through a
@@ -1600,9 +1604,16 @@ void sub_080252E8(void *);
  * because sub_080370F0 lives in another translation unit. They take
  * `void (*)(void)` and NOT `void *`, so their call sites pass a function by
  * name with no cast -- the opposite of the sub_08011AAC / sub_08011B34 /
- * sub_0801F024 convention a few lines up. sub_0803662C registers sub_08036944 /
- * sub_080369BC through the same pair, sub_080370F0 registers sub_08036884 /
- * sub_080368E8; the two wrappers are what fix which setter drives which slot. */
+ * sub_0801F024 convention a few lines up.
+ *
+ * gUnknown_030040D0 is the VBlank-side slot reached through RunVBlankCallback
+ * after AgbMain registers that wrapper with sub_0801BB00. gUnknown_030040EC is
+ * the main-loop slot that AgbMain calls directly. sub_0803662C registers
+ * sub_08036944 / sub_080369BC through the same pair, sub_080370F0 registers
+ * sub_08036884 / sub_080368E8; the two wrappers are what fix which setter
+ * drives which slot. */
+void SetMainLoopCallback(void (*)(void));
+void SetVBlankCallback(void (*)(void));
 void sub_080366C4(void (*)(void));
 void sub_080366D0(void (*)(void));
 void sub_08002D7C(void);

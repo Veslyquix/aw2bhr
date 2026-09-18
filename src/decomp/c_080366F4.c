@@ -7,11 +7,14 @@
  * sub_080366F4 @ 0x080366F4
  */
 
-/* The guarded call of the hook sub_080366D0 installs. `bl _call_via_r0` is the
- * nullary indirect trampoline and the pointer stays in r0 across the NULL test,
- * so naming the global directly is enough -- no binding local is wanted. */
-void sub_080366F4(void)
+/* The guarded call of the hook SetVBlankCallback installs. `bl _call_via_r0`
+ * is the nullary indirect trampoline and the pointer stays in r0 across the
+ * NULL test, so naming the global directly is enough -- no binding local is
+ * wanted. */
+void RunVBlankCallback(void)
 {
     if (gUnknown_030040D0 != NULL)
         gUnknown_030040D0();
 }
+
+asm(".global sub_080366F4\n.thumb_set sub_080366F4, RunVBlankCallback\n");

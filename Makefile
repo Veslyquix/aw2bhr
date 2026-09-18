@@ -188,7 +188,7 @@ $(shell mkdir -p $(SUBDIRS))
 # = RECIPES =
 # ===========
 
-compare: $(ROM)
+compare: $(ROM) $(SYM)
 	@echo "[SHA]	$<"
 	@$(SHASUM) -c $(BUILD_NAME).sha1
 
