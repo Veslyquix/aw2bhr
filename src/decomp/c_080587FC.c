@@ -86,15 +86,15 @@ int sub_080587FC(int flag)
 
     p = gUnknown_03003338;
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
     {
-        for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
             if ((sub_08035000(gUnknown_03003FC0.unk02)->unk28 & 1) == 0
-             && gUnknown_020288B4[((struct Map *)gUnknown_08499590)->unk417A[y] + x] != 0)
+             && gUnknown_020288B4[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] != 0)
             {
                 xp = (u32)x << 16;
                 yp = (u32)y << 16;
@@ -122,7 +122,7 @@ int sub_080587FC(int flag)
             }
             else
             {
-                idx = ((struct Map *)gUnknown_08499590)->unk417A[y] + x;
+                idx = ((struct Map *)gUnknown_08499590)->rowOffset[y] + x;
                 u = ((struct Map *)gUnknown_08499590)->unk0012[idx];
                 if (u == 0)
                     continue;

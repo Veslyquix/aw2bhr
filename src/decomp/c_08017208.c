@@ -138,8 +138,8 @@ void sub_08017208(void)
     gUnknown_03002F20 = p->unk0ba0;
     gUnknown_03001FF0 = p->unk0ba4;
     map = (struct Map *)gUnknown_08499590;
-    map->unk00 = p->unk0bae;
-    map->unk02 = p->unk0bb0;
+    map->width = p->unk0bae;
+    map->height = p->unk0bb0;
     map->unk04 = a = p->unk0bb2;
     map->unk06 = b = p->unk0bb4;
     map->unk0c = map->unk04 / 16;
@@ -154,13 +154,13 @@ void sub_08017208(void)
                      sub_08024944(gUnknown_03003FC0.unk02));
         sub_080247A4(gUnknown_03003FC0.unk02);
         sub_080215FC();
-        for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk00; y++)
+        for (y = 0; y < ((struct Map *)gUnknown_08499590)->width; y++)
         {
-            for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk02; x++)
+            for (x = 0; x < ((struct Map *)gUnknown_08499590)->height; x++)
             {
-                idx = ((struct Map *)gUnknown_08499590)->unk417a[x] + y;
+                idx = ((struct Map *)gUnknown_08499590)->rowOffset[x] + y;
                 off = idx * 2;
-                ((struct Map *)gUnknown_08499590)->unk0a22[idx] =
+                ((struct Map *)gUnknown_08499590)->tile[idx] =
                     *(u16 *)((u8 *)gUnknown_03003F68 + off + 2);
             }
         }
@@ -170,8 +170,8 @@ void sub_08017208(void)
     {
         for (i = 0; p->unk0bb8[i].unk02 != 0xffff; i++)
         {
-            ((struct Map *)gUnknown_08499590)->unk0a22[
-                ((struct Map *)gUnknown_08499590)->unk417a[p->unk0bb8[i].unk01]
+            ((struct Map *)gUnknown_08499590)->tile[
+                ((struct Map *)gUnknown_08499590)->rowOffset[p->unk0bb8[i].unk01]
                 + p->unk0bb8[i].unk00] = p->unk0bb8[i].unk02;
         }
     }

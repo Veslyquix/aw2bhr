@@ -76,12 +76,12 @@ void sub_0805ACFC(int x, int y, u16 * out)
 
     map = (struct Map *)gUnknown_08499590;
 
-    if (x >= map->unk00)
+    if (x >= map->width)
         return;
-    if (y >= map->unk02)
+    if (y >= map->height)
         return;
 
-    idx = map->unk417A[y] + x;
+    idx = map->rowOffset[y] + x;
 
     if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
         return;
@@ -95,7 +95,7 @@ void sub_0805ACFC(int x, int y, u16 * out)
     if (t == 0x79)
         return;
 
-    terrain = map->unk1432[idx] & 0x1f;
+    terrain = map->terrain[idx] & 0x1f;
 
     if (terrain != 0xd && terrain != 0xb)
         return;

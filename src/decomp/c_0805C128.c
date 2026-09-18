@@ -27,7 +27,7 @@
  *     original   movs r0,#0xe0 / ldr r1,=g / ands r0, r3 / ldrh / cmp r0, r1
  *     old draft  movs r0,#0xe0 / ldr r1,=g / ands r3, r0 / ldrh / cmp r3, r1
  *
- * THE FIX IS TO DELETE THE `u8 cell` LOCAL AND NAME `map->unk1432[idx]` TWICE.
+ * THE FIX IS TO DELETE THE `u8 cell` LOCAL AND NAME `map->terrain[idx]` TWICE.
  * The old draft recorded "`cell` is `u8`, not `int`. The ROM holds ONE QImode
  * pseudo live across both masks" as SETTLED. That was exactly backwards and it
  * is what cost this function two waves. Reading the member twice still emits
@@ -44,7 +44,7 @@
  * local gives `ands r1, r0`. Two functions, same lever, opposite of the note
  * that had been sitting here.
  *
- * The constant-first spelling `0xe0 & map->unk1432[idx]` is still required and
+ * The constant-first spelling `0xe0 & map->terrain[idx]` is still required and
  * is unchanged from the 98.7% draft: agbcc emits a comparison's operand classes
  * in source order, so this schedules the pool `ldr` for gUnknown_03004084
  * between the `movs #0xe0` and the `ands`, which is the ROM's interleaving.
@@ -67,12 +67,12 @@ void sub_0805C128(int x, int y, u16 * out)
 
     map = (struct Map *)gUnknown_08499590;
 
-    if (x >= map->unk00)
+    if (x >= map->width)
         return;
-    if (y >= map->unk02)
+    if (y >= map->height)
         return;
 
-    idx = map->unk417A[y] + x;
+    idx = map->rowOffset[y] + x;
 
     if (map->unk0012[idx] != 0)
         return;
@@ -80,7 +80,7 @@ void sub_0805C128(int x, int y, u16 * out)
     if ((s8)gUnknown_03003340[y][x] < 0)
         return;
 
-    t = map->unk1432[idx] & 0x1f;
+    t = map->terrain[idx] & 0x1f;
 
     if (t == 0xd)
         return;
@@ -88,7 +88,7 @@ void sub_0805C128(int x, int y, u16 * out)
         return;
 
     if (gUnknown_085767D5[t] != 0
-        && (0xe0 & map->unk1432[idx]) != gUnknown_03004084)
+        && (0xe0 & map->terrain[idx]) != gUnknown_03004084)
         return;
 
     out[0] = x;

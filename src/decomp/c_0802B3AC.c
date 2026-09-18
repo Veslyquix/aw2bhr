@@ -78,7 +78,7 @@ void sub_0802B3AC(s16 a, s16 b, s16 c)
 
     if (sub_0803DE94(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02) != NULL
         || gUnknown_020288B4[idx =
-               ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030033E4.unk02]
+               ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030033E4.unk02]
                + gUnknown_030033E4.unk00] != 0)
     {
         sub_080251D8(gUnknown_03003F38);

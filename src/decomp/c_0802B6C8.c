@@ -38,7 +38,7 @@ u8 sub_0802B6C8(u8 x, u8 y)
     u8 army;
     int idx;
 
-    idx = x + ((struct Map *)gUnknown_08499590)->unk417A[y];
+    idx = x + ((struct Map *)gUnknown_08499590)->rowOffset[y];
 
     if (((struct Map *)gUnknown_08499590)->unk0012[idx] == 0)
         return 0;

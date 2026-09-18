@@ -45,7 +45,7 @@ s16 sub_0802A1E4(s16 x, s16 y)
     struct Unk08499594 *unit;
 
     unit = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk0012[
-        ((struct Map *)gUnknown_08499590)->unk417A[y] + x]];
+        ((struct Map *)gUnknown_08499590)->rowOffset[y] + x]];
 
     if (gUnknown_03003F2C == ((unit - gUnknown_08499594) & 0xc0)
         && sub_08042084((u8 *)unit))
@@ -65,11 +65,11 @@ bool8 sub_0802A258(struct Unk2A258 *p)
     if (p->unk03 != 0 && sub_0802A1E4(p->unk02, p->unk03 - 1))
         return 1;
 
-    if (p->unk02 < ((struct Map *)gUnknown_08499590)->unk00 - 1
+    if (p->unk02 < ((struct Map *)gUnknown_08499590)->width - 1
         && sub_0802A1E4(p->unk02 + 1, p->unk03))
         return 1;
 
-    if (p->unk03 < ((struct Map *)gUnknown_08499590)->unk02 - 1
+    if (p->unk03 < ((struct Map *)gUnknown_08499590)->height - 1
         && sub_0802A1E4(p->unk02, p->unk03 + 1))
         return 1;
 

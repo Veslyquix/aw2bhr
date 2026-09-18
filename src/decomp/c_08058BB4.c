@@ -124,12 +124,12 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
 
     map = (struct Map *)gUnknown_08499590;
 
-    if (x >= map->unk00)
+    if (x >= map->width)
         return;
-    if (y >= map->unk02)
+    if (y >= map->height)
         return;
 
-    idx = map->unk417A[y] + x;
+    idx = map->rowOffset[y] + x;
 
     if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
         return;
@@ -139,10 +139,10 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
 
     if (gUnknown_030040D8->unk00 == 0
      || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
-        score = gUnknown_085D583C[map->unk1432[idx] & 0x1f].unk10 * 10;
+        score = gUnknown_085D583C[map->terrain[idx] & 0x1f].unk10 * 10;
 
     if ((((struct Map *)gUnknown_08499590)->unk3262[
-            ((struct Map *)gUnknown_08499590)->unk417A[y] + x] & mask) == 0)
+            ((struct Map *)gUnknown_08499590)->rowOffset[y] + x] & mask) == 0)
         score += 100;
 
     if (score < *pBest)
@@ -173,7 +173,7 @@ int sub_08058DEC(int x, int y, u16 * out)
     tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
     map = (struct Map *)gUnknown_08499590;
 
-    if (tbl->unk1a[map->unk1432[map->unk417A[y] + x] & 0x1f] == 0)
+    if (tbl->unk1a[map->terrain[map->rowOffset[y] + x] & 0x1f] == 0)
         return -1;
 
     sentinel = 0x270F;
@@ -209,12 +209,12 @@ void sub_08058E88(int x, int y, u16 * out)
 
     map = (struct Map *)gUnknown_08499590;
 
-    if (x >= map->unk00)
+    if (x >= map->width)
         return;
-    if (y >= map->unk02)
+    if (y >= map->height)
         return;
 
-    idx = map->unk417A[y] + x;
+    idx = map->rowOffset[y] + x;
 
     if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
         return;
@@ -228,7 +228,7 @@ void sub_08058E88(int x, int y, u16 * out)
 
     tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
 
-    if (tbl->unk1a[map->unk1432[idx] & 0x1f] == 0)
+    if (tbl->unk1a[map->terrain[idx] & 0x1f] == 0)
         return;
 
     out[0] = x;

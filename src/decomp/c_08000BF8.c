@@ -20,9 +20,9 @@ void sub_08000BF8(void)
     if (gUnknown_0200B0B0->unk07 == 0)
     {
         if (gUnknown_0200B0B0->unk2a
-            != ((struct Map *)gUnknown_08499590)->unk1432[
+            != ((struct Map *)gUnknown_08499590)->terrain[
                    gUnknown_0200B0B0->unk08
-                   + ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_0200B0B0->unk0a]])
+                   + ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_0200B0B0->unk0a]])
             gUnknown_0200B0B0->unk65 = 1;
     }
     else
@@ -38,9 +38,9 @@ void sub_08000C68(void)
     sub_0803B4DC(0x65);
 
     if (gUnknown_0200B0B0->unk07 == 0)
-        sub_08000CCC(((struct Map *)gUnknown_08499590)->unk1432[
+        sub_08000CCC(((struct Map *)gUnknown_08499590)->terrain[
             gUnknown_0200B0B0->unk08
-            + ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_0200B0B0->unk0a]]);
+            + ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_0200B0B0->unk0a]]);
     else
         sub_08000CCC(sub_08008B70(gUnknown_0200B0B0->unk08, gUnknown_0200B0B0->unk0a));
 }

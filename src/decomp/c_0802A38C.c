@@ -56,7 +56,7 @@ bool8 sub_0802A38C(struct Unk2A38C *p, int (*fn)(struct Unk2A38C *))
     int t;
 
     if (((struct Map *)gUnknown_08499590)->unk234A[
-            ((struct Map *)gUnknown_08499590)->unk417A[p->unk03] + p->unk02] == 0)
+            ((struct Map *)gUnknown_08499590)->rowOffset[p->unk03] + p->unk02] == 0)
     {
         fn(p);
         return 0;

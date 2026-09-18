@@ -76,7 +76,7 @@ void sub_0805E160(void)
             sub_0805E2AC();
             return;
         }
-        gUnknown_03004730[((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[pos.y] + pos.x] & 0x3f]++;
+        gUnknown_03004730[((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[pos.y] + pos.x] & 0x3f]++;
         r = sub_0805ACA8(pos.x, pos.y, (u16 *)&pos);
         if (r != 1)
             goto loop;

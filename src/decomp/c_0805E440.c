@@ -45,13 +45,13 @@ void sub_0805E440(void)
 
     sub_080202A4(gUnknown_030040D8);
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
     {
-        for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x];
+            id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x];
             if (id == 0)
                 continue;
             if ((id & 0xc0) != gUnknown_03003F2C)
@@ -97,22 +97,22 @@ void sub_0805E5AC(void)
     int id;
     struct Unk08499594 *u;
 
-    if ((((struct Map *)gUnknown_08499590)->unk1432[((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] & 0xe0) != gUnknown_03004084)
+    if ((((struct Map *)gUnknown_08499590)->terrain[((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] & 0xe0) != gUnknown_03004084)
         return;
-    if (gUnknown_085767B8[((struct Map *)gUnknown_08499590)->unk1432[((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] & 0x1f] != 0)
+    if (gUnknown_085767B8[((struct Map *)gUnknown_08499590)->terrain[((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] & 0x1f] != 0)
         return;
 
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, 1, 3, 0);
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
     {
-        for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x] != 0)
+            if (((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] != 0)
             {
-                u = gUnknown_08499594 + (id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x]);
+                u = gUnknown_08499594 + (id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]);
                 if (sub_08026F9C(gUnknown_03003F38, u - gUnknown_08499594) == 0)
                 {
                     if (u->unk00 == 1)

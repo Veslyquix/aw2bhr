@@ -61,27 +61,27 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
             sub_0801F838(0xff);
             sub_0801F9C0(e->unk02, e->unk03, 2, 0);
 
-            for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+            for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
             {
-                for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+                for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
                 {
                     if ((s8)gUnknown_03003340[y][x] < 0)
                         continue;
-                    if (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x] == 0)
+                    if (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] == 0)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x]];
+                    e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x]))
+                        if (!sub_080257C0(((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->unk04_0 <= 10)
                         continue;
-                    if (sub_08026F28(a1, (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x] >> 6) + 1) == 1)
+                    if (sub_08026F28(a1, (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10);
                     else
                         score += e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10);
@@ -128,27 +128,27 @@ u8 sub_0805C514(u16 a1, u8 a2)
             sub_0801F838(0xff);
             sub_0801F9C0(e->unk02, e->unk03, 2, 0);
 
-            for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+            for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
             {
-                for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+                for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
                 {
                     if ((s8)gUnknown_03003340[y][x] < 0)
                         continue;
-                    if (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x] == 0)
+                    if (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] == 0)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x]];
+                    e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x]))
+                        if (!sub_080257C0(((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->unk04_0 <= 10)
                         continue;
-                    if (sub_08026F28(a1, (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x] >> 6) + 1) == 1)
+                    if (sub_08026F28(a1, (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->unk04_0;
                     else
                         score += e->unk04_0;
@@ -196,22 +196,22 @@ u8 sub_0805C720(u16 a1, u8 a2)
             sub_0801F838(0xff);
             sub_0801F9C0(e->unk02, e->unk03, 2, 0);
 
-            for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+            for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
             {
-                for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+                for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
                 {
                     if ((s8)gUnknown_03003340[y][x] < 0)
                         continue;
-                    if (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x] == 0)
+                    if (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] == 0)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x]];
+                    e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x]))
+                        if (!sub_080257C0(((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->unk04_0 <= 10)
@@ -219,7 +219,7 @@ u8 sub_0805C720(u16 a1, u8 a2)
                     mul = 1;
                     if (gUnknown_085D5ABC[e->unk00].unk0e > 1)
                         mul = 2;
-                    if (sub_08026F28(a1, (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->unk417A[y] + x] >> 6) + 1) == 1)
+                    if (sub_08026F28(a1, (((struct Map *)gUnknown_08499590)->unk051A[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10) * mul;
                     else
                         score += e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10) * mul;

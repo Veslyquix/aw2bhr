@@ -26,7 +26,7 @@
  *    bare `u8 *` folds 0x12 into ldrb's displacement (`ldrb r0,[r1,#18]`),
  *    where the ROM computes `(map + 0x12) + idx`; `map->unk0012[idx]` is the
  *    spelling that keeps the constant on the base. Same for +0x2D5A.
- *  - `map->unk417A[y]` likewise. Written as
+ *  - `map->rowOffset[y]` likewise. Written as
  *    `*(u16 *)(gUnknown_08499590 + 0x417A + y * 2)` it reassociates to
  *    `(map + y * 2) + 0x417A`, the wrong way round.
  *  - `map` is bound INSIDE the innermost `if`, not before the loops: the ROM
@@ -59,14 +59,14 @@ void sub_08057D90(s16 *px, s16 *py)
 
     best = 0x7FFF;
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
     {
-        for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0)
             {
                 map = (struct Map *)gUnknown_08499590;
-                idx = map->unk417A[y] + x;
+                idx = map->rowOffset[y] + x;
                 if (map->unk0012[idx] == 0)
                 {
                     v = map->unk2D5A[idx];

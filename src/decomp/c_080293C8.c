@@ -38,7 +38,7 @@ void sub_080293C8(ProcPtr proc)
         {
             Proc_End(proc);
             gUnknown_03003F40 = ((struct Map *)gUnknown_08499590)->unk051A[
-                ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030033E4.unk02]
+                ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030033E4.unk02]
                 + gUnknown_030033E4.unk00];
             sub_08028EE4();
             return;
@@ -63,7 +63,7 @@ bool8 sub_08029490(ProcPtr proc)
 {
     int idx;
 
-    idx = ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030033E4.unk02]
+    idx = ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030033E4.unk02]
         + gUnknown_030033E4.unk00;
 
     if ((s8)((struct Map *)gUnknown_08499590)->unk2852[idx] >= 0)

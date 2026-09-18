@@ -29,7 +29,7 @@ void sub_0802BFD0(int a1)
 {
     if (!(gUnknown_08499598[gUnknown_030033EC].unk1c & 2)
         && ((struct Map *)gUnknown_08499590)->unk234A[
-               ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_03003100.pos.unk02]
+               ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_03003100.pos.unk02]
                + gUnknown_03003100.pos.unk00] == 0)
         return;
 

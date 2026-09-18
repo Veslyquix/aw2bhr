@@ -62,16 +62,16 @@ void sub_08061B4C(void)
 
     for (i = 0; gUnknown_084995A0[i].unk00 != 0xFF; i++)
     {
-        if ((MAP->unk1432[MAP->unk417A[gUnknown_084995A0[i].unk02]
+        if ((MAP->terrain[MAP->rowOffset[gUnknown_084995A0[i].unk02]
                           + gUnknown_084995A0[i].unk01] & 0x1F) == 0x13)
             continue;
 
         if (sub_08026FD0(gUnknown_03003F2C,
-                         MAP->unk1432[MAP->unk417A[gUnknown_084995A0[i].unk02]
+                         MAP->terrain[MAP->rowOffset[gUnknown_084995A0[i].unk02]
                                       + gUnknown_084995A0[i].unk01]) == 1)
             continue;
 
-        c = MAP->unk0012[MAP->unk417A[gUnknown_084995A0[i].unk02]
+        c = MAP->unk0012[MAP->rowOffset[gUnknown_084995A0[i].unk02]
                          + gUnknown_084995A0[i].unk01];
 
         if (c != 0 && sub_08026F9C(gUnknown_03003F2C, c) == 1
@@ -80,12 +80,12 @@ void sub_08061B4C(void)
 
         gUnknown_030013EC(gUnknown_084995A0[i].unk01, gUnknown_084995A0[i].unk02, 1, 3, 0);
 
-        for (j = 0; j < MAP->unk02; j++)
+        for (j = 0; j < MAP->height; j++)
         {
-            for (k = 0; k < MAP->unk00; k++)
+            for (k = 0; k < MAP->width; k++)
             {
                 if ((s8)gUnknown_03003340[j][k] >= 0)
-                    MAP->unk376A[MAP->unk417A[j] + k]++;
+                    MAP->unk376A[MAP->rowOffset[j] + k]++;
             }
         }
     }
