@@ -5,11 +5,15 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807CE5C.
  * sub_0807CE5C @ 0x0807CE5C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
 #include "hardware.h"
-/* sub_0807CE5C @ 0x0807CE5C, 2468 bytes.
+/* CoSelect_IDLE_0807CE5D @ 0x0807CE5C, 2468 bytes.
  *
  * The per-frame update of the unit-select / group-cursor proc that
  * sub_0807D800, sub_0807D860 and sub_0807D918 (all promoted) service.  The
@@ -57,7 +61,7 @@ void sub_0807D918(struct Unk807CE5C *);
  * `adds r0, r7, #0; bl sub_0807F630` with the result never read. */
 void sub_0807F630(struct Unk807CE5C *);
 
-void sub_0807CE5C(struct Unk807CE5C *p)
+void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 {
     int i;
 
@@ -331,3 +335,5 @@ void sub_0807CE5C(struct Unk807CE5C *p)
     sub_0807DA98((struct Unk7DA98 *)p);
     p->unk3c--;
 }
+
+asm(".global sub_0807CE5C\n.thumb_set sub_0807CE5C, CoSelect_IDLE_0807CE5D\n");

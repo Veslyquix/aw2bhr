@@ -5,13 +5,17 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08087C94.
  * sub_08087C94 @ 0x08087C94
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08087C94.
- * sub_08087C94 @ 0x08087C94
+ * CoDesignC1_08087C95 @ 0x08087C94
  */
 
 #include "proc.h"
@@ -53,7 +57,7 @@ struct Unk87C94Proc
  *
  * sub_0807898C's ProcPtr parameter: see work/sub_0808A6CC/sub_0808A6CC.c. Here
  * it is invisible, because r0 already holds proc at the call. */
-void sub_08087C94(struct Unk87C94Proc *proc)
+void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
 {
     int i;
     u16 zero;
@@ -153,3 +157,5 @@ void sub_08087C94(struct Unk87C94Proc *proc)
 
     Proc_Start(gUnknown_08616EFC, proc);
 }
+
+asm(".global sub_08087C94\n.thumb_set sub_08087C94, CoDesignC1_08087C95\n");

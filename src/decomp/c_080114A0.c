@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080114A0.
  * sub_080114A0 @ 0x080114A0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -26,7 +30,7 @@ struct Unk80114A0Proc
  * differs, and agbcc's cross-jumping merges the tail from `movs r2,#0` onward
  * by itself. A ternary in the argument computes the flag first and shares the
  * setup, which is a different instruction stream. */
-void sub_080114A0(struct Unk80114A0Proc *proc)
+void DesignRoomLoad3_IDLE_080114A1(struct Unk80114A0Proc *proc)
 {
     gUnknown_03002F3C += proc->unk64;
 
@@ -45,3 +49,5 @@ void sub_080114A0(struct Unk80114A0Proc *proc)
         Proc_Break(proc);
     }
 }
+
+asm(".global sub_080114A0\n.thumb_set sub_080114A0, DesignRoomLoad3_IDLE_080114A1\n");

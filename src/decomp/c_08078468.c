@@ -5,12 +5,18 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08078468.
  * sub_08078468 @ 0x08078468
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
 
-void sub_08078468(void)
+void WM_ConfirmExit_08078469(void)
 {
     sub_0802D5CC(0, 0);
     gUnknown_03002F08.unk00 = 0;
 }
+
+asm(".global sub_08078468\n.thumb_set sub_08078468, WM_ConfirmExit_08078469\n");

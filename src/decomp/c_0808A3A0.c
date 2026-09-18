@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808A3A0.
  * sub_0808A3A0 @ 0x0808A3A0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Byte-for-byte the same routine as sub_08084544, on the same globals and the
@@ -16,7 +20,7 @@ struct Unk808A3A0
     u16 unk48;
 };
 
-void sub_0808A3A0(struct Unk808A3A0 *proc)
+void CoDesignC4_IDLE_0808A3A1(struct Unk808A3A0 *proc)
 {
     if ((proc->unk48 & 1) == 0)
     {
@@ -27,3 +31,5 @@ void sub_0808A3A0(struct Unk808A3A0 *proc)
     gUnknown_03001FF8++;
     proc->unk48++;
 }
+
+asm(".global sub_0808A3A0\n.thumb_set sub_0808A3A0, CoDesignC4_IDLE_0808A3A1\n");

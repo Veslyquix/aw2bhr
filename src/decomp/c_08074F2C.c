@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08074F2C.
  * sub_08074F2C @ 0x08074F2C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -20,7 +24,7 @@ struct Unk08074F2C
     /* 0x34 */ int unk34;
 };
 
-void sub_08074F2C(struct Unk08074F2C *proc)
+void WM_DrawDifficultyStars_IDLE_08074F2D(struct Unk08074F2C *proc)
 {
     int scale = 0x100;
     int t = Interpolate(0, 8, scale, proc->unk34, 6);
@@ -43,3 +47,5 @@ void sub_08074F2C(struct Unk08074F2C *proc)
 
     proc->unk34++;
 }
+
+asm(".global sub_08074F2C\n.thumb_set sub_08074F2C, WM_DrawDifficultyStars_IDLE_08074F2D\n");

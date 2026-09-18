@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808603C.
  * sub_0808603C @ 0x0808603C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -16,9 +20,11 @@
  * Wave 44 (W44-C) retyped sub_0808606C's parameter from `ProcPtr` to
  * `struct Unk8606CProc *`; ProcPtr is `void *`, so the argument converts
  * implicitly and this stays byte-for-byte identical. Re-verified. */
-void sub_0808603C(ProcPtr proc)
+void PutMapPropertiesPreview_IDLE_0808603D(ProcPtr proc)
 {
     sub_0808606C(proc);
     sub_080860DC(proc);
     sub_08086688(proc);
 }
+
+asm(".global sub_0808603C\n.thumb_set sub_0808603C, PutMapPropertiesPreview_IDLE_0808603D\n");

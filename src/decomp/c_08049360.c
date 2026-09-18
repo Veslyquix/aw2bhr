@@ -5,12 +5,16 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08049360.
  * sub_08049360 @ 0x08049360
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
 #include "hardware.h"
 
-/* sub_08049360 @ 0x08049360, 1480 bytes, THUMB.
+/* BattleMaps_IDLE_08049361 @ 0x08049360, 1480 bytes, THUMB.
  *
  * The unit-list proc's per-frame state machine: a twelve-case switch on
  * gUnknown_084C30F8->unk834, ending in a common "redraw if the list is not
@@ -23,7 +27,7 @@
  * 0x00590005 and the function hands the ADDRESS to sub_0808B6E8 as a copy
  * source, so it is a data template and must be named -- see W56-G.
  */
-void sub_08049360(ProcPtr proc)
+void BattleMaps_IDLE_08049361(ProcPtr proc)
 {
     u16 steps[2];
     int flag = 0;
@@ -237,3 +241,5 @@ void sub_08049360(ProcPtr proc)
                              * 16
                          + 0x39);
 }
+
+asm(".global sub_08049360\n.thumb_set sub_08049360, BattleMaps_IDLE_08049361\n");

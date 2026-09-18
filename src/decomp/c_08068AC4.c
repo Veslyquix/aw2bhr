@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08068AC4.
  * sub_08068AC4 @ 0x08068AC4, sub_08068BE4 @ 0x08068BE4
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -60,7 +64,7 @@ struct Unk08068BE4Proc
     /* 0x2c */ int unk2c;
 };
 
-void sub_08068AC4(struct Unk08068AC4 *proc)
+void IntroT3_08068AC5(struct Unk08068AC4 *proc)
 {
     proc->unk2c = sub_080674F4(gUnknown_0202F204++);
     sub_0801237C();
@@ -85,7 +89,7 @@ void sub_08068AC4(struct Unk08068AC4 *proc)
     sub_0803B524(0x12C);
 }
 
-void sub_08068BE4(struct Unk08068BE4Proc *proc)
+void IntroT3_IDLE_08068BE5(struct Unk08068BE4Proc *proc)
 {
     int t;
 
@@ -133,3 +137,6 @@ void sub_08068BE4(struct Unk08068BE4Proc *proc)
     sub_08072C40(3, gUnknown_08581414[t % 5], (u16)gUnknown_08581414[t % 5 + 1]);
     proc->unk2c--;
 }
+
+asm(".global sub_08068AC4\n.thumb_set sub_08068AC4, IntroT3_08068AC5\n"
+    ".global sub_08068BE4\n.thumb_set sub_08068BE4, IntroT3_IDLE_08068BE5\n");

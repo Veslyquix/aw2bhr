@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08027CC8.
  * sub_08027CC8 @ 0x08027CC8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -12,7 +16,7 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08027B68.
  * sub_08027B68 @ 0x08027B68
- * sub_08027CC8 @ 0x08027CC8
+ * DayStart_IDLE_08027CC9 @ 0x08027CC8
  */
 
 #include "hardware.h"
@@ -46,7 +50,7 @@ struct Unk27B10Proc
     /* 6a */ s16 unk6a;
 };
 
-void sub_08027CC8(struct Unk27B10Proc *proc)
+void DayStart_IDLE_08027CC9(struct Unk27B10Proc *proc)
 {
     proc->unk34 -= Div(proc->unk34, 2);
 
@@ -65,3 +69,5 @@ void sub_08027CC8(struct Unk27B10Proc *proc)
     PutSpriteExt(0, (proc->unk2c & 0x1ff) | (proc->unk6a << 9),
                  (proc->unk30 & 0xff) | 0x300, gUnknown_08499E10, proc->unk4a);
 }
+
+asm(".global sub_08027CC8\n.thumb_set sub_08027CC8, DayStart_IDLE_08027CC9\n");

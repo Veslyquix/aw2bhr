@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080110EC.
  * sub_080110EC @ 0x080110EC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -18,7 +22,7 @@ struct Unk80110ECProc
 
 /* sub_08011054's fade-down twin: same body with the flag sense inverted and
  * the two seeds 0x10 / 0x1000 instead of 0 / 0. */
-void sub_080110EC(struct Unk80110ECProc *proc)
+void DesignRoomFadeIn_080110ED(struct Unk80110ECProc *proc)
 {
     if (gUnknown_03002B5C == 0)
     {
@@ -33,3 +37,5 @@ void sub_080110EC(struct Unk80110ECProc *proc)
     proc->unk64 = 0x100;
     proc->unk66 = 0x1000;
 }
+
+asm(".global sub_080110EC\n.thumb_set sub_080110EC, DesignRoomFadeIn_080110ED\n");

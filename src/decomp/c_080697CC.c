@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080697CC.
  * sub_080697CC @ 0x080697CC, sub_08069864 @ 0x08069864, sub_08069924 @ 0x08069924
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -51,7 +55,7 @@ void sub_080697CC(void)
     sub_08011E54(gUnknown_08580E60, (void *)0x0600F000, 0x1000);
 }
 
-void sub_08069864(struct Unk69864Proc *proc)
+void IntroT3_08069865(struct Unk69864Proc *proc)
 {
     proc->unk2c = sub_080674F4(gUnknown_0202F204++);
     sub_080670F8(gUnknown_08581438);
@@ -69,7 +73,7 @@ void sub_08069864(struct Unk69864Proc *proc)
     sub_08072C40(3, 0, 0);
 }
 
-/* The mode-1 counterpart of sub_08069864's setup: reorder the four BG
+/* The mode-1 counterpart of IntroT3_08069865's setup: reorder the four BG
  * priorities, hand gUnknown_030030B4 to sub_08012C48, clear the tile buffer and
  * load graphics. The one blob is conditional on the argument.
  *
@@ -100,3 +104,5 @@ void sub_08069924(u8 a1)
     Decompress(gUnknown_0817E208, gUnknown_08499580);
     sub_08013B0C();
 }
+
+asm(".global sub_08069864\n.thumb_set sub_08069864, IntroT3_08069865\n");

@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08085F94.
  * sub_08085F94 @ 0x08085F94
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* MATCHED wave 34, W34-E.
@@ -56,7 +60,7 @@ struct Unk8085F94Proc
     /* 0x5c */ int unk5c;
 };
 
-void sub_08085F94(struct Unk8085F94Proc *proc)
+void PutMapPropertiesPreview_08085F95(struct Unk8085F94Proc *proc)
 {
     struct Unk081D940C **pp;
     int kind;
@@ -93,3 +97,5 @@ void sub_08085F94(struct Unk8085F94Proc *proc)
             sub_08087974(proc->unk58, proc);
     }
 }
+
+asm(".global sub_08085F94\n.thumb_set sub_08085F94, PutMapPropertiesPreview_08085F95\n");

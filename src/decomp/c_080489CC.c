@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080489CC.
  * sub_080489CC @ 0x080489CC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -60,7 +64,7 @@
  * load/store with three ANDs, and gUnknown_030030E0's `& 0x3f` is
  * `union BlendCntBuf`'s two-bit `effect` field. */
 
-void sub_080489CC(void)
+void BattleMaps_080489CD(void)
 {
     struct Unk084C30F8 *p;
     u32 v;
@@ -182,3 +186,5 @@ void sub_080489CC(void)
     gUnknown_03002F18 = -2;
     gUnknown_03002B34 = 0;
 }
+
+asm(".global sub_080489CC\n.thumb_set sub_080489CC, BattleMaps_080489CD\n");

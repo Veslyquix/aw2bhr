@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807614C.
  * sub_0807614C @ 0x0807614C, sub_080761C8 @ 0x080761C8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -51,7 +55,7 @@ struct Unk80761C8
     /* 0x40 */ int unk40;
 };
 
-void sub_0807614C(struct Unk807614C *proc)
+void WM_Listener_IDLE_0807614D(struct Unk807614C *proc)
 {
     s16 ox;
     s16 oy;
@@ -79,7 +83,7 @@ void sub_0807614C(struct Unk807614C *proc)
     }
 }
 
-void sub_080761C8(struct Unk80761C8 *proc)
+void WM_Listener_IDLE_080761C9(struct Unk80761C8 *proc)
 {
     int n = gUnknown_08614458[proc->unk40];
 
@@ -109,3 +113,6 @@ void sub_080761C8(struct Unk80761C8 *proc)
         Proc_Break(proc);
     }
 }
+
+asm(".global sub_080761C8\n.thumb_set sub_080761C8, WM_Listener_IDLE_080761C9\n"
+    ".global sub_0807614C\n.thumb_set sub_0807614C, WM_Listener_IDLE_0807614D\n");

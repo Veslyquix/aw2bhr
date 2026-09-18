@@ -5,11 +5,15 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08067638.
  * sub_08067638 @ 0x08067638
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Loads the 0x08067 screen: three graphics blobs, one palette, and both BG
  * scrolls reset. `movs r1,#0xc0; lsls r1,#0x13` is the literal 0x06000000. */
-void sub_08067638(void)
+void IntroT3_Child_08067639(void)
 {
     Decompress(gUnknown_0817B970, (void *)0x06000000);
     Decompress(gUnknown_0817BE90, (void *)0x0600D800);
@@ -20,3 +24,5 @@ void sub_08067638(void)
     sub_08072C40(0, 0, 0);
     sub_08072C40(1, 0, 0);
 }
+
+asm(".global sub_08067638\n.thumb_set sub_08067638, IntroT3_Child_08067639\n");

@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803BBD4.
  * sub_0803BBD4 @ 0x0803BBD4
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* MATCHED byte-for-byte (wave 37, W37-Q2).
@@ -38,7 +42,7 @@
  * itself is r0 left over from the `cmp r0,#0` -- agbcc reuses a register it
  * knows holds zero instead of emitting `movs r0,#0`. */
 
-void sub_0803BBD4(void)
+void MainMenu_0803BBD5(void)
 {
     u8 i;
     u8 t;
@@ -69,3 +73,5 @@ void sub_0803BBD4(void)
         }
     }
 }
+
+asm(".global sub_0803BBD4\n.thumb_set sub_0803BBD4, MainMenu_0803BBD5\n");

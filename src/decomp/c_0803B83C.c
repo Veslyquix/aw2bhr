@@ -5,13 +5,17 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803B83C.
  * sub_0803B83C @ 0x0803B83C, sub_0803B858 @ 0x0803B858
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803B83C.
- * sub_0803B83C @ 0x0803B83C
+ * BattleMaps_0803B83D @ 0x0803B83C
  */
 
 #include "proc.h"
@@ -22,7 +26,7 @@
  * this void, so the two `bl`s are sequential statements and not a nesting.
  * Proc_Start's result is discarded too. */
 
-void sub_0803B83C(void)
+void BattleMaps_0803B83D(void)
 {
     sub_0801537C(gUnknown_0849B048);
     Proc_Start(gUnknown_0849E7F8, PROC_TREE_3);
@@ -40,3 +44,5 @@ void sub_0803B858(void)
     sub_08085AF4();
     Proc_Start(gUnknown_0849EC8C, PROC_TREE_3);
 }
+
+asm(".global sub_0803B83C\n.thumb_set sub_0803B83C, BattleMaps_0803B83D\n");

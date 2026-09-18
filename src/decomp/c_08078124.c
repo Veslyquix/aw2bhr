@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08078124.
  * sub_08078124 @ 0x08078124
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -12,7 +16,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08078124.
- * sub_08078124 @ 0x08078124
+ * Campaign_08078125 @ 0x08078124
  */
 
 
@@ -29,8 +33,10 @@
  * proc-starter table in docs/agbcc-codegen.md distinguishes by r1 being
  * WRITTEN rather than left alone. Proc_Start returns the proc; `pop {r0}` says
  * this discards it. */
-void sub_08078124(void)
+void Campaign_08078125(void)
 {
     sub_080745C0();
     Proc_Start(gUnknown_086147FC, PROC_TREE_3);
 }
+
+asm(".global sub_08078124\n.thumb_set sub_08078124, Campaign_08078125\n");

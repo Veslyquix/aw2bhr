@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808844C.
  * sub_0808844C @ 0x0808844C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Matched wave 54 (W54-B), 2192 bytes, three attempts.
@@ -68,7 +72,7 @@ struct Unk0808844CChild
  * docs/agbcc-codegen.md. */
 #define PAL_AT(base, i) ((u16 *)((i) * 2 + (int)(base)))
 
-void sub_0808844C(struct Unk0808844C *proc)
+void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
 {
     int i;
 
@@ -301,3 +305,5 @@ void sub_0808844C(struct Unk0808844C *proc)
         ApplyPaletteExt(PAL_AT(gUnknown_08239F84, DivRem(Div((u16)proc->unk3c, 4), 0x10)), 0x398, 2);
     }
 }
+
+asm(".global sub_0808844C\n.thumb_set sub_0808844C, CoDesignC2_IDLE_0808844D\n");

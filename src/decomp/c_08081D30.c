@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08081D30.
  * sub_08081D30 @ 0x08081D30
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -87,7 +91,7 @@ void sub_080824D4(struct Unk8081D30 *);
 void sub_08084700(struct Unk8081D30 *);
 void sub_08084974(void);
 
-void sub_08081D30(struct Unk8081D30 *p)
+void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
 {
     int a;
     int b;
@@ -339,3 +343,5 @@ void sub_08081D30(struct Unk8081D30 *p)
     else if (p->unk4c == 8)
         p->unk58 = 0;
 }
+
+asm(".global sub_08081D30\n.thumb_set sub_08081D30, MainMenuC2_IDLE_08081D31\n");

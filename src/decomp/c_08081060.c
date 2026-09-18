@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08081060.
  * sub_08081060 @ 0x08081060
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -42,7 +46,7 @@
  * is a third, also-wrong shape: it truncates at the INCREMENT instead.
  */
 
-void sub_08081060(ProcPtr proc)
+void MainMenuC1_08081061(ProcPtr proc)
 {
     int i;
 
@@ -136,3 +140,5 @@ void sub_08081060(ProcPtr proc)
         Proc_Start(gUnknown_08616A40, proc);
     }
 }
+
+asm(".global sub_08081060\n.thumb_set sub_08081060, MainMenuC1_08081061\n");

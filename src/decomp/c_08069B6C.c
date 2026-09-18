@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08069B6C.
  * sub_08069B6C @ 0x08069B6C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* sub_080688A8 with one extra call. Diffed against it rather than assumed: the
@@ -17,8 +21,10 @@ struct Unk69B6CProc
     /* 2C */ int unk2c;
 };
 
-void sub_08069B6C(struct Unk69B6CProc *proc)
+void IntroT3_08069B6D(struct Unk69B6CProc *proc)
 {
     proc->unk2c = sub_080674F4(gUnknown_0202F204++);
     sub_08012358();
 }
+
+asm(".global sub_08069B6C\n.thumb_set sub_08069B6C, IntroT3_08069B6D\n");

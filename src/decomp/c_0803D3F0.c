@@ -6,6 +6,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803D3F0.
  * sub_0803D3F0 @ 0x0803D3F0, sub_0803D48C @ 0x0803D48C, sub_0803D4A8 @ 0x0803D4A8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* The local `struct Map` cast is load-bearing, not decoration: the ROM
@@ -60,7 +64,7 @@ void sub_0803D3F0(void)
  * which an `int` would not do, and `cmp r4,#0xb; bls` is the unsigned test
  * `i < 12` on that width. The result of each call is discarded, so nothing
  * here settles sub_0803D4A8's return type. */
-void sub_0803D48C(void)
+void MainMenu2_0803D48D(void)
 {
     u8 i;
 
@@ -98,3 +102,5 @@ int sub_0803D4A8(u8 a)
         gUnknown_020280C0[a].filler_14[i] = p->unk4C4[i];
     return 1;
 }
+
+asm(".global sub_0803D48C\n.thumb_set sub_0803D48C, MainMenu2_0803D48D\n");

@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08068E60.
  * sub_08068E60 @ 0x08068E60
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -15,7 +19,7 @@ struct Unk08068E60
     /* 0x2c */ u32 unk2c;
 };
 
-void sub_08068E60(struct Unk08068E60 *proc)
+void IntroT3_08068E61(struct Unk08068E60 *proc)
 {
     int i;
     u32 zero0;
@@ -62,3 +66,5 @@ void sub_08068E60(struct Unk08068E60 *proc)
     sub_080677BC(0, 4, 4, proc);
     sub_080679D8(1, 1, 0, 0x88, 0x3800, 0, 0xc0, 0x100, 0xe, proc);
 }
+
+asm(".global sub_08068E60\n.thumb_set sub_08068E60, IntroT3_08068E61\n");

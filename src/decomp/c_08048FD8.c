@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08048FD8.
  * sub_08048FD8 @ 0x08048FD8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -43,7 +47,7 @@
  * exist and why a single struct array at ...A0 would relocate the second use
  * wrongly. */
 
-void sub_08048FD8(ProcPtr proc)
+void BattleMaps_IDLE_08048FD9(ProcPtr proc)
 {
     u8 n;
     u8 i;
@@ -84,3 +88,5 @@ void sub_08048FD8(ProcPtr proc)
 
     Proc_Break(proc);
 }
+
+asm(".global sub_08048FD8\n.thumb_set sub_08048FD8, BattleMaps_IDLE_08048FD9\n");

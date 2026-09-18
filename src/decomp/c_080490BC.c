@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080490BC.
  * sub_080490BC @ 0x080490BC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -23,7 +27,7 @@
  * gUnknown_0812A15C is a -fforce-addr address word holding &gUnknown_084C30F8,
  * not a global -- the same word as 0x0812A150/154/158. Four references across
  * a merge is what makes agbcc park &gUnknown_084C30F8 in r4 here. */
-void sub_080490BC(ProcPtr proc)
+void BattleMaps_IDLE_080490BD(ProcPtr proc)
 {
     u16 v;
 
@@ -55,3 +59,5 @@ void sub_080490BC(ProcPtr proc)
     sub_0803B4DC(0x71);
     Proc_Break(proc);
 }
+
+asm(".global sub_080490BC\n.thumb_set sub_080490BC, BattleMaps_IDLE_080490BD\n");

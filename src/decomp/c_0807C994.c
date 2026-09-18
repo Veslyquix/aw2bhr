@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807C994.
  * sub_0807C994 @ 0x0807C994, sub_0807C9EC @ 0x0807C9EC, sub_0807CAFC @ 0x0807CAFC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -69,7 +73,7 @@ void sub_0807C994(struct Unk807C994 *proc)
     proc->unk48++;
 }
 
-void sub_0807C9EC(struct Unk0807C9EC *proc)
+void CoSelect_0807C9ED(struct Unk0807C9EC *proc)
 {
     sub_08043B44(9);
 
@@ -118,7 +122,7 @@ void sub_0807C9EC(struct Unk0807C9EC *proc)
     sub_08073304(gUnknown_085802D8 + 0xC, gUnknown_0200FC50, 0x2DC, 0xB, 0, 1, (int)proc);
 }
 
-void sub_0807CAFC(struct Unk807CAFC * proc)
+void CoSelect_IDLE_0807CAFD(struct Unk807CAFC * proc)
 {
     int i;
 
@@ -188,3 +192,6 @@ void sub_0807CAFC(struct Unk807CAFC * proc)
     sub_08043C28(proc->unk34 + 0xB0, 0xA0, 0x1040, 0, 1);
     proc->unk3c--;
 }
+
+asm(".global sub_0807C9EC\n.thumb_set sub_0807C9EC, CoSelect_0807C9ED\n"
+    ".global sub_0807CAFC\n.thumb_set sub_0807CAFC, CoSelect_IDLE_0807CAFD\n");

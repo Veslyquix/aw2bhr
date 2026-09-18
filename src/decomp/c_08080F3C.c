@@ -5,10 +5,16 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08080F3C.
  * sub_08080F3C @ 0x08080F3C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
-void sub_08080F3C(void)
+void MainMenu_08080F3D(void)
 {
     gUnknown_03005924 = 6;
     gUnknown_030058FC = 0;
 }
+
+asm(".global sub_08080F3C\n.thumb_set sub_08080F3C, MainMenu_08080F3D\n");

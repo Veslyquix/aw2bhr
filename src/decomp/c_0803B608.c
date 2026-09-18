@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803B608.
  * sub_0803B608 @ 0x0803B608, sub_0803B628 @ 0x0803B628
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -15,7 +19,7 @@ struct Unk3B608Proc
     /* 0x64 */ u16 unk64;
 };
 
-void sub_0803B608(struct Unk3B608Proc *proc)
+void FadeSound_IDLE_0803B609(struct Unk3B608Proc *proc)
 {
     proc->unk64--;
 
@@ -23,7 +27,10 @@ void sub_0803B608(struct Unk3B608Proc *proc)
         Proc_Break(proc);
 }
 
-bool8 sub_0803B628(void)
+bool8 CampaignIntro_WHILE_0803B629(void)
 {
     return Proc_Find(gUnknown_0849E750) != 0;
 }
+
+asm(".global sub_0803B628\n.thumb_set sub_0803B628, CampaignIntro_WHILE_0803B629\n"
+    ".global sub_0803B608\n.thumb_set sub_0803B608, FadeSound_IDLE_0803B609\n");

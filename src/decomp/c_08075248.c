@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08075248.
  * sub_08075248 @ 0x08075248
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* sub_08075008's twin one field-group up: the counter is the u16 at +0x3a
@@ -21,7 +25,7 @@ struct Unk8075248
     /* 0x3a */ u16 unk3a;
 };
 
-void sub_08075248(struct Unk8075248 *proc)
+void WM_MoveScope_IDLE_08075249(struct Unk8075248 *proc)
 {
     int d = gUnknown_0861436C[(proc->unk3a >> 3) & 3];
 
@@ -29,3 +33,5 @@ void sub_08075248(struct Unk8075248 *proc)
               gUnknown_081CC4F0, gUnknown_0861433C[proc->unk38]);
     proc->unk3a++;
 }
+
+asm(".global sub_08075248\n.thumb_set sub_08075248, WM_MoveScope_IDLE_08075249\n");

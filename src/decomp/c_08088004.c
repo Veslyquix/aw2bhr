@@ -5,12 +5,16 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08088004.
  * sub_08088004 @ 0x08088004
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
 #include "hardware.h"
 
-void sub_08088004(ProcPtr proc)
+void CoDesignC1_08088005(ProcPtr proc)
 {
     gUnknown_03005908 = 0;
     sub_0808A5C4();
@@ -19,3 +23,5 @@ void sub_08088004(ProcPtr proc)
     sub_0808A47C();
     Proc_Start(gUnknown_08616EB4, proc);
 }
+
+asm(".global sub_08088004\n.thumb_set sub_08088004, CoDesignC1_08088005\n");

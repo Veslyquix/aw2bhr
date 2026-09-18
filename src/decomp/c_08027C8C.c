@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08027C8C.
  * sub_08027C8C @ 0x08027C8C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -26,10 +30,12 @@ struct Unk27B10Proc
     /* 64 */ s16 unk64;
 };
 
-void sub_08027C8C(struct Unk27B10Proc *proc)
+void DayStart_IDLE_08027C8D(struct Unk27B10Proc *proc)
 {
     PutSprite(0, proc->unk2c, proc->unk30, gUnknown_08499E08, proc->unk4a);
 
     if (--proc->unk64 == 0)
         Proc_Break(proc);
 }
+
+asm(".global sub_08027C8C\n.thumb_set sub_08027C8C, DayStart_IDLE_08027C8D\n");

@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803BBA8.
  * sub_0803BBA8 @ 0x0803BBA8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Dispatch through gUnknown_0849EACC[gUnknown_030033FC]: publish the entry's
@@ -16,10 +20,12 @@
  * `ldr` after the `strb` and pick `_call_via_r0` instead. The r3 in the
  * trampoline name is not an argument count here -- it is simply the register
  * the pointer was parked in while r0-r2 computed the byte store. */
-void sub_0803BBA8(void)
+void MainMenu2_0803BBA9(void)
 {
     void (*handler)(void) = gUnknown_0849EACC[gUnknown_030033FC].unk00;
 
     gUnknown_0200C420.unk0d = gUnknown_0849EACC[gUnknown_030033FC].unk04;
     handler();
 }
+
+asm(".global sub_0803BBA8\n.thumb_set sub_0803BBA8, MainMenu2_0803BBA9\n");

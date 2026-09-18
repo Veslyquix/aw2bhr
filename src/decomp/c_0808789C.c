@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808789C.
  * sub_0808789C @ 0x0808789C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -12,13 +16,13 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808789C.
- * sub_0808789C @ 0x0808789C
+ * PutEnemyCoMinimug_0808789D @ 0x0808789C
  */
 
 /* Family F025: `push {lr}; ldr r0,[r0,#0x54]; bl f; pop {r0}; bx r0`.
  *
  * The strongest-evidenced member of the family, because the loop closes: the
- * ROM holds `PROC_CALL(sub_0808789C)` at 0x08616DA0, which is INSIDE the
+ * ROM holds `PROC_CALL(PutEnemyCoMinimug_0808789D)` at 0x08616DA0, which is INSIDE the
  * script gUnknown_08616D94 -- and sub_08087B74, the callee here, is the
  * function that does `Proc_Find(gUnknown_08616D94)` and `str r5,[r0,#0x54]`.
  * So +0x54 of this proc is written by the callee and read back by this
@@ -33,7 +37,9 @@ struct Unk0808789CProc
     /* 54 */ int unk54;
 };
 
-void sub_0808789C(struct Unk0808789CProc *proc)
+void PutEnemyCoMinimug_0808789D(struct Unk0808789CProc *proc)
 {
     sub_08087B74(proc->unk54);
 }
+
+asm(".global sub_0808789C\n.thumb_set sub_0808789C, PutEnemyCoMinimug_0808789D\n");

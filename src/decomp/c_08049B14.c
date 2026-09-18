@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08049B14.
  * sub_08049B14 @ 0x08049B14
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* F002, but the callee is sub_080152C0 and NOT sub_080152EC -- the family is
@@ -20,7 +24,9 @@
  * sub_0801537C(const void *). Retyping it `const void *` needs one edit to
  * proc.c and a rebuild of that file to verify, which is why it was not done
  * here. */
-void sub_08049B14(void)
+void BattleMaps_08049B15(void)
 {
     sub_080152C0((s32)gUnknown_084C3128, 0);
 }
+
+asm(".global sub_08049B14\n.thumb_set sub_08049B14, BattleMaps_08049B15\n");

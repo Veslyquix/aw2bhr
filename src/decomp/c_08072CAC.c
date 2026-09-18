@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08072CAC.
  * sub_08072CAC @ 0x08072CAC, sub_08072CE4 @ 0x08072CE4, sub_08072E70 @ 0x08072E70, sub_08072F04 @ 0x08072F04, sub_08072F70 @ 0x08072F70
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -87,7 +91,7 @@ struct UnkF70Proc
  * +0x46 into the s16 working values at +0x2a and jump the script to label 0.
  * +0x58 is reloaded on every iteration because the `strh` through +0x2a may
  * alias it as far as the compiler can tell. */
-void sub_08072CAC(struct UnkCACProc *proc)
+void MainMenu_PutSelectModeSprite_08072CAD(struct UnkCACProc *proc)
 {
     int i;
 
@@ -117,7 +121,7 @@ void sub_08072CAC(struct UnkCACProc *proc)
  * declines it, which is what the ROM has: `mov r4, sb; lsls r3, r4, #3`
  * recomputed in each arm. This is the wave-17 "binding locals are punctuation"
  * rule read backwards -- FEWER distinct pseudos, not more. */
-void sub_08072CE4(struct UnkCE4Proc *proc)
+void MainMenu_PutSelectModeSprite_IDLE_08072CE5(struct UnkCE4Proc *proc)
 {
     int i;
     int t;
@@ -170,8 +174,8 @@ void sub_08072CE4(struct UnkCE4Proc *proc)
 /* The eight-frame slide of the bar: every entry's x eases from its current
  * s16 at +0x2a to its u8 target at +0x46 over unk64 = 0..8, then on the frame
  * after the last one the targets are committed into +0x2a and the proc
- * breaks. Same sprite layout as sub_08072F04. */
-void sub_08072E70(struct UnkE70Proc *proc)
+ * breaks. Same sprite layout as MainMenu_PutSelectModeSprite_IDLE_08072F05. */
+void MainMenu_PutSelectModeSprite_IDLE_08072E71(struct UnkE70Proc *proc)
 {
     int i;
 
@@ -200,7 +204,7 @@ void sub_08072E70(struct UnkE70Proc *proc)
  * has fallen to -0x10 or below. +0x5c is the base OAM attr2 word, +0x5e the
  * palette/priority nibble at bit 12, and each entry is 8 pixels further along.
  * The `unk68` flag makes the proc break on the frame it is set. */
-void sub_08072F04(struct UnkF04Proc *proc)
+void MainMenu_PutSelectModeSprite_IDLE_08072F05(struct UnkF04Proc *proc)
 {
     int i;
 
@@ -231,7 +235,7 @@ void sub_08072F04(struct UnkF04Proc *proc)
  * as `movs #0x14; rsbs` (it does exactly that for Interpolate's third
  * argument above), and only the already-truncated 0xFFEC needs the pool word
  * the ROM has. */
-void sub_08072F70(struct UnkF70Proc *proc)
+void MainMenu_PutSelectModeSprite_IDLE_08072F71(struct UnkF70Proc *proc)
 {
     int i;
     s32 v;
@@ -266,3 +270,9 @@ void sub_08072F70(struct UnkF70Proc *proc)
         Proc_Break(proc);
     }
 }
+
+asm(".global sub_08072CAC\n.thumb_set sub_08072CAC, MainMenu_PutSelectModeSprite_08072CAD\n"
+    ".global sub_08072CE4\n.thumb_set sub_08072CE4, MainMenu_PutSelectModeSprite_IDLE_08072CE5\n"
+    ".global sub_08072E70\n.thumb_set sub_08072E70, MainMenu_PutSelectModeSprite_IDLE_08072E71\n"
+    ".global sub_08072F04\n.thumb_set sub_08072F04, MainMenu_PutSelectModeSprite_IDLE_08072F05\n"
+    ".global sub_08072F70\n.thumb_set sub_08072F70, MainMenu_PutSelectModeSprite_IDLE_08072F71\n");

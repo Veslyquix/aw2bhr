@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808A820.
  * sub_0808A820 @ 0x0808A820
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Family F001 forwarder, 12 bytes:
@@ -19,7 +23,9 @@
  * The callee reads no argument register before writing it, so there
  * is no parameter to pass through either.
  */
-void sub_0808A820(void)
+void CampaignIntro_0808A821(void)
 {
     sub_0808A6A0();
 }
+
+asm(".global sub_0808A820\n.thumb_set sub_0808A820, CampaignIntro_0808A821\n");

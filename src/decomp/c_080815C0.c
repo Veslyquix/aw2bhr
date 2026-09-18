@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080815C0.
  * sub_080815C0 @ 0x080815C0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* MATCHED in wave 79 (W79-A). Parked since WAVE 28 at 97.3% as a "PURE
@@ -35,7 +39,7 @@ struct Unk80815C0
 };
 void sub_08084700(struct Unk80815C0 *);
 
-void sub_080815C0(struct Unk80815C0 *proc)
+void MainMenuC2_IDLE_080815C1(struct Unk80815C0 *proc)
 {
     int i;
     register int k asm("r5");
@@ -75,3 +79,5 @@ void sub_080815C0(struct Unk80815C0 *proc)
 
     sub_08084700(proc);
 }
+
+asm(".global sub_080815C0\n.thumb_set sub_080815C0, MainMenuC2_IDLE_080815C1\n");

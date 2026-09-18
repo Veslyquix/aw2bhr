@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08075008.
  * sub_08075008 @ 0x08075008, sub_08075058 @ 0x08075058
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* The +0x34 counter is UNSIGNED -- the ROM shifts it with `lsrs`, and an `s32`
@@ -44,7 +48,7 @@ struct Unk08075058
     /* 0x34 */ int unk34;
 };
 
-void sub_08075008(struct Unk8075008 *proc)
+void WM_DrawDifficultyStars_IDLE_08075009(struct Unk8075008 *proc)
 {
     int d = gUnknown_0861436C[(proc->unk34 >> 3) & 3];
 
@@ -65,3 +69,5 @@ void *sub_08075058(ProcPtr parent, u16 a2, s16 a3, s16 a4, u16 a5)
 
     return proc;
 }
+
+asm(".global sub_08075008\n.thumb_set sub_08075008, WM_DrawDifficultyStars_IDLE_08075009\n");

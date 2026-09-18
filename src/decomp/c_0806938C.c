@@ -5,13 +5,17 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806938C.
  * sub_0806938C @ 0x0806938C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806938C.
- * sub_0806938C @ 0x0806938C
+ * IntroT3_0806938D @ 0x0806938C
  */
 
 #include "proc.h"
@@ -37,7 +41,7 @@ struct Unk6938CProc
  *
  * `gUnknown_0202F204++` supplies the OLD value; the `lsls #0x18; lsrs #0x18`
  * pair is agbcc's u8 re-truncation of it, not a separate cast. */
-void sub_0806938C(struct Unk6938CProc *proc)
+void IntroT3_0806938D(struct Unk6938CProc *proc)
 {
     int i;
 
@@ -74,3 +78,5 @@ void sub_0806938C(struct Unk6938CProc *proc)
     sub_080677BC(0, 0, -5, proc);
     sub_080679D8(2, 1, 0, 0x88, 0x3800, 0, 0xc0, 0x100, 0xc, proc);
 }
+
+asm(".global sub_0806938C\n.thumb_set sub_0806938C, IntroT3_0806938D\n");

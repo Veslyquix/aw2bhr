@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08049178.
  * sub_08049178 @ 0x08049178, sub_08049264 @ 0x08049264
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -47,7 +51,7 @@ struct Unk8049178
 };
 /* Wave 43, W43-L. MATCHED, byte-for-byte, relocs match (184/184).
  *
- * The downward twin of sub_08049178: while unk1e + 2 is still within 9 it
+ * The downward twin of BattleMaps_IDLE_08049179: while unk1e + 2 is still within 9 it
  * blanks a row and copies rows 0..(5 - unk1e) of the tilemap scratch
  * gUnknown_084C30F8->unk032 into gUnknown_08499578 at a fixed halfword offset
  * of 0x100; past that it hands off to sub_08015C30 instead. unk1e advances
@@ -79,7 +83,7 @@ struct Unk8049264
     /* 0x1e */ s16 unk1e;
 };
 
-void sub_08049178(struct Unk8049178 *proc)
+void BattleMaps_IDLE_08049179(struct Unk8049178 *proc)
 {
     s8 limit;
     u8 row;
@@ -146,3 +150,5 @@ void sub_08049264(struct Unk8049264 *proc)
 
     proc->unk1e++;
 }
+
+asm(".global sub_08049178\n.thumb_set sub_08049178, BattleMaps_IDLE_08049179\n");

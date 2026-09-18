@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080191B0.
  * sub_080191B0 @ 0x080191B0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* The reset for the whole gUnknown_0200C528 list system: clear the ten slots,
@@ -21,7 +25,7 @@
  * 0x200 is materialised once into r4 and copied into r2 for both
  * sub_08011C68 calls: it is not an imm8, so gcc CSEs the
  * `movs r4,#0x80; lsls r4,#2` pair across the pair of calls. */
-void sub_080191B0(void)
+void MainMenu_080191B1(void)
 {
     s16 i;
 
@@ -44,3 +48,5 @@ void sub_080191B0(void)
     sub_08011C68(gUnknown_08499588, (void *)0x06006800, 0x200);
     sub_08011C68(gUnknown_0849958C, (void *)0x0600E000, 0x200);
 }
+
+asm(".global sub_080191B0\n.thumb_set sub_080191B0, MainMenu_080191B1\n");
