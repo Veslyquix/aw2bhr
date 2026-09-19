@@ -25,7 +25,7 @@ int sub_08008B70(int x, int y)
     int hi;
 
     idx = gMap->rowOffset[y] + x;
-    v = gMap->unk0012[idx];
+    v = gMap->unit[idx];
     hi = v & 0xC0;
 
     if (v > 0)

@@ -47,8 +47,8 @@ void sub_08040150(struct Unk40150Proc *proc)
 
     if (!sub_0801C254(proc->unk50,
                       proc->unk2c * 16
-                          - (dx = gMap->unk04 - 8),
+                          - (dx = gMap->scrollX - 8),
                       proc->unk30 * 16
-                          - (dy = gMap->unk06 - 0x10)))
+                          - (dy = gMap->scrollY - 0x10)))
         Proc_Break(proc);
 }

@@ -115,10 +115,10 @@ void sub_0802B868(void)
 {
     u16 x;
 
-    x = gUnknown_030033E4.unk00 * 16 - gMap->unk04;
+    x = gUnknown_030033E4.unk00 * 16 - gMap->scrollX;
 
     if ((s16)(gUnknown_030033E4.unk02 * 16
-              - gMap->unk06) > 0x20)
+              - gMap->scrollY) > 0x20)
     {
         if ((s16)x > 0x7f)
             sub_0802B7E8();

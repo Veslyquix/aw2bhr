@@ -73,12 +73,12 @@ struct Unk40590Proc
 void sub_0804050C(struct Unk4050CProc *proc)
 {
     sub_0801C254(proc->unk50,
-                 proc->unk2c - gMap->unk04,
-                 proc->unk30 - gMap->unk06);
+                 proc->unk2c - gMap->scrollX,
+                 proc->unk30 - gMap->scrollY);
 
     proc->unk30 -= 5;
 
-    if (proc->unk30 - gMap->unk06 < 0)
+    if (proc->unk30 - gMap->scrollY < 0)
     {
         sub_0801C240(proc->unk50);
         Proc_Break(proc);
@@ -99,7 +99,7 @@ void sub_08040590(struct Unk40590Proc *proc)
 {
     proc->unk54 = (proc->unk2c << 4) + 8;
     proc->unk58 = (proc->unk30 << 4) + 0x10;
-    proc->unk66 = gMap->unk06;
+    proc->unk66 = gMap->scrollY;
 
     proc->unk50 = sub_0801C210((void *)gUnknown_08111D94, 1, 1);
     sub_0801C4D4(proc->unk50, 2);

@@ -21,7 +21,7 @@ void sub_0802DE1C(void)
 
     off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
 
-    if ((s8)gMap->unk2852[off] < 0)
+    if ((s8)gMap->move[off] < 0)
         sub_08023274(1);
     else
         sub_08023274(1);
@@ -76,7 +76,7 @@ void sub_0802DEFC(void)
     }
 
     off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
-    id = gMap->unk0012[off];
+    id = gMap->unit[off];
 
     if (id == 0)
         return;

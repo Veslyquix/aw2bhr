@@ -20,7 +20,7 @@ void sub_08060110(void)
 
     tbl = &gUnknown_08499594;
     off = gMap->rowOffset[gUnknown_030046C0.unk03] + gUnknown_030046C0.unk02;
-    u = *tbl + gMap->unk0012[off];
+    u = *tbl + gMap->unit[off];
 
     u->unk09 = 0;
     u->unk0a = 0;

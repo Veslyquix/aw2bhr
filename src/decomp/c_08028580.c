@@ -121,7 +121,7 @@ void sub_08028580(struct Unk28580 *p)
     {
         if ((gUnknown_03003150[i].flags & 0xe0) == gUnknown_084995F4[p->unk64])
         {
-            v = gMap->unk0012[
+            v = gMap->unit[
                     gMap->rowOffset[
                         gUnknown_03003150[i].y] + gUnknown_03003150[i].x];
 

@@ -43,7 +43,7 @@ void sub_08062560(u16 a1, u8 a2)
             for (x = 0; x < gMap->width; x++) {
                 if ((s8)gUnknown_03003340[y][x] >= 0) {
                     off = gMap->rowOffset[y] + x;
-                    gMap->unk3262[off] |= gUnknown_085D5ABC[e->unk00].unk1c;
+                    gMap->dangerMask[off] |= gUnknown_085D5ABC[e->unk00].unk1c;
                 }
             }
         }

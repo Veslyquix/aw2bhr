@@ -13,8 +13,8 @@
  * map-plane setups and one indirect draw call.
  *
  * Uses `gMap` (include/map.h), the typed linker alias for `gUnknown_08499590`
- * -- but the two `sub_0801F92C` calls must pass `gMap->unk2D5A` /
- * `gMap->unk2852` (the plane's OWN array member, which decays to the same
+ * -- but the two `sub_0801F92C` calls must pass `gMap->danger` /
+ * `gMap->move` (the plane's OWN array member, which decays to the same
  * `u8 *` `sub_0801F92C` takes), not `gUnknown_08499590 + offset` or a
  * `(u8 *)gMap + offset` cast. agbcc's CSE unifies repeated loads of the SAME
  * symbol, not two symbols that happen to share an address, so every use in
@@ -24,7 +24,7 @@
  *
  *  - the planes must be STRUCT MEMBERS. `gMap[0x12 + idx]` on a bare `u8 *`
  *    would fold 0x12 into ldrb's displacement (`ldrb r0,[r1,#18]`), where the
- *    ROM computes `(map + 0x12) + idx`; `map->unk0012[idx]` is the spelling
+ *    ROM computes `(map + 0x12) + idx`; `gMap->unit[idx]` is the spelling
  *    that keeps the constant on the base. Same for +0x2D5A.
  *  - `map->rowOffset[y]` likewise: reassociating to `(map + y*2) + 0x417A`
  *    is the wrong way round.
@@ -51,9 +51,9 @@ void sub_08057D90(s16 *px, s16 *py)
     bx = 0;
     by = 0;
 
-    sub_0801F92C(gMap->unk2D5A);
+    sub_0801F92C(gMap->danger);
     gUnknown_030013EC(*px, *py, gUnknown_030040D8->unk00, 0x78, by);
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
     sub_080202A4(gUnknown_030040D8);
 
     best = 0x7FFF;
@@ -66,9 +66,9 @@ void sub_08057D90(s16 *px, s16 *py)
             {
                 map = gMap;
                 idx = map->rowOffset[y] + x;
-                if (map->unk0012[idx] == 0)
+                if (gMap->unit[idx] == 0)
                 {
-                    v = map->unk2D5A[idx];
+                    v = map->danger[idx];
                     if (v <= best)
                     {
                         best = v;

@@ -53,7 +53,7 @@ void sub_08045490(struct Unk45490Proc *proc)
             idx = gMap->rowOffset[proc->unk30] + proc->unk2c;
 
             if (gMap->terrain[idx] == ((gUnknown_030033EC << 5) | 6)
-             && gMap->unk051A[idx] == 0)
+             && gMap->unitUnk[idx] == 0)
             {
                 sub_08029088(proc->unk2c, proc->unk30);
                 return;

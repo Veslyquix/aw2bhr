@@ -31,12 +31,12 @@ void sub_08023860(void)
 
     if (sub_08015BD0((s32)gUnknown_08499B4C) != -1)
     {
-        gUnknown_03001FF8 = (u16)gMap->unk04 - gMap->camX * 16;
-        gUnknown_03001418 = (u16)gMap->unk06 - gMap->camY * 16;
+        gUnknown_03001FF8 = (u16)gMap->scrollX - gMap->camX * 16;
+        gUnknown_03001418 = (u16)gMap->scrollY - gMap->camY * 16;
     }
 
-    gUnknown_03002B34 = -(gMap->camX * 16) + (x = (u16)gMap->unk04);
-    gUnknown_03002F18 = -(gMap->camY * 16) + (y = (u16)gMap->unk06) + 3;
+    gUnknown_03002B34 = -(gMap->camX * 16) + (x = (u16)gMap->scrollX);
+    gUnknown_03002F18 = -(gMap->camY * 16) + (y = (u16)gMap->scrollY) + 3;
     gUnknown_030030A0 = x - gMap->camX * 16;
     gUnknown_03001400 = y - gMap->camY * 16;
     gUnknown_0300200C = x - gMap->camX * 16;

@@ -16,7 +16,7 @@ void sub_0802D458(void)
 
     v = 1;
 
-    if (gUnknown_030033E4.unk00 - gMap->unk04 / 16 <= 6)
+    if (gUnknown_030033E4.unk00 - gMap->scrollX / 16 <= 6)
         v = 0x14;
 
     sub_08024268();

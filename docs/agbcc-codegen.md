@@ -21709,7 +21709,7 @@ resolutions** and their offsets reconcile exactly, so the fix is their union,
 written into every draft. **Byte-neutral, and the reason is worth stating:
 only a field's START OFFSET enters the address arithmetic — an array's
 declared LENGTH never does.** So refining `unk0012[0x1E30]` into
-`unk0012[0x508] + unk051A[0x1928]` cannot change a single instruction in a
+`unk0012[0x508] + unitUnk[0x1928]` cannot change a single instruction in a
 function that indexes `unk0012[]`. All nine functions re-verified byte-for-byte
 after the rewrite.
 
@@ -22996,12 +22996,12 @@ documented single-reference case, visible side by side in one 328-byte function.
 
 ## `struct Map` gained a plane at +0x1432 (wave 36, W36-H)
 
-The canonical body's `u8 unk051A[0x1928]` blob is FIVE 0x508-byte planes; the
+The canonical body's `u8 unitUnk[0x1928]` blob is FIVE 0x508-byte planes; the
 one at 0x051A + 3 * 0x508 = 0x1432 is a terrain-attribute plane
 (`plane[idx] & 0x1F` indexes gUnknown_084999C8's cost table). It is now split as
-`unk051A[0x0F18]` + `unk1432[0x0A10]` in all seven promoted copies and the
+`unitUnk[0x0F18]` + `unk1432[0x0A10]` in all seven promoted copies and the
 work drafts. Byte-neutral, as the wave-35 note says: only a field's start offset
-enters the address arithmetic, and the one promoted reader of `unk051A`
+enters the address arithmetic, and the one promoted reader of `unitUnk`
 (c_080293C8.c) indexes it with a map cell index, far below 0xF18.
 
 ## A PRE-SCALED index local moves the `lsls` AHEAD of the table's pool `ldr` — and it closes a park three waves old (wave 36, W36-J)

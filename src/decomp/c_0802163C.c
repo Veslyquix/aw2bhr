@@ -50,8 +50,8 @@ void sub_0802163C(int a)
         ((struct Unk2163CSrc *)gUnknown_03003F68)->width;
     gMap->height =
         ((struct Unk2163CSrc *)gUnknown_03003F68)->height;
-    gMap->unk04 = 0;
-    gMap->unk06 = 0;
+    gMap->scrollX = 0;
+    gMap->scrollY = 0;
     gMap->unk08 = 0;
     gMap->unk0a = 0;
     gMap->camX = 0;

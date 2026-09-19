@@ -67,21 +67,21 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
                 {
                     if ((s8)gUnknown_03003340[y][x] < 0)
                         continue;
-                    if (gMap->unk051A[gMap->rowOffset[y] + x] == 0)
+                    if (gMap->unitUnk[gMap->rowOffset[y] + x] == 0)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[gMap->unk051A[gMap->rowOffset[y] + x]];
+                    e = &gUnknown_08499594[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(gMap->unk0012[gMap->rowOffset[y] + x]))
+                        if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->unk04_0 <= 10)
                         continue;
-                    if (sub_08026F28(a1, (gMap->unk051A[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
+                    if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10);
                     else
                         score += e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10);
@@ -134,21 +134,21 @@ u8 sub_0805C514(u16 a1, u8 a2)
                 {
                     if ((s8)gUnknown_03003340[y][x] < 0)
                         continue;
-                    if (gMap->unk051A[gMap->rowOffset[y] + x] == 0)
+                    if (gMap->unitUnk[gMap->rowOffset[y] + x] == 0)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[gMap->unk051A[gMap->rowOffset[y] + x]];
+                    e = &gUnknown_08499594[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(gMap->unk0012[gMap->rowOffset[y] + x]))
+                        if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->unk04_0 <= 10)
                         continue;
-                    if (sub_08026F28(a1, (gMap->unk051A[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
+                    if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->unk04_0;
                     else
                         score += e->unk04_0;
@@ -202,16 +202,16 @@ u8 sub_0805C720(u16 a1, u8 a2)
                 {
                     if ((s8)gUnknown_03003340[y][x] < 0)
                         continue;
-                    if (gMap->unk051A[gMap->rowOffset[y] + x] == 0)
+                    if (gMap->unitUnk[gMap->rowOffset[y] + x] == 0)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[gMap->unk051A[gMap->rowOffset[y] + x]];
+                    e = &gUnknown_08499594[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(gMap->unk0012[gMap->rowOffset[y] + x]))
+                        if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->unk04_0 <= 10)
@@ -219,7 +219,7 @@ u8 sub_0805C720(u16 a1, u8 a2)
                     mul = 1;
                     if (gUnknown_085D5ABC[e->unk00].unk0e > 1)
                         mul = 2;
-                    if (sub_08026F28(a1, (gMap->unk051A[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
+                    if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10) * mul;
                     else
                         score += e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10) * mul;

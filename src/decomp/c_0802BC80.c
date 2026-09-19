@@ -24,10 +24,10 @@ void sub_0802BC80(void)
     u16 x;
     s16 v;
 
-    x = gUnknown_030033E4.unk00 * 16 - gMap->unk04;
+    x = gUnknown_030033E4.unk00 * 16 - gMap->scrollX;
 
     if ((s16)(gUnknown_030033E4.unk02 * 16
-              - gMap->unk06) <= 0x40
+              - gMap->scrollY) <= 0x40
         && (s16)x <= 0x7f)
         v = gUnknown_08090A98[1];
     else

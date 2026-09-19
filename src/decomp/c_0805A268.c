@@ -112,11 +112,11 @@ void sub_0805A388(struct Unk5A514Cell *out)
 
             off = gMap->rowOffset[y] + x;
 
-            if (gMap->unk0012[off] != 0)
+            if (gMap->unit[off] != 0)
             {
-                if ((gMap->unk0012[off] & 0xc0) != gUnknown_03003F2C)
+                if ((gMap->unit[off] & 0xc0) != gUnknown_03003F2C)
                     continue;
-                u = &gUnknown_08499594[gMap->unk0012[off]];
+                u = &gUnknown_08499594[gMap->unit[off]];
                 if (flag == 0 && sub_08042084((u8 *)u)
                  && gUnknown_084995A8[gUnknown_030040D8->unk00] != 0)
                 {

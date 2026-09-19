@@ -18,7 +18,7 @@ bool8 sub_0802E724(s16 a1, s16 a2)
     ptbl = &gUnknown_08499594;
 
     off = gMap->rowOffset[a2] + a1;
-    e = &(*ptbl)[gMap->unk0012[off]];
+    e = &(*ptbl)[gMap->unit[off]];
 
     army = gUnknown_03003F38 & 0xc0;
 
@@ -28,10 +28,10 @@ bool8 sub_0802E724(s16 a1, s16 a2)
     if (gUnknown_03003340[a2][a1] > 0x78)
         return FALSE;
 
-    if (gMap->unk0012[off] == 0)
+    if (gMap->unit[off] == 0)
         return TRUE;
 
-    if ((gMap->unk0012[off] & 0xc0) != army)
+    if ((gMap->unit[off] & 0xc0) != army)
         return FALSE;
 
     if ((u8)sub_08025FC0((struct Unk08499594 *)gUnknown_030040D8, e) == 1)

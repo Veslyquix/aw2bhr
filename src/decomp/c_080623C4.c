@@ -17,7 +17,7 @@
  *
  * Three things were load-bearing:
  *
- * 1. THE MAP ADDRESSING is now `gMap->rowOffset[y] + x` / `gMap->unk3262[off]`
+ * 1. THE MAP ADDRESSING is now `gMap->rowOffset[y] + x` / `gMap->dangerMask[off]`
  *    (include/map.h) -- the struct member keeps 0x417A and 0x3262 on the base
  *    the same way c_0804151C.c's one-local-per-step idiom did, emitting
  *    `(map + K) + idx` rather than folding K into a load displacement. The
@@ -58,7 +58,7 @@ int sub_080623C4(int *outX, int *outY)
     while (q->v != -1)
     {
         off = gMap->rowOffset[q->y] + q->x;
-        if (gMap->unk3262[off] != 0)
+        if (gMap->dangerMask[off] != 0)
             q->v = 0x7fff;
         else if (q->v < bestV)
         {

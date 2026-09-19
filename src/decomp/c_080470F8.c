@@ -59,7 +59,7 @@ void sub_080470F8(u16 a1)
     sub_080152EC(gUnknown_084C2140, 0);
     sub_080152EC(gUnknown_084C2198, 0);
 
-    if (gUnknown_030033E4.unk00 - gMap->unk04 / 16 <= 6)
+    if (gUnknown_030033E4.unk00 - gMap->scrollX / 16 <= 6)
         gUnknown_02028DD5 = 0x80;
     else
         gUnknown_02028DD5 = 0;

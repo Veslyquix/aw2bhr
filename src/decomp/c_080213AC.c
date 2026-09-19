@@ -43,17 +43,17 @@ void sub_080213AC(void)
     if (gUnknown_03003FC0.unk0d != 0
         && gUnknown_08499598[gUnknown_030033EC].unk1b == 2)
     {
-        sub_08020754(&gMap->unk1E42[
+        sub_08020754(&gMap->visible[
                          gUnknown_03004070 * 0x508]);
     }
     else
     {
-        sub_080206E4(&gMap->unk1E42[
+        sub_080206E4(&gMap->visible[
                          gUnknown_03004070 * 0x508],
                      1 - gUnknown_03003FC0.unk0d);
     }
 
-    sub_080206E4(&gMap->unk1E42[
+    sub_080206E4(&gMap->visible[
                      gUnknown_03004088 * 0x508],
                  1 - gUnknown_03003FC0.unk0d);
 

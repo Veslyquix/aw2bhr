@@ -32,6 +32,6 @@ void sub_08035B80(void)
     p = &gUnknown_03001470[i];
 
     sub_080155C0(i,
-                 p->unk1e - gMap->unk04,
-                 p->unk20 - gMap->unk06 - 2);
+                 p->unk1e - gMap->scrollX,
+                 p->unk20 - gMap->scrollY - 2);
 }

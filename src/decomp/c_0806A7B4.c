@@ -122,8 +122,8 @@ void sub_0806A8E4(struct Unk6A8E4Proc *proc)
         }
 
         map = gMap;
-        map->unk04 = proc->unk5e + x;
-        map->unk06 = proc->unk60 + y;
+        map->scrollX = proc->unk5e + x;
+        map->scrollY = proc->unk60 + y;
 
         sub_08023860();
         sub_0801237C();

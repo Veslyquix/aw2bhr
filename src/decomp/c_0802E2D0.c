@@ -80,18 +80,18 @@ u8 sub_0802E2D0(s16 x, s16 y)
 
     if (unit != NULL
      && (u8)sub_0803E9F8((struct Unk0803E9F8 *)unit,
-                         gMap->unk2852, 0xFF, 0))
+                         gMap->move, 0xFF, 0))
     {
         sub_08024404();
     }
     else
     {
-        gUnknown_03003F38 = gMap->unk0012[
+        gUnknown_03003F38 = gMap->unit[
             gMap->rowOffset[y] + x];
         gUnknown_030040D8 =
             (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
 
-        if (gMap->unk0012[
+        if (gMap->unit[
                 gMap->rowOffset[y] + x] == 0)
         {
             sub_0802E2BC();
@@ -107,7 +107,7 @@ u8 sub_0802E2D0(s16 x, s16 y)
             return 0;
         }
 
-        sub_0801F92C(gMap->unk2852);
+        sub_0801F92C(gMap->move);
         sub_08035584(gUnknown_030040D8);
         sub_08024404();
         sub_080258CC();

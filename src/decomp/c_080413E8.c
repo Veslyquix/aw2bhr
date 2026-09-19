@@ -92,7 +92,7 @@ int sub_080413E8(void)
             }
             else
             {
-                t = MAP->unk0012[MAP->rowOffset[y] + x];
+                t = gMap->unit[MAP->rowOffset[y] + x];
 
                 if (t == 0)
                     continue;

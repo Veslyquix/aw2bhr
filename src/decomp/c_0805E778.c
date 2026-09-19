@@ -20,7 +20,7 @@ void sub_0805E778(void)
   gUnknown_03004784[1] = 0x64;
   for (i = 0; i < 2; i++)
   {
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, gUnknown_030040D8->unk00, 0x78, 1);
     sub_0805A0EC(p);
     if (1)

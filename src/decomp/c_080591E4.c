@@ -23,7 +23,7 @@
  * matched separately and neither derived from the other.
  *
  * Uses `gMap` (include/map.h), but the `sub_0801F92C` setup calls must also
- * pass `gMap->unk2D5A` / `gMap->unk2852` (the plane's own array member,
+ * pass `gMap->danger` / `gMap->move` (the plane's own array member,
  * decays to `u8 *`), not `gUnknown_08499590 + offset` or a cast -- agbcc's
  * CSE only reuses a pointer load across identical symbols, and mixing in the
  * raw name anywhere forces a second pool load (see sub_08057D90 for the
@@ -58,7 +58,7 @@
  *     shorten_compare then makes the comparison unsigned. Adding `(u8)` or
  *     `100u` breaks it.
  *   - the pre-loop `best` read comes out `ldrsb` here and `ldrb; lsl; asr` in
- *     sub_08059464 from the SAME `(s8)map->unk2D5A[...]` source: `ldrsb` needs
+ *     sub_08059464 from the SAME `(s8)map->danger[...]` source: `ldrsb` needs
  *     a spare register for the zero index, and here the address landed in r2
  *     leaving r0 free while there it landed in r0.
  *   - the 5th argument to the gUnknown_030013EC indirect call is the literal 0
@@ -126,7 +126,7 @@ void sub_080591E4(void *a1)
     bestY = 0;
     mask = 0;
 
-    sub_0801F92C(gMap->unk2D5A);
+    sub_0801F92C(gMap->danger);
     gUnknown_030013EC(cur[0], cur[1], gUnknown_030040D8->unk00, 0x78, 0);
 
     if (gUnknown_03004784[1] >= gUnknown_030040D8->unk07[3] % 100)
@@ -135,13 +135,13 @@ void sub_080591E4(void *a1)
         mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     }
 
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
     sub_080202A4(gUnknown_030040D8);
 
     if (gUnknown_03004784[1] == 100)
         best = 0x7fff;
     else
-        best = (s8)gMap->unk2D5A[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+        best = (s8)gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
 
     bestX = -1;
 
@@ -151,16 +151,16 @@ void sub_080591E4(void *a1)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (gMap->unk2D5A[gMap->rowOffset[y] + x] > best)
+            if (gMap->danger[gMap->rowOffset[y] + x] > best)
                 continue;
-            if (gMap->unk3262[gMap->rowOffset[y] + x] & mask)
+            if (gMap->dangerMask[gMap->rowOffset[y] + x] & mask)
                 continue;
             if (!sub_08059674(x, y))
                 continue;
             if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x20
              && (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)gMap->unk2D5A[gMap->rowOffset[y] + x];
+            best = (s8)gMap->danger[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }
@@ -196,10 +196,10 @@ void sub_08059464(void *a1)
         mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     }
 
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
     sub_080202A4(gUnknown_030040D8);
 
-    best = (s8)gMap->unk2D5A[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+    best = (s8)gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
     bestX = -1;
 
     for (y = 0; y < gMap->height; y++)
@@ -208,15 +208,15 @@ void sub_08059464(void *a1)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (gMap->unk2D5A[gMap->rowOffset[y] + x] > best)
+            if (gMap->danger[gMap->rowOffset[y] + x] > best)
                 continue;
-            if (gMap->unk3262[gMap->rowOffset[y] + x] & mask)
+            if (gMap->dangerMask[gMap->rowOffset[y] + x] & mask)
                 continue;
             if (!sub_08059674(x, y))
                 continue;
             if ((gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)gMap->unk2D5A[gMap->rowOffset[y] + x];
+            best = (s8)gMap->danger[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }

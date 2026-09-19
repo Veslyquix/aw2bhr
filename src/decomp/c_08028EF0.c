@@ -59,10 +59,10 @@ void sub_08028EF0(struct Unk08028EF0 *p)
     u16 d;
     u16 step;
 
-    p->unk1e = gMap->unk04;
-    p->unk20 = gMap->unk06;
-    p->unk26 = p->unk22 - gMap->unk04;
-    p->unk28 = p->unk24 - gMap->unk06;
+    p->unk1e = gMap->scrollX;
+    p->unk20 = gMap->scrollY;
+    p->unk26 = p->unk22 - gMap->scrollX;
+    p->unk28 = p->unk24 - gMap->scrollY;
 
     t = ABS(p->unk26) > ABS(p->unk28) ? p->unk26 : p->unk28;
     d = ABS(t);

@@ -32,10 +32,10 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
     case 0:
         v = (u32)gUnknown_03004008 % 33;
         m = gMap;
-        y = (a2 + m->unk06) >> 4;
+        y = (a2 + m->scrollY) >> 4;
         row = m->rowOffset[y];
-        x = (a1 + m->unk04) >> 4;
-        if (m->unk0012[row + x] == 0 && sub_08042424(x, y) != 0)
+        x = (a1 + m->scrollX) >> 4;
+        if (m->unit[row + x] == 0 && sub_08042424(x, y) != 0)
         {
             a3 = 4;
             if (v <= 4)

@@ -77,11 +77,11 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
             {
                 if ((s8)gUnknown_03003340[y][x] < 0)
                     continue;
-                if (gMap->unk0012[gMap->rowOffset[y] + x] == 0)
+                if (gMap->unit[gMap->rowOffset[y] + x] == 0)
                     continue;
-                if (sub_08026F9C(gUnknown_03003F38, gMap->unk0012[gMap->rowOffset[y] + x]))
+                if (sub_08026F9C(gUnknown_03003F38, gMap->unit[gMap->rowOffset[y] + x]))
                     continue;
-                e = &gUnknown_08499594[gMap->unk0012[gMap->rowOffset[y] + x]];
+                e = &gUnknown_08499594[gMap->unit[gMap->rowOffset[y] + x]];
                 if (gUnknown_03003FC0.unk0d == 0)
                 {
                     if ((u8)(e->unk00 - 0xa) <= 1)

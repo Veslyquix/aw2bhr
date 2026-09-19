@@ -35,7 +35,7 @@ int sub_08045D4C(void)
 
     if (y > 0)
     {
-        c = gMap->unk051A[
+        c = gMap->unitUnk[
                 gMap->rowOffset[y - 1] + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
@@ -43,7 +43,7 @@ int sub_08045D4C(void)
 
     if (y < gMap->height - 1)
     {
-        c = gMap->unk051A[
+        c = gMap->unitUnk[
                 gMap->rowOffset[y + 1] + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
@@ -52,7 +52,7 @@ int sub_08045D4C(void)
     if (x > 0)
     {
         oleft = gMap->rowOffset[y] - 1;
-        c = gMap->unk051A[oleft + x];
+        c = gMap->unitUnk[oleft + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
     }
@@ -60,7 +60,7 @@ int sub_08045D4C(void)
     if (x < gMap->width - 1)
     {
         oright = gMap->rowOffset[y] + 1;
-        c = gMap->unk051A[oright + x];
+        c = gMap->unitUnk[oright + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
     }

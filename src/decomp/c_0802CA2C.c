@@ -35,7 +35,7 @@ int sub_0802CA78(void)
 
     off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
 
-    if (gMap->unk0012[off] != 0)
+    if (gMap->unit[off] != 0)
         return 1;
 
     cur = gUnknown_03003100.raw;
@@ -67,7 +67,7 @@ int sub_0802CB20(void)
 
     off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
 
-    if (gMap->unk0012[off] != 0)
+    if (gMap->unit[off] != 0)
         return 1;
 
     cur = gUnknown_03003100.raw;

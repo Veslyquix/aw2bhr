@@ -36,7 +36,7 @@ struct UnkF510Proc
  */
 void sub_0803F4C8(struct UnkF4C8Proc *proc)
 {
-    if (sub_0801C254(proc->unk50, (proc->unk54 - gMap->unk04) & 0x1FF, (proc->unk58 - gMap->unk06) & 0xFF) == 0)
+    if (sub_0801C254(proc->unk50, (proc->unk54 - gMap->scrollX) & 0x1FF, (proc->unk58 - gMap->scrollY) & 0xFF) == 0)
     {
         sub_0801C240(proc->unk50);
         Proc_Break(proc);

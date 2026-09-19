@@ -46,25 +46,25 @@ void sub_0803E594(int a1, int a2, int a3)
     y = a2;
     for (; y >= 0; y--)
     {
-        if (MAP->unk0012[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unk0012[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
     y = a2;
     for (; x < MAP->width; x++)
     {
-        if (MAP->unk0012[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unk0012[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
     x = a1;
     for (; y < MAP->height; y++)
     {
-        if (MAP->unk0012[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unk0012[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
     y = a2;
     for (; x >= 0; x--)
     {
-        if (MAP->unk0012[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unk0012[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
 }

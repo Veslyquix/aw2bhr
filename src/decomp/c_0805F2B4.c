@@ -13,7 +13,7 @@ struct Unk5F2B4Map
     /* 0x0002 */ u16 unk02;
     /* 0x0004 */ u8 filler_04[0x142e];
     /* 0x1432 */ u8 unk1432[0x1928];
-    /* 0x2d5a */ u8 unk2D5A[0x1420];
+    /* 0x2d5a */ u8 danger[0x1420];
     /* 0x417a */ u16 unk417A[1];
 };
 
@@ -65,7 +65,7 @@ struct Unk5F2B4Map
  *
  * sub_0801F92C takes the raw `u8 *` plane pointer, the spelling
  * c_0805EF9C.c already uses. 0x2D5A is a new member of the shared map layout,
- * carved byte-neutrally out of the existing unk2852[0xA10] filler (0xA10 splits
+ * carved byte-neutrally out of the existing move[0xA10] filler (0xA10 splits
  * into 0x508 + 0x508 at 0x2D5A), so no other reader changes. */
 void sub_0805F2B4(void)
 {
@@ -122,7 +122,7 @@ void sub_0805F2B4(void)
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
-            if ((s8)((struct Unk5F2B4Map *)gUnknown_08499590)->unk2D5A[
+            if ((s8)((struct Unk5F2B4Map *)gUnknown_08499590)->danger[
                     ((struct Unk5F2B4Map *)gUnknown_08499590)->unk417A[y] + x]
                 <= 0)
                 continue;
@@ -138,11 +138,11 @@ void sub_0805F2B4(void)
                 score = 0;
 
             if (best <= score
-             && second > (s8)((struct Unk5F2B4Map *)gUnknown_08499590)->unk2D5A[
+             && second > (s8)((struct Unk5F2B4Map *)gUnknown_08499590)->danger[
                     ((struct Unk5F2B4Map *)gUnknown_08499590)->unk417A[y] + x])
             {
                 best = score;
-                new_var = ((struct Unk5F2B4Map *)gUnknown_08499590)->unk2D5A[
+                new_var = ((struct Unk5F2B4Map *)gUnknown_08499590)->danger[
                     ((struct Unk5F2B4Map *)gUnknown_08499590)->unk417A[y] + x];
                 second = new_var;
                 xp = (u32)x << 16;

@@ -29,10 +29,10 @@ void sub_08021D10(void)
 
     for (y = 0; y <= 0xf; y++)
     {
-        sub_08023BAC((u16)((gMap->unk04 >> 4) - gMap->camX),
-                     (u16)(y + ((gMap->unk06 >> 4) - gMap->camY)),
-                     (u16)(gMap->unk04 >> 4),
-                     (u16)(y + (gMap->unk06 >> 4)));
+        sub_08023BAC((u16)((gMap->scrollX >> 4) - gMap->camX),
+                     (u16)(y + ((gMap->scrollY >> 4) - gMap->camY)),
+                     (u16)(gMap->scrollX >> 4),
+                     (u16)(y + (gMap->scrollY >> 4)));
     }
 
     sub_08013B1C();

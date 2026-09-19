@@ -40,8 +40,8 @@ void sub_0802723C(int x, int y)
 {
     struct Unk2723CProc *proc = Proc_Start(gUnknown_08499D2C, PROC_TREE_3);
 
-    proc->unk2c = (x << 4) - gMap->unk04 - 0x18;
-    proc->unk30 = (y << 4) - gMap->unk06;
+    proc->unk2c = (x << 4) - gMap->scrollX - 0x18;
+    proc->unk30 = (y << 4) - gMap->scrollY;
     proc->unk54 = 2;
 }
 
@@ -49,7 +49,7 @@ void sub_08027278(int x, int y)
 {
     struct Unk27278Proc *proc = Proc_Start(gUnknown_08499CFC, PROC_TREE_3);
 
-    proc->unk2c = (x << 4) - gMap->unk04 - 0x18;
-    proc->unk30 = (y << 4) - gMap->unk06;
+    proc->unk2c = (x << 4) - gMap->scrollX - 0x18;
+    proc->unk30 = (y << 4) - gMap->scrollY;
     proc->unk54 = 0;
 }

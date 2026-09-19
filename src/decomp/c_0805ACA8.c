@@ -83,7 +83,7 @@ void sub_0805ACFC(int x, int y, u16 * out)
 
     idx = map->rowOffset[y] + x;
 
-    if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != gUnknown_03003F38 && gMap->unit[idx] != 0)
         return;
 
     t = (s8)gUnknown_03003340[y][x];

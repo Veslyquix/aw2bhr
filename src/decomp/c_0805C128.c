@@ -9,7 +9,7 @@
  */
 
 /* WAVE 35 canonical `struct Map`, extended by W36-D with +0x1432 (carved out of
- * unk051A's filler; byte-neutral, since only a field's START OFFSET enters the
+ * unitUnk's filler; byte-neutral, since only a field's START OFFSET enters the
  * address arithmetic). Keep every draft in this unit on the same body. */
 
 /* MATCHED (wave 52, W52-C) -- 152/152 bytes, relocs match.
@@ -74,7 +74,7 @@ void sub_0805C128(int x, int y, u16 * out)
 
     idx = map->rowOffset[y] + x;
 
-    if (map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return;
 
     if ((s8)gUnknown_03003340[y][x] < 0)

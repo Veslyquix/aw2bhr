@@ -20,7 +20,7 @@ void sub_0805B3F4(void)
     buf[9] = 9;
 
     sub_080581A4(gMap->unk3C72, 0);
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
 
     u = &gUnknown_08499594[gUnknown_030040D8->unk07[0]];
     gUnknown_030046D4 = u->unk00;

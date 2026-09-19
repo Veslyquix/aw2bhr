@@ -13,8 +13,8 @@ void sub_08027710(void)
     u16 x;
     u16 y;
 
-    x = gUnknown_030033E4.unk00 * 16 - gMap->unk04;
-    y = gUnknown_030033E4.unk02 * 16 - gMap->unk06;
+    x = gUnknown_030033E4.unk00 * 16 - gMap->scrollX;
+    y = gUnknown_030033E4.unk02 * 16 - gMap->scrollY;
 
     if ((s16)y <= 0x4f)
     {

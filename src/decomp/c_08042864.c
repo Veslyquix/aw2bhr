@@ -42,7 +42,7 @@ void sub_08042864(void)
     int m;
 
     e = &gUnknown_08499594[
-        gMap->unk0012[
+        gMap->unit[
             gMap
                 ->rowOffset[gUnknown_03003100.pos.unk02]
             + gUnknown_03003100.pos.unk00]];

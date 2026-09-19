@@ -29,7 +29,7 @@ int sub_0805BD40(int x, int y, int t, int id, s16 *out)
 
     idx = gMap->rowOffset[y] + x;
 
-    if (gMap->unk0012[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return 0;
 
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];

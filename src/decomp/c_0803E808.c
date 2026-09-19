@@ -57,7 +57,7 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
     bestX = 0;
     bestY = 0;
     bestT = 0;
-    sub_0801F92C(MAP->unk2852);
+    sub_0801F92C(MAP->move);
     sub_0801F838(0xff);
     x = a1 + (int)sub_0803E7C0(a4, a5);
     y = a2 + (int)sub_0803E7E4(a4, a5);
@@ -68,18 +68,18 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
         {
             if ((s8)gUnknown_03003340[j][i] < 0)
                 continue;
-            if (MAP->unk0012[MAP->rowOffset[j] + i] == 0)
+            if (gMap->unit[MAP->rowOffset[j] + i] == 0)
                 continue;
-            if (sub_08026F28(gUnknown_030033EC, (MAP->unk0012[MAP->rowOffset[j] + i] >> 6) + 1) == 1)
+            if (sub_08026F28(gUnknown_030033EC, (gMap->unit[MAP->rowOffset[j] + i] >> 6) + 1) == 1)
                 continue;
             if (!sub_08020DBC(gUnknown_030033EC, i, j))
                 continue;
-            u = &gUnknown_08499594[MAP->unk0012[MAP->rowOffset[j] + i]];
+            u = &gUnknown_08499594[gMap->unit[MAP->rowOffset[j] + i]];
             if (u->unk00 == 0x18)
             {
                 if ((u->unk01 & 0x20) != 0)
                     continue;
-                if (!sub_080257C0(MAP->unk0012[MAP->rowOffset[j] + i]))
+                if (!sub_080257C0(gMap->unit[MAP->rowOffset[j] + i]))
                     continue;
             }
             score = u->unk04_0 * (u16)(gUnknown_085D5ABC[u->unk00].unk06 / 10);
@@ -88,7 +88,7 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
             best = score;
             bestX = i;
             bestY = j;
-            bestT = MAP->unk0012[MAP->rowOffset[j] + i];
+            bestT = gMap->unit[MAP->rowOffset[j] + i];
         }
     }
     if (bestT == 0)

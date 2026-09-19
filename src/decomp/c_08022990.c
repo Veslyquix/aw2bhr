@@ -33,8 +33,8 @@ void sub_08022990(int a1, int a2, u16 a3)
     {
         for (x = 0; x <= 0xf; x++)
         {
-            sub_080227F4((u16)(x + (gMap->unk04 >> 4)),
-                         (u16)(y + (gMap->unk06 >> 4)));
+            sub_080227F4((u16)(x + (gMap->scrollX >> 4)),
+                         (u16)(y + (gMap->scrollY >> 4)));
         }
     }
 

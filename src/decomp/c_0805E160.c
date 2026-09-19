@@ -41,7 +41,7 @@
  * See the note at sub_0805A5E0 in include/unknown-functions.h.
  *
  * Uses `gMap` (include/map.h) for the +0x12/+0x417A reads, but the
- * `sub_0801F92C` setup call must pass `gMap->unk2852` (the plane's own array
+ * `sub_0801F92C` setup call must pass `gMap->move` (the plane's own array
  * member, decays to `u8 *`), not `gUnknown_08499590 + 0x2852` or a cast --
  * agbcc's CSE only reuses a pointer load across identical symbols, so mixing
  * in the raw name anywhere forces a second pool load and breaks the match
@@ -67,7 +67,7 @@ void sub_0805E160(void)
     u8 r;
 
     list = gUnknown_03003F20;
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
 
     if ((gUnknown_030040D8->unk07[2] & 0xc0) == 0)
     {
@@ -83,7 +83,7 @@ void sub_0805E160(void)
             sub_0805E2AC();
             return;
         }
-        gUnknown_03004730[gMap->unk0012[gMap->rowOffset[pos.y] + pos.x] & 0x3f]++;
+        gUnknown_03004730[gMap->unit[gMap->rowOffset[pos.y] + pos.x] & 0x3f]++;
         r = sub_0805ACA8(pos.x, pos.y, (u16 *)&pos);
         if (r != 1)
             goto loop;

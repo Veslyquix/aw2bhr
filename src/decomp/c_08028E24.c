@@ -68,8 +68,8 @@ void sub_08028E24(struct Unk08028E24Proc *proc)
         s[i].unk00 += s[i].unk04;
         s[i].unk02 += s[i].unk06;
         PutSprite(0,
-                  s[i].unk00 - gMap->unk04,
-                  s[i].unk02 - gMap->unk06,
+                  s[i].unk00 - gMap->scrollX,
+                  s[i].unk02 - gMap->scrollY,
                   gUnknown_08499FE4, 0);
     }
 }

@@ -21,10 +21,10 @@ void sub_0802C480(struct Unk2C480Proc *proc)
 {
     u32 v = proc->unk20;
 
-    if (v != *(u32 *)&gMap->unk04)
+    if (v != *(u32 *)&gMap->scrollX)
     {
-        gUnknown_030033E4.unk00 = (gMap->unk04 >> 4) + 7;
-        gUnknown_030033E4.unk02 = (gMap->unk06 >> 4) + 5;
+        gUnknown_030033E4.unk00 = (gMap->scrollX >> 4) + 7;
+        gUnknown_030033E4.unk02 = (gMap->scrollY >> 4) + 5;
     }
 
     gUnknown_03003334 = 0;

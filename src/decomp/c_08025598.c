@@ -14,7 +14,7 @@ u8 sub_08025598(s16 a1, s16 a2)
     int id;
 
     off = gMap->rowOffset[a2] + a1;
-    id = gMap->unk051A[off];
+    id = gMap->unitUnk[off];
 
     if ((u16)id == 0)
         return 0;

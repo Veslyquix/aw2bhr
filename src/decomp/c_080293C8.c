@@ -37,7 +37,7 @@ void sub_080293C8(ProcPtr proc)
         if (gpKeySt->held & 1)
         {
             Proc_End(proc);
-            gUnknown_03003F40 = gMap->unk051A[
+            gUnknown_03003F40 = gMap->unitUnk[
                 gMap->rowOffset[gUnknown_030033E4.unk02]
                 + gUnknown_030033E4.unk00];
             sub_08028EE4();
@@ -66,13 +66,13 @@ bool8 sub_08029490(ProcPtr proc)
     idx = gMap->rowOffset[gUnknown_030033E4.unk02]
         + gUnknown_030033E4.unk00;
 
-    if ((s8)gMap->unk2852[idx] >= 0)
+    if ((s8)gMap->move[idx] >= 0)
     {
-        if (gMap->unk1E42[idx] == 0)
+        if (gMap->visible[idx] == 0)
             return 1;
 
-        if (gMap->unk0012[idx] != 0
-            && sub_08026F5C(gMap->unk0012[idx]))
+        if (gMap->unit[idx] != 0
+            && sub_08026F5C(gMap->unit[idx]))
             return 1;
     }
 

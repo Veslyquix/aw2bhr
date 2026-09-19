@@ -29,7 +29,7 @@ bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
   rowOff = 0x417a;
   new_var2 = 0x13;
   ;
-  if (map->unk1E42[(*((u16 *) ((((u8 *) map) + rowOff) + ty))) + x] == 0)
+  if (map->visible[(*((u16 *) ((((u8 *) map) + rowOff) + ty))) + x] == 0)
   {
     return 0;
   }
@@ -62,11 +62,11 @@ bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
     return 1;
   }
   idx = (*((u16 *) ((((u8 *) (*mapPtr)) + rowOff) + ty))) + x;
-  if ((*mapPtr)->unk0012[idx] == 0)
+  if ((*mapPtr)->unit[idx] == 0)
   {
     return 0;
   }
-  new_var = &gUnknown_08499594[(*mapPtr)->unk0012[idx]].unk00;
+  new_var = &gUnknown_08499594[(*mapPtr)->unit[idx]].unk00;
   if (((u8) ((*new_var) - 0x10)) <= 4)
   {
     return 1;

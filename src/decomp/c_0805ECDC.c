@@ -52,7 +52,7 @@ void sub_0805ED70(void)
     sub_08059C00(p, (u16 *)&v);
     if (v.pos.unk00 == 0x270F)
         sub_0805F4F8();
-    gUnknown_03004730[gMap->unk0012[
+    gUnknown_03004730[gMap->unit[
         gMap->rowOffset[v.pos.unk02]
         + v.pos.unk00] & 0x3f]++;
     sub_080591E4(&v);
@@ -142,7 +142,7 @@ void sub_0805EF9C(void)
         sub_0805F4F8();
     else if ((s8)gUnknown_03003340[v.pos.unk02][v.pos.unk00] <= 0x79)
         sub_080591E4(&v);
-    sub_0801F92C(gMap->unk2D5A);
+    sub_0801F92C(gMap->danger);
     gUnknown_030013EC(v.pos.unk00, v.pos.unk02, 0x10, 0x78, 0);
     sub_08059464(&v);
     sub_0805F7B8();

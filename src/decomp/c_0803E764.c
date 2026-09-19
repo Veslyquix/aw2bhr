@@ -43,9 +43,9 @@ void sub_0803E764(struct Unk02028360Pos *p, int a2)
     {
         x = p->unk00;
         y = p->unk02;
-        if (gMap->unk0012[gMap->rowOffset[y] + x] != 0)
+        if (gMap->unit[gMap->rowOffset[y] + x] != 0)
         {
-            t = gMap->unk0012[gMap->rowOffset[y] + x];
+            t = gMap->unit[gMap->rowOffset[y] + x];
             sub_0803E560(x, y, t, a2);
         }
         p++;

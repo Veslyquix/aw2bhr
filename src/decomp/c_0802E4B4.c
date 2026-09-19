@@ -83,7 +83,7 @@ void sub_0802E4B4(s16 x, s16 y)
     sub_08024454();
     sub_080258CC();
     gUnknown_03004480 = (*sel >> 6) + 1;
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
     sub_080202A4(gUnknown_030040D8);
     gUnknown_03004480 = gUnknown_030033EC;
     sub_08022990((u16)sx, (u16)sy, 0);

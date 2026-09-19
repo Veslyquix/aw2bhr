@@ -57,7 +57,7 @@ void sub_08022428(u16 x, u16 y)
 
     if (y >= gMap->height
         || (id = gMap
-                     ->unk051A[gMap->rowOffset[y] + x]) == 0
+                     ->unitUnk[gMap->rowOffset[y] + x]) == 0
         || gMap
                ->unk234A[gMap->rowOffset[y] + x] == 0
         || !sub_0802571C(id)

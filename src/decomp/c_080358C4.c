@@ -45,13 +45,13 @@ void sub_080358C4(s16 a1, s16 a2)
     nx = 10000;
     ny = 10000;
 
-    dx = a1 - gMap->unk04;
+    dx = a1 - gMap->scrollX;
     if (dx <= 0x1f)
         nx = a1 - 0x20;
     if (dx > 0xc0)
         nx = a1 - 0xc0;
 
-    dy = a2 - gMap->unk06;
+    dy = a2 - gMap->scrollY;
     if (dy <= 0x1f)
         ny = a2 - 0x20;
     if (dy > 0x70)
@@ -61,7 +61,7 @@ void sub_080358C4(s16 a1, s16 a2)
     {
         if ((s16)ny == (s16)nx)
             return;
-        nx = gMap->unk04;
+        nx = gMap->scrollX;
     }
     else if ((s16)nx < 0)
         nx = 0;
@@ -69,14 +69,14 @@ void sub_080358C4(s16 a1, s16 a2)
         nx = (gMap->width - 0xf) * 16;
 
     if ((s16)ny == 10000)
-        ny = gMap->unk06;
+        ny = gMap->scrollY;
     else if ((s16)ny < 0)
         ny = 0;
     else if ((s16)ny > (gMap->height - 0xa) * 16)
         ny = (gMap->height - 0xa) * 16;
 
-    gMap->unk04 = nx;
-    gMap->unk06 = ny;
+    gMap->scrollX = nx;
+    gMap->scrollY = ny;
 
     sub_08023860();
 }

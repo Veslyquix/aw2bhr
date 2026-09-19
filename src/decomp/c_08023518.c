@@ -30,13 +30,13 @@ void sub_08023518(void)
     dir = (gpKeySt->unk00 >> 4) & 0xf;
 
     if (gUnknown_08499C7C[dir][0] < 0)
-        gUnknown_030033E4.unk00 = (gMap->unk04 >> 4) + 2;
+        gUnknown_030033E4.unk00 = (gMap->scrollX >> 4) + 2;
     if (gUnknown_08499C7C[dir][0] > 0)
-        gUnknown_030033E4.unk00 = (gMap->unk04 >> 4) + 0xc;
+        gUnknown_030033E4.unk00 = (gMap->scrollX >> 4) + 0xc;
     if (gUnknown_08499C7C[dir][1] < 0)
-        gUnknown_030033E4.unk02 = (gMap->unk06 >> 4) + 2;
+        gUnknown_030033E4.unk02 = (gMap->scrollY >> 4) + 2;
     if (gUnknown_08499C7C[dir][1] > 0)
-        gUnknown_030033E4.unk02 = (gMap->unk06 >> 4) + 7;
+        gUnknown_030033E4.unk02 = (gMap->scrollY >> 4) + 7;
 
     n = gUnknown_030033E4.unk00 + gUnknown_08499C7C[dir][0];
     if (n >= 0 && n < gMap->width)

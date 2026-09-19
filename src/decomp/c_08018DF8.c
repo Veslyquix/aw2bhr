@@ -27,7 +27,7 @@ void sub_08018DF8(struct Unk0200C528 *slot)
     struct Unk0200C528Node *p;
 
     p = (struct Unk0200C528Node *)slot->unk14;
-    sub_08043418((s16)p->unk08 - gMap->unk04,
-                 (s16)p->unk0a - gMap->unk06,
+    sub_08043418((s16)p->unk08 - gMap->scrollX,
+                 (s16)p->unk0a - gMap->scrollY,
                  p->unk0c);
 }

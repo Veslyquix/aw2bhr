@@ -35,7 +35,7 @@ u8 sub_080242B0(s16 a1, s16 a2)
     hi = cell & 0xe0;
     lo = cell & 0x1f;
 
-    if (map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return FALSE;
 
     if (hi != gUnknown_03004084)

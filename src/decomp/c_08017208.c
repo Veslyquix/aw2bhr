@@ -140,10 +140,10 @@ void sub_08017208(void)
     map = gMap;
     map->width = p->unk0bae;
     map->height = p->unk0bb0;
-    map->unk04 = a = p->unk0bb2;
-    map->unk06 = b = p->unk0bb4;
-    map->camX = map->unk04 / 16;
-    map->camY = map->unk06 / 16;
+    map->scrollX = a = p->unk0bb2;
+    map->scrollY = b = p->unk0bb4;
+    map->camX = map->scrollX / 16;
+    map->camY = map->scrollY / 16;
     map->unk08 = a;
     map->unk0a = b;
     map->unk10 = p->unk0bb6;

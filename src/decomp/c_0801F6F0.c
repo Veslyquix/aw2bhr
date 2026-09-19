@@ -49,9 +49,9 @@ void sub_0801F6F0(u8 a1, u8 a2, u8 a3)
         return;
 
     if (gUnknown_084999C8->unk22 != 0
-        && gMap->unk0012[idx] != 0
+        && gMap->unit[idx] != 0
         && (gUnknown_084999C8->unk2a
-            & gUnknown_084999C8->unk24[gMap->unk0012[idx] >> 6]))
+            & gUnknown_084999C8->unk24[gMap->unit[idx] >> 6]))
         return;
 
     if ((s16)v > gUnknown_084999C8->unk20)

@@ -89,7 +89,7 @@ void sub_0802B3AC(s16 a, s16 b, s16 c)
     }
 
     sub_080251BC(gUnknown_03003F38,
-                 gMap->unk0012[idx],
+                 gMap->unit[idx],
                  &gUnknown_03003100.pos);
     x = (u16)((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[c * 3] + a + 0x1b;
     sub_08037200(x, b - 0x14 - (s8)d,

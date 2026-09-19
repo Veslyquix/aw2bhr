@@ -10,7 +10,7 @@
 
 /* WAVE 35: CANONICAL `struct Map`, extended by W36-D with the two plane starts
  * this block reads (+0x1432 and +0x3262). Both are carved out of existing
- * fillers -- unk051A[0x1928] splits at 0x1432 and unk2852[0x1928] splits at
+ * fillers -- unitUnk[0x1928] splits at 0x1432 and move[0x1928] splits at
  * 0x3262 -- so the layout is unchanged and the edit is byte-neutral: only a
  * field's START OFFSET enters the address arithmetic, never its length. */
 /* struct Unk085D5ABC's unk14 target, described as a struct so the `(p + 0x1a)
@@ -131,7 +131,7 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
 
     idx = map->rowOffset[y] + x;
 
-    if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != gUnknown_03003F38 && gMap->unit[idx] != 0)
         return;
 
     if (gUnknown_03003340[y][x] > 0x78)
@@ -141,7 +141,7 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
      || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
         score = gUnknown_085D583C[map->terrain[idx] & 0x1f].unk10 * 10;
 
-    if ((gMap->unk3262[
+    if ((gMap->dangerMask[
             gMap->rowOffset[y] + x] & mask) == 0)
         score += 100;
 
@@ -216,7 +216,7 @@ void sub_08058E88(int x, int y, u16 * out)
 
     idx = map->rowOffset[y] + x;
 
-    if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != gUnknown_03003F38 && gMap->unit[idx] != 0)
         return;
 
     t = (s8)gUnknown_03003340[y][x];

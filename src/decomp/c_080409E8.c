@@ -42,8 +42,8 @@ void sub_080409E8(int a1, int a2, int a3, int a4, int a5)
     int x;
     int y;
 
-    x = a1 * 16 - gMap->unk04 + 8;
-    y = a2 * 16 - gMap->unk06 + 0x10;
+    x = a1 * 16 - gMap->scrollX + 8;
+    y = a2 * 16 - gMap->scrollY + 0x10;
     if (x <= 0x1f)
         x = 0x20;
     if (x > 0xd0)

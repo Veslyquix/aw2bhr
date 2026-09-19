@@ -33,7 +33,7 @@ void sub_0803F400(struct UnkF400Proc *proc)
 
     proc->unk50 = sprite;
     proc->unk54 = proc->unk2c * 16 + 8;
-    proc->unk58 = gMap->unk06 + 0x10;
+    proc->unk58 = gMap->scrollY + 0x10;
 
     sprite->unk22 = 0x51CA;
 }

@@ -25,10 +25,10 @@ struct Unk0805DFF4Rec
 
 u8 sub_08059674(s16 x, s16 y)
 {
-    if (gMap->unk0012[
+    if (gMap->unit[
             gMap->rowOffset[y] + x]
                 != gUnknown_03003F38
-        && gMap->unk0012[
+        && gMap->unit[
             gMap->rowOffset[y] + x] != 0)
         return 0;
     if ((u8)sub_0805C988(x, y))
@@ -65,7 +65,7 @@ void sub_08059760(void)
 {
     union Unk802C57CBuf v;
 
-    sub_0801F92C(gMap->unk2D5A);
+    sub_0801F92C(gMap->danger);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, -1);
     sub_0801FD9C(0x79);
@@ -90,7 +90,7 @@ void sub_08059824(void)
 {
     union Unk802C57CBuf v;
 
-    sub_0801F92C(gMap->unk2D5A);
+    sub_0801F92C(gMap->danger);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_0801FD9C(0x79);
@@ -116,7 +116,7 @@ void sub_080598BC(void)
 
     p = gUnknown_03003F20;
     sub_0805DCD4();
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_08059A0C(p);
@@ -144,7 +144,7 @@ void sub_08059978(void)
 
     p = gUnknown_03003F20;
     sub_0805DCD4();
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_08059A0C(p);

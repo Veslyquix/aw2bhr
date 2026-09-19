@@ -53,7 +53,7 @@ void sub_08001DAC(void)
     u16 m3;
     u16 m4;
 
-    sx = gUnknown_0200B0B0->unk08 - (gMap->unk04 >> 4);
+    sx = gUnknown_0200B0B0->unk08 - (gMap->scrollX >> 4);
     flag = 1;
 
     switch (gUnknown_0200B0B0->unk4c)

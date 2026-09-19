@@ -74,8 +74,8 @@ void sub_0803F908(int x, int y, const u8 *obj, int a4, u8 a5)
             oam2 = 0xD000;
     }
 
-    x = x * 16 - gMap->unk04;
-    y = y * 16 - gMap->unk06;
+    x = x * 16 - gMap->scrollX;
+    y = y * 16 - gMap->scrollY;
 
     PutSprite(4, x, y, (u16 *)obj, oam2 + 0x48);
 }

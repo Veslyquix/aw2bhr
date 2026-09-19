@@ -15,10 +15,10 @@ bool8 sub_0802C8F8(void)
 
     off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
 
-    if (gMap->unk0012[off] == 0)
+    if (gMap->unit[off] == 0)
         return TRUE;
 
-    e = &gUnknown_08499594[gMap->unk0012[off]];
+    e = &gUnknown_08499594[gMap->unit[off]];
 
     if (!sub_08025FC0((struct Unk08499594 *)gUnknown_030040D8, e))
         return TRUE;

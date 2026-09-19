@@ -30,7 +30,7 @@ void sub_0805E9DC(void)
 {
     void (*fns[2])(void) = { sub_0805E87C, sub_0805E778 };
 
-    sub_0801F92C(gMap->unk2852);
+    sub_0801F92C(gMap->move);
 
     if ((gUnknown_030040D8->unk05 & 0xf8) == 0
         && ((struct Unk5E9DCFlags *)gUnknown_030040D8)->unk09_0 != 0

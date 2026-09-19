@@ -33,11 +33,11 @@ u8 sub_08039140(u16 x, s16 y, u8 w, u8 h)
     int dx;
     int dy;
 
-    dy = y - gMap->unk06;
+    dy = y - gMap->scrollY;
 
     if (dy > -h && dy <= 0x9f)
     {
-        dx = (s16)x - gMap->unk04;
+        dx = (s16)x - gMap->scrollX;
 
         if (dx > -w && dx <= 0xef)
             return 1;

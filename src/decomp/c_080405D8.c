@@ -36,8 +36,8 @@ struct Unk405D8Proc
 void sub_080405D8(struct Unk405D8Proc *proc)
 {
     sub_0801C254(proc->unk50,
-                 proc->unk54 - gMap->unk04,
-                 proc->unk66 - gMap->unk06);
+                 proc->unk54 - gMap->scrollX,
+                 proc->unk66 - gMap->scrollY);
 
     proc->unk66 += 8;
 

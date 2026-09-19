@@ -99,9 +99,9 @@ int sub_08008A8C(int mode, int x, int y)
 
     idx = gMap->rowOffset[y] + x;
 
-    if (gMap->unk0012[idx] != 0)
+    if (gMap->unit[idx] != 0)
     {
-        e = &gUnknown_08499594[gMap->unk0012[idx]];
+        e = &gUnknown_08499594[gMap->unit[idx]];
 
         if (mode != 0)
         {

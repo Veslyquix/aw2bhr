@@ -85,6 +85,6 @@ void sub_0806A6F0(ProcPtr a1, int a2, int a3)
     sub = Proc_Start(gUnknown_085815D0, a1);
     sub->unk2c = a1;
 
-    PROC->unk5e = gMap->unk04;
-    PROC->unk60 = gMap->unk06;
+    PROC->unk5e = gMap->scrollX;
+    PROC->unk60 = gMap->scrollY;
 }

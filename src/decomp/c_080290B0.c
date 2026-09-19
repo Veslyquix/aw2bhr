@@ -71,8 +71,8 @@ void sub_080290B0(int a1, int a2, u8 a3)
     dx = 0;
     dy = 0;
 
-    cx = gMap->unk04 / 16;
-    cy = gMap->unk06 / 16;
+    cx = gMap->scrollX / 16;
+    cy = gMap->scrollY / 16;
 
     if (a3 != 0)
     {

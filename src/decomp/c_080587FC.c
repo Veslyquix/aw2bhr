@@ -123,7 +123,7 @@ int sub_080587FC(int flag)
             else
             {
                 idx = gMap->rowOffset[y] + x;
-                u = gMap->unk0012[idx];
+                u = gMap->unit[idx];
                 if (u == 0)
                     continue;
                 if (sub_08026F9C(gUnknown_03003F38, u) == 1)

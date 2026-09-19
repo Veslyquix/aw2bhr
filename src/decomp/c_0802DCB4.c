@@ -36,13 +36,13 @@ void sub_0802DCB4(void)
 
         if (gpKeySt->held & 0x100)
         {
-            if (gMap->unk0012[
+            if (gMap->unit[
                     gMap->rowOffset[gUnknown_030033E4.unk02]
                     + gUnknown_030033E4.unk00] != 0)
             {
                 sub_0801B780(0);
                 sub_0803A8F0(&gUnknown_08499594[
-                    gMap->unk0012[
+                    gMap->unit[
                         gMap->rowOffset[gUnknown_030033E4.unk02]
                         + gUnknown_030033E4.unk00]]);
                 return;

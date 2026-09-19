@@ -78,10 +78,10 @@ void sub_08062DF0(void)
         }
 
         if ((gpKeySt->unk00 & 4)
-            && MAP->unk0012[MAP->rowOffset[gUnknown_030033E4.unk02]
+            && gMap->unit[MAP->rowOffset[gUnknown_030033E4.unk02]
                             + gUnknown_030033E4.unk00] != 0)
         {
-            gUnknown_03003F38 = MAP->unk0012[MAP->rowOffset[gUnknown_030033E4.unk02]
+            gUnknown_03003F38 = gMap->unit[MAP->rowOffset[gUnknown_030033E4.unk02]
                                              + gUnknown_030033E4.unk00];
             gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
 

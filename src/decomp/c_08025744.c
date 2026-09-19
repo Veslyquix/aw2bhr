@@ -14,15 +14,15 @@ u8 sub_08025744(int a1, int a2)
     int id;
 
     off = gMap->rowOffset[(s16)a2] + (s16)a1;
-    id = gMap->unk051A[off];
+    id = gMap->unitUnk[off];
 
     if (id == 0)
         return 0;
 
-    if (gMap->unk1E42[off] == 0)
+    if (gMap->visible[off] == 0)
         return 0;
 
-    if (gMap->unk0012[off] == 0 && (gUnknown_08499594[id].unk01 & 4) == 0)
+    if (gMap->unit[off] == 0 && (gUnknown_08499594[id].unk01 & 4) == 0)
         return 0;
 
     return sub_08026F5C(id);

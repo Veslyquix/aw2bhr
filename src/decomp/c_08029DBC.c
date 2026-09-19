@@ -22,10 +22,10 @@
  * `ldrh` above the first compare and cost the extra register copy. */
 int sub_08029DBC(int x, int y)
 {
-    if (x < (gMap->unk04 >> 4)
-     || y < (gMap->unk06 >> 4)
-     || x > (gMap->unk04 >> 4) + 0xE
-     || y > (gMap->unk06 >> 4) + 9)
+    if (x < (gMap->scrollX >> 4)
+     || y < (gMap->scrollY >> 4)
+     || x > (gMap->scrollX >> 4) + 0xE
+     || y > (gMap->scrollY >> 4) + 9)
         return 0;
 
     return 1;

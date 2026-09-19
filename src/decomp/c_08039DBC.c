@@ -60,12 +60,12 @@ void sub_08039DBC(struct Unk39DBCProc *proc)
         return;
     }
 
-    if ((u8)sub_0801306C((proc->unk29 << 4) - gMap->unk04,
-                         (proc->unk2a << 4) - gMap->unk06,
+    if ((u8)sub_0801306C((proc->unk29 << 4) - gMap->scrollX,
+                         (proc->unk2a << 4) - gMap->scrollY,
                          0x40))
     {
-        sub_0801BD00(((proc->unk29 << 4) - gMap->unk04 + 8) & 0x1ff,
-                     ((proc->unk2a << 4) - gMap->unk06 + 8) & 0xff,
+        sub_0801BD00(((proc->unk29 << 4) - gMap->scrollX + 8) & 0x1ff,
+                     ((proc->unk2a << 4) - gMap->scrollY + 8) & 0xff,
                      gUnknown_0849D81C,
                      proc->unk2c);
     }

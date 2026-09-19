@@ -35,7 +35,7 @@ void sub_0805FB70(void)
     {
         ((struct Unk5FB70Rec *)gUnknown_030040D8)->unk09_3 = 0;
         u = &gUnknown_08499594[
-            gMap->unk0012[
+            gMap->unit[
                 gMap->rowOffset[v.pos.unk02]
                 + v.pos.unk00]];
         ((struct Unk5FB70Unit *)u)->unk09_6++;

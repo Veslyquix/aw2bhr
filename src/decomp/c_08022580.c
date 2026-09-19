@@ -27,8 +27,8 @@ void sub_08022580(void)
     {
         for (x = 0; x <= 0xf; x++)
         {
-            sub_08022428((u16)(x + (gMap->unk04 >> 4)),
-                         (u16)(y + (gMap->unk06 >> 4)));
+            sub_08022428((u16)(x + (gMap->scrollX >> 4)),
+                         (u16)(y + (gMap->scrollY >> 4)));
         }
     }
 

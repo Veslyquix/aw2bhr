@@ -41,7 +41,7 @@ bool8 sub_0804209C(s16 x, s16 y)
     y2 = y * 2;
     rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    units = p->unk051A;
+    units = p->unitUnk;
     id = units[off];
 
     if (id == 0)
@@ -208,7 +208,7 @@ bool8 sub_080422A8(s16 x, s16 y)
     y2 = y * 2;
     rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    ids = p->unk0012;
+    ids = p->unit;
     id = ids[off];
     unit = &gUnknown_08499594[id];
 

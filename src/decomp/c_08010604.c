@@ -10,7 +10,7 @@
 
 /* The map header sub_0800F2E0 and its neighbours walk, seen through the LOCAL
  * struct spelling recorded on gUnknown_08499590 in include/unknown-globals.h.
- * unk0A22 is a REFINEMENT of the canonical `u8 unk051A[0x0F18]` used by the
+ * unk0A22 is a REFINEMENT of the canonical `u8 unitUnk[0x0F18]` used by the
  * twelve promoted files that already declare `struct Map`: that run splits at
  * 0x0A22 into a u16 plane of the same 0x508 cells as unk0012, indexed by the
  * same `unk417A[y] + x` key, and 0x0A22 + 0x508 * 2 lands exactly on unk1432.

@@ -69,7 +69,7 @@ void sub_0805F914(void)
     sub_08062474();
 
     if ((gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d
-         & gMap->unk3262[
+         & gMap->dangerMask[
             gMap->rowOffset[gUnknown_030040D8->unk03]
             + gUnknown_030040D8->unk02]) == 0)
         return;
@@ -83,7 +83,7 @@ void sub_0805F914(void)
             if (((s8 *)gUnknown_03003340[y])[x] < 0)
                 continue;
             if ((gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d
-                 & gMap->unk3262[
+                 & gMap->dangerMask[
                     gMap->rowOffset[y] + x]) != 0)
                 continue;
             if (((s8 *)gUnknown_03003340[y])[x] > best)

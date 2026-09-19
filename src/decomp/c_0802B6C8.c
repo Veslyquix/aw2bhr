@@ -40,10 +40,10 @@ u8 sub_0802B6C8(u8 x, u8 y)
 
     idx = x + gMap->rowOffset[y];
 
-    if (gMap->unk0012[idx] == 0)
+    if (gMap->unit[idx] == 0)
         return 0;
 
-    unit = &gUnknown_08499594[gMap->unk0012[idx]];
+    unit = &gUnknown_08499594[gMap->unit[idx]];
     army = ((unit - gUnknown_08499594) >> 6) + 1;
 
     if (sub_0802706C(unit->unk00, gUnknown_030033EC, army))

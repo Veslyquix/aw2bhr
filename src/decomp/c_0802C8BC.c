@@ -18,7 +18,7 @@ bool8 sub_0802C8BC(void)
 
     off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
 
-    if (gMap->unk0012[off] == 0)
+    if (gMap->unit[off] == 0)
         return FALSE;
 
     return TRUE;

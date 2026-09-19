@@ -77,7 +77,7 @@ u8 sub_0805BA34(int x, int y, u16 *out)
 
     idx = gMap->rowOffset[y] + x;
 
-    if (gMap->unk0012[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return 0;
 
     tbl = (struct Unk085D5ABCUnk14 *)gUnknown_085D5ABC[23].unk14;
@@ -120,7 +120,7 @@ void sub_0805BAFC(int x, int y, int t, u16 *out)
 
     idx = gMap->rowOffset[y] + x;
 
-    if (gMap->unk0012[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return;
 
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
@@ -140,7 +140,7 @@ u8 sub_0805BB8C(int x, int y)
     int n;
 
     if (gMap
-            ->unk0012[gMap->rowOffset[y] + x]
+            ->unit[gMap->rowOffset[y] + x]
         != 0)
         return 0;
 
@@ -171,7 +171,7 @@ int sub_0805BBF8(int x, int y)
 
     idx = gMap->rowOffset[y] + x;
 
-    if (gMap->unk0012[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return 0;
 
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
