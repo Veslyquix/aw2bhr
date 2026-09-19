@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -30,16 +31,7 @@
  * `const` (see include/unknown-globals.h).
  */
 
-struct Unk3F44Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 plane[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3F44Map *)gUnknown_08499590)
+#define MAP gMap
 /* Each 0x0848_88xx symbol is TWO 0x10-byte rows (see include/unknown-globals.h).
  * Row 1 must be reached through a COMPONENT_REF, not as `base[k + 0x10]` and
  * not as `(base + 0x10)[k]`: the first hoists `k + 0x10`, the second folds the
@@ -86,12 +78,12 @@ int sub_0800CB30(int a1, int a2)
     {
         for (x = 0; x < MAP->width; x++)
         {
-            c = MAP->cell[MAP->rowOffset[y] + x];
+            c = MAP->terrain[MAP->rowOffset[y] + x];
             switch (c & 0xE0)
             {
             case 0x20:
                 c = (c & 0x1F) | (gUnknown_084888A0[result + a1 * 0x10] << 4);
-                MAP->cell[MAP->rowOffset[y] + x] = c;
+                MAP->terrain[MAP->rowOffset[y] + x] = c;
                 switch (c & 0x1F)
                 {
                 case 8:
@@ -114,12 +106,12 @@ int sub_0800CB30(int a1, int a2)
                     break;
                 }
                 if (v >= 0)
-                    MAP->plane[MAP->rowOffset[y] + x] = v;
+                    MAP->tile[MAP->rowOffset[y] + x] = v;
                 break;
 
             case 0x40:
                 c = (c & 0x1F) | (gUnknown_084888C0[result + a1 * 0x10] << 4);
-                MAP->cell[MAP->rowOffset[y] + x] = c;
+                MAP->terrain[MAP->rowOffset[y] + x] = c;
                 switch (c & 0x1F)
                 {
                 case 8:
@@ -142,12 +134,12 @@ int sub_0800CB30(int a1, int a2)
                     break;
                 }
                 if (v >= 0)
-                    MAP->plane[MAP->rowOffset[y] + x] = v;
+                    MAP->tile[MAP->rowOffset[y] + x] = v;
                 break;
 
             case 0x60:
                 c = (c & 0x1F) | (gUnknown_084888E0[result + a1 * 0x10] << 4);
-                MAP->cell[MAP->rowOffset[y] + x] = c;
+                MAP->terrain[MAP->rowOffset[y] + x] = c;
                 switch (c & 0x1F)
                 {
                 case 8:
@@ -170,12 +162,12 @@ int sub_0800CB30(int a1, int a2)
                     break;
                 }
                 if (v >= 0)
-                    MAP->plane[MAP->rowOffset[y] + x] = v;
+                    MAP->tile[MAP->rowOffset[y] + x] = v;
                 break;
 
             case 0x80:
                 c = (c & 0x1F) | (gUnknown_08488900[result + a1 * 0x10] << 4);
-                MAP->cell[MAP->rowOffset[y] + x] = c;
+                MAP->terrain[MAP->rowOffset[y] + x] = c;
                 switch (c & 0x1F)
                 {
                 case 8:
@@ -198,7 +190,7 @@ int sub_0800CB30(int a1, int a2)
                     break;
                 }
                 if (v >= 0)
-                    MAP->plane[MAP->rowOffset[y] + x] = v;
+                    MAP->tile[MAP->rowOffset[y] + x] = v;
                 break;
 
             }

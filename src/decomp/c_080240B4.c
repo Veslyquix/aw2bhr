@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -20,13 +21,6 @@
  * the scan, and as a plain inline pool word for the final read. Both come out
  * of the one honest name; see include/unknown-globals.h. */
 
-struct Unk240B4Map
-{
-    /* 0x0000 */ u8 filler_0000[0x0A22];
-    /* 0x0A22 */ u16 tile[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
 /* Near-twin of sub_080240B4: same scan of the 0xFFFF-terminated
  * gUnknown_08499B0C list against the map's +0x0A22 tile halfword, same
  * `i / 5 * 5`, same `(s16)n` return. Three differences -- it does not write
@@ -46,32 +40,24 @@ struct Unk240B4Map
  * instead (probed) preserves the grouping too but schedules the shift up above
  * the map address computation, which is a different miss. */
 
-struct Unk2419CMap
-{
-    /* 0x0000 */ u8 filler_0000[0x0A22];
-    /* 0x0A22 */ u16 tile[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 s16 sub_080240B4(s16 a1, s16 a2, u8 a3)
 {
     int i;
     int n;
 
-    gUnknown_030033F8 = ((struct Unk240B4Map *)gUnknown_08499590)->tile[
-        ((struct Unk240B4Map *)gUnknown_08499590)->rowOffset[a2] + a1];
+    gUnknown_030033F8 = gMap->tile[
+        gMap->rowOffset[a2] + a1];
 
     for (i = 0; gUnknown_08499B0C[i] != 0xffff; i++)
     {
-        if (gUnknown_08499B0C[i] == ((struct Unk240B4Map *)gUnknown_08499590)->tile[
-                ((struct Unk240B4Map *)gUnknown_08499590)->rowOffset[a2] + a1])
+        if (gUnknown_08499B0C[i] == gMap->tile[
+                gMap->rowOffset[a2] + a1])
             break;
     }
 
     n = i / 5 * 5;
-    ((struct Unk240B4Map *)gUnknown_08499590)->tile[
-        ((struct Unk240B4Map *)gUnknown_08499590)->rowOffset[a2] + a1] =
+    gMap->tile[
+        gMap->rowOffset[a2] + a1] =
             gUnknown_08499B0C[n + (a3 >> 5)];
     return n;
 }
@@ -83,15 +69,15 @@ s16 sub_0802419C(s16 a1, s16 a2, u8 a3)
 
     for (i = 0; gUnknown_08499B0C[i] != 0xffff; i++)
     {
-        if (gUnknown_08499B0C[i] == ((struct Unk2419CMap *)gUnknown_08499590)->tile[
-                ((struct Unk2419CMap *)gUnknown_08499590)->rowOffset[a2] + a1])
+        if (gUnknown_08499B0C[i] == gMap->tile[
+                gMap->rowOffset[a2] + a1])
             break;
     }
 
     n = i / 5 * 5;
     if (n <= 4)
-        ((struct Unk2419CMap *)gUnknown_08499590)->tile[
-            ((struct Unk2419CMap *)gUnknown_08499590)->rowOffset[a2] + a1] =
+        gMap->tile[
+            gMap->rowOffset[a2] + a1] =
                 gUnknown_08499B0C[n + (u8)((a3 >> 5) + 0xa)];
     return n;
 }

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -22,16 +23,7 @@
  *     is the mask hardware.h already documents as carrying 0x200 (L) and
  *     0x100 (R), which is exactly the 0x300 tested here. */
 
-struct Unk3F44Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x10 - 0x04];
-    /* 0x0010 */ u16 unk10;
-    /* 0x0012 */ u8 filler_0012[0x417A - 0x12];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3F44Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_08003B8C(void)
 {

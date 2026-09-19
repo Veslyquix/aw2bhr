@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -17,12 +18,7 @@
  * is left alone per the shared-type rule. sub_0801F838, which fills the same
  * table, stores a u8 -- the two are consistent, the plane just carries a
  * negative "unreached" sentinel that only this reader looks at. */
-struct Unk20020Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-};
-#define MAP ((struct Unk20020Map *)gUnknown_08499590)
+#define MAP gMap
 #define ROW(n) ((s8 *)gUnknown_03003340[n])
 
 void sub_08020020(void)

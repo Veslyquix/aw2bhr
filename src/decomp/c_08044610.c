@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -76,17 +77,10 @@ struct Unk08044610Proc
     /* 0x66 */ u8 filler_66[0x02];
     /* 0x68 */ s16 unk68;
 };
-struct Unk08044610Map
-{
-    /* 0x0000 */ u8 filler_0000[0x234A];
-    /* 0x234A */ u8 unk234A[0x1E30];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_08044610(struct Unk08044610Proc *proc)
 {
     struct Unk08499594 *unit;
-    struct Unk08044610Map *m;
+    struct Map *m;
     int idx;
     u8 x;
     u8 y;
@@ -111,7 +105,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
                    .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1]
                    .unk04(unit) != 0)
         {
-            m = (struct Unk08044610Map *)gUnknown_08499590;
+            m = gMap;
             idx = m->rowOffset[unit->unk03] + unit->unk02;
 
             if (m->unk234A[idx] == 0 || (unit->unk01 & 8) != 0)

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -27,15 +28,6 @@
  * `(gUnknown_030033EC << 5) | 6` is an `orrs`, not an add: the low bits of the
  * shifted army number are known zero but the ROM still spells the combine as
  * a bitwise or. */
-struct Unk45490Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x051A - 0x0004];
-    /* 0x051A */ u8 plane51A[0x1432 - 0x051A];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
 struct Unk45490Proc
 {
     /* 00 */ PROC_HEADER;
@@ -54,14 +46,14 @@ void sub_08045490(struct Unk45490Proc *proc)
         return;
     }
 
-    while (proc->unk30 < ((struct Unk45490Map *)gUnknown_08499590)->height)
+    while (proc->unk30 < gMap->height)
     {
-        while (proc->unk2c < ((struct Unk45490Map *)gUnknown_08499590)->width)
+        while (proc->unk2c < gMap->width)
         {
-            idx = ((struct Unk45490Map *)gUnknown_08499590)->rowOffset[proc->unk30] + proc->unk2c;
+            idx = gMap->rowOffset[proc->unk30] + proc->unk2c;
 
-            if (((struct Unk45490Map *)gUnknown_08499590)->terrain[idx] == ((gUnknown_030033EC << 5) | 6)
-             && ((struct Unk45490Map *)gUnknown_08499590)->plane51A[idx] == 0)
+            if (gMap->terrain[idx] == ((gUnknown_030033EC << 5) | 6)
+             && gMap->unk051A[idx] == 0)
             {
                 sub_08029088(proc->unk2c, proc->unk30);
                 return;

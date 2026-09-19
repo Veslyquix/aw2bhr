@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -37,22 +38,13 @@
  * both; no c_local workaround is needed.
  */
 
-struct Unk3F44Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 plane[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3F44Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_08004724(void)
 {
     u16 tiles[4];
     const u8 *p;
-    struct Unk3F44Map *m;
+    struct Map *m;
     int x;
     int y;
     int c;
@@ -65,8 +57,8 @@ void sub_08004724(void)
         for (x = 0; x < MAP->width; x++)
         {
             m = MAP;
-            m->plane[MAP->rowOffset[y] + x] = 0x2A;
-            m->cell[MAP->rowOffset[y] + x] = c;
+            m->tile[MAP->rowOffset[y] + x] = 0x2A;
+            m->terrain[MAP->rowOffset[y] + x] = c;
         }
 
     for (y = 0; y < MAP->height; y++)

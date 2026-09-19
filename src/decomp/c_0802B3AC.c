@@ -78,7 +78,7 @@ void sub_0802B3AC(s16 a, s16 b, s16 c)
 
     if (sub_0803DE94(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02) != NULL
         || gUnknown_020288B4[idx =
-               ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030033E4.unk02]
+               gMap->rowOffset[gUnknown_030033E4.unk02]
                + gUnknown_030033E4.unk00] != 0)
     {
         sub_080251D8(gUnknown_03003F38);
@@ -89,7 +89,7 @@ void sub_0802B3AC(s16 a, s16 b, s16 c)
     }
 
     sub_080251BC(gUnknown_03003F38,
-                 ((struct Map *)gUnknown_08499590)->unk0012[idx],
+                 gMap->unk0012[idx],
                  &gUnknown_03003100.pos);
     x = (u16)((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[c * 3] + a + 0x1b;
     sub_08037200(x, b - 0x14 - (s8)d,

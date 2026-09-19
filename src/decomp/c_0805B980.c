@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,15 +29,6 @@ struct Unk5B980Cell
     /* 00 */ u8 x;
     /* 01 */ u8 y;
     /* 02 */ s16 v;
-};
-struct Unk41EA8Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0e];
-    /* 0x0012 */ u8 unit[0x1420];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
 };
 /* The blob struct Unk085D5ABC's unk14 points at; only the +0x1a table of
  * per-terrain-code permission bytes is proved here. */
@@ -91,14 +83,14 @@ u8 sub_0805BA34(int x, int y, u16 *out)
     int idx;
     int best;
 
-    idx = ((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x;
+    idx = gMap->rowOffset[y] + x;
 
-    if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
+    if (gMap->unk0012[idx] != 0)
         return 0;
 
     tbl = (struct Unk085D5ABCUnk14 *)gUnknown_085D5ABC[23].unk14;
 
-    if (tbl->terrainOk[((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx]
+    if (tbl->terrainOk[gMap->terrain[idx]
                        & 0x1f] == 0)
         return 0;
 
@@ -129,19 +121,19 @@ void sub_0805BAFC(int x, int y, int t, u16 *out)
     if (y < 0)
         return;
 
-    if (x >= ((struct Unk41EA8Map *)gUnknown_08499590)->width)
+    if (x >= gMap->width)
         return;
-    if (y >= ((struct Unk41EA8Map *)gUnknown_08499590)->height)
+    if (y >= gMap->height)
         return;
 
-    idx = ((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x;
+    idx = gMap->rowOffset[y] + x;
 
-    if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
+    if (gMap->unk0012[idx] != 0)
         return;
 
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
-    c = (((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx] & 0x1f)
+    c = (gMap->terrain[idx] & 0x1f)
         + gUnknown_085D5ABC[t].unk19 * 32;
 
     if (costs[c] == -1)
@@ -155,8 +147,8 @@ u8 sub_0805BB8C(int x, int y)
 {
     int n;
 
-    if (((struct Unk41EA8Map *)gUnknown_08499590)
-            ->unit[((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x]
+    if (gMap
+            ->unk0012[gMap->rowOffset[y] + x]
         != 0)
         return 0;
 
@@ -180,19 +172,19 @@ int sub_0805BBF8(int x, int y)
     if (y < 0)
         return 0;
 
-    if (x >= ((struct Unk41EA8Map *)gUnknown_08499590)->width)
+    if (x >= gMap->width)
         return 0;
-    if (y >= ((struct Unk41EA8Map *)gUnknown_08499590)->height)
+    if (y >= gMap->height)
         return 0;
 
-    idx = ((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x;
+    idx = gMap->rowOffset[y] + x;
 
-    if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
+    if (gMap->unk0012[idx] != 0)
         return 0;
 
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
-    c = (((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx] & 0x1f)
+    c = (gMap->terrain[idx] & 0x1f)
         + gUnknown_085D5ABC[1].unk19 * 32;
 
     if (costs[c] == -1)

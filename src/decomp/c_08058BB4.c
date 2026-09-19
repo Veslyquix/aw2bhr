@@ -122,7 +122,7 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
     if (y < 0)
         return;
 
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
 
     if (x >= map->width)
         return;
@@ -141,8 +141,8 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
      || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
         score = gUnknown_085D583C[map->terrain[idx] & 0x1f].unk10 * 10;
 
-    if ((((struct Map *)gUnknown_08499590)->unk3262[
-            ((struct Map *)gUnknown_08499590)->rowOffset[y] + x] & mask) == 0)
+    if ((gMap->unk3262[
+            gMap->rowOffset[y] + x] & mask) == 0)
         score += 100;
 
     if (score < *pBest)
@@ -171,7 +171,7 @@ int sub_08058DEC(int x, int y, u16 * out)
     int sentinel;
 
     tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
 
     if (tbl->unk1a[map->terrain[map->rowOffset[y] + x] & 0x1f] == 0)
         return -1;
@@ -207,7 +207,7 @@ void sub_08058E88(int x, int y, u16 * out)
     if (y < 0)
         return;
 
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
 
     if (x >= map->width)
         return;

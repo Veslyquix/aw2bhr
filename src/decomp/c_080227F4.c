@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -17,18 +18,11 @@
  * arm into it -- and the 0x81b2 / 0x81b3 constants are reached by incrementing
  * the 0x81b1 pool word rather than pooled themselves, which is agbcc's own
  * constant CSE and not a different expression. */
-struct MapScreen227F4
-{
-    /* 0x00 */ u8 filler_00[0x0c];
-    /* 0x0c */ u16 unk0c;
-    /* 0x0e */ u16 unk0e;
-};
-
 void sub_080227F4(u16 x, u16 y)
 {
     u16 *p = gUnknown_08499578
-           + ((x - ((struct MapScreen227F4 *)gUnknown_08499590)->unk0c) & 0xF) * 2
-           + ((y - ((struct MapScreen227F4 *)gUnknown_08499590)->unk0e) & 0xF) * 64;
+           + ((x - gMap->camX) & 0xF) * 2
+           + ((y - gMap->camY) & 0xF) * 64;
 
     if ((s8)gUnknown_03003340[y][x] < 0)
     {

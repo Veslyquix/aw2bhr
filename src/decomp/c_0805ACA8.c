@@ -74,7 +74,7 @@ void sub_0805ACFC(int x, int y, u16 * out)
     if (y < 0)
         return;
 
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
 
     if (x >= map->width)
         return;

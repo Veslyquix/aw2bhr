@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -13,23 +14,7 @@
  * Declared LOCALLY and cast onto the `u8 *` symbol, per the rule in
  * include/unknown-globals.h -- only a COMPONENT_REF keeps agbcc from folding
  * the plane constant into a load displacement.  Wave 56, W56-H. */
-struct Unk080258CCMap
-{
-    /* 0x0000 */ u16 unk0000;
-    /* 0x0002 */ u16 unk0002;
-    /* 0x0004 */ s16 unk0004;
-    /* 0x0006 */ s16 unk0006;
-    /* 0x0008 */ u16 unk0008;
-    /* 0x000a */ u16 unk000a;
-    /* 0x000c */ u16 unk000c;
-    /* 0x000e */ u16 unk000e;
-    /* 0x0010 */ u8 filler_0010[0x02];
-    /* 0x0012 */ u8 unk0012[0x508];
-    /* 0x051a */ u8 unk051a[0x1928];
-    /* 0x1e42 */ u8 unk1e42[0x2338];
-    /* 0x417a */ u16 unk417a[0x40];
-};
-#define MAP ((struct Unk080258CCMap *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_080258CC(void)
 {
@@ -38,19 +23,19 @@ void sub_080258CC(void)
     int id;
     u8 c;
 
-    MAP->unk000c = MAP->unk0004 / 16;
-    MAP->unk000e = MAP->unk0006 / 16;
-    MAP->unk0008 = MAP->unk0004;
-    MAP->unk000a = MAP->unk0006;
+    MAP->camX = MAP->unk04 / 16;
+    MAP->camY = MAP->unk06 / 16;
+    MAP->unk08 = MAP->unk04;
+    MAP->unk0a = MAP->unk06;
     sub_08023860();
     sub_080213AC();
 
-    for (i = 0; i < MAP->unk0002; i++)
+    for (i = 0; i < MAP->height; i++)
     {
-        for (j = 0; j < MAP->unk0000; j++)
+        for (j = 0; j < MAP->width; j++)
         {
-            MAP->unk0012[MAP->unk417a[i] + j] = 0;
-            MAP->unk051a[MAP->unk417a[i] + j] = 0;
+            MAP->unk0012[MAP->rowOffset[i] + j] = 0;
+            MAP->unk051A[MAP->rowOffset[i] + j] = 0;
         }
     }
 
@@ -60,24 +45,24 @@ void sub_080258CC(void)
             continue;
         if ((gUnknown_08499594[id].unk01 & 6) == 2)
             continue;
-        c = MAP->unk051a[MAP->unk417a[gUnknown_08499594[id].unk03]
+        c = MAP->unk051A[MAP->rowOffset[gUnknown_08499594[id].unk03]
                          + gUnknown_08499594[id].unk02];
         if (c != 0)
         {
             if ((gUnknown_08499594[c].unk01 & 4) == 0)
                 continue;
         }
-        MAP->unk051a[MAP->unk417a[gUnknown_08499594[id].unk03]
+        MAP->unk051A[MAP->rowOffset[gUnknown_08499594[id].unk03]
                      + gUnknown_08499594[id].unk02] = id;
         if (gUnknown_08499594[id].unk01 & 2)
             continue;
         if (gUnknown_08499598[gUnknown_030033EC].unk1b != 2)
         {
-            if (MAP->unk1e42[MAP->unk417a[gUnknown_08499594[id].unk03]
+            if (MAP->unk1E42[MAP->rowOffset[gUnknown_08499594[id].unk03]
                              + gUnknown_08499594[id].unk02] == 0)
                 continue;
         }
-        MAP->unk0012[MAP->unk417a[gUnknown_08499594[id].unk03]
+        MAP->unk0012[MAP->rowOffset[gUnknown_08499594[id].unk03]
                      + gUnknown_08499594[id].unk02] = id;
     }
 
@@ -91,11 +76,11 @@ void sub_080258CC(void)
             continue;
         if (sub_0802571C(id))
         {
-            if (MAP->unk1e42[MAP->unk417a[gUnknown_08499594[id].unk03]
+            if (MAP->unk1E42[MAP->rowOffset[gUnknown_08499594[id].unk03]
                              + gUnknown_08499594[id].unk02] != 0)
                 continue;
         }
-        MAP->unk0012[MAP->unk417a[gUnknown_08499594[id].unk03]
+        MAP->unk0012[MAP->rowOffset[gUnknown_08499594[id].unk03]
                      + gUnknown_08499594[id].unk02] = 0;
     }
 

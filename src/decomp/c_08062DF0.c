@@ -50,7 +50,7 @@ struct Unk8062DF0Bits
                u8 unk09_3 : 3;
                u8 unk09_6 : 2;
 };
-#define MAP ((struct Map *)gUnknown_08499590)
+#define MAP gMap
 #define BITS(p) ((struct Unk8062DF0Bits *)(p))
 
 void sub_08062DF0(void)

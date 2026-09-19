@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -117,16 +118,7 @@
  * sub_0800B61C: a 3-case switch already balances.)
  */
 
-struct MapScreen
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 4];
-    /* 0x0A22 */ u16 cells[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct MapScreen *)gUnknown_08499590)
+#define MAP gMap
 /* Declared HERE and deliberately not in include/unknown-functions.h. The
  * signature is copied verbatim from the verified draft
  * work/sub_0800F77C/sub_0800F77C.c (W56-J matched it earlier in wave 56); its
@@ -145,11 +137,11 @@ int sub_0800FD44(int x, int y, int a3)
     n = 0;
 
     if (a3 == 0
-     && (u16)(MAP->cells[MAP->rowOffset[y] + x] - 0x162) <= 1)
+     && (u16)(MAP->tile[MAP->rowOffset[y] + x] - 0x162) <= 1)
         return sub_08010604(x, y);
 
     if (sub_0800F8D4(x, y))
-        return MAP->cells[MAP->rowOffset[y] + x];
+        return MAP->tile[MAP->rowOffset[y] + x];
 
     for (i = 0; i < 4; i++)
     {

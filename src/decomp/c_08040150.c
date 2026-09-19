@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -38,12 +39,6 @@ struct Unk40150Proc
     /* 34 */ u8 filler_34[0x50 - 0x34];
     /* 50 */ struct Unk0801C210 *unk50;
 };
-struct Unk40150Map
-{
-    /* 00 */ u8 filler_00[0x04];
-    /* 04 */ s16 unk04;
-    /* 06 */ s16 unk06;
-};
 
 void sub_08040150(struct Unk40150Proc *proc)
 {
@@ -52,8 +47,8 @@ void sub_08040150(struct Unk40150Proc *proc)
 
     if (!sub_0801C254(proc->unk50,
                       proc->unk2c * 16
-                          - (dx = ((struct Unk40150Map *)gUnknown_08499590)->unk04 - 8),
+                          - (dx = gMap->unk04 - 8),
                       proc->unk30 * 16
-                          - (dy = ((struct Unk40150Map *)gUnknown_08499590)->unk06 - 0x10)))
+                          - (dy = gMap->unk06 - 0x10)))
         Proc_Break(proc);
 }

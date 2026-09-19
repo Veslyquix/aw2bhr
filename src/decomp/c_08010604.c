@@ -25,8 +25,8 @@ int sub_08010604(int x, int y)
 {
     u16 t;
 
-    t = ((struct Map *)gUnknown_08499590)->tile[
-            ((struct Map *)gUnknown_08499590)->rowOffset[y] + x];
+    t = gMap->tile[
+            gMap->rowOffset[y] + x];
     if (t == 0x142 || t == 0x162)
         return 0x162;
     if (t == 0x143 || t == 0x163)

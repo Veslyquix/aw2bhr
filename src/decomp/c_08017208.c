@@ -137,30 +137,30 @@ void sub_08017208(void)
     gUnknown_03002F08 = p->unk0b98;
     gUnknown_03002F20 = p->unk0ba0;
     gUnknown_03001FF0 = p->unk0ba4;
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
     map->width = p->unk0bae;
     map->height = p->unk0bb0;
     map->unk04 = a = p->unk0bb2;
     map->unk06 = b = p->unk0bb4;
-    map->unk0c = map->unk04 / 16;
-    map->unk0e = map->unk06 / 16;
+    map->camX = map->unk04 / 16;
+    map->camY = map->unk06 / 16;
     map->unk08 = a;
     map->unk0a = b;
     map->unk10 = p->unk0bb6;
     if (gUnknown_03003FC0.unk02 < 0xb4 || gUnknown_03003FC0.unk02 > 0xbf)
     {
-        ((struct Map *)gUnknown_08499590)->unk4233 = sub_0802490C(gUnknown_03003FC0.unk02);
-        sub_0803CC84(((struct Map *)gUnknown_08499590)->unk421a,
+        gMap->unk4233 = sub_0802490C(gUnknown_03003FC0.unk02);
+        sub_0803CC84(gMap->unk421a,
                      sub_08024944(gUnknown_03003FC0.unk02));
         sub_080247A4(gUnknown_03003FC0.unk02);
         sub_080215FC();
-        for (y = 0; y < ((struct Map *)gUnknown_08499590)->width; y++)
+        for (y = 0; y < gMap->width; y++)
         {
-            for (x = 0; x < ((struct Map *)gUnknown_08499590)->height; x++)
+            for (x = 0; x < gMap->height; x++)
             {
-                idx = ((struct Map *)gUnknown_08499590)->rowOffset[x] + y;
+                idx = gMap->rowOffset[x] + y;
                 off = idx * 2;
-                ((struct Map *)gUnknown_08499590)->tile[idx] =
+                gMap->tile[idx] =
                     *(u16 *)((u8 *)gUnknown_03003F68 + off + 2);
             }
         }
@@ -170,8 +170,8 @@ void sub_08017208(void)
     {
         for (i = 0; p->unk0bb8[i].unk02 != 0xffff; i++)
         {
-            ((struct Map *)gUnknown_08499590)->tile[
-                ((struct Map *)gUnknown_08499590)->rowOffset[p->unk0bb8[i].unk01]
+            gMap->tile[
+                gMap->rowOffset[p->unk0bb8[i].unk01]
                 + p->unk0bb8[i].unk00] = p->unk0bb8[i].unk02;
         }
     }

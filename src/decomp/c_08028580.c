@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -79,13 +80,6 @@
  * source, and so is the `str r2,[sp,#4]` holding &p->unk68 across the loop.
  */
 
-struct Unk28580Map
-{
-    /* 0x0000 */ u8 filler_0000[0x12];
-    /* 0x0012 */ u8 owner[0x1432 - 0x12];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
 struct Unk28580
 {
     /* 0x0000 */ u8 filler_0000[0x64];
@@ -105,14 +99,14 @@ void sub_08028580(struct Unk28580 *p)
 
     if (p->unk66 == 2)
     {
-        struct Unk28580Map *map;
+        struct Map *map;
         int idx;
 
-        map = (struct Unk28580Map *)gUnknown_08499590;
+        map = gMap;
         idx = map->rowOffset[gUnknown_08499598[p->unk64].unk2e & 0x7f]
             + (gUnknown_08499598[p->unk64].unk2d & 0x7f);
-        team = map->plane[idx] >> 5;
-        map->plane[idx] = 8 | gUnknown_084995F4[p->unk64];
+        team = map->terrain[idx] >> 5;
+        map->terrain[idx] = 8 | gUnknown_084995F4[p->unk64];
         sub_080240B4(gUnknown_08499598[p->unk64].unk2d & 0x7f,
                      gUnknown_08499598[p->unk64].unk2e & 0x7f,
                      gUnknown_084995F4[p->unk64]);
@@ -127,8 +121,8 @@ void sub_08028580(struct Unk28580 *p)
     {
         if ((gUnknown_03003150[i].flags & 0xe0) == gUnknown_084995F4[p->unk64])
         {
-            v = ((struct Unk28580Map *)gUnknown_08499590)->owner[
-                    ((struct Unk28580Map *)gUnknown_08499590)->rowOffset[
+            v = gMap->unk0012[
+                    gMap->rowOffset[
                         gUnknown_03003150[i].y] + gUnknown_03003150[i].x];
 
             if (v != 0
@@ -140,8 +134,8 @@ void sub_08028580(struct Unk28580 *p)
 
             if ((gUnknown_03003150[i].flags & 0x1f) == 8)
             {
-                ((struct Unk28580Map *)gUnknown_08499590)->plane[
-                    ((struct Unk28580Map *)gUnknown_08499590)->rowOffset[
+                gMap->terrain[
+                    gMap->rowOffset[
                         gUnknown_03003150[i].y] + gUnknown_03003150[i].x]
                             = 6 | gUnknown_084995F4[team];
                 sub_0802419C(gUnknown_03003150[i].x, gUnknown_03003150[i].y, 0);
@@ -150,8 +144,8 @@ void sub_08028580(struct Unk28580 *p)
             }
             else
             {
-                ((struct Unk28580Map *)gUnknown_08499590)->plane[
-                    ((struct Unk28580Map *)gUnknown_08499590)->rowOffset[
+                gMap->terrain[
+                    gMap->rowOffset[
                         gUnknown_03003150[i].y] + gUnknown_03003150[i].x]
                             = (gUnknown_03003150[i].flags & 0x1f)
                             | gUnknown_084995F4[team];

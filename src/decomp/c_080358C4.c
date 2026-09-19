@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -34,14 +35,6 @@
  * interchangeable). Naming the global honestly reproduces the ROM's
  * three-level `ldr rN,=<word>; ldr r0,[rN]; ldr r1,[r0]`, and the reload after
  * each two-arm clamp is the merge-point reload, not a second variable. */
-struct Unk358C4Map
-{
-    /* 0x00 */ u16 unk00;
-    /* 0x02 */ u16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-};
-
 void sub_080358C4(s16 a1, s16 a2)
 {
     u16 nx;
@@ -52,13 +45,13 @@ void sub_080358C4(s16 a1, s16 a2)
     nx = 10000;
     ny = 10000;
 
-    dx = a1 - ((struct Unk358C4Map *)gUnknown_08499590)->unk04;
+    dx = a1 - gMap->unk04;
     if (dx <= 0x1f)
         nx = a1 - 0x20;
     if (dx > 0xc0)
         nx = a1 - 0xc0;
 
-    dy = a2 - ((struct Unk358C4Map *)gUnknown_08499590)->unk06;
+    dy = a2 - gMap->unk06;
     if (dy <= 0x1f)
         ny = a2 - 0x20;
     if (dy > 0x70)
@@ -68,22 +61,22 @@ void sub_080358C4(s16 a1, s16 a2)
     {
         if ((s16)ny == (s16)nx)
             return;
-        nx = ((struct Unk358C4Map *)gUnknown_08499590)->unk04;
+        nx = gMap->unk04;
     }
     else if ((s16)nx < 0)
         nx = 0;
-    else if ((s16)nx > (((struct Unk358C4Map *)gUnknown_08499590)->unk00 - 0xf) * 16)
-        nx = (((struct Unk358C4Map *)gUnknown_08499590)->unk00 - 0xf) * 16;
+    else if ((s16)nx > (gMap->width - 0xf) * 16)
+        nx = (gMap->width - 0xf) * 16;
 
     if ((s16)ny == 10000)
-        ny = ((struct Unk358C4Map *)gUnknown_08499590)->unk06;
+        ny = gMap->unk06;
     else if ((s16)ny < 0)
         ny = 0;
-    else if ((s16)ny > (((struct Unk358C4Map *)gUnknown_08499590)->unk02 - 0xa) * 16)
-        ny = (((struct Unk358C4Map *)gUnknown_08499590)->unk02 - 0xa) * 16;
+    else if ((s16)ny > (gMap->height - 0xa) * 16)
+        ny = (gMap->height - 0xa) * 16;
 
-    ((struct Unk358C4Map *)gUnknown_08499590)->unk04 = nx;
-    ((struct Unk358C4Map *)gUnknown_08499590)->unk06 = ny;
+    gMap->unk04 = nx;
+    gMap->unk06 = ny;
 
     sub_08023860();
 }

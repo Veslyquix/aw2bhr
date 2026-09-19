@@ -36,14 +36,14 @@ void sub_0802DCB4(void)
 
         if (gpKeySt->held & 0x100)
         {
-            if (((struct Map *)gUnknown_08499590)->unk0012[
-                    ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030033E4.unk02]
+            if (gMap->unk0012[
+                    gMap->rowOffset[gUnknown_030033E4.unk02]
                     + gUnknown_030033E4.unk00] != 0)
             {
                 sub_0801B780(0);
                 sub_0803A8F0(&gUnknown_08499594[
-                    ((struct Map *)gUnknown_08499590)->unk0012[
-                        ((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030033E4.unk02]
+                    gMap->unk0012[
+                        gMap->rowOffset[gUnknown_030033E4.unk02]
                         + gUnknown_030033E4.unk00]]);
                 return;
             }

@@ -20,6 +20,16 @@ ENTRY(Init)
 gNumMusicPlayers = 11;
 gMaxLines = 0;
 
+/* gMap: a second, typed name for the same 4-byte data slot as
+ * gUnknown_08499590 (include/unknown-globals.h) -- a plain `.set`/`.thumb_set`
+ * alias cannot reach across translation units at assembly time (the target
+ * symbol is still undefined then), so the alias has to be a linker symbol
+ * instead. gUnknown_08499590 stays declared `u8 *`; gMap is declared
+ * `struct Map *` in include/map.h for new code that wants field access
+ * without casting -- see the comment there for why the canonical symbol's
+ * type itself can't just change. */
+gMap = gUnknown_08499590;
+
 SECTIONS
 {
 	. = 0x02000000;

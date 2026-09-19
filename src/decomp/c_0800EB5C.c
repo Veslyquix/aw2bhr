@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -23,16 +24,9 @@
  * (0x417A before 0x1432) falls out of source order: the row table is read first.
  */
 
-struct MapEB5C
-{
-    u8 filler0[0x1432];
-    u8 terrain[0x2D48];
-    u16 rowOffset[1];
-};
-
 void sub_0800EB5C(int x, int y)
 {
-    struct MapEB5C *map = (struct MapEB5C *)gUnknown_08499590;
+    struct Map *map = gMap;
 
     if (map->terrain[map->rowOffset[y] + x] == 4) {
         sub_0800EBFC(x, y, 0x25);

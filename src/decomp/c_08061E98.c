@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -68,15 +69,6 @@ struct Unk61E98Unit
  * The two clears are ONE chained assignment: the ROM loads both pool addresses
  * before materialising the 0, which is the operand-class grouping of a single
  * statement. Written as two statements agbcc interleaves the ldr/strb pairs. */
-struct Unk61F34Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x1432 - 0x0004];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_08061E98(void)
 {
     void (*fns[3])() = {sub_08061DCC, sub_08061E54, sub_08061E80};
@@ -106,14 +98,14 @@ void sub_08061F34(void)
 
     gUnknown_030046B8 = gUnknown_030045C0 = 0;
 
-    for (y = 0; y < ((struct Unk61F34Map *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk61F34Map *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if (sub_0802700C(gUnknown_030033EC, x, y) == 0)
-                gUnknown_030045C0 |= v[gUnknown_085767F2[((struct Unk61F34Map *)gUnknown_08499590)->plane[((struct Unk61F34Map *)gUnknown_08499590)->rowOffset[y] + x] & 0x1f] >> 1];
+                gUnknown_030045C0 |= v[gUnknown_085767F2[gMap->terrain[gMap->rowOffset[y] + x] & 0x1f] >> 1];
 
-            gUnknown_030046B8 |= v[gUnknown_085767F2[((struct Unk61F34Map *)gUnknown_08499590)->plane[((struct Unk61F34Map *)gUnknown_08499590)->rowOffset[y] + x] & 0x1f] >> 1];
+            gUnknown_030046B8 |= v[gUnknown_085767F2[gMap->terrain[gMap->rowOffset[y] + x] & 0x1f] >> 1];
         }
     }
 }

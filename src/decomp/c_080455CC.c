@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -17,14 +18,6 @@
  * into gUnknown_020288B4 kills the CSE of the pointer deref, which is why the
  * ROM reloads `[r5]` on every inner iteration and why the address constant
  * ends up materialised twice (r8 for the outer bound, r5 for the body). */
-struct Unk455CCMap
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x1432 - 0x0004];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
 /* The read-only twin of sub_080455CC: the same double scan of the map header
  * at gUnknown_08499590, asking whether any cell of the parallel byte plane at
  * gUnknown_020288B4 is set. With no store in the loop, LICM hoists the height
@@ -35,13 +28,6 @@ struct Unk455CCMap
  * `return TRUE` and not a `break`: with a break the array address would keep
  * three references at expand time and the in-loop `ldr` would stop being
  * invariant, and the reduction declines. */
-struct Unk45650Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x417A - 0x0004];
-    /* 0x417A */ u16 rowOffset[1];
-};
 /* The RLE COMPRESSOR, exact inverse of the matched sub_080456B8 expander: it
  * walks the whole byte plane at gUnknown_020288B4 and writes, into the caller's
  * buffer, a literal `cell | 0x80` for every non-zero cell and a plain count for
@@ -59,25 +45,19 @@ struct Unk45650Map
  * every iteration, because the `strb` through the `u8 *` parameter kills them.
  *
  * `run` is u8, read off the truncation on its own increment. */
-struct Unk45700Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-};
-
 void sub_080455CC(void)
 {
     int x;
     int y;
     int idx;
 
-    for (y = 0; y < ((struct Unk455CCMap *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk455CCMap *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
-            idx = ((struct Unk455CCMap *)gUnknown_08499590)->rowOffset[y] + x;
+            idx = gMap->rowOffset[y] + x;
 
-            if (((struct Unk455CCMap *)gUnknown_08499590)->terrain[idx] == 0x10)
+            if (gMap->terrain[idx] == 0x10)
                 gUnknown_020288B4[idx] = 0x63;
             else
                 gUnknown_020288B4[idx] = 0;
@@ -90,9 +70,9 @@ bool8 sub_08045650(void)
     int x;
     int y;
 
-    for (y = 0; y < ((struct Unk45650Map *)gUnknown_08499590)->height; y++)
-        for (x = 0; x < ((struct Unk45650Map *)gUnknown_08499590)->width; x++)
-            if (gUnknown_020288B4[((struct Unk45650Map *)gUnknown_08499590)->rowOffset[y] + x] != 0)
+    for (y = 0; y < gMap->height; y++)
+        for (x = 0; x < gMap->width; x++)
+            if (gUnknown_020288B4[gMap->rowOffset[y] + x] != 0)
                 return TRUE;
 
     return FALSE;
@@ -146,8 +126,8 @@ void sub_08045700(u8 *dst)
     run = 0;
 
     for (i = 0;
-         i < ((struct Unk45700Map *)gUnknown_08499590)->width
-           * ((struct Unk45700Map *)gUnknown_08499590)->height;
+         i < gMap->width
+           * gMap->height;
          i++)
     {
         if (src[i] != 0)

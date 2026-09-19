@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,15 +29,6 @@
  *
  * `y << 16` living in r8 across the inner loop and the `asrs #0x10` that
  * unpacks it at the call are loop-optimiser output -- y is a plain int here. */
-struct Unk212ACMap
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x1432 - 0x04];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_080212AC(u16 faction)
 {
     int i;
@@ -48,12 +40,12 @@ void sub_080212AC(u16 faction)
         for (i = 0; i <= 0x32; i++)
             sub_080211DC((u8)(gUnknown_084995FE[faction] + i), 1);
 
-        for (y = 0; y < ((struct Unk212ACMap *)gUnknown_08499590)->height; y++)
+        for (y = 0; y < gMap->height; y++)
         {
-            for (x = 0; x < ((struct Unk212ACMap *)gUnknown_08499590)->width; x++)
+            for (x = 0; x < gMap->width; x++)
             {
-                if ((((struct Unk212ACMap *)gUnknown_08499590)->plane[
-                         ((struct Unk212ACMap *)gUnknown_08499590)->rowOffset[y] + x] & 0xE0)
+                if ((gMap->terrain[
+                         gMap->rowOffset[y] + x] & 0xE0)
                     == gUnknown_084995F4[faction])
                 {
                     sub_080210C8(x, y, 0, gUnknown_08499598[faction].unk1c, 1, 0);

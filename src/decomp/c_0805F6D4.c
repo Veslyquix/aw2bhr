@@ -31,12 +31,12 @@ void sub_0805F6D4(void)
     {
         gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                           gUnknown_030040D8->unk00, 0x78, 0);
-        for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
+        for (y = 0; y < gMap->height; y++)
         {
-            for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
+            for (x = 0; x < gMap->width; x++)
             {
                 if ((s8)gUnknown_03003340[y][x] >= 0
-                    && gUnknown_020288B4[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] != 0)
+                    && gUnknown_020288B4[gMap->rowOffset[y] + x] != 0)
                 {
                     fx = x;
                     fy = y;

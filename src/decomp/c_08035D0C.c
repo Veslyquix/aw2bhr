@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,12 +29,6 @@
  * the ROM keeps the incoming pointer in r4 alone (`push {r4, lr}`), while a
  * binding local makes a second pseudo that gets copied into r5 for the second
  * member read and pushes r5 as well.  The cast at each use is free. */
-struct Unk35D0CMap
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
 struct Unk35D0CProc
 {
     /* 0x00 */ PROC_HEADER;
@@ -44,7 +39,7 @@ struct Unk35D0CProc
 
 u16 sub_08035D0C(ProcPtr proc)
 {
-    struct Unk35D0CMap *map;
+    struct Map *map;
 
     if (sub_08035C90(proc))
         return 0x2d;
@@ -52,9 +47,9 @@ u16 sub_08035D0C(ProcPtr proc)
     if (sub_08035CF4(proc))
         return 0x43;
 
-    map = (struct Unk35D0CMap *)gUnknown_08499590;
+    map = gMap;
 
-    switch (map->plane[map->rowOffset[
+    switch (map->terrain[map->rowOffset[
                 (((struct Unk35D0CProc *)proc)->unk44 + 8) / 16]
                        + (((struct Unk35D0CProc *)proc)->unk42 + 8) / 16] & 0x1f)
     {

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -37,14 +38,6 @@ struct Unk401B4Proc
  * sub_0803FECC's third argument is invisible at the call -- r1 still holds this
  * function's own second parameter -- which its declared `ProcPtr` third
  * parameter is what proves. */
-struct Unk40200Map
-{
-    /* 0x0000 */ u8 filler_0000[0x0A22];
-    /* 0x0A22 */ u16 unkA22[0x508];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_080401B4(struct Unk401B4Proc *proc)
 {
     struct Unk08499594 *ent = proc->unk4c;
@@ -58,12 +51,12 @@ void sub_08040200(struct Unk02028360 *ent, ProcPtr a2)
 {
     sub_0803FECC(ent->unk00, ent->unk01, a2);
 
-    ((struct Unk40200Map *)gUnknown_08499590)->terrain[
-        ((struct Unk40200Map *)gUnknown_08499590)->rowOffset[ent->unk01]
+    gMap->terrain[
+        gMap->rowOffset[ent->unk01]
         + ent->unk00] = 1;
 
-    ((struct Unk40200Map *)gUnknown_08499590)->unkA22[
-        ((struct Unk40200Map *)gUnknown_08499590)->rowOffset[ent->unk01]
+    gMap->tile[
+        gMap->rowOffset[ent->unk01]
         + ent->unk00] = 4;
 
     sub_08024268();

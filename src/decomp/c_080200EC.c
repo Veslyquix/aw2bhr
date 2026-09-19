@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -40,12 +41,7 @@
  * narrows all four arguments -- and has since been applied to the header.
  */
 
-struct Unk200ECMap
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-};
-#define MAP ((struct Unk200ECMap *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_080200EC(s16 cx, s16 cy, s16 r, s16 value)
 {

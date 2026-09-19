@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -55,16 +56,6 @@
  *    gUnknown_085D584C[terrain & 0x1f].unk00 * 10, compared signed.
  */
 
-struct Unk5F914Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_04[0x1432 - 4];
-    /* 0x1432 */ u8 terrain[0x3262 - 0x1432];
-    /* 0x3262 */ u8 unk3262[0x417a - 0x3262];
-    /* 0x417a */ u16 rows[1];
-};
-
 void sub_0805F914(void)
 {
     int best = 0x7fff;
@@ -78,22 +69,22 @@ void sub_0805F914(void)
     sub_08062474();
 
     if ((gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d
-         & ((struct Unk5F914Map *)gUnknown_08499590)->unk3262[
-            ((struct Unk5F914Map *)gUnknown_08499590)->rows[gUnknown_030040D8->unk03]
+         & gMap->unk3262[
+            gMap->rowOffset[gUnknown_030040D8->unk03]
             + gUnknown_030040D8->unk02]) == 0)
         return;
 
     sub_080202A4(gUnknown_030040D8);
 
-    for (y = 0; y < ((struct Unk5F914Map *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk5F914Map *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if (((s8 *)gUnknown_03003340[y])[x] < 0)
                 continue;
             if ((gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d
-                 & ((struct Unk5F914Map *)gUnknown_08499590)->unk3262[
-                    ((struct Unk5F914Map *)gUnknown_08499590)->rows[y] + x]) != 0)
+                 & gMap->unk3262[
+                    gMap->rowOffset[y] + x]) != 0)
                 continue;
             if (((s8 *)gUnknown_03003340[y])[x] > best)
                 continue;
@@ -113,17 +104,17 @@ void sub_0805F914(void)
 
     selX = -1;
 
-    for (y = 0; y < ((struct Unk5F914Map *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk5F914Map *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
             if (gUnknown_030040D8->unk00 == 0
              || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
                 v = gUnknown_085D584C[
-                        ((struct Unk5F914Map *)gUnknown_08499590)->terrain[
-                            ((struct Unk5F914Map *)gUnknown_08499590)->rows[y] + x]
+                        gMap->terrain[
+                            gMap->rowOffset[y] + x]
                         & 0x1f].unk00 * 10;
             else
                 v = 0;

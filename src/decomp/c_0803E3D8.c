@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -32,15 +33,7 @@
  * grouped case label.
  */
 
-struct Unk3E3D8Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_0004[0x1432 - 0x04];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3E3D8Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_0803E3D8(void)
 {
@@ -52,9 +45,9 @@ void sub_0803E3D8(void)
     a = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk1c;
     b = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk1e;
     sub_0803DE14();
-    for (y = 0; y < MAP->unk02; y++)
+    for (y = 0; y < MAP->height; y++)
     {
-        for (x = 0; x < MAP->unk00; x++)
+        for (x = 0; x < MAP->width; x++)
         {
             if (sub_0803DE94(x, y))
                 continue;

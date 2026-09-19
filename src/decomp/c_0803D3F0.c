@@ -47,12 +47,12 @@ void sub_0803D3F0(void)
 {
     int x, y;
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++) {
-        for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++) {
-            int idx = ((struct Map *)gUnknown_08499590)->rowOffset[y] + x;
+    for (y = 0; y < gMap->height; y++) {
+        for (x = 0; x < gMap->width; x++) {
+            int idx = gMap->rowOffset[y] + x;
 
-            ((struct Map *)gUnknown_08499590)->terrain[idx] =
-                gUnknown_0849959C[((struct Map *)gUnknown_08499590)->tile[idx]];
+            gMap->terrain[idx] =
+                gUnknown_0849959C[gMap->tile[idx]];
         }
     }
     sub_080219AC();

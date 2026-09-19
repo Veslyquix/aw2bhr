@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -15,14 +16,7 @@
  * use (`lsls #0x10; asrs #0x10`), which is why one `lsls` feeds both an `lsrs`
  * and an `asrs`. `int` counters lose all four shifts. The `adds r0, r5, 0x10000`
  * carrying `y << 16` is the loop optimiser's giv, not source. */
-struct Unk206E4Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x417A - 0x0004];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk206E4Map *)gUnknown_08499590)
+#define MAP gMap
 
 /* Linear scan of the 0x5c-stride ROM table for the entry whose unk2c[0] equals
  * the caller's word; returns its index, or the first index past the 0xbf bound

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,16 +8,7 @@
  * sub_080040C8 @ 0x080040C8, sub_0800449C @ 0x0800449C
  */
 
-struct Unk3F44Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 plane[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3F44Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_080040C8(void)
 {
@@ -32,8 +24,8 @@ void sub_080040C8(void)
     {
         for (x = 0; x < MAP->width; x++)
         {
-            MAP->plane[MAP->rowOffset[y] + x] = 0x2A;
-            MAP->cell[MAP->rowOffset[y] + x] = t;
+            MAP->tile[MAP->rowOffset[y] + x] = 0x2A;
+            MAP->terrain[MAP->rowOffset[y] + x] = t;
         }
     }
 
@@ -63,7 +55,7 @@ void sub_080040C8(void)
     {
         a = sub_08003B6C(0x1A, 4);
         b = sub_08003B6C(0x10, 4);
-        if (MAP->cell[MAP->rowOffset[b] + a] == 1)
+        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
         {
             sub_080011F4(a, b, 3);
             sub_08007F14(a, b, 0x20);
@@ -99,7 +91,7 @@ void sub_080040C8(void)
     {
         a = sub_08003B6C(0x1A, 4);
         b = sub_08003B6C(0x10, 4);
-        if (MAP->cell[MAP->rowOffset[b] + a] == 1)
+        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
         {
             sub_080011F4(a, b, 4);
             sub_08007F14(a, b, 0x87);
@@ -130,17 +122,17 @@ void sub_080040C8(void)
         for (x = n = 1; x < MAP->width - 1; x++)
         {
             if (sub_08003B6C(0xC8, 0x64) > 0x95
-             && MAP->cell[MAP->rowOffset[y] + x] == 1)
+             && MAP->terrain[MAP->rowOffset[y] + x] == 1)
             {
-                if (MAP->cell[MAP->rowOffset[y - 1] + x] == 7)
+                if (MAP->terrain[MAP->rowOffset[y - 1] + x] == 7)
                     sub_0800BA9C(x, y - 1);
-                if (MAP->cell[MAP->rowOffset[y + 1] + x] == 7)
+                if (MAP->terrain[MAP->rowOffset[y + 1] + x] == 7)
                     sub_0800BA9C(x, y + 1);
                 r = MAP->rowOffset[y] - 1;
-                if (MAP->cell[r + x] == 7)
+                if (MAP->terrain[r + x] == 7)
                     sub_0800BA9C(x - 1, y);
                 r = MAP->rowOffset[y] + 1;
-                if (MAP->cell[r + x] == 7)
+                if (MAP->terrain[r + x] == 7)
                     sub_0800BA9C(x + 1, y);
             }
         }
@@ -160,8 +152,8 @@ void sub_0800449C(void)
     {
         for (x = 0; x < MAP->width; x++)
         {
-            MAP->plane[MAP->rowOffset[y] + x] = 0x2A;
-            MAP->cell[MAP->rowOffset[y] + x] = t;
+            MAP->tile[MAP->rowOffset[y] + x] = 0x2A;
+            MAP->terrain[MAP->rowOffset[y] + x] = t;
         }
     }
 
@@ -189,7 +181,7 @@ void sub_0800449C(void)
     {
         a = sub_08003B6C(0x1D, 0);
         b = sub_08003B6C(0x13, 0);
-        if (MAP->cell[MAP->rowOffset[b] + a] == 1)
+        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
         {
             sub_080011F4(a, b, 3);
             sub_08007F14(a, b, 0x20);
@@ -224,7 +216,7 @@ void sub_0800449C(void)
     {
         a = sub_08003B6C(0x1A, 4);
         b = sub_08003B6C(0x10, 4);
-        if (MAP->cell[MAP->rowOffset[b] + a] == 1)
+        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
         {
             sub_080011F4(a, b, 4);
             sub_08007F14(a, b, 0x87);

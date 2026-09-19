@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -46,17 +47,10 @@
  * address` at +0x148 (gUnknown_085D3E20 vs gUnknown_085D3DD0+0x50) -- the
  * documented false mismatch; 0x085D3E20 IS
  * &gUnknown_085D3DD0[0].unk38[0].unk18[0] (0x38 + 0x18 == 0x50). */
-struct Unk386ECMap
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_080386EC(int a)
 {
     struct Unk0849D5F8 *p;
-    struct Unk386ECMap *map;
+    struct Map *map;
     s8 *costs;
     s8 *stack;
     s8 *cur;
@@ -86,9 +80,9 @@ void sub_080386EC(int a)
                 .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].unk1e]
                 .unk18[gUnknown_03003FC0.unk2c];
 
-        map = (struct Unk386ECMap *)gUnknown_08499590;
+        map = gMap;
 
-        c = (map->plane[map->rowOffset[gUnknown_0849D5F8->unk2c[i]]
+        c = (map->terrain[map->rowOffset[gUnknown_0849D5F8->unk2c[i]]
                         + gUnknown_0849D5F8->unk20[i]] & 0x1f)
             + gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk19 * 32;
 

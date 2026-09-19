@@ -35,32 +35,32 @@ int sub_08045D4C(void)
 
     if (y > 0)
     {
-        c = ((struct Map *)gUnknown_08499590)->unk051A[
-                ((struct Map *)gUnknown_08499590)->rowOffset[y - 1] + x];
+        c = gMap->unk051A[
+                gMap->rowOffset[y - 1] + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
     }
 
-    if (y < ((struct Map *)gUnknown_08499590)->height - 1)
+    if (y < gMap->height - 1)
     {
-        c = ((struct Map *)gUnknown_08499590)->unk051A[
-                ((struct Map *)gUnknown_08499590)->rowOffset[y + 1] + x];
+        c = gMap->unk051A[
+                gMap->rowOffset[y + 1] + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
     }
 
     if (x > 0)
     {
-        oleft = ((struct Map *)gUnknown_08499590)->rowOffset[y] - 1;
-        c = ((struct Map *)gUnknown_08499590)->unk051A[oleft + x];
+        oleft = gMap->rowOffset[y] - 1;
+        c = gMap->unk051A[oleft + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
     }
 
-    if (x < ((struct Map *)gUnknown_08499590)->width - 1)
+    if (x < gMap->width - 1)
     {
-        oright = ((struct Map *)gUnknown_08499590)->rowOffset[y] + 1;
-        c = ((struct Map *)gUnknown_08499590)->unk051A[oright + x];
+        oright = gMap->rowOffset[y] + 1;
+        c = gMap->unk051A[oright + x];
         if (c != 0 && gUnknown_08499598[(c >> 6) + 1].unk1a == side)
             return 1;
     }

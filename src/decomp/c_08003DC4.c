@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -35,15 +36,7 @@
  * `ands r2, r4` in the case-1 arm is `x & 1` with agbcc substituting the
  * switch register, which cse knows equals 1 after `cmp r2,#1; beq`. */
 
-struct UnkDC4Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x1432 - 0x0004];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct UnkDC4Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_08003DC4(int x, int y, int kind)
 {
@@ -57,7 +50,7 @@ void sub_08003DC4(int x, int y, int kind)
             idx = MAP->rowOffset[y];
             idx++;
             idx += x;
-            if (MAP->cell[idx] == 1 || MAP->cell[idx] == 0xD)
+            if (MAP->terrain[idx] == 1 || MAP->terrain[idx] == 0xD)
                 sub_08007F9C(x + 1, y);
         }
         if (x > 0)
@@ -67,7 +60,7 @@ void sub_08003DC4(int x, int y, int kind)
             idx = MAP->rowOffset[y];
             idx--;
             idx += x;
-            if (MAP->cell[idx] == 1 || MAP->cell[idx] == 0xD)
+            if (MAP->terrain[idx] == 1 || MAP->terrain[idx] == 0xD)
                 sub_08007F9C(x - 1, y);
         }
         break;
@@ -77,14 +70,14 @@ void sub_08003DC4(int x, int y, int kind)
         {
             if (y > 0)
             {
-                if (MAP->cell[MAP->rowOffset[y - 1] + x] == 7
-                 || MAP->cell[MAP->rowOffset[y - 1] + x] == 0xD)
+                if (MAP->terrain[MAP->rowOffset[y - 1] + x] == 7
+                 || MAP->terrain[MAP->rowOffset[y - 1] + x] == 0xD)
                     sub_08007F9C(x, y);
             }
             if (y < MAP->height - 1)
             {
-                if (MAP->cell[MAP->rowOffset[y + 1] + x] == 7
-                 || MAP->cell[MAP->rowOffset[y + 1] + x] == 0xD)
+                if (MAP->terrain[MAP->rowOffset[y + 1] + x] == 7
+                 || MAP->terrain[MAP->rowOffset[y + 1] + x] == 0xD)
                     sub_08007F9C(x, y);
             }
         }

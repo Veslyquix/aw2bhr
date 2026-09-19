@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,16 +8,7 @@
  * sub_08003C48 @ 0x08003C48
  */
 
-struct Unk3F44Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 plane[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3F44Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_08003C48(int a1)
 {
@@ -41,20 +33,20 @@ void sub_08003C48(int a1)
             switch (a1)
             {
             case 7:
-                MAP->plane[MAP->rowOffset[y] + x] = 0x2A;
-                MAP->cell[MAP->rowOffset[y] + x] = a1;
+                MAP->tile[MAP->rowOffset[y] + x] = 0x2A;
+                MAP->terrain[MAP->rowOffset[y] + x] = a1;
                 break;
             case 1:
-                MAP->plane[MAP->rowOffset[y] + x] = a1;
-                MAP->cell[MAP->rowOffset[y] + x] = 1;
+                MAP->tile[MAP->rowOffset[y] + x] = a1;
+                MAP->terrain[MAP->rowOffset[y] + x] = 1;
                 break;
             case 3:
                 sub_080011F4(x, y, 3);
                 sub_0800B048(x, y);
                 break;
             case 4:
-                MAP->plane[MAP->rowOffset[y] + x] = 0x87;
-                MAP->cell[MAP->rowOffset[y] + x] = a1;
+                MAP->tile[MAP->rowOffset[y] + x] = 0x87;
+                MAP->terrain[MAP->rowOffset[y] + x] = a1;
                 break;
             }
         }

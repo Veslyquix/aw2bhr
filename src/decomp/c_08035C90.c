@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -30,12 +31,6 @@
  * `b` is the if/else-return form, not a returned comparison -- and the arm
  * ORDER settles the sense: `== 2` returning 1 puts the `beq` on the 1 arm,
  * which is what the ROM has; the `!= 2` spelling emits the two arms swapped. */
-struct Unk35C90Map
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
 struct Unk35C90Proc
 {
     /* 0x00 */ PROC_HEADER;
@@ -47,9 +42,9 @@ struct Unk35C90Proc
 u8 sub_08035C90(ProcPtr procArg)
 {
     struct Unk35C90Proc *proc = procArg;
-    struct Unk35C90Map *map = (struct Unk35C90Map *)gUnknown_08499590;
+    struct Map *map = gMap;
 
-    if ((map->plane[map->rowOffset[(proc->unk44 + 8) / 16]
+    if ((map->terrain[map->rowOffset[(proc->unk44 + 8) / 16]
                     + (proc->unk42 + 8) / 16] & 0x1f) == 2)
         return 1;
 

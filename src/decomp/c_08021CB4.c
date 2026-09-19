@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -17,25 +18,18 @@
  * behind.  The bound is also tested BEFORE the 0xFF terminator on every
  * iteration but not on entry, which is loop rotation of a `while (flags !=
  * 0xff)` whose body ends in the `if (i > 0x5b) break;`. */
-struct Unk21CB4Map
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_08021CB4(void)
 {
-    struct Unk21CB4Map *map;
+    struct Map *map;
     int i;
 
     i = 0;
 
     while (gUnknown_03003150[i].flags != 0xff)
     {
-        map = (struct Unk21CB4Map *)gUnknown_08499590;
+        map = gMap;
         gUnknown_03003150[i].flags =
-            map->plane[map->rowOffset[gUnknown_03003150[i].y] + gUnknown_03003150[i].x];
+            map->terrain[map->rowOffset[gUnknown_03003150[i].y] + gUnknown_03003150[i].x];
         i++;
         if (i > 0x5b)
             break;

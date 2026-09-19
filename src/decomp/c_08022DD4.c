@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -12,19 +13,9 @@
  * include/unknown-globals.h: only a COMPONENT_REF keeps agbcc from folding
  * 0x12 into a load displacement or reassociating the 0x417A row table.
  * Wave 56, W56-H. */
-struct Unk08022DD4Map
-{
-    /* 0x0000 */ u8 filler_0000[0x04];
-    /* 0x0004 */ s16 unk0004;
-    /* 0x0006 */ s16 unk0006;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x4168];
-    /* 0x417a */ u16 unk417a[0x40];
-};
-
 void sub_08022DD4(s16 a1, s16 a2, s16 a3)
 {
-    struct Unk08022DD4Map *m;
+    struct Map *m;
     struct UnkVec vec;
     int v;
     int x;
@@ -40,10 +31,10 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
     {
     case 0:
         v = (u32)gUnknown_03004008 % 33;
-        m = (struct Unk08022DD4Map *)gUnknown_08499590;
-        y = (a2 + m->unk0006) >> 4;
-        row = m->unk417a[y];
-        x = (a1 + m->unk0004) >> 4;
+        m = gMap;
+        y = (a2 + m->unk06) >> 4;
+        row = m->rowOffset[y];
+        x = (a1 + m->unk04) >> 4;
         if (m->unk0012[row + x] == 0 && sub_08042424(x, y) != 0)
         {
             a3 = 4;

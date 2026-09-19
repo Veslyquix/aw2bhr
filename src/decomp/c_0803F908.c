@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -37,16 +38,6 @@
  *
  * The x/y registers follow from the same decision (ROM r4/r5, candidate r5/r6),
  * so the percentage is one allocation decision renaming the rest. */
-struct MapScreenF908
-{
-    /* 0x0000 */ u8 filler_0000[0x04];
-    /* 0x0004 */ s16 unk04;
-    /* 0x0006 */ s16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x234A - 0x08];
-    /* 0x234A */ u8 unk234A[0x417A - 0x234A];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 /* WAVE 77, W77-E -- SIGNATURE RECONCILED; THIS DRAFT HAD NEVER COMPILED.
  * Until now `u16 *obj` conflicted with include/unknown-functions.h, so every
  * screen in the project reported this function "NOT MEASURED" and no oracle
@@ -78,13 +69,13 @@ void sub_0803F908(int x, int y, const u8 *obj, int a4, u8 a5)
         oam2 = (u16)((a4 + 8) * 0x1000);
 
         if (a5 != 0
-         && ((struct MapScreenF908 *)gUnknown_08499590)->unk234A[
-                ((struct MapScreenF908 *)gUnknown_08499590)->rowOffset[y] + x] == 0)
+         && gMap->unk234A[
+                gMap->rowOffset[y] + x] == 0)
             oam2 = 0xD000;
     }
 
-    x = x * 16 - ((struct MapScreenF908 *)gUnknown_08499590)->unk04;
-    y = y * 16 - ((struct MapScreenF908 *)gUnknown_08499590)->unk06;
+    x = x * 16 - gMap->unk04;
+    y = y * 16 - gMap->unk06;
 
     PutSprite(4, x, y, (u16 *)obj, oam2 + 0x48);
 }

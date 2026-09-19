@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,12 +10,6 @@
 
 /* sub_0803F550's twin: same three calls over a different blob/palette pair,
  * a sound cue in the middle, and different wrap offsets and object id. */
-struct MapScrollF2F4
-{
-    /* 0x00 */ u8 filler_00[0x04];
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-};
 struct UnkF2F4Sub
 {
     /* 0x00 */ u8 filler_00[0x24];
@@ -38,7 +33,7 @@ void sub_0803F2F4(struct UnkF2F4Proc *proc)
     ApplyPaletteExt(gUnknown_081169B0, 0x2A0, 0x20);
     sub_0803B4DC(0x1D8);
     ((struct UnkF2F4Ret *)sub_0801C70C(gUnknown_081161CC,
-                 (proc->unk2c * 16 - ((struct MapScrollF2F4 *)gUnknown_08499590)->unk04 + 0x20) & 0x1FF,
-                 (proc->unk30 * 16 - ((struct MapScrollF2F4 *)gUnknown_08499590)->unk06 + 8) & 0xFF,
+                 (proc->unk2c * 16 - gMap->unk04 + 0x20) & 0x1FF,
+                 (proc->unk30 * 16 - gMap->unk06 + 8) & 0xFF,
                  0x51CA, 0, 1))->unk50->unk24 = gUnknown_0200FC50;
 }

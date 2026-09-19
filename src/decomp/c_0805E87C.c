@@ -111,9 +111,9 @@ void sub_0805E87C(void)
         }
         else
         {
-            if (((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[pos.y] + pos.x] != 0)
+            if (gMap->unk0012[gMap->rowOffset[pos.y] + pos.x] != 0)
             {
-                u = (struct Unk5E87CUnit *)(gUnknown_08499594 + (id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[pos.y] + pos.x]));
+                u = (struct Unk5E87CUnit *)(gUnknown_08499594 + (id = gMap->unk0012[gMap->rowOffset[pos.y] + pos.x]));
                 if ((s8)gUnknown_03003340[pos.y][pos.x] <= sub_08058224((struct Unk08499594 *)gUnknown_030040D8))
                 {
                     if (u->unk00 == 0x16)

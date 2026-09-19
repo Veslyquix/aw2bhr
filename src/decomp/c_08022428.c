@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,19 +7,6 @@
  * contiguous block at 0x08022428.
  * sub_08022428 @ 0x08022428
  */
-
-struct Unk22428Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x000C - 0x0004];
-    /* 0x000C */ u16 camX;
-    /* 0x000E */ u16 camY;
-    /* 0x0010 */ u8 filler_0010[0x051A - 0x0010];
-    /* 0x051A */ u8 unitId[0x234A - 0x051A];
-    /* 0x234A */ u8 flag234A[0x417A - 0x234A];
-    /* 0x417A */ u16 rowOffset[1];
-};
 
 /* MATCHED (wave 52, W52-E), by decomp-permuter at iteration 553 from the 98.5%
  * hand draft. PROMOTION MUST CARRY THE POOL WORDS:
@@ -67,11 +55,11 @@ void sub_08022428(u16 x, u16 y)
     u16 hp;
     unsigned char new_var;
 
-    if (y >= ((struct Unk22428Map *)gUnknown_08499590)->height
-        || (id = ((struct Unk22428Map *)gUnknown_08499590)
-                     ->unitId[((struct Unk22428Map *)gUnknown_08499590)->rowOffset[y] + x]) == 0
-        || ((struct Unk22428Map *)gUnknown_08499590)
-               ->flag234A[((struct Unk22428Map *)gUnknown_08499590)->rowOffset[y] + x] == 0
+    if (y >= gMap->height
+        || (id = gMap
+                     ->unk051A[gMap->rowOffset[y] + x]) == 0
+        || gMap
+               ->unk234A[gMap->rowOffset[y] + x] == 0
         || !sub_0802571C(id)
         || (gUnknown_08499594[id].unk01 & 4) != 0)
     {
@@ -84,8 +72,8 @@ void sub_08022428(u16 x, u16 y)
         else
             v = id & 0xc0;
 
-        cx = ((x - ((struct Unk22428Map *)gUnknown_08499590)->camX) & 0xf) * 2;
-        cy = ((y - ((struct Unk22428Map *)gUnknown_08499590)->camY) & 0xf) * 2;
+        cx = ((x - gMap->camX) & 0xf) * 2;
+        cy = ((y - gMap->camY) & 0xf) * 2;
 
         e = &gUnknown_08499594[id];
 

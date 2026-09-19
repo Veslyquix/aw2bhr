@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -39,16 +40,7 @@
  * iterations. Whatever the original wrote here made one more value live across
  * sweep 2, and this reproduces the effect without recovering the cause. */
 
-struct Unk3F44Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 plane[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3F44Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_08010664(int x, int y)
 {
@@ -69,8 +61,8 @@ void sub_08010664(int x, int y)
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
                 sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
-            else if (MAP->plane[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
-                  || MAP->plane[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
+            else if (MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
+                  || MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
             {
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
                 sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
@@ -78,7 +70,7 @@ void sub_08010664(int x, int y)
         }
     }
 
-    v = MAP->plane[MAP->rowOffset[y] + x];
+    v = MAP->tile[MAP->rowOffset[y] + x];
     if (v == 0x142 || v == 0x143 || v == 0x140 || v == 0x141
      || v == 0x160 || v == 0x161 || v == 0x162 || v == 0x163
      || v == 0x122 || v == 0x123 || v == 0x121 || v == 0x120
@@ -101,8 +93,8 @@ void sub_08010664(int x, int y)
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
                 sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
-            else if (MAP->plane[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
-                  || MAP->plane[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
+            else if (MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
+                  || MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
             {
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
                 sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
@@ -110,7 +102,7 @@ void sub_08010664(int x, int y)
         }
     }
 
-    v = MAP->plane[MAP->rowOffset[y] + x];
+    v = MAP->tile[MAP->rowOffset[y] + x];
     if (v == 0x142 || v == 0x143 || v == 0x140 || v == 0x141
      || v == 0x160 || v == 0x161 || v == 0x162 || v == 0x163
      || v == 0x122 || v == 0x123 || v == 0x121 || v == 0x120
@@ -133,8 +125,8 @@ void sub_08010664(int x, int y)
                 t = sub_08010B34(x + gUnknown_0848896C[i], y + gUnknown_08488974[i]);
                 sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
-            else if (MAP->plane[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
-                  || MAP->plane[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
+            else if (MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
+                  || MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
             {
                 t = sub_08010B34(x + gUnknown_0848896C[i], y + gUnknown_08488974[i]);
                 sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);

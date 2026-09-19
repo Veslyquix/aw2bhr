@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -61,17 +62,10 @@
  *   - W73-E's three pointer-global spellings: all three TIE at 89.4%.
  *
  * 0x417A and 0x417E are rowOffset[0] and rowOffset[2]. */
-struct Unk45CMap
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 int sub_08045C18(void)
 {
   unsigned short new_var;
-  struct Unk45CMap *m = (struct Unk45CMap *) gUnknown_08499590;
+  struct Map *m = gMap;
   if (((m->terrain[m->rowOffset[0] + 0x15] & 0xe0) >> 5) != 2)
   {
     return 0;

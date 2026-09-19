@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -14,13 +15,6 @@
  * declaration in unknown-functions.h cannot satisfy both -- see the note there
  * for the four measurements. */
 int sub_0805A8C0();
-struct Unk59674Map
-{
-    /* 0x0000 */ u8 filler_00[0x12];
-    /* 0x0012 */ u8 unit[0x1420];
-    /* 0x1432 */ u8 terrain[0x2d48];
-    /* 0x417a */ u16 rows[1];
-};
 struct Unk0805DFF4Rec
 {
     /* 0x00 */ u8 filler_00[0x09];
@@ -31,23 +25,23 @@ struct Unk0805DFF4Rec
 
 u8 sub_08059674(s16 x, s16 y)
 {
-    if (((struct Unk59674Map *)gUnknown_08499590)->unit[
-            ((struct Unk59674Map *)gUnknown_08499590)->rows[y] + x]
+    if (gMap->unk0012[
+            gMap->rowOffset[y] + x]
                 != gUnknown_03003F38
-        && ((struct Unk59674Map *)gUnknown_08499590)->unit[
-            ((struct Unk59674Map *)gUnknown_08499590)->rows[y] + x] != 0)
+        && gMap->unk0012[
+            gMap->rowOffset[y] + x] != 0)
         return 0;
     if ((u8)sub_0805C988(x, y))
         return 0;
-    if (gUnknown_085767D5[((struct Unk59674Map *)gUnknown_08499590)->terrain[
-            ((struct Unk59674Map *)gUnknown_08499590)->rows[y] + x] & 0x1f] == 0)
+    if (gUnknown_085767D5[gMap->terrain[
+            gMap->rowOffset[y] + x] & 0x1f] == 0)
         return 1;
-    if ((((struct Unk59674Map *)gUnknown_08499590)->terrain[
-            ((struct Unk59674Map *)gUnknown_08499590)->rows[y] + x] & 0xe0)
+    if ((gMap->terrain[
+            gMap->rowOffset[y] + x] & 0xe0)
                 != gUnknown_03004084)
     {
-        if ((((struct Unk59674Map *)gUnknown_08499590)->terrain[
-                ((struct Unk59674Map *)gUnknown_08499590)->rows[y] + x] & 0xe0) == 0)
+        if ((gMap->terrain[
+                gMap->rowOffset[y] + x] & 0xe0) == 0)
             return 0;
         if (gUnknown_030040D8->unk00 <= 2)
             return 1;
@@ -55,11 +49,11 @@ u8 sub_08059674(s16 x, s16 y)
             return 1;
         return 0;
     }
-    if (gUnknown_085767B8[((struct Unk59674Map *)gUnknown_08499590)->terrain[
-            ((struct Unk59674Map *)gUnknown_08499590)->rows[y] + x] & 0x1f] == 0)
+    if (gUnknown_085767B8[gMap->terrain[
+            gMap->rowOffset[y] + x] & 0x1f] == 0)
         return 1;
-    if (gUnknown_085767B8[((struct Unk59674Map *)gUnknown_08499590)->terrain[
-            ((struct Unk59674Map *)gUnknown_08499590)->rows[y] + x] & 0x1f]
+    if (gUnknown_085767B8[gMap->terrain[
+            gMap->rowOffset[y] + x] & 0x1f]
                 == gUnknown_030046AC)
         return 1;
     if (!gUnknown_030045CC.unk00_1)

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -41,20 +42,11 @@
  * for the first statement, and that .rodata word is the ROM's
  * gUnknown_0808D834 (promotion needs "rodata": ["0x0808D834"]); the later arms
  * use the plain literal-pool address, which is exactly the mix the ROM has. */
-struct MapScreen
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 4];
-    /* 0x0A22 */ u16 cells[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct MapScreen *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_0800A098(int x, int y)
 {
-    int c = MAP->cells[MAP->rowOffset[y] + x];
+    int c = MAP->tile[MAP->rowOffset[y] + x];
 
     if (c == 0x39)
     {
@@ -62,7 +54,7 @@ void sub_0800A098(int x, int y)
         {
             int nx = x - 1;
             if (sub_0800164C(nx, y) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x39
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x39
              && sub_0800AA30(nx, y, 0) == 0)
             {
                 int t;
@@ -76,7 +68,7 @@ void sub_0800A098(int x, int y)
         {
             int nx = x + 1;
             if (sub_0800164C(nx, y) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x39
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x39
              && sub_0800AA30(nx, y, 1) == 0)
             {
                 int t;
@@ -93,7 +85,7 @@ void sub_0800A098(int x, int y)
         {
             int ny = y - 1;
             if (sub_0800164C(x, ny) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x18
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x18
              && sub_0800AA30(x, ny, 2) == 0)
             {
                 int t;
@@ -107,7 +99,7 @@ void sub_0800A098(int x, int y)
         {
             int ny = y + 1;
             if (sub_0800164C(x, ny) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x18
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x18
              && sub_0800AA30(x, ny, 4) == 0)
             {
                 int t;

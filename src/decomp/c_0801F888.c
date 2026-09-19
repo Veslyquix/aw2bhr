@@ -92,10 +92,10 @@ void sub_0801F92C(u8 *a1)
 {
     int y;
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
-        gUnknown_03003340[y] = a1 + ((struct Map *)gUnknown_08499590)->rowOffset[y];
-    gUnknown_084999C8->unk28 = ((struct Map *)gUnknown_08499590)->width;
-    gUnknown_084999C8->unk29 = ((struct Map *)gUnknown_08499590)->height;
+    for (y = 0; y < gMap->height; y++)
+        gUnknown_03003340[y] = a1 + gMap->rowOffset[y];
+    gUnknown_084999C8->unk28 = gMap->width;
+    gUnknown_084999C8->unk29 = gMap->height;
 }
 
 /* A busy-wait sized by the gUnknown_08499590 screen: the nested loop has an

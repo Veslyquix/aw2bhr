@@ -41,17 +41,17 @@ void sub_0801F6F0(u8 a1, u8 a2, u8 a3)
     x = a2 + gUnknown_0300409C->unk00;
     y = a3 + gUnknown_0300409C->unk01;
 
-    v = gUnknown_084999C8->unk00[((struct Map *)gUnknown_08499590)->terrain[
-            idx = ((struct Map *)gUnknown_08499590)->rowOffset[y] + x] & 0x1F]
+    v = gUnknown_084999C8->unk00[gMap->terrain[
+            idx = gMap->rowOffset[y] + x] & 0x1F]
         + (s8)gUnknown_03003340[gUnknown_0300409C->unk01][gUnknown_0300409C->unk00];
 
     if ((s16)v >= gUnknown_03003340[y][x])
         return;
 
     if (gUnknown_084999C8->unk22 != 0
-        && ((struct Map *)gUnknown_08499590)->unk0012[idx] != 0
+        && gMap->unk0012[idx] != 0
         && (gUnknown_084999C8->unk2a
-            & gUnknown_084999C8->unk24[((struct Map *)gUnknown_08499590)->unk0012[idx] >> 6]))
+            & gUnknown_084999C8->unk24[gMap->unk0012[idx] >> 6]))
         return;
 
     if ((s16)v > gUnknown_084999C8->unk20)

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,16 +7,6 @@
  * contiguous block at 0x08041EA8.
  * sub_08041EA8 @ 0x08041EA8
  */
-
-struct Unk41EA8Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0e];
-    /* 0x0012 */ u8 unit[0x1420];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
 
 u8 sub_08041EA8(s16 x, s16 y, int t)
 {
@@ -28,19 +19,19 @@ u8 sub_08041EA8(s16 x, s16 y, int t)
     if (y < 0)
         return 0;
 
-    if (x >= ((struct Unk41EA8Map *)gUnknown_08499590)->width)
+    if (x >= gMap->width)
         return 0;
-    if (y >= ((struct Unk41EA8Map *)gUnknown_08499590)->height)
+    if (y >= gMap->height)
         return 0;
 
-    idx = ((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x;
+    idx = gMap->rowOffset[y] + x;
 
-    if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
+    if (gMap->unk0012[idx] != 0)
         return 0;
 
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
-    c = (((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx] & 0x1f)
+    c = (gMap->terrain[idx] & 0x1f)
         + gUnknown_085D5ABC[t].unk19 * 32;
 
     if (costs[c] < 0)

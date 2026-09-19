@@ -71,17 +71,17 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
         sub_0801F838(0xff);
         sub_0801F9C0(a1, a2, 9, 0);
 
-        for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
+        for (y = 0; y < gMap->height; y++)
         {
-            for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++)
+            for (x = 0; x < gMap->width; x++)
             {
                 if ((s8)gUnknown_03003340[y][x] < 0)
                     continue;
-                if (((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x] == 0)
+                if (gMap->unk0012[gMap->rowOffset[y] + x] == 0)
                     continue;
-                if (sub_08026F9C(gUnknown_03003F38, ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]))
+                if (sub_08026F9C(gUnknown_03003F38, gMap->unk0012[gMap->rowOffset[y] + x]))
                     continue;
-                e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[y] + x]];
+                e = &gUnknown_08499594[gMap->unk0012[gMap->rowOffset[y] + x]];
                 if (gUnknown_03003FC0.unk0d == 0)
                 {
                     if ((u8)(e->unk00 - 0xa) <= 1)

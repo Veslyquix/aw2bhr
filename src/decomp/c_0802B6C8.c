@@ -38,12 +38,12 @@ u8 sub_0802B6C8(u8 x, u8 y)
     u8 army;
     int idx;
 
-    idx = x + ((struct Map *)gUnknown_08499590)->rowOffset[y];
+    idx = x + gMap->rowOffset[y];
 
-    if (((struct Map *)gUnknown_08499590)->unk0012[idx] == 0)
+    if (gMap->unk0012[idx] == 0)
         return 0;
 
-    unit = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk0012[idx]];
+    unit = &gUnknown_08499594[gMap->unk0012[idx]];
     army = ((unit - gUnknown_08499594) >> 6) + 1;
 
     if (sub_0802706C(unit->unk00, gUnknown_030033EC, army))

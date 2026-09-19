@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,16 +7,6 @@
  * contiguous block at 0x0805F0EC.
  * sub_0805F0EC @ 0x0805F0EC
  */
-
-struct Unk5F0ECMap
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142e];
-    /* 0x1432 */ u8 unk1432[0x1928];
-    /* 0x2d5a */ u8 unk2D5A[0x1420];
-    /* 0x417a */ u16 unk417A[1];
-};
 
 /* Scores every passable cell by the gUnknown_0202DAD8 influence record for its
  * 4x4 block, keeps the best, and hands the winning cell to sub_080591E4 -- the
@@ -95,9 +86,9 @@ void sub_0805F0EC(void)
                       gUnknown_030040D8->unk00, cost, best2);
     v.raw = (v.raw & 0xFFFF0000) | 0x270F;
 
-    for (y = 0; y < ((struct Unk5F0ECMap *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk5F0ECMap *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
@@ -121,8 +112,8 @@ void sub_0805F0EC(void)
                 if (gUnknown_030040D8->unk00 == 0
                  || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
                     score = gUnknown_085D583C[
-                        ((struct Unk5F0ECMap *)gUnknown_08499590)->unk1432[
-                            ((struct Unk5F0ECMap *)gUnknown_08499590)->unk417A[y]
+                        gMap->terrain[
+                            gMap->rowOffset[y]
                             + x] & 0x1f].unk10 * 10;
                 else
                     score = 0;

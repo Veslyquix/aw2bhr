@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,13 +7,6 @@
  * contiguous block at 0x0805ECDC.
  * sub_0805ECDC @ 0x0805ECDC, sub_0805ED70 @ 0x0805ED70, sub_0805EE40 @ 0x0805EE40, sub_0805EF00 @ 0x0805EF00, sub_0805EF9C @ 0x0805EF9C, sub_0805F074 @ 0x0805F074
  */
-
-struct Unk5ED70Map
-{
-    /* 0x0000 */ u8 filler_00[0x12];
-    /* 0x0012 */ u8 plane[0x4168];
-    /* 0x417a */ u16 rows[1];
-};
 
 void sub_0805ECDC(void)
 {
@@ -58,8 +52,8 @@ void sub_0805ED70(void)
     sub_08059C00(p, (u16 *)&v);
     if (v.pos.unk00 == 0x270F)
         sub_0805F4F8();
-    gUnknown_03004730[((struct Unk5ED70Map *)gUnknown_08499590)->plane[
-        ((struct Unk5ED70Map *)gUnknown_08499590)->rows[v.pos.unk02]
+    gUnknown_03004730[gMap->unk0012[
+        gMap->rowOffset[v.pos.unk02]
         + v.pos.unk00] & 0x3f]++;
     sub_080591E4(&v);
     sub_0805F7B8();

@@ -1,3 +1,5 @@
+#ifndef GUARD_MAP_H
+#define GUARD_MAP_H
 
 struct Map
 {
@@ -7,8 +9,8 @@ struct Map
     /* 0x0006 */ s16 unk06;
     /* 0x0008 */ u16 unk08;
     /* 0x000A */ u16 unk0a;
-    /* 0x000C */ u16 unk0c;
-    /* 0x000E */ u16 unk0e;
+    /* 0x000C */ u16 camX; 
+    /* 0x000E */ u16 camY; 
     /* 0x0010 */ u16 unk10;
     /* 0x0012 */ u8 unk0012[0x0508];
     /* 0x051A */ u8 unk051A[0x0508];
@@ -28,15 +30,18 @@ struct Map
     /* 0x4233 */ u8 unk4233;
 };
 
-// extern struct Map * gUnknown_08499590;
+/* `gMap` is a linker alias for `gUnknown_08499590` (include/unknown-globals.h),
+ * the same 4-byte ROM data slot given a second name with the honest type --
+ * see aw2bhr.lds for the linker symbol assignment that ties them together
+ * (a plain `.set` can't alias across translation units at assembly time).
+ * `gUnknown_08499590` itself is deliberately left declared `u8 *`: the huge
+ * majority of already-matched files index it with raw byte-offset arithmetic
+ * (`gUnknown_08499590 + tileMap_417A`, etc.), and per the Wave 50 note beside
+ * its declaration, agbcc's codegen for that arithmetic depends on it staying
+ * a `u8 *` -- switching the canonical symbol's type would silently change
+ * addressing math in ~300 call sites without a compile error. New code that
+ * wants a typed `struct Map *` (no cast, no manual offset math) should use
+ * `gMap` instead of casting `gUnknown_08499590`. */
+extern struct Map *gMap;
 
-
-
-
-
-
-
-
-
-
-
+#endif /* GUARD_MAP_H */

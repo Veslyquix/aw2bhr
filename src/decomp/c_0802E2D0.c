@@ -83,13 +83,13 @@ u8 sub_0802E2D0(s16 x, s16 y)
     }
     else
     {
-        gUnknown_03003F38 = ((struct Map *)gUnknown_08499590)->unk0012[
-            ((struct Map *)gUnknown_08499590)->rowOffset[y] + x];
+        gUnknown_03003F38 = gMap->unk0012[
+            gMap->rowOffset[y] + x];
         gUnknown_030040D8 =
             (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
 
-        if (((struct Map *)gUnknown_08499590)->unk0012[
-                ((struct Map *)gUnknown_08499590)->rowOffset[y] + x] == 0)
+        if (gMap->unk0012[
+                gMap->rowOffset[y] + x] == 0)
         {
             sub_0802E2BC();
             return 1;

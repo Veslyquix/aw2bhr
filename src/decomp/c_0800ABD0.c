@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,12 +8,7 @@
  * sub_0800ABD0 @ 0x0800ABD0
  */
 
-struct Map0800ABD0
-{
-    u16 width;
-    u16 height;
-};
-#define MAP0800ABD0 ((struct Map0800ABD0 *)gUnknown_08499590)
+#define MAP0800ABD0 gMap
 
 /* VERIFIED MATCH, 732/732 bytes under configured try_match.  Casting
  * gUnknown_08499590 to the map-header aggregate fixes the older pool-address
