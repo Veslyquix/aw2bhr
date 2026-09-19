@@ -41,11 +41,11 @@
  * See the note at sub_0805A5E0 in include/unknown-functions.h.
  *
  * Uses `gMap` (include/map.h) for the +0x12/+0x417A reads, but the
- * `sub_0801F92C` setup call must spell it `(u8 *)gMap + 0x2852`, not
- * `gUnknown_08499590 + 0x2852` -- agbcc's CSE only reuses a pointer load
- * across identical symbols, so mixing the two names for the same address
- * forces a second pool load and breaks the match (see sub_08057D90 for the
- * fuller writeup of this). */
+ * `sub_0801F92C` setup call must pass `gMap->unk2852` (the plane's own array
+ * member, decays to `u8 *`), not `gUnknown_08499590 + 0x2852` or a cast --
+ * agbcc's CSE only reuses a pointer load across identical symbols, so mixing
+ * in the raw name anywhere forces a second pool load and breaks the match
+ * (see sub_08057D90 for the fuller writeup of this). */
 
 struct Unk5A514Cell
 {
@@ -67,7 +67,7 @@ void sub_0805E160(void)
     u8 r;
 
     list = gUnknown_03003F20;
-    sub_0801F92C((u8 *)gMap + 0x2852);
+    sub_0801F92C(gMap->unk2852);
 
     if ((gUnknown_030040D8->unk07[2] & 0xc0) == 0)
     {

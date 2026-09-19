@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,19 +10,11 @@
 
 u8 sub_08025598(s16 a1, s16 a2)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *units;
-    int t;
     int off;
     int id;
 
-    p = gUnknown_08499590;
-    t = a2 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + a1;
-    units = p + 0x51A;
-    id = units[off];
+    off = gMap->rowOffset[a2] + a1;
+    id = gMap->unk051A[off];
 
     if ((u16)id == 0)
         return 0;

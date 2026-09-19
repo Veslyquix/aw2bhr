@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -37,10 +38,10 @@ int sub_0800B5C0(int x, int y)
     if (x > 0)
         r |= sub_0800B4F0(x - 1, y) << 2;
 
-    if (x < *(u16 *)gUnknown_08499590 - 1)
+    if (x < gMap->width - 1)
         r |= sub_0800B4F0(x + 1, y) << 1;
 
-    if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+    if (y < gMap->height - 1)
         r |= sub_0800B4F0(x, y + 1);
 
     return r;

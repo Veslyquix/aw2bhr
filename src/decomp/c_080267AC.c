@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -43,8 +44,8 @@ void sub_080267AC(void)
             sub_08022AAC(gUnknown_08499598[gUnknown_030033EC].unk2d & 0x7f,
                          gUnknown_08499598[gUnknown_030033EC].unk2e & 0x7f);
         else
-            sub_08022AAC(*(s16 *)(gUnknown_08499590 + 4) / 16 + 7,
-                         *(s16 *)(gUnknown_08499590 + 6) / 16 + 4);
+            sub_08022AAC(gMap->unk04 / 16 + 7,
+                         gMap->unk06 / 16 + 4);
         gUnknown_08499598[gUnknown_030033EC].unk2f = gUnknown_030033E4.unk00;
         gUnknown_08499598[gUnknown_030033EC].unk30 = gUnknown_030033E4.unk02;
     }

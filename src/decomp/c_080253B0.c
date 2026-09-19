@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -37,21 +38,13 @@
 
 bool8 sub_080253B0(struct Unk08499594 *a1)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
     u8 cell;
     u8 cost;
     int sum;
 
-    p = gUnknown_08499590;
-    t = a1->unk03 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + a1->unk02;
-    tiles = p + 0x1432;
-    cell = tiles[off];
+    off = gMap->rowOffset[a1->unk03] + a1->unk02;
+    cell = gMap->terrain[off];
 
     cost = gUnknown_085D5ABC[a1->unk00].unk58[cell & 0x1f];
 

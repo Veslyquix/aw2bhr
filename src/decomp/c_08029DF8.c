@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -110,7 +111,7 @@ void sub_08029DF8(struct Unk03001470 *proc)
         }
 
         if ((gUnknown_03003F40 & (s16)gUnknown_0849A0D8[proc->unk1e * 3]) != 0) {
-            map = gUnknown_08499590;
+            map = (u8 *)gMap;
             cp = &gUnknown_03003100.pos;
             t = ((s16)gUnknown_0849A0D8[proc->unk1e * 3 + 2] + cp->unk02) * 2;
             rows = map + 0x417A;

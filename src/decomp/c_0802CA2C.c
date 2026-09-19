@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -26,23 +27,15 @@ int sub_0802CA2C(void)
 
 int sub_0802CA78(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
     u32 cur;
 
     if (gUnknown_030033E8[0] + gUnknown_030033E8[1] != 0)
         return 1;
 
-    p = gUnknown_08499590;
-    t = gUnknown_03003100.pos.unk02 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + gUnknown_03003100.pos.unk00;
-    tiles = p + 0x12;
+    off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
 
-    if (tiles[off] != 0)
+    if (gMap->unk0012[off] != 0)
         return 1;
 
     cur = gUnknown_03003100.raw;
@@ -66,23 +59,15 @@ int sub_0802CA78(void)
 
 int sub_0802CB20(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
     u32 cur;
 
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e == 1)
         return 1;
 
-    p = gUnknown_08499590;
-    t = gUnknown_03003100.pos.unk02 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + gUnknown_03003100.pos.unk00;
-    tiles = p + 0x12;
+    off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
 
-    if (tiles[off] != 0)
+    if (gMap->unk0012[off] != 0)
         return 1;
 
     cur = gUnknown_03003100.raw;

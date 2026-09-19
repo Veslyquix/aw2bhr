@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -11,10 +12,6 @@
 
 void sub_0802DE1C(void)
 {
-    u8 *p;
-    u8 *rows;
-    s8 *terrain;
-    int t;
     int off;
     int v;
 
@@ -22,13 +19,9 @@ void sub_0802DE1C(void)
     sub_080236E8();
     sub_08023908(4);
 
-    p = gUnknown_08499590;
-    t = gUnknown_030033E4.unk02 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + gUnknown_030033E4.unk00;
-    terrain = (s8 *)(p + 0x2852);
+    off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
 
-    if (terrain[off] < 0)
+    if ((s8)gMap->unk2852[off] < 0)
         sub_08023274(1);
     else
         sub_08023274(1);
@@ -63,10 +56,6 @@ void sub_0802DE1C(void)
 
 void sub_0802DEFC(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
     int id;
     struct Unk08499594 *e;
@@ -86,12 +75,8 @@ void sub_0802DEFC(void)
         return;
     }
 
-    p = gUnknown_08499590;
-    t = gUnknown_030033E4.unk02 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + gUnknown_030033E4.unk00;
-    tiles = p + 0x12;
-    id = tiles[off];
+    off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
+    id = gMap->unk0012[off];
 
     if (id == 0)
         return;

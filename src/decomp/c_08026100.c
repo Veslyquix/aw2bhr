@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -56,11 +57,11 @@ void sub_08026100(int x, int y, int c)
     if (y < 0)
         return;
 
-    p = gUnknown_08499590;
+    p = (u8 *)gMap;
 
-    if (x >= *(u16 *)p)
+    if (x >= gMap->width)
         return;
-    if (y >= *(u16 *)(p + 2))
+    if (y >= gMap->height)
         return;
 
     u = &gUnknown_08499594[(pp = &gUnknown_08499594, t = y * 2,

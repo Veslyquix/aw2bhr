@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -25,8 +26,8 @@ void sub_080353E8(void)
 
     for (j = n * 16; j < m * 16 + 16; j++)
     {
-        sub_0801BDB4(((gUnknown_02027DE8[j].unk00 >> 8) - *(s16 *)(gUnknown_08499590 + 4)) & 0xff,
-                     ((gUnknown_02027DE8[j].unk02 >> 8) - *(s16 *)(gUnknown_08499590 + 6)) & 0xff,
+        sub_0801BDB4(((gUnknown_02027DE8[j].unk00 >> 8) - gMap->unk04) & 0xff,
+                     ((gUnknown_02027DE8[j].unk02 >> 8) - gMap->unk06) & 0xff,
                      &gUnknown_0849BDA0[gUnknown_02027DE8[j].unk08 * 4],
                      0);
     }

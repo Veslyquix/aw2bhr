@@ -53,10 +53,13 @@
  * struct Unk08499594 are the same object under two names (see the note on
  * Unk030040D8.unk01 in unknown-globals.h); they cost nothing.
  *
- * The map planes are reached as MEMBERS of a struct cast onto
- * gUnknown_08499590 and INLINE rather than through a `map` local, which is the
- * W34-F rule that c_08003DC4.c records; that is what gives `(p + K) + idx`
- * rather than `(p + idx) + K`. */
+ * The map planes are reached as MEMBERS of `gMap` (include/map.h) and INLINE
+ * rather than through a `map` local, which is the W34-F rule that
+ * c_08003DC4.c records; that is what gives `(p + K) + idx` rather than
+ * `(p + idx) + K`. Every use in the function -- including the
+ * `sub_0803E9F8`/`sub_0801F92C` setup calls -- must name `gMap`, since
+ * agbcc's CSE only reuses a pointer load across identical symbols (see
+ * sub_08057D90 for the fuller writeup). */
 
 struct Unk0803E9F8;
 void sub_08024404(void);
@@ -77,7 +80,7 @@ u8 sub_0802E2D0(s16 x, s16 y)
 
     if (unit != NULL
      && (u8)sub_0803E9F8((struct Unk0803E9F8 *)unit,
-                         gUnknown_08499590 + 0x2852, 0xFF, 0))
+                         gMap->unk2852, 0xFF, 0))
     {
         sub_08024404();
     }
@@ -104,7 +107,7 @@ u8 sub_0802E2D0(s16 x, s16 y)
             return 0;
         }
 
-        sub_0801F92C(gUnknown_08499590 + 0x2852);
+        sub_0801F92C(gMap->unk2852);
         sub_08035584(gUnknown_030040D8);
         sub_08024404();
         sub_080258CC();

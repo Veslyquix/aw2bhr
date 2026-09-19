@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -143,16 +144,8 @@ int sub_0800C7E8(int a)
  * arithmetic written the same way. */
 int sub_0800C840(int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + x;
-    tiles = p + 0x1432;
-    return sub_0800C7E8(tiles[off] & 0x1F);
+    off = gMap->rowOffset[y] + x;
+    return sub_0800C7E8(gMap->terrain[off] & 0x1F);
 }

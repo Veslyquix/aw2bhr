@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -26,19 +27,11 @@
  * narrow-returning callee. See include/unknown-functions.h. */
 bool8 sub_0804247C(s16 a, s16 b)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
-    t = b * 2;
-    rows = p + 0x417a;
-    off = *(u16 *)(rows + t) + a;
-    cells = p + 0x1432;
+    off = gMap->rowOffset[b] + a;
 
-    if ((cells[off] & 0x1f) == 0x11)
+    if ((gMap->terrain[off] & 0x1f) == 0x11)
         return 1;
     else
         return 0;

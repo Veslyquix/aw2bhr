@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -16,5 +17,5 @@
 
 u8 sub_080248F8(void)
 {
-    return gUnknown_08499590[0x4233];
+    return gMap->unk4233;
 }

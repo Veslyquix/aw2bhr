@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -35,7 +36,7 @@ void sub_08007F9C(int x, int y)
             sub_080080F8(x, n);
         }
 
-        if (x < *(u16 *)gUnknown_08499590 - 1)
+        if (x < gMap->width - 1)
         {
             int m = x + 1;
             register s16 ret asm("r0");
@@ -60,7 +61,7 @@ void sub_08007F9C(int x, int y)
         sub_080080F8(m, y);
     }
 
-    if (x < *(u16 *)gUnknown_08499590 - 1)
+    if (x < gMap->width - 1)
     {
         int m = x + 1;
         register s16 ret asm("r0");
@@ -72,7 +73,7 @@ void sub_08007F9C(int x, int y)
         sub_080080F8(m, y);
     }
 
-    if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+    if (y < gMap->height - 1)
     {
         int n = y + 1;
 
@@ -98,7 +99,7 @@ void sub_08007F9C(int x, int y)
             sub_080080F8(x, n);
         }
 
-        if (x < *(u16 *)gUnknown_08499590 - 1)
+        if (x < gMap->width - 1)
         {
             int m = x + 1;
             register s16 ret asm("r0");

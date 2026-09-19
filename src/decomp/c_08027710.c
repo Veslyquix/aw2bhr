@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -12,8 +13,8 @@ void sub_08027710(void)
     u16 x;
     u16 y;
 
-    x = gUnknown_030033E4.unk00 * 16 - *(u16 *)(gUnknown_08499590 + 4);
-    y = gUnknown_030033E4.unk02 * 16 - *(u16 *)(gUnknown_08499590 + 6);
+    x = gUnknown_030033E4.unk00 * 16 - gMap->unk04;
+    y = gUnknown_030033E4.unk02 * 16 - gMap->unk06;
 
     if ((s16)y <= 0x4f)
     {

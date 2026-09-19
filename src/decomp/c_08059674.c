@@ -65,7 +65,7 @@ void sub_08059760(void)
 {
     union Unk802C57CBuf v;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2d5a);
+    sub_0801F92C(gMap->unk2D5A);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, -1);
     sub_0801FD9C(0x79);
@@ -90,7 +90,7 @@ void sub_08059824(void)
 {
     union Unk802C57CBuf v;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2d5a);
+    sub_0801F92C(gMap->unk2D5A);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_0801FD9C(0x79);
@@ -116,7 +116,7 @@ void sub_080598BC(void)
 
     p = gUnknown_03003F20;
     sub_0805DCD4();
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->unk2852);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_08059A0C(p);
@@ -144,7 +144,7 @@ void sub_08059978(void)
 
     p = gUnknown_03003F20;
     sub_0805DCD4();
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->unk2852);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_08059A0C(p);

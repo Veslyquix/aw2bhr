@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -40,7 +41,7 @@ int sub_0804B42C(int x, int y)
 
     best = 0;
     result = 0;
-    p = gUnknown_08499590;
+    p = (u8 *)gMap;
     d = gUnknown_08551CDC[0];
     rows = p + 0x417A;
     terrain = p + 0x1432;
@@ -88,7 +89,7 @@ int sub_0804B4C4(int x, int y)
 
     best = 0;
     result = 0;
-    p = gUnknown_08499590;
+    p = (u8 *)gMap;
     d = gUnknown_08551CDC[0];
     rows = p + 0x417A;
     terrain = p + 0x1432;

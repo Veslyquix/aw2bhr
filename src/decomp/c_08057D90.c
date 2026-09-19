@@ -13,13 +13,14 @@
  * map-plane setups and one indirect draw call.
  *
  * Uses `gMap` (include/map.h), the typed linker alias for `gUnknown_08499590`
- * -- but the two `sub_0801F92C` calls must spell it `(u8 *)gMap + offset`,
- * not `gUnknown_08499590 + offset`. agbcc's CSE unifies repeated loads of the
- * SAME symbol, not two symbols that happen to share an address: casting the
- * setup calls to `gMap` too lets the compiler reuse the one pointer load for
- * the whole function, exactly as it did with the raw symbol before the
- * struct-typed rewrite. Mixing the two spellings forces a second, separate
- * pool load and permanently breaks the match.
+ * -- but the two `sub_0801F92C` calls must pass `gMap->unk2D5A` /
+ * `gMap->unk2852` (the plane's OWN array member, which decays to the same
+ * `u8 *` `sub_0801F92C` takes), not `gUnknown_08499590 + offset` or a
+ * `(u8 *)gMap + offset` cast. agbcc's CSE unifies repeated loads of the SAME
+ * symbol, not two symbols that happen to share an address, so every use in
+ * the function has to name `gMap` for the compiler to reuse the one pointer
+ * load; a leftover raw-symbol or cast spelling anywhere forces a second,
+ * separate pool load and permanently breaks the match.
  *
  *  - the planes must be STRUCT MEMBERS. `gMap[0x12 + idx]` on a bare `u8 *`
  *    would fold 0x12 into ldrb's displacement (`ldrb r0,[r1,#18]`), where the
@@ -50,9 +51,9 @@ void sub_08057D90(s16 *px, s16 *py)
     bx = 0;
     by = 0;
 
-    sub_0801F92C((u8 *)gMap + 0x2D5A);
+    sub_0801F92C(gMap->unk2D5A);
     gUnknown_030013EC(*px, *py, gUnknown_030040D8->unk00, 0x78, by);
-    sub_0801F92C((u8 *)gMap + 0x2852);
+    sub_0801F92C(gMap->unk2852);
     sub_080202A4(gUnknown_030040D8);
 
     best = 0x7FFF;

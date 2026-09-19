@@ -18,8 +18,10 @@
  * buffer; gUnknown_03003F20 stays declared `struct Unk03003338 *` and is cast
  * here, exactly as the promoted readers do. Do NOT reshape struct Unk03003338.
  *
- * Cell addressing is sub_080415E4's idiom -- p, then t, then rows, then off,
- * then cells -- with 0x3C72 in place of 0x12. `t = y * 2` and
+ * `gMap->unk3C72[gMap->rowOffset[y] + x]` (include/map.h) reproduces
+ * sub_080415E4's cell-addressing idiom without naming p/rows/off/cells by
+ * hand -- the struct member keeps the same `(base + 0x3C72) + idx`
+ * association those intermediates existed to force. `t = y * 2` and
  * `&gUnknown_03003340[y]` both end up in the OUTER loop's preheader (sl and r4);
  * that is LICM, not source, and neither is authored.
  */
@@ -41,28 +43,18 @@ struct Unk085D5ABCUnk14
 void sub_0805B980(void)
 {
     struct Unk5B980Cell *out;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
-    int off;
     int x;
     int y;
 
     out = (struct Unk5B980Cell *)gUnknown_03003F20;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0)
             {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x3c72;
-                if (cells[off] != 0)
+                if (gMap->unk3C72[gMap->rowOffset[y] + x] != 0)
                 {
                     out->x = x;
                     out->y = y;

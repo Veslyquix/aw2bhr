@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -23,7 +24,7 @@
  * the same object c_08007D70.c and c_0800BEE4.c read. */
 void sub_0800CEF8(int x, int y)
 {
-    if (x < *(u16 *)gUnknown_08499590 - 1)
+    if (x < gMap->width - 1)
     {
         x++;
         sub_08001158(x, y, sub_080016D0(x, y));

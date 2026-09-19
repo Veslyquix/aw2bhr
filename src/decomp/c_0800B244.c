@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -25,21 +26,10 @@
  * ROM branches past them. */
 void sub_0800B244(int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
-    int off;
     int tile;
     int v;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = (*(u16 *)(rows + t) + x) * 2;
-    tiles = p + 0xA22;
-    tiles += off;
-    tile = *(u16 *)tiles;
+    tile = gMap->tile[gMap->rowOffset[y] + x];
 
     if (sub_0800B1FC(x, y) == 0)
     {
@@ -147,14 +137,7 @@ void sub_0800B244(int x, int y)
         {
             int up;
 
-            tiles = gUnknown_08499590;
-            p = tiles;
-            t = (y - 1) * 2;
-            rows = p + 0x417A;
-            off = (*(u16 *)(rows + t) + x) * 2;
-            tiles = tiles + 0xA22;
-            tiles += off;
-            up = *(u16 *)tiles;
+            up = gMap->tile[gMap->rowOffset[y - 1] + x];
 
             if (up == 0x20 || up == 2)
                 sub_08001158(x, y - 1, 0x20);

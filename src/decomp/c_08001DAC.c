@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -52,7 +53,7 @@ void sub_08001DAC(void)
     u16 m3;
     u16 m4;
 
-    sx = gUnknown_0200B0B0->unk08 - ((s16)*(u16 *)(gUnknown_08499590 + 4) >> 4);
+    sx = gUnknown_0200B0B0->unk08 - (gMap->unk04 >> 4);
     flag = 1;
 
     switch (gUnknown_0200B0B0->unk4c)

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -32,10 +33,10 @@ void sub_08010ADC(int x, int y)
     for (i = 0; i < 5; i++)
     {
         nx = x + gUnknown_0848897C[i];
-        if (nx >= 0 && nx < *(u16 *)gUnknown_08499590)
+        if (nx >= 0 && nx < gMap->width)
         {
             ny = y + gUnknown_08488986[i];
-            if (ny >= 0 && ny < *(u16 *)(gUnknown_08499590 + 2))
+            if (ny >= 0 && ny < gMap->height)
                 sub_08010664(nx, ny);
         }
     }

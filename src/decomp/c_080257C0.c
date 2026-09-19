@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -70,7 +71,7 @@ u8 sub_080257C0(u16 id)
         return 1;
 
     if (sub_08026FD0(gUnknown_084995FE[gUnknown_030033EC],
-                     (p = gUnknown_08499590, t = y * 2, rows = p + 0x417A,
+                     (p = (u8 *)gMap, t = y * 2, rows = p + 0x417A,
                       idx = *(u16 *)(rows + t) + x, cells = p + 0x1432,
                       *(cells + idx))))
         return 1;
@@ -81,10 +82,10 @@ u8 sub_080257C0(u16 id)
     if (y > 0)
         total += sub_08025744(x, y - 1);
 
-    if (x < *(u16 *)gUnknown_08499590 - 1)
+    if (x < gMap->width - 1)
         total += sub_08025744(x + 1, y);
 
-    if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+    if (y < gMap->height - 1)
         total += sub_08025744(x, y + 1);
 
     if (total != 0)

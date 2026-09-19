@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -30,16 +31,16 @@ void sub_080210C8(s16 a1, s16 a2, s16 a3, s16 kind, s8 a5, int a6)
         break;
     case 1:
         sub_08020EDC(a1, a2, a3,
-                     gUnknown_08499590 + (gUnknown_03004070 * 1288 + 0x1E42),
+                     (u8 *)gMap + (gUnknown_03004070 * 1288 + 0x1E42),
                      a5, a6);
         break;
     case 3:
         sub_08020EDC(a1, a2, a3,
-                     gUnknown_08499590 + (gUnknown_03004070 * 1288 + 0x1E42),
+                     (u8 *)gMap + (gUnknown_03004070 * 1288 + 0x1E42),
                      a5, a6);
     case 2:
         sub_08020EDC(a1, a2, a3,
-                     gUnknown_08499590 + (gUnknown_03004088 * 1288 + 0x1E42),
+                     (u8 *)gMap + (gUnknown_03004088 * 1288 + 0x1E42),
                      a5, a6);
         break;
     }

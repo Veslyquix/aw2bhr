@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -19,13 +20,7 @@
  * and src/decomp/c_08003DC4.c's note). A flat `gUnknown_08499590[0x1432 + row +
  * x]` reassociates to `(p + idx) + K` where the ROM has `(p + K) + idx`, which
  * is +4 bytes and a different high-register assignment. */
-struct Unk409E8Map
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk409E8Map *)gUnknown_08499590)
+#define MAP gMap
 struct Unk409E8Proc
 {
     /* 00 */ u8 filler_00[0x3c];
@@ -47,8 +42,8 @@ void sub_080409E8(int a1, int a2, int a3, int a4, int a5)
     int x;
     int y;
 
-    x = a1 * 16 - *(s16 *)(gUnknown_08499590 + 4) + 8;
-    y = a2 * 16 - *(s16 *)(gUnknown_08499590 + 6) + 0x10;
+    x = a1 * 16 - gMap->unk04 + 8;
+    y = a2 * 16 - gMap->unk06 + 0x10;
     if (x <= 0x1f)
         x = 0x20;
     if (x > 0xd0)
@@ -63,13 +58,13 @@ void sub_080409E8(int a1, int a2, int a3, int a4, int a5)
     p->unk48 = a3;
     p->unk49 = a4;
     p->unk44 = a5;
-    p->unk4a = (MAP->cell[MAP->rowOffset[a2] + a1] & 0x1f) | (a5 << 5);
+    p->unk4a = (MAP->terrain[MAP->rowOffset[a2] + a1] & 0x1f) | (a5 << 5);
     q = Proc_Start(gUnknown_0849FD44, p);
     q->unk3c = x;
     q->unk3e = y;
     q->unk48 = a3;
     q->unk49 = a4;
     q->unk44 = a5;
-    q->unk45 = MAP->cell[MAP->rowOffset[a2] + a1] >> 5;
-    q->unk4a = MAP->cell[MAP->rowOffset[a2] + a1];
+    q->unk45 = MAP->terrain[MAP->rowOffset[a2] + a1] >> 5;
+    q->unk4a = MAP->terrain[MAP->rowOffset[a2] + a1];
 }

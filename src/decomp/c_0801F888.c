@@ -98,7 +98,7 @@ void sub_0801F92C(u8 *a1)
     gUnknown_084999C8->unk29 = gMap->height;
 }
 
-/* A busy-wait sized by the gUnknown_08499590 screen: the nested loop has an
+/* A busy-wait sized by the gMap screen: the nested loop has an
  * EMPTY body and exists only to burn width * height iterations.
  *
  * The inner loop reads as a countdown (`subs r0,#1; cmp r0,#0; bne`) but the
@@ -119,7 +119,7 @@ void sub_0801F98C(void)
     int x;
     int y;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+    for (y = 0; y < gMap->height; y++)
+        for (x = 0; x < gMap->width; x++)
             ;
 }

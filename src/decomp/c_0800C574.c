@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -22,7 +23,7 @@ void sub_0800C574(int x, int y, int t)
 
     n = (s8)gUnknown_0200B0B0->unk12;
 
-    p = gUnknown_08499590;
+    p = (u8 *)gMap;
     u = y * 2;
     rows = p + 0x417A;
     off = *(u16 *)(rows + u) + x;
@@ -69,20 +70,12 @@ void sub_0800C574(int x, int y, int t)
  * is that store aliasing the pointer global. */
 void sub_0800C608(int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
     int off;
     int cell;
-    int t;
     int i;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + x;
-    tiles = p + 0x1432;
-    cell = tiles[off];
+    off = gMap->rowOffset[y] + x;
+    cell = gMap->terrain[off];
 
     if (sub_0800C7E8(cell) == 2)
         sub_0800C7A4(cell);

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,8 +29,8 @@ void sub_0803EF70(struct Unk3EF70Proc *proc)
     Decompress(gUnknown_08113BE0, (void *)0x06013940);
     Decompress(gUnknown_081143D0, (void *)0x06014940);
     ApplyPaletteExt(gUnknown_08114E34, 0x260, 0x40);
-    x = proc->unk2c * 16 - *(s16 *)(gUnknown_08499590 + 4);
-    y = proc->unk30 * 16 - *(s16 *)(gUnknown_08499590 + 6);
+    x = proc->unk2c * 16 - gMap->unk04;
+    y = proc->unk30 * 16 - gMap->unk06;
     sub_0801C70C(gUnknown_08113F84, (x + gUnknown_0849F820[0]) & 0x1ff,
                  (y + gUnknown_0849F828[0]) & 0xff, 0x31ca, 0, 0);
     sub_0801C70C(gUnknown_08113F84, ((x + gUnknown_0849F820[1]) & 0x1ff) | 0x1000,

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -37,15 +38,7 @@
  *    recorded rather than changed.
  */
 
-struct Unk3E808Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_0004[0x12 - 0x04];
-    /* 0x0012 */ u8 unit[0x417A - 0x12];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3E808Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
 {
@@ -64,29 +57,29 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
     bestX = 0;
     bestY = 0;
     bestT = 0;
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(MAP->unk2852);
     sub_0801F838(0xff);
     x = a1 + (int)sub_0803E7C0(a4, a5);
     y = a2 + (int)sub_0803E7E4(a4, a5);
     sub_0801FAC4(x, y, (u16)a5, gUnknown_0849F6B8[a4][0], bestT);
-    for (j = 0; j < MAP->unk02; j++)
+    for (j = 0; j < MAP->height; j++)
     {
-        for (i = 0; i < MAP->unk00; i++)
+        for (i = 0; i < MAP->width; i++)
         {
             if ((s8)gUnknown_03003340[j][i] < 0)
                 continue;
-            if (MAP->unit[MAP->rowOffset[j] + i] == 0)
+            if (MAP->unk0012[MAP->rowOffset[j] + i] == 0)
                 continue;
-            if (sub_08026F28(gUnknown_030033EC, (MAP->unit[MAP->rowOffset[j] + i] >> 6) + 1) == 1)
+            if (sub_08026F28(gUnknown_030033EC, (MAP->unk0012[MAP->rowOffset[j] + i] >> 6) + 1) == 1)
                 continue;
             if (!sub_08020DBC(gUnknown_030033EC, i, j))
                 continue;
-            u = &gUnknown_08499594[MAP->unit[MAP->rowOffset[j] + i]];
+            u = &gUnknown_08499594[MAP->unk0012[MAP->rowOffset[j] + i]];
             if (u->unk00 == 0x18)
             {
                 if ((u->unk01 & 0x20) != 0)
                     continue;
-                if (!sub_080257C0(MAP->unit[MAP->rowOffset[j] + i]))
+                if (!sub_080257C0(MAP->unk0012[MAP->rowOffset[j] + i]))
                     continue;
             }
             score = u->unk04_0 * (u16)(gUnknown_085D5ABC[u->unk00].unk06 / 10);
@@ -95,7 +88,7 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
             best = score;
             bestX = i;
             bestY = j;
-            bestT = MAP->unit[MAP->rowOffset[j] + i];
+            bestT = MAP->unk0012[MAP->rowOffset[j] + i];
         }
     }
     if (bestT == 0)

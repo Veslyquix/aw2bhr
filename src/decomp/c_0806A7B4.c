@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -97,7 +98,7 @@ void sub_0806A8E4(struct Unk6A8E4Proc *proc)
 {
     int x;
     int y;
-    u8 *map;
+    struct Map *map;
 
     proc->unk5c--;
 
@@ -120,9 +121,9 @@ void sub_0806A8E4(struct Unk6A8E4Proc *proc)
             proc->unk5a++;
         }
 
-        map = gUnknown_08499590;
-        *(u16 *)(map + 4) = proc->unk5e + x;
-        *(u16 *)(map + 6) = proc->unk60 + y;
+        map = gMap;
+        map->unk04 = proc->unk5e + x;
+        map->unk06 = proc->unk60 + y;
 
         sub_08023860();
         sub_0801237C();

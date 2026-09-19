@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -29,7 +30,7 @@ void sub_0805E9DC(void)
 {
     void (*fns[2])(void) = { sub_0805E87C, sub_0805E778 };
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->unk2852);
 
     if ((gUnknown_030040D8->unk05 & 0xf8) == 0
         && ((struct Unk5E9DCFlags *)gUnknown_030040D8)->unk09_0 != 0

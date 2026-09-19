@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -30,13 +31,13 @@ void sub_0802361C(void)
     int dir;
     int n;
 
-    if ((*(u16 *)(gUnknown_08499590 + 0x10) & 0xf) != 0)
+    if ((gMap->unk10 & 0xf) != 0)
         return;
 
     dir = (gpKeySt->unk02 >> 4) & 0xf;
 
     n = gUnknown_030033E4.unk00 + gUnknown_08499C7C[dir][0];
-    if (n >= 0 && n < *(u16 *)gUnknown_08499590)
+    if (n >= 0 && n < gMap->width)
     {
         gUnknown_030032C4.unk00 += gUnknown_08499C7C[dir][0] * 4;
         gUnknown_030033E4.unk00 = n;
@@ -45,7 +46,7 @@ void sub_0802361C(void)
     }
 
     n = gUnknown_030033E4.unk02 + gUnknown_08499C7C[dir][1];
-    if (n >= 0 && n < *(u16 *)(gUnknown_08499590 + 2))
+    if (n >= 0 && n < gMap->height)
     {
         gUnknown_030032C4.unk02 += gUnknown_08499C7C[dir][1] * 4;
         gUnknown_030033E4.unk02 = n;

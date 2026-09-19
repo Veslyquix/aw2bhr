@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -58,7 +59,7 @@ loop:
     if (v.pos.unk00 == 0x270F)
         return;
 
-    p = gUnknown_08499590;
+    p = (u8 *)gMap;
     t = v.pos.unk02 * 2;
     rows = p + 0x417a;
     idx = *(u16 *)(rows + t) + v.pos.unk00;

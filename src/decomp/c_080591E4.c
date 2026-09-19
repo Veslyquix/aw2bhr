@@ -23,10 +23,11 @@
  * matched separately and neither derived from the other.
  *
  * Uses `gMap` (include/map.h), but the `sub_0801F92C` setup calls must also
- * spell it `(u8 *)gMap + offset`, not `gUnknown_08499590 + offset` --
- * agbcc's CSE only reuses a pointer load across identical symbols, and
- * mixing the two names for the same address forces a second pool load (see
- * sub_08057D90 for the fuller writeup of this).
+ * pass `gMap->unk2D5A` / `gMap->unk2852` (the plane's own array member,
+ * decays to `u8 *`), not `gUnknown_08499590 + offset` or a cast -- agbcc's
+ * CSE only reuses a pointer load across identical symbols, and mixing in the
+ * raw name anywhere forces a second pool load (see sub_08057D90 for the
+ * fuller writeup of this).
  *
  * `mask` MUST BE A BYTE, and this was the entire residual: with `int mask` the
  * function is 640 bytes with every instruction in the right place, and only
@@ -136,7 +137,7 @@ void sub_080591E4(void *a1)
     bestY = 0;
     mask = 0;
 
-    sub_0801F92C((u8 *)gMap + 0x2D5A);
+    sub_0801F92C(gMap->unk2D5A);
     gUnknown_030013EC(cur[0], cur[1], gUnknown_030040D8->unk00, 0x78, 0);
 
     if (gUnknown_03004784[1] >= gUnknown_030040D8->unk07[3] % 100)
@@ -145,7 +146,7 @@ void sub_080591E4(void *a1)
         mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     }
 
-    sub_0801F92C((u8 *)gMap + 0x2852);
+    sub_0801F92C(gMap->unk2852);
     sub_080202A4(gUnknown_030040D8);
 
     if (gUnknown_03004784[1] == 100)

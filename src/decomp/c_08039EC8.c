@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,7 +29,7 @@ struct Unk39EC8Proc
 void sub_08039EC8(struct Unk39EC8Proc *proc)
 {
     if (sub_0801C254(proc->unk34,
-                     ((proc->unk29 << 4) - *(s16 *)(gUnknown_08499590 + 4) + 8) & 0x1ff,
-                     ((proc->unk2a << 4) - *(s16 *)(gUnknown_08499590 + 6) + 8) & 0xff) == 0)
+                     ((proc->unk29 << 4) - gMap->unk04 + 8) & 0x1ff,
+                     ((proc->unk2a << 4) - gMap->unk06 + 8) & 0xff) == 0)
         Proc_Break(proc);
 }

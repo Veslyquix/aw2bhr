@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -41,10 +42,6 @@ int sub_08008928(void)
         if (v != gUnknown_0200B0B0->unk24)
         {
             s8 *costs;
-            u8 *m;
-            u8 *rows;
-            u8 *cells;
-            int t;
             int idx;
             int c;
 
@@ -64,12 +61,8 @@ int sub_08008928(void)
              * matched -- this is a declaration change, not a behaviour one. */
             costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
-            m = gUnknown_08499590;
-            t = y * 2;
-            rows = m + 0x417A;
-            idx = *(u16 *)(rows + t) + x;
-            cells = m + 0x1432;
-            c = (*(cells + idx) & 0x1f)
+            idx = gMap->rowOffset[y] + x;
+            c = (gMap->terrain[idx] & 0x1f)
                 + gUnknown_085D5ABC[gUnknown_0200B0B0->unk24 & 0x3f].unk19 * 32;
 
             q = costs[c];
@@ -98,25 +91,17 @@ int sub_08008928(void)
 
 int sub_08008A8C(int mode, int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
     struct Unk08499594 *e;
-    int t;
     int idx;
     int result;
 
     result = 0;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    idx = *(u16 *)(rows + t) + x;
-    cells = p + 0x12;
+    idx = gMap->rowOffset[y] + x;
 
-    if (*(cells + idx) != 0)
+    if (gMap->unk0012[idx] != 0)
     {
-        e = &gUnknown_08499594[*(cells + idx)];
+        e = &gUnknown_08499594[gMap->unk0012[idx]];
 
         if (mode != 0)
         {

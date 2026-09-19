@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,7 +29,7 @@ void sub_08062AE4(void)
             b = 0;
             for (y = j * 4; y < j * 4 + 4; y++) {
                 for (x = i * 4; x < i * 4 + 4; x++) {
-                    p = gUnknown_08499590;
+                    p = (u8 *)gMap;
                     t = y * 2;
                     rows = p + 0x417a;
                     off = *(u16 *)(rows + t) + x;
@@ -39,7 +40,7 @@ void sub_08062AE4(void)
                                          cells[*(u16 *)(rows + t) + x]) == 1)
                             a++;
                         else {
-                            p = gUnknown_08499590;
+                            p = (u8 *)gMap;
                             rows = p + 0x417a;
                             off = *(u16 *)(rows + t) + x;
                             p += 0x1432;

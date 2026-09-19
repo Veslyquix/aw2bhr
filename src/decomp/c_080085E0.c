@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,20 +29,12 @@
 
 void sub_080085E0(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int x, y, t, off;
+    int x, y;
 
     x = gUnknown_0200B0B0->unk08;
     y = gUnknown_0200B0B0->unk0a;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = (*(u16 *)(rows + t) + x) * 2;
-    tiles = p + 0xA22;
-    gUnknown_0200B0B0->unk20 = *(u16 *)(tiles + off);
+    gUnknown_0200B0B0->unk20 = gMap->tile[gMap->rowOffset[y] + x];
     gUnknown_0200B0B0->unk00 |= 0x1000;
 
     switch (gUnknown_0200B0B0->unk2a & 0x1f) {

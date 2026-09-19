@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -49,7 +50,7 @@ void sub_0802E4B4(s16 x, s16 y)
     sel = &gUnknown_03003F38;
     sx = x;
     sy = y;
-    p = gUnknown_08499590;
+    p = (u8 *)gMap;
     t = sy * 2;
     rows = p + 0x417A;
     idx = *(u16 *)(rows + t) + sx;
@@ -64,7 +65,7 @@ void sub_0802E4B4(s16 x, s16 y)
         return;
     }
 
-    p = gUnknown_08499590;
+    p = (u8 *)gMap;
     t = sy * 2;
     rows = p + 0x417A;
     idx = *(u16 *)(rows + t) + sx;
@@ -82,7 +83,7 @@ void sub_0802E4B4(s16 x, s16 y)
     sub_08024454();
     sub_080258CC();
     gUnknown_03004480 = (*sel >> 6) + 1;
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->unk2852);
     sub_080202A4(gUnknown_030040D8);
     gUnknown_03004480 = gUnknown_030033EC;
     sub_08022990((u16)sx, (u16)sy, 0);

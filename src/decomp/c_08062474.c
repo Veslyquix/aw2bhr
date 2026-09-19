@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -20,8 +21,8 @@ void sub_08062474(void)
         return;
     gUnknown_030045CC.unk00_0 = 1;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
-    sub_080581A4(gUnknown_08499590 + 0x3262, 0);
+    sub_0801F92C(gMap->unk2852);
+    sub_080581A4(gMap->unk3262, 0);
 
     mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
 

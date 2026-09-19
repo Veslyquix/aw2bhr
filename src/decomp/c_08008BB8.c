@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -21,10 +22,6 @@ void EnsureValidTile(int x, int y)
     if (v > 0)
     {
         s8 *costs;
-        u8 *p;
-        u8 *rows;
-        u8 *cells;
-        int t;
         int idx;
         int c;
 
@@ -33,12 +30,8 @@ void EnsureValidTile(int x, int y)
          * same offset, so `[0]` is byte-identical to the spelling that matched. */
         costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
-        p = gUnknown_08499590;
-        t = y * 2;
-        rows = p + tileMap_417A;
-        idx = *(u16 *)(rows + t) + x;
-        cells = p + terrainMap_1432;
-        c = (*(cells + idx) & 0x1f) + gUnknown_085D5ABC[v & 0x3f].unk19 * 32;
+        idx = gMap->rowOffset[y] + x;
+        c = (gMap->terrain[idx] & 0x1f) + gUnknown_085D5ABC[v & 0x3f].unk19 * 32;
 
         if (costs[c] == -1)
             sub_08008A8C(0, x, y);

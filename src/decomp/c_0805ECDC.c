@@ -142,7 +142,7 @@ void sub_0805EF9C(void)
         sub_0805F4F8();
     else if ((s8)gUnknown_03003340[v.pos.unk02][v.pos.unk00] <= 0x79)
         sub_080591E4(&v);
-    sub_0801F92C(gUnknown_08499590 + 0x2d5a);
+    sub_0801F92C(gMap->unk2D5A);
     gUnknown_030013EC(v.pos.unk00, v.pos.unk02, 0x10, 0x78, 0);
     sub_08059464(&v);
     sub_0805F7B8();
