@@ -43,20 +43,11 @@ void sub_080080F8(int x, int y)
 
     if (sub_0800119C(x, y, 1))
     {
-        u8 *p;
-        u8 *rows;
-        u8 *tiles;
-        int t;
         int off;
         int v;
 
-        p = (u8 *)gMap;
-        scale = 2;
-        t = y * scale;
-        rows = p + 0x417A;
-        off = (*(u16 *)(rows + t) + x) * scale;
-        tiles = p + 0xA22;
-        v = *(u16 *)(tiles + off);
+        off = gMap->rowOffset[y] + x;
+        v = gMap->tile[off];
 
         if (v == 0x43 || v == 3)
         {

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -85,31 +86,23 @@ void sub_08059F24(void *a1)
   struct Unk5A514Cell *out;
   struct Unk08499594 *u;
   int new_var;
-  u8 *q;
-  u8 *rows;
-  u8 *props;
   u8 cell;
   int x;
   int y;
-  int t;
   int off;
   out = a1;
-  for (y = 0; y < (*((u16 *) (gUnknown_08499590 + 2))); y++)
+  for (y = 0; y < gMap->height; y++)
   {
-    for (x = 0; x < (*((u16 *) gUnknown_08499590)); x++)
+    for (x = 0; x < gMap->width; x++)
     {
       gUnknown_03003340[y][x] += 0;
       if (((s8) gUnknown_03003340[y][x]) < 0)
       {
         continue;
       }
-      q = gUnknown_08499590;
-      t = y * 2;
-      rows = q + 0x417a;
-      new_var = (*((u16 *) (rows + t))) + x;
+      new_var = gMap->rowOffset[y] + x;
       off = new_var;
-      props = q + 0x12;
-      cell = props[off];
+      cell = gMap->unit[off];
       if (cell == 0)
       {
         continue;
@@ -147,31 +140,23 @@ void sub_0805A008(void *a1)
   struct Unk5A514Cell *out;
   struct Unk08499594 *u;
   int new_var;
-  u8 *q;
-  u8 *rows;
-  u8 *props;
   u8 cell;
   int x;
   int y;
-  int t;
   int off;
   out = a1;
-  for (y = 0; y < (*((u16 *) (gUnknown_08499590 + 2))); y++)
+  for (y = 0; y < gMap->height; y++)
   {
-    for (x = 0; x < (*((u16 *) gUnknown_08499590)); x++)
+    for (x = 0; x < gMap->width; x++)
     {
       gUnknown_03003340[y][x] += 0;
       if (((s8) gUnknown_03003340[y][x]) < 0)
       {
         continue;
       }
-      q = gUnknown_08499590;
-      t = y * 2;
-      rows = q + 0x417a;
-      new_var = (*((u16 *) (rows + t))) + x;
+      new_var = gMap->rowOffset[y] + x;
       off = new_var;
-      props = q + 0x12;
-      cell = props[off];
+      cell = gMap->unit[off];
       if (cell == 0)
       {
         continue;

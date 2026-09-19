@@ -33,10 +33,7 @@
  * than in the global's type. */
 void sub_0802E4B4(s16 x, s16 y)
 {
-    u8 *p;
-    u8 *rows;
     u8 *sel;
-    int t;
     int idx;
     s16 sx;
     s16 sy;
@@ -50,13 +47,8 @@ void sub_0802E4B4(s16 x, s16 y)
     sel = &gUnknown_03003F38;
     sx = x;
     sy = y;
-    p = (u8 *)gMap;
-    t = sy * 2;
-    rows = p + 0x417A;
-    idx = *(u16 *)(rows + t) + sx;
-    p += 0x12;
-    p += idx;
-    gUnknown_03003F38 = *p;
+    idx = gMap->rowOffset[sy] + sx;
+    gUnknown_03003F38 = gMap->unit[idx];
     gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[*sel];
 
     if (sub_080242B0(sx, sy))
@@ -65,13 +57,8 @@ void sub_0802E4B4(s16 x, s16 y)
         return;
     }
 
-    p = (u8 *)gMap;
-    t = sy * 2;
-    rows = p + 0x417A;
-    idx = *(u16 *)(rows + t) + sx;
-    p += 0x12;
-    p += idx;
-    if (*p == 0 || (gUnknown_030040D8->unk01 & 1))
+    idx = gMap->rowOffset[sy] + sx;
+    if (gMap->unit[idx] == 0 || (gUnknown_030040D8->unk01 & 1))
     {
         sub_0802D458();
         return;

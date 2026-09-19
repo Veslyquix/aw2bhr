@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -25,11 +26,7 @@
  */
 int sub_08045848(void)
 {
-    u8 *p;
-
-    p = gUnknown_08499590;
-
-    if (*(p + *(u16 *)(p + 0x4184) + 0x143f) >> 5 == 1)
+    if (gMap->terrain[gMap->rowOffset[5] + 13] >> 5 == 1)
         return 1;
 
     return 0;
@@ -53,11 +50,7 @@ int sub_08045848(void)
  */
 int sub_08045874(void)
 {
-    u8 *p;
-
-    p = gUnknown_08499590;
-
-    if (*(p + *(u16 *)(p + 0x417e) + 0x1441) >> 5 == 1)
+    if (gMap->terrain[gMap->rowOffset[2] + 15] >> 5 == 1)
         return 1;
 
     return 0;
@@ -81,11 +74,7 @@ int sub_08045874(void)
  */
 int sub_080458A0(void)
 {
-    u8 *p;
-
-    p = gUnknown_08499590;
-
-    if (*(p + *(u16 *)(p + 0x418a) + 0x1435) >> 5 == 1)
+    if (gMap->terrain[gMap->rowOffset[8] + 3] >> 5 == 1)
         return 1;
 
     return 0;
@@ -109,11 +98,7 @@ int sub_080458A0(void)
  */
 int sub_080458CC(void)
 {
-    u8 *p;
-
-    p = gUnknown_08499590;
-
-    if (*(p + *(u16 *)(p + 0x418a) + 0x1438) >> 5 == 1)
+    if (gMap->terrain[gMap->rowOffset[8] + 6] >> 5 == 1)
         return 1;
 
     return 0;
@@ -133,13 +118,7 @@ int sub_080458CC(void)
  */
 int sub_080458F8(void)
 {
-    u8 *p;
-    u8 *q;
-
-    p = gUnknown_08499590;
-    q = p + 0x1432;
-
-    if (*(q + *(u16 *)(p + 0x418c)) >> 5 == 1)
+    if (gMap->terrain[gMap->rowOffset[9]] >> 5 == 1)
         return 1;
 
     return 0;

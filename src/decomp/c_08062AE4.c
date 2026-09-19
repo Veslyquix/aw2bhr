@@ -10,54 +10,59 @@
 
 void sub_08062AE4(void)
 {
-    int i;
-    int j;
-    int x;
-    int y;
-    int a;
-    int b;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
-    int off;
-    int v;
-
-    for (j = 0; j <= 9; j++) {
-        for (i = 0; i <= 0xb; i++) {
-            a = 0;
-            b = 0;
-            for (y = j * 4; y < j * 4 + 4; y++) {
-                for (x = i * 4; x < i * 4 + 4; x++) {
-                    p = (u8 *)gMap;
-                    t = y * 2;
-                    rows = p + 0x417a;
-                    off = *(u16 *)(rows + t) + x;
-                    cells = p + 0x1432;
-                    if (gUnknown_085767D5[cells[off] & 0x1f] != 0) {
-                        gUnknown_0202DAD8[j][i].unk2a++;
-                        if (sub_08026FD0(gUnknown_03003F2C,
-                                         cells[*(u16 *)(rows + t) + x]) == 1)
-                            a++;
-                        else {
-                            p = (u8 *)gMap;
-                            rows = p + 0x417a;
-                            off = *(u16 *)(rows + t) + x;
-                            p += 0x1432;
-                            p += off;
-                            if ((*p & 0xe0) != 0)
-                                b++;
-                        }
-                    }
-                }
+  int i;
+  int j;
+  int x;
+  int y;
+  int a;
+  int b;
+  int off;
+  int v;
+  for (j = 0; j <= 9; j++)
+  {
+    for (i = 0; i <= 0xb; i++)
+    {
+      a = 0;
+      b = 0;
+      for (y = j * 4; y < ((j * 4) + 4); y++)
+      {
+        for (x = i * 4; x < ((i * 4) + 4); x++)
+        {
+          ;
+          if (gUnknown_085767D5[gMap->terrain[gMap->rowOffset[y] + x] & 0x1f] != 0)
+          {
+            gUnknown_0202DAD8[j][i].unk2a++;
+            if (sub_08026FD0(gUnknown_03003F2C, gMap->terrain[gMap->rowOffset[y] + x]) == 1)
+            {
+              a++;
             }
-            if ((s16)gUnknown_0202DAD8[j][i].unk2a != 0 && a + b != 0) {
-                if (a > b)
-                    v = a * 100 / (s16)gUnknown_0202DAD8[j][i].unk2a / 6 - 1;
-                else
-                    v = (b * 100 / (s16)gUnknown_0202DAD8[j][i].unk2a / 6 - 1) | 0x8000;
-                gUnknown_0202DAD8[j][i].unk28 = v;
+            else
+            {
+              off = gMap->rowOffset[y] + x;
+              if ((gMap->terrain[off] & 0xe0) != 0)
+              {
+                b++;
+              }
             }
+          }
         }
+
+      }
+
+      if ((((s16) gUnknown_0202DAD8[j][i].unk2a) != 0) && ((a + b) != 0))
+      {
+        if (a > b)
+        {
+          v = (((a * 100) / ((s16) gUnknown_0202DAD8[j][i].unk2a)) / 6) - 1;
+        }
+        else
+        {
+          v = ((((b * 100) / ((s16) gUnknown_0202DAD8[j][i].unk2a)) / 6) - 1) | 0x8000;
+        }
+        gUnknown_0202DAD8[j][i].unk28 = v;
+      }
     }
+
+  }
+
 }

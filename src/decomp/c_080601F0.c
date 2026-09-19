@@ -29,24 +29,18 @@
  * c_08001158.c's idiom with the plane at +0x234A. */
 void sub_080601F0(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
+    struct Map *map;
     int i;
     int x;
     int y;
-    int t;
     int off;
 
-    p = (u8 *)gMap;
+    map = gMap;
     i = gUnknown_030046C0.unk06;
     y = gUnknown_08499594[i].unk03;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + (x = gUnknown_08499594[i].unk02);
-    cells = p + 0x234A;
+    off = map->rowOffset[y] + (x = gUnknown_08499594[i].unk02);
 
-    if (cells[off] != 0)
+    if (map->unk234A[off] != 0)
     {
         sub_08029088(x, y);
         gUnknown_030046D4 = 0;
@@ -69,22 +63,16 @@ void sub_080601F0(void)
  * Row/tile arithmetic is c_08001158.c's idiom with the plane at +0x234A. */
 void sub_08060264(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
+    struct Map *map;
     int x;
     int y;
-    int t;
     int off;
 
-    p = (u8 *)gMap;
+    map = gMap;
     y = gUnknown_030046C0.unk07;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + (x = gUnknown_030046C0.unk06);
-    cells = p + 0x234A;
+    off = map->rowOffset[y] + (x = gUnknown_030046C0.unk06);
 
-    if (cells[off] != 0)
+    if (map->unk234A[off] != 0)
     {
         sub_08029088(x, y);
         gUnknown_030046D4 = 0;
@@ -101,23 +89,17 @@ void sub_08060264(void)
  * that are not the same spelling; see c_08060264.c. */
 void sub_080602C4(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
+    struct Map *map;
     int x;
     int y;
-    int t;
     int off;
 
     x = gUnknown_030046C0.unk06;
     y = gUnknown_030046C0.unk07;
-    p = (u8 *)gMap;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + x;
-    cells = p + 0x234A;
+    map = gMap;
+    off = map->rowOffset[y] + x;
 
-    if (cells[off] != 0)
+    if (map->unk234A[off] != 0)
     {
         sub_08029088(x, y);
         gUnknown_030046D4 = 0;

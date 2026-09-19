@@ -13,10 +13,6 @@
  * and none of them is guessable. */
 void sub_08044854(int x, int y, int c)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int idx;
     struct Unk08499594 *u;
     struct Unk08499594 **pp;
@@ -26,16 +22,14 @@ void sub_08044854(int x, int y, int c)
     if (y < 0)
         return;
 
-    p = (u8 *)gMap;
-
     if (x >= gMap->width)
         return;
     if (y >= gMap->height)
         return;
 
-    u = &gUnknown_08499594[(pp = &gUnknown_08499594, t = y * 2,
-        idx = *(u16 *)((rows = p + 0x417A) + t) + x,
-        (cells = p + 0x51A)[idx])];
+    u = &gUnknown_08499594[(pp = &gUnknown_08499594,
+        idx = gMap->rowOffset[y] + x,
+        gMap->unitUnk[idx])];
 
     if (u->unk00 == 0)
         return;

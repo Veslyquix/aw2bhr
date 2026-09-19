@@ -31,28 +31,22 @@
  * copies survive in the ROM rather than one or four. */
 int sub_0800F564(int x, int y, int dir)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
+    struct Map *map;
     int nx;
     int ny;
-    int t;
     int off;
     int tile;
     int result;
 
-    p = (u8 *)gMap;
+    map = gMap;
     ny = y + gUnknown_08488954[dir];
-    t = ny * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t);
+    off = map->rowOffset[ny];
     nx = x + gUnknown_0848894C[dir];
-    off = (off + nx) * 2;
-    tiles = p + 0xA22;
-    tile = *(u16 *)(tiles + off);
+    off = off + nx;
+    tile = map->tile[off];
     result = 0;
 
-    if (nx >= 0 && nx < *(u16 *)p && ny >= 0 && ny < *(u16 *)(p + 2))
+    if (nx >= 0 && nx < map->width && ny >= 0 && ny < map->height)
     {
         if (tile == 0x142 || tile == 0x143 || tile == 0x140 || tile == 0x141
             || tile == 0x160 || tile == 0x161 || tile == 0x162 || tile == 0x163

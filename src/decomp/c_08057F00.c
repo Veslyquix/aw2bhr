@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -23,8 +24,7 @@
  * stores 0 on the FALLTHROUGH arm and the `bgt` goes to the `- 5` arm, so the
  * comparison is written that way round.
  *
- * Cell addressing is sub_080415E4's idiom -- p, then t, then rows, then off,
- * then cells -- keeping 0x417A and 0x1432 in pool words.
+ * Cell addressing uses gMap's terrain and rowOffset fields directly.
  */
 
 struct Unk58058Cell
@@ -120,10 +120,6 @@ int sub_08057FE8(int a1)
 int sub_08058058(int n)
 {
     struct Unk58058Cell *out;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
     int x;
     int y;
@@ -134,18 +130,14 @@ int sub_08058058(int n)
     if ((u8)(gUnknown_030040D8->unk00 - 1) > 1)
         return 0;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0)
             {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x1432;
-                if ((cells[off] & 0x1f) == 0x11)
+                off = gMap->rowOffset[y] + x;
+                if ((gMap->terrain[off] & 0x1f) == 0x11)
                 {
                     n++;
                     out->x = x;
@@ -165,8 +157,8 @@ int sub_08058058(int n)
 }
 
 /* Repeatedly pulls the next candidate cell off sub_08057EC0 and maps it through
- * gUnknown_08499590's rowOffset table (+0x417A, u16 per row) into the s8 cell
- * table at +0x193A; that byte selects a gUnknown_084995A0 record.  The first
+ * gMap's rowOffset table into the property plane; that byte selects a
+ * gUnknown_084995A0 record. The first
  * record whose unk03[a2] is not above a1 wins: the counter is bumped and the
  * record returned.  NOTE the return type -- the object really is a
  * `struct Unk084995A0 *`; see the comment in include/unknown-functions.h.
@@ -180,10 +172,6 @@ struct Unk08499594 *sub_08058144(int a1, int a2)
     struct Unk08057EC0Rec *e;
     struct Unk084995A0 **arrp;
     struct Unk084995A0 *q;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int idx;
     int v;
 
@@ -195,12 +183,8 @@ struct Unk08499594 *sub_08058144(int a1, int a2)
         if (e == 0)
             return 0;
 
-        p = gUnknown_08499590;
-        t = e->unk01 * 2;
-        rows = p + 0x417A;
-        idx = *(u16 *)(rows + t) + e->unk00;
-        cells = p + 0x193A;
-        v = *(s8 *)(cells + idx);
+        idx = gMap->rowOffset[e->unk01] + e->unk00;
+        v = (s8)gMap->property[idx];
         q = &(*arrp)[v];
     } while (q->unk03[a2] > a1);
 

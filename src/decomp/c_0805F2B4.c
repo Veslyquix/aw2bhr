@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,16 +7,6 @@
  * contiguous block at 0x0805F2B4.
  * sub_0805F2B4 @ 0x0805F2B4
  */
-
-struct Unk5F2B4Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142e];
-    /* 0x1432 */ u8 unk1432[0x1928];
-    /* 0x2d5a */ u8 danger[0x1420];
-    /* 0x417a */ u16 unk417A[1];
-};
 
 /* sub_0805F0EC's twin: same double scan over the map, same 4-byte (u16, u16)
  * buffer seeded with the 0x270F sentinel and handed to sub_080591E4, but the
@@ -63,10 +54,8 @@ struct Unk5F2B4Map
  * constant for gUnknown_030040D8 and the promotion carries
  * "rodata": ["0x0816DAA8"].
  *
- * sub_0801F92C takes the raw `u8 *` plane pointer, the spelling
- * c_0805EF9C.c already uses. 0x2D5A is a new member of the shared map layout,
- * carved byte-neutrally out of the existing move[0xA10] filler (0xA10 splits
- * into 0x508 + 0x508 at 0x2D5A), so no other reader changes. */
+ * The plane rebuild calls pass gMap's danger and move members directly; the
+ * arrays decay to the `u8 *` parameter type without raw map-pointer arithmetic. */
 void sub_0805F2B4(void)
 {
     union Unk802C57CBuf v;
@@ -107,43 +96,37 @@ void sub_0805F2B4(void)
     a = gUnknown_08499598[gUnknown_030033EC].unk2d & 0x7f;
     b = gUnknown_08499598[gUnknown_030033EC].unk2e & 0x7f;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2d5a);
+    sub_0801F92C(gMap->danger);
     gUnknown_030013EC(a, b, t, 5, best);
     sub_08058F30(&cost);
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->move);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, cost, best);
     v.raw = (v.raw & 0xFFFF0000) | 0x270F;
 
-    for (y = 0; y < ((struct Unk5F2B4Map *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk5F2B4Map *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
-            if ((s8)((struct Unk5F2B4Map *)gUnknown_08499590)->danger[
-                    ((struct Unk5F2B4Map *)gUnknown_08499590)->unk417A[y] + x]
-                <= 0)
+            if ((s8)gMap->danger[gMap->rowOffset[y] + x] <= 0)
                 continue;
 
             new_var2 = 0x10;
             if (gUnknown_030040D8->unk00 == 0
              || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != new_var2)
                 score = gUnknown_085D583C[
-                    ((struct Unk5F2B4Map *)gUnknown_08499590)->unk1432[
-                        ((struct Unk5F2B4Map *)gUnknown_08499590)->unk417A[y]
-                        + x] & 0x1f].unk10 * 10;
+                    gMap->terrain[gMap->rowOffset[y] + x] & 0x1f].unk10 * 10;
             else
                 score = 0;
 
             if (best <= score
-             && second > (s8)((struct Unk5F2B4Map *)gUnknown_08499590)->danger[
-                    ((struct Unk5F2B4Map *)gUnknown_08499590)->unk417A[y] + x])
+             && second > (s8)gMap->danger[gMap->rowOffset[y] + x])
             {
                 best = score;
-                new_var = ((struct Unk5F2B4Map *)gUnknown_08499590)->danger[
-                    ((struct Unk5F2B4Map *)gUnknown_08499590)->unk417A[y] + x];
+                new_var = gMap->danger[gMap->rowOffset[y] + x];
                 second = new_var;
                 xp = (u32)x << 16;
                 yp = (u32)y << 16;

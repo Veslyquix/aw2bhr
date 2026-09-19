@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -6,14 +7,6 @@
  * contiguous block at 0x08042650.
  * sub_08042650 @ 0x08042650
  */
-
-struct Unk42650Map
-{
-    u8 filler_0000[0x1432];
-    u8 terrain[0x234A - 0x1432];
-    u8 flag[0x417A - 0x234A];
-    u16 rowOffset[1];
-};
 
 /* MATCHED (wave 66, W66-B), 532/532 bytes. Separate block-scoped volatile
  * reads of the map pointer keep the two cell-address chains independent;
@@ -103,10 +96,10 @@ void sub_08042650(void)
     n = Div(n * sub_08042F14(gUnknown_030033EC), 100);
 
     {
-        u8 *map;
-        map = *(u8 *volatile *)&gUnknown_08499590;
-        t = ((struct Unk42650Map *)map)->terrain[
-                ((struct Unk42650Map *)map)
+        struct Map *map;
+        map = *(struct Map *volatile *)&gMap;
+        t = map->terrain[
+                map
                     ->rowOffset[gUnknown_03003100.pos.unk02]
                 + gUnknown_03003100.pos.unk00];
     }
@@ -122,10 +115,10 @@ void sub_08042650(void)
         goto do_body;
 
     {
-        u8 *map;
-        map = *(u8 *volatile *)&gUnknown_08499590;
-        if (((struct Unk42650Map *)map)->flag[
-                ((struct Unk42650Map *)map)
+        struct Map *map;
+        map = *(struct Map *volatile *)&gMap;
+        if (map->unk234A[
+                map
                     ->rowOffset[gUnknown_03003100.pos.unk02]
                 + gUnknown_03003100.pos.unk00] == 0)
             goto after_body;

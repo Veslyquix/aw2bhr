@@ -26,8 +26,8 @@
  * 99.4 -> 99.8; a single long run from the draft found nothing, replicating
  * wave 59's 87.3 -> 94.3 -> 98.2 -> match):
  *
- *  1. THE `cell` LOCAL IS NOT IN THE ORIGINAL.  `terr[idx]` is read inline at
- *     both uses -- `(terr[idx] & 0xE0)` and `terr[idx] & 0x1F`.  The park's
+ *  1. THE `cell` LOCAL IS NOT IN THE ORIGINAL.  `gMap->terrain[idx]` is read inline at
+ *     both uses -- `(gMap->terrain[idx] & 0xE0)` and `gMap->terrain[idx] & 0x1F`.  The park's
  *     "NEXT THING TO TRY" note guessed this correctly: `cell` was the one extra
  *     live pseudo taking r4 ahead of `u`, and deleting it is what unwound the
  *     r3/r4/r5 rotation the park had classified as the whole residual.
@@ -80,12 +80,7 @@ void sub_08029FE4(void)
   struct Unk08499594 *u;
   struct Unk802C57C pt;
   u8 *p7;
-  u8 *map;
-  u8 *rows;
-  u8 *terr;
-  u8 *marks;
   u16 i;
-  int t;
   int idx;
   u32 save;
   int n;
@@ -108,22 +103,17 @@ void sub_08029FE4(void)
     {
       continue;
     }
-    map = (u8 *)gMap;
-    t = u->unk03 * 2;
-    rows = map + 0x417A;
-    idx = (*((u16 *) (rows + t))) + u->unk02;
-    terr = map + 0x1432;
+    idx = gMap->rowOffset[u->unk03] + u->unk02;
     ;
-    if ((terr[idx] & 0xE0) != gUnknown_03004084)
+    if ((gMap->terrain[idx] & 0xE0) != gUnknown_03004084)
     {
       continue;
     }
-    if (gUnknown_085D5ABC[u->unk00].unk54[terr[idx] & 0x1F] == 0)
+    if (gUnknown_085D5ABC[u->unk00].unk54[gMap->terrain[idx] & 0x1F] == 0)
     {
       continue;
     }
-    marks = 0x234A + map;
-    if (marks[idx] == 0)
+    if (gMap->unk234A[idx] == 0)
     {
       sub_08029978(u, 0);
       sub_08029A48(u, 0);
