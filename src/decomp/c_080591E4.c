@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -21,9 +22,15 @@
  * What DID transfer between them is the whole loop body verbatim; each was
  * matched separately and neither derived from the other.
  *
+ * Uses `gMap` (include/map.h), but the `sub_0801F92C` setup calls must also
+ * spell it `(u8 *)gMap + offset`, not `gUnknown_08499590 + offset` --
+ * agbcc's CSE only reuses a pointer load across identical symbols, and
+ * mixing the two names for the same address forces a second pool load (see
+ * sub_08057D90 for the fuller writeup of this).
+ *
  * `mask` MUST BE A BYTE, and this was the entire residual: with `int mask` the
  * function is 640 bytes with every instruction in the right place, and only
- * `y` and the loop's `&gUnknown_08499590` pointer have r8 and sb swapped
+ * `y` and the loop's `&gMap` pointer have r8 and sb swapped
  * (`mov r9,r4` / `mov r8,r3` instead of `mov r8,r4` / `mov sb,r3`, with the
  * three reads following). Narrowing the local changes nothing in the emitted
  * stream -- it lives in a stack slot at [sp,#0x10] either way, and THUMB's
@@ -68,16 +75,6 @@
  * matches the four register arguments plus one stack word here.
  */
 
-struct Map591E4
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142E];
-    /* 0x1432 */ u8 unk1432[0x1928];
-    /* 0x2D5A */ u8 unk2D5A[0x0508];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 /* sub_08059464 @ 0x08059464, 528 bytes. MATCHED (first attempt).
  *
  * The sibling of sub_080591E4 at 0x080591E4: the same "walk every cell, keep
@@ -139,7 +136,7 @@ void sub_080591E4(void *a1)
     bestY = 0;
     mask = 0;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2D5A);
+    sub_0801F92C((u8 *)gMap + 0x2D5A);
     gUnknown_030013EC(cur[0], cur[1], gUnknown_030040D8->unk00, 0x78, 0);
 
     if (gUnknown_03004784[1] >= gUnknown_030040D8->unk07[3] % 100)
@@ -148,32 +145,32 @@ void sub_080591E4(void *a1)
         mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     }
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C((u8 *)gMap + 0x2852);
     sub_080202A4(gUnknown_030040D8);
 
     if (gUnknown_03004784[1] == 100)
         best = 0x7fff;
     else
-        best = (s8)((struct Map591E4 *)gUnknown_08499590)->unk2D5A[((struct Map591E4 *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+        best = (s8)gMap->unk2D5A[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
 
     bestX = -1;
 
-    for (y = 0; y < ((struct Map591E4 *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Map591E4 *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (((struct Map591E4 *)gUnknown_08499590)->unk2D5A[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x] > best)
+            if (gMap->unk2D5A[gMap->rowOffset[y] + x] > best)
                 continue;
-            if (((struct Map591E4 *)gUnknown_08499590)->unk3262[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x] & mask)
+            if (gMap->unk3262[gMap->rowOffset[y] + x] & mask)
                 continue;
             if (!sub_08059674(x, y))
                 continue;
             if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x20
-             && (((struct Map591E4 *)gUnknown_08499590)->unk1432[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x] & 0x1f) == 0xb)
+             && (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)((struct Map591E4 *)gUnknown_08499590)->unk2D5A[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x];
+            best = (s8)gMap->unk2D5A[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }

@@ -10,12 +10,17 @@
 
 /* MATCHED.
  *
- * The map planes go through the `struct Map` cast idiom of c_08000BF8.c. Plain
- * `u8 *` arithmetic on gUnknown_08499590 reassociates the 0x1432 / 0x417A /
- * 0x12 constants PAST the index -- the ROM adds the plane constant to the base
- * first, then the index -- and costs far more than the tail below.
- * gUnknown_08499590 is named directly at every use rather than bound to a local:
- * the ROM keeps only its ADDRESS in sl and re-loads the pointer each time.
+ * The map planes go through `gMap` (include/map.h), the typed linker alias
+ * for gUnknown_08499590. Plain `u8 *` arithmetic on it reassociates the
+ * 0x1432 / 0x417A / 0x12 constants PAST the index -- the ROM adds the plane
+ * constant to the base first, then the index -- and costs far more than the
+ * tail below. `gMap` is named directly at every use rather than bound to a
+ * local: the ROM keeps only its ADDRESS in sl and re-loads the pointer each
+ * time. The two `sub_0801F92C`/`sub_080581A4` setup calls must also spell it
+ * `(u8 *)gMap + offset`, not `gUnknown_08499590 + offset` -- agbcc's CSE only
+ * reuses a pointer load across identical symbols, and mixing the two names
+ * for the same address forces a second pool load (see sub_08057D90 for the
+ * fuller writeup of this).
  *
  * gUnknown_08499594 is a REAL declared global, not a pool word, and so is
  * gUnknown_08499590 -- both trip the "named pointer whose target is also named"
@@ -47,7 +52,7 @@
  * -- and it behaved exactly as advertised.
  */
 
-#define MAP ((struct Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_08061B4C(void)
 {
@@ -57,8 +62,8 @@ void sub_08061B4C(void)
     int k;
     u8 c;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
-    sub_080581A4(gUnknown_08499590 + 0x376A, 0);
+    sub_0801F92C((u8 *)gMap + 0x2852);
+    sub_080581A4((u8 *)gMap + 0x376A, 0);
 
     for (i = 0; gUnknown_084995A0[i].unk00 != 0xFF; i++)
     {

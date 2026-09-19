@@ -38,7 +38,14 @@
  * because src/decomp/c_0805A268.c, c_0805A514.c and c_0805A744.c all define it
  * file-locally; sub_0805A514's promoted definition takes it, so the cast on
  * gUnknown_03003F20 is what keeps this unit in agreement with that definition.
- * See the note at sub_0805A5E0 in include/unknown-functions.h. */
+ * See the note at sub_0805A5E0 in include/unknown-functions.h.
+ *
+ * Uses `gMap` (include/map.h) for the +0x12/+0x417A reads, but the
+ * `sub_0801F92C` setup call must spell it `(u8 *)gMap + 0x2852`, not
+ * `gUnknown_08499590 + 0x2852` -- agbcc's CSE only reuses a pointer load
+ * across identical symbols, so mixing the two names for the same address
+ * forces a second pool load and breaks the match (see sub_08057D90 for the
+ * fuller writeup of this). */
 
 struct Unk5A514Cell
 {
@@ -60,7 +67,7 @@ void sub_0805E160(void)
     u8 r;
 
     list = gUnknown_03003F20;
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C((u8 *)gMap + 0x2852);
 
     if ((gUnknown_030040D8->unk07[2] & 0xc0) == 0)
     {
@@ -76,7 +83,7 @@ void sub_0805E160(void)
             sub_0805E2AC();
             return;
         }
-        gUnknown_03004730[((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->rowOffset[pos.y] + pos.x] & 0x3f]++;
+        gUnknown_03004730[gMap->unk0012[gMap->rowOffset[pos.y] + pos.x] & 0x3f]++;
         r = sub_0805ACA8(pos.x, pos.y, (u16 *)&pos);
         if (r != 1)
             goto loop;
