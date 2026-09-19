@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -23,7 +24,7 @@
  * pairing gUnknown_085D5ABC's own comments record for sub_08042998. */
 bool8 sub_0804209C(s16 x, s16 y)
 {
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *units;
     struct Unk08499594 *unit;
@@ -32,15 +33,15 @@ bool8 sub_0804209C(s16 x, s16 y)
     int off;
     int id;
 
-    if (x < 0 || x >= *(u16 *)gUnknown_08499590
-     || y < 0 || y >= *(u16 *)(gUnknown_08499590 + 2))
+    if (x < 0 || x >= gMap->width
+     || y < 0 || y >= gMap->height)
         return FALSE;
 
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = y * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    units = p + 0x51a;
+    units = p->unk051A;
     id = units[off];
 
     if (id == 0)
@@ -76,7 +77,7 @@ bool8 sub_0804209C(s16 x, s16 y)
 bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
     u8 *costs;
@@ -85,11 +86,11 @@ bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int idx;
 
     t = gUnknown_085D5ABC[a1->unk00].unk14;
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = a3 * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + a2;
-    cells = p + 0x1432;
+    cells = p->terrain;
     idx = cells[off] & 0x1f;
     costs = t + 0x1a;
 
@@ -116,7 +117,7 @@ bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
 bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
     u8 *costs;
@@ -125,11 +126,11 @@ bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int idx;
 
     t = gUnknown_085D5ABC[a1->unk00].unk14;
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = a3 * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + a2;
-    cells = p + 0x1432;
+    cells = p->terrain;
     idx = cells[off] & 0x1f;
     costs = t + 0x1a;
 
@@ -148,7 +149,7 @@ bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
 bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
     u8 *costs;
@@ -157,11 +158,11 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int idx;
 
     t = gUnknown_085D5ABC[a1->unk00].unk14;
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = a3 * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + a2;
-    cells = p + 0x1432;
+    cells = p->terrain;
     idx = cells[off] & 0x1f;
     costs = t + 0x1a;
 
@@ -188,10 +189,10 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
  * `bl` kills its MEM and the ROM reloads it. */
 bool8 sub_080422A8(s16 x, s16 y)
 {
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *ids;
-    u8 *p2;
+    struct Map *p2;
     u8 *rows2;
     u8 *cells;
     u8 *costs;
@@ -203,11 +204,11 @@ bool8 sub_080422A8(s16 x, s16 y)
     int id;
     int idx;
 
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = y * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    ids = p + 0x12;
+    ids = p->unk0012;
     id = ids[off];
     unit = &gUnknown_08499594[id];
 
@@ -222,10 +223,10 @@ bool8 sub_080422A8(s16 x, s16 y)
 
     t = gUnknown_085D5ABC[unit->unk00].unk14;
 
-    p2 = gUnknown_08499590;
-    rows2 = p2 + 0x417a;
+    p2 = gMap;
+    rows2 = (u8 *)p2->rowOffset;
     off2 = *(u16 *)(rows2 + y2) + x;
-    cells = p2 + 0x1432;
+    cells = p2->terrain;
     idx = cells[off2] & 0x1f;
     costs = t + 0x1a;
 
@@ -244,10 +245,10 @@ bool8 sub_080422A8(s16 x, s16 y)
 bool8 sub_0804236C(s16 x, s16 y)
 {
     u8 army;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
-    u8 *p2;
+    struct Map *p2;
     u8 *rows2;
     u8 *cells2;
     int y2;
@@ -255,19 +256,19 @@ bool8 sub_0804236C(s16 x, s16 y)
     int off2;
 
     army = gUnknown_03003F38;
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = y * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    cells = p + 0x1432;
+    cells = p->terrain;
 
     if (sub_08026FD0(army, cells[off]) == 1)
         return FALSE;
 
-    p2 = gUnknown_08499590;
-    rows2 = p2 + 0x417a;
+    p2 = gMap;
+    rows2 = (u8 *)p2->rowOffset;
     off2 = *(u16 *)(rows2 + y2) + x;
-    cells2 = p2 + 0x1432;
+    cells2 = p2->terrain;
 
     switch (cells2[off2] & 0x1f)
     {

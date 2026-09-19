@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -19,17 +20,17 @@ void sub_08007BA4(int x, int y)
     }
     else if (v < 0)
     {
-        u8 *p;
+        struct Map *p;
         u8 *rows;
         u8 *cells;
         int t;
         int idx;
 
-        p = gUnknown_08499590;
+        p = gMap;
         t = y * 2;
-        rows = p + 0x417A;
+        rows = (u8 *)p->rowOffset;
         idx = *(u16 *)(rows + t) + x;
-        cells = p + 0x1432;
+        cells = p->terrain;
         if (*(cells + idx) == 7)
             v = 0x2A;
     }
@@ -51,7 +52,7 @@ void sub_08007C04(int x, int y)
 
         sub_08007BA4(x, n);
 
-        if (x < *(u16 *)gUnknown_08499590 - 1)
+        if (x < gMap->width - 1)
             sub_08007BA4(x + 1, n);
     }
 
@@ -60,10 +61,10 @@ void sub_08007C04(int x, int y)
 
     sub_08007BA4(x, y);
 
-    if (x < *(u16 *)gUnknown_08499590 - 1)
+    if (x < gMap->width - 1)
         sub_08007BA4(x + 1, y);
 
-    if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+    if (y < gMap->height - 1)
     {
         y++;
 
@@ -72,7 +73,7 @@ void sub_08007C04(int x, int y)
 
         sub_08007BA4(x, y);
 
-        if (x < *(u16 *)gUnknown_08499590 - 1)
+        if (x < gMap->width - 1)
             sub_08007BA4(x + 1, y);
     }
 }

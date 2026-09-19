@@ -112,17 +112,6 @@
  * sign-extend.
  */
 
-struct Map59464
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142E];
-    /* 0x1432 */ u8 unk1432[0x1928];
-    /* 0x2D5A */ u8 unk2D5A[0x0508];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
-
 void sub_080591E4(void *a1)
 {
     u16 *cur;
@@ -207,27 +196,27 @@ void sub_08059464(void *a1)
         mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     }
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->unk2852);
     sub_080202A4(gUnknown_030040D8);
 
-    best = (s8)((struct Map59464 *)gUnknown_08499590)->unk2D5A[((struct Map59464 *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+    best = (s8)gMap->unk2D5A[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
     bestX = -1;
 
-    for (y = 0; y < ((struct Map59464 *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Map59464 *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (((struct Map59464 *)gUnknown_08499590)->unk2D5A[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x] > best)
+            if (gMap->unk2D5A[gMap->rowOffset[y] + x] > best)
                 continue;
-            if (((struct Map59464 *)gUnknown_08499590)->unk3262[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x] & mask)
+            if (gMap->unk3262[gMap->rowOffset[y] + x] & mask)
                 continue;
             if (!sub_08059674(x, y))
                 continue;
-            if ((((struct Map59464 *)gUnknown_08499590)->unk1432[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x] & 0x1f) == 0xb)
+            if ((gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)((struct Map59464 *)gUnknown_08499590)->unk2D5A[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x];
+            best = (s8)gMap->unk2D5A[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }

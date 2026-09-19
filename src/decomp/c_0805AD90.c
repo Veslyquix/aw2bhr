@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -41,41 +42,26 @@ void sub_0805AD90(void)
     int b;
     int x;
     int y;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
     int terrain;
 
     if (sub_0805B4D8(sub_0805B4A8(), &a, &b) == 0)
         sub_0805F7B8();
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->unk2852);
 
     gUnknown_030013EC(a, b, gUnknown_030046D4, gUnknown_085766E0->unk0f, 0);
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0)
             {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x1432;
-                terrain = cells[off] & 0x1f;
+                off = gMap->rowOffset[y] + x;
+                terrain = gMap->terrain[off] & 0x1f;
                 if (terrain == 0xd || terrain == 0xb)
-                {
-                    do
-                    {
-                        p += 0x3c72;
-                        p += off;
-                    } while (0);
-                    (*p)++;
-                }
+                    gMap->unk3C72[off]++;
             }
         }
     }
