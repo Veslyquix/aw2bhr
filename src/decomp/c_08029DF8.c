@@ -53,14 +53,9 @@
  *     operands differ in complexity -- gcc's commutative_operand_precedence
  *     swaps them, and the swap flips which register the `adds` writes.
  *     Two places, 16 bytes together:
- *       - `rows + u->unk03 * 2`: the MULT outranks the pseudo, so it lands as
- *         operand 0.  Binding `t2 = u->unk03 * 2;` first makes both operands
- *         plain pseudos and restores source order.
- *       - the pt stores must be written `cp->unk00 + table[...]`, i.e. the
+ * *       - the pt stores must be written `cp->unk00 + table[...]`, i.e. the
  *         OPPOSITE of the reading order, to get the ROM's `ldrh table` first.
- *     `t = (...) * 2` before the 0x417A binding is the same constraint
- *     c_08026100.c documents, and it already holds here as separate
- *     statements -- no comma chain was needed.
+ *     The row lookups read gMap->rowOffset[] directly.
  *
  * `pt` is a 4-byte struct, so agbcc gives it SImode and both member stores
  * become read-modify-write bitfield inserts on one stack word

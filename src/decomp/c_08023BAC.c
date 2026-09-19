@@ -38,7 +38,7 @@
 
 void sub_08023BAC(u16 a1, u16 a2, u16 a3, u16 a4)
 {
-    struct Unk08499590 *m;
+    struct Map *m;
     u16 *dst;
     u16 i;
 
@@ -47,20 +47,20 @@ void sub_08023BAC(u16 a1, u16 a2, u16 a3, u16 a4)
 
     for (i = 0; i <= 15; i++)
     {
-        m = (struct Unk08499590 *)gMap;
-        if (m->unk234a[m->unk417a[a4] + (a3 + i)] == 0)
+        m = gMap;
+        if (m->unk234A[m->rowOffset[a4] + (a3 + i)] == 0)
         {
-            dst[a1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][0] + 0x4000;
-            dst[a1 + 1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][1] + 0x4000;
-            dst[a1 + 32] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][2] + 0x4000;
-            dst[a1 + 33] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][3] + 0x4000;
+            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][0] + 0x4000;
+            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][1] + 0x4000;
+            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][2] + 0x4000;
+            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][3] + 0x4000;
         }
         else
         {
-            dst[a1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][0];
-            dst[a1 + 1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][1];
-            dst[a1 + 32] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][2];
-            dst[a1 + 33] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][3];
+            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][0];
+            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][1];
+            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][2];
+            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][3];
         }
         a1 = a1 + 2;
         a1 &= 0x1F;

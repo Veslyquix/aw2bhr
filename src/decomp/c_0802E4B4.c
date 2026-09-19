@@ -8,25 +8,11 @@
  * sub_0802E4B4 @ 0x0802E4B4
  */
 
-/* The cell fetch is the c_08008B70 / c_080094EC family expression: the screen
- * descriptor's u16 rowOffset[] lives at +0x417A and the byte cell array at
- * +0x12. Two things are load-bearing here and neither is guessable from the
- * listing:
- *
- *   - `sel = &gUnknown_03003F38` up front. Under -fforce-addr the destination
- *     of `gUnknown_03003F38 = ...` has its address forced into a register
- *     BEFORE the right-hand side is expanded, so the pool word for it lands
- *     ahead of gUnknown_08499590's and the address survives the whole index
- *     computation in r8. Spelling the two later reads through the global
- *     instead puts that pool word after gUnknown_08499590's and costs 45 bytes.
- *   - `p += idx` rather than `p[idx]`. Both are one `adds`, but the compound
- *     assignment accumulates into the pointer's own register (`adds r1,r1,r0;
- *     ldrb r0,[r1]`) while the subscript picks the index's (`adds r0,r1,r0;
- *     ldrb r0,[r0]`). Four bytes, twice.
+/* The cell fetch is gMap->unit[gMap->rowOffset[sy] + sx], read twice.
  *
  * The whole address chain is recomputed after the sub_080242B0 call because
- * the call clobbers memory; only `sy * 2` and the two s16 casts survive as
- * common subexpressions, which is why they read as locals and p/rows do not.
+ * the call clobbers memory; only the two s16 casts survive as common
+ * subexpressions, which is why sx/sy read as locals.
  *
  * gUnknown_030040D8 is the same object as gUnknown_08499594[i] -- see the note
  * on struct Unk030040D8 in unknown-globals.h for why the cast is here rather

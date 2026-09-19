@@ -9,8 +9,8 @@
  */
 
 /* MATCHED. Byte-for-byte the same function as sub_08026100. Read that one --
- * the comma chain in the index expression is three separate position readouts
- * and none of them is guessable. */
+ * the comma chain in the index expression is a position readout that no
+ * statement boundary reaches. */
 void sub_08044854(int x, int y, int c)
 {
     int idx;

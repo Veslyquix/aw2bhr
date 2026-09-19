@@ -94,19 +94,13 @@ void sub_08020984(void)
  * sign-extended form yet. Written after `yy = y - r` it costs a third
  * instruction and negates the sign-extended copy instead.
  *
- * `rows` must be its own local or agbcc reassociates the 0x417A constant to
- * last -- c_0805AD90.c's rule, and it applies to the `p + 0x12` unit-id plane
- * here for the same reason. */
+ * The map reads go straight through gMap->rowOffset[] and gMap->unit[]. */
 void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
 {
     s16 xx;
     s16 yy;
     s16 dy;
     struct Unk02028360 *u;
-    u8 *p;
-    u8 *rows;
-    u8 *ids;
-    int ty;
     int m;
     int n;
     int t;
@@ -130,10 +124,7 @@ void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
                 continue;
 
             u = sub_0803DF54(xx, yy);
-            m = gUnknown_020288B4[(p = (u8 *)gMap,
-                                   ty = yy * 2,
-                                   rows = p + 0x417a,
-                                   *(u16 *)(rows + ty) + xx)];
+            m = gUnknown_020288B4[gMap->rowOffset[yy] + xx];
             n = 0;
             if (u != NULL)
                 n = u->unk02_6;
@@ -148,8 +139,7 @@ void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
             }
             else
             {
-                ids = p + 0x12;
-                t = ids[*(u16 *)(rows + ty) + xx];
+                t = gMap->unit[gMap->rowOffset[yy] + xx];
                 if (t == 0)
                     continue;
                 if (sub_08026F9C(gUnknown_03003F38, t) == 1)

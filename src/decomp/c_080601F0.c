@@ -12,7 +12,7 @@
 
 /* One arm of the 0x08060 cursor state machine: if the cell under the CURRENT
  * UNIT (gUnknown_030046C0.unk06 indexes gUnknown_08499594, and the unit carries
- * its own column/row in unk02/unk03) is occupied on the +0x234A plane, hand it
+ * its own column/row in unk02/unk03) is occupied on the gMap->unk234A plane, hand it
  * to sub_08029088 and advance to state 7; otherwise state 3.
  *
  * NO POINTER IS BOUND. The unit element is named twice and CSE gives it one
@@ -51,7 +51,7 @@ void sub_080601F0(void)
 }
 
 /* One arm of the 0x08060 cursor state machine: if the cursor's own cell
- * (gUnknown_030046C0.unk06/.unk07) is occupied on the +0x234A plane, hand it to
+ * (gUnknown_030046C0.unk06/.unk07) is occupied on the gMap->unk234A plane, hand it to
  * sub_08029088 and advance to state 8; otherwise state 4.
  *
  * THE COLUMN IS ASSIGNED INSIDE THE OFFSET EXPRESSION. It has to be read after
@@ -60,7 +60,7 @@ void sub_080601F0(void)
  * `sub_08029088(gUnknown_030046C0.unk06, y)` sets up r1 before r0 while the ROM
  * sets r0 first. The embedded assignment is the only spelling that gets both.
  *
- * Row/tile arithmetic is c_08001158.c's idiom with the plane at +0x234A. */
+ * The cell is gMap->unk234A[gMap->rowOffset[y] + x]. */
 void sub_08060264(void)
 {
     struct Map *map;

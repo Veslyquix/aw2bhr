@@ -18,20 +18,20 @@
 
 void sub_08000DF8(int a1)
 {
-    u16 *map;
+    struct Map *map;
 
     gUnknown_030032D8 = 0;
     sub_080215D0();
 
     if (a1 == 0)
     {
-        map = (u16 *)gMap;
-        map[2] = 0;
-        map[3] = 0;
-        map[4] = 0;
-        map[5] = 0;
-        map[6] = 0;
-        map[7] = 0;
+        map = gMap;
+        map->scrollX = 0;
+        map->scrollY = 0;
+        map->unk08 = 0;
+        map->unk0a = 0;
+        map->camX = 0;
+        map->camY = 0;
         sub_08003B8C();
     }
 

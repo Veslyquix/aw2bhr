@@ -10,15 +10,11 @@
 
 /* MATCHED, and the first of a byte-identical pair with sub_08044854. Applies
  * `c` points of damage to the unit standing on cell (x, y), flooring at 1:
- * bounds-check the cell against the gUnknown_08499590 screen header, look the
- * unit id up through the +0x51A plane, and clamp.
+ * bounds-check the cell against gMap's width/height, look the
+ * unit id up through gMap->unitUnk, and clamp.
  *
- * The screen indexing is c_08001158.c's idiom exactly -- `rows = p + 0x417A`,
- * `t = y * 2`, `*(u16 *)(rows + t) + x` -- and the two pointer bindings are
- * load-bearing for the reason docs/agbcc-codegen.md gives under `p[X + C]` vs
- * `*(p + X + C)`: without `cells = p + 0x51A` agbcc reassociates the constant
- * to the outside and emits `((idx + p) + 0x51A)` where the ROM has
- * `idx + (p + 0x51A)`.
+ * The unit id is gMap->unitUnk[gMap->rowOffset[y] + x]; binding `idx` before
+ * the plane read orders the two adds the way the ROM has them.
  *
  * THE COMMA CHAIN IS NOT DECORATION and it is the whole cost of this function.
  * Three separate facts are read off the ROM and every one of them needs a
@@ -32,22 +28,13 @@
  *    frame loses r6. An anchor spelled `u = gUnknown_08499594;` does NOT work
  *    -- that is a pointer LOAD (`ldr addr; ldr [addr]`), and the ROM's deref is
  *    at the end.
- *  - `t = y * 2` must sit after the anchor and before the 0x417A load, which
- *    only an embedded assignment reaches; as its own statement it is one slot
- *    early.
- *  - `idx = ...` before `(cells = p + 0x51A)[idx]` orders the two adds the way
- *    the ROM has them. Written the other way round the pool order flips to
- *    0x51A before 0x417A.
+ *  - `idx = ...` sits inside the index expression, ahead of the plane read.
  *
  * Every neighbouring spelling misses by exactly one slot, which is what makes
  * this a readout rather than a lucky arrangement -- see the wave-20 section in
  * docs/agbcc-codegen.md for the table. */
 void sub_08026100(int x, int y, int c)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int idx;
     struct Unk08499594 *u;
     struct Unk08499594 **pp;
@@ -57,16 +44,14 @@ void sub_08026100(int x, int y, int c)
     if (y < 0)
         return;
 
-    p = (u8 *)gMap;
-
     if (x >= gMap->width)
         return;
     if (y >= gMap->height)
         return;
 
-    u = &gUnknown_08499594[(pp = &gUnknown_08499594, t = y * 2,
-        idx = *(u16 *)((rows = p + 0x417A) + t) + x,
-        (cells = p + 0x51A)[idx])];
+    u = &gUnknown_08499594[(pp = &gUnknown_08499594,
+        idx = gMap->rowOffset[y] + x,
+        gMap->unitUnk[idx])];
 
     if (u->unk00 == 0)
         return;

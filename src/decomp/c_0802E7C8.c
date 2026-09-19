@@ -32,12 +32,11 @@
  * `lsls r3, r7, #0x10` between `(s16)nx` and `x = nx`); the step is written in
  * the SHIFTED domain, `nx = (u32)(nx * 0x10000 + 0x10000) >> 16`, because the
  * natural `nx = (u16)(nx + 1)` lets cross-jumping merge the shift pair across
- * cases 0/1; the map read is c_08026100.c's `rows = map + 0x417A` /
- * `cells = map + 0x51A` idiom; the unk2a compare is c_08026F9C.c's idiom, where
+ * cases 0/1; the map read is gMap->unitUnk[gMap->rowOffset[y] + x]; the unk2a compare is c_08026F9C.c's idiom, where
  * element [n + 1] folds the 0x3c stride into the 0x2a member offset and emits
  * `adds r1, #0x66`; and `cur` must be a block-scope pointer declared at the top
  * of the loop BODY so its pseudo is created first and wins sl, leaving
- * gUnknown_08499590 to be re-loaded from an inline pool word each iteration.
+ * gMap to be re-loaded from an inline pool word each iteration.
  * Hoisting `cur` above the loop inverts that choice and costs a -fforce-addr
  * .rodata address constant the ROM does not have.
  */
@@ -59,11 +58,6 @@ int sub_0802E7C8(int a1, int a2, void *a3, int a4)
 
     while (*p != 4 && *p != -1) {
         union Unk802C57CBuf *cur = &gUnknown_03003100;
-        u8 *map;
-        u8 *rows;
-        u8 *cells;
-        int t;
-        int idx;
         u8 tile;
 
         switch (*p) {
@@ -81,12 +75,7 @@ int sub_0802E7C8(int a1, int a2, void *a3, int a4)
             break;
         }
 
-        map = (u8 *)gMap;
-        t = (s16)ny * 2;
-        rows = map + 0x417A;
-        idx = *(u16 *)(rows + t) + (s16)nx;
-        cells = map + 0x51A;
-        tile = cells[idx];
+        tile = gMap->unitUnk[gMap->rowOffset[(s16)ny] + (s16)nx];
 
         if (tile != 0
          && gUnknown_08499598[(tile >> 6) + 1].unk2a != gUnknown_08499598[gUnknown_030033EC].unk2a) {

@@ -26,22 +26,16 @@
  *
  * The loop is a `goto` loop, as its sibling c_0805B778.c is: nothing is
  * LICM-hoisted into a preheader -- the 0x270F, the sp alias and
- * gUnknown_08499590 are all re-formed on every iteration.
+ * gMap are all re-formed on every iteration.
  *
- * The cell lookup is c_08057F00.c's sub_08058144 idiom -- p, then t, then
- * rows, then idx, then cells -- keeping 0x417A and 0x193A in pool words.
+ * The cell lookup is gMap->property[gMap->rowOffset[y] + x], read as s8.
  */
 
 void sub_08059B4C(int a1, int a2, int a3, void *a4, void *a5)
 {
     union Unk802C57CBuf v;
     struct Unk084995A0 *arr;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
     u8 k;
-    int t;
-    int idx;
     int w;
     int n;
 
@@ -59,12 +53,7 @@ loop:
     if (v.pos.unk00 == 0x270F)
         return;
 
-    p = (u8 *)gMap;
-    t = v.pos.unk02 * 2;
-    rows = p + 0x417a;
-    idx = *(u16 *)(rows + t) + v.pos.unk00;
-    cells = p + 0x193a;
-    w = *(s8 *)(cells + idx);
+    w = (s8)gMap->property[gMap->rowOffset[v.pos.unk02] + v.pos.unk00];
     arr = gUnknown_084995A0;
 
     if (n < (&arr[w])->unk03[k])

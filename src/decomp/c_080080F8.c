@@ -10,36 +10,19 @@
 
 /* Repaints one cell through four independent terrain tests, each a
  * sub_0800119C query on the same (x, y). The first re-reads the cell's own
- * tile through the c_08001158.c fetch idiom (rows at +0x417A, tiles at +0xA22)
- * and, when it is one of the two bridge ids, clears it unless the cell below
- * is joinable.
+ * tile through gMap->tile and, when it is one of the two bridge ids, clears it
+ * unless the cell below is joinable.
  *
  * sub_0800B61C returns s16 -- the `lsls #0x10 / asrs #0x10` before the sign
  * test is agbcc re-narrowing a narrow-returning callee, and the narrowed value
  * in r2 is then handed straight to sub_08001158 as its third argument.
  *
- * PERMUTER WIN, so this is byte-exact but is NOT claimed to be the original
- * source. Written the plain way -- `t = y * 2;` and `... * 2` with the literal
- * inline, and `sub_08001158(x, y, sub_080016D0(x, y))` nested -- every
- * instruction, branch target, literal pool word and relocation is already
- * correct and exactly THREE bytes differ: the cell's tile lands in r0 where
- * the ROM uses r2 (`ldrh r2,[r1]` / `cmp r2,#67` / `cmp r2,#3`). That was
- * re-derived from scratch here against the c_080081E0.c exemplar and
- * reproduced the same 98.7% independently, so the residual is structural
- * rather than an artefact of how the expression is spelled -- W37-D had
- * already ruled out int v, u16 v, no local at all, a two-case switch, and
- * hoisting every local to function scope.
- *
- * What closes it is `scale`: binding the constant 2 to a local that BOTH
- * multiplies read keeps a register occupied across the tile fetch, so r0 is
- * no longer free at the `ldrh` and the allocator falls to r2. Splitting the
- * nested sub_080016D0 call into `tile` is the second half of the same
- * pressure change. Both are permuter output, kept because they are what the
- * bytes require. */
+ * Permuter-derived, so byte-exact but not claimed to be the original source:
+ * the cell's tile has to land in r2 rather than r0, which the `v` local plus
+ * the split-out sub_080016D0 call achieves. */
 void sub_080080F8(int x, int y)
 {
     s16 height;
-    int scale;
 
     if (sub_0800119C(x, y, 1))
     {

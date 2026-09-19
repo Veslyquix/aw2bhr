@@ -21,33 +21,19 @@
  * jump-table slots point at the tail, which is also the default, and the id
  * that reaches sub_0801C7DC in those cases is the selector itself.
  *
- * Three things are load-bearing and none of them is visible in the listing:
+ * Case 0 reads the unit id under the pixel position: the s16 scroll fields
+ * (gMap->scrollX / scrollY) are added before the `>> 4` that turns a pixel
+ * coordinate into a cell coordinate, and the cell is gMap->unit[idx]. They are
+ * a different pair from the tile-granularity camX / camY.
  *
- *   - `id` is REUSED as the 4-or-0 flag in case 0, rather than a `flag` local.
- *     Both spellings are the same statement count, but a separate local lands
- *     the constant straight in r2 and the original spends `adds r2, r4, #0`
- *     copying it out of the switch variable's register. Two bytes.
- *   - the rowOffset load is its own statement, with the column computed
- *     AFTER it. Folding the column into the `idx = ... + col` expression the
- *     way `c_0802E4B4.c` does leaves the column, the row and the 0x417A
- *     literal live across the `ldrh` at once, which costs a fourth
- *     callee-saved register: the original's frame is `push {r4, r5, r6, lr}`
- *     and that spelling makes it `{r4, r5, r6, r7, lr}`.
- *   - `p += 0x12; p += idx;` and not `p[0x12 + idx]`, which is the same
- *     compound-assignment rule `c_0802E4B4.c` already records for this idiom.
- *
- * The cell fetch is otherwise the c_08001158.c family expression unchanged:
- * u16 rowOffset[] at +0x417A, byte cells at +0x12. What is new here is the
- * pair of s16 camera fields at +0x04 and +0x06 -- the pixel scroll, added
- * before the `>> 4` that turns a pixel coordinate into a cell coordinate.
- * They are a different pair from the +0x0C / +0x0E tile-granularity camera
- * that unknown-globals.h already records on this descriptor.
+ * `id` is REUSED as the 4-or-0 flag in case 0, rather than a `flag` local:
+ * a separate local lands the constant straight in r2 and the original spends
+ * `adds r2, r4, #0` copying it out of the switch variable's register. The
+ * rowOffset load is its own statement with the column computed after it, which
+ * keeps the frame at `push {r4, r5, r6, lr}`.
  */
 void sub_08043418(int x, int y, int id)
 {
-    u8 *p;
-    u8 *rows;
-    int t;
     int idx;
     int col;
     int row;
@@ -57,16 +43,11 @@ void sub_08043418(int x, int y, int id)
     case 0:
         x += 8;
         y += 8;
-        p = (u8 *)gMap;
-        row = (y + *(s16 *)(p + 6)) >> 4;
-        t = row * 2;
-        rows = p + 0x417A;
-        idx = *(u16 *)(rows + t);
-        col = (x + *(s16 *)(p + 4)) >> 4;
+        row = (y + gMap->scrollY) >> 4;
+        idx = gMap->rowOffset[row];
+        col = (x + gMap->scrollX) >> 4;
         idx += col;
-        p += 0x12;
-        p += idx;
-        if (*p == 0 && sub_08042424(col, row))
+        if (gMap->unit[idx] == 0 && sub_08042424(col, row))
             id = 4;
         else
             id = 0;

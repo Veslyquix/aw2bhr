@@ -8,6 +8,10 @@
  * sub_08062AE4 @ 0x08062AE4
  */
 
+/* Tallies, for each 4x4-cell block of the map, how many cells sub_08026FD0
+ * accepts (a) versus how many carry a nonzero top-three-bit terrain flag (b),
+ * and stores the ratio as a percentage in gUnknown_0202DAD8[j][i].unk28. The
+ * source is permuter output, kept because it is what the bytes require. */
 void sub_08062AE4(void)
 {
   int i;

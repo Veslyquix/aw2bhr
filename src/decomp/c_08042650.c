@@ -10,17 +10,11 @@
 
 /* MATCHED (wave 66, W66-B), 532/532 bytes. Separate block-scoped volatile
  * reads of the map pointer keep the two cell-address chains independent;
- * COMPONENT_REF access for both the row table and the 0x1432/0x234A planes
+ * struct Map field access for the row table and the terrain/unk234A planes
  * preserves `(map + field) + index`. Binding `&gUnknown_030040D8`, then its
  * pointee, emits both pointer loads before `n << 3` and retains the outer
  * pointer for the ROM's later reload. Promotion needs .rodata words
  * 0x08091354, 0x08091358 and 0x0809135C.
- *
- * Historical wave-36 diagnosis follows. It was parked at 72.2%.
- * SIZE IS EXACT (532/532) in every attempt, both pool blocks are the ROM's,
- * every `bl`, every branch and the whole control-flow skeleton are right.
- * First difference at +0x4b. What is left is address-expression ASSOCIATION in
- * one basic block plus its register-numbering fallout.
  *
  * SETTLED HERE, and none of it should be re-derived:
  *   - gUnknown_030040D8->unk04 is a 7-BIT BITFIELD. sub_08042650 reads it
@@ -52,34 +46,7 @@
  *   - `t & 0x1f` must be written INLINE at all three comparison sites. Bound
  *     to a `terr` local it hoists above the `gUnknown_03003FC0.unk09` test;
  *     inline, CSE keeps it in r3 exactly where the ROM has it.
- *
- * REMAINING DIFF -- one thing and its consequences. The SECOND cell read (the
- * +0x234A plane, inside the third arm of the `||` chain) associates its
- * address differently from the ROM, even though it is the SAME TEXT as the
- * first cell read (+0x1432), which matches:
- *     ROM    ldr r2,=map; ldrh r1,[r6,#2]; lsls r1,#1; mov r4,sb;
- *            adds r0,r2,r4; adds r0,r0,r1          <- (map + 0x417A) + y*2
- *     draft  ldrh r0,[r6,#2]; ldr r2,=map; lsls r0,#1;
- *            adds r0,r0,r2; add r0,sb              <- (y*2 + map) + 0x417A
- * i.e. the map pointer is loaded second and 0x417A is added last, through the
- * high-register `add r0,sb` form instead of a `mov` into a low register. That
- * reorders the two force-addr pool words against gUnknown_08499590 and shifts
- * every register number in the block. The only difference between the two
- * sites is that by the second one the constant 0x417A has been CSE'd into a
- * pseudo (sb) by the first, so this is a CSE-vs-fold interaction, not a
- * spelling: block one proves the spelling is right.
- * TRIED AND WORSE: `((u16 *)(gUnknown_08499590 + 0x417A))[y]` for both sites.
- * It does not fix the second site and it BREAKS the first, which the flat
- * `*(u16 *)(gUnknown_08499590 + 0x417A + y * 2)` above gets exactly right.
- *
- * SECOND, SMALLER: the bitfield-byte store wants `lsls r3,r5,#3` AFTER the two
- * pointer loads and the `orrs` tied to the AND's register. Measured:
- *     `(unk05 & 7) | (n << 3)`      -> `ldrb` first, orrs dest = AND  (half)
- *     `(n << 3) | (unk05 & 7)`      -> `lsls` first, orrs dest = shift (half)
- *     `v = n << 3;` then `... | v`  -> `lsls` hoisted ABOVE the pointer loads,
- *                                      orrs dest = AND (this file, closest)
- * None of the three puts the shift between the loads and the `ldrb`. Whatever
- * does that is the last thing this function needs. */
+ */
 void sub_08042650(void)
 {
     u8 t;

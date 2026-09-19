@@ -10,8 +10,8 @@
 
 /* Grows the gUnknown_03003340 reachability plane by one cell in each of the
  * four directions: every cell that is set (>= 0), is not already flagged 0x40
- * and -- when it is non-zero -- sits on terrain byte 0 of the map's +0x12
- * plane, bumps each orthogonal neighbour's counter and stamps 0x40 on it. The
+ * and -- when it is non-zero -- sits on an empty (0) cell of gMap->unit,
+ * bumps each orthogonal neighbour's counter and stamps 0x40 on it. The
  * second pass then clears every cell that did NOT get the 0x40 flag to -1.
  *
  * gUnknown_0809093C is NOT a global: the ROM word there holds 0x08499590, i.e.

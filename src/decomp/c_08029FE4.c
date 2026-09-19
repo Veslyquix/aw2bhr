@@ -26,13 +26,12 @@
  * 99.4 -> 99.8; a single long run from the draft found nothing, replicating
  * wave 59's 87.3 -> 94.3 -> 98.2 -> match):
  *
- *  1. THE `cell` LOCAL IS NOT IN THE ORIGINAL.  `gMap->terrain[idx]` is read inline at
- *     both uses -- `(gMap->terrain[idx] & 0xE0)` and `gMap->terrain[idx] & 0x1F`.  The park's
- *     "NEXT THING TO TRY" note guessed this correctly: `cell` was the one extra
- *     live pseudo taking r4 ahead of `u`, and deleting it is what unwound the
- *     r3/r4/r5 rotation the park had classified as the whole residual.
+ *  1. THERE IS NO `cell` LOCAL.  `gMap->terrain[idx]` is read inline at
+ *     both uses -- `(gMap->terrain[idx] & 0xE0)` and `gMap->terrain[idx] & 0x1F`;
+ *     a `cell` pseudo took r4 ahead of `u` and rotated r3/r4/r5.
  *
- *  2. `marks = 0x234A + map;` with the CONSTANT FIRST, not `map + 0x234A`.
+ *  2. The row/cell/mark planes are read straight through gMap->rowOffset[],
+ *     gMap->terrain[] and gMap->unk234A[], with no pointer locals bound.
  *
  *  3. THE TWO-CALL SUM MUST BE SPLIT, AND 978 EVALUATED FIRST:
  *         n = sub_08029978(u, 0);
@@ -69,11 +68,10 @@
  *    matter, only its presence.
  *  - `n != 0 || m != 0` is the right spelling of the early-out, and the
  *    `if (m != 0)` arm really does zero `n` before sub_08029CB8.
- *  - the `marks[idx] == 0` arm (three calls, results discarded) must be the
+ *  - the `gMap->unk234A[idx] == 0` arm (three calls, results discarded) must be the
  *    fall-through, and both arms are genuine source call sites.
  *  - `pt` is a 4-byte struct, so both member stores are SImode bitfield
  *    inserts on one stack word.
- *  - `t = u->unk03 * 2;` must be its own statement before `rows = map+0x417A`.
  */
 void sub_08029FE4(void)
 {

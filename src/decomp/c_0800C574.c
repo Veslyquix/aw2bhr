@@ -10,9 +10,6 @@
 
 void sub_0800C574(int x, int y, int t)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *plane;
     int n;
     int off;
     int u;
@@ -23,12 +20,8 @@ void sub_0800C574(int x, int y, int t)
 
     n = (s8)gUnknown_0200B0B0->unk12;
 
-    p = (u8 *)gMap;
-    u = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + u) + x;
-    plane = p + 0x193A;
-    plane[off] = (z = 0, n);
+    off = gMap->rowOffset[y] + x;
+    gMap->property[off] = (z = 0, n);
 
     gUnknown_084995A0[n].unk00 = t;
     gUnknown_084995A0[n].unk01 = x;
@@ -48,8 +41,8 @@ void sub_0800C574(int x, int y, int t)
  * from the two parallel arrays and decrements the count sub_0800C574
  * increments.
  *
- * The cell byte comes off the +0x1432 terrain plane through the +0x417A row
- * table, the c_0800C840 idiom -- but UNMASKED here, where sub_0800C840 hands
+ * The cell byte comes off gMap->terrain through gMap->rowOffset, the
+ * c_0800C840 idiom -- but UNMASKED here, where sub_0800C840 hands
  * sub_0800C7E8 `& 0x1f`.  sub_0800C7E8 masks internally, so the two spellings
  * agree; sub_0800C7A4 then switches the same raw byte over 0x28/0x48/0x68/0x88,
  * values outside the low five bits, so the mask genuinely is absent here.

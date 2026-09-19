@@ -12,11 +12,9 @@
  * 0 = off the map or not a road tile, 1 = road, 2 = road that continues along
  * `dir`, 3 = road that continues on the perpendicular axis.
  *
- * The row offset is loaded into `off` on its own line before `nx` is computed.
- * That is forced: folding the load into `off = (*(u16 *)(rows + t) + nx) * 2`
- * hoists the whole of `nx` above the `ldrh`, and dropping `rows` reassociates
- * `p + 0x417A + t` into `(t + p) + 0x417A`. Only this split reproduces
- * `lsls; ldr =0x417A; adds; adds; ldrh`.
+ * The row offset is loaded into `off` on its own line before `nx` is computed;
+ * folding the load into the tile index hoists the whole of `nx` above the
+ * `ldrh` and changes the instruction order.
  *
  * The first `||` chain starts with 0x142, 0x143 because that pair is the only
  * one agbcc folds into a range (`tile - 0x142 <= 1u`): `fold` merges two
