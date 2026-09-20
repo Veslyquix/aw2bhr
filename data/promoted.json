@@ -215,101 +215,25 @@
    "sub_0800168C",
    "sub_080016D0",
    "sub_08001704",
-   "sub_08001A04"
-  ],
-  "size": 2960
- },
- {
-  "file": "src/decomp/c_08001CE8.c",
-  "obj": "src/decomp/c_08001CE8.o",
-  "addr_hex": "0x08001CE8",
-  "functions": [
-   "sub_08001CE8"
-  ],
-  "size": 28
- },
- {
-  "file": "src/decomp/c_08001D04.c",
-  "obj": "src/decomp/c_08001D04.o",
-  "addr_hex": "0x08001D04",
-  "functions": [
+   "sub_08001A04",
+   "sub_08001CE8",
    "sub_08001D04",
-   "sub_08001D24"
-  ],
-  "size": 136
- },
- {
-  "file": "src/decomp/c_08001D8C.c",
-  "obj": "src/decomp/c_08001D8C.o",
-  "addr_hex": "0x08001D8C",
-  "functions": [
+   "sub_08001D24",
    "sub_08001D8C",
-   "sub_08001D9C"
-  ],
-  "size": 32
- },
- {
-  "file": "src/decomp/c_08001DAC.c",
-  "obj": "src/decomp/c_08001DAC.o",
-  "addr_hex": "0x08001DAC",
-  "functions": [
-   "sub_08001DAC"
-  ],
-  "size": 1260,
-  "rodata": [
-   "0x0808D70C"
-  ]
- },
- {
-  "file": "src/decomp/c_08002298.c",
-  "obj": "src/decomp/c_08002298.o",
-  "addr_hex": "0x08002298",
-  "functions": [
-   "sub_08002298"
-  ],
-  "size": 632,
-  "rodata": [
-   "0x0808D710"
-  ]
- },
- {
-  "file": "src/decomp/c_08002510.c",
-  "obj": "src/decomp/c_08002510.o",
-  "addr_hex": "0x08002510",
-  "functions": [
-   "sub_08002510"
-  ],
-  "size": 540,
-  "rodata": [
-   "0x0808D714"
-  ]
- },
- {
-  "file": "src/decomp/c_0800272C.c",
-  "obj": "src/decomp/c_0800272C.o",
-  "addr_hex": "0x0800272C",
-  "functions": [
-   "sub_0800272C"
-  ],
-  "size": 280
- },
- {
-  "file": "src/decomp/c_08002844.c",
-  "obj": "src/decomp/c_08002844.o",
-  "addr_hex": "0x08002844",
-  "functions": [
-   "sub_08002844"
-  ],
-  "size": 288
- },
- {
-  "file": "src/decomp/c_08002964.c",
-  "obj": "src/decomp/c_08002964.o",
-  "addr_hex": "0x08002964",
-  "functions": [
+   "sub_08001D9C",
+   "sub_08001DAC",
+   "sub_08002298",
+   "sub_08002510",
+   "sub_0800272C",
+   "sub_08002844",
    "sub_08002964"
   ],
-  "size": 144
+  "size": 6300,
+  "rodata": [
+   "0x0808D70C",
+   "0x0808D710",
+   "0x0808D714"
+  ]
  },
  {
   "file": "src/decomp/c_08002AB0.c",

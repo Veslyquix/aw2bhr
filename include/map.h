@@ -18,6 +18,8 @@ struct Map
     /* 0x0A22 */ u16 tile[MAP_POOL_SIZE];
     /* 0x1432 */ u8 terrain[MAP_POOL_SIZE];
     /* 0x193A */ s8 property[MAP_POOL_SIZE]; // property index for use with gProperty. -1 if invalid. 
+        // player interface terrain window loads a palette (obj pal 6) based on MAP_OBJ_ARMY(gMap->property)
+    
     /* 0x1E42 */ u8 visible[MAP_POOL_SIZE]; 
     /* 0x234A */ u8 unk234A[MAP_POOL_SIZE];
     /* 0x2852 */ s8 move[MAP_POOL_SIZE]; // unk2852. s8: 3 signed reads (< 0, >= 0, > 0; -1 = blocked) vs 1 unsigned
