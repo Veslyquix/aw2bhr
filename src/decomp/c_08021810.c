@@ -36,7 +36,7 @@
  * cell.  Pass one counts each army's properties into gUnknown_08499598[].unk11,
  * stamps the list index into the map's second 0x508-byte plane at +0x193A, and
  * fills gUnknown_084995A0[] with (terrain, x, y); pass two fills
- * gUnknown_03003150[] with (raw cell, x, y).  Both lists are 0xFF-terminated,
+ * gProperty[] with (raw cell, x, y).  Both lists are 0xFF-terminated,
  * and the second is capped at 0x5C entries -- the counter still advances past
  * the cap, so the terminator can land exactly at [0x5b].
  * The reset loop really is ascending: `subs r6,#1 / cmp r6,#0 / bge` at the
@@ -177,10 +177,10 @@ void sub_080219AC(void)
             case 25:
                 if (n <= 0x5b)
                 {
-                    gUnknown_03003150[n].flags =
+                    gProperty[n].flags =
                         gMap->terrain[gMap->rowOffset[y] + x];
-                    gUnknown_03003150[n].x = x;
-                    gUnknown_03003150[n].y = y;
+                    gProperty[n].x = x;
+                    gProperty[n].y = y;
                 }
 
                 n++;
@@ -190,5 +190,5 @@ void sub_080219AC(void)
     }
 
     if (n <= 0x5b)
-        gUnknown_03003150[n].flags = 0xff;
+        gProperty[n].flags = 0xff;
 }

@@ -362,7 +362,7 @@ struct Unk0200B0B0 /* >= 0x76 */
                           * floor; no reader found. Wave 36, W36-I.
                           *
                           * Wave 48 (W48-A) finds the readers and CONFIRMS u8.
-                          * It is the count of live gUnknown_03003150 records:
+                          * It is the count of live gProperty records:
                           * sub_0800C574 appends at this index and stores the
                           * bumped value back, sub_0800C608 decrements it and
                           * clamps at 0, and sub_0800C874 recomputes it by
@@ -2348,7 +2348,7 @@ extern const struct Unk0849F688 gUnknown_0849F698[];
 /* Wave 49, W49-C. Eleven 8-byte ROM blobs at 0x0849F990 through 0x0849F9E0, all
  * of them sub_0803F990's per-terrain-code payload for sub_0803F908's third
  * parameter, and two POINTER TABLES at 0x0849FAB0 and 0x0849FAC4 indexed
- * `lsls #2` by the terrain byte's TOP THREE BITS (`gUnknown_03003150[i].flags
+ * `lsls #2` by the terrain byte's TOP THREE BITS (`gProperty[i].flags
  * >> 5`, the owning army). Same `const u8 *` element type as the blobs, reached
  * with `ldr r2, [r1]`; gUnknown_0849FAB0 also has its element 0 named directly
  * as the fallback when the +0x234A map plane is clear, which is what fixes 0 as
@@ -2867,12 +2867,12 @@ struct Unk0849A354
  * fixes it as an array rather than three named bytes. */
 /* Wave 48 (W48-A) carves filler_00 into three named bytes.  sub_0800C574 is the
  * writer and it fills a record whose first three bytes MIRROR struct
- * Unk03003150's: the same three values (tile id, x, y) are stored into
- * gUnknown_084995A0[n] and gUnknown_03003150[n] back to back at the same index
+ * Property's: the same three values (tile id, x, y) are stored into
+ * gUnknown_084995A0[n] and gProperty[n] back to back at the same index
  * n, so the two arrays are parallel and this one is the wider record.
  * sub_0800C608 removes an entry by zeroing unk00 in this array and flags in the
  * other, again at one index -- so unk00 carries the same "slot occupied"
- * meaning as Unk03003150's flags.
+ * meaning as Property's flags.
  *
  * sub_0800C574 also terminates the list by writing 0xFF to the NEXT record's
  * unk00 (`strb r0, [r1, #8]` off the same `n * 8` product), which is where the
@@ -2881,9 +2881,9 @@ struct Unk0849A354
 struct Unk084995A0 /* 0x08 */
 {
     /* 0x00 */ u8 unk00; /* tile id / slot tag; 0 is empty and 0xFF terminates
-                          * the list, matching Unk03003150's flags byte */
-    /* 0x01 */ u8 unk01; /* map column, the same value as Unk03003150's x */
-    /* 0x02 */ u8 unk02; /* map row, the same value as Unk03003150's y */
+                          * the list, matching Property's flags byte */
+    /* 0x01 */ u8 unk01; /* map column, the same value as Property's x */
+    /* 0x02 */ u8 unk02; /* map row, the same value as Property's y */
     /* 0x03 */ u8 unk03[0x03];
     /* 0x06 */ u8 filler_06[0x02];
 };
@@ -3850,7 +3850,7 @@ struct Unk08074584 /* 0x18 */
  * off it as `adds r0,#0x48` and `adds r0,#0x49`, which is 0x44 + 4i and
  * 0x45 + 4i said through a shared giv. Declared flat, agbcc recomputes
  * `lsls r3, r5, #2` every pass and hoists a second base register holding
- * &unk44 + 1 instead -- same rule as struct Unk03003150 and the map header in
+ * &unk44 + 1 instead -- same rule as struct Property and the map header in
  * src/decomp/c_08024058.c. */
 struct Unk085C77A0Slot /* 0x04 */
 {

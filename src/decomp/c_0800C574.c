@@ -29,11 +29,11 @@ void sub_0800C574(int x, int y, int t)
     gUnknown_084995A0[n].unk03[0] = z;
     gUnknown_084995A0[n + 1].unk00 = 0xFF;
 
-    gUnknown_03003150[n].flags = t;
-    gUnknown_03003150[n].x = x;
-    gUnknown_03003150[n].y = y;
+    gProperty[n].flags = t;
+    gProperty[n].x = x;
+    gProperty[n].y = y;
     n++;
-    gUnknown_03003150[n].flags = -1;
+    gProperty[n].flags = -1;
     gUnknown_0200B0B0->unk12 = n;
 }
 
@@ -75,13 +75,13 @@ void sub_0800C608(int x, int y)
 
     for (i = 0; i <= 0x5B; i++)
     {
-        if (gUnknown_03003150[i].flags == 0xFF)
+        if (gProperty[i].flags == 0xFF)
             break;
-        if (gUnknown_03003150[i].flags != 0 && gUnknown_03003150[i].x == x
-         && gUnknown_03003150[i].y == y)
+        if (gProperty[i].flags != 0 && gProperty[i].x == x
+         && gProperty[i].y == y)
         {
             gUnknown_084995A0[i].unk00 = 0;
-            gUnknown_03003150[i].flags = 0;
+            gProperty[i].flags = 0;
             gUnknown_0200B0B0->unk12--;
             if ((s8)gUnknown_0200B0B0->unk12 < 0)
                 gUnknown_0200B0B0->unk12 = 0;

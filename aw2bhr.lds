@@ -30,6 +30,10 @@ gMaxLines = 0;
  * type itself can't just change. */
 gMap = gUnknown_08499590;
 
+/* gProperty: typed name for the 0x03003150 record list (struct Property,
+ * include/map.h); linker alias for the same reason as gMap. */
+gProperty = gUnknown_03003150;
+
 SECTIONS
 {
 	. = 0x02000000;

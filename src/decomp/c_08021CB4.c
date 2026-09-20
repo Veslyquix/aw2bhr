@@ -8,7 +8,7 @@
  * sub_08021CB4 @ 0x08021CB4
  */
 
-/* Refreshes the cached terrain byte of every entry in the gUnknown_03003150
+/* Refreshes the cached terrain byte of every entry in the gProperty
  * list from the map plane: entry.flags = plane[rowOffset[entry.y] + entry.x].
  *
  * The bound is an `int` INDEX, not a pointer: the ROM's `cmp r3, r4; bgt` is a
@@ -25,11 +25,11 @@ void sub_08021CB4(void)
 
     i = 0;
 
-    while (gUnknown_03003150[i].flags != 0xff)
+    while (gProperty[i].flags != 0xff)
     {
         map = gMap;
-        gUnknown_03003150[i].flags =
-            map->terrain[map->rowOffset[gUnknown_03003150[i].y] + gUnknown_03003150[i].x];
+        gProperty[i].flags =
+            map->terrain[map->rowOffset[gProperty[i].y] + gProperty[i].x];
         i++;
         if (i > 0x5b)
             break;

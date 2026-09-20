@@ -63,7 +63,7 @@
  *    the function came out 588 bytes AND mis-allocated the loop; dropping it
  *    fixed size and every register slot at once.
  *
- * 2. gUnknown_03003150 MUST be a struct, not `u8 [][4]`. The ROM forms the
+ * 2. gProperty MUST be a struct, not `u8 [][4]`. The ROM forms the
  *    element address once and takes the three fields off it as `[r,#0]/#1/#2`
  *    displacements, which only a COMPONENT_REF preserves; the flat array spells
  *    each field as its own address expression and agbcc answers with separate
@@ -76,7 +76,7 @@
  * sub_08026F9C/sub_08026FD0 reaching it the same way). `i` is u16 from
  * `adds #1; lsls #0x10; lsrs #0x10` and the unsigned `bhi`; the `i <= 0x5b` half
  * of the loop condition folds away at the top guard because i is 0 there. r5
- * (&gUnknown_084995F4[team]) and sl (&gUnknown_03003150) are LICM hoists, not
+ * (&gUnknown_084995F4[team]) and sl (&gProperty) are LICM hoists, not
  * source, and so is the `str r2,[sp,#4]` holding &p->unk68 across the loop.
  */
 
@@ -117,13 +117,13 @@ void sub_08028580(struct Unk28580 *p)
         team = 0;
     }
 
-    for (i = 0; i <= 0x5b && gUnknown_03003150[i].flags != 0xff; i++)
+    for (i = 0; i <= 0x5b && gProperty[i].flags != 0xff; i++)
     {
-        if (MAP_OBJ_ARMY_MASK(gUnknown_03003150[i].flags) == gUnknown_084995F4[p->unk64])
+        if (MAP_OBJ_ARMY_MASK(gProperty[i].flags) == gUnknown_084995F4[p->unk64])
         {
             v = gMap->unit[
                     gMap->rowOffset[
-                        gUnknown_03003150[i].y] + gUnknown_03003150[i].x];
+                        gProperty[i].y] + gProperty[i].x];
 
             if (v != 0
              && gUnknown_08499598[(v >> 6) + 1].unk2a == gUnknown_08499598[team].unk2a)
@@ -132,24 +132,24 @@ void sub_08028580(struct Unk28580 *p)
                 unit->unk05_3 = 0;
             }
 
-            if (MAP_OBJ_TERRAIN(gUnknown_03003150[i].flags) == 8)
+            if (MAP_OBJ_TERRAIN(gProperty[i].flags) == 8)
             {
                 gMap->terrain[
                     gMap->rowOffset[
-                        gUnknown_03003150[i].y] + gUnknown_03003150[i].x]
+                        gProperty[i].y] + gProperty[i].x]
                             = 6 | gUnknown_084995F4[team];
-                sub_0802419C(gUnknown_03003150[i].x, gUnknown_03003150[i].y, 0);
-                sub_080240B4(gUnknown_03003150[i].x, gUnknown_03003150[i].y,
+                sub_0802419C(gProperty[i].x, gProperty[i].y, 0);
+                sub_080240B4(gProperty[i].x, gProperty[i].y,
                              gUnknown_084995F4[team]);
             }
             else
             {
                 gMap->terrain[
                     gMap->rowOffset[
-                        gUnknown_03003150[i].y] + gUnknown_03003150[i].x]
-                            = MAP_OBJ_TERRAIN(gUnknown_03003150[i].flags)
+                        gProperty[i].y] + gProperty[i].x]
+                            = MAP_OBJ_TERRAIN(gProperty[i].flags)
                             | gUnknown_084995F4[team];
-                sub_080240B4(gUnknown_03003150[i].x, gUnknown_03003150[i].y,
+                sub_080240B4(gProperty[i].x, gProperty[i].y,
                              gUnknown_084995F4[team]);
             }
         }

@@ -17,7 +17,7 @@ struct Map
     /* 0x051A */ u8 unitUnk[MAP_POOL_SIZE]; // often the same as unit[]
     /* 0x0A22 */ u16 tile[MAP_POOL_SIZE];
     /* 0x1432 */ u8 terrain[MAP_POOL_SIZE];
-    /* 0x193A */ s8 property[MAP_POOL_SIZE]; // s8: all 3 readers are signed (0xFF = -1 = "none", used as an index/test)
+    /* 0x193A */ s8 property[MAP_POOL_SIZE]; // property index for use with gProperty. -1 if invalid. 
     /* 0x1E42 */ u8 visible[MAP_POOL_SIZE]; 
     /* 0x234A */ u8 unk234A[MAP_POOL_SIZE];
     /* 0x2852 */ s8 move[MAP_POOL_SIZE]; // unk2852. s8: 3 signed reads (< 0, >= 0, > 0; -1 = blocked) vs 1 unsigned
@@ -60,10 +60,10 @@ extern struct Map *gMap;
  * (`lsls #2; add base`) and takes the three fields off it as `ldrb [r, #0]` /
  * `[r, #1]` / `[r, #2]` displacements. Only a COMPONENT_REF preserves that --
  * the flat array spells each field as its own address expression, and agbcc
- * answers with separate `gUnknown_03003150 + 1` and `+ 2` force-addr pool words
+ * answers with separate `gProperty + 1` and `+ 2` force-addr pool words
  * plus enough extra register pressure to spill a value the ROM keeps in a
  * register. Same rule as the map header in src/decomp/c_08024058.c. */
-struct Unk03003150 /* 0x04 */
+struct Property /* 0x04 */
 {
     /* 0x00 */ u8 flags;      /* `& 0xe0` selects the owning army and is compared
                                * against gUnknown_084995F4[army]; `& 0x1f` is a
@@ -76,8 +76,42 @@ struct Unk03003150 /* 0x04 */
     /* 0x02 */ u8 y;          /* map row; `lsls #1` indexes rowOffset[] at
                                * +0x417A, the c_08001158.c idiom */
     /* 0x03 */ u8 filler_03[0x01];
+}; // 3003150
+extern struct Property gProperty[]; // previously gUnknown_03003150 
+
+
+void MakeTileSimple(int x, int y, int tileID);
+int IsTerrainAtCoordsType(int x, int y, int terrainID);
+void SetTerrainAt(int x, int y, int terrainID);
+int GetDesignRoomOption(int id);
+int IsTerrainLand(int x, int y);
+int IsTerrainWater(int x, int y);
+int IsTerrainWaterOrRiver(int x, int y);
+int GetTileWithShadow_unkMapA22(int x, int y);
+int GetTileWithShadow(int x, int y, int tile);
+int GetTileWithShadow2(int x, int y, int tile);
+void EnsureValidTile(int x, int y);
+
+
+enum TerrainKind {
+    TERRAIN_PLAIN = 1,
+    TERRAIN_RIVER = 2,
+    TERRAIN_MOUNTAIN = 3,
+    TERRAIN_WOOD = 4,
+    TERRAIN_ROAD = 5,
+    TERRAIN_CITY = 6,
+    TERRAIN_SEA = 7,
+    TERRAIN_HQ = 8,
+    TERRAIN_AIRPORT = 0xA,
+    TERRAIN_PORT = 0xB,
+    TERRAIN_BRIDGE = 0xC,
+    TERRAIN_SHOAL = 0xD,
+    TERRAIN_BASE = 0xE,
+    TERRAIN_PIPE = 0xF,
+    TERRAIN_PIPE_SEAM = 0x10,
+    TERRAIN_SILO = 0x11,
+    TERRAIN_REEF = 0x13,
 };
-extern struct Unk03003150 gUnknown_03003150[];
 
 #define MAP_OBJ_TERRAIN(f)   ((f) & 0x1f)
 #define MAP_OBJ_ARMY(f)      (((f) & 0xe0) >> 5)

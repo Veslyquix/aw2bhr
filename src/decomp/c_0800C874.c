@@ -7,7 +7,7 @@
  * sub_0800C874 @ 0x0800C874, sub_0800C8A0 @ 0x0800C8A0, sub_0800C8D8 @ 0x0800C8D8, sub_0800C958 @ 0x0800C958, sub_0800C9E8 @ 0x0800C9E8
  */
 
-/* Counts the live entries in the gUnknown_03003150 list: 4-byte records whose
+/* Counts the live entries in the gProperty list: 4-byte records whose
  * first byte is 0 when the slot is empty and 0xFF when the list ends.
  *
  * The list bound and the sentinel are TWO exits and their order is readable
@@ -29,9 +29,9 @@ int sub_0800C874(void)
 
     for (i = 0; i <= 0x5B; i++)
     {
-        if (gUnknown_03003150[i].flags == 0xFF)
+        if (gProperty[i].flags == 0xFF)
             break;
-        if (gUnknown_03003150[i].flags != 0)
+        if (gProperty[i].flags != 0)
             n++;
     }
 
@@ -39,7 +39,7 @@ int sub_0800C874(void)
 }
 
 /* sub_0800C874 with one more conjunct: the same bounded scan of
- * gUnknown_03003150, counting only the live records whose flags byte equals
+ * gProperty, counting only the live records whose flags byte equals
  * the caller's.  The `cmp r0,#0` survives beside `cmp r0,r3` even though a
  * zero argument would make it redundant, so the emptiness test really is
  * written separately in the source and is not folded into the equality.
@@ -55,9 +55,9 @@ u32 sub_0800C8A0(int a)
 
     for (i = 0; i <= 0x5B; i++)
     {
-        if (gUnknown_03003150[i].flags == 0xFF)
+        if (gProperty[i].flags == 0xFF)
             break;
-        if (gUnknown_03003150[i].flags != 0 && gUnknown_03003150[i].flags == a)
+        if (gProperty[i].flags != 0 && gProperty[i].flags == a)
             n++;
     }
 
@@ -79,18 +79,18 @@ int sub_0800C8D8(void)
 
     for (i = 0; i <= 0x5B; i++)
     {
-        if (gUnknown_03003150[i].flags == 0xFF)
+        if (gProperty[i].flags == 0xFF)
             break;
-        if (gUnknown_03003150[i].flags != 0)
+        if (gProperty[i].flags != 0)
         {
-            switch (gUnknown_03003150[i].flags)
+            switch (gProperty[i].flags)
             {
             case 0x28:
             case 0x48:
             case 0x68:
             case 0x88:
-                sub_0800C75C(gUnknown_03003150[i].flags, gUnknown_03003150[i].x,
-                             gUnknown_03003150[i].y);
+                sub_0800C75C(gProperty[i].flags, gProperty[i].x,
+                             gProperty[i].y);
                 n++;
                 break;
             }
