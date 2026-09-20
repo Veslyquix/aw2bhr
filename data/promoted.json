@@ -16131,6 +16131,18 @@
   ]
  },
  {
+  "file": "src/decomp/c_0803F990.c",
+  "obj": "src/decomp/c_0803F990.o",
+  "addr_hex": "0x0803F990",
+  "functions": [
+   "sub_0803F990"
+  ],
+  "size": 664,
+  "rodata": [
+   "0x0809130C"
+  ]
+ },
+ {
   "file": "src/decomp/c_0803FC28.c",
   "obj": "src/decomp/c_0803FC28.o",
   "addr_hex": "0x0803FC28",
