@@ -119,7 +119,7 @@ void sub_08029FE4(void)
     }
     else
     {
-      save = gUnknown_08499598[gUnknown_030033EC].unk00;
+      save = gUnknown_08499598[gUnknown_030033EC].funds;
       n = sub_08029978(u, 0);
       n = sub_08029A48(u, 0) + n;
       m = sub_08029AF8(u, 2, 1 - (*p7));
@@ -129,7 +129,7 @@ void sub_08029FE4(void)
         if (m != 0)
         {
           flag = 1;
-          gUnknown_08499598[gUnknown_030033EC].unk00 = save;
+          gUnknown_08499598[gUnknown_030033EC].funds = save;
           n = 0;
         }
         pt.unk00 = u->unk02;

@@ -79,7 +79,7 @@ void sub_080397DC(void)
 
 void sub_080397F4(u16 a)
 {
-    sub_08019818(a, gUnknown_08499598[gUnknown_030033EC].unk1d, 0);
+    sub_08019818(a, gUnknown_08499598[gUnknown_030033EC].co, 0);
 }
 
 /* In mode 1 the scripted line (sub_08039850) is tried first and the random
@@ -89,7 +89,7 @@ void sub_080397F4(u16 a)
 
 void sub_08039820(ProcPtr proc)
 {
-    if (gUnknown_03003FC0.unk01 == 1)
+    if (gPlaySt.gameMode == 1)
     {
         if (sub_08039850(proc) == 0)
             sub_080398D0(proc);

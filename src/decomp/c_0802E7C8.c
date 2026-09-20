@@ -78,7 +78,7 @@ int sub_0802E7C8(int a1, int a2, void *a3, int a4)
         tile = gMap->unitUnk[gMap->rowOffset[(s16)ny] + (s16)nx];
 
         if (tile != 0
-         && gUnknown_08499598[(tile >> 6) + 1].unk2a != gUnknown_08499598[gUnknown_030033EC].unk2a) {
+         && gUnknown_08499598[(tile >> 6) + 1].team != gUnknown_08499598[gUnknown_030033EC].team) {
             p[0] = 10;
             p[1] = d;
             cur->pos.unk00 = x;

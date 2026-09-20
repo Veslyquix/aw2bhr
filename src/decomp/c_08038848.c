@@ -21,11 +21,11 @@
  * new entry is the previous one minus the terrain cost of the cell stepped on.
  *
  * The cost table is
- * `gUnknown_085D3DD0[row].unk38[e->unk1e].unk18[gUnknown_03003FC0.unk2c]`,
+ * `gUnknown_085D3DD0[row].unk38[e->unk1e].unk18[gPlaySt.unk2c]`,
  * where `e` is gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1] -- the +1 rides
  * in the 0x59 / 0x5a displacements (0x3c + 0x1d and 0x3c + 0x1e), the same
  * one-based indexing src/decomp/c_080211DC.c uses on that array. `row` is
- * e->unk1d normally and the literal 1 when gUnknown_03003FC0.unk08 is clear,
+ * e->unk1d normally and the literal 1 when gPlaySt.coAbilities is clear,
  * which is why the else arm is the bare constant 0x104 == 1 * sizeof(entry).
  * Unk085D3DD0Entry.unk18 was a scalar `s8 *` until this wave; the
  * `(unk1e * 17 + unk2c) << 2` off the +0x50 member base is a 4-byte stride
@@ -64,11 +64,11 @@ void sub_08038848(s8 a, s8 b)
     cur = &stack[i];
     prev = &stack[i - 1];
 
-    costs = gUnknown_085D3DD0[gUnknown_03003FC0.unk08
-                ? gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].unk1d
+    costs = gUnknown_085D3DD0[gPlaySt.coAbilities
+                ? gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].co
                 : 1]
-            .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].unk1e]
-            .unk18[gUnknown_03003FC0.unk2c];
+            .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].coMode]
+            .unk18[gPlaySt.unk2c];
 
     map = gMap;
 

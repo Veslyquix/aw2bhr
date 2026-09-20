@@ -74,11 +74,11 @@ void sub_080386EC(int a)
         cur = &stack[idx];
         prev = &stack[idx - 1];
 
-        costs = gUnknown_085D3DD0[gUnknown_03003FC0.unk08
-                    ? gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].unk1d
+        costs = gUnknown_085D3DD0[gPlaySt.coAbilities
+                    ? gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].co
                     : 1]
-                .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].unk1e]
-                .unk18[gUnknown_03003FC0.unk2c];
+                .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].coMode]
+                .unk18[gPlaySt.unk2c];
 
         map = gMap;
 

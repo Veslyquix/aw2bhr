@@ -8,7 +8,7 @@
  */
 
 /* A membership test over unit/terrain ids 6..20 that returns the shared
- * gUnknown_03003FC0.unk28 word for six of them and 0 otherwise. agbcc emits a
+ * gPlaySt.propertyFunds word for six of them and 0 otherwise. agbcc emits a
  * jump table because the fifteen labels are dense, and the six hits all share
  * one body, so the table holds the same target six times.
  *
@@ -23,7 +23,7 @@ u32 sub_08026C6C(u8 a)
     case 11:
     case 14:
     case 20:
-        return gUnknown_03003FC0.unk28;
+        return gPlaySt.propertyFunds;
     }
     return 0;
 }

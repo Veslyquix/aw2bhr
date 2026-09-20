@@ -72,7 +72,7 @@
  *     gUnknown_03004084 in between is what kills the CSE entry.
  *
  * The `.rodata` relocation against gUnknown_0808E554 is the -fforce-addr pool
- * word for &gUnknown_03003FC0 (0x0808E554 holds 0x03003FC0 in baserom.gba), not
+ * word for &gPlaySt (0x0808E554 holds 0x03003FC0 in baserom.gba), not
  * a global and not a difference -- see work/sub_08016F38/. */
 
 extern u8 gUnknown_02023284[];
@@ -128,10 +128,10 @@ void sub_08017208(void)
     gUnknown_03004084 = v * 0x20;
     gUnknown_03003F2C = (gUnknown_030033EC - 1) * 0x40;
     gUnknown_03004480 = v;
-    sub_0808B6E8(&gUnknown_03003FC0, p->unk0140, 0x48);
+    sub_0808B6E8(&gPlaySt, p->unk0140, 0x48);
     *(struct Unk08499594 *)gUnknown_03004490 = p->unk0008;
-    gUnknown_0200C420.unk0e = gUnknown_03003FC0.unk09;
-    gUnknown_0200C420.unk14 = (gUnknown_03003FC0.unk0c == 0);
+    gUnknown_0200C420.unk0e = gPlaySt.unk09;
+    gUnknown_0200C420.unk14 = (gPlaySt.unk0c == 0);
     for (i = 0; i < 4; i++)
         gUnknown_030033F4[i] = p->unk0b18[i];
     gUnknown_03002F08 = p->unk0b98;
@@ -147,12 +147,12 @@ void sub_08017208(void)
     map->unk08 = a;
     map->unk0a = b;
     map->unk10 = p->unk0bb6;
-    if (gUnknown_03003FC0.unk02 < 0xb4 || gUnknown_03003FC0.unk02 > 0xbf)
+    if (gPlaySt.mapID < 0xb4 || gPlaySt.mapID > 0xbf)
     {
-        gMap->unk4233 = sub_0802490C(gUnknown_03003FC0.unk02);
+        gMap->unk4233 = sub_0802490C(gPlaySt.mapID);
         sub_0803CC84(gMap->unk421a,
-                     sub_08024944(gUnknown_03003FC0.unk02));
-        sub_080247A4(gUnknown_03003FC0.unk02);
+                     sub_08024944(gPlaySt.mapID));
+        sub_080247A4(gPlaySt.mapID);
         sub_080215FC();
         for (y = 0; y < gMap->width; y++)
         {
@@ -166,7 +166,7 @@ void sub_08017208(void)
         }
         sub_0802481C();
     }
-    if (gUnknown_03003FC0.unk02 < 0xb4 || gUnknown_03003FC0.unk02 > 0xbf)
+    if (gPlaySt.mapID < 0xb4 || gPlaySt.mapID > 0xbf)
     {
         for (i = 0; p->unk0bb8[i].unk02 != 0xffff; i++)
         {

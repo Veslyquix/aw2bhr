@@ -75,7 +75,7 @@ void sub_08060170(void)
     gUnknown_030032D8 = 1;
     sub_08025EA0();
     gUnknown_03004780 = 0;
-    gUnknown_03003FC0.unk2e = gUnknown_030046C0.unk06;
+    gPlaySt.unk2e = gUnknown_030046C0.unk06;
     gUnknown_03004490[0] = gUnknown_030046C0.unk07;
     gUnknown_03004490[1] = gUnknown_030046C0.unk0c;
     gUnknown_03004490[2] = gUnknown_030046C0.unk0d;

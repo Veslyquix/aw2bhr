@@ -9,6 +9,6 @@
 
 void sub_08044560(void)
 {
-    gUnknown_08499598[gUnknown_030033EC].unk26 = Div(gUnknown_08499598[gUnknown_030033EC].unk00, 300);
-    gUnknown_08499598[gUnknown_030033EC].unk28 = 10;
+    gUnknown_08499598[gUnknown_030033EC].tempFirepower = Div(gUnknown_08499598[gUnknown_030033EC].funds, 300);
+    gUnknown_08499598[gUnknown_030033EC].tempDefense = 10;
 }

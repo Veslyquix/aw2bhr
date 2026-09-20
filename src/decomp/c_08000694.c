@@ -15,7 +15,7 @@
  *
  * This draft was PARKED in wave 13 and the block it was parked on no longer
  * exists: the single difference was that agbcc puts `.LC0: .word
- * gUnknown_0200B0B0` in this unit's own `.rodata` where the ROM relocates
+ * gActiveMap` in this unit's own `.rodata` where the ROM relocates
  * against gUnknown_0808D6DC, and wave 18 taught the split to PLACE that word
  * (tools/split_rodata.py). Nothing about the C below changed; the harness
  * caught up with it.
@@ -26,35 +26,35 @@
  * it. See docs/agbcc-codegen.md (wave 20, W20-A) for the sweep that found it
  * and the one-line command that repeats it.
  *
- * The wave-13 note kept for the record: the `struct Unk0200B0B0 **const
+ * The wave-13 note kept for the record: the `struct ActiveMap **const
  * gUnknown_0808D6DC` workaround declaration reproduces the CSE exactly but
  * force-addr then fires on THAT symbol in turn -- 400 bytes against 392 --
  * which is why the honest spelling below is the right one and was all along. */
 
 void sub_08000694(void)
 {
-    if (gUnknown_0200B0B0->unk06 != 0)
+    if (gActiveMap->unk06 != 0)
     {
-        gUnknown_0200B0B0->unk06 = 0;
-        gUnknown_0200B0B0->unk02 = 0;
+        gActiveMap->unk06 = 0;
+        gActiveMap->unk02 = 0;
         sub_08001D9C();
         sub_08003948();
-        gUnknown_0200B0B0->unk0c = 2;
+        gActiveMap->unk0c = 2;
         sub_080039D0();
         sub_0803B4DC(0x76);
     }
 
-    switch (gUnknown_0200B0B0->unk02)
+    switch (gActiveMap->unk02)
     {
     case 0:
-        if (--gUnknown_0200B0B0->unk0c <= 0)
-            gUnknown_0200B0B0->unk02 = 50;
+        if (--gActiveMap->unk0c <= 0)
+            gActiveMap->unk02 = 50;
         break;
 
     case 50:
         gUnknown_03001418 = 0xFFD8;
         gUnknown_03001FF8 = 0xFFC4;
-        gUnknown_0200B0B0->unk02 = 60;
+        gActiveMap->unk02 = 60;
         /* fall through */
     case 60:
     {
@@ -66,7 +66,7 @@ void sub_08000694(void)
 
         if (blend > 5)
         {
-            gUnknown_0200B0B0->unk02 = 70;
+            gActiveMap->unk02 = 70;
             sub_0803CE28(0, 0);
         }
         break;
@@ -78,15 +78,15 @@ void sub_08000694(void)
         sub_08023908(8);
         if (gpKeySt->held & 0xb)
         {
-            gUnknown_0200B0B0->unk02 = 80;
-            gUnknown_0200B0B0->unk0c = 10;
+            gActiveMap->unk02 = 80;
+            gActiveMap->unk0c = 10;
         }
         break;
 
     case 80:
-        if (--gUnknown_0200B0B0->unk0c < 0)
+        if (--gActiveMap->unk0c < 0)
         {
-            gUnknown_0200B0B0->unk02 = 90;
+            gActiveMap->unk02 = 90;
             sub_0803CEAC();
             sub_08012BC8(gUnknown_08499578, 0, 0, 15, 10, 0);
             sub_08013AEC();
@@ -99,7 +99,7 @@ void sub_08000694(void)
         if (gUnknown_03001FFC == 0)
         {
             gUnknown_03002EFC = 0xa0;
-            gUnknown_0200B0B0->unk02 = 100;
+            gActiveMap->unk02 = 100;
             gUnknown_03001FE8.bits.mosaic = 0;
             ((union BgCntBuf *)&gUnknown_0300251C)->bits.mosaic = 0;
             *(u8 *)&gUnknown_030030C4 = 0;
@@ -108,7 +108,7 @@ void sub_08000694(void)
         break;
 
     case 100:
-        gUnknown_0200B0B0->unk02 = 40;
+        gActiveMap->unk02 = 40;
         sub_08001D8C();
         sub_08003934();
         sub_0800056C(1);

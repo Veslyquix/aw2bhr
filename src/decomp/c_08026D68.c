@@ -34,16 +34,16 @@ void sub_08026D68(void)
     u8 b;
     u8 t;
     int kind;
-    struct Unk08499598 *army;
+    struct PlayerStruct *army;
 
     for (i = 0; i <= 4; i++)
     {
-        gUnknown_08499598[i].unk08 = 0;
-        gUnknown_08499598[i].unk0c = 0;
-        gUnknown_08499598[i].unk0d = 0;
-        gUnknown_08499598[i].unk0e = 0;
-        gUnknown_08499598[i].unk0f = 0;
-        gUnknown_08499598[i].unk2d |= 0x80;
+        gUnknown_08499598[i].income = 0;
+        gUnknown_08499598[i].bases = 0;
+        gUnknown_08499598[i].cities = 0;
+        gUnknown_08499598[i].airports = 0;
+        gUnknown_08499598[i].ports = 0;
+        gUnknown_08499598[i].hqX |= 0x80;
     }
 
     for (j = 0; j < gMap->height; j++)
@@ -62,29 +62,29 @@ void sub_08026D68(void)
                 switch (kind)
                 {
                 case 8:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk2d = k;
-                    army->unk2e = j;
+                    army->income += sub_08026C6C(kind);
+                    army->hqX = k;
+                    army->hqY = j;
                     break;
                 case 14:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0c++;
+                    army->income += sub_08026C6C(kind);
+                    army->bases++;
                     break;
                 case 20:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk10++;
+                    army->income += sub_08026C6C(kind);
+                    army->labs++;
                     break;
                 case 6:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0d++;
+                    army->income += sub_08026C6C(kind);
+                    army->cities++;
                     break;
                 case 10:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0e++;
+                    army->income += sub_08026C6C(kind);
+                    army->airports++;
                     break;
                 case 11:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0f++;
+                    army->income += sub_08026C6C(kind);
+                    army->ports++;
                     break;
                 }
             }

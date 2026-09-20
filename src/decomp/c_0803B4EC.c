@@ -23,7 +23,7 @@
 
 #include "proc.h"
 
-/* "Play song id, unless sound is suppressed": when gUnknown_03003FC0.unk0c is
+/* "Play song id, unless sound is suppressed": when gPlaySt.unk0c is
  * set the id goes to sub_0803B524 and actually starts; otherwise it is only
  * PARKED in gUnknown_030005C8 with the requested slot gUnknown_030005CA blanked
  * to 0xFFFF, which is precisely the state sub_0803B640 next door later drains
@@ -44,7 +44,7 @@ void sub_0803B4EC(int a)
 {
     u16 v = a;
 
-    if (gUnknown_03003FC0.unk0c != 0)
+    if (gPlaySt.unk0c != 0)
     {
         sub_0803B524((s16)v);
     }

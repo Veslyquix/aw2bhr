@@ -9,22 +9,22 @@
 
 void sub_08019870(void)
 {
-    gUnknown_03003FC0.unk06 = 0;
+    gPlaySt.unk06 = 0;
 }
 
 void sub_0801987C(void)
 {
-    gUnknown_03003FC0.unk06 = 1;
+    gPlaySt.unk06 = 1;
 }
 
 void sub_08019888(void)
 {
-    gUnknown_03003FC0.unk07 = 1;
+    gPlaySt.unk07 = 1;
 }
 
 void sub_08019894(void)
 {
-    gUnknown_03003FC0.unk07 = 0;
+    gPlaySt.unk07 = 0;
 }
 
 void sub_080198A0(void (*func)(void))

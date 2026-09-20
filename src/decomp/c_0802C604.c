@@ -47,7 +47,7 @@
 
 bool8 sub_0802C604(void)
 {
-    if (gUnknown_03003FC0.unk01 == 1)
+    if (gPlaySt.gameMode == 1)
     {
         switch (sub_08078E14())
         {

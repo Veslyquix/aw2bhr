@@ -12,7 +12,7 @@
  * alias below so every other unit keeps resolving it unchanged. */
 int IsHardCampaignMode(void)
 {
-    if (gUnknown_03003FC0.unk01 == 1 && IsCampaignCompletionFlagSet(0x60) != 0)
+    if (gPlaySt.gameMode == 1 && IsCampaignCompletionFlagSet(0x60) != 0)
         return 1;
     return 0;
 }

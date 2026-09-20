@@ -51,6 +51,6 @@ void sub_0804009C(struct Unk4009CProc *proc)
     sub_0803B4DC(0x10);
     sub_08013338(1, 0x14, proc->unk14);
 
-    if (gUnknown_03003FC0.unk01 != 5)
+    if (gPlaySt.gameMode != 5)
         sub_080130DC(4, 0, 2, proc->unk14);
 }

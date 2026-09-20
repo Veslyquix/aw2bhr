@@ -42,15 +42,15 @@ void sub_08059C60(void *a1)
                 continue;
             if (!sub_08020DBC(gUnknown_030033EC, p->unk02, p->unk03))
                 continue;
-            x = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
+            x = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
                              gUnknown_030040D8->unk00, p->unk00, 0);
-            y = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
+            y = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
                              gUnknown_030040D8->unk00, p->unk00, 1);
             if (x < y)
-                z = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
+                z = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
                                  gUnknown_030040D8->unk00, p->unk00, 1);
             else
-                z = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
+                z = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
                                  gUnknown_030040D8->unk00, p->unk00, 0);
             if (z <= 0x31)
                 continue;

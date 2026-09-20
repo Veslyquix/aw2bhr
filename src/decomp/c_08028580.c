@@ -72,7 +72,7 @@
  *
  * Readout notes: `gUnknown_08499598[(v >> 6) + 1].unk2a` is the ROM's
  * `adds r1, #0x66` -- 0x3c + 0x2a, the 1-based army slot, NOT a member at +0x66
- * (struct Unk08499598 is only 0x3c long, and its unk2a comment already records
+ * (struct PlayerStruct is only 0x3c long, and its unk2a comment already records
  * sub_08026F9C/sub_08026FD0 reaching it the same way). `i` is u16 from
  * `adds #1; lsls #0x10; lsrs #0x10` and the unsigned `bhi`; the `i <= 0x5b` half
  * of the loop condition folds away at the top guard because i is 0 there. r5
@@ -95,7 +95,7 @@ void sub_08028580(struct Unk28580 *p)
     u8 v;
     struct Unk08499594 *unit;
 
-    sub_08019818(gUnknown_08499FA0[gUnknown_08499598[p->unk64].unk1a - 1], 0, 0);
+    sub_08019818(gUnknown_08499FA0[gUnknown_08499598[p->unk64].teamColor - 1], 0, 0);
 
     if (p->unk66 == 2)
     {
@@ -103,12 +103,12 @@ void sub_08028580(struct Unk28580 *p)
         int idx;
 
         map = gMap;
-        idx = map->rowOffset[gUnknown_08499598[p->unk64].unk2e & 0x7f]
-            + (gUnknown_08499598[p->unk64].unk2d & 0x7f);
+        idx = map->rowOffset[gUnknown_08499598[p->unk64].hqY & 0x7f]
+            + (gUnknown_08499598[p->unk64].hqX & 0x7f);
         team = map->terrain[idx] >> 5;
         map->terrain[idx] = 8 | gUnknown_084995F4[p->unk64];
-        sub_080240B4(gUnknown_08499598[p->unk64].unk2d & 0x7f,
-                     gUnknown_08499598[p->unk64].unk2e & 0x7f,
+        sub_080240B4(gUnknown_08499598[p->unk64].hqX & 0x7f,
+                     gUnknown_08499598[p->unk64].hqY & 0x7f,
                      gUnknown_084995F4[p->unk64]);
         sub_080219AC();
     }
@@ -126,7 +126,7 @@ void sub_08028580(struct Unk28580 *p)
                         gProperty[i].y] + gProperty[i].x];
 
             if (v != 0
-             && gUnknown_08499598[(v >> 6) + 1].unk2a == gUnknown_08499598[team].unk2a)
+             && gUnknown_08499598[(v >> 6) + 1].team == gUnknown_08499598[team].team)
             {
                 unit = &gUnknown_08499594[v];
                 unit->unk05_3 = 0;

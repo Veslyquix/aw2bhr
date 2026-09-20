@@ -33,6 +33,6 @@ void sub_080211DC(u8 a1, s8 a2)
 
     sub_080210C8(e->unk02, e->unk03,
                  bonus + sub_08042D84(((e - gUnknown_08499594) >> 6) + 1, e->unk00),
-                 gUnknown_08499598[(a1 >> 6) + 1].unk1c,
+                 gUnknown_08499598[(a1 >> 6) + 1].turnState,
                  a2, (a1 >> 6) + 1);
 }

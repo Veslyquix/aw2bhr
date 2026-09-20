@@ -23,22 +23,22 @@
  * AddPlayerFunds applies to unk00. */
 void SubtractPlayerFunds(u16 a, u32 b)
 {
-    struct Unk08499598 *arr = gUnknown_08499598;
+    struct PlayerStruct *arr = gUnknown_08499598;
 
-    arr[a].unk00 -= b;
-    arr[a].unk04 += b;
-    if (arr[a].unk04 > 999999)
-        arr[a].unk04 = 999999;
+    arr[a].funds -= b;
+    arr[a].spent += b;
+    if (arr[a].spent > 999999)
+        arr[a].spent = 999999;
 }
 
 /* Xenesis's Datasheet: "Fund Adder subroutine, input r0 = Player, r1 = Funds". */
 void AddPlayerFunds(u16 a, u32 b)
 {
-    struct Unk08499598 *arr = gUnknown_08499598;
+    struct PlayerStruct *arr = gUnknown_08499598;
 
-    arr[a].unk00 += b;
-    if (arr[a].unk00 > 999999)
-        arr[a].unk00 = 999999;
+    arr[a].funds += b;
+    if (arr[a].funds > 999999)
+        arr[a].funds = 999999;
 }
 
 /* unk06_0 is a 7-bit field: the clear path emits `movs #0x80; rsbs` (= ~0x7f)

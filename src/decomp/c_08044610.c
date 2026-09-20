@@ -101,7 +101,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
         unit = &gUnknown_08499594[gUnknown_03003F2C + proc->unk68];
 
         if (unit->unk00 != 0
-            && gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].unk1d]
+            && gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].co]
                    .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1]
                    .unk04(unit) != 0)
         {
@@ -110,7 +110,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
 
             if (m->unk234A[idx] == 0 || (unit->unk01 & 8) != 0)
             {
-                gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].unk1d]
+                gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].co]
                     .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1]
                     .unk08(unit);
 
@@ -124,7 +124,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
                 if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
                     return;
 
-                gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].unk1d]
+                gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].co]
                     .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1]
                     .unk08(unit);
 

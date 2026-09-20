@@ -51,7 +51,7 @@ u8 sub_08028BAC(void)
             buf[i] = 1;
     }
 
-    if (gUnknown_03003FC0.unk04 & 4)
+    if (gPlaySt.unk04 & 4)
     {
         for (i = 1; i <= 4; i++)
         {
@@ -78,7 +78,7 @@ u8 sub_08028BAC(void)
             for (j = 1; j <= 4; j++)
             {
                 if (i != j && buf[j]
-                 && gUnknown_08499598[i].unk2a != gUnknown_08499598[j].unk2a)
+                 && gUnknown_08499598[i].team != gUnknown_08499598[j].team)
                     count++;
             }
 

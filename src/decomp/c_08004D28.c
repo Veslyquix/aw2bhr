@@ -21,7 +21,7 @@
 
 void sub_08004D28(void)
 {
-    switch ((s8)gUnknown_0200B0B0->unk10)
+    switch ((s8)gActiveMap->unk10)
     {
     case 0:
         sub_080055B8(0, 0, 0);

@@ -24,7 +24,7 @@ void sub_0802CF48(int a1, int a2, u8 a3)
     }
 }
 
-/* Two teardown calls, then a guarded hand-off of gUnknown_03003FC0.unk2e.
+/* Two teardown calls, then a guarded hand-off of gPlaySt.unk2e.
  *
  * Both member reads go through `adds r0, r1, #0; adds r0, #0x2e` (and #0x32)
  * rather than an `ldrb` displacement, because 0x2e and 0x32 are both past
@@ -41,17 +41,17 @@ void sub_0802CF6C(void)
     sub_0801A168();
     sub_08042B9C();
 
-    if (gUnknown_03003FC0.unk32 != 0)
-        sub_080344F0(gUnknown_03003FC0.unk2e);
+    if (gPlaySt.unk32 != 0)
+        sub_080344F0(gPlaySt.unk2e);
 }
 
 /* A wrapping 0-1-2 counter published to sub_08035020.
  *
  * gUnknown_08090C00 is NOT a global and must not be declared as one: the ROM
- * word at 0x08090C00 is 0x03003FC0, i.e. &gUnknown_03003FC0, and its immediate
+ * word at 0x08090C00 is 0x03003FC0, i.e. &gPlaySt, and its immediate
  * neighbours at 0x08090BF8/BFC/C04 hold &gUnknown_030033EC (twice) and
  * &gUnknown_030033E8 -- a `-fforce-addr` address-constant run. The honest
- * spelling is therefore just `gUnknown_03003FC0.unk2c`, and since wave 18 agbcc
+ * spelling is therefore just `gPlaySt.unk2c`, and since wave 18 agbcc
  * parks its own copy of the address in this unit's `.rodata` and the split
  * places it. That reproduces the ROM's double indirection (`ldr r1, =word;
  * ldr r0, [r1]`) with no `*const` pointer declaration and no c_local
@@ -66,12 +66,12 @@ void sub_0802CF6C(void)
 
 void sub_0802CF94(void)
 {
-    if (gUnknown_03003FC0.unk2c > 1)
-        gUnknown_03003FC0.unk2c = 0;
+    if (gPlaySt.unk2c > 1)
+        gPlaySt.unk2c = 0;
     else
-        gUnknown_03003FC0.unk2c++;
+        gPlaySt.unk2c++;
 
-    sub_08035020(gUnknown_03003FC0.unk2c);
+    sub_08035020(gPlaySt.unk2c);
 }
 
 /* A three-argument callback that acts only when bit 1 of its third argument is
@@ -99,7 +99,7 @@ void sub_0802CFC0(int a1, int a2, u8 a3)
 }
 
 /* sub_0802C1D0's twin, one block down: the same
- * `sub_08016D04(gUnknown_03003FC0.unk01)` result handed to a u16-taking
+ * `sub_08016D04(gPlaySt.gameMode)` result handed to a u16-taking
  * sub_08016Dxx entry, with the fused `lsls #0x18; asrs #8; lsrs #0x10` s8-to-u16
  * conversion between the two `bl`s. sub_08016DB8's own prologue
  * (`lsls r0,#0x10; lsrs r0,#0x10`) confirms the u16 independently of the call
@@ -113,5 +113,5 @@ void sub_0802CFC0(int a1, int a2, u8 a3)
 void sub_0802CFDC(void)
 {
     sub_0801A168();
-    sub_08016DB8(sub_08016D04(gUnknown_03003FC0.unk01));
+    sub_08016DB8(sub_08016D04(gPlaySt.gameMode));
 }

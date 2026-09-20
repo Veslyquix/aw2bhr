@@ -16,9 +16,9 @@ void sub_08007A30(void)
   register int a asm("r3");
   register int b asm("r5");
   u8 t;
-  struct Unk0200B0B0 *p;
+  struct ActiveMap *p;
   s16 *pair;
-  p = gUnknown_0200B0B0;
+  p = gActiveMap;
   switch (p->unk6c)
   {
     case 0:
@@ -29,7 +29,7 @@ void sub_08007A30(void)
       a = 0x750;
       p->unk6c = 0xA;
     }
-      pair = &gUnknown_0200B0B0->unk6e;
+      pair = &gActiveMap->unk6e;
       *pair = a;
       pair++;
       b = *pair;
@@ -48,9 +48,9 @@ void sub_08007A30(void)
     {
       a = 0x780;
       p->unk6c = 0x14;
-      gUnknown_0200B0B0->unk6d = 0x1E;
+      gActiveMap->unk6d = 0x1E;
     }
-      pair = &gUnknown_0200B0B0->unk6e;
+      pair = &gActiveMap->unk6e;
       *pair = a;
       pair++;
       b = *pair;
@@ -67,7 +67,7 @@ void sub_08007A30(void)
       p->unk6d = t - 1;
       if (((s8) t) <= 0)
     {
-      gUnknown_0200B0B0->unk6c = 0;
+      gActiveMap->unk6c = 0;
     }
       break;
 
@@ -75,7 +75,7 @@ void sub_08007A30(void)
 
   {
     register int raw asm("r0");
-    struct Unk0200B0B0 *tail = gUnknown_0200B0B0;
+    struct ActiveMap *tail = gActiveMap;
     raw = (u16)tail->unk6e;
     raw <<= 16;
     a = raw >> 20;

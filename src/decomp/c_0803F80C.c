@@ -36,10 +36,10 @@ void sub_0803F80C(int a1)
     int i;
 
     pal = gUnknown_080D3EE4;
-    ApplyPaletteExt(pal[gUnknown_08499598[0].unk1a], (u16)((a1 + 0x10) * 0x20), 0x20);
+    ApplyPaletteExt(pal[gUnknown_08499598[0].teamColor], (u16)((a1 + 0x10) * 0x20), 0x20);
     ApplyPaletteExt(pal[6], (u16)((a1 + 0x15) * 0x20), 0x20);
     for (i = 1; i < 5; i++)
-        ApplyPaletteExt(pal[gUnknown_08499598[i].unk1a], (u16)((a1 + 0x10 + i) * 0x20), 0x20);
+        ApplyPaletteExt(pal[gUnknown_08499598[i].teamColor], (u16)((a1 + 0x10 + i) * 0x20), 0x20);
 }
 
 /* MATCHED (wave 49, W49-C), first attempt. 96/96 bytes, relocs match.
@@ -47,7 +47,7 @@ void sub_0803F80C(int a1)
  * `gUnknown_08499598[i + 1]` and not a new member: the ROM reads
  * `adds r0, r5, r0; adds r0, #0x56; ldrb r0, [r0]` with the giv r5 stepping
  * 0x3c, and 0x56 is 0x3c + 0x1a -- the NEXT record's unk1a, reached through one
- * induction variable. struct Unk08499598 is 0x3c bytes, so an 0x56 member would
+ * induction variable. struct PlayerStruct is 0x3c bytes, so an 0x56 member would
  * not fit it in the first place.
  *
  * sub_0801368C's second parameter is `u16`, and that is what makes the whole
@@ -67,5 +67,5 @@ void sub_0803F880(int a1, int a2)
 
     pal = a1 ? gUnknown_080D3DE4 : gUnknown_080D3EE4;
     for (i = 0; i < sub_08026340(); i++)
-        sub_0801368C(&pal[gUnknown_08499598[i + 1].unk1a][6], (a2 + 0x11 + i) * 0x20 + 0xc, 2);
+        sub_0801368C(&pal[gUnknown_08499598[i + 1].teamColor][6], (a2 + 0x11 + i) * 0x20 + 0xc, 2);
 }

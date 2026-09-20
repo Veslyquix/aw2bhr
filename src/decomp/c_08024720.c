@@ -39,7 +39,7 @@ void sub_08024720(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b != 0)
+        if (gUnknown_08499598[i].aiControlled != 0)
         {
             if (sub_0804415C(i) && (j = idx) >= 0)
             {

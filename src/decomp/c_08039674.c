@@ -51,9 +51,9 @@ void sub_08039674(struct Unk39674Proc *proc)
     proc->unk64 = 0;
 
     p = Proc_Start(gUnknown_0849D6D4, proc);
-    p->unk54 = gUnknown_08499598[i].unk1d;
+    p->unk54 = gUnknown_08499598[i].co;
 
-    sub_08039930(gUnknown_08499598[i].unk1d, proc);
+    sub_08039930(gUnknown_08499598[i].co, proc);
     sub_08024584();
 
     gUnknown_030030E0.bits.effect = 1;

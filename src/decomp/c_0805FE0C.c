@@ -55,7 +55,7 @@ void sub_0805FE0C(void)
         gUnknown_030045D4 = 1;
     }
 
-    if (gUnknown_03003FC0.unk32 == 0 || gUnknown_03003F60 != 4)
+    if (gPlaySt.unk32 == 0 || gUnknown_03003F60 != 4)
         sub_08029088(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
 
     gUnknown_030045D4 = 1;

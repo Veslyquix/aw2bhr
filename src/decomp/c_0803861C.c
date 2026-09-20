@@ -36,7 +36,7 @@ bool8 sub_0803861C(void)
     count = 0;
     for (i = 1; i <= 4; i++)
     {
-        if (sub_080266DC(i) && gUnknown_08499598[1].unk2a == gUnknown_08499598[i].unk2a)
+        if (sub_080266DC(i) && gUnknown_08499598[1].team == gUnknown_08499598[i].team)
             count++;
     }
     if (count != 0)

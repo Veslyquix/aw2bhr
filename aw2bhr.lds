@@ -34,6 +34,12 @@ gMap = gUnknown_08499590;
  * include/map.h); linker alias for the same reason as gMap. */
 gProperty = gUnknown_03003150;
 
+/* gPlaySt / gActiveMap: typed names for the play-settings block (struct PlaySt)
+ * and the design-room active-map pointer (struct ActiveMap); the names follow
+ * SRR_AW2's Definitions.s. Linker aliases, same reason as gMap. */
+gPlaySt = gUnknown_03003FC0;
+gActiveMap = gUnknown_0200B0B0;
+
 SECTIONS
 {
 	. = 0x02000000;

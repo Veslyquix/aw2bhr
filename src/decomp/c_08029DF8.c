@@ -93,7 +93,7 @@ void sub_08029DF8(struct Unk03001470 *proc)
       }
       sub_08015328(gUnknown_03001FBC);
       sub_080424FC();
-      if ((proc->unk20 == 0) && (gUnknown_03003FC0.unk32 != 0))
+      if ((proc->unk20 == 0) && (gPlaySt.unk32 != 0))
       {
         sub_08034534(6, gUnknown_03003F38, 0, 0);
       }

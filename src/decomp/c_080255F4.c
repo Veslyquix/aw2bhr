@@ -51,12 +51,12 @@ u8 sub_080255F4(struct Unk08499594 *unit, s16 ax, s16 ay)
     if (!(unit->unk01 & 0x20))
         return 1;
 
-    if (gUnknown_08499598[(id >> 6) + 1].unk1c & 2)
+    if (gUnknown_08499598[(id >> 6) + 1].turnState & 2)
         return 1;
 
     idx = gMap->rowOffset[ay] + ax;
 
-    if (gUnknown_08499598[gMap->terrain[idx] >> 5].unk1c & 2)
+    if (gUnknown_08499598[gMap->terrain[idx] >> 5].turnState & 2)
         return 1;
 
     if (ax > 0)

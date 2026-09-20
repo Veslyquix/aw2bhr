@@ -9,7 +9,7 @@
 
 bool8 sub_08018C54(s16 a)
 {
-    gUnknown_03003FC0.unk04 = gUnknown_0200C528[a].unk04->unk08;
+    gPlaySt.unk04 = gUnknown_0200C528[a].unk04->unk08;
     gUnknown_0200C528[a].unk04++;
     return TRUE;
 }

@@ -28,7 +28,7 @@ void sub_08025340(u8 a1)
 
     p->unk01 |= 2;
 
-    if (gUnknown_03003FC0.unk0d != 0)
+    if (gPlaySt.unk0d != 0)
         sub_080211DC(a1, -1);
 }
 
@@ -43,6 +43,6 @@ void sub_08025378(u8 a1)
 
     p->unk01 &= ~2;
 
-    if (gUnknown_03003FC0.unk0d != 0)
+    if (gPlaySt.unk0d != 0)
         sub_080211DC(a1, 1);
 }

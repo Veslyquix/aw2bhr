@@ -13,7 +13,7 @@
  * data/promoted.json entry:
  *     "rodata": ["0x08090D8C"]
  * then re-run tools/split_rodata.py and tools/gen_lds.py before building.
- * 0x08090D8C holds 0x03003FC0, i.e. &gUnknown_03003FC0. The honest spelling
+ * 0x08090D8C holds 0x03003FC0, i.e. &gPlaySt. The honest spelling
  * reproduces it exactly, including the reload of the address after the loop
  * (`ldr r3, [r7]`) that the -fforce-addr indirection forces. See the
  * non-consecutive-words promotion warning in sub_08033F1C's note.
@@ -35,7 +35,7 @@
  * gUnknown_085C77E0 is NOT a global: it is `gUnknown_085C77A0 + 0x40`, and
  * `gUnknown_085C77A0[n].unk40[i]` emits that base as an LICM-hoisted address
  * constant, which trymatch reports as resolving to the same address.
- * gUnknown_03003FC0.unk02 is reloaded every iteration rather than hoisted
+ * gPlaySt.mapID is reloaded every iteration rather than hoisted
  * because the loop stores into unk38 of the same struct and agbcc cannot
  * prove the two do not alias.
  *
@@ -51,26 +51,26 @@ void ResetRulesAfterCampaignMap(void)
 
     SetDefaultRules();
 
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 2:
-        gUnknown_03003FC0.unk38[1] = 1;
-        gUnknown_03003FC0.unk38[2] = 2;
-        gUnknown_03003FC0.unk38[3] = 2;
-        gUnknown_03003FC0.unk38[4] = 2;
+        gPlaySt.aiControlled[1] = 1;
+        gPlaySt.aiControlled[2] = 2;
+        gPlaySt.aiControlled[3] = 2;
+        gPlaySt.aiControlled[4] = 2;
         break;
 
     case 1:
         for (i = 0; i < 4; i++)
         {
-            if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk40[i] == 5)
-                gUnknown_03003FC0.unk38[i + 1] = 2;
+            if (gUnknown_085C77A0[gPlaySt.mapID].unk40[i] == 5)
+                gPlaySt.aiControlled[i + 1] = 2;
             else
-                gUnknown_03003FC0.unk38[i + 1] = 1;
+                gPlaySt.aiControlled[i + 1] = 1;
         }
 
-        if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk17 != 0)
-            gUnknown_03003FC0.unk0d = 1;
+        if (gUnknown_085C77A0[gPlaySt.mapID].unk17 != 0)
+            gPlaySt.unk0d = 1;
         break;
     }
 }

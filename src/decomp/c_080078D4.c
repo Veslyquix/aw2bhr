@@ -16,5 +16,5 @@
 
 void sub_080078D4(u8 a)
 {
-    gUnknown_0200B0B0->unk2f = a;
+    gActiveMap->unk2f = a;
 }

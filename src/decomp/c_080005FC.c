@@ -17,18 +17,18 @@
 
 void sub_080005FC(void)
 {
-    if (gUnknown_0200B0B0->unk06 != 0)
+    if (gActiveMap->unk06 != 0)
     {
-        gUnknown_0200B0B0->unk06 = 0;
-        gUnknown_0200B0B0->unk02 = 0;
-        gUnknown_0200B0B0->unk0c = 30;
+        gActiveMap->unk06 = 0;
+        gActiveMap->unk02 = 0;
+        gActiveMap->unk0c = 30;
     }
 
-    if (gUnknown_0200B0B0->unk02 == 0)
+    if (gActiveMap->unk02 == 0)
     {
-        if (--gUnknown_0200B0B0->unk0c == 0)
+        if (--gActiveMap->unk0c == 0)
         {
-            gUnknown_0200B0B0->unk02 = 1;
+            gActiveMap->unk02 = 1;
             sub_080193B0(sub_08004E44() == 0 ? gUnknown_084856FC : gUnknown_084857AC);
         }
     }

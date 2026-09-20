@@ -87,7 +87,7 @@ ProcPtr sub_080355CC(u16 x, u16 y, u16 a3, u16 a4)
     proc->unk2c->unk22 = (proc->unk3a * 9 + 0x29A) | (sub_08035AE8(proc->unk3a) * 0x1000);
 
     tbl = gUnknown_0810EA60;
-    pal = gUnknown_08499598[proc->unk37 + 1].unk1a - 1;
+    pal = gUnknown_08499598[proc->unk37 + 1].teamColor - 1;
     ApplyPaletteExt(tbl[pal],
                     (u16)(0x20 * (sub_08035AE8(proc->unk3a) + 0x10)), 0x20);
 

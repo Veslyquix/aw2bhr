@@ -15,7 +15,7 @@
  * with `lsls r0,#0x18`. Byte-exact before and after. */
 u8 sub_08035CF4(ProcPtr proc)
 {
-    if (gUnknown_03003FC0.unk2c == 1)
+    if (gPlaySt.unk2c == 1)
         return 1;
 
     return 0;

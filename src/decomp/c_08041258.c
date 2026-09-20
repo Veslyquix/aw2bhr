@@ -8,7 +8,7 @@
  */
 
 /* `lsls r1, r0, #4; subs r1, r1, r0; lsls r1, r1, #2` is a multiply by
- * 15 * 4 = 0x3c, which is exactly sizeof(struct Unk08499598) -- so this is an
+ * 15 * 4 = 0x3c, which is exactly sizeof(struct PlayerStruct) -- so this is an
  * array index on gUnknown_08499598 and not hand-rolled arithmetic. Neither
  * parameter is narrowed at entry, so both are `int`.
  *
@@ -17,7 +17,7 @@
  * agbcc materialises 0x1DA. */
 void sub_08041258(int a, int b)
 {
-    if (gUnknown_08499598[a].unk1b == 1)
+    if (gUnknown_08499598[a].aiControlled == 1)
     {
         if ((b & 0x1F) == 8)
             sub_0803B4DC(0x83);

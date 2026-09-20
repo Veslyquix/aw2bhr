@@ -15,7 +15,7 @@
 
 bool8 IsPlayerAliveAndActive(u8 index)
 {
-    if (gUnknown_08499598[index].unk1b != 0 && gUnknown_08499598[index].unk14 == 0)
+    if (gUnknown_08499598[index].aiControlled != 0 && gUnknown_08499598[index].unk14 == 0)
         return TRUE;
 
     return FALSE;

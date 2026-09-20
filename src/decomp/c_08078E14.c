@@ -16,5 +16,5 @@
 
 int sub_08078E14(void)
 {
-    return gUnknown_03003FC0.unk02 - 0x89;
+    return gPlaySt.mapID - 0x89;
 }

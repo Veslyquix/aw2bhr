@@ -15,8 +15,8 @@ void sub_08035020(u16 a)
 
 void sub_0803504C(struct Unk03001470 *p)
 {
-    gUnknown_03003FC0.unk2c = p->unk20;
-    sub_08035020(gUnknown_03003FC0.unk2c);
+    gPlaySt.unk2c = p->unk20;
+    sub_08035020(gPlaySt.unk2c);
 }
 
 /* Named per Xenesis's AW2 Subroutine List: "Code that retrieves the Sound

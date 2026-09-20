@@ -146,20 +146,20 @@ retry:
 
         if (((struct Unk60AB0Tbl *)gUnknown_085766E0)->rows[i - 1].unk07 != 0)
         {
-            a = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                             gUnknown_08499598[gUnknown_030033EC].unk1e,
+            a = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
+                             gUnknown_08499598[gUnknown_030033EC].coMode,
                              i, pick, 0);
-            b = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                             gUnknown_08499598[gUnknown_030033EC].unk1e,
+            b = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
+                             gUnknown_08499598[gUnknown_030033EC].coMode,
                              i, pick, 1);
 
             if (a > b)
-                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                                 gUnknown_08499598[gUnknown_030033EC].unk1e,
+                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
+                                 gUnknown_08499598[gUnknown_030033EC].coMode,
                                  i, pick, 0);
             else
-                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                                 gUnknown_08499598[gUnknown_030033EC].unk1e,
+                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
+                                 gUnknown_08499598[gUnknown_030033EC].coMode,
                                  i, pick, 1);
 
             if (r >= thr)
@@ -210,7 +210,7 @@ again:
         if (sub_08060ED4(k) == 0)
             goto again;
 
-        funds = gUnknown_08499598[gUnknown_030033EC].unk00;
+        funds = gUnknown_08499598[gUnknown_030033EC].funds;
 
         if (cost > funds)
             goto again;

@@ -28,10 +28,10 @@ void sub_08005874(void)
         sub_08004D74(1, 2);
     else
         sub_08004D90(1, 2, gUnknown_0200B204);
-    gUnknown_0200B0B0->unk46 = 0x15;
-    gUnknown_0200B0B0->unk48 = 0x30;
+    gActiveMap->unk46 = 0x15;
+    gActiveMap->unk48 = 0x30;
     sub_0801A444(3, 2, 0xA, 4);
-    sub_080149C0(4, 3, gUnknown_08499578, &gUnknown_0200B0B0->unk9c, 0x8000, 0);
+    sub_080149C0(4, 3, gUnknown_08499578, &gActiveMap->unk9c, 0x8000, 0);
     sub_08013AEC();
 }
 
@@ -41,7 +41,7 @@ void sub_08005964(void)
 {
     sub_0801B780(0x70);
     sub_08019F2C(gUnknown_08488514, 2, 6, 0,
-                 (s8)gUnknown_0200B0B0->unk10 < 0 ? 0 : (s8)gUnknown_0200B0B0->unk10);
+                 (s8)gActiveMap->unk10 < 0 ? 0 : (s8)gActiveMap->unk10);
     sub_08005874();
-    gUnknown_0200B0B0->unk02 = 4;
+    gActiveMap->unk02 = 4;
 }

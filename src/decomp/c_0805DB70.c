@@ -31,10 +31,10 @@ void sub_0805DB70(void)
 
     if ((u8)sub_08044280(gUnknown_030033EC))
     {
-        fn = gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].unk1d].unk1c;
+        fn = gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].co].unk1c;
         if (fn != 0 && fn(2) == 1)
         {
-            if (gUnknown_03003FC0.unk32 != 0)
+            if (gPlaySt.unk32 != 0)
                 sub_08034534(0x10, 0, gUnknown_030033EC, 0);
             sub_0804438C(gUnknown_030033EC, 2);
             return;
@@ -45,17 +45,17 @@ void sub_0805DB70(void)
     {
         v = sub_080441D4(gUnknown_030033EC);
         n = sub_08044208(gUnknown_030033EC) - v;
-        n = Div(n * gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].unk1d].unk17,
+        n = Div(n * gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].co].unk17,
                 100);
         v += n;
         if (v >= (int)sub_08044094(gUnknown_030033EC)
             && sub_080129E0() % 100
-                   < gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].unk1d].unk18)
+                   < gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].co].unk18)
         {
-            fn = gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].unk1d].unk1c;
+            fn = gUnknown_085D3DD0[gUnknown_08499598[gUnknown_030033EC].co].unk1c;
             if (fn != 0 && fn(1) == 1)
             {
-                if (gUnknown_03003FC0.unk32 != 0)
+                if (gPlaySt.unk32 != 0)
                     sub_08034534(0xf, 0, gUnknown_030033EC, 0);
                 sub_0804438C(gUnknown_030033EC, 1);
             }

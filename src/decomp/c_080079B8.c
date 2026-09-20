@@ -60,13 +60,13 @@
 
 void sub_080079B8(int a1)
 {
-    struct Unk0200B0B0 *p;
+    struct ActiveMap *p;
     int n;
     int c;
     int i;
     int m;
 
-    p = gUnknown_0200B0B0;
+    p = gActiveMap;
     n = p->unk3a;
     c = p->unk07;
     i = n + 3;

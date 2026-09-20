@@ -32,12 +32,12 @@ void sub_08026CD0(void)
     {
         j = i - 1;
         k = i - 2;
-        if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk48[k].unk00 != 0xff)
+        if (gUnknown_085C77A0[gPlaySt.mapID].unk48[k].unk00 != 0xff)
         {
-            gUnknown_08499598[j].unk2d |=
-                gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk48[k].unk00;
-            gUnknown_08499598[j].unk2e |=
-                gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk48[k].unk01;
+            gUnknown_08499598[j].hqX |=
+                gUnknown_085C77A0[gPlaySt.mapID].unk48[k].unk00;
+            gUnknown_08499598[j].hqY |=
+                gUnknown_085C77A0[gPlaySt.mapID].unk48[k].unk01;
         }
     }
 }

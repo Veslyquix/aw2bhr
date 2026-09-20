@@ -21,7 +21,7 @@
 
 int sub_0805C268(void)
 {
-    if (gUnknown_03003FC0.unk2c == 1 && (u8)(gUnknown_03003FC0.unk2d - 2) > 1)
+    if (gPlaySt.unk2c == 1 && (u8)(gPlaySt.unk2d - 2) > 1)
         return 0;
 
     return 1;

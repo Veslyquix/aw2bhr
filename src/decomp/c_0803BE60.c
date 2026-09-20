@@ -13,15 +13,15 @@
  * every slot 100000 of whatever unk10 counts.
  *
  * `unk10` had to become a real member ARRAY for this to match, and that is the
- * whole derivation. The ROM keeps the UNBIASED `.word gUnknown_03003FC0` in
+ * whole derivation. The ROM keeps the UNBIASED `.word gPlaySt` in
  * r2, hoists `adds r5,r2,#0; adds r5,#0x10` into the third preheader and
  * reaches unk28 as `str r3,[r2,#0x28]`. Two rejected spellings, both 4 bytes
  * short:
- *   - `(&gUnknown_03003FC0.unk14)[i - 1]` on the old scalar fields folds the
- *     offset into the pool word (`.word gUnknown_03003FC0+0x10`) and then
+ *   - `(&gPlaySt.unk14)[i - 1]` on the old scalar fields folds the
+ *     offset into the pool word (`.word gPlaySt+0x10`) and then
  *     reaches unk28 as `[r2,#0x18]` off that biased base -- no hoisted add at
  *     all.
- *   - binding a `struct Unk03003FC0 *p = &gUnknown_03003FC0;` local gets the
+ *   - binding a `struct PlaySt *p = &gPlaySt;` local gets the
  *     unbiased base but folds the 0x10 into the store displacement
  *     (`str r3,[r0,#0x10]`) and pulls the `ldr` up to the top of the function,
  *     ahead of the gUnknown_0849ECDC load, where the ROM has it in the third
@@ -31,7 +31,7 @@
  * arithmetic folds" rule in docs/agbcc-codegen.md, and it discriminates a
  * declared array from four scalars at the same addresses.
  *
- * `gUnknown_03003FC0.unk28 = 1000` is INSIDE the loop in the source: it is
+ * `gPlaySt.propertyFunds = 1000` is INSIDE the loop in the source: it is
  * re-stored on every iteration and agbcc does not sink stores.
  *
  * `i = n + 1` on a u8 gives the `adds r0,r2,#1; lsls #0x18; lsrs r1,#0x18`
@@ -53,7 +53,7 @@ void sub_0803BE60(void)
 
     for (i = 1; i <= 4; i++)
     {
-        gUnknown_03003FC0.unk10[i] = 100000;
-        gUnknown_03003FC0.unk28 = 1000;
+        gPlaySt.unk10[i] = 100000;
+        gPlaySt.propertyFunds = 1000;
     }
 }

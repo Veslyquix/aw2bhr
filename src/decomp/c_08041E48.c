@@ -26,7 +26,7 @@ struct Unk41E48Proc
 };
 
 /* The same three bracketing calls src/decomp/c_0802CFFC.c opens with, and the
- * same gUnknown_03003FC0.unk32 gate on the same sub_08034534 command -- this
+ * same gPlaySt.unk32 gate on the same sub_08034534 command -- this
  * is that function's per-proc variant, taking the two coordinates off the proc
  * instead of passing zeros. The `lsls #0x18; lsrs #0x18` pair on each is what
  * retyped sub_08034534's third and fourth parameters to u8; c_0802CFFC.c's two
@@ -38,6 +38,6 @@ void sub_08041E48(struct Unk41E48Proc *proc)
     sub_080424FC();
     sub_0802C594();
 
-    if (proc->unk64 != 0 && gUnknown_03003FC0.unk32 != 0)
+    if (proc->unk64 != 0 && gPlaySt.unk32 != 0)
         sub_08034534(5, gUnknown_03003F38, proc->unk2c, proc->unk30);
 }

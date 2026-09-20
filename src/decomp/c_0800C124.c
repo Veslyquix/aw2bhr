@@ -9,13 +9,13 @@
  */
 
 /* Exact configured match. Repaints the cell at (x, y) after a change: if it is
- * a road tile, record its tile in gUnknown_0200B0B0->unk20 and repaint; else
+ * a road tile, record its tile in gActiveMap->unk20 and repaint; else
  * switch on its terrain byte. All map reads go straight through
  * gMap->tile[] / gMap->terrain[] / gMap->rowOffset[]; `q` is bound once in the
  * true arm. */
 void sub_0800C124(int x, int y)
 {
-    struct Unk0200B0B0 *q;
+    struct ActiveMap *q;
 
     if (sub_0800164C(x, y))
     {
@@ -23,7 +23,7 @@ void sub_0800C124(int x, int y)
             return;
         if (sub_0800C840(x, y))
             sub_0800C608(x, y);
-        q = gUnknown_0200B0B0;
+        q = gActiveMap;
         q->unk20 = gMap->tile[gMap->rowOffset[y] + x];
         sub_0800EC20(x, y);
         sub_08001158(x, y, 0x2A);

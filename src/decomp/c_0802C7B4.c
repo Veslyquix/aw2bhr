@@ -23,7 +23,7 @@
 void sub_0802C7B4(void)
 {
     sub_0801A168();
-    sub_080193B0(gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk08);
+    sub_080193B0(gUnknown_085C77A0[gPlaySt.mapID].unk08);
 }
 
 /* The gUnknown_030044A0 counterpart of sub_0802CD54's gUnknown_030040F0 stash:

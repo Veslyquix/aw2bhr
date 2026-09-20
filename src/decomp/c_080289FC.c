@@ -8,7 +8,7 @@
  */
 
 /* "Is army a1 the last one standing among the armies sharing its +0x2a team
- * byte?" -- gated on gUnknown_03003FC0.unk04 bit 2, and answering TRUE (the
+ * byte?" -- gated on gPlaySt.unk04 bit 2, and answering TRUE (the
  * fall-through) whenever the gate is closed.
  *
  * The `&&` chain is what puts the gUnknown_08499598 pool word INSIDE the loop:
@@ -25,7 +25,7 @@ bool8 sub_080289FC(int a1)
 {
     int i;
 
-    if (gUnknown_03003FC0.unk04 & 4)
+    if (gPlaySt.unk04 & 4)
     {
         if (!sub_080266DC(a1))
             return FALSE;
@@ -33,7 +33,7 @@ bool8 sub_080289FC(int a1)
         for (i = 1; i <= 4; i++)
         {
             if (a1 != i
-             && gUnknown_08499598[a1].unk2a == gUnknown_08499598[i].unk2a
+             && gUnknown_08499598[a1].team == gUnknown_08499598[i].team
              && !sub_080266DC(i))
                 return FALSE;
         }
@@ -102,7 +102,7 @@ void sub_08028AEC(void)
     }
 }
 
-/* "Which army slot is first at or past gUnknown_03003FC0.unk31?" -- a linear
+/* "Which army slot is first at or past gPlaySt.unk31?" -- a linear
  * scan of slots 1..4 returning the slot number, or 0 both when unk31 is zero
  * and when nothing reaches it.
  *
@@ -118,12 +118,12 @@ int sub_08028B70(void)
 {
     u8 i;
 
-    if (gUnknown_03003FC0.unk31 == 0)
+    if (gPlaySt.unk31 == 0)
         return 0;
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk11 >= gUnknown_03003FC0.unk31)
+        if (gUnknown_08499598[i].captures >= gPlaySt.unk31)
             return i;
     }
 

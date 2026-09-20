@@ -22,13 +22,13 @@
 
 bool8 sub_0802C9A4(void)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return TRUE;
 
     if (sub_0802C958())
         return TRUE;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk1d != 4)
+    if (gUnknown_08499598[gUnknown_030033EC].co != 4)
         return TRUE;
 
     return FALSE;
@@ -49,10 +49,10 @@ bool8 sub_0802C9E8(void)
     if (sub_0802C958())
         return TRUE;
 
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return FALSE;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk1d == 4)
+    if (gUnknown_08499598[gUnknown_030033EC].co == 4)
         return TRUE;
 
     return FALSE;

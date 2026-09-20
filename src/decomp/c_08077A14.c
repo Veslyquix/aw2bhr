@@ -59,7 +59,7 @@ void sub_08077A14(struct Unk8077A14Proc * proc)
     sub_08037750(4);
 
     for (i = 0; i < 4; i++)
-        gUnknown_08499598[i + 1].unk1a = gUnknown_085C77A0[proc->unk34].unk40[i];
+        gUnknown_08499598[i + 1].teamColor = gUnknown_085C77A0[proc->unk34].unk40[i];
 
     sub_0803D6D0();
     sub_0801B6EC((void *)(0x06001000 + (gUnknown_03002B6C.bits.chr_block << 14)));

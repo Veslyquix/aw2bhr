@@ -9,9 +9,9 @@
 
 void sub_0802CE04(void)
 {
-    gUnknown_03003FC0.unk0c = 1 - gUnknown_03003FC0.unk0c;
+    gPlaySt.unk0c = 1 - gPlaySt.unk0c;
 
-    switch (gUnknown_03003FC0.unk0c)
+    switch (gPlaySt.unk0c)
     {
     case 0:
         sub_0803B5E8();
@@ -23,5 +23,5 @@ void sub_0802CE04(void)
     }
 
     sub_08019E68();
-    gUnknown_0200C420.unk14 = (gUnknown_03003FC0.unk0c == 0);
+    gUnknown_0200C420.unk14 = (gPlaySt.unk0c == 0);
 }

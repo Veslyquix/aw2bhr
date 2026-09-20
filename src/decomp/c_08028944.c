@@ -7,7 +7,7 @@
  * sub_08028944 @ 0x08028944
  */
 
-/* "Is army `a` still playable?" -- only asked at all when gUnknown_03003FC0's
+/* "Is army `a` still playable?" -- only asked at all when gPlaySt's
  * +0x04 flag byte has bit 1 set, and then it is `sub_080266DC(a) && !unk32`.
  *
  * The RETURN-BLOCK ORDER is a readout: the ROM's `movs r0,#1; b` sits inline
@@ -17,13 +17,13 @@
  * same size, different bytes. */
 bool8 sub_08028944(u16 a)
 {
-    if ((gUnknown_03003FC0.unk04 & 2) == 0)
+    if ((gPlaySt.unk04 & 2) == 0)
         return TRUE;
 
     if (sub_080266DC(a) == 0)
         return FALSE;
 
-    if (gUnknown_08499598[a].unk32 != 0)
+    if (gUnknown_08499598[a].killOnEndTurn != 0)
         return FALSE;
 
     return TRUE;

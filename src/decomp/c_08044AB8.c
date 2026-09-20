@@ -29,7 +29,7 @@ void sub_08044AB8(int a)
     int b0;
     int b1;
 
-    i = gUnknown_08499598[a].unk1d;
+    i = gUnknown_08499598[a].co;
     j = gUnknown_08499598[a].unk1f;
     p = (const u8 *)gUnknown_084A0090;
     m = (j - 1) * 5;

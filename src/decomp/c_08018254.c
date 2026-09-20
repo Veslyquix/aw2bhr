@@ -118,7 +118,7 @@ void sub_08018254(s16 a)
     {
         if (((s16)raw & 0x8000) != 0)
         {
-            gUnknown_03002F08.unk02 = gUnknown_08499598[i].unk1d;
+            gUnknown_03002F08.unk02 = gUnknown_08499598[i].co;
             gUnknown_03002F08.unk02 += v * 24;
         }
         else

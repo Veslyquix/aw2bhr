@@ -43,7 +43,7 @@ void sub_0802DE1C(void)
     if (!(gpKeySt->held & 2))
         return;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.unk32 != 0)
         sub_08034534(0x11, gUnknown_03003F38, 0, 0);
 
     sub_08029088(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
@@ -92,7 +92,7 @@ void sub_0802DEFC(void)
     if (!(gpKeySt->held & 1))
         return;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.unk32 != 0)
         sub_08034534(0x12, id, 0, 0);
 
     sub_0804018C(e);

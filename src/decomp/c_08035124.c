@@ -9,7 +9,7 @@
 
 void sub_08035124(u8 a)
 {
-    if (a != 0 && gUnknown_03003FC0.unk2c != a)
+    if (a != 0 && gPlaySt.unk2c != a)
         sub_080350E4();
 }
 

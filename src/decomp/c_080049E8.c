@@ -17,6 +17,6 @@ void sub_080049E8(void)
     sub_0801A168();
     sub_0800056C(6);
     sub_080152EC(gUnknown_084872B4, 0);
-    gUnknown_0200B0B0->unk46 = 0x57;
-    gUnknown_0200B0B0->unk48 = 0x10;
+    gActiveMap->unk46 = 0x57;
+    gActiveMap->unk48 = 0x10;
 }

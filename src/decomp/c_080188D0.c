@@ -29,7 +29,7 @@ bool8 sub_080188D0(s16 a)
         if ((s16)p->unk08 == 0)
             v = 5;
         else
-            v = gUnknown_08499598[(s16)p->unk08].unk1a;
+            v = gUnknown_08499598[(s16)p->unk08].teamColor;
         sub_0802D5CC(v - 1, gUnknown_03002F08.unk00);
     }
     gUnknown_0200C528[a].unk04++;

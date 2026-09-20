@@ -52,7 +52,7 @@ u8 *sub_08024944(u16 a1)
 
 int sub_08024984(int a1)
 {
-    int r = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk58;
+    int r = gUnknown_085C77A0[gPlaySt.mapID].unk58;
 
     if (r == 0 || (a1 & 0x1F) == 8)
     {

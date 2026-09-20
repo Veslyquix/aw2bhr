@@ -98,7 +98,7 @@ void sub_0805F7B8(void)
             sub_0805D648(bestX, bestY, 2, 0, 0);
     }
 
-    if (sub_08035000(gUnknown_03003FC0.unk02)->unk28 & 1)
+    if (sub_08035000(gPlaySt.mapID)->unk28 & 1)
         sub_0805F6D4();
     sub_08071910(gUnknown_03004680, 1);
 }

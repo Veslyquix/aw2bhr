@@ -14,7 +14,7 @@
  * documented in include/unknown-globals.h). 0x0808D7B8 holds 0x0200B204 and
  * 0x0808D7BC/0x0808D7C0/0x0808D7C4/0x0808D7D0/0x0808D7D4 hold 0x0200B0B0 or
  * 0x0200B204 -- read straight out of baserom.gba. So the honest spelling is to
- * name gUnknown_0200B204 / gUnknown_0200B0B0 directly and let the build place
+ * name gUnknown_0200B204 / gActiveMap directly and let the build place
  * the pool word.
  *
  * The reload of the pool word after every `bl` (`ldr r4, [r6]`) is what
@@ -39,11 +39,11 @@ void sub_0800572C(void)
         sub_08004D74(0, 2);
     else
         sub_08004D90(0, 2, gUnknown_0200B204);
-    gUnknown_0200B0B0->unk46 = 0x15;
-    gUnknown_0200B0B0->unk48 = 0x20;
+    gActiveMap->unk46 = 0x15;
+    gActiveMap->unk48 = 0x20;
 }
 
-/* NO local for the slot id -- `(s8)gUnknown_0200B0B0->unk10` is written TWICE,
+/* NO local for the slot id -- `(s8)gActiveMap->unk10` is written TWICE,
  * once in the test and once in the value arm, and that is the whole difference
  * between the two forms of a signed-byte load. Bound to an `s8` (or `int`)
  * local the read is `ldrb; lsls #24; asrs #24`; read twice and CSEd it becomes
@@ -58,7 +58,7 @@ void sub_0800572C(void)
 void sub_080057EC(void)
 {
     sub_08019F2C(gUnknown_08488494, 2, 4, 0,
-                 (s8)gUnknown_0200B0B0->unk10 < 0 ? 0 : (s8)gUnknown_0200B0B0->unk10);
+                 (s8)gActiveMap->unk10 < 0 ? 0 : (s8)gActiveMap->unk10);
     sub_0800572C();
-    gUnknown_0200B0B0->unk02 = 3;
+    gActiveMap->unk02 = 3;
 }

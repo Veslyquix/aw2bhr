@@ -21,7 +21,7 @@ void sub_08003C48(int a1)
     }
 
     sub_08025E74();
-    gUnknown_0200B0B0->unk13 = 0;
+    gActiveMap->unk13 = 0;
 
     for (x = 0; x < MAP->height; x++)
         MAP->rowOffset[x] = x * MAP->width;
@@ -54,5 +54,5 @@ void sub_08003C48(int a1)
 
     sub_080219AC();
     sub_0800C8D8();
-    gUnknown_0200B0B0->unk12 = sub_0800C874();
+    gActiveMap->propertyCount = sub_0800C874();
 }

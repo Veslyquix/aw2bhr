@@ -15,16 +15,16 @@ void sub_08004BD8(void)
 {
     sub_0801A168();
     sub_0800056C(9);
-    sub_080193B0((gUnknown_0200B0B0->unk00 & 0x1000) ? gUnknown_08487B64
+    sub_080193B0((gActiveMap->unk00 & 0x1000) ? gUnknown_08487B64
                                                      : gUnknown_08487AC4);
 }
 
 void sub_08004C10(void)
 {
     sub_080037AC();
-    gUnknown_0200B0B0->unk02 = 2;
-    gUnknown_0200B0B0->unk46 = 0x15;
-    gUnknown_0200B0B0->unk48 = 0x18;
+    gActiveMap->unk02 = 2;
+    gActiveMap->unk46 = 0x15;
+    gActiveMap->unk48 = 0x18;
 }
 
 void sub_08004C34(void)
@@ -42,11 +42,11 @@ void sub_08004C34(void)
  * separate-statement shape and not a lever. */
 void sub_08004C5C(void)
 {
-    gUnknown_0200B0B0->unk06 = 0;
-    gUnknown_0200B0B0->unk02 = 1;
+    gActiveMap->unk06 = 0;
+    gActiveMap->unk02 = 1;
     sub_08003704();
-    gUnknown_0200B0B0->unk46 = 0x15;
-    gUnknown_0200B0B0->unk48 = 0x10;
+    gActiveMap->unk46 = 0x15;
+    gActiveMap->unk48 = 0x10;
     sub_0801B780(0x70);
     sub_08022AD0(0x10, 0x10);
     sub_08001D9C();

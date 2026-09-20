@@ -35,7 +35,7 @@ void sub_080610D0(void)
     struct Unk08499594 *unit;
 
     if (sub_08042C9C(gUnknown_030033EC, gUnknown_030046C0.unk06) * 10
-            <= gUnknown_08499598[gUnknown_030033EC].unk00
+            <= gUnknown_08499598[gUnknown_030033EC].funds
         && gUnknown_03004674 <= 0x3f)
     {
         do
@@ -51,7 +51,7 @@ void sub_080610D0(void)
             unit->unk0b = gUnknown_030046C0.unk07;
             gUnknown_03003100.pos.unk00 = pos.unk00;
             gUnknown_03003100.pos.unk02 = pos.unk02;
-            if (gUnknown_03003FC0.unk32 != 0)
+            if (gPlaySt.unk32 != 0)
                 sub_08034534(0xe, gUnknown_030046C0.unk06, gUnknown_030046C0.unk07, 0);
         }
     }

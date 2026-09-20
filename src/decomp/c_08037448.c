@@ -29,7 +29,7 @@ u8 sub_08037448(u8 a1)
     u8 v;
 
     v = sub_08026340();
-    if (gUnknown_03003FC0.unk01 != 2 && gUnknown_03003FC0.unk01 != 4
+    if (gPlaySt.gameMode != 2 && gPlaySt.gameMode != 4
         && sub_0803CA9C(a1) == 0)
         return 0;
 

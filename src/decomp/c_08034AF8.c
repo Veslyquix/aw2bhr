@@ -21,7 +21,7 @@ void sub_08034AF8(void)
 {
     if (sub_080348B4())
     {
-        sub_08034A7C(0x4e, gUnknown_08499598[sub_08026704(gUnknown_030033EC)].unk1a);
+        sub_08034A7C(0x4e, gUnknown_08499598[sub_08026704(gUnknown_030033EC)].teamColor);
         switch (gUnknown_02028E40)
         {
         case 0:

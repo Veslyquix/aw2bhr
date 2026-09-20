@@ -33,7 +33,7 @@
 
 int GetCoCostBonus(int a, int b, int c)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk14;
@@ -44,7 +44,7 @@ int GetCoCostBonus(int a, int b, int c)
 
 int GetCoVisionBonus(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk0c;

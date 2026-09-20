@@ -30,29 +30,29 @@ void sub_08026BAC(void)
 
     for (i = 0; i <= 4; i++)
     {
-        gUnknown_08499598[i].unk00 = 0;
-        gUnknown_08499598[i].unk04 = 0;
-        gUnknown_08499598[i].unk11 = 0;
+        gUnknown_08499598[i].funds = 0;
+        gUnknown_08499598[i].spent = 0;
+        gUnknown_08499598[i].captures = 0;
         gUnknown_08499598[i].unk12 = 0;
         gUnknown_08499598[i].unk13 = 0;
         gUnknown_08499598[i].unk14 = 0;
-        gUnknown_08499598[i].unk16 = 0;
-        gUnknown_08499598[i].unk18 = 0;
-        gUnknown_08499598[i].unk1a = 0;
-        gUnknown_08499598[i].unk1b = 0;
-        gUnknown_08499598[i].unk1c = 0;
-        gUnknown_08499598[i].unk1e = 0;
+        gUnknown_08499598[i].destroyedThisTurn = 0;
+        gUnknown_08499598[i].totalDestroyed = 0;
+        gUnknown_08499598[i].teamColor = 0;
+        gUnknown_08499598[i].aiControlled = 0;
+        gUnknown_08499598[i].turnState = 0;
+        gUnknown_08499598[i].coMode = 0;
         gUnknown_08499598[i].unk1f = 0;
-        gUnknown_08499598[i].unk20 = 0;
+        gUnknown_08499598[i].coCharge = 0;
         gUnknown_08499598[i].unk24 = 0;
         gUnknown_08499598[i].unk25 = 0;
-        gUnknown_08499598[i].unk26 = 0;
-        gUnknown_08499598[i].unk28 = 0;
-        gUnknown_08499598[i].unk2a = i;
+        gUnknown_08499598[i].tempFirepower = 0;
+        gUnknown_08499598[i].tempDefense = 0;
+        gUnknown_08499598[i].team = i;
         gUnknown_08499598[i].unk31 = 0;
-        gUnknown_08499598[i].unk32 = 0;
-        gUnknown_08499598[i].unk3a = 0;
-        gUnknown_08499598[i].unk3b = 0;
+        gUnknown_08499598[i].killOnEndTurn = 0;
+        gUnknown_08499598[i].unitCount = 0;
+        gUnknown_08499598[i].unitsLost = 0;
     }
 
     gUnknown_08499598[1].unk2b = 1;

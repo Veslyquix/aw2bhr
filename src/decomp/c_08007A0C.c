@@ -10,7 +10,7 @@
 /* Same shape as sub_08005D50, different constants. */
 void sub_08007A0C(void)
 {
-    struct Unk0200B0B0 *p = gUnknown_0200B0B0;
+    struct ActiveMap *p = gActiveMap;
 
     p->unk6e = 0x780;
     p->unk70 = 0x970;

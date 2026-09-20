@@ -652,7 +652,7 @@ void sub_080135F4(u16 *, u32, u16);
 void sub_08030ED4(void);
 
 /* The gUnknown_085D3DD0 lookup family. Every one of them is
- * `if (!gUnknown_03003FC0.unk08) return <fallback>; return <table entry>;` and
+ * `if (!gPlaySt.unk08) return <fallback>; return <table entry>;` and
  * each has a one-line forwarder next to it that supplies (unk1d, unk1e) out of
  * gUnknown_08499598. sub_08042F34 and sub_08042F7C IGNORE their second
  * argument -- it is still declared, because their forwarders load and pass it.
@@ -3063,7 +3063,7 @@ int sub_080208C8(int);
 /* Wave 49, W49-I: copied VERBATIM from the byte-verified definition in
  * src/decomp/c_08020634.c, which had no declaration anywhere. */
 void sub_08020634(u8 *, u8 *);
-/* sub_08034890 loads gUnknown_03003FC0.unk02 with `ldrb` and passes it with no
+/* sub_08034890 loads gPlaySt.unk02 with `ldrb` and passes it with no
  * further narrowing, which is byte-identical for `int` and `u8`, so `int` is
  * the weakest model. */
 void sub_0802163C(int);
@@ -3561,7 +3561,7 @@ int sub_08007328(void);
 /* Wave 56 (W56-D), from the one call site in sub_08005F4C -- still `asm`, not
  * matched, so this is a contract and not a measurement. r0 arrives as a bare
  * `ldrh` of gUnknown_0200B0D0[i].unk04 and r1 as a sign-extended
- * gUnknown_0200B0B0->unk32 (s8), which is exactly what two `int` parameters
+ * gActiveMap->unk32 (s8), which is exactly what two `int` parameters
  * produce; a narrow second parameter would zero-extend under agbcc's
  * PROMOTE_MODE and lose the `lsls #0x18; asrs #0x18`. The caller's next
  * instruction is `bl sub_08007B74`, so r0 is dead and the return is void. */
@@ -4334,7 +4334,7 @@ int sub_08008C34(int, int);
  * and not a returned comparison.
  *
  * sub_08025308's result is stored with a bare `strb` into four consecutive
- * bytes of gUnknown_0200B0B0 by sub_080088F0, with NO `lsls #0x18; lsrs #0x18`
+ * bytes of gActiveMap by sub_080088F0, with NO `lsls #0x18; lsrs #0x18`
  * in front -- so `int`, per the re-narrowing rule. Its argument is the 1-based
  * army number, matching the note on gUnknown_08499594.
  *
@@ -4997,7 +4997,7 @@ bool8 sub_0802C660(void);
 /* The 0x0802C0E8 block's own callees and forwarders (wave 24, W24-A).
  *
  * sub_0802C0E8 takes a parameter it never reads -- its body opens by loading
- * gUnknown_03003FC0 straight over r0 -- so the width is settled entirely at its
+ * gPlaySt straight over r0 -- so the width is settled entirely at its
  * one call site, sub_0802C118: that hands it the u16 global gUnknown_030033EC
  * with a bare `ldrb`. A `u8` parameter is what turns a u16 load into a byte
  * load; an `int` one would have emitted `ldrh`. Returns nothing (`pop {r0};
@@ -5244,7 +5244,7 @@ int sub_08038474(void);
  * one gUnknown_0200C420.unk38[] record -- a1 is the id it first searches the
  * live run for, a2 the bits-8..19 field and a3 the bits-20..31 field. a1 is
  * `int` and NOT `u8`: sub_08038484, its only caller, passes the int expression
- * `gUnknown_03003FC0.unk02 - 0x8a` with no re-narrowing before the `bl`, which
+ * `gPlaySt.unk02 - 0x8a` with no re-narrowing before the `bl`, which
  * a narrow parameter would force. a2 and a3 arrive as bare `ldrh` results, so
  * `u16` would fit them equally well (PROMOTE_MODE zero-extends either way and
  * the bitfield stores mask to 12 bits regardless) -- `int` is the weakest type
@@ -5290,7 +5290,7 @@ void sub_080176C0(u32);
  * sub_0807823C's whole body is `bx lr` -- it does nothing at all. Its arity is
  * therefore invisible from the body and comes from the one call site, which
  * sets up r0 only. `int` because that site passes the int expression
- * `gUnknown_03003FC0.unk02 - 0x8a` with no narrowing before the `bl`.
+ * `gPlaySt.unk02 - 0x8a` with no narrowing before the `bl`.
  *
  * sub_0807821C returns `gUnknown_08615194[a].unk02 & 0x10` as a literal 0 or 1
  * through two arms. Its parameter is scaled `(a * 2 + a) << 4`, a 0x30 stride,
@@ -6196,7 +6196,7 @@ void sub_0804DC5C(u16, u16, int);
  * docs/agbcc-codegen.md. Types copied from the definition, not re-derived. */
 void sub_0803B3C8(void);
 
-/* Returns 1 when gUnknown_03003FC0's byte 1 is 1 and sub_0803CBD8(0x60) is
+/* Returns 1 when gPlaySt's byte 1 is 1 and sub_0803CBD8(0x60) is
  * non-zero, else 0. `int`, and this one is settled by population rather than by
  * the body: 20 call sites across asm/ and not one narrows the result -- 18 are
  * a bare `cmp r0, #0` (or a copy then a compare) and TWO use it directly as a
@@ -6537,7 +6537,7 @@ bool8 sub_080281A0(void);
 u16 sub_080206B0(u32);
 /* Its FIRST parameter is dead -- the body clobbers r0 with the
  * gUnknown_08499EE4 pool word before reading it -- and is readable only at
- * sub_08017B08, which loads it `ldrb` from gUnknown_03003FC0.unk02. The second
+ * sub_08017B08, which loads it `ldrb` from gPlaySt.unk02. The second
  * is stored whole with `str` into the resulting slot's +0x18. */
 void sub_080281D8(u8, u32);
 
@@ -6944,7 +6944,7 @@ int sub_0803CC64(u16);
 /* Matched in wave 27. `u8` and not `int`: the `lsls #0x18; lsrs #0x18` is in
  * the prologue operating on r0 IN PLACE, which is PROMOTE_MODE narrowing a
  * sub-word parameter, not a cast at a use (that would copy first). Its one
- * caller sub_08037E64 passes gUnknown_03003FC0.unk01, itself a `u8`. */
+ * caller sub_08037E64 passes gPlaySt.unk01, itself a `u8`. */
 void sub_080375A4(u8);
 
 /* The three arms of sub_080375D4's `switch (p->unk1e++ & 0x3f)`, each called as
@@ -7777,7 +7777,7 @@ void sub_08035828(struct Unk35828Proc *);
 
 /* The block's own helpers.
  *
- * sub_08035124 takes `u8`: sub_080351F0 reaches gUnknown_03003FC0.unk2e with a
+ * sub_08035124 takes `u8`: sub_080351F0 reaches gPlaySt.unk2e with a
  * plain `ldrb` and the callee's prologue is `lsls #0x18; lsrs #0x18` operating
  * on r0 IN PLACE before any global is touched, which is PROMOTE_MODE and not a
  * cast at a use.
@@ -8440,7 +8440,7 @@ void sub_08035810(void);
 /* Wave 34 (W34-I). All three are called argument-free by the block-0x08042
  * cursor helpers (sub_080424FC, sub_0804256C, sub_08042B9C). sub_080176A4 and
  * sub_080198D0 discard the result at every call site, so void.
- * sub_08035170's result is stored straight into gUnknown_03003FC0's byte at
+ * sub_08035170's result is stored straight into gPlaySt's byte at
  * +0x2e with a bare `strb` and no re-narrowing -- which does NOT discriminate
  * u8 from int, since `strb` truncates either way. u8 is the weaker guess of
  * the two and is recorded as UNPROVED. */
@@ -8553,14 +8553,14 @@ void sub_08026584(u8, u16);
  *
  * sub_080265D0: r0 is the 1..4 slot counter narrowed with `lsls #0x18;
  * lsrs #0x18` (the same value the sub_080266DC(u8) guard immediately above the
- * call already fixed as u8), r1 is a plain `ldrb` of gUnknown_03003FC0.unk02.
+ * call already fixed as u8), r1 is a plain `ldrb` of gPlaySt.unk02.
  * The result is discarded -- the next instruction is the loop increment.  The
  * second parameter's width is NOT settled: an `ldrb` source needs no narrowing
  * for u8, u16 or int, so u8 is the load width and nothing more.
  *
  * sub_08017720: four arguments, each loaded at its member's own width and
  * handed over with no narrowing -- `ldrb` of gUnknown_08499598[n].unk1d,
- * `ldrb` of gUnknown_03003FC0.unk02, `ldrh` of gUnknown_08499598[n].unk38 and
+ * `ldrb` of gPlaySt.unk02, `ldrh` of gUnknown_08499598[n].unk38 and
  * `ldrh` of gUnknown_03004080, where n is sub_0807A908() evaluated separately
  * for the first and third.  Result discarded (`bl sub_08030574` follows).
  * Same caveat: the widths are the loads', so they are a floor.  Wave 65 then
@@ -8959,7 +8959,7 @@ void sub_08026B28(void);
  * to need a declaration. Copied verbatim from the definitions rather than
  * inferred: sub_08026C6C's is src/decomp/c_08026C6C.c (a leaf whose `u8`
  * parameter is fixed by its dense jump table over ids 6..20, returning the u32
- * gUnknown_03003FC0.unk28), and sub_08026CD0's is its own body, matched earlier
+ * gPlaySt.unk28), and sub_08026CD0's is its own body, matched earlier
  * this wave -- it reads and writes only globals and ends `pop {r0}; bx r0`. */
 u32 sub_08026C6C(u8);
 void sub_08026CD0(void);
@@ -9809,8 +9809,8 @@ void sub_0806B87C(ProcPtr);
 /* PARKED in data/parked.json (95.5%), so declared from its call site in
  * sub_0804365C rather than promoted. It reads NO argument register --
  * parked.json records its body as
- * `if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk24) return it;
- *  if (gUnknown_03003FC0.unk30) return it; return 0;` -- and sub_0804365C
+ * `if (gUnknown_085C77A0[gPlaySt.unk02].unk24) return it;
+ *  if (gPlaySt.unk30) return it; return 0;` -- and sub_0804365C
  * uses the result (`adds r4,r0,#0; cmp r4,#0`), so it is not void. The
  * parked entry probed u16 and int and found them byte-identical, so `int`
  * is the weakest fit. */
@@ -10352,13 +10352,13 @@ void sub_080369BC(void);
  *                 discarded -- nullary void.
  *   sub_0800C8D8  likewise -- but see below, this one was WRONG.
  *   sub_0800C874  nullary; its r0 is `strb`d straight into
- *                 gUnknown_0200B0B0->unk12, so the return is at least a byte
+ *                 gActiveMap->unk12, so the return is at least a byte
  *                 and `int` is the weakest fit (no re-narrowing appears).
  *   sub_0800CAA0  nullary; its r0 is handed on as sub_0800CB30's second
  *                 argument with no narrowing between the two `bl`s.
  *   sub_0800CB30  called as (1, sub_0800CAA0()).
  *   sub_0808B694  two pointers -- a struct Unk03001470 field address and
- *                 &gUnknown_0200B0B0->unk9c -- and the result is a bare
+ *                 &gActiveMap->unk9c -- and the result is a bare
  *                 `cmp r0,#0`, so a comparison predicate. */
 void sub_08002F1C(void);
 /* Wave 48 (W48-A) retypes sub_0800C8D8 from `void` to `int`.  W36-I inferred
@@ -10606,7 +10606,7 @@ void sub_0800AF24(int, int);
  * so `void` is the return type unless noted.
  *
  * The seven nullary ones are sub_0800057C's jump-table arms (cases 0..7 of
- * gUnknown_0200B0B0->unk04); none of them reads r0-r3 before writing it. */
+ * gActiveMap->unk04); none of them reads r0-r3 before writing it. */
 void sub_080005FC(void);
 void sub_08000650(void);
 void sub_08000664(void);
@@ -10640,7 +10640,7 @@ void sub_08002510(int, int);
  * `bl` each of them with no argument setup at all and discard r0, and neither
  * callee reads r0-r3 before writing them (sub_08007B54's first instruction
  * after the push loads its own pool word; sub_08007B74's loads
- * gUnknown_0200B0B0). */
+ * gActiveMap). */
 void sub_08007B54(void);
 void sub_08007B74(void);
 
@@ -10779,7 +10779,7 @@ void sub_0801BAB8(void);
 void IrqMain(void);
 /* Already DEFINED in src/decomp/c_0804B0CC.c; signature copied from the
  * definition, which wins. sub_080048D4 is its first cross-file caller and
- * passes `(int)&gUnknown_0200B0B0->unk9c` -- the int first parameter is the
+ * passes `(int)&gActiveMap->unk9c` -- the int first parameter is the
  * definition's, so the pointer is cast at the call site. */
 void sub_0804B10C(int, u8);
 /* Already DEFINED in src/decomp/c_0801820C.c; sub_08018254 is its first
@@ -11480,7 +11480,7 @@ void sub_0800CEF8(int, int);
 
 /* Wave 45, W45-G.  sub_0800C7A4 and sub_0800C75C are the clear and the set
  * half of one pair: both switch the same first parameter over
- * 0x28/0x48/0x68/0x88 to an index 0..3 and write gUnknown_0200B0B0's unk17
+ * 0x28/0x48/0x68/0x88 to an index 0..3 and write gActiveMap's unk17
  * and unk1b at that index.  The first parameter is not narrowed at entry, so
  * `int`; sub_0800C75C's second and third are stored with bare `strb`s, which
  * makes their width a floor only, and `int` is the weakest that fits.  Both
@@ -11758,10 +11758,10 @@ void sub_08086F3C(int);
  * (the preceding insn is `beq`, and r0-r3 are dead across it), and the next
  * instruction is another argument-free `bl sub_08021D10`, so r0 is neither
  * supplied nor read -- void(void). This agrees with the two existing notes on
- * struct Unk0200B0B0: unk2a is described as "the action code sub_080085E0
+ * struct ActiveMap: unk2a is described as "the action code sub_080085E0
  * dispatches on" and unk6a as "a one-byte result code sub_080085E0 leaves
  * behind", i.e. it takes its input and returns its output through the
- * gUnknown_0200B0B0 record, not through registers.
+ * gActiveMap record, not through registers.
  *
  * sub_0800AEAC: called as `ldrsh r0,[r3,#8]; ldrsh r1,[r3,#0xa]; bl`, the same
  * (x, y) cell pair sub_0800B528, sub_0800BC5C, sub_08009310 and sub_08010DD4

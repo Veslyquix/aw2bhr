@@ -10,12 +10,12 @@
 /* MATCHED byte-for-byte (wave 43, W43-E), first attempt.
  *
  * trymatch reports `relocs: name different symbols that resolve to the same
- * address -- original gUnknown_03003FF3, candidate gUnknown_03003FC0`, which
+ * address -- original gUnknown_03003FF3, candidate gPlaySt`, which
  * is a match and needs nothing placed. gen_lds.py invents the name
  * gUnknown_03003FF3 for 0x03003FF3 because a pool word points there, but the
- * address is just &gUnknown_03003FC0.unk33[0] (0x03003FC0 + 0x33): agbcc folds
+ * address is just &gPlaySt.armyColor[0] (0x03003FC0 + 0x33): agbcc folds
  * the member-array base into the pool as symbol+addend, so the honest
- * `gUnknown_03003FC0.unk33[i]` relocates to the same word. Do NOT declare a
+ * `gPlaySt.armyColor[i]` relocates to the same word. Do NOT declare a
  * global for it.
  *
  * The seeding loop's index is `s16`, not u8 and not int: each use is a
@@ -34,22 +34,22 @@ void sub_080385A4(void)
 {
     s16 i;
 
-    gUnknown_08499598[0].unk1a = 0;
+    gUnknown_08499598[0].teamColor = 0;
 
     for (i = 1; i <= 4; i++)
-        gUnknown_03003FC0.unk33[i] = i;
+        gPlaySt.armyColor[i] = i;
 
-    gUnknown_03003FC0.unk3d[1] = 1;
-    gUnknown_03003FC0.unk3d[2] = 3;
-    gUnknown_03003FC0.unk3d[3] = 9;
-    gUnknown_03003FC0.unk3d[4] = 6;
+    gPlaySt.co[1] = 1;
+    gPlaySt.co[2] = 3;
+    gPlaySt.co[3] = 9;
+    gPlaySt.co[4] = 6;
 
-    if (gUnknown_03003FC0.unk01 != 3)
+    if (gPlaySt.gameMode != 3)
     {
-        gUnknown_03003FC0.unk38[1] = 1;
-        gUnknown_03003FC0.unk38[2] = 2;
-        gUnknown_03003FC0.unk38[3] = 2;
-        gUnknown_03003FC0.unk38[4] = 2;
+        gPlaySt.aiControlled[1] = 1;
+        gPlaySt.aiControlled[2] = 2;
+        gPlaySt.aiControlled[3] = 2;
+        gPlaySt.aiControlled[4] = 2;
         sub_08026900();
     }
 }

@@ -19,7 +19,7 @@
  * `strh`. */
 void sub_0802A7C4(void)
 {
-    if (gUnknown_03003FC0.unk05 == 0)
+    if (gPlaySt.dispMiniPanel == 0)
         return;
 
     sub_0801F024((void *)sub_0802AA78, 1);

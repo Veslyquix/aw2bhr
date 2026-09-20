@@ -16,5 +16,5 @@
 
 void sub_08003934(void)
 {
-    gUnknown_0200B0B0->unk00 |= 8;
+    gActiveMap->unk00 |= 8;
 }

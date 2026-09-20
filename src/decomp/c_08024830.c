@@ -24,13 +24,13 @@
 
 void sub_08024830(void)
 {
-    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[1].unk1a - 1) * 0x20),
+    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[1].teamColor - 1) * 0x20),
                     0x180, 0x20);
-    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[2].unk1a - 1) * 0x20),
+    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[2].teamColor - 1) * 0x20),
                     0x1A0, 0x20);
-    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[3].unk1a - 1) * 0x20),
+    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[3].teamColor - 1) * 0x20),
                     0x1C0, 0x20);
-    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[4].unk1a - 1) * 0x20),
+    ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[4].teamColor - 1) * 0x20),
                     0x1E0, 0x20);
 
     sub_0803F80C(8);
@@ -38,7 +38,7 @@ void sub_08024830(void)
 
     ApplyPaletteExt(gUnknown_0809163C, 0x240, 0x20);
 
-    sub_08035020(gUnknown_03003FC0.unk2c);
+    sub_08035020(gPlaySt.unk2c);
     sub_08022A34();
 
     sub_0801A5B0(gUnknown_030033EC);

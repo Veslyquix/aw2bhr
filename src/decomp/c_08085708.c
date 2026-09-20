@@ -63,14 +63,14 @@ void sub_08085708(s16 *a1, int a2)
                 sub_0801F34C(sub_08085410(a2, t), DivRem(i, 4) * 0x36 + 0x24,
                              (i >> 2) * 0x18 + 0x28, 0, 1);
 
-            if (sub_08043200(gUnknown_08499598[a2].unk1d, gUnknown_08499598[a2].unk1e, t) != 0)
+            if (sub_08043200(gUnknown_08499598[a2].co, gUnknown_08499598[a2].coMode, t) != 0)
             {
                 sub_0801F34C(0x94, DivRem(i, 4) * 0x36 + 0x25,
                              (i >> 2) * 0x18 + 0x30, 0, 1);
                 sub_0801F34C(sub_080856A0(a2, t), DivRem(i, 4) * 0x36 + 0x2d,
                              (i >> 2) * 0x18 + 0x30, 0, 1);
             }
-            else if (sub_08043190(gUnknown_08499598[a2].unk1d, gUnknown_08499598[a2].unk1e, t) != 0)
+            else if (sub_08043190(gUnknown_08499598[a2].co, gUnknown_08499598[a2].coMode, t) != 0)
             {
                 sub_0801F34C(0x93, DivRem(i, 4) * 0x36 + 0x25,
                              (i >> 2) * 0x18 + 0x30, 0, 1);

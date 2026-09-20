@@ -8,7 +8,7 @@
  */
 
 /* Commits a tile edit at (x, y): stash the cell's current tile in
- * gUnknown_0200B0B0->unk20, repaint it, then re-run sub_0800C124 and then
+ * gActiveMap->unk20, repaint it, then re-run sub_0800C124 and then
  * sub_0800C22C over the cell and its four cardinal neighbours, and repaint
  * once more.  Returns 0 if sub_0800BC98 rejects the cell, 1 otherwise.  The
  * `bl sub_0800BC98` is reached with r0/r1 untouched from entry -- a
@@ -35,7 +35,7 @@
  *  - `**pp` is right, and a local is wrong, at exactly one site: the SECOND
  *    half's `if (y > 0)` inner read, where the ROM re-derives both levels.
  *
- *  - `b` is bound before `q` because the ROM loads gUnknown_0200B0B0's pool
+ *  - `b` is bound before `q` because the ROM loads gActiveMap's pool
  *    word first.  That is the LHS-expands-first rule, but it only reaches the
  *    top of the block if the destination is a local: with the RHS split into
  *    statements (which the c_08001158 idiom requires) the store's own
@@ -48,7 +48,7 @@ int sub_0800BF78(int x, int y)
     u8 **const *pp;
     u8 **q;
     u8 **s;
-    struct Unk0200B0B0 *b;
+    struct ActiveMap *b;
     u8 *p;
     u8 *rows;
     u8 *tiles;
@@ -62,7 +62,7 @@ int sub_0800BF78(int x, int y)
     if (sub_0800C840(x, y))
         sub_0800C608(x, y);
 
-    b = gUnknown_0200B0B0;
+    b = gActiveMap;
     q = gUnknown_0808D86C;
     p = *q;
     t = y * 2;

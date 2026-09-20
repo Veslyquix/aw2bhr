@@ -22,7 +22,7 @@
  * sign-extension spelled out (`ldrh; lsls #16; asrs #20`).
  *
  * unk6d goes through an `s8` lvalue and that is MEASURED, not decoration: the
- * ROM decrements it `subs r2, r1, #1`, while `gUnknown_0200B0B0->unk6d--` on
+ * ROM decrements it `subs r2, r1, #1`, while `gActiveMap->unk6d--` on
  * the u8 member the header declares emits `adds r2, r1, #0; adds r2, #255` --
  * the modulo-256 wraparound -- for +2 bytes. The `--` is a discriminating use
  * where the load form is not; see the note in include/unknown-globals.h. */
@@ -30,35 +30,35 @@ void sub_08005D74(void)
 {
     int v;
 
-    switch (gUnknown_0200B0B0->unk6c)
+    switch (gActiveMap->unk6c)
     {
     case 0:
-        v = gUnknown_0200B0B0->unk6e;
+        v = gActiveMap->unk6e;
         v += (0xB0 - v) >> 3;
         if (v <= 0xD0)
         {
             v = 0xD0;
-            gUnknown_0200B0B0->unk6c = 0xA;
+            gActiveMap->unk6c = 0xA;
         }
-        gUnknown_0200B0B0->unk6e = v;
+        gActiveMap->unk6e = v;
         break;
     case 0xA:
-        v = gUnknown_0200B0B0->unk6e;
+        v = gActiveMap->unk6e;
         v += (0x120 - v) >> 3;
         if (v > 0xFF)
         {
             v = 0x100;
-            gUnknown_0200B0B0->unk6c = 0x14;
-            *(s8 *)&gUnknown_0200B0B0->unk6d = 0x1E;
+            gActiveMap->unk6c = 0x14;
+            *(s8 *)&gActiveMap->unk6d = 0x1E;
         }
-        gUnknown_0200B0B0->unk6e = v;
+        gActiveMap->unk6e = v;
         break;
     case 0x14:
-        if ((*(s8 *)&gUnknown_0200B0B0->unk6d)-- <= 0)
-            gUnknown_0200B0B0->unk6c = 0;
+        if ((*(s8 *)&gActiveMap->unk6d)-- <= 0)
+            gActiveMap->unk6c = 0;
         break;
     }
-    v = (s16)gUnknown_0200B0B0->unk6e >> 4;
+    v = (s16)gActiveMap->unk6e >> 4;
     sub_0801BD00(0x2078, v | 0x400, (void *)gUnknown_08488664, 0xD000);
 }
 
@@ -72,34 +72,34 @@ void sub_08005E30(void)
 {
     int v;
 
-    switch (gUnknown_0200B0B0->unk6c)
+    switch (gActiveMap->unk6c)
     {
     case 0:
-        v = gUnknown_0200B0B0->unk70;
+        v = gActiveMap->unk70;
         v += (0x850 - v) >> 3;
         if (v > 0x82F)
         {
             v = 0x830;
-            gUnknown_0200B0B0->unk6c = 0xA;
+            gActiveMap->unk6c = 0xA;
         }
-        gUnknown_0200B0B0->unk70 = v;
+        gActiveMap->unk70 = v;
         break;
     case 0xA:
-        v = gUnknown_0200B0B0->unk70;
+        v = gActiveMap->unk70;
         v += (0x7E0 - v) >> 3;
         if (v <= 0x800)
         {
             v = 0x800;
-            gUnknown_0200B0B0->unk6c = 0x14;
-            *(s8 *)&gUnknown_0200B0B0->unk6d = 0x1E;
+            gActiveMap->unk6c = 0x14;
+            *(s8 *)&gActiveMap->unk6d = 0x1E;
         }
-        gUnknown_0200B0B0->unk70 = v;
+        gActiveMap->unk70 = v;
         break;
     case 0x14:
-        if ((*(s8 *)&gUnknown_0200B0B0->unk6d)-- <= 0)
-            gUnknown_0200B0B0->unk6c = 0;
+        if ((*(s8 *)&gActiveMap->unk6d)-- <= 0)
+            gActiveMap->unk6c = 0;
         break;
     }
-    v = (s16)gUnknown_0200B0B0->unk70 >> 4;
+    v = (s16)gActiveMap->unk70 >> 4;
     sub_0801BD00(0x78, 0x400 | v, (void *)gUnknown_08488664, 0xD000);
 }

@@ -21,13 +21,13 @@ int sub_08008928(void)
 
     result = 0;
 
-    gUnknown_030033EC = f = gUnknown_0200B0B0->unk2f;
+    gUnknown_030033EC = f = gActiveMap->unk2f;
     gUnknown_03003F2C = (f - 1) << 6;
 
-    x = gUnknown_0200B0B0->unk08;
-    y = gUnknown_0200B0B0->unk0a;
+    x = gActiveMap->cursorX;
+    y = gActiveMap->cursorY;
 
-    if (gUnknown_0200B0B0->unk24 == 0x19)
+    if (gActiveMap->unk24 == 0x19)
     {
         if (sub_08008A8C(1, x, y))
         {
@@ -39,7 +39,7 @@ int sub_08008928(void)
     {
         v = sub_08008B70(x, y);
 
-        if (v != gUnknown_0200B0B0->unk24)
+        if (v != gActiveMap->unk24)
         {
             s8 *costs;
             int idx;
@@ -49,8 +49,8 @@ int sub_08008928(void)
             {
                 v = -1;
             }
-            else if (sub_08025308(gUnknown_0200B0B0->unk2f) > 0x31
-                     && (v >> 6) + 1 != gUnknown_0200B0B0->unk2f)
+            else if (sub_08025308(gActiveMap->unk2f) > 0x31
+                     && (v >> 6) + 1 != gActiveMap->unk2f)
             {
                 return -1;
             }
@@ -63,7 +63,7 @@ int sub_08008928(void)
 
             idx = gMap->rowOffset[y] + x;
             c = (gMap->terrain[idx] & 0x1f)
-                + gUnknown_085D5ABC[gUnknown_0200B0B0->unk24 & 0x3f].unk19 * 32;
+                + gUnknown_085D5ABC[gActiveMap->unk24 & 0x3f].unk19 * 32;
 
             q = costs[c];
 
@@ -72,8 +72,8 @@ int sub_08008928(void)
                 if (v > 0)
                     sub_08008A8C(0, x, y);
 
-                if (sub_08025308(gUnknown_0200B0B0->unk2f) <= 0x31
-                    && sub_08025CC8(x, y, gUnknown_0200B0B0->unk24 & 0x3f))
+                if (sub_08025308(gActiveMap->unk2f) <= 0x31
+                    && sub_08025CC8(x, y, gActiveMap->unk24 & 0x3f))
                     result = 1;
             }
             else

@@ -52,36 +52,36 @@ void sub_08000CCC(int a1)
     int a;
     int b;
 
-    if (gUnknown_0200B0B0->unk07 == 0)
+    if (gActiveMap->unk07 == 0)
     {
         a = sub_08001D24(a1);
         a -= 4;
         if (a < 0)
             a += 0x11;
-        gUnknown_0200B0B0->unk36 = a;
-        sub_080073F8(gUnknown_0200B0B0->unk07, a1);
-        b = gUnknown_0200B0B0->unk3a + 4;
+        gActiveMap->unk36 = a;
+        sub_080073F8(gActiveMap->unk07, a1);
+        b = gActiveMap->unk3a + 4;
         if (b > 9)
-            b = gUnknown_0200B0B0->unk3a - 6;
+            b = gActiveMap->unk3a - 6;
         b = gUnknown_0200B0D0[b].unk04;
-        gUnknown_0200B0B0->unk2a = b;
+        gActiveMap->selectedTerrain = b;
     }
     else
     {
         if (a1 != 0x19)
-            gUnknown_0200B0B0->unk2f = (a1 >> 6) + 1;
+            gActiveMap->unk2f = (a1 >> 6) + 1;
         a = sub_08001D24(a1);
         a -= 3;
         if (a < 0)
             a += 0x14;
-        gUnknown_0200B0B0->unk38 = a;
-        sub_080073F8(gUnknown_0200B0B0->unk07, a1);
-        b = gUnknown_0200B0B0->unk3a + 3;
+        gActiveMap->unk38 = a;
+        sub_080073F8(gActiveMap->unk07, a1);
+        b = gActiveMap->unk3a + 3;
         if (b > 7)
-            b = gUnknown_0200B0B0->unk3a - 5;
+            b = gActiveMap->unk3a - 5;
         b = gUnknown_0200B0D0[b].unk04;
         b = (a1 & 0xC0) | (b & 0x3F);
-        gUnknown_0200B0B0->unk24 = b;
+        gActiveMap->unk24 = b;
     }
 
     sub_08011E54(gUnknown_0808D8AC, (void *)0x06014D40, 0x8C << 3);

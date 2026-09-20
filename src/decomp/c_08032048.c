@@ -26,7 +26,7 @@
  *    value of the assignment expression -- a plain u8 forwards the 0 and emits
  *    no load at all. That is the whole evidence for the volatile.
  * 2. `(unk02 - 0xb4)` is computed TWICE, once for the modulo and once for the
- *    divide, and the ldrb of gUnknown_03003FC0.unk02 is repeated with it.
+ *    divide, and the ldrb of gPlaySt.mapID is repeated with it.
  *    Binding it to a local is what would cost bytes.
  * 3. gUnknown_0849B060 is reloaded between the two stores. The lvalue's
  *    address is evaluated before the right-hand side, so the copy kept in r5
@@ -42,6 +42,6 @@ void sub_08032048(void)
     gUnknown_03003F1C = gUnknown_030044C4 = 0;
 
     gUnknown_0849B060->unk02 = 3;
-    gUnknown_0849B060->unk08 = (gUnknown_03003FC0.unk02 - 0xb4) % 3;
-    gUnknown_0849B060->unk09 = (gUnknown_03003FC0.unk02 - 0xb4) / 3;
+    gUnknown_0849B060->unk08 = (gPlaySt.mapID - 0xb4) % 3;
+    gUnknown_0849B060->unk09 = (gPlaySt.mapID - 0xb4) / 3;
 }

@@ -34,8 +34,8 @@ bool8 sub_080348B4(void)
     u8 v;
     int found;
 
-    if (gUnknown_03003FC0.unk32 == 0 && gUnknown_03003FC0.unk0d != 0
-        && gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.unk32 == 0 && gPlaySt.unk0d != 0
+        && gPlaySt.gameMode == 3)
     {
         v = 0;
         found = 0;
@@ -46,13 +46,13 @@ bool8 sub_080348B4(void)
             {
                 if (found != 0)
                 {
-                    if (gUnknown_08499598[i].unk1b == 1
-                        && v != gUnknown_08499598[i].unk2a)
+                    if (gUnknown_08499598[i].aiControlled == 1
+                        && v != gUnknown_08499598[i].team)
                         return 1;
                 }
-                else if (gUnknown_08499598[i].unk1b == 1)
+                else if (gUnknown_08499598[i].aiControlled == 1)
                 {
-                    v = gUnknown_08499598[i].unk2a;
+                    v = gUnknown_08499598[i].team;
                     found = 1;
                 }
             }

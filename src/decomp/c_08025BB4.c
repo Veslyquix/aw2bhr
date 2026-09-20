@@ -24,6 +24,6 @@ void sub_08025BB4(void *a1)
 {
     sub_08035740(a1);
 
-    if (gUnknown_03003FC0.unk0d != 0)
+    if (gPlaySt.unk0d != 0)
         sub_08025B80((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
 }

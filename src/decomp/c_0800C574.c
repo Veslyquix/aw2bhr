@@ -15,10 +15,10 @@ void sub_0800C574(int x, int y, int t)
     int u;
     int z;
 
-    if ((s8)gUnknown_0200B0B0->unk12 > 0x5B)
+    if ((s8)gActiveMap->propertyCount > 0x5B)
         return;
 
-    n = (s8)gUnknown_0200B0B0->unk12;
+    n = (s8)gActiveMap->propertyCount;
 
     off = gMap->rowOffset[y] + x;
     gMap->property[off] = (z = 0, n);
@@ -34,7 +34,7 @@ void sub_0800C574(int x, int y, int t)
     gProperty[n].y = y;
     n++;
     gProperty[n].flags = -1;
-    gUnknown_0200B0B0->unk12 = n;
+    gActiveMap->propertyCount = n;
 }
 
 /* The REMOVE half of the sub_0800C574 pair: drops the record for cell (x, y)
@@ -54,7 +54,7 @@ void sub_0800C574(int x, int y, int t)
  * because gUnknown_084995A0's 8-byte stride needs it (`lsls r0, r4, #3`); the
  * 4-byte array still gets the giv.
  *
- * `(s8)gUnknown_0200B0B0->unk12` on the u8 member emits `movs r0,#0x12;
+ * `(s8)gActiveMap->propertyCount` on the u8 member emits `movs r0,#0x12;
  * ldrsb r0,[r1,r0]` -- see the note in src/decomp/c_08010B34.c, which this
  * function corrects: the cast folds to ldrsb whenever the address is
  * base+constant, and only leaves `ldrb; lsl; asr` behind when it is not.
@@ -82,9 +82,9 @@ void sub_0800C608(int x, int y)
         {
             gUnknown_084995A0[i].unk00 = 0;
             gProperty[i].flags = 0;
-            gUnknown_0200B0B0->unk12--;
-            if ((s8)gUnknown_0200B0B0->unk12 < 0)
-                gUnknown_0200B0B0->unk12 = 0;
+            gActiveMap->propertyCount--;
+            if ((s8)gActiveMap->propertyCount < 0)
+                gActiveMap->propertyCount = 0;
         }
     }
 }
@@ -139,10 +139,10 @@ int sub_0800C6E8(int a, int *b, int *c)
         return ok;
     }
 
-    if ((s8)gUnknown_0200B0B0->unk17[i] >= 0 && (s8)gUnknown_0200B0B0->unk1b[i] >= 0)
+    if ((s8)gActiveMap->unk17[i] >= 0 && (s8)gActiveMap->unk1b[i] >= 0)
     {
-        *b = (s8)gUnknown_0200B0B0->unk17[i];
-        *c = (s8)gUnknown_0200B0B0->unk1b[i];
+        *b = (s8)gActiveMap->unk17[i];
+        *c = (s8)gActiveMap->unk1b[i];
         ok = 1;
     }
 

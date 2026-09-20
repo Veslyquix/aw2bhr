@@ -28,7 +28,7 @@
  *    result. 0x24 + 8*4 == 0x44 fills the record exactly, and the two indices
  *    in use (gUnknown_085D5ABC[c].unk18, and GetUnitCombatClassColumn's 5/6/7) span it.
  *
- * 2. Both lookups happen BEFORE the gUnknown_03003FC0.unk08 early-out. That is
+ * 2. Both lookups happen BEFORE the gPlaySt.coAbilities early-out. That is
  *    not scheduling -- agbcc will not hoist a load above a branch -- so the
  *    two assignments really are the first two statements, unlike the F038
  *    accessors in c_08042E2C.c where the early-out comes first.
@@ -52,7 +52,7 @@ int GetCoAttackBonus(int a, int b, int c)
     p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     if (gUnknown_085D5ABC[c].unk18 == 0)
@@ -71,7 +71,7 @@ int GetCoDefenceBonus(int a, int b, int c)
     p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     if (gUnknown_085D5ABC[c].unk18 == 0)
@@ -90,7 +90,7 @@ int GetCoMovementBonus(int a, int b, int c)
     p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     if (gUnknown_085D5ABC[c].unk18 == 0)
@@ -109,7 +109,7 @@ int GetCoRangeBonus(int a, int b, int c)
     p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     if (gUnknown_085D5ABC[c].unk18 == 0)

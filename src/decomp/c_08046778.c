@@ -56,13 +56,13 @@ void sub_08046778(u8 a, u8 b)
   n = 0;
   for (i = 0; i <= 6; i++)
   {
-    new_var3 = gUnknown_085D3DD0[(gUnknown_03003FC0.unk08) ? (gUnknown_08499598[gUnknown_030033EC].unk1d) : (1)].unk38[gUnknown_08499598[gUnknown_030033EC].unk1e].unk18[gUnknown_03003FC0.unk2c];
+    new_var3 = gUnknown_085D3DD0[(gPlaySt.coAbilities) ? (gUnknown_08499598[gUnknown_030033EC].co) : (1)].unk38[gUnknown_08499598[gUnknown_030033EC].coMode].unk18[gPlaySt.unk2c];
     if (new_var3[(gUnknown_084C212A[i] * 32) + b] != (-1))
     {
       new_var = gUnknown_084C211C[n * 2];
       new_var2 = a;
       new_var5 = new_var2 + (new_var * 8);
-      sub_08014B0C(new_var5 / 8, gUnknown_084C211C[(n * 2) + 1], gUnknown_08499578, (new_var4 = gUnknown_085D3DD0[(gUnknown_03003FC0.unk08) ? (gUnknown_08499598[gUnknown_030033EC].unk1d) : (1)].unk38[gUnknown_08499598[gUnknown_030033EC].unk1e].unk18[gUnknown_03003FC0.unk2c])[(gUnknown_084C212A[i] * 32) + b], 0x8000, 0);
+      sub_08014B0C(new_var5 / 8, gUnknown_084C211C[(n * 2) + 1], gUnknown_08499578, (new_var4 = gUnknown_085D3DD0[(gPlaySt.coAbilities) ? (gUnknown_08499598[gUnknown_030033EC].co) : (1)].unk38[gUnknown_08499598[gUnknown_030033EC].coMode].unk18[gPlaySt.unk2c])[(gUnknown_084C212A[i] * 32) + b], 0x8000, 0);
       n++;
     }
   }

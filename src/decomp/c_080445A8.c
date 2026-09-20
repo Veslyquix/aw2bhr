@@ -22,7 +22,7 @@ void sub_080445A8(struct Unk080445A8Proc *proc)
 {
     sub_0801DA94();
 
-    if (gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].unk1d]
+    if (gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].co]
             .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1].unk04 == NULL)
     {
         Proc_End(proc);

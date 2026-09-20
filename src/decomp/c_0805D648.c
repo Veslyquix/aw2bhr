@@ -82,7 +82,7 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
                 if (sub_08026F9C(gUnknown_03003F38, gMap->unit[gMap->rowOffset[y] + x]))
                     continue;
                 e = &gUnknown_08499594[gMap->unit[gMap->rowOffset[y] + x]];
-                if (gUnknown_03003FC0.unk0d == 0)
+                if (gPlaySt.unk0d == 0)
                 {
                     if ((u8)(e->unk00 - 0xa) <= 1)
                         continue;
@@ -125,7 +125,7 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
     d->unk12 = gUnknown_030040D8->unk06 - gUnknown_03004074;
     d->unk13 = 1;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.unk32 != 0)
         sub_0805D5EC();
 
     sub_08071910(gUnknown_03004680, 1);

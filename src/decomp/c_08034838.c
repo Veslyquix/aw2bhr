@@ -20,7 +20,7 @@
 
 void MainMenu2_08034839(void)
 {
-    gUnknown_03003FC0.unk32 = 0;
+    gPlaySt.unk32 = 0;
 }
 
 asm(".global sub_08034838\n.thumb_set sub_08034838, MainMenu2_08034839\n");

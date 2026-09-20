@@ -31,7 +31,7 @@ void sub_080876B4(void)
     gUnknown_030030A4.bits.win0_enable_blend = 1;
     gUnknown_030030A4.bits.win1_enable_blend = 1;
 
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
         gUnknown_03002B68 = 0;
         gUnknown_03002B30 = 0x28;

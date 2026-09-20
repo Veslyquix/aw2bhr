@@ -12,5 +12,5 @@
  */
 void sub_08004BC0(void)
 {
-    gUnknown_0200B0B0->unk00 |= 0x4000;
+    gActiveMap->unk00 |= 0x4000;
 }

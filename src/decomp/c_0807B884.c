@@ -52,7 +52,7 @@ void sub_0807B884(ProcPtr proc)
 
     Proc_Start(gUnknown_086165B0, proc);
 
-    switch (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk58)
+    switch (gUnknown_085C77A0[gPlaySt.mapID].unk58)
     {
     case 1:
         song = 0x194;

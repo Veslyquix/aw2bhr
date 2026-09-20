@@ -27,7 +27,7 @@ void sub_08019940(u8 a, u8 b)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk2a != gUnknown_08499598[a].unk2a
+        if (gUnknown_08499598[i].team != gUnknown_08499598[a].team
          && sub_080266DC(i))
             sub_08028874(i, b);
     }

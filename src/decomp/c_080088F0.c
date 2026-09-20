@@ -9,8 +9,8 @@
 
 void sub_080088F0(void)
 {
-    gUnknown_0200B0B0->unk13 = sub_08025308(1);
-    gUnknown_0200B0B0->unk14 = sub_08025308(2);
-    gUnknown_0200B0B0->unk15 = sub_08025308(3);
-    gUnknown_0200B0B0->unk16 = sub_08025308(4);
+    gActiveMap->unk13 = sub_08025308(1);
+    gActiveMap->unk14 = sub_08025308(2);
+    gActiveMap->unk15 = sub_08025308(3);
+    gActiveMap->unk16 = sub_08025308(4);
 }

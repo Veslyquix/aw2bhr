@@ -28,14 +28,14 @@ void sub_08020984(void)
     u16 t;
     u16 v;
 
-    gUnknown_08499598[0].unk1c = 0;
+    gUnknown_08499598[0].turnState = 0;
     for (i = 1; i <= 4; i++)
-        gUnknown_08499598[i].unk1c = 0;
+        gUnknown_08499598[i].turnState = 0;
 
-    v = gUnknown_08090944[gUnknown_08499598[gUnknown_030033EC].unk1b];
+    v = gUnknown_08090944[gUnknown_08499598[gUnknown_030033EC].aiControlled];
     if (v == 1 && (u8)sub_08020864(gUnknown_030033EC))
         v = 3;
-    gUnknown_08499598[gUnknown_030033EC].unk1c = v;
+    gUnknown_08499598[gUnknown_030033EC].turnState = v;
 
     for (i = 1; i <= 3; i++)
     {
@@ -43,7 +43,7 @@ void sub_08020984(void)
           ? gUnknown_030033EC + i
           : gUnknown_030033EC + i - 4;
         if ((u16)sub_08020824(gUnknown_030033EC, t) == 2)
-            gUnknown_08499598[t].unk1c = v;
+            gUnknown_08499598[t].turnState = v;
     }
 
     if (!(u8)sub_080208C8(gUnknown_030033EC))
@@ -54,13 +54,13 @@ void sub_08020984(void)
               ? gUnknown_030033EC + i
               : gUnknown_030033EC + i - 4;
             if ((u16)sub_08020824(gUnknown_030033EC, t) == 1
-             && gUnknown_08499598[t].unk1b == 1)
+             && gUnknown_08499598[t].aiControlled == 1)
             {
-                gUnknown_08499598[t].unk1c = v ^ 3;
+                gUnknown_08499598[t].turnState = v ^ 3;
                 for (j = 1; j <= 3; j++)
                 {
                     if ((u16)sub_08020824(t, t + j <= 4 ? t + j : t + j - 4) == 2)
-                        gUnknown_08499598[t + j <= 4 ? t + j : t + j - 4].unk1c = v ^ 3;
+                        gUnknown_08499598[t + j <= 4 ? t + j : t + j - 4].turnState = v ^ 3;
                 }
             }
         }
@@ -70,12 +70,12 @@ void sub_08020984(void)
     {
         if (i > 4)
         {
-            gUnknown_08499598[gUnknown_030033EC].unk1c |= 2;
+            gUnknown_08499598[gUnknown_030033EC].turnState |= 2;
             break;
         }
-        if (sub_080266DC(i) && gUnknown_08499598[i].unk1b == 1)
+        if (sub_080266DC(i) && gUnknown_08499598[i].aiControlled == 1)
             break;
-        if (sub_080266DC(i) && (gUnknown_08499598[i].unk1c & 2))
+        if (sub_080266DC(i) && (gUnknown_08499598[i].turnState & 2))
             break;
     }
 

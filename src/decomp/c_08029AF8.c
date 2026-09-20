@@ -135,7 +135,7 @@ int sub_08029AF8(struct Unk08499594 *p, u16 a2, u8 a3)
 
             if (a3)
             {
-                if (gUnknown_08499598[gUnknown_030033EC].unk00 < v)
+                if (gUnknown_08499598[gUnknown_030033EC].funds < v)
                     goto _done;
 
                 sub_08025B28(gUnknown_030033EC, v);

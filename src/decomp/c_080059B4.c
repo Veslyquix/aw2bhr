@@ -13,7 +13,7 @@ void sub_080059B4(int a1, int a2, u8 a3)
 {
     if (a3 != 2)
     {
-        gUnknown_0200B0B0->unk02 = 0;
+        gActiveMap->unk02 = 0;
         sub_0801A614();
         sub_0801A168();
         sub_080152C0((s32)gUnknown_0848863C, 0);

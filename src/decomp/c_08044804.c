@@ -16,7 +16,7 @@
  * unsigned. */
 void sub_08044804(ProcPtr parent)
 {
-    sub_08025B58(gUnknown_030033EC, gUnknown_08499598[gUnknown_030033EC].unk00 >> 1);
+    sub_08025B58(gUnknown_030033EC, gUnknown_08499598[gUnknown_030033EC].funds >> 1);
     sub_0803B4DC(0x1F6);
     sub_080443C4(parent);
 }

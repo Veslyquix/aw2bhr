@@ -13,7 +13,7 @@ int sub_08027198(int a1)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b != 0 && gUnknown_08499598[i].unk1a == a1)
+        if (gUnknown_08499598[i].aiControlled != 0 && gUnknown_08499598[i].teamColor == a1)
             return i;
     }
 }

@@ -52,7 +52,7 @@ void sub_08017ABC(struct Unk0200C528 *slot)
  * the u32 key sub_080206B0 scans gUnknown_085C77A0 for. */
 bool8 sub_08017AD4(s16 a)
 {
-    gUnknown_03003FC0.unk02 = sub_080206B0((u32)gUnknown_0200C528[a].unk04->unk04);
+    gPlaySt.mapID = sub_080206B0((u32)gUnknown_0200C528[a].unk04->unk04);
     gUnknown_0200C528[a].unk04++;
     return FALSE;
 }
@@ -65,7 +65,7 @@ bool8 sub_08017B08(s16 a)
 {
     gUnknown_0200C528[a].unk08 = (struct Unk0200C528Node *)sub_08017ABC;
     sub_08034F7C();
-    sub_080281D8(gUnknown_03003FC0.unk02,
+    sub_080281D8(gPlaySt.mapID,
         (u32)gUnknown_0200C528[a].unk04->unk04);
     gUnknown_0200C528[a].unk04++;
     return FALSE;

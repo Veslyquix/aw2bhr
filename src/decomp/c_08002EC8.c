@@ -21,9 +21,9 @@ void sub_08002EC8(void)
 {
     sub_08001DAC();
 
-    if ((gUnknown_0200B0B0->unk00 & 0x20) == 0)
+    if ((gActiveMap->unk00 & 0x20) == 0)
     {
-        if (gUnknown_0200B0B0->unk07 == 0)
+        if (gActiveMap->unk07 == 0)
             sub_08002AB0();
         else
             sub_08002C38();
@@ -45,7 +45,7 @@ void sub_08002EF8(void)
 {
     int v;
 
-    if (gUnknown_0200B0B0->unk07 == 0)
+    if (gActiveMap->unk07 == 0)
         v = 0xAB;
     else
         v = 0xAA;

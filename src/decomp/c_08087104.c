@@ -73,7 +73,7 @@ void sub_08087104(void *arg)
     }
 }
 
-/* Draws up to four HUD elements, in two layouts chosen by gUnknown_03003FC0.unk01.
+/* Draws up to four HUD elements, in two layouts chosen by gPlaySt.gameMode.
  *
  * THE CONDITION IS TWO STATEMENTS, NOT ONE EXPRESSION, and that is what wave 34
  * parked this function on at 92.4%. The ROM's window is
@@ -124,7 +124,7 @@ void sub_08087168(int a)
     int n;
     int g;
 
-    m = gUnknown_03003FC0.unk01;
+    m = gPlaySt.gameMode;
 
     if (m == 2)
     {

@@ -31,7 +31,7 @@ void sub_080267AC(void)
     gUnknown_03003F2C = (gUnknown_030033EC - 1) * 0x40;
     gUnknown_03004480 = n;
     gUnknown_030032C0 = 0;
-    gUnknown_08499598[gUnknown_030033EC].unk16 = 0;
+    gUnknown_08499598[gUnknown_030033EC].destroyedThisTurn = 0;
     gUnknown_08499598[gUnknown_030033EC].unk24 = 0;
     sub_08020984();
     sub_08026F04();
@@ -41,14 +41,14 @@ void sub_080267AC(void)
     if (gUnknown_03004080 == 1)
     {
         if (sub_08026D44(gUnknown_030033EC))
-            sub_08022AAC(gUnknown_08499598[gUnknown_030033EC].unk2d & 0x7f,
-                         gUnknown_08499598[gUnknown_030033EC].unk2e & 0x7f);
+            sub_08022AAC(gUnknown_08499598[gUnknown_030033EC].hqX & 0x7f,
+                         gUnknown_08499598[gUnknown_030033EC].hqY & 0x7f);
         else
             sub_08022AAC(gMap->scrollX / 16 + 7,
                          gMap->scrollY / 16 + 4);
-        gUnknown_08499598[gUnknown_030033EC].unk2f = gUnknown_030033E4.unk00;
-        gUnknown_08499598[gUnknown_030033EC].unk30 = gUnknown_030033E4.unk02;
+        gUnknown_08499598[gUnknown_030033EC].cursorX = gUnknown_030033E4.unk00;
+        gUnknown_08499598[gUnknown_030033EC].cursorY = gUnknown_030033E4.unk02;
     }
-    sub_08022AAC(gUnknown_08499598[gUnknown_030033EC].unk2f,
-                 gUnknown_08499598[gUnknown_030033EC].unk30);
+    sub_08022AAC(gUnknown_08499598[gUnknown_030033EC].cursorX,
+                 gUnknown_08499598[gUnknown_030033EC].cursorY);
 }

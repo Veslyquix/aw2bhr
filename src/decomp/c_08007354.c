@@ -9,7 +9,7 @@
 
 void sub_08007354(void)
 {
-    struct Unk0200B0B0 *p = gUnknown_0200B0B0;
+    struct ActiveMap *p = gActiveMap;
     int i;
 
     if (p->unk07 == 0)
@@ -25,7 +25,7 @@ void sub_08007354(void)
 
         p->unk2c = gUnknown_0200B0D0[i].unk04;
         p->unk37 = p->unk36;
-        gUnknown_0200B0B0->unk30 = gUnknown_0200B0B0->unk2e;
+        gActiveMap->unk30 = gActiveMap->unk2e;
     }
     else
     {
@@ -40,6 +40,6 @@ void sub_08007354(void)
 
         p->unk26 = gUnknown_0200B0D0[i].unk04;
         p->unk39 = p->unk38;
-        gUnknown_0200B0B0->unk31 = gUnknown_0200B0B0->unk2f;
+        gActiveMap->unk31 = gActiveMap->unk2f;
     }
 }

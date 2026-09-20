@@ -19,13 +19,13 @@
  *
  * NEITHER POOL WORD IS A GLOBAL, and the second one is the trap this batch was
  * warned about.  Dereferenced in baserom.gba, 0x0808D7C8 holds 0x0200B0B0
- * (&gUnknown_0200B0B0) and 0x0808D7CC holds 0x03002EE0 -- and 0x03002EE0 is
+ * (&gActiveMap) and 0x0808D7CC holds 0x03002EE0 -- and 0x03002EE0 is
  * `gpKeySt`, declared in include/hardware.h, NOT an unnamed global.  Wave 20
  * invented a gUnknown_03002EE0 for that address and the SPLIT build caught it
  * as an undefined reference, because aw2bhr.lds already binds it; the
  * unknown-globals.h comment at gUnknown_03005920 records the whole episode.
  * Both are ordinary -fforce-addr address constants and the honest
- * `gUnknown_0200B0B0` / `gpKeySt` spellings produce the ROM's
+ * `gActiveMap` / `gpKeySt` spellings produce the ROM's
  * `ldr rN,=<pool>; ldr rM,[rN]; ldr rP,[rM]` triples.
  *
  * global.h does NOT include hardware.h, so the `#include "hardware.h"` below
@@ -42,10 +42,10 @@
 
 void sub_08005B24(void)
 {
-    if (gUnknown_0200B0B0->unk06 != 0)
+    if (gActiveMap->unk06 != 0)
     {
-        gUnknown_0200B0B0->unk06 = 0;
-        gUnknown_0200B0B0->unk02 = 0;
+        gActiveMap->unk06 = 0;
+        gActiveMap->unk02 = 0;
         gUnknown_03001418 = 0;
         gUnknown_03001FF8 = 0;
         sub_0801A444(2, 2, 0x1A, 0xF);
@@ -53,20 +53,20 @@ void sub_08005B24(void)
     }
 
     if ((gpKeySt->held & 7) != 0)
-        gUnknown_0200B0B0->unk02 = 0x5A;
+        gActiveMap->unk02 = 0x5A;
 
-    switch (gUnknown_0200B0B0->unk02)
+    switch (gActiveMap->unk02)
     {
     case 0:
         sub_0801B780(0);
-        gUnknown_0200B0B0->unk02++;
+        gActiveMap->unk02++;
         sub_080059FC();
         sub_08005EF0(1);
         /* fallthrough */
     case 1:
         if ((gpKeySt->held & 0x80) != 0)
         {
-            gUnknown_0200B0B0->unk02 = 0xA;
+            gActiveMap->unk02 = 0xA;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
             sub_08013AEC();
             sub_08005F1C();
@@ -75,14 +75,14 @@ void sub_08005B24(void)
         break;
     case 0xA:
         sub_0801B780(0);
-        gUnknown_0200B0B0->unk02++;
+        gActiveMap->unk02++;
         sub_08005AA0();
         sub_08005EF0(0);
         /* fallthrough */
     case 0xB:
         if ((gpKeySt->held & 0x40) != 0)
         {
-            gUnknown_0200B0B0->unk02 = 0;
+            gActiveMap->unk02 = 0;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
             sub_08013AEC();
             sub_08005F1C();
@@ -96,7 +96,7 @@ void sub_08005B24(void)
         break;
     }
 
-    if (gUnknown_0200B0B0->unk02 == 0x5A)
+    if (gActiveMap->unk02 == 0x5A)
     {
         if ((gpKeySt->held & 2) == 0)
             gUnknown_03002F1C = 1;

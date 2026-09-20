@@ -15,6 +15,6 @@
 
 void sub_0802A4DC(void)
 {
-    sub_08029088(gUnknown_08499598[gUnknown_030033EC].unk2f,
-                 gUnknown_08499598[gUnknown_030033EC].unk30);
+    sub_08029088(gUnknown_08499598[gUnknown_030033EC].cursorX,
+                 gUnknown_08499598[gUnknown_030033EC].cursorY);
 }

@@ -9,7 +9,7 @@
  */
 
 /* sub_0800EC20 -- MATCHED.  Autotile fixup: on the tile at (x, y), look at
- * the neighbour named by gUnknown_0200B0B0->unk20 and repaint the corner it
+ * the neighbour named by gActiveMap->unk20 and repaint the corner it
  * shares with this one.  `col` must stay its own statement: folded into the
  * index, gcse/PRE hoists the `- 1` and reassociates it into
  * `rowval + (x - 1)`, which steals x's low register. */
@@ -18,7 +18,7 @@ void sub_0800EC20(int x, int y)
     int col;
     int tile;
 
-    switch (gUnknown_0200B0B0->unk20)
+    switch (gActiveMap->unk20)
     {
     case 70:
         sub_0800EBFC(x - 1, y - 1, 0x87);

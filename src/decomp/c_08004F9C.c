@@ -9,8 +9,8 @@
 
 /* MATCHED, wave 36 (W36-I). PROMOTION NEEDS THE POOL WORD PLACED:
  *     "rodata": ["0x0808D7AC"]
- * 0x0808D7AC holds &gUnknown_0200B0B0 (checked in baserom.gba); it is a
- * -fforce-addr word, not a global, so gUnknown_0200B0B0 is named honestly.
+ * 0x0808D7AC holds &gActiveMap (checked in baserom.gba); it is a
+ * -fforce-addr word, not a global, so gActiveMap is named honestly.
  *
  * `case 0: break;` is not decoration: sharing the default label with case 0 is
  * what puts the low-bound `cmp r0,#1; ble` into the compare tree. Without it
@@ -29,12 +29,12 @@ void sub_08004F9C(void)
     int v;
 
     t = sub_0800CB30(0, 0);
-    sub_0803CF54(gUnknown_0200B0B0->unk10, &gUnknown_0200B0B0->unk9c,
+    sub_0803CF54(gActiveMap->unk10, &gActiveMap->unk9c,
                  sub_0800C9E8());
     sub_0800CB30(1, t);
 
     v = 7;
-    switch ((s8)gUnknown_0200B0B0->unk10)
+    switch ((s8)gActiveMap->unk10)
     {
     case 0:
         break;
@@ -48,15 +48,15 @@ void sub_08004F9C(void)
 
     sub_08012BC8(gUnknown_08499578, 3, v, 0xB, 2, 0);
     sub_0801F2AC(9, gUnknown_08499578 + (v * 32 + 3));
-    sub_080149C0(5, (s16)v, gUnknown_08499578, &gUnknown_0200B0B0->unk9c,
+    sub_080149C0(5, (s16)v, gUnknown_08499578, &gActiveMap->unk9c,
                  0x8000, 0);
     sub_08013AEC();
 
-    if (gUnknown_0200B0B0->unk00 & 0x100)
+    if (gActiveMap->unk00 & 0x100)
     {
-        gUnknown_0200B0B0->unk00 &= 0xFEFF;
-        gUnknown_0200B0B0->unk9c = 0;
+        gActiveMap->unk00 &= 0xFEFF;
+        gActiveMap->unk9c = 0;
     }
 
-    gUnknown_0200B0B0->unk00 &= 0xEFFF;
+    gActiveMap->unk00 &= 0xEFFF;
 }

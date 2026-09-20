@@ -54,7 +54,7 @@
  *     .rodata+0x04 -> 0x08091344   &gUnknown_08499598
  *     .rodata+0x08 -> 0x08091348   &gUnknown_030013D0
  *     .rodata+0x0c -> 0x0809134C   &gUnknown_030013B0
- *     .rodata+0x10 -> 0x08091350   &gUnknown_03003FC0
+ *     .rodata+0x10 -> 0x08091350   &gPlaySt
  * The last one agrees with the block listing already in
  * docs/agbcc-codegen.md, which is an independent check on the other four.
  * These are the documented false-mismatch class; the promotion must carry them.
@@ -142,8 +142,8 @@ void sub_08041978(u8 a1, int a2)
         gUnknown_03004484 = 1 - r;
         gUnknown_0300450C = gUnknown_03003F50;
 
-        gUnknown_03004580[gUnknown_03003F50][0] = gUnknown_08499598[army1].unk1a - 1;
-        gUnknown_03004580[gUnknown_03004484][0] = gUnknown_08499598[army2].unk1a - 1;
+        gUnknown_03004580[gUnknown_03003F50][0] = gUnknown_08499598[army1].teamColor - 1;
+        gUnknown_03004580[gUnknown_03004484][0] = gUnknown_08499598[army2].teamColor - 1;
 
         gUnknown_03004580[gUnknown_03003F50][1] =
             gUnknown_0809131E[(sel = (struct Unk08499594 *)gUnknown_030040D8)->unk00];
@@ -159,10 +159,10 @@ void sub_08041978(u8 a1, int a2)
 
         gUnknown_03004580[gUnknown_03003F50][4] =
             gUnknown_08499598[(struct Unk41978Army *)sel
-                              - (struct Unk41978Army *)gUnknown_08499594 + 1].unk1d;
+                              - (struct Unk41978Army *)gUnknown_08499594 + 1].co;
         gUnknown_03004580[gUnknown_03004484][4] =
             gUnknown_08499598[(struct Unk41978Army *)unit
-                              - (struct Unk41978Army *)gUnknown_08499594 + 1].unk1d;
+                              - (struct Unk41978Army *)gUnknown_08499594 + 1].co;
 
         gUnknown_03004580[gUnknown_03003F50][5] = sel->unk04_0;
         gUnknown_03004580[gUnknown_03004484][5] = unit->unk04_0;
@@ -176,7 +176,7 @@ void sub_08041978(u8 a1, int a2)
         gUnknown_03004528[gUnknown_03003F50] = (u8 *)sel;
         gUnknown_03004528[gUnknown_03004484] = (u8 *)unit;
 
-        gUnknown_03004520 = gUnknown_03003FC0.unk2c;
+        gUnknown_03004520 = gPlaySt.unk2c;
 
         if (sel->unk04_0 != 0)
             t = Div(sel->unk04_0 - 1, 10) + 1;
@@ -219,10 +219,10 @@ void sub_08041978(u8 a1, int a2)
         sub_080440E0(army1, x1 + Div(x2, 2));
         sub_080440E0(army2, x2 + Div(x1, 2));
 
-        v = gUnknown_03003FC0.unk09;
+        v = gPlaySt.unk09;
 
         if (v == 3)
-            v = (gUnknown_08499598[gUnknown_030033EC].unk1b == 1) ? 2 : 0;
+            v = (gUnknown_08499598[gUnknown_030033EC].aiControlled == 1) ? 2 : 0;
 
         if (v != 0)
         {

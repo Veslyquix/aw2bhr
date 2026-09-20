@@ -34,7 +34,7 @@ u8 GetTechScore(u8 a)
 
     if (sub_080266DC(a))
     {
-        n = gUnknown_03003FC0.unk01 == 1 ? 0x14 : 0xa;
+        n = gPlaySt.gameMode == 1 ? 0x14 : 0xa;
         x = sub_08025CF0(a);
         y = sub_08025D08(a);
 

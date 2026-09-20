@@ -23,5 +23,5 @@
 
 void sub_0802C1D0(void)
 {
-    sub_08016D30(sub_08016D04(gUnknown_03003FC0.unk01), 0);
+    sub_08016D30(sub_08016D04(gPlaySt.gameMode), 0);
 }

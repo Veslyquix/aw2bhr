@@ -8,7 +8,7 @@
  */
 
 /* Two unconditional calls, then a bit-13 gate on the flag word at +0 of
- * gUnknown_0200B0B0. 0x4000 is `movs #0x80; lsls #7`, agbcc's way of building a
+ * gActiveMap. 0x4000 is `movs #0x80; lsls #7`, agbcc's way of building a
  * single set bit above 255 without a pool word -- reading it as a shift of the
  * flag would be backwards, the shift is on the CONSTANT.
  *
@@ -19,7 +19,7 @@ void sub_08000DC0(void)
     sub_0800057C();
     sub_08002EC8();
 
-    if (gUnknown_0200B0B0->unk00 & 0x4000)
+    if (gActiveMap->unk00 & 0x4000)
     {
         sub_08015C30(gUnknown_03001FBC);
         gUnknown_030040A0 = 0;

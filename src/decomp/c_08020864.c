@@ -32,7 +32,7 @@ int sub_08020864(u16 a)
     for (k = 1; k <= 3; k++)
     {
         r = sub_08020824(a, a + k <= 4 ? a + k : a + k - 4);
-        if (r == 2 && gUnknown_08499598[a + k <= 4 ? a + k : a + k - 4].unk1b == 1)
+        if (r == 2 && gUnknown_08499598[a + k <= 4 ? a + k : a + k - 4].aiControlled == 1)
             return 1;
     }
     return 0;
@@ -49,7 +49,7 @@ int sub_08020864(u16 a)
  * (`ldr rA,=<pool>; ldr rB,[rA]; ldr rC,[rB]`) reproduces on its own: agbcc
  * parks &gUnknown_08499598 in this unit's .rodata, which is the ROM word at
  * 0x08090940 that gen_lds.py calls gUnknown_08090940. Declaring that word as a
- * `struct Unk08499598 **` global is NOT needed and would be wrong -- it is
+ * `struct PlayerStruct **` global is NOT needed and would be wrong -- it is
  * agbcc's own address-constant pool entry. */
 int sub_080208C8(int a)
 {
@@ -57,7 +57,7 @@ int sub_080208C8(int a)
     int seen;
     int seenValue;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk1b == 1)
+    if (gUnknown_08499598[gUnknown_030033EC].aiControlled == 1)
         return 0;
 
     seenValue = 0;
@@ -70,17 +70,17 @@ int sub_080208C8(int a)
             continue;
         if (seen)
         {
-            if (gUnknown_08499598[k].unk1b == 1
-             && seenValue != gUnknown_08499598[k].unk2a
-             && gUnknown_08499598[a].unk2a != gUnknown_08499598[k].unk2a)
+            if (gUnknown_08499598[k].aiControlled == 1
+             && seenValue != gUnknown_08499598[k].team
+             && gUnknown_08499598[a].team != gUnknown_08499598[k].team)
                 return 1;
         }
         else
         {
-            if (gUnknown_08499598[k].unk1b == 1
-             && gUnknown_08499598[k].unk2a != gUnknown_08499598[a].unk2a)
+            if (gUnknown_08499598[k].aiControlled == 1
+             && gUnknown_08499598[k].team != gUnknown_08499598[a].team)
             {
-                seenValue = gUnknown_08499598[k].unk2a;
+                seenValue = gUnknown_08499598[k].team;
                 seen = 1;
             }
         }

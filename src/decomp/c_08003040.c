@@ -9,16 +9,16 @@
 
 void sub_08003040(void)
 {
-    gUnknown_0200B0B0->unk72[0] = 0;
-    gUnknown_0200B0B0->unk72[1] = 0;
-    gUnknown_0200B0B0->unk72[2] = 0;
-    gUnknown_0200B0B0->unk72[3] = 0;
+    gActiveMap->unk72[0] = 0;
+    gActiveMap->unk72[1] = 0;
+    gActiveMap->unk72[2] = 0;
+    gActiveMap->unk72[3] = 0;
 }
 
 void sub_08003064(void)
 {
-    gUnknown_0200B0B0->unk72[0] = 0x32;
-    gUnknown_0200B0B0->unk72[1] = 0x32;
-    gUnknown_0200B0B0->unk72[2] = 0x32;
-    gUnknown_0200B0B0->unk72[3] = 0x32;
+    gActiveMap->unk72[0] = 0x32;
+    gActiveMap->unk72[1] = 0x32;
+    gActiveMap->unk72[2] = 0x32;
+    gActiveMap->unk72[3] = 0x32;
 }

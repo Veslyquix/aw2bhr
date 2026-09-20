@@ -93,28 +93,28 @@ void sub_0807F630(struct Unk807CE5C *p)
     {
         k = 0;
 
-        for (i = 0; i < sub_0802490C(gUnknown_03003FC0.unk02); i++)
+        for (i = 0; i < sub_0802490C(gPlaySt.mapID); i++)
         {
-            if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i] == 0xff)
+            if (gUnknown_085C77A0[gPlaySt.mapID].unk3c[i] == 0xff)
             {
                 if (i == p->unk64)
                 {
-                    gUnknown_08499598[i + 1].unk1d =
+                    gUnknown_08499598[i + 1].co =
                         gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c];
                 }
                 else if (i < p->unk64)
                 {
-                    gUnknown_08499598[i + 1].unk1d = gUnknown_030058D4[k];
+                    gUnknown_08499598[i + 1].co = gUnknown_030058D4[k];
                     k++;
                 }
                 else
                 {
                     if (gUnknown_030059C0[i] == 0)
-                        gUnknown_08499598[i + 1].unk1a = gUnknown_03005958[i] + 1;
+                        gUnknown_08499598[i + 1].teamColor = gUnknown_03005958[i] + 1;
                     else
-                        gUnknown_08499598[i + 1].unk1a = sub_08026AC0(i + 1, 1);
+                        gUnknown_08499598[i + 1].teamColor = sub_08026AC0(i + 1, 1);
 
-                    switch (gUnknown_08499598[i + 1].unk1a)
+                    switch (gUnknown_08499598[i + 1].teamColor)
                     {
                     case 1:
                     default:
@@ -134,18 +134,18 @@ void sub_0807F630(struct Unk807CE5C *p)
                         break;
                     }
 
-                    gUnknown_08499598[i + 1].unk1d = v;
+                    gUnknown_08499598[i + 1].co = v;
                 }
             }
             else
             {
-                gUnknown_08499598[i + 1].unk1d =
-                    gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i];
+                gUnknown_08499598[i + 1].co =
+                    gUnknown_085C77A0[gPlaySt.mapID].unk3c[i];
             }
 
-            gUnknown_08499598[i + 1].unk1a =
-                sub_08026AC0(i + 1, sub_08042E18(gUnknown_08499598[i + 1].unk1d));
-            gUnknown_08499598[i + 1].unk00 = 0;
+            gUnknown_08499598[i + 1].teamColor =
+                sub_08026AC0(i + 1, sub_08042E18(gUnknown_08499598[i + 1].co));
+            gUnknown_08499598[i + 1].funds = 0;
         }
 
         gUnknown_030033EC = p->unk64 + 1;

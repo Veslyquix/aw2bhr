@@ -62,14 +62,14 @@ bool8 sub_080381C0(void)
     u8 n;
     u8 i;
 
-    if (gUnknown_03003FC0.unk32 == 0)
+    if (gPlaySt.unk32 == 0)
     {
-        if (gUnknown_03003FC0.unk01 == 3)
+        if (gPlaySt.gameMode == 3)
         {
             n = 0;
             for (i = 1; i <= 4; i++)
             {
-                if (gUnknown_08499598[i].unk1b == 1)
+                if (gUnknown_08499598[i].aiControlled == 1)
                 {
                     buf[n] = i;
                     n++;
@@ -128,7 +128,7 @@ void sub_08038240(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b)
+        if (gUnknown_08499598[i].aiControlled)
         {
             if (sub_080266DC(i))
             {
@@ -149,13 +149,13 @@ void sub_08038240(void)
 
     gUnknown_0202FDEC.unk0c = gUnknown_0200C420.unk00;
 
-    if (gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.gameMode == 3)
     {
         gUnknown_0202FDEC.unk0a = 0;
     }
     else
     {
-        gUnknown_0202FDEC.unk0a = gUnknown_08499598[sub_0807A908()].unk38;
+        gUnknown_0202FDEC.unk0a = gUnknown_08499598[sub_0807A908()].totalScore;
 
         if (sub_0803866C())
             gUnknown_0202FDEC.unk0a = gUnknown_0202FDEC.unk0a * 2;

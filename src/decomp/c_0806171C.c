@@ -75,10 +75,10 @@ void sub_08061788(u16 a)
 {
     u8 v;
 
-    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk27 != 0)
+    if (gUnknown_085C77A0[gPlaySt.mapID].unk27 != 0)
     {
         sub_08061A40(SCRATCH,
-            &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk27][gUnknown_08499598[a].unk1d]]);
+            &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gPlaySt.mapID].unk27][gUnknown_08499598[a].co]]);
     }
     else
     {
@@ -88,7 +88,7 @@ void sub_08061788(u16 a)
             v = 4;
 
         sub_08061A40(SCRATCH,
-            &gUnknown_085771C4[gUnknown_0857690C[v][gUnknown_08499598[a].unk1d]]);
+            &gUnknown_085771C4[gUnknown_0857690C[v][gUnknown_08499598[a].co]]);
     }
 
     sub_08061A40(&gUnknown_02029D84, SCRATCH);
@@ -107,8 +107,8 @@ void sub_08061788(u16 a)
 void sub_08061868(void)
 {
     gUnknown_030046B4 = sub_0803866C()
-        ? gUnknown_08615194[gUnknown_03003FC0.unk02 - 0x8a].unk28
-        : gUnknown_08615194[gUnknown_03003FC0.unk02 - 0x8a].unk24;
+        ? gUnknown_08615194[gPlaySt.mapID - 0x8a].unk28
+        : gUnknown_08615194[gPlaySt.mapID - 0x8a].unk24;
 
     sub_08061CDC();
     sub_08061CF8();
@@ -122,6 +122,6 @@ void sub_08061868(void)
     gUnknown_03004780 = 1;
     gUnknown_030044D8 = gUnknown_03004770 = 0;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk1a == 5 && gUnknown_030046B4 != 0)
+    if (gUnknown_08499598[gUnknown_030033EC].teamColor == 5 && gUnknown_030046B4 != 0)
         sub_080607E8();
 }

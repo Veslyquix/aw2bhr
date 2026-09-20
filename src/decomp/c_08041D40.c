@@ -14,7 +14,7 @@
  * exact division by the 0x0c stride (`mul 0x55555555; neg; asr #2`) with the
  * `>> 6` merged into the single `asr #8`. The `+ 1` then indexes
  * gUnknown_08499598 ONE-BASED, which is what puts the member at a runtime
- * 0x3c + 0x2d == 0x69: exactly the reach struct Unk08499598's own unk2a note
+ * 0x3c + 0x2d == 0x69: exactly the reach struct PlayerStruct's own unk2a note
  * records for sub_08026F9C/sub_08026FD0, which read element [n + 1] the same
  * way.
  *
@@ -30,8 +30,8 @@ int sub_08041D40(struct Unk08499594 *a, struct Unk08499594 *b)
     if (a->unk02 != b->unk02)
         return 0;
 
-    if ((gUnknown_08499598[((a - gUnknown_08499594) >> 6) + 1].unk2d & 0x7f)
-     <= (gUnknown_08499598[((b - gUnknown_08499594) >> 6) + 1].unk2d & 0x7f))
+    if ((gUnknown_08499598[((a - gUnknown_08499594) >> 6) + 1].hqX & 0x7f)
+     <= (gUnknown_08499598[((b - gUnknown_08499594) >> 6) + 1].hqX & 0x7f))
         return 0;
 
     return 1;

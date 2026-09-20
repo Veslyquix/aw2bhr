@@ -20,14 +20,14 @@ void sub_08042B9C(void)
 {
     u8 *q;
 
-    gUnknown_03003FC0.unk2e = sub_08035170();
+    gPlaySt.unk2e = sub_08035170();
     q = gUnknown_030044B0;
     *(u32 *)(q + 8) = gUnknown_03001FD4;
 
-    if (gUnknown_03003FC0.unk32 == 0)
+    if (gPlaySt.unk32 == 0)
     {
-        gUnknown_08499598[gUnknown_030033EC].unk2f = gUnknown_030033E4.unk00;
-        gUnknown_08499598[gUnknown_030033EC].unk30 = gUnknown_030033E4.unk02;
+        gUnknown_08499598[gUnknown_030033EC].cursorX = gUnknown_030033E4.unk00;
+        gUnknown_08499598[gUnknown_030033EC].cursorY = gUnknown_030033E4.unk02;
     }
 
     gUnknown_030032D8 = 1;

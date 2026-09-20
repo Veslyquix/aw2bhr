@@ -31,12 +31,12 @@ void sub_08026A48(void)
 {
     int i;
 
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 1:
     case 2:
         for (i = 1; i <= 4; i++)
-            gUnknown_08499598[i].unk1a = sub_08026AC0(i, sub_08042DFC(i));
+            gUnknown_08499598[i].teamColor = sub_08026AC0(i, sub_08042DFC(i));
         break;
     }
 }
@@ -55,7 +55,7 @@ bool8 sub_08026A88(int n, int v)
 
     for (i = 1; i < n; i++)
     {
-        if (gUnknown_08499598[i].unk1a == v)
+        if (gUnknown_08499598[i].teamColor == v)
             return 0;
     }
 
@@ -75,10 +75,10 @@ int sub_08026AC0(int slot, int fallback)
 {
     int v;
 
-    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[slot - 1] == 0xff)
+    if (gUnknown_085C77A0[gPlaySt.mapID].unk3c[slot - 1] == 0xff)
         v = fallback;
     else
-        v = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk40[slot - 1];
+        v = gUnknown_085C77A0[gPlaySt.mapID].unk40[slot - 1];
 
     if (!sub_08026A88(slot, v))
     {
@@ -118,11 +118,11 @@ void sub_08026B28(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b != 0)
+        if (gUnknown_08499598[i].aiControlled != 0)
         {
             for (j = 1; j <= 4; j++)
             {
-                if (i != j && gUnknown_08499598[i].unk2a != gUnknown_08499598[j].unk2a)
+                if (i != j && gUnknown_08499598[i].team != gUnknown_08499598[j].team)
                     gUnknown_08499598[i].unk2c |= gUnknown_08090A84[j];
             }
         }

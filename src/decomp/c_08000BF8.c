@@ -17,19 +17,19 @@
 
 void sub_08000BF8(void)
 {
-    if (gUnknown_0200B0B0->unk07 == 0)
+    if (gActiveMap->unk07 == 0)
     {
-        if (gUnknown_0200B0B0->unk2a
+        if (gActiveMap->selectedTerrain
             != gMap->terrain[
-                   gUnknown_0200B0B0->unk08
-                   + gMap->rowOffset[gUnknown_0200B0B0->unk0a]])
-            gUnknown_0200B0B0->unk65 = 1;
+                   gActiveMap->cursorX
+                   + gMap->rowOffset[gActiveMap->cursorY]])
+            gActiveMap->unk65 = 1;
     }
     else
     {
-        if (gUnknown_0200B0B0->unk24
-            != sub_08008B70(gUnknown_0200B0B0->unk08, gUnknown_0200B0B0->unk0a))
-            gUnknown_0200B0B0->unk65 = 1;
+        if (gActiveMap->unk24
+            != sub_08008B70(gActiveMap->cursorX, gActiveMap->cursorY))
+            gActiveMap->unk65 = 1;
     }
 }
 
@@ -37,10 +37,10 @@ void sub_08000C68(void)
 {
     sub_0803B4DC(0x65);
 
-    if (gUnknown_0200B0B0->unk07 == 0)
+    if (gActiveMap->unk07 == 0)
         sub_08000CCC(gMap->terrain[
-            gUnknown_0200B0B0->unk08
-            + gMap->rowOffset[gUnknown_0200B0B0->unk0a]]);
+            gActiveMap->cursorX
+            + gMap->rowOffset[gActiveMap->cursorY]]);
     else
-        sub_08000CCC(sub_08008B70(gUnknown_0200B0B0->unk08, gUnknown_0200B0B0->unk0a));
+        sub_08000CCC(sub_08008B70(gActiveMap->cursorX, gActiveMap->cursorY));
 }

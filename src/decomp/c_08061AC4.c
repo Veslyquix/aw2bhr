@@ -21,7 +21,7 @@ void sub_08061AC4(void)
         sub_08042B9C();
         gUnknown_03004780 = 0;
 
-        if (gUnknown_03003FC0.unk32 != 0)
-            sub_080344F0(gUnknown_03003FC0.unk2e);
+        if (gPlaySt.unk32 != 0)
+            sub_080344F0(gPlaySt.unk2e);
     }
 }

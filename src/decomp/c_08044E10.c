@@ -184,7 +184,7 @@ void sub_08044F24(struct Unk08044F24Proc *proc)
         }
 
         if (sub_080266DC(j) != 0
-            && gUnknown_08499598[j].unk2a != gUnknown_08499598[proc->unk2c].unk2a)
+            && gUnknown_08499598[j].team != gUnknown_08499598[proc->unk2c].team)
             break;
 
         j++;

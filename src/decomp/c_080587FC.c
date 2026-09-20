@@ -93,7 +93,7 @@ int sub_080587FC(int flag)
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
-            if ((sub_08035000(gUnknown_03003FC0.unk02)->unk28 & 1) == 0
+            if ((sub_08035000(gPlaySt.mapID)->unk28 & 1) == 0
              && gUnknown_020288B4[gMap->rowOffset[y] + x] != 0)
             {
                 xp = (u32)x << 16;

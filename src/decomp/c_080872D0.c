@@ -70,7 +70,7 @@ void sub_080872D0(int a1)
     int k;
     int m;
 
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
         w = 0x70;
         v = Div(a1 * 0x70, gUnknown_02027F74.unk37 + 1);

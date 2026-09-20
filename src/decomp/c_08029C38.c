@@ -46,13 +46,13 @@ void sub_08029C38(struct Unk29C38Proc *proc)
     if (proc->unk24 > 0)
     {
         if (proc->unk30 == 1)
-            gUnknown_08499598[gUnknown_030033EC].unk00 -= proc->unk2c;
+            gUnknown_08499598[gUnknown_030033EC].funds -= proc->unk2c;
 
         return;
     }
 
     if (proc->unk30 == 1)
-        gUnknown_08499598[gUnknown_030033EC].unk00 = proc->unk28;
+        gUnknown_08499598[gUnknown_030033EC].funds = proc->unk28;
 
     sub_080272B4();
     sub_08015328(gUnknown_03001FBC);
@@ -70,11 +70,11 @@ void StartSupplyAnimation(struct Unk802C57C *a1, u8 a2, int a3, u8 a4)
 
     proc = (struct Unk29CB8Proc *)sub_080152EC(gUnknown_0849A0A8, 0);
     proc->unk24 = a3;
-    proc->unk28 = gUnknown_08499598[gUnknown_030033EC].unk00 - a3;
+    proc->unk28 = gUnknown_08499598[gUnknown_030033EC].funds - a3;
     proc->unk20 = a1->unk00;
     proc->unk22 = a1->unk02;
 
-    if (gUnknown_03003FC0.unk47 != 0)
+    if (gPlaySt.unk47 != 0)
         proc->unk30 = 0;
     else
         proc->unk30 = a4;

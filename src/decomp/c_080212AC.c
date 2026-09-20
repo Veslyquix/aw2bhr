@@ -35,7 +35,7 @@ void sub_080212AC(u16 faction)
     int x;
     int y;
 
-    if (gUnknown_08499598[faction].unk1b != 0 && gUnknown_08499598[faction].unk1c != 0)
+    if (gUnknown_08499598[faction].aiControlled != 0 && gUnknown_08499598[faction].turnState != 0)
     {
         for (i = 0; i <= 0x32; i++)
             sub_080211DC((u8)(gUnknown_084995FE[faction] + i), 1);
@@ -48,7 +48,7 @@ void sub_080212AC(u16 faction)
                          gMap->rowOffset[y] + x] & 0xE0)
                     == gUnknown_084995F4[faction])
                 {
-                    sub_080210C8(x, y, 0, gUnknown_08499598[faction].unk1c, 1, 0);
+                    sub_080210C8(x, y, 0, gUnknown_08499598[faction].turnState, 1, 0);
                 }
             }
         }

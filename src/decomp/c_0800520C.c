@@ -9,14 +9,14 @@
 
 void sub_0800520C(void)
 {
-    gUnknown_0200B0B0->unk00 &= 0xFEFF;
-    gUnknown_0200B0B0->unk10 = 0;
-    if (sub_0803CCB8(gUnknown_0200B0B0->unk10, gUnknown_0200B204) != 1)
+    gActiveMap->unk00 &= 0xFEFF;
+    gActiveMap->unk10 = 0;
+    if (sub_0803CCB8(gActiveMap->unk10, gUnknown_0200B204) != 1)
     {
-        if (!sub_080051EC((const char *)&gUnknown_0200B0B0->unk9c))
+        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gUnknown_0200B0B0->unk9c, (const char *)gUnknown_08610A38[0x9FE]);
-            gUnknown_0200B0B0->unk00 |= 0x100;
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FE]);
+            gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
         else
@@ -26,10 +26,10 @@ void sub_0800520C(void)
     }
     else
     {
-        if (!sub_080051EC((const char *)&gUnknown_0200B0B0->unk9c))
+        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gUnknown_0200B0B0->unk9c, (const char *)gUnknown_08610A38[0x9FE]);
-            gUnknown_0200B0B0->unk00 |= 0x100;
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FE]);
+            gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
         else
@@ -41,14 +41,14 @@ void sub_0800520C(void)
 
 void sub_080052D8(void)
 {
-    gUnknown_0200B0B0->unk00 &= 0xFEFF;
-    gUnknown_0200B0B0->unk10 = 1;
-    if (sub_0803CCB8(gUnknown_0200B0B0->unk10, gUnknown_0200B204) != 1)
+    gActiveMap->unk00 &= 0xFEFF;
+    gActiveMap->unk10 = 1;
+    if (sub_0803CCB8(gActiveMap->unk10, gUnknown_0200B204) != 1)
     {
-        if (!sub_080051EC((const char *)&gUnknown_0200B0B0->unk9c))
+        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gUnknown_0200B0B0->unk9c, (const char *)gUnknown_08610A38[0x9FF]);
-            gUnknown_0200B0B0->unk00 |= 0x100;
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FF]);
+            gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
         else
@@ -58,10 +58,10 @@ void sub_080052D8(void)
     }
     else
     {
-        if (!sub_080051EC((const char *)&gUnknown_0200B0B0->unk9c))
+        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gUnknown_0200B0B0->unk9c, (const char *)gUnknown_08610A38[0x9FF]);
-            gUnknown_0200B0B0->unk00 |= 0x100;
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FF]);
+            gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
         else
@@ -73,14 +73,14 @@ void sub_080052D8(void)
 
 void sub_080053A8(void)
 {
-    gUnknown_0200B0B0->unk00 &= 0xFEFF;
-    gUnknown_0200B0B0->unk10 = 2;
-    if (sub_0803CCB8(gUnknown_0200B0B0->unk10, gUnknown_0200B204) != 1)
+    gActiveMap->unk00 &= 0xFEFF;
+    gActiveMap->unk10 = 2;
+    if (sub_0803CCB8(gActiveMap->unk10, gUnknown_0200B204) != 1)
     {
-        if (!sub_080051EC((const char *)&gUnknown_0200B0B0->unk9c))
+        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gUnknown_0200B0B0->unk9c, (const char *)gUnknown_08610A38[0xA00]);
-            gUnknown_0200B0B0->unk00 |= 0x100;
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0xA00]);
+            gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
         else
@@ -90,10 +90,10 @@ void sub_080053A8(void)
     }
     else
     {
-        if (!sub_080051EC((const char *)&gUnknown_0200B0B0->unk9c))
+        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gUnknown_0200B0B0->unk9c, (const char *)gUnknown_08610A38[0xA00]);
-            gUnknown_0200B0B0->unk00 |= 0x100;
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0xA00]);
+            gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
         else
@@ -118,13 +118,13 @@ int sub_08005474(int a1)
         switch (a1)
         {
         case 0:
-            gUnknown_0200B0B0->unk00 |= 0x200;
+            gActiveMap->unk00 |= 0x200;
             break;
         case 1:
-            gUnknown_0200B0B0->unk00 |= 0x400;
+            gActiveMap->unk00 |= 0x400;
             break;
         case 2:
-            gUnknown_0200B0B0->unk00 |= 0x800;
+            gActiveMap->unk00 |= 0x800;
             break;
         }
     }
@@ -134,13 +134,13 @@ int sub_08005474(int a1)
         switch (a1)
         {
         case 0:
-            gUnknown_0200B0B0->unk00 &= 0xFDFF;
+            gActiveMap->unk00 &= 0xFDFF;
             break;
         case 1:
-            gUnknown_0200B0B0->unk00 &= 0xFBFF;
+            gActiveMap->unk00 &= 0xFBFF;
             break;
         case 2:
-            gUnknown_0200B0B0->unk00 &= 0xF7FF;
+            gActiveMap->unk00 &= 0xF7FF;
             break;
         }
     }

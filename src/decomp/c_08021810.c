@@ -9,7 +9,7 @@
  */
 
 /* Reports two byte counts through out-pointers.  For the 0xB4..0xBF range of
- * gUnknown_03003FC0.unk02 the answers are canned in gUnknown_020280C0's record;
+ * gPlaySt.mapID the answers are canned in gUnknown_020280C0's record;
  * otherwise it loads the map, tallies the properties on it per owner into a
  * six-byte scratch, and reports (largest single army's tally, total).
  *
@@ -51,7 +51,7 @@
  * identical fix; see docs/agbcc-codegen.md.
  *
  * Case 16 in pass two falls THROUGH into the main group when
- * gUnknown_03003FC0.unk01 == 5; the ROM's `bne` to the skip label plus a
+ * gPlaySt.gameMode == 5; the ROM's `bne` to the skip label plus a
  * fall-in to the shared block is exactly a case label with no break. */
 
 void sub_08021810(u8 *a, u8 *b)
@@ -59,14 +59,14 @@ void sub_08021810(u8 *a, u8 *b)
     u8 x;
     u8 y;
 
-    if (gUnknown_03003FC0.unk02 >= 0xb4 && gUnknown_03003FC0.unk02 <= 0xbf)
+    if (gPlaySt.mapID >= 0xb4 && gPlaySt.mapID <= 0xbf)
     {
-        *b = gUnknown_020280C0[gUnknown_03003FC0.unk02 - 0xb4].filler_14[5];
-        *a = gUnknown_020280C0[gUnknown_03003FC0.unk02 - 0xb4].filler_14[6];
+        *b = gUnknown_020280C0[gPlaySt.mapID - 0xb4].filler_14[5];
+        *a = gUnknown_020280C0[gPlaySt.mapID - 0xb4].filler_14[6];
         return;
     }
 
-    sub_0802163C(gUnknown_03003FC0.unk02);
+    sub_0802163C(gPlaySt.mapID);
 
     for (x = 0; x <= 5; x++)
         gUnknown_030032D0[x] = 0;
@@ -119,7 +119,7 @@ void sub_080219AC(void)
     sub_0801F838(0xff);
 
     for (x = 0; x <= 4; x++)
-        gUnknown_08499598[x].unk11 = 0;
+        gUnknown_08499598[x].captures = 0;
 
     for (y = 0; y < gMap->height; y++)
     {
@@ -135,7 +135,7 @@ void sub_080219AC(void)
             case TERRAIN_SILO:
             case TERRAIN_LAB:
                 gUnknown_08499598[
-                    gMap->terrain[gMap->rowOffset[y] + x] >> 5].unk11++;
+                    gMap->terrain[gMap->rowOffset[y] + x] >> 5].captures++;
                 gMap->property[gMap->rowOffset[y] + x] = n;
                 gUnknown_084995A0[n].unk00 =
                     gMap->terrain[gMap->rowOffset[y] + x] & 0x1f;
@@ -149,7 +149,7 @@ void sub_080219AC(void)
     }
 
     gUnknown_084995A0[n].unk00 = 0xff;
-    gUnknown_03003FC0.unk47 = 0;
+    gPlaySt.unk47 = 0;
 
     n = 0;
 
@@ -160,7 +160,7 @@ void sub_080219AC(void)
             switch (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f)
             {
             case TERRAIN_PIPE_SEAM:
-                if (gUnknown_03003FC0.unk01 != 5)
+                if (gPlaySt.gameMode != 5)
                     break;
             case TERRAIN_CITY:
             case TERRAIN_HQ:

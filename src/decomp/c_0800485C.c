@@ -11,6 +11,6 @@ void sub_0800485C(void)
 {
     sub_0801A664();
     sub_0803B4DC(0x66);
-    gUnknown_0200B0B0->unk04 = 3;
+    gActiveMap->unk04 = 3;
     sub_08004C5C();
 }

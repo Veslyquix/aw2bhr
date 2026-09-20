@@ -32,7 +32,7 @@ void sub_08077F9C(struct Unk8077F9C *proc)
 {
     sub_080638D0(0);
 
-    gUnknown_03003FC0.unk02 = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk00;
+    gPlaySt.mapID = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk00;
 
     gUnknown_030046B4 = sub_0803866C()
         ? gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk28

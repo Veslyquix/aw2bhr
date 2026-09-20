@@ -11,7 +11,7 @@
 #include "hardware.h"
 /* MATCHED, wave 40 (W40-A). Needs its .rodata pool word placed:
  *   "rodata": ["0x0808D788"]
- * -- the ROM word there holds &gUnknown_0200B0B0, so writing the global's name
+ * -- the ROM word there holds &gActiveMap, so writing the global's name
  * honestly is correct and trymatch reports only the symbol-naming artefact.
  *
  * Resets the map header to 30 x 20, rebuilds the +0x417A row-offset table, and
@@ -31,7 +31,7 @@ void sub_08003B8C(void)
     int keys;
 
     sub_08025E74();
-    gUnknown_0200B0B0->unk13 = 0;
+    gActiveMap->unk13 = 0;
     MAP->width = 0x1E;
     MAP->height = 0x14;
     MAP->unk10 = 0;
@@ -67,5 +67,5 @@ void sub_08003B8C(void)
 
     sub_080219AC();
     sub_0800C8D8();
-    gUnknown_0200B0B0->unk12 = sub_0800C874();
+    gActiveMap->propertyCount = sub_0800C874();
 }

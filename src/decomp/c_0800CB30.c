@@ -60,18 +60,18 @@ int sub_0800CB30(int a1, int a2)
             result |= 2;
         if (sub_0800C958(0x88) >= 0)
             result |= 1;
-        gUnknown_03003FC0.unk33[1] = gUnknown_08488948[(ROW1(gUnknown_084888A0)[result] >> 1) - 1];
-        gUnknown_03003FC0.unk33[2] = gUnknown_08488948[(ROW1(gUnknown_084888C0)[result] >> 1) - 1];
-        gUnknown_03003FC0.unk33[3] = gUnknown_08488948[(ROW1(gUnknown_084888E0)[result] >> 1) - 1];
-        gUnknown_03003FC0.unk33[4] = gUnknown_08488948[(ROW1(gUnknown_08488900)[result] >> 1) - 1];
+        gPlaySt.armyColor[1] = gUnknown_08488948[(ROW1(gUnknown_084888A0)[result] >> 1) - 1];
+        gPlaySt.armyColor[2] = gUnknown_08488948[(ROW1(gUnknown_084888C0)[result] >> 1) - 1];
+        gPlaySt.armyColor[3] = gUnknown_08488948[(ROW1(gUnknown_084888E0)[result] >> 1) - 1];
+        gPlaySt.armyColor[4] = gUnknown_08488948[(ROW1(gUnknown_08488900)[result] >> 1) - 1];
     }
     else
     {
         result = a2;
-        gUnknown_08499598[1].unk1a = 1;
-        gUnknown_08499598[2].unk1a = 2;
-        gUnknown_08499598[3].unk1a = 3;
-        gUnknown_08499598[4].unk1a = 4;
+        gUnknown_08499598[1].teamColor = 1;
+        gUnknown_08499598[2].teamColor = 2;
+        gUnknown_08499598[3].teamColor = 3;
+        gUnknown_08499598[4].teamColor = 4;
     }
 
     for (y = 0; y < MAP->height; y++)

@@ -49,7 +49,7 @@ void sub_08061928(struct Unk085771C4 *dst, u8 a2, u8 a3, u16 a4)
 
     d = (struct Unk8061928 *)dst;
     s1 = (const struct Unk8061928 *)&gUnknown_085771C4[a2];
-    s2 = (const struct Unk8061928 *)&gUnknown_085771C4[gUnknown_0857690C[a3][gUnknown_08499598[a4].unk1d]];
+    s2 = (const struct Unk8061928 *)&gUnknown_085771C4[gUnknown_0857690C[a3][gUnknown_08499598[a4].co]];
 
     d->unk00[0] = s1->unk00[0];
     d->unk00[1] = s1->unk00[1];

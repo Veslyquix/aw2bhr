@@ -39,7 +39,7 @@ void sub_08035490(void)
 
     for (i = 1; i < 5; i++)
     {
-        if (gUnknown_08499598[i].unk1b != 0)
+        if (gUnknown_08499598[i].aiControlled != 0)
         {
             gUnknown_03004490[1]--;
             gUnknown_03004490[2]--;

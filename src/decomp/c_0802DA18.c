@@ -78,7 +78,7 @@ void sub_0802DA18(void)
         gUnknown_03003100.pos.unk00 = gUnknown_030040A4.unk00;
         gUnknown_03003100.pos.unk02 = gUnknown_030040A4.unk02;
 
-        if (gUnknown_03003FC0.unk32 != 0)
+        if (gPlaySt.unk32 != 0)
             sub_08034534(1, ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00,
                          0, 0);
 

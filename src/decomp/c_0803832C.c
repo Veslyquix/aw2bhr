@@ -9,9 +9,9 @@
 
 void sub_0803832C(void)
 {
-    sub_0803CA28(gUnknown_03003FC0.unk02, 1);
+    sub_0803CA28(gPlaySt.mapID, 1);
 
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 1:
         sub_08038484();

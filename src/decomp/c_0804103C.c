@@ -37,7 +37,7 @@ void sub_0804103C(int a1, int a2, int a3)
     int sel = (u8)a1;
     int k = sel & 0x1f;
     int i = sub_08024984(sel);
-    u8 pal = gUnknown_08499598[(sel >> 5) & 7].unk1a;
+    u8 pal = gUnknown_08499598[(sel >> 5) & 7].teamColor;
     u8 *src;
 
     switch (k)

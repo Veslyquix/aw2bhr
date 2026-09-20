@@ -16,17 +16,17 @@
  *     does not.
  *   - The bound is re-evaluated every iteration, which is what puts the whole
  *     `?:` in the `for` condition rather than in a local: the ROM re-loads
- *     gUnknown_03003FC0 and re-runs the call at the loop bottom on each trip.
+ *     gPlaySt and re-runs the call at the loop bottom on each trip.
  *     Both arms return u8, hence the `lsls #0x18; lsrs #0x18` before the
  *     signed `cmp r4, r0; blt`.
  * `ldr r5, .LC` held across the loop is agbcc's -fforce-addr pool word for
- * &gUnknown_03003FC0 -- the ROM word the splitter calls gUnknown_081D93F8,
+ * &gPlaySt -- the ROM word the splitter calls gUnknown_081D93F8,
  * which dereferences to 0x03003FC0. */
 
 void sub_080853B0(void)
 {
     int i;
 
-    for (i = 0; i < (gUnknown_03003FC0.unk01 == 2 ? sub_0802490C(gUnknown_03003FC0.unk02) : sub_080248F8()); i++)
-        sub_0801F34C(gUnknown_08499598[i + 1].unk1a + 0x3d, i * 24 + 0x10, 8, 0, 1);
+    for (i = 0; i < (gPlaySt.gameMode == 2 ? sub_0802490C(gPlaySt.mapID) : sub_080248F8()); i++)
+        sub_0801F34C(gUnknown_08499598[i + 1].teamColor + 0x3d, i * 24 + 0x10, 8, 0, 1);
 }

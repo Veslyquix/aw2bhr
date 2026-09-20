@@ -9,7 +9,7 @@
 
 #include "proc.h"
 /* The per-proc sibling of the matched sub_08041E48 next door: the same three
- * bracketing calls and the same gUnknown_03003FC0.unk32 gate on the same
+ * bracketing calls and the same gPlaySt.unk32 gate on the same
  * sub_08034534 command, but issuing command 4 with the byte behind
  * sub_080413A4's result instead of the proc's own coordinates.
  *
@@ -37,7 +37,7 @@ void sub_08041DF8(struct Unk41DF8Proc *proc)
     {
         p = (u8 *)sub_080413A4(gUnknown_03003F40);
 
-        if (gUnknown_03003FC0.unk32 != 0)
+        if (gPlaySt.unk32 != 0)
             sub_08034534(4, gUnknown_03003F38, *p, 0);
     }
 }

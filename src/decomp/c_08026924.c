@@ -8,7 +8,7 @@
  */
 
 /* Chapter setup: clears the unused army slots' gUnknown_03003FF8 entries, then
- * copies the four per-slot arrays out of gUnknown_03003FC0 into the army
+ * copies the four per-slot arrays out of gPlaySt into the army
  * records, and finally walks the unit table handing every live unit to
  * sub_08025D20.
  *
@@ -49,26 +49,26 @@ void sub_08026924(void)
         gUnknown_03003FF8[j] = 0;
     }
 
-    gUnknown_08499598[1].unk1b = gUnknown_03003FC0.unk38[1];
-    gUnknown_08499598[2].unk1b = gUnknown_03003FC0.unk38[2];
-    gUnknown_08499598[3].unk1b = gUnknown_03003FC0.unk38[3];
-    gUnknown_08499598[4].unk1b = gUnknown_03003FC0.unk38[4];
+    gUnknown_08499598[1].aiControlled = gPlaySt.aiControlled[1];
+    gUnknown_08499598[2].aiControlled = gPlaySt.aiControlled[2];
+    gUnknown_08499598[3].aiControlled = gPlaySt.aiControlled[3];
+    gUnknown_08499598[4].aiControlled = gPlaySt.aiControlled[4];
 
     for (i = 1; i <= 4; i++)
     {
-        gUnknown_08499598[i].unk1a = gUnknown_03003FC0.unk33[i];
-        gUnknown_08499598[i].unk1d = gUnknown_03003FC0.unk3d[i];
-        gUnknown_08499598[i].unk2a = gUnknown_03003FC0.unk42[i];
+        gUnknown_08499598[i].teamColor = gPlaySt.armyColor[i];
+        gUnknown_08499598[i].co = gPlaySt.co[i];
+        gUnknown_08499598[i].team = gPlaySt.unk42[i];
         gUnknown_08499598[i].unk2c = 0;
 
-        if (gUnknown_08499598[i].unk1b == 0)
-            gUnknown_08499598[i].unk1d = 1;
+        if (gUnknown_08499598[i].aiControlled == 0)
+            gUnknown_08499598[i].co = 1;
     }
 
     sub_08026A48();
 
-    if (gUnknown_03003FC0.unk08 == 0)
-        gUnknown_03003FC0.unk07 = 0;
+    if (gPlaySt.coAbilities == 0)
+        gPlaySt.unk07 = 0;
 
     sub_08026B28();
 

@@ -44,7 +44,7 @@ void sub_080408A0(ProcPtr proc)
         sub_08042C24(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
                      gUnknown_030033E4.unk00, gUnknown_030033E4.unk02, proc);
 
-        if (gUnknown_03003FC0.unk32 != 0)
+        if (gPlaySt.unk32 != 0)
             sub_08034534(0x14, gUnknown_03003F38,
                          gUnknown_030033E4.unk00, gUnknown_030033E4.unk02);
 

@@ -21,5 +21,5 @@ void sub_08004A30(int a)
     sub_08003C48(a);
     sub_08002E3C();
     sub_08024268();
-    gUnknown_0200B0B0->unk00 |= 0x1000;
+    gActiveMap->unk00 |= 0x1000;
 }

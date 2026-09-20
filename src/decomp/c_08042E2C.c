@@ -34,7 +34,7 @@
  * unit keeps resolving it unchanged. */
 int GetCoLuckBonus(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 10;
 
     return gUnknown_085D3DD0[a].unk38[b].unk0e;
@@ -54,7 +54,7 @@ asm(".global sub_08042E2C\n.thumb_set sub_08042E2C, GetCoLuckBonus\n");
  * unchanged. */
 int GetPlayerCoLuckBonus(int a1)
 {
-    return GetCoLuckBonus(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return GetCoLuckBonus(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
 }
 
 asm(".global sub_08042E64\n.thumb_set sub_08042E64, GetPlayerCoLuckBonus\n");
@@ -71,7 +71,7 @@ asm(".global sub_08042E64\n.thumb_set sub_08042E64, GetPlayerCoLuckBonus\n");
  * other unit keeps resolving it unchanged. */
 int GetCoNegativeLuckBonus(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk10;
@@ -91,7 +91,7 @@ asm(".global sub_08042E84\n.thumb_set sub_08042E84, GetCoNegativeLuckBonus\n");
  * resolving it unchanged. */
 int GetPlayerCoNegativeLuckBonus(int a1)
 {
-    return GetCoNegativeLuckBonus(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return GetCoNegativeLuckBonus(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
 }
 
 asm(".global sub_08042EBC\n.thumb_set sub_08042EBC, GetPlayerCoNegativeLuckBonus\n");
@@ -105,7 +105,7 @@ asm(".global sub_08042EBC\n.thumb_set sub_08042EBC, GetPlayerCoNegativeLuckBonus
 
 int sub_08042EDC(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 100;
 
     return gUnknown_085D3DD0[a].unk38[b].unk16 + 100;
@@ -120,7 +120,7 @@ int sub_08042EDC(int a, int b)
 
 int sub_08042F14(int a1)
 {
-    return sub_08042EDC(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return sub_08042EDC(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
 }
 
 /* The second argument is never used, but it stays in the signature: the
@@ -128,7 +128,7 @@ int sub_08042F14(int a1)
  * that load is in the original's bytes. */
 int sub_08042F34(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk08;
@@ -143,7 +143,7 @@ int sub_08042F34(int a, int b)
 
 int sub_08042F5C(int a1)
 {
-    return sub_08042F34(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return sub_08042F34(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
 }
 
 /* The second argument is never used, but it stays in the signature: the
@@ -151,7 +151,7 @@ int sub_08042F5C(int a1)
  * that load is in the original's bytes. */
 int sub_08042F7C(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk06;
@@ -166,7 +166,7 @@ int sub_08042F7C(int a, int b)
 
 int sub_08042FA4(int a1)
 {
-    return sub_08042F7C(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return sub_08042F7C(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -181,7 +181,7 @@ int sub_08042FA4(int a1)
  * so every other unit keeps resolving it unchanged. */
 int GetCoCounterattackBonus(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk12;
@@ -201,7 +201,7 @@ asm(".global sub_08042FC4\n.thumb_set sub_08042FC4, GetCoCounterattackBonus\n");
  * resolving it unchanged. */
 int GetPlayerCoCounterattackBonus(int a1)
 {
-    return GetCoCounterattackBonus(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return GetCoCounterattackBonus(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
 }
 
 asm(".global sub_08042FFC\n.thumb_set sub_08042FFC, GetPlayerCoCounterattackBonus\n");
@@ -215,7 +215,7 @@ asm(".global sub_08042FFC\n.thumb_set sub_08042FFC, GetPlayerCoCounterattackBonu
 
 u32 sub_0804301C(int a, int b)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return 0;
 
     return gUnknown_085D3DD0[a].unk38[b].unk08;
@@ -230,5 +230,5 @@ u32 sub_0804301C(int a, int b)
 
 u32 sub_08043050(int a1)
 {
-    return sub_0804301C(gUnknown_08499598[a1].unk1d, gUnknown_08499598[a1].unk1e);
+    return sub_0804301C(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
 }

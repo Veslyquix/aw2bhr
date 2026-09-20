@@ -13,8 +13,8 @@ void sub_0800487C(void)
 
     p = &gUnknown_03001470[gUnknown_03001FBC];
 
-    if (sub_0808B694(&p->unk1e, &gUnknown_0200B0B0->unk9c))
-        gUnknown_0200B0B0->unk00 |= 0x1000;
+    if (sub_0808B694(&p->unk1e, &gActiveMap->unk9c))
+        gActiveMap->unk00 |= 0x1000;
 
     sub_08023348();
     sub_0803662C();

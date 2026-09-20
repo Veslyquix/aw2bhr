@@ -19,8 +19,8 @@ int sub_0805A8C0(u16 x, u16 y)
         {
             if (sub_08026D44(i + 1))
             {
-                dx = x - gUnknown_08499598[i + 1].unk2d + 2;
-                dy = y - gUnknown_08499598[i + 1].unk2e + 2;
+                dx = x - gUnknown_08499598[i + 1].hqX + 2;
+                dy = y - gUnknown_08499598[i + 1].hqY + 2;
 
                 if ((u16)dx <= 4 && (s16)dy >= 0 && (s16)dy <= 4)
                     return 1;

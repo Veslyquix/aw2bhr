@@ -16,6 +16,6 @@
 
 void sub_08044534(void)
 {
-    gUnknown_08499598[gUnknown_030033EC].unk26 = 0;
-    gUnknown_08499598[gUnknown_030033EC].unk28 = 10;
+    gUnknown_08499598[gUnknown_030033EC].tempFirepower = 0;
+    gUnknown_08499598[gUnknown_030033EC].tempDefense = 10;
 }

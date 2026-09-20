@@ -16,7 +16,7 @@ void sub_080295E4(void)
     gUnknown_03001470[gUnknown_03001FBC].unk20 = 3;
     gUnknown_03001470[gUnknown_03001FBC].unk24 = 0;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.unk32 != 0)
         sub_0803446C();
 
     sub_080294FC();

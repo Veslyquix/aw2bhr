@@ -13,7 +13,7 @@
  * tail.
  *
  * The middle is the block unknown-globals.h already records for sub_08042998
- * on gUnknown_03003FC0.unk0d: the zero loaded for the `unk0d == 0` test is
+ * on gPlaySt.unk0d: the zero loaded for the `unk0d == 0` test is
  * REUSED to clear gUnknown_03004074, which is why the store is `strb r5, [r4]`
  * with r5 the byte just compared. `gUnknown_03004074 = 0;` is the source --
  * agbcc's cse records the equivalence from the conditional jump, so no
@@ -33,15 +33,15 @@ void sub_0802D0F4(void)
     sub_08034F48();
     sub_0801A168();
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.unk32 != 0)
     {
-        if (gUnknown_03003FC0.unk0d == 0)
+        if (gPlaySt.unk0d == 0)
         {
             sub_08025B80((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
             gUnknown_03004074 = 0;
         }
 
-        if (gUnknown_03003FC0.unk32 != 0)
+        if (gPlaySt.unk32 != 0)
             sub_08034534(0xa, gUnknown_03003F38, 0, 0);
     }
 

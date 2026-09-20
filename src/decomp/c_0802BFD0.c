@@ -27,7 +27,7 @@
 
 void sub_0802BFD0(int a1)
 {
-    if (!(gUnknown_08499598[gUnknown_030033EC].unk1c & 2)
+    if (!(gUnknown_08499598[gUnknown_030033EC].turnState & 2)
         && gMap->unk234A[
                gMap->rowOffset[gUnknown_03003100.pos.unk02]
                + gUnknown_03003100.pos.unk00] == 0)

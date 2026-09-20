@@ -26,7 +26,7 @@
  * instruction-for-instruction the ROM including the out-of-line case bodies and
  * the literal pool between them:
  *
- *   switch (gUnknown_03003FC0.unk2c)   { case 1: ; case 2: ; }   <- this draft
+ *   switch (gPlaySt.unk2c)   { case 1: ; case 2: ; }   <- this draft
  *   int v = ...;   switch (v)          { case 1: ; case 2: ; }
  *   s8  v = ...;   switch (v)          { ... }  (adds lsl/asr, still no test)
  *   s16 v = ...;   switch (v)          { ... }
@@ -44,7 +44,7 @@
  * if/else-if rewrite. */
 void sub_0803550C(void)
 {
-    switch (gUnknown_03003FC0.unk2c)
+    switch (gPlaySt.unk2c)
     {
     case 0:
         break;

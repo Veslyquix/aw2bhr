@@ -95,7 +95,7 @@ void sub_0800C454(int x, int y, int t)
     int b;
     int u;
 
-    if ((s8)gUnknown_0200B0B0->unk12 > 0x3B && sub_0800C840(x, y) == 0)
+    if ((s8)gActiveMap->propertyCount > 0x3B && sub_0800C840(x, y) == 0)
         return;
 
     if (sub_0800C6E8(t, &a, &b))

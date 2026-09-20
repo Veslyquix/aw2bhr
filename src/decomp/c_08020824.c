@@ -19,10 +19,10 @@
  * first puts the constants the other way round. */
 int sub_08020824(u16 a, u16 b)
 {
-    if (gUnknown_08499598[b].unk1b == 0)
+    if (gUnknown_08499598[b].aiControlled == 0)
         return 0;
 
-    if (gUnknown_08499598[a].unk2a != gUnknown_08499598[b].unk2a)
+    if (gUnknown_08499598[a].team != gUnknown_08499598[b].team)
         return 1;
 
     return 2;

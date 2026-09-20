@@ -93,23 +93,23 @@ int sub_08042C68(int a, int b)
 int GetCoPriceMultiplier(int a, int b)
 {
     return Div(GetUnitBaseCost(b)
-        * (GetCoCostBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
+        * (GetCoCostBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b)
             + 0x64), 100);
 }
 
 /* The `lsls #4; subs; lsls #2` triple is the 0x3c stride of
- * struct Unk08499598, and gUnknown_08499598 is a pointer to it, so the pool
+ * struct PlayerStruct, and gUnknown_08499598 is a pointer to it, so the pool
  * word is dereferenced once before the index is added. */
 int GetUnitAttackWithCoBonus(int a, int b)
 {
-    return GetCoAttackBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
+    return GetCoAttackBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b)
         + 0x64;
 }
 
 /* GetUnitAttackWithCoBonus's twin over GetCoDefenceBonus. */
 int GetUnitDefenceWithCoBonus(int a, int b)
 {
-    return GetCoDefenceBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b)
+    return GetCoDefenceBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b)
         + 0x64;
 }
 
@@ -118,14 +118,14 @@ int GetUnitDefenceWithCoBonus(int a, int b)
 int GetUnitMovementWithCoBonus(int a, int b)
 {
     return GetUnitBaseMovement(b)
-        + GetCoMovementBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b);
+        + GetCoMovementBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b);
 }
 
 /* GetUnitMovementWithCoBonus's twin over GetUnitBaseFiringRange / GetCoRangeBonus. */
 int GetUnitFiringRangeWithCoBonus(int a, int b)
 {
     return GetUnitBaseFiringRange(b)
-        + GetCoRangeBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e, b);
+        + GetCoRangeBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b);
 }
 
 /* The floor is written `if (n > 1) return n; else return 1;` and not the other
@@ -133,7 +133,7 @@ int GetUnitFiringRangeWithCoBonus(int a, int b)
  * the THEN on the condition being true, which is the ROM's `bgt` over an inline
  * `movs r0, #1`.
  *
- * gUnknown_03003FC0.unk2c is reached with `adds r0, #0x2c` on the base rather
+ * gPlaySt.unk2c is reached with `adds r0, #0x2c` on the base rather
  * than an `ldrb` displacement because 0x2c is past `ldrb`'s 5-bit field -- that
  * is addressing, not a member-array tell. */
 int GetUnitVisionWithCoBonus(int a, int b)
@@ -141,9 +141,9 @@ int GetUnitVisionWithCoBonus(int a, int b)
     int n;
 
     n = GetUnitBaseVision(b)
-        + GetCoVisionBonus(gUnknown_08499598[a].unk1d, gUnknown_08499598[a].unk1e);
+        + GetCoVisionBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode);
 
-    if (gUnknown_03003FC0.unk2c == 2)
+    if (gPlaySt.unk2c == 2)
         n--;
 
     if (n > 1)

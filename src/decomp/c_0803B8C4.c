@@ -11,6 +11,6 @@
 
 void sub_0803B8C4(void)
 {
-    gUnknown_03003FC0.unk01 = 3;
+    gPlaySt.gameMode = 3;
     Proc_Start(gUnknown_0849ECE0, PROC_TREE_3);
 }

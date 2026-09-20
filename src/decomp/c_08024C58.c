@@ -45,7 +45,7 @@ void sub_08024C58(struct Unk030013D0 *a1, int a2, u8 a3)
 
     if (a1->unk0c != 0)
     {
-        if (gUnknown_03003FC0.unk06 == 0 || a3 != 0)
+        if (gPlaySt.unk06 == 0 || a3 != 0)
         {
             r = DivRem(sub_080129E0(),
                        sub_08042E64(((a1->unk00 - gUnknown_08499594) >> 6) + 1));

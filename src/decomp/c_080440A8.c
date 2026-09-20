@@ -30,15 +30,15 @@ void sub_080440E0(int a1, int a2)
 {
     int v;
 
-    if (gUnknown_03003FC0.unk07 == 0)
+    if (gPlaySt.unk07 == 0)
         return;
     if (sub_0804415C(a1))
         return;
-    v = gUnknown_08499598[a1].unk20;
+    v = gUnknown_08499598[a1].coCharge;
     if (v < 0)
         return;
     if (v + a2 > sub_08044208(a1))
-        gUnknown_08499598[a1].unk20 = sub_08044208(a1);
+        gUnknown_08499598[a1].coCharge = sub_08044208(a1);
     else
-        gUnknown_08499598[a1].unk20 = gUnknown_08499598[a1].unk20 + a2;
+        gUnknown_08499598[a1].coCharge = gUnknown_08499598[a1].coCharge + a2;
 }

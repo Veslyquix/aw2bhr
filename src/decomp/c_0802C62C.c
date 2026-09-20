@@ -16,7 +16,7 @@
 
 bool8 sub_0802C62C(void)
 {
-    if (gUnknown_03003FC0.unk32 == 0)
+    if (gPlaySt.unk32 == 0)
         return FALSE;
 
     return TRUE;

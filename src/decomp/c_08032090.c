@@ -11,6 +11,6 @@
 
 void sub_08032090(ProcPtr proc)
 {
-    if (gUnknown_03003FC0.unk02 < 0xb4)
+    if (gPlaySt.mapID < 0xb4)
         Proc_Goto(proc, 1);
 }

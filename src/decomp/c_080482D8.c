@@ -85,7 +85,7 @@ void sub_080482D8(struct Unk0804769C *p)
     }
 
     sub_08048158((struct Unk08047B98 *)p);
-    sub_0801F34C(gUnknown_08499598[gUnknown_030033EC].unk1a + 0x3d, 0xf, 8, 0, 0);
+    sub_0801F34C(gUnknown_08499598[gUnknown_030033EC].teamColor + 0x3d, 0xf, 8, 0, 0);
     sub_0801F34C(1, 0xaa, 8, 0, 0);
 
     for (i = 0; i <= 5 && gUnknown_02028DD8[p->unk20 + i] != 0xff; i++)

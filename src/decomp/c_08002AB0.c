@@ -14,15 +14,15 @@ void sub_08002AB0(void)
     int flag;
     struct Unk0200B0D0 *q;
 
-    if (gUnknown_0200B0B0->unk00 & 0x10)
+    if (gActiveMap->unk00 & 0x10)
     {
         sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
-        if (gUnknown_0200B0B0->unk02 == 0x33)
+        if (gActiveMap->unk02 == 0x33)
         {
-            flag = gUnknown_0200B0B0->unk07;
-            j = gUnknown_0200B0B0->unk3a + 3;
+            flag = gActiveMap->unk07;
+            j = gActiveMap->unk3a + 3;
             if (flag == 0)
-                j = gUnknown_0200B0B0->unk3a + 4;
+                j = gActiveMap->unk3a + 4;
             if (j > 9)
                 j -= 10;
             switch (gUnknown_0200B0D0[j].unk04 & 0x1F)
@@ -32,7 +32,7 @@ void sub_08002AB0(void)
             case 10:
             case 11:
             case 14:
-                if (gUnknown_0200B0B0->unk6b == -1)
+                if (gActiveMap->unk6b == -1)
                     sub_08007B54();
                 break;
             }
@@ -43,7 +43,7 @@ void sub_08002AB0(void)
         }
     }
 
-    j = gUnknown_0200B0B0->unk3a;
+    j = gActiveMap->unk3a;
     for (i = 9; i >= 0; i--)
     {
         q = &gUnknown_0200B0D0[j];
@@ -67,17 +67,17 @@ void sub_08002C38(void)
     int j;
     struct Unk0200B0D0 *q;
 
-    if (gUnknown_0200B0B0->unk00 & 0x10)
+    if (gActiveMap->unk00 & 0x10)
     {
         sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
-        if (gUnknown_0200B0B0->unk02 == 0x33)
+        if (gActiveMap->unk02 == 0x33)
         {
-            j = gUnknown_0200B0B0->unk3a + 3;
+            j = gActiveMap->unk3a + 3;
             if (j > 7)
-                j = gUnknown_0200B0B0->unk3a - 5;
+                j = gActiveMap->unk3a - 5;
             if (gUnknown_0200B0D0[j].unk04 != 0x19)
             {
-                if (gUnknown_0200B0B0->unk6b == -1)
+                if (gActiveMap->unk6b == -1)
                     sub_08007B54();
             }
             else
@@ -87,7 +87,7 @@ void sub_08002C38(void)
         }
     }
 
-    j = gUnknown_0200B0B0->unk3a;
+    j = gActiveMap->unk3a;
     for (i = 7; i >= 0; i--)
     {
         q = &gUnknown_0200B0D0[j];

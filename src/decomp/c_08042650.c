@@ -44,7 +44,7 @@
  *     OPPOSITE of the neighbouring sub_08045BF0, whose `>> 6` is `asrs` and
  *     needs an `int`; check the shift before copying that note.
  *   - `t & 0x1f` must be written INLINE at all three comparison sites. Bound
- *     to a `terr` local it hoists above the `gUnknown_03003FC0.unk09` test;
+ *     to a `terr` local it hoists above the `gPlaySt.unk09` test;
  *     inline, CSE keeps it in r3 exactly where the ROM has it.
  */
 void sub_08042650(void)
@@ -77,8 +77,8 @@ void sub_08042650(void)
     if (n > 0x13)
         n = 0x14;
 
-    if (gUnknown_03003FC0.unk0d == 0
-        || (gUnknown_08499598[gUnknown_030033EC].unk1c & 2) != 0)
+    if (gPlaySt.unk0d == 0
+        || (gUnknown_08499598[gUnknown_030033EC].turnState & 2) != 0)
         goto do_body;
 
     {
@@ -93,7 +93,7 @@ void sub_08042650(void)
 
 do_body:
     {
-       if (gUnknown_03003FC0.unk09 == 1 || (t & 0x1f) == 8
+       if (gPlaySt.unk09 == 1 || (t & 0x1f) == 8
             || (t & 0x1f) == 0x14)
             sub_080409E8(gUnknown_03003100.pos.unk00,
                          gUnknown_03003100.pos.unk02,
@@ -116,7 +116,7 @@ after_body:
                        - gUnknown_08499594) >> 6) + 1, t >> 5);
         gUnknown_030040D8->unk05 &= 7;
         if ((t & 0x1f) == 8 || (t & 0x1f) == 0x14)
-            gUnknown_08499598[t >> 5].unk32 = 1;
+            gUnknown_08499598[t >> 5].killOnEndTurn = 1;
         sub_08024058(gUnknown_03003100.spos.unk00,
                      gUnknown_03003100.spos.unk02);
     }

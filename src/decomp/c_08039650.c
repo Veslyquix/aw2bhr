@@ -24,7 +24,7 @@ struct Unk39650Proc
     /* 0x58 */ int unk58;
 };
 
-/* `lsls #4; subs; lsls #2` is the x0x3c stride of struct Unk08499598 -- an
+/* `lsls #4; subs; lsls #2` is the x0x3c stride of struct PlayerStruct -- an
  * array index, not hand-rolled arithmetic.
  *
  * The proc is also sub_08080E74's THIRD argument, which is why the incoming
@@ -35,5 +35,5 @@ struct Unk39650Proc
 
 void sub_08039650(struct Unk39650Proc *proc)
 {
-    sub_08080E74(gUnknown_08499598[proc->unk54].unk1d, proc->unk58, proc);
+    sub_08080E74(gUnknown_08499598[proc->unk54].co, proc->unk58, proc);
 }

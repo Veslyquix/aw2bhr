@@ -29,14 +29,14 @@ int sub_08030D1C(void)
  * loads the pool word straight into r0 with no `ldr r0, [r0]` after it.
  *
  * Its second argument is the literal 1 and costs no instruction -- r1 is still
- * holding the 1 that the `gUnknown_03003FC0.unk32 = 1` store put there, and
+ * holding the 1 that the `gPlaySt.unk32 = 1` store put there, and
  * agbcc reuses it rather than re-materialising the constant. Dropping the
  * argument would compile too, and identically, which is exactly why the
  * declared arity is what settles it. */
 void sub_08030D4C(void)
 {
     gUnknown_0849B018->unk04 = 5;
-    gUnknown_03003FC0.unk32 = 1;
+    gPlaySt.unk32 = 1;
     sub_0802F8FC((u16 *)&gUnknown_03004008, 1);
     sub_08015C30(gUnknown_03001FBC);
 }

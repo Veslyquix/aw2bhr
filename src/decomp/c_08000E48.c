@@ -12,8 +12,8 @@
  * keyed off proc->unk1e, which is 0 on a fresh start and non-zero on a resume,
  * and the two `if (a == 0)` blocks are the fresh-start-only halves.
  *
- * gUnknown_0200B0B0 is reached TWO ways in one function and that is agbcc,
- * not two source spellings: -fforce-addr parks &gUnknown_0200B0B0 in this
+ * gActiveMap is reached TWO ways in one function and that is agbcc,
+ * not two source spellings: -fforce-addr parks &gActiveMap in this
  * unit's own pool (0x0808D6EC in the ROM) for the reads inside the loop, while
  * the later statements get an ordinary inline pool word. Likewise 0x0808D6F0 /
  * 0x0808D6F4 hold &sub_08036944 / &sub_080369BC with the THUMB bit set, and
@@ -29,7 +29,7 @@ void sub_08000E48(struct Unk03001470 *proc)
 
     a = proc->unk1e;
 
-    gUnknown_0200B0B0 = &gUnknown_0200B000;
+    gActiveMap = &gUnknown_0200B000;
     gUnknown_0200B000.unk9c = 0;
 
     if (a == 0)
@@ -45,12 +45,12 @@ void sub_08000E48(struct Unk03001470 *proc)
     sub_08026BAC();
     sub_08034780();
     sub_08026924();
-    gUnknown_08499598[0].unk1d = 0;
-    gUnknown_08499598[1].unk1d = 1;
-    gUnknown_08499598[2].unk1d = 3;
-    gUnknown_08499598[3].unk1d = 8;
-    gUnknown_08499598[4].unk1d = 6;
-    gUnknown_03003FC0.unk04 = 0;
+    gUnknown_08499598[0].co = 0;
+    gUnknown_08499598[1].co = 1;
+    gUnknown_08499598[2].co = 3;
+    gUnknown_08499598[3].co = 8;
+    gUnknown_08499598[4].co = 6;
+    gPlaySt.unk04 = 0;
     gUnknown_030033EC = 0;
     gUnknown_03004080 = 1;
     sub_08026768();
@@ -63,20 +63,20 @@ void sub_08000E48(struct Unk03001470 *proc)
 
     if (a == 0)
     {
-        gUnknown_0200B0B0->unk00 |= 0x1000;
-        gUnknown_0200B0B0->unk28 = 0;
-        gUnknown_0200B0B0->unk12 = 0;
+        gActiveMap->unk00 |= 0x1000;
+        gActiveMap->unk28 = 0;
+        gActiveMap->propertyCount = 0;
 
         for (i = 0; i <= 3; i++)
         {
-            gUnknown_0200B0B0->unk17[i] |= 0xFF;
-            gUnknown_0200B0B0->unk1b[i] |= 0xFF;
+            gActiveMap->unk17[i] |= 0xFF;
+            gActiveMap->unk1b[i] |= 0xFF;
         }
 
-        gUnknown_0200B0B0->unk6b = 0xFF;
-        gUnknown_0200B0B0->unk60 = 0xFC00;
-        gUnknown_0200B0B0->unk5c = 0x1220;
-        gUnknown_0200B0B0->unk3e = 1;
+        gActiveMap->unk6b = 0xFF;
+        gActiveMap->unk60 = 0xFC00;
+        gActiveMap->unk5c = 0x1220;
+        gActiveMap->unk3e = 1;
     }
 
     sub_0803662C();
@@ -86,13 +86,13 @@ void sub_08000E48(struct Unk03001470 *proc)
     sub_0801B780(0);
     sub_08002EB4();
     sub_08022AAC(7, 4);
-    gUnknown_0200B0B0->unk10 = 0xFF;
-    gUnknown_0200B0B0->unk4e = 0xFD80;
-    gUnknown_0200B0B0->unk50 = 0xB8;
-    gUnknown_0200B0B0->unk4a = 0x64;
-    gUnknown_0200B0B0->unk2a = 1;
-    gUnknown_0200B0B0->unk2e = 1;
-    gUnknown_0200B0B0->unk2f = 1;
+    gActiveMap->unk10 = 0xFF;
+    gActiveMap->unk4e = 0xFD80;
+    gActiveMap->unk50 = 0xB8;
+    gActiveMap->unk4a = 0x64;
+    gActiveMap->selectedTerrain = 1;
+    gActiveMap->unk2e = 1;
+    gActiveMap->unk2f = 1;
     sub_08007328();
     sub_0800056C(0);
     sub_080152C0((s32)&gUnknown_084857AC[0x100], 0);

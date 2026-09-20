@@ -12,7 +12,7 @@
  * selects which of the chapter row's two thresholds applies.
  *
  * unk20 and unk22 are a PAIR at +0x20/+0x22 of the 0x5c-byte chapter row; the
- * second read repeats the whole `gUnknown_03003FC0.unk02 * 0x5c` index rather
+ * second read repeats the whole `gPlaySt.mapID * 0x5c` index rather
  * than reusing the first, because the call to sub_0803866C sits between them.
  *
  * The first compare is `bhi` and the second `bge` -- unsigned then signed --
@@ -27,9 +27,9 @@ u8 GetSpeedScore(u8 a)
 {
     u16 t;
 
-    t = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk20;
+    t = gUnknown_085C77A0[gPlaySt.mapID].unk20;
     if (sub_0803866C())
-        t = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk22;
+        t = gUnknown_085C77A0[gPlaySt.mapID].unk22;
 
     if (sub_080266DC(a))
     {

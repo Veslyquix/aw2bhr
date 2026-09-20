@@ -10,7 +10,7 @@
 
 /* The SET half of the pair sub_0800C7A4 clears: the same binary-search switch
  * mapping 0x28/0x48/0x68/0x88 to a slot index 0..3, then the caller's two
- * values into gUnknown_0200B0B0's unk17 and unk1b planes at that index.
+ * values into gActiveMap's unk17 and unk1b planes at that index.
  *
  * The extra `push {r4, lr}` over sub_0800C7A4 is the second argument being
  * carried across the decision tree; the third needs no saving because nothing
@@ -38,8 +38,8 @@ void sub_0800C75C(int a, int b, int c)
         return;
     }
 
-    gUnknown_0200B0B0->unk17[i] = b;
-    gUnknown_0200B0B0->unk1b[i] = c;
+    gActiveMap->unk17[i] = b;
+    gActiveMap->unk1b[i] = c;
 }
 
 /* The CLEAR half of the sub_0800C75C pair: same switch, same two planes, but
@@ -80,8 +80,8 @@ void sub_0800C7A4(int a)
         return;
     }
 
-    gUnknown_0200B0B0->unk17[i] = 0xFF;
-    gUnknown_0200B0B0->unk1b[i] = -1;
+    gActiveMap->unk17[i] = 0xFF;
+    gActiveMap->unk1b[i] = -1;
 }
 
 /* A classification of the low five bits of a terrain byte into 0, 1 or 2.

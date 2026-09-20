@@ -68,7 +68,7 @@ void sub_08045090(struct Unk45090Proc *proc)
 
         if (sub_080266DC(i))
         {
-            if (gUnknown_08499598[i].unk2a != gUnknown_08499598[proc->unk2c].unk2a)
+            if (gUnknown_08499598[i].team != gUnknown_08499598[proc->unk2c].team)
                 break;
         }
 

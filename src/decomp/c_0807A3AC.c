@@ -9,7 +9,7 @@
 
 int sub_0807A3AC(int a, int b)
 {
-    if (gUnknown_03003FC0.unk01 == 1)
+    if (gPlaySt.gameMode == 1)
     {
         switch (b)
         {

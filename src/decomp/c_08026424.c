@@ -34,15 +34,15 @@ u8 GetPowerScore(u8 a)
     sum = 0;
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b != 0
-         && gUnknown_08499598[a].unk2a != gUnknown_08499598[i].unk2a)
+        if (gUnknown_08499598[i].aiControlled != 0
+         && gUnknown_08499598[a].team != gUnknown_08499598[i].team)
             sum += sub_08025CF0(i);
     }
 
     if (sum == 0)
         return 0;
 
-    sum = Div(gUnknown_08499598[a].unk18 * 1000, sum);
+    sum = Div(gUnknown_08499598[a].totalDestroyed * 1000, sum);
     if (sum > 100)
         sum = 100;
     return sum;

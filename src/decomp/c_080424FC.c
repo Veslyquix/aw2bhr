@@ -7,7 +7,7 @@
  * sub_080424FC @ 0x080424FC, sub_0804256C @ 0x0804256C
  */
 
-/* sub_0804256C with three extra calls and the gUnknown_03003FC0.unk0d gate.
+/* sub_0804256C with three extra calls and the gPlaySt.unk0d gate.
  * sub_08025B80's parameter is declared `struct Unk08499594 *` and the argument
  * is gUnknown_030040D8, so the cast is unavoidable here -- the two struct tags
  * describe the same object and unknown-globals.h records why they are kept
@@ -20,7 +20,7 @@ void sub_080424FC(void)
     gUnknown_030040D8->unk02 = gUnknown_03003100.pos.unk00;
     gUnknown_030040D8->unk03 = gUnknown_03003100.pos.unk02;
 
-    if (gUnknown_03003FC0.unk0d == 0)
+    if (gPlaySt.unk0d == 0)
         sub_08025B80((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
 
     sub_08035810();

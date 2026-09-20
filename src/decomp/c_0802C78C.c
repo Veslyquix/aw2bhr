@@ -9,7 +9,7 @@
 
 bool8 sub_0802C78C(void)
 {
-    if (gUnknown_03003FC0.unk0c == 1)
+    if (gPlaySt.unk0c == 1)
         return FALSE;
 
     return TRUE;
@@ -17,7 +17,7 @@ bool8 sub_0802C78C(void)
 
 bool8 sub_0802C7A0(void)
 {
-    if (gUnknown_03003FC0.unk0c == 0)
+    if (gPlaySt.unk0c == 0)
         return FALSE;
 
     return TRUE;

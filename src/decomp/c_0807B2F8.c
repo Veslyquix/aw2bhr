@@ -16,7 +16,7 @@ struct Unk807B2F8
 
 void sub_0807B2F8(ProcPtr proc)
 {
-    if (gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.gameMode == 3)
         Proc_Goto(proc, 0);
 
     sub_080149C0(1, (s16)(((struct Unk807B2F8 *)proc)->unk30 + 1),

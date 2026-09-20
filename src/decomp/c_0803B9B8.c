@@ -15,7 +15,7 @@
  */
 
 
-/* A mode entry point, and the fourth of the family the gUnknown_03003FC0.unk01
+/* A mode entry point, and the fourth of the family the gPlaySt.gameMode
  * comment in include/unknown-globals.h already lists: write the mode selector,
  * then start the mode. sub_0803BADC / sub_0803BA00 / sub_0803B8C4 write 1 / 2 /
  * 3 and Proc_Start a script directly; this one writes 5 and goes through two
@@ -26,7 +26,7 @@
 
 void sub_0803B9B8(void)
 {
-    gUnknown_03003FC0.unk01 = 5;
+    gPlaySt.gameMode = 5;
 
     sub_0803B5E8();
     sub_08001038(0);

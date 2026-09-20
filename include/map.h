@@ -153,6 +153,49 @@ enum TerrainKind {
     TERRAIN_BASE_YC = 0x8E, // Yellow Comet
 };
 
+/* Tile ids stored in gMap->tile[] (see MakeTileSimple). Names and values come
+ * from SRR_AW2's C_code.c, where each is written as a byte offset `>> 2`.
+ * The per-army HQ/base tiles repeat every 5 ids: OS 0x1C5, BM 0x1CA, GE 0x1CF,
+ * YC 0x1D4, i.e. HQ_OS + army * 5. */
+enum TileKind {
+    TILE_PLAIN = (0x4 >> 2),
+    TILE_SEA = (0x20 >> 2), // one tile of sea in plains
+    TILE_BRIDGE_H = (0x50 >> 2),
+    TILE_BRIDGE_V = (0x58 >> 2),
+    TILE_MOUNTAIN = (0x80 >> 2),
+    TILE_SEA_C = (0xA8 >> 2), // sea connecting to other sea
+    TILE_ROAD_V = (0x100 >> 2),
+    TILE_ROAD_H = (0x184 >> 2),
+    TILE_FOREST = (0x21C >> 2),
+    TILE_REEF = (0x5A0 >> 2),
+    TILE_SILO = (0x600 >> 2),
+    TILE_LASER = (0x604 >> 2),
+    TILE_CANNON_D = (0x608 >> 2),
+    TILE_CANNON_U = (0x60C >> 2),
+    TILE_CANNON_L = (0x610 >> 2),
+    TILE_CANNON_R = (0x614 >> 2),
+    TILE_BLACK_CANNON_D = (0x61C >> 2),
+    TILE_BLACK_CANNON_U = (0x628 >> 2),
+    TILE_FACTORY = (0x634 >> 2),
+    TILE_DEATH_RAY = (0x640 >> 2), // also the missile silo thing
+    TILE_VOLCANO = (0x69C >> 2),
+    TILE_RUIN = (0x6AC >> 2),
+    TILE_X = (0x6BC >> 2),
+    TILE_HQ = (0x700 >> 2), // neutral versions
+    TILE_BASE = (0x704 >> 2),
+    TILE_CITY = (0x708 >> 2),
+    TILE_AIRPORT = (0x70C >> 2),
+    TILE_PORT = (0x710 >> 2),
+    TILE_HQ_OS = (0x714 >> 2),
+    TILE_BASE_OS = (0x718 >> 2),
+    TILE_HQ_BM = (0x728 >> 2),
+    TILE_BASE_BM = (0x72C >> 2),
+    TILE_HQ_GE = (0x73C >> 2),
+    TILE_BASE_GE = (0x740 >> 2),
+    TILE_HQ_YC = (0x750 >> 2),
+    TILE_BASE_YC = (0x754 >> 2),
+};
+
 #define MAP_OBJ_TERRAIN(f)   ((f) & 0x1f)
 #define MAP_OBJ_ARMY(f)      (((f) & 0xe0) >> 5)
 #define MAP_OBJ_ARMY_MASK(f) ((f) & 0xe0)

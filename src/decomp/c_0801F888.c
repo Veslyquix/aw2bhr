@@ -49,11 +49,11 @@ void sub_0801F888(int a1)
 
     for (i = 0; i < 32; i++) {
         dst = &gUnknown_084999C8->unk00[i];
-        costs = gUnknown_085D3DD0[gUnknown_03003FC0.unk08
-                    ? gUnknown_08499598[gUnknown_03004480].unk1d
+        costs = gUnknown_085D3DD0[gPlaySt.coAbilities
+                    ? gUnknown_08499598[gUnknown_03004480].co
                     : 1]
-                .unk38[gUnknown_08499598[gUnknown_03004480].unk1e]
-                .unk18[gUnknown_03003FC0.unk2c];
+                .unk38[gUnknown_08499598[gUnknown_03004480].coMode]
+                .unk18[gPlaySt.unk2c];
         c = i + gUnknown_085D5ABC[a1].unk19 * 32;
         *dst = costs[c];
     }

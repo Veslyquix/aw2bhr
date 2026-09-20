@@ -9,7 +9,7 @@
 
 /* MATCHED first attempt, wave 36 (W36-I). PROMOTION NEEDS THE POOL WORD PLACED:
  *     "rodata": ["0x0808D75C"]
- * 0x0808D75C holds &gUnknown_0200B0B0 (checked in baserom.gba). The neighbour
+ * 0x0808D75C holds &gActiveMap (checked in baserom.gba). The neighbour
  * 0x0808D754 immediately in front of it is NOT such a word -- it is the real
  * eight-byte table `01 03 05 07 03 01 07 05` this function memcpys to the
  * stack, which is why it is passed to sub_0808B6E8 without a deref.
@@ -32,81 +32,81 @@ void sub_080030BC(int a1, int a2, int a3)
 
     sub_0808B6E8(buf, gUnknown_0808D754, 8);
 
-    switch (gUnknown_0200B0B0->unk72[a1])
+    switch (gActiveMap->unk72[a1])
     {
     case 0:
-        gUnknown_0200B0B0->unk72[a1] = gUnknown_0200B0B0->unk3e != 0 ? 0xA : 0x32;
-        gUnknown_0200B0B0->unk82[a1] = 0x1180;
-        gUnknown_0200B0B0->unk7a[a1] =
-            buf[gUnknown_0200B0B0->unk3e == 0 ? a1 + 4 : a1];
+        gActiveMap->unk72[a1] = gActiveMap->unk3e != 0 ? 0xA : 0x32;
+        gActiveMap->unk82[a1] = 0x1180;
+        gActiveMap->unk7a[a1] =
+            buf[gActiveMap->unk3e == 0 ? a1 + 4 : a1];
         break;
     case 0xA:
-        gUnknown_0200B0B0->unk7a[a1]--;
-        if (gUnknown_0200B0B0->unk7a[a1] <= 0)
+        gActiveMap->unk7a[a1]--;
+        if (gActiveMap->unk7a[a1] <= 0)
         {
-            gUnknown_0200B0B0->unk82[a1] +=
-                (0xBE0 - gUnknown_0200B0B0->unk82[a1]) >> 3;
-            if (gUnknown_0200B0B0->unk82[a1] <= 0xCC0)
+            gActiveMap->unk82[a1] +=
+                (0xBE0 - gActiveMap->unk82[a1]) >> 3;
+            if (gActiveMap->unk82[a1] <= 0xCC0)
             {
-                gUnknown_0200B0B0->unk82[a1] = 0xCC0;
-                gUnknown_0200B0B0->unk72[a1] = 0x14;
+                gActiveMap->unk82[a1] = 0xCC0;
+                gActiveMap->unk72[a1] = 0x14;
             }
         }
         break;
     case 0x14:
-        if (gUnknown_0200B0B0->unk3e == 0 || gUnknown_0200B0B0->unk04 != 1)
-            gUnknown_0200B0B0->unk72[a1] = 0x1E;
+        if (gActiveMap->unk3e == 0 || gActiveMap->unk04 != 1)
+            gActiveMap->unk72[a1] = 0x1E;
         break;
     case 0x1E:
-        gUnknown_0200B0B0->unk82[a1] +=
-            (0x1180 - gUnknown_0200B0B0->unk82[a1]) >> 3;
-        if (gUnknown_0200B0B0->unk82[a1] > 0x10DF)
+        gActiveMap->unk82[a1] +=
+            (0x1180 - gActiveMap->unk82[a1]) >> 3;
+        if (gActiveMap->unk82[a1] > 0x10DF)
         {
-            gUnknown_0200B0B0->unk82[a1] = 0x10E0;
-            if (gUnknown_0200B0B0->unk04 == 1)
-                gUnknown_0200B0B0->unk72[a1] =
-                    gUnknown_0200B0B0->unk3e == 0 ? 0x32 : 0;
+            gActiveMap->unk82[a1] = 0x10E0;
+            if (gActiveMap->unk04 == 1)
+                gActiveMap->unk72[a1] =
+                    gActiveMap->unk3e == 0 ? 0x32 : 0;
         }
         break;
     }
 
-    switch (gUnknown_0200B0B0->unk72[a1])
+    switch (gActiveMap->unk72[a1])
     {
     case 0x32:
-        gUnknown_0200B0B0->unk72[a1] = gUnknown_0200B0B0->unk3e == 0 ? 0x3C : 0;
-        gUnknown_0200B0B0->unk82[a1] = 0xFD80;
-        gUnknown_0200B0B0->unk7a[a1] =
-            buf[gUnknown_0200B0B0->unk3e == 0 ? a1 + 4 : a1];
+        gActiveMap->unk72[a1] = gActiveMap->unk3e == 0 ? 0x3C : 0;
+        gActiveMap->unk82[a1] = 0xFD80;
+        gActiveMap->unk7a[a1] =
+            buf[gActiveMap->unk3e == 0 ? a1 + 4 : a1];
         break;
     case 0x3C:
-        gUnknown_0200B0B0->unk7a[a1]--;
-        if (gUnknown_0200B0B0->unk7a[a1] <= 0)
+        gActiveMap->unk7a[a1]--;
+        if (gActiveMap->unk7a[a1] <= 0)
         {
-            gUnknown_0200B0B0->unk82[a1] +=
-                (0x140 - gUnknown_0200B0B0->unk82[a1]) >> 3;
-            if (gUnknown_0200B0B0->unk82[a1] > 0x1F)
+            gActiveMap->unk82[a1] +=
+                (0x140 - gActiveMap->unk82[a1]) >> 3;
+            if (gActiveMap->unk82[a1] > 0x1F)
             {
-                gUnknown_0200B0B0->unk82[a1] = 0x20;
-                gUnknown_0200B0B0->unk72[a1] = 0x46;
+                gActiveMap->unk82[a1] = 0x20;
+                gActiveMap->unk72[a1] = 0x46;
             }
         }
         break;
     case 0x46:
-        if (gUnknown_0200B0B0->unk3e != 0 || gUnknown_0200B0B0->unk04 != 1)
-            gUnknown_0200B0B0->unk72[a1] = 0x50;
+        if (gActiveMap->unk3e != 0 || gActiveMap->unk04 != 1)
+            gActiveMap->unk72[a1] = 0x50;
         break;
     case 0x50:
-        gUnknown_0200B0B0->unk82[a1] +=
-            (-928 - gUnknown_0200B0B0->unk82[a1]) >> 3;
-        if (gUnknown_0200B0B0->unk82[a1] <= -640)
+        gActiveMap->unk82[a1] +=
+            (-928 - gActiveMap->unk82[a1]) >> 3;
+        if (gActiveMap->unk82[a1] <= -640)
         {
-            gUnknown_0200B0B0->unk82[a1] = -640;
-            if (gUnknown_0200B0B0->unk04 == 1)
-                gUnknown_0200B0B0->unk72[a1] =
-                    gUnknown_0200B0B0->unk3e == 0 ? 0x32 : 0;
+            gActiveMap->unk82[a1] = -640;
+            if (gActiveMap->unk04 == 1)
+                gActiveMap->unk72[a1] =
+                    gActiveMap->unk3e == 0 ? 0x32 : 0;
         }
         break;
     }
 
-    sub_080032EC(a1, gUnknown_0200B0B0->unk82[a1] >> 4, 0x6A);
+    sub_080032EC(a1, gActiveMap->unk82[a1] >> 4, 0x6A);
 }

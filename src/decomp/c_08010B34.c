@@ -114,7 +114,7 @@ void sub_08010D28(int x, int y)
  * low or sub_0800C840 accepting the cell. sub_08010604 supplies the tile id
  * that both sub_08001158 and sub_0800C574 are handed.
  *
- * `(s8)gUnknown_0200B0B0->unk12` is a CAST on a u8 member, not an s8 member.
+ * `(s8)gActiveMap->propertyCount` is a CAST on a u8 member, not an s8 member.
  *
  * Wave 48 (W48-A) corrects the REASON this comment used to give.  It read the
  * `ldrb; lsl #24; asr #24` here as proof of the u8 declaration, on the grounds
@@ -139,7 +139,7 @@ void sub_08010D80(int x, int y)
 {
     int t;
 
-    if ((s8)gUnknown_0200B0B0->unk12 <= 0x3b || sub_0800C840(x, y) != 0)
+    if ((s8)gActiveMap->propertyCount <= 0x3b || sub_0800C840(x, y) != 0)
     {
         sub_080011F4(x, y, 0x10);
         t = sub_08010604(x, y);

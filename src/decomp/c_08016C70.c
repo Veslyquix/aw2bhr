@@ -12,7 +12,7 @@ void sub_08016C70(u8 a)
     if (a != 0) {
         sub_08016A14();
         sub_0801ABF8(a);
-        if (gUnknown_03003FC0.unk01 == 1)
+        if (gPlaySt.gameMode == 1)
             sub_08016E74();
     }
 }
@@ -58,7 +58,7 @@ void sub_08016CEC(s8 a, u8 b)
     *sub_08016C9C(a) = b;
 }
 
-/* The gUnknown_03003FC0.unk01 mode -> id map every caller uses
+/* The gPlaySt.gameMode mode -> id map every caller uses
  * (src/decomp/c_0802C1D0.c, c_0802CF48.c, c_08038548.c, c_08045770.c). A
  * `switch`: the repeated `cmp r0,#2` with `beq` then `bgt` is gcc's decision
  * tree. `s8` return and `u8` parameter were already settled by those callers;

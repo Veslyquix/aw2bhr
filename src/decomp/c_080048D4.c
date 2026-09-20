@@ -7,7 +7,7 @@
  * sub_080048D4 @ 0x080048D4
  */
 
-/* Copies the up-to-19-byte NUL-terminated name at gUnknown_0200B0B0->unk9c
+/* Copies the up-to-19-byte NUL-terminated name at gActiveMap->unk9c
  * into the current gUnknown_03001470 slot at +0x1e, then hands the source to
  * sub_0804B10C. sub_0800487C (already promoted) strcmps the same two
  * addresses, which corroborates both as strings.
@@ -33,7 +33,7 @@
  * W40-F reaches the same conclusion from the other side, calling its layout
  * `struct Unk8019A60` a gUnknown_03001470 slot OVERLAY.
  *
- * gUnknown_0200B0B0 IS NAMED EXACTLY TWICE and both mentions are load-bearing:
+ * gActiveMap IS NAMED EXACTLY TWICE and both mentions are load-bearing:
  * THREE mentions crosses agbcc's -fforce-addr threshold and buys a .rodata
  * indirection the ROM does not have (+20 bytes, measured); ONE mention, bound
  * at the TOP of the body, lets LICM hoist it and loses both reloads (-4 bytes,
@@ -63,8 +63,8 @@ void sub_080048D4(void)
 
     do
     {
-        d[i] = ((struct Unk48D4Name *)&gUnknown_0200B0B0->unk9c)->nm[i];
-        q = &gUnknown_0200B0B0->unk9c;
+        d[i] = ((struct Unk48D4Name *)&gActiveMap->unk9c)->nm[i];
+        q = &gActiveMap->unk9c;
         if (q[i] == 0)
             break;
         i++;

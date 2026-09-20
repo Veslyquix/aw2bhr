@@ -91,7 +91,7 @@ void sub_08017720(int a, int b, int c, int d)
     if (sub_0803861C() == 0)
         return;
 
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 2:
         b -= 0x6c;

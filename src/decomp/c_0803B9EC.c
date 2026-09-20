@@ -17,6 +17,6 @@ void sub_0803B9EC(void)
 /* Same shape as sub_0803B8C4 (unk01 = 3) and sub_0803BADC (unk01 = 1). */
 void sub_0803BA00(void)
 {
-    gUnknown_03003FC0.unk01 = 2;
+    gPlaySt.gameMode = 2;
     Proc_Start(gUnknown_0849EC1C, PROC_TREE_3);
 }

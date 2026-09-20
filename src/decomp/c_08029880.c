@@ -37,6 +37,6 @@ void sub_08029880(void)
     gUnknown_03003334 = 0;
     sub_080424FC();
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.unk32 != 0)
         sub_080344B4(gUnknown_03003F38, gUnknown_030033E8[0], gUnknown_030033E8[1]);
 }

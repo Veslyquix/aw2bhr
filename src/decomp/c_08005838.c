@@ -18,7 +18,7 @@ void sub_08005838(int a1, int a2, u8 a3)
     }
     else
     {
-        gUnknown_0200B0B0->unk02 = 0;
+        gActiveMap->unk02 = 0;
         sub_0801A614();
         sub_0801A168();
         sub_080152C0((s32)gUnknown_08488614, 0);

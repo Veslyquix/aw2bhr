@@ -9,11 +9,11 @@
  */
 
 /* The tile-action dispatcher: read the map cell under the cursor, then run one
- * of nineteen handlers picked by the low five bits of gUnknown_0200B0B0->unk2a,
+ * of nineteen handlers picked by the low five bits of gActiveMap->selectedTerrain,
  * leaving a result code in unk6a.
  *
  * gUnknown_0808D800 is NOT a global of the original source -- see the note on
- * it in unknown-globals.h. The source says `gUnknown_0200B0B0` and agbcc's
+ * it in unknown-globals.h. The source says `gActiveMap` and agbcc's
  * -fforce-addr parks the address in this unit's .rodata. The split can now
  * place that word directly, so the honest spelling below is byte-exact and
  * promotion must carry `rodata: ["0x0808D800"]`.
@@ -31,17 +31,17 @@ void sub_080085E0(void)
 {
     int x, y;
 
-    x = gUnknown_0200B0B0->unk08;
-    y = gUnknown_0200B0B0->unk0a;
+    x = gActiveMap->cursorX;
+    y = gActiveMap->cursorY;
 
-    gUnknown_0200B0B0->unk20 = gMap->tile[gMap->rowOffset[y] + x];
-    gUnknown_0200B0B0->unk00 |= 0x1000;
+    gActiveMap->unk20 = gMap->tile[gMap->rowOffset[y] + x];
+    gActiveMap->unk00 |= 0x1000;
 
-    switch (gUnknown_0200B0B0->unk2a & 0x1f) {
+    switch (gActiveMap->selectedTerrain & 0x1f) {
     case 7:
         sub_08007CA0(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x8a;
+        gActiveMap->unk6a = 0x8a;
         break;
 
     case 13:
@@ -53,7 +53,7 @@ void sub_080085E0(void)
         }
         sub_0800BA9C(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x4b;
+        gActiveMap->unk6a = 0x4b;
         break;
 
     case 5:
@@ -65,7 +65,7 @@ void sub_080085E0(void)
         }
         sub_0800F4E0(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x89;
+        gActiveMap->unk6a = 0x89;
         break;
 
     case 2:
@@ -78,13 +78,13 @@ void sub_080085E0(void)
         if (sub_08009F10(x, y) == 0)
             break;
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x2d;
+        gActiveMap->unk6a = 0x2d;
         break;
 
     case 12:
         sub_08008F6C(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x89;
+        gActiveMap->unk6a = 0x89;
         break;
 
     case 3:
@@ -96,25 +96,25 @@ void sub_080085E0(void)
         }
         sub_0800AF74(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x4b;
+        gActiveMap->unk6a = 0x4b;
         break;
 
     case 19:
         if (sub_0800BF78(x, y) == 0)
             break;
-        gUnknown_0200B0B0->unk6a = 0x8a;
+        gActiveMap->unk6a = 0x8a;
         break;
 
     case 4:
         sub_0800CF28(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x4b;
+        gActiveMap->unk6a = 0x4b;
         break;
 
     case 8:
-        sub_0800C454(x, y, gUnknown_0200B0B0->unk2a);
+        sub_0800C454(x, y, gActiveMap->selectedTerrain);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x88;
+        gActiveMap->unk6a = 0x88;
         break;
 
     case 6:
@@ -122,9 +122,9 @@ void sub_080085E0(void)
     case 11:
     case 14:
     case 17:
-        sub_0800C454(x, y, gUnknown_0200B0B0->unk2a);
+        sub_0800C454(x, y, gActiveMap->selectedTerrain);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x87;
+        gActiveMap->unk6a = 0x87;
         break;
 
     case 15:
@@ -136,7 +136,7 @@ void sub_080085E0(void)
         }
         sub_08010D28(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x87;
+        gActiveMap->unk6a = 0x87;
         break;
 
     case 16:
@@ -148,7 +148,7 @@ void sub_080085E0(void)
         }
         sub_08010D80(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x87;
+        gActiveMap->unk6a = 0x87;
         break;
 
     case 1:
@@ -159,7 +159,7 @@ void sub_080085E0(void)
         sub_0800EC20(x, y);
         sub_0800BEE4(x, y);
         sub_08008BB8(x, y);
-        gUnknown_0200B0B0->unk6a = 0x4b;
+        gActiveMap->unk6a = 0x4b;
         break;
     }
 }

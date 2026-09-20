@@ -13,7 +13,7 @@ void sub_08043590(void)
 
     if ((u16)(gUnknown_030005D0 - 1) > 3)
         return;
-    if (gUnknown_03003FC0.unk07 == 0)
+    if (gPlaySt.unk07 == 0)
         return;
 
     if (sub_0804423C(gUnknown_030005D0))

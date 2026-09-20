@@ -73,8 +73,8 @@ int sub_0800C8D8(void)
 
     for (i = 0; i <= 3; i++)
     {
-        gUnknown_0200B0B0->unk17[i] |= 0xFF;
-        gUnknown_0200B0B0->unk1b[i] |= 0xFF;
+        gActiveMap->unk17[i] |= 0xFF;
+        gActiveMap->unk1b[i] |= 0xFF;
     }
 
     for (i = 0; i <= 0x5B; i++)

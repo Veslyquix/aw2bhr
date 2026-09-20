@@ -17,11 +17,11 @@ void sub_08034DF8(void)
 
     sub_0801B780(0);
 
-    if (gUnknown_03003FC0.unk32 == 0
-     || gUnknown_08499598[gUnknown_030033EC].unk1b == 1)
+    if (gPlaySt.unk32 == 0
+     || gUnknown_08499598[gUnknown_030033EC].aiControlled == 1)
     {
-        sub_08029088(gUnknown_08499598[gUnknown_030033EC].unk2f,
-                     gUnknown_08499598[gUnknown_030033EC].unk30);
+        sub_08029088(gUnknown_08499598[gUnknown_030033EC].cursorX,
+                     gUnknown_08499598[gUnknown_030033EC].cursorY);
     }
 
     if (sub_08015BD0((s32)gUnknown_0849A00C) == -1)

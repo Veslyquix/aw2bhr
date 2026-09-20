@@ -17,7 +17,7 @@
  * stored halfword, so the return costs nothing. */
 int sub_08007328(void)
 {
-    struct Unk0200B0B0 *p = gUnknown_0200B0B0;
+    struct ActiveMap *p = gActiveMap;
     int n;
     int m;
     int v;
@@ -27,6 +27,6 @@ int sub_08007328(void)
     v = p->unk3a + m;
     if (v >= n)
         v -= n;
-    p->unk3c = v;
+    p->previousTerrain = v;
     return v;
 }

@@ -57,7 +57,7 @@ void *BuyUnit(int a1, int a2, int a3)
 
     cost = sub_08042C9C(gUnknown_030033EC, a3) * 10;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk00 < cost)
+    if (gUnknown_08499598[gUnknown_030033EC].funds < cost)
         return NULL;
 
     r = sub_08025C98(a1, a2, a3);

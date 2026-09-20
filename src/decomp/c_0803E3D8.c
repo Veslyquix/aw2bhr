@@ -42,8 +42,8 @@ void sub_0803E3D8(void)
     int a;
     int b;
 
-    a = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk1c;
-    b = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk1e;
+    a = gUnknown_085C77A0[gPlaySt.mapID].unk1c;
+    b = gUnknown_085C77A0[gPlaySt.mapID].unk1e;
     sub_0803DE14();
     for (y = 0; y < MAP->height; y++)
     {

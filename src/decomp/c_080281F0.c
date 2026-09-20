@@ -20,7 +20,7 @@
  *      .rodata+0x30 -> gUnknown_08090AF4   &gpKeySt        (force-addr)
  *      .rodata+0x34 -> gUnknown_08090AF8   &gUnknown_03001FBC
  *      .rodata+0x38 -> gUnknown_08090AFC   &gUnknown_03001470
- *      .rodata+0x3c -> gUnknown_08090B00   &gUnknown_03003FC0
+ *      .rodata+0x3c -> gUnknown_08090B00   &gPlaySt
  * `trymatch` resolves a force-addr word automatically (it reads the word's value
  * out of baserom.gba) but cannot do that for a string, which has no address to
  * check -- hence the false negative. Promotion needs the whole run
@@ -68,18 +68,18 @@ void sub_080281F0(void)
         switch (gUnknown_03001470[gUnknown_03001FBC].unk1e)
         {
         case 0:
-            if (gUnknown_08499F4C[0] < gUnknown_03003FC0.unk02)
-                gUnknown_03003FC0.unk02--;
+            if (gUnknown_08499F4C[0] < gPlaySt.mapID)
+                gPlaySt.mapID--;
             break;
 
         case 1:
-            if (gUnknown_08499F4C[2] < gUnknown_03003FC0.unk2c)
-                gUnknown_03003FC0.unk2c--;
+            if (gUnknown_08499F4C[2] < gPlaySt.unk2c)
+                gPlaySt.unk2c--;
             break;
 
         case 2:
-            if (gUnknown_08499F4C[4] < gUnknown_03003FC0.unk0d)
-                gUnknown_03003FC0.unk0d--;
+            if (gUnknown_08499F4C[4] < gPlaySt.unk0d)
+                gPlaySt.unk0d--;
             break;
         }
     }
@@ -89,24 +89,24 @@ void sub_080281F0(void)
         switch (gUnknown_03001470[gUnknown_03001FBC].unk1e)
         {
         case 0:
-            if (gUnknown_08499F4C[1] > gUnknown_03003FC0.unk02)
-                gUnknown_03003FC0.unk02++;
+            if (gUnknown_08499F4C[1] > gPlaySt.mapID)
+                gPlaySt.mapID++;
             break;
 
         case 1:
-            if (gUnknown_08499F4C[3] > gUnknown_03003FC0.unk2c)
-                gUnknown_03003FC0.unk2c++;
+            if (gUnknown_08499F4C[3] > gPlaySt.unk2c)
+                gPlaySt.unk2c++;
             break;
 
         case 2:
-            if (gUnknown_08499F4C[5] > gUnknown_03003FC0.unk0d)
-                gUnknown_03003FC0.unk0d++;
+            if (gUnknown_08499F4C[5] > gPlaySt.unk0d)
+                gPlaySt.unk0d++;
             break;
         }
     }
 
     sub_08013428(8, (s16)(gUnknown_03001470[gUnknown_03001FBC].unk1e * 2 + 14), "O");
-    sub_08013428(10, 14, " MAP:%02d", gUnknown_03003FC0.unk02);
-    sub_08013428(10, 16, "SNOW:%s", sNames[gUnknown_03003FC0.unk2c]);
-    sub_08013428(10, 18, "SAKU:%s", sNames[gUnknown_03003FC0.unk0d]);
+    sub_08013428(10, 14, " MAP:%02d", gPlaySt.mapID);
+    sub_08013428(10, 16, "SNOW:%s", sNames[gPlaySt.unk2c]);
+    sub_08013428(10, 18, "SAKU:%s", sNames[gPlaySt.unk0d]);
 }

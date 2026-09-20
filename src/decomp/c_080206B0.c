@@ -45,7 +45,7 @@ u16 sub_080206B0(u32 a1)
 /* Wave 49, W49-K RETYPES the second parameter from `u16` to `int`, with the
  * narrowing moved into an explicit `u16` local -- byte-identical here (still
  * `lsls r1,#0x10; lsrs r7,#0x10` at entry) and REQUIRED by the newly matched
- * caller sub_080213AC, which passes `1 - gUnknown_03003FC0.unk0d` with no
+ * caller sub_080213AC, which passes `1 - gPlaySt.unk0d` with no
  * narrowing at all.  agbcc narrows a `u16` argument AT THE CALL SITE as well as
  * at entry (measured: +4 bytes per site, and sub_0802163C's `sub_080247A4(a)`
  * shows the same pair on the caller side), so a `u16` prototype cannot produce
