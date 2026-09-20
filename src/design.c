@@ -79,87 +79,87 @@ int sub_080012DC(int a) {
 
   switch (a) {
   case TERRAIN_CITY:
-    r = 0x1c2;
+    r = TILE_CITY;
     break;
   case TERRAIN_CITY_OS:
-    r = 0x1c7;
+    r = TILE_CITY_OS;
     break;
   case TERRAIN_CITY_BM:
-    r = 0x1cc;
+    r = TILE_CITY_BM;
     break;
   case TERRAIN_CITY_GE:
-    r = 0x1d1;
+    r = TILE_CITY_GE;
     break;
   case TERRAIN_CITY_YC:
-    r = 0x1d6;
+    r = TILE_CITY_YC;
     break;
 
   case TERRAIN_HQ:
-    r = 0x1c0;
+    r = TILE_HQ;
     break;
   case TERRAIN_HQ_OS:
-    r = 0x1c5;
+    r = TILE_HQ_OS;
     break;
   case TERRAIN_HQ_BM:
-    r = 0x1ca;
+    r = TILE_HQ_BM;
     break;
   case TERRAIN_HQ_GE:
-    r = 0x1cf;
+    r = TILE_HQ_GE;
     break;
   case TERRAIN_HQ_YC:
-    r = 0x1d4;
+    r = TILE_HQ_YC;
     break;
 
   case TERRAIN_AIRPORT:
-    r = 0x1c3;
+    r = TILE_AIRPORT;
     break;
   case TERRAIN_AIRPORT_OS:
-    r = 0x1c8;
+    r = TILE_AIRPORT_OS;
     break;
   case TERRAIN_AIRPORT_BM:
-    r = 0x1cd;
+    r = TILE_AIRPORT_BM;
     break;
   case TERRAIN_AIRPORT_GE:
-    r = 0x1d2;
+    r = TILE_AIRPORT_GE;
     break;
   case TERRAIN_AIRPORT_YC:
-    r = 0x1d7;
+    r = TILE_AIRPORT_YC;
     break;
 
   case TERRAIN_PORT:
-    r = 0x1c4;
+    r = TILE_PORT;
     break;
   case TERRAIN_PORT_OS:
-    r = 0x1c9;
+    r = TILE_PORT_OS;
     break;
   case TERRAIN_PORT_BM:
-    r = 0x1ce;
+    r = TILE_PORT_BM;
     break;
   case TERRAIN_PORT_GE:
-    r = 0x1d3;
+    r = TILE_PORT_GE;
     break;
   case TERRAIN_PORT_YC:
-    r = 0x1d8;
+    r = TILE_PORT_YC;
     break;
 
   case TERRAIN_BASE:
-    r = 0x1c1;
+    r = TILE_BASE;
     break;
   case TERRAIN_BASE_OS:
-    r = 0x1c6;
+    r = TILE_BASE_OS;
     break;
   case TERRAIN_BASE_BM:
-    r = 0x1cb;
+    r = TILE_BASE_BM;
     break;
   case TERRAIN_BASE_GE:
-    r = 0x1d0;
+    r = TILE_BASE_GE;
     break;
   case TERRAIN_BASE_YC:
-    r = 0x1d5;
+    r = TILE_BASE_YC;
     break;
 
   case TERRAIN_SILO:
-    r = 0x180;
+    r = TILE_SILO;
     break;
   }
 
@@ -938,9 +938,8 @@ void sub_08002844(int a1, int a2, int a3, int a4, int a5, int a6, int a7) {
           sub_08026190() + ((sub_080261A4(cls, a4) & 0x3FF) << 5),
           (void *)(0x06010000 + ((gUnknown_08485D20[a1] & 0x3FF) << 5)), 0x80);
     }
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 +
-                         (gPlayers[cls].teamColor - 1) * 0x20),
-                 22);
+    ApplyPalette(
+        (u16 *)(gUnknown_0810E6E0 + (gPlayers[cls].teamColor - 1) * 0x20), 22);
   } else {
     sub_0801F19C(0x12, (void *)0x06010000, gUnknown_08485D20[a1]);
     ApplyPalette(gUnknown_081268D8, 30);

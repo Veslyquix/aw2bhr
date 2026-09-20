@@ -155,8 +155,13 @@ enum TerrainKind {
 
 /* Tile ids stored in gMap->tile[] (see MakeTileSimple). Names and values come
  * from SRR_AW2's C_code.c, where each is written as a byte offset `>> 2`.
- * The per-army HQ/base tiles repeat every 5 ids: OS 0x1C5, BM 0x1CA, GE 0x1CF,
- * YC 0x1D4, i.e. HQ_OS + army * 5. */
+ *
+ * The property tiles run five to a block, always in the order HQ, base, city,
+ * airport, port: the neutral set at 0x1C0 and then one block per army at +5
+ * each (OS 0x1C5, BM 0x1CA, GE 0x1CF, YC 0x1D4). SRR names only the HQ and
+ * base of each block; the other fifteen are filled in from sub_080012DC in
+ * src/design.c, a byte-matched terrain-to-tile table that spells all 25 of
+ * these ids out as literals, so none of the block is guessed. */
 enum TileKind {
     TILE_PLAIN = (0x4 >> 2),
     TILE_SEA = (0x20 >> 2), // one tile of sea in plains
@@ -181,19 +186,31 @@ enum TileKind {
     TILE_VOLCANO = (0x69C >> 2),
     TILE_RUIN = (0x6AC >> 2),
     TILE_X = (0x6BC >> 2),
-    TILE_HQ = (0x700 >> 2), // neutral versions
+    TILE_HQ = (0x700 >> 2), // neutral
     TILE_BASE = (0x704 >> 2),
     TILE_CITY = (0x708 >> 2),
     TILE_AIRPORT = (0x70C >> 2),
     TILE_PORT = (0x710 >> 2),
-    TILE_HQ_OS = (0x714 >> 2),
+    TILE_HQ_OS = (0x714 >> 2), // Orange Star
     TILE_BASE_OS = (0x718 >> 2),
-    TILE_HQ_BM = (0x728 >> 2),
+    TILE_CITY_OS = (0x71C >> 2),
+    TILE_AIRPORT_OS = (0x720 >> 2),
+    TILE_PORT_OS = (0x724 >> 2),
+    TILE_HQ_BM = (0x728 >> 2), // Blue Moon
     TILE_BASE_BM = (0x72C >> 2),
-    TILE_HQ_GE = (0x73C >> 2),
+    TILE_CITY_BM = (0x730 >> 2),
+    TILE_AIRPORT_BM = (0x734 >> 2),
+    TILE_PORT_BM = (0x738 >> 2),
+    TILE_HQ_GE = (0x73C >> 2), // Green Earth
     TILE_BASE_GE = (0x740 >> 2),
-    TILE_HQ_YC = (0x750 >> 2),
+    TILE_CITY_GE = (0x744 >> 2),
+    TILE_AIRPORT_GE = (0x748 >> 2),
+    TILE_PORT_GE = (0x74C >> 2),
+    TILE_HQ_YC = (0x750 >> 2), // Yellow Comet
     TILE_BASE_YC = (0x754 >> 2),
+    TILE_CITY_YC = (0x758 >> 2),
+    TILE_AIRPORT_YC = (0x75C >> 2),
+    TILE_PORT_YC = (0x760 >> 2),
 };
 
 #define MAP_OBJ_TERRAIN(f)   ((f) & 0x1f)
