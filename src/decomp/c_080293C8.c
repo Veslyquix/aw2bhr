@@ -66,7 +66,7 @@ bool8 sub_08029490(ProcPtr proc)
     idx = gMap->rowOffset[gUnknown_030033E4.unk02]
         + gUnknown_030033E4.unk00;
 
-    if ((s8)gMap->move[idx] >= 0)
+    if (gMap->move[idx] >= 0)
     {
         if (gMap->visible[idx] == 0)
             return 1;

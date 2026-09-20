@@ -21,7 +21,7 @@ void sub_0802DE1C(void)
 
     off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
 
-    if ((s8)gMap->move[off] < 0)
+    if (gMap->move[off] < 0)
         sub_08023274(1);
     else
         sub_08023274(1);

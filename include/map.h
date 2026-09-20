@@ -17,14 +17,17 @@ struct Map
     /* 0x051A */ u8 unitUnk[MAP_POOL_SIZE]; // often the same as unit[]
     /* 0x0A22 */ u16 tile[MAP_POOL_SIZE];
     /* 0x1432 */ u8 terrain[MAP_POOL_SIZE];
-    /* 0x193A */ u8 property[MAP_POOL_SIZE];
+    /* 0x193A */ s8 property[MAP_POOL_SIZE]; // s8: all 3 readers are signed (0xFF = -1 = "none", used as an index/test)
     /* 0x1E42 */ u8 visible[MAP_POOL_SIZE]; 
     /* 0x234A */ u8 unk234A[MAP_POOL_SIZE];
-    /* 0x2852 */ u8 move[MAP_POOL_SIZE]; // unk2852
-    /* 0x2D5A */ u8 danger[MAP_POOL_SIZE]; // unk2D5A
+    /* 0x2852 */ s8 move[MAP_POOL_SIZE]; // unk2852. s8: 3 signed reads (< 0, >= 0, > 0; -1 = blocked) vs 1 unsigned
+                                       // (`(u8)move > 0x78`, so the -1 sentinel counts as "too far")
+    /* 0x2D5A */ s8 danger[MAP_POOL_SIZE]; // unk2D5A. s8: 6 signed reads (sentinel/<= 0 tests, `best = danger`) vs 4 unsigned
+                                       // (min-search compares `(u8)danger > best`, where 0xFF must rank as the worst value)
     /* 0x3262 */ u8 dangerMask[MAP_POOL_SIZE]; 
     /* 0x376A */ u8 unk376A[MAP_POOL_SIZE];
-    /* 0x3C72 */ u8 unk3C72[MAP_POOL_SIZE];
+    /* 0x3C72 */ u8 unk3C72[MAP_POOL_SIZE]; // might be signed (0x7f sentinel, ++, sums), but NO signed read exists and s8 changes
+                                       // the code of c_0805A744/c_0805B980/c_0805F4F8, so it stays u8
     /* 0x417a */ u16 rowOffset[(0x421a - 0x417a) / 2];
     /* 0x421a */ u8 unk421a[0x4232 - 0x421a];
 

@@ -1002,7 +1002,7 @@ u8 sub_080390CC(u8);
  * parameter whose narrowing combine can prove redundant looks unnarrowed at the
  * call site while its declaration is perfectly ordinary, and that is how one
  * ambiguous argument was read as two. */
-u8 sub_08039140(u16, s16, u8, u8);
+u8 sub_08039140();
 void sub_0803941C(int, int);
 void sub_08039544(u8 *);
 void sub_08039930(int, ProcPtr);

@@ -184,7 +184,7 @@ struct Unk08499594 *sub_08058144(int a1, int a2)
             return 0;
 
         idx = gMap->rowOffset[e->unk01] + e->unk00;
-        v = (s8)gMap->property[idx];
+        v = gMap->property[idx];
         q = &(*arrp)[v];
     } while (q->unk03[a2] > a1);
 

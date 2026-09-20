@@ -6028,6 +6028,108 @@
   "size": 154
  },
  {
+  "file": "src/proc.c",
+  "obj": "src/proc.o",
+  "addr_hex": "0x0801C878",
+  "functions": [
+   "Proc_Init",
+   "Proc_Start",
+   "Proc_StartBlocking",
+   "DeleteProcessRecursive",
+   "Proc_End",
+   "AllocateProcess",
+   "FreeProcess",
+   "InsertRootProcess",
+   "InsertChildProcess",
+   "UnlinkProcess",
+   "RunProcCore",
+   "Proc_Run",
+   "Proc_Break",
+   "Proc_Find",
+   "Proc_Count",
+   "Proc_FindUnblocked",
+   "Proc_FindWithMark",
+   "Proc_Goto",
+   "Proc_GotoScript",
+   "Proc_Mark",
+   "Proc_SetEndFunc",
+   "Proc_ForAll",
+   "Proc_ForEach",
+   "Proc_ForEachMarked",
+   "Proc_LockEachMarked",
+   "Proc_ReleaseEachMarked",
+   "Proc_EndEachMarked",
+   "EndProc",
+   "Proc_EndEach",
+   "BreakProc",
+   "Proc_BreakEach",
+   "WalkProcSubtree",
+   "Proc_ForSubtree",
+   "ProcCmd_End",
+   "ProcCmd_01_0801CD90",
+   "ProcCmd_Call",
+   "ProcCmd_CallRet",
+   "ProcCmd_CallArg",
+   "ProcCmd_While",
+   "ProcCmd_Repeat",
+   "ProcCmd_SetEndFunc",
+   "ProcCmd_SpawnChild",
+   "ProcCmd_SpawnBlockingChild",
+   "ProcCmd_SpawnBugged",
+   "ProcCmd_WhileExists",
+   "ProcCmd_EndEach",
+   "ProcCmd_BreakEach",
+   "ProcCmd_Label",
+   "ProcCmd_GotoScript",
+   "ProcCmd_Goto",
+   "ProcCmd_GotoIfYes",
+   "ProcCmd_GotoIfNo",
+   "ProcCmd_29_0801CF90",
+   "SleepRepeatFunc",
+   "ProcCmd_Sleep",
+   "ProcCmd_Mark",
+   "ProcCmd_13_Nop",
+   "ProcCmd_Block",
+   "ProcCmd_EndIfDuplicate",
+   "ProcCmd_EndDuplicates",
+   "ProcCmd_15_Nop",
+   "ProcCmd_SetFlag2",
+   "ProcCmd_1B_0801D0AC",
+   "ProcCmd_1C_0801D0C8",
+   "ProcCmd_1D_0801D0E4",
+   "ProcCmd_1E_0801D104",
+   "ProcCmd_1F_0801D124",
+   "ProcCmd_20_0801D140",
+   "ProcCmd_21_0801D15C",
+   "ProcCmd_22_0801D178",
+   "ProcCmd_23_0801D194",
+   "ProcCmd_24_0801D1B4",
+   "ProcCmd_25_0801D1D4",
+   "ProcCmd_26_0801D1F4",
+   "ProcCmd_19_0801D214",
+   "ProcCmd_1A_0801D238",
+   "RunProcessScript",
+   "PrintProcInfo",
+   "WalkPrintProcInfo",
+   "Proc_PrintSubtreeInfo",
+   "NOP_0801D324",
+   "Proc_SetRepeatFunc",
+   "Proc_Lock",
+   "Proc_Release",
+   "sub_0801D344"
+  ],
+  "size": 2768,
+  "rodata": [
+   "0x0808F094",
+   "0x0808F098",
+   {
+    "addr": "0x0848B5DC",
+    "size": "0xAC",
+    "sect": ".data"
+   }
+  ]
+ },
+ {
   "file": "src/decomp/c_0801D348.c",
   "obj": "src/decomp/c_0801D348.o",
   "addr_hex": "0x0801D348",
@@ -7346,6 +7448,20 @@
    "0x080909FC",
    "0x08090A00",
    "0x08090A04"
+  ]
+ },
+ {
+  "file": "src/decomp/c_080236E8.c",
+  "obj": "src/decomp/c_080236E8.o",
+  "addr_hex": "0x080236E8",
+  "functions": [
+   "sub_080236E8"
+  ],
+  "size": 316,
+  "rodata": [
+   "0x08090A08",
+   "0x08090A0C",
+   "0x08090A10"
   ]
  },
  {
@@ -22131,15 +22247,6 @@
   ]
  },
  {
-  "file": "src/decomp/c_08060DAC.c",
-  "obj": "src/decomp/c_08060DAC.o",
-  "addr_hex": "0x08060DAC",
-  "functions": [
-   "sub_08060DAC"
-  ],
-  "size": 296
- },
- {
   "file": "src/decomp/c_08060D4C.c",
   "obj": "src/decomp/c_08060D4C.o",
   "addr_hex": "0x08060D4C",
@@ -22148,6 +22255,15 @@
    "sub_08060D78"
   ],
   "size": 96
+ },
+ {
+  "file": "src/decomp/c_08060DAC.c",
+  "obj": "src/decomp/c_08060DAC.o",
+  "addr_hex": "0x08060DAC",
+  "functions": [
+   "sub_08060DAC"
+  ],
+  "size": 296
  },
  {
   "file": "src/decomp/c_08060ED4.c",
@@ -25112,6 +25228,106 @@
    "sub_0806C95C"
   ],
   "size": 88
+ },
+ {
+  "file": "src/title-screen.c",
+  "obj": "src/title-screen.o",
+  "addr_hex": "0x0806C9B4",
+  "functions": [
+   "sub_0806C9B4",
+   "sub_0806C9C0",
+   "sub_0806CA38",
+   "sub_0806CA50",
+   "Title_StartMainMenu",
+   "sub_0806CA98",
+   "sub_0806CB5C",
+   "sub_0806CB88",
+   "sub_0806CBA8",
+   "sub_0806CC00",
+   "sub_0806CC34",
+   "sub_0806CC4C",
+   "sub_0806CC64",
+   "TitlePressStartDraw_Init",
+   "TitlePressStartDraw_Loop",
+   "TitleSpriteDraw_Init",
+   "TitleSpriteDraw_Loop_Draw2",
+   "TitleSpriteDraw_Loop_SlideTitleIn",
+   "TitleSpriteDraw_StartIdle",
+   "TitleSpriteDraw_Loop_Idle"
+  ],
+  "size": 1556,
+  "rodata": [
+   {
+    "addr": "0x08581C68",
+    "size": "0x28",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581C90",
+    "size": "0x28",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581CB8",
+    "size": "0x40",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581CF8",
+    "size": "0x40",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581D38",
+    "size": "0x8",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581D40",
+    "size": "0x20",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581D60",
+    "size": "0x44",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581DA4",
+    "size": "0x14",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581DB8",
+    "size": "0x2",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581DBA",
+    "size": "0x32",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581DEC",
+    "size": "0x1A",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581E06",
+    "size": "0xA",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581E10",
+    "size": "0x18",
+    "sect": ".data"
+   },
+   {
+    "addr": "0x08581E28",
+    "size": "0x48",
+    "sect": ".data"
+   }
+  ]
  },
  {
   "file": "src/decomp/c_0806CFC8.c",
@@ -30862,207 +31078,5 @@
    "sub_0808BB0C"
   ],
   "size": 36
- },
- {
-  "file": "src/proc.c",
-  "obj": "src/proc.o",
-  "addr_hex": "0x0801C878",
-  "functions": [
-   "Proc_Init",
-   "Proc_Start",
-   "Proc_StartBlocking",
-   "DeleteProcessRecursive",
-   "Proc_End",
-   "AllocateProcess",
-   "FreeProcess",
-   "InsertRootProcess",
-   "InsertChildProcess",
-   "UnlinkProcess",
-   "RunProcCore",
-   "Proc_Run",
-   "Proc_Break",
-   "Proc_Find",
-   "Proc_Count",
-   "Proc_FindUnblocked",
-   "Proc_FindWithMark",
-   "Proc_Goto",
-   "Proc_GotoScript",
-   "Proc_Mark",
-   "Proc_SetEndFunc",
-   "Proc_ForAll",
-   "Proc_ForEach",
-   "Proc_ForEachMarked",
-   "Proc_LockEachMarked",
-   "Proc_ReleaseEachMarked",
-   "Proc_EndEachMarked",
-   "EndProc",
-   "Proc_EndEach",
-   "BreakProc",
-   "Proc_BreakEach",
-   "WalkProcSubtree",
-   "Proc_ForSubtree",
-   "ProcCmd_End",
-   "ProcCmd_01_0801CD90",
-   "ProcCmd_Call",
-   "ProcCmd_CallRet",
-   "ProcCmd_CallArg",
-   "ProcCmd_While",
-   "ProcCmd_Repeat",
-   "ProcCmd_SetEndFunc",
-   "ProcCmd_SpawnChild",
-   "ProcCmd_SpawnBlockingChild",
-   "ProcCmd_SpawnBugged",
-   "ProcCmd_WhileExists",
-   "ProcCmd_EndEach",
-   "ProcCmd_BreakEach",
-   "ProcCmd_Label",
-   "ProcCmd_GotoScript",
-   "ProcCmd_Goto",
-   "ProcCmd_GotoIfYes",
-   "ProcCmd_GotoIfNo",
-   "ProcCmd_29_0801CF90",
-   "SleepRepeatFunc",
-   "ProcCmd_Sleep",
-   "ProcCmd_Mark",
-   "ProcCmd_13_Nop",
-   "ProcCmd_Block",
-   "ProcCmd_EndIfDuplicate",
-   "ProcCmd_EndDuplicates",
-   "ProcCmd_15_Nop",
-   "ProcCmd_SetFlag2",
-   "ProcCmd_1B_0801D0AC",
-   "ProcCmd_1C_0801D0C8",
-   "ProcCmd_1D_0801D0E4",
-   "ProcCmd_1E_0801D104",
-   "ProcCmd_1F_0801D124",
-   "ProcCmd_20_0801D140",
-   "ProcCmd_21_0801D15C",
-   "ProcCmd_22_0801D178",
-   "ProcCmd_23_0801D194",
-   "ProcCmd_24_0801D1B4",
-   "ProcCmd_25_0801D1D4",
-   "ProcCmd_26_0801D1F4",
-   "ProcCmd_19_0801D214",
-   "ProcCmd_1A_0801D238",
-   "RunProcessScript",
-   "PrintProcInfo",
-   "WalkPrintProcInfo",
-   "Proc_PrintSubtreeInfo",
-   "NOP_0801D324",
-   "Proc_SetRepeatFunc",
-   "Proc_Lock",
-   "Proc_Release",
-   "sub_0801D344"
-  ],
-  "size": 2768,
-  "rodata": [
-   "0x0808F094",
-   "0x0808F098",
-   {
-    "addr": "0x0848B5DC",
-    "size": "0xAC",
-    "sect": ".data"
-   }
-  ]
- },
- {
-  "file": "src/title-screen.c",
-  "obj": "src/title-screen.o",
-  "addr_hex": "0x0806C9B4",
-  "functions": [
-   "sub_0806C9B4",
-   "sub_0806C9C0",
-   "sub_0806CA38",
-   "sub_0806CA50",
-   "Title_StartMainMenu",
-   "sub_0806CA98",
-   "sub_0806CB5C",
-   "sub_0806CB88",
-   "sub_0806CBA8",
-   "sub_0806CC00",
-   "sub_0806CC34",
-   "sub_0806CC4C",
-   "sub_0806CC64",
-   "TitlePressStartDraw_Init",
-   "TitlePressStartDraw_Loop",
-   "TitleSpriteDraw_Init",
-   "TitleSpriteDraw_Loop_Draw2",
-   "TitleSpriteDraw_Loop_SlideTitleIn",
-   "TitleSpriteDraw_StartIdle",
-   "TitleSpriteDraw_Loop_Idle"
-  ],
-  "size": 1556,
-  "rodata": [
-   {
-    "addr": "0x08581C68",
-    "size": "0x28",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581C90",
-    "size": "0x28",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581CB8",
-    "size": "0x40",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581CF8",
-    "size": "0x40",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581D38",
-    "size": "0x8",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581D40",
-    "size": "0x20",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581D60",
-    "size": "0x44",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581DA4",
-    "size": "0x14",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581DB8",
-    "size": "0x2",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581DBA",
-    "size": "0x32",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581DEC",
-    "size": "0x1A",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581E06",
-    "size": "0xA",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581E10",
-    "size": "0x18",
-    "sect": ".data"
-   },
-   {
-    "addr": "0x08581E28",
-    "size": "0x48",
-    "sect": ".data"
-   }
-  ]
  }
 ]

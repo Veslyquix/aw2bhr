@@ -53,7 +53,7 @@ loop:
     if (v.pos.unk00 == 0x270F)
         return;
 
-    w = (s8)gMap->property[gMap->rowOffset[v.pos.unk02] + v.pos.unk00];
+    w = gMap->property[gMap->rowOffset[v.pos.unk02] + v.pos.unk00];
     arr = gUnknown_084995A0;
 
     if (n < (&arr[w])->unk03[k])

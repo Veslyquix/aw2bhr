@@ -68,7 +68,7 @@ void sub_08057D90(s16 *px, s16 *py)
                 idx = map->rowOffset[y] + x;
                 if (gMap->unit[idx] == 0)
                 {
-                    v = map->danger[idx];
+                    v = (u8)map->danger[idx];
                     if (v <= best)
                     {
                         best = v;

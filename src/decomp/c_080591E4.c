@@ -141,7 +141,7 @@ void sub_080591E4(void *a1)
     if (gUnknown_03004784[1] == 100)
         best = 0x7fff;
     else
-        best = (s8)gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+        best = gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
 
     bestX = -1;
 
@@ -151,7 +151,7 @@ void sub_080591E4(void *a1)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (gMap->danger[gMap->rowOffset[y] + x] > best)
+            if ((u8)gMap->danger[gMap->rowOffset[y] + x] > best)
                 continue;
             if (gMap->dangerMask[gMap->rowOffset[y] + x] & mask)
                 continue;
@@ -160,7 +160,7 @@ void sub_080591E4(void *a1)
             if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x20
              && (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)gMap->danger[gMap->rowOffset[y] + x];
+            best = gMap->danger[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }
@@ -199,7 +199,7 @@ void sub_08059464(void *a1)
     sub_0801F92C(gMap->move);
     sub_080202A4(gUnknown_030040D8);
 
-    best = (s8)gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+    best = gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
     bestX = -1;
 
     for (y = 0; y < gMap->height; y++)
@@ -208,7 +208,7 @@ void sub_08059464(void *a1)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (gMap->danger[gMap->rowOffset[y] + x] > best)
+            if ((u8)gMap->danger[gMap->rowOffset[y] + x] > best)
                 continue;
             if (gMap->dangerMask[gMap->rowOffset[y] + x] & mask)
                 continue;
@@ -216,7 +216,7 @@ void sub_08059464(void *a1)
                 continue;
             if ((gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)gMap->danger[gMap->rowOffset[y] + x];
+            best = gMap->danger[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }

@@ -28,7 +28,11 @@
  * which is agbcc re-narrowing a u8-returning callee and is exactly what an
  * `int` return does not produce. */
 
-u8 sub_08039140(u16 x, s16 y, u8 w, u8 h)
+u8 sub_08039140(x, y, w, h)
+u16 x;
+s16 y;
+u8 w;
+u8 h;
 {
     int dx;
     int dy;

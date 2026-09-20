@@ -111,7 +111,7 @@ void sub_0805F2B4(void)
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
-            if ((s8)gMap->danger[gMap->rowOffset[y] + x] <= 0)
+            if (gMap->danger[gMap->rowOffset[y] + x] <= 0)
                 continue;
 
             new_var2 = 0x10;
@@ -123,10 +123,10 @@ void sub_0805F2B4(void)
                 score = 0;
 
             if (best <= score
-             && second > (s8)gMap->danger[gMap->rowOffset[y] + x])
+             && second > gMap->danger[gMap->rowOffset[y] + x])
             {
                 best = score;
-                new_var = gMap->danger[gMap->rowOffset[y] + x];
+                new_var = (u8)gMap->danger[gMap->rowOffset[y] + x];
                 second = new_var;
                 xp = (u32)x << 16;
                 yp = (u32)y << 16;

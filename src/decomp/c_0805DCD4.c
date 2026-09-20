@@ -63,7 +63,7 @@ void sub_0805DCD4(void)
 
     if (tx > 0)
     {
-      gUnknown_084995A0[(s8) gMap->property[gMap->rowOffset[ty] + tx]].unk03[0]++;
+      gUnknown_084995A0[gMap->property[gMap->rowOffset[ty] + tx]].unk03[0]++;
       ((struct Unk5DCD4Unit *)gUnknown_030040D8)->unk09_6--;
       if (bx != tx)
       {
