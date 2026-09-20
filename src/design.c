@@ -89,87 +89,87 @@ int sub_080012DC(int a)
     r = 0;
 
     switch (a) {
-    case 6:
+    case TERRAIN_CITY:
         r = 0x1c2;
         break;
-    case 38:
+    case TERRAIN_CITY_OS:
         r = 0x1c7;
         break;
-    case 70:
+    case TERRAIN_CITY_BM:
         r = 0x1cc;
         break;
-    case 102:
+    case TERRAIN_CITY_GE:
         r = 0x1d1;
         break;
-    case 134:
+    case TERRAIN_CITY_YC:
         r = 0x1d6;
         break;
 
-    case 8:
+    case TERRAIN_HQ:
         r = 0x1c0;
         break;
-    case 40:
+    case TERRAIN_HQ_OS:
         r = 0x1c5;
         break;
-    case 72:
+    case TERRAIN_HQ_BM:
         r = 0x1ca;
         break;
-    case 104:
+    case TERRAIN_HQ_GE:
         r = 0x1cf;
         break;
-    case 136:
+    case TERRAIN_HQ_YC:
         r = 0x1d4;
         break;
 
-    case 10:
+    case TERRAIN_AIRPORT:
         r = 0x1c3;
         break;
-    case 42:
+    case TERRAIN_AIRPORT_OS:
         r = 0x1c8;
         break;
-    case 74:
+    case TERRAIN_AIRPORT_BM:
         r = 0x1cd;
         break;
-    case 106:
+    case TERRAIN_AIRPORT_GE:
         r = 0x1d2;
         break;
-    case 138:
+    case TERRAIN_AIRPORT_YC:
         r = 0x1d7;
         break;
 
-    case 11:
+    case TERRAIN_PORT:
         r = 0x1c4;
         break;
-    case 43:
+    case TERRAIN_PORT_OS:
         r = 0x1c9;
         break;
-    case 75:
+    case TERRAIN_PORT_BM:
         r = 0x1ce;
         break;
-    case 107:
+    case TERRAIN_PORT_GE:
         r = 0x1d3;
         break;
-    case 139:
+    case TERRAIN_PORT_YC:
         r = 0x1d8;
         break;
 
-    case 14:
+    case TERRAIN_BASE:
         r = 0x1c1;
         break;
-    case 46:
+    case TERRAIN_BASE_OS:
         r = 0x1c6;
         break;
-    case 78:
+    case TERRAIN_BASE_BM:
         r = 0x1cb;
         break;
-    case 110:
+    case TERRAIN_BASE_GE:
         r = 0x1d0;
         break;
-    case 142:
+    case TERRAIN_BASE_YC:
         r = 0x1d5;
         break;
 
-    case 17:
+    case TERRAIN_SILO:
         r = 0x180;
         break;
     }
@@ -280,26 +280,26 @@ int GetTileWithShadow(int x, int y, int v)
         case TERRAIN_AIRPORT:
         case TERRAIN_PORT:
         case TERRAIN_BASE:
-        case 38:
-        case 40:
-        case 42:
-        case 43:
-        case 46:
-        case 70:
-        case 72:
-        case 74:
-        case 75:
-        case 78:
-        case 102:
-        case 104:
-        case 106:
-        case 107:
-        case 110:
-        case 134:
-        case 136:
-        case 138:
-        case 139:
-        case 142:
+        case TERRAIN_CITY_OS:
+        case TERRAIN_HQ_OS:
+        case TERRAIN_AIRPORT_OS:
+        case TERRAIN_PORT_OS:
+        case TERRAIN_BASE_OS:
+        case TERRAIN_CITY_BM:
+        case TERRAIN_HQ_BM:
+        case TERRAIN_AIRPORT_BM:
+        case TERRAIN_PORT_BM:
+        case TERRAIN_BASE_BM:
+        case TERRAIN_CITY_GE:
+        case TERRAIN_HQ_GE:
+        case TERRAIN_AIRPORT_GE:
+        case TERRAIN_PORT_GE:
+        case TERRAIN_BASE_GE:
+        case TERRAIN_CITY_YC:
+        case TERRAIN_HQ_YC:
+        case TERRAIN_AIRPORT_YC:
+        case TERRAIN_PORT_YC:
+        case TERRAIN_BASE_YC:
             for (i = 0; i <= 0x30; i++) {
                 if (v == *pa) {
                     if (*pb == 0x21 && IsTerrainAtCoordsType(x, y + 1, TERRAIN_MOUNTAIN))
@@ -355,26 +355,26 @@ int GetTileWithShadow2(int x, int y, int v)
         case TERRAIN_AIRPORT:
         case TERRAIN_PORT:
         case TERRAIN_BASE:
-        case 38:
-        case 40:
-        case 42:
-        case 43:
-        case 46:
-        case 70:
-        case 72:
-        case 74:
-        case 75:
-        case 78:
-        case 102:
-        case 104:
-        case 106:
-        case 107:
-        case 110:
-        case 134:
-        case 136:
-        case 138:
-        case 139:
-        case 142:
+        case TERRAIN_CITY_OS:
+        case TERRAIN_HQ_OS:
+        case TERRAIN_AIRPORT_OS:
+        case TERRAIN_PORT_OS:
+        case TERRAIN_BASE_OS:
+        case TERRAIN_CITY_BM:
+        case TERRAIN_HQ_BM:
+        case TERRAIN_AIRPORT_BM:
+        case TERRAIN_PORT_BM:
+        case TERRAIN_BASE_BM:
+        case TERRAIN_CITY_GE:
+        case TERRAIN_HQ_GE:
+        case TERRAIN_AIRPORT_GE:
+        case TERRAIN_PORT_GE:
+        case TERRAIN_BASE_GE:
+        case TERRAIN_CITY_YC:
+        case TERRAIN_HQ_YC:
+        case TERRAIN_AIRPORT_YC:
+        case TERRAIN_PORT_YC:
+        case TERRAIN_BASE_YC:
             for (i = 0; i <= 0x30; i++) {
                 if (v == *pa)
                     return *pb;

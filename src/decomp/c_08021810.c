@@ -82,7 +82,7 @@ void sub_08021810(u8 *a, u8 *b)
             case TERRAIN_AIRPORT:
             case TERRAIN_PORT:
             case TERRAIN_BASE:
-            case 20:
+            case TERRAIN_LAB:
                 gUnknown_030032D0[5]++;
                 gUnknown_030032D0[
                     gMap->terrain[gMap->rowOffset[y] + x] >> 5]++;
@@ -133,7 +133,7 @@ void sub_080219AC(void)
             case TERRAIN_PORT:
             case TERRAIN_BASE:
             case TERRAIN_SILO:
-            case 20:
+            case TERRAIN_LAB:
                 gUnknown_08499598[
                     gMap->terrain[gMap->rowOffset[y] + x] >> 5].unk11++;
                 gMap->property[gMap->rowOffset[y] + x] = n;
@@ -168,13 +168,13 @@ void sub_080219AC(void)
             case TERRAIN_PORT:
             case TERRAIN_BASE:
             case TERRAIN_SILO:
-            case 18:
-            case 20:
-            case 21:
-            case 22:
-            case 23:
-            case 24:
-            case 25:
+            case TERRAIN_SILO_USED:
+            case TERRAIN_LAB:
+            case TERRAIN_MINICANNON_S:
+            case TERRAIN_MINICANNON_N:
+            case TERRAIN_MINICANNON_W:
+            case TERRAIN_MINICANNON_E:
+            case TERRAIN_LASER:
                 if (n <= 0x5b)
                 {
                     gProperty[n].flags =

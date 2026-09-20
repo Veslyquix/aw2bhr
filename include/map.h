@@ -127,14 +127,28 @@ enum TerrainKind {
     TERRAIN_DEATHRAY = 0x1E,
     TERRAIN_BLOCKED = 0x1F, 
     
-    // Terrain repeats with each faction
-    TERRAIN_CITY_OS = 0x26, // Orange star 
-    TERRAIN_CITY_BM = 0x46, // Blue Moon 
-    TERRAIN_CITY_GE = 0x66, // Green Earth 
-    TERRAIN_CITY_YC = 0x86, // Yellow Comet 
-    // Black Hole (reuses one of these) 
-    
-    
+    // Property terrain repeats per owning faction: the army is OR'd into the
+    // top three bits (see MAP_OBJ_ARMY). Black Hole reuses one of these.
+    TERRAIN_CITY_OS = 0x26, // Orange Star
+    TERRAIN_CITY_BM = 0x46, // Blue Moon
+    TERRAIN_CITY_GE = 0x66, // Green Earth
+    TERRAIN_CITY_YC = 0x86, // Yellow Comet
+    TERRAIN_HQ_OS = 0x28, // Orange Star
+    TERRAIN_HQ_BM = 0x48, // Blue Moon
+    TERRAIN_HQ_GE = 0x68, // Green Earth
+    TERRAIN_HQ_YC = 0x88, // Yellow Comet
+    TERRAIN_AIRPORT_OS = 0x2A, // Orange Star
+    TERRAIN_AIRPORT_BM = 0x4A, // Blue Moon
+    TERRAIN_AIRPORT_GE = 0x6A, // Green Earth
+    TERRAIN_AIRPORT_YC = 0x8A, // Yellow Comet
+    TERRAIN_PORT_OS = 0x2B, // Orange Star
+    TERRAIN_PORT_BM = 0x4B, // Blue Moon
+    TERRAIN_PORT_GE = 0x6B, // Green Earth
+    TERRAIN_PORT_YC = 0x8B, // Yellow Comet
+    TERRAIN_BASE_OS = 0x2E, // Orange Star
+    TERRAIN_BASE_BM = 0x4E, // Blue Moon
+    TERRAIN_BASE_GE = 0x6E, // Green Earth
+    TERRAIN_BASE_YC = 0x8E, // Yellow Comet
 };
 
 #define MAP_OBJ_TERRAIN(f)   ((f) & 0x1f)

@@ -70,7 +70,7 @@ void sub_0803F990(void) {
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849FAC4[k], k, 1);
       break;
-    case 0x14:
+    case TERRAIN_LAB:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9A8, k, 1);
       break;
@@ -78,27 +78,27 @@ void sub_0803F990(void) {
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9B0, k, 1);
       break;
-    case 0x12:
+    case TERRAIN_SILO_USED:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9B8, k, 1);
       break;
-    case 0x15:
+    case TERRAIN_MINICANNON_S:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9D0, sub_08027198(5), 0);
       break;
-    case 0x16:
+    case TERRAIN_MINICANNON_N:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9D8, sub_08027198(5), 0);
       break;
-    case 0x17:
+    case TERRAIN_MINICANNON_W:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9C0, sub_08027198(5), 0);
       break;
-    case 0x18:
+    case TERRAIN_MINICANNON_E:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9C8, sub_08027198(5), 0);
       break;
-    case 0x19:
+    case TERRAIN_LASER:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9E0, sub_08027198(5), 0);
       break;
