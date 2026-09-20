@@ -5,6 +5,7 @@
 #include "gba/defines.h"
 
 #include "types.h"
+#include "map.h"
 
 #include "unknown-globals.h"
 #include "unknown-functions.h"

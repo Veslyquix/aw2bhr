@@ -49,4 +49,34 @@ struct Map
  * `gMap` instead of casting `gUnknown_08499590`. */
 extern struct Map *gMap;
 
+/* Wave 39 (W39-E), from sub_08028580. A 0xFF-terminated list of at most 0x5c
+ * four-byte entries. Byte 0 packs two fields -- `& 0xe0` selects the owning
+ * army (compared against gUnknown_084995F4[army]) and `& 0x1f` a terrain code,
+ * with 0xFF terminating -- and bytes 1 and 2 are the map x and y handed to
+ * sub_080240B4 / sub_0802419C. Byte 3 is never read here.
+ *
+ * IT MUST BE A STRUCT, not the flat `u8 [][4]` this declaration started as, and
+ * the difference is byte-visible: the ROM forms the element address ONCE
+ * (`lsls #2; add base`) and takes the three fields off it as `ldrb [r, #0]` /
+ * `[r, #1]` / `[r, #2]` displacements. Only a COMPONENT_REF preserves that --
+ * the flat array spells each field as its own address expression, and agbcc
+ * answers with separate `gUnknown_03003150 + 1` and `+ 2` force-addr pool words
+ * plus enough extra register pressure to spill a value the ROM keeps in a
+ * register. Same rule as the map header in src/decomp/c_08024058.c. */
+struct Unk03003150 /* 0x04 */
+{
+    /* 0x00 */ u8 flags;      /* `& 0xe0` selects the owning army and is compared
+                               * against gUnknown_084995F4[army]; `& 0x1f` is a
+                               * terrain code, with 8 distinguished; 0xFF
+                               * terminates the list. Plain masks off a `ldrb`,
+                               * not bitfields -- both are extracted with an
+                               * `ands` against a register-held constant. */
+    /* 0x01 */ u8 x;          /* map column, passed to sub_080240B4's s16 first
+                               * parameter with no narrowing in between */
+    /* 0x02 */ u8 y;          /* map row; `lsls #1` indexes rowOffset[] at
+                               * +0x417A, the c_08001158.c idiom */
+    /* 0x03 */ u8 filler_03[0x01];
+};
+extern struct Unk03003150 gUnknown_03003150[];
+
 #endif /* GUARD_MAP_H */
