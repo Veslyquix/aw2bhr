@@ -62,11 +62,11 @@ void sub_08076F34(ProcPtr proc)
                          1);
 
             if (sub_0803866C())
-                sub_08075298(proc, gUnknown_08615194[p->unk00].unk04,
+                sub_08075298(proc, gUnknown_08615194[p->unk00].hardModeStars,
                              gUnknown_0202FDFC.unk04 + 8,
                              gUnknown_0202FDFC.unk06 + 0xc, 0);
             else
-                sub_08075298(proc, gUnknown_08615194[p->unk00].unk03,
+                sub_08075298(proc, gUnknown_08615194[p->unk00].difficultyStars,
                              gUnknown_0202FDFC.unk04 + 8,
                              gUnknown_0202FDFC.unk06 + 0xc, 0);
 

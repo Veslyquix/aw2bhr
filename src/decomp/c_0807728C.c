@@ -29,7 +29,7 @@ void sub_080772B8(struct Unk080772B8 *p)
     u8 buf[8];
     int i;
 
-    sub_080733C8((s16)gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk00,
+    sub_080733C8((s16)gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID,
                  gUnknown_086145C8, buf);
 
     for (i = 0; i <= 4; i++)

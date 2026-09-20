@@ -111,7 +111,7 @@ void sub_0800081C(void)
     }
     else
     {
-        s8 *tbl = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+        s8 *tbl = gUnknown_085D3DD0[1].power[0].movementChart[0];
 
         index = MAP->terrain[MAP->rowOffset[gActiveMap->cursorY]
                              + gActiveMap->cursorX] & 0x1f;

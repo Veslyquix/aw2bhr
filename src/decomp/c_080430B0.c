@@ -49,8 +49,8 @@ int GetCoAttackBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
-    q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
+    p = gUnknown_085D3DD0[a].power[b].unk24[gUnknown_085D5ABC[c].unitClass];
+    q = gUnknown_085D3DD0[a].power[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;
@@ -68,8 +68,8 @@ int GetCoDefenceBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
-    q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
+    p = gUnknown_085D3DD0[a].power[b].unk24[gUnknown_085D5ABC[c].unitClass];
+    q = gUnknown_085D3DD0[a].power[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;
@@ -87,8 +87,8 @@ int GetCoMovementBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
-    q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
+    p = gUnknown_085D3DD0[a].power[b].unk24[gUnknown_085D5ABC[c].unitClass];
+    q = gUnknown_085D3DD0[a].power[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;
@@ -106,8 +106,8 @@ int GetCoRangeBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
-    q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
+    p = gUnknown_085D3DD0[a].power[b].unk24[gUnknown_085D5ABC[c].unitClass];
+    q = gUnknown_085D3DD0[a].power[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;

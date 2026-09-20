@@ -53,7 +53,7 @@ int sub_08075904(int a1)
     int i;
     int j;
 
-    p = gUnknown_08615194[a1].unk0c;
+    p = gUnknown_08615194[a1].mapSectionToColor;
 
     if (p == 0)
         return 0;
@@ -94,7 +94,7 @@ u8 sub_080759A0(int a1, int a2, u8 *a3)
 
     v = a2;
 
-    p = gUnknown_08615194[a1].unk0c;
+    p = gUnknown_08615194[a1].mapSectionToColor;
 
     if (p == 0)
         return 0;

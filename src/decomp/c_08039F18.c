@@ -17,6 +17,6 @@
 u8 *sub_08039F18(int a)
 {
     return gUnknown_08610A38[gUnknown_085D3DD0[gPlayers[a].co]
-                                 .unk38[gPlayers[a].coMode]
-                                 .unk00];
+                                 .power[gPlayers[a].coMode]
+                                 .powerNameId];
 }

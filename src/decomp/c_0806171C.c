@@ -107,8 +107,8 @@ void sub_08061788(u16 a)
 void sub_08061868(void)
 {
     gUnknown_030046B4 = sub_0803866C()
-        ? gUnknown_08615194[gPlaySt.mapID - 0x8a].unk28
-        : gUnknown_08615194[gPlaySt.mapID - 0x8a].unk24;
+        ? gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptHc
+        : gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptNc;
 
     sub_08061CDC();
     sub_08061CF8();

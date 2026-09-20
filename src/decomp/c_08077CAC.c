@@ -117,9 +117,9 @@ void sub_08077CAC(struct Unk8077CAC *proc)
         sub_08074EEC(2);
         sub_08013C54();
         sub_08037678();
-        sub_0807548C(gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk06
+        sub_0807548C(gUnknown_08615194[gUnknown_0202FDFC.unk0c].flagX
                          - gUnknown_0202FDFC.unk00 + 1,
-                     gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk08
+                     gUnknown_08615194[gUnknown_0202FDFC.unk0c].flagY
                          - gUnknown_0202FDFC.unk02 + 2,
                      2, proc);
         Proc_Break(proc);

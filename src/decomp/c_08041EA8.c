@@ -29,7 +29,7 @@ u8 sub_08041EA8(s16 x, s16 y, int t)
     if (gMap->unit[idx] != 0)
         return 0;
 
-    costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+    costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
 
     c = (gMap->terrain[idx] & 0x1f)
         + gUnknown_085D5ABC[t].movementType * 32;

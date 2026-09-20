@@ -52,8 +52,8 @@ void sub_0801F888(int a1)
         costs = gUnknown_085D3DD0[gPlaySt.coAbilities
                     ? gPlayers[gUnknown_03004480].co
                     : 1]
-                .unk38[gPlayers[gUnknown_03004480].coMode]
-                .unk18[gPlaySt.weather];
+                .power[gPlayers[gUnknown_03004480].coMode]
+                .movementChart[gPlaySt.weather];
         c = i + gUnknown_085D5ABC[a1].movementType * 32;
         *dst = costs[c];
     }

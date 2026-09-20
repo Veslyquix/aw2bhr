@@ -113,11 +113,11 @@ void sub_08077304(struct Unk8077304Proc * proc)
     sub_08072C40(0, 0, 0);
     sub_08072C40(2, 0, 0);
 
-    proc->unk34 = (s16)gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk00;
+    proc->unk34 = (s16)gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
     proc->unk2c = gUnknown_085C77A0[proc->unk34].unk18;
     proc->unk30 = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk10;
 
-    if (gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk20 == NULL)
+    if (gUnknown_08615194[gUnknown_0202FDFC.unk0c].coSelect == NULL)
     {
         arg = gUnknown_085C77A0[proc->unk34].unk3c[0];
         sub_08043E3C(arg,
@@ -130,7 +130,7 @@ void sub_08077304(struct Unk8077304Proc * proc)
         Decompress(gUnknown_081D1F74,
                    (void *)(0x060008C0 + (gUnknown_03002B6C.bits.chr_block << 14)));
         ApplyPaletteExt(gUnknown_081D208C, 0x20, 0x20);
-        proc->unk38 = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk20;
+        proc->unk38 = gUnknown_08615194[gUnknown_0202FDFC.unk0c].coSelect;
         proc->unk3c = 0;
     }
 

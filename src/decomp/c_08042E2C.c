@@ -37,7 +37,7 @@ int GetCoLuckBonus(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 10;
 
-    return gUnknown_085D3DD0[a].unk38[b].unk0e;
+    return gUnknown_085D3DD0[a].power[b].luckPositive;
 }
 
 asm(".global sub_08042E2C\n.thumb_set sub_08042E2C, GetCoLuckBonus\n");
@@ -74,7 +74,7 @@ int GetCoNegativeLuckBonus(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk38[b].unk10;
+    return gUnknown_085D3DD0[a].power[b].luckNegative;
 }
 
 asm(".global sub_08042E84\n.thumb_set sub_08042E84, GetCoNegativeLuckBonus\n");
@@ -108,7 +108,7 @@ int sub_08042EDC(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 100;
 
-    return gUnknown_085D3DD0[a].unk38[b].unk16 + 100;
+    return gUnknown_085D3DD0[a].power[b].captureRateModifier + 100;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -131,7 +131,7 @@ int sub_08042F34(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk08;
+    return gUnknown_085D3DD0[a].rainBringerPercent;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -154,7 +154,7 @@ int sub_08042F7C(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk06;
+    return gUnknown_085D3DD0[a].snowBringerPercent;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -184,7 +184,7 @@ int GetCoCounterattackBonus(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk38[b].unk12;
+    return gUnknown_085D3DD0[a].power[b].counterMultiplier;
 }
 
 asm(".global sub_08042FC4\n.thumb_set sub_08042FC4, GetCoCounterattackBonus\n");
@@ -218,7 +218,7 @@ u32 sub_0804301C(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk38[b].unk08;
+    return gUnknown_085D3DD0[a].power[b].specialAbilities;
 }
 
 /* Promoted from assembly; each function below is byte-for-byte

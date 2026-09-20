@@ -28,7 +28,7 @@ void EnsureValidTile(int x, int y)
         /* WAVE 37 final sweep: `.unk18` was `s8 *` when this function was
          * verified; W37-H later widened it to `s8 *[3]`. Element 0 is at the
          * same offset, so `[0]` is byte-identical to the spelling that matched. */
-        costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+        costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
 
         idx = gMap->rowOffset[y] + x;
         c = (gMap->terrain[idx] & 0x1f) + gUnknown_085D5ABC[v & 0x3f].movementType * 32;

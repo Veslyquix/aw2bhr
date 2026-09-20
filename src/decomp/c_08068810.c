@@ -45,7 +45,7 @@ void sub_08068810(int a1, int a2, int a3, int a4, u16 a5, u8 a6, ProcPtr parent)
     proc->unk30 = a5;
     proc->unk32 = a6;
     ApplyPalettes(gUnknown_0817DA18, a6 + 0x10, 1);
-    proc->unk2a = sub_08068038(gUnknown_08610A38[(tbl = gUnknown_085D3DD0)[a1].unk00], a5);
+    proc->unk2a = sub_08068038(gUnknown_08610A38[(tbl = gUnknown_085D3DD0)[a1].nameIndex], a5);
     proc->unk38 = a2;
     proc->unk39 = a3;
     proc->unk4e = a4;

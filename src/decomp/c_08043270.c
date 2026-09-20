@@ -36,7 +36,7 @@ int GetCoCostBonus(int a, int b, int c)
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk38[b].unk14;
+    return gUnknown_085D3DD0[a].power[b].unitCostModifier;
 }
 
 /* Family F038, the twin of GetCoCostBonus one member down: the ROM's
@@ -47,7 +47,7 @@ int GetCoVisionBonus(int a, int b)
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    return gUnknown_085D3DD0[a].unk38[b].unk0c;
+    return gUnknown_085D3DD0[a].power[b].visionBonus;
 }
 
 asm(".global sub_08043270\n.thumb_set sub_08043270, GetCoCostBonus\n"

@@ -33,7 +33,7 @@ void sub_08043AC0(int a, int b, int c)
 {
     int i = a % 24;
 
-    ApplyPaletteExt(gUnknown_084A0090[i % 24].unk08 + c * 16, (u16)(b * 0x20), 0x20);
+    ApplyPaletteExt(gUnknown_084A0090[i % 24].palette + c * 16, (u16)(b * 0x20), 0x20);
 }
 
 void sub_08043AFC(int a, int b)
@@ -47,7 +47,7 @@ void sub_08043AFC(int a, int b)
  */
 void sub_08043B14(int a, int b)
 {
-    Decompress(gUnknown_084A0090[a].unk04, (void *)(0x06010000 + (b & 0x3ff) * 32));
+    Decompress(gUnknown_084A0090[a].nameGraphic, (void *)(0x06010000 + (b & 0x3ff) * 32));
 }
 
 void sub_08043B44(int a)
@@ -89,10 +89,10 @@ void sub_08043BA4(int a, int b, int c)
  */
 void sub_08043BC8(int a, int b)
 {
-    Decompress(gUnknown_084A0090[a].unk00[0], (void *)(0x06010000 + (b & 0x3ff) * 32));
+    Decompress(gUnknown_084A0090[a].fullBody[0], (void *)(0x06010000 + (b & 0x3ff) * 32));
 }
 
 void sub_08043BF8(int a, int b)
 {
-    Decompress(gUnknown_084A0090[a].unk00[1], (void *)(0x06010000 + ((b + 0x80) & 0x3ff) * 32));
+    Decompress(gUnknown_084A0090[a].fullBody[1], (void *)(0x06010000 + ((b + 0x80) & 0x3ff) * 32));
 }

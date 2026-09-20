@@ -23,7 +23,7 @@ void sub_080445A8(struct Unk080445A8Proc *proc)
     sub_0801DA94();
 
     if (gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
-            .unk1c[gPlayers[gUnknown_030033EC].unk1f - 1].unk04 == NULL)
+            .power[gPlayers[gUnknown_030033EC].unk1f - 1].animationCondition == NULL)
     {
         Proc_End(proc);
     }

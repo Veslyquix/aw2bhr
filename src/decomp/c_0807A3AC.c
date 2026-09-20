@@ -146,5 +146,5 @@ int sub_0807A3AC(int a, int b)
         }
     }
 
-    return gUnknown_085D3DD0[a].unk34;
+    return gUnknown_085D3DD0[a].victoryQuote;
 }

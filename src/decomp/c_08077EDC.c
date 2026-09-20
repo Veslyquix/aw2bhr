@@ -23,7 +23,7 @@
  * lands on the wrong side of the literal pool, which is -4 bytes of alignment. */
 void sub_08077EDC(ProcPtr proc)
 {
-    void *p = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk14;
+    void *p = gUnknown_08615194[gUnknown_0202FDFC.unk0c].preBattleDialogue;
     u8 (*f)(void) = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk2c;
 
     if (p != NULL)

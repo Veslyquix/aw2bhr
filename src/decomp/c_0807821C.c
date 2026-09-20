@@ -16,7 +16,7 @@
 
 bool8 sub_0807821C(int i)
 {
-    if (gUnknown_08615194[i].unk02 & 0x10)
+    if (gUnknown_08615194[i].specialProperty & 0x10)
         return 1;
 
     return 0;

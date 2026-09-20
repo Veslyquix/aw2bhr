@@ -49,7 +49,7 @@ void sub_08043E8C(int a1, u16 *a2, int a3)
     u16 v;
 
     src = gUnknown_02017C50;
-    sub_08011C68(gUnknown_084A0090[a1].unk18, src, 0x180);
+    sub_08011C68(gUnknown_084A0090[a1].miniPortrait, src, 0x180);
     for (j = 0; j < 12; j++)
     {
         for (i = 0; i < 16; i++)
@@ -78,5 +78,5 @@ void sub_08043E8C(int a1, u16 *a2, int a3)
     if (a3 <= 14)
         sub_08043AA0(a1, a3);
     else
-        CpuFastSet(gUnknown_084A0090[a1 % 24].unk08 + sub_08017860(a1 % 24) * 16, (void *)a3, 8);
+        CpuFastSet(gUnknown_084A0090[a1 % 24].palette + sub_08017860(a1 % 24) * 16, (void *)a3, 8);
 }

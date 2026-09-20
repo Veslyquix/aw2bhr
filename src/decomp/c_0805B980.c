@@ -123,7 +123,7 @@ void sub_0805BAFC(int x, int y, int t, u16 *out)
     if (gMap->unit[idx] != 0)
         return;
 
-    costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+    costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
 
     c = (gMap->terrain[idx] & 0x1f)
         + gUnknown_085D5ABC[t].movementType * 32;
@@ -174,7 +174,7 @@ int sub_0805BBF8(int x, int y)
     if (gMap->unit[idx] != 0)
         return 0;
 
-    costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+    costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
 
     c = (gMap->terrain[idx] & 0x1f)
         + gUnknown_085D5ABC[1].movementType * 32;

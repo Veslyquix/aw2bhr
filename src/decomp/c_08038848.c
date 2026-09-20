@@ -67,8 +67,8 @@ void sub_08038848(s8 a, s8 b)
     costs = gUnknown_085D3DD0[gPlaySt.coAbilities
                 ? gPlayers[(gUnknown_03003F38 >> 6) + 1].co
                 : 1]
-            .unk38[gPlayers[(gUnknown_03003F38 >> 6) + 1].coMode]
-            .unk18[gPlaySt.weather];
+            .power[gPlayers[(gUnknown_03003F38 >> 6) + 1].coMode]
+            .movementChart[gPlaySt.weather];
 
     map = gMap;
 

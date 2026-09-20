@@ -23,8 +23,8 @@ void sub_08044B28(int a1, int a2, ProcPtr a3)
     gPlayers[a1].unk1f = a2;
 
     gUnknown_085D3DD0[gPlayers[a1].co]
-        .unk38[gPlayers[a1].unk1f].unk04(a3);
+        .power[gPlayers[a1].unk1f].powerAssembly(a3);
 
     gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
-        .unk1c[gPlayers[gUnknown_030033EC].unk1f - 1].unk0c(0);
+        .power[gPlayers[gUnknown_030033EC].unk1f - 1].onActivate(0);
 }

@@ -9,6 +9,6 @@
 
 void sub_08043E3C(int a, void *b, int c)
 {
-    Decompress(gUnknown_084A0090[a % 24].unk0c[a / 24], b);
+    Decompress(gUnknown_084A0090[a % 24].face[a / 24], b);
     sub_08043AA0(a, c);
 }

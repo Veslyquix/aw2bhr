@@ -4088,20 +4088,20 @@ struct Unk085C77A0 /* 0x5c */
  * wrong base. Anything citing the old numbering wants +8 added to it. */
 struct Unk085D3DD0Entry /* 0x44 */
 {
-    /* 0x00 */ u32 unk00; /* indexes gUnknown_08610A38 (sub_08039F18) */
-    /* 0x04 */ void (*unk04)(void *); /* wave 32 (W32-C): sub_08044B28 loads it
+    /* 0x00 */ u32 powerNameId; /* indexes gUnknown_08610A38 (sub_08039F18) */
+    /* 0x04 */ void (*powerAssembly)(void *); /* wave 32 (W32-C): sub_08044B28 loads it
                                        * and calls it through `bl _call_via_r1`
                                        * with its own ProcPtr argument in r0 --
                                        * r1 holds the pointer, so exactly one
                                        * argument. */
-    /* 0x08 */ u32 unk08;
-    /* 0x0c */ s16 unk0c; /* `ldrsh`, sub_080432A8 (K = 0x44 = 0x38 + 0x0c) */
-    /* 0x0e */ s16 unk0e;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14; /* `ldrsh`, sub_08043270 (K = 0x4c = 0x38 + 0x14) */
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s8 *unk18[3]; /* Wave 34, W34-F. A pointer to a [movement type][32
+    /* 0x08 */ u32 specialAbilities;
+    /* 0x0c */ s16 visionBonus; /* `ldrsh`, sub_080432A8 (K = 0x44 = 0x38 + 0x0c) */
+    /* 0x0e */ s16 luckPositive;
+    /* 0x10 */ s16 luckNegative;
+    /* 0x12 */ s16 counterMultiplier;
+    /* 0x14 */ s16 unitCostModifier; /* `ldrsh`, sub_08043270 (K = 0x4c = 0x38 + 0x14) */
+    /* 0x16 */ s16 captureRateModifier;
+    /* 0x18 */ s8 *movementChart[3]; /* Wave 34, W34-F. A pointer to a [movement type][32
                            * terrain] table of SIGNED cost bytes: sub_08041EA8
                            * reads `unk18[(cell & 0x1f) + gUnknown_085D5ABC[t]
                            * .unk19 * 32]` with `movs r0,#0; ldrsb r0,[r3,r0]`
@@ -4134,9 +4134,27 @@ struct Unk085D3DD0Entry /* 0x44 */
                                * struct is byte-identical and NOT ruled out. */
 };
 
+/* The per-CO data table, indexed by gPlayers[].co. Field names nameIndex,
+ * music, snowBringerPercent, rainBringerPercent, coPowerStars,
+ * superCoPowerStars, copQuote, victoryQuote and power, and every name on
+ * struct Unk085D3DD0Entry, come from the 'aw2co' Nightmare module -- a
+ * community ROM-editor definition, not this tree's work and not SRR_AW2's;
+ * that repo only carries a copy of the module set.
+ *
+ * The module's flat offsets are what revealed the shape this tree had already
+ * found: its three named groups at 0x38, 0x7C and 0xC0 are 0x44 apart, which
+ * is exactly unk38[3] -- one Unk085D3DD0Entry per power level, day-to-day,
+ * CO power and super CO power, the same 0/1/2 that gPlayers[].coMode holds.
+ * unk20[6] likewise lines up with its six COP quotes and Entry's
+ * movementChart[3] with its normal/snow/rain movement charts, all three of
+ * which were derived here independently before the module was consulted.
+ *
+ * NOT applied: the module calls +0x14 'Army Sprites' (two bytes), but
+ * sub_08039948 reads +0x14 as a bare `ldrb` switched over 0..3, so that one
+ * is left alone. +0x16 'Colour' has no corroboration here either. */
 struct Unk085D3DD0 /* 0x104 */
 {
-    /* 0x00 */ u32 unk00; /* Wave 36, W36-K: carved out of filler_00[0x04]. A
+    /* 0x00 */ u32 nameIndex; /* Wave 36, W36-K: carved out of filler_00[0x04]. A
                            * subscript into gUnknown_08610A38[] (the same role
                            * unk38[..].unk00 plays at +0x38): sub_080686E8 and
                            * sub_08068810 both do `ldr` at the row base and then
@@ -4145,20 +4163,30 @@ struct Unk085D3DD0 /* 0x104 */
                            * so not four filler bytes. Start offset unchanged,
                            * so the carve is byte-neutral for every other
                            * reader. */
-    /* 0x04 */ u16 unk04;
-    /* 0x06 */ s16 unk06; /* both `ldrsh`, sub_08042F7C and sub_08042F34 */
-    /* 0x08 */ s16 unk08;
+    /* 0x04 */ u16 music;
+    /* 0x06 */ s16 snowBringerPercent; /* both `ldrsh`, sub_08042F7C and sub_08042F34 */
+    /* 0x08 */ s16 rainBringerPercent;
     /* 0x0a */ u8 filler_0a[0x02];
-    /* 0x0c */ int unk0c; /* wave 25: two per-terrain WORD multipliers, read
+    /* 0x0c */ int coPowerStars; /* This CO power's star count, and
+                           * superCoPowerStars at +0x10 is the super's. Read
                            * `ldr` off `adds r3,#0xc` / `adds r3,#0x10` on the
                            * bare table symbol with the x0x104 outer index, by
-                           * sub_080441D4 and sub_08044208 respectively. Each
-                           * multiplies sub_0804419C's percentage, so they are
-                           * the two income/repair rates for the terrain named
-                           * by gPlayers[army].unk1d. Signedness is
-                           * unproved -- `muls` is byte-neutral -- so `int` is
-                           * the weakest model that fits. */
-    /* 0x10 */ int unk10;
+                           * sub_080441D4 and sub_08044208, each of which
+                           * returns `sub_0804419C(army) * <this>` -- a
+                           * per-star cost times a star count, which is what
+                           * fixes the meaning. Whole words here; the Nightmare
+                           * module declares only the low byte of each.
+                           * Signedness unproved -- `muls` is byte-neutral -- so
+                           * `int` is the weakest model that fits.
+                           *
+                           * WAVE 25 READ THIS PAIR WRONG and the old note is
+                           * worth recording: it called them "the two income/
+                           * repair rates for the terrain named by
+                           * gPlayers[army].unk1d". That field is gPlayers[].co,
+                           * a CO id and not a terrain, so the subscript was
+                           * misread and the per-terrain reading followed from
+                           * it. */
+    /* 0x10 */ int superCoPowerStars;
     /* 0x14 */ u8 unk14; /* Wave 34 (W34-H): sub_08039948 switches on it with a
                           * bare `ldrb r1,[r0,#0x14]` over cases 0..3, each
                           * arm picking one of four (unk2c, unk30) offset pairs
@@ -4183,7 +4211,7 @@ struct Unk085D3DD0 /* 0x104 */
                           * register index of the veneer is what fixes the
                           * arity. Carved out of filler_17, offsets
                           * unchanged. */
-    /* 0x20 */ u16 unk20[0x06]; /* Wave 30, W30-A: sub_080398D0 picks one of
+    /* 0x20 */ u16 copQuote[0x06]; /* Wave 30, W30-A: sub_080398D0 picks one of
                                  * SIX with `sub_080129E0() % 6` and hands it
                                  * to sub_080397F4(u16). The `adds r4,#0x20` on
                                  * the bare table symbol -- kept in r4 across
@@ -4192,7 +4220,7 @@ struct Unk085D3DD0 /* 0x104 */
                                  * unk38. The extent is proved by the modulus,
                                  * not by the layout. */
     /* 0x2c */ u8 filler_2c[0x08];
-    /* 0x34 */ u16 unk34; /* Wave 55 (W55-B), carved out of filler_2c without
+    /* 0x34 */ u16 victoryQuote; /* Wave 55 (W55-B), carved out of filler_2c without
                            * moving anything: sub_0807A3AC's fallback return is
                            * `ldrh r0,[r1,#0x34]` off `gUnknown_085D3DD0[a]`
                            * (the `(a*64+a)*4` stride synthesis), reached
@@ -4200,14 +4228,15 @@ struct Unk085D3DD0 /* 0x104 */
                            * only -- a `ldrh` feeding an `int` return signs
                            * nothing. */
     /* 0x36 */ u8 filler_36[0x02];
-    /* 0x38 */ struct Unk085D3DD0Entry unk38[3];
+    /* 0x38 */ struct Unk085D3DD0Entry power[3];
 };
 
 /* The per-unit-type stats table. Field names cost, movement, maxAmmo,
  * vision, minRange, maxRange, maxFuel, transportTable, unitClass,
  * movementType, deployLocation, baseDamage, repairTable and fuelCost come
- * from the 'Advance Wars 2 Unit Editor' Nightmare module (SRR_AW2's
- * 'AW2 Updated Nightmare Modules'), which describes 24 records of 0x5c bytes
+ * from the 'Advance Wars 2 Unit Editor' Nightmare module -- a community
+ * ROM-editor definition, not this tree's or SRR_AW2's own work; that repo
+ * merely carries a copy. It describes 24 records of 0x5c bytes
  * at 0x085D5B18. THIS array starts one record EARLIER, at 0x085D5ABC -- the
  * terrain table above it ends exactly there -- so our index is the module's
  * plus one and element 0 is a dummy. c_0805B980.c reaching [23] for a
@@ -4353,14 +4382,28 @@ struct Unk085D5ABC /* 0x5c */
 /* Stride 0x30, proved by `lsls #1; adds rI,rI,r0; lsls #4` (x*3*16) in
  * sub_0807821C. 16 users across 0x08074xxx-0x08077xxx; only unk02 is named so
  * far, a flag byte whose bit 4 sub_0807821C reports as a bool. */
+/* The campaign map headers, indexed by `gPlaySt.mapID - 0x8a`. Field names
+ * come from the 'Advance Wars 2 Campaign Header Editor' Nightmare module, a
+ * community ROM-editor definition that neither this tree nor SRR_AW2 wrote.
+ *
+ * Two shapes derived here independently are what the module explains: wave 28
+ * had unk06/unk08 as an (x, y) pair handed to sub_08074C84, which the module
+ * names Flag X and Flag Y; and wave 54 had difficultyStars/hardModeStars as a
+ * byte pair sub_08076F34 picks between on sub_0803866C(), which is the same
+ * normal-versus-hard selector that picks between factoryScriptNc and
+ * factoryScriptHc at 0x24/0x28 -- so sub_0803866C() is the hard-mode flag and
+ * unk18/unk1c are very likely a third NC/HC pair the module leaves unnamed.
+ *
+ * NOT applied: the module calls +0x10 'Map Description', two bytes, but this
+ * tree has a whole-word nullable pointer there. */
 struct Unk08615194 /* 0x30 */
 {
-    /* 0x00 */ u16 unk00; /* wave 26: sub_08077F30 reads it with `ldrh` and
+    /* 0x00 */ u16 mapID; /* wave 26: sub_08077F30 reads it with `ldrh` and
                            * stores it into the u8 gPlaySt.unk02, so
                            * the slot really is a halfword and only its low byte
                            * survives. It was filler until this wave. */
-    /* 0x02 */ u8 unk02;
-    /* 0x03 */ u8 unk03; /* wave 54 (W54-F): a PAIR of byte slots sub_08076F34
+    /* 0x02 */ u8 specialProperty;
+    /* 0x03 */ u8 difficultyStars; /* wave 54 (W54-F): a PAIR of byte slots sub_08076F34
                           * picks between on sub_0803866C() and hands to
                           * sub_08075298's `int` second parameter -- exactly the
                           * unk24/unk28 and unk18/unk1c shape one record along,
@@ -4368,15 +4411,15 @@ struct Unk08615194 /* 0x30 */
                           * record base with no extension after them. Carved out
                           * of filler_03; 0x05 is still filler and every later
                           * offset is unchanged. */
-    /* 0x04 */ u8 unk04;
+    /* 0x04 */ u8 hardModeStars;
     /* 0x05 */ u8 filler_05[0x01];
-    /* 0x06 */ s16 unk06; /* wave 28, W28-B: sub_080749FC reads unk06 and unk08
+    /* 0x06 */ s16 flagX; /* wave 28, W28-B: sub_080749FC reads unk06 and unk08
                            * with register-offset `ldrsh` and hands both to
                            * sub_08074C84's two `s32` parameters -- an (x, y)
                            * pair, and signed on the load's own evidence. */
-    /* 0x08 */ s16 unk08;
+    /* 0x08 */ s16 flagY;
     /* 0x0a */ u8 filler_0a[0x02];
-    /* 0x0c */ const void *unk0c; /* wave 38 (W38-E): a nullable pointer to a
+    /* 0x0c */ const void *mapSectionToColor; /* wave 38 (W38-E): a nullable pointer to a
                              * 4-byte header plus a tile-id blob -- u8 x, u8 y,
                              * u8 width, u8 height, then a `const u8 *` at +0x04
                              * pointing at width*height palette-bank ids.
@@ -4394,7 +4437,7 @@ struct Unk08615194 /* 0x30 */
                              * +0x30 word, exactly the unk20 shape below. The
                              * WORD width is what is proved; `void *` follows
                              * unk14/unk24 because nothing dereferences it. */
-    /* 0x14 */ void *unk14; /* wave 35 (W35-B): sub_08077EDC `ldr`s it, null-
+    /* 0x14 */ void *preBattleDialogue; /* wave 35 (W35-B): sub_08077EDC `ldr`s it, null-
                              * checks it and hands it to sub_08078540's `void *`
                              * first parameter -- the same role and the same
                              * word-wide-pointer-with-unknown-pointee reading as
@@ -4409,7 +4452,7 @@ struct Unk08615194 /* 0x30 */
                              * by the `ldr`; the pointee is not, so `void *` for
                              * the same reason unk24/unk28 carry it. */
     /* 0x1c */ void *unk1c;
-    /* 0x20 */ void *unk20; /* Wave 54 (W54-F), carved out of filler_20; same
+    /* 0x20 */ void *coSelect; /* Wave 54 (W54-F), carved out of filler_20; same
                              * extent, so nothing moves. sub_08077304 `ldr`s it,
                              * NULL-CHECKS it and, when it is non-null, stores it
                              * into its own proc's +0x38 word -- the null check
@@ -4418,13 +4461,13 @@ struct Unk08615194 /* 0x30 */
                              * gUnknown_081D1F74 and a sub_08043E3C of the
                              * record's own unk3c[0]. `void *` because nothing
                              * dereferences it. */
-    /* 0x24 */ void *unk24; /* wave 26: a pair of word slots sub_08077F30
+    /* 0x24 */ void *factoryScriptNc; /* wave 26: a pair of word slots sub_08077F30
                              * selects between with sub_0803866C() and publishes
                              * as gUnknown_030046B4. Both are plain `ldr`s and
                              * nothing in the ROM yet dereferences the result,
                              * so `void *` is a guess at the pointee -- the word
                              * width is what is proved. */
-    /* 0x28 */ void *unk28;
+    /* 0x28 */ void *factoryScriptHc;
     /* 0x2c */ u8 (*unk2c)(void); /* wave 35 (W35-B): a FUNCTION POINTER, and
                              * sub_08077EDC is decisive about both halves of the
                              * type. It loads the word, tests it against NULL and
@@ -9534,10 +9577,10 @@ extern const struct ProcCmd gUnknown_0849E7D8[];
  * so unk1f is 1-based. */
 struct Unk084A0090Entry /* 0x14 */
 {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 unk01;
+    /* 0x00 */ u8 unitAnimation;
+    /* 0x01 */ u8 unitAnimationPalette;
     /* 0x02 */ u8 filler_02[0x02];
-    /* 0x04 */ bool8 (*unk04)(void *); /* Wave 45, W45-A: a FUNCTION POINTER,
+    /* 0x04 */ bool8 (*animationCondition)(void *); /* Wave 45, W45-A: a FUNCTION POINTER,
                               * retyped from `void *`. sub_080445A8 only tests
                               * it against NULL, which is byte-identical either
                               * way and could not settle it; sub_08044610 is the
@@ -9550,27 +9593,44 @@ struct Unk084A0090Entry /* 0x14 */
                               * bool8 (*)(void *). Producer and consumer now
                               * agree independently. c_080445A8.c re-verified
                               * byte-identical after the retype. */
-    /* 0x08 */ void (*unk08)(void *); /* Wave 45, W45-A: named out of the old
+    /* 0x08 */ void (*onEachUnit)(void *); /* Wave 45, W45-A: named out of the old
                               * filler_08, which nothing read. sub_08044610
                               * calls it `bl _call_via_r1` off record + 0x24 on
                               * both arms of its terrain test, again with the
                               * unit record in r0, and DISCARDS the result --
                               * so one argument and void. The companion of
                               * unk04 above: unk04 asks, unk08 acts. */
-    /* 0x0c */ void (*unk0c)(void *); /* `bl _call_via_r1` with a literal 0 */
-    /* 0x10 */ s16 unk10[2]; /* Wave 34 (W34-H): a TWO-frame animation pair,
-                              * subscripted by the gUnknown_030043F8 toggle in
+    /* 0x0c */ void (*onActivate)(void *); /* `bl _call_via_r1` with a literal 0 */
+    /* 0x10 */ s16 sound[2]; /* The two sound ids for this power level.
+                              * Subscripted by the gUnknown_030043F8 toggle in
                               * sub_08039ACC and read `ldrsh`, which is what
                               * makes it signed and the extent exactly 2 --
-                              * that toggle only ever holds 0 or 1. */
+                              * that toggle only ever holds 0 or 1.
+                              *
+                              * WAVE 34 (W34-H) CALLED THIS A TWO-FRAME
+                              * ANIMATION PAIR. It is not: the value's only
+                              * consumer is sub_0803B4DC, which
+                              * include/unknown-functions.h already documents as
+                              * taking a sound id. The extent and signedness
+                              * that wave established still stand. */
 };
 
+/* The per-CO presentation table -- portraits, palettes and the two CO-power
+ * hooks -- indexed by gPlayers[].co, beside the stats in gUnknown_085D3DD0.
+ * Field names come from the 'CO Other Editor' Nightmare module, a community
+ * ROM-editor definition that neither this tree nor SRR_AW2 authored.
+ *
+ * The module's flat offsets confirm two shapes this tree had already derived:
+ * its CO Face / Face Happy / Face Sad pointers at 0x0c/0x10/0x14 are face[3]
+ * (Decompress(.face[a / 24]) in c_08043E3C.c picks the variant), and its COP
+ * and SCOP blocks at 0x1c and 0x30 are 0x14 apart, which is power[2] -- one
+ * Unk084A0090Entry per power level, subscripted `gPlayers[].unk1f - 1`. */
 struct Unk084A0090 /* 0x44 */
 {
-    /* 0x00 */ u8 **unk00;
-    /* 0x04 */ u8 *unk04;
-    /* 0x08 */ u16 *unk08;
-    /* 0x0c */ u8 *unk0c[3]; /* Wave 35 (W35-A): an ARRAY of Decompress
+    /* 0x00 */ u8 **fullBody;
+    /* 0x04 */ u8 *nameGraphic;
+    /* 0x08 */ u16 *palette;
+    /* 0x0c */ u8 *face[3]; /* Wave 35 (W35-A): an ARRAY of Decompress
                               * sources, not a single pointer. sub_08043E3C
                               * loads `[rec + 0xc + (a / 24) * 4]` in one go --
                               * the +0xc and the scaled index are added to the
@@ -9581,8 +9641,8 @@ struct Unk084A0090 /* 0x44 */
                               * (frame, slot) selector. Nothing else in
                               * src/decomp/ named unk0c, so nothing had to
                               * change with it. */
-    /* 0x18 */ void *unk18;
-    /* 0x1c */ struct Unk084A0090Entry unk1c[2];
+    /* 0x18 */ void *miniPortrait;
+    /* 0x1c */ struct Unk084A0090Entry power[2];
 };
 extern const struct Unk084A0090 gUnknown_084A0090[];
 /* A single 16-colour palette in ROM. sub_08043B44 hands it to

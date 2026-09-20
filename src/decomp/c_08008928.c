@@ -59,7 +59,7 @@ int sub_08008928(void)
              * verified; W37-H later widened it to `s8 *[3]`. Element 0 is at
              * the same offset, so `[0]` is byte-identical to the spelling that
              * matched -- this is a declaration change, not a behaviour one. */
-            costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+            costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
 
             idx = gMap->rowOffset[y] + x;
             c = (gMap->terrain[idx] & 0x1f)

@@ -102,8 +102,8 @@ void sub_08044610(struct Unk08044610Proc *proc)
 
         if (unit->unk00 != 0
             && gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
-                   .unk1c[gPlayers[gUnknown_030033EC].unk1f - 1]
-                   .unk04(unit) != 0)
+                   .power[gPlayers[gUnknown_030033EC].unk1f - 1]
+                   .animationCondition(unit) != 0)
         {
             m = gMap;
             idx = m->rowOffset[unit->unk03] + unit->unk02;
@@ -111,8 +111,8 @@ void sub_08044610(struct Unk08044610Proc *proc)
             if (m->unk234A[idx] == 0 || (unit->unk01 & 8) != 0)
             {
                 gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
-                    .unk1c[gPlayers[gUnknown_030033EC].unk1f - 1]
-                    .unk08(unit);
+                    .power[gPlayers[gUnknown_030033EC].unk1f - 1]
+                    .onEachUnit(unit);
 
                 proc->unk68++;
                 break;
@@ -125,8 +125,8 @@ void sub_08044610(struct Unk08044610Proc *proc)
                     return;
 
                 gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
-                    .unk1c[gPlayers[gUnknown_030033EC].unk1f - 1]
-                    .unk08(unit);
+                    .power[gPlayers[gUnknown_030033EC].unk1f - 1]
+                    .onEachUnit(unit);
 
                 x = unit->unk02;
                 y = unit->unk03;
