@@ -16,9 +16,6 @@
 
 #include "map.h"
 static inline u8 flags(int f) { return f; }
-static inline u8 terrain(u8 f) { return f & 0x1f; }
-static inline u8 army(u8 f) { return (f & 0xe0) >> 5; }
-
 void sub_0803F990(void) {
   int k;
   int h;
@@ -46,8 +43,8 @@ void sub_0803F990(void) {
     if (cx > gUnknown_03003150[i].x || gUnknown_03003150[i].x > cx + w ||
         cy > gUnknown_03003150[i].y || gUnknown_03003150[i].y > cy + h)
       continue;
-    k = army(gUnknown_03003150[i].flags);
-    switch (terrain(gUnknown_03003150[i].flags)) {
+    k = MAP_OBJ_ARMY(gUnknown_03003150[i].flags);
+    switch (MAP_OBJ_TERRAIN(gUnknown_03003150[i].flags)) {
     case 6:
       sub_0803F908(gUnknown_03003150[i].x, gUnknown_03003150[i].y,
                    gUnknown_0849F990, k, 1);

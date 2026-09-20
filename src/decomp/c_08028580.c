@@ -119,7 +119,7 @@ void sub_08028580(struct Unk28580 *p)
 
     for (i = 0; i <= 0x5b && gUnknown_03003150[i].flags != 0xff; i++)
     {
-        if ((gUnknown_03003150[i].flags & 0xe0) == gUnknown_084995F4[p->unk64])
+        if (MAP_OBJ_ARMY_MASK(gUnknown_03003150[i].flags) == gUnknown_084995F4[p->unk64])
         {
             v = gMap->unit[
                     gMap->rowOffset[
@@ -132,7 +132,7 @@ void sub_08028580(struct Unk28580 *p)
                 unit->unk05_3 = 0;
             }
 
-            if ((gUnknown_03003150[i].flags & 0x1f) == 8)
+            if (MAP_OBJ_TERRAIN(gUnknown_03003150[i].flags) == 8)
             {
                 gMap->terrain[
                     gMap->rowOffset[
@@ -147,7 +147,7 @@ void sub_08028580(struct Unk28580 *p)
                 gMap->terrain[
                     gMap->rowOffset[
                         gUnknown_03003150[i].y] + gUnknown_03003150[i].x]
-                            = (gUnknown_03003150[i].flags & 0x1f)
+                            = MAP_OBJ_TERRAIN(gUnknown_03003150[i].flags)
                             | gUnknown_084995F4[team];
                 sub_080240B4(gUnknown_03003150[i].x, gUnknown_03003150[i].y,
                              gUnknown_084995F4[team]);

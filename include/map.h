@@ -79,4 +79,8 @@ struct Unk03003150 /* 0x04 */
 };
 extern struct Unk03003150 gUnknown_03003150[];
 
+#define MAP_OBJ_TERRAIN(f)   ((f) & 0x1f)
+#define MAP_OBJ_ARMY(f)      (((f) & 0xe0) >> 5)
+#define MAP_OBJ_ARMY_MASK(f) ((f) & 0xe0)
+
 #endif /* GUARD_MAP_H */
