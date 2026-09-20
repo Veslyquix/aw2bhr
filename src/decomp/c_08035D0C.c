@@ -53,23 +53,23 @@ u16 sub_08035D0C(ProcPtr proc)
                 (((struct Unk35D0CProc *)proc)->unk44 + 8) / 16]
                        + (((struct Unk35D0CProc *)proc)->unk42 + 8) / 16] & 0x1f)
     {
-    case 2:
-    case 7:
-    case 19:
+    case TERRAIN_RIVER:
+    case TERRAIN_SEA:
+    case TERRAIN_REEF:
         return 0x2d;
-    case 3:
+    case TERRAIN_MOUNTAIN:
         return 0x4b;
-    case 4:
-    case 13:
+    case TERRAIN_WOOD:
+    case TERRAIN_SHOAL:
         return 0x47;
-    case 1:
-    case 5:
-    case 6:
-    case 8:
-    case 10:
-    case 11:
-    case 12:
-    case 14:
+    case TERRAIN_PLAIN:
+    case TERRAIN_ROAD:
+    case TERRAIN_CITY:
+    case TERRAIN_HQ:
+    case TERRAIN_AIRPORT:
+    case TERRAIN_PORT:
+    case TERRAIN_BRIDGE:
+    case TERRAIN_BASE:
         return 0x29;
     }
 

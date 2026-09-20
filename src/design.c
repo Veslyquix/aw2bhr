@@ -273,13 +273,13 @@ int GetTileWithShadow(int x, int y, int v)
         off += x;
 
         switch (gMap->terrain[off]) {
-        case 3:
-        case 4:
-        case 6:
-        case 8:
-        case 10:
-        case 11:
-        case 14:
+        case TERRAIN_MOUNTAIN:
+        case TERRAIN_WOOD:
+        case TERRAIN_CITY:
+        case TERRAIN_HQ:
+        case TERRAIN_AIRPORT:
+        case TERRAIN_PORT:
+        case TERRAIN_BASE:
         case 38:
         case 40:
         case 42:
@@ -348,13 +348,13 @@ int GetTileWithShadow2(int x, int y, int v)
         off += x;
 
         switch (gMap->terrain[off]) {
-        case 3:
-        case 4:
-        case 6:
-        case 8:
-        case 10:
-        case 11:
-        case 14:
+        case TERRAIN_MOUNTAIN:
+        case TERRAIN_WOOD:
+        case TERRAIN_CITY:
+        case TERRAIN_HQ:
+        case TERRAIN_AIRPORT:
+        case TERRAIN_PORT:
+        case TERRAIN_BASE:
         case 38:
         case 40:
         case 42:

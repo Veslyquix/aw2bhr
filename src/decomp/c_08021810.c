@@ -77,11 +77,11 @@ void sub_08021810(u8 *a, u8 *b)
         {
             switch (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f)
             {
-            case 6:
-            case 8:
-            case 10:
-            case 11:
-            case 14:
+            case TERRAIN_CITY:
+            case TERRAIN_HQ:
+            case TERRAIN_AIRPORT:
+            case TERRAIN_PORT:
+            case TERRAIN_BASE:
             case 20:
                 gUnknown_030032D0[5]++;
                 gUnknown_030032D0[
@@ -127,12 +127,12 @@ void sub_080219AC(void)
         {
             switch (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f)
             {
-            case 6:
-            case 8:
-            case 10:
-            case 11:
-            case 14:
-            case 17:
+            case TERRAIN_CITY:
+            case TERRAIN_HQ:
+            case TERRAIN_AIRPORT:
+            case TERRAIN_PORT:
+            case TERRAIN_BASE:
+            case TERRAIN_SILO:
             case 20:
                 gUnknown_08499598[
                     gMap->terrain[gMap->rowOffset[y] + x] >> 5].unk11++;
@@ -159,15 +159,15 @@ void sub_080219AC(void)
         {
             switch (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f)
             {
-            case 16:
+            case TERRAIN_PIPE_SEAM:
                 if (gUnknown_03003FC0.unk01 != 5)
                     break;
-            case 6:
-            case 8:
-            case 10:
-            case 11:
-            case 14:
-            case 17:
+            case TERRAIN_CITY:
+            case TERRAIN_HQ:
+            case TERRAIN_AIRPORT:
+            case TERRAIN_PORT:
+            case TERRAIN_BASE:
+            case TERRAIN_SILO:
             case 18:
             case 20:
             case 21:

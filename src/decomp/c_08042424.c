@@ -43,9 +43,9 @@ u8 sub_08042424(s16 x, s16 y)
 
     switch (gMap->terrain[off] & 0x1f)
     {
-    case 0xa:
-    case 0xb:
-    case 0xe:
+    case TERRAIN_AIRPORT:
+    case TERRAIN_PORT:
+    case TERRAIN_BASE:
         return TRUE;
     default:
         return FALSE;

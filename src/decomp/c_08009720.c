@@ -19,12 +19,12 @@ int sub_08009720(int x, int y)
 
     switch (terrain)
     {
-    case 7:
-    case 0xD:
-    case 0x13:
+    case TERRAIN_SEA:
+    case TERRAIN_SHOAL:
+    case TERRAIN_REEF:
         r = 1;
         break;
-    case 2:
+    case TERRAIN_RIVER:
         r = sub_080094EC(x, y);
         break;
     }

@@ -19,17 +19,17 @@ void sub_0802D5E8(s16 a1, s16 a2)
 
     switch (gMap->terrain[off] & 0x1f)
     {
-    case 6:
-    case 8:
-    case 14:
+    case TERRAIN_CITY:
+    case TERRAIN_HQ:
+    case TERRAIN_BASE:
         v = 7;
         break;
 
-    case 10:
+    case TERRAIN_AIRPORT:
         v = 0x10;
         break;
 
-    case 11:
+    case TERRAIN_PORT:
         v = 0x20;
         break;
     }

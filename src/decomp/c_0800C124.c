@@ -34,7 +34,7 @@ void sub_0800C124(int x, int y)
     {
         switch (gMap->terrain[gMap->rowOffset[y] + x])
         {
-        case 7:
+        case TERRAIN_SEA:
             sub_08007CA0(x, y);
             if (gMap->tile[gMap->rowOffset[y] + x] != 0x2A)
             {
@@ -43,10 +43,10 @@ void sub_0800C124(int x, int y)
             }
             break;
 
-        case 0xD:
+        case TERRAIN_SHOAL:
             break;
 
-        case 0x13:
+        case TERRAIN_REEF:
             break;
         }
     }

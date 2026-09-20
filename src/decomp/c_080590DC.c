@@ -42,11 +42,11 @@ void sub_080590DC(void *a1)
       }
       switch (gMap->terrain[gMap->rowOffset[i] + j] & 0x1f)
       {
-        case 7:
+        case TERRAIN_SEA:
 
-        case 0xb:
+        case TERRAIN_PORT:
 
-        case 0xd:
+        case TERRAIN_SHOAL:
           t = gUnknown_03003340[i][j];
           best = t;
           v.raw = (i << 16) | ((u16) j);

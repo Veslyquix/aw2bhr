@@ -94,6 +94,7 @@ void EnsureValidTile(int x, int y);
 
 
 enum TerrainKind {
+    TERRAIN_NONE = 0,
     TERRAIN_PLAIN = 1,
     TERRAIN_RIVER = 2,
     TERRAIN_MOUNTAIN = 3,
@@ -102,6 +103,7 @@ enum TerrainKind {
     TERRAIN_CITY = 6,
     TERRAIN_SEA = 7,
     TERRAIN_HQ = 8,
+    TERRAIN_UNK = 9,
     TERRAIN_AIRPORT = 0xA,
     TERRAIN_PORT = 0xB,
     TERRAIN_BRIDGE = 0xC,
@@ -110,7 +112,29 @@ enum TerrainKind {
     TERRAIN_PIPE = 0xF,
     TERRAIN_PIPE_SEAM = 0x10,
     TERRAIN_SILO = 0x11,
+    TERRAIN_SILO_USED = 0x12,
     TERRAIN_REEF = 0x13,
+    TERRAIN_LAB = 0x14,
+    TERRAIN_MINICANNON_S = 0x15,
+    TERRAIN_MINICANNON_N = 0x16,
+    TERRAIN_MINICANNON_W = 0x17,
+    TERRAIN_MINICANNON_E = 0x18,
+    TERRAIN_LASER = 0x19,
+    TERRAIN_CANNON_S = 0x1A,
+    TERRAIN_CANNON_N = 0x1B,
+    TERRAIN_VOLCANO = 0x1C,
+    TERRAIN_FACTORY = 0x1D,
+    TERRAIN_DEATHRAY = 0x1E,
+    TERRAIN_BLOCKED = 0x1F, 
+    
+    // Terrain repeats with each faction
+    TERRAIN_CITY_OS = 0x26, // Orange star 
+    TERRAIN_CITY_BM = 0x46, // Blue Moon 
+    TERRAIN_CITY_GE = 0x66, // Green Earth 
+    TERRAIN_CITY_YC = 0x86, // Yellow Comet 
+    // Black Hole (reuses one of these) 
+    
+    
 };
 
 #define MAP_OBJ_TERRAIN(f)   ((f) & 0x1f)

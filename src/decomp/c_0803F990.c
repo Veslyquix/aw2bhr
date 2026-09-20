@@ -45,11 +45,11 @@ void sub_0803F990(void) {
       continue;
     k = MAP_OBJ_ARMY(gProperty[i].flags);
     switch (MAP_OBJ_TERRAIN(gProperty[i].flags)) {
-    case 6:
+    case TERRAIN_CITY:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F990, k, 1);
       break;
-    case 0xE:
+    case TERRAIN_BASE:
       if (gMap->unk234A[gMap->rowOffset[gProperty[i].y] +
                         gProperty[i].x] != 0)
         sub_0803F908(gProperty[i].x, gProperty[i].y,
@@ -58,15 +58,15 @@ void sub_0803F990(void) {
         sub_0803F908(gProperty[i].x, gProperty[i].y,
                      gUnknown_0849FAB0[0], 0, 1);
       break;
-    case 0xA:
+    case TERRAIN_AIRPORT:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F998, k, 1);
       break;
-    case 0xB:
+    case TERRAIN_PORT:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9A0, k, 1);
       break;
-    case 8:
+    case TERRAIN_HQ:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849FAC4[k], k, 1);
       break;
@@ -74,7 +74,7 @@ void sub_0803F990(void) {
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9A8, k, 1);
       break;
-    case 0x11:
+    case TERRAIN_SILO:
       sub_0803F908(gProperty[i].x, gProperty[i].y,
                    gUnknown_0849F9B0, k, 1);
       break;

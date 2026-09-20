@@ -45,13 +45,13 @@ int sub_0800AFCC(int x, int y)
 {
     switch (MAP->terrain[MAP->rowOffset[y] + x] & 0x1f)
     {
-    case 3:
-    case 4:
-    case 6:
-    case 8:
-    case 10:
-    case 11:
-    case 14:
+    case TERRAIN_MOUNTAIN:
+    case TERRAIN_WOOD:
+    case TERRAIN_CITY:
+    case TERRAIN_HQ:
+    case TERRAIN_AIRPORT:
+    case TERRAIN_PORT:
+    case TERRAIN_BASE:
         return 1;
     }
 
