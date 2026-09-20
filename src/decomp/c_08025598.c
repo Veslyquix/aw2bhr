@@ -19,7 +19,7 @@ u8 sub_08025598(s16 a1, s16 a2)
     if ((u16)id == 0)
         return 0;
 
-    if (gUnknown_08499598[((u16)id >> 6) + 1].turnState & 2)
+    if (gPlayers[((u16)id >> 6) + 1].turnState & 2)
         return 1;
 
     return 0;

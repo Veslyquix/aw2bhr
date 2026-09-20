@@ -16,18 +16,18 @@ void sub_08005874(void)
 {
     sub_0801F150(0, (void *)(0x06000000 + (gUnknown_03002B6C.bits.chr_block << 14)), 0x2FC, 10);
     sub_0801F234(9);
-    if (sub_0803CCB8(0, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(0, gDesignRoomName) != 1)
         sub_08004D74(1, 0);
     else
-        sub_08004D90(1, 0, gUnknown_0200B204);
-    if (sub_0803CCB8(1, gUnknown_0200B204) != 1)
+        sub_08004D90(1, 0, gDesignRoomName);
+    if (sub_0803CCB8(1, gDesignRoomName) != 1)
         sub_08004D74(1, 1);
     else
-        sub_08004D90(1, 1, gUnknown_0200B204);
-    if (sub_0803CCB8(2, gUnknown_0200B204) != 1)
+        sub_08004D90(1, 1, gDesignRoomName);
+    if (sub_0803CCB8(2, gDesignRoomName) != 1)
         sub_08004D74(1, 2);
     else
-        sub_08004D90(1, 2, gUnknown_0200B204);
+        sub_08004D90(1, 2, gDesignRoomName);
     gActiveMap->unk46 = 0x15;
     gActiveMap->unk48 = 0x30;
     sub_0801A444(3, 2, 0xA, 4);

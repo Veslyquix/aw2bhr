@@ -31,26 +31,26 @@ void SetDefaultRules(void)
 
     sub_08026900();
 
-    gPlaySt.unk30 = 0;
-    gPlaySt.unk31 = 0;
+    gPlaySt.turnLimit = 0;
+    gPlaySt.captureLimit = 0;
     gPlaySt.propertyFunds = 1000;
     gPlaySt.unk24 = 0;
     gPlaySt.unk10[1] = 0;
     gPlaySt.unk10[2] = 0;
     gPlaySt.unk10[3] = 0;
     gPlaySt.unk10[4] = 0;
-    gPlaySt.unk0d = 0;
-    gPlaySt.unk2f = 0;
-    gPlaySt.unk2c = 0;
-    gPlaySt.unk2d = 0;
+    gPlaySt.fog = 0;
+    gPlaySt.defaultWeather = 0;
+    gPlaySt.weather = 0;
+    gPlaySt.randomWeatherOn = 0;
     gPlaySt.unk2e = 0;
-    gPlaySt.unk04 = 3;
+    gPlaySt.event20 = 3;
     gPlaySt.dispMiniPanel = 1;
-    gPlaySt.unk06 = 0;
+    gPlaySt.campaignRelated = 0;
     gPlaySt.coAbilities = 1;
-    gPlaySt.unk07 = 1;
-    gPlaySt.unk09 = gUnknown_0200C420.unk0e;
-    gPlaySt.unk0c = (gUnknown_0200C420.unk14 == 0);
+    gPlaySt.eventRelated = 1;
+    gPlaySt.animOpts = gUnknown_0200C420.unk0e;
+    gPlaySt.bgmOn = (gUnknown_0200C420.unk14 == 0);
 }
 
 asm(".global sub_08034780\n.thumb_set sub_08034780, SetDefaultRules\n");

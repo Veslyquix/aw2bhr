@@ -11,7 +11,7 @@ void sub_08022AF8(u8 a, u8 b, u8 c, u8 d)
 {
     u8 t;
 
-    t = (u32)gUnknown_03004008 % 33;
+    t = (u32)gGameClock % 33;
 
     if (t < 5)
         t = 2;

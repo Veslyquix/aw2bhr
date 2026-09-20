@@ -33,15 +33,15 @@ void sub_0802D0F4(void)
     sub_08034F48();
     sub_0801A168();
 
-    if (gPlaySt.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
     {
-        if (gPlaySt.unk0d == 0)
+        if (gPlaySt.fog == 0)
         {
             sub_08025B80((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
             gUnknown_03004074 = 0;
         }
 
-        if (gPlaySt.unk32 != 0)
+        if (gPlaySt.savingEnabled != 0)
             sub_08034534(0xa, gUnknown_03003F38, 0, 0);
     }
 

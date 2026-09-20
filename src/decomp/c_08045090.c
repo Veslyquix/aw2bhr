@@ -9,7 +9,7 @@
 
 #include "proc.h"
 /* Every fifth call (unk2b is a frame divider), advance to the next live army
- * whose gUnknown_08499598 unk2a differs from the current one's, then walk that
+ * whose gPlayers unk2a differs from the current one's, then walk that
  * army's 50 gUnknown_08499594 slots from unk29 looking for the first live,
  * unflagged unit; decay its unk04_0 by `unk2d * 10` with a floor of 1, start
  * the 0x080452C0 popup for it and stop. unk29 is the resume cursor and wraps
@@ -68,7 +68,7 @@ void sub_08045090(struct Unk45090Proc *proc)
 
         if (sub_080266DC(i))
         {
-            if (gUnknown_08499598[i].team != gUnknown_08499598[proc->unk2c].team)
+            if (gPlayers[i].team != gPlayers[proc->unk2c].team)
                 break;
         }
 

@@ -1,400 +1,381 @@
 #include "global.h"
-#include "map.h"
 #include "hardware.h"
+#include "map.h"
 
+void MakeTileSimple(int x, int y, int val) {
+  if (val < 0)
+    return;
 
-void MakeTileSimple(int x, int y, int val)
-{
-    if (val < 0)
-        return;
-
-    gMap->tile[
-        gMap->rowOffset[y] + x] = val & 0x1FF;
+  gMap->tile[gMap->rowOffset[y] + x] = val & 0x1FF;
 }
 
 asm(".global sub_08001158\n.thumb_set sub_08001158, MakeTileSimple\n");
 
-int IsTerrainAtCoordsType(int x, int y, int k)
-{
-    if (x < 0 || y < 0 || y > gMap->height - 1 ||
-        x > gMap->width - 1)
-        return 0;
+int IsTerrainAtCoordsType(int x, int y, int k) {
+  if (x < 0 || y < 0 || y > gMap->height - 1 || x > gMap->width - 1)
+    return 0;
 
-    return gMap->terrain[
-        gMap->rowOffset[y] + x] == k;
+  return gMap->terrain[gMap->rowOffset[y] + x] == k;
 }
 
 asm(".global sub_0800119C\n.thumb_set sub_0800119C, IsTerrainAtCoordsType\n");
 
-void SetTerrainAt(int x, int y, int val)
-{
-    gMap->terrain[
-        gMap->rowOffset[y] + x] = val;
+void SetTerrainAt(int x, int y, int val) {
+  gMap->terrain[gMap->rowOffset[y] + x] = val;
 
-    if (val == TERRAIN_SEA)
-        EnsureValidTile(x, y);
+  if (val == TERRAIN_SEA)
+    EnsureValidTile(x, y);
 }
 
 asm(".global sub_080011F4\n.thumb_set sub_080011F4, SetTerrainAt\n");
 
-int GetDesignRoomOption(int a)
-{
-    switch (a & 0x1f) {
-    case TERRAIN_PLAIN:
-        return TERRAIN_PLAIN;
-    case TERRAIN_RIVER:
-        return TERRAIN_RIVER;
-    case TERRAIN_MOUNTAIN:
-        return TERRAIN_MOUNTAIN;
-    case TERRAIN_WOOD:
-        return TERRAIN_WOOD;
-    case TERRAIN_ROAD:
-        return TERRAIN_ROAD;
-    case TERRAIN_CITY:
-        return TERRAIN_CITY;
-    case TERRAIN_SEA:
-        return TERRAIN_SEA;
-    case TERRAIN_HQ:
-        return TERRAIN_HQ;
-    case TERRAIN_AIRPORT:
-        return TERRAIN_AIRPORT;
-    case TERRAIN_PORT:
-        return TERRAIN_PORT;
-    case TERRAIN_BRIDGE:
-        return TERRAIN_BRIDGE;
-    case TERRAIN_SHOAL:
-        return TERRAIN_SHOAL;
-    case TERRAIN_BASE:
-        return TERRAIN_BASE;
-    case TERRAIN_REEF:
-        return TERRAIN_REEF;
-    case TERRAIN_PIPE:
-        return TERRAIN_PIPE;
-    case TERRAIN_PIPE_SEAM:
-        return TERRAIN_PIPE_SEAM;
-    case TERRAIN_SILO:
-        return TERRAIN_SILO;
-    }
+int GetDesignRoomOption(int a) {
+  switch (a & 0x1f) {
+  case TERRAIN_PLAIN:
+    return TERRAIN_PLAIN;
+  case TERRAIN_RIVER:
+    return TERRAIN_RIVER;
+  case TERRAIN_MOUNTAIN:
+    return TERRAIN_MOUNTAIN;
+  case TERRAIN_WOOD:
+    return TERRAIN_WOOD;
+  case TERRAIN_ROAD:
+    return TERRAIN_ROAD;
+  case TERRAIN_CITY:
+    return TERRAIN_CITY;
+  case TERRAIN_SEA:
+    return TERRAIN_SEA;
+  case TERRAIN_HQ:
+    return TERRAIN_HQ;
+  case TERRAIN_AIRPORT:
+    return TERRAIN_AIRPORT;
+  case TERRAIN_PORT:
+    return TERRAIN_PORT;
+  case TERRAIN_BRIDGE:
+    return TERRAIN_BRIDGE;
+  case TERRAIN_SHOAL:
+    return TERRAIN_SHOAL;
+  case TERRAIN_BASE:
+    return TERRAIN_BASE;
+  case TERRAIN_REEF:
+    return TERRAIN_REEF;
+  case TERRAIN_PIPE:
+    return TERRAIN_PIPE;
+  case TERRAIN_PIPE_SEAM:
+    return TERRAIN_PIPE_SEAM;
+  case TERRAIN_SILO:
+    return TERRAIN_SILO;
+  }
 
-    return 0;
+  return 0;
 }
 
 asm(".global sub_08001230\n.thumb_set sub_08001230, GetDesignRoomOption\n");
 
+int sub_080012DC(int a) {
+  int r;
 
+  r = 0;
 
-int sub_080012DC(int a)
-{
-    int r;
+  switch (a) {
+  case TERRAIN_CITY:
+    r = 0x1c2;
+    break;
+  case TERRAIN_CITY_OS:
+    r = 0x1c7;
+    break;
+  case TERRAIN_CITY_BM:
+    r = 0x1cc;
+    break;
+  case TERRAIN_CITY_GE:
+    r = 0x1d1;
+    break;
+  case TERRAIN_CITY_YC:
+    r = 0x1d6;
+    break;
 
-    r = 0;
+  case TERRAIN_HQ:
+    r = 0x1c0;
+    break;
+  case TERRAIN_HQ_OS:
+    r = 0x1c5;
+    break;
+  case TERRAIN_HQ_BM:
+    r = 0x1ca;
+    break;
+  case TERRAIN_HQ_GE:
+    r = 0x1cf;
+    break;
+  case TERRAIN_HQ_YC:
+    r = 0x1d4;
+    break;
 
-    switch (a) {
-    case TERRAIN_CITY:
-        r = 0x1c2;
-        break;
-    case TERRAIN_CITY_OS:
-        r = 0x1c7;
-        break;
-    case TERRAIN_CITY_BM:
-        r = 0x1cc;
-        break;
-    case TERRAIN_CITY_GE:
-        r = 0x1d1;
-        break;
-    case TERRAIN_CITY_YC:
-        r = 0x1d6;
-        break;
+  case TERRAIN_AIRPORT:
+    r = 0x1c3;
+    break;
+  case TERRAIN_AIRPORT_OS:
+    r = 0x1c8;
+    break;
+  case TERRAIN_AIRPORT_BM:
+    r = 0x1cd;
+    break;
+  case TERRAIN_AIRPORT_GE:
+    r = 0x1d2;
+    break;
+  case TERRAIN_AIRPORT_YC:
+    r = 0x1d7;
+    break;
 
-    case TERRAIN_HQ:
-        r = 0x1c0;
-        break;
-    case TERRAIN_HQ_OS:
-        r = 0x1c5;
-        break;
-    case TERRAIN_HQ_BM:
-        r = 0x1ca;
-        break;
-    case TERRAIN_HQ_GE:
-        r = 0x1cf;
-        break;
-    case TERRAIN_HQ_YC:
-        r = 0x1d4;
-        break;
+  case TERRAIN_PORT:
+    r = 0x1c4;
+    break;
+  case TERRAIN_PORT_OS:
+    r = 0x1c9;
+    break;
+  case TERRAIN_PORT_BM:
+    r = 0x1ce;
+    break;
+  case TERRAIN_PORT_GE:
+    r = 0x1d3;
+    break;
+  case TERRAIN_PORT_YC:
+    r = 0x1d8;
+    break;
 
-    case TERRAIN_AIRPORT:
-        r = 0x1c3;
-        break;
-    case TERRAIN_AIRPORT_OS:
-        r = 0x1c8;
-        break;
-    case TERRAIN_AIRPORT_BM:
-        r = 0x1cd;
-        break;
-    case TERRAIN_AIRPORT_GE:
-        r = 0x1d2;
-        break;
-    case TERRAIN_AIRPORT_YC:
-        r = 0x1d7;
-        break;
+  case TERRAIN_BASE:
+    r = 0x1c1;
+    break;
+  case TERRAIN_BASE_OS:
+    r = 0x1c6;
+    break;
+  case TERRAIN_BASE_BM:
+    r = 0x1cb;
+    break;
+  case TERRAIN_BASE_GE:
+    r = 0x1d0;
+    break;
+  case TERRAIN_BASE_YC:
+    r = 0x1d5;
+    break;
 
-    case TERRAIN_PORT:
-        r = 0x1c4;
-        break;
-    case TERRAIN_PORT_OS:
-        r = 0x1c9;
-        break;
-    case TERRAIN_PORT_BM:
-        r = 0x1ce;
-        break;
-    case TERRAIN_PORT_GE:
-        r = 0x1d3;
-        break;
-    case TERRAIN_PORT_YC:
-        r = 0x1d8;
-        break;
+  case TERRAIN_SILO:
+    r = 0x180;
+    break;
+  }
 
-    case TERRAIN_BASE:
-        r = 0x1c1;
-        break;
-    case TERRAIN_BASE_OS:
-        r = 0x1c6;
-        break;
-    case TERRAIN_BASE_BM:
-        r = 0x1cb;
-        break;
-    case TERRAIN_BASE_GE:
-        r = 0x1d0;
-        break;
-    case TERRAIN_BASE_YC:
-        r = 0x1d5;
-        break;
-
-    case TERRAIN_SILO:
-        r = 0x180;
-        break;
-    }
-
-    return r;
+  return r;
 }
 
-int IsTerrainLand(int x, int y)
-{
-    struct Map *map = gMap;
-    int v;
-    int w;
-    int s;
-    int r;
+int IsTerrainLand(int x, int y) {
+  struct Map *map = gMap;
+  int v;
+  int w;
+  int s;
+  int r;
 
-    v = map->terrain[map->rowOffset[y] + x];
+  v = map->terrain[map->rowOffset[y] + x];
 
-    if (v == TERRAIN_RIVER)
-        s = sub_080094EC(x, y);
-    else
-        s = 0;
+  if (v == TERRAIN_RIVER)
+    s = sub_080094EC(x, y);
+  else
+    s = 0;
 
-    w = sub_08008C34(x, y);
+  w = sub_08008C34(x, y);
 
-    r = 0;
-    if (v != TERRAIN_SEA && v != TERRAIN_SHOAL && v != TERRAIN_REEF && w == 0 &&
-        s == 0)
-        r = 1;
+  r = 0;
+  if (v != TERRAIN_SEA && v != TERRAIN_SHOAL && v != TERRAIN_REEF && w == 0 &&
+      s == 0)
+    r = 1;
 
-    return r;
+  return r;
 }
 
 asm(".global sub_080015E4\n.thumb_set sub_080015E4, IsTerrainLand\n");
 
-int IsTerrainWater(int x, int y)
-{
-    struct Map *map = gMap;
-    int v;
-    int r;
+int IsTerrainWater(int x, int y) {
+  struct Map *map = gMap;
+  int v;
+  int r;
 
-    v = map->terrain[map->rowOffset[y] + x];
+  v = map->terrain[map->rowOffset[y] + x];
 
-    r = 0;
+  r = 0;
 
-    if (v != TERRAIN_SEA && v != TERRAIN_SHOAL)
-        r = (v != TERRAIN_REEF);
+  if (v != TERRAIN_SEA && v != TERRAIN_SHOAL)
+    r = (v != TERRAIN_REEF);
 
-    return r;
+  return r;
 }
 
 asm(".global sub_0800164C\n.thumb_set sub_0800164C, IsTerrainWater\n");
 
-int IsTerrainWaterOrRiver(int x, int y)
-{
-    struct Map *map = gMap;
-    int v;
-    int r;
+int IsTerrainWaterOrRiver(int x, int y) {
+  struct Map *map = gMap;
+  int v;
+  int r;
 
-    v = map->terrain[map->rowOffset[y] + x];
+  v = map->terrain[map->rowOffset[y] + x];
 
-    r = 0;
+  r = 0;
 
-    if (v != TERRAIN_SEA && v != TERRAIN_SHOAL && v != TERRAIN_REEF)
-        r = (v != TERRAIN_RIVER);
+  if (v != TERRAIN_SEA && v != TERRAIN_SHOAL && v != TERRAIN_REEF)
+    r = (v != TERRAIN_RIVER);
 
-    return r;
+  return r;
 }
 
 asm(".global sub_0800168C\n.thumb_set sub_0800168C, IsTerrainWaterOrRiver\n");
 
-int GetTileWithShadow_unkMapA22(int x, int y)
-{
-    struct Map *map = gMap;
+int GetTileWithShadow_unkMapA22(int x, int y) {
+  struct Map *map = gMap;
 
-    return GetTileWithShadow(x, y, map->tile[map->rowOffset[y] + x]);
+  return GetTileWithShadow(x, y, map->tile[map->rowOffset[y] + x]);
 }
 
 asm(".global sub_080016D0\n.thumb_set sub_080016D0, "
     "GetTileWithShadow_unkMapA22\n");
 
+int GetTileWithShadow(int x, int y, int v) {
+  const s16 *pa;
+  const s16 *pb;
+  int off;
+  int i;
 
-int GetTileWithShadow(int x, int y, int v)
-{
-    const s16 *pa;
-    const s16 *pb;
-    int off;
-    int i;
+  pa = gUnknown_0848591C[0];
+  pb = gUnknown_0848591C[1];
 
-    pa = gUnknown_0848591C[0];
-    pb = gUnknown_0848591C[1];
-
-    if (x <= 0) {
-        for (i = 0; i <= 0x30; i++) {
-            if (v == *pb)
-                return *pa;
-            pa++;
-            pb++;
-        }
-    } else {
-        off = gMap->rowOffset[y] - 1;
-        off += x;
-
-        switch (gMap->terrain[off]) {
-        case TERRAIN_MOUNTAIN:
-        case TERRAIN_WOOD:
-        case TERRAIN_CITY:
-        case TERRAIN_HQ:
-        case TERRAIN_AIRPORT:
-        case TERRAIN_PORT:
-        case TERRAIN_BASE:
-        case TERRAIN_CITY_OS:
-        case TERRAIN_HQ_OS:
-        case TERRAIN_AIRPORT_OS:
-        case TERRAIN_PORT_OS:
-        case TERRAIN_BASE_OS:
-        case TERRAIN_CITY_BM:
-        case TERRAIN_HQ_BM:
-        case TERRAIN_AIRPORT_BM:
-        case TERRAIN_PORT_BM:
-        case TERRAIN_BASE_BM:
-        case TERRAIN_CITY_GE:
-        case TERRAIN_HQ_GE:
-        case TERRAIN_AIRPORT_GE:
-        case TERRAIN_PORT_GE:
-        case TERRAIN_BASE_GE:
-        case TERRAIN_CITY_YC:
-        case TERRAIN_HQ_YC:
-        case TERRAIN_AIRPORT_YC:
-        case TERRAIN_PORT_YC:
-        case TERRAIN_BASE_YC:
-            for (i = 0; i <= 0x30; i++) {
-                if (v == *pa) {
-                    if (*pb == 0x21 && IsTerrainAtCoordsType(x, y + 1, TERRAIN_MOUNTAIN))
-                        return 3;
-                    return *pb;
-                }
-                pa++;
-                pb++;
-            }
-            break;
-        default:
-            for (i = 0; i <= 0x30; i++) {
-                if (v == *pb)
-                    return *pa;
-                pa++;
-                pb++;
-            }
-            break;
-        }
+  if (x <= 0) {
+    for (i = 0; i <= 0x30; i++) {
+      if (v == *pb)
+        return *pa;
+      pa++;
+      pb++;
     }
+  } else {
+    off = gMap->rowOffset[y] - 1;
+    off += x;
 
-    return -1;
+    switch (gMap->terrain[off]) {
+    case TERRAIN_MOUNTAIN:
+    case TERRAIN_WOOD:
+    case TERRAIN_CITY:
+    case TERRAIN_HQ:
+    case TERRAIN_AIRPORT:
+    case TERRAIN_PORT:
+    case TERRAIN_BASE:
+    case TERRAIN_CITY_OS:
+    case TERRAIN_HQ_OS:
+    case TERRAIN_AIRPORT_OS:
+    case TERRAIN_PORT_OS:
+    case TERRAIN_BASE_OS:
+    case TERRAIN_CITY_BM:
+    case TERRAIN_HQ_BM:
+    case TERRAIN_AIRPORT_BM:
+    case TERRAIN_PORT_BM:
+    case TERRAIN_BASE_BM:
+    case TERRAIN_CITY_GE:
+    case TERRAIN_HQ_GE:
+    case TERRAIN_AIRPORT_GE:
+    case TERRAIN_PORT_GE:
+    case TERRAIN_BASE_GE:
+    case TERRAIN_CITY_YC:
+    case TERRAIN_HQ_YC:
+    case TERRAIN_AIRPORT_YC:
+    case TERRAIN_PORT_YC:
+    case TERRAIN_BASE_YC:
+      for (i = 0; i <= 0x30; i++) {
+        if (v == *pa) {
+          if (*pb == 0x21 && IsTerrainAtCoordsType(x, y + 1, TERRAIN_MOUNTAIN))
+            return 3;
+          return *pb;
+        }
+        pa++;
+        pb++;
+      }
+      break;
+    default:
+      for (i = 0; i <= 0x30; i++) {
+        if (v == *pb)
+          return *pa;
+        pa++;
+        pb++;
+      }
+      break;
+    }
+  }
+
+  return -1;
 }
 
 asm(".global sub_08001704\n.thumb_set sub_08001704, GetTileWithShadow\n");
 
-int GetTileWithShadow2(int x, int y, int v)
-{
-    const s16 *pa;
-    const s16 *pb;
-    int off;
-    int i;
+int GetTileWithShadow2(int x, int y, int v) {
+  const s16 *pa;
+  const s16 *pb;
+  int off;
+  int i;
 
-    pa = gUnknown_0848591C[0];
-    pb = gUnknown_0848591C[1];
+  pa = gUnknown_0848591C[0];
+  pb = gUnknown_0848591C[1];
 
-    if (x <= 0) {
-        for (i = 0; i <= 0x30; i++) {
-            if (v == *pb)
-                return *pa;
-            pa++;
-            pb++;
-        }
-    } else {
-        off = gMap->rowOffset[y] - 1;
-        off += x;
-
-        switch (gMap->terrain[off]) {
-        case TERRAIN_MOUNTAIN:
-        case TERRAIN_WOOD:
-        case TERRAIN_CITY:
-        case TERRAIN_HQ:
-        case TERRAIN_AIRPORT:
-        case TERRAIN_PORT:
-        case TERRAIN_BASE:
-        case TERRAIN_CITY_OS:
-        case TERRAIN_HQ_OS:
-        case TERRAIN_AIRPORT_OS:
-        case TERRAIN_PORT_OS:
-        case TERRAIN_BASE_OS:
-        case TERRAIN_CITY_BM:
-        case TERRAIN_HQ_BM:
-        case TERRAIN_AIRPORT_BM:
-        case TERRAIN_PORT_BM:
-        case TERRAIN_BASE_BM:
-        case TERRAIN_CITY_GE:
-        case TERRAIN_HQ_GE:
-        case TERRAIN_AIRPORT_GE:
-        case TERRAIN_PORT_GE:
-        case TERRAIN_BASE_GE:
-        case TERRAIN_CITY_YC:
-        case TERRAIN_HQ_YC:
-        case TERRAIN_AIRPORT_YC:
-        case TERRAIN_PORT_YC:
-        case TERRAIN_BASE_YC:
-            for (i = 0; i <= 0x30; i++) {
-                if (v == *pa)
-                    return *pb;
-                pa++;
-                pb++;
-            }
-            break;
-        default:
-            for (i = 0; i <= 0x30; i++) {
-                if (v == *pb)
-                    return *pa;
-                pa++;
-                pb++;
-            }
-            break;
-        }
+  if (x <= 0) {
+    for (i = 0; i <= 0x30; i++) {
+      if (v == *pb)
+        return *pa;
+      pa++;
+      pb++;
     }
+  } else {
+    off = gMap->rowOffset[y] - 1;
+    off += x;
 
-    return -1;
+    switch (gMap->terrain[off]) {
+    case TERRAIN_MOUNTAIN:
+    case TERRAIN_WOOD:
+    case TERRAIN_CITY:
+    case TERRAIN_HQ:
+    case TERRAIN_AIRPORT:
+    case TERRAIN_PORT:
+    case TERRAIN_BASE:
+    case TERRAIN_CITY_OS:
+    case TERRAIN_HQ_OS:
+    case TERRAIN_AIRPORT_OS:
+    case TERRAIN_PORT_OS:
+    case TERRAIN_BASE_OS:
+    case TERRAIN_CITY_BM:
+    case TERRAIN_HQ_BM:
+    case TERRAIN_AIRPORT_BM:
+    case TERRAIN_PORT_BM:
+    case TERRAIN_BASE_BM:
+    case TERRAIN_CITY_GE:
+    case TERRAIN_HQ_GE:
+    case TERRAIN_AIRPORT_GE:
+    case TERRAIN_PORT_GE:
+    case TERRAIN_BASE_GE:
+    case TERRAIN_CITY_YC:
+    case TERRAIN_HQ_YC:
+    case TERRAIN_AIRPORT_YC:
+    case TERRAIN_PORT_YC:
+    case TERRAIN_BASE_YC:
+      for (i = 0; i <= 0x30; i++) {
+        if (v == *pa)
+          return *pb;
+        pa++;
+        pb++;
+      }
+      break;
+    default:
+      for (i = 0; i <= 0x30; i++) {
+        if (v == *pb)
+          return *pa;
+        pa++;
+        pb++;
+      }
+      break;
+    }
+  }
+
+  return -1;
 }
 
 asm(".global sub_08001A04\n.thumb_set sub_08001A04, GetTileWithShadow2\n");
@@ -402,10 +383,7 @@ asm(".global sub_08001A04\n.thumb_set sub_08001A04, GetTileWithShadow2\n");
 /* The `ldrsh` fixes gUnknown_0200B224[].unk00 as a signed halfword; the `lsls
  * #2` on gActiveMap->unk28 fixes the element stride at 4.
  */
-s16 sub_08001CE8(void)
-{
-    return gUnknown_0200B224[gActiveMap->unk28].unk00;
-}
+s16 sub_08001CE8(void) { return gUnknown_0200B224[gActiveMap->unk28].unk00; }
 
 /* A linear search over the byte pairs at gUnknown_084859E0: key, value, with
  * 0xFF terminating the table and 0xE returned when the key is absent.
@@ -417,28 +395,25 @@ s16 sub_08001CE8(void)
  * swaps the two instructions (measured, wave 42).
  *
  * The key test comes first and the terminator test is the loop's exit
- * condition, so the shape is `for (;;)` with both breaks. A `while (p[0] != key)`
- * header emits the 0xFF compare first and costs an extra `adds r0, r3, #0` on
- * the not-found path. */
-int sub_08001D04(int a1)
-{
-    const u8 *p;
-    int result;
+ * condition, so the shape is `for (;;)` with both breaks. A `while (p[0] !=
+ * key)` header emits the 0xFF compare first and costs an extra `adds r0, r3,
+ * #0` on the not-found path. */
+int sub_08001D04(int a1) {
+  const u8 *p;
+  int result;
 
-    p = gUnknown_084859E0;
-    result = 0xE;
-    for (;;)
-    {
-        if (p[0] == a1)
-        {
-            result = p[1];
-            break;
-        }
-        if (p[0] == 0xFF)
-            break;
-        p += 2;
+  p = gUnknown_084859E0;
+  result = 0xE;
+  for (;;) {
+    if (p[0] == a1) {
+      result = p[1];
+      break;
     }
-    return result;
+    if (p[0] == 0xFF)
+      break;
+    p += 2;
+  }
+  return result;
 }
 
 /* Look up an id in gUnknown_0200B224 and return its index, or -1.
@@ -455,41 +430,29 @@ int sub_08001D04(int a1)
  *
  * The `ldrh` on the s16 unk00 is the mask narrowing the load: only the low 5 or
  * 6 bits survive, so agbcc drops the sign extension. */
-int sub_08001D24(int a1)
-{
-    int i;
+int sub_08001D24(int a1) {
+  int i;
 
-    if (gActiveMap->unk07 == 0)
-    {
-        a1 &= 0x1F;
-        for (i = 0; i <= 0x10; i++)
-        {
-            if ((gUnknown_0200B224[i].unk00 & 0x1F) == a1)
-                return i;
-        }
+  if (gActiveMap->unk07 == 0) {
+    a1 &= 0x1F;
+    for (i = 0; i <= 0x10; i++) {
+      if ((gUnknown_0200B224[i].unk00 & 0x1F) == a1)
+        return i;
     }
-    else
-    {
-        a1 &= 0x3F;
-        for (i = 0; i <= 0x13; i++)
-        {
-            if ((gUnknown_0200B224[i].unk00 & 0x3F) == a1)
-                return i;
-        }
+  } else {
+    a1 &= 0x3F;
+    for (i = 0; i <= 0x13; i++) {
+      if ((gUnknown_0200B224[i].unk00 & 0x3F) == a1)
+        return i;
     }
+  }
 
-    return -1;
+  return -1;
 }
 
-void sub_08001D8C(void)
-{
-    gActiveMap->unk4c = 10;
-}
+void sub_08001D8C(void) { gActiveMap->unk4c = 10; }
 
-void sub_08001D9C(void)
-{
-    gActiveMap->unk4c = 0;
-}
+void sub_08001D9C(void) { gActiveMap->unk4c = 0; }
 
 /* Wave 37 (W37-E). Matched. PROMOTION NEEDS THE POOL WORD PLACED:
  *     "rodata": ["0x0808D70C"]
@@ -522,197 +485,174 @@ void sub_08001D9C(void)
  * just proved zero -- which is r7 (b) on one side and r4 (m) on the other,
  * exactly as the ROM has it. */
 
-void sub_08001DAC(void)
-{
-    int flag;
-    int b;
-    int sx;
-    int sy;
-    int idx;
-    u16 m1;
-    u16 m2;
-    u16 m3;
-    u16 m4;
+void sub_08001DAC(void) {
+  int flag;
+  int b;
+  int sx;
+  int sy;
+  int idx;
+  u16 m1;
+  u16 m2;
+  u16 m3;
+  u16 m4;
 
-    sx = gActiveMap->cursorX - (gMap->scrollX >> 4);
-    flag = 1;
+  sx = gActiveMap->cursorX - (gMap->scrollX >> 4);
+  flag = 1;
 
-    switch (gActiveMap->unk4c)
-    {
+  switch (gActiveMap->unk4c) {
+  case 0:
+    gActiveMap->unk54 += 2;
+    if (gActiveMap->unk54 > 7)
+      gActiveMap->unk54 = 8;
+    gActiveMap->unk50 += gActiveMap->unk54;
+    if (gActiveMap->unk50 > 0xB7) {
+      gActiveMap->unk50 = 0xB8;
+      gActiveMap->unk4c = flag;
+    }
+    flag = 0;
+    break;
+  case 1:
+    return;
+  case 0xA:
+    gActiveMap->unk54 += 1;
+    if (gActiveMap->unk54 > 7)
+      gActiveMap->unk54 = 8;
+    gActiveMap->unk50 -= gActiveMap->unk54;
+    if (gActiveMap->unk50 <= 0x6A) {
+      gActiveMap->unk50 = 0x6A;
+      gActiveMap->unk4c = 0xB;
+    }
+    break;
+  }
+
+  switch (gActiveMap->unk4a) {
+  case 0xA:
+    gActiveMap->unk4e += (0x1180 - gActiveMap->unk4e) >> 3;
+    if (gActiveMap->unk4e > 0xEFF) {
+      gActiveMap->unk4e = 0xFD80;
+      gActiveMap->unk4a = 0x14;
+    }
+    break;
+  case 0x14:
+    gActiveMap->unk4e += (0xA0 - gActiveMap->unk4e) >> 3;
+    if (gActiveMap->unk4e >= 0) {
+      gActiveMap->unk4e = 0;
+      gActiveMap->unk4a = 0x1E;
+    }
+    break;
+  case 0:
+  case 0x1E:
+    if (sx <= 6) {
+      gActiveMap->unk3e = 1;
+      gActiveMap->unk4a = 0x64;
+    }
+    break;
+  case 0x64:
+    gActiveMap->unk4e += (-960 - gActiveMap->unk4e) >> 3;
+    if (gActiveMap->unk4e < -640) {
+      gActiveMap->unk4e = 0x11A0;
+      gActiveMap->unk4a = 0x6E;
+    }
+    break;
+  case 0x6E:
+    gActiveMap->unk4e += (0xB40 - gActiveMap->unk4e) >> 3;
+    if (gActiveMap->unk4e <= 0xCA0) {
+      gActiveMap->unk4e = 0xCA0;
+      gActiveMap->unk4a = 0x78;
+    }
+    break;
+  case 0x78:
+    if (sx > 7) {
+      gActiveMap->unk3e = 0;
+      gActiveMap->unk4a = 0xA;
+    }
+    break;
+  }
+
+  sx = gActiveMap->unk4e >> 4;
+  b = gActiveMap->unk07 != 0;
+
+  if (b == 0) {
+    if ((gActiveMap->unk00 & 0x40) == 0)
+      sub_08002964(0, sx + 7, gActiveMap->unk50 + 0x26,
+                   gActiveMap->selectedTerrain, b, flag);
+    sy = gActiveMap->unk50;
+    if ((gActiveMap->selectedTerrain & 0x1F) == 8)
+      sy += 6;
+  } else {
+    m1 = gActiveMap->unk00 & 0x40;
+    if (m1 == 0)
+      sub_080029F4(0, sx + 7, gActiveMap->unk50 + 0x26, gActiveMap->unk24, m1,
+                   flag);
+    sy = gActiveMap->unk50;
+  }
+
+  if (gActiveMap->unk65 != 0) {
+    switch (gActiveMap->unk66) {
     case 0:
-        gActiveMap->unk54 += 2;
-        if (gActiveMap->unk54 > 7)
-            gActiveMap->unk54 = 8;
-        gActiveMap->unk50 += gActiveMap->unk54;
-        if (gActiveMap->unk50 > 0xB7)
-        {
-            gActiveMap->unk50 = 0xB8;
-            gActiveMap->unk4c = flag;
-        }
-        flag = 0;
-        break;
-    case 1:
-        return;
+      gActiveMap->unk67 = 0xA;
+      gActiveMap->unk66 = 8;
+      gActiveMap->unk68 = 0;
+      break;
+    case 9:
+      sub_08000C68();
+    case 8:
+      gActiveMap->unk66++;
     case 0xA:
-        gActiveMap->unk54 += 1;
-        if (gActiveMap->unk54 > 7)
-            gActiveMap->unk54 = 8;
-        gActiveMap->unk50 -= gActiveMap->unk54;
-        if (gActiveMap->unk50 <= 0x6A)
-        {
-            gActiveMap->unk50 = 0x6A;
-            gActiveMap->unk4c = 0xB;
-        }
-        break;
+      gActiveMap->unk68 += 0x20;
+      if (gActiveMap->unk68 > 0xFF)
+        gActiveMap->unk68 = 0x100;
+      idx = (0x100 - gActiveMap->unk68) >> 4;
+      SetObjAffine(0,
+                   Div(gSinLut[0x40 + (idx & 0xFF)] << 4,
+                       gActiveMap->unk68 != 0 ? gActiveMap->unk68 : 2),
+                   Div(-gSinLut[idx & 0xFF] << 4, 0x100),
+                   Div(gSinLut[idx & 0xFF] << 4,
+                       gActiveMap->unk68 != 0 ? gActiveMap->unk68 : 2),
+                   Div(gSinLut[0x40 + (idx & 0xFF)] << 4, 0x100));
+      gActiveMap->unk67--;
+      if (gActiveMap->unk67 < 0) {
+        gActiveMap->unk66 = 0;
+        gActiveMap->unk65 = 0;
+      }
+      break;
     }
 
-    switch (gActiveMap->unk4a)
-    {
-    case 0xA:
-        gActiveMap->unk4e += (0x1180 - gActiveMap->unk4e) >> 3;
-        if (gActiveMap->unk4e > 0xEFF)
-        {
-            gActiveMap->unk4e = 0xFD80;
-            gActiveMap->unk4a = 0x14;
-        }
-        break;
-    case 0x14:
-        gActiveMap->unk4e += (0xA0 - gActiveMap->unk4e) >> 3;
-        if (gActiveMap->unk4e >= 0)
-        {
-            gActiveMap->unk4e = 0;
-            gActiveMap->unk4a = 0x1E;
-        }
-        break;
-    case 0:
-    case 0x1E:
-        if (sx <= 6)
-        {
-            gActiveMap->unk3e = 1;
-            gActiveMap->unk4a = 0x64;
-        }
-        break;
-    case 0x64:
-        gActiveMap->unk4e += (-960 - gActiveMap->unk4e) >> 3;
-        if (gActiveMap->unk4e < -640)
-        {
-            gActiveMap->unk4e = 0x11A0;
-            gActiveMap->unk4a = 0x6E;
-        }
-        break;
-    case 0x6E:
-        gActiveMap->unk4e += (0xB40 - gActiveMap->unk4e) >> 3;
-        if (gActiveMap->unk4e <= 0xCA0)
-        {
-            gActiveMap->unk4e = 0xCA0;
-            gActiveMap->unk4a = 0x78;
-        }
-        break;
-    case 0x78:
-        if (sx > 7)
-        {
-            gActiveMap->unk3e = 0;
-            gActiveMap->unk4a = 0xA;
-        }
-        break;
+    m2 = gActiveMap->unk00 & 0x40;
+    if (m2 == 0) {
+      if (b == 0)
+        sub_0800272C(0, sx + 0xB, sy, gActiveMap->selectedTerrain, 1, b, flag);
+      else
+        sub_08002844(0, sx + 0xB, sy, gActiveMap->unk24, 1, 0, flag);
     }
-
-    sx = gActiveMap->unk4e >> 4;
-    b = gActiveMap->unk07 != 0;
-
-    if (b == 0)
-    {
-        if ((gActiveMap->unk00 & 0x40) == 0)
-            sub_08002964(0, sx + 7, gActiveMap->unk50 + 0x26,
-                         gActiveMap->selectedTerrain, b, flag);
-        sy = gActiveMap->unk50;
-        if ((gActiveMap->selectedTerrain & 0x1F) == 8)
-            sy += 6;
+  } else {
+    m3 = gActiveMap->unk00 & 0x40;
+    if (m3 == 0) {
+      if (b == 0)
+        sub_0800272C(0, sx + 0xB, sy, gActiveMap->selectedTerrain,
+                     gActiveMap->unk34, m3, flag);
+      else
+        sub_08002844(0, sx + 0xB, sy, gActiveMap->unk24, gActiveMap->unk34, m3,
+                     flag);
     }
-    else
-    {
-        m1 = gActiveMap->unk00 & 0x40;
-        if (m1 == 0)
-            sub_080029F4(0, sx + 7, gActiveMap->unk50 + 0x26,
-                         gActiveMap->unk24, m1, flag);
-        sy = gActiveMap->unk50;
-    }
+  }
 
-    if (gActiveMap->unk65 != 0)
-    {
-        switch (gActiveMap->unk66)
-        {
-        case 0:
-            gActiveMap->unk67 = 0xA;
-            gActiveMap->unk66 = 8;
-            gActiveMap->unk68 = 0;
-            break;
-        case 9:
-            sub_08000C68();
-        case 8:
-            gActiveMap->unk66++;
-        case 0xA:
-            gActiveMap->unk68 += 0x20;
-            if (gActiveMap->unk68 > 0xFF)
-                gActiveMap->unk68 = 0x100;
-            idx = (0x100 - gActiveMap->unk68) >> 4;
-            SetObjAffine(0,
-                Div(gSinLut[0x40 + (idx & 0xFF)] << 4,
-                    gActiveMap->unk68 != 0 ? gActiveMap->unk68 : 2),
-                Div(-gSinLut[idx & 0xFF] << 4, 0x100),
-                Div(gSinLut[idx & 0xFF] << 4,
-                    gActiveMap->unk68 != 0 ? gActiveMap->unk68 : 2),
-                Div(gSinLut[0x40 + (idx & 0xFF)] << 4, 0x100));
-            gActiveMap->unk67--;
-            if (gActiveMap->unk67 < 0)
-            {
-                gActiveMap->unk66 = 0;
-                gActiveMap->unk65 = 0;
-            }
-            break;
-        }
+  sub_08003088(sx, sy);
 
-        m2 = gActiveMap->unk00 & 0x40;
-        if (m2 == 0)
-        {
-            if (b == 0)
-                sub_0800272C(0, sx + 0xB, sy, gActiveMap->selectedTerrain, 1, b, flag);
-            else
-                sub_08002844(0, sx + 0xB, sy, gActiveMap->unk24, 1, 0, flag);
-        }
-    }
-    else
-    {
-        m3 = gActiveMap->unk00 & 0x40;
-        if (m3 == 0)
-        {
-            if (b == 0)
-                sub_0800272C(0, sx + 0xB, sy, gActiveMap->selectedTerrain,
-                             gActiveMap->unk34, m3, flag);
-            else
-                sub_08002844(0, sx + 0xB, sy, gActiveMap->unk24,
-                             gActiveMap->unk34, m3, flag);
-        }
-    }
+  if (gActiveMap->unk50 > 0x9F)
+    return;
 
-    sub_08003088(sx, sy);
+  sub_08002510(sx, 0x26);
 
-    if (gActiveMap->unk50 > 0x9F)
-        return;
+  m4 = gActiveMap->unk00 & 0x40;
+  if (m4 == 0) {
+    sub_08002298(sx, gActiveMap->unk50 - 10);
+    sub_0801F34C(0xAA, (sx + 2) & 0x1FF, (gActiveMap->unk50 - 1) & 0xFF, m4, 0);
+    PutSprite(5, sx, gActiveMap->unk50, gUnknown_08485B2C, 0x3000);
+  }
 
-    sub_08002510(sx, 0x26);
-
-    m4 = gActiveMap->unk00 & 0x40;
-    if (m4 == 0)
-    {
-        sub_08002298(sx, gActiveMap->unk50 - 10);
-        sub_0801F34C(0xAA, (sx + 2) & 0x1FF,
-                     (gActiveMap->unk50 - 1) & 0xFF, m4, 0);
-        PutSprite(5, sx, gActiveMap->unk50, gUnknown_08485B2C, 0x3000);
-    }
-
-    if (gActiveMap->unk04 != 4)
-        ApplyPaletteExt(gUnknown_084891C0, 0x260, 0x20);
+  if (gActiveMap->unk04 != 4)
+    ApplyPaletteExt(gUnknown_084891C0, 0x260, 0x20);
 }
 
 /* Wave 57 (W57-A). sub_08002510's state machine (src/decomp/c_08002510.c) on a
@@ -744,113 +684,92 @@ void sub_08001DAC(void)
  * 0xFD80 is unsigned because the ROM's pool word is `.4byte 0x0000FD80`, while
  * -800 / -640 are full negative ints (`0xFFFFFCE0` / `0xFFFFFD80`).
  * unk12 stays u8 with an (s8) cast at each use, per its header comment. */
-void sub_08002298(int a1, int a2)
-{
-    int a;
+void sub_08002298(int a1, int a2) {
+  int a;
 
-    a2 &= 0xFF;
+  a2 &= 0xFF;
 
-    switch (gActiveMap->unk64)
-    {
-    case 0:
-        if (gActiveMap->unk07 == 0)
-        {
-            if (sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
-                return;
-        }
-        else if (gActiveMap->unk24 == 0x19)
-        {
-            return;
-        }
-        gActiveMap->unk64 = gActiveMap->unk3e != 0 ? 0xA : 0x32;
-        gActiveMap->unk60 = 0x1180;
-        break;
-    case 0xA:
-        gActiveMap->unk60 += (0xBE0 - gActiveMap->unk60) >> 3;
-        if (gActiveMap->unk60 <= 0xCC0)
-        {
-            gActiveMap->unk60 = 0xCC0;
-            gActiveMap->unk64 = 0x14;
-        }
-        break;
-    case 0x14:
-        if (gActiveMap->unk07 == 0)
-        {
-            if (gActiveMap->unk3e == 0
-                || sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
-                gActiveMap->unk64 = 0x1E;
-        }
-        else if (gActiveMap->unk3e == 0
-                 || gActiveMap->unk24 == 0x19)
-        {
-            gActiveMap->unk64 = 0x1E;
-        }
-        break;
-    case 0x1E:
-        gActiveMap->unk60 += (0x1180 - gActiveMap->unk60) >> 3;
-        if (gActiveMap->unk60 > 0x10DF)
-        {
-            gActiveMap->unk60 = 0x10E0;
-            gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x32 : 0;
-        }
-        break;
+  switch (gActiveMap->unk64) {
+  case 0:
+    if (gActiveMap->unk07 == 0) {
+      if (sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+        return;
+    } else if (gActiveMap->unk24 == 0x19) {
+      return;
     }
-
-    switch (gActiveMap->unk64)
-    {
-    case 0x32:
-        if (gActiveMap->unk07 == 0)
-        {
-            if (sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
-                return;
-        }
-        else if (gActiveMap->unk24 == 0x19)
-        {
-            return;
-        }
-        gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x3C : 0;
-        gActiveMap->unk60 = 0xFD80;
-        break;
-    case 0x3C:
-        gActiveMap->unk60 += (0x320 - gActiveMap->unk60) >> 3;
-        if (gActiveMap->unk60 > 0xBF)
-        {
-            gActiveMap->unk60 = 0xC0;
-            gActiveMap->unk64 = 0x46;
-        }
-        break;
-    case 0x46:
-        if (gActiveMap->unk07 == 0)
-        {
-            if (gActiveMap->unk3e != 0
-                || sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
-                gActiveMap->unk64 = 0x50;
-        }
-        else if (gActiveMap->unk3e != 0
-                 || gActiveMap->unk24 == 0x19)
-        {
-            gActiveMap->unk64 = 0x50;
-        }
-        break;
-    case 0x50:
-        gActiveMap->unk60 += (-800 - gActiveMap->unk60) >> 3;
-        if (gActiveMap->unk60 <= -640)
-        {
-            gActiveMap->unk60 = -640;
-            gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x32 : 0;
-        }
-        break;
+    gActiveMap->unk64 = gActiveMap->unk3e != 0 ? 0xA : 0x32;
+    gActiveMap->unk60 = 0x1180;
+    break;
+  case 0xA:
+    gActiveMap->unk60 += (0xBE0 - gActiveMap->unk60) >> 3;
+    if (gActiveMap->unk60 <= 0xCC0) {
+      gActiveMap->unk60 = 0xCC0;
+      gActiveMap->unk64 = 0x14;
     }
+    break;
+  case 0x14:
+    if (gActiveMap->unk07 == 0) {
+      if (gActiveMap->unk3e == 0 ||
+          sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+        gActiveMap->unk64 = 0x1E;
+    } else if (gActiveMap->unk3e == 0 || gActiveMap->unk24 == 0x19) {
+      gActiveMap->unk64 = 0x1E;
+    }
+    break;
+  case 0x1E:
+    gActiveMap->unk60 += (0x1180 - gActiveMap->unk60) >> 3;
+    if (gActiveMap->unk60 > 0x10DF) {
+      gActiveMap->unk60 = 0x10E0;
+      gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x32 : 0;
+    }
+    break;
+  }
 
-    a = gActiveMap->unk60 >> 4;
-    sub_0801F34C(0x54, (a - 0xC) & 0x1FF, a2 + 1, 0, 0);
-    if (gActiveMap->unk07 == 0)
-        sub_0802BD54((a + 0x1A) & 0x1FF, a2,
-                     0x3C - (s8)gActiveMap->propertyCount);
-    else
-        sub_0802BD54((a + 0x1A) & 0x1FF, a2,
-                     0x32 - (s8)((struct ActiveMap *)((u8 *)gActiveMap
-                                 + gActiveMap->unk2f))->propertyCount);
+  switch (gActiveMap->unk64) {
+  case 0x32:
+    if (gActiveMap->unk07 == 0) {
+      if (sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+        return;
+    } else if (gActiveMap->unk24 == 0x19) {
+      return;
+    }
+    gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x3C : 0;
+    gActiveMap->unk60 = 0xFD80;
+    break;
+  case 0x3C:
+    gActiveMap->unk60 += (0x320 - gActiveMap->unk60) >> 3;
+    if (gActiveMap->unk60 > 0xBF) {
+      gActiveMap->unk60 = 0xC0;
+      gActiveMap->unk64 = 0x46;
+    }
+    break;
+  case 0x46:
+    if (gActiveMap->unk07 == 0) {
+      if (gActiveMap->unk3e != 0 ||
+          sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+        gActiveMap->unk64 = 0x50;
+    } else if (gActiveMap->unk3e != 0 || gActiveMap->unk24 == 0x19) {
+      gActiveMap->unk64 = 0x50;
+    }
+    break;
+  case 0x50:
+    gActiveMap->unk60 += (-800 - gActiveMap->unk60) >> 3;
+    if (gActiveMap->unk60 <= -640) {
+      gActiveMap->unk60 = -640;
+      gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x32 : 0;
+    }
+    break;
+  }
+
+  a = gActiveMap->unk60 >> 4;
+  sub_0801F34C(0x54, (a - 0xC) & 0x1FF, a2 + 1, 0, 0);
+  if (gActiveMap->unk07 == 0)
+    sub_0802BD54((a + 0x1A) & 0x1FF, a2, 0x3C - (s8)gActiveMap->propertyCount);
+  else
+    sub_0802BD54(
+        (a + 0x1A) & 0x1FF, a2,
+        0x32 - (s8)((struct ActiveMap *)((u8 *)gActiveMap + gActiveMap->unk2f))
+                   ->propertyCount);
 }
 
 /* Wave 37 (W37-E). Matched first attempt. PROMOTION NEEDS THE POOL WORD PLACED:
@@ -870,82 +789,73 @@ void sub_08002298(int a1, int a2)
  * 0xFD80 is unsigned because the ROM's pool word is `.4byte 0x0000FD80`, while
  * -928 / -480 are full negative ints (`0xFFFFFC60` / `0xFFFFFE20`). */
 
-void sub_08002510(int a1, int a2)
-{
-    int v;
+void sub_08002510(int a1, int a2) {
+  int v;
 
-    v = a2 & 0xFF;
+  v = a2 & 0xFF;
 
-    switch (gActiveMap->unk5a)
-    {
-    case 0:
-        if (sub_0800C9E8() == 0)
-            return;
-        gActiveMap->unk5a = gActiveMap->unk3e != 0 ? 0xA : 0x32;
-        gActiveMap->unk5c = 0x1180;
-        break;
-    case 0xA:
-        gActiveMap->unk5c += (0xB40 - gActiveMap->unk5c) >> 3;
-        if (gActiveMap->unk5c <= 0xD60)
-        {
-            gActiveMap->unk5c = 0xD60;
-            gActiveMap->unk5a = 0x14;
-        }
-        break;
-    case 0x14:
-        if (sub_0800C9E8() == 0 || gActiveMap->unk3e == 0
-            || gActiveMap->unk04 != 1)
-            gActiveMap->unk5a = 0x1E;
-        break;
-    case 0x1E:
-        gActiveMap->unk5c += (0x12A0 - gActiveMap->unk5c) >> 3;
-        if (gActiveMap->unk5c > 0x10DF)
-        {
-            gActiveMap->unk5c = 0x10E0;
-            if (sub_0800C9E8() == 0)
-                return;
-            if (gActiveMap->unk04 == 1)
-                gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x32 : 0;
-        }
-        break;
+  switch (gActiveMap->unk5a) {
+  case 0:
+    if (sub_0800C9E8() == 0)
+      return;
+    gActiveMap->unk5a = gActiveMap->unk3e != 0 ? 0xA : 0x32;
+    gActiveMap->unk5c = 0x1180;
+    break;
+  case 0xA:
+    gActiveMap->unk5c += (0xB40 - gActiveMap->unk5c) >> 3;
+    if (gActiveMap->unk5c <= 0xD60) {
+      gActiveMap->unk5c = 0xD60;
+      gActiveMap->unk5a = 0x14;
     }
-
-    switch (gActiveMap->unk5a)
-    {
-    case 0x32:
-        if (sub_0800C9E8() == 0)
-            return;
-        gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x3C : 0;
-        gActiveMap->unk5c = 0xFD80;
-        break;
-    case 0x3C:
-        gActiveMap->unk5c += (0x3C0 - gActiveMap->unk5c) >> 3;
-        if (gActiveMap->unk5c > 0x19F)
-        {
-            gActiveMap->unk5c = 0x1A0;
-            gActiveMap->unk5a = 0x46;
-        }
-        break;
-    case 0x46:
-        if (sub_0800C9E8() == 0 || gActiveMap->unk3e != 0
-            || gActiveMap->unk04 != 1)
-            gActiveMap->unk5a = 0x50;
-        break;
-    case 0x50:
-        gActiveMap->unk5c += (-928 - gActiveMap->unk5c) >> 3;
-        if (gActiveMap->unk5c <= -480)
-        {
-            gActiveMap->unk5c = -480;
-            if (sub_0800C9E8() == 0)
-                return;
-            if (gActiveMap->unk04 == 1)
-                gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x32 : 0;
-        }
-        break;
+    break;
+  case 0x14:
+    if (sub_0800C9E8() == 0 || gActiveMap->unk3e == 0 || gActiveMap->unk04 != 1)
+      gActiveMap->unk5a = 0x1E;
+    break;
+  case 0x1E:
+    gActiveMap->unk5c += (0x12A0 - gActiveMap->unk5c) >> 3;
+    if (gActiveMap->unk5c > 0x10DF) {
+      gActiveMap->unk5c = 0x10E0;
+      if (sub_0800C9E8() == 0)
+        return;
+      if (gActiveMap->unk04 == 1)
+        gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x32 : 0;
     }
+    break;
+  }
 
-    sub_0801F34C(0x8F, ((gActiveMap->unk5c >> 4) - 0x18) & 0x1FF, v, 0, 0);
-    gActiveMap->unk5b = (gActiveMap->unk5b + 1) & 0x3F;
+  switch (gActiveMap->unk5a) {
+  case 0x32:
+    if (sub_0800C9E8() == 0)
+      return;
+    gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x3C : 0;
+    gActiveMap->unk5c = 0xFD80;
+    break;
+  case 0x3C:
+    gActiveMap->unk5c += (0x3C0 - gActiveMap->unk5c) >> 3;
+    if (gActiveMap->unk5c > 0x19F) {
+      gActiveMap->unk5c = 0x1A0;
+      gActiveMap->unk5a = 0x46;
+    }
+    break;
+  case 0x46:
+    if (sub_0800C9E8() == 0 || gActiveMap->unk3e != 0 || gActiveMap->unk04 != 1)
+      gActiveMap->unk5a = 0x50;
+    break;
+  case 0x50:
+    gActiveMap->unk5c += (-928 - gActiveMap->unk5c) >> 3;
+    if (gActiveMap->unk5c <= -480) {
+      gActiveMap->unk5c = -480;
+      if (sub_0800C9E8() == 0)
+        return;
+      if (gActiveMap->unk04 == 1)
+        gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x32 : 0;
+    }
+    break;
+  }
+
+  sub_0801F34C(0x8F, ((gActiveMap->unk5c >> 4) - 0x18) & 0x1FF, v, 0, 0);
+  gActiveMap->unk5b = (gActiveMap->unk5b + 1) & 0x3F;
 }
 
 /* Loads one of eleven OBJ graphics sets into OBJ VRAM and then hands the
@@ -955,57 +865,49 @@ void sub_08002510(int a1, int a2)
  * there means "one of the five sized variants", which the switch turns into
  * sub_0803F6BC's second argument, and anything else is passed through with
  * variant 1 and shifts the sprite down eight pixels. */
-void sub_0800272C(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
-{
-    void *dest;
+void sub_0800272C(int a1, int a2, int a3, int a4, int a5, int a6, int a7) {
+  void *dest;
 
-    dest = (void *)(0x06010000 + ((gUnknown_08485C9C[a1] & 0x3FF) << 5));
+  dest = (void *)(0x06010000 + ((gUnknown_08485C9C[a1] & 0x3FF) << 5));
 
-    if ((a4 & 0x1F) == 8)
-    {
-        switch (a4)
-        {
-        case 0x08:
-        case 0x28:
-            sub_0803F6BC(8, 1, dest, a7);
-            break;
-        case 0x48:
-            sub_0803F6BC(8, 2, dest, a7);
-            break;
-        case 0x68:
-            sub_0803F6BC(8, 3, dest, a7);
-            break;
-        case 0x88:
-            sub_0803F6BC(8, 4, dest, a7);
-            break;
-        }
+  if ((a4 & 0x1F) == 8) {
+    switch (a4) {
+    case 0x08:
+    case 0x28:
+      sub_0803F6BC(8, 1, dest, a7);
+      break;
+    case 0x48:
+      sub_0803F6BC(8, 2, dest, a7);
+      break;
+    case 0x68:
+      sub_0803F6BC(8, 3, dest, a7);
+      break;
+    case 0x88:
+      sub_0803F6BC(8, 4, dest, a7);
+      break;
     }
-    else
-    {
-        sub_0803F6BC(a4 & 0x1F, 1, dest, a7);
-        a3 += 8;
-    }
+  } else {
+    sub_0803F6BC(a4 & 0x1F, 1, dest, a7);
+    a3 += 8;
+  }
 
-    if (a5)
-    {
-        int attr1;
+  if (a5) {
+    int attr1;
 
-        attr1 = a2 & 0x1FF;
-        if (a6)
-            attr1 |= 0x1000;
-        a3 = (a3 & 0xFF) | 0x500;
-        sub_0801BD00(attr1, a3, gUnknown_08485CC8[a1], sub_08001D04(a4) << 12);
-    }
-    else
-    {
-        int attr1;
+    attr1 = a2 & 0x1FF;
+    if (a6)
+      attr1 |= 0x1000;
+    a3 = (a3 & 0xFF) | 0x500;
+    sub_0801BD00(attr1, a3, gUnknown_08485CC8[a1], sub_08001D04(a4) << 12);
+  } else {
+    int attr1;
 
-        attr1 = a2 & 0x1FF;
-        if (a6)
-            attr1 |= 0x1000;
-        a3 = (a3 & 0xFF) | 0x400;
-        sub_0801BD00(attr1, a3, gUnknown_08485CC8[a1], sub_08001D04(a4) << 12);
-    }
+    attr1 = a2 & 0x1FF;
+    if (a6)
+      attr1 |= 0x1000;
+    a3 = (a3 & 0xFF) | 0x400;
+    sub_0801BD00(attr1, a3, gUnknown_08485CC8[a1], sub_08001D04(a4) << 12);
+  }
 }
 
 /* The sibling of sub_0800272C one table along: loads a unit's OBJ graphics and
@@ -1019,63 +921,60 @@ void sub_0800272C(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
  * single-def constant local gets: its def is in another basic block so combine
  * never folds the shift, local-alloc gives it reg_equiv_constant instead of a
  * hard register, and reload reloads the 6 into r0 at the use. */
-void sub_08002844(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
-{
-    int cls;
-    int attr0, attr1;
-    int pal;
+void sub_08002844(int a1, int a2, int a3, int a4, int a5, int a6, int a7) {
+  int cls;
+  int attr0, attr1;
+  int pal;
 
-    pal = 6;
-    cls = (s8)gActiveMap->unk2f;
-    if (cls == 0)
-        cls = 1;
+  pal = 6;
+  cls = (s8)gActiveMap->unk2f;
+  if (cls == 0)
+    cls = 1;
 
-    a4 &= 0x3F;
-    if (a4 != 0x19)
-    {
-        if (a7)
-        {
-            sub_08011E54(sub_08026190() + ((sub_080261A4(cls, a4) & 0x3FF) << 5),
-                         (void *)(0x06010000 + ((gUnknown_08485D20[a1] & 0x3FF) << 5)),
-                         0x80);
-        }
-        ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[cls].teamColor - 1) * 0x20), 22);
+  a4 &= 0x3F;
+  if (a4 != 0x19) {
+    if (a7) {
+      sub_08011E54(
+          sub_08026190() + ((sub_080261A4(cls, a4) & 0x3FF) << 5),
+          (void *)(0x06010000 + ((gUnknown_08485D20[a1] & 0x3FF) << 5)), 0x80);
     }
-    else
-    {
-        sub_0801F19C(0x12, (void *)0x06010000, gUnknown_08485D20[a1]);
-        ApplyPalette(gUnknown_081268D8, 30);
-    }
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 +
+                         (gPlayers[cls].teamColor - 1) * 0x20),
+                 22);
+  } else {
+    sub_0801F19C(0x12, (void *)0x06010000, gUnknown_08485D20[a1]);
+    ApplyPalette(gUnknown_081268D8, 30);
+  }
 
-    a3 += 8;
+  a3 += 8;
 
-    attr1 = a2 & 0x1FF;
-    if (a6)
-        attr1 |= 0x1000;
-    attr0 = ((a3 + 8) & 0xFF) | 0x400;
-    if (a5)
-        attr0 |= 0x100;
-    sub_0801BD00(attr1, attr0, gUnknown_08485D44[a1], a4 != 0x19 ? pal << 12 : 0xE000);
+  attr1 = a2 & 0x1FF;
+  if (a6)
+    attr1 |= 0x1000;
+  attr0 = ((a3 + 8) & 0xFF) | 0x400;
+  if (a5)
+    attr0 |= 0x100;
+  sub_0801BD00(attr1, attr0, gUnknown_08485D44[a1],
+               a4 != 0x19 ? pal << 12 : 0xE000);
 }
 
-void sub_08002964(int a1, int a2, int a3, int a4, int a5, int a6)
-{
-    int idx;
-    int attr0, attr1;
+void sub_08002964(int a1, int a2, int a3, int a4, int a5, int a6) {
+  int idx;
+  int attr0, attr1;
 
-    sub_08001230(a4);
-    if (a1 != 0)
-        idx = a1 * 8 + 0x2B2;
-    else
-        idx = 0x262;
+  sub_08001230(a4);
+  if (a1 != 0)
+    idx = a1 * 8 + 0x2B2;
+  else
+    idx = 0x262;
 
-    if (a6)
-        sub_08011E54((void *)sub_0802A85C(a4 & 0x1F),
-                     (void *)(0x06010000 + (idx << 5)), 0x100);
+  if (a6)
+    sub_08011E54((void *)sub_0802A85C(a4 & 0x1F),
+                 (void *)(0x06010000 + (idx << 5)), 0x100);
 
-    attr1 = (a2 - 4) & 0x1FF;
-    attr0 = (a3 & 0xFF) | 0x400;
-    if (a5)
-        attr0 |= 0x100;
-    sub_0801BD00(attr1, attr0, gUnknown_08485CF4[a1], 0x1000);
+  attr1 = (a2 - 4) & 0x1FF;
+  attr0 = (a3 & 0xFF) | 0x400;
+  if (a5)
+    attr0 |= 0x100;
+  sub_0801BD00(attr1, attr0, gUnknown_08485CF4[a1], 0x1000);
 }

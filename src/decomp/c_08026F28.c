@@ -11,7 +11,7 @@
  * indices arrive already resolved rather than as `(a >> 6) + 1`. */
 bool8 sub_08026F28(u16 a, u16 b)
 {
-    if (gUnknown_08499598[a].team == gUnknown_08499598[b].team)
+    if (gPlayers[a].team == gPlayers[b].team)
         return TRUE;
 
     return FALSE;

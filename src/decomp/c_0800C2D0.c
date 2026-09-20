@@ -89,7 +89,7 @@ void sub_0800C2D0(int x, int y, int f)
     }
 }
 
-void sub_0800C454(int x, int y, int t)
+void MakeProperty(int x, int y, int t)
 {
     int a;
     int b;
@@ -129,3 +129,5 @@ void sub_0800C454(int x, int y, int t)
     sub_0800BEE4(x, y);
     sub_0800EC20(x, y);
 }
+
+asm(".global sub_0800C454\n.thumb_set sub_0800C454, MakeProperty\n");

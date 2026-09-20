@@ -13,9 +13,9 @@
 
 void ClearPlayerCoPowerStatus(int a1)
 {
-    gUnknown_08499598[a1].coMode = 0;
-    gUnknown_08499598[a1].tempFirepower = 0;
-    gUnknown_08499598[a1].tempDefense = 0;
+    gPlayers[a1].coMode = 0;
+    gPlayers[a1].tempFirepower = 0;
+    gPlayers[a1].tempDefense = 0;
 }
 
 asm(".global sub_08044178\n.thumb_set sub_08044178, ClearPlayerCoPowerStatus\n");

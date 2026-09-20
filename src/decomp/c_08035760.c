@@ -44,7 +44,7 @@ void sub_08035760(ProcPtr proc, void *src)
     ((struct Unk35760Proc *)proc)->unk34 = 0;
     ((struct Unk35760Proc *)proc)->unk35 = 4;
 
-    if (gPlaySt.unk32 == 0 || gUnknown_030032D8 != 0x13)
+    if (gPlaySt.savingEnabled == 0 || gUnknown_030032D8 != 0x13)
         sub_08029088(((struct Unk35760Proc *)proc)->unk42 / 16,
                      ((struct Unk35760Proc *)proc)->unk44 / 16);
 

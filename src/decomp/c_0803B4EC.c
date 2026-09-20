@@ -44,7 +44,7 @@ void sub_0803B4EC(int a)
 {
     u16 v = a;
 
-    if (gPlaySt.unk0c != 0)
+    if (gPlaySt.bgmOn != 0)
     {
         sub_0803B524((s16)v);
     }

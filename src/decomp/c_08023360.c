@@ -43,10 +43,10 @@ void sub_08023360(int a)
     sub_08011C68(gUnknown_0849957C, (void *)0x0600F000, 0x800);
     sub_08011C68(gUnknown_08499580, (void *)0x06007800, 0x800);
 
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[1].teamColor - 1) * 0x20), 12);
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[2].teamColor - 1) * 0x20), 13);
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[3].teamColor - 1) * 0x20), 14);
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[4].teamColor - 1) * 0x20), 15);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[1].teamColor - 1) * 0x20), 12);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[2].teamColor - 1) * 0x20), 13);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[3].teamColor - 1) * 0x20), 14);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[4].teamColor - 1) * 0x20), 15);
 
     sub_0803F80C(8);
     sub_0802D2EC();
@@ -62,7 +62,7 @@ void sub_08023360(int a)
     sub_08035568();
     sub_080116E8();
     sub_080354FC();
-    sub_08035020(gPlaySt.unk2c);
+    sub_08035020(gPlaySt.weather);
     sub_08022A34();
 
     sub_0801A5B0(gUnknown_030033EC);

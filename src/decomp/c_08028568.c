@@ -7,9 +7,11 @@
  * sub_08028568 @ 0x08028568
  */
 
-void sub_08028568(void)
+void FinalizeBattleResult(void)
 {
     sub_08027118();
     sub_0807443C();
     gUnknown_030032D8 = 0x12;
 }
+
+asm(".global sub_08028568\n.thumb_set sub_08028568, FinalizeBattleResult\n");

@@ -20,7 +20,7 @@ bool8 sub_0802700C(int a1, int a2, int a3)
     if (army == 0)
         return FALSE;
 
-    if (gUnknown_08499598[a1].team == gUnknown_08499598[army].team)
+    if (gPlayers[a1].team == gPlayers[army].team)
         return TRUE;
 
     return FALSE;
@@ -28,8 +28,8 @@ bool8 sub_0802700C(int a1, int a2, int a3)
 
 bool8 sub_0802706C(u8 a1, u16 a2, u16 a3)
 {
-    if (gPlaySt.unk0d != 0
-        && (gUnknown_08499598[a3].turnState & 2) == 0
+    if (gPlaySt.fog != 0
+        && (gPlayers[a3].turnState & 2) == 0
         && gUnknown_085D5ABC[a1].unk14 != NULL)
         return TRUE;
 

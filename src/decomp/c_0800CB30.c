@@ -68,10 +68,10 @@ int sub_0800CB30(int a1, int a2)
     else
     {
         result = a2;
-        gUnknown_08499598[1].teamColor = 1;
-        gUnknown_08499598[2].teamColor = 2;
-        gUnknown_08499598[3].teamColor = 3;
-        gUnknown_08499598[4].teamColor = 4;
+        gPlayers[1].teamColor = 1;
+        gPlayers[2].teamColor = 2;
+        gPlayers[3].teamColor = 3;
+        gPlayers[4].teamColor = 4;
     }
 
     for (y = 0; y < MAP->height; y++)

@@ -15,7 +15,7 @@
  * count -- the difference is entirely in the relocation addend.
  *
  * The element address is recomputed for the second store because the first
- * `strb` kills gUnknown_08499598's MEM (it is a non-const pointer global). */
+ * `strb` kills gPlayers's MEM (it is a non-const pointer global). */
 void sub_08042B9C(void)
 {
     u8 *q;
@@ -24,10 +24,10 @@ void sub_08042B9C(void)
     q = gUnknown_030044B0;
     *(u32 *)(q + 8) = gUnknown_03001FD4;
 
-    if (gPlaySt.unk32 == 0)
+    if (gPlaySt.savingEnabled == 0)
     {
-        gUnknown_08499598[gUnknown_030033EC].cursorX = gUnknown_030033E4.unk00;
-        gUnknown_08499598[gUnknown_030033EC].cursorY = gUnknown_030033E4.unk02;
+        gPlayers[gUnknown_030033EC].cursorX = gUnknown_030033E4.unk00;
+        gPlayers[gUnknown_030033EC].cursorY = gUnknown_030033E4.unk02;
     }
 
     gUnknown_030032D8 = 1;

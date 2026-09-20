@@ -37,7 +37,7 @@ void sub_08041DF8(struct Unk41DF8Proc *proc)
     {
         p = (u8 *)sub_080413A4(gUnknown_03003F40);
 
-        if (gPlaySt.unk32 != 0)
+        if (gPlaySt.savingEnabled != 0)
             sub_08034534(4, gUnknown_03003F38, *p, 0);
     }
 }

@@ -37,7 +37,7 @@ u8 sub_08039850(ProcPtr procPtr)
     {
         while (e->unk01 != -1)
         {
-            if (e->unk01 == gUnknown_08499598[proc->unk54].co
+            if (e->unk01 == gPlayers[proc->unk54].co
              && e->unk02 == sub_08044374(proc->unk54)
              && (e->unk00 == 0 || e->unk00 == proc->unk54))
             {

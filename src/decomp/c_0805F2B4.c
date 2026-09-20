@@ -93,8 +93,8 @@ void sub_0805F2B4(void)
     if (tag == 0x20)
         t = 0x11;
 
-    a = gUnknown_08499598[gUnknown_030033EC].hqX & 0x7f;
-    b = gUnknown_08499598[gUnknown_030033EC].hqY & 0x7f;
+    a = gPlayers[gUnknown_030033EC].hqX & 0x7f;
+    b = gPlayers[gUnknown_030033EC].hqY & 0x7f;
 
     sub_0801F92C(gMap->danger);
     gUnknown_030013EC(a, b, t, 5, best);

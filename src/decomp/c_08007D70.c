@@ -17,7 +17,7 @@
  * descriptor, the same object c_08001158.c indexes at +0x417A. The `x++` is a real
  * mutation of the parameter: the ROM bumps r4 in place and both later calls use
  * the new value. */
-void sub_08007D70(int x, int y)
+void MakeForestSimple(int x, int y)
 {
     sub_08001158(x, y, sub_080016D0(x, y));
 
@@ -27,6 +27,8 @@ void sub_08007D70(int x, int y)
         sub_08001158(x, y, sub_080016D0(x, y));
     }
 }
+
+asm(".global sub_08007D70\n.thumb_set sub_08007D70, MakeForestSimple\n");
 
 /* Ask sub_08007DD0 for a tile id and write it only if it is not the negative
  * "no tile" answer.

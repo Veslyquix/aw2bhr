@@ -32,7 +32,7 @@
  * reads a variable that otherwise looks like a pure count. Do not split it
  * into two locals; the ROM keeps one register (r5) live across both roles.
  *
- * `(u32)gUnknown_03004008` is required, not cosmetic: the global is declared
+ * `(u32)gGameClock` is required, not cosmetic: the global is declared
  * s32 but the ROM calls __umodsi3, and unknown-globals.h already records other
  * readers treating it unsigned.
  *
@@ -75,7 +75,7 @@ void BattleMaps_IDLE_08048FD9(ProcPtr proc)
             }
 
             gUnknown_084C30F8->unk839 =
-                gUnknown_084C30F8->unk83d[(u32)gUnknown_03004008 % n] + 3;
+                gUnknown_084C30F8->unk83d[(u32)gGameClock % n] + 3;
         }
         else
         {

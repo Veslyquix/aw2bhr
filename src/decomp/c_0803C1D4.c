@@ -29,12 +29,12 @@ void sub_0803C1D4(void)
 {
     u8 i;
 
-    gPlaySt.unk09 = gUnknown_08580934->unk02;
+    gPlaySt.animOpts = gUnknown_08580934->unk02;
     gUnknown_0200C420.unk0e = gUnknown_08580934->unk02;
-    gPlaySt.unk0d = gUnknown_08580934->unk00;
-    gPlaySt.unk30 = gUnknown_08580934->unk03;
+    gPlaySt.fog = gUnknown_08580934->unk00;
+    gPlaySt.turnLimit = gUnknown_08580934->unk03;
     gPlaySt.propertyFunds = gUnknown_08580934->unk04;
-    gPlaySt.unk31 = gUnknown_08580934->unk07;
+    gPlaySt.captureLimit = gUnknown_08580934->unk07;
     gPlaySt.coAbilities = gUnknown_08580934->unk01;
 
     for (i = 0; i < 4; i++)
@@ -48,29 +48,29 @@ void sub_0803C1D4(void)
     switch (gUnknown_08580934->unk06)
     {
     case 0:
-        gPlaySt.unk2d = 1;
-        gPlaySt.unk2c = 0;
+        gPlaySt.randomWeatherOn = 1;
+        gPlaySt.weather = 0;
         gPlaySt.unk2e = 0;
-        gPlaySt.unk2f = 0;
+        gPlaySt.defaultWeather = 0;
         break;
     case 2:
-        gPlaySt.unk2d = 3;
-        gPlaySt.unk2c = 2;
+        gPlaySt.randomWeatherOn = 3;
+        gPlaySt.weather = 2;
         gPlaySt.unk2e = 2;
-        gPlaySt.unk2f = 2;
+        gPlaySt.defaultWeather = 2;
         break;
     case 3:
-        gPlaySt.unk2d = 3;
-        gPlaySt.unk2c = 1;
+        gPlaySt.randomWeatherOn = 3;
+        gPlaySt.weather = 1;
         gPlaySt.unk2e = 1;
-        gPlaySt.unk2f = 1;
+        gPlaySt.defaultWeather = 1;
         break;
     case 1:
     default:
-        gPlaySt.unk2d = 0;
-        gPlaySt.unk2c = 0;
+        gPlaySt.randomWeatherOn = 0;
+        gPlaySt.weather = 0;
         gPlaySt.unk2e = 0;
-        gPlaySt.unk2f = 0;
+        gPlaySt.defaultWeather = 0;
         break;
     }
 }

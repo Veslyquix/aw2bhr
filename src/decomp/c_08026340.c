@@ -28,7 +28,7 @@ u8 sub_08026340(void)
  * every other unit keeps resolving it unchanged. */
 u32 GetClampedRankScoreSum(u8 a)
 {
-    u32 v = gUnknown_08499598[a].speedScore + gUnknown_08499598[a].powerScore + gUnknown_08499598[a].techScore;
+    u32 v = gPlayers[a].speedScore + gPlayers[a].powerScore + gPlayers[a].techScore;
 
     if (v > 999)
         v = 9999;

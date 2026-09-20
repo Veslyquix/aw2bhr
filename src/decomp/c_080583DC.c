@@ -13,7 +13,7 @@
  *
  *  - The army-mask test is INVERTED (`cmp r1,#0; beq` where the exemplar has
  *    `bne`), so this counts the armies whose bit in
- *    gUnknown_08499598[gUnknown_030033EC].unk2c is SET.
+ *    gPlayers[gUnknown_030033EC].unk2c is SET.
  *  - The unit predicate is `unk00 == 0` (`ldrb; cmp #0; beq`), not `<= 2`.
  *  - The gUnknown_085D5ABC[unk00].unk0b cap test is absent, which is why this
  *    function carries five pool words to the exemplar's six.
@@ -36,7 +36,7 @@ int sub_080583DC(void)
 
     for (i = 0; i < 4; i++)
     {
-        if (((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1) == 0)
+        if (((gPlayers[gUnknown_030033EC].unk2c >> i) & 1) == 0)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
@@ -89,7 +89,7 @@ int sub_0805848C(void)
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
@@ -126,7 +126,7 @@ int sub_08058530(void)
 
     for (i = 0; i < 4; i++)
     {
-        if (((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1) == 0)
+        if (((gPlayers[gUnknown_030033EC].unk2c >> i) & 1) == 0)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)

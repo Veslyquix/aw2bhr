@@ -9,7 +9,7 @@
 
 void sub_08035124(u8 a)
 {
-    if (a != 0 && gPlaySt.unk2c != a)
+    if (a != 0 && gPlaySt.weather != a)
         sub_080350E4();
 }
 

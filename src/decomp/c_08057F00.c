@@ -104,7 +104,7 @@ int sub_08057FE8(int a1)
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
         {
             for (j = i * 64; j < i * 64 + 0x40; j++)
             {

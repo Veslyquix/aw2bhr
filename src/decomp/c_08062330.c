@@ -27,7 +27,7 @@ void sub_08062330(void)
     int dy;
 
     army = gUnknown_030033EC;
-    base = gUnknown_08499598;
+    base = gPlayers;
     u = (struct PlayerStruct *)(army * 0x3c + (int)base);
     cx = u->hqX & 0x7f;
     cy = u->hqY & 0x7f;

@@ -30,7 +30,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
     switch (a3)
     {
     case 0:
-        v = (u32)gUnknown_03004008 % 33;
+        v = (u32)gGameClock % 33;
         m = gMap;
         y = (a2 + m->scrollY) >> 4;
         row = m->rowOffset[y];
@@ -60,7 +60,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
         }
         break;
     case 1:
-        v = (u32)gUnknown_03004008 % 33;
+        v = (u32)gGameClock % 33;
         if (v <= 4)
             v = 0;
         else if (v <= 8)
@@ -71,7 +71,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
             v = 1;
         break;
     case 2:
-        v = (u32)gUnknown_03004008 % 20;
+        v = (u32)gGameClock % 20;
         if (v <= 4)
             v = 6;
         else if (v <= 9)
@@ -82,7 +82,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
             v = 9;
         break;
     case 3:
-        v = (u32)gUnknown_03004008 % 28;
+        v = (u32)gGameClock % 28;
         if (v <= 5)
             v = 3;
         else if (v <= 8)
@@ -93,7 +93,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
             v = 4;
         break;
     case 5:
-        v = (u32)gUnknown_03004008 % 33;
+        v = (u32)gGameClock % 33;
         if (v <= 4)
             v = 0xA;
         else if (v <= 8)
@@ -104,7 +104,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
             v = 0xB;
         break;
     case 6:
-        v = (u32)gUnknown_03004008 % 33;
+        v = (u32)gGameClock % 33;
         if (v <= 4)
             v = 0xA;
         else if (v <= 8)
@@ -115,7 +115,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
             v = 0xB;
         break;
     case 7:
-        v = (u32)gUnknown_03004008 % 26;
+        v = (u32)gGameClock % 26;
         if (v <= 0xF)
             v = 0;
         else if (v <= 0x12)
@@ -129,7 +129,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
     case 9:
     case 10:
     case 11:
-        v = (u32)gUnknown_03004008 % 24;
+        v = (u32)gGameClock % 24;
         if (v <= 3)
             v = 3;
         else if (v <= 5)
@@ -142,7 +142,7 @@ void sub_08022DD4(s16 a1, s16 a2, s16 a3)
         break;
     case 12:
     case 13:
-        v = (u32)gUnknown_03004008 % 24;
+        v = (u32)gGameClock % 24;
         if (v <= 3)
             v = 0xF;
         else if (v <= 5)

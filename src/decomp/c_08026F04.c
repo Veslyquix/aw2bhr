@@ -20,7 +20,7 @@
 
 void AddPlayerIncomeToFunds(void)
 {
-    AddPlayerFunds(gUnknown_030033EC, gUnknown_08499598[gUnknown_030033EC].income);
+    AddPlayerFunds(gUnknown_030033EC, gPlayers[gUnknown_030033EC].income);
 }
 
 asm(".global sub_08026F04\n.thumb_set sub_08026F04, AddPlayerIncomeToFunds\n");

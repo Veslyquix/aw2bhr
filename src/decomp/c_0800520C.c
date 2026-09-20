@@ -11,7 +11,7 @@ void sub_0800520C(void)
 {
     gActiveMap->unk00 &= 0xFEFF;
     gActiveMap->unk10 = 0;
-    if (sub_0803CCB8(gActiveMap->unk10, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(gActiveMap->unk10, gDesignRoomName) != 1)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
@@ -43,7 +43,7 @@ void sub_080052D8(void)
 {
     gActiveMap->unk00 &= 0xFEFF;
     gActiveMap->unk10 = 1;
-    if (sub_0803CCB8(gActiveMap->unk10, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(gActiveMap->unk10, gDesignRoomName) != 1)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
@@ -75,7 +75,7 @@ void sub_080053A8(void)
 {
     gActiveMap->unk00 &= 0xFEFF;
     gActiveMap->unk10 = 2;
-    if (sub_0803CCB8(gActiveMap->unk10, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(gActiveMap->unk10, gDesignRoomName) != 1)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
@@ -112,7 +112,7 @@ int sub_08005474(int a1)
 {
     int result;
 
-    if (sub_0803CCB8((u8)a1, gUnknown_0200B204) == 1)
+    if (sub_0803CCB8((u8)a1, gDesignRoomName) == 1)
     {
         result = 0;
         switch (a1)

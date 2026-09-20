@@ -39,7 +39,7 @@ bool8 sub_0801906C(s16 a)
     army = (s16)gUnknown_0200C528[a].unk04->unk08;
     r = DivRem((s16)gUnknown_0200C528[a].unk04->unk0a, 0x18);
     n = gUnknown_0200C528[a].unk04->unk0c;
-    if (gUnknown_08499598[army].co != r)
+    if (gPlayers[army].co != r)
     {
         while (n > 0)
         {

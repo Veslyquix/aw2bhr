@@ -23,7 +23,7 @@
  *
  * The three guards are one `&&` chain rather than three early returns; both
  * spellings cross-jump onto the same `movs r0,#0`, so that is a readability
- * choice and not a measured one. `gUnknown_08499598` is the pointer-to-array
+ * choice and not a measured one. `gPlayers` is the pointer-to-array
  * global, so a plain `[i]` subscript is what produces the
  * `ldr rN,=sym; ldr rN,[rN]` pair -- see its note in unknown-globals.h. The
  * `(x*16 - x)*4` synthesis is agbcc's 60-byte stride multiply. */
@@ -34,7 +34,7 @@ bool8 sub_080348B4(void)
     u8 v;
     int found;
 
-    if (gPlaySt.unk32 == 0 && gPlaySt.unk0d != 0
+    if (gPlaySt.savingEnabled == 0 && gPlaySt.fog != 0
         && gPlaySt.gameMode == 3)
     {
         v = 0;
@@ -46,13 +46,13 @@ bool8 sub_080348B4(void)
             {
                 if (found != 0)
                 {
-                    if (gUnknown_08499598[i].aiControlled == 1
-                        && v != gUnknown_08499598[i].team)
+                    if (gPlayers[i].aiControlled == 1
+                        && v != gPlayers[i].team)
                         return 1;
                 }
-                else if (gUnknown_08499598[i].aiControlled == 1)
+                else if (gPlayers[i].aiControlled == 1)
                 {
-                    v = gUnknown_08499598[i].team;
+                    v = gPlayers[i].team;
                     found = 1;
                 }
             }

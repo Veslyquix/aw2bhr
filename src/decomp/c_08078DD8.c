@@ -8,12 +8,12 @@
  */
 
 /* Bumps one counter and drops another, but only on the frames bit 0 of
- * gUnknown_03004008 selects. sub_0807B858 is the same function on a different
+ * gGameClock selects. sub_0807B858 is the same function on a different
  * pair of counters. */
 
 void sub_08078DD8(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
     {
         gUnknown_0300200C++;
         gUnknown_03002000--;

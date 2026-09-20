@@ -41,18 +41,18 @@ void sub_08024ABC(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 
     {
         v2 = sub_080433F8(a->unk00->unk00, b->unk00->unk00, 1);
         if (v2 != 0)
-            v1 = (u16)sub_08043070(gUnknown_08499598[army].co,
-                              gUnknown_08499598[army].coMode,
+            v1 = (u16)sub_08043070(gPlayers[army].co,
+                              gPlayers[army].coMode,
                               a->unk00->unk00, b->unk00->unk00, c);
         if (t->unk0e == 1 && a->unk00->unk04_7 != 0)
         {
             if ((b->unk00->unk01 & 0x20) != 0)
-                v3 = (u16)sub_08043070(gUnknown_08499598[army].co,
-                                  gUnknown_08499598[army].coMode,
+                v3 = (u16)sub_08043070(gPlayers[army].co,
+                                  gPlayers[army].coMode,
                                   a->unk00->unk00, 0x19, v3);
             else
-                v3 = (u16)sub_08043070(gUnknown_08499598[army].co,
-                                  gUnknown_08499598[army].coMode,
+                v3 = (u16)sub_08043070(gPlayers[army].co,
+                                  gPlayers[army].coMode,
                                   a->unk00->unk00, b->unk00->unk00, v3);
         }
     }
@@ -60,12 +60,12 @@ void sub_08024ABC(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 
              && a->unk00->unk04_7 != 0 && d == 1)
     {
         if ((b->unk00->unk01 & 0x20) != 0)
-            v3 = (u16)sub_08043070(gUnknown_08499598[army].co,
-                              gUnknown_08499598[army].coMode,
+            v3 = (u16)sub_08043070(gPlayers[army].co,
+                              gPlayers[army].coMode,
                               a->unk00->unk00, 0x19, v3);
         else
-            v3 = (u16)sub_08043070(gUnknown_08499598[army].co,
-                              gUnknown_08499598[army].coMode,
+            v3 = (u16)sub_08043070(gPlayers[army].co,
+                              gPlayers[army].coMode,
                               a->unk00->unk00, b->unk00->unk00, v3);
     }
 

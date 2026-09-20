@@ -28,18 +28,18 @@ void sub_08031CF4(struct Unk08031CF4Proc *proc)
     sub_08013AEC();
 
     sub_0801BD00(proc->unk1e, proc->unk20,
-                 gUnknown_0849B074[((u32)gUnknown_03004008 >> 3) % 3], 0x4054);
+                 gUnknown_0849B074[((u32)gGameClock >> 3) % 3], 0x4054);
 }
 
 void sub_08031D54(struct Unk08031D54Proc *proc)
 {
     proc->unk22 = gUnknown_0849B060->unk0a + 0x64;
 
-    if (proc->unk22 != proc->unk1e && (gUnknown_03004008 & 1) == 0)
+    if (proc->unk22 != proc->unk1e && (gGameClock & 1) == 0)
         proc->unk1e++;
 
     sub_0801BD00(proc->unk1e, proc->unk20,
-                 gUnknown_0849B074[((u32)gUnknown_03004008 >> 3) % 3], 0x4054);
+                 gUnknown_0849B074[((u32)gGameClock >> 3) % 3], 0x4054);
 }
 
 /* Sets up the unit records the 0x08031 screen edits: publishes

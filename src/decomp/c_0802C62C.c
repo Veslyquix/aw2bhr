@@ -16,7 +16,7 @@
 
 bool8 sub_0802C62C(void)
 {
-    if (gPlaySt.unk32 == 0)
+    if (gPlaySt.savingEnabled == 0)
         return FALSE;
 
     return TRUE;

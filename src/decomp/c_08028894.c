@@ -42,8 +42,8 @@ u8 sub_080288D8(u16 a1)
 }
 
 /* `lsls r0,#4; subs r0,r0,r4; lsls r0,#2` is a MULTIPLY by 0x3c, i.e. the
- * stride of gUnknown_08499598's elements -- written as a subscript, not as
- * hand-rolled arithmetic. gUnknown_08499598 is a POINTER variable in ROM, so
+ * stride of gPlayers's elements -- written as a subscript, not as
+ * hand-rolled arithmetic. gPlayers is a POINTER variable in ROM, so
  * the base arrives through `ldr r1, [r0]`.
  *
  * BOTH FAILING PATHS RETURN 0 AND THE SUCCESS IS THE LAST STATEMENT. The ROM
@@ -56,7 +56,7 @@ u8 sub_08028904(u16 a1)
     if (sub_080266DC(a1) == 0)
         return 0;
 
-    if (gUnknown_08499598[a1].unk14 == 0 && gUnknown_08499598[a1].unk31 != 0)
+    if (gPlayers[a1].defeated == 0 && gPlayers[a1].unk31 != 0)
         return 0;
 
     return 1;

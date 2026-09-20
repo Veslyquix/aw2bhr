@@ -33,9 +33,9 @@ void sub_0806C1C8(struct Unk6C1C8Proc *proc)
  * `lsrs #1; lsls #1` is not a mask clearing bit 0: counted as
  * `(u32)x >> 1 << 1` it is the /2 fused with the u16 array's own scale, i.e.
  * the byte offset of element x/2. The `(u32)` cast is load-bearing --
- * gUnknown_03004008 is `s32` and without it the divide is `asrs`.
+ * gGameClock is `s32` and without it the divide is `asrs`.
  *
- * The literal pool is ordered (gUnknown_081A3D84, gUnknown_03004008, gPal), and
+ * The literal pool is ordered (gUnknown_081A3D84, gGameClock, gPal), and
  * because agbcc's expand_assignment computes the DESTINATION address first, the
  * one-statement spelling emits gPal FIRST. Binding the table base moves that
  * reference into an earlier statement (sub_0806E7FC's fix, which lands gPal in
@@ -46,7 +46,7 @@ void sub_0806C1C8(struct Unk6C1C8Proc *proc)
 void sub_0806C1E4(void)
 {
     const u16 *tbl = gUnknown_081A3D84;
-    u32 i = ((u32)gUnknown_03004008 & 0x1F) / 2;
+    u32 i = ((u32)gGameClock & 0x1F) / 2;
 
     gPal[0x12C] = tbl[i];
     sub_080135A4();

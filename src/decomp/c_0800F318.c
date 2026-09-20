@@ -110,7 +110,7 @@ int sub_0800F418(int x, int y)
     return gUnknown_084865C4[m];
 }
 
-void sub_0800F4E0(int x, int y)
+void MakeRoad(int x, int y)
 {
     if (sub_0800119C(x, y, 2) || sub_0800119C(x, y, 0xC))
     {
@@ -128,3 +128,5 @@ void sub_0800F4E0(int x, int y)
         sub_0800EC20(x, y);
     }
 }
+
+asm(".global sub_0800F4E0\n.thumb_set sub_0800F4E0, MakeRoad\n");

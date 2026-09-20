@@ -26,7 +26,7 @@
  * `subs r0, #1`. The 19/16/18 order is likewise the source's: GCC lays case
  * bodies out in source order, and the ROM has 19's before 16's.
  */
-void sub_080345C8(void)
+void MapMainIdle(void)
 {
     u16 *const *state;
     int idle;
@@ -66,3 +66,5 @@ void sub_080345C8(void)
             sub_0802776C(3);
     }
 }
+
+asm(".global sub_080345C8\n.thumb_set sub_080345C8, MapMainIdle\n");

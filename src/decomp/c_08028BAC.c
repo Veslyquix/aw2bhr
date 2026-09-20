@@ -28,7 +28,7 @@
  * i and j are all `int`: bare `adds #1` and a signed `ble` with no narrowing
  * anywhere. r6 = i << 16 in pass 2 and the two walking `* 0x3c` offsets in
  * pass 3 (r2, r8) are strength_reduce givs and LICM hoists, not source --
- * pass 3 is written with the ordinary gUnknown_08499598[i] subscript.
+ * pass 3 is written with the ordinary gPlayers[i] subscript.
  *
  * sub_08026F28 had no declaration before this function; added to
  * include/unknown-functions.h from the promoted src/decomp/c_08026F28.c. An
@@ -51,7 +51,7 @@ u8 sub_08028BAC(void)
             buf[i] = 1;
     }
 
-    if (gPlaySt.unk04 & 4)
+    if (gPlaySt.event20 & 4)
     {
         for (i = 1; i <= 4; i++)
         {
@@ -78,7 +78,7 @@ u8 sub_08028BAC(void)
             for (j = 1; j <= 4; j++)
             {
                 if (i != j && buf[j]
-                 && gUnknown_08499598[i].team != gUnknown_08499598[j].team)
+                 && gPlayers[i].team != gPlayers[j].team)
                     count++;
             }
 

@@ -38,6 +38,6 @@ void sub_08041E48(struct Unk41E48Proc *proc)
     sub_080424FC();
     sub_0802C594();
 
-    if (proc->unk64 != 0 && gPlaySt.unk32 != 0)
+    if (proc->unk64 != 0 && gPlaySt.savingEnabled != 0)
         sub_08034534(5, gUnknown_03003F38, proc->unk2c, proc->unk30);
 }

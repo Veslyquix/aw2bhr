@@ -9,15 +9,15 @@
 
 void sub_08035538(void)
 {
-    gPlaySt.unk2d = 1;
+    gPlaySt.randomWeatherOn = 1;
 }
 
 void sub_08035548(void)
 {
-    gPlaySt.unk2d = 2;
+    gPlaySt.randomWeatherOn = 2;
 }
 
 void sub_08035558(void)
 {
-    gPlaySt.unk2d = 0;
+    gPlaySt.randomWeatherOn = 0;
 }

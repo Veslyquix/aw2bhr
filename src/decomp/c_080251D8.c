@@ -25,16 +25,16 @@ void sub_080251D8(int a1)
 
     if (e->unk04_7 != 0)
     {
-        a = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
-                         gUnknown_08499598[gUnknown_030033EC].coMode,
+        a = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                         gPlayers[gUnknown_030033EC].coMode,
                          e->unk00, 3, 0);
     }
     else
     {
         ok = sub_080433F8(e->unk00, 3, 1);
         if (ok != 0)
-            b = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
-                             gUnknown_08499598[gUnknown_030033EC].coMode,
+            b = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                             gPlayers[gUnknown_030033EC].coMode,
                              e->unk00, 3, 1);
     }
 

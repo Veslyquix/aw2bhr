@@ -15,7 +15,7 @@
 
 int sub_08085410(int a1, int a2)
 {
-    switch (sub_080430B0(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode, a2))
+    switch (sub_080430B0(gPlayers[a1].co, gPlayers[a1].coMode, a2))
     {
     case -10:
         return 0x9b;

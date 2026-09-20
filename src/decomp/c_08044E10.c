@@ -65,7 +65,7 @@ struct Unk08044E10Proc
  *    the top and an unconditional `b` back to it -- the un-rotated shape.
  *    `for (j = ...; ; j++)` with the guard inside the body does NOT give it:
  *    gcc puts the increment BEFORE the test and adds an entry branch to skip
- *    it, and the giv (`j * 0x3c`, the gUnknown_08499598 element offset) is
+ *    it, and the giv (`j * 0x3c`, the gPlayers element offset) is
  *    then never strength-reduced, so the multiply moves inside the loop.
  *    Written as `while (1) { if (j > 4) {...return;} ...; j++; }` the exit
  *    test stays at the top, `adds r6, #0x3c` appears in the bottom block
@@ -184,7 +184,7 @@ void sub_08044F24(struct Unk08044F24Proc *proc)
         }
 
         if (sub_080266DC(j) != 0
-            && gUnknown_08499598[j].team != gUnknown_08499598[proc->unk2c].team)
+            && gPlayers[j].team != gPlayers[proc->unk2c].team)
             break;
 
         j++;

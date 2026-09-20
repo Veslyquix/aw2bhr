@@ -21,7 +21,7 @@
 
 bool8 sub_08026F5C(s16 a1)
 {
-    if (gUnknown_08499598[gUnknown_030033EC].team == gUnknown_08499598[(a1 >> 6) + 1].team)
+    if (gPlayers[gUnknown_030033EC].team == gPlayers[(a1 >> 6) + 1].team)
         return TRUE;
 
     return FALSE;

@@ -16,5 +16,5 @@
 
 void sub_08044080(int a1, u32 a2)
 {
-    gUnknown_08499598[a1].coCharge = a2;
+    gPlayers[a1].coCharge = a2;
 }

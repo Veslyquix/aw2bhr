@@ -44,7 +44,7 @@ void sub_08038484(void)
     if (sub_0803861C())
     {
         sub_08038368(gPlaySt.mapID - 0x8a, gUnknown_03004080,
-                     gUnknown_08499598[sub_0807A908()].totalScore);
+                     gPlayers[sub_0807A908()].totalScore);
         sub_0807823C(gPlaySt.mapID - 0x8a);
         gUnknown_0202FDFC.unk0c = gPlaySt.mapID - 0x8a;
         gUnknown_0202FDFC.unk11 = 1;

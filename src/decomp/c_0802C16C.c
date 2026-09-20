@@ -36,6 +36,6 @@ void sub_0802C184(void)
 {
     sub_0802C154(gUnknown_030033EC);
 
-    if (gPlaySt.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0x13, 0, 0, 0);
 }

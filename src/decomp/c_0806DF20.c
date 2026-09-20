@@ -24,7 +24,7 @@
  * that is the constant-reuse rule, not a second literal. 0x290 / 2 == 0x148. */
 void sub_0806DF20(void)
 {
-    int n = gUnknown_03004008 & 0x1F;
+    int n = gGameClock & 0x1F;
 
     if (n > 0xF)
         n = 0x1F - n;

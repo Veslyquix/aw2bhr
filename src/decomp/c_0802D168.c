@@ -52,7 +52,7 @@ void sub_0802D1C0(void)
     sub_08060684();
     sub_080424FC();
 
-    if (gPlaySt.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0xB, gUnknown_03003F38, 0, 0);
 }
 
@@ -66,6 +66,6 @@ void sub_0802D1F8(void)
     sub_080606A0();
     sub_080424FC();
 
-    if (gPlaySt.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0xC, gUnknown_03003F38, 0, 0);
 }

@@ -130,8 +130,8 @@ void sub_08017208(void)
     gUnknown_03004480 = v;
     sub_0808B6E8(&gPlaySt, p->unk0140, 0x48);
     *(struct Unk08499594 *)gUnknown_03004490 = p->unk0008;
-    gUnknown_0200C420.unk0e = gPlaySt.unk09;
-    gUnknown_0200C420.unk14 = (gPlaySt.unk0c == 0);
+    gUnknown_0200C420.unk0e = gPlaySt.animOpts;
+    gUnknown_0200C420.unk14 = (gPlaySt.bgmOn == 0);
     for (i = 0; i < 4; i++)
         gUnknown_030033F4[i] = p->unk0b18[i];
     gUnknown_03002F08 = p->unk0b98;

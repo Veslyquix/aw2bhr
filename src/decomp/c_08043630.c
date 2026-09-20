@@ -52,10 +52,10 @@ int sub_08043630(void)
 
     if (v == 0)
     {
-        if (gPlaySt.unk30 == 0)
+        if (gPlaySt.turnLimit == 0)
             return 0;
 
-        return gPlaySt.unk30;
+        return gPlaySt.turnLimit;
     }
 
     return v;

@@ -28,7 +28,7 @@ struct Unk8078BDC
 
 void sub_08078BDC(struct Unk8078BDC *proc)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
         gUnknown_03001FFC++;
 
     if (gUnknown_03001FFC == 0x10)
@@ -40,7 +40,7 @@ void sub_08078BDC(struct Unk8078BDC *proc)
 
 void sub_08078C18(struct Unk8078BDC *proc)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
         gUnknown_03001FFC--;
 
     if (gUnknown_03001FFC == 0)

@@ -15,12 +15,12 @@ int sub_0805A8C0(u16 x, u16 y)
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
         {
             if (sub_08026D44(i + 1))
             {
-                dx = x - gUnknown_08499598[i + 1].hqX + 2;
-                dy = y - gUnknown_08499598[i + 1].hqY + 2;
+                dx = x - gPlayers[i + 1].hqX + 2;
+                dy = y - gPlayers[i + 1].hqY + 2;
 
                 if ((u16)dx <= 4 && (s16)dy >= 0 && (s16)dy <= 4)
                     return 1;

@@ -47,7 +47,7 @@
  * all leave the 0x3F half coalescing into r2. Only the reuse of `b` for the
  * OR result gives both halves the ROM's constant-tied registers. */
 
-void sub_08000CCC(int a1)
+void SetSelectedTile(int a1)
 {
     int a;
     int b;
@@ -86,3 +86,5 @@ void sub_08000CCC(int a1)
 
     sub_08011E54(gUnknown_0808D8AC, (void *)0x06014D40, 0x8C << 3);
 }
+
+asm(".global sub_08000CCC\n.thumb_set sub_08000CCC, SetSelectedTile\n");

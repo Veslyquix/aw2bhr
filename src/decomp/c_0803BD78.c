@@ -17,18 +17,18 @@
 void sub_0803BD78(void)
 {
     gPlaySt.gameMode = 3;
-    gPlaySt.unk0d = 1;
-    gPlaySt.unk07 = 1;
+    gPlaySt.fog = 1;
+    gPlaySt.eventRelated = 1;
     gPlaySt.coAbilities = 1;
-    gPlaySt.unk2d = 1;
-    gPlaySt.unk2c = 0;
+    gPlaySt.randomWeatherOn = 1;
+    gPlaySt.weather = 0;
     gPlaySt.unk2e = 0;
-    gPlaySt.unk2f = 0;
-    gPlaySt.unk30 = 0;
+    gPlaySt.defaultWeather = 0;
+    gPlaySt.turnLimit = 0;
     gPlaySt.propertyFunds = 1000;
-    gPlaySt.unk31 = 0;
-    if (gPlaySt.unk32 != 0)
-        gPlaySt.unk09 = 1;
+    gPlaySt.captureLimit = 0;
+    if (gPlaySt.savingEnabled != 0)
+        gPlaySt.animOpts = 1;
 }
 
 /* Re-arm gPlaySt across a sub_08034848 reset, carrying unk0c over it
@@ -41,18 +41,18 @@ void sub_0803BD78(void)
  * not disturb that model. */
 void sub_0803BDBC(void)
 {
-    u8 saved = gPlaySt.unk0c;
+    u8 saved = gPlaySt.bgmOn;
 
     sub_08034848();
-    gPlaySt.unk0c = saved;
+    gPlaySt.bgmOn = saved;
     gPlaySt.aiControlled[1] = 0;
     gPlaySt.aiControlled[2] = 0;
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
-    gPlaySt.unk0d = 1;
-    gPlaySt.unk07 = 1;
+    gPlaySt.fog = 1;
+    gPlaySt.eventRelated = 1;
     gPlaySt.coAbilities = 1;
-    gPlaySt.unk2c = 0;
-    gPlaySt.unk2d = 1;
+    gPlaySt.weather = 0;
+    gPlaySt.randomWeatherOn = 1;
     gPlaySt.unk00 = 1;
 }

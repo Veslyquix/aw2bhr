@@ -122,5 +122,5 @@ void sub_08030E40(void)
         }
     }
 
-    gUnknown_0849B018->unk1ab0 = gUnknown_03004008;
+    gUnknown_0849B018->unk1ab0 = gGameClock;
 }

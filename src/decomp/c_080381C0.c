@@ -10,8 +10,8 @@
 /* MATCHED byte-for-byte (wave 43, W43-E).
  *
  * NEEDS ITS .rodata POOL WORD PLACED: "rodata": ["0x08090EFC"]. That ROM word
- * holds 0x08499598, i.e. &gUnknown_08499598, so it is agbcc's own -fforce-addr
- * address constant and not a global. The honest `gUnknown_08499598[i]`
+ * holds 0x08499598, i.e. &gPlayers, so it is agbcc's own -fforce-addr
+ * address constant and not a global. The honest `gPlayers[i]`
  * subscript emits the full three-level chain (`ldr rA,=<pool>; ldr rB,[rA];
  * ldr rC,[rB]`) by itself -- see the note above the declaration in
  * include/unknown-globals.h. trymatch reports only `relocs: name different
@@ -62,20 +62,20 @@ bool8 sub_080381C0(void)
     u8 n;
     u8 i;
 
-    if (gPlaySt.unk32 == 0)
+    if (gPlaySt.savingEnabled == 0)
     {
         if (gPlaySt.gameMode == 3)
         {
             n = 0;
             for (i = 1; i <= 4; i++)
             {
-                if (gUnknown_08499598[i].aiControlled == 1)
+                if (gPlayers[i].aiControlled == 1)
                 {
                     buf[n] = i;
                     n++;
                 }
             }
-            if (n == 1 && gUnknown_08499598[buf[0]].unk31 == 1)
+            if (n == 1 && gPlayers[buf[0]].unk31 == 1)
                 return 0;
         }
         else
@@ -93,7 +93,7 @@ bool8 sub_080381C0(void)
  * predicate before publishing the funds figure and the turn limit.
  *
  * TWO -fforce-addr pool words, and they must stay in this order: 0x08090F00
- * holds &gUnknown_0202FDEC and 0x08090F04 holds &gUnknown_08499598. Both are
+ * holds &gUnknown_0202FDEC and 0x08090F04 holds &gPlayers. Both are
  * agbcc's own address constants, so the honest spelling emits them and the
  * promotion carries "rodata": ["0x08090F00", "0x08090F04"].
  *
@@ -128,7 +128,7 @@ void sub_08038240(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].aiControlled)
+        if (gPlayers[i].aiControlled)
         {
             if (sub_080266DC(i))
             {
@@ -155,7 +155,7 @@ void sub_08038240(void)
     }
     else
     {
-        gUnknown_0202FDEC.unk0a = gUnknown_08499598[sub_0807A908()].totalScore;
+        gUnknown_0202FDEC.unk0a = gPlayers[sub_0807A908()].totalScore;
 
         if (sub_0803866C())
             gUnknown_0202FDEC.unk0a = gUnknown_0202FDEC.unk0a * 2;

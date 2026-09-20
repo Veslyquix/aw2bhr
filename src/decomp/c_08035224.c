@@ -44,7 +44,7 @@ void sub_080352B4(void)
         gUnknown_02027C68[i].unk02 = gUnknown_02027C68[i].unk02 + gUnknown_02027C68[i].unk06;
     }
 
-    k = gUnknown_03004008 & 1;
+    k = gGameClock & 1;
     i = k * 0x10;
 
     for (j = i; j < i + 0x10; j++)

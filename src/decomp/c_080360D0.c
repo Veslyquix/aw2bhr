@@ -54,7 +54,7 @@ void sub_080360D0(ProcPtr procArg)
             proc->unk35 = 5;
             sub_08027278(proc->unk42 >> 4, proc->unk44 >> 4);
             sub_0803B4DC(0x7d);
-            if (gPlaySt.unk32 != 0
+            if (gPlaySt.savingEnabled != 0
                 && gUnknown_030032D8 != 0x13
                 && (u8)sub_0805C974() == 0)
                 sub_08034534(2, proc->unk30 - gUnknown_08499594, 0, 0);
@@ -75,7 +75,7 @@ void sub_080360D0(ProcPtr procArg)
         case 3:
             sub_080360A4(proc);
             proc->unk39++;
-            if ((gUnknown_08499598[gUnknown_030033EC].turnState & 2) == 0)
+            if ((gPlayers[gUnknown_030033EC].turnState & 2) == 0)
             {
                 t = proc->unk44 + 8;
                 while (t == 0)

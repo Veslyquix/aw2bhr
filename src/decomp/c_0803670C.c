@@ -14,7 +14,7 @@ void sub_0803670C(void)
 {
     u32 v;
 
-    v = (u32)gUnknown_03004008 % 0x2e;
+    v = (u32)gGameClock % 0x2e;
 
     if (v <= 0xb)
         v = 0;
@@ -46,7 +46,7 @@ void UpdateFuelAmmoGraphics(void)
 {
     u32 v;
 
-    v = (u32)gUnknown_03004008 % 0x32;
+    v = (u32)gGameClock % 0x32;
 
     switch (v)
     {
@@ -106,7 +106,7 @@ void sub_08036884(void)
         gUnknown_03004094 = 0;
     }
     sub_0801F0FC();
-    gUnknown_03004008++;
+    gGameClock++;
     sub_0803B408();
 }
 
@@ -154,14 +154,14 @@ void sub_08036944(void)
         gUnknown_03004094 = 0;
     }
     sub_0801F0FC();
-    gUnknown_03004008++;
+    gGameClock++;
     sub_0803B408();
     gUnknown_030044D0 = 0;
 }
 
 void sub_080369BC(void)
 {
-    if (gUnknown_03004094 == 0 && (gUnknown_03004008 & gUnknown_030043F4) == 0)
+    if (gUnknown_03004094 == 0 && (gGameClock & gUnknown_030043F4) == 0)
     {
         sub_0801F050();
         sub_08013510();
@@ -212,13 +212,13 @@ void sub_08036A50(void)
         gUnknown_03004094 = 0;
     }
     sub_0801F0FC();
-    gUnknown_03004008++;
+    gGameClock++;
     sub_0803B408();
 }
 
 void sub_08036AB8(void)
 {
-    if (gUnknown_03004094 == 0 && (gUnknown_03004008 & gUnknown_030043F4) == 0)
+    if (gUnknown_03004094 == 0 && (gGameClock & gUnknown_030043F4) == 0)
     {
         sub_08013510();
         sub_08054B7C();

@@ -110,6 +110,6 @@ void sub_08043418(int x, int y, int id)
         break;
     }
 
-    sub_0801C7DC(gUnknown_08101EC0, id, gUnknown_03004008,
+    sub_0801C7DC(gUnknown_08101EC0, id, gGameClock,
                  x & 0x1FF, y & 0xFF, 0x1365, 1);
 }

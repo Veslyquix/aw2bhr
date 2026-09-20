@@ -27,7 +27,7 @@
  *
  * SETTLED (each read out of baserom.gba, and all four are -fforce-addr pool
  * words, NOT objects -- do not declare a gUnknown_081D93xx for any of them):
- *   0x081D93DC -> 0x08499598  gUnknown_08499598 (already `struct PlayerStruct *`)
+ *   0x081D93DC -> 0x08499598  gPlayers (already `struct PlayerStruct *`)
  *   0x081D93E0 -> 0x03003FC0  gPlaySt
  *   0x081D93E4 -> 0x08616BE4  the Proc_Start script
  *   0x081D93E8 -> 0x08043591  sub_08043590, THUMB bit set
@@ -54,12 +54,12 @@ void sub_080849C8(ProcPtr parent)
     sub_08078D80(savedParent);
     sub_08085950(0, gUnknown_030033EC);
     sub_0802D5A0((void *)(gUnknown_030030B4.bits.chr_block * 0x4000 + 0x06006C00),
-                 gUnknown_08616B1C[gUnknown_08499598[gUnknown_030033EC].teamColor], 0);
+                 gUnknown_08616B1C[gPlayers[gUnknown_030033EC].teamColor], 0);
     sub_080858C0();
-    sub_08043BA4(gUnknown_08499598[gUnknown_030033EC].co, 0xB6 * 2, 5);
-    sub_08043FA8(gUnknown_08499598[gUnknown_030033EC].co, (void *)0x06015700, 0x16);
+    sub_08043BA4(gPlayers[gUnknown_030033EC].co, 0xB6 * 2, 5);
+    sub_08043FA8(gPlayers[gUnknown_030033EC].co, (void *)0x06015700, 0x16);
     sub_08043B44(8);
-    sub_08043B14(gUnknown_08499598[gUnknown_030033EC].co, 0xAB * 4);
+    sub_08043B14(gPlayers[gUnknown_030033EC].co, 0xAB * 4);
     sub_0801F114();
     sub_0801F150(0, (void *)0x06010000, 0xB1 * 4, 0x12);
     sub_0801F150(1, (void *)0x06010000, 0xB3 * 4, 0x13);
@@ -71,7 +71,7 @@ void sub_080849C8(ProcPtr parent)
          i < (gPlaySt.gameMode == 2 ? sub_0802490C(gPlaySt.mapID)
                                            : sub_080248F8());
          i++)
-        sub_0801F234(gUnknown_08499598[i + 1].teamColor + 0x3D);
+        sub_0801F234(gPlayers[i + 1].teamColor + 0x3D);
 
     sub_0801F234(0x9B);
     sub_0801F234(0x9C);

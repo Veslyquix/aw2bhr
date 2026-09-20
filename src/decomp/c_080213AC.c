@@ -40,8 +40,8 @@ void sub_080213AC(void)
     int xend;
     int yend;
 
-    if (gPlaySt.unk0d != 0
-        && gUnknown_08499598[gUnknown_030033EC].aiControlled == 2)
+    if (gPlaySt.fog != 0
+        && gPlayers[gUnknown_030033EC].aiControlled == 2)
     {
         sub_08020754(&gMap->visible[
                          gUnknown_03004070 * 0x508]);
@@ -50,14 +50,14 @@ void sub_080213AC(void)
     {
         sub_080206E4(&gMap->visible[
                          gUnknown_03004070 * 0x508],
-                     1 - gPlaySt.unk0d);
+                     1 - gPlaySt.fog);
     }
 
     sub_080206E4(&gMap->visible[
                      gUnknown_03004088 * 0x508],
-                 1 - gPlaySt.unk0d);
+                 1 - gPlaySt.fog);
 
-    if (gPlaySt.unk0d != 0)
+    if (gPlaySt.fog != 0)
     {
         sub_080212AC(1);
         sub_080212AC(2);

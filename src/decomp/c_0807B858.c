@@ -8,13 +8,13 @@
  */
 
 /* The gUnknown_03002B34 / gUnknown_03002F18 twin of sub_08078DD8 -- same guard
- * on bit 0 of gUnknown_03004008, same increment/decrement pair.
+ * on bit 0 of gGameClock, same increment/decrement pair.
  * gUnknown_03002F18 is declared volatile for sub_0804BA4C's sake; a plain
  * `--` on it is byte-identical either way. */
 
 void sub_0807B858(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
     {
         gUnknown_03002B34++;
         gUnknown_03002F18--;

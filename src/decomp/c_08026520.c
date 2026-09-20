@@ -20,10 +20,10 @@ void sub_08026520(void)
 
     for (i = 1; i <= 4; i++)
     {
-        gUnknown_08499598[i].speedScore = sub_080263A4(i);
-        gUnknown_08499598[i].powerScore = sub_08026424(i);
-        gUnknown_08499598[i].techScore = sub_080264BC(i);
-        gUnknown_08499598[i].totalScore = sub_08026368(i);
-        gUnknown_08499598[i].rank = sub_08037D80(gUnknown_08499598[i].totalScore);
+        gPlayers[i].speedScore = sub_080263A4(i);
+        gPlayers[i].powerScore = sub_08026424(i);
+        gPlayers[i].techScore = sub_080264BC(i);
+        gPlayers[i].totalScore = sub_08026368(i);
+        gPlayers[i].rank = sub_08037D80(gPlayers[i].totalScore);
     }
 }

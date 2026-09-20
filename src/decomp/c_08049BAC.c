@@ -9,7 +9,7 @@
 
 void sub_08049BAC(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
     {
         gUnknown_0300200C++;
         gUnknown_03002000--;

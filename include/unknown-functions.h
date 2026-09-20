@@ -654,7 +654,7 @@ void sub_08030ED4(void);
 /* The gUnknown_085D3DD0 lookup family. Every one of them is
  * `if (!gPlaySt.unk08) return <fallback>; return <table entry>;` and
  * each has a one-line forwarder next to it that supplies (unk1d, unk1e) out of
- * gUnknown_08499598. sub_08042F34 and sub_08042F7C IGNORE their second
+ * gPlayers. sub_08042F34 and sub_08042F7C IGNORE their second
  * argument -- it is still declared, because their forwarders load and pass it.
  */
 int sub_08042DCC(int);
@@ -702,7 +702,7 @@ void sub_08044854(int, int, int);
  * `lsls #24`, which a bool8 return would have forced. */
 int sub_0803CBD8(int);
 /* CORRECTION, wave 32 (W32-A). Both were promoted as `u8 (int)` -- one-line
- * bodies returning gUnknown_08499598[i].unk3a / .unk3b, which are u8 members --
+ * bodies returning gPlayers[i].unk3a / .unk3b, which are u8 members --
  * and neither had a declaration or a C caller until now. sub_080264BC is the
  * first, and it takes BOTH results with a bare `adds r4, r0, #0` /
  * `adds r1, r0, #0` and no re-narrowing before comparing them against each
@@ -1243,7 +1243,7 @@ bool8 sub_0803E388(int);
 /* Same 0/1-plus-`lsls #24` shape as sub_0803E388, at the call site in
  * sub_08045830. */
 bool8 sub_08045650(void);
-/* Indexes gUnknown_08499598 by its argument and ends `pop {r0}; bx r0`. */
+/* Indexes gPlayers by its argument and ends `pop {r0}; bx r0`. */
 void sub_08044AB8(int);
 
 /* NINE arguments -- four in registers and five on the stack -- behind the five
@@ -1757,7 +1757,7 @@ void sub_08021D10(void);
  * sub_08021750's parameter is an `int` whose only use is `+ 0x4c` narrowed to
  * u8 for sub_0803CF3C's first parameter; nothing dereferences it, so it is not
  * a pointer.  sub_080212AC's is `u16` -- the `lsls #0x10; lsrs #0x10` prologue
- * -- and it indexes both gUnknown_08499598 (0x3c stride) and the two
+ * -- and it indexes both gPlayers (0x3c stride) and the two
  * gUnknown_084995F4 / _FE halfword tables as an army slot.  Neither sets r0. */
 void sub_08021750(int);
 void sub_080212AC(u16);
@@ -4690,7 +4690,7 @@ void sub_08015568(int);
 void sub_08072BBC(int);
 
 /* The 0x08044 per-army funds block (wave 25). Every one of these takes the
- * army slot index that subscripts gUnknown_08499598, passed and compared as a
+ * army slot index that subscripts gPlayers, passed and compared as a
  * bare `int` at every call site in the block -- no prologue masking anywhere,
  * which per the PROMOTE_MODE rule is positive evidence for a wide parameter.
  *
@@ -4842,7 +4842,7 @@ int sub_080444B4(struct Unk030040D8 *);
  * The parameter is `int`, not the `u8` its body suggests: the prologue is
  * `adds r4,r0,#0` THEN `lsls r0,r4,#0x18; lsrs r0,r0,#0x18` -- copy-then-narrow,
  * which per docs/agbcc-codegen.md is a cast at a use (it feeds
- * sub_0803CCB8(a, gUnknown_0200B204)) and not a narrow parameter; the saved r4
+ * sub_0803CCB8(a, gDesignRoomName)) and not a narrow parameter; the saved r4
  * is switched on unnarrowed as 0/1/2 immediately afterwards.
  *
  * It RETURNS a value and that is decisive rather than inferred: all three F058
@@ -5162,7 +5162,7 @@ void sub_08011C90(const void *, void *, u16);
  * with `bhi` -- an UNSIGNED compare, so the locals themselves are `u32` and
  * cannot be the source of the narrowing. agbcc re-narrows a narrow-returning
  * callee at every call site, which is exactly what is there. Its five
- * arguments arrive as two `ldrb`s off gUnknown_08499598[army], two more
+ * arguments arrive as two `ldrb`s off gPlayers[army], two more
  * `ldrb`s (or the literal 0x19), and one stack word; nothing narrows on the
  * caller side, so `int` throughout.
  *
@@ -5578,7 +5578,7 @@ bool8 sub_08042084(u8 *);
  * promoted when this was corrected, so the edit cost one trymatch on
  * c_08026F9C.c. */
 bool8 sub_08026FD0(s16, u8);
-/* Wave 34 (W34-I). sub_08026FD0's sibling -- gUnknown_08499598's unk2a comment
+/* Wave 34 (W34-I). sub_08026FD0's sibling -- gPlayers's unk2a comment
  * records the pair as comparing that field between two entries, and both take a
  * unit id and a second id truncated to a byte. sub_080422A8 is the only caller
  * in C so far and it hands the arguments the OTHER way round from sub_0804236C's
@@ -6628,7 +6628,7 @@ void sub_08018DF8(struct Unk0200C528 *);
  *
  * sub_08043120 / sub_08043190 / sub_08043200 are sub_080430B0's siblings,
  * declared above as `int (int, int, int)`. Every one of them is reached from
- * the same call shape -- `ldrb` of gUnknown_08499598[a].unk1d and .unk1e into
+ * the same call shape -- `ldrb` of gPlayers[a].unk1d and .unk1e into
  * r0/r1 with the caller's second argument already parked in r2 -- so they take
  * the same three wide arguments and their results are added to or offset by a
  * constant, hence `int`. */
@@ -6738,7 +6738,7 @@ void sub_0801F2AC(int, u16 *);
  * gUnknown_08610A38[0x9FA] and a literal 0 -- so two wide parameters. Both end
  * `pop {r0}; bx r0`, the VOID epilogue. sub_08004D90's third parameter is the
  * same `u8 *` sub_08004DD4 declares: both call sites hand it
- * `gUnknown_0200B204` straight through with `adds r2, rN, #0`. */
+ * `gDesignRoomName` straight through with `adds r2, rN, #0`. */
 void sub_08004D74(int, int);
 void sub_08004D90(int, int, u8 *);
 
@@ -7089,7 +7089,7 @@ s16 sub_08011D7C(void *, int);
 /* An (x, y) pair. Both prologues are a bare `adds r4, r0, #0` / `adds r5, r1,
  * #0` with no PROMOTE_MODE shift pair, so both parameters are `int`; both end
  * `pop {r0}; bx r0`, so void. They are twins -- same guard on
- * gUnknown_03004008, same `& 0x1FF` / `& 0xFF` wrap, differing only in the id
+ * gGameClock, same `& 0x1FF` / `& 0xFF` wrap, differing only in the id
  * they pass sub_0801F34C (0x43 vs 0x44) and sub_08064500's extra palette
  * write. */
 void sub_08064474(int, int);
@@ -8559,8 +8559,8 @@ void sub_08026584(u8, u16);
  * for u8, u16 or int, so u8 is the load width and nothing more.
  *
  * sub_08017720: four arguments, each loaded at its member's own width and
- * handed over with no narrowing -- `ldrb` of gUnknown_08499598[n].unk1d,
- * `ldrb` of gPlaySt.unk02, `ldrh` of gUnknown_08499598[n].unk38 and
+ * handed over with no narrowing -- `ldrb` of gPlayers[n].unk1d,
+ * `ldrb` of gPlaySt.unk02, `ldrh` of gPlayers[n].unk38 and
  * `ldrh` of gUnknown_03004080, where n is sub_0807A908() evaluated separately
  * for the first and third.  Result discarded (`bl sub_08030574` follows).
  * Same caveat: the widths are the loads', so they are a floor.  Wave 65 then
@@ -8786,7 +8786,7 @@ void sub_08032BA4(void);
 void sub_08044144(int);
 void sub_08044B28(int, int, ProcPtr);
 /* Same third-parameter proof from sub_08039650, where it additionally forces
- * the r2/r3 split between the proc pointer and the gUnknown_08499598 base. */
+ * the r2/r3 split between the proc pointer and the gPlayers base. */
 void sub_08080E74(int, int, ProcPtr);
 /* Wave 54, W54-C. Already promoted as `void sub_08080E40(ProcPtr proc)` in
  * src/decomp/c_08080DFC.c but never declared here; sub_08080BF0 is its only
@@ -8931,7 +8931,7 @@ int sub_08042DFC(int);
 /* Wave 41 (W41-C). The team-colour assignment pair, both from their own
  * definitions (now matched).
  *   sub_08026A88(slot, colour) answers whether `colour` is still free among
- * gUnknown_08499598[1 .. slot-1]. Its SECOND parameter is `int`, NOT `u8`:
+ * gPlayers[1 .. slot-1]. Its SECOND parameter is `int`, NOT `u8`:
  * sub_08026AC0 calls it twice, and the second call passes a plain int loop
  * counter with a bare `adds r1, r4, #0` -- a `u8` parameter would have forced
  * an `lsls #0x18; lsrs #0x18` there and none is present. The callee side cannot
@@ -9494,7 +9494,7 @@ void sub_08063DDC(struct Vec3 *, struct Mtx43 *, struct Vec3 *);
  * with r0 written (`movs r0,#0`) before it is ever read. The call site is what
  * proves the arity: sub_08085244 sets up r0 (its own `s16 *`) and r1
  * (`p[0x33]`, the army index every one of the callees below takes) immediately
- * before the `bl`. r1 is used unnarrowed as a gUnknown_08499598 index and as
+ * before the `bl`. r1 is used unnarrowed as a gPlayers index and as
  * sub_08085410 / sub_08085638 / sub_080856A0's first argument, so `int`.
  * `pop {r4,r5,r6,r7}; pop {r0}` makes it void. */
 void sub_08085708(s16 *, int);
@@ -9513,7 +9513,7 @@ int sub_08085410(int, int);
 int sub_08085638(int, int);
 int sub_080856A0(int, int);
 /* Already MATCHED (32 bytes, never promoted or declared): returns
- * `&gUnknown_0810E6E0[(gUnknown_08499598[i].unk1a - 1) * 0x20]`, the stride-0x20
+ * `&gUnknown_0810E6E0[(gPlayers[i].unk1a - 1) * 0x20]`, the stride-0x20
  * palette row that table's note describes. `u16 *` rather than `u8 *` because
  * its only caller, sub_08085950, hands the result straight to
  * ApplyPaletteExt's `u16 *` first parameter with no arithmetic in between; the
@@ -9866,10 +9866,10 @@ s16 sub_0802419C(s16, s16, u8);
 int sub_080249EC(int, s8, u8);
 /* Two more undeclared callees of block 0x08024, both from sub_080246B4 and
  * both with the SAME first argument, the literal 0x48. sub_0803F8E0's second
- * argument is `Div(gUnknown_03004008, 20) % 4` and sub_0803FE50's is
- * gUnknown_03004008 itself, each materialised in r1 immediately before its
+ * argument is `Div(gGameClock, 20) % 4` and sub_0803FE50's is
+ * gGameClock itself, each materialised in r1 immediately before its
  * `bl`; nothing reads r0 after either, so both are void. `int` throughout is
- * the weakest type that fits -- gUnknown_03004008 is already s32 and neither
+ * the weakest type that fits -- gGameClock is already s32 and neither
  * value is narrowed on the way in. (Neither was on the wave brief's
  * undeclared-callee list for this block, which listed only sub_080240B4,
  * sub_08024DDC and sub_0803F880 -- the list undercounts.) */
@@ -10264,7 +10264,7 @@ u16 sub_0807B7BC(u8 *, u16 *, u8 *, int, void *);
  * and its own prologue reads none. It ends by writing 2 into +0x3a of the
  * struct Unk03001470 sub_08014740 returns, so the result is discarded too. */
 void sub_0807A860(void);
-/* sub_0807A860 hands it the u8 at +0x1d of a gUnknown_08499598 record and
+/* sub_0807A860 hands it the u8 at +0x1d of a gPlayers record and
  * sub_08078E14's `int` result, and narrows the value it returns to u16 for
  * sub_08014740's fourth parameter. `int` both ways is the weakest model that
  * gives that single `lsls #0x10; lsrs #0x10` at the call site; a `u16` return
@@ -10850,11 +10850,11 @@ void sub_08012F6C(const void *src, void *dst, int size);
 /* Wave 37 (W37-I). sub_08034A7C is defined in src/decomp/c_08034A7C.c and was
  * never declared here; sub_08034AF8 is its first caller outside its own unit.
  * Both parameters are plain `int` -- the y arrives as a `movs #0x4e` immediate
- * and the second as a bare `ldrb` of gUnknown_08499598[i].unk1a. */
+ * and the second as a bare `ldrb` of gPlayers[i].unk1a. */
 void sub_08034A7C(int, int);
 /* Byte-returning predicate: every caller re-narrows the result with
  * `lsls #0x18` before testing it (sub_08034AF8, and the guard the
- * gUnknown_08499598.unk2d note describes). */
+ * gPlayers.unk2d note describes). */
 bool8 sub_08026D44(int);
 void sub_08026F04(void);
 void sub_080268F4(void);
@@ -11339,7 +11339,7 @@ void sub_08061A40(struct Unk085771C4 *, const struct Unk085771C4 *);
 /* Wave 50, W50-M, MATCHED. Builds one gUnknown_085771C4-shaped record into the
  * destination: the 0x10-byte header is copied from gUnknown_085771C4[a2] and
  * the 24 following 0xc-byte rows are that record summed byte-wise with
- * gUnknown_085771C4[gUnknown_0857690C[a3][gUnknown_08499598[a4].unk1d]]. The
+ * gUnknown_085771C4[gUnknown_0857690C[a3][gPlayers[a4].unk1d]]. The
  * pointee is the sized record for the same reason sub_08061A40's is -- the
  * 0x130 stride is what proves it. Parameter widths are read straight off the
  * entry narrowings: `lsls/lsrs #0x18` twice then `#0x10`. */

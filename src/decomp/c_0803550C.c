@@ -44,7 +44,7 @@
  * if/else-if rewrite. */
 void sub_0803550C(void)
 {
-    switch (gPlaySt.unk2c)
+    switch (gPlaySt.weather)
     {
     case 0:
         break;

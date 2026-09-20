@@ -21,15 +21,15 @@ void sub_080310D8(void)
 {
     sub_08034848();
 
-    gPlaySt.unk32 = 1;
+    gPlaySt.savingEnabled = 1;
     gPlaySt.aiControlled[1] = 0;
     gPlaySt.aiControlled[2] = 0;
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
-    gPlaySt.unk0d = 1;
-    gPlaySt.unk07 = 1;
-    gPlaySt.unk2c = 0;
-    gPlaySt.unk2d = 1;
+    gPlaySt.fog = 1;
+    gPlaySt.eventRelated = 1;
+    gPlaySt.weather = 0;
+    gPlaySt.randomWeatherOn = 1;
 
     gUnknown_0849B018->unk00 = 1;
     gUnknown_0849B060->unk02 = 1;
@@ -44,15 +44,15 @@ void sub_08031128(void)
 {
     sub_08034848();
 
-    gPlaySt.unk32 = 1;
+    gPlaySt.savingEnabled = 1;
     gPlaySt.aiControlled[1] = 0;
     gPlaySt.aiControlled[2] = 0;
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
-    gPlaySt.unk0d = 1;
-    gPlaySt.unk07 = 1;
-    gPlaySt.unk2c = 0;
-    gPlaySt.unk2d = 1;
+    gPlaySt.fog = 1;
+    gPlaySt.eventRelated = 1;
+    gPlaySt.weather = 0;
+    gPlaySt.randomWeatherOn = 1;
 
     gUnknown_0849B018->unk00 = 3;
     gUnknown_0849B060->unk02 = 1;
@@ -66,15 +66,15 @@ void sub_0803117C(void)
 {
     sub_08034848();
 
-    gPlaySt.unk32 = 1;
+    gPlaySt.savingEnabled = 1;
     gPlaySt.aiControlled[1] = 0;
     gPlaySt.aiControlled[2] = 0;
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
-    gPlaySt.unk0d = 1;
-    gPlaySt.unk07 = 1;
-    gPlaySt.unk2c = 0;
-    gPlaySt.unk2d = 1;
+    gPlaySt.fog = 1;
+    gPlaySt.eventRelated = 1;
+    gPlaySt.weather = 0;
+    gPlaySt.randomWeatherOn = 1;
 
     gUnknown_0849B018->unk00 = 2;
     gUnknown_0849B060->unk02 = 1;

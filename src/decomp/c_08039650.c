@@ -20,7 +20,7 @@ struct Unk39650Proc
     /* 0x00 */ PROC_HEADER;
     /* 0x29 */ STRUCT_PAD(0x29, 0x54);
     /* 0x54 */ int unk54; /* an army index: it is what indexes
-                           * gUnknown_08499598[] here and in sub_080397BC */
+                           * gPlayers[] here and in sub_080397BC */
     /* 0x58 */ int unk58;
 };
 
@@ -35,5 +35,5 @@ struct Unk39650Proc
 
 void sub_08039650(struct Unk39650Proc *proc)
 {
-    sub_08080E74(gUnknown_08499598[proc->unk54].co, proc->unk58, proc);
+    sub_08080E74(gPlayers[proc->unk54].co, proc->unk58, proc);
 }

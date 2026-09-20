@@ -43,7 +43,7 @@
 
 #define MAP gMap
 
-void sub_0800B048(int x, int y)
+void MakeMountain(int x, int y)
 {
     if (sub_0800119C(x, y - 1, 1) == 0 && sub_0800119C(x, y - 1, 3) == 0)
     {
@@ -118,3 +118,5 @@ void sub_0800B048(int x, int y)
         }
     }
 }
+
+asm(".global sub_0800B048\n.thumb_set sub_0800B048, MakeMountain\n");

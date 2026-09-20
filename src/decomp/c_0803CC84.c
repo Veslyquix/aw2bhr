@@ -15,7 +15,7 @@
  * advances i by one. The `u8` counter is proved by the `lsl #24; lsr #24` on
  * the increment. dst is r0 and src is r1 -- sub_0803CCB8 passes its own second
  * parameter as dst and &gUnknown_020280C0[i].unk02 as src. */
-void sub_0803CC84(u8 *dst, const u8 *src)
+void CopyString(u8 *dst, const u8 *src)
 {
     u8 i = 0;
 
@@ -28,3 +28,5 @@ void sub_0803CC84(u8 *dst, const u8 *src)
 
     dst[i] = 0;
 }
+
+asm(".global sub_0803CC84\n.thumb_set sub_0803CC84, CopyString\n");

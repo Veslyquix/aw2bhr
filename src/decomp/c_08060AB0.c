@@ -41,7 +41,7 @@
  * after it.
  *
  * The `? :` on sub_08043070's fifth argument is NOT a `? :`. The ROM duplicates
- * the whole gUnknown_08499598 subscript and both `ldrb`s into each arm and
+ * the whole gPlayers subscript and both `ldrb`s into each arm and
  * cross-jumps only from `str r2,[sp]` onward, which an argument-position
  * COND_EXPR cannot produce -- gcc evaluates that argument into one pseudo and
  * the other arguments outside the branch. Two full calls in an if/else is what
@@ -146,20 +146,20 @@ retry:
 
         if (((struct Unk60AB0Tbl *)gUnknown_085766E0)->rows[i - 1].unk07 != 0)
         {
-            a = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
-                             gUnknown_08499598[gUnknown_030033EC].coMode,
+            a = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                             gPlayers[gUnknown_030033EC].coMode,
                              i, pick, 0);
-            b = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
-                             gUnknown_08499598[gUnknown_030033EC].coMode,
+            b = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                             gPlayers[gUnknown_030033EC].coMode,
                              i, pick, 1);
 
             if (a > b)
-                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
-                                 gUnknown_08499598[gUnknown_030033EC].coMode,
+                r = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                                 gPlayers[gUnknown_030033EC].coMode,
                                  i, pick, 0);
             else
-                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].co,
-                                 gUnknown_08499598[gUnknown_030033EC].coMode,
+                r = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                                 gPlayers[gUnknown_030033EC].coMode,
                                  i, pick, 1);
 
             if (r >= thr)
@@ -210,7 +210,7 @@ again:
         if (sub_08060ED4(k) == 0)
             goto again;
 
-        funds = gUnknown_08499598[gUnknown_030033EC].funds;
+        funds = gPlayers[gUnknown_030033EC].funds;
 
         if (cost > funds)
             goto again;

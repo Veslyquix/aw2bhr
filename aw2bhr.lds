@@ -40,6 +40,15 @@ gProperty = gUnknown_03003150;
 gPlaySt = gUnknown_03003FC0;
 gActiveMap = gUnknown_0200B0B0;
 
+/* gPlayers: the five-entry per-army record array (struct PlayerStruct,
+ * 0x3c each, based at 0x02023284); SRR_AW2's Definitions.s names the
+ * elements gPlayer0..gPlayer4. gGameClock is the frame counter and
+ * gDesignRoomName the design-map name buffer LoadDesignRoomName fills.
+ * Linker aliases, same reason as gMap. */
+gPlayers = gUnknown_08499598;
+gGameClock = gUnknown_03004008;
+gDesignRoomName = gUnknown_0200B204;
+
 SECTIONS
 {
 	. = 0x02000000;

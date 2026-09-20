@@ -108,7 +108,7 @@
  * sub_08029FE4 and did not move sub_080290B0 -- so a chained run is worth the
  * budget if anyone has it.
  *
- * SETTLED, keep as-is: `gUnknown_08499598` is a POINTER to an array of 60-byte
+ * SETTLED, keep as-is: `gPlayers` is a POINTER to an array of 60-byte
  * elements (`ldr r1,[r0]` then index*60) and `.unk00` is a 32-bit member.
  * `[r5,#4]` is a 7-bit count plus a preserved top bit (the header's `unk04_0`)
  * -- the `!= 0` test compiles to `movs #0x7f ; ands` while the VALUE read
@@ -135,7 +135,7 @@ int sub_08029AF8(struct Unk08499594 *p, u16 a2, u8 a3)
 
             if (a3)
             {
-                if (gUnknown_08499598[gUnknown_030033EC].funds < v)
+                if (gPlayers[gUnknown_030033EC].funds < v)
                     goto _done;
 
                 sub_08025B28(gUnknown_030033EC, v);

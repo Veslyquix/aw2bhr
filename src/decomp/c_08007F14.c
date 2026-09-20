@@ -7,7 +7,7 @@
  * sub_08007F14 @ 0x08007F14
  */
 
-void sub_08007F14(int x, int y, int v)
+void MakeTile2(int x, int y, int v)
 {
     sub_08001158(x, y, v);
 
@@ -28,3 +28,5 @@ void sub_08007F14(int x, int y, int v)
     sub_08007F9C(x, y);
     sub_0800A588(x, y);
 }
+
+asm(".global sub_08007F14\n.thumb_set sub_08007F14, MakeTile2\n");

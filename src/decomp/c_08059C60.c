@@ -29,7 +29,7 @@ void sub_08059C60(void *a1)
     k = (gUnknown_03003F38 >> 6) + 1;
     for (i = 0; i < 4; i++)
     {
-        if (!((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1))
+        if (!((gPlayers[gUnknown_030033EC].unk2c >> i) & 1))
             continue;
         for (j = i * 64; j < i * 64 + 64; j++)
         {
@@ -42,15 +42,15 @@ void sub_08059C60(void *a1)
                 continue;
             if (!sub_08020DBC(gUnknown_030033EC, p->unk02, p->unk03))
                 continue;
-            x = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
+            x = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
                              gUnknown_030040D8->unk00, p->unk00, 0);
-            y = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
+            y = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
                              gUnknown_030040D8->unk00, p->unk00, 1);
             if (x < y)
-                z = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
+                z = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
                                  gUnknown_030040D8->unk00, p->unk00, 1);
             else
-                z = sub_08043070(gUnknown_08499598[k].co, gUnknown_08499598[k].coMode,
+                z = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
                                  gUnknown_030040D8->unk00, p->unk00, 0);
             if (z <= 0x31)
                 continue;

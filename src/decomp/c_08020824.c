@@ -9,7 +9,7 @@
 
 /* Three-valued: 0 if the second record is empty, 2 if the two records agree on
  * unk2a, 1 otherwise. The `lsls #4; subs; lsls #2` chain is x * 15 * 4, agbcc's
- * shape for gUnknown_08499598's 0x3c stride.
+ * shape for gPlayers's 0x3c stride.
  *
  * `adds rN, #0x2a` on both bases rather than a displacement: 0x2a is past
  * ldrb's imm5 limit of 31.
@@ -19,10 +19,10 @@
  * first puts the constants the other way round. */
 int sub_08020824(u16 a, u16 b)
 {
-    if (gUnknown_08499598[b].aiControlled == 0)
+    if (gPlayers[b].aiControlled == 0)
         return 0;
 
-    if (gUnknown_08499598[a].team != gUnknown_08499598[b].team)
+    if (gPlayers[a].team != gPlayers[b].team)
         return 1;
 
     return 2;

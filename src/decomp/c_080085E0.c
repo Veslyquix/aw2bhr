@@ -27,7 +27,7 @@
  * same epilogue the range check does.
  */
 
-void sub_080085E0(void)
+void MakeTile(void)
 {
     int x, y;
 
@@ -163,3 +163,5 @@ void sub_080085E0(void)
         break;
     }
 }
+
+asm(".global sub_080085E0\n.thumb_set sub_080085E0, MakeTile\n");

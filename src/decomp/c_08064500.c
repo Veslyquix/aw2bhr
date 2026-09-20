@@ -46,7 +46,7 @@ void sub_08064500(int a1, int a2)
 {
     int i;
 
-    if (gUnknown_03000604 == gUnknown_03004008 - 1)
+    if (gUnknown_03000604 == gGameClock - 1)
     {
         a1 = (gUnknown_03000608 + a1) / 2;
         a2 = (gUnknown_0300060A + a2) / 2;
@@ -54,10 +54,10 @@ void sub_08064500(int a1, int a2)
 
     sub_0801F34C(0x44, a1 & 0x1ff, a2 & 0xff, 0, 0);
 
-    gUnknown_03000604 = gUnknown_03004008;
+    gUnknown_03000604 = gGameClock;
     gUnknown_03000608 = a1;
     gUnknown_0300060A = a2 + 1;
 
-    i = DivRem(Div(gUnknown_03004008, 4), 0x10) * 2;
+    i = DivRem(Div(gGameClock, 4), 0x10) * 2;
     ApplyPaletteExt((u16 *)((u8 *)gUnknown_08239F84 + i), 0x358, 2);
 }

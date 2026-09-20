@@ -49,26 +49,26 @@ void sub_08026924(void)
         gUnknown_03003FF8[j] = 0;
     }
 
-    gUnknown_08499598[1].aiControlled = gPlaySt.aiControlled[1];
-    gUnknown_08499598[2].aiControlled = gPlaySt.aiControlled[2];
-    gUnknown_08499598[3].aiControlled = gPlaySt.aiControlled[3];
-    gUnknown_08499598[4].aiControlled = gPlaySt.aiControlled[4];
+    gPlayers[1].aiControlled = gPlaySt.aiControlled[1];
+    gPlayers[2].aiControlled = gPlaySt.aiControlled[2];
+    gPlayers[3].aiControlled = gPlaySt.aiControlled[3];
+    gPlayers[4].aiControlled = gPlaySt.aiControlled[4];
 
     for (i = 1; i <= 4; i++)
     {
-        gUnknown_08499598[i].teamColor = gPlaySt.armyColor[i];
-        gUnknown_08499598[i].co = gPlaySt.co[i];
-        gUnknown_08499598[i].team = gPlaySt.unk42[i];
-        gUnknown_08499598[i].unk2c = 0;
+        gPlayers[i].teamColor = gPlaySt.armyColor[i];
+        gPlayers[i].co = gPlaySt.co[i];
+        gPlayers[i].team = gPlaySt.unk42[i];
+        gPlayers[i].unk2c = 0;
 
-        if (gUnknown_08499598[i].aiControlled == 0)
-            gUnknown_08499598[i].co = 1;
+        if (gPlayers[i].aiControlled == 0)
+            gPlayers[i].co = 1;
     }
 
     sub_08026A48();
 
     if (gPlaySt.coAbilities == 0)
-        gPlaySt.unk07 = 0;
+        gPlaySt.eventRelated = 0;
 
     sub_08026B28();
 

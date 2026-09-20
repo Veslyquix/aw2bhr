@@ -13,7 +13,7 @@
  * globals -- see include/unknown-globals.h. */
 void sub_0806D050(int a1, int a2)
 {
-    if (gUnknown_03000618 == gUnknown_03004008 - 1)
+    if (gUnknown_03000618 == gGameClock - 1)
     {
         a1 = (gUnknown_0300061C + a1) / 2;
         a2 = (gUnknown_0300061E + a2) / 2;
@@ -21,7 +21,7 @@ void sub_0806D050(int a1, int a2)
 
     sub_0801F34C(0x44, a1 & 0x1ff, a2 & 0xff, 0, 0);
 
-    gUnknown_03000618 = gUnknown_03004008;
+    gUnknown_03000618 = gGameClock;
     gUnknown_0300061C = a1;
     gUnknown_0300061E = a2;
 }

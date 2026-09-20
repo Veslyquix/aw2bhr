@@ -24,7 +24,7 @@
  * The magic ladder (`* 0x55555555; rsbs; asrs #8`) is the pointer-difference
  * chapter of docs/agbcc-codegen.md: post_shift 8 and the inverse of 3 means a
  * 768-byte stride, i.e. 64 struct Unk08499594 records = one army, and the `+ 1`
- * makes it a 1-based gUnknown_08499598 index. struct Unk41978Army exists purely
+ * makes it a 1-based gPlayers index. struct Unk41978Army exists purely
  * for that size.
  *
  * The head's pointer is gUnknown_030040D8 CAST TO struct Unk08499594 *, NOT
@@ -51,7 +51,7 @@
  * The five `.rodata` words are this unit's -fforce-addr pool and they land
  * exactly on the ROM's, verified positionally by trymatch:
  *     .rodata+0x00 -> 0x08091340   &gUnknown_030040D8
- *     .rodata+0x04 -> 0x08091344   &gUnknown_08499598
+ *     .rodata+0x04 -> 0x08091344   &gPlayers
  *     .rodata+0x08 -> 0x08091348   &gUnknown_030013D0
  *     .rodata+0x0c -> 0x0809134C   &gUnknown_030013B0
  *     .rodata+0x10 -> 0x08091350   &gPlaySt
@@ -142,8 +142,8 @@ void sub_08041978(u8 a1, int a2)
         gUnknown_03004484 = 1 - r;
         gUnknown_0300450C = gUnknown_03003F50;
 
-        gUnknown_03004580[gUnknown_03003F50][0] = gUnknown_08499598[army1].teamColor - 1;
-        gUnknown_03004580[gUnknown_03004484][0] = gUnknown_08499598[army2].teamColor - 1;
+        gUnknown_03004580[gUnknown_03003F50][0] = gPlayers[army1].teamColor - 1;
+        gUnknown_03004580[gUnknown_03004484][0] = gPlayers[army2].teamColor - 1;
 
         gUnknown_03004580[gUnknown_03003F50][1] =
             gUnknown_0809131E[(sel = (struct Unk08499594 *)gUnknown_030040D8)->unk00];
@@ -158,10 +158,10 @@ void sub_08041978(u8 a1, int a2)
         gUnknown_03004580[gUnknown_03004484][3] = ((struct Unk030013D0 *)gUnknown_030013B0)->unk04;
 
         gUnknown_03004580[gUnknown_03003F50][4] =
-            gUnknown_08499598[(struct Unk41978Army *)sel
+            gPlayers[(struct Unk41978Army *)sel
                               - (struct Unk41978Army *)gUnknown_08499594 + 1].co;
         gUnknown_03004580[gUnknown_03004484][4] =
-            gUnknown_08499598[(struct Unk41978Army *)unit
+            gPlayers[(struct Unk41978Army *)unit
                               - (struct Unk41978Army *)gUnknown_08499594 + 1].co;
 
         gUnknown_03004580[gUnknown_03003F50][5] = sel->unk04_0;
@@ -176,7 +176,7 @@ void sub_08041978(u8 a1, int a2)
         gUnknown_03004528[gUnknown_03003F50] = (u8 *)sel;
         gUnknown_03004528[gUnknown_03004484] = (u8 *)unit;
 
-        gUnknown_03004520 = gPlaySt.unk2c;
+        gUnknown_03004520 = gPlaySt.weather;
 
         if (sel->unk04_0 != 0)
             t = Div(sel->unk04_0 - 1, 10) + 1;
@@ -219,10 +219,10 @@ void sub_08041978(u8 a1, int a2)
         sub_080440E0(army1, x1 + Div(x2, 2));
         sub_080440E0(army2, x2 + Div(x1, 2));
 
-        v = gPlaySt.unk09;
+        v = gPlaySt.animOpts;
 
         if (v == 3)
-            v = (gUnknown_08499598[gUnknown_030033EC].aiControlled == 1) ? 2 : 0;
+            v = (gPlayers[gUnknown_030033EC].aiControlled == 1) ? 2 : 0;
 
         if (v != 0)
         {

@@ -14,7 +14,7 @@
  */
 
 /* Binding the deref to a local is what keeps `ldr r3,[r2]` out of the second
- * and third statements: repeating gUnknown_08499598[a] would reload the
+ * and third statements: repeating gPlayers[a] would reload the
  * pointer after each store (see sub_08044178), and the target loads it once.
  */
 /* Xenesis's Datasheet: a caller of this function is annotated "Checks
@@ -23,7 +23,7 @@
  * AddPlayerFunds applies to unk00. */
 void SubtractPlayerFunds(u16 a, u32 b)
 {
-    struct PlayerStruct *arr = gUnknown_08499598;
+    struct PlayerStruct *arr = gPlayers;
 
     arr[a].funds -= b;
     arr[a].spent += b;
@@ -34,7 +34,7 @@ void SubtractPlayerFunds(u16 a, u32 b)
 /* Xenesis's Datasheet: "Fund Adder subroutine, input r0 = Player, r1 = Funds". */
 void AddPlayerFunds(u16 a, u32 b)
 {
-    struct PlayerStruct *arr = gUnknown_08499598;
+    struct PlayerStruct *arr = gPlayers;
 
     arr[a].funds += b;
     if (arr[a].funds > 999999)

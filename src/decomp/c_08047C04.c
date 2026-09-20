@@ -112,7 +112,7 @@ void sub_08047C04(struct Unk08047C04 * a)
     sub_0801F150(0, (void *)0x06010000, 0x20A, 0x16);
     sub_0801F234(1);
     sub_0801F150(1, (void *)0x06010000, 0x204, 0x14);
-    sub_0801F234(gUnknown_08499598[gUnknown_030033EC].teamColor + 0x3D);
+    sub_0801F234(gPlayers[gUnknown_030033EC].teamColor + 0x3D);
     sub_08011C68(gUnknown_0812A2AC, (void *)0x06013940, 0x80);
     sub_0801B780(0);
     sub_08013C00();
@@ -120,7 +120,7 @@ void sub_08047C04(struct Unk08047C04 * a)
     sub_08071948(gUnknown_08499580, 1, 0, gUnknown_0812A8C8, 0x8360);
     sub_08047190(a, a->unk1e);
     sub_080149C0(4, 1, gUnknown_08499578,
-        gUnknown_08610A38[gUnknown_0849F658[gUnknown_08499598[gUnknown_030033EC].teamColor]],
+        gUnknown_08610A38[gUnknown_0849F658[gPlayers[gUnknown_030033EC].teamColor]],
         0x8000, 0);
     sub_08014A5C(8, 5, gUnknown_08499578, 0x96F, 0x8000, 0);
     sub_08014A5C(0xF, 5, gUnknown_08499578, 0x970, 0x8000, 0);

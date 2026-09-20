@@ -19,6 +19,6 @@ void sub_0802D0B4(void)
     sub_080424FC();
     sub_0802C594();
 
-    if (gPlaySt.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(7, gUnknown_03003F38, 0, 0);
 }

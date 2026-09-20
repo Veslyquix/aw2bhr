@@ -75,7 +75,7 @@ void sub_08013510(void)
 {
     u16 v;
 
-    if (gPlaySt.unk32 != 0 && sub_080303B0() == 1)
+    if (gPlaySt.savingEnabled != 0 && sub_080303B0() == 1)
     {
         v = sub_080303C8();
         sub_08030234();

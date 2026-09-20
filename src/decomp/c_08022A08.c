@@ -39,7 +39,7 @@ void sub_08022A34(void)
  * which is why the ROM bumps the held base by 0x20 bytes in place instead of
  * loading a second pool word.
  *
- * `lsrs #2` on gUnknown_03004008 is a LOGICAL shift, and that is a second
+ * `lsrs #2` on gGameClock is a LOGICAL shift, and that is a second
  * independent proof -- alongside sub_0806F064's __umodsi3 -- that the counter
  * is unsigned; the declaration is still `s32` for src/title-screen.c's sake, so
  * the cast carries it. See the note in unknown-globals.h.
@@ -48,6 +48,6 @@ void sub_08022A34(void)
  * calls, which is what pays for r5. */
 void sub_08022A6C(void)
 {
-    sub_0801368C(gUnknown_08101984 + (((u32)gUnknown_03004008 >> 2) & 0xF), 0x228, 2);
-    sub_0801368C(gUnknown_08101984 + 0x10 + (((u32)gUnknown_03004008 >> 2) & 0xF), 0x238, 2);
+    sub_0801368C(gUnknown_08101984 + (((u32)gGameClock >> 2) & 0xF), 0x228, 2);
+    sub_0801368C(gUnknown_08101984 + 0x10 + (((u32)gGameClock >> 2) & 0xF), 0x238, 2);
 }

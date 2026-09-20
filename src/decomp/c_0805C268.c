@@ -21,7 +21,7 @@
 
 int sub_0805C268(void)
 {
-    if (gPlaySt.unk2c == 1 && (u8)(gPlaySt.unk2d - 2) > 1)
+    if (gPlaySt.weather == 1 && (u8)(gPlaySt.randomWeatherOn - 2) > 1)
         return 0;
 
     return 1;

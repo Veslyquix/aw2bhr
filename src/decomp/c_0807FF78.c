@@ -54,7 +54,7 @@ void sub_0807FF78(void)
     v = *p;
     pp = &gUnknown_081D937C;
 
-    if (v < 0x10 && (gUnknown_03004008 & 1))
+    if (v < 0x10 && (gGameClock & 1))
     {
         (*p)++;
         gUnknown_03002B28--;
@@ -88,7 +88,7 @@ void sub_0807FFF0(ProcPtr proc)
     v = *p;
     pp = &gUnknown_081D9380;
 
-    if (v != 0 && (gUnknown_03004008 & 1))
+    if (v != 0 && (gGameClock & 1))
     {
         (*p)--;
         gUnknown_03002B28++;

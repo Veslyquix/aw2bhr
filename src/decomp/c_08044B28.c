@@ -20,11 +20,11 @@
  * re-read rather than reused. */
 void sub_08044B28(int a1, int a2, ProcPtr a3)
 {
-    gUnknown_08499598[a1].unk1f = a2;
+    gPlayers[a1].unk1f = a2;
 
-    gUnknown_085D3DD0[gUnknown_08499598[a1].co]
-        .unk38[gUnknown_08499598[a1].unk1f].unk04(a3);
+    gUnknown_085D3DD0[gPlayers[a1].co]
+        .unk38[gPlayers[a1].unk1f].unk04(a3);
 
-    gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].co]
-        .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1].unk0c(0);
+    gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
+        .unk1c[gPlayers[gUnknown_030033EC].unk1f - 1].unk0c(0);
 }

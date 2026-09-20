@@ -70,7 +70,7 @@ void ResetRulesAfterCampaignMap(void)
         }
 
         if (gUnknown_085C77A0[gPlaySt.mapID].unk17 != 0)
-            gPlaySt.unk0d = 1;
+            gPlaySt.fog = 1;
         break;
     }
 }

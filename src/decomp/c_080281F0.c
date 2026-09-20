@@ -73,13 +73,13 @@ void sub_080281F0(void)
             break;
 
         case 1:
-            if (gUnknown_08499F4C[2] < gPlaySt.unk2c)
-                gPlaySt.unk2c--;
+            if (gUnknown_08499F4C[2] < gPlaySt.weather)
+                gPlaySt.weather--;
             break;
 
         case 2:
-            if (gUnknown_08499F4C[4] < gPlaySt.unk0d)
-                gPlaySt.unk0d--;
+            if (gUnknown_08499F4C[4] < gPlaySt.fog)
+                gPlaySt.fog--;
             break;
         }
     }
@@ -94,19 +94,19 @@ void sub_080281F0(void)
             break;
 
         case 1:
-            if (gUnknown_08499F4C[3] > gPlaySt.unk2c)
-                gPlaySt.unk2c++;
+            if (gUnknown_08499F4C[3] > gPlaySt.weather)
+                gPlaySt.weather++;
             break;
 
         case 2:
-            if (gUnknown_08499F4C[5] > gPlaySt.unk0d)
-                gPlaySt.unk0d++;
+            if (gUnknown_08499F4C[5] > gPlaySt.fog)
+                gPlaySt.fog++;
             break;
         }
     }
 
     sub_08013428(8, (s16)(gUnknown_03001470[gUnknown_03001FBC].unk1e * 2 + 14), "O");
     sub_08013428(10, 14, " MAP:%02d", gPlaySt.mapID);
-    sub_08013428(10, 16, "SNOW:%s", sNames[gPlaySt.unk2c]);
-    sub_08013428(10, 18, "SAKU:%s", sNames[gPlaySt.unk0d]);
+    sub_08013428(10, 16, "SNOW:%s", sNames[gPlaySt.weather]);
+    sub_08013428(10, 18, "SAKU:%s", sNames[gPlaySt.fog]);
 }

@@ -36,7 +36,7 @@ bool8 IsNeotanksUnlocked(int a)
 
     if (gPlaySt.gameMode == 1)
     {
-        switch (gUnknown_08499598[a].teamColor - 1)
+        switch (gPlayers[a].teamColor - 1)
         {
         case 0:
             v = 0x65;

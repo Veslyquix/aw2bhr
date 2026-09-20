@@ -54,7 +54,7 @@ asm(".global sub_08042E2C\n.thumb_set sub_08042E2C, GetCoLuckBonus\n");
  * unchanged. */
 int GetPlayerCoLuckBonus(int a1)
 {
-    return GetCoLuckBonus(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
+    return GetCoLuckBonus(gPlayers[a1].co, gPlayers[a1].coMode);
 }
 
 asm(".global sub_08042E64\n.thumb_set sub_08042E64, GetPlayerCoLuckBonus\n");
@@ -91,7 +91,7 @@ asm(".global sub_08042E84\n.thumb_set sub_08042E84, GetCoNegativeLuckBonus\n");
  * resolving it unchanged. */
 int GetPlayerCoNegativeLuckBonus(int a1)
 {
-    return GetCoNegativeLuckBonus(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
+    return GetCoNegativeLuckBonus(gPlayers[a1].co, gPlayers[a1].coMode);
 }
 
 asm(".global sub_08042EBC\n.thumb_set sub_08042EBC, GetPlayerCoNegativeLuckBonus\n");
@@ -120,11 +120,11 @@ int sub_08042EDC(int a, int b)
 
 int sub_08042F14(int a1)
 {
-    return sub_08042EDC(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
+    return sub_08042EDC(gPlayers[a1].co, gPlayers[a1].coMode);
 }
 
 /* The second argument is never used, but it stays in the signature: the
- * forwarder next door loads gUnknown_08499598[a1].unk1e and passes it, and
+ * forwarder next door loads gPlayers[a1].unk1e and passes it, and
  * that load is in the original's bytes. */
 int sub_08042F34(int a, int b)
 {
@@ -143,11 +143,11 @@ int sub_08042F34(int a, int b)
 
 int sub_08042F5C(int a1)
 {
-    return sub_08042F34(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
+    return sub_08042F34(gPlayers[a1].co, gPlayers[a1].coMode);
 }
 
 /* The second argument is never used, but it stays in the signature: the
- * forwarder next door loads gUnknown_08499598[a1].unk1e and passes it, and
+ * forwarder next door loads gPlayers[a1].unk1e and passes it, and
  * that load is in the original's bytes. */
 int sub_08042F7C(int a, int b)
 {
@@ -166,7 +166,7 @@ int sub_08042F7C(int a, int b)
 
 int sub_08042FA4(int a1)
 {
-    return sub_08042F7C(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
+    return sub_08042F7C(gPlayers[a1].co, gPlayers[a1].coMode);
 }
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -201,7 +201,7 @@ asm(".global sub_08042FC4\n.thumb_set sub_08042FC4, GetCoCounterattackBonus\n");
  * resolving it unchanged. */
 int GetPlayerCoCounterattackBonus(int a1)
 {
-    return GetCoCounterattackBonus(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
+    return GetCoCounterattackBonus(gPlayers[a1].co, gPlayers[a1].coMode);
 }
 
 asm(".global sub_08042FFC\n.thumb_set sub_08042FFC, GetPlayerCoCounterattackBonus\n");
@@ -230,5 +230,5 @@ u32 sub_0804301C(int a, int b)
 
 u32 sub_08043050(int a1)
 {
-    return sub_0804301C(gUnknown_08499598[a1].co, gUnknown_08499598[a1].coMode);
+    return sub_0804301C(gPlayers[a1].co, gPlayers[a1].coMode);
 }

@@ -30,7 +30,7 @@ void sub_080312AC(struct Unk080312ACProc *proc)
 
     n = 0;
 
-    x = gUnknown_03004008 & 0x3f;
+    x = gGameClock & 0x3f;
 
     if ((s16)gUnknown_0849B060->unk02 == 3)
         return;

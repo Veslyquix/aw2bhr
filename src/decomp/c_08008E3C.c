@@ -107,7 +107,7 @@ void sub_08008E3C(int x, int y)
 /* MATCHED, wave 66. The typed gMap spelling is byte-exact here as long as the
  * rowOffset/terrain byte-pointer locals stay scoped per use. */
 
-void sub_08008F6C(int x, int y)
+void MakeBridge(int x, int y)
 {
     struct Map *p;
     u8 *rows;
@@ -342,6 +342,8 @@ void sub_08008F6C(int x, int y)
         }
     }
 }
+
+asm(".global sub_08008F6C\n.thumb_set sub_08008F6C, MakeBridge\n");
 
 /* MATCHED, wave 66. The missing 12 bytes were the two inner predicates, not
  * duplicated repaint bodies. Each predicate is a three-case switch: agbcc's

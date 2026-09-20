@@ -8,7 +8,7 @@
  * sub_08020984 @ 0x08020984, sub_08020B88 @ 0x08020B88
  */
 
-/* Recomputes every army's gUnknown_08499598 unk1c "stance" byte for the current
+/* Recomputes every army's gPlayers unk1c "stance" byte for the current
  * army gUnknown_030033EC: clear all five, seed the current one from the
  * gUnknown_08090944 table (upgraded to 3 when sub_08020864 agrees), propagate it
  * to every army sub_08020824 rates 2, then -- unless sub_080208C8 vetoes -- paint
@@ -28,14 +28,14 @@ void sub_08020984(void)
     u16 t;
     u16 v;
 
-    gUnknown_08499598[0].turnState = 0;
+    gPlayers[0].turnState = 0;
     for (i = 1; i <= 4; i++)
-        gUnknown_08499598[i].turnState = 0;
+        gPlayers[i].turnState = 0;
 
-    v = gUnknown_08090944[gUnknown_08499598[gUnknown_030033EC].aiControlled];
+    v = gUnknown_08090944[gPlayers[gUnknown_030033EC].aiControlled];
     if (v == 1 && (u8)sub_08020864(gUnknown_030033EC))
         v = 3;
-    gUnknown_08499598[gUnknown_030033EC].turnState = v;
+    gPlayers[gUnknown_030033EC].turnState = v;
 
     for (i = 1; i <= 3; i++)
     {
@@ -43,7 +43,7 @@ void sub_08020984(void)
           ? gUnknown_030033EC + i
           : gUnknown_030033EC + i - 4;
         if ((u16)sub_08020824(gUnknown_030033EC, t) == 2)
-            gUnknown_08499598[t].turnState = v;
+            gPlayers[t].turnState = v;
     }
 
     if (!(u8)sub_080208C8(gUnknown_030033EC))
@@ -54,13 +54,13 @@ void sub_08020984(void)
               ? gUnknown_030033EC + i
               : gUnknown_030033EC + i - 4;
             if ((u16)sub_08020824(gUnknown_030033EC, t) == 1
-             && gUnknown_08499598[t].aiControlled == 1)
+             && gPlayers[t].aiControlled == 1)
             {
-                gUnknown_08499598[t].turnState = v ^ 3;
+                gPlayers[t].turnState = v ^ 3;
                 for (j = 1; j <= 3; j++)
                 {
                     if ((u16)sub_08020824(t, t + j <= 4 ? t + j : t + j - 4) == 2)
-                        gUnknown_08499598[t + j <= 4 ? t + j : t + j - 4].turnState = v ^ 3;
+                        gPlayers[t + j <= 4 ? t + j : t + j - 4].turnState = v ^ 3;
                 }
             }
         }
@@ -70,12 +70,12 @@ void sub_08020984(void)
     {
         if (i > 4)
         {
-            gUnknown_08499598[gUnknown_030033EC].turnState |= 2;
+            gPlayers[gUnknown_030033EC].turnState |= 2;
             break;
         }
-        if (sub_080266DC(i) && gUnknown_08499598[i].aiControlled == 1)
+        if (sub_080266DC(i) && gPlayers[i].aiControlled == 1)
             break;
-        if (sub_080266DC(i) && (gUnknown_08499598[i].turnState & 2))
+        if (sub_080266DC(i) && (gPlayers[i].turnState & 2))
             break;
     }
 

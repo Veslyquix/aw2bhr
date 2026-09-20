@@ -21,7 +21,7 @@
  * the 0x142/0x162 pair collapses to 0x162, the 0x143/0x163 pair to 0x163, and
  * anything else to 0x180. The `add r0,#0x20` / `add r0,#1` chains are agbcc
  * reusing the previous compare's constant, not a source-level expression. */
-int sub_08010604(int x, int y)
+int GetSeamType(int x, int y)
 {
     u16 t;
 
@@ -33,3 +33,5 @@ int sub_08010604(int x, int y)
         return 0x163;
     return 0x180;
 }
+
+asm(".global sub_08010604\n.thumb_set sub_08010604, GetSeamType\n");

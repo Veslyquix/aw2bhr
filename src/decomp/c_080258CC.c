@@ -48,7 +48,7 @@ void sub_080258CC(void)
                       + gUnknown_08499594[id].unk02] = id;
         if (gUnknown_08499594[id].unk01 & 2)
             continue;
-        if (gUnknown_08499598[gUnknown_030033EC].aiControlled != 2)
+        if (gPlayers[gUnknown_030033EC].aiControlled != 2)
         {
             if (gMap->visible[gMap->rowOffset[gUnknown_08499594[id].unk03]
                               + gUnknown_08499594[id].unk02] == 0)
@@ -64,7 +64,7 @@ void sub_080258CC(void)
             continue;
         if ((u8)(gUnknown_08499594[id].unk01 & 2) != 0)
             continue;
-        if (gUnknown_08499598[gUnknown_030033EC].aiControlled == 2)
+        if (gPlayers[gUnknown_030033EC].aiControlled == 2)
             continue;
         if (sub_0802571C(id))
         {

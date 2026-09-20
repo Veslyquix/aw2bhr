@@ -12,12 +12,12 @@
  * That is what `g++; DivRem(g, 2)` produces, where `DivRem(++g, 2)` would keep
  * the value in the register.
  *
- * The gate is a bare `& 1` on the `s32` gUnknown_03004008, so this runs on
+ * The gate is a bare `& 1` on the `s32` gGameClock, so this runs on
  * alternate frames of an alternate condition -- the half-rate idiom the
  * gUnknown_081A47E4 readers use with `/2` instead. */
 void sub_0808A664(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
     {
         gUnknown_0300200C++;
 

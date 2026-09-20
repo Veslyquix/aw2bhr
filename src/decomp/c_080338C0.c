@@ -26,6 +26,6 @@ void sub_080338C0(int a)
 
 void sub_080338DC(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
         gUnknown_03001FF8++;
 }

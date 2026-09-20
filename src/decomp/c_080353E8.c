@@ -21,7 +21,7 @@ void sub_080353E8(void)
         gUnknown_02027DE8[i].unk02 += gUnknown_02027DE8[i].unk06;
     }
 
-    n = gUnknown_03004008 & 1;
+    n = gGameClock & 1;
     asm("" : "=r"(m) : "0"(n));
 
     for (j = n * 16; j < m * 16 + 16; j++)

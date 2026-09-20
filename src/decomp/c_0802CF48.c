@@ -41,7 +41,7 @@ void sub_0802CF6C(void)
     sub_0801A168();
     sub_08042B9C();
 
-    if (gPlaySt.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_080344F0(gPlaySt.unk2e);
 }
 
@@ -66,12 +66,12 @@ void sub_0802CF6C(void)
 
 void sub_0802CF94(void)
 {
-    if (gPlaySt.unk2c > 1)
-        gPlaySt.unk2c = 0;
+    if (gPlaySt.weather > 1)
+        gPlaySt.weather = 0;
     else
-        gPlaySt.unk2c++;
+        gPlaySt.weather++;
 
-    sub_08035020(gPlaySt.unk2c);
+    sub_08035020(gPlaySt.weather);
 }
 
 /* A three-argument callback that acts only when bit 1 of its third argument is

@@ -45,12 +45,12 @@ void sub_08000E48(struct Unk03001470 *proc)
     sub_08026BAC();
     sub_08034780();
     sub_08026924();
-    gUnknown_08499598[0].co = 0;
-    gUnknown_08499598[1].co = 1;
-    gUnknown_08499598[2].co = 3;
-    gUnknown_08499598[3].co = 8;
-    gUnknown_08499598[4].co = 6;
-    gPlaySt.unk04 = 0;
+    gPlayers[0].co = 0;
+    gPlayers[1].co = 1;
+    gPlayers[2].co = 3;
+    gPlayers[3].co = 8;
+    gPlayers[4].co = 6;
+    gPlaySt.event20 = 0;
     gUnknown_030033EC = 0;
     gUnknown_03004080 = 1;
     sub_08026768();

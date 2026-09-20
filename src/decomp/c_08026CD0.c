@@ -34,9 +34,9 @@ void sub_08026CD0(void)
         k = i - 2;
         if (gUnknown_085C77A0[gPlaySt.mapID].unk48[k].unk00 != 0xff)
         {
-            gUnknown_08499598[j].hqX |=
+            gPlayers[j].hqX |=
                 gUnknown_085C77A0[gPlaySt.mapID].unk48[k].unk00;
-            gUnknown_08499598[j].hqY |=
+            gPlayers[j].hqY |=
                 gUnknown_085C77A0[gPlaySt.mapID].unk48[k].unk01;
         }
     }

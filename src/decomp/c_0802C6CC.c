@@ -34,7 +34,7 @@ bool8 sub_0802C6CC(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gPlaySt.unk09 != 0)
+    if (gPlaySt.animOpts != 0)
         return TRUE;
 
     return FALSE;
@@ -67,7 +67,7 @@ bool8 sub_0802C6FC(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gPlaySt.unk09 != 1)
+    if (gPlaySt.animOpts != 1)
         return TRUE;
 
     return FALSE;
@@ -100,7 +100,7 @@ bool8 sub_0802C72C(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gPlaySt.unk09 != 2)
+    if (gPlaySt.animOpts != 2)
         return TRUE;
 
     return FALSE;
@@ -133,7 +133,7 @@ bool8 sub_0802C75C(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gPlaySt.unk09 != 3)
+    if (gPlaySt.animOpts != 3)
         return TRUE;
 
     return FALSE;

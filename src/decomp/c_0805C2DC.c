@@ -9,7 +9,7 @@
  */
 
 /* Scores every unit in the armies whose bit is set in
- * gUnknown_08499598[a1].unk2c and returns the slot number of the best one.
+ * gPlayers[a1].unk2c and returns the slot number of the best one.
  *
  * struct Map is the local cast-on view of gUnknown_08499590 that
  * include/unknown-globals.h prescribes: the ROM computes every plane address as
@@ -48,7 +48,7 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
 
     for (i = 0; i <= 3; i++)
     {
-        if (((gUnknown_08499598[a1].unk2c >> i) & 1) == 0)
+        if (((gPlayers[a1].unk2c >> i) & 1) == 0)
             continue;
 
         for (n = i * 64; n < i * 64 + 64; n++)
@@ -115,7 +115,7 @@ u8 sub_0805C514(u16 a1, u8 a2)
 
     for (i = 0; i <= 3; i++)
     {
-        if (((gUnknown_08499598[a1].unk2c >> i) & 1) == 0)
+        if (((gPlayers[a1].unk2c >> i) & 1) == 0)
             continue;
 
         for (n = i * 64; n < i * 64 + 64; n++)
@@ -183,7 +183,7 @@ u8 sub_0805C720(u16 a1, u8 a2)
 
     for (i = 0; i <= 3; i++)
     {
-        if (((gUnknown_08499598[a1].unk2c >> i) & 1) == 0)
+        if (((gPlayers[a1].unk2c >> i) & 1) == 0)
             continue;
 
         for (n = i * 64; n < i * 64 + 64; n++)

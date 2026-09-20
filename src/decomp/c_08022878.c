@@ -25,7 +25,7 @@ struct Unk228B8Proc
  * own literal; that is not evidence of two different addresses. */
 void sub_08022878(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
         sub_08011C68(gUnknown_08091B9C, (void *)0x06003600, 0x80);
     else
         sub_08011C68(gUnknown_0809181C, (void *)0x06003600, 0x80);

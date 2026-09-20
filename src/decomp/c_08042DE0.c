@@ -24,12 +24,12 @@
 
 int sub_08042DE0(int a1)
 {
-    return sub_08042DCC(gUnknown_08499598[a1].co);
+    return sub_08042DCC(gPlayers[a1].co);
 }
 
 /* `int`, not `u8`: a u8 return re-narrows the callee's result with
  * `lsls #24; lsrs #24`, which the original does not have. */
 int sub_08042DFC(int a1)
 {
-    return sub_08042E18(gUnknown_08499598[a1].co);
+    return sub_08042E18(gPlayers[a1].co);
 }

@@ -26,7 +26,7 @@
 
 #define MAP gMap
 
-void sub_0800CF28(int x, int y)
+void MakeForest(int x, int y)
 {
     int off;
 
@@ -52,3 +52,5 @@ void sub_0800CF28(int x, int y)
     sub_08007F9C(x, y);
     sub_0800BEE4(x, y);
 }
+
+asm(".global sub_0800CF28\n.thumb_set sub_0800CF28, MakeForest\n");

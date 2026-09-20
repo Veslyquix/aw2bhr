@@ -11,7 +11,7 @@
  * byte?" -- gated on gPlaySt.unk04 bit 2, and answering TRUE (the
  * fall-through) whenever the gate is closed.
  *
- * The `&&` chain is what puts the gUnknown_08499598 pool word INSIDE the loop:
+ * The `&&` chain is what puts the gPlayers pool word INSIDE the loop:
  * the deref is written in place, once per iteration, and nothing hoists it
  * because the `bl sub_080266DC` in the same body clobbers it. r7 and r6 are
  * strength_reduce's two givs for `a1 * 0x3c` and `i * 0x3c`; only r6 is
@@ -25,7 +25,7 @@ bool8 sub_080289FC(int a1)
 {
     int i;
 
-    if (gPlaySt.unk04 & 4)
+    if (gPlaySt.event20 & 4)
     {
         if (!sub_080266DC(a1))
             return FALSE;
@@ -33,7 +33,7 @@ bool8 sub_080289FC(int a1)
         for (i = 1; i <= 4; i++)
         {
             if (a1 != i
-             && gUnknown_08499598[a1].team == gUnknown_08499598[i].team
+             && gPlayers[a1].team == gPlayers[i].team
              && !sub_080266DC(i))
                 return FALSE;
         }
@@ -82,7 +82,7 @@ void sub_08028A68(void)
  * sub_08028894 at all four call sites -- 132 bytes and 56 instructions each,
  * differing in nothing else, not a register, an immediate or a branch. See the
  * comment on sub_08028A68 for the readout of the s16 induction variable. */
-void sub_08028AEC(void)
+void MarkDefeatedArmies(void)
 {
     s16 i;
 
@@ -102,6 +102,8 @@ void sub_08028AEC(void)
     }
 }
 
+asm(".global sub_08028AEC\n.thumb_set sub_08028AEC, MarkDefeatedArmies\n");
+
 /* "Which army slot is first at or past gPlaySt.unk31?" -- a linear
  * scan of slots 1..4 returning the slot number, or 0 both when unk31 is zero
  * and when nothing reaches it.
@@ -111,19 +113,19 @@ void sub_08028AEC(void)
  * because the counter already lives zero-extended. The compare against unk31 is
  * `bhs`, unsigned on both sides, which is what types the +0x11 member u8.
  *
- * The `ldr r3, [gUnknown_08499598]` in the preheader is the loop optimiser's
+ * The `ldr r3, [gPlayers]` in the preheader is the loop optimiser's
  * LICM hoist of the pointer deref, not source -- the body is written with the
- * ordinary `gUnknown_08499598[i]` subscript. */
+ * ordinary `gPlayers[i]` subscript. */
 int sub_08028B70(void)
 {
     u8 i;
 
-    if (gPlaySt.unk31 == 0)
+    if (gPlaySt.captureLimit == 0)
         return 0;
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].captures >= gPlaySt.unk31)
+        if (gPlayers[i].captures >= gPlaySt.captureLimit)
             return i;
     }
 

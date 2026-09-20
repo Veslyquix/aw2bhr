@@ -33,7 +33,7 @@ u8 sub_080398D0(ProcPtr procPtr)
 {
     struct Unk398D0Proc *proc = procPtr;
 
-    sub_080397F4(gUnknown_085D3DD0[gUnknown_08499598[proc->unk54].co]
+    sub_080397F4(gUnknown_085D3DD0[gPlayers[proc->unk54].co]
                      .unk20[sub_080129E0() % 6]);
 
     return 0;

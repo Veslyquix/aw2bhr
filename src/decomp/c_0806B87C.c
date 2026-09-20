@@ -111,13 +111,13 @@ void sub_0806B910(struct Unk6B910Proc *proc)
  * value but not the address. */
 void sub_0806B980(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
     {
         gUnknown_03002F18++;
         gUnknown_03001400--;
         gUnknown_0300200C++;
     }
 
-    if ((gUnknown_03004008 & 3) == 0)
+    if ((gGameClock & 3) == 0)
         gUnknown_03002000--;
 }

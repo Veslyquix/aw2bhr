@@ -77,8 +77,8 @@ void sub_08042650(void)
     if (n > 0x13)
         n = 0x14;
 
-    if (gPlaySt.unk0d == 0
-        || (gUnknown_08499598[gUnknown_030033EC].turnState & 2) != 0)
+    if (gPlaySt.fog == 0
+        || (gPlayers[gUnknown_030033EC].turnState & 2) != 0)
         goto do_body;
 
     {
@@ -93,7 +93,7 @@ void sub_08042650(void)
 
 do_body:
     {
-       if (gPlaySt.unk09 == 1 || (t & 0x1f) == 8
+       if (gPlaySt.animOpts == 1 || (t & 0x1f) == 8
             || (t & 0x1f) == 0x14)
             sub_080409E8(gUnknown_03003100.pos.unk00,
                          gUnknown_03003100.pos.unk02,
@@ -116,7 +116,7 @@ after_body:
                        - gUnknown_08499594) >> 6) + 1, t >> 5);
         gUnknown_030040D8->unk05 &= 7;
         if ((t & 0x1f) == 8 || (t & 0x1f) == 0x14)
-            gUnknown_08499598[t >> 5].killOnEndTurn = 1;
+            gPlayers[t >> 5].killOnEndTurn = 1;
         sub_08024058(gUnknown_03003100.spos.unk00,
                      gUnknown_03003100.spos.unk02);
     }

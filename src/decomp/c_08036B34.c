@@ -11,7 +11,7 @@
 #include "hardware.h"
 
 /* The boot/reset unit's frame-gate reset: clears the mask sub_080369BC ANDs
- * against gUnknown_03004008, then re-enters through sub_0801F00C.
+ * against gGameClock, then re-enters through sub_0801F00C.
  *
  * sub_08036B48 below is NOT a label. The index gives this function a size of
  * 24, but the body plus its single pool word only reach 0x08036B48; the last
@@ -46,7 +46,7 @@ void sub_08036B4C(void)
     sub_080366C4(0);
     sub_080366D0(0);
     gUnknown_03004094 = 0;
-    gUnknown_03004008 = 0;
+    gGameClock = 0;
     gUnknown_03003330 = 0;
     gUnknown_03004078 = 0;
     gUnknown_030043F0 = 0;

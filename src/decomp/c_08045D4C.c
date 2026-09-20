@@ -20,7 +20,7 @@ int sub_08045D4C(void)
     x = gUnknown_030040D8->unk02;
     y = gUnknown_030040D8->unk03;
 
-    switch (gUnknown_08499598[(((struct Unk08499594 *)gUnknown_030040D8
+    switch (gPlayers[(((struct Unk08499594 *)gUnknown_030040D8
                                 - gUnknown_08499594) >> 6) + 1].teamColor)
     {
     case 3:
@@ -37,7 +37,7 @@ int sub_08045D4C(void)
     {
         c = gMap->unitUnk[
                 gMap->rowOffset[y - 1] + x];
-        if (c != 0 && gUnknown_08499598[(c >> 6) + 1].teamColor == side)
+        if (c != 0 && gPlayers[(c >> 6) + 1].teamColor == side)
             return 1;
     }
 
@@ -45,7 +45,7 @@ int sub_08045D4C(void)
     {
         c = gMap->unitUnk[
                 gMap->rowOffset[y + 1] + x];
-        if (c != 0 && gUnknown_08499598[(c >> 6) + 1].teamColor == side)
+        if (c != 0 && gPlayers[(c >> 6) + 1].teamColor == side)
             return 1;
     }
 
@@ -53,7 +53,7 @@ int sub_08045D4C(void)
     {
         oleft = gMap->rowOffset[y] - 1;
         c = gMap->unitUnk[oleft + x];
-        if (c != 0 && gUnknown_08499598[(c >> 6) + 1].teamColor == side)
+        if (c != 0 && gPlayers[(c >> 6) + 1].teamColor == side)
             return 1;
     }
 
@@ -61,7 +61,7 @@ int sub_08045D4C(void)
     {
         oright = gMap->rowOffset[y] + 1;
         c = gMap->unitUnk[oright + x];
-        if (c != 0 && gUnknown_08499598[(c >> 6) + 1].teamColor == side)
+        if (c != 0 && gPlayers[(c >> 6) + 1].teamColor == side)
             return 1;
     }
 

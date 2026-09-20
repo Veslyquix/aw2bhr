@@ -98,7 +98,7 @@ int sub_08010B34(int x, int y)
  * second is `sub_08001158(x, y, sub_0800FD44(x, y, 1))` -- the nested call
  * leaves its result in r0 and agbcc moves it to r2 before reloading r0/r1, so
  * the nesting costs the same `add r2,r0,#0` a temporary would. */
-void sub_08010D28(int x, int y)
+void MakePipe(int x, int y)
 {
     sub_080011F4(x, y, 0xf);
     sub_08001158(x, y, sub_0800FD44(x, y, 1));
@@ -109,6 +109,8 @@ void sub_08010D28(int x, int y)
     sub_0800BEE4(x, y);
     sub_0800EC20(x, y);
 }
+
+asm(".global sub_08010D28\n.thumb_set sub_08010D28, MakePipe\n");
 
 /* Redraws one cell as a road/bridge, gated on either the campaign counter being
  * low or sub_0800C840 accepting the cell. sub_08010604 supplies the tile id
@@ -135,7 +137,7 @@ void sub_08010D28(int x, int y)
  * "`ldrsb` vs `ldrb; lsl #24; asr #24`" chapter of docs/agbcc-codegen.md.
  *
  * The u8 declaration itself is unaffected -- this file still matches. */
-void sub_08010D80(int x, int y)
+void MakeSeam(int x, int y)
 {
     int t;
 
@@ -148,6 +150,8 @@ void sub_08010D80(int x, int y)
         sub_080219AC();
     }
 }
+
+asm(".global sub_08010D80\n.thumb_set sub_08010D80, MakeSeam\n");
 
 /* "Is this bridge cell connected?" -- a horizontal bridge (0x142) is checked
  * against its left and right neighbours, a vertical one (0x143) against the

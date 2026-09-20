@@ -33,7 +33,7 @@
  */
 
 /* Rebuilds the two property lists from the map plane, in two passes over every
- * cell.  Pass one counts each army's properties into gUnknown_08499598[].unk11,
+ * cell.  Pass one counts each army's properties into gPlayers[].unk11,
  * stamps the list index into the map's second 0x508-byte plane at +0x193A, and
  * fills gUnknown_084995A0[] with (terrain, x, y); pass two fills
  * gProperty[] with (raw cell, x, y).  Both lists are 0xFF-terminated,
@@ -119,7 +119,7 @@ void sub_080219AC(void)
     sub_0801F838(0xff);
 
     for (x = 0; x <= 4; x++)
-        gUnknown_08499598[x].captures = 0;
+        gPlayers[x].captures = 0;
 
     for (y = 0; y < gMap->height; y++)
     {
@@ -134,7 +134,7 @@ void sub_080219AC(void)
             case TERRAIN_BASE:
             case TERRAIN_SILO:
             case TERRAIN_LAB:
-                gUnknown_08499598[
+                gPlayers[
                     gMap->terrain[gMap->rowOffset[y] + x] >> 5].captures++;
                 gMap->property[gMap->rowOffset[y] + x] = n;
                 gUnknown_084995A0[n].unk00 =

@@ -27,7 +27,7 @@ void sub_0802CFFC(void)
     sub_080424FC();
     sub_0802C594();
 
-    if (gPlaySt.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
     {
         if (gUnknown_030033E8[0] == 0 && gUnknown_030033E8[1] == 0)
             sub_08034534(2, gUnknown_03003F38, 0, 0);

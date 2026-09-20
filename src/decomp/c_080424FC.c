@@ -20,7 +20,7 @@ void sub_080424FC(void)
     gUnknown_030040D8->unk02 = gUnknown_03003100.pos.unk00;
     gUnknown_030040D8->unk03 = gUnknown_03003100.pos.unk02;
 
-    if (gPlaySt.unk0d == 0)
+    if (gPlaySt.fog == 0)
         sub_08025B80((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
 
     sub_08035810();

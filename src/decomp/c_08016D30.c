@@ -20,7 +20,7 @@
  * result is the truth test of its s8 return. */
 void sub_08016D30(u16 a, u8 b)
 {
-    if (a != 0 && gPlaySt.unk32 == 0) {
+    if (a != 0 && gPlaySt.savingEnabled == 0) {
         sub_08016A14();
         if (sub_08016CD8(a) == 0)
             sub_08016CEC(a, 1);

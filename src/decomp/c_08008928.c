@@ -89,7 +89,7 @@ int sub_08008928(void)
     return result;
 }
 
-int sub_08008A8C(int mode, int x, int y)
+int RemoveUnitAt(int mode, int x, int y)
 {
     struct Unk08499594 *e;
     int idx;
@@ -141,3 +141,5 @@ int sub_08008A8C(int mode, int x, int y)
 
     return result;
 }
+
+asm(".global sub_08008A8C\n.thumb_set sub_08008A8C, RemoveUnitAt\n");

@@ -14,12 +14,12 @@
  */
 void sub_08025D20(int index)
 {
-    if (gUnknown_08499598[index].unitCount != 0xff)
-        gUnknown_08499598[index].unitCount++;
+    if (gPlayers[index].unitCount != 0xff)
+        gPlayers[index].unitCount++;
 }
 
 void sub_08025D40(int index)
 {
-    if (gUnknown_08499598[index].unitsLost != 0xff)
-        gUnknown_08499598[index].unitsLost++;
+    if (gPlayers[index].unitsLost != 0xff)
+        gPlayers[index].unitsLost++;
 }

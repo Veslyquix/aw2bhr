@@ -24,9 +24,9 @@ void sub_0807C588(struct Unk807C588 *proc)
     for (i = 0; i < sub_0802490C(gPlaySt.mapID); i++)
     {
         if (gUnknown_085C77A0[gPlaySt.mapID].unk3c[i] == 0xff)
-            gUnknown_08499598[i + 1].aiControlled = 1;
+            gPlayers[i + 1].aiControlled = 1;
         else
-            gUnknown_08499598[i + 1].aiControlled = 2;
+            gPlayers[i + 1].aiControlled = 2;
     }
 
     proc->unk58 = 0;

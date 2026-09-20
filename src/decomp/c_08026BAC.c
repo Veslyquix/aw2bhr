@@ -21,7 +21,7 @@
  * own CSE and not a different source spelling -- one plain assignment
  * statement per field reproduces the grouping exactly.
  *
- * gUnknown_08090A8C is the -fforce-addr word holding &gUnknown_08499598, which
+ * gUnknown_08090A8C is the -fforce-addr word holding &gPlayers, which
  * is why the chain is three `ldr`s deep. Named honestly; the build places the
  * word. */
 void sub_08026BAC(void)
@@ -30,33 +30,33 @@ void sub_08026BAC(void)
 
     for (i = 0; i <= 4; i++)
     {
-        gUnknown_08499598[i].funds = 0;
-        gUnknown_08499598[i].spent = 0;
-        gUnknown_08499598[i].captures = 0;
-        gUnknown_08499598[i].unk12 = 0;
-        gUnknown_08499598[i].unk13 = 0;
-        gUnknown_08499598[i].unk14 = 0;
-        gUnknown_08499598[i].destroyedThisTurn = 0;
-        gUnknown_08499598[i].totalDestroyed = 0;
-        gUnknown_08499598[i].teamColor = 0;
-        gUnknown_08499598[i].aiControlled = 0;
-        gUnknown_08499598[i].turnState = 0;
-        gUnknown_08499598[i].coMode = 0;
-        gUnknown_08499598[i].unk1f = 0;
-        gUnknown_08499598[i].coCharge = 0;
-        gUnknown_08499598[i].unk24 = 0;
-        gUnknown_08499598[i].unk25 = 0;
-        gUnknown_08499598[i].tempFirepower = 0;
-        gUnknown_08499598[i].tempDefense = 0;
-        gUnknown_08499598[i].team = i;
-        gUnknown_08499598[i].unk31 = 0;
-        gUnknown_08499598[i].killOnEndTurn = 0;
-        gUnknown_08499598[i].unitCount = 0;
-        gUnknown_08499598[i].unitsLost = 0;
+        gPlayers[i].funds = 0;
+        gPlayers[i].spent = 0;
+        gPlayers[i].captures = 0;
+        gPlayers[i].unk12 = 0;
+        gPlayers[i].unk13 = 0;
+        gPlayers[i].defeated = 0;
+        gPlayers[i].destroyedThisTurn = 0;
+        gPlayers[i].totalDestroyed = 0;
+        gPlayers[i].teamColor = 0;
+        gPlayers[i].aiControlled = 0;
+        gPlayers[i].turnState = 0;
+        gPlayers[i].coMode = 0;
+        gPlayers[i].unk1f = 0;
+        gPlayers[i].coCharge = 0;
+        gPlayers[i].unk24 = 0;
+        gPlayers[i].unk25 = 0;
+        gPlayers[i].tempFirepower = 0;
+        gPlayers[i].tempDefense = 0;
+        gPlayers[i].team = i;
+        gPlayers[i].unk31 = 0;
+        gPlayers[i].killOnEndTurn = 0;
+        gPlayers[i].unitCount = 0;
+        gPlayers[i].unitsLost = 0;
     }
 
-    gUnknown_08499598[1].unk2b = 1;
-    gUnknown_08499598[2].unk2b = 2;
-    gUnknown_08499598[3].unk2b = 4;
-    gUnknown_08499598[4].unk2b = 8;
+    gPlayers[1].unk2b = 1;
+    gPlayers[2].unk2b = 2;
+    gPlayers[3].unk2b = 4;
+    gPlayers[4].unk2b = 8;
 }

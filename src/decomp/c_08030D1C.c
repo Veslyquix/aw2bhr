@@ -25,7 +25,7 @@ int sub_08030D1C(void)
     return 1;
 }
 
-/* sub_0802F8FC takes the ADDRESS of gUnknown_03004008, not its value: the ROM
+/* sub_0802F8FC takes the ADDRESS of gGameClock, not its value: the ROM
  * loads the pool word straight into r0 with no `ldr r0, [r0]` after it.
  *
  * Its second argument is the literal 1 and costs no instruction -- r1 is still
@@ -36,7 +36,7 @@ int sub_08030D1C(void)
 void sub_08030D4C(void)
 {
     gUnknown_0849B018->unk04 = 5;
-    gPlaySt.unk32 = 1;
-    sub_0802F8FC((u16 *)&gUnknown_03004008, 1);
+    gPlaySt.savingEnabled = 1;
+    sub_0802F8FC((u16 *)&gGameClock, 1);
     sub_08015C30(gUnknown_03001FBC);
 }

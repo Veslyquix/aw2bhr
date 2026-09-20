@@ -9,22 +9,22 @@
 
 void sub_08019870(void)
 {
-    gPlaySt.unk06 = 0;
+    gPlaySt.campaignRelated = 0;
 }
 
 void sub_0801987C(void)
 {
-    gPlaySt.unk06 = 1;
+    gPlaySt.campaignRelated = 1;
 }
 
 void sub_08019888(void)
 {
-    gPlaySt.unk07 = 1;
+    gPlaySt.eventRelated = 1;
 }
 
 void sub_08019894(void)
 {
-    gPlaySt.unk07 = 0;
+    gPlaySt.eventRelated = 0;
 }
 
 void sub_080198A0(void (*func)(void))

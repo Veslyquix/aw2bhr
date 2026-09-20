@@ -10,7 +10,7 @@
 
 #define MAP gMap
 
-int sub_08009F10(int x, int y)
+int MakeRiver(int x, int y)
 {
     int a;
     int b;
@@ -91,3 +91,5 @@ placed:
     sub_0800EC20(x, y);
     return 1;
 }
+
+asm(".global sub_08009F10\n.thumb_set sub_08009F10, MakeRiver\n");

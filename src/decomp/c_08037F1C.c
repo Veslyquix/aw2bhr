@@ -8,12 +8,12 @@
  */
 
 /* Two independent `if`s and not an if/else: the second test re-loads
- * gUnknown_03004008 from the same pool word the first one kept live in r2,
+ * gGameClock from the same pool word the first one kept live in r2,
  * which is only possible if the first `if` falls through into it. */
 void sub_08037F1C(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
         gUnknown_0300200C++;
-    if (DivRem(gUnknown_03004008, 3) == 0)
+    if (DivRem(gGameClock, 3) == 0)
         gUnknown_03002000--;
 }

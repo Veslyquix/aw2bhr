@@ -16,7 +16,7 @@
 
 int sub_08061DA8(int index)
 {
-    struct PlayerStruct *p = &gUnknown_08499598[index];
+    struct PlayerStruct *p = &gPlayers[index];
 
     return p->bases + p->cities + p->airports + p->ports + 1;
 }

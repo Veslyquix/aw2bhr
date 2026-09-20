@@ -52,12 +52,12 @@ void sub_0802CDA4(u8 a1, u8 a2, u8 a3)
         sub_0802D43C, sub_0802D40C, sub_0802D41C, sub_0802D42C,
     };
 
-    gPlaySt.unk09++;
+    gPlaySt.animOpts++;
 
-    if (gPlaySt.unk09 > 3)
-        gPlaySt.unk09 = 0;
+    if (gPlaySt.animOpts > 3)
+        gPlaySt.animOpts = 0;
 
-    fns[gPlaySt.unk09](a1, a2, a3);
+    fns[gPlaySt.animOpts](a1, a2, a3);
     sub_08019E68();
-    gUnknown_0200C420.unk0e = gPlaySt.unk09;
+    gUnknown_0200C420.unk0e = gPlaySt.animOpts;
 }

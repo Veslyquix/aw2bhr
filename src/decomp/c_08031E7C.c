@@ -111,11 +111,11 @@ void sub_08031E7C(struct Unk31E7CProc *proc)
 }
 
 /* sub_08031E7C's repeat half: the counter it arms with 0x20 ticks down once
- * every fourth frame, `gUnknown_03004008 & 3` being the frame phase. */
+ * every fourth frame, `gGameClock & 3` being the frame phase. */
 
 void sub_08031E9C(struct Unk31E9CProc *proc)
 {
-    if ((gUnknown_03004008 & 3) == 0)
+    if ((gGameClock & 3) == 0)
     {
         sub_080718F0();
         sub_080135A4();

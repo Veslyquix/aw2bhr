@@ -10,7 +10,7 @@
 /* MATCHED, first draft, one attempt, and the first of a byte-identical pair
  * with sub_08058318. Counts the deployed units of every army that is not masked
  * out: for each of the four armies, skip it if bit i of
- * gUnknown_08499598[gUnknown_030033EC].unk2c is set, then scan that army's 64
+ * gPlayers[gUnknown_030033EC].unk2c is set, then scan that army's 64
  * slots and count the ones that are a real unit of class 2, whose type has a
  * non-zero gUnknown_085D5ABC cap, and that are actually standing on the map.
  *
@@ -30,7 +30,7 @@
  *    it.
  *
  * gUnknown_030033EC's load is hoisted out of the outer loop and
- * gUnknown_08499598's deref is NOT, although both are invariant. That falls out
+ * gPlayers's deref is NOT, although both are invariant. That falls out
  * of gcc's own invariant motion and needs nothing in the source. */
 int sub_08058254(void)
 {
@@ -43,7 +43,7 @@ int sub_08058254(void)
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
@@ -79,7 +79,7 @@ int sub_08058318(void)
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)

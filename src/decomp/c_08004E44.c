@@ -21,9 +21,9 @@
  * agbcc re-narrowing sub_0803CCB8's declared bool8. */
 int sub_08004E44(void)
 {
-    if (sub_0803CCB8(0, gUnknown_0200B204) != 1
-     && sub_0803CCB8(1, gUnknown_0200B204) != 1
-     && sub_0803CCB8(2, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(0, gDesignRoomName) != 1
+     && sub_0803CCB8(1, gDesignRoomName) != 1
+     && sub_0803CCB8(2, gDesignRoomName) != 1)
         return 2;
 
     return 0;

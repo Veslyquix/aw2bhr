@@ -38,12 +38,12 @@ void sub_08026D68(void)
 
     for (i = 0; i <= 4; i++)
     {
-        gUnknown_08499598[i].income = 0;
-        gUnknown_08499598[i].bases = 0;
-        gUnknown_08499598[i].cities = 0;
-        gUnknown_08499598[i].airports = 0;
-        gUnknown_08499598[i].ports = 0;
-        gUnknown_08499598[i].hqX |= 0x80;
+        gPlayers[i].income = 0;
+        gPlayers[i].bases = 0;
+        gPlayers[i].cities = 0;
+        gPlayers[i].airports = 0;
+        gPlayers[i].ports = 0;
+        gPlayers[i].hqX |= 0x80;
     }
 
     for (j = 0; j < gMap->height; j++)
@@ -56,7 +56,7 @@ void sub_08026D68(void)
             t = b & 0xe0;
             if (t != 0)
             {
-                army = &gUnknown_08499598[t >> 5];
+                army = &gPlayers[t >> 5];
                 kind = b & 0x1f;
 
                 switch (kind)

@@ -30,7 +30,7 @@ void sub_080324C4(int a1, int a2, u8 a3)
 
     sub_0801237C();
 
-    if ((gUnknown_03004008 & 1) || a2 == -1)
+    if ((gGameClock & 1) || a2 == -1)
     {
         ApplyPaletteExt(gUnknown_081D8A14, 0, 0x20);
         Decompress(gUnknown_081D3EE8,

@@ -43,7 +43,7 @@
  *  - `pp = &gUnknown_0808D86C` sits after sub_0800EC20, not at the top, because
  *    that is where the ROM emits `mov r8, r4`; the pool word itself is loaded
  *    once, at the top, and r4 carries it across the three intervening calls. */
-int sub_0800BF78(int x, int y)
+int MakeReefSafe(int x, int y)
 {
     u8 **const *pp;
     u8 **q;
@@ -133,3 +133,5 @@ int sub_0800BF78(int x, int y)
     sub_08001158(x, y, 0x168);
     return 1;
 }
+
+asm(".global sub_0800BF78\n.thumb_set sub_0800BF78, MakeReefSafe\n");

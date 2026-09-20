@@ -264,7 +264,7 @@ void sub_08058F30(u8 * out)
 }
 
 /* Runs sub_08059050 once per set bit of the current army's four-bit mask at
- * gUnknown_08499598[gUnknown_030033EC].unk2c, passing the 1-based army index
+ * gPlayers[gUnknown_030033EC].unk2c, passing the 1-based army index
  * and a shared s16 sentinel. Returns -1 if nothing wrote the sentinel.
  *
  * The sentinel really is `s16` and not `u16`: the final read is
@@ -291,16 +291,16 @@ int sub_08058F90(void * arg)
 
     best = 0x7FFF;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 1)
+    if (gPlayers[gUnknown_030033EC].unk2c & 1)
         sub_08059050(1, &best, arg);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 2)
+    if (gPlayers[gUnknown_030033EC].unk2c & 2)
         sub_08059050(2, &best, arg);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 4)
+    if (gPlayers[gUnknown_030033EC].unk2c & 4)
         sub_08059050(3, &best, arg);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 8)
+    if (gPlayers[gUnknown_030033EC].unk2c & 8)
         sub_08059050(4, &best, arg);
 
     if (best != 0x7FFF)

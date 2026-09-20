@@ -20,7 +20,7 @@
  * Permuter-derived, so byte-exact but not claimed to be the original source:
  * the cell's tile has to land in r2 rather than r0, which the `v` local plus
  * the split-out sub_080016D0 call achieves. */
-void sub_080080F8(int x, int y)
+void RepaintTile(int x, int y)
 {
     s16 height;
 
@@ -64,3 +64,5 @@ void sub_080080F8(int x, int y)
             sub_08001158(x, y, w);
     }
 }
+
+asm(".global sub_080080F8\n.thumb_set sub_080080F8, RepaintTile\n");

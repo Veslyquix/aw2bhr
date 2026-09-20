@@ -17,7 +17,7 @@
  *
  * The `?:` inside `costs` is a real branch, and that is why gUnknown_0849D5F8
  * is loaded TWICE in the body: CSE cannot carry the first load across it. The
- * `+ 1` on the gUnknown_08499598 subscript rides in the 0x59 / 0x5a
+ * `+ 1` on the gPlayers subscript rides in the 0x59 / 0x5a
  * displacements (0x3c + 0x1d, 0x3c + 0x1e), the same one-based indexing
  * work/sub_08038848 and src/decomp/c_080211DC.c record for that array.
  *
@@ -75,10 +75,10 @@ void sub_080386EC(int a)
         prev = &stack[idx - 1];
 
         costs = gUnknown_085D3DD0[gPlaySt.coAbilities
-                    ? gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].co
+                    ? gPlayers[(gUnknown_03003F38 >> 6) + 1].co
                     : 1]
-                .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].coMode]
-                .unk18[gPlaySt.unk2c];
+                .unk38[gPlayers[(gUnknown_03003F38 >> 6) + 1].coMode]
+                .unk18[gPlaySt.weather];
 
         map = gMap;
 

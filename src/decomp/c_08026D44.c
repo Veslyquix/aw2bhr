@@ -12,7 +12,7 @@
  * per the branch-polarity rule makes `return FALSE` the first return. */
 bool8 sub_08026D44(int a)
 {
-    if ((gUnknown_08499598[a].hqX & 0x80) != 0)
+    if ((gPlayers[a].hqX & 0x80) != 0)
         return FALSE;
 
     return TRUE;

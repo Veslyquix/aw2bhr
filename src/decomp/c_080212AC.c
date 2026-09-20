@@ -14,7 +14,7 @@
  *
  * gUnknown_08090960 in the asm is NOT a global: the ROM word at 0x08090960
  * holds 0x08499598, so it is agbcc's own -fforce-addr address constant for
- * gUnknown_08499598 (the guard names it twice, the inner loop once, and only
+ * gPlayers (the guard names it twice, the inner loop once, and only
  * the guard gets the word).
  *
  * The `ldrb` on gUnknown_084995FE is combine narrowing a halfword load to the
@@ -35,7 +35,7 @@ void sub_080212AC(u16 faction)
     int x;
     int y;
 
-    if (gUnknown_08499598[faction].aiControlled != 0 && gUnknown_08499598[faction].turnState != 0)
+    if (gPlayers[faction].aiControlled != 0 && gPlayers[faction].turnState != 0)
     {
         for (i = 0; i <= 0x32; i++)
             sub_080211DC((u8)(gUnknown_084995FE[faction] + i), 1);
@@ -48,7 +48,7 @@ void sub_080212AC(u16 faction)
                          gMap->rowOffset[y] + x] & 0xE0)
                     == gUnknown_084995F4[faction])
                 {
-                    sub_080210C8(x, y, 0, gUnknown_08499598[faction].turnState, 1, 0);
+                    sub_080210C8(x, y, 0, gPlayers[faction].turnState, 1, 0);
                 }
             }
         }

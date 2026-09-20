@@ -19,7 +19,7 @@ bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
   int ty;
   int rowOff;
   n = 0;
-  if (gPlaySt.unk0d == 0)
+  if (gPlaySt.fog == 0)
   {
     return 1;
   }

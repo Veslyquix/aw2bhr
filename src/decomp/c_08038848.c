@@ -22,7 +22,7 @@
  *
  * The cost table is
  * `gUnknown_085D3DD0[row].unk38[e->unk1e].unk18[gPlaySt.unk2c]`,
- * where `e` is gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1] -- the +1 rides
+ * where `e` is gPlayers[(gUnknown_03003F38 >> 6) + 1] -- the +1 rides
  * in the 0x59 / 0x5a displacements (0x3c + 0x1d and 0x3c + 0x1e), the same
  * one-based indexing src/decomp/c_080211DC.c uses on that array. `row` is
  * e->unk1d normally and the literal 1 when gPlaySt.coAbilities is clear,
@@ -65,10 +65,10 @@ void sub_08038848(s8 a, s8 b)
     prev = &stack[i - 1];
 
     costs = gUnknown_085D3DD0[gPlaySt.coAbilities
-                ? gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].co
+                ? gPlayers[(gUnknown_03003F38 >> 6) + 1].co
                 : 1]
-            .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].coMode]
-            .unk18[gPlaySt.unk2c];
+            .unk38[gPlayers[(gUnknown_03003F38 >> 6) + 1].coMode]
+            .unk18[gPlaySt.weather];
 
     map = gMap;
 

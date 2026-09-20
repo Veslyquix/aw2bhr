@@ -93,23 +93,23 @@ int sub_08042C68(int a, int b)
 int GetCoPriceMultiplier(int a, int b)
 {
     return Div(GetUnitBaseCost(b)
-        * (GetCoCostBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b)
+        * (GetCoCostBonus(gPlayers[a].co, gPlayers[a].coMode, b)
             + 0x64), 100);
 }
 
 /* The `lsls #4; subs; lsls #2` triple is the 0x3c stride of
- * struct PlayerStruct, and gUnknown_08499598 is a pointer to it, so the pool
+ * struct PlayerStruct, and gPlayers is a pointer to it, so the pool
  * word is dereferenced once before the index is added. */
 int GetUnitAttackWithCoBonus(int a, int b)
 {
-    return GetCoAttackBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b)
+    return GetCoAttackBonus(gPlayers[a].co, gPlayers[a].coMode, b)
         + 0x64;
 }
 
 /* GetUnitAttackWithCoBonus's twin over GetCoDefenceBonus. */
 int GetUnitDefenceWithCoBonus(int a, int b)
 {
-    return GetCoDefenceBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b)
+    return GetCoDefenceBonus(gPlayers[a].co, gPlayers[a].coMode, b)
         + 0x64;
 }
 
@@ -118,14 +118,14 @@ int GetUnitDefenceWithCoBonus(int a, int b)
 int GetUnitMovementWithCoBonus(int a, int b)
 {
     return GetUnitBaseMovement(b)
-        + GetCoMovementBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b);
+        + GetCoMovementBonus(gPlayers[a].co, gPlayers[a].coMode, b);
 }
 
 /* GetUnitMovementWithCoBonus's twin over GetUnitBaseFiringRange / GetCoRangeBonus. */
 int GetUnitFiringRangeWithCoBonus(int a, int b)
 {
     return GetUnitBaseFiringRange(b)
-        + GetCoRangeBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode, b);
+        + GetCoRangeBonus(gPlayers[a].co, gPlayers[a].coMode, b);
 }
 
 /* The floor is written `if (n > 1) return n; else return 1;` and not the other
@@ -141,9 +141,9 @@ int GetUnitVisionWithCoBonus(int a, int b)
     int n;
 
     n = GetUnitBaseVision(b)
-        + GetCoVisionBonus(gUnknown_08499598[a].co, gUnknown_08499598[a].coMode);
+        + GetCoVisionBonus(gPlayers[a].co, gPlayers[a].coMode);
 
-    if (gPlaySt.unk2c == 2)
+    if (gPlaySt.weather == 2)
         n--;
 
     if (n > 1)

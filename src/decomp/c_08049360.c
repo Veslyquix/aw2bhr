@@ -136,7 +136,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         gUnknown_084C30F8->unk834++;
         /* fallthrough */
     case 5:
-        if ((gUnknown_03004008 & 1) == 0)
+        if ((gGameClock & 1) == 0)
             break;
         gUnknown_084C30F8->unk028 -= steps
             [gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
@@ -222,7 +222,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         {
             if (sub_08048F10() != 0)
                 break;
-            gUnknown_084C30F8->unk83a = gUnknown_03004008 & 3;
+            gUnknown_084C30F8->unk83a = gGameClock & 3;
             sub_080485DC(gUnknown_084C30E8[gUnknown_084C30F8->unk83a]);
         }
         gUnknown_084C30F8->unk834 = 0xb;

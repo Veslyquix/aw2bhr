@@ -8,7 +8,7 @@
  * sub_08007BA4 @ 0x08007BA4, sub_08007C04 @ 0x08007C04, sub_08007CA0 @ 0x08007CA0
  */
 
-void sub_08007BA4(int x, int y)
+void MakeSea(int x, int y)
 {
     int v;
 
@@ -41,7 +41,9 @@ void sub_08007BA4(int x, int y)
         sub_080011F4(x, y, 7);
 }
 
-void sub_08007C04(int x, int y)
+asm(".global sub_08007BA4\n.thumb_set sub_08007BA4, MakeSea\n");
+
+void MakeSeaSafe(int x, int y)
 {
     if (y > 0)
     {
@@ -78,7 +80,9 @@ void sub_08007C04(int x, int y)
     }
 }
 
-void sub_08007CA0(int x, int y)
+asm(".global sub_08007C04\n.thumb_set sub_08007C04, MakeSeaSafe\n");
+
+void MakeSeaSafest(int x, int y)
 {
     if (sub_0800119C(x, y, 7))
         return;
@@ -114,3 +118,5 @@ void sub_08007CA0(int x, int y)
         sub_0800EC20(x, y);
     }
 }
+
+asm(".global sub_08007CA0\n.thumb_set sub_08007CA0, MakeSeaSafest\n");

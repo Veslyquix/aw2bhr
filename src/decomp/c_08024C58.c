@@ -18,8 +18,8 @@ void sub_08024C58(struct Unk030013D0 *a1, int a2, u8 a3)
     int q;
 
     idx = (a1->unk00 - gUnknown_08499594) >> 6;
-    x = *(s16 *)((u8 *)&gUnknown_08499598[idx] + 0x62);
-    y = *(s16 *)((u8 *)&gUnknown_08499598[idx] + 0x64);
+    x = *(s16 *)((u8 *)&gPlayers[idx] + 0x62);
+    y = *(s16 *)((u8 *)&gPlayers[idx] + 0x64);
     acc = 100;
 
     if (a1->unk00->unk04_0 != 0)
@@ -45,7 +45,7 @@ void sub_08024C58(struct Unk030013D0 *a1, int a2, u8 a3)
 
     if (a1->unk0c != 0)
     {
-        if (gPlaySt.unk06 == 0 || a3 != 0)
+        if (gPlaySt.campaignRelated == 0 || a3 != 0)
         {
             r = DivRem(sub_080129E0(),
                        sub_08042E64(((a1->unk00 - gUnknown_08499594) >> 6) + 1));

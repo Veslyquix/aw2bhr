@@ -41,7 +41,7 @@
  * Kept from the inherited draft, all of it still load-bearing:
  *   - gUnknown_08614588 is `s16 [][2]`; a struct of two s16 comes out two
  *     instructions short and a flat `s16 []` two long (recorded on the global).
- *   - Both modulo tests are __umodsi3, so gUnknown_03004008 is read through a
+ *   - Both modulo tests are __umodsi3, so gGameClock is read through a
  *     (u32) -- it is declared s32 and a signed operand would call __modsi3.
  *   - The `lsls #0xf; lsrs #0x10` pairs are `(s16)(t >> 1)` after the abs, not
  *     a division: no `lsr #31` bias, unlike the easing `/ 2`s above them.
@@ -67,7 +67,7 @@ void sub_08076E20(u16 a1)
     gUnknown_03000640.unk00 = gUnknown_08614588[n][0] * 2;
     gUnknown_03000640.unk02 = gUnknown_08614588[n][1] * 2;
 
-    if ((u32)gUnknown_03004008 % k == 0)
+    if ((u32)gGameClock % k == 0)
     {
         gUnknown_03000640.unk04 +=
             (gUnknown_03000640.unk00 - gUnknown_03000640.unk04) / 2;

@@ -35,11 +35,11 @@ void sub_08024720(void)
     u16 v;
     u16 *p;
 
-    idx = ((u32)gUnknown_03004008 >> 2) & 0xf;
+    idx = ((u32)gGameClock >> 2) & 0xf;
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].aiControlled != 0)
+        if (gPlayers[i].aiControlled != 0)
         {
             if (sub_0804415C(i) && (j = idx) >= 0)
             {

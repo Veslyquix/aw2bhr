@@ -36,7 +36,7 @@ void sub_0806A668(struct Unk806A668 *proc)
  * decrement and the test are one expression. */
 void sub_0806A680(struct Unk806A680 *proc)
 {
-    if (!(gUnknown_03004008 & 1))
+    if (!(gGameClock & 1))
     {
         sub_0806A5B8();
         if (--proc->unk44 == 0)
@@ -51,7 +51,7 @@ void sub_0806A680(struct Unk806A680 *proc)
  * counter reload before the break. */
 void sub_0806A6B8(struct Unk806A6B8 *proc)
 {
-    if (!(gUnknown_03004008 & 1))
+    if (!(gGameClock & 1))
     {
         sub_080718F0();
         sub_080135A4();

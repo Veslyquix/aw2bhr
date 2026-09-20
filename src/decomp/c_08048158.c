@@ -48,13 +48,13 @@ void sub_08048158(struct Unk08047B98 *p)
     if (p->unk21 > 5 && p->unk20 < p->unk21 - 6)
         sub_08043418(0x29, 0x97, 0xf);
 
-    i = DivRem(Div(0x40 - DivRem(gUnknown_03004008, 0x40), 4), 0x10) * 2;
+    i = DivRem(Div(0x40 - DivRem(gGameClock, 0x40), 4), 0x10) * 2;
 
     ApplyPaletteExt((u16 *)((u8 *)gUnknown_0823E550 + i),
                     0x2a0,
-                    (0x10 - DivRem(Div(0x40 - DivRem(gUnknown_03004008, 0x40), 4), 0x10)) * 2);
+                    (0x10 - DivRem(Div(0x40 - DivRem(gGameClock, 0x40), 4), 0x10)) * 2);
 
     ApplyPaletteExt(gUnknown_0823E550,
-                    (u16)((0x10 - DivRem(Div(0x40 - DivRem(gUnknown_03004008, 0x40), 4), 0x10)) * 2 + 0x2a0),
-                    DivRem(Div(0x40 - DivRem(gUnknown_03004008, 0x40), 4), 0x10) * 2);
+                    (u16)((0x10 - DivRem(Div(0x40 - DivRem(gGameClock, 0x40), 4), 0x10)) * 2 + 0x2a0),
+                    DivRem(Div(0x40 - DivRem(gGameClock, 0x40), 4), 0x10) * 2);
 }

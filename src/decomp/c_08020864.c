@@ -32,7 +32,7 @@ int sub_08020864(u16 a)
     for (k = 1; k <= 3; k++)
     {
         r = sub_08020824(a, a + k <= 4 ? a + k : a + k - 4);
-        if (r == 2 && gUnknown_08499598[a + k <= 4 ? a + k : a + k - 4].aiControlled == 1)
+        if (r == 2 && gPlayers[a + k <= 4 ? a + k : a + k - 4].aiControlled == 1)
             return 1;
     }
     return 0;
@@ -45,9 +45,9 @@ int sub_08020864(u16 a)
  * the `unk1b == 1` guard is inside BOTH of them rather than hoisted above the
  * `if`, which is the order the branches appear in.
  *
- * gUnknown_08499598 is named honestly here and the three-level chain
+ * gPlayers is named honestly here and the three-level chain
  * (`ldr rA,=<pool>; ldr rB,[rA]; ldr rC,[rB]`) reproduces on its own: agbcc
- * parks &gUnknown_08499598 in this unit's .rodata, which is the ROM word at
+ * parks &gPlayers in this unit's .rodata, which is the ROM word at
  * 0x08090940 that gen_lds.py calls gUnknown_08090940. Declaring that word as a
  * `struct PlayerStruct **` global is NOT needed and would be wrong -- it is
  * agbcc's own address-constant pool entry. */
@@ -57,7 +57,7 @@ int sub_080208C8(int a)
     int seen;
     int seenValue;
 
-    if (gUnknown_08499598[gUnknown_030033EC].aiControlled == 1)
+    if (gPlayers[gUnknown_030033EC].aiControlled == 1)
         return 0;
 
     seenValue = 0;
@@ -70,17 +70,17 @@ int sub_080208C8(int a)
             continue;
         if (seen)
         {
-            if (gUnknown_08499598[k].aiControlled == 1
-             && seenValue != gUnknown_08499598[k].team
-             && gUnknown_08499598[a].team != gUnknown_08499598[k].team)
+            if (gPlayers[k].aiControlled == 1
+             && seenValue != gPlayers[k].team
+             && gPlayers[a].team != gPlayers[k].team)
                 return 1;
         }
         else
         {
-            if (gUnknown_08499598[k].aiControlled == 1
-             && gUnknown_08499598[k].team != gUnknown_08499598[a].team)
+            if (gPlayers[k].aiControlled == 1
+             && gPlayers[k].team != gPlayers[a].team)
             {
-                seenValue = gUnknown_08499598[k].team;
+                seenValue = gPlayers[k].team;
                 seen = 1;
             }
         }

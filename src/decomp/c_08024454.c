@@ -23,7 +23,7 @@ void sub_08024454(void)
     gUnknown_030030E0.bits.target2_enable_bg3 = 1;
     gUnknown_030030E0.bits.target2_enable_obj = 1;
 
-    if (gPlaySt.unk2c == 1)
+    if (gPlaySt.weather == 1)
     {
         gUnknown_03002020 = 10;
         gUnknown_03002B28 = 8;

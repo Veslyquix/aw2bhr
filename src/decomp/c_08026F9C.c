@@ -12,7 +12,7 @@
  */
 bool8 sub_08026F9C(s16 a, s16 b)
 {
-    if (gUnknown_08499598[(a >> 6) + 1].team == gUnknown_08499598[(b >> 6) + 1].team)
+    if (gPlayers[(a >> 6) + 1].team == gPlayers[(b >> 6) + 1].team)
         return TRUE;
 
     return FALSE;
@@ -33,7 +33,7 @@ bool8 sub_08026FD0(s16 a, u8 b)
     if (t == 0)
         return FALSE;
 
-    if (gUnknown_08499598[(a >> 6) + 1].team == gUnknown_08499598[t].team)
+    if (gPlayers[(a >> 6) + 1].team == gPlayers[t].team)
         return TRUE;
 
     return FALSE;

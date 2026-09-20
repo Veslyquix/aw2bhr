@@ -15,8 +15,8 @@ void sub_08035020(u16 a)
 
 void sub_0803504C(struct Unk03001470 *p)
 {
-    gPlaySt.unk2c = p->unk20;
-    sub_08035020(gPlaySt.unk2c);
+    gPlaySt.weather = p->unk20;
+    sub_08035020(gPlaySt.weather);
 }
 
 /* Named per Xenesis's AW2 Subroutine List: "Code that retrieves the Sound

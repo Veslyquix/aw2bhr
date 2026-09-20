@@ -54,7 +54,7 @@ bool8 sub_0802C69C(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gPlaySt.unk09 == 0)
+    if (gPlaySt.animOpts == 0)
         return TRUE;
 
     return FALSE;

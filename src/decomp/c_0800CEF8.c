@@ -22,7 +22,7 @@
  *
  * `*(u16 *)gUnknown_08499590` is the map width at +0 of the screen descriptor,
  * the same object c_08007D70.c and c_0800BEE4.c read. */
-void sub_0800CEF8(int x, int y)
+void RepaintTileRight(int x, int y)
 {
     if (x < gMap->width - 1)
     {
@@ -30,3 +30,5 @@ void sub_0800CEF8(int x, int y)
         sub_08001158(x, y, sub_080016D0(x, y));
     }
 }
+
+asm(".global sub_0800CEF8\n.thumb_set sub_0800CEF8, RepaintTileRight\n");

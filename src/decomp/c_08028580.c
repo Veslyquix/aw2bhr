@@ -15,7 +15,7 @@
  *     "rodata": ["0x08090B50", "0x08090B54"]
  * then re-run tools/split_rodata.py and tools/gen_lds.py before building. Those
  * two words are agbcc's own -fforce-addr address constants for
- * &gUnknown_08499598 and &gUnknown_08499590; writing the globals' names
+ * &gPlayers and &gUnknown_08499590; writing the globals' names
  * honestly reproduces the ROM's three-level `ldr rN,=<word>; ldr rN,[rN];
  * ldr rD,[rN]` exactly, which is why neither needs a declaration. Both symbols
  * ALSO appear as ordinary inline pool words elsewhere in this same function --
@@ -70,7 +70,7 @@
  *    `+1` and `+2` force-addr pool words plus enough pressure to spill a value
  *    the ROM keeps in a register.
  *
- * Readout notes: `gUnknown_08499598[(v >> 6) + 1].unk2a` is the ROM's
+ * Readout notes: `gPlayers[(v >> 6) + 1].unk2a` is the ROM's
  * `adds r1, #0x66` -- 0x3c + 0x2a, the 1-based army slot, NOT a member at +0x66
  * (struct PlayerStruct is only 0x3c long, and its unk2a comment already records
  * sub_08026F9C/sub_08026FD0 reaching it the same way). `i` is u16 from
@@ -95,7 +95,7 @@ void sub_08028580(struct Unk28580 *p)
     u8 v;
     struct Unk08499594 *unit;
 
-    sub_08019818(gUnknown_08499FA0[gUnknown_08499598[p->unk64].teamColor - 1], 0, 0);
+    sub_08019818(gUnknown_08499FA0[gPlayers[p->unk64].teamColor - 1], 0, 0);
 
     if (p->unk66 == 2)
     {
@@ -103,12 +103,12 @@ void sub_08028580(struct Unk28580 *p)
         int idx;
 
         map = gMap;
-        idx = map->rowOffset[gUnknown_08499598[p->unk64].hqY & 0x7f]
-            + (gUnknown_08499598[p->unk64].hqX & 0x7f);
+        idx = map->rowOffset[gPlayers[p->unk64].hqY & 0x7f]
+            + (gPlayers[p->unk64].hqX & 0x7f);
         team = map->terrain[idx] >> 5;
         map->terrain[idx] = 8 | gUnknown_084995F4[p->unk64];
-        sub_080240B4(gUnknown_08499598[p->unk64].hqX & 0x7f,
-                     gUnknown_08499598[p->unk64].hqY & 0x7f,
+        sub_080240B4(gPlayers[p->unk64].hqX & 0x7f,
+                     gPlayers[p->unk64].hqY & 0x7f,
                      gUnknown_084995F4[p->unk64]);
         sub_080219AC();
     }
@@ -126,7 +126,7 @@ void sub_08028580(struct Unk28580 *p)
                         gProperty[i].y] + gProperty[i].x];
 
             if (v != 0
-             && gUnknown_08499598[(v >> 6) + 1].team == gUnknown_08499598[team].team)
+             && gPlayers[(v >> 6) + 1].team == gPlayers[team].team)
             {
                 unit = &gUnknown_08499594[v];
                 unit->unk05_3 = 0;

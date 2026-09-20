@@ -34,7 +34,7 @@ void sub_080385A4(void)
 {
     s16 i;
 
-    gUnknown_08499598[0].teamColor = 0;
+    gPlayers[0].teamColor = 0;
 
     for (i = 1; i <= 4; i++)
         gPlaySt.armyColor[i] = i;

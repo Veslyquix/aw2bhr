@@ -78,7 +78,7 @@ void sub_08061788(u16 a)
     if (gUnknown_085C77A0[gPlaySt.mapID].unk27 != 0)
     {
         sub_08061A40(SCRATCH,
-            &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gPlaySt.mapID].unk27][gUnknown_08499598[a].co]]);
+            &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gPlaySt.mapID].unk27][gPlayers[a].co]]);
     }
     else
     {
@@ -88,7 +88,7 @@ void sub_08061788(u16 a)
             v = 4;
 
         sub_08061A40(SCRATCH,
-            &gUnknown_085771C4[gUnknown_0857690C[v][gUnknown_08499598[a].co]]);
+            &gUnknown_085771C4[gUnknown_0857690C[v][gPlayers[a].co]]);
     }
 
     sub_08061A40(&gUnknown_02029D84, SCRATCH);
@@ -122,6 +122,6 @@ void sub_08061868(void)
     gUnknown_03004780 = 1;
     gUnknown_030044D8 = gUnknown_03004770 = 0;
 
-    if (gUnknown_08499598[gUnknown_030033EC].teamColor == 5 && gUnknown_030046B4 != 0)
+    if (gPlayers[gUnknown_030033EC].teamColor == 5 && gUnknown_030046B4 != 0)
         sub_080607E8();
 }
