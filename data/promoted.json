@@ -21605,6 +21605,19 @@
   "size": 48
  },
  {
+  "file": "src/decomp/c_0805DCD4.c",
+  "obj": "src/decomp/c_0805DCD4.o",
+  "addr_hex": "0x0805DCD4",
+  "functions": [
+   "sub_0805DCD4"
+  ],
+  "size": 740,
+  "rodata": [
+   "0x0816DA50",
+   "0x0816DA54"
+  ]
+ },
+ {
   "file": "src/decomp/c_0805DFB8.c",
   "obj": "src/decomp/c_0805DFB8.o",
   "addr_hex": "0x0805DFB8",
@@ -22116,6 +22129,15 @@
    "0x0816DAD8",
    "0x0816DADC"
   ]
+ },
+ {
+  "file": "src/decomp/c_08060DAC.c",
+  "obj": "src/decomp/c_08060DAC.o",
+  "addr_hex": "0x08060DAC",
+  "functions": [
+   "sub_08060DAC"
+  ],
+  "size": 296
  },
  {
   "file": "src/decomp/c_08060D4C.c",
