@@ -34,7 +34,7 @@ int HasMaxRangeGreaterThanOne(struct Unk030040D8 *p)
 asm(".global sub_0804440C\n.thumb_set sub_0804440C, IsUnitDirectForCoPowerAnim\n"
     ".global sub_0804443C\n.thumb_set sub_0804443C, HasMaxRangeGreaterThanOne\n");
 
-int sub_08044460(struct Unk030040D8 *p)
+int IsUnitSoldier(struct Unk030040D8 *p)
 {
     if ((p->unk01 & 8) || gUnknown_085D5ABC[p->unk00].unitClass != 0)
         return 0;
@@ -42,7 +42,9 @@ int sub_08044460(struct Unk030040D8 *p)
         return 1;
 }
 
-int sub_08044488(struct Unk030040D8 *p)
+asm(".global sub_08044460\n.thumb_set sub_08044460, IsUnitSoldier\n");
+
+int IsUnitAir(struct Unk030040D8 *p)
 {
     int t;
 
@@ -55,6 +57,8 @@ int sub_08044488(struct Unk030040D8 *p)
         return 1;
     return 0;
 }
+
+asm(".global sub_08044488\n.thumb_set sub_08044488, IsUnitAir\n");
 
 int sub_080444B4(struct Unk030040D8 *p)
 {

@@ -15,7 +15,9 @@
  * codegen one. Reconciled at wave 13 promotion, where the `u32` definition and
  * a `void *` prototype added for the new caller collided at link time; a
  * per-function check cannot see that conflict because it compiles one unit. */
-void *sub_08035B68(u16 i)
+void *GetUnitSpriteFormat(u16 i)
 {
     return (void *)gUnknown_0849CD88[i].spriteFormat;
 }
+
+asm(".global sub_08035B68\n.thumb_set sub_08035B68, GetUnitSpriteFormat\n");

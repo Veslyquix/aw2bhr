@@ -20,10 +20,12 @@
  * `(s8)(unk10 * 10)`. Written as a shift it is a different instruction
  * sequence -- shorten_binary_op applies to MULT_EXPR and not to shifts. */
 
-int sub_080249EC(int a1, s8 a2, u8 a3)
+int GetTerrainDefense(int a1, s8 a2, u8 a3)
 {
     if (gUnknown_085D5ABC[a3].deployLocation == 0x10)
         return 0;
 
     return (s8)(gUnknown_085D583C[a2].defense * 10);
 }
+
+asm(".global sub_080249EC\n.thumb_set sub_080249EC, GetTerrainDefense\n");
