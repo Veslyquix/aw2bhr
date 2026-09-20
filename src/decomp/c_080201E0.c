@@ -16,5 +16,5 @@ void sub_080201E0(s16 x, s16 y, struct Unk08499594 *e)
     sub_080200EC(x, y,
                  sub_08042D50(((e - gUnknown_08499594) >> 6) + 1, e->unk00), 1);
     if (sub_08042D50(((e - gUnknown_08499594) >> 6) + 1, e->unk00) != 1)
-        sub_080200EC(x, y, gUnknown_085D5ABC[e->unk00].unk0e - 1, -1);
+        sub_080200EC(x, y, gUnknown_085D5ABC[e->unk00].minRange - 1, -1);
 }

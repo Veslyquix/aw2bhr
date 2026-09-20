@@ -138,7 +138,7 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
         return;
 
     if (gUnknown_030040D8->unk00 == 0
-     || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
+     || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x10)
         score = gUnknown_085D583C[map->terrain[idx] & 0x1f].unk10 * 10;
 
     if ((gMap->dangerMask[
@@ -170,7 +170,7 @@ int sub_08058DEC(int x, int y, u16 * out)
     struct Map * map;
     int sentinel;
 
-    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
+    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable;
     map = gMap;
 
     if (tbl->unk1a[map->terrain[map->rowOffset[y] + x] & 0x1f] == 0)
@@ -226,7 +226,7 @@ void sub_08058E88(int x, int y, u16 * out)
     if (t == 0x79)
         return;
 
-    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
+    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable;
 
     if (tbl->unk1a[map->terrain[idx] & 0x1f] == 0)
         return;
@@ -253,7 +253,7 @@ void sub_08058F30(u8 * out)
     if ((gUnknown_030046B8 & 2) == 0)
         return;
 
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 7)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 7)
         return;
 
     *out = sub_08042D1C(gUnknown_030033EC, gUnknown_030040D8->unk00)

@@ -71,7 +71,7 @@ int sub_08057F54(int a1)
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
         if (gUnknown_08499594[i].unk00 != 0
-         && (gUnknown_085D5ABC[gUnknown_08499594[i].unk00].unk1a & a1) != 0)
+         && (gUnknown_085D5ABC[gUnknown_08499594[i].unk00].deployLocation & a1) != 0)
             count++;
     }
 

@@ -4203,6 +4203,25 @@ struct Unk085D3DD0 /* 0x104 */
     /* 0x38 */ struct Unk085D3DD0Entry unk38[3];
 };
 
+/* The per-unit-type stats table. Field names cost, movement, maxAmmo,
+ * vision, minRange, maxRange, maxFuel, transportTable, unitClass,
+ * movementType, deployLocation, baseDamage, repairTable and fuelCost come
+ * from the 'Advance Wars 2 Unit Editor' Nightmare module (SRR_AW2's
+ * 'AW2 Updated Nightmare Modules'), which describes 24 records of 0x5c bytes
+ * at 0x085D5B18. THIS array starts one record EARLIER, at 0x085D5ABC -- the
+ * terrain table above it ends exactly there -- so our index is the module's
+ * plus one and element 0 is a dummy. c_0805B980.c reaching [23] for a
+ * transport blob is the check: the module's [22] is the Lander.
+ *
+ * EVERY field boundary this tree derived on its own lands on a module field,
+ * and several of the wave comments below independently say what the module
+ * says (movementType, fuelCost, transportTable, maxFuel, maxAmmo). Where the
+ * two DISAGREE the module was not followed: it calls 0x00/0x02/0x04 name and
+ * weapon-name indices, but all three are passed to sub_08014A5C as sprite
+ * ids here, and it calls 0x1b the 'AI byte' while the readers below show a
+ * 1..6 class tag, which does not fit Unit Class.txt's 0..4 range either.
+ * baseDamage[k][i] is indexed by THIS array's unit id, so [k][0] is the
+ * dummy and the module's two 25-byte damage rows are [k][1..25]. */
 struct Unk085D5ABC /* 0x5c */
 {
     /* 0x00 */ u16 unk00; /* Wave 56, W56-G: NAMED out of filler_00[0x02], not
@@ -4221,7 +4240,7 @@ struct Unk085D5ABC /* 0x5c */
                            * with them, so they are a two-entry graphic id
                            * pair. */
     /* 0x04 */ u16 unk04;
-    /* 0x06 */ u16 unk06;
+    /* 0x06 */ u16 cost;
     /* 0x08 */ u16 unk08; /* Wave 38 (W38-J). Was filler; NAMED, not reshaped --
                            * same offset, same two bytes. sub_08029978 reads it
                            * `ldrh rN,[rM,#8]` off the usual `unk00 * 0x5c`
@@ -4230,27 +4249,27 @@ struct Unk085D5ABC /* 0x5c */
                            * per-step magnitude that goes with the unk0b cap two
                            * fields down. Width from the `ldrh`; signedness
                            * unproved, nothing sign-extends it. */
-    /* 0x0a */ u8 unk0a;
-    /* 0x0b */ u8 unk0b; /* wave 15 (C): a CAP, compared `bls` against a sum of
+    /* 0x0a */ u8 movement;
+    /* 0x0b */ u8 maxAmmo; /* wave 15 (C): a CAP, compared `bls` against a sum of
                           * two 4-bit fields of struct Unk08499594's unk04
                           * container (sub_08022618, sub_08042998), and the
                           * clamp value when the sum exceeds it. Same role as
                           * unk10 one field over, which caps the 5-bit unk06
                           * pair the same way. Plain `ldrb`. */
-    /* 0x0c */ u8 unk0c;
+    /* 0x0c */ u8 vision;
     /* 0x0d */ u8 filler_0d[0x01];
-    /* 0x0e */ u8 unk0e; /* a 3-valued mode tag: sub_080432E0 maps 0 -> 7,
+    /* 0x0e */ u8 minRange; /* a 3-valued mode tag: sub_080432E0 maps 0 -> 7,
                           * 1 -> 5 and everything else -> 6, which its callers
                           * use as a column index into gUnknown_085D3E2C. */
-    /* 0x0f */ u8 unk0f;
-    /* 0x10 */ u8 unk10; /* sub_08061E54 compares `unk10 - 5` against a 7-bit
+    /* 0x0f */ u8 maxRange;
+    /* 0x10 */ u8 maxFuel; /* sub_08061E54 compares `unk10 - 5` against a 7-bit
                           * field of its pointer parameter; plain `ldrb`. */
     /* 0x11 */ u8 unk11; /* Wave 30, W30-A: sub_0805CA24 ORs it with unk0e and
                           * tests the pair against zero, so it is a flag byte
                           * beside that one rather than filler. Plain `ldrb`;
                           * signedness unproved. */
     /* 0x12 */ u8 filler_12[0x02];
-    /* 0x14 */ u8 *unk14; /* Wave 34 (W34-D): a POINTER to a byte blob, and
+    /* 0x14 */ u8 *transportTable; /* Wave 34 (W34-D): a POINTER to a byte blob, and
                            * three readers agree independently. sub_0802706C
                            * only tests it `!= 0` (`ldr` at +0x14, whole
                            * word), but sub_08025EF0 and sub_08025F74 both
@@ -4259,18 +4278,18 @@ struct Unk085D5ABC /* 0x5c */
                            * so the target really is `u8 []` and the word is
                            * an address rather than an int. Carved out of
                            * filler_12, which used to span 0x12..0x17. */
-    /* 0x18 */ u8 unk18; /* plain `ldrb`, used by family F049 as an index into
+    /* 0x18 */ u8 unitClass; /* plain `ldrb`, used by family F049 as an index into
                           * struct Unk085D3DD0Entry.unk24[] and separately
                           * tested against 0. Signedness unproved: both uses
                           * are u8-context (a subscript and a `cmp #0`), so a
                           * signed object would be byte-identical here. */
-    /* 0x19 */ u8 unk19; /* Wave 34, W34-F. The unit's MOVEMENT TYPE: sub_08041EA8
+    /* 0x19 */ u8 movementType; /* Wave 34, W34-F. The unit's MOVEMENT TYPE: sub_08041EA8
                           * uses it as `unk19 * 32`, a row index into the s8
                           * terrain-cost table at
                           * gUnknown_085D3DD0[1].unk38[0].unk18, whose column is
                           * the 5-bit terrain code. Plain `ldrb`, so unsigned by
                           * the load; nothing sign-extends it. */
-    /* 0x1a */ u8 unk1a; /* Wave 29, W29-A. sub_080249EC compares it `ldrb`
+    /* 0x1a */ u8 deployLocation; /* Wave 29, W29-A. sub_080249EC compares it `ldrb`
                           * against 0x10 and returns 0 when it matches, so it is
                           * a small tag rather than a flag. Width from the load;
                           * the compare is `beq`, which says nothing about
@@ -4300,9 +4319,9 @@ struct Unk085D5ABC /* 0x5c */
                           * only use is `plane_byte & mask` tested against zero.
                           * Plain `ldrb`, so unsigned by the load; carved out of
                           * filler_1c, which used to span 0x1c..0x1d. */
-    /* 0x1e */ u8 unk1e[2][0x1a];
+    /* 0x1e */ u8 baseDamage[2][0x1a];
     /* 0x52 */ u8 filler_52[0x02];
-    /* 0x54 */ s8 *unk54; /* Wave 49, W49-J. Carved out of filler_52[0x06] --
+    /* 0x54 */ s8 *repairTable; /* Wave 49, W49-J. Carved out of filler_52[0x06] --
                            * same start offset, and nothing in src/decomp names
                            * filler_52, so byte-neutral for every other reader.
                            * gen_lds.py calls this word gUnknown_085D5B10, which
@@ -4318,7 +4337,7 @@ struct Unk085D5ABC /* 0x5c */
                            * sub_08046778, so the shifts are NOT evidence of an
                            * unsigned pointee. The pointee's meaning is
                            * unproved. */
-    /* 0x58 */ const u8 *unk58; /* Wave 34 (W34-D): a POINTER to a per-terrain
+    /* 0x58 */ const u8 *fuelCost; /* Wave 34 (W34-D): a POINTER to a per-terrain
                                  * cost table. sub_080253B0 loads the whole word
                                  * (`adds rB, #0x58; ldr`) and immediately indexes
                                  * it by the LOW FIVE BITS of the gUnknown_08499590

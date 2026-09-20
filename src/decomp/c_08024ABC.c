@@ -44,7 +44,7 @@ void sub_08024ABC(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 
             v1 = (u16)sub_08043070(gPlayers[army].co,
                               gPlayers[army].coMode,
                               a->unk00->unk00, b->unk00->unk00, c);
-        if (t->unk0e == 1 && a->unk00->unk04_7 != 0)
+        if (t->minRange == 1 && a->unk00->unk04_7 != 0)
         {
             if ((b->unk00->unk01 & 0x20) != 0)
                 v3 = (u16)sub_08043070(gPlayers[army].co,
@@ -56,7 +56,7 @@ void sub_08024ABC(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 
                                   a->unk00->unk00, b->unk00->unk00, v3);
         }
     }
-    else if (t->unk0e <= c && c <= sub_08042D50(army, a->unk00->unk00)
+    else if (t->minRange <= c && c <= sub_08042D50(army, a->unk00->unk00)
              && a->unk00->unk04_7 != 0 && d == 1)
     {
         if ((b->unk00->unk01 & 0x20) != 0)

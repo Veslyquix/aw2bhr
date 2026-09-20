@@ -54,7 +54,7 @@ int sub_08058254(void)
                 continue;
             if (gUnknown_0857680F[u->unk00] != 2)
                 continue;
-            if (gUnknown_085D5ABC[u->unk00].unk0b == 0)
+            if (gUnknown_085D5ABC[u->unk00].maxAmmo == 0)
                 continue;
             if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
                 continue;
@@ -90,7 +90,7 @@ int sub_08058318(void)
                 continue;
             if (gUnknown_0857680F[u->unk00] != 2)
                 continue;
-            if (gUnknown_085D5ABC[u->unk00].unk0b == 0)
+            if (gUnknown_085D5ABC[u->unk00].maxAmmo == 0)
                 continue;
             if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
                 continue;

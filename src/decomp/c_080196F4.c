@@ -86,10 +86,10 @@ void sub_080196F4(void *arg)
             u->unk09 = 0;
             u->unk0a = 0;
             u->unk0b = p->unk09;
-            if (u->unk06_0 > gUnknown_085D5ABC[u->unk00].unk10)
-                u->unk06_0 = gUnknown_085D5ABC[u->unk00].unk10;
-            if (u->unk04_7 > gUnknown_085D5ABC[u->unk00].unk0b)
-                u->unk04_7 = gUnknown_085D5ABC[u->unk00].unk0b;
+            if (u->unk06_0 > gUnknown_085D5ABC[u->unk00].maxFuel)
+                u->unk06_0 = gUnknown_085D5ABC[u->unk00].maxFuel;
+            if (u->unk04_7 > gUnknown_085D5ABC[u->unk00].maxAmmo)
+                u->unk04_7 = gUnknown_085D5ABC[u->unk00].maxAmmo;
         }
         p++;
     }

@@ -157,7 +157,7 @@ void sub_080591E4(void *a1)
                 continue;
             if (!sub_08059674(x, y))
                 continue;
-            if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x20
+            if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x20
              && (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
             best = gMap->danger[gMap->rowOffset[y] + x];

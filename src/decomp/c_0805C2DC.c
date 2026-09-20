@@ -217,7 +217,7 @@ u8 sub_0805C720(u16 a1, u8 a2)
                     if (e->unk04_0 <= 10)
                         continue;
                     mul = 1;
-                    if (gUnknown_085D5ABC[e->unk00].unk0e > 1)
+                    if (gUnknown_085D5ABC[e->unk00].minRange > 1)
                         mul = 2;
                     if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10) * mul;

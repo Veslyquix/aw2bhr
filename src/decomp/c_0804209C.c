@@ -60,10 +60,10 @@ bool8 sub_0804209C(s16 x, s16 y)
 
     e = &gUnknown_085D5ABC[unit->unk00];
 
-    if (e->unk0b != unit->unk04_7)
+    if (e->maxAmmo != unit->unk04_7)
         return TRUE;
 
-    if (e->unk10 != unit->unk06_0)
+    if (e->maxFuel != unit->unk06_0)
         return TRUE;
 
     return FALSE;
@@ -85,7 +85,7 @@ bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int off;
     int idx;
 
-    t = gUnknown_085D5ABC[a1->unk00].unk14;
+    t = gUnknown_085D5ABC[a1->unk00].transportTable;
     p = gMap;
     y2 = a3 * 2;
     rows = (u8 *)p->rowOffset;
@@ -125,7 +125,7 @@ bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int off;
     int idx;
 
-    t = gUnknown_085D5ABC[a1->unk00].unk14;
+    t = gUnknown_085D5ABC[a1->unk00].transportTable;
     p = gMap;
     y2 = a3 * 2;
     rows = (u8 *)p->rowOffset;
@@ -157,7 +157,7 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int off;
     int idx;
 
-    t = gUnknown_085D5ABC[a1->unk00].unk14;
+    t = gUnknown_085D5ABC[a1->unk00].transportTable;
     p = gMap;
     y2 = a3 * 2;
     rows = (u8 *)p->rowOffset;
@@ -221,7 +221,7 @@ bool8 sub_080422A8(s16 x, s16 y)
     if (sub_08025F74(&gUnknown_08499594[id], gUnknown_030040D8->unk00) == 0)
         return FALSE;
 
-    t = gUnknown_085D5ABC[unit->unk00].unk14;
+    t = gUnknown_085D5ABC[unit->unk00].transportTable;
 
     p2 = gMap;
     rows2 = (u8 *)p2->rowOffset;

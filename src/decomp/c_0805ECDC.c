@@ -14,7 +14,7 @@ void sub_0805ECDC(void)
     u8 x;
     int t;
 
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a == 0x20)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation == 0x20)
         t = 0x11;
     else
         t = gUnknown_030040D8->unk00;
@@ -25,7 +25,7 @@ void sub_0805ECDC(void)
 
     if (sub_08058F90(&v) == -1)
         sub_0805F4F8();
-    else if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a == 0x20)
+    else if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation == 0x20)
         sub_080590DC(&v);
     else
         sub_080591E4(&v);
@@ -44,7 +44,7 @@ void sub_0805ED70(void)
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, x, 0);
     sub_08059AEC();
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a == 0x20)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation == 0x20)
         sub_0805A008(p);
     else
         sub_08059F24(p);
@@ -74,7 +74,7 @@ void sub_0805EE40(void)
                       gUnknown_030040D8->unk00, x, 0);
     sub_08059AEC();
     sub_08059A0C(p);
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e > 1)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange > 1)
     {
         q = sub_08057F00(4);
         a = gUnknown_085766E0->unk0c;
@@ -104,7 +104,7 @@ void sub_0805EF00(void)
 
     p = gUnknown_03003F20;
     sub_08059A0C(p);
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e > 1)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange > 1)
     {
         q = sub_08057F00(4);
         a = gUnknown_085766E0->unk0c;

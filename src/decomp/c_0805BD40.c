@@ -35,7 +35,7 @@ int sub_0805BD40(int x, int y, int t, int id, s16 *out)
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
     c = (gMap->terrain[idx] & 0x1f)
-        + gUnknown_085D5ABC[t].unk19 * 32;
+        + gUnknown_085D5ABC[t].movementType * 32;
 
     if (costs[c] != -1)
     {

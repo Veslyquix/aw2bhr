@@ -96,8 +96,8 @@ void sub_08025BE0(struct Unk08499594 *a1, u8 a2)
     a1->unk01 = 0;
     a1->unk06_7 = 0;
     a1->unk04_0 = 0x64;
-    a1->unk06_0 = gUnknown_085D5ABC[a2].unk10;
-    a1->unk04_7 = gUnknown_085D5ABC[a2].unk0b;
+    a1->unk06_0 = gUnknown_085D5ABC[a2].maxFuel;
+    a1->unk04_7 = gUnknown_085D5ABC[a2].maxAmmo;
     a1->unk05_3 = 0;
     a1->unk07 = 0;
     a1->unk08 = 0;

@@ -52,7 +52,7 @@ void sub_0805EB58(void)
                 continue;
             if (sub_08026FD0(gUnknown_03003F38, gMap->terrain[idx]) == 1)
                 continue;
-            tbl = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
+            tbl = gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable;
             t = gMap->terrain[gMap->rowOffset[y] + x] & 0x1f;
             tbl += 0x1a;
             if (tbl[t] == 0)

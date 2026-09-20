@@ -20,7 +20,7 @@ void sub_08020354(u16 x, u16 y, struct Unk08499594 *e)
 {
     sub_0801F9C0(x, y,
                  sub_08042D50(((e - gUnknown_08499594) >> 6) + 1, e->unk00), 0);
-    sub_0801F9C0(x, y, gUnknown_085D5ABC[e->unk00].unk0e - 1, 0xff);
+    sub_0801F9C0(x, y, gUnknown_085D5ABC[e->unk00].minRange - 1, 0xff);
 }
 
 /* Clears the four orthogonal neighbours of cell (x, y) in the

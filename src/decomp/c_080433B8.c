@@ -29,22 +29,22 @@
 
 int GetUnitBaseMovement(int a)
 {
-    return gUnknown_085D5ABC[a].unk0a;
+    return gUnknown_085D5ABC[a].movement;
 }
 
 int GetUnitBaseFiringRange(int a)
 {
-    return gUnknown_085D5ABC[a].unk0f;
+    return gUnknown_085D5ABC[a].maxRange;
 }
 
 int GetUnitBaseCost(int a)
 {
-    return gUnknown_085D5ABC[a].unk06;
+    return gUnknown_085D5ABC[a].cost;
 }
 
 int GetUnitBaseVision(int a)
 {
-    return gUnknown_085D5ABC[a].unk0c;
+    return gUnknown_085D5ABC[a].vision;
 }
 
 asm(".global sub_080433B8\n.thumb_set sub_080433B8, GetUnitBaseMovement\n"

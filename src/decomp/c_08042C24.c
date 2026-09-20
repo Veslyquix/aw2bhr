@@ -79,8 +79,8 @@ int sub_08042C68(int a, int b)
     lo = 2;
 
     if ((sub_08043050(a) & 0x80) != 0
-        && gUnknown_085D5ABC[b].unk18 <= hi
-        && gUnknown_085D5ABC[b].unk18 >= lo)
+        && gUnknown_085D5ABC[b].unitClass <= hi
+        && gUnknown_085D5ABC[b].unitClass >= lo)
         return -2;
 
     return 0;

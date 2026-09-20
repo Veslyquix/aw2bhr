@@ -80,7 +80,7 @@ void sub_0805F7B8(void)
                     continue;
                 v = *(s8 *)cell;
                 if (gUnknown_030040D8->unk00 == 0
-                 || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
+                 || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x10)
                     score = gUnknown_085D584C[gMap->terrain[gMap->rowOffset[y] + x] & 0x1f].unk00 * 10 - (n = v - 0x14);
                 else
                     score = 0x14 - v;

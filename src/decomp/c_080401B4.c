@@ -42,7 +42,7 @@ void sub_080401B4(struct Unk401B4Proc *proc)
 {
     struct Unk08499594 *ent = proc->unk4c;
 
-    sub_0803FF48(ent->unk02, ent->unk03, gUnknown_085D5ABC[ent->unk00].unk18, proc);
+    sub_0803FF48(ent->unk02, ent->unk03, gUnknown_085D5ABC[ent->unk00].unitClass, proc);
     sub_08025D60(ent - gUnknown_08499594);
     sub_080258CC();
 }

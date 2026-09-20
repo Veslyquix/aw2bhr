@@ -15,7 +15,7 @@ bool8 sub_08025EF0(int a1, int a2)
     if ((a1 & 0xc0) != (a2 & 0xc0))
         return FALSE;
 
-    t = gUnknown_085D5ABC[gUnknown_08499594[a1].unk00].unk14;
+    t = gUnknown_085D5ABC[gUnknown_08499594[a1].unk00].transportTable;
 
     if (t == NULL)
         return FALSE;
@@ -39,7 +39,7 @@ bool8 sub_08025F74(struct Unk08499594 *a1, u8 a2)
     u8 *t;
     u8 *u;
 
-    t = gUnknown_085D5ABC[a1->unk00].unk14;
+    t = gUnknown_085D5ABC[a1->unk00].transportTable;
 
     if (t == NULL)
         return FALSE;

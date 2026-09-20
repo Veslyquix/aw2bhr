@@ -111,7 +111,7 @@ void sub_0805F914(void)
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
             if (gUnknown_030040D8->unk00 == 0
-             || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
+             || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x10)
                 v = gUnknown_085D584C[
                         gMap->terrain[
                             gMap->rowOffset[y] + x]

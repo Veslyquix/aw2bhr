@@ -46,7 +46,7 @@ bool8 sub_080253B0(struct Unk08499594 *a1)
     off = gMap->rowOffset[a1->unk03] + a1->unk02;
     cell = gMap->terrain[off];
 
-    cost = gUnknown_085D5ABC[a1->unk00].unk58[cell & 0x1f];
+    cost = gUnknown_085D5ABC[a1->unk00].fuelCost[cell & 0x1f];
 
     if (a1->unk01 & 8)
         return FALSE;
@@ -71,7 +71,7 @@ bool8 sub_080253B0(struct Unk08499594 *a1)
     if (a1->unk06_0 != 0)
         return FALSE;
 
-    if ((gUnknown_085D5ABC[a1->unk00].unk1a & 0x30) == 0)
+    if ((gUnknown_085D5ABC[a1->unk00].deployLocation & 0x30) == 0)
         return FALSE;
 
     return TRUE;

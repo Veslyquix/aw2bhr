@@ -49,13 +49,13 @@ int GetCoAttackBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
+    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    if (gUnknown_085D5ABC[c].unk18 == 0)
+    if (gUnknown_085D5ABC[c].unitClass == 0)
         return p[0];
 
     return p[0] + q[0];
@@ -68,13 +68,13 @@ int GetCoDefenceBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
+    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    if (gUnknown_085D5ABC[c].unk18 == 0)
+    if (gUnknown_085D5ABC[c].unitClass == 0)
         return p[1];
 
     return p[1] + q[1];
@@ -87,13 +87,13 @@ int GetCoMovementBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
+    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    if (gUnknown_085D5ABC[c].unk18 == 0)
+    if (gUnknown_085D5ABC[c].unitClass == 0)
         return p[2];
 
     return p[2] + q[2];
@@ -106,13 +106,13 @@ int GetCoRangeBonus(int a, int b, int c)
     s16 *p;
     s16 *q;
 
-    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unk18];
+    p = gUnknown_085D3DD0[a].unk38[b].unk24[gUnknown_085D5ABC[c].unitClass];
     q = gUnknown_085D3DD0[a].unk38[b].unk24[GetUnitCombatClassColumn(c)];
 
     if (gPlaySt.coAbilities == 0)
         return 0;
 
-    if (gUnknown_085D5ABC[c].unk18 == 0)
+    if (gUnknown_085D5ABC[c].unitClass == 0)
         return p[3];
 
     return p[3] + q[3];

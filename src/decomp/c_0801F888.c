@@ -54,7 +54,7 @@ void sub_0801F888(int a1)
                     : 1]
                 .unk38[gPlayers[gUnknown_03004480].coMode]
                 .unk18[gPlaySt.weather];
-        c = i + gUnknown_085D5ABC[a1].unk19 * 32;
+        c = i + gUnknown_085D5ABC[a1].movementType * 32;
         *dst = costs[c];
     }
 }

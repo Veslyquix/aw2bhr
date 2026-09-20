@@ -18,7 +18,7 @@ void sub_0802D230(void)
 
     if (((struct Unk08499594 *)gUnknown_030040D8)->unk04_0 != 0)
         v = (Div(((struct Unk08499594 *)gUnknown_030040D8)->unk04_0 - 1, 10) + 1)
-            * gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk06 / 2;
+            * gUnknown_085D5ABC[gUnknown_030040D8->unk00].cost / 2;
     else
         v = 0;
 

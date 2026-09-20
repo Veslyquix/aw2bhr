@@ -15,7 +15,7 @@ void sub_08059AEC(void)
     if (sub_08042D50(gUnknown_030033EC, gUnknown_030040D8->unk00) > 1)
         n = sub_08042D50(gUnknown_030033EC, gUnknown_030040D8->unk00);
     else
-        n = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e;
+        n = gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange;
 
     for (i = 0; i < n; i++)
         sub_0801FD9C((u8)(0x79 + i));

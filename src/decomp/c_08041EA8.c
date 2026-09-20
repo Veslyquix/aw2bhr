@@ -32,7 +32,7 @@ u8 sub_08041EA8(s16 x, s16 y, int t)
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
     c = (gMap->terrain[idx] & 0x1f)
-        + gUnknown_085D5ABC[t].unk19 * 32;
+        + gUnknown_085D5ABC[t].movementType * 32;
 
     if (costs[c] < 0)
         return 0;

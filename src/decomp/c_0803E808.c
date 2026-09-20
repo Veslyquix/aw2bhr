@@ -82,7 +82,7 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
                 if (!sub_080257C0(gMap->unit[MAP->rowOffset[j] + i]))
                     continue;
             }
-            score = u->unk04_0 * (u16)(gUnknown_085D5ABC[u->unk00].unk06 / 10);
+            score = u->unk04_0 * (u16)(gUnknown_085D5ABC[u->unk00].cost / 10);
             if (best > score)
                 continue;
             best = score;

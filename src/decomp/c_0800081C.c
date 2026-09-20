@@ -115,7 +115,7 @@ void sub_0800081C(void)
 
         index = MAP->terrain[MAP->rowOffset[gActiveMap->cursorY]
                              + gActiveMap->cursorX] & 0x1f;
-        index += gUnknown_085D5ABC[gActiveMap->unk24 & 0x3f].unk19 * 32;
+        index += gUnknown_085D5ABC[gActiveMap->unk24 & 0x3f].movementType * 32;
         r = tbl[index] != -1 ? 1 : 6;
     }
 

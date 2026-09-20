@@ -30,7 +30,7 @@ bool8 sub_0802706C(u8 a1, u16 a2, u16 a3)
 {
     if (gPlaySt.fog != 0
         && (gPlayers[a3].turnState & 2) == 0
-        && gUnknown_085D5ABC[a1].unk14 != NULL)
+        && gUnknown_085D5ABC[a1].transportTable != NULL)
         return TRUE;
 
     return FALSE;

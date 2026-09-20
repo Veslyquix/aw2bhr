@@ -73,7 +73,7 @@ void sub_08038848(s8 a, s8 b)
     map = gMap;
 
     c = (map->terrain[map->rowOffset[b] + a] & 0x1f)
-        + gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk19 * 32;
+        + gUnknown_085D5ABC[gUnknown_030040D8->unk00].movementType * 32;
 
     *cur = *prev - costs[c];
 }

@@ -88,7 +88,7 @@ void sub_0805F2B4(void)
 
     table = gUnknown_085D5ABC;
     type = gUnknown_030040D8->unk00;
-    tag = table[type].unk1a;
+    tag = table[type].deployLocation;
     t = type;
     if (tag == 0x20)
         t = 0x11;
@@ -116,7 +116,7 @@ void sub_0805F2B4(void)
 
             new_var2 = 0x10;
             if (gUnknown_030040D8->unk00 == 0
-             || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != new_var2)
+             || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != new_var2)
                 score = gUnknown_085D583C[
                     gMap->terrain[gMap->rowOffset[y] + x] & 0x1f].unk10 * 10;
             else

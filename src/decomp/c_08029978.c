@@ -17,7 +17,7 @@ int sub_08029978(struct Unk08499594 *p, u8 a2)
         ? (Div(p->unk04_0 - 1, 10) + 1) * gUnknown_085D5ABC[p->unk00].unk08
         : 0;
 
-    while (p->unk04_7 != gUnknown_085D5ABC[p->unk00].unk0b)
+    while (p->unk04_7 != gUnknown_085D5ABC[p->unk00].maxAmmo)
     {
         if (a2)
         {
@@ -42,7 +42,7 @@ int sub_08029A48(struct Unk08499594 *p, u8 a2)
     acc = 0;
     v = p->unk04_0 != 0 ? Div(p->unk04_0 - 1, 10) + 1 : 0;
 
-    while (p->unk06_0 != gUnknown_085D5ABC[p->unk00].unk10)
+    while (p->unk06_0 != gUnknown_085D5ABC[p->unk00].maxFuel)
     {
         if (a2)
         {

@@ -63,7 +63,7 @@ int sub_08008928(void)
 
             idx = gMap->rowOffset[y] + x;
             c = (gMap->terrain[idx] & 0x1f)
-                + gUnknown_085D5ABC[gActiveMap->unk24 & 0x3f].unk19 * 32;
+                + gUnknown_085D5ABC[gActiveMap->unk24 & 0x3f].movementType * 32;
 
             q = costs[c];
 

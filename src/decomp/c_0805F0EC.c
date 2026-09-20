@@ -110,7 +110,7 @@ void sub_0805F0EC(void)
                 best = sum;
 
                 if (gUnknown_030040D8->unk00 == 0
-                 || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
+                 || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x10)
                     score = gUnknown_085D583C[
                         gMap->terrain[
                             gMap->rowOffset[y]

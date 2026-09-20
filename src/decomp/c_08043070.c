@@ -22,7 +22,7 @@
  */
 int sub_08043070(int a1, int a2, int a3, int a4, int a5)
 {
-    int v = gUnknown_085D5ABC[a3].unk1e[a5][a4];
+    int v = gUnknown_085D5ABC[a3].baseDamage[a5][a4];
     int base = sub_080430B0(a1, a2, a3) + 100;
     int r;
 

@@ -104,9 +104,9 @@ void sub_08047920(void *arg)
         sub_080149C0(0x14, (s16)(i * 2 + 7), gUnknown_08499578,
                      gUnknown_084C3F38, 0x8000, pal[b]);
         sub_08014B0C(0x16, (s16)(i * 2 + 7), gUnknown_08499578,
-                     gUnknown_085D5ABC[u->unk00].unk10, 0x8000, pal[b]);
+                     gUnknown_085D5ABC[u->unk00].maxFuel, 0x8000, pal[b]);
 
-        if (gUnknown_085D5ABC[u->unk00].unk0b == 0)
+        if (gUnknown_085D5ABC[u->unk00].maxAmmo == 0)
         {
             if (gUnknown_085D5ABC[u->unk00].unk11 != 0)
                 sub_08014A5C(0x18, (s16)(i * 2 + 7), gUnknown_08499578, 0x962,
@@ -122,7 +122,7 @@ void sub_08047920(void *arg)
             sub_080149C0(0x1a, (s16)(i * 2 + 7), gUnknown_08499578,
                          gUnknown_084C3F3C, 0x8000, pal[b]);
             sub_08014B0C(0x1b, (s16)(i * 2 + 7), gUnknown_08499578,
-                         gUnknown_085D5ABC[u->unk00].unk0b, 0x8000, pal[b]);
+                         gUnknown_085D5ABC[u->unk00].maxAmmo, 0x8000, pal[b]);
         }
     }
 }

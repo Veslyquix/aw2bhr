@@ -192,7 +192,7 @@ again:
     {
         buf[sel - 1] = 0;
 
-        switch (gUnknown_085D5ABC[sel].unk1a)
+        switch (gUnknown_085D5ABC[sel].deployLocation)
         {
         case 0x10:
             k = 4;

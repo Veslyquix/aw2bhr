@@ -31,7 +31,7 @@ void EnsureValidTile(int x, int y)
         costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
         idx = gMap->rowOffset[y] + x;
-        c = (gMap->terrain[idx] & 0x1f) + gUnknown_085D5ABC[v & 0x3f].unk19 * 32;
+        c = (gMap->terrain[idx] & 0x1f) + gUnknown_085D5ABC[v & 0x3f].movementType * 32;
 
         if (costs[c] == -1)
             sub_08008A8C(0, x, y);

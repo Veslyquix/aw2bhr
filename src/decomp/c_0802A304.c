@@ -41,7 +41,7 @@ int sub_0802A304(void *arg)
 
     sum = 0;
 
-    for (i = 0; i < gUnknown_085D5ABC[p->unk00].unk14[0]; i++)
+    for (i = 0; i < gUnknown_085D5ABC[p->unk00].transportTable[0]; i++)
     {
         if (p->unk07[i] != 0)
         {

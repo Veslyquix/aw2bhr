@@ -41,10 +41,10 @@ int sub_0802CA78(void)
     cur = gUnknown_03003100.raw;
 
     if (cur != gUnknown_03003F24.raw
-        && gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e != 1)
+        && gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange != 1)
         return 1;
 
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e == 0)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange == 0)
         return 1;
 
     sub_0801F838(0xff);
@@ -62,7 +62,7 @@ int sub_0802CB20(void)
     int off;
     u32 cur;
 
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e == 1)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange == 1)
         return 1;
 
     off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
@@ -75,7 +75,7 @@ int sub_0802CB20(void)
     if (cur != gUnknown_03003F24.raw)
         return 1;
 
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk0e == 0)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange == 0)
         return 1;
 
     sub_0801F838(0xff);

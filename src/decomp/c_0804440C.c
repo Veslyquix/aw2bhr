@@ -36,7 +36,7 @@ asm(".global sub_0804440C\n.thumb_set sub_0804440C, IsUnitDirectForCoPowerAnim\n
 
 int sub_08044460(struct Unk030040D8 *p)
 {
-    if ((p->unk01 & 8) || gUnknown_085D5ABC[p->unk00].unk18 != 0)
+    if ((p->unk01 & 8) || gUnknown_085D5ABC[p->unk00].unitClass != 0)
         return 0;
     else
         return 1;
@@ -48,7 +48,7 @@ int sub_08044488(struct Unk030040D8 *p)
 
     if (p->unk01 & 8)
         return 0;
-    t = gUnknown_085D5ABC[p->unk00].unk18;
+    t = gUnknown_085D5ABC[p->unk00].unitClass;
     if (t == 2)
         return 1;
     if (t == 3)
@@ -62,7 +62,7 @@ int sub_080444B4(struct Unk030040D8 *p)
 
     if (p->unk01 & 8)
         return 0;
-    t = gUnknown_085D5ABC[p->unk00].unk18;
+    t = gUnknown_085D5ABC[p->unk00].unitClass;
     if (t == 2)
         return 1;
     if (t == 3)

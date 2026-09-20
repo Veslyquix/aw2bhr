@@ -84,7 +84,7 @@ void sub_080386EC(int a)
 
         c = (map->terrain[map->rowOffset[gUnknown_0849D5F8->unk2c[i]]
                         + gUnknown_0849D5F8->unk20[i]] & 0x1f)
-            + gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk19 * 32;
+            + gUnknown_085D5ABC[gUnknown_030040D8->unk00].movementType * 32;
 
         *cur = *prev - costs[c];
     }

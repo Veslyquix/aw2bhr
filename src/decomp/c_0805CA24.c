@@ -40,8 +40,8 @@ int sub_0805CA24(void)
 {
     struct Unk085D5ABC *type = &gUnknown_085D5ABC[gUnknown_030040D8->unk00];
 
-    if ((type->unk11 | type->unk0e) == 0
-        || (type->unk0b != 0
+    if ((type->unk11 | type->minRange) == 0
+        || (type->maxAmmo != 0
             && (*(u16 *)((u8 *)gUnknown_030040D8 + 4) & 0x780) == 0))
         return 0;
 

@@ -105,7 +105,8 @@ enum TerrainKind {
     TERRAIN_CITY = 6,
     TERRAIN_SEA = 7,
     TERRAIN_HQ = 8,
-    TERRAIN_UNK = 9,
+    TERRAIN_UNK = 9, // Terrain.txt (Nightmare) calls entry 8 "Umi?" -- umi is
+                      // Japanese for sea, so a sea variant of some kind
     TERRAIN_AIRPORT = 0xA,
     TERRAIN_PORT = 0xB,
     TERRAIN_BRIDGE = 0xC,

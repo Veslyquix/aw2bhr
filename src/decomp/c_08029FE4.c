@@ -107,7 +107,7 @@ void sub_08029FE4(void)
     {
       continue;
     }
-    if (gUnknown_085D5ABC[u->unk00].unk54[gMap->terrain[idx] & 0x1F] == 0)
+    if (gUnknown_085D5ABC[u->unk00].repairTable[gMap->terrain[idx] & 0x1F] == 0)
     {
       continue;
     }

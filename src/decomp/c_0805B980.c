@@ -80,7 +80,7 @@ u8 sub_0805BA34(int x, int y, u16 *out)
     if (gMap->unit[idx] != 0)
         return 0;
 
-    tbl = (struct Unk085D5ABCUnk14 *)gUnknown_085D5ABC[23].unk14;
+    tbl = (struct Unk085D5ABCUnk14 *)gUnknown_085D5ABC[23].transportTable;
 
     if (tbl->terrainOk[gMap->terrain[idx]
                        & 0x1f] == 0)
@@ -126,7 +126,7 @@ void sub_0805BAFC(int x, int y, int t, u16 *out)
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
     c = (gMap->terrain[idx] & 0x1f)
-        + gUnknown_085D5ABC[t].unk19 * 32;
+        + gUnknown_085D5ABC[t].movementType * 32;
 
     if (costs[c] == -1)
         return;
@@ -177,7 +177,7 @@ int sub_0805BBF8(int x, int y)
     costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
 
     c = (gMap->terrain[idx] & 0x1f)
-        + gUnknown_085D5ABC[1].unk19 * 32;
+        + gUnknown_085D5ABC[1].movementType * 32;
 
     if (costs[c] == -1)
         return 0;

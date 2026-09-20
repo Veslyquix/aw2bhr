@@ -20,7 +20,7 @@ void sub_0802D67C(u8 mask)
     {
         id = gUnknown_081BA054[i];
 
-        if (gUnknown_085D5ABC[id].unk1a & mask)
+        if (gUnknown_085D5ABC[id].deployLocation & mask)
         {
             if (id != 8 || sub_080261E8(gUnknown_030033EC))
             {

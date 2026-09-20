@@ -27,7 +27,7 @@
  */
 int GetUnitCombatClassColumn(int a)
 {
-    u32 v = gUnknown_085D5ABC[a].unk0e;
+    u32 v = gUnknown_085D5ABC[a].minRange;
 
     if (v > 1)
         return 6;
