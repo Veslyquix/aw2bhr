@@ -91,13 +91,13 @@ void sub_080265D0(u8 a1, u8 a2)
 
     v = 0;
 
-    if (gUnknown_03004080 < gUnknown_085C77A0[a2].unk20)
+    if (gUnknown_03004080 < gUnknown_085C77A0[a2].speedRankTurnLimitNc)
     {
         v = 500;
         i = 0;
-        if (i < gUnknown_085C77A0[a2].unk20 - gUnknown_03004080)
+        if (i < gUnknown_085C77A0[a2].speedRankTurnLimitNc - gUnknown_03004080)
         {
-            n = gUnknown_085C77A0[a2].unk20;
+            n = gUnknown_085C77A0[a2].speedRankTurnLimitNc;
 
             while (1)
             {
@@ -114,18 +114,18 @@ void sub_080265D0(u8 a1, u8 a2)
         }
     }
 
-    if (gUnknown_03004080 == gUnknown_085C77A0[a2].unk20)
+    if (gUnknown_03004080 == gUnknown_085C77A0[a2].speedRankTurnLimitNc)
         v = 500;
 
-    if (gUnknown_03004080 > gUnknown_085C77A0[a2].unk20)
+    if (gUnknown_03004080 > gUnknown_085C77A0[a2].speedRankTurnLimitNc)
     {
         v = 500;
         i = 0;
-        while (i < gUnknown_03004080 - gUnknown_085C77A0[a2].unk20)
+        while (i < gUnknown_03004080 - gUnknown_085C77A0[a2].speedRankTurnLimitNc)
         {
             v -= 150;
             i++;
-            if (i >= gUnknown_03004080 - gUnknown_085C77A0[a2].unk20)
+            if (i >= gUnknown_03004080 - gUnknown_085C77A0[a2].speedRankTurnLimitNc)
                 break;
             if (v <= 149)
             {

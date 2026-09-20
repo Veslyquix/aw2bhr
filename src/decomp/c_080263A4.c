@@ -27,9 +27,9 @@ u8 GetSpeedScore(u8 a)
 {
     u16 t;
 
-    t = gUnknown_085C77A0[gPlaySt.mapID].unk20;
+    t = gUnknown_085C77A0[gPlaySt.mapID].speedRankTurnLimitNc;
     if (sub_0803866C())
-        t = gUnknown_085C77A0[gPlaySt.mapID].unk22;
+        t = gUnknown_085C77A0[gPlaySt.mapID].speedRankTurnLimitHc;
 
     if (sub_080266DC(a))
     {

@@ -27,5 +27,5 @@ const u8 * sub_0802A8AC(int a, int b)
     if (b != 0)
         return gUnknown_08106864[b += 8];
 
-    return gUnknown_08106864[gUnknown_0849A2C8[a].unk02];
+    return gUnknown_08106864[gUnknown_0849A2C8[a].palette];
 }

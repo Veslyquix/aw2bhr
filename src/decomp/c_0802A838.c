@@ -14,5 +14,5 @@ const u8 * sub_0802A838(int a1)
 
 const u8 * sub_0802A85C(int a1)
 {
-    return gUnknown_08106A64[(gUnknown_0849A2C8[a1].unk00 * 8) & 0x3ff];
+    return gUnknown_08106A64[(gUnknown_0849A2C8[a1].nameGraphic * 8) & 0x3ff];
 }

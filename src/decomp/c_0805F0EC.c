@@ -114,7 +114,7 @@ void sub_0805F0EC(void)
                     score = gUnknown_085D583C[
                         gMap->terrain[
                             gMap->rowOffset[y]
-                            + x] & 0x1f].unk10 * 10;
+                            + x] & 0x1f].defense * 10;
                 else
                     score = 0;
 

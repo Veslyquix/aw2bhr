@@ -214,6 +214,19 @@ enum TileKind {
     TILE_PORT_YC = (0x760 >> 2),
 };
 
+/* gUnknown_080BFBC4 maps a gMap->tile[] id to the four 8x8 quadrants that draw
+ * it. Column order is from the '88TerrainEditor' Nightmare module (a community
+ * ROM-editor definition) and is confirmed by the writers in c_08023A4C.c and
+ * c_08023BAC.c, which store the four columns at dst +0, +1, +32 and +33 -- one
+ * screen row being 32 entries. The high byte of each u16 carries the palette
+ * and animation bits the module names beside each quadrant. */
+enum TileQuadrant {
+    TILE_QUAD_TOP_LEFT = 0,
+    TILE_QUAD_TOP_RIGHT = 1,
+    TILE_QUAD_BOTTOM_LEFT = 2,
+    TILE_QUAD_BOTTOM_RIGHT = 3,
+};
+
 #define MAP_OBJ_TERRAIN(f)   ((f) & 0x1f)
 #define MAP_OBJ_ARMY(f)      (((f) & 0xe0) >> 5)
 #define MAP_OBJ_ARMY_MASK(f) ((f) & 0xe0)

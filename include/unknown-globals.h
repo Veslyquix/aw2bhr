@@ -2869,10 +2869,16 @@ struct PlayerStruct /* 0x3c */
     /* 0x3b */ u8 unitsLost;
 };
 
+/* The terrain info-box art table, indexed by terrain kind. Both names come
+ * from the '44TerrainBoxEditor' Nightmare module (a community ROM-editor
+ * definition). The module prints both fields at offset 0, which is a typo in
+ * the module; the two call sites settle it -- sub_08017E00 reaches
+ * gUnknown_08106A64 through +0 and sub_08017E1C reaches the palette table
+ * gUnknown_08106864 through +2. */
 struct Unk0849A2C8
 {
-    u16 unk00;
-    u16 unk02;
+    /* 0x00 */ u16 nameGraphic;
+    /* 0x02 */ u16 palette;
 };
 
 struct Unk0849A354
@@ -3261,10 +3267,21 @@ struct Unk0849B060 /* >= 0x0e */
  * flat `u8 filler` spelling below is kept because the two constant-index
  * readers (sub_08035B68, sub_08035B00, sub_08035F68) need named members; the
  * variable-index reader casts the row's address to `u8 **` instead. */
+/* The compressed unit-sprite table. sprite[5] and spriteFormat come from the
+ * 'Compressed Unit Sprite' Nightmare module (community), which puts 24 records
+ * of 0x24 at 0x0849CDAC -- one record after this symbol, the same
+ * dummy-at-index-0 offset the unit and terrain tables have. The module names
+ * the five leading pointers OS, BM, GE, YC and BH, which is what fixes the
+ * old filler_00[0x14] as a five-element array. +0x18 onward it leaves
+ * unnamed, so unk18/unk1a/unk1e/unk20 keep their wave-derived comments. */
 struct Unk0849CD88 /* 0x24 */
 {
-    /* 0x00 */ u8 filler_00[0x14];
-    /* 0x14 */ u32 unk14;
+    /* 0x00 */ void *sprite[5]; /* one compressed sprite per army, in the
+                                * Nightmare module's order: OS, BM, GE, YC,
+                                * BH. Carved out of filler_00[0x14] -- same
+                                * offset, same twenty bytes, and nothing
+                                * named the filler. */
+    /* 0x14 */ u32 spriteFormat;
     /* 0x18 */ s16 unk18; /* wave 28, W28-A: `ldrsh`, and sub_08035B00 returns
                            * it as `s16` both bare and doubled. */
     /* 0x1a */ u16 unk1a; /* wave 37, W37-H: sub_08035E90 and sub_08035FA8 both
@@ -3880,10 +3897,28 @@ struct Unk085C77A0Slot /* 0x04 */
     /* 0x02 */ u8 filler_02[0x02]; /* never read */
 };
 
+/* The map headers, subscripted by gPlaySt.mapID. Names come from the
+ * 'Advance Wars 2 Map Header Editor' Nightmare module (a community ROM-editor
+ * definition), WITH TWO OFFSETS TO KEEP IN MIND:
+ *   - the module bases its 179 records at 0x085C7800, which is this symbol
+ *     plus 0x60, i.e. record 1 plus four bytes; so our index is the module's
+ *     plus one, the same dummy-at-0 the unit and terrain tables have, and
+ *   - THIS STRUCT'S WINDOW SITS FOUR BYTES EARLIER than the module's record.
+ *     Every field below is at `module offset + 4`, which is why filler_00[4]
+ *     leads and why the module's 'Name Index' at +0x10 is nameIndex at +0x14.
+ * The shift is not a guess: fogOfWar at +0x17 is the module's 'Fog of War
+ * Toggle' at +0x13, and sub_080346FC reads exactly that byte and sets
+ * gPlaySt.fog from it -- two independent sources agreeing on one byte. The
+ * speedRankTurnLimitNc/Hc pair at +0x20/+0x22 is the module's NC/HC pair at
+ * +0x1c/+0x1e, and sub_080263A4 feeds the speed score.
+ *
+ * NOT applied: the module's 'Number of Players' would be +0x18 here, but
+ * wave 29 proved that byte is a fallback id for the 0xb4..0xbf range, so it
+ * is left as unk18; and +0x08 'Terms' is too vague to be worth a name. */
 struct Unk085C77A0 /* 0x5c */
 {
     /* 0x00 */ u8 filler_00[0x04];
-    /* 0x04 */ const struct Unk08074584 *unk04; /* wave 28, W28-B: sub_08074584
+    /* 0x04 */ const struct Unk08074584 *dialogueHeader; /* wave 28, W28-B: sub_08074584
                            * returns this word and its six callers each `ldr`
                            * one of six word offsets off it, so it is a pointer
                            * to a record of pointers rather than a scalar. */
@@ -3898,7 +3933,7 @@ struct Unk085C77A0 /* 0x5c */
                            * hoist an array global's `g[i].member` always
                            * produces -- see the displacement-overflow rules --
                            * not evidence of anything else. */
-    /* 0x0c */ const u8 *unk0c; /* Wave 45, W45-B. The SECOND script-blob slot,
+    /* 0x0c */ const u8 *hardcodedUnits; /* Wave 45, W45-B. The SECOND script-blob slot,
                            * carved out of the old filler_0c: sub_080364F4 loads
                            * this word off
                            * gUnknown_085C77A0[gPlaySt.unk02] with a
@@ -3908,12 +3943,12 @@ struct Unk085C77A0 /* 0x5c */
                            * same type; the record's unk1a selects between them
                            * (<= 2 runs this one, otherwise sub_080364E0's
                            * gUnknown_0849D10C default runs instead). */
-    /* 0x10 */ u8 *unk10; /* Wave 33, W33-B: sub_0803FD80 reads this word off
+    /* 0x10 */ u8 *tileGraphic4x4; /* Wave 33, W33-B: sub_0803FD80 reads this word off
                            * gUnknown_085C77A0[gPlaySt.unk02] as the
                            * default Decompress source (`u8 *`, first argument
                            * of Decompress(u8 *, void *)). Non-const for the
                            * same reason. */
-    /* 0x14 */ u16 unk14; /* Wave 29, W29-A. sub_08024944 reads it `ldrh` and
+    /* 0x14 */ u16 nameIndex; /* Wave 29, W29-A. sub_08024944 reads it `ldrh` and
                            * uses it to index gUnknown_08610A38[], so it is a
                            * table row id. Width from the load; signedness
                            * unproved (a subscript is u16-context). */
@@ -3922,7 +3957,7 @@ struct Unk085C77A0 /* 0x5c */
                           * sub_0807A99C's first parameter, which is wide -- so
                           * the field's width comes from the `ldrb` here and
                           * nothing narrows it at the callee. */
-    /* 0x17 */ u8 unk17; /* Wave 43 (W43-C), carved out of filler_17.
+    /* 0x17 */ u8 fogOfWar; /* Wave 43 (W43-C), carved out of filler_17.
                           * sub_080346FC reads it `ldrb [rB, #0x17]` off
                           * gUnknown_085C77A0[gPlaySt.unk02] and, when
                           * it is non-zero, sets gPlaySt.unk0d -- a
@@ -3934,7 +3969,7 @@ struct Unk085C77A0 /* 0x5c */
                           * ids outside the 0xb4..0xbf range that goes to
                           * sub_0803CD14 instead. */
     /* 0x19 */ u8 filler_19[0x01];
-    /* 0x1a */ u16 unk1a; /* ldrh, tested against 0 by sub_0802C660 */
+    /* 0x1a */ u16 category; /* ldrh, tested against 0 by sub_0802C660 */
     /* 0x1c */ u16 unk1c; /* Wave 49, W49-C, carved out of the old
                            * filler_1c[0x04] -- NAMED, nothing reshaped.
                            * sub_0803E3D8 reads the pair `ldrh [rB,#0x1c]` /
@@ -3947,7 +3982,7 @@ struct Unk085C77A0 /* 0x5c */
                            * unk20/unk22 are: every consumer takes them
                            * adjacently and in this order. */
     /* 0x1e */ u16 unk1e;
-    /* 0x20 */ u16 unk20; /* Wave 32, W32-A. A PAIR with unk22: sub_080263A4
+    /* 0x20 */ u16 speedRankTurnLimitNc; /* Wave 32, W32-A. A PAIR with unk22: sub_080263A4
                            * reads unk20 `ldrh` off
                            * gUnknown_085C77A0[gPlaySt.unk02] and
                            * replaces it with unk22 from the same element when
@@ -3958,8 +3993,8 @@ struct Unk085C77A0 /* 0x5c */
                            * which is consistent with u16 but not a proof of
                            * it -- agbcc knows a zero-extended value is
                            * non-negative and picks the unsigned condition. */
-    /* 0x22 */ u16 unk22;
-    /* 0x24 */ u16 unk24; /* wave 28, W28-B: sub_08043630 reads it `ldrh` off
+    /* 0x22 */ u16 speedRankTurnLimitHc;
+    /* 0x24 */ u16 timer; /* wave 28, W28-B: sub_08043630 reads it `ldrh` off
                            * gUnknown_085C77A0[gPlaySt.unk02] and
                            * returns it when non-zero, falling back to
                            * gPlaySt.unk30. Width only. */
@@ -4219,7 +4254,9 @@ struct Unk085D3DD0 /* 0x104 */
                                  * hoist, the same idiom sub_08039F18 uses for
                                  * unk38. The extent is proved by the modulus,
                                  * not by the layout. */
-    /* 0x2c */ u8 filler_2c[0x08];
+    /* 0x2c */ u16 dossierPage[4]; /* the four CO dossier text ids; carved out
+                                    * of filler_2c[0x08], same offset and same
+                                    * eight bytes, and nothing named the filler. */
     /* 0x34 */ u16 victoryQuote; /* Wave 55 (W55-B), carved out of filler_2c without
                            * moving anything: sub_0807A3AC's fallback return is
                            * `ldrh r0,[r1,#0x34]` off `gUnknown_085D3DD0[a]`
@@ -7835,6 +7872,8 @@ extern u8 gUnknown_0812B29C[];
 /* 0x400 bytes of uncompressed ROM data, copied verbatim over the buffer
  * gUnknown_0849959C points at by sub_080215D0 (`for (i = 0; i <= 0x3ff; i++)`,
  * one `ldrb`/`strb` per byte). Non-const for the usual -Werror reason. */
+/* 1024 bytes, one per gMap->tile[] id. The '16TerrainEditor' Nightmare
+ * module (community) calls the byte 'Type'. */
 extern u8 gUnknown_080C1BC4[];
 /* A ROM word holding 0x0200D510, i.e. &gUnknown_0200D510 -- the sprite-list
  * layer-head array. Its only user is sub_0801BE78, which derefs it twice with
@@ -9390,6 +9429,9 @@ extern struct Unk0849D5F8 *gUnknown_0849D5F8;
  * gUnknown_08582E74 indexed by `gUnknown_030040F8[(terrain >> 6) + 1] + 0x12`.
  * Signedness is unproved for all six: every loaded value is only ever used as
  * an index or a mask. */
+/* 32 halfwords, one per terrain kind -- sub_0801759C subscripts it with the
+ * 5-bit terrain code. The 'Advance Wars 2 44TerrainEditor' Nightmare module
+ * (community) calls the value 'Graphic'. */
 extern const u16 gUnknown_0849D3DC[];
 extern const u16 gUnknown_0849D434[];
 extern const u16 gUnknown_0849D474[];
@@ -11254,6 +11296,12 @@ struct Unk0849E318
 };
 extern const struct Unk0849E318 gUnknown_0849E318[];
 extern const struct Unk0849E318 gUnknown_0849E358[];
+/* 24 rows of 16 halfwords: the unit info-screen text ids. Column order is
+ * from the 'Info Screen Editor' Nightmare module (a community ROM-editor
+ * definition) -- 0 unit, 1 movement, 2 vision, 3 fuel, 4 weapon 1, 5 ammo,
+ * 6 range, 7..10 weapon 1 detail 1..4, 11 weapon 2, 12..15 weapon 2 detail
+ * 1..4. The row is picked by gUnknown_081BA068[..] - 1 and the column by
+ * gUnknown_0849D89C->unk09, so the subscripts stay dynamic here. */
 extern const u16 gUnknown_0849E398[][0x10];
 extern const char *const gUnknown_0849E5F8[];
 /* Wave 35, W35-E: a table of `void *` blobs sub_0803A07C hands to
@@ -11761,15 +11809,27 @@ extern struct Unk03003338 *const gUnknown_0849FE74[];
  * (sub_08036F68, sub_080249EC and sub_0802AB70 all do the same `lsls #2;
  * adds; lsls #1` on the loaded word). Word-sized -- the load is `ldr` -- and
  * the index is a plain u8 unit id in every user. */
+/* The per-terrain data record. Names picture, picturePalette, nameIndex,
+ * descriptionIndex and defense come from the 'Advance Wars 2 Terrain Editor'
+ * Nightmare module (a community ROM-editor definition), which puts 31 records
+ * of 0x14 at 0x085D5850 -- exactly one record AFTER this symbol, the same
+ * dummy-at-index-0 offset gUnknown_085D5ABC has, and the terrain table ends
+ * where that unit table begins. `defense` is the check: sub_08046D9C returns
+ * `(s8)(gUnknown_085D583C[t].defense * 10)`, a defence star count scaled to a
+ * percentage. gUnknown_0849982C and gUnknown_084998A4 are two more tables of
+ * this same record type.
+ *
+ * NOT applied: the module calls +0x08 a 3-byte 'Graphic Reading Method', but
+ * wave 49 carved a whole-word u16 * there. */
 struct Unk085D583C /* 0x14 */
 {
-    /* 0x00 */ u8 *unk00;  /* Wave 36, W36-J. sub_08046E48 hands the word at
+    /* 0x00 */ u8 *picture;  /* Wave 36, W36-J. sub_08046E48 hands the word at
                             * +0x00 straight to `Decompress(u8 *, void *)` and
                             * the word at +0x04 straight to
                             * `ApplyPaletteExt(u16 *, u32, u16)`, with no
                             * arithmetic between the `ldr` and the `bl` -- so
                             * each member takes its callee's parameter type. */
-    /* 0x04 */ u16 *unk04;
+    /* 0x04 */ u16 *picturePalette;
     /* 0x08 */ u16 *unk08;  /* Wave 49, W49-J. Carved out of filler_08[0x06];
                              * start offset unchanged, so byte-neutral for every
                              * other reader (nothing in src/decomp names
@@ -11783,15 +11843,15 @@ struct Unk085D583C /* 0x14 */
                              * gUnknown_0849982C, gUnknown_084998A4), which is
                              * what makes it a member and not a one-table
                              * accident. */
-    /* 0x0c */ u16 unk0c;   /* Wave 49, W49-J. The remaining two bytes of the old
+    /* 0x0c */ u16 nameIndex;   /* Wave 49, W49-J. The remaining two bytes of the old
                              * filler_08. A HALFWORD (`ldrh [.,#0xc]`) used by
                              * sub_08046914 as a word subscript into
                              * gUnknown_08610A38[] -- `lsls #2; adds` off that
                              * table's base, the same role struct
                              * Unk085D3DD0Entry.unk00 plays. */
-    /* 0x0e */ u16 unk0e; /* wave 13 (A2): sub_08046D30 reads it `ldrh [.,#0xe]`
+    /* 0x0e */ u16 descriptionIndex; /* wave 13 (A2): sub_08046D30 reads it `ldrh [.,#0xe]`
                            * and passes it as sub_08014668's tile argument */
-    /* 0x10 */ int unk10;
+    /* 0x10 */ int defense;
 };
 extern const struct Unk085D583C gUnknown_085D583C[];
 /* An EWRAM buffer whose ADDRESS is published: sub_08036F68 clears its byte 1
@@ -15982,6 +16042,11 @@ extern u16 gUnknown_080D4188[];
  * and sub_08002844 masks the result with 0x3ff, so the entries are tile
  * indices. Non-const is unproved either way: nothing writes it and nothing
  * takes its address. */
+/* 5 rows of 25 halfwords, subscripted [set][unitType]. The 'Uncompressed
+ * Unit Sprite Editor' Nightmare module (community) names the 25 columns and
+ * they are unit types in the SAME numbering struct Unk085D5ABC uses, column 0
+ * being the module's 'Blank' -- independent corroboration that this tree is
+ * right to start gUnknown_085D5ABC one record early with a dummy at 0. */
 extern u16 gUnknown_08499608[][0x19];
 /* Wave 29, W29-A. The proc script sub_0802A54C starts, parented to its own
  * second argument; the new proc's +0x4c is filled with the struct Unk08499594 *
@@ -18476,6 +18541,20 @@ struct Unk085771C4
 {
     /* 0x00 */ u8 filler_00[0x130];
 };
+/* The AI build table: 122 records of 0x130 bytes, selected through
+ * gUnknown_0857690C[gUnknown_085C77A0[gPlaySt.mapID]].
+ *
+ * The body is left as filler ON PURPOSE. The 'aw2aibuild' Nightmare module (a
+ * community ROM-editor definition) names 160 fields in it, but NOTHING in this
+ * tree reads one, so there is no access to check a layout against and carving
+ * the module's offsets in would be asserting a shape on no local evidence.
+ * What the module says, for whoever decompiles the AI and can then verify it:
+ * a short header -- +0x00 minimum infantry, +0x04 T-Copter, +0x06 APC and
+ * +0x07 Lander priority-build flags -- followed by per-unit-type records on a
+ * 0xc stride, with the build rates running from +0x1b (infantry, mech,
+ * md tank, unit 0x4, tank, recon, APC, neotank, ...) and 5-byte 'value 0x5 to
+ * 0x9' runs from +0xec (... B-Copter, T-Copter, battleship, cruiser, lander,
+ * sub at +0x128). */
 extern const struct Unk085771C4 gUnknown_085771C4[];
 /* The RAM destination of the second sub_08061A40 in sub_08061788; one whole
  * record, and the linker script gives it its own symbol. */

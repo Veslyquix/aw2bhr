@@ -36,7 +36,7 @@ u8 sub_08037448(u8 a1)
     count = 0;
     for (i = 0; i < 0xc0; i++)
     {
-        if (gUnknown_085C77A0[i].unk1a == a1 && sub_080373F0(i, v))
+        if (gUnknown_085C77A0[i].category == a1 && sub_080373F0(i, v))
             gUnknown_02027F78[count++] = i;
         if (count > 0x31)
             break;

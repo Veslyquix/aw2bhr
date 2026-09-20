@@ -9,7 +9,7 @@
 
 const struct Unk08074584 *sub_08074584(void)
 {
-    return sub_08035000(gPlaySt.mapID)->unk04;
+    return sub_08035000(gPlaySt.mapID)->dialogueHeader;
 }
 
 /* The `lsls #0x18; lsrs #0x18` in front of the `pop` is THIS function's own u8

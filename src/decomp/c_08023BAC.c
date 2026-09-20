@@ -50,17 +50,17 @@ void sub_08023BAC(u16 a1, u16 a2, u16 a3, u16 a4)
         m = gMap;
         if (m->unk234A[m->rowOffset[a4] + (a3 + i)] == 0)
         {
-            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][0] + 0x4000;
-            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][1] + 0x4000;
-            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][2] + 0x4000;
-            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][3] + 0x4000;
+            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_LEFT] + 0x4000;
+            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_RIGHT] + 0x4000;
+            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_LEFT] + 0x4000;
+            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_RIGHT] + 0x4000;
         }
         else
         {
-            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][0];
-            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][1];
-            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][2];
-            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][3];
+            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_LEFT];
+            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_RIGHT];
+            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_LEFT];
+            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_RIGHT];
         }
         a1 = a1 + 2;
         a1 &= 0x1F;

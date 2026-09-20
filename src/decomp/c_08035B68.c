@@ -17,5 +17,5 @@
  * per-function check cannot see that conflict because it compiles one unit. */
 void *sub_08035B68(u16 i)
 {
-    return (void *)gUnknown_0849CD88[i].unk14;
+    return (void *)gUnknown_0849CD88[i].spriteFormat;
 }

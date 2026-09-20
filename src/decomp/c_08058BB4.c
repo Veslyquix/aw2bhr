@@ -139,7 +139,7 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
 
     if (gUnknown_030040D8->unk00 == 0
      || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x10)
-        score = gUnknown_085D583C[map->terrain[idx] & 0x1f].unk10 * 10;
+        score = gUnknown_085D583C[map->terrain[idx] & 0x1f].defense * 10;
 
     if ((gMap->dangerMask[
             gMap->rowOffset[y] + x] & mask) == 0)

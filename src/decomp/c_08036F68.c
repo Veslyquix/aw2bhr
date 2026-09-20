@@ -30,8 +30,8 @@ void sub_08036F68(u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8,
     gUnknown_03004580[1][5] = a13;
     gUnknown_03004580[0][6] = a7;
     gUnknown_03004580[1][6] = a14;
-    gUnknown_03004580[0][7] = gUnknown_085D583C[a3].unk10 * 10;
-    gUnknown_03004580[1][7] = gUnknown_085D583C[a10].unk10 * 10;
+    gUnknown_03004580[0][7] = gUnknown_085D583C[a3].defense * 10;
+    gUnknown_03004580[1][7] = gUnknown_085D583C[a10].defense * 10;
 
     gUnknown_02027F68[1] = 0;
     gUnknown_03004528[0] = gUnknown_02027F68;

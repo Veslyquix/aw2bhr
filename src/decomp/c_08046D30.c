@@ -23,7 +23,7 @@ void sub_08046D30(void)
             gUnknown_02028DD4 = 2;
             sub_08014878();
             sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gUnknown_08499578,
-                         gUnknown_085D583C[gUnknown_02028DD6].unk0e, 0x8000, 0x100);
+                         gUnknown_085D583C[gUnknown_02028DD6].descriptionIndex, 0x8000, 0x100);
         }
         break;
 
@@ -80,18 +80,18 @@ void sub_08046E48(void)
     switch (gUnknown_02028DD6)
     {
     case 8:
-        src = gUnknown_0849982C[gUnknown_02028DD7].unk00;
-        pal = gUnknown_0849982C[gUnknown_02028DD7].unk04;
+        src = gUnknown_0849982C[gUnknown_02028DD7].picture;
+        pal = gUnknown_0849982C[gUnknown_02028DD7].picturePalette;
         break;
 
     case 6:
-        src = gUnknown_084998A4[gUnknown_02028DD7].unk00;
-        pal = gUnknown_084998A4[gUnknown_02028DD7].unk04;
+        src = gUnknown_084998A4[gUnknown_02028DD7].picture;
+        pal = gUnknown_084998A4[gUnknown_02028DD7].picturePalette;
         break;
 
     default:
-        src = gUnknown_085D583C[gUnknown_02028DD6].unk00;
-        pal = gUnknown_085D583C[gUnknown_02028DD6].unk04;
+        src = gUnknown_085D583C[gUnknown_02028DD6].picture;
+        pal = gUnknown_085D583C[gUnknown_02028DD6].picturePalette;
         break;
     }
 
@@ -109,7 +109,7 @@ void sub_08046E48(void)
         sub_08046914(gUnknown_02028DD5, gUnknown_02028DD6);
         sub_08014878();
         sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gUnknown_08499578,
-                     gUnknown_085D583C[gUnknown_02028DD6].unk0e, 0x8000, 0x100);
+                     gUnknown_085D583C[gUnknown_02028DD6].descriptionIndex, 0x8000, 0x100);
         break;
 
     case 1:
@@ -120,7 +120,7 @@ void sub_08046E48(void)
     case 2:
         sub_08014878();
         sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gUnknown_08499578,
-                     gUnknown_085D583C[gUnknown_02028DD6].unk0e, 0x8000, 0x100);
+                     gUnknown_085D583C[gUnknown_02028DD6].descriptionIndex, 0x8000, 0x100);
         break;
     }
 

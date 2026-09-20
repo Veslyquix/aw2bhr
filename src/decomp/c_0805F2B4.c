@@ -118,7 +118,7 @@ void sub_0805F2B4(void)
             if (gUnknown_030040D8->unk00 == 0
              || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != new_var2)
                 score = gUnknown_085D583C[
-                    gMap->terrain[gMap->rowOffset[y] + x] & 0x1f].unk10 * 10;
+                    gMap->terrain[gMap->rowOffset[y] + x] & 0x1f].defense * 10;
             else
                 score = 0;
 

@@ -47,7 +47,7 @@ int sub_08043630(void)
     {
         register const struct Unk085C77A0 *p asm("r1");
         asm("add %0, %1, %2" : "=r"(p) : "r"(off), "r"(base));
-        v = p->unk24;
+        v = p->timer;
     }
 
     if (v == 0)

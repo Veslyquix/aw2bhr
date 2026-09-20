@@ -69,7 +69,7 @@ void ResetRulesAfterCampaignMap(void)
                 gPlaySt.aiControlled[i + 1] = 1;
         }
 
-        if (gUnknown_085C77A0[gPlaySt.mapID].unk17 != 0)
+        if (gUnknown_085C77A0[gPlaySt.mapID].fogOfWar != 0)
             gPlaySt.fog = 1;
         break;
     }

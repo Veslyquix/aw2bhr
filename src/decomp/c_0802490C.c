@@ -38,7 +38,7 @@ u8 *sub_08024944(u16 a1)
     if ((u16)(a1 - 0xB4) <= 0xB)
         return sub_0803CCEC(a1 + 0x4C);
 
-    return gUnknown_08610A38[gUnknown_085C77A0[a1].unk14];
+    return gUnknown_08610A38[gUnknown_085C77A0[a1].nameIndex];
 }
 
 /* One accumulator, not two returns: the value lives in r1 across both arms and

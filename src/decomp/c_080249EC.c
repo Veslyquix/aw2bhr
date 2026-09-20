@@ -25,5 +25,5 @@ int sub_080249EC(int a1, s8 a2, u8 a3)
     if (gUnknown_085D5ABC[a3].deployLocation == 0x10)
         return 0;
 
-    return (s8)(gUnknown_085D583C[a2].unk10 * 10);
+    return (s8)(gUnknown_085D583C[a2].defense * 10);
 }
