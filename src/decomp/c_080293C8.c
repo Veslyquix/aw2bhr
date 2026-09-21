@@ -34,7 +34,7 @@ void sub_080293C8(ProcPtr proc)
     {
         sub_08023274(2);
 
-        if (gpKeySt->held & 1)
+        if (gpKeySt->pressed & 1)
         {
             Proc_End(proc);
             gUnknown_03003F40 = gMap->unitUnk[
@@ -49,7 +49,7 @@ void sub_080293C8(ProcPtr proc)
         sub_08023274(1);
     }
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         gUnknown_030033E4.unk00 = gUnknown_03003100.pos.unk00;
         gUnknown_030033E4.unk02 = gUnknown_03003100.pos.unk02;

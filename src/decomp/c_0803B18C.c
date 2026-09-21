@@ -38,7 +38,7 @@ bool8 sub_0803B18C(void)
     return FALSE;
 }
 
-/* A/START (9 = 1 | 8) on gpKeySt->held plays sound id 0x71 and stops the
+/* A/START (9 = 1 | 8) on gpKeySt->pressed plays sound id 0x71 and stops the
  * gUnknown_03001FBC entry; either way the tail runs. Both tail calls are
  * unconditional and neither result is used, so they are two statements and not
  * a nesting -- sequential `bl`s carry no nesting signal (docs/agbcc-codegen.md)
@@ -49,7 +49,7 @@ bool8 sub_0803B18C(void)
 
 void sub_0803B198(void)
 {
-    if (gpKeySt->held & 9)
+    if (gpKeySt->pressed & 9)
     {
         sub_0803B4DC(0x71);
         sub_08015C30(gUnknown_03001FBC);

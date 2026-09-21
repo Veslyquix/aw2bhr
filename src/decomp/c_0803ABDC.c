@@ -25,20 +25,20 @@ void sub_0803ABDC(struct Unk0803ABDC *p)
     sub_080119A0(0, 8, gUnknown_08090FA4);
     sub_0802BD54(0x28, 8, p->unk1e);
     sub_080119A0(0x38, 8, gUnknown_0849E5F8[i]);
-    if ((gpKeySt->held & 3) != 0)
+    if ((gpKeySt->pressed & 3) != 0)
     {
         sub_08016E14();
         sub_08015C30(gUnknown_03001FBC);
     }
-    else if ((gpKeySt->held & DPAD_LEFT) != 0)
+    else if ((gpKeySt->pressed & DPAD_LEFT) != 0)
         sub_0803CA00(p->unk1e, 0);
-    else if ((gpKeySt->held & DPAD_RIGHT) != 0)
+    else if ((gpKeySt->pressed & DPAD_RIGHT) != 0)
         sub_0803CA00(p->unk1e, 1);
     else
     {
-        if ((gpKeySt->unk02 & DPAD_UP) != 0 && p->unk1e > 0x20)
+        if ((gpKeySt->repeated & DPAD_UP) != 0 && p->unk1e > 0x20)
             p->unk1e--;
-        if ((gpKeySt->unk02 & DPAD_DOWN) != 0 && p->unk1e <= 0x5e)
+        if ((gpKeySt->repeated & DPAD_DOWN) != 0 && p->unk1e <= 0x5e)
             p->unk1e++;
     }
 }

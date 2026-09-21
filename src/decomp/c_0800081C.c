@@ -53,13 +53,13 @@ void sub_0800081C(void)
     if (gUnknown_030033E4.unk00 != gActiveMap->cursorX
      || gUnknown_030033E4.unk02 != gActiveMap->cursorY)
     {
-        keys = gpKeySt->unk00;
+        keys = gpKeySt->held;
         gActiveMap->cursorX = gUnknown_030033E4.unk00;
         gActiveMap->cursorY = gUnknown_030033E4.unk02;
     }
     else
     {
-        keys = gpKeySt->held;
+        keys = gpKeySt->pressed;
     }
 
     if (gActiveMap->unk07 == 0)
@@ -148,7 +148,7 @@ void sub_0800081C(void)
 
         if (r == 6)
         {
-            if (gpKeySt->held & 1)
+            if (gpKeySt->pressed & 1)
                 sub_0803B4DC(0x68);
 
             gActiveMap->unk58++;
@@ -162,7 +162,7 @@ void sub_0800081C(void)
     }
     else
     {
-        t = gpKeySt->held & 2;
+        t = gpKeySt->pressed & 2;
         if (t != 0)
         {
             sub_080088F0();
@@ -192,14 +192,14 @@ void sub_0800081C(void)
 
     if (sub_0802DBF8() && sub_08034F6C() == 0)
     {
-        t = gpKeySt->held & 4;
+        t = gpKeySt->pressed & 4;
         if (t != 0)
         {
             sub_0800056C(3);
         }
         else
         {
-            m = gpKeySt->held & (A_BUTTON | B_BUTTON | R_BUTTON | L_BUTTON);
+            m = gpKeySt->pressed & (A_BUTTON | B_BUTTON | R_BUTTON | L_BUTTON);
             if (m == 0x100)
             {
                 gActiveMap->unk07 = t;

@@ -11,7 +11,7 @@
 
 /* "Wait for one of the keys in the node's mask." The node's +0x04 is the
  * polymorphic script operand again -- here a NULLARY function -- and its +0x0c
- * the key mask ANDed with gpKeySt->last.
+ * the key mask ANDed with gpKeySt->unk0c.
  *
  * `bl _call_via_r2` is NOT a two-argument call: r0 and r1 are simply both live
  * (the AND result and the node) when the pointer is materialised, so gcc takes
@@ -25,7 +25,7 @@ bool8 sub_08018B68(s16 a)
     p = gUnknown_0200C528[a].unk04;
     f = (void (*)(void))p->unk04;
 
-    if (gpKeySt->last & p->unk0c)
+    if (gpKeySt->unk0c & p->unk0c)
     {
         f();
         sub_08017E74();

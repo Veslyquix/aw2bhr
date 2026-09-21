@@ -19,7 +19,7 @@ void sub_0805C114(u16 keys)
      * propagated and the loop re-tests the hoisted AND. */
     while (1)
     {
-        if (gpKeySt->held & keys)
+        if (gpKeySt->pressed & keys)
             break;
     }
 }

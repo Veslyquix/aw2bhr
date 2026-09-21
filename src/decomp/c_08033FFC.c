@@ -42,7 +42,7 @@ void sub_08033FFC(struct Unk33FFCProc *proc)
     PutSpriteExt(0, 0x60, gUnknown_0849BC38[2],
         gUnknown_0849BC18[proc->unk36], (proc->unk36 + 1) << 12);
 
-    if (proc->unk4c > 0x78 || (gpKeySt->held & 1))
+    if (proc->unk4c > 0x78 || (gpKeySt->pressed & 1))
     {
         proc->unk4c = 0;
         Proc_Break(proc);
@@ -77,7 +77,7 @@ void sub_08034130(struct Unk34130Proc *proc)
     struct Unk34130Child *child = proc->unk2c;
     u8 n = child->unk36;
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_0803BD60();
         sub_0803B4DC(0x66);
@@ -85,7 +85,7 @@ void sub_08034130(struct Unk34130Proc *proc)
     }
     else if (child->unk37 == 0)
     {
-        if (gpKeySt->held & 9)
+        if (gpKeySt->pressed & 9)
         {
             gUnknown_0849B060->unk0d = n;
             Proc_EndEach(gUnknown_0849BB50);
@@ -95,14 +95,14 @@ void sub_08034130(struct Unk34130Proc *proc)
         }
         else
         {
-            if (gpKeySt->unk02 & DPAD_UP)
+            if (gpKeySt->repeated & DPAD_UP)
             {
                 if (n != 0)
                     n = n - 1;
                 else
                     n = 2;
             }
-            else if (gpKeySt->unk02 & DPAD_DOWN)
+            else if (gpKeySt->repeated & DPAD_DOWN)
             {
                 if (n <= 1)
                     n = n + 1;

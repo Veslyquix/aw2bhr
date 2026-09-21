@@ -61,7 +61,7 @@ void sub_08019A60(void *arg)
     long new_var;
     void (*fn)(u8, u8, u8);
 
-    if (gpKeySt->held & 4)
+    if (gpKeySt->pressed & 4)
     {
         fn = P->unk20[P->unk31[P->unk42]].unk10;
 
@@ -69,7 +69,7 @@ void sub_08019A60(void *arg)
             fn(P->unk31[P->unk42], P->unk42,
                P->unk24[P->unk31[P->unk42]]);
     }
-    else if (gpKeySt->held & 1)
+    else if (gpKeySt->pressed & 1)
     {
         u8 *idx;
         u8 *tbl;
@@ -93,7 +93,7 @@ void sub_08019A60(void *arg)
             }
         }
     }
-    else if (gpKeySt->held & 2)
+    else if (gpKeySt->pressed & 2)
     {
         sub_0801537C(gUnknown_08489568);
 

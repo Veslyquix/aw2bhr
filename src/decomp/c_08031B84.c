@@ -24,7 +24,7 @@ int sub_08031B84(void)
 
     gUnknown_0849B01C->unk06 = 0x9ABC;
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0803B4DC(0x68);
 
     if (gUnknown_0849B01C->unk212 == 0)

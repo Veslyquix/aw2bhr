@@ -68,7 +68,7 @@ void sub_08062DF0(void)
 
     if ((MAP->unk10 & 0xF) == 0)
     {
-        if (gpKeySt->held == 1)
+        if (gpKeySt->pressed == 1)
         {
             gUnknown_03004780 = gUnknown_030045DC;
             sub_08024584();
@@ -77,7 +77,7 @@ void sub_08062DF0(void)
             return;
         }
 
-        if ((gpKeySt->unk00 & 4)
+        if ((gpKeySt->held & 4)
             && gMap->unit[MAP->rowOffset[gUnknown_030033E4.unk02]
                             + gUnknown_030033E4.unk00] != 0)
         {

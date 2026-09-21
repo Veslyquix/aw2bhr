@@ -27,7 +27,7 @@ void sub_0802925C(struct Unk2925CProc *proc)
     if (r != -1)
         return;
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         gUnknown_030033E4.unk00 = gUnknown_03003100.pos.unk00;
         gUnknown_030033E4.unk02 = gUnknown_03003100.pos.unk02;
@@ -39,7 +39,7 @@ void sub_0802925C(struct Unk2925CProc *proc)
         return;
     }
 
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         gUnknown_03003F40 = proc->unk64;
         Proc_End(proc);
@@ -49,7 +49,7 @@ void sub_0802925C(struct Unk2925CProc *proc)
 
     old = proc->unk64;
 
-    if (gpKeySt->unk02 & (DPAD_RIGHT | DPAD_DOWN))
+    if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_DOWN))
     {
         proc->unk64 = proc->unk64 + 1;
 
@@ -57,7 +57,7 @@ void sub_0802925C(struct Unk2925CProc *proc)
             proc->unk64 = 0;
     }
 
-    if (gpKeySt->unk02 & (DPAD_LEFT | DPAD_UP))
+    if (gpKeySt->repeated & (DPAD_LEFT | DPAD_UP))
     {
         if (proc->unk64 <= 0)
             proc->unk64 = proc->unk66;

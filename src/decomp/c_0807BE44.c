@@ -47,6 +47,6 @@ void sub_0807BE90(struct Proc7BE90 *proc)
     sub_0807C278(proc);
     sub_0807C46C(proc);
     proc->unk_68++;
-    if (proc->unk_68 == 0x1e0 || (gpKeySt->held & 1))
+    if (proc->unk_68 == 0x1e0 || (gpKeySt->pressed & 1))
         Proc_Start(gUnknown_08616570, proc);
 }

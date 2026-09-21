@@ -45,7 +45,7 @@ void sub_08034AF8(void)
                          gUnknown_08090E14);
             break;
         }
-        if ((gpKeySt->held & 1) == 0)
+        if ((gpKeySt->pressed & 1) == 0)
             return;
     }
     sub_08026768();

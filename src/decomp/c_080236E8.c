@@ -22,7 +22,7 @@ void sub_080236E8(void)
     if ((gMap->unk10 & 0xf) != 0)
         return;
 
-    kk = gpKeySt->unk02;
+    kk = gpKeySt->repeated;
     keys = kk;
     dir = (keys >> 4) & 0xf;
 
@@ -31,7 +31,7 @@ void sub_080236E8(void)
 
     if (gMap->move[gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00] > 0
      && (u8)gMap->move[gMap->rowOffset[next.unk02] + next.unk00] > 0x78
-     && keys != gpKeySt->held)
+     && keys != gpKeySt->pressed)
         return;
 
     n = gUnknown_030033E4.unk00 + gUnknown_08499C7C[dir][0];

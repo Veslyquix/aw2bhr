@@ -31,7 +31,7 @@ void sub_08049E50(ProcPtr proc)
         if (gUnknown_084C3240->unk2c > 0xdc)
             flag = 1;
 
-        if (gpKeySt->held & 1)
+        if (gpKeySt->pressed & 1)
             flag = 1;
 
         if (flag == 1)

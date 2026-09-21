@@ -9,7 +9,7 @@
 
 #include "hardware.h"
 
-/* L or R (0xc0 of gpKeySt->unk02) flips the unk09[] mark of the slot unk32/2
+/* L or R (0xc0 of gpKeySt->repeated) flips the unk09[] mark of the slot unk32/2
  * selects between 1 and 2; if that leaves no slot marked 1, slot 1 -- or slot 0
  * when unk32/2 is not zero -- is forced back to 1. Then sound 0x64.
  *
@@ -39,7 +39,7 @@ void sub_08065D20(void)
 
     k = gUnknown_08580934->unk32 / 2;
 
-    if (gpKeySt->unk02 & (DPAD_UP | DPAD_DOWN))
+    if (gpKeySt->repeated & (DPAD_UP | DPAD_DOWN))
     {
         if (gUnknown_08580934->unk09[k] == 1)
             gUnknown_08580934->unk09[k] = 2;

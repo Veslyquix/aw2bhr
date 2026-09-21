@@ -56,7 +56,7 @@ void sub_0802DA18(void)
 
     ent = &gUnknown_03001470[gUnknown_03001FBC];
 
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         if ((tbl = (struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk01 == 2)
         {
@@ -85,10 +85,10 @@ void sub_0802DA18(void)
         sub_08074410(0xe, p);
     }
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0803B4DC(0x66);
 
-    if (gpKeySt->held & 3)
+    if (gpKeySt->pressed & 3)
     {
         sub_08015C30(gUnknown_03001FBC);
         sub_0802D76C();
@@ -96,7 +96,7 @@ void sub_0802DA18(void)
         return;
     }
 
-    if (gpKeySt->unk02 & DPAD_DOWN)
+    if (gpKeySt->repeated & DPAD_DOWN)
     {
         int v;
 
@@ -110,7 +110,7 @@ void sub_0802DA18(void)
         }
     }
 
-    if (gpKeySt->unk02 & DPAD_UP)
+    if (gpKeySt->repeated & DPAD_UP)
     {
         int v;
 

@@ -27,7 +27,7 @@ void sub_08023518(void)
     if ((gMap->unk10 & 0xf) != 0)
         return;
 
-    dir = (gpKeySt->unk00 >> 4) & 0xf;
+    dir = (gpKeySt->held >> 4) & 0xf;
 
     if (gUnknown_08499C7C[dir][0] < 0)
         gUnknown_030033E4.unk00 = (gMap->scrollX >> 4) + 2;

@@ -27,7 +27,7 @@
  * (both measured, wave 34). */
 void sub_08064410(void)
 {
-    if (gpKeySt->unk00 & L_BUTTON)
+    if (gpKeySt->held & L_BUTTON)
     {
         struct KeySt *dst;
 
@@ -35,7 +35,7 @@ void sub_08064410(void)
         dst[1] = *gpKeySt;
     }
 
-    if (gpKeySt->unk00 & R_BUTTON)
+    if (gpKeySt->held & R_BUTTON)
     {
         struct KeySt *dst;
 
@@ -43,7 +43,7 @@ void sub_08064410(void)
         dst[2] = *gpKeySt;
     }
 
-    if ((gpKeySt->unk00 & (R_BUTTON | L_BUTTON)) == 0)
+    if ((gpKeySt->held & (R_BUTTON | L_BUTTON)) == 0)
     {
         struct KeySt *dst;
 

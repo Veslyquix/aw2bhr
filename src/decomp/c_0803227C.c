@@ -18,7 +18,7 @@
  * zero-extended, and every READ of it re-extends signed (`lsls #0x18; asrs`).
  * It is not a u8 return.
  *
- * The two `if`s are independent, not an else-chain: `gpKeySt->held` is reloaded
+ * The two `if`s are independent, not an else-chain: `gpKeySt->pressed` is reloaded
  * for the second test. `i` is s16, so each step runs in the HIGH half
  * (`lsls #0x10; adds <-0x10000>; lsrs #0x10`) and the wrap test reads the sign
  * of that word for free. The `-0x10000` pool word and the LICM-hoisted
@@ -32,7 +32,7 @@ void sub_0803227C(void)
     i = gUnknown_0849B060->unk04;
     n = sub_0802F534();
 
-    if (gpKeySt->held & DPAD_LEFT)
+    if (gpKeySt->pressed & DPAD_LEFT)
     {
         do
         {
@@ -43,7 +43,7 @@ void sub_0803227C(void)
         } while (gUnknown_0300449C[i] == 0);
     }
 
-    if (gpKeySt->held & DPAD_RIGHT)
+    if (gpKeySt->pressed & DPAD_RIGHT)
     {
         do
         {

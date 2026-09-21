@@ -44,7 +44,7 @@ void sub_08032E88(struct Unk32E88Proc *proc)
     PutSpriteExt(0, 0x60, 0x358, gUnknown_0849B6D6, 0);
     PutSpriteExt(0, 0x290, 0x358, gUnknown_0849B6D6, 8);
 
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         if (proc->unk29 != 0)
             sub_0803BD60();
@@ -56,10 +56,10 @@ void sub_08032E88(struct Unk32E88Proc *proc)
     }
     else
     {
-        if (gpKeySt->held & DPAD_LEFT)
+        if (gpKeySt->pressed & DPAD_LEFT)
             proc->unk29--;
 
-        if (gpKeySt->held & DPAD_RIGHT)
+        if (gpKeySt->pressed & DPAD_RIGHT)
             proc->unk29++;
 
         proc->unk29 &= 1;

@@ -29,7 +29,7 @@ void CampaignIntro_IDLE_0808A82D(ProcPtr proc)
  * r0, so none of them is nested inside another. */
 void CampaignIntro_IDLE_0808A845(ProcPtr proc)
 {
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         sub_08013C00();
         sub_08013AEC();
@@ -49,7 +49,7 @@ void CampaignIntro_IDLE_0808A885(ProcPtr proc)
     if (!sub_08019260())
         Proc_Start(gUnknown_08617094, proc);
 
-    if (gpKeySt->held & 8)
+    if (gpKeySt->pressed & 8)
         Proc_Start(gUnknown_08617094, proc);
 }
 

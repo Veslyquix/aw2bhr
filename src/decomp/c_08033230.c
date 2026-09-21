@@ -107,11 +107,11 @@ void sub_08033230(struct Unk33230Proc *proc)
                 sub_080315E8(gUnknown_0849B060->unk00, 0, 0);
         }
 
-        if (proc->unk64 == 0 && (gpKeySt->held & 2))
+        if (proc->unk64 == 0 && (gpKeySt->pressed & 2))
             Proc_GotoScript(proc, gUnknown_0849BA68);
     }
 
-    if ((gpKeySt->held & 9) && proc->unk64 == 0
+    if ((gpKeySt->pressed & 9) && proc->unk64 == 0
         && gUnknown_03003F70[0x18] == 0 && gUnknown_03003F70[0x1e] != 0)
     {
         proc->unk64 = 1;

@@ -31,7 +31,7 @@ void sub_0802DE1C(void)
     if (!sub_0802DBF8())
         return;
 
-    v = gpKeySt->held & 1;
+    v = gpKeySt->pressed & 1;
 
     if (v != 0)
     {
@@ -40,7 +40,7 @@ void sub_0802DE1C(void)
         return;
     }
 
-    if (!(gpKeySt->held & 2))
+    if (!(gpKeySt->pressed & 2))
         return;
 
     if (gPlaySt.savingEnabled != 0)
@@ -68,7 +68,7 @@ void sub_0802DEFC(void)
     if (!sub_0802DBF8())
         return;
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_0803B4DC(0x66);
         gUnknown_03003334 = 0;
@@ -89,7 +89,7 @@ void sub_0802DEFC(void)
     if (e->unk01 & 1)
         return;
 
-    if (!(gpKeySt->held & 1))
+    if (!(gpKeySt->pressed & 1))
         return;
 
     if (gPlaySt.savingEnabled != 0)

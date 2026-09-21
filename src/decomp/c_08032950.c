@@ -39,7 +39,7 @@ void sub_08032950(void)
     if (Proc_Exists(gUnknown_0849B688) == TRUE)
         return;
 
-    if (gpKeySt->held & DPAD_LEFT)
+    if (gpKeySt->pressed & DPAD_LEFT)
     {
         do
             i = (i - 1) & 3;
@@ -48,7 +48,7 @@ void sub_08032950(void)
         gUnknown_0849B060->unk10 = 1;
     }
 
-    if (gpKeySt->held & DPAD_RIGHT)
+    if (gpKeySt->pressed & DPAD_RIGHT)
     {
         do
             i = (i + 1) & 3;

@@ -42,11 +42,11 @@ u8 sub_08019B80(void *arg)
     if (Q->unk41 <= 1)
         return 0;
 
-    if (gpKeySt->unk02 & DPAD_UP)
+    if (gpKeySt->repeated & DPAD_UP)
     {
         if (Q->unk42 == 0)
         {
-            if (gpKeySt->unk02 != gpKeySt->held)
+            if (gpKeySt->repeated != gpKeySt->pressed)
                 return 0;
             Q->unk42 = Q->unk41;
         }
@@ -55,11 +55,11 @@ u8 sub_08019B80(void *arg)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->unk02 & DPAD_DOWN)
+    if (gpKeySt->repeated & DPAD_DOWN)
     {
         if (Q->unk42 == Q->unk41 - 1)
         {
-            if (gpKeySt->unk02 != gpKeySt->held)
+            if (gpKeySt->repeated != gpKeySt->pressed)
                 return 0;
             Q->unk42 = 0xff;
         }

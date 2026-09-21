@@ -32,9 +32,9 @@ void sub_08019510(void *proc)
 {
     struct Unk8019510 *p = (struct Unk8019510 *)proc;
 
-    if (gpKeySt->last & 9)
+    if (gpKeySt->unk0c & 9)
     {
-        if (sub_08014BE8() && (gpKeySt->last & 8))
+        if (sub_08014BE8() && (gpKeySt->unk0c & 8))
             gUnknown_03002514 = 1;
 
         sub_080179D0(p->unk28);

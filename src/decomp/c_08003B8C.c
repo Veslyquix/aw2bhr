@@ -19,7 +19,7 @@
  *   - the row-offset loop has NO entry guard because the `strh #0x14` two
  *     statements earlier is CSE'd into the guard's load, folding `0 < 20` away.
  *     It is an ordinary `for`, not a do/while.
- *   - the key word is gpKeySt->unk00 (offset 0), NOT ->held (offset 4). unk00
+ *   - the key word is gpKeySt->held (offset 0), NOT ->held (offset 4). unk00
  *     is the mask hardware.h already documents as carrying 0x200 (L) and
  *     0x100 (R), which is exactly the 0x300 tested here. */
 
@@ -38,7 +38,7 @@ void GenerateRandomMap(void)
     for (i = 0; i < MAP->height; i++)
         MAP->rowOffset[i] = i * MAP->width;
 
-    keys = gpKeySt->unk00 & (R_BUTTON | L_BUTTON);
+    keys = gpKeySt->held & (R_BUTTON | L_BUTTON);
     if (keys == (R_BUTTON | L_BUTTON))
     {
         sub_08004724();

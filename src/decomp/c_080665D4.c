@@ -59,7 +59,7 @@ void sub_080665D4(void)
     {
         struct KeySt *keys = (struct KeySt *)&gUnknown_03002040;
 
-        if ((s8)gUnknown_08580934->unk70[i] == 0 && (keys[i].held & 1))
+        if ((s8)gUnknown_08580934->unk70[i] == 0 && (keys[i].pressed & 1))
         {
             struct Unk08580934_Obj *obj = gUnknown_08580934->unk34[i];
             int x = obj->unk28;
@@ -70,7 +70,7 @@ void sub_080665D4(void)
             return;
         }
 
-        if ((s8)gUnknown_08580934->unk70[i] == 1 && (keys[i].held & 2))
+        if ((s8)gUnknown_08580934->unk70[i] == 1 && (keys[i].pressed & 2))
         {
             sub_080665BC(i);
             sub_0803B4DC(0x66);
@@ -98,7 +98,7 @@ void sub_0806666C(void)
     {
         struct KeySt *keys = (struct KeySt *)&gUnknown_03002040;
 
-        if ((s8)gUnknown_08580934->unk70[i] == 0 && (keys[i].held & 1))
+        if ((s8)gUnknown_08580934->unk70[i] == 0 && (keys[i].pressed & 1))
         {
             struct Unk08580934_Obj *obj = gUnknown_08580934->unk44[i];
             int x = obj->unk28;
@@ -109,7 +109,7 @@ void sub_0806666C(void)
             return;
         }
 
-        if ((s8)gUnknown_08580934->unk70[i] == 1 && (keys[i].held & 2))
+        if ((s8)gUnknown_08580934->unk70[i] == 1 && (keys[i].pressed & 2))
         {
             sub_080665BC(i);
             sub_0803B4DC(0x66);

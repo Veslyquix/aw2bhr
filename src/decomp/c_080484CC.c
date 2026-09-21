@@ -34,7 +34,7 @@ void sub_080484CC(struct Unk0804769C *p)
     s16 i;
     u16 sel;
 
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         for (i = p->unk1f; i >= 0; i--)
         {
@@ -46,7 +46,7 @@ void sub_080484CC(struct Unk0804769C *p)
         sub_0803B4DC(0x65);
         sub_08015C30(gUnknown_03001FBC);
     }
-    else if (gpKeySt->held & 2)
+    else if (gpKeySt->pressed & 2)
     {
         sub_0803B4DC(0x66);
         sub_08015C30(gUnknown_03001FBC);

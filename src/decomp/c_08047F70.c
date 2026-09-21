@@ -88,7 +88,7 @@ void sub_08047F70(struct Unk08047B98 *p)
 
     changed = 0;
 
-    if (gpKeySt->unk02 & DPAD_UP)
+    if (gpKeySt->repeated & DPAD_UP)
     {
         if (p->unk1f == 0)
             return;
@@ -104,7 +104,7 @@ void sub_08047F70(struct Unk08047B98 *p)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->unk02 & DPAD_DOWN)
+    if (gpKeySt->repeated & DPAD_DOWN)
     {
         if (p->unk1f >= (p->unk21 - 1))
             return;
@@ -131,7 +131,7 @@ void sub_08047F70(struct Unk08047B98 *p)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->unk02 & L_BUTTON)
+    if (gpKeySt->repeated & L_BUTTON)
     {
         if (p->unk20 == 0)
             return;
@@ -153,7 +153,7 @@ void sub_08047F70(struct Unk08047B98 *p)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->unk02 & R_BUTTON)
+    if (gpKeySt->repeated & R_BUTTON)
     {
         if (p->unk20 >= (p->unk21 - 6))
             return;
@@ -175,7 +175,7 @@ void sub_08047F70(struct Unk08047B98 *p)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->unk02 & DPAD_LEFT)
+    if (gpKeySt->repeated & DPAD_LEFT)
     {
         if (p->unk1e == 0)
             p->unk1e = 3;
@@ -186,7 +186,7 @@ void sub_08047F70(struct Unk08047B98 *p)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->unk02 & DPAD_RIGHT)
+    if (gpKeySt->repeated & DPAD_RIGHT)
     {
         if (p->unk1e > 2)
             p->unk1e = 0;
@@ -197,7 +197,7 @@ void sub_08047F70(struct Unk08047B98 *p)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->held & (SELECT_BUTTON | START_BUTTON))
+    if (gpKeySt->pressed & (SELECT_BUTTON | START_BUTTON))
     {
         if (p->unk21 == 0)
             return;

@@ -28,12 +28,12 @@ void sub_08066D74(void)
                  Div(gSinLut[0] * 16, sc != 0 ? sc : 2),
                  Div(gSinLut[0x40] * 16, sc != 0 ? sc : 2));
 
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         sub_0806377C(gUnknown_08580DD8);
         sub_0803BD54();
     }
-    else if (gpKeySt->held & 2)
+    else if (gpKeySt->pressed & 2)
     {
         gUnknown_08580934->unk31 = 1;
         sub_080733B8();

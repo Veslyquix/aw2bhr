@@ -41,20 +41,20 @@ void sub_0806DFF0(void)
     if (gUnknown_08580934->unk2d != 0)
         return;
 
-    if (gUnknown_0202F2C8 == 0 && (gpKeySt->held & 8))
+    if (gUnknown_0202F2C8 == 0 && (gpKeySt->pressed & 8))
     {
         sub_08015C30(gUnknown_03001FBC);
         return;
     }
 
-    if (gpKeySt->unk00 & 2)
+    if (gpKeySt->held & 2)
     {
         gUnknown_0202F2C8 = 1;
         sub_08015C30(gUnknown_03001FBC);
         return;
     }
 
-    if (gUnknown_08580934->unk30 == 0 && (gpKeySt->held & L_BUTTON))
+    if (gUnknown_08580934->unk30 == 0 && (gpKeySt->pressed & L_BUTTON))
     {
         sub_0803B4DC(0x73);
         sub_080733B8();
@@ -65,7 +65,7 @@ void sub_0806DFF0(void)
         return;
     }
 
-    if (gUnknown_08580934->unk30 == 1 && (gpKeySt->held & R_BUTTON))
+    if (gUnknown_08580934->unk30 == 1 && (gpKeySt->pressed & R_BUTTON))
     {
         sub_0803B4DC(0x73);
         sub_080733B8();

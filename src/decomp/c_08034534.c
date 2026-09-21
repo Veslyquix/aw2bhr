@@ -38,7 +38,7 @@ void sub_08034598(void)
     sub_08023518();
     sub_08023908(4);
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0802FA64();
 
     sub_0802776C(3);

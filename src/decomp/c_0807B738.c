@@ -27,7 +27,7 @@ void sub_0807B738(ProcPtr proc)
 
 void sub_0807B760(ProcPtr proc)
 {
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         Proc_Start(gUnknown_0861604C, proc);
         Proc_Break(proc);

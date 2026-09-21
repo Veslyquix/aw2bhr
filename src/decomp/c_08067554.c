@@ -46,7 +46,7 @@ void IntroT0_08067555(struct Unk67554Proc *proc)
 /* "Hold the message up for +0x60 more frames, then let A or START dismiss it."
  * IntroT0_08067555 is the matching init and 0x14 the frame count it arms.
  *
- * Key mask 9 is A|START, read off `gpKeySt->held` (+0x04) and not `pressed`
+ * Key mask 9 is A|START, read off `gpKeySt->pressed` (+0x04) and not `pressed`
  * (+0x08) -- the offset in the ROM is unambiguous even though a dismiss
  * usually reads the edge. gpKeySt is upstream's own symbol from hardware.h;
  * there is no gUnknown_ at 0x03002EE0 and one cannot be created.
@@ -59,7 +59,7 @@ void IntroT0_IDLE_08067565(struct Unk67564Proc *proc)
     {
         proc->unk60--;
     }
-    else if (gpKeySt->held & 9)
+    else if (gpKeySt->pressed & 9)
     {
         sub_0803B5E8();
         proc->unk64 = 1;

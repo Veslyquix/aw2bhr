@@ -65,7 +65,7 @@ void sub_08014400(struct Unk08014074 *s)
     if ((s8)sub_08015BD0((s32)gUnknown_0848A3C4) != b)
         return;
 
-    if (sub_08014BE8() && (gpKeySt->last & 8) && gUnknown_03002514 == 0)
+    if (sub_08014BE8() && (gpKeySt->unk0c & 8) && gUnknown_03002514 == 0)
     {
         gUnknown_03002514 = 1;
         sub_080179D0(sub_08013D64(s));
@@ -74,7 +74,7 @@ void sub_08014400(struct Unk08014074 *s)
         return;
     }
 
-    if (s->unk3a > 1 && (gpKeySt->last & 1))
+    if (s->unk3a > 1 && (gpKeySt->unk0c & 1))
         sub_08014074(s);
 
     t = ++s->unk39;

@@ -28,13 +28,13 @@ void sub_080466DC(void)
         sub_08013B0C();
         gUnknown_084C1430->unk50 = 0;
     }
-    else if (gpKeySt->held & 3)
+    else if (gpKeySt->pressed & 3)
     {
         sub_08014878();
         sub_0803B4DC(0x66);
         sub_08015C30(gUnknown_03001FBC);
 
-        if (gpKeySt->held & 2)
+        if (gpKeySt->pressed & 2)
             gUnknown_03002F1C = 1;
 
         return;

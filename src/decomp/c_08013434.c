@@ -30,15 +30,15 @@ void sub_08013434(void)
 
     for (i = 0; i <= 4; i++)
     {
-        ((struct KeySt *)&gUnknown_03002040)[i].repeated = 0;
-        ((struct KeySt *)&gUnknown_03002040)[i].unk00 = 0;
-        ((struct KeySt *)&gUnknown_03002040)[i].held = 0;
-        ((struct KeySt *)&gUnknown_03002040)[i].pressed2 = 0;
-        ((struct KeySt *)&gUnknown_03002040)[i].unk02 = 0;
-        ((struct KeySt *)&gUnknown_03002040)[i].ablr_pressed = 0;
-        ((struct KeySt *)&gUnknown_03002040)[i].pressed = 0;
-        ((struct KeySt *)&gUnknown_03002040)[i].last = 0;
         ((struct KeySt *)&gUnknown_03002040)[i].previous = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].held = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].pressed = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].unk10 = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].repeated = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].unk0e = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].unk08 = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].unk0c = 0;
+        ((struct KeySt *)&gUnknown_03002040)[i].unk0a = 0;
     }
 
     gpKeySt = (struct KeySt *)&gUnknown_03002090;

@@ -131,7 +131,7 @@ void sub_08060324(void)
 
     gUnknown_030046D4++;
 
-    if (gUnknown_030046D4 > 0x1e || (gpKeySt->unk00 & 1))
+    if (gUnknown_030046D4 > 0x1e || (gpKeySt->held & 1))
         gUnknown_030045D4 = 3;
 }
 
@@ -156,7 +156,7 @@ void sub_08060384(void)
 
     gUnknown_030046D4++;
 
-    if (gUnknown_030046D4 > 0x1e || (gpKeySt->unk00 & 1))
+    if (gUnknown_030046D4 > 0x1e || (gpKeySt->held & 1))
         gUnknown_030045D4 = 4;
 }
 
@@ -172,6 +172,6 @@ void sub_080603D4(void)
 
     gUnknown_030046D4++;
 
-    if (gUnknown_030046D4 > 0x1e || (gpKeySt->unk00 & 1))
+    if (gUnknown_030046D4 > 0x1e || (gpKeySt->held & 1))
         gUnknown_030045D4 = 5;
 }

@@ -18,6 +18,6 @@ void sub_0807BA3C(void)
 
 void sub_0807BA68(ProcPtr proc)
 {
-    if (gpKeySt->held & 8)
+    if (gpKeySt->pressed & 8)
         Proc_Start(gUnknown_08616570, proc);
 }

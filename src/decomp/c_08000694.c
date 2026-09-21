@@ -76,7 +76,7 @@ void sub_08000694(void)
         sub_08023824();
         sub_08023518();
         sub_08023908(8);
-        if (gpKeySt->held & (A_BUTTON | B_BUTTON | START_BUTTON))
+        if (gpKeySt->pressed & (A_BUTTON | B_BUTTON | START_BUTTON))
         {
             gActiveMap->unk02 = 80;
             gActiveMap->unk0c = 10;

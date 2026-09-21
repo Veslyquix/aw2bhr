@@ -78,7 +78,7 @@ void sub_0806C9C0(struct ProcTitleScreen * proc)
         Proc_Break(proc);
     }
 
-    if ((proc->unk_2C <= (2700 - gUnknown_0202F2C4)) && (gpKeySt->held & 9))
+    if ((proc->unk_2C <= (2700 - gUnknown_0202F2C4)) && (gpKeySt->pressed & 9))
     {
         sub_0803B4DC(0x71);
         sub_08030ED4();

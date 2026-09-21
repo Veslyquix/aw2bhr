@@ -11,7 +11,7 @@
 #include "proc.h"
 
 /* One five-argument sub_0801F34C call, then a key test that breaks the proc.
- * 0x103 is A | B | Start against gpKeySt->held (+0x04), and it is a pool word
+ * 0x103 is A | B | Start against gpKeySt->pressed (+0x04), and it is a pool word
  * because it does not fit a THUMB immediate.
  *
  * The parameter survives in r4 across the first call only to reach Proc_Break,
@@ -20,6 +20,6 @@ void sub_08085A8C(ProcPtr proc)
 {
     sub_0801F34C(0x92, 0x38, 0x38, 0, 0);
 
-    if (gpKeySt->held & (A_BUTTON | B_BUTTON | R_BUTTON))
+    if (gpKeySt->pressed & (A_BUTTON | B_BUTTON | R_BUTTON))
         Proc_Break(proc);
 }

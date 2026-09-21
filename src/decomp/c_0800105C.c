@@ -21,7 +21,7 @@ int sub_0800105C(void)
     if ((gMap->unk10 & 0xf) != 0)
         return 0;
 
-    i = (gpKeySt->unk02 >> 4) & 0xf;
+    i = (gpKeySt->repeated >> 4) & 0xf;
 
     v = gUnknown_030033E4.unk00 + gUnknown_08499C7C[i][0];
 

@@ -17,7 +17,7 @@
  * for the `> 0x19` compare and the 0x0202F2D8 store, once WITHOUT for the
  * `< 0` sign test, which is exactly what a u8 field could never produce.
  *
- * The `u16 t` local is load-bearing. `gpKeySt->unk02 & DPAD_LEFT` is narrowed
+ * The `u16 t` local is load-bearing. `gpKeySt->repeated & DPAD_LEFT` is narrowed
  * `lsls #0x10; lsrs #0x10` where the neighbouring `& 2` and `& 0x10` tests are
  * not -- that only happens when the value lands in a u16 pseudo. It is also
  * why the wrap store in the Right branch is `strb r2` and not a fresh `movs`:
@@ -32,7 +32,7 @@ void sub_0806F550(struct Unk0806F550Proc *proc)
 {
     u16 t;
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_0803B4DC(0x66);
         gUnknown_0202F2D8 = proc->unk38;
@@ -40,7 +40,7 @@ void sub_0806F550(struct Unk0806F550Proc *proc)
     }
     else
     {
-        t = gpKeySt->unk02 & DPAD_LEFT;
+        t = gpKeySt->repeated & DPAD_LEFT;
 
         if (t != 0)
         {
@@ -52,7 +52,7 @@ void sub_0806F550(struct Unk0806F550Proc *proc)
             sub_0806E8E4(0);
             Proc_Goto(proc, 0);
         }
-        else if (gpKeySt->unk02 & DPAD_RIGHT)
+        else if (gpKeySt->repeated & DPAD_RIGHT)
         {
             proc->unk38++;
 

@@ -85,10 +85,10 @@ void sub_08019470(void)
 
     if (gUnknown_03001404 != 0)
     {
-        gpKeySt->unk02 = gUnknown_03002EF0;
-        gpKeySt->held = gUnknown_03002EF0;
-        gpKeySt->unk00 = gUnknown_03002EF0;
         gpKeySt->repeated = gUnknown_03002EF0;
+        gpKeySt->pressed = gUnknown_03002EF0;
+        gpKeySt->held = gUnknown_03002EF0;
+        gpKeySt->previous = gUnknown_03002EF0;
         gUnknown_03004538 = 0;
         gUnknown_03004518 = 0;
     }

@@ -21,20 +21,20 @@ void sub_0802DCB4(void)
 
     if (sub_0802DBF8())
     {
-        if (gpKeySt->held & 8)
+        if (gpKeySt->pressed & 8)
         {
             sub_0802E250();
             return;
         }
 
-        if (gpKeySt->held & 4)
+        if (gpKeySt->pressed & 4)
         {
             sub_0801B780(0);
             sub_0802D458();
             return;
         }
 
-        if (gpKeySt->held & R_BUTTON)
+        if (gpKeySt->pressed & R_BUTTON)
         {
             if (gMap->unit[
                     gMap->rowOffset[gUnknown_030033E4.unk02]
@@ -53,7 +53,7 @@ void sub_0802DCB4(void)
             return;
         }
 
-        if (gpKeySt->held & L_BUTTON)
+        if (gpKeySt->pressed & L_BUTTON)
         {
             sub_08025580();
             unit = sub_080254AC();
@@ -70,14 +70,14 @@ void sub_0802DCB4(void)
             }
         }
 
-        if (gpKeySt->held & 1)
+        if (gpKeySt->pressed & 1)
         {
             sub_0802E4B4(((struct Unk802C57CS *)&gUnknown_030033E4)->unk00,
                          ((struct Unk802C57CS *)&gUnknown_030033E4)->unk02);
             return;
         }
 
-        if (gpKeySt->held & 2)
+        if (gpKeySt->pressed & 2)
         {
             if (sub_0802E2D0(((struct Unk802C57CS *)&gUnknown_030033E4)->unk00,
                              ((struct Unk802C57CS *)&gUnknown_030033E4)->unk02))

@@ -12,7 +12,7 @@
  * src/decomp/c_080059FC.c -- both are this function's own callees, so their
  * prototypes and the gUnknown_08499578 window model came for free.  The nearer
  * exemplar for the KEY handling is src/decomp/c_08004970.c, which carries the
- * identical `(gpKeySt->held & 7) != 0` / `(gpKeySt->held & 2) == 0` pair and
+ * identical `(gpKeySt->pressed & 7) != 0` / `(gpKeySt->pressed & 2) == 0` pair and
  * the same trailing sub_08012BC8 / sub_08013B0C / sub_08015C30 teardown.
  * PROMOTION NEEDS BOTH POOL WORDS PLACED, in this order:
  *     "rodata": ["0x0808D7C8", "0x0808D7CC"]
@@ -52,7 +52,7 @@ void sub_08005B24(void)
         sub_0801B780(0);
     }
 
-    if ((gpKeySt->held & 7) != 0)
+    if ((gpKeySt->pressed & 7) != 0)
         gActiveMap->unk02 = 0x5A;
 
     switch (gActiveMap->unk02)
@@ -64,7 +64,7 @@ void sub_08005B24(void)
         sub_08005EF0(1);
         /* fallthrough */
     case 1:
-        if ((gpKeySt->held & DPAD_DOWN) != 0)
+        if ((gpKeySt->pressed & DPAD_DOWN) != 0)
         {
             gActiveMap->unk02 = 0xA;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
@@ -80,7 +80,7 @@ void sub_08005B24(void)
         sub_08005EF0(0);
         /* fallthrough */
     case 0xB:
-        if ((gpKeySt->held & DPAD_UP) != 0)
+        if ((gpKeySt->pressed & DPAD_UP) != 0)
         {
             gActiveMap->unk02 = 0;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
@@ -98,7 +98,7 @@ void sub_08005B24(void)
 
     if (gActiveMap->unk02 == 0x5A)
     {
-        if ((gpKeySt->held & 2) == 0)
+        if ((gpKeySt->pressed & 2) == 0)
             gUnknown_03002F1C = 1;
         sub_08005F1C();
         sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);

@@ -14,10 +14,10 @@ void sub_08033030(ProcPtr proc)
 {
     u8 v[0x34];
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0803B4DC(0x68);
 
-    if ((gpKeySt->held & 9)
+    if ((gpKeySt->pressed & 9)
      && Proc_Find(gUnknown_0849B688) == NULL
      && Proc_Find(gUnknown_0849B670) == NULL)
     {

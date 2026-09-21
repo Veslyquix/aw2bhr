@@ -19,7 +19,7 @@
  * spelled with the `== 0` case FIRST: the ROM branches away on `bne`, which
  * puts the equality arm inline. */
 /* Steps the seven-entry unk54[] selector at gUnknown_08580934->unk33 with the
- * gpKeySt->unk02 bitmask, and plays sound 0x64 whenever the index actually
+ * gpKeySt->repeated bitmask, and plays sound 0x64 whenever the index actually
  * moved. Byte-identical twin of sub_0806DCB8: the two differ only in which
  * private .rodata address-constant word carries &gUnknown_08580934 and
  * &gpKeySt (0x0816E158/0x0816E15C vs 0x0816E1AC/0x0816E1B0 -- both pairs hold
@@ -39,11 +39,11 @@ void HandleRulesMenuInput(void)
 
     i = gUnknown_08580934->unk33;
 
-    if (gpKeySt->unk02 & DPAD_LEFT)
+    if (gpKeySt->repeated & DPAD_LEFT)
     {
         if (i == 0)
         {
-            if (gpKeySt->unk02 == gpKeySt->held)
+            if (gpKeySt->repeated == gpKeySt->pressed)
                 i = 6;
         }
         else
@@ -52,11 +52,11 @@ void HandleRulesMenuInput(void)
         }
     }
 
-    if (gpKeySt->unk02 & DPAD_RIGHT)
+    if (gpKeySt->repeated & DPAD_RIGHT)
     {
         if (i == 6)
         {
-            if (gpKeySt->unk02 == gpKeySt->held)
+            if (gpKeySt->repeated == gpKeySt->pressed)
                 i = 0;
         }
         else
@@ -82,13 +82,13 @@ void sub_08066C70(struct Unk08580934_Obj *p)
 
     if (p->unk47 == 0)
     {
-        if (gpKeySt->unk02 & DPAD_UP)
+        if (gpKeySt->repeated & DPAD_UP)
         {
             if (p->unk48 != 0)
                 p->unk48 = p->unk48 - 1;
         }
 
-        if (gpKeySt->unk02 & DPAD_DOWN)
+        if (gpKeySt->repeated & DPAD_DOWN)
         {
             if (p->unk48 < p->unk4b - 1)
                 p->unk48 = p->unk48 + 1;
@@ -96,7 +96,7 @@ void sub_08066C70(struct Unk08580934_Obj *p)
     }
     else
     {
-        if (gpKeySt->unk02 & DPAD_UP)
+        if (gpKeySt->repeated & DPAD_UP)
         {
             if (p->unk48 == 0)
                 p->unk48 = p->unk4b - 1;
@@ -104,7 +104,7 @@ void sub_08066C70(struct Unk08580934_Obj *p)
                 p->unk48 = p->unk48 - 1;
         }
 
-        if (gpKeySt->unk02 & DPAD_DOWN)
+        if (gpKeySt->repeated & DPAD_DOWN)
         {
             if (p->unk48 == p->unk4b - 1)
                 p->unk48 = 0;

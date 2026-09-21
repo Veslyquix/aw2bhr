@@ -32,11 +32,11 @@ void sub_0806DCB8(void)
 
     i = gUnknown_08580934->unk33;
 
-    if (gpKeySt->unk02 & DPAD_LEFT)
+    if (gpKeySt->repeated & DPAD_LEFT)
     {
         if (i == 0)
         {
-            if (gpKeySt->unk02 == gpKeySt->held)
+            if (gpKeySt->repeated == gpKeySt->pressed)
                 i = 6;
         }
         else
@@ -45,11 +45,11 @@ void sub_0806DCB8(void)
         }
     }
 
-    if (gpKeySt->unk02 & DPAD_RIGHT)
+    if (gpKeySt->repeated & DPAD_RIGHT)
     {
         if (i == 6)
         {
-            if (gpKeySt->unk02 == gpKeySt->held)
+            if (gpKeySt->repeated == gpKeySt->pressed)
                 i = 0;
         }
         else
@@ -73,13 +73,13 @@ void sub_0806DD34(struct Unk0806DD34 *p)
 
     if (p->unk47 == 0)
     {
-        if (gpKeySt->unk02 & DPAD_UP)
+        if (gpKeySt->repeated & DPAD_UP)
         {
             if (p->unk48 != 0)
                 p->unk48 = p->unk48 - 1;
         }
 
-        if (gpKeySt->unk02 & DPAD_DOWN)
+        if (gpKeySt->repeated & DPAD_DOWN)
         {
             if (p->unk48 < p->unk4b - 1)
                 p->unk48 = p->unk48 + 1;
@@ -87,7 +87,7 @@ void sub_0806DD34(struct Unk0806DD34 *p)
     }
     else
     {
-        if (gpKeySt->unk02 & DPAD_UP)
+        if (gpKeySt->repeated & DPAD_UP)
         {
             if (p->unk48 == 0)
                 p->unk48 = p->unk4b - 1;
@@ -95,7 +95,7 @@ void sub_0806DD34(struct Unk0806DD34 *p)
                 p->unk48 = p->unk48 - 1;
         }
 
-        if (gpKeySt->unk02 & DPAD_DOWN)
+        if (gpKeySt->repeated & DPAD_DOWN)
         {
             if (p->unk48 == p->unk4b - 1)
                 p->unk48 = 0;

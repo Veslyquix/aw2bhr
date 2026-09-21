@@ -21,10 +21,10 @@ void sub_0802966C(void)
     struct Unk08499594 *unit;
     u8 r;
 
-    if (gpKeySt->unk02 & (DPAD_RIGHT | DPAD_UP))
+    if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_UP))
         sub_080294FC();
 
-    if (gpKeySt->unk02 & (DPAD_LEFT | DPAD_DOWN))
+    if (gpKeySt->repeated & (DPAD_LEFT | DPAD_DOWN))
         sub_08029570();
 
     gUnknown_030033E4.unk00 = gUnknown_03003100.pos.unk00
@@ -34,7 +34,7 @@ void sub_0802966C(void)
 
     sub_08023274(1);
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_08015328(gUnknown_03001FBC);
         sub_08034F8C();
@@ -42,7 +42,7 @@ void sub_0802966C(void)
         gUnknown_030033E4.unk00 = gUnknown_03003F24.pos.unk00;
         gUnknown_030033E4.unk02 = gUnknown_03003F24.pos.unk02;
     }
-    else if (gpKeySt->held & 1)
+    else if (gpKeySt->pressed & 1)
     {
         gUnknown_03003F40 = gUnknown_03001470[gUnknown_03001FBC].unk20;
 

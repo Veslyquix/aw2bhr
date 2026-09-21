@@ -42,7 +42,7 @@ void sub_0804A048(void)
  * sub_0804A124's `>> 6` read exactly. */
 void sub_0804A0A0(void)
 {
-    switch (gpKeySt->held)
+    switch (gpKeySt->pressed)
     {
     case 1:
         sub_0803B4DC(0x71);

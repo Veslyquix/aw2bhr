@@ -14,18 +14,18 @@ void sub_08066220(void)
     u16 v;
 
     sub_08065C9C(gUnknown_08580934->unk08);
-    sub_080660BC(gpKeySt->unk02, gUnknown_08580934->unk32, 1);
+    sub_080660BC(gpKeySt->repeated, gUnknown_08580934->unk32, 1);
     sub_08066078();
 
     if (gUnknown_08580934->unk08 == 2)
     {
         if (gUnknown_08580934->unk31 == 1)
-            gpKeySt->held = 2;
+            gpKeySt->pressed = 2;
         else
-            gpKeySt->held = 1;
+            gpKeySt->pressed = 1;
     }
 
-    v = gpKeySt->held & 2;
+    v = gpKeySt->pressed & 2;
 
     if (v != 0)
     {
@@ -40,7 +40,7 @@ void sub_08066220(void)
 
         sub_0803B4DC(0x66);
     }
-    else if (gpKeySt->held & 1)
+    else if (gpKeySt->pressed & 1)
     {
         sub_080654E8();
         sub_08064A44();

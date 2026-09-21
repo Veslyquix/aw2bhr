@@ -52,12 +52,12 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
             break;
         if (gUnknown_084C30F8->unk836 != 0)
         {
-            if ((gpKeySt->held & 2) != 0)
+            if ((gpKeySt->pressed & 2) != 0)
                 flag = 1;
         }
         else
         {
-            if ((gpKeySt->last & 2) != 0)
+            if ((gpKeySt->unk0c & 2) != 0)
                 sub_080485F8();
             if (sub_08019260())
                 break;
@@ -71,7 +71,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         }
         if (gUnknown_084C30F8->unk836 == 0)
             return;
-        if ((gpKeySt->held & 1) == 0)
+        if ((gpKeySt->pressed & 1) == 0)
             break;
         gUnknown_084C30F8->unk834++;
         break;
@@ -86,7 +86,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         break;
 
     case 2:
-        if ((gpKeySt->last & 2) != 0)
+        if ((gpKeySt->unk0c & 2) != 0)
         {
             sub_080485F8();
             gUnknown_084C30F8->unk834 = 8;
@@ -196,7 +196,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         break;
 
     case 7:
-        if ((gpKeySt->last & 2) != 0)
+        if ((gpKeySt->unk0c & 2) != 0)
             sub_080485F8();
         if (sub_08019260())
             break;

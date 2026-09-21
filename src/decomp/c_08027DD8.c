@@ -34,7 +34,7 @@ struct Unk27DD8
  */
 void sub_08027DD8(struct Unk27DD8 *e)
 {
-    if (gpKeySt->held & (A_BUTTON | B_BUTTON | START_BUTTON))
+    if (gpKeySt->pressed & (A_BUTTON | B_BUTTON | START_BUTTON))
     {
         Proc_EndEach(gUnknown_08499E18);
         sub_0801537C(gUnknown_08499D90);

@@ -15,7 +15,7 @@
  * because the same object is both the tested value and the stored one. Writing
  * the store as a literal 0 loses that.
  *
- * The key is read at gpKeySt->unk00, offset 0, not `held` at +4. */
+ * The key is read at gpKeySt->held, offset 0, not `held` at +4. */
 
 void sub_0802DFC8(void)
 {
@@ -26,7 +26,7 @@ void sub_0802DFC8(void)
     sub_08023908(4);
     sub_08023274(1);
 
-    v = gpKeySt->unk00 & 2;
+    v = gpKeySt->held & 2;
 
     if (v == 0)
     {

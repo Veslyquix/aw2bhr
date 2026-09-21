@@ -14,7 +14,7 @@
 #include "hardware.h"
 #include "proc.h"
 
-/* A proc tick. B (gpKeySt->last & 2) re-opens the view and bumps unk83c; the
+/* A proc tick. B (gpKeySt->unk0c & 2) re-opens the view and bumps unk83c; the
  * proc then breaks unless unk836 is set AND unk83c has fallen back to zero,
  * waits out sub_08019260 and the sub_08048EC4 slide, and finally repaints and
  * breaks.
@@ -31,7 +31,7 @@ void BattleMaps_IDLE_080490BD(ProcPtr proc)
 {
     u16 v;
 
-    if ((gpKeySt->last & 2) != 0)
+    if ((gpKeySt->unk0c & 2) != 0)
     {
         sub_080485F8();
         gUnknown_084C30F8->unk83c++;

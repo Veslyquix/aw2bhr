@@ -62,10 +62,10 @@ void sub_080321F0(ProcPtr proc)
 
 void sub_08032234(ProcPtr proc)
 {
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0803B4DC(0x68);
 
-    if (gpKeySt->held & 9)
+    if (gpKeySt->pressed & 9)
     {
         gUnknown_0849B060->unk09 = gUnknown_0849B060->unk04;
 

@@ -44,14 +44,14 @@ struct Unk77954Proc
 
 /* Wave 35 (W35-B). The "press anything" front end of the same screen
  * sub_08077C70 drives: B breaks the proc, A and R jump to two different labels,
- * and sub_08014824 gates both of the latter. gpKeySt->held is re-loaded after
+ * and sub_08014824 gates both of the latter. gpKeySt->pressed is re-loaded after
  * that call because the call clobbers it, and the two remaining bit tests share
  * the one reload. */
 void sub_08077790(ProcPtr proc)
 {
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_08014878();
         sub_080733A0(5);
@@ -60,13 +60,13 @@ void sub_08077790(ProcPtr proc)
     }
     else if (!sub_08014824())
     {
-        if (gpKeySt->held & 1)
+        if (gpKeySt->pressed & 1)
         {
             sub_08014878();
             sub_0803B4DC(0x1CE);
             Proc_Goto(proc, 1);
         }
-        else if (gpKeySt->held & R_BUTTON)
+        else if (gpKeySt->pressed & R_BUTTON)
         {
             sub_08014878();
             Proc_Goto(proc, 2);

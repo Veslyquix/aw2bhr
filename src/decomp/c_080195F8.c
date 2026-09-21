@@ -39,7 +39,7 @@ void sub_080195F8(void *proc)
 
     if (p->unk1e != 0)
     {
-        if (p->unk1e == 1 && (gpKeySt->last & DPAD_LEFT))
+        if (p->unk1e == 1 && (gpKeySt->unk0c & DPAD_LEFT))
         {
             p->unk1e = 0;
             sub_08019578(p);
@@ -47,7 +47,7 @@ void sub_080195F8(void *proc)
             return;
         }
     }
-    else if (gpKeySt->last & (B_BUTTON | DPAD_RIGHT))
+    else if (gpKeySt->unk0c & (B_BUTTON | DPAD_RIGHT))
     {
         p->unk1e = 1;
         sub_08019578(p);
@@ -55,7 +55,7 @@ void sub_080195F8(void *proc)
         return;
     }
 
-    if (gpKeySt->last & 1)
+    if (gpKeySt->unk0c & 1)
     {
         gUnknown_03002EE4 = p->unk1e;
         sub_080179D0(p->unk28);
