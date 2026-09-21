@@ -977,3 +977,335 @@ void sub_08002964(int a1, int a2, int a3, int a4, int a5, int a6) {
     attr0 |= 0x100;
   sub_0801BD00(attr1, attr0, gUnknown_08485CF4[a1], 0x1000);
 }
+
+/* Draws one CO-power / terrain-window sprite, loading its graphic into OBJ
+ * VRAM first when a6 says to.  a1 selects the army: 0 uses the fixed VRAM slot
+ * at 0x06014BC0, anything else the per-army slot eight tiles further along.
+ *
+ * FOUND BY THE PERMUTER (wave 61) after this function had been parked since
+ * wave 52 as "compiler output we cannot spell".  TWO THINGS BELOW ARE
+ * LOAD-BEARING AND MUST NOT BE TIDIED AWAY -- both were re-checked with
+ * trymatch after each edit:
+ *
+ *   1. `idxBase` HOLDS 0x28C IN A VARIABLE, assigned before the `if (a6)`.
+ *      That is the fold barrier.  Written as a literal, agbcc collapses
+ *      ((a1 - 1) * 8 + 0x28C) * 32 + 0x06010000 to `lsls r6,#8` plus a
+ *      0x06015080 pool word; held in a variable it emits the ROM's own
+ *      unfolded `movs #0xa3; lsls #2; adds; lsls #5; ldr =0x06010000; adds`.
+ *      Waves 52, 57 and 59 ruled out statement splits, block boundaries,
+ *      reference counts and all six compiler profiles looking for this; a
+ *      variable-held constant is what it turned out to be.
+ *
+ *   2. `t = (a1 - 1) * 8;` LOOKS DEAD AND IS NOT.  Nothing reads t afterwards,
+ *      but deleting the store loses the match, and so does reusing t as the
+ *      index in place of recomputing (a1 - 1) * 8 in the expression (196
+ *      bytes).  The store is doing register-allocation work, so the source
+ *      really does compute that product twice.
+ *
+ * t is read for gUnknown_08489190[t] in both arms BEFORE it is overwritten,
+ * so the reuse is legitimate and the source argument is the diamond's.
+ */
+void sub_080029F4(int a1, int a2, int a3, int a4, int a5, int a6)
+{
+    u8 t;
+    int k;
+    void *src;
+    int attr0;
+    int attr1;
+    int idxBase;
+
+    t = gUnknown_02028E40;
+    k = a4 & 0x3F;
+    idxBase = 0x28C;
+
+    if (a6 != 0)
+    {
+        if (a1 == 0)
+        {
+            if (k != 0x19)
+                src = (void *)sub_0802A838(k);
+            else
+                src = gUnknown_08489190[t];
+
+            sub_08011E54(src, (void *)0x06014BC0, 0x100);
+        }
+        else
+        {
+            if (k != 0x19)
+                src = (void *)sub_0802A838(k);
+            else
+                src = gUnknown_08489190[t];
+
+            t = (a1 - 1) * 8;
+            sub_08011E54(src,
+                         (void *)(0x06010000 + ((((a1 - 1) * 8) + idxBase) << 5)),
+                         0x100);
+        }
+    }
+
+    attr1 = (a2 - 4) & 0x1FF;
+    attr0 = (a3 & 0xFF) | 0x400;
+    if (a5)
+        attr0 |= 0x100;
+
+    sub_0801BD00(attr1, attr0, gUnknown_08485D68[a1], 0x1000);
+}
+
+void sub_08002AB0(void)
+{
+    int i;
+    int j;
+    int flag;
+    struct Unk0200B0D0 *q;
+
+    if (gActiveMap->unk00 & 0x10)
+    {
+        sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
+        if (gActiveMap->unk02 == 0x33)
+        {
+            flag = gActiveMap->unk07;
+            j = gActiveMap->unk3a + 3;
+            if (flag == 0)
+                j = gActiveMap->unk3a + 4;
+            if (j > 9)
+                j -= 10;
+            switch (gUnknown_0200B0D0[j].unk04 & 0x1F)
+            {
+            case 6:
+            case 8:
+            case 10:
+            case 11:
+            case 14:
+                if (gActiveMap->unk6b == -1)
+                    sub_08007B54();
+                break;
+            }
+        }
+        else
+        {
+            sub_08007B74();
+        }
+    }
+
+    j = gActiveMap->unk3a;
+    for (i = 9; i >= 0; i--)
+    {
+        q = &gUnknown_0200B0D0[j];
+        j++;
+        if (j > 9)
+            j -= 10;
+        if (q->unk00 & 1)
+        {
+            if (!(q->unk00 & 0x80))
+                sub_08002964(q->unk06 + 1, (q->unk0c >> 8) - 4, (q->unk10 >> 8) + 0x21, q->unk04, q->unk00 & 0x20, q->unk00 & 8);
+            if (!(q->unk00 & 0x40))
+                sub_0800272C(q->unk06 + 1, q->unk0c >> 8, q->unk10 >> 8, q->unk04, q->unk00 & 0x10, q->unk00 & 0x100, q->unk00 & 8);
+            q->unk00 &= ~8;
+        }
+    }
+}
+
+void sub_08002C38(void)
+{
+    int i;
+    int j;
+    struct Unk0200B0D0 *q;
+
+    if (gActiveMap->unk00 & 0x10)
+    {
+        sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
+        if (gActiveMap->unk02 == 0x33)
+        {
+            j = gActiveMap->unk3a + 3;
+            if (j > 7)
+                j = gActiveMap->unk3a - 5;
+            if (gUnknown_0200B0D0[j].unk04 != 0x19)
+            {
+                if (gActiveMap->unk6b == -1)
+                    sub_08007B54();
+            }
+            else
+            {
+                sub_08007B74();
+            }
+        }
+    }
+
+    j = gActiveMap->unk3a;
+    for (i = 7; i >= 0; i--)
+    {
+        q = &gUnknown_0200B0D0[j];
+        j++;
+        if (j > 7)
+            j -= 8;
+        if (q->unk00 & 1)
+        {
+            if (!(q->unk00 & 0x80))
+                sub_080029F4(q->unk06 + 1, (q->unk0c >> 8) - 4, (q->unk10 >> 8) + 0x21, q->unk04, q->unk00 & 0x20, q->unk00 & 8);
+            if (!(q->unk00 & 0x40))
+                sub_08002844(q->unk06 + 1, q->unk0c >> 8, q->unk10 >> 8, q->unk04, q->unk00 & 0x10, q->unk00 & 0x100, q->unk00 & 8);
+            q->unk00 &= ~8;
+        }
+    }
+}
+
+void sub_08002D7C(void)
+{
+    sub_0801F114();
+    sub_0801F150(1, (void *)0x06010000, 0x31C, 0x14);
+    sub_0801F234(0x3E);
+    sub_0801F234(0x3F);
+    sub_0801F234(0x40);
+    sub_0801F234(0x41);
+    sub_0801F150(2, (void *)0x06010000, 0x32C, 0x1D);
+    sub_0801F234(0x54);
+    sub_0801F234(0x90);
+    sub_0801F234(0x91);
+    sub_0801F234(0x8E);
+    sub_0801F234(0x8F);
+    sub_0801F234(0xAA);
+    sub_08002EF8();
+}
+
+void sub_08002DEC(void)
+{
+    ApplyPaletteExt((u16 *)sub_0802A8AC(3, 0), 0x2E0, 0x20);
+    ApplyPaletteExt((u16 *)sub_0802A8AC(0xF, 0), 0x2C0, 0x20);
+    ApplyPaletteExt((u16 *)sub_0802A8AC(1, 0), 0x3C0, 0x20);
+    ApplyPaletteExt((u16 *)sub_0802A8AC(5, 0), 0x3E0, 0x20);
+}
+
+/* A 0x460-byte VRAM push and one call. 0x460 is `movs #0x8c; lsls #3`, agbcc's
+ * way of building an even constant above 255 without a pool word. */
+void sub_08002E3C(void)
+{
+    sub_08011E54(gUnknown_0808D8AC, (void *)0x06014D40, 0x460);
+    sub_08002EF8();
+}
+
+void sub_08002E5C(void)
+{
+    sub_08011E54(gUnknown_0808D8AC, (void *)0x06014D40, 0x460);
+    sub_08002EF8();
+    sub_08011E54(gUnknown_0808DD0C, (void *)0x06016180, 0x200);
+    sub_08011E54(gUnknown_0808DF0C, (void *)0x06016140, 0x20);
+    sub_08011E54(gUnknown_0808DF2C, (void *)0x06016160, 0x20);
+}
+
+/* F018: `push {lr}; bl a; bl b; bl c; pop {r0}; bx r0`.
+ * THREE INDEPENDENT STATEMENTS, not a nest. Nothing moves r0 between the `bl`s,
+ * which by itself does not separate `c(b(a()))` from three calls -- both leave
+ * r0 alone. What settles it is the callees: all three take no arguments (none
+ * of them reads r0-r3 before writing it) and all three end `pop {r0}`, i.e.
+ * void, so there is no value to nest. src/decomp/c_08048558.c is the matched
+ * exemplar of the same shape. */
+void sub_08002EB4(void)
+{
+    sub_08002DEC();
+    sub_08002D7C();
+    sub_08002E5C();
+}
+
+/* Bit 5 of the flag word gates a two-way choice on unk07.
+ *
+ * unk07 is read `movs r0, #7; ldrsb r0, [r2, r0]` -- the reg+reg form agbcc
+ * rewrites a plain s8 member load into, and the same tell that settled unk06 in
+ * sub_08000664. The pointer is loaded once and held: nothing here writes
+ * through it, so there is no aliasing reload.
+ *
+ * Wave 31 declared this `void (void)` from its call sites in sub_08000DC0
+ * before its body had been read; the body agrees -- no argument register is
+ * read, and the epilogue is `pop {r0}; bx r0`. */
+void sub_08002EC8(void)
+{
+    sub_08001DAC();
+
+    if ((gActiveMap->unk00 & 0x20) == 0)
+    {
+        if (gActiveMap->unk07 == 0)
+            sub_08002AB0();
+        else
+            sub_08002C38();
+    }
+}
+
+/* One call whose second argument is 0xAB or 0xAA depending on unk07, and whose
+ * first is always 0xAA.
+ *
+ * An if/ELSE, not `v = 0xAA;` followed by a guarded overwrite: both spellings
+ * preset r1 to 0xAA and conditionally replace it, but the plain assignment puts
+ * that `movs r1, #0xaa` ahead of the pool load, where the ROM has it after the
+ * field has been read.
+ *
+ * The two 0xAA are NOT shared: agbcc does not CSE a `movs` of a small constant
+ * across a branch -- the same observation as src/decomp/c_0802D168.c's two
+ * `movs r0, #1`. */
+void sub_08002EF8(void)
+{
+    int v;
+
+    if (gActiveMap->unk07 == 0)
+        v = 0xAB;
+    else
+        v = 0xAA;
+
+    sub_0801F1EC(0xAA, v);
+}
+
+/* Draws the 5x4 grid of unit icons from a 20-halfword template copied onto the
+ * stack. `k` walks the template flat while `i` and `j` place the cell: `x`
+ * steps 0x14 across a row from 0x4C, `y` steps 0x19 down from 0x13.
+ *
+ * `gUnknown_08485CC8[i + 1]` is why `adds r6, #1` sits in the middle of the
+ * body rather than at the bottom -- the same idiom the matched sub_08003640
+ * uses on gUnknown_08485C9C, and it is what makes the counter run 1..4 while
+ * the coordinate givs run from the i = 0 origin.
+ *
+ * The `lsls #0x10` hoisted into the outer loop with only the `lsrs #0x10` left
+ * at the call is LICM on the u16 conversion sub_0802BD54's second parameter
+ * forces; it must not be authored. */
+void sub_08002F1C(void)
+{
+    u16 buf[0x14];
+    int i, j, k, x, y;
+    u16 t;
+
+    sub_0808B6E8(buf, gUnknown_0808D728, 0x28);
+    y = 0x13;
+    k = 0;
+    for (j = 0; j <= 4; j++)
+    {
+        x = 0x4C;
+        for (i = 0; i <= 3; i++)
+        {
+            t = buf[k];
+            sub_0802BD54((x + 0xA) & 0x1FF, (y + 0x10) | 0x400, sub_0800C8A0(t));
+            sub_0801BD00((x + 2) & 0x1FF, y | 0x400, gUnknown_08485CC8[i + 1],
+                         sub_08001D04(t) << 12);
+            x += 0x14;
+            k++;
+        }
+        y += 0x19;
+    }
+}
+
+/* Loads the four unit-slot graphics named by a 4-byte template on the stack.
+ *
+ * `gUnknown_08485C9C[i + 1]` is the same spelling the matched sub_08003640
+ * (src/decomp/c_08003640.c) uses on the same table, and it is what puts
+ * `adds r4, #1` between the two array reads: the template is indexed with the
+ * pre-increment value and the tile table with the post-increment one. */
+void sub_08002FE4(void)
+{
+    u8 buf[4];
+    int i;
+
+    sub_0808B6E8(buf, gUnknown_0808D750, 4);
+    sub_0801A444(9, 2, 0xB, 0x11);
+    sub_08013AD4(2);
+    for (i = 0; i <= 3; i++)
+    {
+        sub_0803F6BC(buf[i] & 0x1F, 0,
+                     (void *)(0x06010000 + (gUnknown_08485C9C[i + 1] << 5)), 1);
+    }
+}

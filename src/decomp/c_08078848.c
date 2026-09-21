@@ -16,9 +16,11 @@
  * absence of any `lsl`/`lsr` pair between two `bl`s is also what keeps every
  * link int-wide. */
 
-void sub_08078848(void)
+void SetupCoSelectGreatSeaBattle(void)
 {
     sub_080785FC();
     sub_080786A4(sub_08078608(sub_080786F0(0)));
     sub_08078740();
 }
+
+asm(".global sub_08078848\n.thumb_set sub_08078848, SetupCoSelectGreatSeaBattle\n");

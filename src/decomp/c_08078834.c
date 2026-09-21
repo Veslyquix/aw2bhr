@@ -36,9 +36,11 @@
  * builders and does consume it.
  */
 
-void sub_08078834(void)
+void SetupCoSelectNeotanksGe(void)
 {
     sub_080785FC();
     sub_080786F0(0);
     sub_08078740();
 }
+
+asm(".global sub_08078834\n.thumb_set sub_08078834, SetupCoSelectNeotanksGe\n");

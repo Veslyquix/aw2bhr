@@ -20,12 +20,14 @@
  * sub_08078790, 0xd4 bytes above, is the short version of the same source --
  * `sub_080785FC(); sub_08078740(sub_08078608(0));`.
  */
-void sub_08078864(void)
+void SetupCoSelectHotPursuit(void)
 {
     sub_080785FC();
     sub_080786A4(sub_080786F0(sub_08078658(sub_08078608(0))));
     sub_08078758();
 }
+
+asm(".global sub_08078864\n.thumb_set sub_08078864, SetupCoSelectHotPursuit\n");
 
 /* Family F001 forwarder, 12 bytes:
  *     push {lr}
@@ -39,10 +41,12 @@ void sub_08078864(void)
  * The callee reads no argument register before writing it, so there
  * is no parameter to pass through either.
  */
-void sub_08078884(void)
+void SetupCoSelectFinalFront(void)
 {
     sub_08078864();
 }
+
+asm(".global sub_08078884\n.thumb_set sub_08078884, SetupCoSelectFinalFront\n");
 
 /* Family F001 forwarder, 12 bytes:
  *     push {lr}

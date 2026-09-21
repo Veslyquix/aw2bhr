@@ -85,4 +85,14 @@ void InitGameSettings(void);
 void LoadGameplayGraphics(int a);
 void HandleRulesMenuInput(void);
 
+void SetupCoSelectLiberation(void);
+void SetupCoSelectNeotanksBm(void);
+void SetupCoSelectFactoryBlues(void);
+void SetupCoSelectNeotanksYc(void);
+void SetupCoSelectHuntsEnd(void);
+void SetupCoSelectNeotanksGe(void);
+void SetupCoSelectGreatSeaBattle(void);
+void SetupCoSelectHotPursuit(void);
+void SetupCoSelectFinalFront(void);
+
 #endif /* GUARD_DATA_NAMES_H */

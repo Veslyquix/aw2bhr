@@ -12,7 +12,7 @@
 /* sub_080787B8's twin, 0x48 bytes along: the same shape with the roles of
  * sub_08078658 and sub_080786A4 swapped and the tag 0x6a instead of 0x6b. */
 
-void sub_08078800(void)
+void SetupCoSelectHuntsEnd(void)
 {
     s32 i;
 
@@ -30,3 +30,5 @@ void sub_08078800(void)
         sub_08078740();
     }
 }
+
+asm(".global sub_08078800\n.thumb_set sub_08078800, SetupCoSelectHuntsEnd\n");

@@ -57,12 +57,14 @@
  * builders and does consume it.
  */
 
-void sub_08078790(void)
+void SetupCoSelectLiberation(void)
 {
     sub_080785FC();
     sub_08078608(0);
     sub_08078740();
 }
+
+asm(".global sub_08078790\n.thumb_set sub_08078790, SetupCoSelectLiberation\n");
 
 /* The gUnknown_030058E0 display-list variant: sub_080785FC resets the cursor
  * and sub_08078740 clears the five words of gUnknown_030059C0, and both are
@@ -71,9 +73,11 @@ void sub_08078790(void)
  * builders and does consume it.
  */
 
-void sub_080787A4(void)
+void SetupCoSelectNeotanksBm(void)
 {
     sub_080785FC();
     sub_08078658(0);
     sub_08078740();
 }
+
+asm(".global sub_080787A4\n.thumb_set sub_080787A4, SetupCoSelectNeotanksBm\n");

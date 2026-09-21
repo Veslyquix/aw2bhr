@@ -20,7 +20,7 @@
  * expression: the pseudo lives in r4 across the sub_0803CBD8 call, so each
  * assignment emits its copy even though only the second is read. */
 
-void sub_080787B8(void)
+void SetupCoSelectFactoryBlues(void)
 {
     s32 i;
 
@@ -38,3 +38,5 @@ void sub_080787B8(void)
         sub_08078740();
     }
 }
+
+asm(".global sub_080787B8\n.thumb_set sub_080787B8, SetupCoSelectFactoryBlues\n");
