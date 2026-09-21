@@ -44,7 +44,7 @@ struct Unk08057EC0Rec
     /* 0x02 */ s16 unk02;
 };
 
-int sub_08057F00(int a1)
+int CountUnitsWithTypeTag(int a1)
 {
     int i;
     int count;
@@ -60,6 +60,8 @@ int sub_08057F00(int a1)
 
     return count;
 }
+
+asm(".global sub_08057F00\n.thumb_set sub_08057F00, CountUnitsWithTypeTag\n");
 
 int sub_08057F54(int a1)
 {

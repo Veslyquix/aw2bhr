@@ -9,7 +9,7 @@
 
 void sub_08034A7C(int y, int b)
 {
-    char *s = (char *)gUnknown_08610A38[gUnknown_08499CCC[b]];
+    char *s = (char *)gTextTable[gUnknown_08499CCC[b]];
     int x = sub_08034A44(s);
 
     sub_08034A58(y, s);

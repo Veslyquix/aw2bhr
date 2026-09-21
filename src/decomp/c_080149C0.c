@@ -150,7 +150,7 @@ void sub_08014A5C(int a1, int a2, void *a3, int a4, int a5, int a6)
   u16 *v;
   new_var = sub_08015BD0(0);
   s = (struct Unk08014074 *) (&gUnknown_03001470[new_var]);
-  s->unk20 = gUnknown_08610A38[d];
+  s->unk20 = gTextTable[d];
   s->unk24 = 0;
   s->unk28 = a3;
   s->unk2c = e;

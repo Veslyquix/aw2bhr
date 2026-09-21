@@ -42,7 +42,7 @@ void sub_08026BAC(void)
         gPlayers[i].aiControlled = 0;
         gPlayers[i].turnState = 0;
         gPlayers[i].coMode = 0;
-        gPlayers[i].unk1f = 0;
+        gPlayers[i].coActivationMode = 0;
         gPlayers[i].coCharge = 0;
         gPlayers[i].unk24 = 0;
         gPlayers[i].unk25 = 0;

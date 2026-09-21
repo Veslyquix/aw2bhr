@@ -7,7 +7,7 @@
  * sub_080440A8 @ 0x080440A8, sub_080440E0 @ 0x080440E0
  */
 
-void sub_080440A8(int a1, int a2)
+void SpendCoPowerCharge(int a1, int a2)
 {
     int v;
 
@@ -25,6 +25,8 @@ void sub_080440A8(int a1, int a2)
         v = 0;
     sub_08044080(a1, v);
 }
+
+asm(".global sub_080440A8\n.thumb_set sub_080440A8, SpendCoPowerCharge\n");
 
 void sub_080440E0(int a1, int a2)
 {

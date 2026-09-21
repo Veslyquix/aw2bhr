@@ -34,7 +34,7 @@ void sub_08045564(struct Unk45564Proc *proc)
     y = proc->unk30;
     flag = 0;
 
-    if (gPlayers[gUnknown_030033EC].unk1f == 2)
+    if (gPlayers[gUnknown_030033EC].coActivationMode == 2)
         flag = 1;
 
     sub_08044B08(x, y, flag);

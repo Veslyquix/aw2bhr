@@ -4306,7 +4306,7 @@ void sub_08086CE0(u32, int, int);
 
 /* Wave 46, W46-G.  Copied from the promoted definition in
  * src/decomp/c_0802490C.c, which is authoritative -- it returns a `u8 *` out of
- * gUnknown_08610A38 and nothing narrows it.  sub_08086BF8/sub_08086CE0 are the
+ * gTextTable and nothing narrows it.  sub_08086BF8/sub_08086CE0 are the
  * first callers to need it; they hand the result straight to sub_080149C0's
  * `u8 *` fourth parameter. */
 u8 *sub_08024944(u16);
@@ -4429,7 +4429,7 @@ void sub_08073574(int, int, int, int, int, int);
  * each -- r0..r3 plus two words at [sp] and [sp, #4]. They differ in the third
  * argument's type and that is real: sub_08014668 takes a u16 tile value read
  * with `ldrh`, sub_080149C0 takes a `u8 *` read with `ldr` out of
- * gUnknown_08610A38. */
+ * gTextTable. */
 /* Wave 21 (W21-A) corrects sub_08014668 on two axes, from the body rather than
  * from the call sites:
  *   Arguments 4..6 are `u16`, not `int`. They are narrowed `lsls #0x10;
@@ -6303,7 +6303,7 @@ void sub_0800CFDC(int, int);
  * (`lsrs`). Parameter 4 is stored as a word at +0x28 and never narrowed, and
  * is `u16 *` only so that sub_08014668's third argument forwards without a
  * cast. Parameters 5 and 7 are `u16` on the body's own evidence (5 is
- * zero-extended and scaled `lsrs #0xe` into gUnknown_08610A38[]; 7 is
+ * zero-extended and scaled `lsrs #0xe` into gTextTable[]; 7 is
  * zero-extended and stored to two halfwords); 6 is only ever `strh`'d, so its
  * width is a floor and u16 is the weakest spelling that costs the callers
  * nothing. */
@@ -6614,7 +6614,7 @@ void sub_080185BC(struct Unk0200C528 *);
 /* Wave 33, W33-G. The two gUnknown_0200C528 list-script handlers next door to
  * sub_08018758, and the same bool8 shape: `movs r3,#0` / `movs r3,#1` split
  * across a `b` into one `adds r0,r3,#0`. sub_08014004's argument is the
- * `u8 *` element of gUnknown_08610A38[] (the sub_080149C0 precedent above) and
+ * `u8 *` element of gTextTable[] (the sub_080149C0 precedent above) and
  * its result is re-narrowed `lsls #0x18` at the call site, which is a byte
  * return. */
 bool8 sub_08014004(u8 *);
@@ -6735,7 +6735,7 @@ void sub_0801F2AC(int, u16 *);
 /* Wave 37, W37-A. The two forwarders described in the note above, declared for
  * their only callers sub_0800572C and sub_08005874. sub_08004D74 pushes only
  * {lr} and forwards r0/r1 into sub_08004DD4 untouched, adding
- * gUnknown_08610A38[0x9FA] and a literal 0 -- so two wide parameters. Both end
+ * gTextTable[0x9FA] and a literal 0 -- so two wide parameters. Both end
  * `pop {r0}; bx r0`, the VOID epilogue. sub_08004D90's third parameter is the
  * same `u8 *` sub_08004DD4 declares: both call sites hand it
  * `gDesignRoomName` straight through with `adds r2, rN, #0`. */
@@ -9747,7 +9747,7 @@ void sub_08067ED0(u8, u16, int, int, int, int, u8, u8, ProcPtr);
  * definition. Same shape as sub_08068810 below. */
 void sub_080686E8(int, int, u16, u8, ProcPtr);
 /* Wave 36, W36-K. The graphics loader both sub_080686E8 and sub_08068810 hand
- * a `gUnknown_08610A38[]` blob to. First parameter is `u8 *`: the body walks it
+ * a `gTextTable[]` blob to. First parameter is `u8 *`: the body walks it
  * with `ldrb [p]` and `ldrb [p + n]` as a 0xff-terminated id list. Second is
  * u16 (`lsls #0x10; lsrs #0x10` at entry, then `lsls #5` for a 0x20-byte VRAM
  * stride). Returns the loop counter held in ip -- an `int` count, not a u8;
@@ -9755,7 +9755,7 @@ void sub_080686E8(int, int, u16, u8, ProcPtr);
  * the weaker fit that costs no caller a re-narrowing. */
 int sub_08068038(u8 *, u16);
 /* Wave 36, W36-K. sub_080686E8's seven-argument sibling: same proc setup, same
- * gUnknown_085D3DD0 -> gUnknown_08610A38 -> sub_08068038 graphics chain, but it
+ * gUnknown_085D3DD0 -> gTextTable -> sub_08068038 graphics chain, but it
  * fills four more proc bytes (+0x38, +0x39, +0x4e, +0x4f) instead of +0x4d.
  * Arguments 5 and 6 narrow at entry exactly as sub_080686E8's 3 and 4 do. */
 void sub_08068810(int, int, int, int, u16, u8, ProcPtr);

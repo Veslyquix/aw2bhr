@@ -18,7 +18,7 @@
  * different objects.  The honest spelling (name the real global, never the
  * 0x08090Cxx slot) is what produced this match.
  *
- * gUnknown_08610A38 is NOT a pool slot -- a scaled index is added before the
+ * gTextTable is NOT a pool slot -- a scaled index is added before the
  * load, so it is a genuine array base and is referenced normally.
  *
  * Three readings that each cost an attempt:
@@ -67,7 +67,7 @@ void sub_0802D7B4(int a1)
             v = 0x100;
         }
 
-        s = gUnknown_08610A38[*(u16 *)&gUnknown_085D5ABC[
+        s = gTextTable[*(u16 *)&gUnknown_085D5ABC[
                 gUnknown_02023830[((s16)base + i) * 4]]];
 
         buf[0] = 0x19;

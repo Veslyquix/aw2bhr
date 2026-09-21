@@ -2793,7 +2793,7 @@ struct PlayerStruct /* 0x3c */
                            * `movs #2; ands` mask (wave 13, A2) */
     /* 0x1d */ u8 co; /* indexes gUnknown_085D3DD0 (sub_08043D84) */
     /* 0x1e */ u8 coMode;
-    /* 0x1f */ u8 unk1f;
+    /* 0x1f */ u8 coActivationMode;
     /* 0x20 */ u32 coCharge;
     /* 0x24 */ u8 unk24; /* wave 25: zeroed with a plain `strb` by sub_0804438C
                           * right after it runs the per-turn income for the same
@@ -3958,7 +3958,7 @@ struct Unk085C77A0 /* 0x5c */
                            * of Decompress(u8 *, void *)). Non-const for the
                            * same reason. */
     /* 0x14 */ u16 nameIndex; /* Wave 29, W29-A. sub_08024944 reads it `ldrh` and
-                           * uses it to index gUnknown_08610A38[], so it is a
+                           * uses it to index gTextTable[], so it is a
                            * table row id. Width from the load; signedness
                            * unproved (a subscript is u16-context). */
     /* 0x16 */ u8 unk16; /* wave 24: sub_08078E48 reads it `ldrb` off the
@@ -4132,7 +4132,7 @@ struct Unk085C77A0 /* 0x5c */
  * wrong base. Anything citing the old numbering wants +8 added to it. */
 struct Unk085D3DD0Entry /* 0x44 */
 {
-    /* 0x00 */ u32 powerNameId; /* indexes gUnknown_08610A38 (sub_08039F18) */
+    /* 0x00 */ u32 powerNameId; /* indexes gTextTable (sub_08039F18) */
     /* 0x04 */ void (*powerAssembly)(void *); /* wave 32 (W32-C): sub_08044B28 loads it
                                        * and calls it through `bl _call_via_r1`
                                        * with its own ProcPtr argument in r0 --
@@ -4199,10 +4199,10 @@ struct Unk085D3DD0Entry /* 0x44 */
 struct Unk085D3DD0 /* 0x104 */
 {
     /* 0x00 */ u32 nameIndex; /* Wave 36, W36-K: carved out of filler_00[0x04]. A
-                           * subscript into gUnknown_08610A38[] (the same role
+                           * subscript into gTextTable[] (the same role
                            * unk38[..].unk00 plays at +0x38): sub_080686E8 and
                            * sub_08068810 both do `ldr` at the row base and then
-                           * `lsls #2; adds` off gUnknown_08610A38 to reach the
+                           * `lsls #2; adds` off gTextTable to reach the
                            * graphics blob they hand sub_08068038. Whole word,
                            * so not four filler bytes. Start offset unchanged,
                            * so the carve is byte-neutral for every other
@@ -4311,7 +4311,7 @@ struct Unk085D5ABC /* 0x5c */
                            * readers agree they are `ldrh` at +2 / +4 off the
                            * `unk00 * 0x5c` stride. sub_0803A2BC hands each to
                            * a separate sub_08014A5C (sprite ids 7 and 0xd),
-                           * and sub_0803A5B8 subscripts gUnknown_08610A38[]
+                           * and sub_0803A5B8 subscripts gTextTable[]
                            * with them, so they are a two-entry graphic id
                            * pair. */
     /* 0x04 */ u16 unk04;
@@ -5352,7 +5352,7 @@ extern u8 gUnknown_0200B614[];
  * sub_080147B4 builds it field by field and sub_080145E8 copies exactly the
  * same fields, in exactly the same order, out of gUnknown_0200C020 -- so the
  * two functions agree on every width below, and the tail now reaches 0x40:
- *   +0x20 is `gUnknown_08610A38[arg5]`, i.e. a `u8 *` (that array is declared
+ *   +0x20 is `gTextTable[arg5]`, i.e. a `u8 *` (that array is declared
  *     `u8 *[]` above);  +0x28 is sub_080147B4's `u16 *` argument forwarded;
  *   +0x2c/+0x2e/+0x34/+0x36 are `strh`/`ldrh`;  +0x30..+0x33, +0x38 and +0x40
  *     are `strb`/`ldrb`;  +0x3c is written with `=sub_08013AEC`, a
@@ -7696,7 +7696,7 @@ extern struct Unk0808E5C8 gUnknown_0200C624[];
  * its own .rodata level on top, so the draft reads .LC -> &g -> g -> element
  * where the ROM reads .LC -> g -> element. See the same correction on
  * gUnknown_080909E8 below. The force-addr level appears only for an address
- * referenced more than once: in the same function gUnknown_08610A38,
+ * referenced more than once: in the same function gTextTable,
  * gUnknown_08499588 and gUnknown_03002F08 are each named once and each get an
  * ordinary direct pool word. */
 /* A byte-stream script walked by sub_0801B8A8, which is a
@@ -10767,7 +10767,7 @@ extern const struct Unk0816E120 gUnknown_0816E120;
 /* See struct Unk0816E1B8 for why this is const and why it is an extra level of
  * indirection in front of gUnknown_08580934 rather than a global of its own. */
 extern struct Unk0816E1B8 *const gUnknown_0816E1B8;
-extern u8 *gUnknown_08610A38[];
+extern u8 *gTextTable[];
 /* A ROM u16 table read as `gUnknown_08616F0C[unk1d * 4 + gUnknown_03005940]` by
  * sub_080852A8 -- FLAT and not `[][4]`: the ROM scales the row index and then
  * adds the column before the single element shift (`lsl #2; add; lsl #1`),
@@ -11816,7 +11816,7 @@ extern u16 *const *const gUnknown_0849BC30[];
  * instead, per the "evidence about YOUR access, not about the object" rule. */
 extern const u8 gUnknown_0849BC38[];
 /* Wave 34, W34-C. sub_08034A7C indexes it by its own second argument and uses
- * the loaded word to index gUnknown_08610A38[], i.e. a table of string ids. */
+ * the loaded word to index gTextTable[], i.e. a table of string ids. */
 extern const int gUnknown_08499CCC[];
 /* A ROM word holding the base of the stride-8 record array gUnknown_03003338
  * and gUnknown_03003F20 point into; sub_0803486C copies element 0 into both. */
@@ -11862,7 +11862,7 @@ struct Unk085D583C /* 0x14 */
     /* 0x0c */ u16 nameIndex;   /* Wave 49, W49-J. The remaining two bytes of the old
                              * filler_08. A HALFWORD (`ldrh [.,#0xc]`) used by
                              * sub_08046914 as a word subscript into
-                             * gUnknown_08610A38[] -- `lsls #2; adds` off that
+                             * gTextTable[] -- `lsls #2; adds` off that
                              * table's base, the same role struct
                              * Unk085D3DD0Entry.unk00 plays. */
     /* 0x0e */ u16 descriptionIndex; /* wave 13 (A2): sub_08046D30 reads it `ldrh [.,#0xe]`
@@ -15295,7 +15295,7 @@ struct Unk0849EDB0 /* 0x18 */
     /* 0x01 */ u8 filler_01[0x01];
     /* 0x02 */ u16 unk02; /* Wave 35, W35-L. `ldrh`, used by sub_080487B4 as
                            * the index into the `u8 *` table
-                           * gUnknown_08610A38. */
+                           * gTextTable. */
     /* 0x04 */ u32 unk04; /* Wave 35, W35-L. A word (`ldr`) that sub_080487B4
                            * passes as sub_08014B0C's fourth argument. INTEGER
                            * and not a pointer: sub_08047B98 fills the same
@@ -17876,8 +17876,8 @@ extern int gUnknown_081CC538[];
 /* Six halfwords immediately before the 0x081CC584 literal pool (see the
  * force-addr note below), subscripted by gUnknown_081CC4F8[]'s element with
  * `lsls #1; ldrh` in sub_08075F44 and used in turn to index
- * gUnknown_08610A38[]. Values 0x0CEF..0x0CF3 -- string ids, the same role the
- * gUnknown_08610A38 subscripts elsewhere in the ROM carry. */
+ * gTextTable[]. Values 0x0CEF..0x0CF3 -- string ids, the same role the
+ * gTextTable subscripts elsewhere in the ROM carry. */
 extern u16 gUnknown_081CC578[];
 /* FORCE-ADDR, NOT OBJECTS: 0x081CC584, 0x081CC588 and 0x081CC58C hold
  * 0x0202FDFC, 0x03002B6C and 0x030030B4 -- the addresses of gUnknown_0202FDFC,
@@ -19079,7 +19079,7 @@ extern u8 gUnknown_02012790[];
  *   0823E140  `Decompress(u8 *, void *)`'s source, into gUnknown_0200FC50.
  *   0823FFA8  the same, into gUnknown_0200FC50 a second time.
  *   0849F658  indexed `lsls #1; ldrh` by gPlayers[].unk1a, so `u16 []`;
- *             the halfword it yields is then the subscript of gUnknown_08610A38.
+ *             the halfword it yields is then the subscript of gTextTable.
  *   084C3F38  sub_080149C0's `u8 *` fourth parameter, passed by name.
  * None can be `const`: Decompress, sub_08011C68 and sub_080149C0 all take
  * non-const pointers and -Werror rejects the qualifier being dropped. Note that

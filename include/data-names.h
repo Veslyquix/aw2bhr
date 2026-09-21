@@ -101,4 +101,11 @@ void AiCalcBuildPriorities(void);
 int AiBuildPropertyList(void);
 void AiScanBuildableFacilities(void);
 
+int CountUnitsWithTypeTag(int a1);
+u32 GetPlayerSpecialAbilities(int a1);
+int GetCoCaptureRate(int a, int b);
+void SpendCoPowerCharge(int a1, int a2);
+void ActivateCoPower(int a1, int a2, ProcPtr a3);
+void FillMapBuffer(u8 *dst, int value);
+
 #endif /* GUARD_DATA_NAMES_H */

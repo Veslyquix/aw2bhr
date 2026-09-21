@@ -49,6 +49,12 @@ gPlayers = gUnknown_08499598;
 gGameClock = gUnknown_03004008;
 gDesignRoomName = gUnknown_0200B204;
 
+/* gTextTable: the 3316-entry string table at 0x08610A38 that every *NameIndex
+ * in this tree subscripts -- struct Unk085D3DD0's nameIndex and its power
+ * blocks' powerNameId, and the map header's nameIndex. Named from the Xenesis
+ * datasheet ('Text Table Starts', 3316 entries). Linker alias, as gMap. */
+gTextTable = gUnknown_08610A38;
+
 SECTIONS
 {
 	. = 0x02000000;

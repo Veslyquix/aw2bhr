@@ -24,7 +24,7 @@ void sub_080852A8(struct Unk080852A8 *proc)
     {
         sub_0801B780(0);
         sub_080149C0(3, 5, gUnknown_08499578,
-                     gUnknown_08610A38[gUnknown_085D3DD0[gPlayers[proc->unk66].co]
+                     gTextTable[gUnknown_085D3DD0[gPlayers[proc->unk66].co]
                                            .power[1].powerNameId],
                      0x8000, 0);
     }
@@ -32,7 +32,7 @@ void sub_080852A8(struct Unk080852A8 *proc)
     {
         sub_0801B780(0);
         sub_080149C0(3, 5, gUnknown_08499578,
-                     gUnknown_08610A38[gUnknown_085D3DD0[gPlayers[proc->unk66].co]
+                     gTextTable[gUnknown_085D3DD0[gPlayers[proc->unk66].co]
                                            .power[2].powerNameId],
                      0x8000, 0);
     }

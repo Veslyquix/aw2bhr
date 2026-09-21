@@ -17,7 +17,7 @@
 
 void SetPlayerCoPowerStatus(int a1)
 {
-    gPlayers[a1].coMode = gPlayers[a1].unk1f;
+    gPlayers[a1].coMode = gPlayers[a1].coActivationMode;
 }
 
 asm(".global sub_08044144\n.thumb_set sub_08044144, SetPlayerCoPowerStatus\n");

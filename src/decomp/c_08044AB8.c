@@ -30,7 +30,7 @@ void sub_08044AB8(int a)
     int b1;
 
     i = gPlayers[a].co;
-    j = gPlayers[a].unk1f;
+    j = gPlayers[a].coActivationMode;
     p = (const u8 *)gUnknown_084A0090;
     m = (j - 1) * 5;
     p += (i * 17 + m) * 4;

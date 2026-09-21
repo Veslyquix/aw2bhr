@@ -120,7 +120,7 @@ void sub_08047C04(struct Unk08047C04 * a)
     sub_08071948(gUnknown_08499580, 1, 0, gUnknown_0812A8C8, 0x8360);
     sub_08047190(a, a->unk1e);
     sub_080149C0(4, 1, gUnknown_08499578,
-        gUnknown_08610A38[gUnknown_0849F658[gPlayers[gUnknown_030033EC].teamColor]],
+        gTextTable[gUnknown_0849F658[gPlayers[gUnknown_030033EC].teamColor]],
         0x8000, 0);
     sub_08014A5C(8, 5, gUnknown_08499578, 0x96F, 0x8000, 0);
     sub_08014A5C(0xF, 5, gUnknown_08499578, 0x970, 0x8000, 0);

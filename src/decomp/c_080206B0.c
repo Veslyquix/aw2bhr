@@ -53,7 +53,7 @@ u16 sub_080206B0(u32 a1)
  * caller's translation unit -- default argument promotions passed an int and
  * the callee re-narrowed -- and since this tree has one shared header, spelling
  * the parameter `int` plus a local is the only way to say that once. */
-void sub_080206E4(u8 *dst, int value)
+void FillMapBuffer(u8 *dst, int value)
 {
     s16 x, y;
     u16 v;
@@ -64,3 +64,5 @@ void sub_080206E4(u8 *dst, int value)
         for (x = 0; x < MAP->width; x++)
             dst[MAP->rowOffset[y] + x] = v;
 }
+
+asm(".global sub_080206E4\n.thumb_set sub_080206E4, FillMapBuffer\n");

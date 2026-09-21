@@ -7,7 +7,7 @@
  * sub_08004D74 @ 0x08004D74
  */
 
-/* Two pool words for one array element -- `ldr r2,=gUnknown_08610A38;
+/* Two pool words for one array element -- `ldr r2,=gTextTable;
  * ldr r3,=0x27E8; adds r2,r2,r3; ldr r2,[r2]` -- is `-fforce-addr` holding the
  * BASE address in its own register and then adding a byte offset too large for
  * `adds #imm8`. It is a constant subscript, not a variable one:
@@ -17,5 +17,5 @@
  * written before the `bl`), and are read off sub_08004DD4. */
 void sub_08004D74(int a, int b)
 {
-    sub_08004DD4(a, b, gUnknown_08610A38[0x9fa], 0);
+    sub_08004DD4(a, b, gTextTable[0x9fa], 0);
 }

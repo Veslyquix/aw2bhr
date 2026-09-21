@@ -15,7 +15,7 @@ void sub_0800520C(void)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FE]);
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FE]);
             gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
@@ -28,7 +28,7 @@ void sub_0800520C(void)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FE]);
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FE]);
             gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
@@ -47,7 +47,7 @@ void sub_080052D8(void)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FF]);
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FF]);
             gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
@@ -60,7 +60,7 @@ void sub_080052D8(void)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0x9FF]);
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FF]);
             gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
@@ -79,7 +79,7 @@ void sub_080053A8(void)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0xA00]);
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0xA00]);
             gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
@@ -92,7 +92,7 @@ void sub_080053A8(void)
     {
         if (!sub_080051EC((const char *)&gActiveMap->unk9c))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gUnknown_08610A38[0xA00]);
+            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0xA00]);
             gActiveMap->unk00 |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }

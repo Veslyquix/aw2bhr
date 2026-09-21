@@ -103,13 +103,15 @@ asm(".global sub_08042EBC\n.thumb_set sub_08042EBC, GetPlayerCoNegativeLuckBonus
  * sub_08042EDC @ 0x08042EDC
  */
 
-int sub_08042EDC(int a, int b)
+int GetCoCaptureRate(int a, int b)
 {
     if (gPlaySt.coAbilities == 0)
         return 100;
 
     return gUnknown_085D3DD0[a].power[b].captureRateModifier + 100;
 }
+
+asm(".global sub_08042EDC\n.thumb_set sub_08042EDC, GetCoCaptureRate\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -228,7 +230,9 @@ u32 sub_0804301C(int a, int b)
  * sub_08043050 @ 0x08043050
  */
 
-u32 sub_08043050(int a1)
+u32 GetPlayerSpecialAbilities(int a1)
 {
     return sub_0804301C(gPlayers[a1].co, gPlayers[a1].coMode);
 }
+
+asm(".global sub_08043050\n.thumb_set sub_08043050, GetPlayerSpecialAbilities\n");

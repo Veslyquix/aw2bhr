@@ -10,7 +10,7 @@
 #include "proc.h"
 #include "hardware.h"
 /* sub_080686E8's seven-argument sibling -- same 0x0858xxxx proc script setup,
- * same gUnknown_085D3DD0 -> gUnknown_08610A38 -> sub_08068038 graphics chain.
+ * same gUnknown_085D3DD0 -> gTextTable -> sub_08068038 graphics chain.
  * Diffed against sub_080686E8 rather than predicted: the proc fields written
  * are +0x29, +0x30, +0x32, +0x2a, then +0x38, +0x39, +0x4e and +0x4f, where the
  * shorter one writes +0x4d and +0x4f. The store to +0x32 reaches through the
@@ -45,7 +45,7 @@ void sub_08068810(int a1, int a2, int a3, int a4, u16 a5, u8 a6, ProcPtr parent)
     proc->unk30 = a5;
     proc->unk32 = a6;
     ApplyPalettes(gUnknown_0817DA18, a6 + 0x10, 1);
-    proc->unk2a = sub_08068038(gUnknown_08610A38[(tbl = gUnknown_085D3DD0)[a1].nameIndex], a5);
+    proc->unk2a = sub_08068038(gTextTable[(tbl = gUnknown_085D3DD0)[a1].nameIndex], a5);
     proc->unk38 = a2;
     proc->unk39 = a3;
     proc->unk4e = a4;

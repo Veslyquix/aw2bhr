@@ -48,7 +48,7 @@ void sub_08019E68(void)
         {
             p->unk31[n++] = i;
 
-            t = sub_08014D20((const char *)gUnknown_08610A38[e->unk1c]);
+            t = sub_08014D20((const char *)gTextTable[e->unk1c]);
 
             if (maxw < t)
                 maxw = t;

@@ -29,7 +29,7 @@ u8 sub_0802490C(u16 a1)
 }
 
 /* The name-string twin of sub_0802490C -- same 0xb4..0xbf range test, same
- * branch polarity. Here the fallback is gUnknown_08610A38[row.unk14], a table
+ * branch polarity. Here the fallback is gTextTable[row.unk14], a table
  * of `u8 *`, which is why the return is a pointer and nothing narrows
  * sub_0803CCEC's result. */
 
@@ -38,7 +38,7 @@ u8 *sub_08024944(u16 a1)
     if ((u16)(a1 - 0xB4) <= 0xB)
         return sub_0803CCEC(a1 + 0x4C);
 
-    return gUnknown_08610A38[gUnknown_085C77A0[a1].nameIndex];
+    return gTextTable[gUnknown_085C77A0[a1].nameIndex];
 }
 
 /* One accumulator, not two returns: the value lives in r1 across both arms and

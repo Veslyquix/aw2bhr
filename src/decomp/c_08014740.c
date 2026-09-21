@@ -35,12 +35,12 @@ struct Unk03001470 *sub_08014740(s16 a, s16 b, u16 *c, u16 d, u16 e, u16 f)
 }
 
 /* Fills in the whole tail of the record. `lsls #0x10; lsrs #0xe` on argument 5
- * is the u16 narrowing folded with the *4 scaling of gUnknown_08610A38[], a
+ * is the u16 narrowing folded with the *4 scaling of gTextTable[], a
  * `u8 *[]`, so +0x20 is a `u8 *`. The two `strb`s of arguments 2 and 3 each
  * happen twice (0x30/0x32 and 0x31/0x33) off one narrowed register. */
 void sub_080147B4(struct Unk08014074 *s, s16 a2, s16 a3, u16 *a4, u16 a5, u16 a6, u16 a7)
 {
-    s->unk20 = gUnknown_08610A38[a5];
+    s->unk20 = gTextTable[a5];
     s->unk24 = 0;
     s->unk28 = a4;
     s->unk2c = a6;
