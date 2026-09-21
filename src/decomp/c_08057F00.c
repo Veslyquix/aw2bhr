@@ -78,7 +78,7 @@ int sub_08057F54(int a1)
     return count;
 }
 
-int sub_08057FA8(int a1)
+int CountUnitsOfType(int a1)
 {
     int i;
     int count;
@@ -93,6 +93,8 @@ int sub_08057FA8(int a1)
 
     return count;
 }
+
+asm(".global sub_08057FA8\n.thumb_set sub_08057FA8, CountUnitsOfType\n");
 
 int sub_08057FE8(int a1)
 {

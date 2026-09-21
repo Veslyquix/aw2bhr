@@ -33,4 +33,13 @@ bool8 IsPlayer1TeamAlive(void);
 void DrawOamObject(int a1, int a2, int a3, int a4, int a5);
 int RepairUnit(struct Unk08499594 *p, u16 a2, u8 a3);
 
+int HasNoDeathRay(void);
+int HasNoLaser(void);
+int HasNoBlackCannon(void);
+int HasNoMinicannon(void);
+int HasNoPipeSeams(void);
+bool8 CountLivingInventionsOfType(int a1);
+int CountUnitsOfType(int a1);
+bool8 ShouldPromptCountryName(void);
+
 #endif /* GUARD_DATA_NAMES_H */

@@ -46,13 +46,15 @@ int sub_080457BC(void)
  * sub_080457D0 @ 0x080457D0
  */
 
-int sub_080457D0(void)
+int HasNoDeathRay(void)
 {
     if (sub_0803E388(5) == 0)
         return 1;
 
     return 0;
 }
+
+asm(".global sub_080457D0\n.thumb_set sub_080457D0, HasNoDeathRay\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -61,13 +63,15 @@ int sub_080457D0(void)
  * sub_080457E8 @ 0x080457E8
  */
 
-int sub_080457E8(void)
+int HasNoLaser(void)
 {
     if (sub_0803E388(1) == 0)
         return 1;
 
     return 0;
 }
+
+asm(".global sub_080457E8\n.thumb_set sub_080457E8, HasNoLaser\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -76,13 +80,15 @@ int sub_080457E8(void)
  * sub_08045800 @ 0x08045800
  */
 
-int sub_08045800(void)
+int HasNoBlackCannon(void)
 {
     if (sub_0803E388(3) == 0)
         return 1;
 
     return 0;
 }
+
+asm(".global sub_08045800\n.thumb_set sub_08045800, HasNoBlackCannon\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -91,13 +97,15 @@ int sub_08045800(void)
  * sub_08045818 @ 0x08045818
  */
 
-int sub_08045818(void)
+int HasNoMinicannon(void)
 {
     if (sub_0803E388(4) == 0)
         return 1;
 
     return 0;
 }
+
+asm(".global sub_08045818\n.thumb_set sub_08045818, HasNoMinicannon\n");
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -106,10 +114,12 @@ int sub_08045818(void)
  * sub_08045830 @ 0x08045830
  */
 
-int sub_08045830(void)
+int HasNoPipeSeams(void)
 {
     if (sub_08045650() == 0)
         return 1;
 
     return 0;
 }
+
+asm(".global sub_08045830\n.thumb_set sub_08045830, HasNoPipeSeams\n");

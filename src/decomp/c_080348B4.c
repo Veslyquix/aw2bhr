@@ -28,7 +28,7 @@
  * `ldr rN,=sym; ldr rN,[rN]` pair -- see its note in unknown-globals.h. The
  * `(x*16 - x)*4` synthesis is agbcc's 60-byte stride multiply. */
 
-bool8 sub_080348B4(void)
+bool8 ShouldPromptCountryName(void)
 {
     u8 i;
     u8 v;
@@ -61,3 +61,5 @@ bool8 sub_080348B4(void)
 
     return 0;
 }
+
+asm(".global sub_080348B4\n.thumb_set sub_080348B4, ShouldPromptCountryName\n");

@@ -19,7 +19,7 @@ struct Unk02028360 *sub_0803E354(int a1)
     return NULL;
 }
 
-bool8 sub_0803E388(int a1)
+bool8 CountLivingInventionsOfType(int a1)
 {
     struct Unk02028360 *p;
     int n;
@@ -48,3 +48,5 @@ bool8 sub_0803E388(int a1)
         return TRUE;
     return FALSE;
 }
+
+asm(".global sub_0803E388\n.thumb_set sub_0803E388, CountLivingInventionsOfType\n");
