@@ -108,4 +108,10 @@ void SpendCoPowerCharge(int a1, int a2);
 void ActivateCoPower(int a1, int a2, ProcPtr a3);
 void FillMapBuffer(u8 *dst, int value);
 
+void CalcBattleDamage(s16 a1, s16 a2, struct Unk802C57C *a3);
+void FillMovementMap(u8 a);
+void AiMarkAffordableUnits(void);
+u8 AiSelectBuildUnit(void);
+void DrawCoPowerLabel(int x, int y, int i);
+
 #endif /* GUARD_DATA_NAMES_H */

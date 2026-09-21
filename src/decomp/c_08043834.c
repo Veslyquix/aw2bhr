@@ -20,7 +20,7 @@ void sub_08043834(int a)
     sub_08011E54(gUnknown_081259CC, (void *)0x06010840, 0xc0);
 }
 
-void sub_08043898(int x, int y, int i)
+void DrawCoPowerLabel(int x, int y, int i)
 {
     switch (gPlayers[i].coMode)
     {
@@ -33,6 +33,8 @@ void sub_08043898(int x, int y, int i)
         break;
     }
 }
+
+asm(".global sub_08043898\n.thumb_set sub_08043898, DrawCoPowerLabel\n");
 
 void sub_080438FC(int a, int b, int c)
 {

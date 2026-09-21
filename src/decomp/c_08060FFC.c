@@ -19,7 +19,7 @@ struct Unk60FFCTbl
     /* 0x14 */ struct Unk60FFCRow rows[1];
 };
 
-u8 sub_08060FFC(void)
+u8 AiSelectBuildUnit(void)
 {
     int v;
     u8 best;
@@ -67,3 +67,5 @@ u8 sub_08060FFC(void)
 
     return best;
 }
+
+asm(".global sub_08060FFC\n.thumb_set sub_08060FFC, AiSelectBuildUnit\n");

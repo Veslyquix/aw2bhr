@@ -7,7 +7,7 @@
  * sub_08024F20 @ 0x08024F20
  */
 
-void sub_08024F20(s16 a1, s16 a2, struct Unk802C57C *a3)
+void CalcBattleDamage(s16 a1, s16 a2, struct Unk802C57C *a3)
 {
     u32 saved;
     int dx;
@@ -55,3 +55,5 @@ void sub_08024F20(s16 a1, s16 a2, struct Unk802C57C *a3)
     gUnknown_08499594[a1].unk02 = saved;
     gUnknown_08499594[a1].unk03 = saved >> 16;
 }
+
+asm(".global sub_08024F20\n.thumb_set sub_08024F20, CalcBattleDamage\n");

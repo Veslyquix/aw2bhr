@@ -126,7 +126,7 @@ asm(".global sub_08060F00\n.thumb_set sub_08060F00, AiCalcBuildPriorities\n");
  * `movs r6, #0xff` before the loop is LICM hoisting the constant both stores
  * share, not a source variable. Each `strh r6, [r4]` carries the dead `ldrh`
  * of the volatile gUnknown_03004640 documented in include/unknown-globals.h. */
-void sub_08060F74(void)
+void AiMarkAffordableUnits(void)
 {
     int i;
 
@@ -141,3 +141,5 @@ void sub_08060F74(void)
             gUnknown_03004640[i] = 0xff;
     }
 }
+
+asm(".global sub_08060F74\n.thumb_set sub_08060F74, AiMarkAffordableUnits\n");
