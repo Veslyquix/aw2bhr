@@ -39,7 +39,7 @@ struct Unk61178Tbl
     /* 0x14 */ struct Unk61178Row rows[1];
 };
 
-u8 sub_08061178(u8 a1)
+u8 PickWeightedAiUnit(u8 a1)
 {
     struct Unk61178Tbl *tbl;
     u8 r;
@@ -64,3 +64,5 @@ u8 sub_08061178(u8 a1)
 
     return 1;
 }
+
+asm(".global sub_08061178\n.thumb_set sub_08061178, PickWeightedAiUnit\n");

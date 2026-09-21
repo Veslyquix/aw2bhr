@@ -17,6 +17,8 @@
  * evidence there is" -- was correct when written and is now falsified. Taking
  * the parameter is byte-neutral here: the body reads nothing either way. */
 
-void sub_0807823C(int a)
+void CampaignMapNoOp(int a)
 {
 }
+
+asm(".global sub_0807823C\n.thumb_set sub_0807823C, CampaignMapNoOp\n");

@@ -17,20 +17,24 @@ const struct Unk08074584 *sub_08074584(void)
  * epilogue pair for a declared-narrow return whether or not the value it is
  * returning is already narrow.
  */
-u8 sub_08074598(void)
+u8 IsPlayer1CoPowerReady(void)
 {
     return sub_0804423C(1);
 }
+
+asm(".global sub_08074598\n.thumb_set sub_08074598, IsPlayer1CoPowerReady\n");
 
 /* `movs #0` / `movs #1` split across a `b` is the two-return spelling, not
  * `return f() != 0;`.  Which constant falls through fixes the sense: the ROM
  * reaches `movs r0, #0` by falling through, so the `return 1;` is the THEN arm
  * and the test is `!= 0`.
  */
-bool8 sub_080745A8(void)
+bool8 HasPlayer1CoPowerCharge(void)
 {
     if (sub_08044094(1) != 0)
         return 1;
 
     return 0;
 }
+
+asm(".global sub_080745A8\n.thumb_set sub_080745A8, HasPlayer1CoPowerCharge\n");

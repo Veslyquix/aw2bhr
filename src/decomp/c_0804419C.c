@@ -34,7 +34,7 @@ int GetSuperCoPowerCost(int a1)
 
 asm(".global sub_08044208\n.thumb_set sub_08044208, GetSuperCoPowerCost\n");
 
-u8 sub_0804423C(int a1)
+u8 IsCoPowerReady(int a1)
 {
     int funds;
 
@@ -47,6 +47,8 @@ u8 sub_0804423C(int a1)
         return 1;
     return 0;
 }
+
+asm(".global sub_0804423C\n.thumb_set sub_0804423C, IsCoPowerReady\n");
 
 int sub_08044280(int a1)
 {

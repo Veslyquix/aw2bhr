@@ -29,7 +29,7 @@ void sub_08080E40(ProcPtr proc)
     sub_08071B0C(0x11, 0x10, proc);
 }
 
-void sub_08080E74(int a, int b, ProcPtr proc)
+void StartCoPowerScript(int a, int b, ProcPtr proc)
 {
     gUnknown_03005970 = a;
     gUnknown_03005904 = b;
@@ -40,3 +40,5 @@ void sub_08080E74(int a, int b, ProcPtr proc)
     if (b == 2)
         Proc_StartBlocking(gUnknown_08616844, proc);
 }
+
+asm(".global sub_08080E74\n.thumb_set sub_08080E74, StartCoPowerScript\n");

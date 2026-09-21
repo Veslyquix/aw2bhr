@@ -64,4 +64,13 @@ void DrawWindowBackground(int a1, int a2, int a3, int a4, u16 *a5, int a6);
 void EnableCoPowers(void);
 void DisableCoPowers(void);
 
+u32 GetCoPowerCharge(int a1);
+u8 IsCoPowerReady(int a1);
+u8 IsPlayer1CoPowerReady(void);
+bool8 HasPlayer1CoPowerCharge(void);
+void CampaignMapNoOp(int a);
+void StartCoPowerScript(int a, int b, ProcPtr proc);
+int CountBuildablePropertiesOfKind(int a1);
+u8 PickWeightedAiUnit(u8 a1);
+
 #endif /* GUARD_DATA_NAMES_H */

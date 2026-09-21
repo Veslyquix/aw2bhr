@@ -64,7 +64,7 @@ struct Unk60F00Tbl
  *
  * `cmp r0, #0xfe; bls` is the terminator test spelled `<= 0xfe`. A leaf with no
  * frame -- it ends `bx lr` with no `push` -- so nothing here may spill. */
-int sub_08060ED4(int a1)
+int CountBuildablePropertiesOfKind(int a1)
 {
     struct Unk085766E4 *p;
     int n;
@@ -82,6 +82,8 @@ int sub_08060ED4(int a1)
 
     return n;
 }
+
+asm(".global sub_08060ED4\n.thumb_set sub_08060ED4, CountBuildablePropertiesOfKind\n");
 
 void sub_08060F00(void)
 {

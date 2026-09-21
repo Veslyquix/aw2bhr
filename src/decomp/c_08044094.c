@@ -14,7 +14,9 @@
  * sub_08044094 @ 0x08044094
  */
 
-u32 sub_08044094(int a1)
+u32 GetCoPowerCharge(int a1)
 {
     return gPlayers[a1].coCharge;
 }
+
+asm(".global sub_08044094\n.thumb_set sub_08044094, GetCoPowerCharge\n");
