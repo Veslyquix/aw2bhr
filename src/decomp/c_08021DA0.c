@@ -9,7 +9,7 @@
 
 #include "hardware.h"
 
-void sub_08021DA0(int a1)
+void LoadRiverAnimFrame(int a1)
 {
     u8 n = a1;
 
@@ -17,3 +17,5 @@ void sub_08021DA0(int a1)
                  (void *)(0x06004000 + (gUnknown_0300251C.bits.chr_block << 14)),
                  0xc00);
 }
+
+asm(".global sub_08021DA0\n.thumb_set sub_08021DA0, LoadRiverAnimFrame\n");

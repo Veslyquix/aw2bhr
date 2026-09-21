@@ -63,7 +63,7 @@ int CountUnitsWithTypeTag(int a1)
 
 asm(".global sub_08057F00\n.thumb_set sub_08057F00, CountUnitsWithTypeTag\n");
 
-int sub_08057F54(int a1)
+int CountUnitsByDeployLocation(int a1)
 {
     int i;
     int count;
@@ -79,6 +79,8 @@ int sub_08057F54(int a1)
 
     return count;
 }
+
+asm(".global sub_08057F54\n.thumb_set sub_08057F54, CountUnitsByDeployLocation\n");
 
 int CountUnitsOfType(int a1)
 {

@@ -36,7 +36,7 @@
  * same address (0x080BFBC4 + 6 == 0x080BFBCA) and contribute zero differing
  * bytes; they were never the residual, despite NOTES.md's reading. */
 
-void sub_08023BAC(u16 a1, u16 a2, u16 a3, u16 a4)
+void BlitMapRow(u16 a1, u16 a2, u16 a3, u16 a4)
 {
     struct Map *m;
     u16 *dst;
@@ -66,3 +66,5 @@ void sub_08023BAC(u16 a1, u16 a2, u16 a3, u16 a4)
         a1 &= 0x1F;
     }
 }
+
+asm(".global sub_08023BAC\n.thumb_set sub_08023BAC, BlitMapRow\n");

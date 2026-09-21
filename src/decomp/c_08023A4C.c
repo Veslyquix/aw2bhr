@@ -8,7 +8,7 @@
  * sub_08023A4C @ 0x08023A4C
  */
 
-void sub_08023A4C(u16 a1, u16 a2, u16 a3, u16 a4)
+void BlitMapColumn(u16 a1, u16 a2, u16 a3, u16 a4)
 {
     struct Map *m;
     u16 *dst;
@@ -38,3 +38,5 @@ void sub_08023A4C(u16 a1, u16 a2, u16 a3, u16 a4)
         off = ((u32)(off + 0x40) << 22) >> 22;
     }
 }
+
+asm(".global sub_08023A4C\n.thumb_set sub_08023A4C, BlitMapColumn\n");

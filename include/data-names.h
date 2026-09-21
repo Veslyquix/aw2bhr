@@ -133,4 +133,10 @@ int RegisterArmyHqs(void);
 int CountProperties(void);
 void RecountArmyProperties(void);
 
+void LoadSeaAnimFrame(int a1);
+void LoadRiverAnimFrame(int a1);
+int CountUnitsByDeployLocation(int a1);
+void BlitMapRow(u16 a1, u16 a2, u16 a3, u16 a4);
+void BlitMapColumn(u16 a1, u16 a2, u16 a3, u16 a4);
+
 #endif /* GUARD_DATA_NAMES_H */
