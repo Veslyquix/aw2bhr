@@ -20,7 +20,7 @@
  *
  * A leaf with no `push`: the counter, the pointer giv and the limit fit in
  * r0..r3. */
-int sub_0800C874(void)
+int CountProperties(void)
 {
     int i;
     int n;
@@ -37,6 +37,8 @@ int sub_0800C874(void)
 
     return n;
 }
+
+asm(".global sub_0800C874\n.thumb_set sub_0800C874, CountProperties\n");
 
 /* sub_0800C874 with one more conjunct: the same bounded scan of
  * gProperty, counting only the live records whose flags byte equals
@@ -64,7 +66,7 @@ u32 sub_0800C8A0(int a)
     return n;
 }
 
-int sub_0800C8D8(void)
+int RegisterArmyHqs(void)
 {
     int i;
     int n;
@@ -99,6 +101,8 @@ int sub_0800C8D8(void)
 
     return n;
 }
+
+asm(".global sub_0800C8D8\n.thumb_set sub_0800C8D8, RegisterArmyHqs\n");
 
 /* Totals three sub_0800C8A0 counts for whichever id the caller names, after
  * checking the id is currently valid.  Undeclared before this wave.

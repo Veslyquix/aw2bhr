@@ -7,7 +7,9 @@
  * sub_08003B6C @ 0x08003B6C
  */
 
-int sub_08003B6C(int a, int b)
+int RandRange(int a, int b)
 {
     return (DivRem(sub_080129E0(), (a - b) * 32) >> 5) + b;
 }
+
+asm(".global sub_08003B6C\n.thumb_set sub_08003B6C, RandRange\n");

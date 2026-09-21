@@ -107,7 +107,7 @@ void sub_08021810(u8 *a, u8 *b)
     *a = gUnknown_030032D0[0];
 }
 
-void sub_080219AC(void)
+void RecountArmyProperties(void)
 {
     int n;
     int x;
@@ -192,3 +192,5 @@ void sub_080219AC(void)
     if (n <= 0x5b)
         gProperty[n].flags = 0xff;
 }
+
+asm(".global sub_080219AC\n.thumb_set sub_080219AC, RecountArmyProperties\n");

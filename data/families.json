@@ -36,7 +36,7 @@
  "counts": {
   "families": 102,
   "members": 724,
-  "unmatched_members": 52,
+  "unmatched_members": 53,
   "entirely_unmatched_families": 6,
   "fuzzy_clusters": 22
  },
@@ -243,6 +243,30 @@
     ]
    },
    {
+    "id": "F023",
+    "n_members": 7,
+    "n_unmatched": 4,
+    "n_insns": 12,
+    "sizes": [
+     32
+    ],
+    "representative": "sub_08042F14",
+    "exemplar_src": "src/decomp/c_08042E2C.c",
+    "addr_span": [
+     "0x08042E64",
+     "0x08043050"
+    ],
+    "varies": [
+     "bl S"
+    ],
+    "members": [
+     "sub_08042E64",
+     "sub_08042EBC",
+     "sub_08042FFC",
+     "sub_08043050"
+    ]
+   },
+   {
     "id": "F037",
     "n_members": 5,
     "n_unmatched": 4,
@@ -266,29 +290,6 @@
      "sub_080787A4",
      "sub_080787EC",
      "sub_08078834"
-    ]
-   },
-   {
-    "id": "F023",
-    "n_members": 7,
-    "n_unmatched": 3,
-    "n_insns": 12,
-    "sizes": [
-     32
-    ],
-    "representative": "sub_08042F14",
-    "exemplar_src": "src/decomp/c_08042E2C.c",
-    "addr_span": [
-     "0x08042E64",
-     "0x08043050"
-    ],
-    "varies": [
-     "bl S"
-    ],
-    "members": [
-     "sub_08042E64",
-     "sub_08042EBC",
-     "sub_08042FFC"
     ]
    },
    {
@@ -5311,8 +5312,8 @@
   {
    "id": "F023",
    "n_members": 7,
-   "n_unmatched": 3,
-   "n_matched": 4,
+   "n_unmatched": 4,
+   "n_matched": 3,
    "n_insns": 12,
    "sizes": [
     32
@@ -5398,7 +5399,7 @@
      "addr": "0x08043050",
      "size": 32,
      "src": "code-0801D390.s",
-     "status": "matched"
+     "status": "asm"
     }
    ]
   },

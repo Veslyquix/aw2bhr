@@ -38,7 +38,7 @@
 
 #define MAP gMap
 
-void sub_08003DC4(int x, int y, int kind)
+void FixShorelineAt(int x, int y, int kind)
 {
     switch (kind)
     {
@@ -88,3 +88,5 @@ void sub_08003DC4(int x, int y, int kind)
         break;
     }
 }
+
+asm(".global sub_08003DC4\n.thumb_set sub_08003DC4, FixShorelineAt\n");

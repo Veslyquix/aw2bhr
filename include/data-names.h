@@ -125,4 +125,12 @@ void ApplySiloDamage(struct Unk40640Proc *proc);
 int IsCoSelectionUnique(struct Unk807D800 *p);
 bool8 CanTransportCarry(struct Unk08499594 *a1, u8 a2);
 
+int RandRange(int a, int b);
+void ClearAllUnits(void);
+void FixShorelineAt(int x, int y, int kind);
+void FixAllShorelines(void);
+int RegisterArmyHqs(void);
+int CountProperties(void);
+void RecountArmyProperties(void);
+
 #endif /* GUARD_DATA_NAMES_H */

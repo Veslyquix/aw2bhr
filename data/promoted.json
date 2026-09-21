@@ -20925,6 +20925,15 @@
   "size": 60
  },
  {
+  "file": "src/decomp/c_08059E3C.c",
+  "obj": "src/decomp/c_08059E3C.o",
+  "addr_hex": "0x08059E3C",
+  "functions": [
+   "sub_08059E3C"
+  ],
+  "size": 232
+ },
+ {
   "file": "src/decomp/c_08059F24.c",
   "obj": "src/decomp/c_08059F24.o",
   "addr_hex": "0x08059F24",

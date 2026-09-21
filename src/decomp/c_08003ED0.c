@@ -15,7 +15,7 @@
 
 #define MAP gMap
 
-void sub_08003ED0(void)
+void FixAllShorelines(void)
 {
     int x, y;
 
@@ -23,3 +23,5 @@ void sub_08003ED0(void)
         for (x = 0; x < MAP->width; x++)
             sub_08003DC4(x, y, MAP->terrain[MAP->rowOffset[y] + x]);
 }
+
+asm(".global sub_08003ED0\n.thumb_set sub_08003ED0, FixAllShorelines\n");
