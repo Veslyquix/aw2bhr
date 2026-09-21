@@ -14,7 +14,9 @@
  * sub_08078E14 @ 0x08078E14
  */
 
-int sub_08078E14(void)
+int GetCampaignMissionId(void)
 {
     return gPlaySt.mapID - 0x89;
 }
+
+asm(".global sub_08078E14\n.thumb_set sub_08078E14, GetCampaignMissionId\n");

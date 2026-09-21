@@ -42,4 +42,15 @@ bool8 CountLivingInventionsOfType(int a1);
 int CountUnitsOfType(int a1);
 bool8 ShouldPromptCountryName(void);
 
+void AiDoNothing(void);
+void AiChargeAggressively(void);
+void AiMoveWithFrontLine(void);
+void AiMoveUpConservatively(void);
+void AiProtectHq(void);
+void AiConsiderBuildingTCopter(void);
+void AiConsiderBuildingApc(void);
+void AiConsiderBuildingLander(void);
+int GetCampaignMissionId(void);
+void ClearArmyCount(void);
+
 #endif /* GUARD_DATA_NAMES_H */

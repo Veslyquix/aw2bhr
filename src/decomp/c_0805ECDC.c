@@ -8,7 +8,7 @@
  * sub_0805ECDC @ 0x0805ECDC, sub_0805ED70 @ 0x0805ED70, sub_0805EE40 @ 0x0805EE40, sub_0805EF00 @ 0x0805EF00, sub_0805EF9C @ 0x0805EF9C, sub_0805F074 @ 0x0805F074
  */
 
-void sub_0805ECDC(void)
+void AiChargeAggressively(void)
 {
     union Unk802C57CBuf v;
     u8 x;
@@ -33,7 +33,9 @@ void sub_0805ECDC(void)
     sub_0805F7B8();
 }
 
-void sub_0805ED70(void)
+asm(".global sub_0805ECDC\n.thumb_set sub_0805ECDC, AiChargeAggressively\n");
+
+void AiMoveWithFrontLine(void)
 {
     union Unk802C57CBuf v;
     struct Unk03003338 *p;
@@ -58,6 +60,8 @@ void sub_0805ED70(void)
     sub_080591E4(&v);
     sub_0805F7B8();
 }
+
+asm(".global sub_0805ED70\n.thumb_set sub_0805ED70, AiMoveWithFrontLine\n");
 
 void sub_0805EE40(void)
 {
@@ -148,7 +152,7 @@ void sub_0805EF9C(void)
     sub_0805F7B8();
 }
 
-void sub_0805F074(void)
+void AiMoveUpConservatively(void)
 {
     union Unk802C57CBuf v;
     struct Unk03003338 *p;
@@ -167,3 +171,5 @@ void sub_0805F074(void)
     sub_080591E4(&v);
     sub_0805F7B8();
 }
+
+asm(".global sub_0805F074\n.thumb_set sub_0805F074, AiMoveUpConservatively\n");

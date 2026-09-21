@@ -56,7 +56,7 @@
  *
  * The plane rebuild calls pass gMap's danger and move members directly; the
  * arrays decay to the `u8 *` parameter type without raw map-pointer arithmetic. */
-void sub_0805F2B4(void)
+void AiProtectHq(void)
 {
     union Unk802C57CBuf v;
     int new_var2;
@@ -142,3 +142,5 @@ void sub_0805F2B4(void)
     sub_080591E4(p);
     sub_0805F7B8();
 }
+
+asm(".global sub_0805F2B4\n.thumb_set sub_0805F2B4, AiProtectHq\n");

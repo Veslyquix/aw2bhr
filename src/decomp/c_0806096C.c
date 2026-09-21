@@ -19,7 +19,7 @@
  * gUnknown_030046D4 is re-read inside the else arm (`ldr r1, [r1]`) after the
  * `cmp` already loaded it, which is the volatile behaviour c_08060384.c
  * measures. */
-void sub_0806096C(void)
+void AiConsiderBuildingTCopter(void)
 {
     int v;
     int r;
@@ -38,12 +38,14 @@ void sub_0806096C(void)
     }
 }
 
+asm(".global sub_0806096C\n.thumb_set sub_0806096C, AiConsiderBuildingTCopter\n");
+
 /* sub_0806096C's sibling for action 7, with the threshold chosen by bit 0 of
  * gUnknown_030046B8 -- two different difficulty entries for the same test.
  * Both arms of that choice are separate `ldr`/`ldr`/`ldrb` runs off their own
  * pool word, so the ROM did not CSE the table pointer across the branch and
  * neither should the source bind it. */
-void sub_080609B8(void)
+void AiConsiderBuildingApc(void)
 {
     int v;
     int r;
@@ -68,6 +70,8 @@ void sub_080609B8(void)
     }
 }
 
+asm(".global sub_080609B8\n.thumb_set sub_080609B8, AiConsiderBuildingApc\n");
+
 /* sub_0806096C's sibling for action 0x17, with TWO gates: the raw count from
  * sub_08057F54(7) has to clear the difficulty table's +0x22 floor before the
  * percentage is compared at all, and the percentage threshold is halved.
@@ -76,7 +80,7 @@ void sub_080609B8(void)
  * gUnknown_030046D4, which is why this one keeps both counts in callee-saved
  * registers across the divide. `>> 1` on a u8 is `lsrs`, i.e. unsigned, so the
  * threshold is not sign-extended on the way in. */
-void sub_08060A20(void)
+void AiConsiderBuildingLander(void)
 {
     int a;
     int b;
@@ -97,3 +101,5 @@ void sub_08060A20(void)
             gUnknown_030046C0.unk06 = 0x17;
     }
 }
+
+asm(".global sub_08060A20\n.thumb_set sub_08060A20, AiConsiderBuildingLander\n");

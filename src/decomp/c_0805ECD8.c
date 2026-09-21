@@ -7,6 +7,8 @@
  * sub_0805ECD8 @ 0x0805ECD8
  */
 
-void sub_0805ECD8(void)
+void AiDoNothing(void)
 {
 }
+
+asm(".global sub_0805ECD8\n.thumb_set sub_0805ECD8, AiDoNothing\n");
