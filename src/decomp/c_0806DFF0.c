@@ -54,7 +54,7 @@ void sub_0806DFF0(void)
         return;
     }
 
-    if (gUnknown_08580934->unk30 == 0 && (gpKeySt->held & 0x200))
+    if (gUnknown_08580934->unk30 == 0 && (gpKeySt->held & L_BUTTON))
     {
         sub_0803B4DC(0x73);
         sub_080733B8();
@@ -65,7 +65,7 @@ void sub_0806DFF0(void)
         return;
     }
 
-    if (gUnknown_08580934->unk30 == 1 && (gpKeySt->held & 0x100))
+    if (gUnknown_08580934->unk30 == 1 && (gpKeySt->held & R_BUTTON))
     {
         sub_0803B4DC(0x73);
         sub_080733B8();

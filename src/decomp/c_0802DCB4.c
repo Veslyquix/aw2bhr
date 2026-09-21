@@ -34,7 +34,7 @@ void sub_0802DCB4(void)
             return;
         }
 
-        if (gpKeySt->held & 0x100)
+        if (gpKeySt->held & R_BUTTON)
         {
             if (gMap->unit[
                     gMap->rowOffset[gUnknown_030033E4.unk02]
@@ -53,7 +53,7 @@ void sub_0802DCB4(void)
             return;
         }
 
-        if (gpKeySt->held & 0x200)
+        if (gpKeySt->held & L_BUTTON)
         {
             sub_08025580();
             unit = sub_080254AC();

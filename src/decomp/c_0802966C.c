@@ -21,10 +21,10 @@ void sub_0802966C(void)
     struct Unk08499594 *unit;
     u8 r;
 
-    if (gpKeySt->unk02 & 0x50)
+    if (gpKeySt->unk02 & (DPAD_RIGHT | DPAD_UP))
         sub_080294FC();
 
-    if (gpKeySt->unk02 & 0xa0)
+    if (gpKeySt->unk02 & (DPAD_LEFT | DPAD_DOWN))
         sub_08029570();
 
     gUnknown_030033E4.unk00 = gUnknown_03003100.pos.unk00

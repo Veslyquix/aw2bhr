@@ -45,7 +45,7 @@ void sub_080281F0(void)
         return;
     }
 
-    if (gpKeySt->held & 0x40)
+    if (gpKeySt->held & DPAD_UP)
     {
         ent = &gUnknown_03001470[gUnknown_03001FBC];
         v = (u16)ent->unk1e;
@@ -54,7 +54,7 @@ void sub_080281F0(void)
             ent->unk1e = v - 1;
     }
 
-    if (gpKeySt->held & 0x80)
+    if (gpKeySt->held & DPAD_DOWN)
     {
         ent = &gUnknown_03001470[gUnknown_03001FBC];
         v = (u16)ent->unk1e;
@@ -63,7 +63,7 @@ void sub_080281F0(void)
             ent->unk1e = v + 1;
     }
 
-    if (gpKeySt->unk02 & 0x20)
+    if (gpKeySt->unk02 & DPAD_LEFT)
     {
         switch (gUnknown_03001470[gUnknown_03001FBC].unk1e)
         {
@@ -84,7 +84,7 @@ void sub_080281F0(void)
         }
     }
 
-    if (gpKeySt->unk02 & 0x10)
+    if (gpKeySt->unk02 & DPAD_RIGHT)
     {
         switch (gUnknown_03001470[gUnknown_03001FBC].unk1e)
         {

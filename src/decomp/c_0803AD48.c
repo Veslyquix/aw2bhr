@@ -56,31 +56,31 @@ void sub_0803AD48(struct Unk0803AD48 *p)
         p->unk08 = 0;
         return;
     }
-    if (gpKeySt->unk02 & 0x40) {
+    if (gpKeySt->unk02 & DPAD_UP) {
         if (p->unk1e != 0)
             p->unk1e--;
     }
-    if (gpKeySt->unk02 & 0x80) {
+    if (gpKeySt->unk02 & DPAD_DOWN) {
         if (p->unk1e <= 6)
             p->unk1e++;
     }
-    if (gpKeySt->held & 0x100) {
+    if (gpKeySt->held & R_BUTTON) {
         for (i = 0; i <= 8; i++)
             p->unk20[i] = gUnknown_08091038[i];
     }
-    if (gpKeySt->held & 0x200) {
+    if (gpKeySt->held & L_BUTTON) {
         for (i = 0; i <= 8; i++)
             p->unk20[i] = 0;
         sub_0803C670();
         sub_0803BA1C();
     }
-    if (gpKeySt->unk02 & 0x10) {
+    if (gpKeySt->unk02 & DPAD_RIGHT) {
         if (gUnknown_08091038[p->unk1e] - gUnknown_0809104A[p->unk1e] < p->unk20[p->unk1e])
             p->unk20[p->unk1e] = gUnknown_08091038[p->unk1e];
         else
             p->unk20[p->unk1e] += gUnknown_0809104A[p->unk1e];
     }
-    if (gpKeySt->unk02 & 0x20) {
+    if (gpKeySt->unk02 & DPAD_LEFT) {
         if (gUnknown_0809104A[p->unk1e] > p->unk20[p->unk1e])
             p->unk20[p->unk1e] = 0;
         else

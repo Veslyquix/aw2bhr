@@ -40,7 +40,7 @@ void sub_080876B4(void)
 
         SetWinEnable(0, 1, 0);
     }
-    else if (gpKeySt->held & 0x330)
+    else if (gpKeySt->held & (DPAD_RIGHT | DPAD_LEFT | R_BUTTON | L_BUTTON))
     {
         gUnknown_03002B68 = 0;
         gUnknown_03002B30 = 0;

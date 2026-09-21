@@ -30,15 +30,15 @@ void sub_0803ABDC(struct Unk0803ABDC *p)
         sub_08016E14();
         sub_08015C30(gUnknown_03001FBC);
     }
-    else if ((gpKeySt->held & 0x20) != 0)
+    else if ((gpKeySt->held & DPAD_LEFT) != 0)
         sub_0803CA00(p->unk1e, 0);
-    else if ((gpKeySt->held & 0x10) != 0)
+    else if ((gpKeySt->held & DPAD_RIGHT) != 0)
         sub_0803CA00(p->unk1e, 1);
     else
     {
-        if ((gpKeySt->unk02 & 0x40) != 0 && p->unk1e > 0x20)
+        if ((gpKeySt->unk02 & DPAD_UP) != 0 && p->unk1e > 0x20)
             p->unk1e--;
-        if ((gpKeySt->unk02 & 0x80) != 0 && p->unk1e <= 0x5e)
+        if ((gpKeySt->unk02 & DPAD_DOWN) != 0 && p->unk1e <= 0x5e)
             p->unk1e++;
     }
 }

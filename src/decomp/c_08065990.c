@@ -132,7 +132,7 @@ void sub_08065990(void)
 
     sub_080152EC(gUnknown_08580CC4, 3);
     gUnknown_08580934->unk30 = 0;
-    gpKeySt->held = 0x200;
+    gpKeySt->held = L_BUTTON;
     sub_08065238();
     gUnknown_08580934->unk30 = 1;
     gpKeySt->held = 0;

@@ -39,7 +39,7 @@ void sub_080195F8(void *proc)
 
     if (p->unk1e != 0)
     {
-        if (p->unk1e == 1 && (gpKeySt->last & 0x20))
+        if (p->unk1e == 1 && (gpKeySt->last & DPAD_LEFT))
         {
             p->unk1e = 0;
             sub_08019578(p);
@@ -47,7 +47,7 @@ void sub_080195F8(void *proc)
             return;
         }
     }
-    else if (gpKeySt->last & 0x12)
+    else if (gpKeySt->last & (B_BUTTON | DPAD_RIGHT))
     {
         p->unk1e = 1;
         sub_08019578(p);

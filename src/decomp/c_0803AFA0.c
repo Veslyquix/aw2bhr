@@ -80,13 +80,13 @@ void sub_0803AFA0(struct Unk0803AFA0 *p)
         }
         break;
     case 1:
-        if ((gpKeySt->unk00 & 0x300) == 0x300 && (gpKeySt->held & 4)) {
+        if ((gpKeySt->unk00 & (R_BUTTON | L_BUTTON)) == 0x300 && (gpKeySt->held & 4)) {
             sub_0803AF78();
             return;
         }
         break;
     case 2:
-        if ((gpKeySt->unk00 & 0x300) == 0x300 && (gpKeySt->held & 4)) {
+        if ((gpKeySt->unk00 & (R_BUTTON | L_BUTTON)) == 0x300 && (gpKeySt->held & 4)) {
             sub_0803AF90();
             sub_08036CB4();
             return;
@@ -97,11 +97,11 @@ void sub_0803AFA0(struct Unk0803AFA0 *p)
         p->unk08 = 0;
         return;
     }
-    if (gpKeySt->unk02 & 0x40) {
+    if (gpKeySt->unk02 & DPAD_UP) {
         if (p->unk20 > 0)
             p->unk20--;
     }
-    if (gpKeySt->unk02 & 0x80) {
+    if (gpKeySt->unk02 & DPAD_DOWN) {
         if (p->unk20 <= 1)
             p->unk20++;
     }

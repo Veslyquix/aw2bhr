@@ -16,7 +16,7 @@ void sub_08046D30(void)
     switch (gUnknown_02028DD4)
     {
     case 1:
-        if (gpKeySt->held & 0x80)
+        if (gpKeySt->held & DPAD_DOWN)
         {
             sub_0803B4DC(0x67);
             sub_080468D4(gUnknown_02028DD5);
@@ -28,7 +28,7 @@ void sub_08046D30(void)
         break;
 
     case 2:
-        if (gpKeySt->held & 0x40)
+        if (gpKeySt->held & DPAD_UP)
         {
             sub_0803B4DC(0x67);
             sub_08012BC8(gUnknown_08499578, (gUnknown_02028DD5 >> 3) + 1, 0xb, 0xc, 8, 0);
@@ -39,7 +39,7 @@ void sub_08046D30(void)
         break;
     }
 
-    if (gpKeySt->held & 0x102)
+    if (gpKeySt->held & (B_BUTTON | R_BUTTON))
     {
         sub_08014878();
         sub_080470E8();

@@ -96,7 +96,7 @@ void sub_0802DA18(void)
         return;
     }
 
-    if (gpKeySt->unk02 & 0x80)
+    if (gpKeySt->unk02 & DPAD_DOWN)
     {
         int v;
 
@@ -110,7 +110,7 @@ void sub_0802DA18(void)
         }
     }
 
-    if (gpKeySt->unk02 & 0x40)
+    if (gpKeySt->unk02 & DPAD_UP)
     {
         int v;
 

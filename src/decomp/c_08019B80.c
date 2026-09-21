@@ -42,7 +42,7 @@ u8 sub_08019B80(void *arg)
     if (Q->unk41 <= 1)
         return 0;
 
-    if (gpKeySt->unk02 & 0x40)
+    if (gpKeySt->unk02 & DPAD_UP)
     {
         if (Q->unk42 == 0)
         {
@@ -55,7 +55,7 @@ u8 sub_08019B80(void *arg)
         sub_0803B4DC(0x67);
     }
 
-    if (gpKeySt->unk02 & 0x80)
+    if (gpKeySt->unk02 & DPAD_DOWN)
     {
         if (Q->unk42 == Q->unk41 - 1)
         {

@@ -43,9 +43,9 @@ void sub_08048F4C(void)
 
     p = gUnknown_084C30F8;
 
-    if (p->unk030 == 0 && (gpKeySt->unk02 & 0xc0) != 0)
+    if (p->unk030 == 0 && (gpKeySt->unk02 & (DPAD_UP | DPAD_DOWN)) != 0)
     {
-        if ((gpKeySt->unk02 & 0x40) != 0)
+        if ((gpKeySt->unk02 & DPAD_UP) != 0)
         {
             if (p->unk01e == 0)
                 return;

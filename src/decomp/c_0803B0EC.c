@@ -30,7 +30,7 @@ void sub_0803B0EC(void)
 {
     sub_080116E8();
 
-    if (gpKeySt->unk00 & 0x200)
+    if (gpKeySt->unk00 & L_BUTTON)
     {
         sub_0803AF5C();
         gUnknown_03002F1C = 1;

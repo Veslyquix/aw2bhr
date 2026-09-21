@@ -20,6 +20,6 @@ void sub_08085A8C(ProcPtr proc)
 {
     sub_0801F34C(0x92, 0x38, 0x38, 0, 0);
 
-    if (gpKeySt->held & 0x103)
+    if (gpKeySt->held & (A_BUTTON | B_BUTTON | R_BUTTON))
         Proc_Break(proc);
 }

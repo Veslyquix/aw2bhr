@@ -26,19 +26,19 @@ void sub_080719EC(struct Unk80719EC *proc)
     sub_08011A20(0x78, 0x50, proc->unk58);
     sub_08011A20(0x78 - proc->unk5c * 8, 0x58, 0);
 
-    if (gpKeySt->unk02 & 0x20)
+    if (gpKeySt->unk02 & DPAD_LEFT)
     {
         if (proc->unk5c <= 3)
             proc->unk5c++;
     }
 
-    if (gpKeySt->unk02 & 0x10)
+    if (gpKeySt->unk02 & DPAD_RIGHT)
     {
         if (proc->unk5c > 0)
             proc->unk5c--;
     }
 
-    if (gpKeySt->unk02 & 0x40)
+    if (gpKeySt->unk02 & DPAD_UP)
     {
         proc->unk58 += gUnknown_08613E48[proc->unk5c];
 
@@ -46,7 +46,7 @@ void sub_080719EC(struct Unk80719EC *proc)
             proc->unk58 = 0x1869f;
     }
 
-    if (gpKeySt->unk02 & 0x80)
+    if (gpKeySt->unk02 & DPAD_DOWN)
     {
         proc->unk58 -= gUnknown_08613E48[proc->unk5c];
 

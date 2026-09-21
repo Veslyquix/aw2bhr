@@ -256,9 +256,9 @@ void sub_08082660(struct Unk8082660 *p)
     {
         sub_08082C0C((struct Unk8082C0C *)p, p->unk4c - 4);
 
-        if ((gpKeySt->unk02 & 0x40) && p->unk4c > 7 && p->unk4c <= 0xD)
+        if ((gpKeySt->unk02 & DPAD_UP) && p->unk4c > 7 && p->unk4c <= 0xD)
             p->unk5c = -1;
-        else if ((gpKeySt->unk02 & 0x80) && p->unk4c > 7 && p->unk4c <= 0xD)
+        else if ((gpKeySt->unk02 & DPAD_DOWN) && p->unk4c > 7 && p->unk4c <= 0xD)
             p->unk5c = 1;
     }
     else if (p->unk4c <= 0x17)
@@ -298,9 +298,9 @@ void sub_08082660(struct Unk8082660 *p)
                 gUnknown_03005920 = 0;
             }
 
-            if ((gpKeySt->unk02 & 0x40) && p->unk4c > 0xD && p->unk4c <= 0x17)
+            if ((gpKeySt->unk02 & DPAD_UP) && p->unk4c > 0xD && p->unk4c <= 0x17)
                 p->unk5c = -1;
-            else if ((gpKeySt->unk02 & 0x80) && p->unk4c > 0xD && p->unk4c <= 0x17)
+            else if ((gpKeySt->unk02 & DPAD_DOWN) && p->unk4c > 0xD && p->unk4c <= 0x17)
                 p->unk5c = 1;
 
             if (p->unk5c != 0 && p->unk4c == 0x17)
@@ -311,12 +311,12 @@ void sub_08082660(struct Unk8082660 *p)
     {
         sub_080829B0((struct Unk80831FC *)p, p->unk4c - 0x18);
 
-        if ((gpKeySt->unk02 & 0x40) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
+        if ((gpKeySt->unk02 & DPAD_UP) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
         {
             p->unk5c = -1;
             p->unk4c = 0xD;
         }
-        else if ((gpKeySt->unk02 & 0x80) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
+        else if ((gpKeySt->unk02 & DPAD_DOWN) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
         {
             p->unk5c = 1;
             p->unk4c = 0xD;

@@ -24,7 +24,7 @@ void sub_08065C9C(int a1)
 {
     int v = gUnknown_08580934->unk32;
 
-    if (gpKeySt->unk02 & 0x20)
+    if (gpKeySt->unk02 & DPAD_LEFT)
     {
         if (v == 0)
         {
@@ -37,7 +37,7 @@ void sub_08065C9C(int a1)
         }
     }
 
-    if (gpKeySt->unk02 & 0x10)
+    if (gpKeySt->unk02 & DPAD_RIGHT)
     {
         if (v == a1 - 1)
         {

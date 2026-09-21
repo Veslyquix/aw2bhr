@@ -32,7 +32,7 @@ void sub_0803227C(void)
     i = gUnknown_0849B060->unk04;
     n = sub_0802F534();
 
-    if (gpKeySt->held & 0x20)
+    if (gpKeySt->held & DPAD_LEFT)
     {
         do
         {
@@ -43,7 +43,7 @@ void sub_0803227C(void)
         } while (gUnknown_0300449C[i] == 0);
     }
 
-    if (gpKeySt->held & 0x10)
+    if (gpKeySt->held & DPAD_RIGHT)
     {
         do
         {

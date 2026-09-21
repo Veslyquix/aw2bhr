@@ -22,7 +22,7 @@ void sub_0802C3D0(void)
     if (*(u32 *)&gUnknown_030033E0 & 0x00070007)
         return;
 
-    if (!(gpKeySt->held & 0xb))
+    if (!(gpKeySt->held & (A_BUTTON | B_BUTTON | START_BUTTON)))
         return;
 
     sub_0803B4DC(0x66);

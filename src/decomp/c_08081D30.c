@@ -100,7 +100,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
     b = 0;
 
     if (p->unk4e != 0 && p->unk64 == 0 && p->unk68 == 0 && p->unk4c > 0x1B
-        && (gpKeySt->unk02 & 0xC0))
+        && (gpKeySt->unk02 & (DPAD_UP | DPAD_DOWN)))
     {
         p->unk4e = b;
         a = p->unk4c;
@@ -111,7 +111,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
     {
         if (p->unk64 == 0)
         {
-            if (gpKeySt->unk02 & 0x40)
+            if (gpKeySt->unk02 & DPAD_UP)
             {
                 if (p->unk52 == 5)
                     p->unk52 = 0;
@@ -123,7 +123,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 sub_0803B4DC(0x67);
                 gUnknown_03005920 = 0;
             }
-            else if (gpKeySt->unk02 & 0x80)
+            else if (gpKeySt->unk02 & DPAD_DOWN)
             {
                 if (p->unk52 == 0)
                     p->unk52 = 5;
@@ -135,7 +135,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 sub_0803B4DC(0x67);
                 gUnknown_03005920 = 0;
             }
-            else if (gpKeySt->held & 0x11)
+            else if (gpKeySt->held & (A_BUTTON | DPAD_RIGHT))
             {
                 if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 2
                     || gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 4)
@@ -174,7 +174,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
 
                     if (gpKeySt->held & 1)
                         sub_0803B4DC(0x71);
-                    else if (gpKeySt->held & 0x10)
+                    else if (gpKeySt->held & DPAD_RIGHT)
                         sub_0803B4DC(0x67);
                 }
             }
@@ -191,7 +191,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
         }
         else if (p->unk64 > 0)
         {
-            if (gpKeySt->held & 0x40)
+            if (gpKeySt->held & DPAD_UP)
             {
                 if (p->unk66 == 6)
                     p->unk66 = 0xB;
@@ -210,7 +210,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                     gUnknown_03005920 = 0;
                 }
             }
-            else if (gpKeySt->held & 0x80)
+            else if (gpKeySt->held & DPAD_DOWN)
             {
                 if (p->unk66 == 0xB)
                     p->unk66 = 6;
@@ -289,7 +289,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 Proc_Start(gUnknown_08616A68, p);
                 sub_0803BD54();
             }
-            else if (gpKeySt->held & 0x22)
+            else if (gpKeySt->held & (B_BUTTON | DPAD_LEFT))
             {
                 p->unk68 = 0xFFFF;
                 p->unk4c = 0;
@@ -297,7 +297,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
 
                 if (gpKeySt->held & 2)
                     sub_0803B4DC(0x66);
-                else if (gpKeySt->held & 0x20)
+                else if (gpKeySt->held & DPAD_LEFT)
                     sub_0803B4DC(0x67);
             }
         }

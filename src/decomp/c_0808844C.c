@@ -82,7 +82,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
         {
             if (proc->unk4e == 0 && proc->unk60 == 0)
             {
-                if (gpKeySt->unk02 & 0x20)
+                if (gpKeySt->unk02 & DPAD_LEFT)
                 {
                     sub_08043E3C(FRAME(proc->unk52), (void *)0x06014200, 0x16);
                     sub_08043E3C(FRAME(proc->unk52 + 1), (void *)0x06014680, 0x17);
@@ -94,7 +94,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
                     sub_08043B14(FRAME(proc->unk52), 0x2CC);
                     sub_0803B4DC(0x67);
                 }
-                else if (gpKeySt->unk02 & 0x10)
+                else if (gpKeySt->unk02 & DPAD_RIGHT)
                 {
                     sub_08043E3C(FRAME(proc->unk52), (void *)0x06014200, 0x16);
                     sub_08043E3C(FRAME(proc->unk52 + 1), (void *)0x06014680, 0x17);
@@ -109,7 +109,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
                     sub_08043B14(FRAME(proc->unk52), 0x2CC);
                     sub_0803B4DC(0x67);
                 }
-                else if ((gpKeySt->unk02 & 0x40) && (int)gUnknown_03005944 > 1)
+                else if ((gpKeySt->unk02 & DPAD_UP) && (int)gUnknown_03005944 > 1)
                 {
                     gUnknown_03005978[proc->unk58] = proc->unk52;
                     if (proc->unk58 == 0)
@@ -125,7 +125,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
                     sub_08043B14(FRAME(proc->unk52), 0x2CC);
                     sub_0803B4DC(0x67);
                 }
-                else if ((gpKeySt->unk02 & 0x80) && (int)gUnknown_03005944 > 1)
+                else if ((gpKeySt->unk02 & DPAD_DOWN) && (int)gUnknown_03005944 > 1)
                 {
                     gUnknown_03005978[proc->unk58] = proc->unk52;
                     proc->unk58++;
@@ -206,7 +206,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
         }
         else if (gUnknown_03005908 == 1)
         {
-            if (gpKeySt->unk02 & 0x20)
+            if (gpKeySt->unk02 & DPAD_LEFT)
             {
                 if (gUnknown_03005964 == 0)
                     gUnknown_03005964 = 7;
@@ -216,7 +216,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
                 sub_08043AC0(FRAME(proc->unk52), 0x11, gUnknown_03005964);
                 sub_0803B4DC(0x64);
             }
-            else if (gpKeySt->unk02 & 0x10)
+            else if (gpKeySt->unk02 & DPAD_RIGHT)
             {
                 if (gUnknown_03005964 == 7)
                     gUnknown_03005964 = 0;
@@ -226,7 +226,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
                 sub_08043AC0(FRAME(proc->unk52), 0x11, gUnknown_03005964);
                 sub_0803B4DC(0x64);
             }
-            else if (gpKeySt->held & 0x40)
+            else if (gpKeySt->held & DPAD_UP)
             {
                 if (gUnknown_03005964 > 3)
                 {
@@ -235,7 +235,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
                     sub_0803B4DC(0x64);
                 }
             }
-            else if (gpKeySt->held & 0x80)
+            else if (gpKeySt->held & DPAD_DOWN)
             {
                 if (gUnknown_03005964 <= 3)
                 {

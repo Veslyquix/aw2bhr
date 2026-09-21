@@ -45,7 +45,7 @@ void sub_0803A69C(void)
   int new_var;
   u16 *map;
   sub_08023274(2);
-  if (gpKeySt->unk02 & 0x60)
+  if (gpKeySt->unk02 & (DPAD_LEFT | DPAD_UP))
   {
     sub_0803B4DC(0x67);
     gUnknown_0849D89C->unk09--;
@@ -63,7 +63,7 @@ void sub_0803A69C(void)
     }
 
   }
-  if (gpKeySt->unk02 & 0x90)
+  if (gpKeySt->unk02 & (DPAD_RIGHT | DPAD_DOWN))
   {
     sub_0803B4DC(0x67);
     gUnknown_0849D89C->unk09++;
@@ -112,7 +112,7 @@ void sub_0803A69C(void)
     sub_08015C30(gUnknown_03001FBC);
   }
   else
-    if (gpKeySt->held & 0x100)
+    if (gpKeySt->held & R_BUTTON)
   {
     sub_08014878();
     sub_0803A59C();

@@ -66,7 +66,7 @@ void sub_08077790(ProcPtr proc)
             sub_0803B4DC(0x1CE);
             Proc_Goto(proc, 1);
         }
-        else if (gpKeySt->held & 0x100)
+        else if (gpKeySt->held & R_BUTTON)
         {
             sub_08014878();
             Proc_Goto(proc, 2);

@@ -39,7 +39,7 @@ void sub_08065D20(void)
 
     k = gUnknown_08580934->unk32 / 2;
 
-    if (gpKeySt->unk02 & 0xc0)
+    if (gpKeySt->unk02 & (DPAD_UP | DPAD_DOWN))
     {
         if (gUnknown_08580934->unk09[k] == 1)
             gUnknown_08580934->unk09[k] = 2;

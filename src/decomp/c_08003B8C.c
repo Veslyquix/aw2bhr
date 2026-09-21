@@ -38,18 +38,18 @@ void GenerateRandomMap(void)
     for (i = 0; i < MAP->height; i++)
         MAP->rowOffset[i] = i * MAP->width;
 
-    keys = gpKeySt->unk00 & 0x300;
-    if (keys == 0x300)
+    keys = gpKeySt->unk00 & (R_BUTTON | L_BUTTON);
+    if (keys == (R_BUTTON | L_BUTTON))
     {
         sub_08004724();
         sub_08003ED0();
     }
-    else if (keys == 0x200)
+    else if (keys == L_BUTTON)
     {
         sub_080040C8();
         sub_08003ED0();
     }
-    else if (keys == 0x100)
+    else if (keys == R_BUTTON)
     {
         sub_0800449C();
         sub_08003ED0();

@@ -56,10 +56,10 @@ void sub_08032E88(struct Unk32E88Proc *proc)
     }
     else
     {
-        if (gpKeySt->held & 0x20)
+        if (gpKeySt->held & DPAD_LEFT)
             proc->unk29--;
 
-        if (gpKeySt->held & 0x10)
+        if (gpKeySt->held & DPAD_RIGHT)
             proc->unk29++;
 
         proc->unk29 &= 1;

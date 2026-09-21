@@ -95,14 +95,14 @@ void sub_08034130(struct Unk34130Proc *proc)
         }
         else
         {
-            if (gpKeySt->unk02 & 0x40)
+            if (gpKeySt->unk02 & DPAD_UP)
             {
                 if (n != 0)
                     n = n - 1;
                 else
                     n = 2;
             }
-            else if (gpKeySt->unk02 & 0x80)
+            else if (gpKeySt->unk02 & DPAD_DOWN)
             {
                 if (n <= 1)
                     n = n + 1;

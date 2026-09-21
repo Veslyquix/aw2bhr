@@ -199,7 +199,7 @@ void sub_0800081C(void)
         }
         else
         {
-            m = gpKeySt->held & 0x303;
+            m = gpKeySt->held & (A_BUTTON | B_BUTTON | R_BUTTON | L_BUTTON);
             if (m == 0x100)
             {
                 gActiveMap->unk07 = t;

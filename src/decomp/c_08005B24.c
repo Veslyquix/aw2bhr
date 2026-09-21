@@ -64,7 +64,7 @@ void sub_08005B24(void)
         sub_08005EF0(1);
         /* fallthrough */
     case 1:
-        if ((gpKeySt->held & 0x80) != 0)
+        if ((gpKeySt->held & DPAD_DOWN) != 0)
         {
             gActiveMap->unk02 = 0xA;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
@@ -80,7 +80,7 @@ void sub_08005B24(void)
         sub_08005EF0(0);
         /* fallthrough */
     case 0xB:
-        if ((gpKeySt->held & 0x40) != 0)
+        if ((gpKeySt->held & DPAD_UP) != 0)
         {
             gActiveMap->unk02 = 0;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);

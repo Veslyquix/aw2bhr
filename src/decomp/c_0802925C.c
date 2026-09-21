@@ -49,7 +49,7 @@ void sub_0802925C(struct Unk2925CProc *proc)
 
     old = proc->unk64;
 
-    if (gpKeySt->unk02 & 0x90)
+    if (gpKeySt->unk02 & (DPAD_RIGHT | DPAD_DOWN))
     {
         proc->unk64 = proc->unk64 + 1;
 
@@ -57,7 +57,7 @@ void sub_0802925C(struct Unk2925CProc *proc)
             proc->unk64 = 0;
     }
 
-    if (gpKeySt->unk02 & 0x60)
+    if (gpKeySt->unk02 & (DPAD_LEFT | DPAD_UP))
     {
         if (proc->unk64 <= 0)
             proc->unk64 = proc->unk66;

@@ -97,7 +97,7 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
     sub_080119A0(0x40, 0x40, sColors[gPlayers[army].teamColor]);
     sub_080119A0(0, proc->unk20 * 8, "/");
 
-    if (gpKeySt->held & 0x100)
+    if (gpKeySt->held & R_BUTTON)
     {
         do
         {
@@ -108,7 +108,7 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
         } while (gPlayers[proc->unk1E].aiControlled == 0);
     }
 
-    if (gpKeySt->held & 0x200)
+    if (gpKeySt->held & L_BUTTON)
     {
         do
         {
@@ -119,25 +119,25 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
         } while (gPlayers[proc->unk1E].aiControlled == 0);
     }
 
-    if (gpKeySt->unk02 & 0x40)
+    if (gpKeySt->unk02 & DPAD_UP)
     {
         if (proc->unk20 > 1)
             proc->unk20--;
     }
 
-    if (gpKeySt->unk02 & 0x80)
+    if (gpKeySt->unk02 & DPAD_DOWN)
     {
         if (proc->unk20 <= 6)
             proc->unk20++;
     }
 
-    if (gpKeySt->unk02 & 0x20)
+    if (gpKeySt->unk02 & DPAD_LEFT)
         delta = 0xFF;
 
-    if (gpKeySt->unk02 & 0x10)
+    if (gpKeySt->unk02 & DPAD_RIGHT)
         delta = 1;
 
-    if (gpKeySt->unk02 & 0x30)
+    if (gpKeySt->unk02 & (DPAD_RIGHT | DPAD_LEFT))
     {
         switch ((s16)(proc->unk20 - 1))
         {
