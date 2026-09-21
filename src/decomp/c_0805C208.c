@@ -20,7 +20,7 @@
  * The tail is the 24-byte `if (...) return 1; ... return 0;` split across a `b`
  * with the two `movs` in different blocks, not a returned comparison. */
 
-int sub_0805C208(void)
+int CopCondUnitsInjured(void)
 {
     int count;
     int i;
@@ -42,3 +42,5 @@ int sub_0805C208(void)
 
     return 0;
 }
+
+asm(".global sub_0805C208\n.thumb_set sub_0805C208, CopCondUnitsInjured\n");

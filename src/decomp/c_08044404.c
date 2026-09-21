@@ -12,7 +12,9 @@ bool8 sub_08044404(void *unit)
     return 1;
 }
 
-bool8 sub_08044408(void *unit)
+bool8 CopUnitCondAlways(void *unit)
 {
     return 1;
 }
+
+asm(".global sub_08044408\n.thumb_set sub_08044408, CopUnitCondAlways\n");

@@ -17,15 +17,19 @@ void sub_0801987C(void)
     gPlaySt.campaignRelated = 1;
 }
 
-void sub_08019888(void)
+void EnableCoPowers(void)
 {
-    gPlaySt.eventRelated = 1;
+    gPlaySt.coPowersEnabled = 1;
 }
 
-void sub_08019894(void)
+asm(".global sub_08019888\n.thumb_set sub_08019888, EnableCoPowers\n");
+
+void DisableCoPowers(void)
 {
-    gPlaySt.eventRelated = 0;
+    gPlaySt.coPowersEnabled = 0;
 }
+
+asm(".global sub_08019894\n.thumb_set sub_08019894, DisableCoPowers\n");
 
 void sub_080198A0(void (*func)(void))
 {

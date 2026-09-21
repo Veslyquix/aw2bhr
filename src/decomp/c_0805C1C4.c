@@ -11,10 +11,12 @@
  * canonical `i < N` form (`cmp #N-1; bls`). The pool sitting between the two
  * return blocks is the `if (C) return A; return B;` shape rather than a
  * ternary, which would compute into r1 and put the pool after the `bx lr`. */
-int sub_0805C1C4(void)
+int CopCondStartOfTurn(void)
 {
     if (gUnknown_03004770 < 2)
         return 1;
 
     return 0;
 }
+
+asm(".global sub_0805C1C4\n.thumb_set sub_0805C1C4, CopCondStartOfTurn\n");

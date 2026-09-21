@@ -30,7 +30,7 @@ void sub_080440E0(int a1, int a2)
 {
     int v;
 
-    if (gPlaySt.eventRelated == 0)
+    if (gPlaySt.coPowersEnabled == 0)
         return;
     if (sub_0804415C(a1))
         return;

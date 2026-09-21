@@ -32,7 +32,7 @@ u16 sub_080206B0(u32 a1)
     u16 i;
 
     i = 0;
-    while ((u32)gUnknown_085C77A0[i].unk2c[0] != a1)
+    while ((u32)gUnknown_085C77A0[i].mapData[0] != a1)
     {
         i++;
         if (i > 0xbf)

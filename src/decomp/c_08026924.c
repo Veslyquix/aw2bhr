@@ -68,7 +68,7 @@ void sub_08026924(void)
     sub_08026A48();
 
     if (gPlaySt.coAbilities == 0)
-        gPlaySt.eventRelated = 0;
+        gPlaySt.coPowersEnabled = 0;
 
     sub_08026B28();
 

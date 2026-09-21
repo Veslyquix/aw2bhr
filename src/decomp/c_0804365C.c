@@ -56,7 +56,7 @@ void sub_080436DC(int x, int y, int pid)
     off = ((gPlayers[pid].co * 8) & 0x3ff) * 0x20;
     sub_08011E54(gUnknown_08102F64 + off, (void *)0x06010740, 0x100);
 
-    if (gPlaySt.eventRelated != 0)
+    if (gPlaySt.coPowersEnabled != 0)
     {
         if (gPlayers[pid].coMode != 0)
             sub_08043898(x, y, pid);

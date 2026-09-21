@@ -23,7 +23,7 @@
 
 bool8 sub_0802C820(void)
 {
-    if (gPlaySt.eventRelated & sub_080442AC(gUnknown_030033EC))
+    if (gPlaySt.coPowersEnabled & sub_080442AC(gUnknown_030033EC))
         return FALSE;
 
     return TRUE;
@@ -37,7 +37,7 @@ bool8 sub_0802C820(void)
 
 bool8 sub_0802C848(void)
 {
-    if (gPlaySt.eventRelated & sub_08044280(gUnknown_030033EC))
+    if (gPlaySt.coPowersEnabled & sub_08044280(gUnknown_030033EC))
         return FALSE;
 
     return TRUE;

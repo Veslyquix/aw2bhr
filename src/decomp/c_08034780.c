@@ -48,7 +48,7 @@ void SetDefaultRules(void)
     gPlaySt.dispMiniPanel = 1;
     gPlaySt.campaignRelated = 0;
     gPlaySt.coAbilities = 1;
-    gPlaySt.eventRelated = 1;
+    gPlaySt.coPowersEnabled = 1;
     gPlaySt.animOpts = gUnknown_0200C420.unk0e;
     gPlaySt.bgmOn = (gUnknown_0200C420.unk14 == 0);
 }

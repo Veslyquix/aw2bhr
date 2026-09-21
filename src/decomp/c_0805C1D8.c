@@ -26,7 +26,7 @@
  * u32 rather than int. The `movs r0, #1` in the first arm is BOTH the stored
  * value and the returned one -- agbcc reuses the register it already loaded. */
 
-int sub_0805C1D8(int a)
+int CopCondTurnBoundary(int a)
 {
     if (gUnknown_03004770 > 0x10 && a == 2)
     {
@@ -40,3 +40,5 @@ int sub_0805C1D8(int a)
 
     return 0;
 }
+
+asm(".global sub_0805C1D8\n.thumb_set sub_0805C1D8, CopCondTurnBoundary\n");

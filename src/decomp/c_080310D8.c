@@ -27,7 +27,7 @@ void sub_080310D8(void)
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
     gPlaySt.fog = 1;
-    gPlaySt.eventRelated = 1;
+    gPlaySt.coPowersEnabled = 1;
     gPlaySt.weather = 0;
     gPlaySt.randomWeatherOn = 1;
 
@@ -50,7 +50,7 @@ void sub_08031128(void)
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
     gPlaySt.fog = 1;
-    gPlaySt.eventRelated = 1;
+    gPlaySt.coPowersEnabled = 1;
     gPlaySt.weather = 0;
     gPlaySt.randomWeatherOn = 1;
 
@@ -72,7 +72,7 @@ void sub_0803117C(void)
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
     gPlaySt.fog = 1;
-    gPlaySt.eventRelated = 1;
+    gPlaySt.coPowersEnabled = 1;
     gPlaySt.weather = 0;
     gPlaySt.randomWeatherOn = 1;
 

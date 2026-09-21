@@ -7,7 +7,7 @@
  * sub_080247A4 @ 0x080247A4
  */
 
-void sub_080247A4(u16 a1)
+void LoadMapData(u16 a1)
 {
     void *p;
 
@@ -20,10 +20,12 @@ void sub_080247A4(u16 a1)
     {
         sub_08037B84(sub_08014E44(0xa14));
 
-        p = gUnknown_085C77A0[a1].unk2c[sub_0803866C()];
+        p = gUnknown_085C77A0[a1].mapData[sub_0803866C()];
         if (p == NULL)
-            p = gUnknown_085C77A0[a1].unk2c[0];
+            p = gUnknown_085C77A0[a1].mapData[0];
 
         LZ77UnCompWram(p, gUnknown_03003F68);
     }
 }
+
+asm(".global sub_080247A4\n.thumb_set sub_080247A4, LoadMapData\n");

@@ -53,4 +53,15 @@ void AiConsiderBuildingLander(void);
 int GetCampaignMissionId(void);
 void ClearArmyCount(void);
 
+bool8 CopUnitCondAlways(void *unit);
+u8 CopCondAlways(int mode);
+int CopCondStartOfTurn(void);
+int CopCondTurnBoundary(int a);
+int CopCondUnitsInjured(void);
+int CopCondNotSnowing(void);
+void LoadMapData(u16 a1);
+void DrawWindowBackground(int a1, int a2, int a3, int a4, u16 *a5, int a6);
+void EnableCoPowers(void);
+void DisableCoPowers(void);
+
 #endif /* GUARD_DATA_NAMES_H */

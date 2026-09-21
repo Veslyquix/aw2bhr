@@ -11,7 +11,7 @@
  * one top row, a4-2 middle rows alternating between two forms, one bottom row,
  * each 32 entries further on. If the buffer is one of the four known BG maps,
  * flag that BG for upload. */
-void sub_0801A368(int a1, int a2, int a3, int a4, u16 *a5, int a6)
+void DrawWindowBackground(int a1, int a2, int a3, int a4, u16 *a5, int a6)
 {
     u16 *dst;
     u16 i, alt;
@@ -44,3 +44,5 @@ void sub_0801A368(int a1, int a2, int a3, int a4, u16 *a5, int a6)
 
     sub_0802465C();
 }
+
+asm(".global sub_0801A368\n.thumb_set sub_0801A368, DrawWindowBackground\n");

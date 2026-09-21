@@ -18,7 +18,7 @@ void sub_0803BD78(void)
 {
     gPlaySt.gameMode = 3;
     gPlaySt.fog = 1;
-    gPlaySt.eventRelated = 1;
+    gPlaySt.coPowersEnabled = 1;
     gPlaySt.coAbilities = 1;
     gPlaySt.randomWeatherOn = 1;
     gPlaySt.weather = 0;
@@ -50,7 +50,7 @@ void sub_0803BDBC(void)
     gPlaySt.aiControlled[3] = 0;
     gPlaySt.aiControlled[4] = 0;
     gPlaySt.fog = 1;
-    gPlaySt.eventRelated = 1;
+    gPlaySt.coPowersEnabled = 1;
     gPlaySt.coAbilities = 1;
     gPlaySt.weather = 0;
     gPlaySt.randomWeatherOn = 1;

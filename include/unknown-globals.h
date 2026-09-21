@@ -1981,7 +1981,7 @@ struct Unk02025564
  *
  * NOT INDEPENDENTLY VERIFIED against this tree's own code -- taken from SRR
  * on the strength of the layout agreeing everywhere it could be checked:
- * event20, campaignRelated, eventRelated, bgmOn, fog, weather,
+ * event20, campaignRelated, bgmOn, fog, weather,
  * randomWeatherOn, defaultWeather, turnLimit, captureLimit and savingEnabled.
  * Treat each as a lead, not a settled fact, and re-read the byte's users
  * before relying on one. animOpts is the exception in that group: SRR calls
@@ -1990,7 +1990,16 @@ struct Unk02025564
  * only in comparing it against 0, 1, 2 or 3, which is the same 0..3 range.
  * event20 is likewise better evidenced than its name suggests -- it is a BIT
  * MASK, not a scalar: sub_08028990, sub_08028944 and sub_080289FC test bits
- * 0, 1, 2 and 4 of it while deciding a win/loss condition. */
+ * 0, 1, 2 and 4 of it while deciding a win/loss condition.
+ *
+ * TWO OF THAT GROUP HAVE SINCE BEEN SETTLED and are no longer caveated.
+ * coPowersEnabled at +0x07 was SRR's 'eventRelated', a name this tree's own
+ * code refutes: sub_0802C820 spells it `coPowersEnabled & IsCoPowerAvailable
+ * (army)`, and sub_08019888 / sub_08019894 are its enable/disable pair, which
+ * is what the Xenesis subroutine list calls 'Disables CO Powers'. It is
+ * distinct from coAbilities at +0x08, which gates the CO BONUS tables.
+ * weather at +0x2c is confirmed by CopCondNotSnowing, whose whole body is
+ * `weather == 1 && ...`, so 1 is snow. */
 struct PlaySt /* 0x47 */
 {
     /* 0x00 */ u8 unk00; /* wave 27, W27-C: sub_0803BDBC sets it to 1 with a
@@ -2011,7 +2020,7 @@ struct PlaySt /* 0x47 */
                           * otherwise differ in nothing. Width only; no reader
                           * is known. */
     /* 0x06 */ u8 campaignRelated;
-    /* 0x07 */ u8 eventRelated;
+    /* 0x07 */ u8 coPowersEnabled; /* see the note above the struct */
     /* 0x08 */ u8 coAbilities; /* a mode flag: the whole sub_08042E2C..sub_0804301C
                           * table-lookup family reads it and returns a fixed
                           * fallback when it is zero */
@@ -4011,7 +4020,7 @@ struct Unk085C77A0 /* 0x5c */
                           * byte of filler_26. */
     /* 0x28 */ u8 unk28;
     /* 0x29 */ u8 filler_29[0x03];
-    /* 0x2c */ void *unk2c[2]; /* Wave 35, W35-C: an ARRAY of two words, the
+    /* 0x2c */ void *mapData[2]; /* Wave 35, W35-C: an ARRAY of two words, the
                               * same shape (and the same evidence) as unk34
                               * below, which is why the old `u32 unk2c` plus
                               * `filler_30[4]` pair is folded into one member.
