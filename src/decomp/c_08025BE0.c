@@ -90,7 +90,7 @@
  * 0 at all.
  */
 
-void sub_08025BE0(struct Unk08499594 *a1, u8 a2)
+void InitUnit(struct Unk08499594 *a1, u8 a2)
 {
     a1->unk00 = a2;
     a1->unk01 = 0;
@@ -121,3 +121,5 @@ void sub_08025BE0(struct Unk08499594 *a1, u8 a2)
         break;
     }
 }
+
+asm(".global sub_08025BE0\n.thumb_set sub_08025BE0, InitUnit\n");

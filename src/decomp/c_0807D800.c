@@ -30,7 +30,7 @@ struct Unk807D860
     /* 0x5c */ int unk5c;
 };
 
-int sub_0807D800(struct Unk807D800 *p)
+int IsCoSelectionUnique(struct Unk807D800 *p)
 {
     int i;
 
@@ -42,6 +42,8 @@ int sub_0807D800(struct Unk807D800 *p)
 
     return 1;
 }
+
+asm(".global sub_0807D800\n.thumb_set sub_0807D800, IsCoSelectionUnique\n");
 
 void sub_0807D860(struct Unk807D860 *p)
 {

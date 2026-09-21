@@ -34,7 +34,7 @@ bool8 sub_08025EF0(int a1, int a2)
     return TRUE;
 }
 
-bool8 sub_08025F74(struct Unk08499594 *a1, u8 a2)
+bool8 CanTransportCarry(struct Unk08499594 *a1, u8 a2)
 {
     u8 *t;
     u8 *u;
@@ -57,6 +57,8 @@ bool8 sub_08025F74(struct Unk08499594 *a1, u8 a2)
 
     return TRUE;
 }
+
+asm(".global sub_08025F74\n.thumb_set sub_08025F74, CanTransportCarry\n");
 
 bool8 sub_08025FC0(struct Unk08499594 *a1, struct Unk08499594 *a2)
 {

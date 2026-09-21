@@ -32,7 +32,7 @@ struct Unk40640Proc
     /* 58 */ int unk58;
 };
 
-void sub_08040640(struct Unk40640Proc *proc)
+void ApplySiloDamage(struct Unk40640Proc *proc)
 {
     sub_08026100(proc->unk2c,     proc->unk30 - 2, proc->unk44);
     sub_08026100(proc->unk2c - 1, proc->unk30 - 1, proc->unk44);
@@ -54,3 +54,5 @@ void sub_08040640(struct Unk40640Proc *proc)
                  proc->unk4a, 3, 1);
     sub_0803B4DC(0x1C7);
 }
+
+asm(".global sub_08040640\n.thumb_set sub_08040640, ApplySiloDamage\n");

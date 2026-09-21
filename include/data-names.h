@@ -114,4 +114,15 @@ void AiMarkAffordableUnits(void);
 u8 AiSelectBuildUnit(void);
 void DrawCoPowerLabel(int x, int y, int i);
 
+void CopUnitResupply(void *p);
+void InitUnit(struct Unk08499594 *a1, u8 a2);
+/* These two take structs that live in their own .c file; forward-declare the
+ * tags so the prototypes below do not introduce them inside a parameter list
+ * (agbcc warns, and warnings are errors here). */
+struct Unk40640Proc;
+struct Unk807D800;
+void ApplySiloDamage(struct Unk40640Proc *proc);
+int IsCoSelectionUnique(struct Unk807D800 *p);
+bool8 CanTransportCarry(struct Unk08499594 *a1, u8 a2);
+
 #endif /* GUARD_DATA_NAMES_H */
