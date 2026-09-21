@@ -9,7 +9,7 @@
 
 #include "map.h"
 
-int sub_08060DAC(void)
+int AiBuildPropertyList(void)
 {
     int n;
     int count;
@@ -39,3 +39,5 @@ int sub_08060DAC(void)
     gUnknown_085766E4[n].unk00 = 0xFF;
     return count;
 }
+
+asm(".global sub_08060DAC\n.thumb_set sub_08060DAC, AiBuildPropertyList\n");

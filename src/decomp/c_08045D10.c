@@ -22,7 +22,7 @@
  * Nothing stores in the loop, so the bound and the array deref are hoisted and
  * strength_reduce gives the r0 pointer giv; the ascending `blt` at the bottom is
  * the source's own direction (no dbra reversal, because the giv keeps i live). */
-bool8 sub_08045D10(void)
+bool8 HasNoPlayer2Battleship(void)
 {
     int i;
 
@@ -37,3 +37,5 @@ bool8 sub_08045D10(void)
 
     return TRUE;
 }
+
+asm(".global sub_08045D10\n.thumb_set sub_08045D10, HasNoPlayer2Battleship\n");

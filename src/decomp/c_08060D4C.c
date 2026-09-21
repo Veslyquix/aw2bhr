@@ -7,7 +7,7 @@
  * sub_08060D4C @ 0x08060D4C, sub_08060D78 @ 0x08060D78
  */
 
-void sub_08060D4C(void)
+void AiPickUnitToBuild(void)
 {
     u8 v;
 
@@ -20,6 +20,8 @@ void sub_08060D4C(void)
             gUnknown_030046C0.unk06 = v;
     }
 }
+
+asm(".global sub_08060D4C\n.thumb_set sub_08060D4C, AiPickUnitToBuild\n");
 
 void sub_08060D78(s16 *p)
 {

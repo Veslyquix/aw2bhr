@@ -88,7 +88,7 @@ void sub_08061E98(void)
     }
 }
 
-void sub_08061F34(void)
+void AiScanBuildableFacilities(void)
 {
     u8 v[5];
     int x;
@@ -109,3 +109,5 @@ void sub_08061F34(void)
         }
     }
 }
+
+asm(".global sub_08061F34\n.thumb_set sub_08061F34, AiScanBuildableFacilities\n");

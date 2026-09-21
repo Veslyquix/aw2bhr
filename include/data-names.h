@@ -95,4 +95,10 @@ void SetupCoSelectGreatSeaBattle(void);
 void SetupCoSelectHotPursuit(void);
 void SetupCoSelectFinalFront(void);
 
+bool8 HasNoPlayer2Battleship(void);
+void AiPickUnitToBuild(void);
+void AiCalcBuildPriorities(void);
+int AiBuildPropertyList(void);
+void AiScanBuildableFacilities(void);
+
 #endif /* GUARD_DATA_NAMES_H */

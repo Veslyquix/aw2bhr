@@ -85,7 +85,7 @@ int CountBuildablePropertiesOfKind(int a1)
 
 asm(".global sub_08060ED4\n.thumb_set sub_08060ED4, CountBuildablePropertiesOfKind\n");
 
-void sub_08060F00(void)
+void AiCalcBuildPriorities(void)
 {
     int i;
     int d;
@@ -100,6 +100,8 @@ void sub_08060F00(void)
             gUnknown_03004640[i] = sub_08057FA8(i) * 1000 / gUnknown_03004674 * 10 / d;
     }
 }
+
+asm(".global sub_08060F00\n.thumb_set sub_08060F00, AiCalcBuildPriorities\n");
 
 /* sub_08060F74 @ 0x08060F74, 136 bytes.
  *

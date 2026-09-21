@@ -7201,7 +7201,14 @@ extern u16 gUnknown_030045D4;
  * gUnknown_030046B8: `ldrb` of byte 0, tested against 1 and then 2 with
  * `movs rD,#K / ands`. That form is byte-neutral between a bitfield and a
  * scalar mask -- only a CLEAR would discriminate and there is none here, so the
- * weaker scalar spelling is used. */
+ * weaker scalar spelling is used.
+ *
+ * WAVE 61 SETTLES WHAT IT HOLDS: AiScanBuildableFacilities (sub_08061F34)
+ * walks every map cell and ORs in a per-terrain flag byte, so it is a mask of
+ * WHICH FACILITY KINDS EXIST ON THIS MAP, not a unit id. That matches the AI
+ * note carried with the Nightmare module set -- bit 0 airport present, bit 1
+ * port present -- and explains the `tested against 1 and then 2` shape above.
+ * SRR_AW2's Definitions.s calls this symbol `aiUnitType`, which is wrong. */
 extern int gUnknown_030045D8;
 struct Unk35828Proc;
 extern struct Unk35828Proc *gUnknown_030045E0[];
