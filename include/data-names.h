@@ -23,4 +23,14 @@ int GetTerrainDefense(int a1, s8 a2, u8 a3);
 int IsUnitSoldier(struct Unk030040D8 *p);
 int IsUnitAir(struct Unk030040D8 *p);
 
+void *GetCoPowerAnimation(int a);
+void *GetCoPowerAnimationPalette(int a);
+int IsCoPowerAvailable(int a1);
+bool8 IsTerrainSilo(s16 a, s16 b);
+void CalcRandomWeatherChances(void);
+void DrawDaysRemaining(int x, int y);
+bool8 IsPlayer1TeamAlive(void);
+void DrawOamObject(int a1, int a2, int a3, int a4, int a5);
+int RepairUnit(struct Unk08499594 *p, u16 a2, u8 a3);
+
 #endif /* GUARD_DATA_NAMES_H */

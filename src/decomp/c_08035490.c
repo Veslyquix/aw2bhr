@@ -31,7 +31,7 @@ struct Unk35490Counts
     /* 0x03 */ u8 unk03[5];
 };
 
-void sub_08035490(void)
+void CalcRandomWeatherChances(void)
 {
     u8 i;
 
@@ -52,3 +52,5 @@ void sub_08035490(void)
 
     sub_080354FC();
 }
+
+asm(".global sub_08035490\n.thumb_set sub_08035490, CalcRandomWeatherChances\n");

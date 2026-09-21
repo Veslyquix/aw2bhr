@@ -117,7 +117,7 @@
  * `acc` is int in r8, `v` is u16.
  */
 
-int sub_08029AF8(struct Unk08499594 *p, u16 a2, u8 a3)
+int RepairUnit(struct Unk08499594 *p, u16 a2, u8 a3)
 {
     int acc;
     u16 v;
@@ -157,3 +157,5 @@ _done:
 
     return acc;
 }
+
+asm(".global sub_08029AF8\n.thumb_set sub_08029AF8, RepairUnit\n");

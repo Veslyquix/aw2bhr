@@ -12,7 +12,7 @@
  * agbcc's fold() (W35-A). The two `ldr rA,=0x1FF; adds rB,rA,#0; ands rC,rB`
  * triplets that used to be one instruction short in each arm are sub_0802BD54's
  * u16 parameters -- see the retyped declaration in unknown-functions.h. */
-void sub_0804365C(int x, int y)
+void DrawDaysRemaining(int x, int y)
 {
     int t = sub_08043630();
     int n;
@@ -35,6 +35,8 @@ void sub_0804365C(int x, int y)
     else
         sub_0802BD54((x - 0xf) & 0x1ff, y, t);
 }
+
+asm(".global sub_0804365C\n.thumb_set sub_0804365C, DrawDaysRemaining\n");
 
 void sub_080436DC(int x, int y, int pid)
 {

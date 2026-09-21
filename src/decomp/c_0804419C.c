@@ -60,7 +60,7 @@ int sub_08044280(int a1)
     return 0;
 }
 
-int sub_080442AC(int a1)
+int IsCoPowerAvailable(int a1)
 {
     int funds;
 
@@ -73,3 +73,5 @@ int sub_080442AC(int a1)
         return 1;
     return 0;
 }
+
+asm(".global sub_080442AC\n.thumb_set sub_080442AC, IsCoPowerAvailable\n");

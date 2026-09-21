@@ -25,14 +25,16 @@
  * returns literal 0/1), but the sole caller sub_08041758 re-narrows the result
  * with `lsls #0x18; lsrs #0x18` before `cmp #1`, which agbcc emits only for a
  * narrow-returning callee. See include/unknown-functions.h. */
-bool8 sub_0804247C(s16 a, s16 b)
+bool8 IsTerrainSilo(s16 a, s16 b)
 {
     int off;
 
     off = gMap->rowOffset[b] + a;
 
-    if ((gMap->terrain[off] & 0x1f) == 0x11)
+    if ((gMap->terrain[off] & 0x1f) == TERRAIN_SILO)
         return 1;
     else
         return 0;
 }
+
+asm(".global sub_0804247C\n.thumb_set sub_0804247C, IsTerrainSilo\n");

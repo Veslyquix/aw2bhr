@@ -28,7 +28,7 @@
  * by side; see docs/agbcc-codegen.md.
  */
 
-bool8 sub_0803861C(void)
+bool8 IsPlayer1TeamAlive(void)
 {
     u8 count;
     u8 i;
@@ -43,3 +43,5 @@ bool8 sub_0803861C(void)
         return 1;
     return 0;
 }
+
+asm(".global sub_0803861C\n.thumb_set sub_0803861C, IsPlayer1TeamAlive\n");
