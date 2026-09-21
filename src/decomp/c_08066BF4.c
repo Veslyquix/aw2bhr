@@ -33,7 +33,7 @@
  *
  * The wrap is gated on `unk02 == held`, i.e. it only fires when the pressed
  * mask is exactly the held mask -- no other key down. */
-void sub_08066BF4(void)
+void HandleRulesMenuInput(void)
 {
     int i;
 
@@ -73,6 +73,8 @@ void sub_08066BF4(void)
 
     gUnknown_08580934->unk33 = i;
 }
+
+asm(".global sub_08066BF4\n.thumb_set sub_08066BF4, HandleRulesMenuInput\n");
 
 void sub_08066C70(struct Unk08580934_Obj *p)
 {

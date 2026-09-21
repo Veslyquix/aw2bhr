@@ -104,7 +104,7 @@ void sub_08061788(u16 a)
  * emits both pool `ldr`s first (0x030044D8's, then 0x03004770's), then the
  * single `movs r0,#0`, then the `str` and the `strb` in that order. Two
  * separate statements interleave the pool loads with their stores instead. */
-void sub_08061868(void)
+void RunAiTurn(void)
 {
     gUnknown_030046B4 = sub_0803866C()
         ? gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptHc
@@ -125,3 +125,5 @@ void sub_08061868(void)
     if (gPlayers[gUnknown_030033EC].teamColor == 5 && gUnknown_030046B4 != 0)
         sub_080607E8();
 }
+
+asm(".global sub_08061868\n.thumb_set sub_08061868, RunAiTurn\n");

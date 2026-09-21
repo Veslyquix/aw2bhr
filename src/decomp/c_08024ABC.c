@@ -22,7 +22,7 @@ struct Unk08024ABCArg
     /* 0x18 */ u16 unk18;
 };
 
-void sub_08024ABC(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 d)
+void CalcDamage(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 d)
 {
     const struct Unk085D5ABC *t;
     u16 army;
@@ -84,3 +84,5 @@ void sub_08024ABC(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 
         a->unk0a--;
     }
 }
+
+asm(".global sub_08024ABC\n.thumb_set sub_08024ABC, CalcDamage\n");

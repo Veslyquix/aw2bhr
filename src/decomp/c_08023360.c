@@ -18,7 +18,7 @@
  * whole difference on this function. (s16) is byte-identical here, so the
  * signedness is not settled -- only the presence of the cast is.
  */
-void sub_08023360(int a)
+void LoadGameplayGraphics(int a)
 {
     sub_08011B18();
 
@@ -69,3 +69,5 @@ void sub_08023360(int a)
     sub_08043834(gUnknown_030033EC);
     sub_0801A57C(gUnknown_030033EC);
 }
+
+asm(".global sub_08023360\n.thumb_set sub_08023360, LoadGameplayGraphics\n");

@@ -7,7 +7,9 @@
  * sub_08044B08 @ 0x08044B08
  */
 
-void sub_08044B08(u8 a1, u8 a2, u8 a3)
+void AnimateUnitCreation(u8 a1, u8 a2, u8 a3)
 {
     sub_08039ACC(a1, a2, 0x51CA, a3);
 }
+
+asm(".global sub_08044B08\n.thumb_set sub_08044B08, AnimateUnitCreation\n");

@@ -13,7 +13,7 @@
  * -30..80 -- and the case bodies come out in SOURCE order, which is what fixes
  * `default:` between case -30 and case 10 rather than at the end. */
 
-int sub_08085410(int a1, int a2)
+int GetFirepowerIcon(int a1, int a2)
 {
     switch (sub_080430B0(gPlayers[a1].co, gPlayers[a1].coMode, a2))
     {
@@ -45,3 +45,5 @@ int sub_08085410(int a1, int a2)
         return 0xa7;
     }
 }
+
+asm(".global sub_08085410\n.thumb_set sub_08085410, GetFirepowerIcon\n");

@@ -40,7 +40,7 @@
  *     target-reuse swap and emits `adds r0, r0, r4` -- the operands come out
  *     reversed no matter which order the source writes them in. Same lever
  *     c_08038848.c records for the same subexpression. */
-void sub_0801F888(int a1)
+void CacheUnitMovementCosts(int a1)
 {
     int i;
     u8 *dst;
@@ -58,6 +58,8 @@ void sub_0801F888(int a1)
         *dst = costs[c];
     }
 }
+
+asm(".global sub_0801F888\n.thumb_set sub_0801F888, CacheUnitMovementCosts\n");
 
 /* Rebuilds the gUnknown_03003340 row-pointer table sub_0801F838 and friends
  * write through: row y of the caller's plane starts at `a1 + rowOffset[y]`,

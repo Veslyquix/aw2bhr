@@ -25,7 +25,7 @@
 
 #define MAP gMap
 
-void sub_08003B8C(void)
+void GenerateRandomMap(void)
 {
     int i;
     int keys;
@@ -69,3 +69,5 @@ void sub_08003B8C(void)
     sub_0800C8D8();
     gActiveMap->propertyCount = sub_0800C874();
 }
+
+asm(".global sub_08003B8C\n.thumb_set sub_08003B8C, GenerateRandomMap\n");

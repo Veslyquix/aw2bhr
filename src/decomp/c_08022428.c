@@ -45,7 +45,7 @@
  *   - the guards must be ONE `||` chain with the drawing arm as the `else`;
  *     five separate `if (...) { blank; return; }` blocks lay the blank arm out
  *     after the drawing arm. */
-void sub_08022428(u16 x, u16 y)
+void DrawUnitAt(u16 x, u16 y)
 {
     struct Unk08499594 *e;
     u8 id;
@@ -92,3 +92,5 @@ void sub_08022428(u16 x, u16 y)
                      sub_08043050((id >> 6) + 1) & 1);
     }
 }
+
+asm(".global sub_08022428\n.thumb_set sub_08022428, DrawUnitAt\n");

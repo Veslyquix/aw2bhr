@@ -73,4 +73,16 @@ void StartCoPowerScript(int a, int b, ProcPtr proc);
 int CountBuildablePropertiesOfKind(int a1);
 u8 PickWeightedAiUnit(u8 a1);
 
+void CacheUnitMovementCosts(int a1);
+void AnimateUnitCreation(u8 a1, u8 a2, u8 a3);
+void CalcDamage(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 d);
+int GetFirepowerIcon(int a1, int a2);
+void DrawUnitAt(u16 x, u16 y);
+void RunAiTurn(void);
+
+void GenerateRandomMap(void);
+void InitGameSettings(void);
+void LoadGameplayGraphics(int a);
+void HandleRulesMenuInput(void);
+
 #endif /* GUARD_DATA_NAMES_H */
