@@ -7,23 +7,17 @@
  * sub_080048D4 @ 0x080048D4
  */
 
-/* Copies the up-to-19-byte NUL-terminated name at gActiveMap->unk9c
+/* Copies the up-to-19-byte NUL-terminated name at gActiveMap->designName
  * into the current gUnknown_03001470 slot at +0x1e, then hands the source to
  * sub_0804B10C. sub_0800487C (already promoted) strcmps the same two
  * addresses, which corroborates both as strings.
  *
  * THE 0x9c NAME FIELD IS AN ARRAY IN THE ORIGINAL SOURCE, and that is a
  * measured claim, not a guess: the ROM computes `g + 0x9c` and THEN adds `i`,
- * which is the ARRAY_REF tree. Spelling it `(&g->unk9c)[i]` on the scalar the
- * shared header declares gives `g + i` then `+ 0x9c` -- fold is free to
- * reassociate the two integer addends -- and that one swapped pair was the only
- * difference left in an otherwise byte-exact 88-byte candidate. The extent is
- * exact rather than assumed: 0x9c..0xae is the 0x13 bytes this loop copies.
- *   include/unknown-globals.h declares `u8 unk9c;` followed by
- * `filler_9d[0x11]` and a separately-named `unkae` that sub_0800492C writes, so
- * turning it into `u8 unk9c[0x13]` is a SHARED-STRUCT RESHAPE. It is flagged
- * there instead of made here; struct NameBlk is the local, non-invasive way to
- * get the same tree and is byte-identical to the array member.
+ * which is the ARRAY_REF tree. The old scalar-plus-padding declaration instead
+ * reassociated the address as `g + i + 0x9c` and missed by one swapped pair.
+ * The extent is exact rather than assumed: 0x9c..0xae is the 0x13 bytes this
+ * loop copies. The shared declaration now records that measured array.
  *
  * struct Unk03001470 has the same problem at the destination end and is also
  * left alone: 0x1e is typed `s16 unk1e` (a frame counter measured from
@@ -44,11 +38,6 @@
  * `for` spelling makes agbcc rotate the loop and emit the i == 0 iteration a
  * second time ahead of it, with `d[0]` folded to a `strb [p,#30]`
  * displacement: +20 bytes, measured. */
-struct Unk48D4Name
-{
-    /* 0x00 */ u8 nm[0x13];
-};
-
 void sub_080048D4(void)
 {
     struct Unk03001470 *p;
@@ -63,8 +52,8 @@ void sub_080048D4(void)
 
     do
     {
-        d[i] = ((struct Unk48D4Name *)&gActiveMap->unk9c)->nm[i];
-        q = &gActiveMap->unk9c;
+        d[i] = gActiveMap->designName[i];
+        q = gActiveMap->designName;
         if (q[i] == 0)
             break;
         i++;

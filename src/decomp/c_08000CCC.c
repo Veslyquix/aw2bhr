@@ -52,36 +52,36 @@ void SetSelectedTile(int a1)
     int a;
     int b;
 
-    if (gActiveMap->unk07 == 0)
+    if (gActiveMap->editMode == 0)
     {
         a = sub_08001D24(a1);
         a -= 4;
         if (a < 0)
             a += 0x11;
-        gActiveMap->unk36 = a;
-        sub_080073F8(gActiveMap->unk07, a1);
-        b = gActiveMap->unk3a + 4;
+        gActiveMap->terrainListIndex = a;
+        sub_080073F8(gActiveMap->editMode, a1);
+        b = gActiveMap->ringIndex + 4;
         if (b > 9)
-            b = gActiveMap->unk3a - 6;
+            b = gActiveMap->ringIndex - 6;
         b = gUnknown_0200B0D0[b].unk04;
         gActiveMap->selectedTerrain = b;
     }
     else
     {
         if (a1 != 0x19)
-            gActiveMap->unk2f = (a1 >> 6) + 1;
+            gActiveMap->unitArmy = (a1 >> 6) + 1;
         a = sub_08001D24(a1);
         a -= 3;
         if (a < 0)
             a += 0x14;
-        gActiveMap->unk38 = a;
-        sub_080073F8(gActiveMap->unk07, a1);
-        b = gActiveMap->unk3a + 3;
+        gActiveMap->unitListIndex = a;
+        sub_080073F8(gActiveMap->editMode, a1);
+        b = gActiveMap->ringIndex + 3;
         if (b > 7)
-            b = gActiveMap->unk3a - 5;
+            b = gActiveMap->ringIndex - 5;
         b = gUnknown_0200B0D0[b].unk04;
         b = (a1 & 0xC0) | (b & 0x3F);
-        gActiveMap->unk24 = b;
+        gActiveMap->cursorUnit = b;
     }
 
     sub_08011E54(gUnknown_0808D8AC, (void *)0x06014D40, 0x8C << 3);

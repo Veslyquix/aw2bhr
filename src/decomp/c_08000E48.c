@@ -30,7 +30,7 @@ void sub_08000E48(struct Unk03001470 *proc)
     a = proc->unk1e;
 
     gActiveMap = &gUnknown_0200B000;
-    gUnknown_0200B000.unk9c = 0;
+    gUnknown_0200B000.designName[0] = 0;
 
     if (a == 0)
     {
@@ -63,20 +63,20 @@ void sub_08000E48(struct Unk03001470 *proc)
 
     if (a == 0)
     {
-        gActiveMap->unk00 |= 0x1000;
-        gActiveMap->unk28 = 0;
+        gActiveMap->flags |= 0x1000;
+        gActiveMap->selectionIndex = 0;
         gActiveMap->propertyCount = 0;
 
         for (i = 0; i <= 3; i++)
         {
-            gActiveMap->unk17[i] |= 0xFF;
-            gActiveMap->unk1b[i] |= 0xFF;
+            gActiveMap->hqX[i] |= 0xFF;
+            gActiveMap->hqY[i] |= 0xFF;
         }
 
-        gActiveMap->unk6b = 0xFF;
-        gActiveMap->unk60 = 0xFC00;
-        gActiveMap->unk5c = 0x1220;
-        gActiveMap->unk3e = 1;
+        gActiveMap->spriteId = 0xFF;
+        gActiveMap->countPanelX = 0xFC00;
+        gActiveMap->sidePanelX = 0x1220;
+        gActiveMap->panelSide = 1;
     }
 
     sub_0803662C();
@@ -86,13 +86,13 @@ void sub_08000E48(struct Unk03001470 *proc)
     sub_0801B780(0);
     sub_08002EB4();
     sub_08022AAC(7, 4);
-    gActiveMap->unk10 = 0xFF;
-    gActiveMap->unk4e = 0xFD80;
-    gActiveMap->unk50 = 0xB8;
-    gActiveMap->unk4a = 0x64;
+    gActiveMap->designSlot = 0xFF;
+    gActiveMap->tilePanelX = 0xFD80;
+    gActiveMap->tilePanelY = 0xB8;
+    gActiveMap->tilePanelState = 0x64;
     gActiveMap->selectedTerrain = 1;
-    gActiveMap->unk2e = 1;
-    gActiveMap->unk2f = 1;
+    gActiveMap->propertyArmy = 1;
+    gActiveMap->unitArmy = 1;
     sub_08007328();
     sub_0800056C(0);
     sub_080152C0((s32)&gUnknown_084857AC[0x100], 0);

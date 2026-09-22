@@ -75,8 +75,8 @@ int RegisterArmyHqs(void)
 
     for (i = 0; i <= 3; i++)
     {
-        gActiveMap->unk17[i] |= 0xFF;
-        gActiveMap->unk1b[i] |= 0xFF;
+        gActiveMap->hqX[i] |= 0xFF;
+        gActiveMap->hqY[i] |= 0xFF;
     }
 
     for (i = 0; i <= 0x5B; i++)

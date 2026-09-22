@@ -31,7 +31,7 @@ void GenerateRandomMap(void)
     int keys;
 
     ClearAllUnits();
-    gActiveMap->unk13 = 0;
+    gActiveMap->army1UnitCount = 0;
     MAP->width = 0x1E;
     MAP->height = 0x14;
     MAP->unk10 = 0;

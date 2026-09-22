@@ -19,7 +19,7 @@ void sub_08000DC0(void)
     sub_0800057C();
     sub_08002EC8();
 
-    if (gActiveMap->unk00 & 0x4000)
+    if (gActiveMap->flags & 0x4000)
     {
         sub_08015C30(gUnknown_03001FBC);
         gUnknown_030040A0 = 0;

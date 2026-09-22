@@ -12,34 +12,34 @@ void sub_08007354(void)
     struct ActiveMap *p = gActiveMap;
     int i;
 
-    if (p->unk07 == 0)
+    if (p->editMode == 0)
     {
-        if (p->unk00 & 1)
+        if (p->flags & 1)
             return;
 
-        p->unk00 |= 1;
+        p->flags |= 1;
 
-        i = p->unk3a + 4;
+        i = p->ringIndex + 4;
         if (i > 9)
-            i = p->unk3a - 6;
+            i = p->ringIndex - 6;
 
-        p->unk2c = gUnknown_0200B0D0[i].unk04;
-        p->unk37 = p->unk36;
-        gActiveMap->unk30 = gActiveMap->unk2e;
+        p->savedTerrain = gUnknown_0200B0D0[i].unk04;
+        p->savedTerrainListIndex = p->terrainListIndex;
+        gActiveMap->savedPropertyArmy = gActiveMap->propertyArmy;
     }
     else
     {
-        if (p->unk00 & 2)
+        if (p->flags & 2)
             return;
 
-        p->unk00 |= 2;
+        p->flags |= 2;
 
-        i = p->unk3a + 3;
+        i = p->ringIndex + 3;
         if (i > 7)
-            i = p->unk3a - 5;
+            i = p->ringIndex - 5;
 
-        p->unk26 = gUnknown_0200B0D0[i].unk04;
-        p->unk39 = p->unk38;
-        gActiveMap->unk31 = gActiveMap->unk2f;
+        p->savedUnit = gUnknown_0200B0D0[i].unk04;
+        p->savedUnitListIndex = p->unitListIndex;
+        gActiveMap->savedUnitArmy = gActiveMap->unitArmy;
     }
 }

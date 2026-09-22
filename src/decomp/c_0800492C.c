@@ -14,5 +14,5 @@ void sub_0800492C(void)
 {
     sub_0803B524(0xd8);
     sub_0800056C(1);
-    gActiveMap->unkae = 0;
+    gActiveMap->designName[0x12] = 0;
 }

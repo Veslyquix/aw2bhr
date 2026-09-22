@@ -11,7 +11,7 @@ void sub_08005154(void)
 {
     sub_0801A168();
     sub_080152EC(gUnknown_08487E8C, 0);
-    gActiveMap->unk02 = 7;
+    gActiveMap->state = 7;
     sub_08024268();
 }
 
@@ -19,7 +19,7 @@ void sub_08005154(void)
  * the only reason the address arithmetic is a separate instruction. */
 void sub_0800517C(void)
 {
-    gActiveMap->unk9c = 0;
+    gActiveMap->designName[0] = 0;
 }
 
 /* gUnknown_08499578 and gUnknown_08499580 are POINTER variables, so each

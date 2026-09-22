@@ -19,13 +19,13 @@
  * statements produce. */
 void sub_08000664(void)
 {
-    if (gActiveMap->unk06 != 0)
+    if (gActiveMap->stateChanged != 0)
     {
-        gActiveMap->unk06 = 0;
-        gActiveMap->unk02 = 0;
+        gActiveMap->stateChanged = 0;
+        gActiveMap->state = 0;
         sub_08003640();
     }
 
-    if (gActiveMap->unk02 == 0)
+    if (gActiveMap->state == 0)
         sub_080035C8();
 }

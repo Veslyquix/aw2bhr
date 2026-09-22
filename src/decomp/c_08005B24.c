@@ -42,10 +42,10 @@
 
 void sub_08005B24(void)
 {
-    if (gActiveMap->unk06 != 0)
+    if (gActiveMap->stateChanged != 0)
     {
-        gActiveMap->unk06 = 0;
-        gActiveMap->unk02 = 0;
+        gActiveMap->stateChanged = 0;
+        gActiveMap->state = 0;
         gUnknown_03001418 = 0;
         gUnknown_03001FF8 = 0;
         sub_0801A444(2, 2, 0x1A, 0xF);
@@ -53,20 +53,20 @@ void sub_08005B24(void)
     }
 
     if ((gpKeySt->pressed & 7) != 0)
-        gActiveMap->unk02 = 0x5A;
+        gActiveMap->state = 0x5A;
 
-    switch (gActiveMap->unk02)
+    switch (gActiveMap->state)
     {
     case 0:
         sub_0801B780(0);
-        gActiveMap->unk02++;
+        gActiveMap->state++;
         sub_080059FC();
         sub_08005EF0(1);
         /* fallthrough */
     case 1:
         if ((gpKeySt->pressed & DPAD_DOWN) != 0)
         {
-            gActiveMap->unk02 = 0xA;
+            gActiveMap->state = 0xA;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
             sub_08013AEC();
             sub_08005F1C();
@@ -75,14 +75,14 @@ void sub_08005B24(void)
         break;
     case 0xA:
         sub_0801B780(0);
-        gActiveMap->unk02++;
+        gActiveMap->state++;
         sub_08005AA0();
         sub_08005EF0(0);
         /* fallthrough */
     case 0xB:
         if ((gpKeySt->pressed & DPAD_UP) != 0)
         {
-            gActiveMap->unk02 = 0;
+            gActiveMap->state = 0;
             sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
             sub_08013AEC();
             sub_08005F1C();
@@ -96,7 +96,7 @@ void sub_08005B24(void)
         break;
     }
 
-    if (gActiveMap->unk02 == 0x5A)
+    if (gActiveMap->state == 0x5A)
     {
         if ((gpKeySt->pressed & 2) == 0)
             gUnknown_03002F1C = 1;

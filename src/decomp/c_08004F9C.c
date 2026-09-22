@@ -29,12 +29,12 @@ void sub_08004F9C(void)
     int v;
 
     t = sub_0800CB30(0, 0);
-    sub_0803CF54(gActiveMap->unk10, &gActiveMap->unk9c,
+    sub_0803CF54(gActiveMap->designSlot, gActiveMap->designName,
                  sub_0800C9E8());
     sub_0800CB30(1, t);
 
     v = 7;
-    switch ((s8)gActiveMap->unk10)
+    switch ((s8)gActiveMap->designSlot)
     {
     case 0:
         break;
@@ -48,15 +48,15 @@ void sub_08004F9C(void)
 
     sub_08012BC8(gUnknown_08499578, 3, v, 0xB, 2, 0);
     sub_0801F2AC(9, gUnknown_08499578 + (v * 32 + 3));
-    sub_080149C0(5, (s16)v, gUnknown_08499578, &gActiveMap->unk9c,
+    sub_080149C0(5, (s16)v, gUnknown_08499578, gActiveMap->designName,
                  0x8000, 0);
     sub_08013AEC();
 
-    if (gActiveMap->unk00 & 0x100)
+    if (gActiveMap->flags & 0x100)
     {
-        gActiveMap->unk00 &= 0xFEFF;
-        gActiveMap->unk9c = 0;
+        gActiveMap->flags &= 0xFEFF;
+        gActiveMap->designName[0] = 0;
     }
 
-    gActiveMap->unk00 &= 0xEFFF;
+    gActiveMap->flags &= 0xEFFF;
 }

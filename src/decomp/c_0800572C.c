@@ -39,11 +39,11 @@ void sub_0800572C(void)
         sub_08004D74(0, 2);
     else
         sub_08004D90(0, 2, gDesignRoomName);
-    gActiveMap->unk46 = 0x15;
-    gActiveMap->unk48 = 0x20;
+    gActiveMap->menuCursorX = 0x15;
+    gActiveMap->menuCursorY = 0x20;
 }
 
-/* NO local for the slot id -- `(s8)gActiveMap->unk10` is written TWICE,
+/* NO local for the slot id -- `(s8)gActiveMap->designSlot` is written TWICE,
  * once in the test and once in the value arm, and that is the whole difference
  * between the two forms of a signed-byte load. Bound to an `s8` (or `int`)
  * local the read is `ldrb; lsls #24; asrs #24`; read twice and CSEd it becomes
@@ -58,7 +58,7 @@ void sub_0800572C(void)
 void sub_080057EC(void)
 {
     sub_08019F2C(gUnknown_08488494, 2, 4, 0,
-                 (s8)gActiveMap->unk10 < 0 ? 0 : (s8)gActiveMap->unk10);
+                 (s8)gActiveMap->designSlot < 0 ? 0 : (s8)gActiveMap->designSlot);
     sub_0800572C();
-    gActiveMap->unk02 = 3;
+    gActiveMap->state = 3;
 }

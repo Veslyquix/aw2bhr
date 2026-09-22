@@ -21,7 +21,7 @@
 
 void sub_08004D28(void)
 {
-    switch ((s8)gActiveMap->unk10)
+    switch ((s8)gActiveMap->designSlot)
     {
     case 0:
         sub_080055B8(0, 0, 0);

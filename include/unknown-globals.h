@@ -320,19 +320,19 @@ struct Unk0200C420 /* 0xe0 */
  * member lvalue (see the `orr` operand rule in docs/agbcc-codegen.md), so a
  * scalar spelling of this global cannot express it at all.
  */
-struct ActiveMap /* >= 0x76 */
+struct ActiveMap /* 0xb0 */
 {
-    /* 0x00 */ u16 unk00; /* flags; bit 3 set by sub_08003934, cleared by sub_08003948;
+    /* 0x00 */ u16 flags; /* bit 3 set by sub_08003934, cleared by sub_08003948;
                            * bit 14 set by sub_08004BC0 */
-    /* 0x02 */ u16 unk02;
-    /* 0x04 */ u16 unk04;
-    /* 0x06 */ s8 unk06; /* SIGNED, same tell as unk07/unk11 one line down:
+    /* 0x02 */ u16 state;
+    /* 0x04 */ u16 mode;
+    /* 0x06 */ s8 stateChanged; /* SIGNED, same tell as unk07/unk11 one line down:
                           * sub_08000694 (wave 13) reads it `movs r0,#6;
                           * ldrsb r0,[r2,r0]`. Was u8; its only other user,
                           * sub_0800056C's `= 1`, is a bare `strb` and is
                           * byte-identical either way (re-verified with
                           * trymatch after the change). */
-    /* 0x07 */ s8 unk07; /* SIGNED: sub_08007328 reads it `movs r0,#7;
+    /* 0x07 */ s8 editMode; /* 0 selects terrain editing, nonzero selects unit editing. SIGNED:
                           * ldrsb r0,[r2,r0]` -- the register offset is ldrsb
                           * having no immediate form, same shape as unk11.
                           * Used only as a zero test, selecting a ring size of
@@ -342,18 +342,18 @@ struct ActiveMap /* >= 0x76 */
                            * halves `movs r0,#8; ldrsh` / `movs r2,#0xa; ldrsh`
                            * and hands them to nineteen different callees. */
     /* 0x0a */ s16 cursorY;
-    /* 0x0c */ s32 unk0c; /* A word countdown: sub_08000694 stores 2 and 10
+    /* 0x0c */ s32 stateTimer; /* A word countdown: sub_08000694 stores 2 and 10
                            * into it and steps it with `ldr; subs #1; str`,
                            * testing the result with `ble`/`bge` -- a signed
                            * word, so `int`/`s32` and not a narrow field. */
-    /* 0x10 */ u8 unk10; /* set to 0, 1 or 2 by family F057 (sub_08004EDC /
+    /* 0x10 */ u8 designSlot; /* set to 0, 1 or 2 by family F057 (sub_08004EDC /
                           * sub_08004F1C / sub_08004F5C), which is one body
                           * three times: each tests a different bit of unk00
                           * (0x200 / 0x400 / 0x800) and stores the matching
                           * 0 / 1 / 2 here before starting the same script.
                           * A mode selector, not a flag. Bare `strb` of a
                           * literal, so the width is not otherwise constrained. */
-    /* 0x11 */ s8 unk11; /* SIGNED: sub_08000D9C reads it `movs r0,#0x11;
+    /* 0x11 */ s8 inputDelay; /* SIGNED: sub_08000D9C reads it `movs r0,#0x11;
                           * ldrsb r0,[r1,r0]` -- the register offset is ldrsb
                           * having no immediate form, and the sign extension is
                           * the object's, not a cast. Written 0x14 when zero. */
@@ -371,7 +371,7 @@ struct ActiveMap /* >= 0x76 */
                           * 0x5B is the last valid index, and sub_0800C574
                           * refuses to append past it.
                           *
-                          * Every reader casts: `(s8)gActiveMap->unk12`.
+                          * Every reader casts: `(s8)gActiveMap->propertyCount`.
                           * Three matched functions read it that way and the
                           * INSTRUCTIONS DISAGREE -- sub_08010D80 gets
                           * `ldrb; lsl #24; asr #24`, sub_0800C574 and
@@ -383,13 +383,13 @@ struct ActiveMap /* >= 0x76 */
                           * u8 because all three match under it and the clamp
                           * at 0 is the only thing that wants a sign, which the
                           * cast supplies. */
-    /* 0x13 */ u8 unk13; /* Wave 31 (W31-C): four consecutive counters
+    /* 0x13 */ u8 army1UnitCount; /* Wave 31 (W31-C): four consecutive counters
                           * sub_080088F0 fills with sub_08025308(1..4), one call
                           * per army, each result stored with a bare `strb`. */
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17[4]; /* Wave 45 (W45-G), carved out of filler_17.  Four
+    /* 0x14 */ u8 army2UnitCount;
+    /* 0x15 */ u8 army3UnitCount;
+    /* 0x16 */ u8 army4UnitCount;
+    /* 0x17 */ u8 hqX[4]; /* One stored HQ coordinate per army. Wave 45 (W45-G): four
                              * parallel slots subscripted 0..3 by the pair
                              * sub_0800C75C (set) / sub_0800C7A4 (clear), which
                              * both switch their first parameter over
@@ -429,7 +429,7 @@ struct ActiveMap /* >= 0x76 */
                              * instruction is not evidence about a byte member's
                              * signedness in either direction** -- see the
                              * `ldrsb` chapter of docs/agbcc-codegen.md. */
-    /* 0x1b */ u8 unk1b[4]; /* Wave 45 (W45-G), carved out of filler_17.  The
+    /* 0x1b */ u8 hqY[4]; /* The companion HQ y-coordinate plane. Wave 45 (W45-G):
                              * companion plane of unk17 at the same index, and
                              * u8 for the same sub_0800C8D8 reason -- the `|=
                              * 0xFF` over this plane is a read-modify-write too.
@@ -450,28 +450,28 @@ struct ActiveMap /* >= 0x76 */
                              * cast to (s8), which is what makes the negative
                              * "empty" marker work. */
     /* 0x1f */ u8 filler_1f[0x01];
-    /* 0x20 */ u16 unk20; /* sub_080085E0 stores the map tile under (unk08,
+    /* 0x20 */ u16 cursorTerrain; /* sub_080085E0 stores the map tile under (cursorX,
                            * unk0a) here on entry -- `strh`, so 16 bits. */
     /* 0x22 */ u8 filler_22[0x02];
-    /* 0x24 */ u16 unk24; /* Wave 37 (W37-D): a unit-ish id, read `ldrh` three
+    /* 0x24 */ u16 cursorUnit; /* Wave 37 (W37-D): the unit id at the cursor, read `ldrh` three
                            * times by sub_08008928 and once more by the same
                            * function's tail. Compared against 0x19 whole, and
                            * separately masked `& 0x3f` to subscript
                            * gUnknown_085D5ABC[] (stride 0x5c) -- so the low six
                            * bits are a type selector inside a wider word, the
                            * same split unk2a records one field over. */
-    /* 0x26 */ u16 unk26; /* Wave 37 (W37-D): the sibling of unk2c. sub_08007354
+    /* 0x26 */ u16 savedUnit; /* Wave 37 (W37-D): the sibling of savedTerrain. sub_08007354
                            * writes one or the other with a bare `strh` from
                            * gUnknown_0200B0D0[i].unk04, picking unk26 when unk07
                            * is set and unk2c when it is clear. */
-    /* 0x28 */ u16 unk28; /* index into gUnknown_0200B224 (sub_08001CE8) */
+    /* 0x28 */ u16 selectionIndex; /* index into gUnknown_0200B224 (sub_08001CE8) */
     /* 0x2a */ u16 selectedTerrain; /* The action code sub_080085E0 dispatches on: it
                            * switches on `unk2a & 0x1f` over cases 1..19 and
                            * separately passes the UNMASKED halfword to
                            * sub_0800C454, so the low five bits are a selector
                            * inside a wider word rather than the whole field. */
-    /* 0x2c */ u16 unk2c; /* Wave 37 (W37-D): see unk26. */
-    /* 0x2e */ s8 unk2e;  /* WAVE 56 (W56-D) RETYPES THIS FROM u8, on a
+    /* 0x2c */ u16 savedTerrain; /* Wave 37 (W37-D): see savedUnit. */
+    /* 0x2e */ s8 propertyArmy;  /* WAVE 56 (W56-D) RETYPES THIS FROM u8, on a
                            * discriminating use rather than a load form.
                            * sub_08005F4C reads unk2e and unk2f through ONE
                            * merged `movs rI,#0; ldrsb rD,[rB,rI]` after
@@ -490,7 +490,7 @@ struct ActiveMap /* >= 0x76 */
                            * unk30/unk31 by sub_08007354, byte for byte
                            * (`ldrb` then `strb`, no extension either way), so
                            * the two pairs are the same width. */
-    /* 0x2f */ s8 unk2f; /* set by sub_080078D4. SIGNED, wave 37 (W37-D):
+    /* 0x2f */ s8 unitArmy; /* set by sub_080078D4. SIGNED, wave 37 (W37-D):
                           * sub_08008928 reads it `ldrb; lsls #0x18; asrs #0x18`
                           * (the base is already advanced by `adds rN,#0x2f`, so
                           * `ldrsb` has no addressing mode left) and then both
@@ -499,10 +499,10 @@ struct ActiveMap /* >= 0x76 */
                           * sign extension at either use. Was u8; the only
                           * writer, sub_080078D4, is a bare `strb` and is
                           * byte-identical either way. */
-    /* 0x30 */ u8 unk30;  /* Wave 37 (W37-D): the copy destinations for
+    /* 0x30 */ u8 savedPropertyArmy;  /* Wave 37 (W37-D): the copy destinations for
                            * unk2e/unk2f. */
-    /* 0x31 */ u8 unk31;
-    /* 0x32 */ s8 unk32; /* Wave 56 (W56-D), carved out of filler_32 -- nothing
+    /* 0x31 */ u8 savedUnitArmy;
+    /* 0x32 */ s8 selectionAnimKind; /* Wave 56 (W56-D), carved out of filler_32 -- nothing
                           * outside this header named it, so the layout is
                           * unchanged. sub_08005F4C's 0x28 state stores a 0..4
                           * selector here (`adds rN,#0x32; strb`) and reads it
@@ -512,14 +512,14 @@ struct ActiveMap /* >= 0x76 */
                           * (the base is already advanced past ldrsb's
                           * register-offset-only addressing, same reason as
                           * unk2f). */
-    /* 0x33 */ s8 unk33; /* Wave 56 (W56-D): the frame cursor into the s16
+    /* 0x33 */ s8 selectionAnimFrame; /* Wave 56 (W56-D): the frame cursor into the s16
                           * table gUnknown_084886DC. sub_08005F4C clears it in
                           * state 0x28 and then post-increments it once per
                           * state (`ldrb; adds #1; strb`), indexing the table
                           * with the value SIGN-extended and doubled
                           * (`lsls #0x18; asrs #0x17`), which is what makes it
                           * signed rather than u8. */
-    /* 0x34 */ s8 unk34;  /* Wave 37 (W37-E): sub_08001DAC reads it
+    /* 0x34 */ s8 spriteFrame;  /* Wave 37 (W37-E): sub_08001DAC reads it
                            * `adds rN,#0x34; ldrb; lsls #0x18; asrs #0x18` and
                            * hands the value to sub_0800272C/sub_08002844's
                            * fifth (int) parameter -- the same load form unk2f
@@ -528,26 +528,26 @@ struct ActiveMap /* >= 0x76 */
                            * addressing. No writer found in asm/, so the width
                            * is a floor. */
     /* 0x35 */ u8 filler_35[0x01];
-    /* 0x36 */ s8 unk36;  /* Wave 37 (W37-D): two (value, shadow) byte pairs,
+    /* 0x36 */ s8 terrainListIndex;  /* Wave 37 (W37-D): two (value, shadow) byte pairs,
                            * one per unk07 side -- sub_08007354 copies unk36 to
                            * unk37 and unk38 to unk39. SIGNED because
                            * sub_080079B8 reads unk36/unk38 `ldrb; lsls #0x18;
                            * asrs #0x18` before adding 4 / 3; the copy in
                            * sub_08007354 is byte-to-byte and says nothing. */
-    /* 0x37 */ s8 unk37;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ s8 unk39;
-    /* 0x3a */ s16 unk3a; /* SIGNED: sub_08007328 reads it `movs r4,#0x3a;
+    /* 0x37 */ s8 savedTerrainListIndex;
+    /* 0x38 */ s8 unitListIndex;
+    /* 0x39 */ s8 savedUnitListIndex;
+    /* 0x3a */ s16 ringIndex; /* SIGNED: sub_08007328 reads it `movs r4,#0x3a;
                            * ldrsh r0,[r2,r4]`. A ring index -- 08007328 stores
                            * (unk3a + n - 1) % n into unk3c, with n from unk07. */
-    /* 0x3c */ u16 previousTerrain;
-    /* 0x3e */ s16 unk3e; /* SIGNED: sub_08003814 reads it `movs r1,#0x3e;
+    /* 0x3c */ u16 previousRingIndex;
+    /* 0x3e */ s16 panelSide; /* zero places panels on the left, nonzero on the right. SIGNED:
                            * ldrsh r0,[r0,r1]` -- the register offset is ldrsh
                            * having no immediate form. Used only as a zero
                            * test, selecting a sprite x of 0xCE when nonzero
                            * and 2 when zero. Wave 36, W36-I. */
     /* 0x40 */ u8 filler_40[0x02];
-    /* 0x42 */ s16 unk42; /* SIGNED, corrected in wave 36 (W36-I): sub_08003890
+    /* 0x42 */ s16 introScreenY; /* SIGNED, corrected in wave 36 (W36-I): sub_08003890
                            * is the first reader, and it reads it
                            * `movs r0,#0; ldrsh r3,[r1,r0]` and then compares
                            * the value against -2, -3 and -10. A u16 member
@@ -568,36 +568,36 @@ struct ActiveMap /* >= 0x76 */
                            * be the two-instruction negate. So u16, value
                            * 0xFFF6. No reader found. */
     /* 0x44 */ u8 filler_44[0x02];
-    /* 0x46 */ u16 unk46; /* An x/y pair, always written together as a literal
+    /* 0x46 */ u16 menuCursorX; /* An x/y pair, always written together as a literal
                            * `strh` pair by the 0x08004xxx screen setups:
                            * (0x15,0x10) by sub_08004B7C/sub_08004C5C,
                            * (0x57,0x10) by sub_080049E8, (0x15,0x18) by
                            * sub_08004C10. Reached as `adds rN, #0x46` because
                            * THUMB's strh immediate stops at 62. Nothing reads
                            * them yet, so the width is a floor. Wave 26. */
-    /* 0x48 */ u16 unk48;
-    /* 0x4a */ u16 unk4a; /* Wave 37 (W37-E): the second state machine in
+    /* 0x48 */ u16 menuCursorY;
+    /* 0x4a */ u16 tilePanelState; /* Wave 37 (W37-E): the second state machine in
                            * sub_08001DAC, switched over 0 / 0xA / 0x14 / 0x1E /
                            * 0x64 / 0x6E / 0x78 with a plain `ldrh` and no sign
                            * extension anywhere, so u16. */
-    /* 0x4c */ u16 unk4c;
-    /* 0x4e */ s16 unk4e; /* Wave 37 (W37-E): a screen x eased toward a target by
+    /* 0x4c */ u16 tilePanelYState;
+    /* 0x4e */ s16 tilePanelX; /* Wave 37 (W37-E): a screen x eased toward a target by
                            * `v += (K - v) >> 3`, exactly like unk82 -- the
                            * `K - v` read is a bare `movs rI,#0; ldrsh`, which a
                            * u16 member cannot produce, and the values run
                            * 0xFC40..0x1180. sub_08001DAC also reads it
                            * `ldrh; lsls #0x10; asrs #0x14`, the sign extension
                            * merged into a `>> 4`. */
-    /* 0x50 */ s16 unk50; /* Wave 37 (W37-E): a screen y walked by unk54 and
+    /* 0x50 */ s16 tilePanelY; /* Wave 37 (W37-E): a screen y walked by tilePanelYSpeed and
                            * clamped to 0x6A..0xB8. SIGNED: every read in
                            * sub_08001DAC is `movs rI,#0; ldrsh`. */
     /* 0x52 */ u8 filler_52[0x02];
-    /* 0x54 */ s16 unk54; /* Wave 37 (W37-E): the step added to unk50, capped at
+    /* 0x54 */ s16 tilePanelYSpeed; /* Wave 37 (W37-E): the step added to tilePanelY, capped at
                            * 8. SIGNED: sub_08001DAC does `ldrh; adds #n; strh`
                            * and then tests the STORED value `lsls #0x10;
                            * asrs #0x10; cmp #7; ble` -- the same shorten_binary_op
                            * pair unk7a carries. */
-    /* 0x56 */ s16 unk56; /* Wave 56 (W56-D), carved out of filler_56 -- the
+    /* 0x56 */ s16 selectionAffineScale; /* Wave 56 (W56-D), carved out of filler_56 -- the
                            * remaining two bytes stay filler, so the layout is
                            * unchanged. The OBJ affine scale sub_08005F4C
                            * drives: it seeds 0x100, walks it down by 0x40 with
@@ -607,7 +607,7 @@ struct ActiveMap /* >= 0x76 */
                            * subtraction and handed to Div as a divisor, and the
                            * table it is copied from stores -1 as an
                            * end-of-script marker. */
-    /* 0x58 */ s8 unk58;  /* Wave 56, W56-L: NAMED out of filler_58[0x02], not
+    /* 0x58 */ s8 cursorIdleFrames;  /* Wave 56, W56-L: NAMED out of filler_58[0x02], not
                            * reshaped -- same two offsets, same two bytes, so
                            * the layout is unchanged and no existing reader
                            * moves. An idle-frame COUNTER and its reload, read
@@ -618,7 +618,7 @@ struct ActiveMap /* >= 0x76 */
                            * read, which is the threshold test -- `movs r0,#0;
                            * ldrsb r0,[r1,r0]; cmp r0,#0x31`, the register
                            * offset being ldrsb having no immediate form. */
-    /* 0x59 */ s8 unk59;  /* Wave 56, W56-L. unk58's companion, set to 0xc when
+    /* 0x59 */ s8 cursorIdleTimer;  /* Wave 56, W56-L. cursorIdleFrames' companion, set to 0xc when
                            * the cursor is held and counted DOWN on the frames
                            * it is not; when the decrement takes it past zero
                            * both bytes reset together. SIGNED for the same
@@ -627,20 +627,20 @@ struct ActiveMap /* >= 0x76 */
                            * (only the low byte is stored back) and then tests
                            * the OLD value with `lsls #0x18; cmp #0; bgt` --
                            * a sign test on bit 7, which a u8 would not need. */
-    /* 0x5a */ u8 unk5a; /* Wave 37 (W37-E): sub_08002510's state byte, the same
+    /* 0x5a */ u8 sidePanelState; /* Wave 37 (W37-E): sub_08002510's state byte, the same
                           * 0 -> 0xA -> 0x14 -> 0x1E -> 0x32 -> 0x3C -> 0x46 ->
                           * 0x50 machine sub_080030BC runs on unk72, but a single
                           * lane rather than an array. Plain `ldrb`/`strb`. */
-    /* 0x5b */ u8 unk5b; /* Wave 37 (W37-E): sub_08002510's tail counter,
+    /* 0x5b */ u8 sidePanelFrame; /* Wave 37 (W37-E): sub_08002510's tail counter,
                           * `ldrb; adds #1; ands #0x3f; strb` -- the `adds #1`
                           * (not `adds #255`) says nothing about signedness
                           * because it is an increment; the `& 0x3f` keeps it in
                           * range either way, so u8 is the weakest fit. */
-    /* 0x5c */ s16 unk5c; /* Wave 37 (W37-E): unk5a's companion, unk82's role for
+    /* 0x5c */ s16 sidePanelX; /* Wave 37 (W37-E): sidePanelState's companion, armyPanelX's role for
                            * this lane -- eased by `v += (K - v) >> 3` with the
                            * `K - v` read a bare `ldrsh`, values 0xFD80..0x11A0. */
     /* 0x5e */ u8 filler_5e[0x02];
-    /* 0x60 */ s16 unk60; /* Wave 50 (W50-E): carved out of filler_5e, which
+    /* 0x60 */ s16 countPanelX; /* Wave 50 (W50-E): carved out of filler_5e, which
                            * nothing outside this header ever named, so the
                            * layout is unchanged. sub_08000E48's opening reset
                            * writes 0xFC00 here and 0x1220 into unk5c through
@@ -651,7 +651,7 @@ struct ActiveMap /* >= 0x76 */
                            * easing pair; nothing reads it under a load form
                            * that would settle the sign independently. */
     /* 0x62 */ u8 filler_62[0x02];
-    /* 0x64 */ u8 unk64; /* Wave 57 (W57-A), carved out of filler_62 -- the
+    /* 0x64 */ u8 countPanelState; /* Wave 57 (W57-A), carved out of filler_62 -- the
                           * remaining two bytes stay filler, so the layout is
                           * unchanged, and nothing outside this header ever
                           * named filler_62. sub_08002298's state byte: the same
@@ -662,42 +662,42 @@ struct ActiveMap /* >= 0x76 */
                           * place of unk5c. Plain `ldrb`/`strb`, reached as
                           * `adds rN,#0x64` because THUMB's ldrb immediate stops
                           * at 31. */
-    /* 0x65 */ u8 unk65; /* Wave 37 (W37-E): a one-shot "cursor moved" flag.
+    /* 0x65 */ u8 cursorMoved; /* Wave 37 (W37-E): a one-shot "cursor moved" flag.
                           * sub_08000BF8 sets it to 1 with a bare `strb` when the
                           * terrain or unit under (unk08, unk0a) differs from the
                           * cached unk2a/unk24; sub_08001DAC tests it `ldrb;
                           * cmp #0` to decide whether to run the unk66 animation,
                           * and clears it there. */
-    /* 0x66 */ u8 unk66; /* Wave 37 (W37-E): that animation's state byte, switched
+    /* 0x66 */ u8 cursorMoveState; /* Wave 37 (W37-E): that animation's state byte, switched
                           * over 0 / 8 / 9 / 0xA and stepped `ldrb; adds #1;
                           * strb`. */
-    /* 0x67 */ s8 unk67; /* SIGNED, wave 37 (W37-E), on the W37-A `--` test rather
+    /* 0x67 */ s8 cursorMoveTimer; /* SIGNED, wave 37 (W37-E), on the W37-A `--` test rather
                           * than the load form: sub_08001DAC does
                           * `ldrb; subs r0,#1; strb`, and agbcc emits `subs #1`
                           * only through a signed lvalue -- a u8 `x--` gives the
                           * modulo-256 `adds rD,rS,#0; adds rD,#255`. The reload
                           * that follows tests it `ldrb; lsls #0x18; asrs #0x18;
                           * cmp #0; bge`, i.e. as a signed frame countdown. */
-    /* 0x68 */ s16 unk68; /* Wave 37 (W37-E): the animation's angle/scale word,
+    /* 0x68 */ s16 cursorMoveScale; /* Wave 37 (W37-E): the animation's angle/scale word,
                            * stepped `+= 0x20` and clamped at 0x100, then fed to
                            * gSinLut and Div. SIGNED: read `movs rI,#0; ldrsh`
                            * and the clamp tests the stored value
                            * `lsls #0x10; asrs #0x10; cmp #0xff; ble`. */
-    /* 0x6a */ u8 unk6a;  /* A one-byte result code sub_080085E0 leaves behind:
+    /* 0x6a */ u8 soundId;  /* A one-byte sound id sub_080085E0 leaves behind:
                            * 0x2d, 0x4b, 0x87, 0x88, 0x89 or 0x8a depending on
                            * which of its nineteen cases ran. Reached as
                            * `adds rN, #0x6a; strb` because THUMB's strb
                            * immediate stops at 31. */
-    /* 0x6b */ s8 unk6b;   /* a proc/sprite id with -1 as "none", and SIGNED:
+    /* 0x6b */ s8 spriteId;   /* a proc/sprite id with -1 as "none", and SIGNED:
                            * sub_08005F1C / sub_08007B74 read it `ldrsb`, test
                            * it against -1 and hand it to sub_08015328's s16
                            * parameter, then write 0xFF back. Reached as
                            * `adds rN, #0x6b; ldrsb` / `strb` for the same
                            * addressing-mode reason as unk6a above (wave 20,
                            * W20-C). */
-    /* 0x6c */ u8 unk6c;  /* cleared alongside unk6e/unk70 by sub_08005D50,
+    /* 0x6c */ u8 overlayState;  /* cleared alongside overlayX/overlayY by sub_08005D50,
                            * sub_08007A0C */
-    /* 0x6d */ u8 unk6d;  /* Wave 37 (W37-D): the dwell counter for the unk6c
+    /* 0x6d */ u8 overlayTimer;  /* Wave 37 (W37-D): the dwell counter for the overlayState
                            * state machine. sub_08007A30 seeds it with 0x1e on
                            * the 0x0a -> 0x14 edge and, in state 0x14, does
                            * `ldrb; subs #1; strb` and then tests the value it
@@ -712,7 +712,7 @@ struct ActiveMap /* >= 0x76 */
                            * use rather than a load form: sub_08005D74 and
                            * sub_08005E30 (both matched) decrement it, and the
                            * ROM does `ldrb r1; subs r2, r1, #1; strb r2`.
-                           * Spelled `gActiveMap->unk6d--` on a u8 member
+                           * Spelled `gActiveMap->overlayTimer--` on a u8 member
                            * agbcc emits `adds r2, r1, #0; adds r2, #255` -- the
                            * modulo-256 wraparound -- and both functions miss by
                            * +2 bytes; through an `s8` lvalue they match. So the
@@ -726,7 +726,7 @@ struct ActiveMap /* >= 0x76 */
                            * the load form, because the load form was measured
                            * in wave 30 to be a position artefact and not a type
                            * tell (see docs/agbcc-codegen.md). */
-    /* 0x6e */ s16 unk6e; /* an x/y pair: (0x100,0x800) by sub_08005D50,
+    /* 0x6e */ s16 overlayX; /* an x/y pair: (0x100,0x800) by sub_08005D50,
                            * (0x780,0x970) by sub_08007A0C.
                            * SIGNED, wave 37 (W37-D): sub_08007A30 reads both
                            * halves `movs r1,#0; ldrsh r3,[r0,r1]` while easing
@@ -738,8 +738,8 @@ struct ActiveMap /* >= 0x76 */
                            * two literal-store functions above are
                            * byte-identical either way (re-verified with
                            * trymatch after the change). */
-    /* 0x70 */ s16 unk70;
-    /* 0x72 */ u8 unk72[4]; /* An ARRAY, wave 36 (W36-I): sub_080030BC indexes
+    /* 0x70 */ s16 overlayY;
+    /* 0x72 */ u8 armyPanelState[4]; /* An ARRAY, wave 36 (W36-I): sub_080030BC indexes
                              * it by its own first parameter (`adds rN,#0x72;
                              * adds r4,rN,r5`) and sub_08003088 calls that with
                              * 0, 1, 2, 3. It is a per-lane state byte stepped
@@ -748,66 +748,44 @@ struct ActiveMap /* >= 0x76 */
                              * separate members, which is why sub_08003040 and
                              * sub_08003064 write all four one after another;
                              * both re-verified after the change. */
-    /* 0x76 */ u8 unk76[4]; /* An ARRAY, wave 37 (W37-E), the same four lanes as
+    /* 0x76 */ u8 armyPanelAffineState[4]; /* An ARRAY, wave 37 (W37-E), the same four lanes as
                              * unk72: sub_080032EC indexes it by its own first
                              * parameter (`adds rN,#0x76; add rN,r8`) and
                              * sub_080030BC -- which sub_08003088 calls with
                              * 0, 1, 2, 3 -- is what calls sub_080032EC. A second
                              * per-lane state byte, stepped 0 -> 0xA -> 0x14 ->
                              * 0x1E. */
-    /* 0x7a */ s16 unk7a[4]; /* Wave 36 (W36-I): the same four lanes as unk72,
+    /* 0x7a */ s16 armyPanelTimer[4]; /* Wave 36 (W36-I): the same four lanes as armyPanelState,
                               * a frame countdown. sub_080030BC does
                               * `ldrh; subs #1; strh` and then tests the stored
                               * value as SIGNED (`lsls #0x10; cmp #0; bgt`),
                               * which a u16 member cannot produce. Seeded from
                               * the eight-byte ROM table gUnknown_0808D754. */
-    /* 0x82 */ s16 unk82[4]; /* Wave 36 (W36-I): four lanes again, a screen x
+    /* 0x82 */ s16 armyPanelX[4]; /* Wave 36 (W36-I): four lanes again, a screen x
                               * eased toward a target by `v += (K - v) >> 3`.
                               * SIGNED: the `K - v` read is a bare `ldrsh`
                               * (`movs rN,#0; ldrsh r1,[r3,rN]`) and the values
                               * range over 0xFD80..0x1180, i.e. -640..4480.
                               * The `ldrh` in the `+=` is shorten_binary_op on
                               * the same member, not a second object. */
-    /* 0x8a */ s16 unk8a[4]; /* Wave 37 (W37-E): four lanes again, the sprite
+    /* 0x8a */ s16 armyPanelScale[4]; /* Wave 37 (W37-E): four lanes again, the sprite
                               * scale sub_080032EC divides gSinLut by. SIGNED:
                               * every read is `movs rI,#0; ldrsh`, and the
                               * clamp at 0x100 tests the stored value
                               * `lsls #0x10; asrs #0x10`. */
-    /* 0x92 */ s16 unk92[4]; /* Wave 37 (W37-E): the matching per-lane angle,
+    /* 0x92 */ s16 armyPanelAngle[4]; /* Wave 37 (W37-E): the matching per-lane angle,
                               * counted down by 0x20 with a wrap to +0x148 and
                               * masked `& 0xff` before indexing gSinLut. SIGNED
                               * for the same `movs rI,#0; ldrsh` reason; the
                               * `ldrb` at the first gSinLut read is the `& 0xff`
                               * folded into the load, not a second object. */
     /* 0x9a */ u8 filler_9a[0x02];
-    /* 0x9c */ u8 unk9c; /* Wave 30, W30-B: sub_0800517C is nothing but
-                          * `gActiveMap->unk9c = 0`, reached as
-                          * `adds rN, #0x9c` (past `strb`'s imm5) with a bare
-                          * `strb`. No reader found, so u8 is the weakest fit,
-                          * exactly as for unkae below.
-                          * WAVE 40 (W40-G) FOUND THE READER, and it says this
-                          * is really `u8 unk9c[0x13]` spanning 0x9c..0xae --
-                          * i.e. absorbing filler_9d AND unkae -- a
-                          * NUL-terminated name string. sub_080048D4 copies it
-                          * byte by byte into a gUnknown_03001470 slot at +0x1e,
-                          * stopping at the NUL, with the bound `i <= 0x12`
-                          * exactly matching that extent; sub_0800487C strcmps
-                          * the same two addresses through sub_0808B694.
-                          * The codegen proves the ARRAY, not just the size: the
-                          * ROM computes `g + 0x9c` and then adds `i`, which is
-                          * the ARRAY_REF tree, where `(&g->unk9c)[i]` on this
-                          * scalar lets fold reassociate to `g + i` then
-                          * `+ 0x9c` and misses by exactly that swapped pair.
-                          * NOT CHANGED HERE because it would rename unkae,
-                          * which sub_0800492C writes -- src/decomp/c_080048D4.c
-                          * uses a local struct to get the same tree and is
-                          * byte-identical. Whoever owns unkae should merge
-                          * them. */
-    /* 0x9d */ u8 filler_9d[0x11];
-    /* 0xae */ u8 unkae; /* sub_0800492C clears it with a bare `strb` through
-                          * `adds rN, #0xae`; no reader found, so u8 is the
-                          * weakest fit and the extent above is a floor, not a
-                          * measurement. Wave 26. */
+    /* 0x9c */ u8 designName[0x13]; /* NUL-terminated design-room name. Wave 40
+                          * proved both the exact 0x13-byte extent and the array
+                          * type: sub_080048D4 copies indices 0..0x12, while
+                          * sub_0800487C compares the same address as a string.
+                          * The former scalar at 0x9c, filler through 0xad, and
+                          * separately named byte at 0xae were one array. */
 };
 
 /* Wave 37 (W37-D). Stride 0x1c, proved by the `lsls #3; subs; lsls #2` multiply
@@ -8142,7 +8120,7 @@ extern const u8 gUnknown_084879D4[];
  *   084872FC  sub_08004B7C -> sub_0801A148(blob, 2, 2, 0)
  *   08487AC4  sub_08004BD8 -> sub_080193B0, the "flag clear" arm
  *   08487B64  sub_08004BD8 -> sub_080193B0, the "flag set" arm; the two are
- *             selected by one `?:` on gActiveMap->unk00 & 0x1000 and
+ *             selected by one `?:` on gActiveMap->flags & 0x1000 and
  *             share a single `bl`
  *   08487C04  sub_08004C34 -> sub_0801A148(blob, 2, 3, 0)
  *   08487D44  sub_08004D10 -> sub_080193B0 */
@@ -8161,7 +8139,7 @@ extern const u8 gUnknown_08487C84[];
  * word at 0x0808D75C right behind it IS one, holding &gActiveMap).
  * sub_080030BC copies all eight bytes to a stack buffer with sub_0808B6E8 and
  * then reads `buf[lane]` or `buf[lane + 4]`, so it is two four-entry rows of
- * frame counts selected by gActiveMap->unk3e. Wave 36, W36-I. */
+ * frame counts selected by gActiveMap->panelSide. Wave 36, W36-I. */
 extern const u8 gUnknown_0808D754[];
 extern const u8 gUnknown_08487D44[];
 /* A gUnknown_03001470 list blob, not a proc script: family F057
@@ -11242,7 +11220,7 @@ extern const struct ProcCmd gUnknown_08616FD4[];
  */
 /* Wave 30, W30-D. One more of the same species, one record earlier:
  * sub_08003910 is `sub_080152EC(gUnknown_08485D8C, 0)` followed by
- * `gActiveMap->unk42 = 0xFFF6`. `const u8 []` for the same reason as
+ * `gActiveMap->introScreenY = 0xFFF6`. `const u8 []` for the same reason as
  * its neighbours -- sub_080152EC's first parameter is `const void *`. */
 extern const u8 gUnknown_08485D8C[];
 /* Wave 50, W50-G. sub_08002AB0 and sub_08002C38 both pass it as sub_0801BD00's
@@ -11603,7 +11581,7 @@ extern u16 gUnknown_081268D8[];
  *   0808D6E8 03002EE0   0808D6EC 0200B0B0   ...   0808D70C..0808D718
  *   0200B0B0 four more times
  *
- * so the original source of sub_08000694 says `gActiveMap->unk02` and
+ * so the original source of sub_08000694 says `gActiveMap->state` and
  * the compiler put the word there.
  *
  * The gUnknown_08090CD8 `**const` workaround does NOT work here and the
@@ -16070,7 +16048,7 @@ extern u16 gUnknown_08499608[][0x19];
 extern const struct ProcCmd gUnknown_0849A198[];
 /* Wave 29, W29-A. Two gUnknown_03001470 list scripts of the gUnknown_0849A108
  * shape: sub_08005560 and sub_08005598 are one body twice, each
- * `sub_080152EC(blob, 0)` after clearing gActiveMap->unk02, and these are
+ * `sub_080152EC(blob, 0)` after clearing gActiveMap->state, and these are
  * the only two words they differ in. `const u8 []` because sub_080152EC's first
  * parameter is `const void *` and nothing dereferences either symbol. */
 extern const u8 gUnknown_08488444[];
@@ -17341,7 +17319,7 @@ extern const u8 gUnknown_08499B4C[];
 
 /* Wave 31, W31-A. A proc script blob sub_08007B54 starts with
  * `sub_080152C0((s32)this, 0)`, keeping the s8 slot id it returns in
- * gActiveMap->unk6b. `const u8 []` plus the cast at the call site is the
+ * gActiveMap->spriteId. `const u8 []` plus the cast at the call site is the
  * spelling src/decomp/c_08005838.c and c_080059B4.c already use for
  * gUnknown_08488614 and gUnknown_0848863C, the neighbouring blobs. */
 extern const u8 gUnknown_08488890[];

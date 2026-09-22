@@ -21,13 +21,13 @@ int sub_08008928(void)
 
     result = 0;
 
-    gUnknown_030033EC = f = gActiveMap->unk2f;
+    gUnknown_030033EC = f = gActiveMap->unitArmy;
     gUnknown_03003F2C = (f - 1) << 6;
 
     x = gActiveMap->cursorX;
     y = gActiveMap->cursorY;
 
-    if (gActiveMap->unk24 == 0x19)
+    if (gActiveMap->cursorUnit == 0x19)
     {
         if (RemoveUnitAt(1, x, y))
         {
@@ -39,7 +39,7 @@ int sub_08008928(void)
     {
         v = GetUnitTypeAt(x, y);
 
-        if (v != gActiveMap->unk24)
+        if (v != gActiveMap->cursorUnit)
         {
             s8 *costs;
             int idx;
@@ -49,8 +49,8 @@ int sub_08008928(void)
             {
                 v = -1;
             }
-            else if (CountArmyUnits(gActiveMap->unk2f) > 0x31
-                     && (v >> 6) + 1 != gActiveMap->unk2f)
+            else if (CountArmyUnits(gActiveMap->unitArmy) > 0x31
+                     && (v >> 6) + 1 != gActiveMap->unitArmy)
             {
                 return -1;
             }
@@ -63,7 +63,7 @@ int sub_08008928(void)
 
             idx = gMap->rowOffset[y] + x;
             c = (gMap->terrain[idx] & 0x1f)
-                + gUnknown_085D5ABC[gActiveMap->unk24 & 0x3f].movementType * 32;
+                + gUnknown_085D5ABC[gActiveMap->cursorUnit & 0x3f].movementType * 32;
 
             q = costs[c];
 
@@ -72,8 +72,8 @@ int sub_08008928(void)
                 if (v > 0)
                     RemoveUnitAt(0, x, y);
 
-                if (CountArmyUnits(gActiveMap->unk2f) <= 0x31
-                    && CreateUnitAt(x, y, gActiveMap->unk24 & 0x3f))
+                if (CountArmyUnits(gActiveMap->unitArmy) <= 0x31
+                    && CreateUnitAt(x, y, gActiveMap->cursorUnit & 0x3f))
                     result = 1;
             }
             else

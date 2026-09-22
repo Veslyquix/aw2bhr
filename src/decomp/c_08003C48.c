@@ -21,7 +21,7 @@ void sub_08003C48(int a1)
     }
 
     ClearAllUnits();
-    gActiveMap->unk13 = 0;
+    gActiveMap->army1UnitCount = 0;
 
     for (x = 0; x < MAP->height; x++)
         MAP->rowOffset[x] = x * MAP->width;

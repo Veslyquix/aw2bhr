@@ -3561,7 +3561,7 @@ int sub_08007328(void);
 /* Wave 56 (W56-D), from the one call site in sub_08005F4C -- still `asm`, not
  * matched, so this is a contract and not a measurement. r0 arrives as a bare
  * `ldrh` of gUnknown_0200B0D0[i].unk04 and r1 as a sign-extended
- * gActiveMap->unk32 (s8), which is exactly what two `int` parameters
+ * gActiveMap->selectionAnimKind (s8), which is exactly what two `int` parameters
  * produce; a narrow second parameter would zero-extend under agbcc's
  * PROMOTE_MODE and lose the `lsls #0x18; asrs #0x18`. The caller's next
  * instruction is `bl sub_08007B74`, so r0 is dead and the return is void. */
@@ -10352,13 +10352,13 @@ void sub_080369BC(void);
  *                 discarded -- nullary void.
  *   sub_0800C8D8  likewise -- but see below, this one was WRONG.
  *   sub_0800C874  nullary; its r0 is `strb`d straight into
- *                 gActiveMap->unk12, so the return is at least a byte
+ *                 gActiveMap->propertyCount, so the return is at least a byte
  *                 and `int` is the weakest fit (no re-narrowing appears).
  *   sub_0800CAA0  nullary; its r0 is handed on as sub_0800CB30's second
  *                 argument with no narrowing between the two `bl`s.
  *   sub_0800CB30  called as (1, sub_0800CAA0()).
  *   sub_0808B694  two pointers -- a struct Unk03001470 field address and
- *                 &gActiveMap->unk9c -- and the result is a bare
+ *                 gActiveMap->designName -- and the result is a bare
  *                 `cmp r0,#0`, so a comparison predicate. */
 void sub_08002F1C(void);
 /* Wave 48 (W48-A) retypes sub_0800C8D8 from `void` to `int`.  W36-I inferred
@@ -10606,7 +10606,7 @@ void sub_0800AF24(int, int);
  * so `void` is the return type unless noted.
  *
  * The seven nullary ones are sub_0800057C's jump-table arms (cases 0..7 of
- * gActiveMap->unk04); none of them reads r0-r3 before writing it. */
+ * gActiveMap->mode); none of them reads r0-r3 before writing it. */
 void sub_080005FC(void);
 void sub_08000650(void);
 void sub_08000664(void);
@@ -10779,7 +10779,7 @@ void sub_0801BAB8(void);
 void IrqMain(void);
 /* Already DEFINED in src/decomp/c_0804B0CC.c; signature copied from the
  * definition, which wins. sub_080048D4 is its first cross-file caller and
- * passes `(int)&gActiveMap->unk9c` -- the int first parameter is the
+ * passes `(int)gActiveMap->designName` -- the int first parameter is the
  * definition's, so the pointer is cast at the call site. */
 void sub_0804B10C(int, u8);
 /* Already DEFINED in src/decomp/c_0801820C.c; sub_08018254 is its first

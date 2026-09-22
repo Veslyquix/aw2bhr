@@ -9,8 +9,8 @@
 
 void sub_080088F0(void)
 {
-    gActiveMap->unk13 = CountArmyUnits(1);
-    gActiveMap->unk14 = CountArmyUnits(2);
-    gActiveMap->unk15 = CountArmyUnits(3);
-    gActiveMap->unk16 = CountArmyUnits(4);
+    gActiveMap->army1UnitCount = CountArmyUnits(1);
+    gActiveMap->army2UnitCount = CountArmyUnits(2);
+    gActiveMap->army3UnitCount = CountArmyUnits(3);
+    gActiveMap->army4UnitCount = CountArmyUnits(4);
 }

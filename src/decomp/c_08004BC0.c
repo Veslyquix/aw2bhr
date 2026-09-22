@@ -12,5 +12,5 @@
  */
 void sub_08004BC0(void)
 {
-    gActiveMap->unk00 |= 0x4000;
+    gActiveMap->flags |= 0x4000;
 }

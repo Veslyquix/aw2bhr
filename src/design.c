@@ -383,9 +383,9 @@ int GetTileWithShadow2(int x, int y, int v) {
 asm(".global sub_08001A04\n.thumb_set sub_08001A04, GetTileWithShadow2\n");
 
 /* The `ldrsh` fixes gUnknown_0200B224[].unk00 as a signed halfword; the `lsls
- * #2` on gActiveMap->unk28 fixes the element stride at 4.
+ * #2` on gActiveMap->selectionIndex fixes the element stride at 4.
  */
-s16 sub_08001CE8(void) { return gUnknown_0200B224[gActiveMap->unk28].unk00; }
+s16 sub_08001CE8(void) { return gUnknown_0200B224[gActiveMap->selectionIndex].unk00; }
 
 /* A linear search over the byte pairs at gUnknown_084859E0: key, value, with
  * 0xFF terminating the table and 0xE returned when the key is absent.
@@ -420,7 +420,7 @@ int sub_08001D04(int a1) {
 
 /* Look up an id in gUnknown_0200B224 and return its index, or -1.
  *
- * gActiveMap->unk07 selects both the mask and the entry count: 0x1F over
+ * gActiveMap->editMode selects both the mask and the entry count: 0x1F over
  * 17 entries, or 0x3F over 20. The two arms are structurally identical but the
  * ROM carries both bodies -- they share only the `return i` block and the -1
  * tail, which agbcc cross-jumps on its own.
@@ -435,7 +435,7 @@ int sub_08001D04(int a1) {
 int sub_08001D24(int a1) {
   int i;
 
-  if (gActiveMap->unk07 == 0) {
+  if (gActiveMap->editMode == 0) {
     a1 &= 0x1F;
     for (i = 0; i <= 0x10; i++) {
       if ((gUnknown_0200B224[i].unk00 & 0x1F) == a1)
@@ -452,9 +452,9 @@ int sub_08001D24(int a1) {
   return -1;
 }
 
-void sub_08001D8C(void) { gActiveMap->unk4c = 10; }
+void sub_08001D8C(void) { gActiveMap->tilePanelYState = 10; }
 
-void sub_08001D9C(void) { gActiveMap->unk4c = 0; }
+void sub_08001D9C(void) { gActiveMap->tilePanelYState = 0; }
 
 /* Wave 37 (W37-E). Matched. PROMOTION NEEDS THE POOL WORD PLACED:
  *     "rodata": ["0x0808D70C"]
@@ -465,7 +465,7 @@ void sub_08001D9C(void) { gActiveMap->unk4c = 0; }
  *
  * Three things cost attempts here, all worth reusing:
  *
- * 1. `idx` MUST be a local. gActiveMap->unk68 is ordinary memory, so cse
+ * 1. `idx` MUST be a local. gActiveMap->cursorMoveScale is ordinary memory, so cse
  *    drops it at every `bl`; the four Div arguments each recomputed
  *    `(0x100 - unk68) >> 4` from scratch, +60 bytes. gSinLut is `const`, so its
  *    reads ARE preserved across the calls and need no local -- the cos<<4 CSE
@@ -501,159 +501,159 @@ void sub_08001DAC(void) {
   sx = gActiveMap->cursorX - (gMap->scrollX >> 4);
   flag = 1;
 
-  switch (gActiveMap->unk4c) {
+  switch (gActiveMap->tilePanelYState) {
   case 0:
-    gActiveMap->unk54 += 2;
-    if (gActiveMap->unk54 > 7)
-      gActiveMap->unk54 = 8;
-    gActiveMap->unk50 += gActiveMap->unk54;
-    if (gActiveMap->unk50 > 0xB7) {
-      gActiveMap->unk50 = 0xB8;
-      gActiveMap->unk4c = flag;
+    gActiveMap->tilePanelYSpeed += 2;
+    if (gActiveMap->tilePanelYSpeed > 7)
+      gActiveMap->tilePanelYSpeed = 8;
+    gActiveMap->tilePanelY += gActiveMap->tilePanelYSpeed;
+    if (gActiveMap->tilePanelY > 0xB7) {
+      gActiveMap->tilePanelY = 0xB8;
+      gActiveMap->tilePanelYState = flag;
     }
     flag = 0;
     break;
   case 1:
     return;
   case 0xA:
-    gActiveMap->unk54 += 1;
-    if (gActiveMap->unk54 > 7)
-      gActiveMap->unk54 = 8;
-    gActiveMap->unk50 -= gActiveMap->unk54;
-    if (gActiveMap->unk50 <= 0x6A) {
-      gActiveMap->unk50 = 0x6A;
-      gActiveMap->unk4c = 0xB;
+    gActiveMap->tilePanelYSpeed += 1;
+    if (gActiveMap->tilePanelYSpeed > 7)
+      gActiveMap->tilePanelYSpeed = 8;
+    gActiveMap->tilePanelY -= gActiveMap->tilePanelYSpeed;
+    if (gActiveMap->tilePanelY <= 0x6A) {
+      gActiveMap->tilePanelY = 0x6A;
+      gActiveMap->tilePanelYState = 0xB;
     }
     break;
   }
 
-  switch (gActiveMap->unk4a) {
+  switch (gActiveMap->tilePanelState) {
   case 0xA:
-    gActiveMap->unk4e += (0x1180 - gActiveMap->unk4e) >> 3;
-    if (gActiveMap->unk4e > 0xEFF) {
-      gActiveMap->unk4e = 0xFD80;
-      gActiveMap->unk4a = 0x14;
+    gActiveMap->tilePanelX += (0x1180 - gActiveMap->tilePanelX) >> 3;
+    if (gActiveMap->tilePanelX > 0xEFF) {
+      gActiveMap->tilePanelX = 0xFD80;
+      gActiveMap->tilePanelState = 0x14;
     }
     break;
   case 0x14:
-    gActiveMap->unk4e += (0xA0 - gActiveMap->unk4e) >> 3;
-    if (gActiveMap->unk4e >= 0) {
-      gActiveMap->unk4e = 0;
-      gActiveMap->unk4a = 0x1E;
+    gActiveMap->tilePanelX += (0xA0 - gActiveMap->tilePanelX) >> 3;
+    if (gActiveMap->tilePanelX >= 0) {
+      gActiveMap->tilePanelX = 0;
+      gActiveMap->tilePanelState = 0x1E;
     }
     break;
   case 0:
   case 0x1E:
     if (sx <= 6) {
-      gActiveMap->unk3e = 1;
-      gActiveMap->unk4a = 0x64;
+      gActiveMap->panelSide = 1;
+      gActiveMap->tilePanelState = 0x64;
     }
     break;
   case 0x64:
-    gActiveMap->unk4e += (-960 - gActiveMap->unk4e) >> 3;
-    if (gActiveMap->unk4e < -640) {
-      gActiveMap->unk4e = 0x11A0;
-      gActiveMap->unk4a = 0x6E;
+    gActiveMap->tilePanelX += (-960 - gActiveMap->tilePanelX) >> 3;
+    if (gActiveMap->tilePanelX < -640) {
+      gActiveMap->tilePanelX = 0x11A0;
+      gActiveMap->tilePanelState = 0x6E;
     }
     break;
   case 0x6E:
-    gActiveMap->unk4e += (0xB40 - gActiveMap->unk4e) >> 3;
-    if (gActiveMap->unk4e <= 0xCA0) {
-      gActiveMap->unk4e = 0xCA0;
-      gActiveMap->unk4a = 0x78;
+    gActiveMap->tilePanelX += (0xB40 - gActiveMap->tilePanelX) >> 3;
+    if (gActiveMap->tilePanelX <= 0xCA0) {
+      gActiveMap->tilePanelX = 0xCA0;
+      gActiveMap->tilePanelState = 0x78;
     }
     break;
   case 0x78:
     if (sx > 7) {
-      gActiveMap->unk3e = 0;
-      gActiveMap->unk4a = 0xA;
+      gActiveMap->panelSide = 0;
+      gActiveMap->tilePanelState = 0xA;
     }
     break;
   }
 
-  sx = gActiveMap->unk4e >> 4;
-  b = gActiveMap->unk07 != 0;
+  sx = gActiveMap->tilePanelX >> 4;
+  b = gActiveMap->editMode != 0;
 
   if (b == 0) {
-    if ((gActiveMap->unk00 & 0x40) == 0)
-      sub_08002964(0, sx + 7, gActiveMap->unk50 + 0x26,
+    if ((gActiveMap->flags & 0x40) == 0)
+      sub_08002964(0, sx + 7, gActiveMap->tilePanelY + 0x26,
                    gActiveMap->selectedTerrain, b, flag);
-    sy = gActiveMap->unk50;
+    sy = gActiveMap->tilePanelY;
     if ((gActiveMap->selectedTerrain & 0x1F) == 8)
       sy += 6;
   } else {
-    m1 = gActiveMap->unk00 & 0x40;
+    m1 = gActiveMap->flags & 0x40;
     if (m1 == 0)
-      sub_080029F4(0, sx + 7, gActiveMap->unk50 + 0x26, gActiveMap->unk24, m1,
+      sub_080029F4(0, sx + 7, gActiveMap->tilePanelY + 0x26, gActiveMap->cursorUnit, m1,
                    flag);
-    sy = gActiveMap->unk50;
+    sy = gActiveMap->tilePanelY;
   }
 
-  if (gActiveMap->unk65 != 0) {
-    switch (gActiveMap->unk66) {
+  if (gActiveMap->cursorMoved != 0) {
+    switch (gActiveMap->cursorMoveState) {
     case 0:
-      gActiveMap->unk67 = 0xA;
-      gActiveMap->unk66 = 8;
-      gActiveMap->unk68 = 0;
+      gActiveMap->cursorMoveTimer = 0xA;
+      gActiveMap->cursorMoveState = 8;
+      gActiveMap->cursorMoveScale = 0;
       break;
     case 9:
       sub_08000C68();
     case 8:
-      gActiveMap->unk66++;
+      gActiveMap->cursorMoveState++;
     case 0xA:
-      gActiveMap->unk68 += 0x20;
-      if (gActiveMap->unk68 > 0xFF)
-        gActiveMap->unk68 = 0x100;
-      idx = (0x100 - gActiveMap->unk68) >> 4;
+      gActiveMap->cursorMoveScale += 0x20;
+      if (gActiveMap->cursorMoveScale > 0xFF)
+        gActiveMap->cursorMoveScale = 0x100;
+      idx = (0x100 - gActiveMap->cursorMoveScale) >> 4;
       SetObjAffine(0,
                    Div(gSinLut[0x40 + (idx & 0xFF)] << 4,
-                       gActiveMap->unk68 != 0 ? gActiveMap->unk68 : 2),
+                       gActiveMap->cursorMoveScale != 0 ? gActiveMap->cursorMoveScale : 2),
                    Div(-gSinLut[idx & 0xFF] << 4, 0x100),
                    Div(gSinLut[idx & 0xFF] << 4,
-                       gActiveMap->unk68 != 0 ? gActiveMap->unk68 : 2),
+                       gActiveMap->cursorMoveScale != 0 ? gActiveMap->cursorMoveScale : 2),
                    Div(gSinLut[0x40 + (idx & 0xFF)] << 4, 0x100));
-      gActiveMap->unk67--;
-      if (gActiveMap->unk67 < 0) {
-        gActiveMap->unk66 = 0;
-        gActiveMap->unk65 = 0;
+      gActiveMap->cursorMoveTimer--;
+      if (gActiveMap->cursorMoveTimer < 0) {
+        gActiveMap->cursorMoveState = 0;
+        gActiveMap->cursorMoved = 0;
       }
       break;
     }
 
-    m2 = gActiveMap->unk00 & 0x40;
+    m2 = gActiveMap->flags & 0x40;
     if (m2 == 0) {
       if (b == 0)
         sub_0800272C(0, sx + 0xB, sy, gActiveMap->selectedTerrain, 1, b, flag);
       else
-        sub_08002844(0, sx + 0xB, sy, gActiveMap->unk24, 1, 0, flag);
+        sub_08002844(0, sx + 0xB, sy, gActiveMap->cursorUnit, 1, 0, flag);
     }
   } else {
-    m3 = gActiveMap->unk00 & 0x40;
+    m3 = gActiveMap->flags & 0x40;
     if (m3 == 0) {
       if (b == 0)
         sub_0800272C(0, sx + 0xB, sy, gActiveMap->selectedTerrain,
-                     gActiveMap->unk34, m3, flag);
+                     gActiveMap->spriteFrame, m3, flag);
       else
-        sub_08002844(0, sx + 0xB, sy, gActiveMap->unk24, gActiveMap->unk34, m3,
+        sub_08002844(0, sx + 0xB, sy, gActiveMap->cursorUnit, gActiveMap->spriteFrame, m3,
                      flag);
     }
   }
 
   sub_08003088(sx, sy);
 
-  if (gActiveMap->unk50 > 0x9F)
+  if (gActiveMap->tilePanelY > 0x9F)
     return;
 
   sub_08002510(sx, 0x26);
 
-  m4 = gActiveMap->unk00 & 0x40;
+  m4 = gActiveMap->flags & 0x40;
   if (m4 == 0) {
-    sub_08002298(sx, gActiveMap->unk50 - 10);
-    DrawOamObject(0xAA, (sx + 2) & 0x1FF, (gActiveMap->unk50 - 1) & 0xFF, m4, 0);
-    PutSprite(5, sx, gActiveMap->unk50, gUnknown_08485B2C, 0x3000);
+    sub_08002298(sx, gActiveMap->tilePanelY - 10);
+    DrawOamObject(0xAA, (sx + 2) & 0x1FF, (gActiveMap->tilePanelY - 1) & 0xFF, m4, 0);
+    PutSprite(5, sx, gActiveMap->tilePanelY, gUnknown_08485B2C, 0x3000);
   }
 
-  if (gActiveMap->unk04 != 4)
+  if (gActiveMap->mode != 4)
     ApplyPaletteExt(gUnknown_084891C0, 0x260, 0x20);
 }
 
@@ -691,86 +691,86 @@ void sub_08002298(int a1, int a2) {
 
   a2 &= 0xFF;
 
-  switch (gActiveMap->unk64) {
+  switch (gActiveMap->countPanelState) {
   case 0:
-    if (gActiveMap->unk07 == 0) {
+    if (gActiveMap->editMode == 0) {
       if (GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
         return;
-    } else if (gActiveMap->unk24 == 0x19) {
+    } else if (gActiveMap->cursorUnit == 0x19) {
       return;
     }
-    gActiveMap->unk64 = gActiveMap->unk3e != 0 ? 0xA : 0x32;
-    gActiveMap->unk60 = 0x1180;
+    gActiveMap->countPanelState = gActiveMap->panelSide != 0 ? 0xA : 0x32;
+    gActiveMap->countPanelX = 0x1180;
     break;
   case 0xA:
-    gActiveMap->unk60 += (0xBE0 - gActiveMap->unk60) >> 3;
-    if (gActiveMap->unk60 <= 0xCC0) {
-      gActiveMap->unk60 = 0xCC0;
-      gActiveMap->unk64 = 0x14;
+    gActiveMap->countPanelX += (0xBE0 - gActiveMap->countPanelX) >> 3;
+    if (gActiveMap->countPanelX <= 0xCC0) {
+      gActiveMap->countPanelX = 0xCC0;
+      gActiveMap->countPanelState = 0x14;
     }
     break;
   case 0x14:
-    if (gActiveMap->unk07 == 0) {
-      if (gActiveMap->unk3e == 0 ||
+    if (gActiveMap->editMode == 0) {
+      if (gActiveMap->panelSide == 0 ||
           GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
-        gActiveMap->unk64 = 0x1E;
-    } else if (gActiveMap->unk3e == 0 || gActiveMap->unk24 == 0x19) {
-      gActiveMap->unk64 = 0x1E;
+        gActiveMap->countPanelState = 0x1E;
+    } else if (gActiveMap->panelSide == 0 || gActiveMap->cursorUnit == 0x19) {
+      gActiveMap->countPanelState = 0x1E;
     }
     break;
   case 0x1E:
-    gActiveMap->unk60 += (0x1180 - gActiveMap->unk60) >> 3;
-    if (gActiveMap->unk60 > 0x10DF) {
-      gActiveMap->unk60 = 0x10E0;
-      gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x32 : 0;
+    gActiveMap->countPanelX += (0x1180 - gActiveMap->countPanelX) >> 3;
+    if (gActiveMap->countPanelX > 0x10DF) {
+      gActiveMap->countPanelX = 0x10E0;
+      gActiveMap->countPanelState = gActiveMap->panelSide == 0 ? 0x32 : 0;
     }
     break;
   }
 
-  switch (gActiveMap->unk64) {
+  switch (gActiveMap->countPanelState) {
   case 0x32:
-    if (gActiveMap->unk07 == 0) {
+    if (gActiveMap->editMode == 0) {
       if (GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
         return;
-    } else if (gActiveMap->unk24 == 0x19) {
+    } else if (gActiveMap->cursorUnit == 0x19) {
       return;
     }
-    gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x3C : 0;
-    gActiveMap->unk60 = 0xFD80;
+    gActiveMap->countPanelState = gActiveMap->panelSide == 0 ? 0x3C : 0;
+    gActiveMap->countPanelX = 0xFD80;
     break;
   case 0x3C:
-    gActiveMap->unk60 += (0x320 - gActiveMap->unk60) >> 3;
-    if (gActiveMap->unk60 > 0xBF) {
-      gActiveMap->unk60 = 0xC0;
-      gActiveMap->unk64 = 0x46;
+    gActiveMap->countPanelX += (0x320 - gActiveMap->countPanelX) >> 3;
+    if (gActiveMap->countPanelX > 0xBF) {
+      gActiveMap->countPanelX = 0xC0;
+      gActiveMap->countPanelState = 0x46;
     }
     break;
   case 0x46:
-    if (gActiveMap->unk07 == 0) {
-      if (gActiveMap->unk3e != 0 ||
+    if (gActiveMap->editMode == 0) {
+      if (gActiveMap->panelSide != 0 ||
           GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
-        gActiveMap->unk64 = 0x50;
-    } else if (gActiveMap->unk3e != 0 || gActiveMap->unk24 == 0x19) {
-      gActiveMap->unk64 = 0x50;
+        gActiveMap->countPanelState = 0x50;
+    } else if (gActiveMap->panelSide != 0 || gActiveMap->cursorUnit == 0x19) {
+      gActiveMap->countPanelState = 0x50;
     }
     break;
   case 0x50:
-    gActiveMap->unk60 += (-800 - gActiveMap->unk60) >> 3;
-    if (gActiveMap->unk60 <= -640) {
-      gActiveMap->unk60 = -640;
-      gActiveMap->unk64 = gActiveMap->unk3e == 0 ? 0x32 : 0;
+    gActiveMap->countPanelX += (-800 - gActiveMap->countPanelX) >> 3;
+    if (gActiveMap->countPanelX <= -640) {
+      gActiveMap->countPanelX = -640;
+      gActiveMap->countPanelState = gActiveMap->panelSide == 0 ? 0x32 : 0;
     }
     break;
   }
 
-  a = gActiveMap->unk60 >> 4;
+  a = gActiveMap->countPanelX >> 4;
   DrawOamObject(0x54, (a - 0xC) & 0x1FF, a2 + 1, 0, 0);
-  if (gActiveMap->unk07 == 0)
+  if (gActiveMap->editMode == 0)
     sub_0802BD54((a + 0x1A) & 0x1FF, a2, 0x3C - (s8)gActiveMap->propertyCount);
   else
     sub_0802BD54(
         (a + 0x1A) & 0x1FF, a2,
-        0x32 - (s8)((struct ActiveMap *)((u8 *)gActiveMap + gActiveMap->unk2f))
+        0x32 - (s8)((struct ActiveMap *)((u8 *)gActiveMap + gActiveMap->unitArmy))
                    ->propertyCount);
 }
 
@@ -796,68 +796,68 @@ void sub_08002510(int a1, int a2) {
 
   v = a2 & 0xFF;
 
-  switch (gActiveMap->unk5a) {
+  switch (gActiveMap->sidePanelState) {
   case 0:
     if (sub_0800C9E8() == 0)
       return;
-    gActiveMap->unk5a = gActiveMap->unk3e != 0 ? 0xA : 0x32;
-    gActiveMap->unk5c = 0x1180;
+    gActiveMap->sidePanelState = gActiveMap->panelSide != 0 ? 0xA : 0x32;
+    gActiveMap->sidePanelX = 0x1180;
     break;
   case 0xA:
-    gActiveMap->unk5c += (0xB40 - gActiveMap->unk5c) >> 3;
-    if (gActiveMap->unk5c <= 0xD60) {
-      gActiveMap->unk5c = 0xD60;
-      gActiveMap->unk5a = 0x14;
+    gActiveMap->sidePanelX += (0xB40 - gActiveMap->sidePanelX) >> 3;
+    if (gActiveMap->sidePanelX <= 0xD60) {
+      gActiveMap->sidePanelX = 0xD60;
+      gActiveMap->sidePanelState = 0x14;
     }
     break;
   case 0x14:
-    if (sub_0800C9E8() == 0 || gActiveMap->unk3e == 0 || gActiveMap->unk04 != 1)
-      gActiveMap->unk5a = 0x1E;
+    if (sub_0800C9E8() == 0 || gActiveMap->panelSide == 0 || gActiveMap->mode != 1)
+      gActiveMap->sidePanelState = 0x1E;
     break;
   case 0x1E:
-    gActiveMap->unk5c += (0x12A0 - gActiveMap->unk5c) >> 3;
-    if (gActiveMap->unk5c > 0x10DF) {
-      gActiveMap->unk5c = 0x10E0;
+    gActiveMap->sidePanelX += (0x12A0 - gActiveMap->sidePanelX) >> 3;
+    if (gActiveMap->sidePanelX > 0x10DF) {
+      gActiveMap->sidePanelX = 0x10E0;
       if (sub_0800C9E8() == 0)
         return;
-      if (gActiveMap->unk04 == 1)
-        gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x32 : 0;
+      if (gActiveMap->mode == 1)
+        gActiveMap->sidePanelState = gActiveMap->panelSide == 0 ? 0x32 : 0;
     }
     break;
   }
 
-  switch (gActiveMap->unk5a) {
+  switch (gActiveMap->sidePanelState) {
   case 0x32:
     if (sub_0800C9E8() == 0)
       return;
-    gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x3C : 0;
-    gActiveMap->unk5c = 0xFD80;
+    gActiveMap->sidePanelState = gActiveMap->panelSide == 0 ? 0x3C : 0;
+    gActiveMap->sidePanelX = 0xFD80;
     break;
   case 0x3C:
-    gActiveMap->unk5c += (0x3C0 - gActiveMap->unk5c) >> 3;
-    if (gActiveMap->unk5c > 0x19F) {
-      gActiveMap->unk5c = 0x1A0;
-      gActiveMap->unk5a = 0x46;
+    gActiveMap->sidePanelX += (0x3C0 - gActiveMap->sidePanelX) >> 3;
+    if (gActiveMap->sidePanelX > 0x19F) {
+      gActiveMap->sidePanelX = 0x1A0;
+      gActiveMap->sidePanelState = 0x46;
     }
     break;
   case 0x46:
-    if (sub_0800C9E8() == 0 || gActiveMap->unk3e != 0 || gActiveMap->unk04 != 1)
-      gActiveMap->unk5a = 0x50;
+    if (sub_0800C9E8() == 0 || gActiveMap->panelSide != 0 || gActiveMap->mode != 1)
+      gActiveMap->sidePanelState = 0x50;
     break;
   case 0x50:
-    gActiveMap->unk5c += (-928 - gActiveMap->unk5c) >> 3;
-    if (gActiveMap->unk5c <= -480) {
-      gActiveMap->unk5c = -480;
+    gActiveMap->sidePanelX += (-928 - gActiveMap->sidePanelX) >> 3;
+    if (gActiveMap->sidePanelX <= -480) {
+      gActiveMap->sidePanelX = -480;
       if (sub_0800C9E8() == 0)
         return;
-      if (gActiveMap->unk04 == 1)
-        gActiveMap->unk5a = gActiveMap->unk3e == 0 ? 0x32 : 0;
+      if (gActiveMap->mode == 1)
+        gActiveMap->sidePanelState = gActiveMap->panelSide == 0 ? 0x32 : 0;
     }
     break;
   }
 
-  DrawOamObject(0x8F, ((gActiveMap->unk5c >> 4) - 0x18) & 0x1FF, v, 0, 0);
-  gActiveMap->unk5b = (gActiveMap->unk5b + 1) & 0x3F;
+  DrawOamObject(0x8F, ((gActiveMap->sidePanelX >> 4) - 0x18) & 0x1FF, v, 0, 0);
+  gActiveMap->sidePanelFrame = (gActiveMap->sidePanelFrame + 1) & 0x3F;
 }
 
 /* Loads one of eleven OBJ graphics sets into OBJ VRAM and then hands the
@@ -929,7 +929,7 @@ void sub_08002844(int a1, int a2, int a3, int a4, int a5, int a6, int a7) {
   int pal;
 
   pal = 6;
-  cls = (s8)gActiveMap->unk2f;
+  cls = (s8)gActiveMap->unitArmy;
   if (cls == 0)
     cls = 1;
 
@@ -1053,13 +1053,13 @@ void sub_08002AB0(void) {
   int flag;
   struct Unk0200B0D0 *q;
 
-  if (gActiveMap->unk00 & 0x10) {
+  if (gActiveMap->flags & 0x10) {
     sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
-    if (gActiveMap->unk02 == 0x33) {
-      flag = gActiveMap->unk07;
-      j = gActiveMap->unk3a + 3;
+    if (gActiveMap->state == 0x33) {
+      flag = gActiveMap->editMode;
+      j = gActiveMap->ringIndex + 3;
       if (flag == 0)
-        j = gActiveMap->unk3a + 4;
+        j = gActiveMap->ringIndex + 4;
       if (j > 9)
         j -= 10;
       switch (gUnknown_0200B0D0[j].unk04 & 0x1F) {
@@ -1068,7 +1068,7 @@ void sub_08002AB0(void) {
       case 10:
       case 11:
       case 14:
-        if (gActiveMap->unk6b == -1)
+        if (gActiveMap->spriteId == -1)
           sub_08007B54();
         break;
       }
@@ -1077,7 +1077,7 @@ void sub_08002AB0(void) {
     }
   }
 
-  j = gActiveMap->unk3a;
+  j = gActiveMap->ringIndex;
   for (i = 9; i >= 0; i--) {
     q = &gUnknown_0200B0D0[j];
     j++;
@@ -1100,14 +1100,14 @@ void sub_08002C38(void) {
   int j;
   struct Unk0200B0D0 *q;
 
-  if (gActiveMap->unk00 & 0x10) {
+  if (gActiveMap->flags & 0x10) {
     sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
-    if (gActiveMap->unk02 == 0x33) {
-      j = gActiveMap->unk3a + 3;
+    if (gActiveMap->state == 0x33) {
+      j = gActiveMap->ringIndex + 3;
       if (j > 7)
-        j = gActiveMap->unk3a - 5;
+        j = gActiveMap->ringIndex - 5;
       if (gUnknown_0200B0D0[j].unk04 != 0x19) {
-        if (gActiveMap->unk6b == -1)
+        if (gActiveMap->spriteId == -1)
           sub_08007B54();
       } else {
         sub_08007B74();
@@ -1115,7 +1115,7 @@ void sub_08002C38(void) {
     }
   }
 
-  j = gActiveMap->unk3a;
+  j = gActiveMap->ringIndex;
   for (i = 7; i >= 0; i--) {
     q = &gUnknown_0200B0D0[j];
     j++;
@@ -1198,8 +1198,8 @@ void sub_08002EB4(void) {
 void sub_08002EC8(void) {
   sub_08001DAC();
 
-  if ((gActiveMap->unk00 & 0x20) == 0) {
-    if (gActiveMap->unk07 == 0)
+  if ((gActiveMap->flags & 0x20) == 0) {
+    if (gActiveMap->editMode == 0)
       sub_08002AB0();
     else
       sub_08002C38();
@@ -1220,7 +1220,7 @@ void sub_08002EC8(void) {
 void sub_08002EF8(void) {
   int v;
 
-  if (gActiveMap->unk07 == 0)
+  if (gActiveMap->editMode == 0)
     v = 0xAB;
   else
     v = 0xAA;

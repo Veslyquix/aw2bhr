@@ -12,7 +12,7 @@ void sub_08003814(void)
     int x;
     int t;
 
-    x = gActiveMap->unk3e == 0 ? 2 : 0xCE;
+    x = gActiveMap->panelSide == 0 ? 2 : 0xCE;
     t = x & 0x1FF;
     DrawOamObject(0x91, t, 0xE, 0, 0);
     DrawOamObject(0x90, t, 0x18, 0, 0);
@@ -42,15 +42,15 @@ void sub_08003890(void)
     int v;
     int t;
 
-    if (gActiveMap->unk00 & 8)
+    if (gActiveMap->flags & 8)
     {
-        q = &gActiveMap->unk42;
+        q = &gActiveMap->introScreenY;
         v = *q;
         v = v >= -2 ? -2 : v + 1;
     }
     else
     {
-        q = &gActiveMap->unk42;
+        q = &gActiveMap->introScreenY;
         v = *q;
         v = v < -10 ? -10 : v - 1;
     }
@@ -59,9 +59,9 @@ void sub_08003890(void)
 
     if (v > -3)
     {
-        t = gActiveMap->unk3e == 0 ? 0x20 : 0xD0;
+        t = gActiveMap->panelSide == 0 ? 0x20 : 0xD0;
         DrawOamObject(0x8E, (t - 0x20) & 0x1FF,
-                     (u8)gActiveMap->unk42, 0, 0);
+                     (u8)gActiveMap->introScreenY, 0, 0);
         sub_08003814();
     }
 }

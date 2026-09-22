@@ -11,6 +11,6 @@
 
 void sub_08005598(void)
 {
-    gActiveMap->unk02 = 0;
+    gActiveMap->state = 0;
     sub_080152EC(gUnknown_0848846C, 0);
 }

@@ -15,7 +15,7 @@ void sub_08005D50(void)
 {
     struct ActiveMap *p = gActiveMap;
 
-    p->unk6e = 0x100;
-    p->unk70 = 0x800;
-    p->unk6c = 0;
+    p->overlayX = 0x100;
+    p->overlayY = 0x800;
+    p->overlayState = 0;
 }

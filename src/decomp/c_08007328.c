@@ -22,11 +22,11 @@ int sub_08007328(void)
     int m;
     int v;
 
-    n = (p->unk07 == 0) ? 10 : 8;
+    n = (p->editMode == 0) ? 10 : 8;
     m = n - 1;
-    v = p->unk3a + m;
+    v = p->ringIndex + m;
     if (v >= n)
         v -= n;
-    p->previousTerrain = v;
+    p->previousRingIndex = v;
     return v;
 }

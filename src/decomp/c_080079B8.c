@@ -67,17 +67,17 @@ void sub_080079B8(int a1)
     int m;
 
     p = gActiveMap;
-    n = p->unk3a;
-    c = p->unk07;
+    n = p->ringIndex;
+    c = p->editMode;
     i = n + 3;
     if (c == 0)
         i = n + 4;
     if (i > 9)
         i -= 10;
     if (c == 0)
-        m = (s8)p->unk36 + 4;
+        m = (s8)p->terrainListIndex + 4;
     else
-        m = (s8)p->unk38 + 3;
+        m = (s8)p->unitListIndex + 3;
     while (m == 0)
         m = 1;
     gUnknown_0200B0D0[i].unk04 = a1;

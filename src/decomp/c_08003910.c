@@ -10,5 +10,5 @@
 void sub_08003910(void)
 {
     sub_080152EC(gUnknown_08485D8C, 0);
-    gActiveMap->unk42 = 0xFFF6;
+    gActiveMap->introScreenY = 0xFFF6;
 }

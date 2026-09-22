@@ -16,5 +16,5 @@
 
 void sub_080078D4(u8 a)
 {
-    gActiveMap->unk2f = a;
+    gActiveMap->unitArmy = a;
 }

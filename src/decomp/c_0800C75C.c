@@ -38,8 +38,8 @@ void sub_0800C75C(int a, int b, int c)
         return;
     }
 
-    gActiveMap->unk17[i] = b;
-    gActiveMap->unk1b[i] = c;
+    gActiveMap->hqX[i] = b;
+    gActiveMap->hqY[i] = c;
 }
 
 /* The CLEAR half of the sub_0800C75C pair: same switch, same two planes, but
@@ -80,8 +80,8 @@ void sub_0800C7A4(int a)
         return;
     }
 
-    gActiveMap->unk17[i] = 0xFF;
-    gActiveMap->unk1b[i] = -1;
+    gActiveMap->hqX[i] = 0xFF;
+    gActiveMap->hqY[i] = -1;
 }
 
 /* A classification of the low five bits of a terrain byte into 0, 1 or 2.

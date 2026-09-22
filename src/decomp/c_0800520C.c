@@ -9,14 +9,14 @@
 
 void sub_0800520C(void)
 {
-    gActiveMap->unk00 &= 0xFEFF;
-    gActiveMap->unk10 = 0;
-    if (sub_0803CCB8(gActiveMap->unk10, gDesignRoomName) != 1)
+    gActiveMap->flags &= 0xFEFF;
+    gActiveMap->designSlot = 0;
+    if (sub_0803CCB8(gActiveMap->designSlot, gDesignRoomName) != 1)
     {
-        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
+        if (!sub_080051EC((const char *)gActiveMap->designName))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FE]);
-            gActiveMap->unk00 |= 0x100;
+            sub_08004E38((char *)gActiveMap->designName, (const char *)gTextTable[0x9FE]);
+            gActiveMap->flags |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
         else
@@ -26,10 +26,10 @@ void sub_0800520C(void)
     }
     else
     {
-        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
+        if (!sub_080051EC((const char *)gActiveMap->designName))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FE]);
-            gActiveMap->unk00 |= 0x100;
+            sub_08004E38((char *)gActiveMap->designName, (const char *)gTextTable[0x9FE]);
+            gActiveMap->flags |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
         else
@@ -41,14 +41,14 @@ void sub_0800520C(void)
 
 void sub_080052D8(void)
 {
-    gActiveMap->unk00 &= 0xFEFF;
-    gActiveMap->unk10 = 1;
-    if (sub_0803CCB8(gActiveMap->unk10, gDesignRoomName) != 1)
+    gActiveMap->flags &= 0xFEFF;
+    gActiveMap->designSlot = 1;
+    if (sub_0803CCB8(gActiveMap->designSlot, gDesignRoomName) != 1)
     {
-        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
+        if (!sub_080051EC((const char *)gActiveMap->designName))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FF]);
-            gActiveMap->unk00 |= 0x100;
+            sub_08004E38((char *)gActiveMap->designName, (const char *)gTextTable[0x9FF]);
+            gActiveMap->flags |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
         else
@@ -58,10 +58,10 @@ void sub_080052D8(void)
     }
     else
     {
-        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
+        if (!sub_080051EC((const char *)gActiveMap->designName))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0x9FF]);
-            gActiveMap->unk00 |= 0x100;
+            sub_08004E38((char *)gActiveMap->designName, (const char *)gTextTable[0x9FF]);
+            gActiveMap->flags |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
         else
@@ -73,14 +73,14 @@ void sub_080052D8(void)
 
 void sub_080053A8(void)
 {
-    gActiveMap->unk00 &= 0xFEFF;
-    gActiveMap->unk10 = 2;
-    if (sub_0803CCB8(gActiveMap->unk10, gDesignRoomName) != 1)
+    gActiveMap->flags &= 0xFEFF;
+    gActiveMap->designSlot = 2;
+    if (sub_0803CCB8(gActiveMap->designSlot, gDesignRoomName) != 1)
     {
-        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
+        if (!sub_080051EC((const char *)gActiveMap->designName))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0xA00]);
-            gActiveMap->unk00 |= 0x100;
+            sub_08004E38((char *)gActiveMap->designName, (const char *)gTextTable[0xA00]);
+            gActiveMap->flags |= 0x100;
             sub_080193B0(gUnknown_08488164);
         }
         else
@@ -90,10 +90,10 @@ void sub_080053A8(void)
     }
     else
     {
-        if (!sub_080051EC((const char *)&gActiveMap->unk9c))
+        if (!sub_080051EC((const char *)gActiveMap->designName))
         {
-            sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gTextTable[0xA00]);
-            gActiveMap->unk00 |= 0x100;
+            sub_08004E38((char *)gActiveMap->designName, (const char *)gTextTable[0xA00]);
+            gActiveMap->flags |= 0x100;
             sub_080193B0(gUnknown_08488224);
         }
         else
@@ -118,13 +118,13 @@ int sub_08005474(int a1)
         switch (a1)
         {
         case 0:
-            gActiveMap->unk00 |= 0x200;
+            gActiveMap->flags |= 0x200;
             break;
         case 1:
-            gActiveMap->unk00 |= 0x400;
+            gActiveMap->flags |= 0x400;
             break;
         case 2:
-            gActiveMap->unk00 |= 0x800;
+            gActiveMap->flags |= 0x800;
             break;
         }
     }
@@ -134,13 +134,13 @@ int sub_08005474(int a1)
         switch (a1)
         {
         case 0:
-            gActiveMap->unk00 &= 0xFDFF;
+            gActiveMap->flags &= 0xFDFF;
             break;
         case 1:
-            gActiveMap->unk00 &= 0xFBFF;
+            gActiveMap->flags &= 0xFBFF;
             break;
         case 2:
-            gActiveMap->unk00 &= 0xF7FF;
+            gActiveMap->flags &= 0xF7FF;
             break;
         }
     }

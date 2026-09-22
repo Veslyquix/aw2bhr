@@ -16,5 +16,5 @@
 
 void sub_08000654(void)
 {
-    gActiveMap->unk02 = 1;
+    gActiveMap->state = 1;
 }

@@ -20,14 +20,14 @@ void sub_08004CA0(void)
 {
     int x;
 
-    if (gActiveMap->unk06 != 0)
+    if (gActiveMap->stateChanged != 0)
     {
         sub_08004C5C();
         sub_08024268();
         sub_0801A104(gUnknown_08487C84, 2, 2, 0);
     }
 
-    switch (gActiveMap->unk02)
+    switch (gActiveMap->state)
     {
     case 1:
         sub_080036A4();

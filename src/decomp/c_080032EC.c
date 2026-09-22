@@ -40,64 +40,64 @@ void sub_080032EC(int a1, int a2, int a3)
     sub_0808B6E8(xo, gUnknown_0808D768, 4);
     sub_0808B6E8(yo, gUnknown_0808D76C, 4);
 
-    switch (gActiveMap->unk76[a1])
+    switch (gActiveMap->armyPanelAffineState[a1])
     {
     case 0:
         if (sub_0800C6E8(kind[a1], &o1, &o2) != 0)
         {
-            gActiveMap->unk76[a1] = 0xA;
-            gActiveMap->unk8a[a1] = 5;
-            gActiveMap->unk92[a1] = 0;
+            gActiveMap->armyPanelAffineState[a1] = 0xA;
+            gActiveMap->armyPanelScale[a1] = 5;
+            gActiveMap->armyPanelAngle[a1] = 0;
         }
         break;
     case 0xA:
-        r = gActiveMap->unk92[a1] - 0x20;
+        r = gActiveMap->armyPanelAngle[a1] - 0x20;
         if (r < 0)
-            r = gActiveMap->unk92[a1] + 0x148;
-        gActiveMap->unk92[a1] = r;
-        s = gActiveMap->unk8a[a1] + 0xA;
+            r = gActiveMap->armyPanelAngle[a1] + 0x148;
+        gActiveMap->armyPanelAngle[a1] = r;
+        s = gActiveMap->armyPanelScale[a1] + 0xA;
         if (s > 0xFF)
         {
             s = 0x100;
-            gActiveMap->unk76[a1] = 0x14;
-            gActiveMap->unk92[a1] = 0;
+            gActiveMap->armyPanelAffineState[a1] = 0x14;
+            gActiveMap->armyPanelAngle[a1] = 0;
         }
-        gActiveMap->unk8a[a1] = s;
+        gActiveMap->armyPanelScale[a1] = s;
         break;
     case 0x14:
         if (sub_0800C6E8(kind[a1], &o1, &o2) == 0)
         {
-            gActiveMap->unk76[a1] = 0x1E;
-            gActiveMap->unk92[a1] = 0;
-            gActiveMap->unk8a[a1] = 0x100;
+            gActiveMap->armyPanelAffineState[a1] = 0x1E;
+            gActiveMap->armyPanelAngle[a1] = 0;
+            gActiveMap->armyPanelScale[a1] = 0x100;
         }
         break;
     case 0x1E:
-        r = gActiveMap->unk92[a1] - 0x20;
+        r = gActiveMap->armyPanelAngle[a1] - 0x20;
         if (r < 0)
-            r = gActiveMap->unk92[a1] + 0x148;
-        gActiveMap->unk92[a1] = r;
-        s = gActiveMap->unk8a[a1] - 0x20;
+            r = gActiveMap->armyPanelAngle[a1] + 0x148;
+        gActiveMap->armyPanelAngle[a1] = r;
+        s = gActiveMap->armyPanelScale[a1] - 0x20;
         if (s <= 0)
         {
             s = 1;
-            gActiveMap->unk76[a1] = 0;
+            gActiveMap->armyPanelAffineState[a1] = 0;
         }
-        gActiveMap->unk8a[a1] = s;
+        gActiveMap->armyPanelScale[a1] = s;
         break;
     }
 
-    if (gActiveMap->unk76[a1] != 0)
+    if (gActiveMap->armyPanelAffineState[a1] != 0)
     {
         SetObjAffine(a1 + 1,
-            Div(COS_Q12(gActiveMap->unk92[a1]) << 4,
-                gActiveMap->unk8a[a1] != 0 ? gActiveMap->unk8a[a1] : 2),
-            Div(-SIN_Q12(gActiveMap->unk92[a1]) << 4,
-                gActiveMap->unk8a[a1] != 0 ? gActiveMap->unk8a[a1] : 2),
-            Div(SIN_Q12(gActiveMap->unk92[a1]) << 4,
-                gActiveMap->unk8a[a1] != 0 ? gActiveMap->unk8a[a1] : 2),
-            Div(COS_Q12(gActiveMap->unk92[a1]) << 4,
-                gActiveMap->unk8a[a1] != 0 ? gActiveMap->unk8a[a1] : 2));
+            Div(COS_Q12(gActiveMap->armyPanelAngle[a1]) << 4,
+                gActiveMap->armyPanelScale[a1] != 0 ? gActiveMap->armyPanelScale[a1] : 2),
+            Div(-SIN_Q12(gActiveMap->armyPanelAngle[a1]) << 4,
+                gActiveMap->armyPanelScale[a1] != 0 ? gActiveMap->armyPanelScale[a1] : 2),
+            Div(SIN_Q12(gActiveMap->armyPanelAngle[a1]) << 4,
+                gActiveMap->armyPanelScale[a1] != 0 ? gActiveMap->armyPanelScale[a1] : 2),
+            Div(COS_Q12(gActiveMap->armyPanelAngle[a1]) << 4,
+                gActiveMap->armyPanelScale[a1] != 0 ? gActiveMap->armyPanelScale[a1] : 2));
 
         c3 = 0x300;
         DrawOamObject(a1 + 0x3E,

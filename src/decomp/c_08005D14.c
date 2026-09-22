@@ -18,8 +18,8 @@ void sub_08005D14(void)
     sub_0800056C(8);
 
     p = gActiveMap;
-    p->unk46 = 0x15;
-    p->unk48 = 0x10;
+    p->menuCursorX = 0x15;
+    p->menuCursorY = 0x10;
 
     sub_0801A614();
     sub_0801A168();

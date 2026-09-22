@@ -9,9 +9,9 @@
 
 void sub_08000D9C(void)
 {
-    if (gActiveMap->unk11 == 0)
+    if (gActiveMap->inputDelay == 0)
     {
-        gActiveMap->unk11 = 0x14;
-        gActiveMap->unk00 |= 0x2000;
+        gActiveMap->inputDelay = 0x14;
+        gActiveMap->flags |= 0x2000;
     }
 }

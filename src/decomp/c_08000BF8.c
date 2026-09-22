@@ -17,19 +17,19 @@
 
 void sub_08000BF8(void)
 {
-    if (gActiveMap->unk07 == 0)
+    if (gActiveMap->editMode == 0)
     {
         if (gActiveMap->selectedTerrain
             != gMap->terrain[
                    gActiveMap->cursorX
                    + gMap->rowOffset[gActiveMap->cursorY]])
-            gActiveMap->unk65 = 1;
+            gActiveMap->cursorMoved = 1;
     }
     else
     {
-        if (gActiveMap->unk24
+        if (gActiveMap->cursorUnit
             != GetUnitTypeAt(gActiveMap->cursorX, gActiveMap->cursorY))
-            gActiveMap->unk65 = 1;
+            gActiveMap->cursorMoved = 1;
     }
 }
 
@@ -37,7 +37,7 @@ void sub_08000C68(void)
 {
     sub_0803B4DC(0x65);
 
-    if (gActiveMap->unk07 == 0)
+    if (gActiveMap->editMode == 0)
         SetSelectedTile(gMap->terrain[
             gActiveMap->cursorX
             + gMap->rowOffset[gActiveMap->cursorY]]);

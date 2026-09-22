@@ -24,10 +24,10 @@ void sub_0800081C(void)
     int index;
     u16 t;
 
-    if (gActiveMap->unk06 != 0)
+    if (gActiveMap->stateChanged != 0)
     {
-        gActiveMap->unk06 = 0;
-        gActiveMap->unk02 = 0;
+        gActiveMap->stateChanged = 0;
+        gActiveMap->state = 0;
         gActiveMap->cursorX = gUnknown_030033E4.unk00;
         gActiveMap->cursorY = gUnknown_030033E4.unk02;
         sub_08002E3C();
@@ -39,13 +39,13 @@ void sub_0800081C(void)
         sub_080088F0();
     }
 
-    if (gActiveMap->unk02 == 0)
+    if (gActiveMap->state == 0)
     {
-        gActiveMap->unk02 = 1;
+        gActiveMap->state = 1;
         return;
     }
 
-    gActiveMap->unk6a = 0;
+    gActiveMap->soundId = 0;
     sub_08023824();
     v = sub_0800105C();
     sub_08023908(4);
@@ -62,7 +62,7 @@ void sub_0800081C(void)
         keys = gpKeySt->pressed;
     }
 
-    if (gActiveMap->unk07 == 0)
+    if (gActiveMap->editMode == 0)
     {
         r = 1;
         if (gActiveMap->selectedTerrain == 0xd)
@@ -100,12 +100,12 @@ void sub_0800081C(void)
             if (sub_08010DD4(gActiveMap->cursorX, gActiveMap->cursorY) != 0)
                 r = 6;
         }
-        else if (gActiveMap->unk00 & 0x2000)
+        else if (gActiveMap->flags & 0x2000)
         {
             r = 6;
         }
     }
-    else if (gActiveMap->unk24 == 0x19)
+    else if (gActiveMap->cursorUnit == 0x19)
     {
         r = 5;
     }
@@ -115,7 +115,7 @@ void sub_0800081C(void)
 
         index = MAP->terrain[MAP->rowOffset[gActiveMap->cursorY]
                              + gActiveMap->cursorX] & 0x1f;
-        index += gUnknown_085D5ABC[gActiveMap->unk24 & 0x3f].movementType * 32;
+        index += gUnknown_085D5ABC[gActiveMap->cursorUnit & 0x3f].movementType * 32;
         r = tbl[index] != -1 ? 1 : 6;
     }
 
@@ -123,7 +123,7 @@ void sub_0800081C(void)
 
     if (keys & 1)
     {
-        if (gActiveMap->unk07 == 0)
+        if (gActiveMap->editMode == 0)
         {
             if (r != 6)
             {
@@ -137,13 +137,13 @@ void sub_0800081C(void)
             k = sub_08008928();
             if (k == 1)
             {
-                gActiveMap->unk6a = 0;
+                gActiveMap->soundId = 0;
                 v = 0;
                 sub_08035850(gActiveMap->cursorX, gActiveMap->cursorY,
-                             gActiveMap->unk24 & 0x3f);
+                             gActiveMap->cursorUnit & 0x3f);
             }
             if (k > 0)
-                gActiveMap->unk00 |= 0x1000;
+                gActiveMap->flags |= 0x1000;
         }
 
         if (r == 6)
@@ -151,11 +151,11 @@ void sub_0800081C(void)
             if (gpKeySt->pressed & 1)
                 sub_0803B4DC(0x68);
 
-            gActiveMap->unk58++;
-            gActiveMap->unk59 = 0xc;
-            if (gActiveMap->unk58 > 0x31)
+            gActiveMap->cursorIdleFrames++;
+            gActiveMap->cursorIdleTimer = 0xc;
+            if (gActiveMap->cursorIdleFrames > 0x31)
             {
-                gActiveMap->unk58 = 0;
+                gActiveMap->cursorIdleFrames = 0;
                 sub_08004D10();
             }
         }
@@ -168,26 +168,26 @@ void sub_0800081C(void)
             sub_080088F0();
             sub_08000BF8();
         }
-        else if (gActiveMap->unk59-- <= 0)
+        else if (gActiveMap->cursorIdleTimer-- <= 0)
         {
-            gActiveMap->unk59 = t;
-            gActiveMap->unk58 = t;
+            gActiveMap->cursorIdleTimer = t;
+            gActiveMap->cursorIdleFrames = t;
         }
     }
 
     if (sub_0802DBF8() && (keys & 8))
         sub_0800056C(5);
 
-    if (gActiveMap->unk6a != 0)
-        sub_0803B4DC(gActiveMap->unk6a);
+    if (gActiveMap->soundId != 0)
+        sub_0803B4DC(gActiveMap->soundId);
     else if (v != 0)
         sub_0803B4DC((s16)v);
 
-    if (gActiveMap->unk11 > 0)
+    if (gActiveMap->inputDelay > 0)
     {
-        gActiveMap->unk11--;
-        if (gActiveMap->unk11 == 0)
-            gActiveMap->unk00 &= 0xDFFF;
+        gActiveMap->inputDelay--;
+        if (gActiveMap->inputDelay == 0)
+            gActiveMap->flags &= 0xDFFF;
     }
 
     if (sub_0802DBF8() && GetCoPowerDepth() == 0)
@@ -202,12 +202,12 @@ void sub_0800081C(void)
             m = gpKeySt->pressed & (A_BUTTON | B_BUTTON | R_BUTTON | L_BUTTON);
             if (m == 0x100)
             {
-                gActiveMap->unk07 = t;
+                gActiveMap->editMode = t;
                 sub_0800056C(2);
             }
             else if (m == 0x200)
             {
-                gActiveMap->unk07 = 1;
+                gActiveMap->editMode = 1;
                 sub_0800056C(2);
             }
             else

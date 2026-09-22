@@ -34,14 +34,14 @@ void MakeTile(void)
     x = gActiveMap->cursorX;
     y = gActiveMap->cursorY;
 
-    gActiveMap->unk20 = gMap->tile[gMap->rowOffset[y] + x];
-    gActiveMap->unk00 |= 0x1000;
+    gActiveMap->cursorTerrain = gMap->tile[gMap->rowOffset[y] + x];
+    gActiveMap->flags |= 0x1000;
 
     switch (gActiveMap->selectedTerrain & 0x1f) {
     case 7:
         MakeSeaSafest(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x8a;
+        gActiveMap->soundId = 0x8a;
         break;
 
     case 13:
@@ -53,7 +53,7 @@ void MakeTile(void)
         }
         sub_0800BA9C(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x4b;
+        gActiveMap->soundId = 0x4b;
         break;
 
     case 5:
@@ -65,7 +65,7 @@ void MakeTile(void)
         }
         MakeRoad(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x89;
+        gActiveMap->soundId = 0x89;
         break;
 
     case 2:
@@ -78,13 +78,13 @@ void MakeTile(void)
         if (MakeRiver(x, y) == 0)
             break;
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x2d;
+        gActiveMap->soundId = 0x2d;
         break;
 
     case 12:
         MakeBridge(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x89;
+        gActiveMap->soundId = 0x89;
         break;
 
     case 3:
@@ -96,25 +96,25 @@ void MakeTile(void)
         }
         sub_0800AF74(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x4b;
+        gActiveMap->soundId = 0x4b;
         break;
 
     case 19:
         if (MakeReefSafe(x, y) == 0)
             break;
-        gActiveMap->unk6a = 0x8a;
+        gActiveMap->soundId = 0x8a;
         break;
 
     case 4:
         MakeForest(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x4b;
+        gActiveMap->soundId = 0x4b;
         break;
 
     case 8:
         MakeProperty(x, y, gActiveMap->selectedTerrain);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x88;
+        gActiveMap->soundId = 0x88;
         break;
 
     case 6:
@@ -124,7 +124,7 @@ void MakeTile(void)
     case 17:
         MakeProperty(x, y, gActiveMap->selectedTerrain);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x87;
+        gActiveMap->soundId = 0x87;
         break;
 
     case 15:
@@ -136,7 +136,7 @@ void MakeTile(void)
         }
         MakePipe(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x87;
+        gActiveMap->soundId = 0x87;
         break;
 
     case 16:
@@ -148,7 +148,7 @@ void MakeTile(void)
         }
         MakeSeam(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x87;
+        gActiveMap->soundId = 0x87;
         break;
 
     case 1:
@@ -159,7 +159,7 @@ void MakeTile(void)
         sub_0800EC20(x, y);
         sub_0800BEE4(x, y);
         EnsureValidTile(x, y);
-        gActiveMap->unk6a = 0x4b;
+        gActiveMap->soundId = 0x4b;
         break;
     }
 }

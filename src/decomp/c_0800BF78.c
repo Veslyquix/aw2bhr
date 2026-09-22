@@ -8,7 +8,7 @@
  */
 
 /* Commits a tile edit at (x, y): stash the cell's current tile in
- * gActiveMap->unk20, repaint it, then re-run sub_0800C124 and then
+ * gActiveMap->cursorTerrain, repaint it, then re-run sub_0800C124 and then
  * sub_0800C22C over the cell and its four cardinal neighbours, and repaint
  * once more.  Returns 0 if sub_0800BC98 rejects the cell, 1 otherwise.  The
  * `bl sub_0800BC98` is reached with r0/r1 untouched from entry -- a
@@ -69,7 +69,7 @@ int MakeReefSafe(int x, int y)
     rows = p + 0x417A;
     off = (*(u16 *)(rows + t) + x) * 2;
     tiles = p + 0xA22;
-    b->unk20 = *(u16 *)(tiles + off);
+    b->cursorTerrain = *(u16 *)(tiles + off);
 
     SetTerrainAt(x, y, 0x13);
     MakeTileSimple(x, y, 0x168);

@@ -17,18 +17,18 @@
 
 void sub_080005FC(void)
 {
-    if (gActiveMap->unk06 != 0)
+    if (gActiveMap->stateChanged != 0)
     {
-        gActiveMap->unk06 = 0;
-        gActiveMap->unk02 = 0;
-        gActiveMap->unk0c = 30;
+        gActiveMap->stateChanged = 0;
+        gActiveMap->state = 0;
+        gActiveMap->stateTimer = 30;
     }
 
-    if (gActiveMap->unk02 == 0)
+    if (gActiveMap->state == 0)
     {
-        if (--gActiveMap->unk0c == 0)
+        if (--gActiveMap->stateTimer == 0)
         {
-            gActiveMap->unk02 = 1;
+            gActiveMap->state = 1;
             sub_080193B0(sub_08004E44() == 0 ? gUnknown_084856FC : gUnknown_084857AC);
         }
     }

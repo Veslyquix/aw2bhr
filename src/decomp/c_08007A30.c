@@ -19,17 +19,17 @@ void sub_08007A30(void)
   struct ActiveMap *p;
   s16 *pair;
   p = gActiveMap;
-  switch (p->unk6c)
+  switch (p->overlayState)
   {
     case 0:
-      a = p->unk6e;
+      a = p->overlayX;
       a += (0x730 - a) >> 3;
       if (a <= 0x750)
     {
       a = 0x750;
-      p->unk6c = 0xA;
+      p->overlayState = 0xA;
     }
-      pair = &gActiveMap->unk6e;
+      pair = &gActiveMap->overlayX;
       *pair = a;
       pair++;
       b = *pair;
@@ -42,15 +42,15 @@ void sub_08007A30(void)
       break;
 
     case 0xA:
-      a = p->unk6e;
+      a = p->overlayX;
       a += (0x7A0 - a) >> 3;
       if (a > 0x77F)
     {
       a = 0x780;
-      p->unk6c = 0x14;
-      gActiveMap->unk6d = 0x1E;
+      p->overlayState = 0x14;
+      gActiveMap->overlayTimer = 0x1E;
     }
-      pair = &gActiveMap->unk6e;
+      pair = &gActiveMap->overlayX;
       *pair = a;
       pair++;
       b = *pair;
@@ -63,11 +63,11 @@ void sub_08007A30(void)
       break;
 
     case 0x14:
-      t = p->unk6d;
-      p->unk6d = t - 1;
+      t = p->overlayTimer;
+      p->overlayTimer = t - 1;
       if (((s8) t) <= 0)
     {
-      gActiveMap->unk6c = 0;
+      gActiveMap->overlayState = 0;
     }
       break;
 
@@ -76,10 +76,10 @@ void sub_08007A30(void)
   {
     register int raw asm("r0");
     struct ActiveMap *tail = gActiveMap;
-    raw = (u16)tail->unk6e;
+    raw = (u16)tail->overlayX;
     raw <<= 16;
     a = raw >> 20;
-    raw = (u16)tail->unk70;
+    raw = (u16)tail->overlayY;
     raw <<= 16;
     b = raw >> 20;
   }

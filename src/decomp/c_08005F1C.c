@@ -8,7 +8,7 @@
  */
 
 /* MATCHED, and the first of a byte-identical pair with sub_08007B74. Releases
- * the sprite id parked at gActiveMap->unk6b and marks the slot empty.
+ * the sprite id parked at gActiveMap->spriteId and marks the slot empty.
  *
  * unk6b is `s8` -- `ldrsb` and a test against -1 -- but the value written back
  * is spelled `0xFF`, not `-1`: the ROM has `movs r1,#0xff; strb`, where `-1`
@@ -16,9 +16,9 @@
  * re-loaded after the call because sub_08015328 may clobber memory. */
 void sub_08005F1C(void)
 {
-    if (gActiveMap->unk6b != -1)
+    if (gActiveMap->spriteId != -1)
     {
-        sub_08015328(gActiveMap->unk6b);
-        gActiveMap->unk6b = 0xFF;
+        sub_08015328(gActiveMap->spriteId);
+        gActiveMap->spriteId = 0xFF;
     }
 }

@@ -16,5 +16,5 @@
 
 void sub_08003934(void)
 {
-    gActiveMap->unk00 |= 8;
+    gActiveMap->flags |= 8;
 }

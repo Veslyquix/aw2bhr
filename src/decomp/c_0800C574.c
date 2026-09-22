@@ -139,10 +139,10 @@ int sub_0800C6E8(int a, int *b, int *c)
         return ok;
     }
 
-    if ((s8)gActiveMap->unk17[i] >= 0 && (s8)gActiveMap->unk1b[i] >= 0)
+    if ((s8)gActiveMap->hqX[i] >= 0 && (s8)gActiveMap->hqY[i] >= 0)
     {
-        *b = (s8)gActiveMap->unk17[i];
-        *c = (s8)gActiveMap->unk1b[i];
+        *b = (s8)gActiveMap->hqX[i];
+        *c = (s8)gActiveMap->hqY[i];
         ok = 1;
     }
 
