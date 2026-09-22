@@ -49,3 +49,27 @@ void WM_Listener_080760B5(struct Unk80760B4 *proc)
 }
 
 asm(".global sub_080760B4\n.thumb_set sub_080760B4, WM_Listener_080760B5\n");
+
+extern struct ProcCmd WM_Listener_WHILE_EXISTS_08614314[];
+extern void WM_Listener_0807610D(void);
+extern void WM_Listener_IDLE_080761C9(void);
+extern void WM_Listener_IDLE_0807614D(void);
+extern void WM_Listener_IDLE_08076299(void);
+
+struct ProcCmd CONST_DATA ProcScr_WM_Listener[] =
+{
+    PROC_2A,
+    PROC_2A,
+    PROC_YIELD,
+    PROC_CALL(WM_Listener_080760B5),
+PROC_LABEL(0),
+    PROC_WHILE_EXISTS(WM_Listener_WHILE_EXISTS_08614314),
+    PROC_CALL(WM_Listener_0807610D),
+    PROC_REPEAT(WM_Listener_IDLE_080761C9),
+    PROC_REPEAT(WM_Listener_IDLE_0807614D),
+    PROC_REPEAT(WM_Listener_IDLE_08076299),
+    PROC_GOTO(0),
+    PROC_END,
+};
+
+asm(".global gUnknown_08614460\n.set gUnknown_08614460, ProcScr_WM_Listener\n");

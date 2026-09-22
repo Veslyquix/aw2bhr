@@ -58,7 +58,7 @@
  * proc->unk30 is re-`ldr`ed three times because each read sits in a different
  * basic block and gcc 2.9's CSE table resets at a label. It is NOT a local.
  *
- * The body of gUnknown_08614390's proc: it spawns one child per step until
+ * The body of ProcScr_WM_MoveScope: it spawns one child per step until
  * unk30 catches up with unk2c, parking each child's proc in the ten-entry table
  * at +0x3c, then breaks. The two `unk2c == unk30` tests are ONE shared break
  * block that agbcc cross-jumps, which is why the ROM has a single _08075230. */

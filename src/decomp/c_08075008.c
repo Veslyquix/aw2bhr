@@ -29,7 +29,7 @@ struct Unk8075008
     /* 0x34 */ u32 unk34;
 };
 #include "proc.h"
-/* The per-entry child spawner of the gUnknown_08614390 menu proc: sub_0807519C
+/* The per-entry child spawner of the ProcScr_WM_MoveScope menu proc: sub_0807519C
  * calls this once per frame-group and keeps the returned proc in the ten-entry
  * pointer table at +0x3c of its own proc, which is why this starter RETURNS the
  * proc where the rest of the family drops it. The parameter widths are read off
@@ -59,7 +59,7 @@ void WM_DrawDifficultyStars_IDLE_08075009(struct Unk8075008 *proc)
 
 void *sub_08075058(ProcPtr parent, u16 a2, s16 a3, s16 a4, u16 a5)
 {
-    struct Unk08075058 *proc = Proc_Start(gUnknown_08614370, parent);
+    struct Unk08075058 *proc = Proc_Start(ProcScr_WM_DrawDifficultyStars, parent);
 
     proc->unk2c = a3;
     proc->unk2e = a4;

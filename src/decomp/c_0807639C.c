@@ -11,5 +11,5 @@
 
 void sub_0807639C(ProcPtr parent)
 {
-    Proc_Start(gUnknown_08614460, parent);
+    Proc_Start(ProcScr_WM_Listener, parent);
 }

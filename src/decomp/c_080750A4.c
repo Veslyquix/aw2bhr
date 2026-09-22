@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -36,3 +37,18 @@ void WM_MoveScope_080750A5(struct Unk80750A4 * p)
 }
 
 asm(".global sub_080750A4\n.thumb_set sub_080750A4, WM_MoveScope_080750A5\n");
+
+extern void WM_MoveScope_IDLE_080750C1(void);
+extern void WM_MoveScope_IDLE_0807519D(void);
+extern void WM_MoveScope_IDLE_08075249(void);
+
+struct ProcCmd CONST_DATA ProcScr_WM_MoveScope[] =
+{
+    PROC_CALL(WM_MoveScope_080750A5),
+    PROC_REPEAT(WM_MoveScope_IDLE_080750C1),
+    PROC_REPEAT(WM_MoveScope_IDLE_0807519D),
+    PROC_REPEAT(WM_MoveScope_IDLE_08075249),
+    PROC_END,
+};
+
+asm(".global gUnknown_08614390\n.set gUnknown_08614390, ProcScr_WM_MoveScope\n");

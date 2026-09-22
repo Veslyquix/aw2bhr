@@ -48,14 +48,15 @@ import awlib
 # section agbcc emits it into.
 #
 # EXTEND THIS LIST when a promoted unit claims a word from a blob not named
-# here -- data/ holds five blobs and this list is deliberately only the ones
+# here -- data/ holds several blobs and this list is deliberately only the ones
 # that have supplied a word so far. Wave 21 added rodata-0808F098.s for
 # sub_0802CFFC's 0x08090C04 (`&gUnknown_030033E8`, a -fforce-addr constant).
 # Add ONLY a blob that actually supplies a word: `blobs.mk` below emits every
 # entry here as a replaced blob whether it was carved or not, and the failure
 # mode for over-listing is megabytes silently dropped from the image.
 SOURCES = [("rodata.s", ".rodata"), ("data.s", ".data"),
-           ("rodata-0808F098.s", ".rodata"), ("data-0848B688.s", ".data")]
+           ("rodata-0808F098.s", ".rodata"), ("data-0848B688.s", ".data"),
+           ("data-08581E70.s", ".data")]
 OUT_DIR = os.path.join(awlib.REPO, "build", "rodata")
 MANIFEST = os.path.join(OUT_DIR, "units.json")
 PROMOTED = os.path.join(awlib.DATA_DIR, "promoted.json")

@@ -28,7 +28,7 @@ struct Unk08075298
 
 void sub_08075298(ProcPtr parent, int a2, s16 a3, s16 a4, u16 a5)
 {
-    struct Unk08075298 *proc = Proc_Start(gUnknown_08614390, parent);
+    struct Unk08075298 *proc = Proc_Start(ProcScr_WM_MoveScope, parent);
 
     proc->unk34 = a3;
     proc->unk36 = a4;

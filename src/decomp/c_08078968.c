@@ -16,7 +16,7 @@
 void sub_08078968(ProcPtr parent)
 {
     sub_0801B780(0x340);
-    Proc_StartBlocking(gUnknown_08615BBC, parent);
+    Proc_StartBlocking(ProcScr_WM_ConfirmExit, parent);
 }
 
 /* A second bare `bx lr` do-nothing callback, same reading as CampaignMapNoOp. */

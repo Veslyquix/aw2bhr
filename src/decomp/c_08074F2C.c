@@ -49,3 +49,15 @@ void WM_DrawDifficultyStars_IDLE_08074F2D(struct Unk08074F2C *proc)
 }
 
 asm(".global sub_08074F2C\n.thumb_set sub_08074F2C, WM_DrawDifficultyStars_IDLE_08074F2D\n");
+
+extern void WM_DrawDifficultyStars_IDLE_08075009(void);
+
+struct ProcCmd CONST_DATA ProcScr_WM_DrawDifficultyStars[] =
+{
+    PROC_YIELD,
+    PROC_REPEAT(WM_DrawDifficultyStars_IDLE_08074F2D),
+    PROC_REPEAT(WM_DrawDifficultyStars_IDLE_08075009),
+    PROC_END,
+};
+
+asm(".global gUnknown_08614370\n.set gUnknown_08614370, ProcScr_WM_DrawDifficultyStars\n");

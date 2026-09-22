@@ -99,13 +99,17 @@ enum
 // PROC_GOTO_IF_YES
 // PROC_GOTO_IF_NO
 #define PROC_29(arg)                      { PROC_CMD_29, (arg), 0 }
-// PROC_2A
+#define PROC_2A                           { PROC_CMD_2A, 0, 0 }
 
 #define PROC_YIELD                        PROC_SLEEP(0)
 
 extern struct ProcCmd ProcScr_IntroT0[];
 extern struct ProcCmd ProcScr_IntroT3Child[];
 extern struct ProcCmd ProcScr_IntroT3[];
+extern struct ProcCmd ProcScr_WM_DrawDifficultyStars[];
+extern struct ProcCmd ProcScr_WM_MoveScope[];
+extern struct ProcCmd ProcScr_WM_Listener[];
+extern struct ProcCmd ProcScr_WM_ConfirmExit[];
 
 #define PROC_HEADER                                                                        \
     const struct ProcCmd * proc_script; /* pointer to proc script */                        \
