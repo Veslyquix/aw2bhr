@@ -67,8 +67,9 @@
  *   - `.bits.priority = 3` emits a bare `orrs #3` with no AND: a bitfield set
  *     to all ones drops the mask (store_fixed_bit_field's all_one case), the
  *     same fold c_080039E4.c records for `effect = 3`.
- *   - gUnknown_03000640's five zero stores really are in ROM order
- *     unk08, unk06, unk04, unk02, unk00 -- reverse declaration order.
+ *   - gSmoothScroll's five zero stores really are in ROM order
+ *     frameCounter, currentY, currentX, targetY, targetX -- reverse
+ *     declaration order.
  *   - sub_08074714 takes a ProcPtr (promoted in c_08074714.c) and is called
  *     with a literal 4, hence the cast. */
 void sub_08076888(ProcPtr proc)
@@ -133,11 +134,11 @@ void sub_08076888(ProcPtr proc)
     end = 0xFFFF;
     *list = end;
 
-    gUnknown_03000640.unk08 = 0;
-    gUnknown_03000640.unk06 = 0;
-    gUnknown_03000640.unk04 = 0;
-    gUnknown_03000640.unk02 = 0;
-    gUnknown_03000640.unk00 = 0;
+    gSmoothScroll.frameCounter = 0;
+    gSmoothScroll.currentY = 0;
+    gSmoothScroll.currentX = 0;
+    gSmoothScroll.targetY = 0;
+    gSmoothScroll.targetX = 0;
 
     sub_08074714((ProcPtr)4);
     sub_0801237C();

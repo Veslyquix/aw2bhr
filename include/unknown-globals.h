@@ -1458,16 +1458,16 @@ struct Unk0202FDFC /* >= 0x3e */
  * distance. All four are `ldrsh` off a zero index register, so s16.
  * unk08 is a free-running frame counter and is UNSIGNED: both of
  * sub_08076E20's modulo tests on it compile to __umodsi3, not __modsi3. */
-struct Unk03000640 /* 0x0c */
+struct SmoothScrollState /* 0x0c */
 {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ u32 unk08;
+    /* 0x00 */ s16 targetX;
+    /* 0x02 */ s16 targetY;
+    /* 0x04 */ s16 currentX;
+    /* 0x06 */ s16 currentY;
+    /* 0x08 */ u32 frameCounter;
 };
 
-extern struct Unk03000640 gUnknown_03000640;
+extern struct SmoothScrollState gSmoothScroll;
 
 /* 0x08614588 -- s16 pairs read by sub_08076E20 at bits 4..7 of its argument.
  * FLAT, not an array of 4-byte records, and the ROM is decisive about it: for a

@@ -46,7 +46,7 @@
  *   - The `lsls #0xf; lsrs #0x10` pairs are `(s16)(t >> 1)` after the abs, not
  *     a division: no `lsr #31` bias, unlike the easing `/ 2`s above them.
  *
- * Eases gUnknown_03000640's current pair toward the gUnknown_08614588 target,
+ * Eases gSmoothScroll's current pair toward the gUnknown_08614588 target,
  * hands each halved axis to its clamp, and rumbles while either is moving. */
 void sub_08076E20(u16 a1)
 {
@@ -64,34 +64,34 @@ void sub_08076E20(u16 a1)
     if (n != 0)
         k = 3;
 
-    gUnknown_03000640.unk00 = gUnknown_08614588[n][0] * 2;
-    gUnknown_03000640.unk02 = gUnknown_08614588[n][1] * 2;
+    gSmoothScroll.targetX = gUnknown_08614588[n][0] * 2;
+    gSmoothScroll.targetY = gUnknown_08614588[n][1] * 2;
 
     if ((u32)gGameClock % k == 0)
     {
-        gUnknown_03000640.unk04 +=
-            (gUnknown_03000640.unk00 - gUnknown_03000640.unk04) / 2;
-        gUnknown_03000640.unk06 +=
-            (gUnknown_03000640.unk02 - gUnknown_03000640.unk06) / 2;
+        gSmoothScroll.currentX +=
+            (gSmoothScroll.targetX - gSmoothScroll.currentX) / 2;
+        gSmoothScroll.currentY +=
+            (gSmoothScroll.targetY - gSmoothScroll.currentY) / 2;
     }
 
-    v = sub_08076CAC(gUnknown_03000640.unk04 / 2)
-        + sub_08076D68(gUnknown_03000640.unk06 / 2);
+    v = sub_08076CAC(gSmoothScroll.currentX / 2)
+        + sub_08076D68(gSmoothScroll.currentY / 2);
 
     if (v == 0)
     {
-        gUnknown_03000640.unk08 = 0;
+        gSmoothScroll.frameCounter = 0;
     }
     else
     {
-        t = gUnknown_03000640.unk04;
+        t = gSmoothScroll.currentX;
 
         if (t < 0)
             t = -t;
 
         a = t >> 1;
 
-        t = gUnknown_03000640.unk06;
+        t = gSmoothScroll.currentY;
 
         if (t < 0)
             t = -t;
@@ -99,9 +99,9 @@ void sub_08076E20(u16 a1)
         b = t >> 1;
         m = a > b ? a : b;
 
-        if (gUnknown_03000640.unk08 % (8 - m) == 0)
+        if (gSmoothScroll.frameCounter % (8 - m) == 0)
             sub_08072B54(0x1D0, gUnknown_0202FDFC.unk04);
 
-        gUnknown_03000640.unk08++;
+        gSmoothScroll.frameCounter++;
     }
 }
