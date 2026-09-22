@@ -30,7 +30,7 @@ void sub_080196C0(void)
     void *p;
     u8 i;
 
-    i = sub_0803866C() != 0;
+    i = IsHardCampaignMode() != 0;
     p = gUnknown_085C77A0[gPlaySt.mapID].unk34[i];
     if (p != NULL)
         sub_080196F4(p);

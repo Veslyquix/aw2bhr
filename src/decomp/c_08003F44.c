@@ -32,11 +32,11 @@ void sub_08003F44(int x, int y, int v)
         {
             MAP->terrain[MAP->rowOffset[y] + x] = 4;
             MAP->tile[MAP->rowOffset[y] + x] = v;
-            sub_0800CF28(x, y);
+            MakeForest(x, y);
         }
         break;
     case 0x2A:
-        sub_08007CA0(x, y);
+        MakeSeaSafest(x, y);
         break;
     }
 }

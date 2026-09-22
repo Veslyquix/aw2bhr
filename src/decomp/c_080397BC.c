@@ -43,14 +43,14 @@ struct Unk397CCProc
  */
 
 
-/* The proc is sub_08044B28's third argument. `adds r2, r0, #0` BEFORE either
+/* The proc is ActivateCoPower's third argument. `adds r2, r0, #0` BEFORE either
  * load is the whole evidence: r2 is the third argument register, and a
  * two-argument call keeps the base in r0 and moves the first argument in last
  * instead. */
 
 void sub_080397BC(struct Unk397BCProc *proc)
 {
-    sub_08044B28(proc->unk54, proc->unk58, proc);
+    ActivateCoPower(proc->unk54, proc->unk58, proc);
 }
 
 /* No `adds rN, r0, #0` here, unlike its two neighbours: the base stays in r0

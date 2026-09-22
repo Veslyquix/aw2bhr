@@ -31,8 +31,8 @@
  * `((struct Unk030013D0 *)gUnknown_030013D0)->unk00`. Both are the same runtime
  * value and both compile, but only gUnknown_030040D8 puts the five force-addr
  * words in the ROM's slots -- and it is what makes the two halves symmetric:
- * `sub_08042C9C(army1, gUnknown_030040D8->unk00)` against
- * `sub_08042C9C(army2, unit->unk00)`. The cast is the merge
+ * `GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00)` against
+ * `GetCoPriceMultiplier(army2, unit->unk00)`. The cast is the merge
  * include/unknown-globals.h already records for gUnknown_08091364, which is
  * typed `struct Unk08499594 **` for exactly this reason. Spelling the head
  * through gUnknown_030013D0 instead cost 8 bytes and two pool words.
@@ -120,11 +120,11 @@ void sub_08041978(u8 a1, int a2)
 
     b = a2;
 
-    unit = &gUnknown_08499594[a1];
+    unit = &gUnits[a1];
 
     army1 = (struct Unk41978Army *)(struct Unk08499594 *)gUnknown_030040D8
-          - (struct Unk41978Army *)gUnknown_08499594 + 1;
-    army2 = (struct Unk41978Army *)unit - (struct Unk41978Army *)gUnknown_08499594 + 1;
+          - (struct Unk41978Army *)gUnits + 1;
+    army2 = (struct Unk41978Army *)unit - (struct Unk41978Army *)gUnits + 1;
 
     if (a1 == 0)
     {
@@ -159,10 +159,10 @@ void sub_08041978(u8 a1, int a2)
 
         gUnknown_03004580[gUnknown_03003F50][4] =
             gPlayers[(struct Unk41978Army *)sel
-                              - (struct Unk41978Army *)gUnknown_08499594 + 1].co;
+                              - (struct Unk41978Army *)gUnits + 1].co;
         gUnknown_03004580[gUnknown_03004484][4] =
             gPlayers[(struct Unk41978Army *)unit
-                              - (struct Unk41978Army *)gUnknown_08499594 + 1].co;
+                              - (struct Unk41978Army *)gUnits + 1].co;
 
         gUnknown_03004580[gUnknown_03003F50][5] = sel->unk04_0;
         gUnknown_03004580[gUnknown_03004484][5] = unit->unk04_0;
@@ -183,7 +183,7 @@ void sub_08041978(u8 a1, int a2)
         else
             t = 0;
 
-        c = sub_08042C9C(army1, gUnknown_030040D8->unk00);
+        c = GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00);
 
         if (((struct Unk030013D0 *)gUnknown_030013D0)->unk08 != 0)
         {
@@ -202,7 +202,7 @@ void sub_08041978(u8 a1, int a2)
         else
             t = 0;
 
-        c = sub_08042C9C(army2, unit->unk00);
+        c = GetCoPriceMultiplier(army2, unit->unk00);
 
         if (((struct Unk030013D0 *)gUnknown_030013B0)->unk08 != 0)
         {

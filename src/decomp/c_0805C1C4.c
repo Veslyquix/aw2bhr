@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0805C1C4.
- * sub_0805C1C4 @ 0x0805C1C4
+ * CopCondStartOfTurn @ 0x0805C1C4
  */
 
 /* `bls` is an unsigned compare, so the global is u32 and the guard is the

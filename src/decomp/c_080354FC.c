@@ -4,14 +4,14 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080354FC.
- * sub_080354FC @ 0x080354FC
+ * LoadWeatherData @ 0x080354FC
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080354FC.
- * sub_080354FC @ 0x080354FC
+ * LoadWeatherData @ 0x080354FC
  */
 
 
@@ -25,7 +25,7 @@
  * second callees does -- see the F005 block in unknown-functions.h. */
 
 /* Named per Xenesis's AW2 Subroutine List: "Loads weather data (OBJ Tile,
- * XY positioning, etc)". The old sub_080354FC symbol is kept as a linker
+ * XY positioning, etc)". The old LoadWeatherData symbol is kept as a linker
  * alias below so every other unit keeps resolving it unchanged. */
 void LoadWeatherData(void)
 {

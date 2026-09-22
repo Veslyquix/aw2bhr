@@ -21,12 +21,12 @@
  * Three things were each worth the whole match:
  *  - `e` is ONE pointer local reused for the outer slot record and the cell's
  *    record. The outer one has to be a pointer, not a subscript, or the base
- *    reload after sub_0801F838 costs three instructions.
+ *    reload after FillMovementMap costs three instructions.
  *  - `n` must be DECLARED BEFORE `i`: their reload spill slots are handed out in
  *    declaration order, and the ROM's are 0x18 (n) then 0x1c (i). Same lever
  *    orders best/score/bestN into 0xc/0x10/0x14.
  *  - the score term is `unk04_0 * (call / 10)`, field FIRST. gcc 2.x's
- *    preexpand_calls hoists the sub_08042C9C call out ahead of the whole
+ *    preexpand_calls hoists the GetCoPriceMultiplier call out ahead of the whole
  *    expression, so the field load lands between it and __divsi3 exactly as the
  *    ROM has it; writing `call / 10 * unk04_0` puts the load after the divide.
  *
@@ -53,12 +53,12 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
 
         for (n = i * 64; n < i * 64 + 64; n++)
         {
-            e = &gUnknown_08499594[n];
+            e = &gUnits[n];
             if (e->unk00 == 0)
                 continue;
 
             score = 0;
-            sub_0801F838(0xff);
+            FillMovementMap(0xff);
             sub_0801F9C0(e->unk02, e->unk03, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
@@ -71,7 +71,7 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[gMap->unitUnk[gMap->rowOffset[y] + x]];
+                    e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
@@ -82,9 +82,9 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
                     if (e->unk04_0 <= 10)
                         continue;
                     if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
-                        score -= e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10);
+                        score -= e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10);
                     else
-                        score += e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10);
+                        score += e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10);
                 }
             }
 
@@ -120,12 +120,12 @@ u8 sub_0805C514(u16 a1, u8 a2)
 
         for (n = i * 64; n < i * 64 + 64; n++)
         {
-            e = &gUnknown_08499594[n];
+            e = &gUnits[n];
             if (e->unk00 == 0)
                 continue;
 
             score = 0;
-            sub_0801F838(0xff);
+            FillMovementMap(0xff);
             sub_0801F9C0(e->unk02, e->unk03, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
@@ -138,7 +138,7 @@ u8 sub_0805C514(u16 a1, u8 a2)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[gMap->unitUnk[gMap->rowOffset[y] + x]];
+                    e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
@@ -188,12 +188,12 @@ u8 sub_0805C720(u16 a1, u8 a2)
 
         for (n = i * 64; n < i * 64 + 64; n++)
         {
-            e = &gUnknown_08499594[n];
+            e = &gUnits[n];
             if (e->unk00 == 0)
                 continue;
 
             score = 0;
-            sub_0801F838(0xff);
+            FillMovementMap(0xff);
             sub_0801F9C0(e->unk02, e->unk03, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
@@ -206,7 +206,7 @@ u8 sub_0805C720(u16 a1, u8 a2)
                         continue;
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
-                    e = &gUnknown_08499594[gMap->unitUnk[gMap->rowOffset[y] + x]];
+                    e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->unk00 == 0x18)
                     {
                         if ((e->unk01 & 0x20) != 0)
@@ -220,9 +220,9 @@ u8 sub_0805C720(u16 a1, u8 a2)
                     if (gUnknown_085D5ABC[e->unk00].minRange > 1)
                         mul = 2;
                     if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
-                        score -= e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10) * mul;
+                        score -= e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10) * mul;
                     else
-                        score += e->unk04_0 * (sub_08042C9C(gUnknown_030033EC, e->unk00) / 10) * mul;
+                        score += e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10) * mul;
                 }
             }
 

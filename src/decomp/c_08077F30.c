@@ -21,7 +21,7 @@
  * other direction.
  *
  * The index is re-read from gUnknown_0202FDFC.unk0c after the `bl` because
- * sub_0803866C may write it; the three pool bases live in r4/r5/r6 across the
+ * IsHardCampaignMode may write it; the three pool bases live in r4/r5/r6 across the
  * call because they are callee-saved. */
 void sub_08077F30(void)
 {
@@ -29,7 +29,7 @@ void sub_08077F30(void)
 
     gPlaySt.mapID = gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
 
-    gUnknown_030046B4 = sub_0803866C()
+    gUnknown_030046B4 = IsHardCampaignMode()
         ? gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptHc
         : gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptNc;
 

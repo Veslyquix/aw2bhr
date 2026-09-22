@@ -17,7 +17,7 @@
  * do not treat the whole 0x0808D6DC..0x0808D8A8 run as one kind of thing.
  *
  * THE LAST 4 BYTES WERE `c3`. The ROM materialises 0x300 (`movs #192;
- * lsls #2`) BEFORE the first argument of the sub_0801F34C call. Written inline
+ * lsls #2`) BEFORE the first argument of the DrawOamObject call. Written inline
  * as `(... & 0xFF) | 0x300` agbcc emits it at the point of use, three
  * instructions later, and the y parameter then lands in r3 instead of r4 --
  * size-exact, 5 bytes wrong, and decomp-permuter cannot reach it. Binding the
@@ -100,7 +100,7 @@ void sub_080032EC(int a1, int a2, int a3)
                 gActiveMap->unk8a[a1] != 0 ? gActiveMap->unk8a[a1] : 2));
 
         c3 = 0x300;
-        sub_0801F34C(a1 + 0x3E,
+        DrawOamObject(a1 + 0x3E,
             ((a2 + xo[a1] - 7) & 0x1FF) | ((a1 + 1) << 9),
             ((a3 + yo[a1] - 6) & 0xFF) | c3,
             0, 0);

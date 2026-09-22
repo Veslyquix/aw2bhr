@@ -64,7 +64,7 @@ bool8 sub_08017AD4(s16 a)
 bool8 sub_08017B08(s16 a)
 {
     gUnknown_0200C528[a].unk08 = (struct Unk0200C528Node *)sub_08017ABC;
-    sub_08034F7C();
+    IncrementCoPowerDepth();
     sub_080281D8(gPlaySt.mapID,
         (u32)gUnknown_0200C528[a].unk04->unk04);
     gUnknown_0200C528[a].unk04++;

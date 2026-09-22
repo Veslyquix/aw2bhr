@@ -17,7 +17,7 @@ u8 sub_080271CC(int a1)
   struct Unk08499594 **pu;
   struct Unk08499594 **pv;
   s16 *pe;
-  if (!sub_080266DC(a1))
+  if (!IsPlayerAliveAndActive(a1))
   {
     return 0;
   }
@@ -26,7 +26,7 @@ u8 sub_080271CC(int a1)
     return 1;
   }
   i = 1;
-  pu = &gUnknown_08499594;
+  pu = &gUnits;
   new_var2 = i;
   pe = &gUnknown_084995FE[a1];
   idx = (u16) (*pe);

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08025B28.
- * sub_08025B28 @ 0x08025B28, sub_08025B58 @ 0x08025B58, sub_08025B80 @ 0x08025B80
+ * SubtractPlayerFunds @ 0x08025B28, AddPlayerFunds @ 0x08025B58, SubtractUnitFuel @ 0x08025B80
  *
  * Named per Xenesis's AW2 Datasheet/Subroutine List (community RE notes,
  * cross-referenced independently of this fork's own wave process). The
@@ -15,7 +15,7 @@
 
 /* Binding the deref to a local is what keeps `ldr r3,[r2]` out of the second
  * and third statements: repeating gPlayers[a] would reload the
- * pointer after each store (see sub_08044178), and the target loads it once.
+ * pointer after each store (see ClearPlayerCoPowerStatus), and the target loads it once.
  */
 /* Xenesis's Datasheet: a caller of this function is annotated "Checks
  * whether repairs can be afforded" -- consistent with subtracting a cost

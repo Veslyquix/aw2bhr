@@ -21,7 +21,7 @@
  *
  * unk32 is tested TWICE and the tests are NESTED, not sequential: the first
  * `beq` jumps past the second test to the tail, which an `if (unk32 && ...)`
- * pair could not produce. sub_08025B80 wants a `struct Unk08499594 *` while
+ * pair could not produce. SubtractUnitFuel wants a `struct Unk08499594 *` while
  * gUnknown_030040D8 is declared `struct Unk030040D8 *`; the cast is
  * byte-neutral and the two struct names are already flagged in
  * unknown-globals.h as the same object (gUnknown_08091364 is
@@ -37,7 +37,7 @@ void sub_0802D0F4(void)
     {
         if (gPlaySt.fog == 0)
         {
-            sub_08025B80((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
+            SubtractUnitFuel((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
             gUnknown_03004074 = 0;
         }
 

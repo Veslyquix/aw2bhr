@@ -63,7 +63,7 @@ void sub_0803FC28(int a1, int a2, int a3, int a4)
         case 5:
             if (p->unk04 == 0)
                 t = gUnknown_0849FA3C;
-            else if (sub_0803866C())
+            else if (IsHardCampaignMode())
                 t = gUnknown_0849FA78;
             else
                 t = gUnknown_0849FA5E;

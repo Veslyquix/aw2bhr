@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08078864.
- * sub_08078864 @ 0x08078864, sub_08078884 @ 0x08078884, sub_08078890 @ 0x08078890
+ * SetupCoSelectHotPursuit @ 0x08078864, SetupCoSelectFinalFront @ 0x08078884, sub_08078890 @ 0x08078890
  */
 
 /* Six `bl`s with a single `movs r0, #0` between the first and the second, and
@@ -17,12 +17,12 @@
  * return anywhere in the chain would have put `lsl #24; lsr #24` between two
  * `bl`s, and there is none, so every link is int-wide.
  *
- * sub_08078790, 0xd4 bytes above, is the short version of the same source --
- * `sub_080785FC(); sub_08078740(sub_08078608(0));`.
+ * SetupCoSelectLiberation, 0xd4 bytes above, is the short version of the same source --
+ * `ClearArmyCount(); sub_08078740(sub_08078608(0));`.
  */
 void SetupCoSelectHotPursuit(void)
 {
-    sub_080785FC();
+    ClearArmyCount();
     sub_080786A4(sub_080786F0(sub_08078658(sub_08078608(0))));
     sub_08078758();
 }
@@ -43,7 +43,7 @@ asm(".global sub_08078864\n.thumb_set sub_08078864, SetupCoSelectHotPursuit\n");
  */
 void SetupCoSelectFinalFront(void)
 {
-    sub_08078864();
+    SetupCoSelectHotPursuit();
 }
 
 asm(".global sub_08078884\n.thumb_set sub_08078884, SetupCoSelectFinalFront\n");
@@ -62,5 +62,5 @@ asm(".global sub_08078884\n.thumb_set sub_08078884, SetupCoSelectFinalFront\n");
  */
 void sub_08078890(void)
 {
-    sub_08078790();
+    SetupCoSelectLiberation();
 }

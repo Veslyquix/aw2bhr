@@ -49,7 +49,7 @@ struct Unk40554Proc
 };
 /* The proc's init: it converts the cell coordinates at unk2c/unk30 into the
  * pixel pair at unk54/unk58 (the same `cell * 16 + halfTile` the matched
- * sub_08040640 then reads back against gUnknown_08499590), snapshots the
+ * ApplySiloDamage then reads back against gUnknown_08499590), snapshots the
  * screen's y scroll into unk66, and installs the animation.
  *
  * `proc->unk50 = sub_0801C210(...)` followed by `sub_0801C4D4(proc->unk50, 2)`

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800C874.
- * sub_0800C874 @ 0x0800C874, sub_0800C8A0 @ 0x0800C8A0, sub_0800C8D8 @ 0x0800C8D8, sub_0800C958 @ 0x0800C958, sub_0800C9E8 @ 0x0800C9E8
+ * CountProperties @ 0x0800C874, sub_0800C8A0 @ 0x0800C8A0, RegisterArmyHqs @ 0x0800C8D8, sub_0800C958 @ 0x0800C958, sub_0800C9E8 @ 0x0800C9E8
  */
 
 /* Counts the live entries in the gProperty list: 4-byte records whose
@@ -40,13 +40,13 @@ int CountProperties(void)
 
 asm(".global sub_0800C874\n.thumb_set sub_0800C874, CountProperties\n");
 
-/* sub_0800C874 with one more conjunct: the same bounded scan of
+/* CountProperties with one more conjunct: the same bounded scan of
  * gProperty, counting only the live records whose flags byte equals
  * the caller's.  The `cmp r0,#0` survives beside `cmp r0,r3` even though a
  * zero argument would make it redundant, so the emptiness test really is
  * written separately in the source and is not folded into the equality.
  *
- * The extra `push {r4, lr}` over sub_0800C874 is the parameter occupying r3,
+ * The extra `push {r4, lr}` over CountProperties is the parameter occupying r3,
  * which pushes the giv limit into r4. */
 u32 sub_0800C8A0(int a)
 {
@@ -158,7 +158,7 @@ int sub_0800C958(int a)
     return n;
 }
 
-/* Asks sub_0800C958 about all four ids, falling back to sub_08025308(team) when
+/* Asks sub_0800C958 about all four ids, falling back to CountArmyUnits(team) when
  * an id is not currently registered, and answers whether ALL four are present
  * and more than one of them is non-empty.
  *
@@ -189,7 +189,7 @@ int sub_0800C9E8(void)
     a = sub_0800C958(0x28);
     if (a == 0)
     {
-        if (sub_08025308(1) > 0)
+        if (CountArmyUnits(1) > 0)
         {
             n++;
             a = 1;
@@ -203,7 +203,7 @@ int sub_0800C9E8(void)
     b = sub_0800C958(0x48);
     if (b == 0)
     {
-        if (sub_08025308(2) > 0)
+        if (CountArmyUnits(2) > 0)
         {
             n++;
             b = 1;
@@ -217,7 +217,7 @@ int sub_0800C9E8(void)
     c = sub_0800C958(0x68);
     if (c == 0)
     {
-        if (sub_08025308(3) > 0)
+        if (CountArmyUnits(3) > 0)
         {
             n++;
             c = 1;
@@ -231,7 +231,7 @@ int sub_0800C9E8(void)
     d = sub_0800C958(0x88);
     if (d == 0)
     {
-        if (sub_08025308(4) > 0)
+        if (CountArmyUnits(4) > 0)
         {
             n++;
             d = 1;

@@ -21,5 +21,5 @@ void sub_0802D458(void)
 
     sub_08024268();
     sub_0801A104(gUnknown_0849AAC0, v, 1, 1);
-    sub_08034F7C();
+    IncrementCoPowerDepth();
 }

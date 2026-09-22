@@ -32,11 +32,11 @@ void sub_0800EB5C(int x, int y)
         sub_0800EBFC(x, y, 0x25);
         sub_0800EBFC(x, y + 1, 0x45);
         sub_0800EBFC(x, y + 2, 0x65);
-        sub_08001158(x + 1, y, 0x26);
-        sub_08001158(x + 2, y, 0x27);
-        sub_08001158(x + 1, y + 1, 0x46);
-        sub_08001158(x + 2, y + 1, 0x47);
-        sub_08001158(x + 1, y + 2, 0x66);
-        sub_08001158(x + 2, y + 2, 0x67);
+        MakeTileSimple(x + 1, y, 0x26);
+        MakeTileSimple(x + 2, y, 0x27);
+        MakeTileSimple(x + 1, y + 1, 0x46);
+        MakeTileSimple(x + 2, y + 1, 0x47);
+        MakeTileSimple(x + 1, y + 2, 0x66);
+        MakeTileSimple(x + 2, y + 2, 0x67);
     }
 }

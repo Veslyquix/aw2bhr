@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08010604.
- * sub_08010604 @ 0x08010604
+ * GetSeamType @ 0x08010604
  */
 
 /* The map header sub_0800F2E0 and its neighbours walk, seen through the LOCAL

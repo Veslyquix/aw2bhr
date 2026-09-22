@@ -82,7 +82,7 @@ void sub_0802D7B4(int a1)
 
         sub_080149C0(4, row, gUnknown_08499578, buf, 0x8000, flag);
         sub_08014B0C(0xe, row, gUnknown_08499578,
-                     sub_08042C9C(gUnknown_030033EC,
+                     GetCoPriceMultiplier(gUnknown_030033EC,
                                   gUnknown_02023830[((s16)base + i) * 4]) * 10,
                      0x8000, flag);
         sub_0802239C(gUnknown_08499578, 2, row,

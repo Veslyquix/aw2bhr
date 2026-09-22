@@ -23,7 +23,7 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
 
         for (i = 4; i > 0; i--)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 sub_0801BD00((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
                              (a2 - acc) & 0xFF,
@@ -47,7 +47,7 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
 
         for (i = 4; i > 0; i--)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 sub_0801BD00((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
                              (a2 - acc) & 0xFF,

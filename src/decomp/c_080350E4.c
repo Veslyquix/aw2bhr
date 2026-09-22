@@ -38,7 +38,7 @@ void sub_080350E4(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (sub_080266DC(i))
+        if (IsPlayerAliveAndActive(i))
             *(vu16 *)&gUnknown_030033EC;
 
         ((struct Unk03004490 *)gUnknown_03004490)->unk03[i] = 0;

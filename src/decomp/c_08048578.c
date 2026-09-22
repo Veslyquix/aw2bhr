@@ -8,7 +8,7 @@
  */
 
 /* gUnknown_03003F2C + proc->unk28 indexes the 12-byte unit records
- * gUnknown_08499594 points at -- the lsls #1; adds; lsls #2 chain is x * 3 * 4,
+ * gUnits points at -- the lsls #1; adds; lsls #2 chain is x * 3 * 4,
  * agbcc's usual shape for a stride of 12. unk02 and unk03 are that struct's
  * cell column and row, and sub_08029088 takes them as s16.
  *
@@ -27,7 +27,7 @@ void sub_08048578(struct Unk48578Proc *proc)
 
     if (proc->unk28 != 0)
     {
-        u = &gUnknown_08499594[gUnknown_03003F2C + proc->unk28];
+        u = &gUnits[gUnknown_03003F2C + proc->unk28];
         sub_08029088(u->unk02, u->unk03);
     }
 }

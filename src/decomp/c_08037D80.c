@@ -4,10 +4,10 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08037D80.
- * sub_08037D80 @ 0x08037D80, sub_08037DA4 @ 0x08037DA4
+ * GetRankFromScore @ 0x08037D80, GetCampaignScoreRank @ 0x08037DA4
  *
- * Named per Xenesis's AW2 Subroutine List: sub_08037D80 = "Calculates Rank
- * in Campaign/War Room (S-C)", sub_08037DA4 = "Obtains ranking on a score
+ * Named per Xenesis's AW2 Subroutine List: GetRankFromScore = "Calculates Rank
+ * in Campaign/War Room (S-C)", GetCampaignScoreRank = "Obtains ranking on a score
  * for Campaign (199, 249, 279) (C = 2, B = 3, A = 4, S = 5)" -- the three
  * thresholds (0xC7=199, 0xF9=249, 0x117=279) match exactly. Both entries are
  * genuinely byte-identical bodies at two separate addresses (not one calling
@@ -16,7 +16,7 @@
  * keeps resolving them unchanged.
  */
 
-/* MATCHED, and the first of a byte-identical pair with sub_08037DA4. A
+/* MATCHED, and the first of a byte-identical pair with GetCampaignScoreRank. A
  * four-way classifier on three thresholds.
  *
  * The LAST test is `if (a <= 0x117) return 4; return 5;` and not

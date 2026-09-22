@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08017704.
- * sub_08017704 @ 0x08017704
+ * TrySpendBattleMapPoints @ 0x08017704
  *
  * Named per Xenesis's AW2 Subroutine List: "Routine that subtracts battle
  * maps points upon a purchase." Returns 0 (can't afford) or, via the UB

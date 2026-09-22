@@ -12,8 +12,8 @@ void sub_08004E88(void)
     sub_0803CEB8(gActiveMap->unk10, gDesignRoomName);
     sub_0800CB30(1, sub_0800CAA0());
     sub_08004E38((char *)&gActiveMap->unk9c, (const char *)gDesignRoomName);
-    sub_080219AC();
-    sub_0800C8D8();
-    gActiveMap->propertyCount = sub_0800C874();
+    RecountArmyProperties();
+    RegisterArmyHqs();
+    gActiveMap->propertyCount = CountProperties();
     gActiveMap->unk00 &= 0xEFFF;
 }

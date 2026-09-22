@@ -31,7 +31,7 @@ void sub_08086D98(struct Unk86D98Proc *proc)
     p = (u8 *)&gUnknown_02027F74;
     i = proc->unk66;
     p += 4;
-    sub_080247A4(p[i]);
+    LoadMapData(p[i]);
 }
 
 /* `0x06004000 + chr_block * 0x4000` is the tile block BG1 is pointed at.

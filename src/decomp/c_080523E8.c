@@ -35,7 +35,7 @@ void sub_080523E8(u16 a, u16 b, int c)
 
     sub_08070544(0x3B);
     sub_08070544(0x3C);
-    sub_0803B48C(0x51);
+    PlayMusicOrSfx(0x51);
 
     t = gUnknown_08553B14[a];
 

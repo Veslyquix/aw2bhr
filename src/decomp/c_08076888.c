@@ -53,9 +53,9 @@
  * moving the statement itself moves the `strh` with it.
  *
  * SETTLED, and all of it converted:
- *   - `if (sub_0803866C() == 0)` with the gUnknown_081D208C arm as the
+ *   - `if (IsHardCampaignMode() == 0)` with the gUnknown_081D208C arm as the
  *     FALLTHROUGH. agbcc lays the then-arm out as the fallthrough and the
- *     else-arm at the branch target, so `if (sub_0803866C())` with the arms
+ *     else-arm at the branch target, so `if (IsHardCampaignMode())` with the arms
  *     the natural way round is backwards. The 208C arm also re-uses r4 from
  *     the ApplyPaletteExt two statements earlier, which is what identifies it.
  *   - gUnknown_081CC588 and gUnknown_081CC58C are FORCE-ADDR POOL WORDS, not
@@ -115,7 +115,7 @@ void sub_08076888(ProcPtr proc)
     Decompress(gUnknown_081D2A54, (void *)0x06010000);
     ApplyPaletteExt(gUnknown_081D208C, 0x200, 0x20);
 
-    if (sub_0803866C() == 0)
+    if (IsHardCampaignMode() == 0)
         ApplyPaletteExt(gUnknown_081D208C, 0x220, 0x20);
     else
         ApplyPaletteExt(gUnknown_081D20CC, 0x220, 0x20);

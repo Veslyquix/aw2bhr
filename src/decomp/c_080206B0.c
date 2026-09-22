@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080206B0.
- * sub_080206B0 @ 0x080206B0, sub_080206E4 @ 0x080206E4
+ * sub_080206B0 @ 0x080206B0, FillMapBuffer @ 0x080206E4
  */
 
 /* Fills one byte per map cell of `dst` with `value`, indexed through the map's
@@ -47,7 +47,7 @@ u16 sub_080206B0(u32 a1)
  * `lsls r1,#0x10; lsrs r7,#0x10` at entry) and REQUIRED by the newly matched
  * caller sub_080213AC, which passes `1 - gPlaySt.unk0d` with no
  * narrowing at all.  agbcc narrows a `u16` argument AT THE CALL SITE as well as
- * at entry (measured: +4 bytes per site, and sub_0802163C's `sub_080247A4(a)`
+ * at entry (measured: +4 bytes per site, and sub_0802163C's `LoadMapData(a)`
  * shows the same pair on the caller side), so a `u16` prototype cannot produce
  * the ROM's caller.  The original almost certainly had no prototype in the
  * caller's translation unit -- default argument promotions passed an int and

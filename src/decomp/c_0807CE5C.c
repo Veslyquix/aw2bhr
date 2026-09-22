@@ -16,7 +16,7 @@
 /* CoSelect_IDLE_0807CE5D @ 0x0807CE5C, 2468 bytes.
  *
  * The per-frame update of the unit-select / group-cursor proc that
- * sub_0807D800, sub_0807D860 and sub_0807D918 (all promoted) service.  The
+ * IsCoSelectionUnique, sub_0807D860 and sub_0807D918 (all promoted) service.  The
  * parameter is the same object those three model; this is the widest window on
  * it so far, so struct Unk7D918's filler is widened here rather than
  * contradicted.
@@ -50,7 +50,6 @@ struct Unk807CE5C
 /* Promoted but undeclared; signatures taken from src/decomp/, not derived. */
 void sub_0803BCDC(u8 *);
 int sub_0807F618(void);
-int sub_0807D800(struct Unk807CE5C *);
 void sub_0807D860(struct Unk807CE5C *);
 void sub_0807D918(struct Unk807CE5C *);
 /* sub_0807DA98 is W56-B's; since wave 56 it is declared in
@@ -181,7 +180,7 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
                 sub_0803B4DC(0x71);
             }
 
-            if ((u8)sub_0807D800(p))
+            if ((u8)IsCoSelectionUnique((struct Unk807D800 *)p))
             {
                 gUnknown_030058D4[p->unk64] = gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c];
                 p->unk64++;

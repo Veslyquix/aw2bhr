@@ -24,7 +24,7 @@ void sub_0804EE08(u16 a, u16 b, s16 c)
     }
     else
     {
-        sub_0803B48C(0x23);
+        PlayMusicOrSfx(0x23);
         gUnknown_02029B80[a][b] = 0;
         gUnknown_02029B94[a][b] = 1;
         gUnknown_02029A10[a].entries[b].frame = 0;

@@ -5,11 +5,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08007D70.
- * sub_08007D70 @ 0x08007D70, sub_08007DB0 @ 0x08007DB0
+ * MakeForestSimple @ 0x08007D70, sub_08007DB0 @ 0x08007DB0
  */
 
 /* Re-tile the cell at (x, y) and, unless it is in the last two columns, the one
- * to its right. `sub_08001158(x, y, sub_080016D0(x, y))` is a genuine nesting
+ * to its right. `MakeTileSimple(x, y, sub_080016D0(x, y))` is a genuine nesting
  * and not two statements: sub_080016D0's result is moved to r2 and used as the
  * third argument -- see sub_080016D0's own note for why it returns at all.
  *
@@ -19,12 +19,12 @@
  * the new value. */
 void MakeForestSimple(int x, int y)
 {
-    sub_08001158(x, y, sub_080016D0(x, y));
+    MakeTileSimple(x, y, sub_080016D0(x, y));
 
     if (x < gMap->width - 2)
     {
         x++;
-        sub_08001158(x, y, sub_080016D0(x, y));
+        MakeTileSimple(x, y, sub_080016D0(x, y));
     }
 }
 
@@ -45,5 +45,5 @@ void sub_08007DB0(int x, int y)
     v = sub_08007DD0(x, y);
 
     if (v >= 0)
-        sub_08001158(x, y, v);
+        MakeTileSimple(x, y, v);
 }

@@ -16,7 +16,7 @@
  * the byte store could have hit the pointer word itself. */
 void sub_0803A9C8(u8 a)
 {
-    sub_08025BE0(&gUnknown_03004100, a);
+    InitUnit(&gUnknown_03004100, a);
     sub_080152EC(gUnknown_0849E280, 0);
     gUnknown_0849D89C->unk00 = 0x80;
     gUnknown_0849D89C->unk04 = &gUnknown_03004100;

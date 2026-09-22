@@ -18,7 +18,7 @@ void sub_0803ABDC(struct Unk0803ABDC *p)
 {
     int i;
 
-    i = sub_0803CBD8(p->unk1e);
+    i = IsCampaignCompletionFlagSet(p->unk1e);
     if (i > 0)
         i = 1;
     sub_080119A0(0, 0, gUnknown_08090F94);

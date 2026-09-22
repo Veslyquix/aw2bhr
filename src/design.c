@@ -72,7 +72,7 @@ int GetDesignRoomOption(int a) {
 
 asm(".global sub_08001230\n.thumb_set sub_08001230, GetDesignRoomOption\n");
 
-int sub_080012DC(int a) {
+int GetDefaultTileForTerrain(int a) {
   int r;
 
   r = 0;
@@ -166,6 +166,8 @@ int sub_080012DC(int a) {
   return r;
 }
 
+asm(".global sub_080012DC\n.thumb_set sub_080012DC, GetDefaultTileForTerrain\n");
+
 int IsTerrainLand(int x, int y) {
   struct Map *map = gMap;
   int v;
@@ -226,14 +228,14 @@ int IsTerrainWaterOrRiver(int x, int y) {
 
 asm(".global sub_0800168C\n.thumb_set sub_0800168C, IsTerrainWaterOrRiver\n");
 
-int GetTileWithShadow_unkMapA22(int x, int y) {
+int GetTileWithShadowAt(int x, int y) {
   struct Map *map = gMap;
 
   return GetTileWithShadow(x, y, map->tile[map->rowOffset[y] + x]);
 }
 
 asm(".global sub_080016D0\n.thumb_set sub_080016D0, "
-    "GetTileWithShadow_unkMapA22\n");
+    "GetTileWithShadowAt\n");
 
 int GetTileWithShadow(int x, int y, int v) {
   const s16 *pa;
@@ -647,7 +649,7 @@ void sub_08001DAC(void) {
   m4 = gActiveMap->unk00 & 0x40;
   if (m4 == 0) {
     sub_08002298(sx, gActiveMap->unk50 - 10);
-    sub_0801F34C(0xAA, (sx + 2) & 0x1FF, (gActiveMap->unk50 - 1) & 0xFF, m4, 0);
+    DrawOamObject(0xAA, (sx + 2) & 0x1FF, (gActiveMap->unk50 - 1) & 0xFF, m4, 0);
     PutSprite(5, sx, gActiveMap->unk50, gUnknown_08485B2C, 0x3000);
   }
 
@@ -678,7 +680,7 @@ void sub_08001DAC(void) {
  * pair survives.  A separate `int v = a2 & 0xFF;` is a single-set pseudo and
  * folds the pair away -- measured both ways with compile_probe, and it is the
  * only difference between a 632-byte match and a 628-byte miss.  sub_08002510
- * never discriminated this because it passes its `v` only to sub_0801F34C's
+ * never discriminated this because it passes its `v` only to DrawOamObject's
  * int parameter.
  *
  * 0xFD80 is unsigned because the ROM's pool word is `.4byte 0x0000FD80`, while
@@ -692,7 +694,7 @@ void sub_08002298(int a1, int a2) {
   switch (gActiveMap->unk64) {
   case 0:
     if (gActiveMap->unk07 == 0) {
-      if (sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+      if (GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
         return;
     } else if (gActiveMap->unk24 == 0x19) {
       return;
@@ -710,7 +712,7 @@ void sub_08002298(int a1, int a2) {
   case 0x14:
     if (gActiveMap->unk07 == 0) {
       if (gActiveMap->unk3e == 0 ||
-          sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+          GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
         gActiveMap->unk64 = 0x1E;
     } else if (gActiveMap->unk3e == 0 || gActiveMap->unk24 == 0x19) {
       gActiveMap->unk64 = 0x1E;
@@ -728,7 +730,7 @@ void sub_08002298(int a1, int a2) {
   switch (gActiveMap->unk64) {
   case 0x32:
     if (gActiveMap->unk07 == 0) {
-      if (sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+      if (GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
         return;
     } else if (gActiveMap->unk24 == 0x19) {
       return;
@@ -746,7 +748,7 @@ void sub_08002298(int a1, int a2) {
   case 0x46:
     if (gActiveMap->unk07 == 0) {
       if (gActiveMap->unk3e != 0 ||
-          sub_0800C7E8(gActiveMap->selectedTerrain) == 0)
+          GetPropertyKindForTerrain(gActiveMap->selectedTerrain) == 0)
         gActiveMap->unk64 = 0x50;
     } else if (gActiveMap->unk3e != 0 || gActiveMap->unk24 == 0x19) {
       gActiveMap->unk64 = 0x50;
@@ -762,7 +764,7 @@ void sub_08002298(int a1, int a2) {
   }
 
   a = gActiveMap->unk60 >> 4;
-  sub_0801F34C(0x54, (a - 0xC) & 0x1FF, a2 + 1, 0, 0);
+  DrawOamObject(0x54, (a - 0xC) & 0x1FF, a2 + 1, 0, 0);
   if (gActiveMap->unk07 == 0)
     sub_0802BD54((a + 0x1A) & 0x1FF, a2, 0x3C - (s8)gActiveMap->propertyCount);
   else
@@ -854,7 +856,7 @@ void sub_08002510(int a1, int a2) {
     break;
   }
 
-  sub_0801F34C(0x8F, ((gActiveMap->unk5c >> 4) - 0x18) & 0x1FF, v, 0, 0);
+  DrawOamObject(0x8F, ((gActiveMap->unk5c >> 4) - 0x18) & 0x1FF, v, 0, 0);
   gActiveMap->unk5b = (gActiveMap->unk5b + 1) & 0x3F;
 }
 
@@ -961,14 +963,14 @@ void sub_08002964(int a1, int a2, int a3, int a4, int a5, int a6) {
   int idx;
   int attr0, attr1;
 
-  sub_08001230(a4);
+  GetDesignRoomOption(a4);
   if (a1 != 0)
     idx = a1 * 8 + 0x2B2;
   else
     idx = 0x262;
 
   if (a6)
-    sub_08011E54((void *)sub_0802A85C(a4 & 0x1F),
+    sub_08011E54((void *)GetTerrainNameGraphic(a4 & 0x1F),
                  (void *)(0x06010000 + (idx << 5)), 0x100);
 
   attr1 = (a2 - 4) & 0x1FF;
@@ -1149,10 +1151,10 @@ void sub_08002D7C(void) {
 }
 
 void sub_08002DEC(void) {
-  ApplyPaletteExt((u16 *)sub_0802A8AC(3, 0), 0x2E0, 0x20);
-  ApplyPaletteExt((u16 *)sub_0802A8AC(0xF, 0), 0x2C0, 0x20);
-  ApplyPaletteExt((u16 *)sub_0802A8AC(1, 0), 0x3C0, 0x20);
-  ApplyPaletteExt((u16 *)sub_0802A8AC(5, 0), 0x3E0, 0x20);
+  ApplyPaletteExt((u16 *)GetTerrainNamePalette(3, 0), 0x2E0, 0x20);
+  ApplyPaletteExt((u16 *)GetTerrainNamePalette(0xF, 0), 0x2C0, 0x20);
+  ApplyPaletteExt((u16 *)GetTerrainNamePalette(1, 0), 0x3C0, 0x20);
+  ApplyPaletteExt((u16 *)GetTerrainNamePalette(5, 0), 0x3E0, 0x20);
 }
 
 /* A 0x460-byte VRAM push and one call. 0x460 is `movs #0x8c; lsls #3`, agbcc's

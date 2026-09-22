@@ -86,13 +86,18 @@ void MakeTileSimple(int x, int y, int tileID);
 int IsTerrainAtCoordsType(int x, int y, int terrainID);
 void SetTerrainAt(int x, int y, int terrainID);
 int GetDesignRoomOption(int id);
+int GetDefaultTileForTerrain(int terrainID);
 int IsTerrainLand(int x, int y);
 int IsTerrainWater(int x, int y);
 int IsTerrainWaterOrRiver(int x, int y);
-int GetTileWithShadow_unkMapA22(int x, int y);
+int GetTileWithShadowAt(int x, int y);
 int GetTileWithShadow(int x, int y, int tile);
 int GetTileWithShadow2(int x, int y, int tile);
 void EnsureValidTile(int x, int y);
+int GetUnitTypeAt(int x, int y);
+int CountArmyUnits(int army);
+int GetPropertyKindForTerrain(int terrainID);
+int GetPropertyKindAt(int x, int y);
 
 
 enum TerrainKind {

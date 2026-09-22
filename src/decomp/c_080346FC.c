@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080346FC.
- * sub_080346FC @ 0x080346FC
+ * ResetRulesAfterCampaignMap @ 0x080346FC
  */
 
 /* MATCHED, wave 43 (W43-C), first attempt.
@@ -42,7 +42,7 @@
  * Named per Xenesis's AW2 Subroutine List: "Clears RAM after a campaign map
  * completion" -- calls SetDefaultRules (the actual reset) and then applies
  * mode-specific overrides on top, rather than clearing memory directly. The
- * old sub_080346FC symbol is kept as a linker alias below so every other
+ * old ResetRulesAfterCampaignMap symbol is kept as a linker alias below so every other
  * unit keeps resolving it unchanged. */
 
 void ResetRulesAfterCampaignMap(void)

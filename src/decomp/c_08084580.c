@@ -80,10 +80,10 @@ void sub_08084600(struct Unk8084600 *p)
 
     i = DivRem(p->unk52, 6);
 
-    if (sub_0803CBD8(0x28) != 0 && DivRem(p->unk52 + 2, 6) == 2)
+    if (IsCampaignCompletionFlagSet(0x28) != 0 && DivRem(p->unk52 + 2, 6) == 2)
         i = 6;
 
-    if (sub_0803CBD8(0x20) != 0 && DivRem(p->unk52 + 2, 6) == 0)
+    if (IsCampaignCompletionFlagSet(0x20) != 0 && DivRem(p->unk52 + 2, 6) == 0)
         i = 7;
 
     if (gUnknown_0300591C[1] == 0)

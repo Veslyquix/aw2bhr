@@ -17,10 +17,10 @@ void sub_0806D3AC(struct Unk08580934_Obj *obj)
     sub_08043FD8((obj->unk28 + 0x18) & 0x1ff, (obj->unk2a + 0x30) & 0xff,
         0xc00 | obj->unk44, 2);
 
-    sub_0801F34C(0xbc, (obj->unk28 - 8) & 0x1ff, (obj->unk2a - 8) & 0xff, 0, 1);
+    DrawOamObject(0xbc, (obj->unk28 - 8) & 0x1ff, (obj->unk2a - 8) & 0xff, 0, 1);
 
     y = obj->unk2a;
-    sub_0801F34C(gUnknown_08580934->unk11[obj->unk1c] + 0xbd, obj->unk28 & 0x1ff,
+    DrawOamObject(gUnknown_08580934->unk11[obj->unk1c] + 0xbd, obj->unk28 & 0x1ff,
         (y + 0x34) & 0xff, 0, 0);
 
     obj->unk49 = obj->unk48;

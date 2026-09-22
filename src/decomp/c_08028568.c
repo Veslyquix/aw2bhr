@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08028568.
- * sub_08028568 @ 0x08028568
+ * FinalizeBattleResult @ 0x08028568
  */
 
 void FinalizeBattleResult(void)

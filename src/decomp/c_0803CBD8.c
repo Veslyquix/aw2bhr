@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803CBD8.
- * sub_0803CBD8 @ 0x0803CBD8
+ * IsCampaignCompletionFlagSet @ 0x0803CBD8
  *
  * Named per Xenesis's AW2 Subroutine List: "Used to check campaign
  * completion status for battle maps/main menu items". `id` selects both the

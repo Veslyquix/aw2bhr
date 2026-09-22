@@ -50,7 +50,7 @@
  *    map lookup is gMap->terrain[gMap->rowOffset[y] + x]. */
 u8 sub_080257C0(u16 id)
 {
-    struct Unk08499594 *unit = &gUnknown_08499594[id];
+    struct Unk08499594 *unit = &gUnits[id];
     u16 total = 0;
     s16 x = unit->unk02;
     s16 y = unit->unk03;
@@ -61,7 +61,7 @@ u8 sub_080257C0(u16 id)
     if (!(unit->unk01 & 0x20))
         return 1;
 
-    if (sub_08026F5C(unit - gUnknown_08499594))
+    if (sub_08026F5C(unit - gUnits))
         return 1;
 
     if (sub_08026FD0(gUnknown_084995FE[gUnknown_030033EC],

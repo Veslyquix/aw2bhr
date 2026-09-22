@@ -37,7 +37,7 @@ bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
   {
     return 1;
   }
-  if ((sub_08043050(a1) & 8) != 0)
+  if ((GetPlayerSpecialAbilities(a1) & 8) != 0)
   {
     return 1;
   }
@@ -66,7 +66,7 @@ bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
   {
     return 0;
   }
-  new_var = &gUnknown_08499594[(*mapPtr)->unit[idx]].unk00;
+  new_var = &gUnits[(*mapPtr)->unit[idx]].unk00;
   if (((u8) ((*new_var) - 0x10)) <= 4)
   {
     return 1;

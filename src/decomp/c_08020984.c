@@ -73,9 +73,9 @@ void sub_08020984(void)
             gPlayers[gUnknown_030033EC].turnState |= 2;
             break;
         }
-        if (sub_080266DC(i) && gPlayers[i].aiControlled == 1)
+        if (IsPlayerAliveAndActive(i) && gPlayers[i].aiControlled == 1)
             break;
-        if (sub_080266DC(i) && (gPlayers[i].turnState & 2))
+        if (IsPlayerAliveAndActive(i) && (gPlayers[i].turnState & 2))
             break;
     }
 

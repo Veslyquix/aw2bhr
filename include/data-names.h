@@ -1,6 +1,10 @@
 #ifndef GUARD_DATA_NAMES_H
 #define GUARD_DATA_NAMES_H
 
+/* The 64-entry-per-army unit table. Keep the address-based symbol available
+ * for assembly and historical notes while new C uses the domain name. */
+#define gUnits gUnknown_08499594
+
 /* Friendly names for the small accessors over the ROM data tables in
  * include/unknown-globals.h -- the per-unit-type, per-terrain, per-CO and
  * map-header records. Each name was read off this tree's own C once the

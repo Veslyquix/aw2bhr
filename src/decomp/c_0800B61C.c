@@ -71,24 +71,24 @@ s16 sub_0800B61C(int x, int y)
     {
         int ny = y - 1;
         if (x > 0)
-            mask |= sub_080015E4(x - 1, ny) << 8;
-        mask |= sub_080015E4(x, ny) << 7;
+            mask |= IsTerrainLand(x - 1, ny) << 8;
+        mask |= IsTerrainLand(x, ny) << 7;
         if (x < MAP->width - 1)
-            mask |= sub_080015E4(x + 1, ny) << 6;
+            mask |= IsTerrainLand(x + 1, ny) << 6;
     }
     if (x > 0)
-        mask |= sub_080015E4(x - 1, y) << 5;
-    mask |= sub_080015E4(x, y) << 4;
+        mask |= IsTerrainLand(x - 1, y) << 5;
+    mask |= IsTerrainLand(x, y) << 4;
     if (x < MAP->width - 1)
-        mask |= sub_080015E4(x + 1, y) << 3;
+        mask |= IsTerrainLand(x + 1, y) << 3;
     if (y < MAP->height - 1)
     {
         int ny = y + 1;
         if (x > 0)
-            mask |= sub_080015E4(x - 1, ny) << 2;
-        mask |= sub_080015E4(x, ny) << 1;
+            mask |= IsTerrainLand(x - 1, ny) << 2;
+        mask |= IsTerrainLand(x, ny) << 1;
         if (x < MAP->width - 1)
-            mask |= sub_080015E4(x + 1, ny);
+            mask |= IsTerrainLand(x + 1, ny);
     }
 
     r = gUnknown_084861C4[mask & ~0x10];
@@ -279,14 +279,14 @@ s16 sub_0800B61C(int x, int y)
             r = 0xf2;
         else if (t == 8)
         {
-            if (x > 0 && y > 0 && sub_080015E4(x - 1, y - 1))
+            if (x > 0 && y > 0 && IsTerrainLand(x - 1, y - 1))
                 r = 0xd3;
             else
                 r = 0xb7;
         }
         else if (t == 0xa)
         {
-            if (x > 0 && y > 0 && sub_080015E4(x - 1, y - 1))
+            if (x > 0 && y > 0 && IsTerrainLand(x - 1, y - 1))
                 r = 0x31;
             else
                 r = 0xf2;

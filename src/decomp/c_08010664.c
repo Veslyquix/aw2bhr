@@ -17,7 +17,7 @@
  *
  * THE LOAD-BEARING SPELLING: the inner call's result goes through a TEMP and
  * the two calls are two statements. Written nested --
- * `sub_08001158(A, B, sub_0800FD44(A, B, 0))` -- agbcc evaluates A and B once
+ * `MakeTileSimple(A, B, sub_0800FD44(A, B, 0))` -- agbcc evaluates A and B once
  * for the outer call and keeps them live across the `bl`, which is four
  * instructions short at each of the six sites (-44 bytes overall). As two
  * statements the intervening call kills the CSE on the ROM tables and both
@@ -59,13 +59,13 @@ void sub_08010664(int x, int y)
              && (sub_0800F564(x, y, i) == 2 || sub_0800F564(x, y, i) == 3))
             {
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
-                sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
+                MakeTileSimple(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
             else if (MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
                   || MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
             {
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
-                sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
+                MakeTileSimple(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
         }
     }
@@ -77,7 +77,7 @@ void sub_08010664(int x, int y)
      || v == 0x103 || v == 0x102)
     {
         t = sub_0800FD44(x, y, 0);
-        sub_08001158(x, y, t);
+        MakeTileSimple(x, y, t);
     }
 
     for (i = 0; i < 4; i++)
@@ -91,13 +91,13 @@ void sub_08010664(int x, int y)
              && (sub_0800F564(x, y, i) == 2 || sub_0800F564(x, y, i) == 3))
             {
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
-                sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
+                MakeTileSimple(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
             else if (MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
                   || MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
             {
                 t = sub_0800FD44(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], 0);
-                sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
+                MakeTileSimple(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
         }
     }
@@ -109,7 +109,7 @@ void sub_08010664(int x, int y)
      || v == 0x103 || v == 0x102)
     {
         t = sub_08010B34(x, y);
-        sub_08001158(x, y, t);
+        MakeTileSimple(x, y, t);
     }
 
     for (i = 0; i < 4; i++)
@@ -123,13 +123,13 @@ void sub_08010664(int x, int y)
              && (sub_0800F564(x, y, i) == 2 || sub_0800F564(x, y, i) == 3))
             {
                 t = sub_08010B34(x + gUnknown_0848896C[i], y + gUnknown_08488974[i]);
-                sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
+                MakeTileSimple(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
             else if (MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x162
                   || MAP->tile[MAP->rowOffset[y + gUnknown_08488974[i]] + (x + gUnknown_0848896C[i])] == 0x163)
             {
                 t = sub_08010B34(x + gUnknown_0848896C[i], y + gUnknown_08488974[i]);
-                sub_08001158(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
+                MakeTileSimple(x + gUnknown_0848896C[i], y + gUnknown_08488974[i], t);
             }
         }
     }

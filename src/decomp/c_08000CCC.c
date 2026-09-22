@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08000CCC.
- * sub_08000CCC @ 0x08000CCC
+ * SetSelectedTile @ 0x08000CCC
  */
 
 /* Wave 37 (W37-E). PARKED at 97.6% -- SIZE EXACT (208 bytes), 5 bytes differ,

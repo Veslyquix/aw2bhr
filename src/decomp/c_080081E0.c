@@ -8,7 +8,7 @@
  * sub_080081E0 @ 0x080081E0
  */
 
-/* Repaints the eight neighbours of (x, y) that sub_080015E4 accepts, each
+/* Repaints the eight neighbours of (x, y) that IsTerrainLand accepts, each
  * through the promoted c_08001158.c tile-fetch idiom. sub_080083E0 is the same
  * function against the next pool word. The typed gMap spelling is byte-exact
  * here as long as the rowOffset/tile byte-pointer locals stay scoped per use.
@@ -21,7 +21,7 @@ void sub_080081E0(int x, int y)
 
         if (x > 0)
         {
-            if (sub_080015E4(x - 1, n))
+            if (IsTerrainLand(x - 1, n))
             {
                 struct Map *p;
                 u8 *rows;
@@ -34,10 +34,10 @@ void sub_080081E0(int x, int y)
                 rows = (u8 *)p->rowOffset;
                 off = (*(u16 *)(rows + t) + (x - 1)) * 2;
                 tiles = (u8 *)p->tile;
-                sub_08007F14(x - 1, n, *(u16 *)(tiles + off));
+                MakeTile2(x - 1, n, *(u16 *)(tiles + off));
             }
         }
-        if (sub_080015E4(x, n))
+        if (IsTerrainLand(x, n))
         {
             struct Map *p;
             u8 *rows;
@@ -50,11 +50,11 @@ void sub_080081E0(int x, int y)
             rows = (u8 *)p->rowOffset;
             off = (*(u16 *)(rows + t) + (x)) * 2;
             tiles = (u8 *)p->tile;
-            sub_08007F14(x, n, *(u16 *)(tiles + off));
+            MakeTile2(x, n, *(u16 *)(tiles + off));
         }
         if (x < gMap->width - 1)
         {
-            if (sub_080015E4(x + 1, n))
+            if (IsTerrainLand(x + 1, n))
             {
                 struct Map *p;
                 u8 *rows;
@@ -67,13 +67,13 @@ void sub_080081E0(int x, int y)
                 rows = (u8 *)p->rowOffset;
                 off = (*(u16 *)(rows + t) + (x + 1)) * 2;
                 tiles = (u8 *)p->tile;
-                sub_08007F14(x + 1, n, *(u16 *)(tiles + off));
+                MakeTile2(x + 1, n, *(u16 *)(tiles + off));
             }
         }
     }
     if (x > 0)
     {
-        if (sub_080015E4(x - 1, y))
+        if (IsTerrainLand(x - 1, y))
         {
             struct Map *p;
             u8 *rows;
@@ -86,12 +86,12 @@ void sub_080081E0(int x, int y)
             rows = (u8 *)p->rowOffset;
             off = (*(u16 *)(rows + t) + (x - 1)) * 2;
             tiles = (u8 *)p->tile;
-            sub_08007F14(x - 1, y, *(u16 *)(tiles + off));
+            MakeTile2(x - 1, y, *(u16 *)(tiles + off));
         }
     }
     if (x < gMap->width - 1)
     {
-        if (sub_080015E4(x + 1, y))
+        if (IsTerrainLand(x + 1, y))
         {
             struct Map *p;
             u8 *rows;
@@ -104,7 +104,7 @@ void sub_080081E0(int x, int y)
             rows = (u8 *)p->rowOffset;
             off = (*(u16 *)(rows + t) + (x + 1)) * 2;
             tiles = (u8 *)p->tile;
-            sub_08007F14(x + 1, y, *(u16 *)(tiles + off));
+            MakeTile2(x + 1, y, *(u16 *)(tiles + off));
         }
     }
     if (y < gMap->height - 1)
@@ -113,7 +113,7 @@ void sub_080081E0(int x, int y)
 
         if (x > 0)
         {
-            if (sub_080015E4(x - 1, n))
+            if (IsTerrainLand(x - 1, n))
             {
                 struct Map *p;
                 u8 *rows;
@@ -126,10 +126,10 @@ void sub_080081E0(int x, int y)
                 rows = (u8 *)p->rowOffset;
                 off = (*(u16 *)(rows + t) + (x - 1)) * 2;
                 tiles = (u8 *)p->tile;
-                sub_08007F14(x - 1, n, *(u16 *)(tiles + off));
+                MakeTile2(x - 1, n, *(u16 *)(tiles + off));
             }
         }
-        if (sub_080015E4(x, n))
+        if (IsTerrainLand(x, n))
         {
             struct Map *p;
             u8 *rows;
@@ -142,11 +142,11 @@ void sub_080081E0(int x, int y)
             rows = (u8 *)p->rowOffset;
             off = (*(u16 *)(rows + t) + (x)) * 2;
             tiles = (u8 *)p->tile;
-            sub_08007F14(x, n, *(u16 *)(tiles + off));
+            MakeTile2(x, n, *(u16 *)(tiles + off));
         }
         if (x < gMap->width - 1)
         {
-            if (sub_080015E4(x + 1, n))
+            if (IsTerrainLand(x + 1, n))
             {
                 struct Map *p;
                 u8 *rows;
@@ -159,7 +159,7 @@ void sub_080081E0(int x, int y)
                 rows = (u8 *)p->rowOffset;
                 off = (*(u16 *)(rows + t) + (x + 1)) * 2;
                 tiles = (u8 *)p->tile;
-                sub_08007F14(x + 1, n, *(u16 *)(tiles + off));
+                MakeTile2(x + 1, n, *(u16 *)(tiles + off));
             }
         }
     }

@@ -32,10 +32,10 @@ int sub_08062730(struct Unk08499594 *a, struct Unk08499594 *b)
 
     dist = dx + dy;
 
-    if (sub_08042D50(gUnknown_030033EC, b->unk00) == 1)
+    if (GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->unk00) == 1)
         cost = sub_08058224(a) + sub_08058224(b) + 1;
     else
-        cost = sub_08058224(a) + sub_08042D50(gUnknown_030033EC, b->unk00);
+        cost = sub_08058224(a) + GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->unk00);
 
     if (dist > cost)
         return 0;

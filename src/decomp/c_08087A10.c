@@ -20,11 +20,11 @@ void sub_08087A10(struct Unk08087A10 *proc)
 
     v = proc->unk54;
 
-    sub_0801F34C(0x61, 0xb8, 0x20, 0, 2);
-    sub_0801F34C(0x60, 0xd8, 0x20, 0, 2);
+    DrawOamObject(0x61, 0xb8, 0x20, 0, 2);
+    DrawOamObject(0x60, 0xd8, 0x20, 0, 2);
 
     for (i = 0; i <= 4; i++)
-        sub_0801F34C(i + 0x6a, 0x70, i * 0x10 + 0x28, 0, 2);
+        DrawOamObject(i + 0x6a, 0x70, i * 0x10 + 0x28, 0, 2);
 
     if (gUnknown_0200C078[gUnknown_02027F74.unk04[v] - 0x6c].unk00[0].unk00_08 == 0)
         return;

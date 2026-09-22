@@ -8,7 +8,7 @@
  */
 
 /* unk2c is an `int` read three different ways and all three are the same
- * member: `ldrsh` for sub_08025CC8's s16 parameter (agbcc narrows the load for
+ * member: `ldrsh` for CreateUnitAt's s16 parameter (agbcc narrows the load for
  * a signed-halfword conversion), `ldr` plus `lsls #0x18; lsrs #0x18` for the
  * u8 one (it does NOT narrow for a byte conversion), and `ldr`/`str` for the
  * increment. Reading them as three fields is the trap -- the `str` at the tail
@@ -28,7 +28,7 @@ void sub_08045564(struct Unk45564Proc *proc)
     u8 y;
     u8 flag;
 
-    sub_08025CC8(proc->unk2c, proc->unk30, proc->unk54)->unk04_0 = 0x5a;
+    CreateUnitAt(proc->unk2c, proc->unk30, proc->unk54)->unk04_0 = 0x5a;
 
     x = proc->unk2c;
     y = proc->unk30;
@@ -37,6 +37,6 @@ void sub_08045564(struct Unk45564Proc *proc)
     if (gPlayers[gUnknown_030033EC].coActivationMode == 2)
         flag = 1;
 
-    sub_08044B08(x, y, flag);
+    AnimateUnitCreation(x, y, flag);
     proc->unk2c++;
 }

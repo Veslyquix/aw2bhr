@@ -14,13 +14,13 @@ void sub_080504A8(u16 a1, u16 a2)
     {
         sub_08070544(0x3B);
         sub_08070544(0x3C);
-        sub_0803B48C(a2);
+        PlayMusicOrSfx(a2);
     }
     else
     {
         sub_08070544(0x3B);
         sub_08070544(0x3C);
-        sub_0803B48C(
+        PlayMusicOrSfx(
             gUnknown_085644A0[gUnknown_02029808[a1].unk30[gUnknown_02029808[a1].unk2e]]);
     }
 }

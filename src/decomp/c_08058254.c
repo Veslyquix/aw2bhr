@@ -48,7 +48,7 @@ int sub_08058254(void)
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
             if (u->unk00 <= 2)
                 continue;
@@ -84,7 +84,7 @@ int sub_08058318(void)
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
             if (u->unk00 <= 2)
                 continue;

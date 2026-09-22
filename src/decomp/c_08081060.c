@@ -117,7 +117,7 @@ void MainMenuC1_08081061(ProcPtr proc)
         sub_080845E8(3, 0x20c);
     }
 
-    if (sub_0803CBD8(0x20) != 0)
+    if (IsCampaignCompletionFlagSet(0x20) != 0)
         ApplyPaletteExt(gUnknown_0823DC38, 0x3a0, 0x20);
 
     sub_08084804();

@@ -13,7 +13,7 @@
  * reads r0. Any literal argument would cost a `movs r0,#N` the ROM does not
  * have, so the value has to be arriving in r0 already.
  *
- * gUnknown_030040D8 is handed straight to sub_08025B80's
+ * gUnknown_030040D8 is handed straight to SubtractUnitFuel's
  * `struct Unk08499594 *` with no arithmetic. That is a SECOND, independent
  * confirmation of the note on struct Unk030040D8.unk01 in unknown-globals.h --
  * the pointed-to object really is a struct Unk08499594. The cast is here rather
@@ -25,5 +25,5 @@ void sub_08025BB4(void *a1)
     sub_08035740(a1);
 
     if (gPlaySt.fog != 0)
-        sub_08025B80((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
+        SubtractUnitFuel((struct Unk08499594 *)gUnknown_030040D8, gUnknown_03004074);
 }

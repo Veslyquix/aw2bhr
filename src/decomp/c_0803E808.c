@@ -58,7 +58,7 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
     bestY = 0;
     bestT = 0;
     sub_0801F92C(MAP->move);
-    sub_0801F838(0xff);
+    FillMovementMap(0xff);
     x = a1 + (int)sub_0803E7C0(a4, a5);
     y = a2 + (int)sub_0803E7E4(a4, a5);
     sub_0801FAC4(x, y, (u16)a5, gUnknown_0849F6B8[a4][0], bestT);
@@ -74,7 +74,7 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
                 continue;
             if (!sub_08020DBC(gUnknown_030033EC, i, j))
                 continue;
-            u = &gUnknown_08499594[gMap->unit[MAP->rowOffset[j] + i]];
+            u = &gUnits[gMap->unit[MAP->rowOffset[j] + i]];
             if (u->unk00 == 0x18)
             {
                 if ((u->unk01 & 0x20) != 0)

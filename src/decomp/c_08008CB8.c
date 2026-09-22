@@ -72,16 +72,16 @@ int sub_08008D14(int x, int y)
     int r = 0;
 
     if (y > 0)
-        r = sub_080015E4(x, y - 1) << 3;
+        r = IsTerrainLand(x, y - 1) << 3;
 
     if (x > 0)
-        r |= sub_080015E4(x - 1, y) << 2;
+        r |= IsTerrainLand(x - 1, y) << 2;
 
     if (x < gMap->width - 1)
-        r |= sub_080015E4(x + 1, y) << 1;
+        r |= IsTerrainLand(x + 1, y) << 1;
 
     if (y < gMap->height - 1)
-        r |= sub_080015E4(x, y + 1);
+        r |= IsTerrainLand(x, y + 1);
 
     return r;
 }

@@ -20,9 +20,9 @@ void sub_0803A07C(void)
     tbl = gUnknown_0849DC18;
     n = sub_08042DE0(gUnknown_0849D89C->unk08) - 1;
     sub_0801BD00(x, 0x39, tbl[u->unk00 * 15 + n], 0x32E8);
-    sub_0801F34C(gUnknown_0849E224[u->unk00], gUnknown_0849D89C->unk00 + 0x3a, 8, 0, 0);
-    sub_0801F34C(0x23, gUnknown_0849D89C->unk00 + 0x3a, 0x18, 0, 0);
-    sub_0801F34C(6, gUnknown_0849D89C->unk00 + 0x44, 0x28, 0, 0);
+    DrawOamObject(gUnknown_0849E224[u->unk00], gUnknown_0849D89C->unk00 + 0x3a, 8, 0, 0);
+    DrawOamObject(0x23, gUnknown_0849D89C->unk00 + 0x3a, 0x18, 0, 0);
+    DrawOamObject(6, gUnknown_0849D89C->unk00 + 0x44, 0x28, 0, 0);
     d = (u->unk06_0 <= 9) ? -4 : 0;
     sub_0802BCF0(d + gUnknown_0849D89C->unk00 + 0x58, 0x28, u->unk06_0);
     d = (gUnknown_085D5ABC[u->unk00].maxFuel <= 9) ? -4 : 0;

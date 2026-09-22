@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08008E3C.
- * sub_08008E3C @ 0x08008E3C, sub_08008F6C @ 0x08008F6C
+ * sub_08008E3C @ 0x08008E3C, MakeBridge @ 0x08008F6C
  */
 
 /* MATCHED in wave 67 (304/304). The struct Map rowOffset member index expands
@@ -41,8 +41,8 @@ void sub_08008E3C(int x, int y)
 
             if (*(u16 *)(tiles + off) == 0x13)
             {
-                sub_08001158(x, y, 0x16);
-                sub_08001158(x, n, 0x16);
+                MakeTileSimple(x, y, 0x16);
+                MakeTileSimple(x, n, 0x16);
             }
         }
 
@@ -63,8 +63,8 @@ void sub_08008E3C(int x, int y)
 
             if (*(u16 *)(qtiles + qoff) == 0x13)
             {
-                sub_08001158(x, y, 0x16);
-                sub_08001158(x, n, 0x16);
+                MakeTileSimple(x, y, 0x16);
+                MakeTileSimple(x, n, 0x16);
             }
         }
     }
@@ -78,8 +78,8 @@ void sub_08008E3C(int x, int y)
 
             if (*(u16 *)(tiles + off) == 0x16)
             {
-                sub_08001158(x, y, 0x13);
-                sub_08001158(x - 1, y, 0x13);
+                MakeTileSimple(x, y, 0x13);
+                MakeTileSimple(x - 1, y, 0x13);
             }
         }
 
@@ -97,8 +97,8 @@ void sub_08008E3C(int x, int y)
 
             if (*(u16 *)(qtiles + qoff) == 0x16)
             {
-                sub_08001158(x, y, 0x13);
-                sub_08001158(x + 1, y, 0x13);
+                MakeTileSimple(x, y, 0x13);
+                MakeTileSimple(x + 1, y, 0x13);
             }
         }
     }
@@ -141,9 +141,9 @@ void MakeBridge(int x, int y)
         case 9:
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x36);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x36);
             sub_08007F9C(x, y);
             break;
 
@@ -162,9 +162,9 @@ void MakeBridge(int x, int y)
         }
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x36);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x36);
             sub_08007F9C(x, y);
             break;
 
@@ -172,9 +172,9 @@ void MakeBridge(int x, int y)
         case 13:
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x36);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x36);
             sub_08007F9C(x, y);
             break;
 
@@ -184,9 +184,9 @@ void MakeBridge(int x, int y)
         tile14:
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x14);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x14);
             sub_08007F9C(x, y);
             break;
 
@@ -203,7 +203,7 @@ void MakeBridge(int x, int y)
             if (cell == 0xD)
             {
                 sub_0800C608(x, y);
-                sub_08007CA0(x, y);
+                MakeSeaSafest(x, y);
             }
 
             k = sub_08008D70(x, y);
@@ -211,8 +211,8 @@ void MakeBridge(int x, int y)
             if (k > 0)
             {
                 sub_0800C608(x, y);
-                sub_080011F4(x, y, 0xC);
-                sub_08001158(x, y, k);
+                SetTerrainAt(x, y, 0xC);
+                MakeTileSimple(x, y, k);
             }
             break;
         }
@@ -337,8 +337,8 @@ void MakeBridge(int x, int y)
         if (v > 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, v);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, v);
         }
     }
 }

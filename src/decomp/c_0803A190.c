@@ -44,6 +44,6 @@ void sub_0803A190(int a1, struct Unk08499594 *a2)
     }
   }
 
-  sub_08014B0C((u8)((v + 0x60) / 8), 1, gUnknown_08499578, sub_08042D1C(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
-  sub_08014B0C((u8)((v + 0x60) / 8), 3, gUnknown_08499578, sub_08042D84(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
+  sub_08014B0C((u8)((v + 0x60) / 8), 1, gUnknown_08499578, GetUnitMovementWithCoBonus(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
+  sub_08014B0C((u8)((v + 0x60) / 8), 3, gUnknown_08499578, GetUnitVisionWithCoBonus(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
 }

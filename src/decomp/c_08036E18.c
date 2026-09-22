@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08036E18.
- * sub_08036E18 @ 0x08036E18, sub_08036E54 @ 0x08036E54
+ * CheckSoftResetCombo @ 0x08036E18, sub_08036E54 @ 0x08036E54
  */
 
 #include "hardware.h"
@@ -24,7 +24,7 @@
  *
  * Named per Xenesis's AW2 Subroutine List: "Subroutine that checks whether
  * A, B Start Select is pressed and performs a soft reset." The old
- * sub_08036E18 symbol is kept as a linker alias below so every other unit
+ * CheckSoftResetCombo symbol is kept as a linker alias below so every other unit
  * keeps resolving it unchanged. */
 void CheckSoftResetCombo(void)
 {

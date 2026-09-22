@@ -15,7 +15,7 @@
  * into a fresh local instead drops that instruction and the function comes out
  * 4 bytes short (measured side by side).
  *
- * Everything after the call is the promoted sub_0803CA54 verbatim, with the
+ * Everything after the call is the promoted IsCampaignMapUnlocked verbatim, with the
  * same `s = &gUnknown_02028030` two-step that keeps `adds r0, #0x12` out of
  * the relocation addend -- and the assignment must sit AFTER the call or the
  * address is held across it in a callee-saved register. */

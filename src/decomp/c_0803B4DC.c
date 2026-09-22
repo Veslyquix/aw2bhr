@@ -28,7 +28,7 @@
  */
 
 
-/* NO cast here, unlike its two siblings: sub_0803B48C's parameter is `s16`
+/* NO cast here, unlike its two siblings: PlayMusicOrSfx's parameter is `s16`
  * (five call sites, all signed, one of them a sum of three ints sign-narrowed
  * at the call), so the conversion is implicit. That refines the note already in
  * include/unknown-functions.h, which reads this shift pair correctly as a
@@ -42,5 +42,5 @@
 
 void sub_0803B4DC(int a)
 {
-    sub_0803B48C(a);
+    PlayMusicOrSfx(a);
 }

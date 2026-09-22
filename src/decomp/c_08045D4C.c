@@ -21,7 +21,7 @@ int sub_08045D4C(void)
     y = gUnknown_030040D8->unk03;
 
     switch (gPlayers[(((struct Unk08499594 *)gUnknown_030040D8
-                                - gUnknown_08499594) >> 6) + 1].teamColor)
+                                - gUnits) >> 6) + 1].teamColor)
     {
     case 3:
         side = 1;

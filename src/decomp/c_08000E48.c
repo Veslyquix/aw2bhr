@@ -43,7 +43,7 @@ void sub_08000E48(struct Unk03001470 *proc)
     gUnknown_030040E8 = 0;
     gMap->unk4233 = 4;
     sub_08026BAC();
-    sub_08034780();
+    SetDefaultRules();
     sub_08026924();
     gPlayers[0].co = 0;
     gPlayers[1].co = 1;
@@ -55,7 +55,7 @@ void sub_08000E48(struct Unk03001470 *proc)
     gUnknown_03004080 = 1;
     sub_08026768();
     sub_08000DF8(a);
-    sub_08025E74();
+    ClearAllUnits();
     sub_0803DE68();
     sub_080268F4();
     sub_080258CC();
@@ -96,7 +96,7 @@ void sub_08000E48(struct Unk03001470 *proc)
     sub_08007328();
     sub_0800056C(0);
     sub_080152C0((s32)&gUnknown_084857AC[0x100], 0);
-    sub_08000CCC(0x28);
+    SetSelectedTile(0x28);
     sub_08003910();
     sub_0803B524(0xD8);
 }

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080345C8.
- * sub_080345C8 @ 0x080345C8
+ * MapMainIdle @ 0x080345C8
  */
 
 /* The gUnknown_030032D8 state machine's per-frame tick.
@@ -31,7 +31,7 @@ void MapMainIdle(void)
     u16 *const *state;
     int idle;
 
-    idle = sub_08034F6C();
+    idle = GetCoPowerDepth();
     state = &gUnknown_08090D88;
 
     if (idle == 0 && gUnknown_030040E4 == 0)
@@ -62,7 +62,7 @@ void MapMainIdle(void)
 
     if (**state == 14 || gUnknown_030044DC == 14)
     {
-        if (sub_08015BD0((s32)gUnknown_0849A00C) != -1 || sub_08034F6C() == 0)
+        if (sub_08015BD0((s32)gUnknown_0849A00C) != -1 || GetCoPowerDepth() == 0)
             sub_0802776C(3);
     }
 }

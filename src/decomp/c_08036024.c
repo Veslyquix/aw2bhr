@@ -35,7 +35,7 @@ void sub_08036024(ProcPtr procArg)
         break;
 
     default:
-        sub_0803B48C(gUnknown_0849CD88[proc->unk36].unk1e);
+        PlayMusicOrSfx(gUnknown_0849CD88[proc->unk36].unk1e);
         break;
     }
 }

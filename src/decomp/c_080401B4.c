@@ -17,7 +17,7 @@
  * up -- the declared `ProcPtr` fourth parameter is what proves it is there.
  *
  * The magic-number chain ends `asr #2` and NOT `asr #8`, so this is the bare
- * pointer subtraction `ent - gUnknown_08499594` with no `>> 6`: it is the unit
+ * pointer subtraction `ent - gUnits` with no `>> 6`: it is the unit
  * index, not the army number that sub_0804203C and sub_08041FE0 derive. */
 struct Unk401B4Proc
 {
@@ -43,7 +43,7 @@ void sub_080401B4(struct Unk401B4Proc *proc)
     struct Unk08499594 *ent = proc->unk4c;
 
     sub_0803FF48(ent->unk02, ent->unk03, gUnknown_085D5ABC[ent->unk00].unitClass, proc);
-    sub_08025D60(ent - gUnknown_08499594);
+    sub_08025D60(ent - gUnits);
     sub_080258CC();
 }
 
@@ -61,5 +61,5 @@ void sub_08040200(struct Unk02028360 *ent, ProcPtr a2)
 
     sub_08024268();
     sub_0803E0D0((struct Unk3E0D0 *)ent);
-    sub_080219AC();
+    RecountArmyProperties();
 }

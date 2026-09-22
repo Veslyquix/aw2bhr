@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803CA54.
- * sub_0803CA54 @ 0x0803CA54
+ * IsCampaignMapUnlocked @ 0x0803CA54
  *
  * Named per Xenesis's AW2 Subroutine List: "Checks if a map has been
  * unlocked. r0 = Map ID". The old sub_XXXXXXXX symbol is kept as a linker

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803B414.
- * sub_0803B414 @ 0x0803B414, sub_0803B48C @ 0x0803B48C
+ * sub_0803B414 @ 0x0803B414, PlayMusicOrSfx @ 0x0803B48C
  */
 
 /* Seven identical sub_08071420 calls over the 0x03005xxx object group, all
@@ -33,7 +33,7 @@ void sub_0803B414(void)
  * the parameter's low halfword and is the same for s16 and u16.
  *
  * Named per Xenesis's AW2 Subroutine List: "Music/SFX player subroutine".
- * The old sub_0803B48C symbol is kept as a linker alias below so every
+ * The old PlayMusicOrSfx symbol is kept as a linker alias below so every
  * other unit keeps resolving it unchanged. */
 void PlayMusicOrSfx(s16 a)
 {

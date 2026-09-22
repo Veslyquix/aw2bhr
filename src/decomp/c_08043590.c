@@ -16,7 +16,7 @@ void sub_08043590(void)
     if (gPlaySt.coPowersEnabled == 0)
         return;
 
-    if (sub_0804423C(gUnknown_030005D0))
+    if (IsCoPowerReady(gUnknown_030005D0))
         sub_0801368C((u16 *)((((t >> 2) & 0xf) * 2) + (int)gUnknown_08104324), 0x2f6, 2);
     else
         sub_0801368C((u16 *)((((t >> 1) & 0xf) * 2) + (int)gUnknown_08104304), 0x2f6, 2);

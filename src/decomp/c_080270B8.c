@@ -40,7 +40,7 @@ void sub_08027118(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (sub_080266DC(i))
+        if (IsPlayerAliveAndActive(i))
         {
             for (j = 1; j <= 4; j++)
             {

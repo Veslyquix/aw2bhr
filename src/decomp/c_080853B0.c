@@ -28,5 +28,5 @@ void sub_080853B0(void)
     int i;
 
     for (i = 0; i < (gPlaySt.gameMode == 2 ? sub_0802490C(gPlaySt.mapID) : sub_080248F8()); i++)
-        sub_0801F34C(gPlayers[i + 1].teamColor + 0x3d, i * 24 + 0x10, 8, 0, 1);
+        DrawOamObject(gPlayers[i + 1].teamColor + 0x3d, i * 24 + 0x10, 8, 0, 1);
 }

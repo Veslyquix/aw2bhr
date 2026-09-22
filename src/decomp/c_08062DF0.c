@@ -83,13 +83,13 @@ void sub_08062DF0(void)
         {
             gUnknown_03003F38 = gMap->unit[MAP->rowOffset[gUnknown_030033E4.unk02]
                                              + gUnknown_030033E4.unk00];
-            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
 
             if (gUnknown_030040D8->unk07[0] != 0)
-                a = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_030040D8->unk07[0]];
+                a = (struct Unk030040D8 *)&gUnits[gUnknown_030040D8->unk07[0]];
 
             if (gUnknown_030040D8->unk07[1] != 0)
-                b = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_030040D8->unk07[1]];
+                b = (struct Unk030040D8 *)&gUnits[gUnknown_030040D8->unk07[1]];
 
             sub_08013428(2, 4, gUnknown_0816DB40);
             sub_08013428(2, 5, gUnknown_0816DB50, BITS(gUnknown_030040D8)->unk09_0);

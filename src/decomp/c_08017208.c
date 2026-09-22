@@ -150,9 +150,9 @@ void sub_08017208(void)
     if (gPlaySt.mapID < 0xb4 || gPlaySt.mapID > 0xbf)
     {
         gMap->unk4233 = sub_0802490C(gPlaySt.mapID);
-        sub_0803CC84(gMap->unk421a,
+        CopyString(gMap->unk421a,
                      sub_08024944(gPlaySt.mapID));
-        sub_080247A4(gPlaySt.mapID);
+        LoadMapData(gPlaySt.mapID);
         sub_080215FC();
         for (y = 0; y < gMap->width; y++)
         {

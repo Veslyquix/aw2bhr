@@ -22,7 +22,7 @@ void sub_0802D230(void)
     else
         v = 0;
 
-    sub_08025B58(gUnknown_030033EC, v);
+    AddPlayerFunds(gUnknown_030033EC, v);
     sub_0804256C();
     sub_08025D60(gUnknown_03003F38);
     sub_080258CC();
@@ -32,12 +32,12 @@ void sub_0802D2A0(int a1, int a2, u8 a3)
 {
     if (!(a3 & 2))
     {
-        sub_0801F838(0xff);
+        FillMovementMap(0xff);
         sub_08020D50(gUnknown_03003100.spos.unk00, gUnknown_03003100.spos.unk02,
             (struct Unk08499594 *)gUnknown_030040D8);
         Proc_Start(gUnknown_0849A9F8, PROC_TREE_3);
         sub_0801A168();
         sub_08024500();
-        sub_08034F7C();
+        IncrementCoPowerDepth();
     }
 }

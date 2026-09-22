@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08023A4C.
- * sub_08023A4C @ 0x08023A4C
+ * BlitMapColumn @ 0x08023A4C
  */
 
 void BlitMapColumn(u16 a1, u16 a2, u16 a3, u16 a4)

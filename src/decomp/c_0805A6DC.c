@@ -11,7 +11,7 @@
  *
  * DO NOT DELETE `u->unk03 += 0;`.  It is a dead store and it is LOAD-BEARING.
  * See the wave-52 chapter in docs/agbcc-codegen.md: without it agbcc hoists
- * both gUnknown_08499594 and the gUnknown_03003F2C bound out of the loop,
+ * both gUnits and the gUnknown_03003F2C bound out of the loop,
  * check_dbra_loop reverses the loop into a countdown, and the function comes
  * out 4 bytes short.  prescan_loop records the store, invariant_p then refuses
  * every MEM, and the store itself is deleted again before output -- so the
@@ -32,7 +32,7 @@ int sub_0805A6DC(u8 *out)
   int i;
   for (i = gUnknown_03003F2C; i < (gUnknown_03003F2C + 0x40); i++)
   {
-    u = &gUnknown_08499594[i];
+    u = &gUnits[i];
     u->unk03 += 0;
     if (u->unk00 != 0x17)
     {

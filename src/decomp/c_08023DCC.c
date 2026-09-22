@@ -22,7 +22,7 @@
  */
 void sub_08023DCC(u16 a, u16 b, u16 c, u16 d)
 {
-    sub_08023A4C(a, b, c, d);
+    BlitMapColumn(a, b, c, d);
     sub_08023D48(a, b, c, d);
 
     if (gUnknown_03000559 == 1)
@@ -44,7 +44,7 @@ void sub_08023DCC(u16 a, u16 b, u16 c, u16 d)
  */
 void sub_08023E14(u16 a, u16 b, u16 c, u16 d)
 {
-    sub_08023A4C(a, b, c, d);
+    BlitMapColumn(a, b, c, d);
     sub_08023D48(a, b, c, d);
 
     if (gUnknown_03000559 == 1)
@@ -66,7 +66,7 @@ void sub_08023E14(u16 a, u16 b, u16 c, u16 d)
  */
 void sub_08023E5C(u16 a, u16 b, u16 c, u16 d)
 {
-    sub_08023BAC(a, b, c, d);
+    BlitMapRow(a, b, c, d);
     sub_08023D14(a, b, c, d);
 
     if (gUnknown_03000559 == 1)
@@ -88,7 +88,7 @@ void sub_08023E5C(u16 a, u16 b, u16 c, u16 d)
  */
 void sub_08023EA4(u16 a, u16 b, u16 c, u16 d)
 {
-    sub_08023BAC(a, b, c, d);
+    BlitMapRow(a, b, c, d);
     sub_08023D14(a, b, c, d);
 
     if (gUnknown_03000559 == 1)

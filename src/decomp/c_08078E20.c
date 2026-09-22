@@ -22,7 +22,7 @@
 
 u8 sub_08078E20(void)
 {
-    s32 x = sub_08078E14();
+    s32 x = GetCampaignMissionId();
 
     if (x == 8 || x == 0x10 || x == 0x18 || x == 0x20 || x == 0x22 || x == 0x2a)
         return 1;

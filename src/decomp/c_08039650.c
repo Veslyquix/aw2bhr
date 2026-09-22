@@ -27,7 +27,7 @@ struct Unk39650Proc
 /* `lsls #4; subs; lsls #2` is the x0x3c stride of struct PlayerStruct -- an
  * array index, not hand-rolled arithmetic.
  *
- * The proc is also sub_08080E74's THIRD argument, which is why the incoming
+ * The proc is also StartCoPowerScript's THIRD argument, which is why the incoming
  * pointer is copied into r2 before anything else: r2 is the third argument
  * register. Drop that argument and agbcc keeps the base in r0, swaps r2 and r3
  * between the proc and the table base, and misses by five bytes in the same
@@ -35,5 +35,5 @@ struct Unk39650Proc
 
 void sub_08039650(struct Unk39650Proc *proc)
 {
-    sub_08080E74(gPlayers[proc->unk54].co, proc->unk58, proc);
+    StartCoPowerScript(gPlayers[proc->unk54].co, proc->unk58, proc);
 }

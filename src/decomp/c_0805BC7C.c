@@ -47,7 +47,7 @@ u8 sub_0805BC7C(int x, int y, u16 *out)
     if (gUnknown_030040D8->unk07[1] == 0)
         return 0;
 
-    e = &gUnknown_08499594[gUnknown_030040D8->unk07[1]];
+    e = &gUnits[gUnknown_030040D8->unk07[1]];
 
     if (sub_0805BD40(x - 1, y, e->unk00, 4, (s16 *)(p = &loc))
         + sub_0805BD40(x + 1, y, e->unk00, 2, (s16 *)&loc)

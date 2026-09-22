@@ -127,7 +127,7 @@ void sub_0800081C(void)
         {
             if (r != 6)
             {
-                sub_080085E0();
+                MakeTile();
                 sub_08021D10();
                 sub_08024268();
             }
@@ -190,7 +190,7 @@ void sub_0800081C(void)
             gActiveMap->unk00 &= 0xDFFF;
     }
 
-    if (sub_0802DBF8() && sub_08034F6C() == 0)
+    if (sub_0802DBF8() && GetCoPowerDepth() == 0)
     {
         t = gpKeySt->pressed & 4;
         if (t != 0)

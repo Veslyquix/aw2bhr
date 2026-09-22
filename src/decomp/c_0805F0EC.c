@@ -11,7 +11,7 @@
 /* Scores every passable cell by the gUnknown_0202DAD8 influence record for its
  * 4x4 block, keeps the best, and hands the winning cell to sub_080591E4 -- the
  * same 4-byte (u16, u16) buffer contract the rest of the 0x08059/0x0805F block
- * uses. sub_0805F2B4 is its twin; c_08058BB4.c is the vocabulary exemplar.
+ * uses. AiProtectHq is its twin; c_08058BB4.c is the vocabulary exemplar.
  *
  * MATCHED in Wave 63 after splitting the packed store into three statements.
  * The configured matcher accepts both literal-pool relocations below as

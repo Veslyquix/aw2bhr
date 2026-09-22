@@ -9,13 +9,13 @@
 
 #include "hardware.h"
 
-/* The palette half of sub_08023360 (src/decomp/c_08023360.c) lifted out as its
+/* The palette half of LoadGameplayGraphics (src/decomp/c_08023360.c) lifted out as its
  * own routine: the same four `gUnknown_0810E6E0 + (gPlayers[i].unk1a
  * - 1) * 0x20` palette rows, on ApplyPaletteExt with a BYTE offset where the
  * exemplar uses ApplyPalette with a slot index -- 0x180/0x1A0/0x1C0/0x1E0 are
  * the exemplar's 12/13/14/15 times 0x20, and 0x240 is its 18.
  *
- * A data_refs-subset target (42% of sub_08023360) and it behaved exactly as
+ * A data_refs-subset target (42% of LoadGameplayGraphics) and it behaved exactly as
  * that axis claims: all five globals and all eight callees already declared,
  * first draft, one attempt, nothing derived but statement order. The fourth
  * ApplyPaletteExt reuses the struct offset 0x10A as the base of its palette

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08066BF4.
- * sub_08066BF4 @ 0x08066BF4, sub_08066C70 @ 0x08066C70
+ * HandleRulesMenuInput @ 0x08066BF4, sub_08066C70 @ 0x08066C70
  */
 
 #include "hardware.h"

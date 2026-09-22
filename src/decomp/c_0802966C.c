@@ -37,7 +37,7 @@ void sub_0802966C(void)
     if (gpKeySt->pressed & 2)
     {
         sub_08015328(gUnknown_03001FBC);
-        sub_08034F8C();
+        DecrementCoPowerDepthIfNonzero();
         sub_0802D558();
         gUnknown_030033E4.unk00 = gUnknown_03003F24.pos.unk00;
         gUnknown_030033E4.unk02 = gUnknown_03003F24.pos.unk02;
@@ -46,7 +46,7 @@ void sub_0802966C(void)
     {
         gUnknown_03003F40 = gUnknown_03001470[gUnknown_03001FBC].unk20;
 
-        unit = &gUnknown_08499594[gUnknown_030040D8->unk07[
+        unit = &gUnits[gUnknown_030040D8->unk07[
                    gUnknown_03001470[gUnknown_03001FBC].unk22]];
 
         gUnknown_030033E8[gUnknown_03000558] =
@@ -67,7 +67,7 @@ void sub_0802966C(void)
         }
 
         sub_080357E0(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
-                     (((struct Unk08499594 *)gUnknown_030040D8 - gUnknown_08499594) & 0xc0) >> 6,
+                     (((struct Unk08499594 *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
                      unit->unk00, gUnknown_03003110);
         sub_08015C30(gUnknown_03001FBC);
         sub_08029868(unit->unk00);

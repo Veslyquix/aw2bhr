@@ -33,6 +33,6 @@ void sub_08087548(int a, int n, int c)
     for (i = 0; i < n; i++)
         if (gUnknown_0200C078[gUnknown_02027F74.unk04[a + i] - 0x6c].unk00[0].unk00_08 != 0)
             sub_08087514(
-                sub_08037D80(gUnknown_0200C078[gUnknown_02027F74.unk04[a + i] - 0x6c].unk00[0].unk00_14),
+                GetRankFromScore(gUnknown_0200C078[gUnknown_02027F74.unk04[a + i] - 0x6c].unk00[0].unk00_14),
                 i, c);
 }

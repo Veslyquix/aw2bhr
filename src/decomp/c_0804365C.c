@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0804365C.
- * sub_0804365C @ 0x0804365C, sub_080436DC @ 0x080436DC
+ * DrawDaysRemaining @ 0x0804365C, sub_080436DC @ 0x080436DC
  */
 
 /* `t -= gUnknown_03004080 - 1;` written in ONE expression reassociates to
@@ -59,7 +59,7 @@ void sub_080436DC(int x, int y, int pid)
     if (gPlaySt.coPowersEnabled != 0)
     {
         if (gPlayers[pid].coMode != 0)
-            sub_08043898(x, y, pid);
+            DrawCoPowerLabel(x, y, pid);
         else
             sub_080438FC(x, y, pid);
     }

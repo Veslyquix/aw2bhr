@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801A368.
- * sub_0801A368 @ 0x0801A368
+ * DrawWindowBackground @ 0x0801A368
  */
 
 /* Draws a box `a4` rows tall into the tilemap buffer `a5` at column a1, row a2:

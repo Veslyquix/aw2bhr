@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080247A4.
- * sub_080247A4 @ 0x080247A4
+ * LoadMapData @ 0x080247A4
  */
 
 void LoadMapData(u16 a1)
@@ -20,7 +20,7 @@ void LoadMapData(u16 a1)
     {
         sub_08037B84(sub_08014E44(0xa14));
 
-        p = gUnknown_085C77A0[a1].mapData[sub_0803866C()];
+        p = gUnknown_085C77A0[a1].mapData[IsHardCampaignMode()];
         if (p == NULL)
             p = gUnknown_085C77A0[a1].mapData[0];
 

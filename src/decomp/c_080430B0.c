@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080430B0.
- * sub_080430B0 @ 0x080430B0, sub_08043120 @ 0x08043120, sub_08043190 @ 0x08043190, sub_08043200 @ 0x08043200
+ * GetCoAttackBonus @ 0x080430B0, GetCoDefenceBonus @ 0x08043120, GetCoMovementBonus @ 0x08043190, GetCoRangeBonus @ 0x08043200
  *
  * Named per Xenesis's AW2 Subroutine List: "Attack Value of CO" / "Defence
  * Value of CO" / "Movement Bonus of CO" / "Range Bonus of CO" for the four

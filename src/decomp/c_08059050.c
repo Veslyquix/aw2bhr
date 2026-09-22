@@ -14,7 +14,7 @@ void sub_08059050(int a1, s16 *best, void *out)
 
     army = a1;
 
-    if (sub_080266DC(army) && sub_08026D44(army))
+    if (IsPlayerAliveAndActive(army) && sub_08026D44(army))
     {
         if ((s8)gUnknown_03003340[gPlayers[army].hqY & 0x7f]
                                  [gPlayers[army].hqX & 0x7f] >= 0)

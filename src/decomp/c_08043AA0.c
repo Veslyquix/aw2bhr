@@ -7,13 +7,13 @@
  * sub_08043AA0 @ 0x08043AA0, sub_08043AC0 @ 0x08043AC0, sub_08043AFC @ 0x08043AFC, sub_08043B14 @ 0x08043B14, sub_08043B44 @ 0x08043B44, sub_08043B60 @ 0x08043B60, sub_08043BA4 @ 0x08043BA4, sub_08043BC8 @ 0x08043BC8, sub_08043BF8 @ 0x08043BF8
  */
 
-/* sub_08017860's result reaches sub_08043AC0's third parameter with a bare
- * `adds r2, r0, #0` and no re-narrowing, which is what forced sub_08017860's
+/* GetLoadedCoPalette's result reaches sub_08043AC0's third parameter with a bare
+ * `adds r2, r0, #0` and no re-narrowing, which is what forced GetLoadedCoPalette's
  * return type from `u8` to `int` (wave 28, W28-B).
  */
 void sub_08043AA0(int a, int b)
 {
-    sub_08043AC0(a % 24, b, sub_08017860(a % 24));
+    sub_08043AC0(a % 24, b, GetLoadedCoPalette(a % 24));
 }
 
 /* Loads one 16-colour palette out of the slot's palette run.

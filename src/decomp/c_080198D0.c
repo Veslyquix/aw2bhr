@@ -16,5 +16,5 @@ void sub_080198D0(void)
     if (gPlayers[gUnknown_030033EC].aiControlled != 2
      && gUnknown_03001FF0 != NULL
      && gUnknown_03001FF0())
-        sub_08034F7C();
+        IncrementCoPowerDepth();
 }

@@ -15,7 +15,7 @@ bool8 sub_0802E724(s16 a1, s16 a2)
     int off;
     int army;
 
-    ptbl = &gUnknown_08499594;
+    ptbl = &gUnits;
 
     off = gMap->rowOffset[a2] + a1;
     e = &(*ptbl)[gMap->unit[off]];

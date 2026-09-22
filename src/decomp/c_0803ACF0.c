@@ -23,10 +23,10 @@ struct Unk0803ACF0
 
 void sub_0803ACF0(struct Unk0803ACF0 *p)
 {
-    p->unk20 = sub_0803CBD8(0x65);
-    p->unk22 = sub_0803CBD8(0x66);
-    p->unk24 = sub_0803CBD8(0x68);
-    p->unk26 = sub_0803CBD8(0x67);
+    p->unk20 = IsCampaignCompletionFlagSet(0x65);
+    p->unk22 = IsCampaignCompletionFlagSet(0x66);
+    p->unk24 = IsCampaignCompletionFlagSet(0x68);
+    p->unk26 = IsCampaignCompletionFlagSet(0x67);
     p->unk28 = gUnknown_0200C420.unk00;
     p->unk2a = gUnknown_0200C420.unk04;
     p->unk2c = 0;

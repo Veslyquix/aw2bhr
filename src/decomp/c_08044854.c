@@ -27,7 +27,7 @@ void sub_08044854(int x, int y, int c)
     if (y >= gMap->height)
         return;
 
-    u = &gUnknown_08499594[(pp = &gUnknown_08499594,
+    u = &gUnits[(pp = &gUnits,
         idx = gMap->rowOffset[y] + x,
         gMap->unitUnk[idx])];
 

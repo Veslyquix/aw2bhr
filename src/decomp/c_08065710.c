@@ -13,7 +13,7 @@
  * that callee's `s8` return before the compare against -1. */
 void sub_08065710(void)
 {
-    sub_0801F34C(0x68, 0xAC, 4, 0, 1);
+    DrawOamObject(0x68, 0xAC, 4, 0, 1);
 
     if (sub_08015BD0((s32)gUnknown_08580DD8) == -1)
         sub_08015C30(gUnknown_03001FBC);

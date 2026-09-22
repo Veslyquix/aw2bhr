@@ -61,7 +61,7 @@ ProcPtr sub_080355CC(u16 x, u16 y, u16 a3, u16 a4)
 
     gUnknown_03003124[slot] = 1;
 
-    gfx = sub_08035B68(a4);
+    gfx = GetUnitSpriteFormat(a4);
     proc = Proc_Start(gUnknown_0849BE38, PROC_TREE_5);
     proc->unk2c = sub_0801C210(gfx, 2, 1);
     proc->unk3a = slot;

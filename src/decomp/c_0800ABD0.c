@@ -34,8 +34,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(x, bandY) == 0
              || sub_08009538(x, bandY) == 0)
             {
-                sub_080011F4(x, bandY, 7);
-                sub_08001158(x, bandY, 0x2a);
+                SetTerrainAt(x, bandY, 7);
+                MakeTileSimple(x, bandY, 0x2a);
                 sub_0800A3D4(x, bandY);
             }
         }
@@ -48,8 +48,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -63,8 +63,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -84,8 +84,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(x, bandY) == 0
              || sub_08009538(x, bandY) == 0)
             {
-                sub_080011F4(x, bandY, 7);
-                sub_08001158(x, bandY, 0x2a);
+                SetTerrainAt(x, bandY, 7);
+                MakeTileSimple(x, bandY, 0x2a);
                 sub_0800A3D4(x, bandY);
             }
         }
@@ -98,8 +98,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -113,8 +113,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -129,8 +129,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(m, y) == 0
              || sub_08009538(m, y) == 0)
             {
-                sub_080011F4(m, y, 7);
-                sub_08001158(m, y, 0x2a);
+                SetTerrainAt(m, y, 7);
+                MakeTileSimple(m, y, 0x2a);
                 sub_0800A3D4(m, y);
             }
         }
@@ -144,8 +144,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(m, y) == 0
              || sub_08009538(m, y) == 0)
             {
-                sub_080011F4(m, y, 7);
-                sub_08001158(m, y, 0x2a);
+                SetTerrainAt(m, y, 7);
+                MakeTileSimple(m, y, 0x2a);
                 sub_0800A3D4(m, y);
             }
         }

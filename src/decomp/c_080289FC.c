@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080289FC.
- * sub_080289FC @ 0x080289FC, sub_08028A68 @ 0x08028A68, sub_08028AEC @ 0x08028AEC, sub_08028B70 @ 0x08028B70
+ * sub_080289FC @ 0x080289FC, sub_08028A68 @ 0x08028A68, MarkDefeatedArmies @ 0x08028AEC, sub_08028B70 @ 0x08028B70
  */
 
 /* "Is army a1 the last one standing among the armies sharing its +0x2a team
@@ -13,13 +13,13 @@
  *
  * The `&&` chain is what puts the gPlayers pool word INSIDE the loop:
  * the deref is written in place, once per iteration, and nothing hoists it
- * because the `bl sub_080266DC` in the same body clobbers it. r7 and r6 are
+ * because the `bl IsPlayerAliveAndActive` in the same body clobbers it. r7 and r6 are
  * strength_reduce's two givs for `a1 * 0x3c` and `i * 0x3c`; only r6 is
  * initialised in the preheader (`movs r6,#0x3c`, i.e. i = 1) and neither is
  * source.
  *
  * `i` is `int`: the increment is a bare `adds r4,#1` and the exit test a signed
- * `ble` with no narrowing anywhere, while the two sub_080266DC arguments carry
+ * `ble` with no narrowing anywhere, while the two IsPlayerAliveAndActive arguments carry
  * the `lsls #0x18; lsrs #0x18` that function's u8 parameter demands. */
 bool8 sub_080289FC(int a1)
 {
@@ -27,14 +27,14 @@ bool8 sub_080289FC(int a1)
 
     if (gPlaySt.event20 & 4)
     {
-        if (!sub_080266DC(a1))
+        if (!IsPlayerAliveAndActive(a1))
             return FALSE;
 
         for (i = 1; i <= 4; i++)
         {
             if (a1 != i
              && gPlayers[a1].team == gPlayers[i].team
-             && !sub_080266DC(i))
+             && !IsPlayerAliveAndActive(i))
                 return FALSE;
         }
     }
@@ -44,12 +44,12 @@ bool8 sub_080289FC(int a1)
 
 /* Runs the four per-army end-of-turn predicates over slots 1..4 and reports the
  * first one that fails to sub_08028894, with a reason code (8, 0x10, 1, 2).
- * sub_08028AEC is the same function against sub_08028874 -- the two instruction
+ * MarkDefeatedArmies is the same function against sub_08028874 -- the two instruction
  * streams differ in nothing but that callee, at all four call sites.
  *
  * `i` is s16 and that is what the whole body's shift pattern is: agbcc keeps the
  * induction variable as `i << 16` in r6 and re-derives every argument from it
- * per the callee's own parameter type -- `lsls/lsrs #0x18` for sub_080266DC's
+ * per the callee's own parameter type -- `lsls/lsrs #0x18` for IsPlayerAliveAndActive's
  * u8, `lsrs #0x10` for the three u16 predicates, `asrs #0x10` for sub_080289BC's
  * and sub_08028894's `int`. Nothing here is a mask and nothing is authored: the
  * `movs r1,#0x80; lsls #9` at the bottom is the loop optimiser adding 0x10000 to
@@ -64,7 +64,7 @@ void sub_08028A68(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (sub_080266DC(i))
+        if (IsPlayerAliveAndActive(i))
         {
             if (!sub_08028904(i))
                 sub_08028894(i, 8);
@@ -88,7 +88,7 @@ void MarkDefeatedArmies(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (sub_080266DC(i))
+        if (IsPlayerAliveAndActive(i))
         {
             if (!sub_08028904(i))
                 sub_08028874(i, 8);

@@ -9,7 +9,7 @@
 
 /* sub_080606D0 @ 0x080606D0, 72 bytes.
  *
- * The AI turn's outer driver: seed a difficulty budget, ask sub_08060DAC how
+ * The AI turn's outer driver: seed a difficulty budget, ask AiBuildPropertyList how
  * many decision passes this turn gets, then run sub_08060718 that many times
  * with the budget.
  *
@@ -38,7 +38,7 @@ void sub_080606D0(void)
 
     v = 0;
     sub_08060D78(&v);
-    n = sub_08060DAC();
+    n = AiBuildPropertyList();
     gUnknown_030045D8 = sub_08057FE8(0x15);
 
     for (j = 0; j < n; j++)
@@ -71,7 +71,7 @@ void sub_080606D0(void)
  *    loop.
  *
  *  - the table base is hoisted for the first read (`adds r2, r0, r1`) and
- *    RE-LOADED from gUnknown_08499594 for the second (`ldr r0, [r7]`), and both
+ *    RE-LOADED from gUnits for the second (`ldr r0, [r7]`), and both
  *    accumulators keep their addresses in registers across the loop
  *    (gUnknown_03004674 in r6, gUnknown_030045D0 through ip then r5). That
  *    asymmetry is LICM's; both accesses are written the same way below.
@@ -92,19 +92,19 @@ void sub_08060718(s16 a1)
 
     for (; k < end; k++)
     {
-        if (gUnknown_08499594[k].unk00 != 0)
+        if (gUnits[k].unk00 != 0)
             gUnknown_03004674++;
 
-        if (gUnknown_08576877[gUnknown_08499594[k].unk00] != 0)
+        if (gUnknown_08576877[gUnits[k].unk00] != 0)
             gUnknown_030045D0++;
     }
 
-    gUnknown_030046D4 = sub_08057F00(1);
+    gUnknown_030046D4 = CountUnitsWithTypeTag(1);
     sub_08060894(a1);
     sub_08060930();
     sub_08060AB0();
     sub_08060A7C();
-    sub_08060D4C();
+    AiPickUnitToBuild();
 
     if (gUnknown_030046C0.unk06 != 0)
         sub_080610D0();

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0802A838.
- * sub_0802A838 @ 0x0802A838, sub_0802A85C @ 0x0802A85C
+ * sub_0802A838 @ 0x0802A838, GetTerrainNameGraphic @ 0x0802A85C
  */
 
 const u8 * sub_0802A838(int a1)

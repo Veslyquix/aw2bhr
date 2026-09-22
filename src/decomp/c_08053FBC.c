@@ -62,7 +62,7 @@ void sub_08053FBC(u16 a1)
 
                     if (v != 0)
                     {
-                        sub_0803B48C(gUnknown_085D6C88[gUnknown_03004580[a1][1]]
+                        PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[a1][1]]
                             .unk00[gUnknown_03004580[a1][3] == 2]
                                   [gUnknown_02029C04[a1] & 1]);
                         gUnknown_02029C04[a1]++;

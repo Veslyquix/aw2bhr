@@ -26,7 +26,7 @@
  * and `return 0` lands after the pool, which is 4 bytes wrong. */
 int sub_0804203C(struct Unk08499594 *p)
 {
-    if (sub_08042D50(((p - gUnknown_08499594) >> 6) + 1, p->unk00) == 1)
+    if (GetUnitFiringRangeWithCoBonus(((p - gUnits) >> 6) + 1, p->unk00) == 1)
         return 0;
 
     if (p->unk04_7 != 0)

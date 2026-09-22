@@ -9,7 +9,7 @@
 
 #include "proc.h"
 /* A near-copy of sub_08077F30 (src/decomp/c_08077F30.c): the same
- * gUnknown_08615194 record lookup and the same sub_0803866C()-selected
+ * gUnknown_08615194 record lookup and the same IsHardCampaignMode()-selected
  * unk28/unk24 ternary, published to gUnknown_030046B4. That file's comment
  * works out why the differing 0x24 / 0x28 constant folds into the base pointer
  * rather than staying an `ldr [.., #0x24]` displacement -- the two arms share
@@ -18,7 +18,7 @@
  * What is new here is the proc tail: a straight branch on +0x3c between
  * calling the proc's own +0x38 hook and going to label 8 after sub_0803BD54.
  * `bl _call_via_r0` is nullary. The index is re-read from
- * gUnknown_0202FDFC.unk0c after the `bl` because sub_0803866C may write it,
+ * gUnknown_0202FDFC.unk0c after the `bl` because IsHardCampaignMode may write it,
  * while the three pool bases stay in r4/r5/r6 across the call as
  * callee-saved. */
 struct Unk8077F9C
@@ -34,7 +34,7 @@ void sub_08077F9C(struct Unk8077F9C *proc)
 
     gPlaySt.mapID = gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
 
-    gUnknown_030046B4 = sub_0803866C()
+    gUnknown_030046B4 = IsHardCampaignMode()
         ? gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptHc
         : gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptNc;
 

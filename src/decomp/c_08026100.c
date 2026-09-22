@@ -20,12 +20,12 @@
  * Three separate facts are read off the ROM and every one of them needs a
  * reference at a position no statement boundary can reach:
  *
- *  - `pp = &gUnknown_08499594` is the wave-17 anchor. gUnknown_08499594 is a
+ *  - `pp = &gUnits` is the wave-17 anchor. gUnits is a
  *    POINTER global whose address is materialised right after the height test
  *    and whose `ldr` is issued last; `pp` is never read, and what matters is
  *    only that the reference precedes `t = y * 2`. Without it the address load
  *    lands five instructions late, the height goes to r2 instead of r6 and the
- *    frame loses r6. An anchor spelled `u = gUnknown_08499594;` does NOT work
+ *    frame loses r6. An anchor spelled `u = gUnits;` does NOT work
  *    -- that is a pointer LOAD (`ldr addr; ldr [addr]`), and the ROM's deref is
  *    at the end.
  *  - `idx = ...` sits inside the index expression, ahead of the plane read.
@@ -49,7 +49,7 @@ void sub_08026100(int x, int y, int c)
     if (y >= gMap->height)
         return;
 
-    u = &gUnknown_08499594[(pp = &gUnknown_08499594,
+    u = &gUnits[(pp = &gUnits,
         idx = gMap->rowOffset[y] + x,
         gMap->unitUnk[idx])];
 

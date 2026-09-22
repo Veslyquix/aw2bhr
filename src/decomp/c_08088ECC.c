@@ -86,22 +86,22 @@ void sub_08088ECC(void *arg)
 
         if (proc->unk4e < 0)
         {
-            sub_0801F34C(0x48,
+            DrawOamObject(0x48,
                 0x18 - Interpolate(4, Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20), 0x10, proc->unk4c, 0x10),
                 Interpolate(4, Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20), 8, proc->unk4c, 0x10) + 0x3C,
                 0, 0);
-            sub_0801F34C(0x49,
+            DrawOamObject(0x49,
                 Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20) + 0x58,
                 0x2C - Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20),
                 0, 0);
         }
         else
         {
-            sub_0801F34C(0x48,
+            DrawOamObject(0x48,
                 0x18 - Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20),
                 Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20) + 0x3C,
                 0, 0);
-            sub_0801F34C(0x49,
+            DrawOamObject(0x49,
                 Interpolate(4, Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20), 0x10, proc->unk4c, 0x10) + 0x58,
                 0x2C - Interpolate(4, Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20), 8, proc->unk4c, 0x10),
                 0, 0);
@@ -124,22 +124,22 @@ void sub_08088ECC(void *arg)
 
         if (proc->unk60 < 0)
         {
-            sub_0801F34C(0x48,
+            DrawOamObject(0x48,
                 0x18 - Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20),
                 Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20) + 0x3C,
                 0, 0);
-            sub_0801F34C(0x49,
+            DrawOamObject(0x49,
                 Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20) + 0x58,
                 0x2C - Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20),
                 0, 0);
         }
         else
         {
-            sub_0801F34C(0x48,
+            DrawOamObject(0x48,
                 0x18 - Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20),
                 Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20) + 0x3C,
                 0, 0);
-            sub_0801F34C(0x49,
+            DrawOamObject(0x49,
                 Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20) + 0x58,
                 0x2C - Interpolate(4, 0, 4, DivRem((s16)proc->unk48, 0x20), 0x20),
                 0, 0);
@@ -160,11 +160,11 @@ void sub_08088ECC(void *arg)
             gUnknown_03002B34 += 0xC;
         }
 
-        sub_0801F34C(0x48,
+        DrawOamObject(0x48,
             0x18 - Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20),
             Interpolate(4, 0, 4, DivRem(proc->unk48, 0x20), 0x20) + 0x3C,
             0, 0);
-        sub_0801F34C(0x49,
+        DrawOamObject(0x49,
             Interpolate(4, 0, 8, DivRem(proc->unk48, 0x20), 0x20) + 0x58,
             0x2C - Interpolate(4, 0, 4, DivRem(proc->unk48, 0x20), 0x20),
             0, 0);
@@ -172,13 +172,13 @@ void sub_08088ECC(void *arg)
 
     if ((int)gUnknown_03005944 > 1)
     {
-        sub_0801F34C(0x43, 0x38, 0x1C, 0, 0);
-        sub_0801F34C(0x44, 0x38, 0x54, 0, 0);
+        DrawOamObject(0x43, 0x38, 0x1C, 0, 0);
+        DrawOamObject(0x44, 0x38, 0x54, 0, 0);
     }
 
     sub_08043C28(proc->unk34 + 0xB0, 0xA0, 0x1040, 2, 1);
     PutSprite(1, 0x20, 0x1C, gUnknown_0848B6A0, 0);
-    sub_0801F34C(gUnknown_03005958[proc->unk58] + 0x3E, 0x20, 0x78, 0, 0);
+    DrawOamObject(gUnknown_03005958[proc->unk58] + 0x3E, 0x20, 0x78, 0, 0);
     sub_08043B60(0x30, 0x78, 0xA2CC, 3);
 }
 
@@ -203,18 +203,18 @@ void sub_08089464(void *arg)
                  Div(COS_Q12(0) * 16, scale != 0 ? scale : 2));
 
     for (i = 0; i < 4; i++)
-        sub_0801F34C(i + 0x83, i * 0x18 + 8, i * 6 + 0x28, 0, 4);
+        DrawOamObject(i + 0x83, i * 0x18 + 8, i * 6 + 0x28, 0, 4);
 
     for (i = 0; i < 4; i++)
-        sub_0801F34C(i + 0x87, i * 0x18 + 0x10, i * 6 + 0x4A, 0, 4);
+        DrawOamObject(i + 0x87, i * 0x18 + 0x10, i * 6 + 0x4A, 0, 4);
 
     if (gUnknown_03005964 <= 3)
-        sub_0801F34C(0x8B,
+        DrawOamObject(0x8B,
                      ((gUnknown_03005964 * 0x18 - 0x10) & 0x1FF) | 0x200,
                      ((gUnknown_03005964 * 6 + 0x10) & 0xFF) | 0x300,
                      0, 5);
     else
-        sub_0801F34C(0x8B,
+        DrawOamObject(0x8B,
                      (((gUnknown_03005964 - 4) * 0x18 - 8) & 0x1FF) | 0x200,
                      (((gUnknown_03005964 - 4) * 6 + 0x32) & 0xFF) | 0x300,
                      0, 5);

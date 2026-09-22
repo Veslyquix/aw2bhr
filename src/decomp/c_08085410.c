@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08085410.
- * sub_08085410 @ 0x08085410
+ * GetFirepowerIcon @ 0x08085410
  */
 
 /* Maps a terrain/defence modifier to one of thirteen consecutive ids
@@ -15,7 +15,7 @@
 
 int GetFirepowerIcon(int a1, int a2)
 {
-    switch (sub_080430B0(gPlayers[a1].co, gPlayers[a1].coMode, a2))
+    switch (GetCoAttackBonus(gPlayers[a1].co, gPlayers[a1].coMode, a2))
     {
     case -10:
         return 0x9b;

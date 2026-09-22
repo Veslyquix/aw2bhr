@@ -9,7 +9,7 @@
 
 #include "proc.h"
 /* Redraws the roster row for the unit list at gUnknown_02027F74.unk04[a]:
- * uploads each unit's tile blob into OBJ VRAM and, for the ones sub_0803CA54
+ * uploads each unit's tile blob into OBJ VRAM and, for the ones IsCampaignMapUnlocked
  * rejects, overwrites their 16-colour palette. The twin of sub_08087C14, which
  * reaches the same byte through the overlapping gUnknown_02027F78 extern.
  *
@@ -48,7 +48,7 @@
  *    PRODUCT, not a mask and a shift.
  *  - `0x90 + i * 0xc` is a strength-reduction giv and must not be authored as
  *    an accumulator.
- *  - the `lsls #0x18` after sub_0803CA54 is the caller's own `(u8)` cast; the
+ *  - the `lsls #0x18` after IsCampaignMapUnlocked is the caller's own `(u8)` cast; the
  *    promoted src/decomp/c_0803CA54.c defines an `int` return. */
 
 struct Unk08087B74Proc
@@ -115,7 +115,7 @@ void sub_08087B74(int a)
             sub_08043FA8(tbl[i + k],
                 (void *)(((0x90 + i * 0xc) & 0x3FF) * 0x20 + 0x06010000), i + 0x17);
 
-            if ((u8)sub_0803CA54(gUnknown_02027F74.unk04[a]) == 0)
+            if ((u8)IsCampaignMapUnlocked(gUnknown_02027F74.unk04[a]) == 0)
                 ApplyPaletteExt(gUnknown_08614238, (u16)((i + 0x17) * 0x20), 0x20);
         }
     }

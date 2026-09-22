@@ -26,7 +26,7 @@ int sub_0803E9F8(struct Unk0803E9F8 *p, u8 *a2, u8 a3, u8 a4)
     if (p->unk04 == 0)
         return 0;
     sub_0801F92C(a2);
-    sub_0801F838(a3);
+    FillMovementMap(a3);
     switch (p->unk02_6)
     {
     case 1:

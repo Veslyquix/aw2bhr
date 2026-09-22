@@ -23,7 +23,7 @@ void sub_08044968(struct UnkP448E4 *proc)
     struct Unk08499594 *e;
 
     if (proc->unk66 != 0) {
-        e = &gUnknown_08499594[proc->unk66];
+        e = &gUnits[proc->unk66];
         sub_0806AA80(e->unk02, e->unk03);
     }
 }

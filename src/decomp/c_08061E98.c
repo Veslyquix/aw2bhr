@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08061E98.
- * sub_08061E98 @ 0x08061E98, sub_08061F34 @ 0x08061F34
+ * sub_08061E98 @ 0x08061E98, AiScanBuildableFacilities @ 0x08061F34
  */
 
 /* Runs one handler over every unit record of the current army window.
@@ -77,7 +77,7 @@ void sub_08061E98(void)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        p = &((struct Unk61E98Unit *)gUnknown_08499594)[i];
+        p = &((struct Unk61E98Unit *)gUnits)[i];
         if (p->unk00 != 0)
         {
             gUnknown_03004784 = (u8 *)gUnknown_085766E0 + (p->unk00 * 12 + 4);

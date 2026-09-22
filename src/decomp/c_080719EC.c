@@ -20,7 +20,7 @@ struct Unk80719EC
 
 void sub_080719EC(struct Unk80719EC *proc)
 {
-    if (proc->unk64 != sub_08034F6C())
+    if (proc->unk64 != GetCoPowerDepth())
         return;
 
     sub_08011A20(0x78, 0x50, proc->unk58);
@@ -56,7 +56,7 @@ void sub_080719EC(struct Unk80719EC *proc)
 
     if (gpKeySt->pressed & 1)
     {
-        proc->unk64 = sub_08034F6C();
+        proc->unk64 = GetCoPowerDepth();
         Proc_Break(proc);
     }
 

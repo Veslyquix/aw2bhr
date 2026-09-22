@@ -29,7 +29,7 @@
  *     the call instead. The load itself stays after the call either way.
  *
  * `ldrb r1, [r5]` on a u16 global is the u8 conversion of a halfword on a
- * little-endian target -- sub_08029CB8's unused second parameter is u8, and
+ * little-endian target -- StartSupplyAnimation's unused second parameter is u8, and
  * this call site is the only thing in the tree that shows its width. */
 /* WAVE 35: CANONICAL `struct Map`. Eight drafts across blocks 0x08029-0x0802B
  * each invented their own body for this tag, with 2 to 7 named fields. Every
@@ -70,6 +70,6 @@ bool8 sub_0802A38C(struct Unk2A38C *p, int (*fn)(struct Unk2A38C *))
 
     t = p->unk03 << 16;
     v = p->unk02 | t;
-    sub_08029CB8((struct Unk802C57C *)&v, *q, r, 0);
+    StartSupplyAnimation((struct Unk802C57C *)&v, *q, r, 0);
     return 1;
 }

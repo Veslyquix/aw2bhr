@@ -43,7 +43,7 @@ void sub_08051454(void)
   oam.tileNum = (new_var = gUnknown_02029710[gUnknown_0300453C ^ 1].unk00);
   if ((gUnknown_03004580[gUnknown_0300453C ^ 1][1] == 0xE) || (gUnknown_03004580[gUnknown_0300453C ^ 1][1] == 0xF))
   {
-    sub_0803B48C(gUnknown_085643A8.unk00[gUnknown_020298E0[gUnknown_0300453C].unk8c & 1]);
+    PlayMusicOrSfx(gUnknown_085643A8.unk00[gUnknown_020298E0[gUnknown_0300453C].unk8c & 1]);
   }
   if (((tbl = (struct Unk85D6A48Row *)gUnknown_085D6A48,
         tbl[gUnknown_03004580[gUnknown_0300453C ^ 1][1]].unk02) == 2) && ((gUnknown_03004580[gUnknown_0300453C ^ 1][1] == 0x17) || (gUnknown_03004580[gUnknown_0300453C ^ 1][1] == 0x11)))

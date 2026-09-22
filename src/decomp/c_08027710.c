@@ -37,7 +37,7 @@ void sub_0802776C(u8 a1)
     switch (a1)
     {
     case 0:
-        sub_0801F024(sub_08027658, 0);
+        sub_0801F024(DrawInfoBoxCombobox, 0);
         break;
 
     case 1:

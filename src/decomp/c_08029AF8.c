@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08029AF8.
- * sub_08029AF8 @ 0x08029AF8
+ * RepairUnit @ 0x08029AF8
  */
 
 /* MATCHED in wave 73 (W73-H), 248/248 bytes. Previously parked at 240/248 (-8)
@@ -124,7 +124,7 @@ int RepairUnit(struct Unk08499594 *p, u16 a2, u8 a3)
     int t;
 
     acc = 0;
-    v = sub_08042C9C(gUnknown_030033EC, p->unk00);
+    v = GetCoPriceMultiplier(gUnknown_030033EC, p->unk00);
 
     if (a2 != 0)
     {
@@ -138,7 +138,7 @@ int RepairUnit(struct Unk08499594 *p, u16 a2, u8 a3)
                 if (gPlayers[gUnknown_030033EC].funds < v)
                     goto _done;
 
-                sub_08025B28(gUnknown_030033EC, v);
+                SubtractPlayerFunds(gUnknown_030033EC, v);
             }
 
             acc += v;

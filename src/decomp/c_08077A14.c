@@ -51,7 +51,7 @@ void sub_08077A14(struct Unk8077A14Proc * proc)
     sub_080755E0();
     sub_08013C54();
     sub_08072C40(1, 0, 0);
-    sub_08025E74();
+    ClearAllUnits();
     sub_08011C68(gUnknown_080A0F38,
                  (void *)(0x06001000 + (gUnknown_03002B6C.bits.chr_block << 14)),
                  0x200);

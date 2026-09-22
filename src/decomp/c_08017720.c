@@ -11,7 +11,7 @@
  * the FULL ARRAY EXPRESSION in the search loop, do NOT reintroduce a pointer.
  *
  * Everything except the search loop's ADDRESSING is byte-exact against the ROM:
- * the sub_0803861C guard, the switch, the whole loop BODY, the `k == 5` bail,
+ * the IsPlayer1TeamAlive guard, the switch, the whole loop BODY, the `k == 5` bail,
  * the `movs r2,#3` / three `lsls` pre-block, the insertion shift loop, all
  * three bitfield stores, and the entire `case 1` arm.
  *
@@ -55,9 +55,9 @@
  *  - The comparisons are SIGNED (`blt`/`bge`/`bgt`) with no cast: a 12-bit
  *    `u32` bitfield promotes to `int`, so `field >= c` with an `int c` gives
  *    the signed condition for free.
- *  - `sub_0803861C` is declared `bool8 (void)` -- the ROM's `bl` with r0 still
+ *  - `IsPlayer1TeamAlive` is declared `bool8 (void)` -- the ROM's `bl` with r0 still
  *    holding the first parameter is not an argument, it is leftover.
- *  - `sub_0803866C()` is called FOUR times in `case 1`, once per access. It is
+ *  - `IsHardCampaignMode()` is called FOUR times in `case 1`, once per access. It is
  *    a call, so nothing CSEs it; spell it at each use.
  *  - The switch bodies are emitted in SOURCE order but the compare chain is
  *    ascending, which is why `case 2` must be written FIRST: the ROM tests 1
@@ -88,7 +88,7 @@ void sub_08017720(int a, int b, int c, int d)
     int j;
     struct Unk0200C078Rec *e;
 
-    if (sub_0803861C() == 0)
+    if (IsPlayer1TeamAlive() == 0)
         return;
 
     switch (gPlaySt.gameMode)
@@ -121,11 +121,11 @@ search_done:
 
     case 1:
         b -= 0x8a;
-        if (gUnknown_0200C2D0[b].unk00[sub_0803866C()].unk00_14 > c)
+        if (gUnknown_0200C2D0[b].unk00[IsHardCampaignMode()].unk00_14 > c)
             return;
-        gUnknown_0200C2D0[b].unk00[sub_0803866C()].unk00_00 = a;
-        gUnknown_0200C2D0[b].unk00[sub_0803866C()].unk00_14 = c;
-        gUnknown_0200C2D0[b].unk00[sub_0803866C()].unk00_08 = d;
+        gUnknown_0200C2D0[b].unk00[IsHardCampaignMode()].unk00_00 = a;
+        gUnknown_0200C2D0[b].unk00[IsHardCampaignMode()].unk00_14 = c;
+        gUnknown_0200C2D0[b].unk00[IsHardCampaignMode()].unk00_08 = d;
         break;
     }
 }

@@ -24,9 +24,9 @@ void sub_0806D7A4(struct Unk6D7A4 *p)
     p->unk24 += p->unk34;
 
     if (p->unk3c == gUnknown_08581F12)
-        sub_0801F34C(0x8c, p->unk24 & 0x1ff, p->unk28 & 0xff, 0, 1);
+        DrawOamObject(0x8c, p->unk24 & 0x1ff, p->unk28 & 0xff, 0, 1);
     else
-        sub_0801F34C(0x8d, p->unk24 & 0x1ff, p->unk28 & 0xff, 0, 1);
+        DrawOamObject(0x8d, p->unk24 & 0x1ff, p->unk28 & 0xff, 0, 1);
 
     if (p->unk24 + 0x30 > 0x120)
         sub_08015C30(gUnknown_03001FBC);

@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08022428.
- * sub_08022428 @ 0x08022428
+ * DrawUnitAt @ 0x08022428
  */
 
 /* MATCHED (wave 52, W52-E), by decomp-permuter at iteration 553 from the 98.5%
@@ -15,7 +15,7 @@
  *
  * then re-run tools/split_rodata.py and tools/gen_lds.py. gUnknown_0809099C
  * and gUnknown_080909A0 are agbcc's own -fforce-addr words for
- * gUnknown_08499590 and gUnknown_08499594; the honest spelling names the
+ * gUnknown_08499590 and gUnits; the honest spelling names the
  * objects and the build places the two words (addends 0 and 4).
  *
  * THE WHOLE RESIDUAL WAS ONE REGISTER SWAP, and `(new_var = cx)` is what
@@ -61,13 +61,13 @@ void DrawUnitAt(u16 x, u16 y)
         || gMap
                ->unk234A[gMap->rowOffset[y] + x] == 0
         || !sub_0802571C(id)
-        || (gUnknown_08499594[id].unk01 & 4) != 0)
+        || (gUnits[id].unk01 & 4) != 0)
     {
         sub_080223E0(x, y);
     }
     else
     {
-        if ((gUnknown_08499594[id].unk01 & 1) != 0)
+        if ((gUnits[id].unk01 & 1) != 0)
             v = 0x100;
         else
             v = id & 0xc0;
@@ -75,7 +75,7 @@ void DrawUnitAt(u16 x, u16 y)
         cx = ((x - gMap->camX) & 0xf) * 2;
         cy = ((y - gMap->camY) & 0xf) * 2;
 
-        e = &gUnknown_08499594[id];
+        e = &gUnits[id];
 
         if (e->unk04_0 != 0)
             hp = Div(e->unk04_0 - 1, 10) + 1;
@@ -83,13 +83,13 @@ void DrawUnitAt(u16 x, u16 y)
             hp = 0;
 
         sub_0802216C((gUnknown_0849957C + (new_var = cx)) + cy * 32,
-                     gUnknown_08499594[id].unk00,
+                     gUnits[id].unk00,
                      v,
                      e->unk07 | e->unk08,
                      e->unk05_3,
                      hp,
                      (u8)(e->unk01 & 0x20),
-                     sub_08043050((id >> 6) + 1) & 1);
+                     GetPlayerSpecialAbilities((id >> 6) + 1) & 1);
     }
 }
 

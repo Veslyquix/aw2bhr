@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08003DC4.
- * sub_08003DC4 @ 0x08003DC4
+ * FixShorelineAt @ 0x08003DC4
  */
 
 /* MATCHED, wave 36 (W36-I), after five waves parked at 93.7%. PROMOTION NEEDS

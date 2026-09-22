@@ -12,14 +12,14 @@
  * value, then its type's gUnknown_085D5ABC[t].unk0e capacity minus one under a
  * different flag.
  *
- * `((e - gUnknown_08499594) >> 6) + 1` is the standard army number for this
+ * `((e - gUnits) >> 6) + 1` is the standard army number for this
  * tree -- the *5 / *17 / *257 / *65537 shift-add chain plus `neg; asr #8` is
  * agbcc's exact division by the 12-byte stride folded together with the `>> 6`
  * that groups 64 slots to an army. */
 void sub_08020354(u16 x, u16 y, struct Unk08499594 *e)
 {
     sub_0801F9C0(x, y,
-                 sub_08042D50(((e - gUnknown_08499594) >> 6) + 1, e->unk00), 0);
+                 GetUnitFiringRangeWithCoBonus(((e - gUnits) >> 6) + 1, e->unk00), 0);
     sub_0801F9C0(x, y, gUnknown_085D5ABC[e->unk00].minRange - 1, 0xff);
 }
 

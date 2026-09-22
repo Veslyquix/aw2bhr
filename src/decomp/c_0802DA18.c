@@ -72,7 +72,7 @@ void sub_0802DA18(void)
             return;
         }
 
-        p = sub_08025E08(gUnknown_030040A4.unk00, gUnknown_030040A4.unk02,
+        p = BuyUnit(gUnknown_030040A4.unk00, gUnknown_030040A4.unk02,
                          ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00);
 
         gUnknown_03003100.pos.unk00 = gUnknown_030040A4.unk00;

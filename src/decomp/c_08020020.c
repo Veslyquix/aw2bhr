@@ -15,7 +15,7 @@
  *
  * gUnknown_03003340 is declared `u8 *[]` and every read here is `ldrsb`, so the
  * (s8 *) cast is on THIS function's access, not on the global: the declaration
- * is left alone per the shared-type rule. sub_0801F838, which fills the same
+ * is left alone per the shared-type rule. FillMovementMap, which fills the same
  * table, stores a u8 -- the two are consistent, the plane just carries a
  * negative "unreached" sentinel that only this reader looks at. */
 #define MAP gMap

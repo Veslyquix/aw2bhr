@@ -11,7 +11,7 @@
 
 void sub_080859E8(ProcPtr proc)
 {
-    sub_0801F34C(0x92,
+    DrawOamObject(0x92,
                  Interpolate(4, 0xF0, 0x38, ((s16 *)proc)[0x32]++, 8) & 0x1FF,
                  0x38, 0, 0);
 
@@ -24,7 +24,7 @@ void sub_080859E8(ProcPtr proc)
 
 void sub_08085A38(ProcPtr proc)
 {
-    sub_0801F34C(0x92,
+    DrawOamObject(0x92,
                  Interpolate(1, 0x38, -0x80, ((s16 *)proc)[0x32]++, 8) & 0x1FF,
                  0x38, 0, 0);
 

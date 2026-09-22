@@ -104,7 +104,7 @@ void sub_0804EB78(void)
     }
     else
     {
-        sub_0803B48C(0x23);
+        PlayMusicOrSfx(0x23);
         gUnknown_02029B80[c][e] = 0;
         gUnknown_02029B94[c][e] = 1;
         e2->frame = 0;

@@ -35,7 +35,7 @@ u16 sub_0804769C(struct Unk0804769C *p, u16 idx)
     struct Unk08499594 *r;
 
     count = 0;
-    r = &gUnknown_08499594[gUnknown_03003F2C + idx];
+    r = &gUnits[gUnknown_03003F2C + idx];
     if (r->unk01 & 8)
     {
         count = 1;
@@ -43,7 +43,7 @@ u16 sub_0804769C(struct Unk0804769C *p, u16 idx)
         {
             for (i = 0; i < p->unk21; i++)
             {
-                r = &gUnknown_08499594[gUnknown_03003F2C + gUnknown_02028DD8[i]];
+                r = &gUnits[gUnknown_03003F2C + gUnknown_02028DD8[i]];
                 if (r->unk01 & 8)
                 {
                     if (idx == r->unk07 - gUnknown_03003F2C

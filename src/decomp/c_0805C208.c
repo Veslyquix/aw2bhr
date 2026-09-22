@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0805C208.
- * sub_0805C208 @ 0x0805C208
+ * CopCondUnitsInjured @ 0x0805C208
  */
 
 /* Next door to src/decomp/c_0805C1D8.c and guarded the same way: the
@@ -31,8 +31,8 @@ int CopCondUnitsInjured(void)
     {
         for (i = gUnknown_03003F2C + 1; i < gUnknown_03003F2C + 0x40; i++)
         {
-            if (gUnknown_08499594[i].unk00 != 0
-                && gUnknown_08499594[i].unk04_0 <= 0x5a)
+            if (gUnits[i].unk00 != 0
+                && gUnits[i].unk04_0 <= 0x5a)
                 count++;
         }
 

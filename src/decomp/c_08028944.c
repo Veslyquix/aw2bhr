@@ -8,7 +8,7 @@
  */
 
 /* "Is army `a` still playable?" -- only asked at all when gPlaySt's
- * +0x04 flag byte has bit 1 set, and then it is `sub_080266DC(a) && !unk32`.
+ * +0x04 flag byte has bit 1 set, and then it is `IsPlayerAliveAndActive(a) && !unk32`.
  *
  * The RETURN-BLOCK ORDER is a readout: the ROM's `movs r0,#1; b` sits inline
  * where the tests fall through and the `movs r0,#0` is at the very end, which
@@ -20,7 +20,7 @@ bool8 sub_08028944(u16 a)
     if ((gPlaySt.event20 & 2) == 0)
         return TRUE;
 
-    if (sub_080266DC(a) == 0)
+    if (IsPlayerAliveAndActive(a) == 0)
         return FALSE;
 
     if (gPlayers[a].killOnEndTurn != 0)

@@ -55,7 +55,7 @@
  *    ROM's `adds r1,r0,#0 / movs r0,#1 / rsbs r0,r0,#0 / cmp r1,r0`, unbound
  *    gives `movs r1,#1 / rsbs / cmp r0,r1`. Both spellings appear in this one
  *    function and the ROM uses each exactly where written here.
- *  - `r = &gUnknown_08499594[u];` is bound: inline, the pointer global is
+ *  - `r = &gUnits[u];` is bound: inline, the pointer global is
  *    dereferenced before the `u * 12` is computed and the final `adds` operands
  *    swap.
  *  - `lim = gUnknown_030013D0;` before each `*(s16 *)(lim + 0x18)`. Inline off
@@ -128,7 +128,7 @@ int sub_080587FC(int flag)
                     continue;
                 if (sub_08026F9C(gUnknown_03003F38, u) == 1)
                     continue;
-                r = &gUnknown_08499594[u];
+                r = &gUnits[u];
                 if (r->unk00 == 0x18 && !sub_080257C0(u))
                     continue;
                 if (!sub_08020DBC(gUnknown_030033EC, x, y))

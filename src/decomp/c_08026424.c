@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08026424.
- * sub_08026424 @ 0x08026424
+ * GetPowerScore @ 0x08026424
  */
 
 /* A percentage, capped at 100: this army's unk18 measured against the summed
@@ -21,14 +21,14 @@
  * `adds r5, r0, #0`, and a signed `sum` turns the ROM's `bls` into `ble`.
  *
  * Named per Xenesis's AW2 Subroutine List: "Power Scoring Subroutine". The
- * old sub_08026424 symbol is kept as a linker alias below so every other
+ * old GetPowerScore symbol is kept as a linker alias below so every other
  * unit keeps resolving it unchanged. */
 u8 GetPowerScore(u8 a)
 {
     u32 sum;
     u16 i;
 
-    if (!sub_080266DC(a))
+    if (!IsPlayerAliveAndActive(a))
         return 0;
 
     sum = 0;

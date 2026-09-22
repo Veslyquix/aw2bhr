@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803E354.
- * sub_0803E354 @ 0x0803E354, sub_0803E388 @ 0x0803E388
+ * sub_0803E354 @ 0x0803E354, CountLivingInventionsOfType @ 0x0803E388
  */
 
 struct Unk02028360 *sub_0803E354(int a1)

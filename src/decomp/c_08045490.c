@@ -12,7 +12,7 @@
 /* The proc scans the map for the first cell of its own army's terrain type
  * whose 0x51A plane byte is still clear, hands the coordinates to
  * sub_08029088 and returns; running off the end of the map (or finding no
- * free gUnknown_08499594 slot at all) goes to label 1 instead.
+ * free gUnits slot at all) goes to label 1 instead.
  *
  * The cursor lives in the PROC, not in locals: `proc->unk2c` and
  * `proc->unk30` are read and written through memory on every iteration, which

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080129E0.
- * sub_080129E0 @ 0x080129E0
+ * GetNextRandomNumber @ 0x080129E0
  *
  * Named per Xenesis's AW2 Datasheet/Subroutine List: "RNG Subroutine". The
  * old sub_XXXXXXXX symbol is kept as a linker alias below so every other

@@ -17,7 +17,7 @@
  * of the body, before the first `bl`, is what forces that spelling rather than
  * `buf[i] = (a && b && ...)`. The five predicates take three DIFFERENT widths
  * and every narrowing comes from the declared prototype, not from a cast here:
- * `lsls/lsrs #0x18` for sub_080266DC's u8, ONE `lsls/lsrs #0x10` pair CSEd
+ * `lsls/lsrs #0x18` for IsPlayerAliveAndActive's u8, ONE `lsls/lsrs #0x10` pair CSEd
  * across all three u16 predicates (r4), and a bare `adds r0,r5,#0` for
  * sub_080289BC's int. Flattening them to one width loses the r4 reuse.
  *
@@ -46,7 +46,7 @@ u8 sub_08028BAC(void)
     {
         buf[i] = 0;
 
-        if (sub_080266DC(i) && sub_08028904(i) && sub_080289BC(i)
+        if (IsPlayerAliveAndActive(i) && sub_08028904(i) && sub_080289BC(i)
          && sub_08028990(i) && sub_08028944(i))
             buf[i] = 1;
     }
@@ -59,7 +59,7 @@ u8 sub_08028BAC(void)
             {
                 for (j = 1; j <= 4; j++)
                 {
-                    if (i != j && sub_080266DC(j) && sub_08026F28(i, j) && !buf[j])
+                    if (i != j && IsPlayerAliveAndActive(j) && sub_08026F28(i, j) && !buf[j])
                     {
                         buf[i] = 0;
                         sub_0802C154(i);

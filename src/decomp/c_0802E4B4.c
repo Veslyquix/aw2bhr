@@ -14,7 +14,7 @@
  * the call clobbers memory; only the two s16 casts survive as common
  * subexpressions, which is why sx/sy read as locals.
  *
- * gUnknown_030040D8 is the same object as gUnknown_08499594[i] -- see the note
+ * gUnknown_030040D8 is the same object as gUnits[i] -- see the note
  * on struct Unk030040D8 in unknown-globals.h for why the cast is here rather
  * than in the global's type. */
 void sub_0802E4B4(s16 x, s16 y)
@@ -35,7 +35,7 @@ void sub_0802E4B4(s16 x, s16 y)
     sy = y;
     idx = gMap->rowOffset[sy] + sx;
     gUnknown_03003F38 = gMap->unit[idx];
-    gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[*sel];
+    gUnknown_030040D8 = (struct Unk030040D8 *)&gUnits[*sel];
 
     if (sub_080242B0(sx, sy))
     {

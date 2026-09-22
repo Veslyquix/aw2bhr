@@ -40,7 +40,7 @@
  *
  * Also settled while getting here, so nobody re-derives it:
  *   - The function is declared non-void and has NO return statement. r0 is
- *     never written and the epilogue is `pop {r1}` -- the sub_08017704 tell.
+ *     never written and the epilogue is `pop {r1}` -- the TrySpendBattleMapPoints tell.
  *     Its three callers all discard the result.
  *   - `pp` is not decoration. Naming gUnknown_0808E5C8 both inside the loop and
  *     after it triggers the -fforce-addr `.rodata` indirection; binding &g to a

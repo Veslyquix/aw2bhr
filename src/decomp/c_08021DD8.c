@@ -27,28 +27,28 @@ void sub_08021DD8(void)
         switch (gUnknown_030043F0 % 0x70)
         {
         case 0x00:
-            sub_08021DA0(0);
+            LoadRiverAnimFrame(0);
             return;
         case 0x0E:
-            sub_08021DA0(1);
+            LoadRiverAnimFrame(1);
             return;
         case 0x1C:
-            sub_08021DA0(2);
+            LoadRiverAnimFrame(2);
             return;
         case 0x2A:
-            sub_08021DA0(3);
+            LoadRiverAnimFrame(3);
             return;
         case 0x38:
-            sub_08021DA0(4);
+            LoadRiverAnimFrame(4);
             return;
         case 0x46:
-            sub_08021DA0(5);
+            LoadRiverAnimFrame(5);
             return;
         case 0x54:
-            sub_08021DA0(6);
+            LoadRiverAnimFrame(6);
             return;
         case 0x62:
-            sub_08021DA0(7);
+            LoadRiverAnimFrame(7);
             return;
         }
 
@@ -57,40 +57,40 @@ void sub_08021DD8(void)
         switch (gUnknown_03004078 % 0x64)
         {
         case 0:
-            sub_08021D64(0);
+            LoadSeaAnimFrame(0);
             break;
         case 1:
-            sub_08021D64(1);
+            LoadSeaAnimFrame(1);
             break;
         case 22:
-            sub_08021D64(2);
+            LoadSeaAnimFrame(2);
             break;
         case 23:
-            sub_08021D64(3);
+            LoadSeaAnimFrame(3);
             break;
         case 36:
-            sub_08021D64(4);
+            LoadSeaAnimFrame(4);
             break;
         case 37:
-            sub_08021D64(5);
+            LoadSeaAnimFrame(5);
             break;
         case 50:
-            sub_08021D64(6);
+            LoadSeaAnimFrame(6);
             break;
         case 51:
-            sub_08021D64(7);
+            LoadSeaAnimFrame(7);
             break;
         case 72:
-            sub_08021D64(4);
+            LoadSeaAnimFrame(4);
             break;
         case 73:
-            sub_08021D64(5);
+            LoadSeaAnimFrame(5);
             break;
         case 86:
-            sub_08021D64(2);
+            LoadSeaAnimFrame(2);
             break;
         case 87:
-            sub_08021D64(3);
+            LoadSeaAnimFrame(3);
             break;
         }
     }

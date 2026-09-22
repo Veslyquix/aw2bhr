@@ -155,7 +155,7 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
         case 2:
             gPlayers[army].coCharge =
                 sub_0803D990(gPlayers[army].coCharge,
-                             (s8)delta * 0x2710, 0, sub_08044208(army), 0);
+                             (s8)delta * 0x2710, 0, GetSuperCoPowerCost(army), 0);
             break;
 
         case 3:

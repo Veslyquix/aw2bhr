@@ -131,7 +131,7 @@ void BattleMaps_080489CD(void)
                    (void *)(0x06010000 + ((i * 8 + 0x1ab) & 0x3ff) * 32), 0x40);
     }
 
-    ApplyPaletteExt(gUnknown_0823FB7C[sub_08017860(0xf)], 0x2c0, 0x20);
+    ApplyPaletteExt(gUnknown_0823FB7C[GetLoadedCoPalette(0xf)], 0x2c0, 0x20);
 
     gUnknown_084C30F8->unk835 = 1;
 

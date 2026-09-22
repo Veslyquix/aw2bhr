@@ -15,7 +15,7 @@ int sub_0802C870(void)
   struct Unk08499594 **pu;
   u16 *pg;
   i = 1;
-  pu = &gUnknown_08499594;
+  pu = &gUnits;
   pg = &gUnknown_03003F2C;
   idx = (*pg) + i;
   goto test;

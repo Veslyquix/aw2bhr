@@ -26,14 +26,14 @@
 /* Twelve bytes: one call, then a literal 0 in r0 and `pop {r1}; bx r1`. The
  * `pop {r1}` epilogue is the one that PRESERVES r0, so unlike the `pop {r0}`
  * forwarders all around it this one returns a value, and the value is the
- * literal rather than sub_080129E0's -- the `movs r0, #0` sits after the `bl`
+ * literal rather than GetNextRandomNumber's -- the `movs r0, #0` sits after the `bl`
  * and overwrites it. The declared `bool8` return in
  * include/unknown-functions.h is kept; `int` compiles identically here, since
  * a returned literal 0 needs no narrowing either way. */
 
 bool8 sub_0803B18C(void)
 {
-    sub_080129E0();
+    GetNextRandomNumber();
 
     return FALSE;
 }
@@ -55,6 +55,6 @@ void sub_0803B198(void)
         sub_08015C30(gUnknown_03001FBC);
     }
 
-    sub_080129E0();
+    GetNextRandomNumber();
     sub_0803ABD8();
 }

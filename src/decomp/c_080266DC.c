@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080266DC.
- * sub_080266DC @ 0x080266DC
+ * IsPlayerAliveAndActive @ 0x080266DC
  *
  * Named per Xenesis's AW2 Datasheet: "Checks whether current player (P1-4)
  * is active and is alive. Returns 1 if true, 0 if false." unk1b is already

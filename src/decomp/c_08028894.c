@@ -31,11 +31,11 @@ void sub_08028894(int a1, int a2)
 }
 
 /* u16 parameter (`lsls #0x10; lsrs #0x10` in place at entry, PROMOTE_MODE),
- * narrowed again to a byte for sub_080266DC and compared whole against the u8
+ * narrowed again to a byte for IsPlayerAliveAndActive and compared whole against the u8
  * gUnknown_030030F8. */
 u8 sub_080288D8(u16 a1)
 {
-    if (sub_080266DC(a1) && gUnknown_030030F8 != a1)
+    if (IsPlayerAliveAndActive(a1) && gUnknown_030030F8 != a1)
         return 1;
     else
         return 0;
@@ -53,7 +53,7 @@ u8 sub_080288D8(u16 a1)
  * the two blocks, because gcc lays the last-written return out last. */
 u8 sub_08028904(u16 a1)
 {
-    if (sub_080266DC(a1) == 0)
+    if (IsPlayerAliveAndActive(a1) == 0)
         return 0;
 
     if (gPlayers[a1].defeated == 0 && gPlayers[a1].unk31 != 0)

@@ -17,8 +17,8 @@ void sub_08028CF4(void)
 
     if (sub_08028BAC())
     {
-        sub_08028AEC();
-        sub_08028568();
+        MarkDefeatedArmies();
+        FinalizeBattleResult();
     }
     else
     {

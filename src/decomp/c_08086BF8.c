@@ -53,7 +53,7 @@ void sub_08086BF8(u32 a1, int a2, int a3)
             flag = 0;
 
         if (gUnknown_02027F74.unk04[a1 + i] <= 0xb3
-            && (u8)sub_0803CA54(gUnknown_02027F74.unk04[a1 + i]) == 0)
+            && (u8)IsCampaignMapUnlocked(gUnknown_02027F74.unk04[a1 + i]) == 0)
         {
             int k = i * 2;
             y = a3 + 9;
@@ -106,7 +106,7 @@ void sub_08086CE0(u32 a1, int a2, int a3)
       {
         flag = 0;
       }
-      if ((gUnknown_02027F74.unk04[a1 + i] <= 0xb3) && (((u8) sub_0803CA54(gUnknown_02027F74.unk04[a1 + i])) == 0))
+      if ((gUnknown_02027F74.unk04[a1 + i] <= 0xb3) && (((u8) IsCampaignMapUnlocked(gUnknown_02027F74.unk04[a1 + i])) == 0))
       {
         int k = i * 2;
         y = a3 + 9;

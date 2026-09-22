@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08040640.
- * sub_08040640 @ 0x08040640
+ * ApplySiloDamage @ 0x08040640
  */
 
 #include "proc.h"

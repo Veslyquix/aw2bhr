@@ -27,7 +27,7 @@
  *
  * The fifth argument to sub_08075298 is a literal 0 in both arms; the ROM
  * spends no instruction on it because each arm already has a register known to
- * hold zero (unk10 in the then arm, sub_0803866C's result in the else arm). */
+ * hold zero (unk10 in the then arm, IsHardCampaignMode's result in the else arm). */
 
 void sub_08076F34(ProcPtr proc)
 {
@@ -61,7 +61,7 @@ void sub_08076F34(ProcPtr proc)
                          p->unk04 - gUnknown_0202FDFC.unk02 + 2,
                          1);
 
-            if (sub_0803866C())
+            if (IsHardCampaignMode())
                 sub_08075298(proc, gUnknown_08615194[p->unk00].hardModeStars,
                              gUnknown_0202FDFC.unk04 + 8,
                              gUnknown_0202FDFC.unk06 + 0xc, 0);

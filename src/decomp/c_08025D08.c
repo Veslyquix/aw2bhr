@@ -15,7 +15,7 @@
  */
 
 /* CORRECTION, wave 32 (W32-A): `int`, not `u8` -- see c_08025CF0.c, its twin.
- * sub_080264BC takes this result with a bare `adds r1, r0, #0`. */
+ * GetTechScore takes this result with a bare `adds r1, r0, #0`. */
 int sub_08025D08(int index)
 {
     return gPlayers[index].unitsLost;

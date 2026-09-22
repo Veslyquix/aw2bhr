@@ -84,7 +84,7 @@ void sub_0802DEFC(void)
     if (((u32)id >> 6) + 1 != gUnknown_030033EC)
         return;
 
-    e = &gUnknown_08499594[id];
+    e = &gUnits[id];
 
     if (e->unk01 & 1)
         return;

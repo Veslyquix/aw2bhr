@@ -8,7 +8,7 @@
  */
 
 /* Advances a player/army slot index and wraps 5 -> 1, returning the first slot
- * for which sub_080266DC is true. A do/while: the increment happens before the
+ * for which IsPlayerAliveAndActive is true. A do/while: the increment happens before the
  * first test, so the value passed in is never itself tested. The wrap compares
  * `== 5` exactly, so a value above 5 never wraps -- reproduced as written. */
 u16 sub_08026704(int a)
@@ -21,13 +21,13 @@ u16 sub_08026704(int a)
         i++;
         if (i == 5)
             i = 1;
-    } while (!sub_080266DC(i));
+    } while (!IsPlayerAliveAndActive(i));
 
     return i;
 }
 
 /* The sub_08026704 twin (see work/sub_08026704): the same wrap-at-5 retry over
- * sub_080266DC, but seeded from gUnknown_030033EC instead of a parameter, and
+ * IsPlayerAliveAndActive, but seeded from gUnknown_030033EC instead of a parameter, and
  * answering whether the slot it landed on is EARLIER than the one it started
  * from -- i.e. whether the search wrapped past the end.
  *
@@ -38,7 +38,7 @@ u16 sub_08026704(int a)
  * decides nothing on its own; check baserom.gba per symbol.
  *
  * The global is re-read after the loop rather than reused because the
- * sub_080266DC call clobbers it, and the compare is `blo`, unsigned.
+ * IsPlayerAliveAndActive call clobbers it, and the compare is `blo`, unsigned.
  * The `movs #0` / `movs #1` split across an unconditional `b` is the
  * if/else-return spelling, not a returned comparison. */
 bool8 sub_0802672C(void)
@@ -52,7 +52,7 @@ bool8 sub_0802672C(void)
         i++;
         if (i == 5)
             i = 1;
-    } while (!sub_080266DC(i));
+    } while (!IsPlayerAliveAndActive(i));
 
     if (i < gUnknown_030033EC)
         return 1;
@@ -64,7 +64,7 @@ bool8 sub_0802672C(void)
  * gUnknown_030033EC is incremented in memory each pass, and reaching 5 calls
  * sub_080176A8 and resets it to 1.
  *
- * The `ldrb r0,[r4]` feeding sub_080266DC is agbcc narrowing the u16 global's
+ * The `ldrb r0,[r4]` feeding IsPlayerAliveAndActive is agbcc narrowing the u16 global's
  * load to that callee's declared `u8` parameter, not a separate byte field --
  * the same halfword is read `ldrh` two instructions earlier.
  *
@@ -81,5 +81,5 @@ void sub_08026768(void)
             sub_080176A8();
             gUnknown_030033EC = 1;
         }
-    } while (!sub_080266DC(gUnknown_030033EC));
+    } while (!IsPlayerAliveAndActive(gUnknown_030033EC));
 }

@@ -165,14 +165,14 @@ void CoSelect_IDLE_0807CAFD(struct Unk807CAFC * proc)
             sub_08043B60(0x2A, 0x100 | (0x68 + i * 0x10), 0x9000 | (0x3C0 + i * 0xC), 0);
 
             if (gUnknown_030059C0[i] != 0)
-                sub_0801F34C(gUnknown_03005958[gUnknown_0300599C[i]] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
+                DrawOamObject(gUnknown_03005958[gUnknown_0300599C[i]] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
             else
-                sub_0801F34C(gUnknown_03005958[i] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
+                DrawOamObject(gUnknown_03005958[i] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
         }
 
-        sub_0801F34C(0x54, 0x5C, 0x68, 0, 0);
-        sub_0801F34C(sub_0803BD14() + 0x55, 0x65, 0x70, 0, 0);
-        sub_0801F34C(0x5F, 0x6D, 0x70, 0, 0);
+        DrawOamObject(0x54, 0x5C, 0x68, 0, 0);
+        DrawOamObject(sub_0803BD14() + 0x55, 0x65, 0x70, 0, 0);
+        DrawOamObject(0x5F, 0x6D, 0x70, 0, 0);
     }
 
     proc->unk4c++;

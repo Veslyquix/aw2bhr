@@ -161,7 +161,7 @@ void sub_0807831C(struct Unk807831C *proc)
 
 /* Walks the four records of gUnknown_08615974 and starts the ones whose two
  * tags pass and whose id is not already flagged. Three guards, all in one
- * `&&` chain: the two `cmp r0, #0` tests after the sub_0803CBD8 calls jump to
+ * `&&` chain: the two `cmp r0, #0` tests after the IsCampaignCompletionFlagSet calls jump to
  * the SAME label as the `& 3` test, which is short-circuiting, not three
  * separate `if`s round one body.
  *
@@ -180,8 +180,8 @@ void sub_08078358(ProcPtr proc)
 
     for (i = 0; i <= 3; i++)
     {
-        if (sub_0803CBD8(gUnknown_08615974[i].unk_00)
-         && !sub_0803CBD8(gUnknown_08615974[i].unk_01)
+        if (IsCampaignCompletionFlagSet(gUnknown_08615974[i].unk_00)
+         && !IsCampaignCompletionFlagSet(gUnknown_08615974[i].unk_01)
          && !(gUnknown_0202FDFC.unk12[gUnknown_08615974[i].unk_02[0]] & 3))
             sub_08074AAC((const u8 *)gUnknown_08615974[i].unk_02, proc);
     }

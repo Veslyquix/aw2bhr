@@ -24,7 +24,7 @@
  *    wrong way round. Read the body order off the jump-table TARGETS, not off
  *    the table's index order.
  *
- * 2. Case 5 is `if (sub_08078E14() == 0x22) song = 0x19f; else song = 0x198;`,
+ * 2. Case 5 is `if (GetCampaignMissionId() == 0x22) song = 0x19f; else song = 0x198;`,
  *    with the CALL first. agbcc presets 0x198 and reaches 0x19f with
  *    `adds r4, #7`; writing `song = 0x198;` before the `if` instead puts the
  *    constant ahead of the `bl`, which the ROM does not.
@@ -75,7 +75,7 @@ void sub_0807B884(ProcPtr proc)
         break;
 
     case 5:
-        if (sub_08078E14() == 0x22)
+        if (GetCampaignMissionId() == 0x22)
             song = 0x19f;
         else
             song = 0x198;
@@ -84,7 +84,7 @@ void sub_0807B884(ProcPtr proc)
         break;
     }
 
-    switch (sub_08078E14())
+    switch (GetCampaignMissionId())
     {
     case 8:
     case 16:

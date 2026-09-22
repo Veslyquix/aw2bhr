@@ -4,14 +4,14 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08078834.
- * sub_08078834 @ 0x08078834
+ * SetupCoSelectNeotanksGe @ 0x08078834
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file .text as one
  * contiguous block at 0x08078834.
- * sub_08078834 @ 0x08078834
+ * SetupCoSelectNeotanksGe @ 0x08078834
  */
 
 /* Family F035 (data/families.json): `push {lr}; bl A; movs r0,#0; bl B; bl C;
@@ -29,16 +29,16 @@
  */
 
 
-/* The gUnknown_030058E0 display-list variant: sub_080785FC resets the cursor
+/* The gUnknown_030058E0 display-list variant: ClearArmyCount resets the cursor
  * and sub_08078740 clears the five words of gUnknown_030059C0, and both are
  * nullary. sub_080786F0 returns the advanced byte index (`pop {r1}; bx r1`) and
- * that result is DISCARDED here -- unlike sub_08078864, which chains the four
+ * that result is DISCARDED here -- unlike SetupCoSelectHotPursuit, which chains the four
  * builders and does consume it.
  */
 
 void SetupCoSelectNeotanksGe(void)
 {
-    sub_080785FC();
+    ClearArmyCount();
     sub_080786F0(0);
     sub_08078740();
 }

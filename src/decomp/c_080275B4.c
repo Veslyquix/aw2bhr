@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080275B4.
- * sub_080275B4 @ 0x080275B4, sub_08027608 @ 0x08027608, sub_08027658 @ 0x08027658
+ * sub_080275B4 @ 0x080275B4, sub_08027608 @ 0x08027608, DrawInfoBoxCombobox @ 0x08027658
  */
 
 void sub_080275B4(void)
@@ -64,7 +64,7 @@ void sub_08027608(void)
  * Combobox in the Main Game Window". Chooses which screen side the box
  * slides to (via sub_080275B4/sub_08027608, whichever eases the box's x
  * position away from the cursor) before the actual draw call. The old
- * sub_08027658 symbol is kept as a linker alias below so every other unit
+ * DrawInfoBoxCombobox symbol is kept as a linker alias below so every other unit
  * keeps resolving it unchanged. */
 void DrawInfoBoxCombobox(void)
 {

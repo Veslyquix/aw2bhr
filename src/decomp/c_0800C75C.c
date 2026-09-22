@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800C75C.
- * sub_0800C75C @ 0x0800C75C, sub_0800C7A4 @ 0x0800C7A4, sub_0800C7E8 @ 0x0800C7E8, sub_0800C840 @ 0x0800C840
+ * sub_0800C75C @ 0x0800C75C, sub_0800C7A4 @ 0x0800C7A4, GetPropertyKindForTerrain @ 0x0800C7E8, GetPropertyKindAt @ 0x0800C840
  */
 
 /* The SET half of the pair sub_0800C7A4 clears: the same binary-search switch
@@ -102,12 +102,12 @@ void sub_0800C7A4(int a)
  * falling through; writing the group first is 9 bytes different with the jump
  * table pointing the other way.
  *
- * The mask is this function's own: its caller sub_0800C840 masks too, but the
+ * The mask is this function's own: its caller GetPropertyKindAt masks too, but the
  * `movs r1,#0x1f; ands r1,r0` here is inside the callee, so the parameter is
  * unconstrained and `int`.
  *
  * A leaf: no `push`, and the epilogue is a bare `bx lr`. */
-int sub_0800C7E8(int a)
+int GetPropertyKindForTerrain(int a)
 {
     int r;
 
@@ -133,19 +133,22 @@ int sub_0800C7E8(int a)
 
 /* sub_080016D0's shape over the BYTE plane instead of the halfword one: the
  * same `rowOffset[y] + x` addressing off gUnknown_08499590, the terrain byte
- * at +0x1432, and the low five bits of that byte handed to sub_0800C7E8.
+ * at +0x1432, and the low five bits of that byte handed to GetPropertyKindForTerrain.
  *
- * It RETURNS what sub_0800C7E8 returns, and the epilogue is the only thing
+ * It RETURNS what GetPropertyKindForTerrain returns, and the epilogue is the only thing
  * that says so: `pop {r4}; pop {r1}; bx r1` keeps r0 intact, where a void
  * function would have popped the return address into r0 itself.
  *
  * The three binding locals are what keep the row table and the terrain plane
  * as separate address computations off one `p`; see c_0800164C.c for the same
  * arithmetic written the same way. */
-int sub_0800C840(int x, int y)
+int GetPropertyKindAt(int x, int y)
 {
     int off;
 
     off = gMap->rowOffset[y] + x;
-    return sub_0800C7E8(gMap->terrain[off] & 0x1F);
+    return GetPropertyKindForTerrain(gMap->terrain[off] & 0x1F);
 }
+
+asm(".global sub_0800C7E8\n.thumb_set sub_0800C7E8, GetPropertyKindForTerrain\n"
+    ".global sub_0800C840\n.thumb_set sub_0800C840, GetPropertyKindAt\n");

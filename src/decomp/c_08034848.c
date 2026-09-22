@@ -15,7 +15,7 @@ void sub_08034848(void)
     gPlaySt.bgmOn = 1;
     gPlaySt.gameMode = 3;
     gPlaySt.mapID = 1;
-    sub_08034780();
+    SetDefaultRules();
     sub_08034838();
     gPlaySt.animOpts = 1;
 }
@@ -33,7 +33,7 @@ void sub_0803486C(void)
 
 void sub_08034890(void)
 {
-    sub_0802150C();
+    InitGameSettings();
     sub_0802163C(gPlaySt.mapID);
     sub_08021598();
     sub_080215B8();

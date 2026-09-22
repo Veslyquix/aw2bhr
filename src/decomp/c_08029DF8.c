@@ -37,13 +37,13 @@
  *     There are three loop-invariant address constants and two callee-saved
  *     hi registers, so the allocation is decided by which pseudo is created
  *     first, i.e. by source order:
- *       - `pp = &gUnknown_08499594;` in the PREHEADER (after the guard, before
+ *       - `pp = &gUnits;` in the PREHEADER (after the guard, before
  *         the loop) is c_08026100.c's idiom exactly.  Without it agbcc hoists
- *         &gUnknown_03003100 instead and gUnknown_08499594 gets an inline pool
+ *         &gUnknown_03003100 instead and gUnits gets an inline pool
  *         word every iteration.
  *       - `ec = &gUnknown_030033EC;` as the first statement of the else-arm,
  *         BEFORE the sub_08029D1C call.  Its only read is the last argument
- *         setup of sub_08029CB8, so nothing else makes the address live
+ *         setup of StartSupplyAnimation, so nothing else makes the address live
  *         across the call, and without it the second hi register is never
  *         allocated at all (`pop {r3}` instead of `pop {r3, r4}`).
  *       - `cp = &gUnknown_03003100.pos;` right after `map = ...`, which fixes
@@ -81,7 +81,7 @@ void sub_08029DF8(struct Unk03001470 *proc)
   {
     return;
   }
-  pp = &gUnknown_08499594;
+  pp = &gUnits;
   for (;;)
   {
     if (proc->unk1e > 3)
@@ -98,7 +98,7 @@ void sub_08029DF8(struct Unk03001470 *proc)
         sub_08034534(6, gUnknown_03003F38, 0, 0);
       }
       sub_08034F48();
-      sub_08034F8C();
+      DecrementCoPowerDepthIfNonzero();
       return;
     }
     if ((gUnknown_03003F40 & ((s16) gUnknown_0849A0D8[proc->unk1e * 3])) != 0)
@@ -121,7 +121,7 @@ void sub_08029DF8(struct Unk03001470 *proc)
         {
           pt.unk00 = cp->unk00 + gUnknown_0849A0D8[(proc->unk1e * 3) + 1];
           pt.unk02 = cp->unk02 + gUnknown_0849A0D8[(proc->unk1e * 3) + 2];
-          sub_08029CB8(&pt, *ec, c, 0);
+          StartSupplyAnimation(&pt, *ec, c, 0);
           proc->unk1e++;
           return;
         }

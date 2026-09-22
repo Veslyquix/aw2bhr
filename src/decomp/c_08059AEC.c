@@ -12,8 +12,8 @@ void sub_08059AEC(void)
     u8 n;
     int i;
 
-    if (sub_08042D50(gUnknown_030033EC, gUnknown_030040D8->unk00) > 1)
-        n = sub_08042D50(gUnknown_030033EC, gUnknown_030040D8->unk00);
+    if (GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, gUnknown_030040D8->unk00) > 1)
+        n = GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, gUnknown_030040D8->unk00);
     else
         n = gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange;
 

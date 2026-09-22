@@ -52,7 +52,7 @@ void sub_0802A3FC(void)
 
     for (i = gUnknown_03001470[gUnknown_03001FBC].unk38; i <= 0x32; i++)
     {
-        p = &gUnknown_08499594[gUnknown_03003F2C + i];
+        p = &gUnits[gUnknown_03003F2C + i];
 
         if (p->unk00 == 0)
             continue;

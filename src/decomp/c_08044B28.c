@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08044B28.
- * sub_08044B28 @ 0x08044B28
+ * ActivateCoPower @ 0x08044B28
  */
 
 #include "proc.h"

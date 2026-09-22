@@ -5,13 +5,13 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0805F2B4.
- * sub_0805F2B4 @ 0x0805F2B4
+ * AiProtectHq @ 0x0805F2B4
  */
 
 /* sub_0805F0EC's twin: same double scan over the map, same 4-byte (u16, u16)
  * buffer seeded with the 0x270F sentinel and handed to sub_080591E4, but the
  * ranking key is the +0x2D5A plane rather than the gUnknown_0202DAD8 influence
- * record, and it is gated on sub_080266DC plus two sub_0801F92C plane rebuilds.
+ * record, and it is gated on IsPlayerAliveAndActive plus two sub_0801F92C plane rebuilds.
  * Read work/sub_0805F0EC/sub_0805F0EC.c first -- every lever is documented
  * there and all of them transferred.
  *
@@ -80,7 +80,7 @@ void AiProtectHq(void)
     best = 0;
     second = 0xff;
 
-    if (!sub_080266DC(gUnknown_030033EC))
+    if (!IsPlayerAliveAndActive(gUnknown_030033EC))
     {
         sub_0805F7B8();
         return;

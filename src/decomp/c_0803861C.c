@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803861C.
- * sub_0803861C @ 0x0803861C
+ * IsPlayer1TeamAlive @ 0x0803861C
  */
 
 /* MATCHED byte-for-byte (wave 43, W43-E). relocs: match.
@@ -36,7 +36,7 @@ bool8 IsPlayer1TeamAlive(void)
     count = 0;
     for (i = 1; i <= 4; i++)
     {
-        if (sub_080266DC(i) && gPlayers[1].team == gPlayers[i].team)
+        if (IsPlayerAliveAndActive(i) && gPlayers[1].team == gPlayers[i].team)
             count++;
     }
     if (count != 0)

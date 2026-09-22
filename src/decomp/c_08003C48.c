@@ -16,11 +16,11 @@ void sub_08003C48(int a1)
 
     if (a1 < 0)
     {
-        sub_08003B8C();
+        GenerateRandomMap();
         return;
     }
 
-    sub_08025E74();
+    ClearAllUnits();
     gActiveMap->unk13 = 0;
 
     for (x = 0; x < MAP->height; x++)
@@ -41,8 +41,8 @@ void sub_08003C48(int a1)
                 MAP->terrain[MAP->rowOffset[y] + x] = 1;
                 break;
             case 3:
-                sub_080011F4(x, y, 3);
-                sub_0800B048(x, y);
+                SetTerrainAt(x, y, 3);
+                MakeMountain(x, y);
                 break;
             case 4:
                 MAP->tile[MAP->rowOffset[y] + x] = 0x87;
@@ -52,7 +52,7 @@ void sub_08003C48(int a1)
         }
     }
 
-    sub_080219AC();
-    sub_0800C8D8();
-    gActiveMap->propertyCount = sub_0800C874();
+    RecountArmyProperties();
+    RegisterArmyHqs();
+    gActiveMap->propertyCount = CountProperties();
 }

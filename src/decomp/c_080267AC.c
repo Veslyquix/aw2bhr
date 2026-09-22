@@ -34,7 +34,7 @@ void sub_080267AC(void)
     gPlayers[gUnknown_030033EC].destroyedThisTurn = 0;
     gPlayers[gUnknown_030033EC].unk24 = 0;
     sub_08020984();
-    sub_08026F04();
+    AddPlayerIncomeToFunds();
     sub_0801A548(gUnknown_030033EC);
     sub_0801A57C(gUnknown_030033EC);
     sub_08043834(gUnknown_030033EC);

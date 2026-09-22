@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08057F00.
- * sub_08057F00 @ 0x08057F00, sub_08057F54 @ 0x08057F54, sub_08057FA8 @ 0x08057FA8, sub_08057FE8 @ 0x08057FE8, sub_08058058 @ 0x08058058, sub_08058144 @ 0x08058144
+ * CountUnitsWithTypeTag @ 0x08057F00, CountUnitsByDeployLocation @ 0x08057F54, CountUnitsOfType @ 0x08057FA8, sub_08057FE8 @ 0x08057FE8, sub_08058058 @ 0x08058058, sub_08058144 @ 0x08058144
  */
 
 /* c_0804151C.c's list builder again, appending to the gUnknown_03003F20 list
@@ -53,8 +53,8 @@ int CountUnitsWithTypeTag(int a1)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        if (gUnknown_08499594[i].unk00 != 0
-         && gUnknown_085D5ABC[gUnknown_08499594[i].unk00].unk1b == a1)
+        if (gUnits[i].unk00 != 0
+         && gUnknown_085D5ABC[gUnits[i].unk00].unk1b == a1)
             count++;
     }
 
@@ -72,8 +72,8 @@ int CountUnitsByDeployLocation(int a1)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        if (gUnknown_08499594[i].unk00 != 0
-         && (gUnknown_085D5ABC[gUnknown_08499594[i].unk00].deployLocation & a1) != 0)
+        if (gUnits[i].unk00 != 0
+         && (gUnknown_085D5ABC[gUnits[i].unk00].deployLocation & a1) != 0)
             count++;
     }
 
@@ -91,7 +91,7 @@ int CountUnitsOfType(int a1)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        if (gUnknown_08499594[i].unk00 == a1)
+        if (gUnits[i].unk00 == a1)
             count++;
     }
 
@@ -114,7 +114,7 @@ int sub_08057FE8(int a1)
         {
             for (j = i * 64; j < i * 64 + 0x40; j++)
             {
-                if (gUnknown_08499594[j].unk00 == a1)
+                if (gUnits[j].unk00 == a1)
                     count++;
             }
         }

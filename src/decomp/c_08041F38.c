@@ -15,7 +15,7 @@
  * out as a bare `movs r4,#4` because cprop knows r is still 0 there; only the
  * last one carries the u8 truncation, the rest being provably in range.
  *
- * unit->unk00 is re-loaded before each of the four calls: gUnknown_08499594 is
+ * unit->unk00 is re-loaded before each of the four calls: gUnits is
  * not const, so every `bl` kills the MEM. */
 u8 sub_08041F38(int x, int y, int id)
 {
@@ -27,7 +27,7 @@ u8 sub_08041F38(int x, int y, int id)
     if (id == 0)
         return 0;
 
-    unit = &gUnknown_08499594[id];
+    unit = &gUnits[id];
 
     if (sub_08041EA8(x - 1, y, unit->unk00) == 1)
         r |= 4;
@@ -45,12 +45,12 @@ u8 sub_08041F38(int x, int y, int id)
 }
 
 /* The same army-number idiom the matched sub_0804203C uses one function over:
- * `(p - gUnknown_08499594) >> 6` is the exact division by the 0x0c stride
+ * `(p - gUnits) >> 6` is the exact division by the 0x0c stride
  * (`mul 0x55555555; neg; asr #2`) with the `>> 6` merged into the ROM's single
- * `asr #8`, and `+ 1` makes it the 1-based army sub_08042D50 takes.
+ * `asr #8`, and `+ 1` makes it the 1-based army GetUnitFiringRangeWithCoBonus takes.
  *
  * p->unk00 is loaded ONCE and reused for both the gUnknown_085D5ABC subscript
- * and sub_08042D50's second argument -- there is no call between the two uses.
+ * and GetUnitFiringRangeWithCoBonus's second argument -- there is no call between the two uses.
  * The 0x780 mask is the four-bit bitfield unk04_7; testing a bitfield against
  * zero needs only the mask, not the usual extract shift pair. */
 int sub_08041FE0(struct Unk08499594 *p)
@@ -58,7 +58,7 @@ int sub_08041FE0(struct Unk08499594 *p)
     if (gUnknown_085D5ABC[p->unk00].unk11 == 1)
         return 1;
 
-    if (sub_08042D50(((p - gUnknown_08499594) >> 6) + 1, p->unk00) > 1)
+    if (GetUnitFiringRangeWithCoBonus(((p - gUnits) >> 6) + 1, p->unk00) > 1)
         return 0;
 
     if (p->unk04_7 != 0)

@@ -16,6 +16,6 @@ void sub_08064E5C(struct Unk08580934_Obj *obj)
     sub_08064E1C(obj->unk28 + 0x20, obj->unk2a + 0x10, obj->unk1c);
     sub_08043FD8((obj->unk28 + 0x18) & 0x1FF, (obj->unk2a + 0x30) & 0xFF,
                  0xC00 | obj->unk44, 2);
-    sub_0801F34C(0xBC, (obj->unk28 - 8) & 0x1FF, (obj->unk2a - 8) & 0xFF, 0, 1);
+    DrawOamObject(0xBC, (obj->unk28 - 8) & 0x1FF, (obj->unk2a - 8) & 0xFF, 0, 1);
     obj->unk49 = obj->unk48;
 }

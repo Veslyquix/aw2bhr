@@ -45,8 +45,8 @@ int sub_0802A304(void *arg)
     {
         if (p->unk07[i] != 0)
         {
-            sum += sub_08029978(&gUnknown_08499594[p->unk07[i]], 0);
-            sum += sub_08029A48(&gUnknown_08499594[p->unk07[i]], 0);
+            sum += sub_08029978(&gUnits[p->unk07[i]], 0);
+            sum += sub_08029A48(&gUnits[p->unk07[i]], 0);
         }
     }
 

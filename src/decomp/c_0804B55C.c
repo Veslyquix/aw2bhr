@@ -51,7 +51,7 @@ u16 sub_0804B55C(u16 a, u8 *p, int unused)
         break;
     case 6:
         q = gUnknown_08551C88[t];
-        result = q[sub_080129E0() & 1];
+        result = q[GetNextRandomNumber() & 1];
         break;
     case 5:
         k = sub_0804B4C4(x, y);
@@ -59,11 +59,11 @@ u16 sub_0804B55C(u16 a, u8 *p, int unused)
             result = gUnknown_08551C3A[k];
         break;
     case 3:
-        if (sub_080129E0() & 1)
+        if (GetNextRandomNumber() & 1)
             result = 0x2c;
         break;
     case 4:
-        if (sub_080129E0() & 1)
+        if (GetNextRandomNumber() & 1)
             result = 0x2d;
         break;
     case 8:

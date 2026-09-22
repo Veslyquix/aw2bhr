@@ -4,23 +4,23 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08078800.
- * sub_08078800 @ 0x08078800
+ * SetupCoSelectHuntsEnd @ 0x08078800
  */
 
 #include "proc.h"
 
-/* sub_080787B8's twin, 0x48 bytes along: the same shape with the roles of
+/* SetupCoSelectFactoryBlues's twin, 0x48 bytes along: the same shape with the roles of
  * sub_08078658 and sub_080786A4 swapped and the tag 0x6a instead of 0x6b. */
 
 void SetupCoSelectHuntsEnd(void)
 {
     s32 i;
 
-    sub_080785FC();
+    ClearArmyCount();
     i = sub_080786A4(0);
     i = sub_08078608(i);
 
-    if (sub_0803CBD8(0x6a))
+    if (IsCampaignCompletionFlagSet(0x6a))
     {
         sub_08078658(i);
         sub_08078770();

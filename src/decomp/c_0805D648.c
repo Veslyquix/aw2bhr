@@ -68,7 +68,7 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
 
     if (gUnknown_030040D8->unk00 == 0x18 && a3 == 2)
     {
-        sub_0801F838(0xff);
+        FillMovementMap(0xff);
         sub_0801F9C0(a1, a2, 9, 0);
 
         for (y = 0; y < gMap->height; y++)
@@ -81,7 +81,7 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
                     continue;
                 if (sub_08026F9C(gUnknown_03003F38, gMap->unit[gMap->rowOffset[y] + x]))
                     continue;
-                e = &gUnknown_08499594[gMap->unit[gMap->rowOffset[y] + x]];
+                e = &gUnits[gMap->unit[gMap->rowOffset[y] + x]];
                 if (gPlaySt.fog == 0)
                 {
                     if ((u8)(e->unk00 - 0xa) <= 1)

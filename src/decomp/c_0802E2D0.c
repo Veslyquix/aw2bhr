@@ -89,7 +89,7 @@ u8 sub_0802E2D0(s16 x, s16 y)
         gUnknown_03003F38 = gMap->unit[
             gMap->rowOffset[y] + x];
         gUnknown_030040D8 =
-            (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+            (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
 
         if (gMap->unit[
                 gMap->rowOffset[y] + x] == 0)
@@ -125,7 +125,7 @@ u8 sub_0802E2D0(s16 x, s16 y)
         if (b)
         {
             if (a == 0)
-                sub_0801F838(0xFF);
+                FillMovementMap(0xFF);
 
             sub_080201E0(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                          (struct Unk08499594 *)gUnknown_030040D8);

@@ -146,7 +146,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
                     gUnknown_03005908 = 3;
                     sub_0802D5CC(gUnknown_03005958[proc->unk58], 1);
                     proc->unk4c = 0;
-                    gUnknown_03005964 = sub_08017860(FRAME(proc->unk52));
+                    gUnknown_03005964 = GetLoadedCoPalette(FRAME(proc->unk52));
                     sub_0803B4DC(0x71);
                 }
                 else if (gpKeySt->pressed & 2)
@@ -253,7 +253,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
             else if (gpKeySt->pressed & 2)
             {
                 gUnknown_03005908 = 4;
-                sub_08043AC0(FRAME(proc->unk52), 0x11, sub_08017860(FRAME(proc->unk52)));
+                sub_08043AC0(FRAME(proc->unk52), 0x11, GetLoadedCoPalette(FRAME(proc->unk52)));
                 proc->unk4c = 0;
                 sub_0803B4DC(0x66);
             }
@@ -264,7 +264,7 @@ void CoDesignC2_IDLE_0808844D(struct Unk0808844C *proc)
             {
                 proc->unk64 = 1;
                 sub_0803B4DC(0x71);
-                sub_08017870(FRAME(proc->unk52), gUnknown_03005964);
+                SetLoadedCoPalette(FRAME(proc->unk52), gUnknown_03005964);
                 sub_08043E3C(FRAME(proc->unk52), (void *)0x06013000, 0x12);
                 Proc_Start(gUnknown_08616EDC, proc);
             }

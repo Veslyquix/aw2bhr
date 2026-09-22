@@ -158,10 +158,10 @@ void sub_08077304(struct Unk8077304Proc * proc)
     d = 0;
     CpuFastSet(&d, gUnknown_08499580, 0x01000200);
 
-    if (gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c].unk00[sub_0803866C()].unk00_08 != 0)
+    if (gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c].unk00[IsHardCampaignMode()].unk00_08 != 0)
     {
-        j = 6 - sub_08037D80(gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c]
-                                 .unk00[sub_0803866C()].unk00_14);
+        j = 6 - GetRankFromScore(gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c]
+                                 .unk00[IsHardCampaignMode()].unk00_14);
 
         if (j != 0)
         {

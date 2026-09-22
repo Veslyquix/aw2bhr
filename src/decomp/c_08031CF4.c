@@ -43,7 +43,7 @@ void sub_08031D54(struct Unk08031D54Proc *proc)
 }
 
 /* Sets up the unit records the 0x08031 screen edits: publishes
- * &gUnknown_08499594[1] as gUnknown_030040D8, redraws the 0xc-wide window, and
+ * &gUnits[1] as gUnknown_030040D8, redraws the 0xc-wide window, and
  * writes two fields on element 1 and two on element 2.
  *
  * THE +0x18 / +0x1C STORES ARE ELEMENT 2, NOT MEMBERS 0x18 AND 0x1C. struct
@@ -55,7 +55,7 @@ void sub_08031D54(struct Unk08031D54Proc *proc)
  * fit `strb`'s imm5, so no address arithmetic appears and the element indices
  * are invisible unless you know the 0x0c stride.
  *
- * THE ARRAY BASE IS BOUND TO A LOCAL. Naming gUnknown_08499594 at each of its
+ * THE ARRAY BASE IS BOUND TO A LOCAL. Naming gUnits at each of its
  * three uses reloads the pointer twice more and puts a fourth word in the
  * literal pool; the ROM materialises it once into r4 and keeps it. By contrast
  * gUnknown_030040D8 IS reloaded for each of its two stores, so that one is
@@ -64,7 +64,7 @@ void sub_08031DC0(void)
 {
     struct Unk08499594 *p;
 
-    p = gUnknown_08499594;
+    p = gUnits;
 
     gUnknown_030040D8 = (struct Unk030040D8 *)&p[1];
 

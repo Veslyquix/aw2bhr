@@ -15,7 +15,7 @@ void sub_08024A2C(struct Unk030013D0 *a1, s16 a2)
     int idx;
     int t;
 
-    e = &gUnknown_08499594[a2];
+    e = &gUnits[a2];
     a1->unk00 = e;
 
     map = gMap;
@@ -23,7 +23,7 @@ void sub_08024A2C(struct Unk030013D0 *a1, s16 a2)
     t = map->terrain[idx] & 0x1f;
 
     a1->unk04 = t;
-    a1->unk06 = (s8)sub_080249EC((u16)(((e - gUnknown_08499594) >> 6) + 1),
+    a1->unk06 = (s8)GetTerrainDefense((u16)(((e - gUnits) >> 6) + 1),
                                  t, e->unk00);
     a1->unk08 = a1->unk00->unk04_0;
     a1->unk0a = a1->unk00->unk04_7;

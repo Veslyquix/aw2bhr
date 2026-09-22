@@ -21,7 +21,7 @@ void sub_080879B0(void)
 
 void sub_080879D8(struct Unk080879D8 *proc)
 {
-    sub_0801A368(0xD, 4, 0x12, 0xC, gUnknown_08499580, 0);
+    DrawWindowBackground(0xD, 4, 0x12, 0xC, gUnknown_08499580, 0);
     sub_08013B0C();
     sub_08085F40();
     sub_08087C14(proc->unk54);

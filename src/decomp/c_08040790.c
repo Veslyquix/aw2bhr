@@ -92,7 +92,7 @@ void sub_080407E4(struct Unk407E4Proc *proc)
         switch (k)
         {
         case 5:
-            sub_080402B4(proc->unk2c, proc->unk30, proc);
+            DestroyPipeSeam(proc->unk2c, proc->unk30, proc);
             break;
         case 0:
         case 3:

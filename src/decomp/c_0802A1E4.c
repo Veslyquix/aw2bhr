@@ -44,11 +44,11 @@ s16 sub_0802A1E4(s16 x, s16 y)
 {
     struct Unk08499594 *unit;
 
-    unit = &gUnknown_08499594[gMap->unit[
+    unit = &gUnits[gMap->unit[
         gMap->rowOffset[y] + x]];
 
-    if (gUnknown_03003F2C == ((unit - gUnknown_08499594) & 0xc0)
-        && sub_08042084((u8 *)unit))
+    if (gUnknown_03003F2C == ((unit - gUnits) & 0xc0)
+        && HasSupplyAbility((u8 *)unit))
         return 1;
 
     return 0;

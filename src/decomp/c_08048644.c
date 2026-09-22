@@ -24,10 +24,10 @@ void sub_08048644(u16 a1, u16 a2)
     if (gUnknown_084C30F8->unk836 > 2)
     {
         if (gUnknown_084C30F8->unk020 != 0)
-            sub_0801F34C(0x43, 0x38, 0x30, 0, 0);
+            DrawOamObject(0x43, 0x38, 0x30, 0, 0);
 
         if (gUnknown_02028E1C[gUnknown_084C30F8->unk020 + 3] != 0xff)
-            sub_0801F34C(0x44, 0x38, 0x68, 0, 0);
+            DrawOamObject(0x44, 0x38, 0x68, 0, 0);
 
         i = DivRem(Div((u16)gGameClock, 4), 0x10) * 2;
         ApplyPaletteExt((u16 *)((u8 *)gUnknown_08239F84 + i), 0x298, 2);

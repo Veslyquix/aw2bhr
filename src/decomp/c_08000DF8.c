@@ -32,7 +32,7 @@ void sub_08000DF8(int a1)
         map->unk0a = 0;
         map->camX = 0;
         map->camY = 0;
-        sub_08003B8C();
+        GenerateRandomMap();
     }
 
     gUnknown_030033E4.unk00 = 0;

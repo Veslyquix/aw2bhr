@@ -19,10 +19,10 @@ struct UnkD8C0Proc
 };
 
 /* Two tests, one `&&`: both `bne`s land on the same sub_0803B524 arm. The
- * `lsls #0x18; cmp #0` on sub_0803861C's result is the bool8 truth test. */
+ * `lsls #0x18; cmp #0` on IsPlayer1TeamAlive's result is the bool8 truth test. */
 void sub_0803D88C(ProcPtr proc)
 {
-    if (gPlaySt.gameMode == 1 && !sub_0803861C())
+    if (gPlaySt.gameMode == 1 && !IsPlayer1TeamAlive())
         Proc_GotoScript(proc, gUnknown_0849F388);
     else
         sub_0803B524(0xcd);

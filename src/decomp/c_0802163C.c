@@ -44,7 +44,7 @@ void sub_0802163C(int a)
         return;
     }
 
-    sub_080247A4(a);
+    LoadMapData(a);
 
     gMap->width =
         ((struct Unk2163CSrc *)gUnknown_03003F68)->width;
@@ -58,7 +58,7 @@ void sub_0802163C(int a)
     gMap->camY = 0;
     gMap->unk10 = 0;
 
-    sub_0803CC84(gMap->unk421a,
+    CopyString(gMap->unk421a,
                  sub_08024944(a));
     gMap->unk4233 = sub_0802490C(a);
 

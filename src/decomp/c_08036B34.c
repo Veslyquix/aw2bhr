@@ -208,6 +208,6 @@ void AgbMain(void)
     for (;;) {
         if (gUnknown_030040EC != 0)
             gUnknown_030040EC();
-        sub_08036E18();
+        CheckSoftResetCombo();
     }
 }

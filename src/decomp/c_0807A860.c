@@ -15,7 +15,7 @@ void sub_0807A860(void)
 
     p = sub_08014740(0x10, 0xF, gUnknown_08499578,
                      sub_0807A3AC(gPlayers[sub_0807A908()].co,
-                                  sub_08078E14()),
+                                  GetCampaignMissionId()),
                      0x8000, 0x41);
     p->unk3a = 2;
 }

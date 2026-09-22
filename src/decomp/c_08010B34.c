@@ -5,10 +5,10 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08010B34.
- * sub_08010B34 @ 0x08010B34, sub_08010D28 @ 0x08010D28, sub_08010D80 @ 0x08010D80, sub_08010DD4 @ 0x08010DD4
+ * sub_08010B34 @ 0x08010B34, MakePipe @ 0x08010D28, MakeSeam @ 0x08010D80, sub_08010DD4 @ 0x08010DD4
  */
 
-/* See the note on struct Map in work/sub_08010604/sub_08010604.c. */
+/* See the note on struct Map in work/GetSeamType/GetSeamType.c. */
 
 /* Picks the connector tile for a road/bridge cell from which of its four
  * neighbours sub_0800F564 reports as joinable, after re-drawing the cell when
@@ -47,8 +47,8 @@ int sub_08010B34(int x, int y)
             if (sub_0800F8D4(x, y))
                 return -1;
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 0xf);
-            sub_08001158(x, y, sub_0800FD44(x, y, 1));
+            SetTerrainAt(x, y, 0xf);
+            MakeTileSimple(x, y, sub_0800FD44(x, y, 1));
         }
         if (sub_0800F564(x, y, 0) == 2)
         {
@@ -95,13 +95,13 @@ int sub_08010B34(int x, int y)
 }
 
 /* Eight redraw passes over one (x, y) cell, all sharing the same key. The
- * second is `sub_08001158(x, y, sub_0800FD44(x, y, 1))` -- the nested call
+ * second is `MakeTileSimple(x, y, sub_0800FD44(x, y, 1))` -- the nested call
  * leaves its result in r0 and agbcc moves it to r2 before reloading r0/r1, so
  * the nesting costs the same `add r2,r0,#0` a temporary would. */
 void MakePipe(int x, int y)
 {
-    sub_080011F4(x, y, 0xf);
-    sub_08001158(x, y, sub_0800FD44(x, y, 1));
+    SetTerrainAt(x, y, 0xf);
+    MakeTileSimple(x, y, sub_0800FD44(x, y, 1));
     sub_08010ADC(x, y);
     sub_0800A588(x, y);
     sub_0800ABD0(x, y);
@@ -113,8 +113,8 @@ void MakePipe(int x, int y)
 asm(".global sub_08010D28\n.thumb_set sub_08010D28, MakePipe\n");
 
 /* Redraws one cell as a road/bridge, gated on either the campaign counter being
- * low or sub_0800C840 accepting the cell. sub_08010604 supplies the tile id
- * that both sub_08001158 and sub_0800C574 are handed.
+ * low or GetPropertyKindAt accepting the cell. GetSeamType supplies the tile id
+ * that both MakeTileSimple and sub_0800C574 are handed.
  *
  * `(s8)gActiveMap->propertyCount` is a CAST on a u8 member, not an s8 member.
  *
@@ -133,7 +133,7 @@ asm(".global sub_08010D28\n.thumb_set sub_08010D28, MakePipe\n");
  * too: sub_0800C6E8 reads two u8 members four instructions apart at the same
  * `base + K + i` addressing under the same test and gets one of each.  What
  * does settle a byte member is an operation that folds under only one
- * signedness -- sub_0800C8D8's `|= 0xFF` -- see the
+ * signedness -- RegisterArmyHqs's `|= 0xFF` -- see the
  * "`ldrsb` vs `ldrb; lsl #24; asr #24`" chapter of docs/agbcc-codegen.md.
  *
  * The u8 declaration itself is unaffected -- this file still matches. */
@@ -141,13 +141,13 @@ void MakeSeam(int x, int y)
 {
     int t;
 
-    if ((s8)gActiveMap->propertyCount <= 0x3b || sub_0800C840(x, y) != 0)
+    if ((s8)gActiveMap->propertyCount <= 0x3b || GetPropertyKindAt(x, y) != 0)
     {
-        sub_080011F4(x, y, 0x10);
-        t = sub_08010604(x, y);
-        sub_08001158(x, y, t);
+        SetTerrainAt(x, y, 0x10);
+        t = GetSeamType(x, y);
+        MakeTileSimple(x, y, t);
         sub_0800C574(x, y, t);
-        sub_080219AC();
+        RecountArmyProperties();
     }
 }
 

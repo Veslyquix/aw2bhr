@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08035124.
- * sub_08035124 @ 0x08035124, sub_08035144 @ 0x08035144
+ * sub_08035124 @ 0x08035124, ChangeGameWeather @ 0x08035144
  */
 
 void sub_08035124(u8 a)
@@ -14,7 +14,7 @@ void sub_08035124(u8 a)
 }
 
 /* Named per Xenesis's AW2 Subroutine List: "Changes current game weather.
- * r0 = Weather ID". The old sub_08035144 symbol is kept as a linker alias
+ * r0 = Weather ID". The old ChangeGameWeather symbol is kept as a linker alias
  * below so every other unit keeps resolving it unchanged. */
 void ChangeGameWeather(u8 a)
 {

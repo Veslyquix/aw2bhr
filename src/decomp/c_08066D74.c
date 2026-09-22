@@ -15,7 +15,7 @@ void sub_08066D74(void)
 
     gUnknown_08580934->unk2a++;
 
-    sub_08066BF4();
+    HandleRulesMenuInput();
     sub_08066C70(gUnknown_08580934->unk54[gUnknown_08580934->unk33]);
     sub_08066B8C(gUnknown_08580934->unk33);
     sub_08066D30();

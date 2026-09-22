@@ -40,7 +40,7 @@
  * through fold. Three contiguous case labels sharing one body become exactly
  * `cmp #3; bgt default` then `cmp #1; blt default`.
  *
- * sub_08078E14 returns `int`: the compares are signed and there is no
+ * GetCampaignMissionId returns `int`: the compares are signed and there is no
  * re-narrowing in front of them, which agbcc emits at every call site of a
  * narrow-returning callee.
  */
@@ -49,7 +49,7 @@ bool8 sub_0802C604(void)
 {
     if (gPlaySt.gameMode == 1)
     {
-        switch (sub_08078E14())
+        switch (GetCampaignMissionId())
         {
         case 1:
         case 2:

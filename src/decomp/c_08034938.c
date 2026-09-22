@@ -48,7 +48,7 @@ void sub_08034938(void)
 
         for (i = 1; i <= 4; i++)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 u8 v = gPlayers[i].captures;
 
@@ -59,11 +59,11 @@ void sub_08034938(void)
 
         for (i = 1; i <= 4; i++)
         {
-            if (sub_080266DC(i) && best > gPlayers[i].captures)
+            if (IsPlayerAliveAndActive(i) && best > gPlayers[i].captures)
                 sub_08028874(i, 0x20);
         }
 
-        sub_08028568();
+        FinalizeBattleResult();
         gUnknown_030032D8 = 0x12;
     }
 }

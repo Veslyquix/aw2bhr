@@ -18,21 +18,21 @@ int sub_0800BA9C(int x, int y)
     if (sub_0800B528(x, y) < 0)
         return 0;
 
-    sub_08007CA0(x, y);
+    MakeSeaSafest(x, y);
     t = MAP->terrain[MAP->rowOffset[y] + x];
-    sub_080011F4(x, y, 0xd);
+    SetTerrainAt(x, y, 0xd);
 
     v = sub_0800B61C(x, y);
 
     if (v < 0)
     {
-        sub_080011F4(x, y, t);
+        SetTerrainAt(x, y, t);
         return 0;
     }
 
-    sub_08001158(x, y, v);
+    MakeTileSimple(x, y, v);
 
-    if (sub_0800119C(x, y, 7) == 0)
+    if (IsTerrainAtCoordsType(x, y, 7) == 0)
         sub_0800BB2C(x, y);
 
     return 1;
@@ -50,11 +50,11 @@ void sub_0800BB2C(int x, int y)
             int v = sub_0800B61C(x, n);
             if (v < 0)
             {
-                sub_080011F4(x, n, 7);
-                sub_08001158(x, n, k);
+                SetTerrainAt(x, n, 7);
+                MakeTileSimple(x, n, k);
             }
             else
-                sub_08001158(x, n, v);
+                MakeTileSimple(x, n, v);
         }
     }
 
@@ -66,11 +66,11 @@ void sub_0800BB2C(int x, int y)
             int v = sub_0800B61C(n, y);
             if (v < 0)
             {
-                sub_080011F4(n, y, 7);
-                sub_08001158(n, y, k);
+                SetTerrainAt(n, y, 7);
+                MakeTileSimple(n, y, k);
             }
             else
-                sub_08001158(n, y, v);
+                MakeTileSimple(n, y, v);
         }
     }
 
@@ -82,11 +82,11 @@ void sub_0800BB2C(int x, int y)
             int v = sub_0800B61C(n, y);
             if (v < 0)
             {
-                sub_080011F4(n, y, 7);
-                sub_08001158(n, y, k);
+                SetTerrainAt(n, y, 7);
+                MakeTileSimple(n, y, k);
             }
             else
-                sub_08001158(n, y, v);
+                MakeTileSimple(n, y, v);
         }
     }
 
@@ -98,11 +98,11 @@ void sub_0800BB2C(int x, int y)
             int v = sub_0800B61C(x, n);
             if (v < 0)
             {
-                sub_080011F4(x, n, 7);
-                sub_08001158(x, n, k);
+                SetTerrainAt(x, n, 7);
+                MakeTileSimple(x, n, k);
             }
             else
-                sub_08001158(x, n, v);
+                MakeTileSimple(x, n, v);
         }
     }
 }

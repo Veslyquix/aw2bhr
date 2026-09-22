@@ -33,14 +33,14 @@ int sub_08058744(void)
 {
     int r = 0;
 
-    if (sub_08042D50(gUnknown_030033EC, gUnknown_030040D8->unk00) == 1)
+    if (GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, gUnknown_030040D8->unk00) == 1)
     {
         sub_080202A4(gUnknown_030040D8);
         sub_0801FD9C(0x79);
     }
     else
     {
-        sub_0801F838(0xff);
+        FillMovementMap(0xff);
         /* WAVE 36: third argument added. W35-H retyped sub_08020354 from
          * (int, int) to (u16, u16, struct Unk08499594 *) on body-side
          * evidence; this call site confirms it independently -- the ROM does

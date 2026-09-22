@@ -78,5 +78,5 @@ void sub_08043E8C(int a1, u16 *a2, int a3)
     if (a3 <= 14)
         sub_08043AA0(a1, a3);
     else
-        CpuFastSet(gUnknown_084A0090[a1 % 24].palette + sub_08017860(a1 % 24) * 16, (void *)a3, 8);
+        CpuFastSet(gUnknown_084A0090[a1 % 24].palette + GetLoadedCoPalette(a1 % 24) * 16, (void *)a3, 8);
 }

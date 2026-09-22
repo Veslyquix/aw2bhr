@@ -120,7 +120,7 @@ void sub_080598BC(void)
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_08059A0C(p);
-    q = sub_08057F00(1);
+    q = CountUnitsWithTypeTag(1);
     v.pos.unk00 = 0x270F;
     sub_08059B4C(q, gUnknown_085766E0->unk04[7], 0, p, &v);
     if (v.pos.unk00 != 0x270F)
@@ -148,7 +148,7 @@ void sub_08059978(void)
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
     sub_08059A0C(p);
-    q = sub_08057F00(1);
+    q = CountUnitsWithTypeTag(1);
     v.pos.unk00 = 0x270F;
     sub_08059B4C(q, gUnknown_085766E0->unk04[6], 0, p, &v);
     if (v.pos.unk00 == 0x270F)

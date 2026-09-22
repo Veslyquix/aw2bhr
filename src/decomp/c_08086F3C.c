@@ -18,9 +18,9 @@ void sub_08086F3C(int a1)
     p = (u8 *)&gUnknown_02027F74;
     p += 4;
 
-    if (p[a1] <= 0xb3 && (u8)sub_0803CA54(p[a1]))
+    if (p[a1] <= 0xb3 && (u8)IsCampaignMapUnlocked(p[a1]))
     {
-        sub_080247A4(p[a1]);
+        LoadMapData(p[a1]);
         sub_0801B6EC((void *)(gUnknown_03001FE8.bits.chr_block * 0x4000 + 0x06004000));
         sub_0801B6FC((void *)(gUnknown_03001FE8.bits.chr_block * 0x4000 + 0x06004000));
         sub_08037A20(gUnknown_0849957C, 0x6200);

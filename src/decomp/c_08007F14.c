@@ -4,12 +4,12 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08007F14.
- * sub_08007F14 @ 0x08007F14
+ * MakeTile2 @ 0x08007F14
  */
 
 void MakeTile2(int x, int y, int v)
 {
-    sub_08001158(x, y, v);
+    MakeTileSimple(x, y, v);
 
     if (v == 0x2A)
         return;
@@ -18,13 +18,13 @@ void MakeTile2(int x, int y, int v)
     {
         int n = y - 1;
 
-        if (sub_0800119C(x, n, 1))
-            sub_08001158(x, n, 1);
+        if (IsTerrainAtCoordsType(x, n, 1))
+            MakeTileSimple(x, n, 1);
 
         sub_0800ABD0(x, y);
     }
 
-    sub_08007D70(x, y);
+    MakeForestSimple(x, y);
     sub_08007F9C(x, y);
     sub_0800A588(x, y);
 }

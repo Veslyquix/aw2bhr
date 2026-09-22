@@ -4,11 +4,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080261E8.
- * sub_080261E8 @ 0x080261E8
+ * IsNeotanksUnlocked @ 0x080261E8
  */
 
 /* A per-army precondition check: in mode 1 the army's class selects a
- * sub_0803CBD8 tag to test, class 5 always passes, and anything outside 1..5
+ * IsCampaignCompletionFlagSet tag to test, class 5 always passes, and anything outside 1..5
  * fails. Outside mode 1 it always passes.
  *
  * THE `else return TRUE` IS LOad-BEARING and is the whole difference between
@@ -20,7 +20,7 @@
  * `return FALSE` at the end creates them the other way round.
  *
  * The four tags are set into one variable and the call is shared: written as
- * four separate `if (!sub_0803CBD8(K)) return FALSE;` the cross-jumped result
+ * four separate `if (!IsCampaignCompletionFlagSet(K)) return FALSE;` the cross-jumped result
  * is the same instructions, so this is a spelling choice, not evidence.
  *
  * `int` parameter: the prologue is a bare `adds r2, r0, #0` with no
@@ -28,7 +28,7 @@
  *
  * Named per Xenesis's AW2 Subroutine List: "Checks whether Neotanks are
  * unlocked. Checks game mode + state bits (input r0 = Army)". The old
- * sub_080261E8 symbol is kept as a linker alias below so every other unit
+ * IsNeotanksUnlocked symbol is kept as a linker alias below so every other unit
  * keeps resolving it unchanged. */
 bool8 IsNeotanksUnlocked(int a)
 {
@@ -56,7 +56,7 @@ bool8 IsNeotanksUnlocked(int a)
             return FALSE;
         }
 
-        if (sub_0803CBD8(v) != 0)
+        if (IsCampaignCompletionFlagSet(v) != 0)
             return TRUE;
     }
     else

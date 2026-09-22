@@ -22,7 +22,7 @@ void sub_0805E2AC(void)
   void (**fn)(int, int, int, int, int);
   best = 0x7FFF;
   v.raw = 0x270F | (v.raw & 0xFFFF0000);
-  n = sub_08060DAC();
+  n = AiBuildPropertyList();
   for (i = 0; i < n; i++)
   {
     if (gUnknown_085766E4[i].unk02 != 6)

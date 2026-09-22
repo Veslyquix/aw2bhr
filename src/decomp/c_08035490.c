@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08035490.
- * sub_08035490 @ 0x08035490
+ * CalcRandomWeatherChances @ 0x08035490
  */
 
 /* Rebuilds the two gUnknown_03004490 counters from the four armies'
@@ -50,7 +50,7 @@ void CalcRandomWeatherChances(void)
         ((struct Unk35490Counts *)gUnknown_03004490)->unk03[i] = 0;
     }
 
-    sub_080354FC();
+    LoadWeatherData();
 }
 
 asm(".global sub_08035490\n.thumb_set sub_08035490, CalcRandomWeatherChances\n");

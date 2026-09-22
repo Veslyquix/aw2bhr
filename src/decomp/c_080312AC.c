@@ -50,7 +50,7 @@ void sub_080312AC(struct Unk080312ACProc *proc)
 
         if (i == gUnknown_0849B018->unk06)
         {
-            sub_0801F34C(gUnknown_0849B27C[i], 0x58 + i * 0x28, 0x58 - *p, 0, 0);
+            DrawOamObject(gUnknown_0849B27C[i], 0x58 + i * 0x28, 0x58 - *p, 0, 0);
             *(u16 *)((u8 *)gPal + palOffset) = gUnknown_081D3E68[(x >> 1) & 0xf];
             sub_080135A4();
         }

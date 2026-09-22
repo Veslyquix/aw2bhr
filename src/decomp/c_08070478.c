@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08070478.
- * sub_08070478 @ 0x08070478, sub_080704A4 @ 0x080704A4, sub_080704F0 @ 0x080704F0, sub_08070544 @ 0x08070544, sub_08070578 @ 0x08070578, sub_080705AC @ 0x080705AC
+ * ActivateMusicOrSoundId @ 0x08070478, sub_080704A4 @ 0x080704A4, sub_080704F0 @ 0x080704F0, sub_08070544 @ 0x08070544, sub_08070578 @ 0x08070578, sub_080705AC @ 0x080705AC
  */
 
 /* PARKED, wave 31 (W31-C). m4aSongNumStart.
@@ -88,7 +88,7 @@
 
 /* Named per Xenesis's AW2 Subroutine List: "Routine that takes Music/Sound
  * ID and activates it?" -- m4aSongNumStart, per the note above. The old
- * sub_08070478 symbol is kept as a linker alias below so every other unit
+ * ActivateMusicOrSoundId symbol is kept as a linker alias below so every other unit
  * keeps resolving it unchanged. */
 void ActivateMusicOrSoundId(u16 n)
 {
@@ -107,8 +107,8 @@ asm(".global sub_08070478\n.thumb_set sub_08070478, ActivateMusicOrSoundId\n");
  * Every instruction, the literal-pool ORDER and the size are the ROM's. The
  * only residual is a two-register exchange: the ROM keeps &gUnknown_08242308
  * in r2 and `song->ms` in r3, this keeps them the other way round. Identical
- * cause to sub_08070478 / sub_08070544 / sub_08070578 / sub_080704F0 -- see
- * work/sub_08070478/sub_08070478.c for the full analysis.
+ * cause to ActivateMusicOrSoundId / sub_08070544 / sub_08070578 / sub_080704F0 -- see
+ * work/ActivateMusicOrSoundId/ActivateMusicOrSoundId.c for the full analysis.
  *
  * NEW this wave: writing the song lookup INLINE (no `song` local) is what fixes
  * the POOL order. With `const struct Song *song = &gUnknown_0824238C[n];` the
@@ -127,7 +127,7 @@ void sub_080704A4(u16 n)
 
 /* PARKED -- wave 32, W32-B. m4aSongNumStartOrContinue. Same single residual as
  * sub_080704A4 (the r2/r3 exchange between the mplay-table address and
- * `song->ms`); see work/sub_08070478/sub_08070478.c for the analysis and
+ * `song->ms`); see work/ActivateMusicOrSoundId/ActivateMusicOrSoundId.c for the analysis and
  * work/sub_080704A4/sub_080704A4.c for why the lookup is written inline. */
 void sub_080704F0(u16 n)
 {
@@ -142,7 +142,7 @@ void sub_080704F0(u16 n)
 /* PARKED, wave 31 (W31-C). m4aSongNumStop. Same 52-byte instruction stream as
  * the ROM; the only difference is that the mplay-table address lands in r3 and
  * `song->ms` in r2, where the ROM has them the other way round. See the long
- * note in work/sub_08070478/sub_08070478.c for the spellings ruled out.
+ * note in work/ActivateMusicOrSoundId/ActivateMusicOrSoundId.c for the spellings ruled out.
  *
  * WAVE 32 (W32-B) applied the wave-31 allocation rule to this function -- the
  * rule this same agent measured -- and the rule PREDICTS THE CANDIDATE, NOT THE
@@ -204,7 +204,7 @@ void sub_08070544(u16 n)
 /* PARKED, wave 31 (W31-C). m4aSongNumContinue. Same 52-byte instruction stream
  * as the ROM; the only difference is that the mplay-table address lands in r3
  * and `song->ms` in r2, where the ROM has them the other way round. See the
- * long note in work/sub_08070478/sub_08070478.c for the spellings ruled out,
+ * long note in work/ActivateMusicOrSoundId/ActivateMusicOrSoundId.c for the spellings ruled out,
  * and for wave 32 (W32-B)'s verdict: the wave-31 allocation rule predicts the
  * CANDIDATE's registers, not the ROM's, so all three of its levers are absent
  * here and the difference is upstream of statement shape -- a type-model

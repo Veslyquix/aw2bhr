@@ -99,8 +99,8 @@ void sub_08032A00(void)
 
     if (gUnknown_0849B060->unk0c > 1)
     {
-        sub_0801F34C(0x45, 0x58 - gUnknown_0849B0C0[((u32)gGameClock >> 3) & 3], 0x4c, 0, 0);
-        sub_0801F34C(0x46, gUnknown_0849B0C0[((u32)gGameClock >> 3) & 3] + 0xd8, 0x4c, 0, 0);
+        DrawOamObject(0x45, 0x58 - gUnknown_0849B0C0[((u32)gGameClock >> 3) & 3], 0x4c, 0, 0);
+        DrawOamObject(0x46, gUnknown_0849B0C0[((u32)gGameClock >> 3) & 3] + 0xd8, 0x4c, 0, 0);
     }
 
     if (gUnknown_0849B060->unk10 != 0)

@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801F888.
- * sub_0801F888 @ 0x0801F888, sub_0801F92C @ 0x0801F92C, sub_0801F98C @ 0x0801F98C
+ * CacheUnitMovementCosts @ 0x0801F888, sub_0801F92C @ 0x0801F92C, sub_0801F98C @ 0x0801F98C
  */
 
 /* Loads the terrain movement-cost row for unit type a1 into the flood fill's
@@ -61,7 +61,7 @@ void CacheUnitMovementCosts(int a1)
 
 asm(".global sub_0801F888\n.thumb_set sub_0801F888, CacheUnitMovementCosts\n");
 
-/* Rebuilds the gUnknown_03003340 row-pointer table sub_0801F838 and friends
+/* Rebuilds the gUnknown_03003340 row-pointer table FillMovementMap and friends
  * write through: row y of the caller's plane starts at `a1 + rowOffset[y]`,
  * where rowOffset is the +0x417A halfword table of the gUnknown_08499590 map.
  * Then it publishes the map's width and height as the u8 pair at

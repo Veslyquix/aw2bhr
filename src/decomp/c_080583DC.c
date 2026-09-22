@@ -41,7 +41,7 @@ int sub_080583DC(void)
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
             if (u->unk00 == 0)
                 continue;
@@ -73,7 +73,7 @@ int sub_080583DC(void)
  * its whole address computation into the preheader: that hoist is gcc's own
  * LICM, not a source-level local. Binding it to a local before the loop is
  * observably different code -- it sinks the `movs r5, #0` loop init BELOW the
- * hoisted block and moves gUnknown_08499594's address into a callee-saved
+ * hoisted block and moves gUnits's address into a callee-saved
  * register. The ROM's order (`movs r7,#0; movs r5,#0` and only then the mask
  * expression) is the tell that the for-init precedes the preheader.
  *
@@ -94,7 +94,7 @@ int sub_0805848C(void)
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
             if ((u8)(u->unk00 - 1) > 1)
                 continue;
@@ -131,7 +131,7 @@ int sub_08058530(void)
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
             if ((u8)(u->unk00 - 1) > 1)
                 continue;

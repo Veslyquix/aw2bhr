@@ -50,7 +50,7 @@ bool8 sub_0804209C(s16 x, s16 y)
     if ((id & 0xc0) != gUnknown_03003F2C)
         return FALSE;
 
-    unit = &gUnknown_08499594[id];
+    unit = &gUnits[id];
 
     if (unit == (struct Unk08499594 *)gUnknown_030040D8)
         return FALSE;
@@ -184,7 +184,7 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
  * (which consumes p in place) then comes out as a copy plus an add.
  *
  * unit is bound BEFORE the `id == 0` test, the same ordering sub_08041F38
- * uses, and the sub_08025F74 argument is respelled &gUnknown_08499594[id]
+ * uses, and the CanTransportCarry argument is respelled &gUnits[id]
  * rather than reusing unit: that global is a non-const pointer, so the first
  * `bl` kills its MEM and the ROM reloads it. */
 bool8 sub_080422A8(s16 x, s16 y)
@@ -210,7 +210,7 @@ bool8 sub_080422A8(s16 x, s16 y)
     off = *(u16 *)(rows + y2) + x;
     ids = p->unit;
     id = ids[off];
-    unit = &gUnknown_08499594[id];
+    unit = &gUnits[id];
 
     if (id == 0)
         return FALSE;
@@ -218,7 +218,7 @@ bool8 sub_080422A8(s16 x, s16 y)
     if (sub_08026F9C(id, gUnknown_03003F38) == 0)
         return FALSE;
 
-    if (sub_08025F74(&gUnknown_08499594[id], gUnknown_030040D8->unk00) == 0)
+    if (CanTransportCarry(&gUnits[id], gUnknown_030040D8->unk00) == 0)
         return FALSE;
 
     t = gUnknown_085D5ABC[unit->unk00].transportTable;

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080249EC.
- * sub_080249EC @ 0x080249EC
+ * GetTerrainDefense @ 0x080249EC
  */
 
 /* THREE parameters and the FIRST is unused: the body opens on r1 and never

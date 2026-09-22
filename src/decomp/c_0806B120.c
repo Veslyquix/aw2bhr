@@ -86,7 +86,7 @@ void sub_0806B120(void)
         gUnknown_0202F214[i].unk00 = gUnknown_0200C420.unk38[i].unk00_00 + 0x8a;
 
         ((struct Unk0202F214Rec *)gUnknown_0202F214)[i].unk02_0 =
-            5 - sub_08037D80(gUnknown_0200C420.unk38[i].unk00_14);
+            5 - GetRankFromScore(gUnknown_0200C420.unk38[i].unk00_14);
 
         ((struct Unk0202F214Rec *)gUnknown_0202F214)[i].unk02_2 =
             gUnknown_0200C420.unk38[i].unk00_08;

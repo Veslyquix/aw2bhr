@@ -9,6 +9,6 @@
 
 void sub_080600F0(void)
 {
-    sub_08025E08(gUnknown_030046C0.unk02, gUnknown_030046C0.unk03, gUnknown_030046C0.unk01);
+    BuyUnit(gUnknown_030046C0.unk02, gUnknown_030046C0.unk03, gUnknown_030046C0.unk01);
     gUnknown_030045D4 = 0xb;
 }

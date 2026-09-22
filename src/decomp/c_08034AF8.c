@@ -11,7 +11,7 @@
 
 /* gUnknown_08090E24 is a `-fforce-addr` .rodata word holding &gUnknown_030033EC
  * (dumped from baserom.gba), not a global -- it is read on both sides of the
- * sub_080348B4 test. gUnknown_08090D90 immediately before it IS a real u16
+ * ShouldPromptCountryName test. gUnknown_08090D90 immediately before it IS a real u16
  * table (0,1,2,3,3,3,2,1,0,0), reached with `lsls #1; adds; ldrh`.
  *
  * gGameClock is declared s32 but the division is `__udivsi3`/`__umodsi3`,
@@ -19,7 +19,7 @@
  * of the global, which a dozen other files share. */
 void sub_08034AF8(void)
 {
-    if (sub_080348B4())
+    if (ShouldPromptCountryName())
     {
         sub_08034A7C(0x4e, gPlayers[sub_08026704(gUnknown_030033EC)].teamColor);
         switch (gUnknown_02028E40)
@@ -50,10 +50,10 @@ void sub_08034AF8(void)
     }
     sub_08026768();
     sub_080268F4();
-    sub_08044178(gUnknown_030033EC);
+    ClearPlayerCoPowerStatus(gUnknown_030033EC);
     sub_08024268();
     sub_08062038();
-    if (sub_080348B4())
+    if (ShouldPromptCountryName())
         sub_0802BFBC();
     sub_08034C8C();
     sub_0803B5E8();

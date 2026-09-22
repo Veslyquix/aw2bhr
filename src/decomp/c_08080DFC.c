@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08080DFC.
- * sub_08080DFC @ 0x08080DFC, sub_08080E40 @ 0x08080E40, sub_08080E74 @ 0x08080E74
+ * sub_08080DFC @ 0x08080DFC, sub_08080E40 @ 0x08080E40, StartCoPowerScript @ 0x08080E74
  */
 
 #include "hardware.h"

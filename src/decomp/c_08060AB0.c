@@ -115,9 +115,9 @@ void sub_08060AB0(void)
     if (gUnknown_03004674 == 0)
         v = 100;
     else
-        v = sub_08057F00(4) * 100 / gUnknown_03004674;
+        v = CountUnitsWithTypeTag(4) * 100 / gUnknown_03004674;
 
-    sub_08060F00();
+    AiCalcBuildPriorities();
     sub_08062C94();
 
 retry:
@@ -205,9 +205,9 @@ again:
             break;
         }
 
-        cost = sub_08042C9C(gUnknown_030033EC, sel) * 10;
+        cost = GetCoPriceMultiplier(gUnknown_030033EC, sel) * 10;
 
-        if (sub_08060ED4(k) == 0)
+        if (CountBuildablePropertiesOfKind(k) == 0)
             goto again;
 
         funds = gPlayers[gUnknown_030033EC].funds;

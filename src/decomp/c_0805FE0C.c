@@ -23,14 +23,14 @@ void sub_0805FE0C(void)
         if (gUnknown_030046C0.unk00 == 0x11)
         {
             gUnknown_03003F38 = gUnknown_030046C0.unk01;
-            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
             gUnknown_030040D8->unk06 = gUnknown_030046C0.unk12;
         }
 
         if (gUnknown_030046C0.unk00 == 0x12)
         {
             gUnknown_03003F38 = gUnknown_030046C0.unk01;
-            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
             sub_08029088(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
         }
 
@@ -39,7 +39,7 @@ void sub_0805FE0C(void)
     }
 
     gUnknown_03003F38 = gUnknown_030046C0.unk01;
-    gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+    gUnknown_030040D8 = (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
 
     gUnknown_03003F24.pos.unk00 = gUnknown_030046C0.filler_04[0];
     gUnknown_03003F24.pos.unk02 = gUnknown_030046C0.filler_04[1];

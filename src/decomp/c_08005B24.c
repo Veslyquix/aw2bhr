@@ -88,11 +88,11 @@ void sub_08005B24(void)
             sub_08005F1C();
             sub_0803B4DC(0x67);
         }
-        sub_0801F34C(0x35, 0x28, 0x421, 0, 0);
-        sub_0801F34C(0x36, 0x28, 0x431, 0, 0);
-        sub_0801F34C(0x37, 0x28, 0x441, 0, 0);
-        sub_0801F34C(0x38, 0x28, 0x451, 0, 0);
-        sub_0801F34C(0x3C, 0x20, 0x461, 0, 0);
+        DrawOamObject(0x35, 0x28, 0x421, 0, 0);
+        DrawOamObject(0x36, 0x28, 0x431, 0, 0);
+        DrawOamObject(0x37, 0x28, 0x441, 0, 0);
+        DrawOamObject(0x38, 0x28, 0x451, 0, 0);
+        DrawOamObject(0x3C, 0x20, 0x461, 0, 0);
         break;
     }
 

@@ -23,7 +23,7 @@
  *
  * THE LAST 10 BYTES, and the reusable rule behind them. The function sat at
  * 98.3% with size exact and a single divergent statement,
- * `gUnknown_08499594[v].unk05_3 = 0;`: same six instructions, but the ROM
+ * `gUnits[v].unk05_3 = 0;`: same six instructions, but the ROM
  * computes `v * 12` BEFORE dereferencing the pointer global, and the plain
  * subscript dereferences it immediately.
  *
@@ -44,7 +44,7 @@
  * expansion and is forced into a register only at the add, after the index is
  * already computed. See docs/agbcc-codegen.md, wave 39 W39-E.
  *
- * REFUTED on the way, worth not repeating: `(v + gUnknown_08499594)->unk05_3`,
+ * REFUTED on the way, worth not repeating: `(v + gUnits)->unk05_3`,
  * to put the index syntactically first, is byte-for-byte IDENTICAL to the plain
  * subscript -- C defines them as the same tree and fold canonicalises them
  * together. And decomp-permuter found nothing better than the 98.3% starting
@@ -110,7 +110,7 @@ void sub_08028580(struct Unk28580 *p)
         sub_080240B4(gPlayers[p->unk64].hqX & 0x7f,
                      gPlayers[p->unk64].hqY & 0x7f,
                      gUnknown_084995F4[p->unk64]);
-        sub_080219AC();
+        RecountArmyProperties();
     }
     else
     {
@@ -128,7 +128,7 @@ void sub_08028580(struct Unk28580 *p)
             if (v != 0
              && gPlayers[(v >> 6) + 1].team == gPlayers[team].team)
             {
-                unit = &gUnknown_08499594[v];
+                unit = &gUnits[v];
                 unit->unk05_3 = 0;
             }
 
@@ -156,7 +156,7 @@ void sub_08028580(struct Unk28580 *p)
     }
 
     sub_08024268();
-    sub_080219AC();
+    RecountArmyProperties();
     sub_08026D68();
     p->unk68 = 1;
 }

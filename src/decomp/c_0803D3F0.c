@@ -55,7 +55,7 @@ void sub_0803D3F0(void)
                 gUnknown_0849959C[gMap->tile[idx]];
         }
     }
-    sub_080219AC();
+    RecountArmyProperties();
     sub_08024268();
 }
 
@@ -94,7 +94,7 @@ int sub_0803D4A8(u8 a)
         return 0;
     }
     sub_0801AC58(b, (u8 *)p);
-    sub_0803CC84(gUnknown_020280C0[a].unk02, p->name);
+    CopyString(gUnknown_020280C0[a].unk02, p->name);
     gUnknown_020280C0[a].unk13 = p->unk4C3;
     gUnknown_020280C0[a].filler_14[5] = p->unk4C9;
     gUnknown_020280C0[a].filler_14[6] = p->unk4CA;

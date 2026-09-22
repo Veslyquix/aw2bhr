@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08078848.
- * sub_08078848 @ 0x08078848
+ * SetupCoSelectGreatSeaBattle @ 0x08078848
  */
 
 #include "proc.h"
@@ -18,7 +18,7 @@
 
 void SetupCoSelectGreatSeaBattle(void)
 {
-    sub_080785FC();
+    ClearArmyCount();
     sub_080786A4(sub_08078608(sub_080786F0(0)));
     sub_08078740();
 }

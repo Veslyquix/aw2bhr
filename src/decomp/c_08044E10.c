@@ -48,7 +48,7 @@ struct Unk08044E10Proc
  * same 7-bit unk04_0 bitfield store -- but subtracting unk2d * 10 with a floor
  * of 1 instead of adding unk2e * 10 with a ceiling of 100, plus a halving of
  * unk06_0 when unk30 is set. It is wrapped in an outer scan for the first army
- * 0..4 that is alive (sub_080266DC) and shares the current army's unk2a.
+ * 0..4 that is alive (IsPlayerAliveAndActive) and shares the current army's unk2a.
  *
  * TWO THINGS THE 0.746 MNEMONIC SIMILARITY WITH sub_08044E10 DOES NOT GIVE
  * YOU. Both were the attempt-1 miss; both are invisible in the shared shape.
@@ -123,7 +123,7 @@ void sub_08044E10(struct Unk08044E10Proc *proc)
 
     for (i = proc->unk29; i <= 0x32; i++)
     {
-        unit = &gUnknown_08499594[(u16)gUnknown_084995FE[proc->unk2c] + i];
+        unit = &gUnits[(u16)gUnknown_084995FE[proc->unk2c] + i];
 
         if (unit->unk00 == 0)
             continue;
@@ -183,7 +183,7 @@ void sub_08044F24(struct Unk08044F24Proc *proc)
             return;
         }
 
-        if (sub_080266DC(j) != 0
+        if (IsPlayerAliveAndActive(j) != 0
             && gPlayers[j].team != gPlayers[proc->unk2c].team)
             break;
 
@@ -194,7 +194,7 @@ void sub_08044F24(struct Unk08044F24Proc *proc)
 
     for (i = proc->unk29; i <= 0x32; i++)
     {
-        unit = &gUnknown_08499594[(u16)gUnknown_084995FE[proc->unk2a] + i];
+        unit = &gUnits[(u16)gUnknown_084995FE[proc->unk2a] + i];
 
         if (unit->unk00 == 0)
             continue;

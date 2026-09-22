@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08043A80.
- * sub_08043A80 @ 0x08043A80, sub_08043A90 @ 0x08043A90
+ * GetCoPowerAnimation @ 0x08043A80, GetCoPowerAnimationPalette @ 0x08043A90
  */
 
 void *GetCoPowerAnimation(int a)

@@ -48,12 +48,12 @@ void sub_080213AC(void)
     }
     else
     {
-        sub_080206E4(&gMap->visible[
+        FillMapBuffer(&gMap->visible[
                          gUnknown_03004070 * 0x508],
                      1 - gPlaySt.fog);
     }
 
-    sub_080206E4(&gMap->visible[
+    FillMapBuffer(&gMap->visible[
                      gUnknown_03004088 * 0x508],
                  1 - gPlaySt.fog);
 

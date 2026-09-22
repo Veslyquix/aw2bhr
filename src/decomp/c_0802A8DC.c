@@ -20,7 +20,7 @@ void sub_0802A8DC(int a1, int a2, int a3, int a4, int a5)
     m = sub_080249C8(t);
     n = sub_08024984(t);
 
-    sub_08011E54((void *)sub_0802A85C(k), (void *)0x06013940, 0x100);
+    sub_08011E54((void *)GetTerrainNameGraphic(k), (void *)0x06013940, 0x100);
 
     sub_0801BD00((a3 + gUnknown_0849A2A6[a5 * 3] + gUnknown_0849A284[0x14]) & 0x1ff,
                  (a4 + gUnknown_0849A284[0x15]) | 0x400,
@@ -32,7 +32,7 @@ void sub_0802A8DC(int a1, int a2, int a3, int a4, int a5)
         m = 0;
 
     sub_08011E54((void *)sub_0802A880(k, n), (void *)0x06013CC0, 0x100);
-    ApplyPaletteExt((u16 *)sub_0802A8AC(k, m), 0x2c0, 0x20);
+    ApplyPaletteExt((u16 *)GetTerrainNamePalette(k, m), 0x2c0, 0x20);
 
     sub_0801BD00((a3 + gUnknown_0849A2A6[a5 * 3] + gUnknown_0849A284[0x12]) & 0x1ff,
                  ((a4 + gUnknown_0849A284[0x13]) & 0xff) | 0x400,

@@ -42,8 +42,8 @@ void sub_0800C574(int x, int y, int t)
  * increments.
  *
  * The cell byte comes off gMap->terrain through gMap->rowOffset, the
- * c_0800C840 idiom -- but UNMASKED here, where sub_0800C840 hands
- * sub_0800C7E8 `& 0x1f`.  sub_0800C7E8 masks internally, so the two spellings
+ * c_0800C840 idiom -- but UNMASKED here, where GetPropertyKindAt hands
+ * GetPropertyKindForTerrain `& 0x1f`.  GetPropertyKindForTerrain masks internally, so the two spellings
  * agree; sub_0800C7A4 then switches the same raw byte over 0x28/0x48/0x68/0x88,
  * values outside the low five bits, so the mask genuinely is absent here.
  *
@@ -70,7 +70,7 @@ void sub_0800C608(int x, int y)
     off = gMap->rowOffset[y] + x;
     cell = gMap->terrain[off];
 
-    if (sub_0800C7E8(cell) == 2)
+    if (GetPropertyKindForTerrain(cell) == 2)
         sub_0800C7A4(cell);
 
     for (i = 0; i <= 0x5B; i++)

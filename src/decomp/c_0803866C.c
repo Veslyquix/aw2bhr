@@ -4,11 +4,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803866C.
- * sub_0803866C @ 0x0803866C
+ * IsHardCampaignMode @ 0x0803866C
  */
 
 /* Named per Xenesis's AW2 Subroutine List: "Checks game mode and whether
- * Hard Campaign is on". The old sub_0803866C symbol is kept as a linker
+ * Hard Campaign is on". The old IsHardCampaignMode symbol is kept as a linker
  * alias below so every other unit keeps resolving it unchanged. */
 int IsHardCampaignMode(void)
 {

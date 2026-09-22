@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08008BB8.
- * sub_08008BB8 @ 0x08008BB8
+ * EnsureValidTile @ 0x08008BB8
  *
  * Named per aw2bhr-main's src/design.c/design.h ("EnsureValidTile"), called
  * from SetTerrainAt (src/decomp/c_080011F4.c) whenever a cell is set to
@@ -17,7 +17,7 @@ void EnsureValidTile(int x, int y)
 {
     int v;
 
-    v = sub_08008B70(x, y);
+    v = GetUnitTypeAt(x, y);
 
     if (v > 0)
     {
@@ -34,7 +34,7 @@ void EnsureValidTile(int x, int y)
         c = (gMap->terrain[idx] & 0x1f) + gUnknown_085D5ABC[v & 0x3f].movementType * 32;
 
         if (costs[c] == -1)
-            sub_08008A8C(0, x, y);
+            RemoveUnitAt(0, x, y);
     }
 }
 

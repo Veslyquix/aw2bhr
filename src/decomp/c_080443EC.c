@@ -17,6 +17,6 @@
 void sub_080443EC(void)
 {
     sub_0803B4DC(0x23);
-    sub_08035144(1);
+    ChangeGameWeather(1);
     sub_08039F58();
 }

@@ -16,7 +16,7 @@ void sub_08064DDC(int a, int b, int c)
     if (gUnknown_08580934->unk09[c] == 2)
         c = 4;
 
-    sub_0801F34C(c + 0x4A, (a + 8) & 0x1FF, b & 0xFF, 0, 0);
+    DrawOamObject(c + 0x4A, (a + 8) & 0x1FF, b & 0xFF, 0, 0);
 }
 
 /* sub_08064DDC's sibling on the +0x0d table: no conditional remap, a different
@@ -25,6 +25,6 @@ void sub_08064DDC(int a, int b, int c)
  * an expression on the parameter compiles to when nothing else reads it. */
 void sub_08064E1C(int a, int b, int c)
 {
-    sub_0801F34C(gUnknown_08580934->unk0d[c] + 0x3D, (a - 0x1E) & 0x1FF,
+    DrawOamObject(gUnknown_08580934->unk0d[c] + 0x3D, (a - 0x1E) & 0x1FF,
                  (b + 0x10) & 0xFF, 0, 0);
 }

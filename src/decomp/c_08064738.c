@@ -18,7 +18,7 @@
  * declared s16 member either way. */
 void sub_08064738(struct Unk08580934_Obj *obj)
 {
-    sub_0801F34C(obj->unk48 ? 0xCB : 0xC8, (obj->unk28 + 8) & 0x1FF,
+    DrawOamObject(obj->unk48 ? 0xCB : 0xC8, (obj->unk28 + 8) & 0x1FF,
                  (obj->unk2a + 0xC) & 0xFF, 0, 0);
 }
 
@@ -34,5 +34,5 @@ void sub_08064774(struct Unk08580934_Obj *obj)
 
     sub_0808B6E8(ids, gUnknown_0816E0C0, 8);
 
-    sub_0801F34C(ids[obj->unk48], obj->unk28 & 0x1FF, (obj->unk2a + 0xC) & 0xFF, 0, 0);
+    DrawOamObject(ids[obj->unk48], obj->unk28 & 0x1FF, (obj->unk2a + 0xC) & 0xFF, 0, 0);
 }

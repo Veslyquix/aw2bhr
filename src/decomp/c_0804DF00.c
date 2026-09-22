@@ -34,7 +34,7 @@ void sub_0804DF00(void)
         {
             sub_080505A4(side, gUnknown_02029A10[side].entries[slot].unk1e);
             gUnknown_02029A10[side].entries[slot].unk1e++;
-            sub_0803B48C(gUnknown_085D6C88[gUnknown_03004580[side][1]]
+            PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[side][1]]
                              .unk0c[gUnknown_03004580[side][2] - 1]
                                    [gUnknown_020296B0[side].unk1a & 1]);
             gUnknown_020296B0[side].unk1a++;

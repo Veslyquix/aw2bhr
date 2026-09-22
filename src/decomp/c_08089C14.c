@@ -61,39 +61,39 @@ void sub_08089C14(struct Unk08089C14 *p)
         for (i = 0; i < 4; i++)
         {
             if (i == gUnknown_03005964)
-                sub_0801F34C(0x83 + i, 8 + i * 24, 0x28 + i * 6, 0, 4);
+                DrawOamObject(0x83 + i, 8 + i * 24, 0x28 + i * 6, 0, 4);
             else
-                sub_0801F34C(0x83 + i, 0x400 | (8 + i * 24), 0x100 | (0x28 + i * 6), 0, 4);
+                DrawOamObject(0x83 + i, 0x400 | (8 + i * 24), 0x100 | (0x28 + i * 6), 0, 4);
         }
 
         for (i = 0; i < 4; i++)
         {
             if (i == gUnknown_03005964 - 4)
-                sub_0801F34C(0x87 + i, 0x10 + i * 24, 0x4A + i * 6, 0, 4);
+                DrawOamObject(0x87 + i, 0x10 + i * 24, 0x4A + i * 6, 0, 4);
             else
-                sub_0801F34C(0x87 + i, 0x400 | (0x10 + i * 24), 0x100 | (0x4A + i * 6), 0, 4);
+                DrawOamObject(0x87 + i, 0x400 | (0x10 + i * 24), 0x100 | (0x4A + i * 6), 0, 4);
         }
 
         if (gUnknown_03005964 <= 3)
         {
-            sub_0801F34C(0x8B, ((gUnknown_03005964 * 24 - 0x10) & 0x1FF) | 0x200,
+            DrawOamObject(0x8B, ((gUnknown_03005964 * 24 - 0x10) & 0x1FF) | 0x200,
                          ((gUnknown_03005964 * 6 + 0x10) & 0xFF) | 0x300, 0, 5);
             if (gUnknown_03005964 <= 1)
-                sub_0801F34C(0x4F, ((gUnknown_03005964 * 24 + 0x20) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, ((gUnknown_03005964 * 24 + 0x20) & 0x1FF) | 0x600,
                              ((gUnknown_03005964 * 6 + 0x28) & 0xFF) | 0x100, 0, 0);
             else
-                sub_0801F34C(0x4F, ((gUnknown_03005964 * 24 - 0x20) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, ((gUnknown_03005964 * 24 - 0x20) & 0x1FF) | 0x600,
                              ((gUnknown_03005964 * 6 + 0x28) & 0xFF) | 0x100, 0, 0);
         }
         else
         {
-            sub_0801F34C(0x8B, (((gUnknown_03005964 - 4) * 24 - 8) & 0x1FF) | 0x200,
+            DrawOamObject(0x8B, (((gUnknown_03005964 - 4) * 24 - 8) & 0x1FF) | 0x200,
                          (((gUnknown_03005964 - 4) * 6 + 0x32) & 0xFF) | 0x300, 0, 5);
             if (gUnknown_03005964 <= 5)
-                sub_0801F34C(0x4F, (((gUnknown_03005964 - 4) * 24 + 0x28) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, (((gUnknown_03005964 - 4) * 24 + 0x28) & 0x1FF) | 0x600,
                              (((gUnknown_03005964 - 4) * 6 + 0x4A) & 0xFF) | 0x100, 0, 0);
             else
-                sub_0801F34C(0x4F, (((gUnknown_03005964 - 4) * 24 - 0x18) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, (((gUnknown_03005964 - 4) * 24 - 0x18) & 0x1FF) | 0x600,
                              (((gUnknown_03005964 - 4) * 6 + 0x4A) & 0xFF) | 0x100, 0, 0);
         }
 
@@ -144,39 +144,39 @@ void sub_08089F90(struct Unk08089F90 *p)
         for (i = 0; i < 4; i++)
         {
             if (i == gUnknown_03005964)
-                sub_0801F34C(0x83 + i, 8 + i * 24, 0x28 + i * 6, 0, 4);
+                DrawOamObject(0x83 + i, 8 + i * 24, 0x28 + i * 6, 0, 4);
             else
-                sub_0801F34C(0x83 + i, 0x400 | (8 + i * 24), 0x100 | (0x28 + i * 6), 0, 4);
+                DrawOamObject(0x83 + i, 0x400 | (8 + i * 24), 0x100 | (0x28 + i * 6), 0, 4);
         }
 
         for (i = 0; i < 4; i++)
         {
             if (i == gUnknown_03005964 - 4)
-                sub_0801F34C(0x87 + i, 0x10 + i * 24, 0x4A + i * 6, 0, 4);
+                DrawOamObject(0x87 + i, 0x10 + i * 24, 0x4A + i * 6, 0, 4);
             else
-                sub_0801F34C(0x87 + i, 0x400 | (0x10 + i * 24), 0x100 | (0x4A + i * 6), 0, 4);
+                DrawOamObject(0x87 + i, 0x400 | (0x10 + i * 24), 0x100 | (0x4A + i * 6), 0, 4);
         }
 
         if (gUnknown_03005964 <= 3)
         {
-            sub_0801F34C(0x8B, ((gUnknown_03005964 * 24 - 0x10) & 0x1FF) | 0x200,
+            DrawOamObject(0x8B, ((gUnknown_03005964 * 24 - 0x10) & 0x1FF) | 0x200,
                          ((gUnknown_03005964 * 6 + 0x10) & 0xFF) | 0x300, 0, 5);
             if (gUnknown_03005964 <= 1)
-                sub_0801F34C(0x4F, ((gUnknown_03005964 * 24 + 0x20) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, ((gUnknown_03005964 * 24 + 0x20) & 0x1FF) | 0x600,
                              ((gUnknown_03005964 * 6 + 0x28) & 0xFF) | 0x100, 0, 0);
             else
-                sub_0801F34C(0x4F, ((gUnknown_03005964 * 24 - 0x20) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, ((gUnknown_03005964 * 24 - 0x20) & 0x1FF) | 0x600,
                              ((gUnknown_03005964 * 6 + 0x28) & 0xFF) | 0x100, 0, 0);
         }
         else
         {
-            sub_0801F34C(0x8B, (((gUnknown_03005964 - 4) * 24 - 8) & 0x1FF) | 0x200,
+            DrawOamObject(0x8B, (((gUnknown_03005964 - 4) * 24 - 8) & 0x1FF) | 0x200,
                          (((gUnknown_03005964 - 4) * 6 + 0x32) & 0xFF) | 0x300, 0, 5);
             if (gUnknown_03005964 <= 5)
-                sub_0801F34C(0x4F, (((gUnknown_03005964 - 4) * 24 + 0x28) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, (((gUnknown_03005964 - 4) * 24 + 0x28) & 0x1FF) | 0x600,
                              (((gUnknown_03005964 - 4) * 6 + 0x4A) & 0xFF) | 0x100, 0, 0);
             else
-                sub_0801F34C(0x4F, (((gUnknown_03005964 - 4) * 24 - 0x18) & 0x1FF) | 0x600,
+                DrawOamObject(0x4F, (((gUnknown_03005964 - 4) * 24 - 0x18) & 0x1FF) | 0x600,
                              (((gUnknown_03005964 - 4) * 6 + 0x4A) & 0xFF) | 0x100, 0, 0);
         }
 

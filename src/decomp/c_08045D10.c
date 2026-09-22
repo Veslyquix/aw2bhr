@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08045D10.
- * sub_08045D10 @ 0x08045D10
+ * HasNoPlayer2Battleship @ 0x08045D10
  */
 
 /* "Is army 2 free of any unit whose unk00 is 0x15?"  The same 0x32-slot scan the
@@ -28,10 +28,10 @@ bool8 HasNoPlayer2Battleship(void)
 
     for (i = (u16)gUnknown_084995FE[2] + 1; i < (u16)gUnknown_084995FE[2] + 0x33; i++)
     {
-        if (gUnknown_08499594[i].unk00 == 0)
+        if (gUnits[i].unk00 == 0)
             continue;
 
-        if (gUnknown_08499594[i].unk00 == 0x15)
+        if (gUnits[i].unk00 == 0x15)
             return FALSE;
     }
 

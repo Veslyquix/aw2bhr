@@ -19,7 +19,7 @@ void sub_080251D8(int a1)
     b = 0;
     ok = 0;
 
-    e = &gUnknown_08499594[a1];
+    e = &gUnits[a1];
 
     sub_08024A2C((struct Unk030013D0 *)gUnknown_030013D0, a1);
 

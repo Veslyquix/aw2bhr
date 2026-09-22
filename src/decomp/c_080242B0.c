@@ -49,7 +49,7 @@ u8 sub_080242B0(s16 a1, s16 a2)
         return TRUE;
 
     case 6:
-        if (sub_08043050(gUnknown_030033EC) & 2)
+        if (GetPlayerSpecialAbilities(gUnknown_030033EC) & 2)
             return TRUE;
         break;
     }

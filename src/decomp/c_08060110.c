@@ -15,10 +15,10 @@ void sub_08060110(void)
     struct Unk08499594 *u;
     int off;
 
-    sub_08025E08(gUnknown_030046C0.unk02, gUnknown_030046C0.unk03,
+    BuyUnit(gUnknown_030046C0.unk02, gUnknown_030046C0.unk03,
                  gUnknown_030046C0.unk01);
 
-    tbl = &gUnknown_08499594;
+    tbl = &gUnits;
     off = gMap->rowOffset[gUnknown_030046C0.unk03] + gUnknown_030046C0.unk02;
     u = *tbl + gMap->unit[off];
 

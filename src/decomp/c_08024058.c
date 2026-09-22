@@ -21,6 +21,6 @@ void sub_08024058(s16 a1, s16 a2)
 
     sub_080240B4(a1, a2, v & 0xe0);
     sub_08024268();
-    sub_080219AC();
+    RecountArmyProperties();
     sub_08026D68();
 }

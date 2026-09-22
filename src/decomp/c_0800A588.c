@@ -14,7 +14,7 @@
  * predicate: for each in-bounds neighbour sub_08009B38 accepts, classify it
  * with sub_0800A95C and either repair it (negative) or redraw it (positive).
  *
- * `v` lives in r2 because it is sub_08001158's third argument -- the
+ * `v` lives in r2 because it is MakeTileSimple's third argument -- the
  * `adds r2, r0, #0` after the `bl` is the copy into that parameter, not a
  * narrowing, and the two `cmp r2, #0` tests (`bge` then `ble`) are what make
  * sub_0800A95C's return signed and NOT s16 (an s16 return would add a
@@ -44,7 +44,7 @@ void sub_0800A588(int x, int y)
                 sub_08007F68(x, n, 1);
             else if (v > 0)
             {
-                sub_08001158(x, n, v);
+                MakeTileSimple(x, n, v);
                 sub_0800A098(x, n);
             }
         }
@@ -60,7 +60,7 @@ void sub_0800A588(int x, int y)
                 sub_08007F68(x, n, 1);
             else if (v > 0)
             {
-                sub_08001158(x, n, v);
+                MakeTileSimple(x, n, v);
                 sub_0800A098(x, n);
             }
         }
@@ -76,7 +76,7 @@ void sub_0800A588(int x, int y)
                 sub_08007F68(n, y, 1);
             else if (v > 0)
             {
-                sub_08001158(n, y, v);
+                MakeTileSimple(n, y, v);
                 sub_0800A098(n, y);
             }
         }
@@ -92,7 +92,7 @@ void sub_0800A588(int x, int y)
                 sub_08007F68(n, y, 1);
             else if (v > 0)
             {
-                sub_08001158(n, y, v);
+                MakeTileSimple(n, y, v);
                 sub_0800A098(n, y);
             }
         }
@@ -103,7 +103,7 @@ int sub_0800A6AC(int x, int y)
 {
     int m;
 
-    if (sub_080094EC(x, y) || sub_080015E4(x, y) == 0)
+    if (sub_080094EC(x, y) || IsTerrainLand(x, y) == 0)
         return -1;
 
     m = 0;
@@ -112,24 +112,24 @@ int sub_0800A6AC(int x, int y)
     {
         int n = y - 1;
         if (x > 0)
-            m = sub_080015E4(x - 1, n) << 8;
-        m |= sub_080015E4(x, n) << 7;
+            m = IsTerrainLand(x - 1, n) << 8;
+        m |= IsTerrainLand(x, n) << 7;
         if (x < MAP->width - 1)
-            m |= sub_080015E4(x + 1, n) << 6;
+            m |= IsTerrainLand(x + 1, n) << 6;
     }
     if (x > 0)
-        m |= sub_080015E4(x - 1, y) << 5;
+        m |= IsTerrainLand(x - 1, y) << 5;
     m |= 0x10;
     if (x < MAP->width - 1)
-        m |= sub_080015E4(x + 1, y) << 3;
+        m |= IsTerrainLand(x + 1, y) << 3;
     if (y < MAP->height - 1)
     {
         int n = y + 1;
         if (x > 0)
-            m |= sub_080015E4(x - 1, n) << 2;
-        m |= sub_080015E4(x, n) << 1;
+            m |= IsTerrainLand(x - 1, n) << 2;
+        m |= IsTerrainLand(x, n) << 1;
         if (x < MAP->width - 1)
-            m |= sub_080015E4(x + 1, n);
+            m |= IsTerrainLand(x + 1, n);
     }
 
     return gUnknown_08486BC4[m];
@@ -139,7 +139,7 @@ int sub_0800A798(int x, int y)
 {
     int m;
 
-    if (sub_0800164C(x, y) == 0)
+    if (IsTerrainWater(x, y) == 0)
         return -1;
 
     m = 0;
@@ -148,25 +148,25 @@ int sub_0800A798(int x, int y)
     {
         int n = y - 1;
         if (x > 0)
-            m = sub_080015E4(x - 1, n) << 8;
-        m |= sub_080015E4(x, n) << 7;
+            m = IsTerrainLand(x - 1, n) << 8;
+        m |= IsTerrainLand(x, n) << 7;
         if (x < MAP->width - 1)
-            m |= sub_080015E4(x + 1, n) << 6;
+            m |= IsTerrainLand(x + 1, n) << 6;
     }
     if (x > 0)
-        m |= sub_080015E4(x - 1, y) << 5;
+        m |= IsTerrainLand(x - 1, y) << 5;
     if (sub_080094EC(x, y) == 0)
         m |= 0x10;
     if (x < MAP->width - 1)
-        m |= sub_080015E4(x + 1, y) << 3;
+        m |= IsTerrainLand(x + 1, y) << 3;
     if (y < MAP->height - 1)
     {
         int n = y + 1;
         if (x > 0)
-            m |= sub_080015E4(x - 1, n) << 2;
-        m |= sub_080015E4(x, n) << 1;
+            m |= IsTerrainLand(x - 1, n) << 2;
+        m |= IsTerrainLand(x, n) << 1;
         if (x < MAP->width - 1)
-            m |= sub_080015E4(x + 1, n);
+            m |= IsTerrainLand(x + 1, n);
     }
 
     return gUnknown_08486BC4[m];
@@ -180,24 +180,24 @@ int sub_0800A884(int x, int y)
     {
         int n = y - 1;
         if (x > 0)
-            m = sub_080015E4(x - 1, n) << 8;
-        m |= sub_080015E4(x, n) << 7;
+            m = IsTerrainLand(x - 1, n) << 8;
+        m |= IsTerrainLand(x, n) << 7;
         if (x < MAP->width - 1)
-            m |= sub_080015E4(x + 1, n) << 6;
+            m |= IsTerrainLand(x + 1, n) << 6;
     }
     if (x > 0)
-        m |= sub_080015E4(x - 1, y) << 5;
+        m |= IsTerrainLand(x - 1, y) << 5;
     m |= 0x10;
     if (x < MAP->width - 1)
-        m |= sub_080015E4(x + 1, y) << 3;
+        m |= IsTerrainLand(x + 1, y) << 3;
     if (y < MAP->height - 1)
     {
         int n = y + 1;
         if (x > 0)
-            m |= sub_080015E4(x - 1, n) << 2;
-        m |= sub_080015E4(x, n) << 1;
+            m |= IsTerrainLand(x - 1, n) << 2;
+        m |= IsTerrainLand(x, n) << 1;
         if (x < MAP->width - 1)
-            m |= sub_080015E4(x + 1, n);
+            m |= IsTerrainLand(x + 1, n);
     }
 
     return gUnknown_084867C4[m];

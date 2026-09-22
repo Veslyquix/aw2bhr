@@ -14,7 +14,7 @@ void sub_0803662C(void)
     sub_08011B18();
     sub_08011B34((void *)sub_08022048);
     sub_08011B34((void *)sub_08021DD8);
-    sub_08011B34((void *)sub_0803678C);
+    sub_08011B34((void *)UpdateFuelAmmoGraphics);
     sub_08011B34((void *)sub_0803550C);
     sub_08011B34((void *)sub_080246B4);
     sub_08011B34((void *)sub_08024720);

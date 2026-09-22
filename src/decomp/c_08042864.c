@@ -41,7 +41,7 @@ void sub_08042864(void)
     struct Unk08499594 *e;
     int m;
 
-    e = &gUnknown_08499594[
+    e = &gUnits[
         gMap->unit[
             gMap
                 ->rowOffset[gUnknown_03003100.pos.unk02]

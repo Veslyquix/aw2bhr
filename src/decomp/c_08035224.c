@@ -17,8 +17,8 @@ void sub_08035224(void)
 
     for (i = 0; i <= 0x1f; i++)
     {
-        gUnknown_02027C68[i].unk00 = (sub_080129E0() % 0xff) << 8;
-        gUnknown_02027C68[i].unk02 = (sub_080129E0() % 0xff) << 8;
+        gUnknown_02027C68[i].unk00 = (GetNextRandomNumber() % 0xff) << 8;
+        gUnknown_02027C68[i].unk02 = (GetNextRandomNumber() % 0xff) << 8;
         j = i % 0x10;
         gUnknown_02027C68[i].unk04 = gUnknown_08090E40[j * 3];
         gUnknown_02027C68[i].unk06 = gUnknown_08090E40[j * 3 + 1];
@@ -65,8 +65,8 @@ void sub_08035354(void)
 
     for (i = 0; i <= 0x1f; i++)
     {
-        gUnknown_02027DE8[i].unk00 = (sub_080129E0() % 0xff) << 8;
-        gUnknown_02027DE8[i].unk02 = (sub_080129E0() % 0xff) << 8;
+        gUnknown_02027DE8[i].unk00 = (GetNextRandomNumber() % 0xff) << 8;
+        gUnknown_02027DE8[i].unk02 = (GetNextRandomNumber() % 0xff) << 8;
         j = i % 0x10;
         gUnknown_02027DE8[i].unk04 = gUnknown_08090E40[j * 3] * 3;
         gUnknown_02027DE8[i].unk06 = gUnknown_08090E40[j * 3 + 1] * 8;

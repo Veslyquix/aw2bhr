@@ -4,14 +4,14 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08060ED4.
- * sub_08060ED4 @ 0x08060ED4, sub_08060F00 @ 0x08060F00, sub_08060F74 @ 0x08060F74
+ * CountBuildablePropertiesOfKind @ 0x08060ED4, AiCalcBuildPriorities @ 0x08060F00, AiMarkAffordableUnits @ 0x08060F74
  */
 
-/* sub_08060F00 @ 0x08060F00, 116 bytes.
+/* AiCalcBuildPriorities @ 0x08060F00, 116 bytes.
  *
  * Scores all 24 unit types into gUnknown_03004640: a type whose weight byte is
  * zero scores 0xFF (i.e. "never"), everything else scores
- * `sub_08057FA8(type) * 1000 / gUnknown_03004674 * 10 / weight` -- the type's
+ * `CountUnitsOfType(type) * 1000 / gUnknown_03004674 * 10 / weight` -- the type's
  * own count worked up into a per-mille share of the AI's occupied-cell tally
  * and then divided by the weight. Both divides are `bl __divsi3`, the SIGNED
  * helper, which is what makes every operand here `int`.
@@ -48,7 +48,7 @@ struct Unk60F00Tbl
     /* 0x14 */ struct Unk60F00Row rows[1];
 };
 
-/* sub_08060ED4 @ 0x08060ED4, 44 bytes.
+/* CountBuildablePropertiesOfKind @ 0x08060ED4, 44 bytes.
  *
  * Counts the entries of the 0xFF-terminated gUnknown_085766E4 list that name
  * class `a1` and have not been marked consumed. The 4-byte stride, the 0xFF
@@ -97,16 +97,16 @@ void AiCalcBuildPriorities(void)
         if (d == 0)
             gUnknown_03004640[i] = 0xff;
         else
-            gUnknown_03004640[i] = sub_08057FA8(i) * 1000 / gUnknown_03004674 * 10 / d;
+            gUnknown_03004640[i] = CountUnitsOfType(i) * 1000 / gUnknown_03004674 * 10 / d;
     }
 }
 
 asm(".global sub_08060F00\n.thumb_set sub_08060F00, AiCalcBuildPriorities\n");
 
-/* sub_08060F74 @ 0x08060F74, 136 bytes.
+/* AiMarkAffordableUnits @ 0x08060F74, 136 bytes.
  *
- * The veto pass over sub_08060F00's scores: a type is struck out (0xFF) unless
- * the army still has a use for it -- sub_08060ED4 must find a live request for
+ * The veto pass over AiCalcBuildPriorities's scores: a type is struck out (0xFF) unless
+ * the army still has a use for it -- CountBuildablePropertiesOfKind must find a live request for
  * the type's class, and the type's cost must not exceed the army's funds. Two
  * types, 15 and 16, are struck out unconditionally unless bit 0 of
  * gUnknown_030045C0 is set.
@@ -119,7 +119,7 @@ asm(".global sub_08060F00\n.thumb_set sub_08060F00, AiCalcBuildPriorities\n");
  * which is sizeof(struct PlayerStruct) -- the same subscript
  * src/decomp/c_080610D0.c already writes as
  * `gPlayers[gUnknown_030033EC].unk00`, against the same
- * `sub_08042C9C(gUnknown_030033EC, type) * 10`. `bls` is unsigned because that
+ * `GetCoPriceMultiplier(gUnknown_030033EC, type) * 10`. `bls` is unsigned because that
  * member is, and gUnknown_030033EC is re-read for the subscript rather than
  * CSEd because it is named twice in the source.
  *
@@ -132,8 +132,8 @@ void AiMarkAffordableUnits(void)
 
     for (i = 1; i <= 24; i++)
     {
-        if (sub_08060ED4(gUnknown_0857680F[i]) == 0
-            || sub_08042C9C(gUnknown_030033EC, i) * 10
+        if (CountBuildablePropertiesOfKind(gUnknown_0857680F[i]) == 0
+            || GetCoPriceMultiplier(gUnknown_030033EC, i) * 10
                    > gPlayers[gUnknown_030033EC].funds)
             gUnknown_03004640[i] = 0xff;
 

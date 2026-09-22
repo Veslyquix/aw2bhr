@@ -66,7 +66,7 @@ int sub_080208C8(int a)
     {
         if (k == a)
             continue;
-        if (!sub_080266DC(k))
+        if (!IsPlayerAliveAndActive(k))
             continue;
         if (seen)
         {

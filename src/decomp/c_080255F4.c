@@ -25,7 +25,7 @@
  * produced -- two basic blocks before its only use -- and then `lsrs r1, r2,
  * #0x16` at the use. That is the u16 truncation left behind at the assignment
  * after combine merged its `lsr #16` with the `>> 6` at the use; spelling the
- * whole thing inline puts both shifts at the use. gUnknown_08499594 is grouped
+ * whole thing inline puts both shifts at the use. gUnits is grouped
  * 64 entries per army, so `id >> 6` is the army and the `+ 1` is the usual
  * 1-based army id, which agbcc folds into `adds r0, #0x58` (0x3c + 0x1c).
  *
@@ -42,7 +42,7 @@
 u8 sub_080255F4(struct Unk08499594 *unit, s16 ax, s16 ay)
 {
     u16 total = 0;
-    u16 id = unit - gUnknown_08499594;
+    u16 id = unit - gUnits;
     int idx;
 
     if (unit == NULL)

@@ -47,14 +47,14 @@ void sub_0803D238(u8 *a1)
 
     save0 = gUnknown_030033EC;
     save1 = gUnknown_03003F2C;
-    sub_08025E74();
+    ClearAllUnits();
     k = 0;
     for (y = 0; y < gMap->height; y++) {
         for (x = 0; x < gMap->width; x++) {
             if (((struct Rec *)a1)->cell[k] != 0) {
                 gUnknown_030033EC = (((struct Rec *)a1)->cell[k] >> 6) + 1;
                 gUnknown_03003F2C = (((struct Rec *)a1)->cell[k] >> 6) << 6;
-                sub_08025CC8(x, y, ((struct Rec *)a1)->cell[k] & 0x3f);
+                CreateUnitAt(x, y, ((struct Rec *)a1)->cell[k] & 0x3f);
             }
             k++;
         }
@@ -74,7 +74,7 @@ void sub_0803D2F8(int a1, u8 *a2)
 {
     int x, y, k;
 
-    sub_0803CC84((u8 *)a1, ((struct Rec *)a2)->name);
+    CopyString((u8 *)a1, ((struct Rec *)a2)->name);
     gMap->unk4233 = ((struct Rec *)a2)->unk4C3;
     for (x = 0; x <= 4; x++)
         gUnknown_03003FF3[x] = ((struct Rec *)a2)->unk4C4[x];

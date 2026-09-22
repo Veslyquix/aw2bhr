@@ -43,7 +43,7 @@
  *     it.  A 99.8%-identical candidate can still have two calls swapped.
  *
  *  4. `u8 flag`, NOT `int flag`.  This is the last two bytes and it is a
- *     general rule (written up in docs/agbcc-codegen.md).  sub_08029CB8's
+ *     general rule (written up in docs/agbcc-codegen.md).  StartSupplyAnimation's
  *     fourth parameter is `u8` -- and that is right, it agrees with the
  *     promoted definition in src/decomp/c_08029C38.c.  With an `int` local the
  *     int->u8 conversion at the call emits no instruction of its own (gcc
@@ -54,7 +54,7 @@
  *
  * A TRAP WORTH KNOWING (wave 60, W60-D): decomp-permuter's type randomizer
  * MUTATES PROTOTYPES inside its own expanded translation unit.  Its 99.8%
- * best.c had silently rewritten sub_08029CB8's fourth parameter from `u8` to
+ * best.c had silently rewritten StartSupplyAnimation's fourth parameter from `u8` to
  * `int` -- which reproduces the ROM's argument order, but is a change we
  * cannot legally adopt, because the promoted body in src/decomp/c_08029C38.c
  * defines it `u8`.  The legal spelling with the SAME effect is the `u8 flag`
@@ -67,7 +67,7 @@
  *    it is the only reason sl holds the right symbol.  Its position does not
  *    matter, only its presence.
  *  - `n != 0 || m != 0` is the right spelling of the early-out, and the
- *    `if (m != 0)` arm really does zero `n` before sub_08029CB8.
+ *    `if (m != 0)` arm really does zero `n` before StartSupplyAnimation.
  *  - the `gMap->unk234A[idx] == 0` arm (three calls, results discarded) must be the
  *    fall-through, and both arms are genuine source call sites.
  *  - `pt` is a 4-byte struct, so both member stores are SImode bitfield
@@ -92,7 +92,7 @@ void sub_08029FE4(void)
   for (; i <= 0x32; i++)
   {
     p7 = &gUnknown_03004007;
-    u = &gUnknown_08499594[gUnknown_03003F2C + i];
+    u = &gUnits[gUnknown_03003F2C + i];
     if (u->unk00 == 0)
     {
       continue;
@@ -115,14 +115,14 @@ void sub_08029FE4(void)
     {
       sub_08029978(u, 0);
       sub_08029A48(u, 0);
-      sub_08029AF8(u, 2, 1 - (*p7));
+      RepairUnit(u, 2, 1 - (*p7));
     }
     else
     {
       save = gPlayers[gUnknown_030033EC].funds;
       n = sub_08029978(u, 0);
       n = sub_08029A48(u, 0) + n;
-      m = sub_08029AF8(u, 2, 1 - (*p7));
+      m = RepairUnit(u, 2, 1 - (*p7));
       if ((n != 0) || (m != 0))
       {
         flag = 0;
@@ -134,7 +134,7 @@ void sub_08029FE4(void)
         }
         pt.unk00 = u->unk02;
         pt.unk02 = u->unk03;
-        sub_08029CB8(&pt, gUnknown_030033EC, m + n, flag);
+        StartSupplyAnimation(&pt, gUnknown_030033EC, m + n, flag);
         gUnknown_03001470[gUnknown_03001FBC].unk38 = i + 1;
         break;
       }

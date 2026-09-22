@@ -9,7 +9,7 @@
 
 void sub_08038568(void)
 {
-    sub_080346FC();
+    ResetRulesAfterCampaignMap();
 
     if (gPlaySt.savingEnabled == 0)
     {

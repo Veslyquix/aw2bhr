@@ -36,7 +36,7 @@ void sub_0800EAF4(int x, int y)
     {
         sub_0800EBFC(x, y, 0x25);
         sub_0800EBFC(x, y + 1, 0x65);
-        sub_08001158(x + 1, y, 0x27);
-        sub_08001158(x + 1, y + 1, 0x67);
+        MakeTileSimple(x + 1, y, 0x27);
+        MakeTileSimple(x + 1, y + 1, 0x67);
     }
 }

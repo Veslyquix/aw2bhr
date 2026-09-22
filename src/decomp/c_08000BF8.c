@@ -28,7 +28,7 @@ void sub_08000BF8(void)
     else
     {
         if (gActiveMap->unk24
-            != sub_08008B70(gActiveMap->cursorX, gActiveMap->cursorY))
+            != GetUnitTypeAt(gActiveMap->cursorX, gActiveMap->cursorY))
             gActiveMap->unk65 = 1;
     }
 }
@@ -38,9 +38,9 @@ void sub_08000C68(void)
     sub_0803B4DC(0x65);
 
     if (gActiveMap->unk07 == 0)
-        sub_08000CCC(gMap->terrain[
+        SetSelectedTile(gMap->terrain[
             gActiveMap->cursorX
             + gMap->rowOffset[gActiveMap->cursorY]]);
     else
-        sub_08000CCC(sub_08008B70(gActiveMap->cursorX, gActiveMap->cursorY));
+        SetSelectedTile(GetUnitTypeAt(gActiveMap->cursorX, gActiveMap->cursorY));
 }

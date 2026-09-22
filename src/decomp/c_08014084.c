@@ -238,7 +238,7 @@ entry_done:
     case 10:
         if (s[1] == 0x80)
         {
-            e = &gUnknown_08499594[gUnknown_030040D8->unk07[0]];
+            e = &gUnits[gUnknown_030040D8->unk07[0]];
             if (e->unk04_0 != 0)
                 n = Div(e->unk04_0 - 1, 10) + 1;
             else
@@ -250,7 +250,7 @@ entry_done:
             p->unk20 += 2;
             return 3;
         }
-        e = &gUnknown_08499594[gUnknown_030040D8->unk07[1]];
+        e = &gUnits[gUnknown_030040D8->unk07[1]];
         if (e->unk04_0 != 0)
             n = Div(e->unk04_0 - 1, 10) + 1;
         else

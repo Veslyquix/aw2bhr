@@ -8,10 +8,10 @@
  */
 
 /* Draws a box into BG map 2 -- gUnknown_08499580 is the third of the four
- * buffers sub_0801A368 recognises, and it is DEREFERENCED here (`ldr r4,[r4]`),
+ * buffers DrawWindowBackground recognises, and it is DEREFERENCED here (`ldr r4,[r4]`),
  * so what goes on the stack is the u16 * it holds. The four `lsls #0x10;
  * asrs #0x10` pairs are PROMOTE_MODE on the declared s16 parameters. */
 void sub_0801A444(s16 a1, s16 a2, s16 a3, s16 a4)
 {
-    sub_0801A368(a1, a2, a3, a4, gUnknown_08499580, 8);
+    DrawWindowBackground(a1, a2, a3, a4, gUnknown_08499580, 8);
 }

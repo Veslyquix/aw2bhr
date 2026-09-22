@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080085E0.
- * sub_080085E0 @ 0x080085E0
+ * MakeTile @ 0x080085E0
  */
 
 /* The tile-action dispatcher: read the map cell under the cursor, then run one
@@ -39,81 +39,81 @@ void MakeTile(void)
 
     switch (gActiveMap->selectedTerrain & 0x1f) {
     case 7:
-        sub_08007CA0(x, y);
-        sub_08008BB8(x, y);
+        MakeSeaSafest(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x8a;
         break;
 
     case 13:
-        if (sub_0800B528(x, y) >= 0 && sub_0800C840(x, y) != 0)
+        if (sub_0800B528(x, y) >= 0 && GetPropertyKindAt(x, y) != 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 1);
-            sub_08007F14(x, y, 1);
+            SetTerrainAt(x, y, 1);
+            MakeTile2(x, y, 1);
         }
         sub_0800BA9C(x, y);
-        sub_08008BB8(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x4b;
         break;
 
     case 5:
-        if (sub_0800C840(x, y) != 0)
+        if (GetPropertyKindAt(x, y) != 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 1);
-            sub_08007F14(x, y, 1);
+            SetTerrainAt(x, y, 1);
+            MakeTile2(x, y, 1);
         }
-        sub_0800F4E0(x, y);
-        sub_08008BB8(x, y);
+        MakeRoad(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x89;
         break;
 
     case 2:
-        if (sub_0800C840(x, y) != 0)
+        if (GetPropertyKindAt(x, y) != 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 1);
-            sub_08007F14(x, y, 1);
+            SetTerrainAt(x, y, 1);
+            MakeTile2(x, y, 1);
         }
-        if (sub_08009F10(x, y) == 0)
+        if (MakeRiver(x, y) == 0)
             break;
-        sub_08008BB8(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x2d;
         break;
 
     case 12:
-        sub_08008F6C(x, y);
-        sub_08008BB8(x, y);
+        MakeBridge(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x89;
         break;
 
     case 3:
-        if (sub_0800C840(x, y) != 0)
+        if (GetPropertyKindAt(x, y) != 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 1);
-            sub_08007F14(x, y, 1);
+            SetTerrainAt(x, y, 1);
+            MakeTile2(x, y, 1);
         }
         sub_0800AF74(x, y);
-        sub_08008BB8(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x4b;
         break;
 
     case 19:
-        if (sub_0800BF78(x, y) == 0)
+        if (MakeReefSafe(x, y) == 0)
             break;
         gActiveMap->unk6a = 0x8a;
         break;
 
     case 4:
-        sub_0800CF28(x, y);
-        sub_08008BB8(x, y);
+        MakeForest(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x4b;
         break;
 
     case 8:
-        sub_0800C454(x, y, gActiveMap->selectedTerrain);
-        sub_08008BB8(x, y);
+        MakeProperty(x, y, gActiveMap->selectedTerrain);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x88;
         break;
 
@@ -122,43 +122,43 @@ void MakeTile(void)
     case 11:
     case 14:
     case 17:
-        sub_0800C454(x, y, gActiveMap->selectedTerrain);
-        sub_08008BB8(x, y);
+        MakeProperty(x, y, gActiveMap->selectedTerrain);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x87;
         break;
 
     case 15:
-        if (sub_0800C840(x, y) != 0)
+        if (GetPropertyKindAt(x, y) != 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 1);
-            sub_08007F14(x, y, 1);
+            SetTerrainAt(x, y, 1);
+            MakeTile2(x, y, 1);
         }
-        sub_08010D28(x, y);
-        sub_08008BB8(x, y);
+        MakePipe(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x87;
         break;
 
     case 16:
-        if (sub_0800C840(x, y) != 0)
+        if (GetPropertyKindAt(x, y) != 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 1);
-            sub_08007F14(x, y, 1);
+            SetTerrainAt(x, y, 1);
+            MakeTile2(x, y, 1);
         }
-        sub_08010D80(x, y);
-        sub_08008BB8(x, y);
+        MakeSeam(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x87;
         break;
 
     case 1:
-        if (sub_0800C840(x, y) != 0)
+        if (GetPropertyKindAt(x, y) != 0)
             sub_0800C608(x, y);
-        sub_080011F4(x, y, 1);
-        sub_08007F14(x, y, 1);
+        SetTerrainAt(x, y, 1);
+        MakeTile2(x, y, 1);
         sub_0800EC20(x, y);
         sub_0800BEE4(x, y);
-        sub_08008BB8(x, y);
+        EnsureValidTile(x, y);
         gActiveMap->unk6a = 0x4b;
         break;
     }

@@ -30,6 +30,6 @@ void sub_0803A8F0(struct Unk08499594 *a)
     else
         gUnknown_0849D89C->unk03 = 0;
     gUnknown_0849D89C->unk04 = a;
-    gUnknown_0849D89C->unk08 = ((a - gUnknown_08499594) >> 6) + 1;
+    gUnknown_0849D89C->unk08 = ((a - gUnits) >> 6) + 1;
     sub_0803B4DC(0x65);
 }

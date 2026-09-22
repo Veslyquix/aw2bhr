@@ -65,7 +65,7 @@ void sub_0805DFF4(void)
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, buf, 0);
     sub_08058058(sub_0804151C());
-    q = sub_08057F00(1) / gUnknown_085766E0->unk04[5];
+    q = CountUnitsWithTypeTag(1) / gUnknown_085766E0->unk04[5];
     if (q == 0)
         q = gUnknown_085766E0->unk00;
     p = sub_08058144(q, 0);

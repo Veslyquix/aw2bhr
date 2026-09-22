@@ -27,7 +27,7 @@ void sub_080311D8(struct Unk080311D8 *proc)
         Div(SIN_Q12(0) << 4, t),
         Div(COS_Q12(0) << 4, t));
 
-    sub_0801F34C(0x4f, 0x188c, 0x170, 0, 0);
+    DrawOamObject(0x4f, 0x188c, 0x170, 0, 0);
 
     if (proc->unk58 > 0xf)
         Proc_Break(proc);

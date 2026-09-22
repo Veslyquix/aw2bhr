@@ -41,7 +41,7 @@ void sub_0802DCB4(void)
                     + gUnknown_030033E4.unk00] != 0)
             {
                 sub_0801B780(0);
-                sub_0803A8F0(&gUnknown_08499594[
+                sub_0803A8F0(&gUnits[
                     gMap->unit[
                         gMap->rowOffset[gUnknown_030033E4.unk02]
                         + gUnknown_030033E4.unk00]]);

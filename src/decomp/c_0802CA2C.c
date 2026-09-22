@@ -16,7 +16,7 @@ int sub_0802CA2C(void)
     if (!sub_0802CBA0())
         return 1;
 
-    sub_0801F838(0xff);
+    FillMovementMap(0xff);
     gUnknown_03003340[gUnknown_03003100.pos.unk02][gUnknown_03003100.pos.unk00] = 0;
 
     if (sub_08041758())
@@ -47,7 +47,7 @@ int sub_0802CA78(void)
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange == 0)
         return 1;
 
-    sub_0801F838(0xff);
+    FillMovementMap(0xff);
     sub_08020354(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
         (struct Unk08499594 *)gUnknown_030040D8);
 
@@ -78,7 +78,7 @@ int sub_0802CB20(void)
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange == 0)
         return 1;
 
-    sub_0801F838(0xff);
+    FillMovementMap(0xff);
     sub_08020354(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
         (struct Unk08499594 *)gUnknown_030040D8);
 

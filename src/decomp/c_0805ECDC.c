@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0805ECDC.
- * sub_0805ECDC @ 0x0805ECDC, sub_0805ED70 @ 0x0805ED70, sub_0805EE40 @ 0x0805EE40, sub_0805EF00 @ 0x0805EF00, sub_0805EF9C @ 0x0805EF9C, sub_0805F074 @ 0x0805F074
+ * AiChargeAggressively @ 0x0805ECDC, AiMoveWithFrontLine @ 0x0805ED70, sub_0805EE40 @ 0x0805EE40, sub_0805EF00 @ 0x0805EF00, sub_0805EF9C @ 0x0805EF9C, AiMoveUpConservatively @ 0x0805F074
  */
 
 void AiChargeAggressively(void)
@@ -80,13 +80,13 @@ void sub_0805EE40(void)
     sub_08059A0C(p);
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange > 1)
     {
-        q = sub_08057F00(4);
+        q = CountUnitsWithTypeTag(4);
         a = gUnknown_085766E0->unk0c;
         b = 1;
     }
     else
     {
-        q = sub_08057F00(5);
+        q = CountUnitsWithTypeTag(5);
         a = gUnknown_085766E0->unk0c;
         b = 2;
     }
@@ -110,13 +110,13 @@ void sub_0805EF00(void)
     sub_08059A0C(p);
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange > 1)
     {
-        q = sub_08057F00(4);
+        q = CountUnitsWithTypeTag(4);
         a = gUnknown_085766E0->unk0c;
         b = 1;
     }
     else
     {
-        q = sub_08057F00(5);
+        q = CountUnitsWithTypeTag(5);
         a = gUnknown_085766E0->unk0c;
         b = 2;
     }

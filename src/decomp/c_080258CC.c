@@ -33,47 +33,47 @@ void sub_080258CC(void)
 
     for (id = 1; id <= 0xFF; id++)
     {
-        if (gUnknown_08499594[id].unk00 == 0)
+        if (gUnits[id].unk00 == 0)
             continue;
-        if ((gUnknown_08499594[id].unk01 & 6) == 2)
+        if ((gUnits[id].unk01 & 6) == 2)
             continue;
-        c = gMap->unitUnk[gMap->rowOffset[gUnknown_08499594[id].unk03]
-                          + gUnknown_08499594[id].unk02];
+        c = gMap->unitUnk[gMap->rowOffset[gUnits[id].unk03]
+                          + gUnits[id].unk02];
         if (c != 0)
         {
-            if ((gUnknown_08499594[c].unk01 & 4) == 0)
+            if ((gUnits[c].unk01 & 4) == 0)
                 continue;
         }
-        gMap->unitUnk[gMap->rowOffset[gUnknown_08499594[id].unk03]
-                      + gUnknown_08499594[id].unk02] = id;
-        if (gUnknown_08499594[id].unk01 & 2)
+        gMap->unitUnk[gMap->rowOffset[gUnits[id].unk03]
+                      + gUnits[id].unk02] = id;
+        if (gUnits[id].unk01 & 2)
             continue;
         if (gPlayers[gUnknown_030033EC].aiControlled != 2)
         {
-            if (gMap->visible[gMap->rowOffset[gUnknown_08499594[id].unk03]
-                              + gUnknown_08499594[id].unk02] == 0)
+            if (gMap->visible[gMap->rowOffset[gUnits[id].unk03]
+                              + gUnits[id].unk02] == 0)
                 continue;
         }
-        gMap->unit[gMap->rowOffset[gUnknown_08499594[id].unk03]
-                   + gUnknown_08499594[id].unk02] = id;
+        gMap->unit[gMap->rowOffset[gUnits[id].unk03]
+                   + gUnits[id].unk02] = id;
     }
 
     for (id = 1; id <= 0xFF; id++)
     {
-        if (gUnknown_08499594[id].unk00 == 0)
+        if (gUnits[id].unk00 == 0)
             continue;
-        if ((u8)(gUnknown_08499594[id].unk01 & 2) != 0)
+        if ((u8)(gUnits[id].unk01 & 2) != 0)
             continue;
         if (gPlayers[gUnknown_030033EC].aiControlled == 2)
             continue;
         if (sub_0802571C(id))
         {
-            if (gMap->visible[gMap->rowOffset[gUnknown_08499594[id].unk03]
-                              + gUnknown_08499594[id].unk02] != 0)
+            if (gMap->visible[gMap->rowOffset[gUnits[id].unk03]
+                              + gUnits[id].unk02] != 0)
                 continue;
         }
-        gMap->unit[gMap->rowOffset[gUnknown_08499594[id].unk03]
-                   + gUnknown_08499594[id].unk02] = 0;
+        gMap->unit[gMap->rowOffset[gUnits[id].unk03]
+                   + gUnits[id].unk02] = 0;
     }
 
     sub_08021D10();

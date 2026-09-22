@@ -13,7 +13,7 @@
 
 #include "proc.h"
 /* Lays out one sub_0804402C sprite per unit past the first, right-to-left from
- * x = 0xd8, then draws two fixed sub_0801F34C sprites.
+ * x = 0xd8, then draws two fixed DrawOamObject sprites.
  *
  * All THREE loop quantities -- the x coordinate, the 0xc-stride tile index and
  * the 0x1000-stride palette field -- are strength-reduction GIVs, not source
@@ -46,8 +46,8 @@ void PutEnemyCoMinimug_IDLE_080878A9(struct Unk080878A8Proc *proc)
         sub_0804402C(0x1000 | (0xd8 - (n - 2) * 0x20 + i * 0x20), 0xa0,
             0x400 | (0x7000 + i * 0x1000) | (0x90 + i * 0xc), 6);
 
-    sub_0801F34C(0x69, 0x26, 0x98, 0, 2);
-    sub_0801F34C(0x52, 0xd0, 0x88, 0, 2);
+    DrawOamObject(0x69, 0x26, 0x98, 0, 2);
+    DrawOamObject(0x52, 0xd0, 0x88, 0, 2);
 }
 
 /* Three sequential sub_0801F234 runs over four id ranges: two singletons, then

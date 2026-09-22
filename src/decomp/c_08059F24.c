@@ -35,7 +35,7 @@
  *    steps, each verified separately:
  *      87.3 -> 94.3  `do { } while (0)` around the last test and the stores.
  *                    This is what swaps `out` into r3 and `x` into r4.
- *      94.3 -> 98.2  bind `u = &gUnknown_08499594[cell]` in its OWN statement.
+ *      94.3 -> 98.2  bind `u = &gUnits[cell]` in its OWN statement.
  *                    That fixes the evaluation ORDER inside the `unk00` test:
  *                    the ROM computes cell*12 FIRST and loads the pointer
  *                    second, so the destination is the operand computed LAST
@@ -43,7 +43,7 @@
  *      98.2 -> MATCH `(off = cell)` inside the gUnknown_03004730 subscript.
  *                    The last 4 bytes were which of two address constants,
  *                    each used once in the loop, wins the callee-saved
- *                    register: the ROM hoists &gUnknown_08499594 into sl and
+ *                    register: the ROM hoists &gUnits into sl and
  *                    rematerialises gUnknown_03004730 from the pool, and the
  *                    draft did the opposite (which is also why pool slots +0x8
  *                    and +0x14 were swapped -- ONE fact, not two). This is the
@@ -61,8 +61,8 @@
  * try_match after ANY cosmetic edit here.
  *
  * MEASURED AND DEAD, so nobody re-spends them:
- *   - `(&gUnknown_08499594[cell])->unk00` written INLINE is byte-identical to
- *     `gUnknown_08499594[cell].unk00`. It is the separate STATEMENT that
+ *   - `(&gUnits[cell])->unk00` written INLINE is byte-identical to
+ *     `gUnits[cell].unk00`. It is the separate STATEMENT that
  *     matters here, not the `&`.
  *   - Moving the `out->v` store ahead of `out->x`/`out->y` re-breaks the
  *     barrier, restores the duplicated guard AND the spill, and turns the map
@@ -111,7 +111,7 @@ void sub_08059F24(void *a1)
       {
         continue;
       }
-      u = &gUnknown_08499594[cell];
+      u = &gUnits[cell];
       if (u->unk00 > 2)
       {
         continue;
@@ -165,7 +165,7 @@ void sub_0805A008(void *a1)
       {
         continue;
       }
-      u = &gUnknown_08499594[cell];
+      u = &gUnits[cell];
       if (u->unk00 != 0x17)
       {
         continue;

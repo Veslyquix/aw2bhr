@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806171C.
- * sub_0806171C @ 0x0806171C, sub_08061788 @ 0x08061788, sub_08061868 @ 0x08061868
+ * sub_0806171C @ 0x0806171C, sub_08061788 @ 0x08061788, RunAiTurn @ 0x08061868
  */
 
 /* The destination record is at 0x02029C54, which aw2bhr.lds does NOT name --
@@ -47,7 +47,7 @@ void sub_0806171C(void)
     switch ((s16)*(volatile u16 *)&gUnknown_03004780)
     {
     case 0:
-        sub_08061868();
+        RunAiTurn();
         break;
     case 1:
         sub_08061B00();
@@ -106,13 +106,13 @@ void sub_08061788(u16 a)
  * separate statements interleave the pool loads with their stores instead. */
 void RunAiTurn(void)
 {
-    gUnknown_030046B4 = sub_0803866C()
+    gUnknown_030046B4 = IsHardCampaignMode()
         ? gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptHc
         : gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptNc;
 
     sub_08061CDC();
     sub_08061CF8();
-    sub_08061F34();
+    AiScanBuildableFacilities();
     sub_08061788(gUnknown_030033EC);
     sub_08062028();
     sub_0806279C();

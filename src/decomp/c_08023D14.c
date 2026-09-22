@@ -13,7 +13,7 @@ void sub_08023D14(u16 a1, u16 a2, u16 a3, u16 a4)
 
     for (i = 0; i < 16; i++)
     {
-        sub_08022428(a3 + i, a4);
+        DrawUnitAt(a3 + i, a4);
         sub_08022618(a3 + i, a4);
     }
 }
@@ -24,7 +24,7 @@ void sub_08023D48(u16 a1, u16 a2, u16 a3, u16 a4)
 
     for (i = 0; i < 11; i++)
     {
-        sub_08022428(a3, a4 + i);
+        DrawUnitAt(a3, a4 + i);
         sub_08022618(a3, a4 + i);
     }
 }

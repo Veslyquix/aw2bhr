@@ -20,16 +20,16 @@ int sub_0800B528(int x, int y)
     n = 0;
 
     if (y > 1)
-        n = sub_080015E4(x, y - 1);
+        n = IsTerrainLand(x, y - 1);
 
     if (y < MAP->height - 1)
-        n += sub_080015E4(x, y + 1);
+        n += IsTerrainLand(x, y + 1);
 
     if (x > 0)
-        n += sub_080015E4(x - 1, y);
+        n += IsTerrainLand(x - 1, y);
 
     if (x < MAP->width - 1)
-        n += sub_080015E4(x + 1, y);
+        n += IsTerrainLand(x + 1, y);
 
     if (n == 4)
         n = -1;

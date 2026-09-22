@@ -62,7 +62,7 @@ void sub_0805EA54(void)
     {
         struct Unk08499594 *p;
 
-        p = &gUnknown_08499594[i];
+        p = &gUnits[i];
 
         if (gUnknown_030040D8->unk00 != p->unk00)
             continue;

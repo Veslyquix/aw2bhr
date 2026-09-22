@@ -12,9 +12,9 @@ void sub_08060930(void)
     if (gUnknown_030046C0.unk06 == 0)
     {
         if (gUnknown_030046B8 & 1)
-            sub_0806096C();
-        sub_080609B8();
+            AiConsiderBuildingTCopter();
+        AiConsiderBuildingApc();
         if (gUnknown_030046B8 & 2)
-            sub_08060A20();
+            AiConsiderBuildingLander();
     }
 }

@@ -14,7 +14,7 @@
  * parameter folds into the load. */
 void sub_08017658(struct Unk03001470 *proc)
 {
-    sub_0802150C();
+    InitGameSettings();
     sub_08016DB8(proc->unk1e);
     sub_08026798();
     sub_08023348();

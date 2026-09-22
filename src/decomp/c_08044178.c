@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08044178.
- * sub_08044178 @ 0x08044178
+ * ClearPlayerCoPowerStatus @ 0x08044178
  *
  * Named per Xenesis's AW2 Subroutine List: "Clears CO Power/Super CO Power
  * Status". The old sub_XXXXXXXX symbol is kept as a linker alias below so

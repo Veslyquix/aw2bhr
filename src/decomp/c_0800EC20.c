@@ -37,10 +37,10 @@ void sub_0800EC20(int x, int y)
         if (tile == 70)
         {
             sub_0800EBFC(x - 2, y - 2, 0x25);
-            sub_08001158(x - 1, y - 2, 0x27);
+            MakeTileSimple(x - 1, y - 2, 0x27);
             sub_0800EBFC(x, y - 2, 0x87);
             sub_0800EBFC(x - 2, y - 1, 0x65);
-            sub_08001158(x - 1, y - 1, 0x67);
+            MakeTileSimple(x - 1, y - 1, 0x67);
             sub_0800EBFC(x, y - 1, 0x87);
             sub_0800EBFC(x - 2, y, 0x87);
             sub_0800EBFC(x - 1, y, 0x87);
@@ -48,9 +48,9 @@ void sub_0800EC20(int x, int y)
         else if (tile == 68 || tile == 69)
         {
             sub_0800EBFC(x - 1, y - 2, 0x25);
-            sub_08001158(x, y - 2, 0x27);
+            MakeTileSimple(x, y - 2, 0x27);
             sub_0800EBFC(x - 1, y - 1, 0x65);
-            sub_08001158(x, y - 1, 0x67);
+            MakeTileSimple(x, y - 1, 0x67);
             sub_0800EBFC(x - 1, y, 0x87);
         }
         else if (tile == 36 || tile == 37)
@@ -69,19 +69,19 @@ void sub_0800EC20(int x, int y)
         {
             sub_0800EBFC(x, y - 2, 0x87);
             sub_0800EBFC(x + 1, y - 2, 0x25);
-            sub_08001158(x + 2, y - 2, 0x27);
+            MakeTileSimple(x + 2, y - 2, 0x27);
             sub_0800EBFC(x, y - 1, 0x87);
             sub_0800EBFC(x + 1, y - 1, 0x65);
-            sub_08001158(x + 2, y - 1, 0x67);
+            MakeTileSimple(x + 2, y - 1, 0x67);
             sub_0800EBFC(x + 1, y, 0x87);
             sub_0800EBFC(x + 2, y, 0x87);
         }
         else if (tile == 71)
         {
             sub_0800EBFC(x, y - 2, 0x25);
-            sub_08001158(x + 1, y - 2, 0x27);
+            MakeTileSimple(x + 1, y - 2, 0x27);
             sub_0800EBFC(x, y - 1, 0x65);
-            sub_08001158(x + 1, y - 1, 0x67);
+            MakeTileSimple(x + 1, y - 1, 0x67);
             sub_0800EBFC(x + 1, y, 0x87);
         }
         else if (tile == 39)
@@ -97,8 +97,8 @@ void sub_0800EC20(int x, int y)
         tile = gMap->tile[col + x];
         if (tile == 70)
         {
-            sub_08001158(x - 1, y, 0x27);
-            sub_08001158(x - 1, y + 1, 0x67);
+            MakeTileSimple(x - 1, y, 0x27);
+            MakeTileSimple(x - 1, y + 1, 0x67);
             sub_0800EBFC(x - 2, y + 1, 0x65);
             sub_0800EBFC(x, y + 1, 0x87);
             sub_0800EBFC(x, y + 2, 0x87);
@@ -127,7 +127,7 @@ void sub_0800EC20(int x, int y)
         {
             sub_0800EBFC(x + 1, y, 0x87);
             sub_0800EBFC(x, y + 1, 0x25);
-            sub_08001158(x + 1, y + 1, 0x27);
+            MakeTileSimple(x + 1, y + 1, 0x27);
         }
         else if (tile == 70)
         {
@@ -136,7 +136,7 @@ void sub_0800EC20(int x, int y)
             sub_0800EBFC(x + 1, y, 0x25);
             sub_0800EBFC(x + 1, y + 1, 0x65);
             sub_0800EBFC(x + 1, y + 2, 0x87);
-            sub_08001158(x + 2, y + 1, 0x67);
+            MakeTileSimple(x + 2, y + 1, 0x67);
             sub_0800EBFC(x + 2, y + 2, 0x87);
         }
         break;
@@ -149,7 +149,7 @@ void sub_0800EC20(int x, int y)
         {
             sub_0800EBFC(x + 1, y - 1, 0x25);
             sub_0800EBFC(x + 1, y, 0x65);
-            sub_08001158(x + 2, y, 0x67);
+            MakeTileSimple(x + 2, y, 0x67);
             sub_0800EBFC(x, y - 1, 0x87);
             sub_0800EBFC(x, y + 1, 0x87);
             sub_0800EBFC(x + 1, y + 1, 0x87);
@@ -162,8 +162,8 @@ void sub_0800EC20(int x, int y)
         tile = gMap->tile[col + x];
         if (tile == 70)
         {
-            sub_08001158(x - 1, y - 1, 0x27);
-            sub_08001158(x - 1, y, 0x67);
+            MakeTileSimple(x - 1, y - 1, 0x27);
+            MakeTileSimple(x - 1, y, 0x67);
             sub_0800EBFC(x - 2, y, 0x65);
             sub_0800EBFC(x, y - 1, 0x87);
             sub_0800EBFC(x, y + 1, 0x87);
@@ -176,8 +176,8 @@ void sub_0800EC20(int x, int y)
         tile = gMap->tile[gMap->rowOffset[y - 1] + x];
         if (tile == 70)
         {
-            sub_08001158(x, y - 2, 0x27);
-            sub_08001158(x, y - 1, 0x67);
+            MakeTileSimple(x, y - 2, 0x27);
+            MakeTileSimple(x, y - 1, 0x67);
             sub_0800EBFC(x - 1, y - 1, 0x65);
             sub_0800EBFC(x - 1, y, 0x87);
             sub_0800EBFC(x + 1, y, 0x87);
@@ -191,8 +191,8 @@ void sub_0800EC20(int x, int y)
         if (tile == 70)
         {
             sub_0800EBFC(x - 1, y + 1, 0x25);
-            sub_08001158(x, y + 1, 0x27);
-            sub_08001158(x, y + 2, 0x67);
+            MakeTileSimple(x, y + 1, 0x27);
+            MakeTileSimple(x, y + 2, 0x67);
             sub_0800EBFC(x - 1, y, 0x87);
             sub_0800EBFC(x + 1, y, 0x87);
             sub_0800EBFC(x + 1, y + 1, 0x87);
@@ -201,5 +201,5 @@ void sub_0800EC20(int x, int y)
         break;
     }
 
-    sub_0800CEF8(x, y);
+    RepaintTileRight(x, y);
 }

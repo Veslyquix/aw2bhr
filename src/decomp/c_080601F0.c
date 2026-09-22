@@ -11,14 +11,14 @@
 #include "hardware.h"
 
 /* One arm of the 0x08060 cursor state machine: if the cell under the CURRENT
- * UNIT (gUnknown_030046C0.unk06 indexes gUnknown_08499594, and the unit carries
+ * UNIT (gUnknown_030046C0.unk06 indexes gUnits, and the unit carries
  * its own column/row in unk02/unk03) is occupied on the gMap->unk234A plane, hand it
  * to sub_08029088 and advance to state 7; otherwise state 3.
  *
  * NO POINTER IS BOUND. The unit element is named twice and CSE gives it one
  * address -- and that is the whole difference between this and a candidate that
- * is 96.6% right. `u = &gUnknown_08499594[i]` puts the table's DEREF after the
- * `* 12` (91.4%); adding `tbl = gUnknown_08499594;` to pull the deref forward
+ * is 96.6% right. `u = &gUnits[i]` puts the table's DEREF after the
+ * `* 12` (91.4%); adding `tbl = gUnits;` to pull the deref forward
  * fixes the order but then the declared local takes r1 where the ROM wants r0,
  * because a declared local's quantity is created at expand_decl and sorts ahead
  * of the unnamed product. Two levers that each fix half. Naming the element
@@ -37,8 +37,8 @@ void sub_080601F0(void)
 
     map = gMap;
     i = gUnknown_030046C0.unk06;
-    y = gUnknown_08499594[i].unk03;
-    off = map->rowOffset[y] + (x = gUnknown_08499594[i].unk02);
+    y = gUnits[i].unk03;
+    off = map->rowOffset[y] + (x = gUnits[i].unk02);
 
     if (map->unk234A[off] != 0)
     {
@@ -111,18 +111,18 @@ void sub_080602C4(void)
 
 /* sub_08060384's variant that parks gUnknown_030033E4 on the CURRENT UNIT's
  * cell instead of the cursor's: gUnknown_030046C0.unk06 indexes
- * gUnknown_08499594 and unk02/unk03 are the unit's own column and row.
+ * gUnits and unk02/unk03 are the unit's own column and row.
  *
  * THE UNIT POINTER MUST BE BOUND here, unlike in c_080601F0.c where naming the
  * element twice is what works. The difference is the store in between: `strh`
- * into gUnknown_030033E4 may alias the pointer global gUnknown_08499594, so
+ * into gUnknown_030033E4 may alias the pointer global gUnits, so
  * agbcc rebuilds the whole subscript for the second member and the function
  * comes out 12 bytes long. c_080601F0.c has no store between its two reads. */
 void sub_08060324(void)
 {
     struct Unk08499594 *u;
 
-    u = &gUnknown_08499594[gUnknown_030046C0.unk06];
+    u = &gUnits[gUnknown_030046C0.unk06];
 
     gUnknown_030033E4.unk00 = u->unk02;
     gUnknown_030033E4.unk02 = u->unk03;

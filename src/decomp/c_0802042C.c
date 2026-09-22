@@ -13,7 +13,7 @@
  * sub_08020634 to reverse in place. Each step samples the four orthogonal
  * neighbours (0 = +x, 1 = -x, 2 = -y, 3 = +y; off-map reads as 0xff), takes the
  * minimum, collects every neighbour tied for it, and breaks the tie with
- * sub_080129E0. `dir` survives across steps because the switch has no default
+ * GetNextRandomNumber. `dir` survives across steps because the switch has no default
  * arm -- a tie count of 0 leaves the previous direction standing.
  *
  * The neighbour stores and the step switch are both written 0, 1, 3, 2; that is
@@ -84,13 +84,13 @@ void sub_0802042C(int x, int y, u8 *p)
             dir = sel[0];
             break;
         case 2:
-            dir = sel[(sub_080129E0() >> 14) & 1];
+            dir = sel[(GetNextRandomNumber() >> 14) & 1];
             break;
         case 3:
-            dir = sel[sub_080129E0() % 3];
+            dir = sel[GetNextRandomNumber() % 3];
             break;
         case 4:
-            dir = sel[sub_080129E0() & 3];
+            dir = sel[GetNextRandomNumber() & 3];
             break;
         }
 

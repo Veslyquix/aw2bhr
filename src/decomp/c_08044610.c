@@ -59,7 +59,7 @@
  *   - the inner test is spelled with `||`, not `&&`. The ROM's unk08-only arm
  *     is the FALL-THROUGH and the sub_08029088 arm is forward past the pool;
  *     `if (cell != 0 && (unk01 & 8) == 0)` lays them out the other way round.
- *   - sub_08044B08's first two arguments are bound to locals BEFORE the flag
+ *   - AnimateUnitCreation's first two arguments are bound to locals BEFORE the flag
  *     is computed. The ROM loads unk02/unk03 into r3/r4 (clobbering the unit
  *     pointer), then builds the flag in r5, then copies all three into r0-r2.
  *     Naming them at the call site instead loads them straight into r0/r1 and
@@ -98,7 +98,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
 
     while (proc->unk68 <= 0x32)
     {
-        unit = &gUnknown_08499594[gUnknown_03003F2C + proc->unk68];
+        unit = &gUnits[gUnknown_03003F2C + proc->unk68];
 
         if (unit->unk00 != 0
             && gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
@@ -135,7 +135,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
                 if (gPlayers[gUnknown_030033EC].coActivationMode == 2)
                     flag = 1;
 
-                sub_08044B08(x, y, flag);
+                AnimateUnitCreation(x, y, flag);
 
                 proc->unk68++;
                 break;

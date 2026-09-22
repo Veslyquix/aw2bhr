@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801F838.
- * sub_0801F838 @ 0x0801F838
+ * FillMovementMap @ 0x0801F838
  */
 
 /* Fills every cell of the gUnknown_08499590 screen (u16 width at +0, u16

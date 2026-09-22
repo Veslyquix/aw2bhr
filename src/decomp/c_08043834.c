@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08043834.
- * sub_08043834 @ 0x08043834, sub_08043898 @ 0x08043898, sub_080438FC @ 0x080438FC
+ * sub_08043834 @ 0x08043834, DrawCoPowerLabel @ 0x08043898, sub_080438FC @ 0x080438FC
  */
 
 void sub_08043834(int a)
@@ -47,9 +47,9 @@ void sub_080438FC(int a, int b, int c)
     int m;
 
     vu = gPlayers[c].coCharge;
-    lo = sub_080441D4(c);
-    hi = sub_08044208(c) - lo;
-    m = sub_0804419C(c);
+    lo = GetCoPowerCost(c);
+    hi = GetSuperCoPowerCost(c) - lo;
+    m = GetCoPowerStarCost(c);
     vt = gGameClock;
     va = a;
     vy = b + 0x18;

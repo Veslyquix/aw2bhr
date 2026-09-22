@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08035020.
- * sub_08035020 @ 0x08035020, sub_0803504C @ 0x0803504C, sub_08035064 @ 0x08035064
+ * sub_08035020 @ 0x08035020, sub_0803504C @ 0x0803504C, PlayWeatherChangeSound @ 0x08035064
  */
 
 void sub_08035020(u16 a)
@@ -20,7 +20,7 @@ void sub_0803504C(struct Unk03001470 *p)
 }
 
 /* Named per Xenesis's AW2 Subroutine List: "Code that retrieves the Sound
- * Effects for weather change IDs". The old sub_08035064 symbol is kept as a
+ * Effects for weather change IDs". The old PlayWeatherChangeSound symbol is kept as a
  * linker alias below so every other unit keeps resolving it unchanged. */
 void PlayWeatherChangeSound(struct Unk03001470 *p)
 {

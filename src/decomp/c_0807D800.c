@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807D800.
- * sub_0807D800 @ 0x0807D800, sub_0807D860 @ 0x0807D860
+ * IsCoSelectionUnique @ 0x0807D800, sub_0807D860 @ 0x0807D860
  */
 
 #include "proc.h"

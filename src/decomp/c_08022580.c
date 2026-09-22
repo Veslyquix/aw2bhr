@@ -27,7 +27,7 @@ void sub_08022580(void)
     {
         for (x = 0; x <= 0xf; x++)
         {
-            sub_08022428((u16)(x + (gMap->scrollX >> 4)),
+            DrawUnitAt((u16)(x + (gMap->scrollX >> 4)),
                          (u16)(y + (gMap->scrollY >> 4)));
         }
     }

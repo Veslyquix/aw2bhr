@@ -14,7 +14,7 @@ void sub_080211DC(u8 a1, s8 a2)
     struct Map *map;
     int bonus;
 
-    e = &gUnknown_08499594[a1];
+    e = &gUnits[a1];
     bonus = 0;
 
     if (e->unk00 == 0)
@@ -32,7 +32,7 @@ void sub_080211DC(u8 a1, s8 a2)
     }
 
     sub_080210C8(e->unk02, e->unk03,
-                 bonus + sub_08042D84(((e - gUnknown_08499594) >> 6) + 1, e->unk00),
+                 bonus + GetUnitVisionWithCoBonus(((e - gUnits) >> 6) + 1, e->unk00),
                  gPlayers[(a1 >> 6) + 1].turnState,
                  a2, (a1 >> 6) + 1);
 }

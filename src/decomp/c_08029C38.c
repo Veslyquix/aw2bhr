@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08029C38.
- * sub_08029C38 @ 0x08029C38, sub_08029CB8 @ 0x08029CB8
+ * sub_08029C38 @ 0x08029C38, StartSupplyAnimation @ 0x08029CB8
  */
 
 /* `proc->unk2c` must NOT be bound to a local first: as `d = proc->unk2c;` its
@@ -61,7 +61,7 @@ void sub_08029C38(struct Unk29C38Proc *proc)
 
 /* Named per Xenesis's AW2 Subroutine List: "Animates Supply? (0802A182)" --
  * sets up the proc sub_08029C38 ticks each frame (funds delta, screen
- * position, whether to actually deduct funds). The old sub_08029CB8 symbol
+ * position, whether to actually deduct funds). The old StartSupplyAnimation symbol
  * is kept as a linker alias below so every other unit keeps resolving it
  * unchanged. */
 void StartSupplyAnimation(struct Unk802C57C *a1, u8 a2, int a3, u8 a4)

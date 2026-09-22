@@ -19,7 +19,7 @@
  * then splits on the s16 at +0x64: zero is the outer carousel (Left/Right step
  * gUnknown_0861696C's six-phase permutation at +0x52, A/B commit or cancel),
  * non-zero is the sub-menu on +0x66. Both arms end in the same two
- * "toggle a word and reset the timer" clauses on sub_0803CBD8(0x20)/(0x28),
+ * "toggle a word and reset the timer" clauses on IsCampaignCompletionFlagSet(0x20)/(0x28),
  * and the function closes by running sub_080824D4 and sub_08084700.
  *
  * Promotion must carry rodata: ["0x081D93AC"], the -fforce-addr copy of
@@ -302,7 +302,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
             }
         }
 
-        if ((gpKeySt->pressed & 4) && sub_0803CBD8(0x20) != 0
+        if ((gpKeySt->pressed & 4) && IsCampaignCompletionFlagSet(0x20) != 0
             && gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0)
         {
             gUnknown_03005968 = ~gUnknown_03005968 & 1;
@@ -310,7 +310,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
             p->unk4c = 0;
         }
 
-        if ((gpKeySt->pressed & 4) && sub_0803CBD8(0x28) != 0
+        if ((gpKeySt->pressed & 4) && IsCampaignCompletionFlagSet(0x28) != 0
             && gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 2)
         {
             gUnknown_03005920 = ~gUnknown_03005920 & 1;

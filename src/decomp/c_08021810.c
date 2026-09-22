@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08021810.
- * sub_08021810 @ 0x08021810, sub_080219AC @ 0x080219AC
+ * sub_08021810 @ 0x08021810, RecountArmyProperties @ 0x080219AC
  */
 
 /* Reports two byte counts through out-pointers.  For the 0xB4..0xBF range of
@@ -28,7 +28,7 @@
  * The clear loop, the inner map loop and the max loop all run on ONE local `x`.
  * Declaring a separate `i` for the two short loops costs 4 bytes: x and the
  * `y * 2` temp swap r3/r4 and the pool address then needs an extra `mov r0, ip`
- * to load through.  sub_080219AC in this same block needed the identical fix;
+ * to load through.  RecountArmyProperties in this same block needed the identical fix;
  * see docs/agbcc-codegen.md.
  */
 
@@ -116,7 +116,7 @@ void RecountArmyProperties(void)
     n = 0;
 
     sub_0801F92C(gMap->property);
-    sub_0801F838(0xff);
+    FillMovementMap(0xff);
 
     for (x = 0; x <= 4; x++)
         gPlayers[x].captures = 0;

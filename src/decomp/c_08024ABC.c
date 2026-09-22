@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08024ABC.
- * sub_08024ABC @ 0x08024ABC
+ * CalcDamage @ 0x08024ABC
  */
 
 struct Unk08024ABCBlk
@@ -31,7 +31,7 @@ void CalcDamage(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 d)
     u32 v3;
 
     army = ((struct Unk08024ABCBlk *)a->unk00
-            - (struct Unk08024ABCBlk *)gUnknown_08499594) + 1;
+            - (struct Unk08024ABCBlk *)gUnits) + 1;
     v3 = 0;
     v1 = 0;
     v2 = 0;
@@ -56,7 +56,7 @@ void CalcDamage(struct Unk08024ABCArg *a, struct Unk08024ABCArg *b, s16 c, u8 d)
                                   a->unk00->unk00, b->unk00->unk00, v3);
         }
     }
-    else if (t->minRange <= c && c <= sub_08042D50(army, a->unk00->unk00)
+    else if (t->minRange <= c && c <= GetUnitFiringRangeWithCoBonus(army, a->unk00->unk00)
              && a->unk00->unk04_7 != 0 && d == 1)
     {
         if ((b->unk00->unk01 & 0x20) != 0)

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08025BE0.
- * sub_08025BE0 @ 0x08025BE0
+ * InitUnit @ 0x08025BE0
  */
 
 /* WAVE 76: MATCHED. A block-scoped fixed-r0 zero with an explicit movs
@@ -79,7 +79,7 @@
  * respelled as an explicit mask/or on a u16 load. The 21 differing bytes are
  * one 2-byte instruction plus the 2-byte shift it imposes on everything after
  * it; the trailing instructions are identical and merely relocated, and the
- * `<_08025C50>` versus `<sub_08025BE0+0x70>` branch targets in the diff are
+ * `<_08025C50>` versus `<InitUnit+0x70>` branch targets in the diff are
  * symbolisation, not byte differences.
  *
  * What is still untried: something that makes the zero arrive from a distinct

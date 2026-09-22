@@ -18,7 +18,7 @@ bool8 sub_0802C8F8(void)
     if (gMap->unit[off] == 0)
         return TRUE;
 
-    e = &gUnknown_08499594[gMap->unit[off]];
+    e = &gUnits[gMap->unit[off]];
 
     if (!sub_08025FC0((struct Unk08499594 *)gUnknown_030040D8, e))
         return TRUE;
@@ -34,7 +34,7 @@ bool8 sub_0802C958(void)
     if (!sub_0802CBA0())
         return TRUE;
 
-    sub_0801F838(0xff);
+    FillMovementMap(0xff);
     gUnknown_03003340[gUnknown_03003100.pos.unk02][gUnknown_03003100.pos.unk00] = 0;
 
     if (sub_0804151C())

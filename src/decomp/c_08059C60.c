@@ -33,7 +33,7 @@ void sub_08059C60(void *a1)
             continue;
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            p = &gUnknown_08499594[j];
+            p = &gUnits[j];
             if (p->unk00 == 0)
                 continue;
             if ((s8)gUnknown_03003340[p->unk03][p->unk02] <= 0)

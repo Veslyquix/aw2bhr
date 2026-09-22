@@ -23,7 +23,7 @@
  * anywhere forces a second pool load (see sub_08057D90 for the fuller
  * writeup of this).
  *
- * gUnknown_08499594 is a REAL declared global, not a pool word, and so is
+ * gUnits is a REAL declared global, not a pool word, and so is
  * gUnknown_08499590 -- both trip the "named pointer whose target is also named"
  * false positive in the pool-word screen.
  *
@@ -31,7 +31,7 @@
  * 98.0% with the size exact, the relocations exact, the pool exact and all ten
  * words in order -- everything but four instructions:
  *
- *   original            plain `gUnknown_08499594[c].unk00`
+ *   original            plain `gUnits[c].unk00`
  *   ldr  r0, [pc,#208]  ldr  r0, [pc,#208]
  *   lsls r1, r4, #1     ldr  r1, [r0]
  *   adds r1, r1, r4     lsls r0, r4, #1
@@ -39,7 +39,7 @@
  *   ldr  r0, [r0]       lsls r0, r0, #2
  *   adds r0, r0, r1     adds r0, r0, r1
  *
- * The ROM computes `c * 12` BETWEEN the pool load of &gUnknown_08499594 and the
+ * The ROM computes `c * 12` BETWEEN the pool load of &gUnits and the
  * `ldr r0,[r0]` that dereferences it, hiding the load in the multiply, and gives
  * the multiply r1 rather than r0. No statement boundary reaches inside that
  * address expression, so no rewriting of the `&&` chain moves it.
@@ -81,7 +81,7 @@ void sub_08061B4C(void)
                          + gUnknown_084995A0[i].unk01];
 
         if (c != 0 && sub_08026F9C(gUnknown_03003F2C, c) == 1
-            && (*(u = &gUnknown_08499594[c])).unk00 <= 2)
+            && (*(u = &gUnits[c])).unk00 <= 2)
             continue;
 
         gUnknown_030013EC(gUnknown_084995A0[i].unk01, gUnknown_084995A0[i].unk02, 1, 3, 0);

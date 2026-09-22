@@ -19,8 +19,8 @@
  * honest spelling names gUnknown_03003F2C and lets the build place the word --
  * sub_08045924, which reads it once, gets a plain `ldr =sym` instead.
  *
- * The element MUST be bound to a local.  Spelling `gUnknown_08499594[i]` inline
- * three times rematerialises &gUnknown_08499594 from the inline pool inside the
+ * The element MUST be bound to a local.  Spelling `gUnits[i]` inline
+ * three times rematerialises &gUnits from the inline pool inside the
  * loop and emits `adds r1, r5, r0` (index + pointer); the binding gives the
  * address its own callee-saved register (r8) and the ROM's `adds r1, r0, r5`.
  * That is the "pointer-sum vs ADDR_EXPR" anchor rule, and it also buys the
@@ -40,7 +40,7 @@ bool8 sub_080459E4(void)
     for (i = (u16)gUnknown_084995FE[gUnknown_03003F2C] + 1;
          i < (u16)gUnknown_084995FE[gUnknown_03003F2C] + 0x33; i++)
     {
-        unit = &gUnknown_08499594[i];
+        unit = &gUnits[i];
 
         if (unit->unk00 == 0)
             continue;
@@ -68,7 +68,7 @@ bool8 sub_080459E4(void)
  * The honest spelling names gUnknown_03003F2C and lets the build place it.
  *
  * The element must be bound to a local for the same reason as sub_080459E4:
- * inline, &gUnknown_08499594 is rematerialised from the inline pool inside the
+ * inline, &gUnits is rematerialised from the inline pool inside the
  * loop and the address adds come out `index + pointer`; bound, the constant wins
  * the third callee-saved register (sb) and the adds come out `pointer + index`.
  *
@@ -88,7 +88,7 @@ bool8 sub_08045A78(void)
     for (i = (u16)gUnknown_084995FE[gUnknown_03003F2C] + 1;
          i < (u16)gUnknown_084995FE[gUnknown_03003F2C] + 0x33; i++)
     {
-        unit = &gUnknown_08499594[i];
+        unit = &gUnits[i];
 
         if (unit->unk00 == 0)
             continue;

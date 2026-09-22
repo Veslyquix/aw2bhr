@@ -24,12 +24,12 @@ void sub_08033800(struct Unk33800Proc *proc)
     if (proc->unk30 != proc->unk38)
         proc->unk30 = proc->unk30 + ((proc->unk38 - proc->unk30) >> 1);
 
-    sub_0801F34C(0x50,
+    DrawOamObject(0x50,
         proc->unk2c + gUnknown_0849B108[proc->unk58 * 2],
         proc->unk30 + gUnknown_0849B108[proc->unk58 * 2 + 1] + 0x10,
         0, 0);
 
-    sub_0801F34C(0x50,
+    DrawOamObject(0x50,
         (proc->unk2c - gUnknown_0849B108[proc->unk58 * 2] + 0x90) | 0x3000,
         proc->unk30 - gUnknown_0849B108[proc->unk58 * 2 + 1] - 0x10,
         0, 0);

@@ -4,11 +4,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0804440C.
- * sub_0804440C @ 0x0804440C, sub_0804443C @ 0x0804443C, sub_08044460 @ 0x08044460, sub_08044488 @ 0x08044488, sub_080444B4 @ 0x080444B4
+ * IsUnitDirectForCoPowerAnim @ 0x0804440C, HasMaxRangeGreaterThanOne @ 0x0804443C, IsUnitSoldier @ 0x08044460, IsUnitAir @ 0x08044488, sub_080444B4 @ 0x080444B4
  */
 
 /* Named per Xenesis's AW2 Subroutine List: "Animation Check - Returns 0x1
- * if the unit is a Direct (Max)". The old sub_0804440C symbol is kept as a
+ * if the unit is a Direct (Max)". The old IsUnitDirectForCoPowerAnim symbol is kept as a
  * linker alias below so every other unit keeps resolving it unchanged. */
 int IsUnitDirectForCoPowerAnim(struct Unk030040D8 *p)
 {
@@ -20,7 +20,7 @@ int IsUnitDirectForCoPowerAnim(struct Unk030040D8 *p)
 }
 
 /* Named per Xenesis's AW2 Subroutine List: "Animation Check - Returns 0x1
- * if the Unit has Max Range >1 (Grit)". The old sub_0804443C symbol is kept
+ * if the Unit has Max Range >1 (Grit)". The old HasMaxRangeGreaterThanOne symbol is kept
  * as a linker alias below so every other unit keeps resolving it
  * unchanged. */
 int HasMaxRangeGreaterThanOne(struct Unk030040D8 *p)

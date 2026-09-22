@@ -19,13 +19,13 @@
  *
  * The else arm's spelling is load-bearing and cost this function its one miss.
  * The ROM has ONE `movs r0,#0` block, at the end of the `unk01 == 3` path and
- * before the literal pool, which the sub_0803861C path reaches by branching
+ * before the literal pool, which the IsPlayer1TeamAlive path reaches by branching
  * BACKWARDS into it (`beq _08038220`). Writing that arm as
- * `else if (sub_0803861C() == 0) return 0;` emits a `bne` to the return-1 tail
+ * `else if (IsPlayer1TeamAlive() == 0) return 0;` emits a `bne` to the return-1 tail
  * plus a SECOND copy of the return-0 block: +4 bytes, 89.1%. Writing it as
  * `if (...) return 1; return 0;` -- the early return spelled with the value
  * the fall-through does NOT use -- makes agbcc invert the branch, and the
- * duplicate block cross-jumps into the shared one. Same rule as sub_0803861C
+ * duplicate block cross-jumps into the shared one. Same rule as IsPlayer1TeamAlive
  * in this block; see docs/agbcc-codegen.md.
  *
  * `buf` is 5 bytes, not 4: the frame is `sub sp, #8` and agbcc rounds to the
@@ -49,7 +49,7 @@
  * literal), and re-verified as still MATCHED after the change.
  *
  * W43-E re-verified this independently and found the CONTROL PAIR that settles
- * it, inside that one caller: sub_08038240 calls sub_0803866C at 0x08038302 and
+ * it, inside that one caller: sub_08038240 calls IsHardCampaignMode at 0x08038302 and
  * sub_080381C0 at 0x0803830E, sixteen bytes apart, and truth-tests both results
  * directly with no intervening local. The first is `cmp r0,#0` with NO shift
  * and is declared `int`; the second is `lsls r0,#0x18; cmp r0,#0`. Same
@@ -80,7 +80,7 @@ bool8 sub_080381C0(void)
         }
         else
         {
-            if (sub_0803861C() != 0)
+            if (IsPlayer1TeamAlive() != 0)
                 return 1;
             return 0;
         }
@@ -89,7 +89,7 @@ bool8 sub_080381C0(void)
 }
 
 /* Per-map setup: registers the two slot callbacks, clears gUnknown_0202FDEC,
- * then partitions armies 1..4 into its two 4-entry lists on sub_080266DC's
+ * then partitions armies 1..4 into its two 4-entry lists on IsPlayerAliveAndActive's
  * predicate before publishing the funds figure and the turn limit.
  *
  * TWO -fforce-addr pool words, and they must stay in this order: 0x08090F00
@@ -130,7 +130,7 @@ void sub_08038240(void)
     {
         if (gPlayers[i].aiControlled)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 if (gUnknown_0202FDEC.unk08 > 3)
                     break;
@@ -157,7 +157,7 @@ void sub_08038240(void)
     {
         gUnknown_0202FDEC.unk0a = gPlayers[sub_0807A908()].totalScore;
 
-        if (sub_0803866C())
+        if (IsHardCampaignMode())
             gUnknown_0202FDEC.unk0a = gUnknown_0202FDEC.unk0a * 2;
     }
 

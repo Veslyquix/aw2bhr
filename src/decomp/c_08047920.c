@@ -32,7 +32,7 @@
  *
  * The unk01 bit-0 test respells the whole subscript instead of using `u`
  * because the intervening sub_0804769C call kills the address expression's CSE
- * class -- gUnknown_08499594 and gUnknown_03003F2C are both plain (non-const)
+ * class -- gUnits and gUnknown_03003F2C are both plain (non-const)
  * memory. The later field reads keep using `u`, which is what proves `u` is a
  * real local and that one access is a separate spelling.
  *
@@ -71,13 +71,13 @@ void sub_08047920(void *arg)
          i++)
     {
         id = gUnknown_02028DD8[i + ((struct Unk0804769C *)arg)->unk20];
-        u = &gUnknown_08499594[gUnknown_03003F2C + id];
+        u = &gUnits[gUnknown_03003F2C + id];
         if (u->unk00 == 0)
             break;
 
         n = sub_0804769C(arg, id) + 1;
 
-        f = gUnknown_08499594[id + gUnknown_03003F2C].unk01;
+        f = gUnits[id + gUnknown_03003F2C].unk01;
         k = 1;
         m = k;
         k &= f;

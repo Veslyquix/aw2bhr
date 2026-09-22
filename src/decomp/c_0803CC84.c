@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803CC84.
- * sub_0803CC84 @ 0x0803CC84
+ * CopyString @ 0x0803CC84
  */
 
 /* Not a member of the 0x0803Cxxx bit-accessor family despite the address --

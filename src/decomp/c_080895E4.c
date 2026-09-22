@@ -34,44 +34,44 @@ void sub_080895E4(struct Unk080895E4Proc *proc)
 
     if (gUnknown_03005964 <= 3)
     {
-        sub_0801F34C(gUnknown_03005964 + 0x83,
+        DrawOamObject(gUnknown_03005964 + 0x83,
                      gUnknown_03005964 * 0x18 + 8,
                      gUnknown_03005964 * 6 + 0x28,
                      0, 4);
-        sub_0801F34C(0x8B,
+        DrawOamObject(0x8B,
                      ((gUnknown_03005964 * 0x18 - 0x10) & 0x1FF) | 0x200,
                      ((gUnknown_03005964 * 6 + 0x10) & 0xFF) | 0x300,
                      0, 5);
 
         if (gUnknown_03005964 <= 1)
-            sub_0801F34C(0x4F,
+            DrawOamObject(0x4F,
                          (gUnknown_03005964 * 0x18 + 0x20) & 0x1FF,
                          (gUnknown_03005964 * 6 + 0x28) & 0xFF,
                          0, 0);
         else
-            sub_0801F34C(0x4F,
+            DrawOamObject(0x4F,
                          (gUnknown_03005964 * 0x18 - 0x20) & 0x1FF,
                          (gUnknown_03005964 * 6 + 0x28) & 0xFF,
                          0, 0);
     }
     else
     {
-        sub_0801F34C(gUnknown_03005964 + 0x83,
+        DrawOamObject(gUnknown_03005964 + 0x83,
                      (gUnknown_03005964 - 4) * 0x18 + 0x10,
                      (gUnknown_03005964 - 4) * 6 + 0x4A,
                      0, 4);
-        sub_0801F34C(0x8B,
+        DrawOamObject(0x8B,
                      (((gUnknown_03005964 - 4) * 0x18 - 8) & 0x1FF) | 0x200,
                      (((gUnknown_03005964 - 4) * 6 + 0x32) & 0xFF) | 0x300,
                      0, 5);
 
         if (gUnknown_03005964 <= 5)
-            sub_0801F34C(0x4F,
+            DrawOamObject(0x4F,
                          ((gUnknown_03005964 - 4) * 0x18 + 0x28) & 0x1FF,
                          ((gUnknown_03005964 - 4) * 6 + 0x4A) & 0xFF,
                          0, 0);
         else
-            sub_0801F34C(0x4F,
+            DrawOamObject(0x4F,
                          ((gUnknown_03005964 - 4) * 0x18 - 0x18) & 0x1FF,
                          ((gUnknown_03005964 - 4) * 6 + 0x4A) & 0xFF,
                          0, 0);

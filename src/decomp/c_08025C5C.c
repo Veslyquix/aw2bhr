@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08025C5C.
- * sub_08025C5C @ 0x08025C5C, sub_08025C98 @ 0x08025C98, sub_08025CC8 @ 0x08025CC8
+ * sub_08025C5C @ 0x08025C5C, sub_08025C98 @ 0x08025C98, CreateUnitAt @ 0x08025CC8
  */
 
 /* An early `return NULL` and not `if (u != NULL) { ...; return u; }`: the
@@ -15,10 +15,10 @@
  * The three parameters are `s16`. Nothing in this body can tell s16 from u16 --
  * PROMOTE_MODE emits the same `lsls #0x10; lsrs #0x10` for both (probed) and
  * the values only ever reach a `strb` -- so the evidence is entirely at the two
- * callers, sub_08025C98 and sub_08025CC8, which SIGN-extend all three before
+ * callers, sub_08025C98 and CreateUnitAt, which SIGN-extend all three before
  * the `bl`. `u16` here makes both of them emit `lsrs` instead.
  *
- * The `lsls #0x18; lsrs #0x18` on a3 is the conversion to sub_08025BE0's u8. */
+ * The `lsls #0x18; lsrs #0x18` on a3 is the conversion to InitUnit's u8. */
 
 struct Unk08499594 *sub_08025C5C(s16 a1, s16 a2, s16 a3)
 {
@@ -27,7 +27,7 @@ struct Unk08499594 *sub_08025C5C(s16 a1, s16 a2, s16 a3)
     if (u == NULL)
         return NULL;
 
-    sub_08025BE0(u, a3);
+    InitUnit(u, a3);
 
     u->unk02 = a1;
     u->unk03 = a2;
@@ -69,7 +69,7 @@ void *sub_08025C98(s16 a1, s16 a2, s16 a3)
  * Byte-neutral; re-verified.
  *
  * Named per Xenesis's AW2 Subroutine List: "Attempts to create a unit at the
- * input grid co-ordinates (r0 = x, r1 = y, r2 = UID)". The old sub_08025CC8
+ * input grid co-ordinates (r0 = x, r1 = y, r2 = UID)". The old CreateUnitAt
  * symbol is kept as a linker alias below so every other unit keeps
  * resolving it unchanged. */
 struct Unk08499594 *CreateUnitAt(s16 a1, s16 a2, s16 a3)

@@ -86,7 +86,7 @@ u8 sub_0805BA34(int x, int y, u16 *out)
                        & 0x1f] == 0)
         return 0;
 
-    unit = &gUnknown_08499594[gUnknown_030040D8->unk07[0]];
+    unit = &gUnits[gUnknown_030040D8->unk07[0]];
 
     best = 9999;
     out[0] = best;

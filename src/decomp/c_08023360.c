@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08023360.
- * sub_08023360 @ 0x08023360
+ * LoadGameplayGraphics @ 0x08023360
  */
 
 #include "hardware.h"
@@ -61,7 +61,7 @@ void LoadGameplayGraphics(int a)
 
     sub_08035568();
     sub_080116E8();
-    sub_080354FC();
+    LoadWeatherData();
     sub_08035020(gPlaySt.weather);
     sub_08022A34();
 

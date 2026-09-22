@@ -71,7 +71,7 @@ u8 sub_08074484(u8 *p, struct Unk030040D8 *a2, int a3)
             break;
 
         case 7:
-            if (p[1] != 0xFF && sub_0803CBD8(p[1]) != 0)
+            if (p[1] != 0xFF && IsCampaignCompletionFlagSet(p[1]) != 0)
             {
                 p = sub_08074570(p);
                 break;
@@ -108,12 +108,12 @@ u8 sub_08074484(u8 *p, struct Unk030040D8 *a2, int a3)
             break;
 
         case 2:
-            if (sub_0803CBD8(p[1]) == 0)
+            if (IsCampaignCompletionFlagSet(p[1]) == 0)
                 p = sub_08074570(p);
             break;
 
         case 3:
-            if (sub_0803CBD8(p[1]) != 0)
+            if (IsCampaignCompletionFlagSet(p[1]) != 0)
                 p = sub_08074570(p);
             break;
         }

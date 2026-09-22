@@ -126,7 +126,7 @@ void CoDesignC2_IDLE_080880BD(struct Unk80880BC * proc)
                 Div(COS_Q12(0) * 0x10, 0x100));
         }
 
-        sub_0801F34C(gUnknown_03005958[proc->unk58] + 0x3E, 0x220, 0x178, 0, 0);
+        DrawOamObject(gUnknown_03005958[proc->unk58] + 0x3E, 0x220, 0x178, 0, 0);
     }
 
     proc->unk4c++;

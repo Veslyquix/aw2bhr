@@ -11,7 +11,7 @@ void sub_080349E4(void)
 {
     u8 v;
 
-    if (sub_080348B4())
+    if (ShouldPromptCountryName())
         sub_0802BFA8();
 
     sub_08024584();

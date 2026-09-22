@@ -4,11 +4,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08034780.
- * sub_08034780 @ 0x08034780
+ * SetDefaultRules @ 0x08034780
  */
 
 /* Named per Xenesis's AW2 Subroutine List: "Sets the default rules (Used
- * for War Room, used to clear after a campaign map)". The old sub_08034780
+ * for War Room, used to clear after a campaign map)". The old SetDefaultRules
  * symbol is kept as a linker alias below so every other unit keeps
  * resolving it unchanged. */
 void SetDefaultRules(void)

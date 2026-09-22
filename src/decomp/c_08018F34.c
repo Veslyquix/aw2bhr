@@ -7,11 +7,11 @@
  * sub_08018F34 @ 0x08018F34, sub_08018F74 @ 0x08018F74, sub_08018FB4 @ 0x08018FB4
  */
 
-/* sub_08018BCC with sub_0803CBD8 in place of the node's own predicate; same
+/* sub_08018BCC with IsCampaignCompletionFlagSet in place of the node's own predicate; same
  * inverted arms and the same sub_08018BAC re-narrow. */
 s16 sub_08018F34(s16 a)
 {
-    if (sub_0803CBD8((s16)gUnknown_0200C528[a].unk04->unk08) != 0)
+    if (IsCampaignCompletionFlagSet((s16)gUnknown_0200C528[a].unk04->unk08) != 0)
         return sub_08018BAC(a);
     else
     {
@@ -23,7 +23,7 @@ s16 sub_08018F34(s16 a)
 /* sub_08018F34 with the predicate inverted. */
 s16 sub_08018F74(s16 a)
 {
-    if (sub_0803CBD8((s16)gUnknown_0200C528[a].unk04->unk08) == 0)
+    if (IsCampaignCompletionFlagSet((s16)gUnknown_0200C528[a].unk04->unk08) == 0)
         return sub_08018BAC(a);
     else
     {

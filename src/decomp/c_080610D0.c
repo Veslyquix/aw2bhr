@@ -12,7 +12,7 @@
  * The ONLY difference between this and the obvious spelling is where the
  * constant 0 shared by the two `strb`s is materialised, and it is worth one
  * callee-saved register: the ROM sets it with `movs r1, #0` AFTER the
- * sub_08025E08 call and pushes {r4, r5, lr}, while the plain version creates the
+ * BuyUnit call and pushes {r4, r5, lr}, while the plain version creates the
  * pseudo before the two intervening calls, so it has to live in r6 and the
  * function pushes {r4, r5, r6, lr}. Instruction count and size are identical
  * either way -- the 31 differing bytes are register numbers.
@@ -23,7 +23,7 @@
  * `unit->unk0a = unit->unk09 = 0;`, nor a `u8 z = 0;` local, nor swapping the
  * two stores, nor making `pos` a union moves it back.
  *
- * The `do { } while (0)` around the sub_08061178 store is what does move it
+ * The `do { } while (0)` around the PickWeightedAiUnit store is what does move it
  * (found by decomp-permuter): it ends the basic block before the
  * sub_080611D8 call, so the constant cannot be hoisted above it. It is
  * standing in for whatever the original had there -- a macro, most likely --
@@ -34,18 +34,18 @@ void sub_080610D0(void)
     struct Unk802C57C pos;
     struct Unk08499594 *unit;
 
-    if (sub_08042C9C(gUnknown_030033EC, gUnknown_030046C0.unk06) * 10
+    if (GetCoPriceMultiplier(gUnknown_030033EC, gUnknown_030046C0.unk06) * 10
             <= gPlayers[gUnknown_030033EC].funds
         && gUnknown_03004674 <= 0x3f)
     {
         do
         {
-            gUnknown_030046C0.unk07 = sub_08061178(gUnknown_030046C0.unk06 - 1);
+            gUnknown_030046C0.unk07 = PickWeightedAiUnit(gUnknown_030046C0.unk06 - 1);
         } while (0);
 
         if (sub_080611D8(&pos))
         {
-            unit = sub_08025E08(pos.unk00, pos.unk02, gUnknown_030046C0.unk06);
+            unit = BuyUnit(pos.unk00, pos.unk02, gUnknown_030046C0.unk06);
             unit->unk09 = 0;
             unit->unk0a = 0;
             unit->unk0b = gUnknown_030046C0.unk07;

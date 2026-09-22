@@ -34,7 +34,7 @@ void sub_0805FB70(void)
     if (v.pos.unk00 != 0x270F)
     {
         ((struct Unk5FB70Rec *)gUnknown_030040D8)->unk09_3 = 0;
-        u = &gUnknown_08499594[
+        u = &gUnits[
             gMap->unit[
                 gMap->rowOffset[v.pos.unk02]
                 + v.pos.unk00]];

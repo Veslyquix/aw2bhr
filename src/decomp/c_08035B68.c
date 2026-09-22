@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08035B68.
- * sub_08035B68 @ 0x08035B68
+ * GetUnitSpriteFormat @ 0x08035B68
  */
 
 /* Returns `void *` and not the `u32` this was first promoted as: the only

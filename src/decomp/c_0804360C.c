@@ -10,5 +10,5 @@
 void sub_0804360C(int a)
 {
     sub_080436DC(a, 3, gUnknown_030033EC);
-    sub_0804365C(a, 6);
+    DrawDaysRemaining(a, 6);
 }

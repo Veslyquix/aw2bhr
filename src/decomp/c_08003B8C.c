@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08003B8C.
- * sub_08003B8C @ 0x08003B8C
+ * GenerateRandomMap @ 0x08003B8C
  */
 
 #include "hardware.h"
@@ -30,7 +30,7 @@ void GenerateRandomMap(void)
     int i;
     int keys;
 
-    sub_08025E74();
+    ClearAllUnits();
     gActiveMap->unk13 = 0;
     MAP->width = 0x1E;
     MAP->height = 0x14;
@@ -42,32 +42,32 @@ void GenerateRandomMap(void)
     if (keys == (R_BUTTON | L_BUTTON))
     {
         sub_08004724();
-        sub_08003ED0();
+        FixAllShorelines();
     }
     else if (keys == L_BUTTON)
     {
         sub_080040C8();
-        sub_08003ED0();
+        FixAllShorelines();
     }
     else if (keys == R_BUTTON)
     {
         sub_0800449C();
-        sub_08003ED0();
+        FixAllShorelines();
     }
-    else if (DivRem(sub_080129E0(), 100) > 0x1D)
+    else if (DivRem(GetNextRandomNumber(), 100) > 0x1D)
     {
         sub_080040C8();
-        sub_08003ED0();
+        FixAllShorelines();
     }
     else
     {
         sub_0800449C();
-        sub_08003ED0();
+        FixAllShorelines();
     }
 
-    sub_080219AC();
-    sub_0800C8D8();
-    gActiveMap->propertyCount = sub_0800C874();
+    RecountArmyProperties();
+    RegisterArmyHqs();
+    gActiveMap->propertyCount = CountProperties();
 }
 
 asm(".global sub_08003B8C\n.thumb_set sub_08003B8C, GenerateRandomMap\n");

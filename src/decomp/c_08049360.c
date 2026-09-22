@@ -147,7 +147,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         if (gUnknown_084C30F8->unk028 < gUnknown_084C30F8->unk02c)
         {
             gUnknown_084C30F8->unk028 = gUnknown_084C30F8->unk02c;
-            sub_08017704(
+            TrySpendBattleMapPoints(
                 gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
                     .unk04);
             sub_08012BC8(gUnknown_08499578, 7, 0xf, 0x17, 4, 0);

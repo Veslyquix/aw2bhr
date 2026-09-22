@@ -17,17 +17,17 @@ void sub_0800C124(int x, int y)
 {
     struct ActiveMap *q;
 
-    if (sub_0800164C(x, y))
+    if (IsTerrainWater(x, y))
     {
         if (sub_08008C34(x, y))
             return;
-        if (sub_0800C840(x, y))
+        if (GetPropertyKindAt(x, y))
             sub_0800C608(x, y);
         q = gActiveMap;
         q->unk20 = gMap->tile[gMap->rowOffset[y] + x];
         sub_0800EC20(x, y);
-        sub_08001158(x, y, 0x2A);
-        sub_080011F4(x, y, 7);
+        MakeTileSimple(x, y, 0x2A);
+        SetTerrainAt(x, y, 7);
         sub_08007F9C(x, y);
     }
     else
@@ -35,11 +35,11 @@ void sub_0800C124(int x, int y)
         switch (gMap->terrain[gMap->rowOffset[y] + x])
         {
         case TERRAIN_SEA:
-            sub_08007CA0(x, y);
+            MakeSeaSafest(x, y);
             if (gMap->tile[gMap->rowOffset[y] + x] != 0x2A)
             {
-                sub_08001158(x, y, 0x2A);
-                sub_080011F4(x, y, 7);
+                MakeTileSimple(x, y, 0x2A);
+                SetTerrainAt(x, y, 7);
             }
             break;
 
@@ -50,5 +50,5 @@ void sub_0800C124(int x, int y)
             break;
         }
     }
-    sub_08008BB8(x, y);
+    EnsureValidTile(x, y);
 }

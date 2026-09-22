@@ -33,10 +33,10 @@ struct Unk33EC8Proc
  *
  * PROMOTION WARNING -- NON-CONSECUTIVE POOL WORDS. 0x08090D7C, 0x08090D80 and
  * 0x08090D8C are pool words of this one translation unit, but 0x08090D84 and
- * 0x08090D88 sitting between them belong to sub_080344F0 and sub_080345C8,
+ * 0x08090D88 sitting between them belong to sub_080344F0 and MapMainIdle,
  * which are promoted separately and reach them by name. split_rodata.py
  * requires a unit's claimed words to be CONSECUTIVE, so this unit and
- * sub_080346FC's may need to be carved or split together.
+ * ResetRulesAfterCampaignMap's may need to be carved or split together.
  *
  * Binding `gUnknown_0849BC30[proc->unk30[i]]` to `p` is load-bearing, and is
  * the same single fact as in sub_08033EC8: written inline the argument

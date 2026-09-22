@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08008928.
- * sub_08008928 @ 0x08008928, sub_08008A8C @ 0x08008A8C
+ * sub_08008928 @ 0x08008928, RemoveUnitAt @ 0x08008A8C
  */
 
 #include "hardware.h"
@@ -29,7 +29,7 @@ int sub_08008928(void)
 
     if (gActiveMap->unk24 == 0x19)
     {
-        if (sub_08008A8C(1, x, y))
+        if (RemoveUnitAt(1, x, y))
         {
             sub_08024268();
             result = 2;
@@ -37,7 +37,7 @@ int sub_08008928(void)
     }
     else
     {
-        v = sub_08008B70(x, y);
+        v = GetUnitTypeAt(x, y);
 
         if (v != gActiveMap->unk24)
         {
@@ -49,7 +49,7 @@ int sub_08008928(void)
             {
                 v = -1;
             }
-            else if (sub_08025308(gActiveMap->unk2f) > 0x31
+            else if (CountArmyUnits(gActiveMap->unk2f) > 0x31
                      && (v >> 6) + 1 != gActiveMap->unk2f)
             {
                 return -1;
@@ -70,10 +70,10 @@ int sub_08008928(void)
             if (q != -1)
             {
                 if (v > 0)
-                    sub_08008A8C(0, x, y);
+                    RemoveUnitAt(0, x, y);
 
-                if (sub_08025308(gActiveMap->unk2f) <= 0x31
-                    && sub_08025CC8(x, y, gActiveMap->unk24 & 0x3f))
+                if (CountArmyUnits(gActiveMap->unk2f) <= 0x31
+                    && CreateUnitAt(x, y, gActiveMap->unk24 & 0x3f))
                     result = 1;
             }
             else
@@ -101,7 +101,7 @@ int RemoveUnitAt(int mode, int x, int y)
 
     if (gMap->unit[idx] != 0)
     {
-        e = &gUnknown_08499594[gMap->unit[idx]];
+        e = &gUnits[gMap->unit[idx]];
 
         if (mode != 0)
         {

@@ -52,7 +52,7 @@ void sub_08064500(int a1, int a2)
         a2 = (gUnknown_0300060A + a2) / 2;
     }
 
-    sub_0801F34C(0x44, a1 & 0x1ff, a2 & 0xff, 0, 0);
+    DrawOamObject(0x44, a1 & 0x1ff, a2 & 0xff, 0, 0);
 
     gUnknown_03000604 = gGameClock;
     gUnknown_03000608 = a1;

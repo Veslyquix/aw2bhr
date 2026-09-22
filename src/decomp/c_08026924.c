@@ -74,7 +74,7 @@ void sub_08026924(void)
 
     for (i = 1; i <= 0xff; i++)
     {
-        if (gUnknown_08499594[i].unk00 != 0)
+        if (gUnits[i].unk00 != 0)
             sub_08025D20((i >> 6) + 1);
     }
 }

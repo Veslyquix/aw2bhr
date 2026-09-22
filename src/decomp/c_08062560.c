@@ -18,7 +18,7 @@ void sub_08062560(u16 a1, u8 a2)
 
     gUnknown_03004480 = a1;
     for (u = (a1 - 1) * 0x40; u < (a1 - 1) * 0x40 + 0x40; u++) {
-        e = &gUnknown_08499594[u];
+        e = &gUnits[u];
         if (e->unk00 == 0)
             continue;
         if ((gUnknown_085D5ABC[e->unk00].unk1c & a2) == 0)
@@ -31,13 +31,13 @@ void sub_08062560(u16 a1, u8 a2)
             continue;
         if ((u8)sub_08020DBC(gUnknown_03004480, e->unk02, e->unk03) == 0)
             continue;
-        if (sub_08042D50(gUnknown_030033EC, e->unk00) == 1) {
+        if (GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, e->unk00) == 1) {
             gUnknown_030013EC(e->unk02, e->unk03, e->unk00,
-                              sub_08042D1C(gUnknown_030033EC, e->unk00), -1);
+                              GetUnitMovementWithCoBonus(gUnknown_030033EC, e->unk00), -1);
             sub_0801FD9C(0x79);
         } else {
             gUnknown_030013EC(e->unk02, e->unk03, 0x10,
-                              sub_08042D50(gUnknown_030033EC, e->unk00), 0);
+                              GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, e->unk00), 0);
         }
         for (y = 0; y < gMap->height; y++) {
             for (x = 0; x < gMap->width; x++) {

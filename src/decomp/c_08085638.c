@@ -9,7 +9,7 @@
 
 int sub_08085638(int a1, int a2)
 {
-    switch (sub_08043190(gPlayers[a1].co, gPlayers[a1].coMode, a2))
+    switch (GetCoMovementBonus(gPlayers[a1].co, gPlayers[a1].coMode, a2))
     {
     case -1:
         return 0x95;
@@ -28,7 +28,7 @@ int sub_08085638(int a1, int a2)
 
 int sub_080856A0(int a1, int a2)
 {
-    switch (sub_08043200(gPlayers[a1].co, gPlayers[a1].coMode, a2))
+    switch (GetCoRangeBonus(gPlayers[a1].co, gPlayers[a1].coMode, a2))
     {
     case -1:
         return 0x95;

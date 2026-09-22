@@ -10,7 +10,7 @@
 /* Orders two units for a queue: by the cell column unk02 first, then by the
  * low seven bits of their army's gPlayers record.
  *
- * `(p - gUnknown_08499594) >> 6` is the matched sub_0804203C's army idiom --
+ * `(p - gUnits) >> 6` is the matched sub_0804203C's army idiom --
  * exact division by the 0x0c stride (`mul 0x55555555; neg; asr #2`) with the
  * `>> 6` merged into the single `asr #8`. The `+ 1` then indexes
  * gPlayers ONE-BASED, which is what puts the member at a runtime
@@ -30,8 +30,8 @@ int sub_08041D40(struct Unk08499594 *a, struct Unk08499594 *b)
     if (a->unk02 != b->unk02)
         return 0;
 
-    if ((gPlayers[((a - gUnknown_08499594) >> 6) + 1].hqX & 0x7f)
-     <= (gPlayers[((b - gUnknown_08499594) >> 6) + 1].hqX & 0x7f))
+    if ((gPlayers[((a - gUnits) >> 6) + 1].hqX & 0x7f)
+     <= (gPlayers[((b - gUnits) >> 6) + 1].hqX & 0x7f))
         return 0;
 
     return 1;

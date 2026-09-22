@@ -138,7 +138,7 @@ int sub_0800FD44(int x, int y, int a3)
 
     if (a3 == 0
      && (u16)(MAP->tile[MAP->rowOffset[y] + x] - 0x162) <= 1)
-        return sub_08010604(x, y);
+        return GetSeamType(x, y);
 
     if (sub_0800F8D4(x, y))
         return MAP->tile[MAP->rowOffset[y] + x];

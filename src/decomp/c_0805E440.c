@@ -58,7 +58,7 @@ void sub_0805E440(void)
                 continue;
             if (sub_0804236C(x, y) == 0)
                 continue;
-            u = gUnknown_08499594 + id;
+            u = gUnits + id;
             if (u->unk04_0 != 0)
             {
                 if (Div(u->unk04_0 - 1, 10) == 9)
@@ -112,8 +112,8 @@ void sub_0805E5AC(void)
                 continue;
             if (gMap->unit[gMap->rowOffset[y] + x] != 0)
             {
-                u = gUnknown_08499594 + (id = gMap->unit[gMap->rowOffset[y] + x]);
-                if (sub_08026F9C(gUnknown_03003F38, u - gUnknown_08499594) == 0)
+                u = gUnits + (id = gMap->unit[gMap->rowOffset[y] + x]);
+                if (sub_08026F9C(gUnknown_03003F38, u - gUnits) == 0)
                 {
                     if (u->unk00 == 1)
                         sub_0805D648(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, 2, 0, 0);

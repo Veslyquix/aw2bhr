@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803670C.
- * sub_0803670C @ 0x0803670C, sub_0803678C @ 0x0803678C, sub_08036884 @ 0x08036884, sub_080368E8 @ 0x080368E8, sub_08036944 @ 0x08036944, sub_080369BC @ 0x080369BC, sub_08036A50 @ 0x08036A50, sub_08036AB8 @ 0x08036AB8
+ * sub_0803670C @ 0x0803670C, UpdateFuelAmmoGraphics @ 0x0803678C, sub_08036884 @ 0x08036884, sub_080368E8 @ 0x080368E8, sub_08036944 @ 0x08036944, sub_080369BC @ 0x080369BC, sub_08036A50 @ 0x08036A50, sub_08036AB8 @ 0x08036AB8
  */
 
 #include "hardware.h"
@@ -40,7 +40,7 @@ void sub_0803670C(void)
 
 /* Named per Xenesis's AW2 Subroutine List: "Subroutine for fuel/ammo
  * graphics updates. Updates on Frame 0, 20, 40" -- matches the switch below
- * exactly (0x14=20, 0x28=40). The old sub_0803678C symbol is kept as a
+ * exactly (0x14=20, 0x28=40). The old UpdateFuelAmmoGraphics symbol is kept as a
  * linker alias below so every other unit keeps resolving it unchanged. */
 void UpdateFuelAmmoGraphics(void)
 {
@@ -171,7 +171,7 @@ void sub_080369BC(void)
         if (gUnknown_03003F3C != 0)
         {
             if (gUnknown_03003F3C == 1)
-                sub_080345C8();
+                MapMainIdle();
         }
 
         sub_08015954();

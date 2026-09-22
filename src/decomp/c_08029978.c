@@ -24,7 +24,7 @@ int sub_08029978(struct Unk08499594 *p, u8 a2)
             if (gPlayers[gUnknown_030033EC].funds < v)
                 break;
 
-            sub_08025B28(gUnknown_030033EC, v);
+            SubtractPlayerFunds(gUnknown_030033EC, v);
         }
 
         acc += v;
@@ -49,7 +49,7 @@ int sub_08029A48(struct Unk08499594 *p, u8 a2)
             if (gPlayers[gUnknown_030033EC].funds < v)
                 break;
 
-            sub_08025B28(gUnknown_030033EC, v);
+            SubtractPlayerFunds(gUnknown_030033EC, v);
         }
 
         acc += v;

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08060DAC.
- * sub_08060DAC @ 0x08060DAC
+ * AiBuildPropertyList @ 0x08060DAC
  */
 
 #include "map.h"

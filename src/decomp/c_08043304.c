@@ -8,10 +8,10 @@
  */
 
 /* The pointer parameter's +0x00 is a `struct Unk08499594 *` into the unit
- * table and +0x06 an s16.  `(p->unk00 - gUnknown_08499594) >> 6` is the
+ * table and +0x06 an s16.  `(p->unk00 - gUnits) >> 6` is the
  * 0-based army number -- the table is grouped 64 entries to an army, the same
  * `>> 6` unknown-globals.h already records -- and the `+ 1` makes it the
- * 1-based one sub_08043050 indexes by.  The whole `sub/lsl/add/neg/asr #8`
+ * 1-based one GetPlayerSpecialAbilities indexes by.  The whole `sub/lsl/add/neg/asr #8`
  * chain is agbcc's EXACT division for the pointer difference (multiply by
  * -inverse(3), negate, then one `asr` that carries both the /4 of the exact
  * division and the >> 6) -- it is one operator, not five.
@@ -25,7 +25,7 @@ struct Unk43304
 
 int sub_08043304(struct Unk43304 *p)
 {
-    if ((sub_08043050(((p->unk00 - gUnknown_08499594) >> 6) + 1) & 0x20) == 0)
+    if ((GetPlayerSpecialAbilities(((p->unk00 - gUnits) >> 6) + 1) & 0x20) == 0)
         return p->unk06;
 
     return p->unk06 * 2;
@@ -35,7 +35,7 @@ int sub_0804334C(struct Unk43304 *p)
 {
     int r;
 
-    if (sub_08043050(((p->unk00 - gUnknown_08499594) >> 6) + 1) & 0x40)
+    if (GetPlayerSpecialAbilities(((p->unk00 - gUnits) >> 6) + 1) & 0x40)
         r = p->unk06;
     else
         r = 0;
@@ -45,5 +45,5 @@ int sub_0804334C(struct Unk43304 *p)
 
 int sub_0804338C(struct Unk43304 *p)
 {
-    return sub_08042FFC(((p->unk00 - gUnknown_08499594) >> 6) + 1);
+    return GetPlayerCoCounterattackBonus(((p->unk00 - gUnits) >> 6) + 1);
 }

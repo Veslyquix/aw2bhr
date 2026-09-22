@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08023BAC.
- * sub_08023BAC @ 0x08023BAC
+ * BlitMapRow @ 0x08023BAC
  */
 
 /* The wrap at the loop bottom is TWO statements, and that is the whole reason

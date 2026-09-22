@@ -19,7 +19,7 @@ void sub_0806D050(int a1, int a2)
         a2 = (gUnknown_0300061E + a2) / 2;
     }
 
-    sub_0801F34C(0x44, a1 & 0x1ff, a2 & 0xff, 0, 0);
+    DrawOamObject(0x44, a1 & 0x1ff, a2 & 0xff, 0, 0);
 
     gUnknown_03000618 = gGameClock;
     gUnknown_0300061C = a1;
@@ -30,13 +30,13 @@ void sub_0806D0D8(struct Unk08580934_Obj *obj)
 {
     obj->unk4c(obj);
 
-    sub_0801F34C(0xc8 - Div(obj->unk2a - 0x18, 8), obj->unk28 & 0x1ff,
+    DrawOamObject(0xc8 - Div(obj->unk2a - 0x18, 8), obj->unk28 & 0x1ff,
         (obj->unk2a - 8) & 0xff, 0, 0);
 
     if (obj->unk46 == 0)
-        sub_0801F34C(0xd8 - Div(obj->unk2a - 0x18, 8), obj->unk28 & 0x1ff,
+        DrawOamObject(0xd8 - Div(obj->unk2a - 0x18, 8), obj->unk28 & 0x1ff,
             obj->unk2a & 0xff, 0, 3);
     else
-        sub_0801F34C(0xd8 - Div(obj->unk2a - 0x18, 8), (obj->unk28 - 0x10) & 0x1ff,
+        DrawOamObject(0xd8 - Div(obj->unk2a - 0x18, 8), (obj->unk28 - 0x10) & 0x1ff,
             ((obj->unk2a - 0x10) & 0xff) | 0x300, 0, 3);
 }

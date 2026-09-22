@@ -57,7 +57,7 @@ void sub_080360D0(ProcPtr procArg)
             if (gPlaySt.savingEnabled != 0
                 && gUnknown_030032D8 != 0x13
                 && (u8)sub_0805C974() == 0)
-                sub_08034534(2, proc->unk30 - gUnknown_08499594, 0, 0);
+                sub_08034534(2, proc->unk30 - gUnits, 0, 0);
             return;
 
         case 4:

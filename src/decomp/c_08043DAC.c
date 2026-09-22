@@ -33,7 +33,7 @@ int sub_08043DAC(u8 a)
     {
     case 0:
     default:
-        sub_0803B4EC((s16)sub_08043D84(a));
+        sub_0803B4EC((s16)GetCoMusic(a));
         break;
     case 1:
         sub_08043DF4(gPlayers[a].co);

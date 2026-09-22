@@ -14,8 +14,8 @@ void sub_08003814(void)
 
     x = gActiveMap->unk3e == 0 ? 2 : 0xCE;
     t = x & 0x1FF;
-    sub_0801F34C(0x91, t, 0xE, 0, 0);
-    sub_0801F34C(0x90, t, 0x18, 0, 0);
+    DrawOamObject(0x91, t, 0xE, 0, 0);
+    DrawOamObject(0x90, t, 0x18, 0, 0);
     t = (x + 0x18) & 0x1FF;
     sub_0802BD54(t, 0xE, gActiveMap->cursorX + 1);
     sub_0802BD54(t, 0x18, gActiveMap->cursorY + 1);
@@ -60,7 +60,7 @@ void sub_08003890(void)
     if (v > -3)
     {
         t = gActiveMap->unk3e == 0 ? 0x20 : 0xD0;
-        sub_0801F34C(0x8E, (t - 0x20) & 0x1FF,
+        DrawOamObject(0x8E, (t - 0x20) & 0x1FF,
                      (u8)gActiveMap->unk42, 0, 0);
         sub_08003814();
     }

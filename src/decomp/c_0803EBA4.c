@@ -41,7 +41,7 @@ void sub_0803EBA4(struct Unk3EBA4Proc *proc)
     p = gUnknown_03003338;
     for (i = 0; p[i].unk00 == 0; i++)
         ;
-    u = &gUnknown_08499594[p[i].unk00];
+    u = &gUnits[p[i].unk00];
     if (p[proc->unk4c].unk00 != 0)
         return;
     switch (p[proc->unk4c].unk02)

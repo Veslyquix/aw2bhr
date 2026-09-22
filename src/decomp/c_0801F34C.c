@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801F34C.
- * sub_0801F34C @ 0x0801F34C
+ * DrawOamObject @ 0x0801F34C
  */
 
 /* Finds the gUnknown_0200F920 entry for tile id a1 and draws it as a sprite.

@@ -48,7 +48,7 @@ int sub_08058BB4(u16 id, u16 * out)
     int mask;
     int sentinel;
 
-    u = &gUnknown_08499594[id];
+    u = &gUnits[id];
     best = 0;
     mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     sentinel = 0x270F;
@@ -242,7 +242,7 @@ void sub_08058E88(int x, int y, u16 * out)
  * the just-stored value through CSE and only has to re-apply the QImode
  * truncation, which is the `lsls #0x18; lsrs #0x18` pair the ROM carries. A
  * separate local would have needed its own truncation at the store as well.
- * gUnknown_030040D8->unk00 is read once and CSEd into sub_08042D1C's second
+ * gUnknown_030040D8->unk00 is read once and CSEd into GetUnitMovementWithCoBonus's second
  * argument, which is why r2 survives the stride multiply.
  *
  * MATCHED first draft. */
@@ -256,7 +256,7 @@ void sub_08058F30(u8 * out)
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 7)
         return;
 
-    *out = sub_08042D1C(gUnknown_030033EC, gUnknown_030040D8->unk00)
+    *out = GetUnitMovementWithCoBonus(gUnknown_030033EC, gUnknown_030040D8->unk00)
          * gUnknown_085766E0->unk0e;
 
     if (*out > 0x78)

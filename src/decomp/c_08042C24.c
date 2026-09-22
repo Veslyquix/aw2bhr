@@ -4,12 +4,12 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08042C24.
- * sub_08042C24 @ 0x08042C24, sub_08042C68 @ 0x08042C68, sub_08042C9C @ 0x08042C9C, sub_08042CD4 @ 0x08042CD4, sub_08042CF8 @ 0x08042CF8, sub_08042D1C @ 0x08042D1C, sub_08042D50 @ 0x08042D50, sub_08042D84 @ 0x08042D84
+ * sub_08042C24 @ 0x08042C24, sub_08042C68 @ 0x08042C68, GetCoPriceMultiplier @ 0x08042C9C, GetUnitAttackWithCoBonus @ 0x08042CD4, GetUnitDefenceWithCoBonus @ 0x08042CF8, GetUnitMovementWithCoBonus @ 0x08042D1C, GetUnitFiringRangeWithCoBonus @ 0x08042D50, GetUnitVisionWithCoBonus @ 0x08042D84
  *
- * sub_08042C9C, sub_08042D1C, sub_08042D50 and sub_08042D84 are named per
+ * GetCoPriceMultiplier, GetUnitMovementWithCoBonus, GetUnitFiringRangeWithCoBonus and GetUnitVisionWithCoBonus are named per
  * Xenesis's AW2 Subroutine List: "Gathers Price multipliers of CO",
  * "Collects Mov Range + CO Boosts", "Collects Max Firing Range + CO Boosts"
- * and "Gathers Vision Total of CO" respectively. sub_08042CD4/sub_08042CF8
+ * and "Gathers Vision Total of CO" respectively. GetUnitAttackWithCoBonus/GetUnitDefenceWithCoBonus
  * aren't separately cited there, but they're structurally identical to the
  * cited Mov/Range/Vision trio one function over (base stat + CO bonus, same
  * `+ 0x64` bias), so they're named by that analogy: attack and defence are
@@ -78,7 +78,7 @@ int sub_08042C68(int a, int b)
     hi = 3;
     lo = 2;
 
-    if ((sub_08043050(a) & 0x80) != 0
+    if ((GetPlayerSpecialAbilities(a) & 0x80) != 0
         && gUnknown_085D5ABC[b].unitClass <= hi
         && gUnknown_085D5ABC[b].unitClass >= lo)
         return -2;

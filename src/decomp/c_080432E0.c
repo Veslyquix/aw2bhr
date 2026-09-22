@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080432E0.
- * sub_080432E0 @ 0x080432E0
+ * GetUnitCombatClassColumn @ 0x080432E0
  *
  * Not itself Xenesis-documented, but named for what its caller
  * (GetCoAttackBonus and siblings, src/decomp/c_080430B0.c) uses it for:

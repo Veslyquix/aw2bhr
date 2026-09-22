@@ -22,7 +22,7 @@ void sub_08044994(struct Unk8044994 *proc)
 
     if (proc->unk66 > 0)
     {
-        e = &gUnknown_08499594[proc->unk66];
+        e = &gUnits[proc->unk66];
         col = e->unk02;
         row = e->unk03;
 

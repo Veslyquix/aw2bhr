@@ -17,7 +17,7 @@
  * the measurement; a binding statement moves the constant's `ldr` ahead of the
  * `and` and swaps the two pool words.
  *
- * `gUnknown_08499594 + id` AND NOT `&gUnknown_08499594[id]`, and this is the
+ * `gUnits + id` AND NOT `&gUnits[id]`, and this is the
  * whole remaining difference between the two spellings. Both emit seven
  * instructions and the same *12 shift-add chain, but the ADDR_EXPR form
  * expands the array base first, so the pointer load lands immediately after
@@ -70,7 +70,7 @@ void sub_0805DA84(void)
     if (pos.x == 0x270F)
         return;
 
-    u = (struct Unk5DA84 *)(gUnknown_08499594 + id);
+    u = (struct Unk5DA84 *)(gUnits + id);
     u->unk09_0 = 0;
 
     sub_0805D648(pos.x, pos.y, 6, id, 0);

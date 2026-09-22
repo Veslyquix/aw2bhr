@@ -15,25 +15,25 @@ void sub_0800AF24(int x, int y)
     if (y > 0)
     {
         int n = y - 1;
-        if (sub_0800119C(x, n, 3))
-            sub_0800B048(x, n);
+        if (IsTerrainAtCoordsType(x, n, 3))
+            MakeMountain(x, n);
     }
 
     if (y < MAP->height - 1)
     {
         int n = y + 1;
-        if (sub_0800119C(x, n, 3))
-            sub_0800B048(x, n);
+        if (IsTerrainAtCoordsType(x, n, 3))
+            MakeMountain(x, n);
     }
 }
 
 void sub_0800AF74(int x, int y)
 {
-    if (sub_0800168C(x, y) == 0)
-        sub_080011F4(x, y, 1);
+    if (IsTerrainWaterOrRiver(x, y) == 0)
+        SetTerrainAt(x, y, 1);
 
-    sub_080011F4(x, y, 3);
-    sub_0800B048(x, y);
+    SetTerrainAt(x, y, 3);
+    MakeMountain(x, y);
     sub_0800A588(x, y);
     sub_0800ABD0(x, y);
     sub_08007F9C(x, y);

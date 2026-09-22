@@ -29,7 +29,7 @@ void sub_08021D10(void)
 
     for (y = 0; y <= 0xf; y++)
     {
-        sub_08023BAC((u16)((gMap->scrollX >> 4) - gMap->camX),
+        BlitMapRow((u16)((gMap->scrollX >> 4) - gMap->camX),
                      (u16)(y + ((gMap->scrollY >> 4) - gMap->camY)),
                      (u16)(gMap->scrollX >> 4),
                      (u16)(y + (gMap->scrollY >> 4)));

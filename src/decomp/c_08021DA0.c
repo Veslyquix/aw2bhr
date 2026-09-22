@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08021DA0.
- * sub_08021DA0 @ 0x08021DA0
+ * LoadRiverAnimFrame @ 0x08021DA0
  */
 
 #include "hardware.h"

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0802150C.
- * sub_0802150C @ 0x0802150C
+ * InitGameSettings @ 0x0802150C
  */
 
 /* The between-maps reset: seventeen globals cleared or seeded, with four
@@ -41,7 +41,7 @@ void InitGameSettings(void)
     gUnknown_03004080 = 1;
     gUnknown_030030F8 = 0;
 
-    sub_08025E74();
+    ClearAllUnits();
     sub_0803DE68();
 }
 

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0805ECD8.
- * sub_0805ECD8 @ 0x0805ECD8
+ * AiDoNothing @ 0x0805ECD8
  */
 
 void AiDoNothing(void)

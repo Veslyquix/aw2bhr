@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08009F10.
- * sub_08009F10 @ 0x08009F10
+ * MakeRiver @ 0x08009F10
  */
 
 #define MAP gMap
@@ -31,18 +31,18 @@ fail:
                 goto fail;
             if ((a & 0xfe00) == 0x4000)
             {
-                sub_080011F4(x, y, 2);
-                sub_08001158(x, y, b);
+                SetTerrainAt(x, y, 2);
+                MakeTileSimple(x, y, b);
             }
             if ((a & 0xfe00) == 0x2000)
             {
-                sub_080011F4(x, y, 2);
-                sub_08001158(x, y, b);
+                SetTerrainAt(x, y, 2);
+                MakeTileSimple(x, y, b);
             }
             if ((a & 0xfe00) == 0)
             {
-                sub_080011F4(x, y, 2);
-                sub_08001158(x, y, b);
+                SetTerrainAt(x, y, 2);
+                MakeTileSimple(x, y, b);
             }
             goto placed;
         }
@@ -61,8 +61,8 @@ fail:
             goto fail;
     }
 
-    sub_080011F4(x, y, 2);
-    sub_08001158(x, y, a);
+    SetTerrainAt(x, y, 2);
+    MakeTileSimple(x, y, a);
 
 placed:
     sub_0800A588(x, y);
@@ -72,10 +72,10 @@ placed:
     if (y > 0)
     {
         int ny = y - 1;
-        if (sub_0800119C(x, ny, 1))
+        if (IsTerrainAtCoordsType(x, ny, 1))
         {
-            sub_08001158(x, ny, 1);
-            sub_08007D70(x, ny);
+            MakeTileSimple(x, ny, 1);
+            MakeForestSimple(x, ny);
             if (MAP->terrain[MAP->rowOffset[y] + x] == 3)
                 sub_0800AF74(x, y);
         }
@@ -83,8 +83,8 @@ placed:
     if (y < MAP->height - 1)
     {
         int ny = y + 1;
-        if (sub_0800119C(x, ny, 1))
-            sub_08007F14(x, ny, 1);
+        if (IsTerrainAtCoordsType(x, ny, 1))
+            MakeTile2(x, ny, 1);
     }
 
     sub_08007F9C(x, y);

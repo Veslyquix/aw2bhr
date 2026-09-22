@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800CF28.
- * sub_0800CF28 @ 0x0800CF28
+ * MakeForest @ 0x0800CF28
  */
 
 /* The full "a cell changed" refresh, and the widest of the family: it is
@@ -30,20 +30,20 @@ void MakeForest(int x, int y)
 {
     int off;
 
-    if (sub_0800C840(x, y))
+    if (GetPropertyKindAt(x, y))
     {
         sub_0800C608(x, y);
-        sub_080011F4(x, y, 1);
+        SetTerrainAt(x, y, 1);
     }
 
     off = MAP->rowOffset[y] + x;
 
     if (MAP->tile[off] == 0x86 || MAP->tile[off] == 0x87 || MAP->terrain[off] != 4)
     {
-        sub_0800CEF8(x, y);
-        sub_080011F4(x, y, 4);
-        sub_08007F14(x, y, 0x87);
-        sub_08007D70(x, y);
+        RepaintTileRight(x, y);
+        SetTerrainAt(x, y, 4);
+        MakeTile2(x, y, 0x87);
+        MakeForestSimple(x, y);
     }
 
     sub_0800CFDC(x, y);

@@ -15,7 +15,7 @@
  * between this and a candidate that is otherwise instruction-exact. Both arms
  * end in the same commit-and-return block, so agbcc reverses a condition
  * written the natural way round -- the same reordering that decided
- * sub_0802F408 and sub_080261E8 this wave. Spelling the test to match the
+ * sub_0802F408 and IsNeotanksUnlocked this wave. Spelling the test to match the
  * ROM's `beq` puts the `== 1` arm inline where the ROM has it.
  *
  * `gUnknown_0808E5A8` is agbcc's -fforce-addr address constant for gpKeySt

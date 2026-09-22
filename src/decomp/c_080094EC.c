@@ -8,7 +8,7 @@
  * sub_080094EC @ 0x080094EC
  */
 
-/* Same screen-struct address computation as sub_08001158, reading the tile
+/* Same screen-struct address computation as MakeTileSimple, reading the tile
  * instead of writing it. The two 0xFC/0xFD tests merge into the unsigned
  * range compare `t - 0xfc <= 1`; 0x11C/0x11D stay separate because they are
  * materialised by `movs #0x8e; lsls #1` and then `adds #1`.

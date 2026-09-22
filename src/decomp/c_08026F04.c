@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08026F04.
- * sub_08026F04 @ 0x08026F04
+ * AddPlayerIncomeToFunds @ 0x08026F04
  *
  * Named per Xenesis's AW2 Datasheet: "Loads a player's current income and
  * adds it to the player's current funds." The old sub_XXXXXXXX symbol is
