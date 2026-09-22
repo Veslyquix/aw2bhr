@@ -40,6 +40,8 @@ gPlaySt = gUnknown_03003FC0;
 gActiveMap = gUnknown_0200B0B0;
 gDesignRing = gUnknown_0200B0D0;
 gSmoothScroll = gUnknown_03000640;
+gOamTransferTail = gUnknown_03000268;
+gOamTransferHead = gUnknown_03000278;
 
 /* gPlayers: the five-entry per-army record array (struct PlayerStruct,
  * 0x3c each, based at 0x02023284); SRR_AW2's Definitions.s names the

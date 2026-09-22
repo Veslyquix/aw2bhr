@@ -1527,18 +1527,15 @@ extern u8 gUnknown_086145E7[];
  */
 extern const struct ProcCmd gUnknown_08614410[];
 
-/* 0x03000278 -- a pending DMA/CpuFastSet descriptor. sub_0801BB88 fills it
- * with src = gUnknown_03002520 (the OAM shadow), dst = 0x07000000 (OAM),
- * unk08 = 0 and unk0a = a halfword count; sub_0801BC08 skips the copy when
- * unk0a is zero and otherwise does CpuFastSet(unk00, unk04, unk0a << 1).
- * The neighbour gUnknown_03000268 is a second descriptor of the same shape.
+/* Pending OAM transfer descriptor. sub_0801BB88 splits the OAM shadow at an
+ * object index, filling one descriptor for each side of the split.
  */
-struct Unk03000278 /* 0x0c */
+struct OamTransfer /* 0x0c */
 {
-    /* 0x00 */ void *unk00;
-    /* 0x04 */ void *unk04;
-    /* 0x08 */ u16 unk08;
-    /* 0x0a */ u16 unk0a;
+    /* 0x00 */ void *src;
+    /* 0x04 */ void *dst;
+    /* 0x08 */ u16 oamOffset;
+    /* 0x0a */ u16 objectCount;
 };
 
 /* 0x03000288 -- 16 entries of stride 0x2c. sub_0801C6E8 scans unk00 for a
@@ -5810,12 +5807,11 @@ extern u16 gUnknown_03000040;
  * function, so they are two scalars rather than one aggregate. */
 extern u16 gUnknown_03000044;
 extern u16 gUnknown_03000046;
-/* The second of the two DMA/CpuFastSet descriptors -- sub_0801BB88 fills both
- * in one go, splitting the OAM shadow at object `a`: 03000278 gets
- * (shadow, OAM, 0, a) and 03000268 gets (shadow + a*8, OAM + a*8, a*8, 0x80-a).
- * Same shape as struct Unk03000278, hence the shared type. */
-extern struct Unk03000278 gUnknown_03000268;
-extern struct Unk03000278 gUnknown_03000278;
+/* sub_0801BB88 fills both in one go, splitting the OAM shadow at object `a`:
+ * the head gets (shadow, OAM, 0, a), while the tail gets
+ * (shadow + a*8, OAM + a*8, a*8, 0x80-a). */
+extern struct OamTransfer gOamTransferTail;
+extern struct OamTransfer gOamTransferHead;
 extern struct Unk03000288 gUnknown_03000288[];
 /* Serial/link block, all four plain 32-bit words -- every access in the ROM is
  * `ldr`/`str`, and none of them is a bitfield: sub_0802EAFC clears the low two
@@ -15930,8 +15926,8 @@ extern int gUnknown_0300005C;
 
 /* 0x03002F2C / 0x0300141C / 0x030030D4 -- latches recording the source of the
  * most recent OAM flush. sub_0801BBC4 and sub_0801BCA8 store
- * gUnknown_03000268.unk00 into 0x03002F2C and gUnknown_03002520 (the OAM
- * shadow) into 0x030030D4; sub_0801BC08 stores gUnknown_03000278.unk00 into
+ * gOamTransferTail.src into 0x03002F2C and gUnknown_03002520 (the OAM
+ * shadow) into 0x030030D4; sub_0801BC08 stores gOamTransferHead.src into
  * 0x0300141C. A plain word `str` of a pointer in every case. Nothing in this
  * block READS any of the three, so `void *` records the store width plus the
  * one thing the stored value is known to be, and no more. */
