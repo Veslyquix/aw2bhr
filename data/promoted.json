@@ -4377,6 +4377,15 @@
   "size": 88
  },
  {
+  "file": "src/decomp/c_08018100.c",
+  "obj": "src/decomp/c_08018100.o",
+  "addr_hex": "0x08018100",
+  "functions": [
+   "sub_08018100"
+  ],
+  "size": 92
+ },
+ {
   "file": "src/decomp/c_0801815C.c",
   "obj": "src/decomp/c_0801815C.o",
   "addr_hex": "0x0801815C",
