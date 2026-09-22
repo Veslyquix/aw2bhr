@@ -61,7 +61,7 @@ void IntroT0_IDLE_080675A1(struct Unk675A0Proc *proc)
     gDispIo.disp_ct.forced_blank = 1;
 
     sub_080638D0(0);
-    Proc_EndEach(gUnknown_08581500);
+    Proc_EndEach(ProcScr_IntroT3);
 
     if (proc->unk64 != 0)
     {

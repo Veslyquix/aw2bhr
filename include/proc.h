@@ -103,6 +103,10 @@ enum
 
 #define PROC_YIELD                        PROC_SLEEP(0)
 
+extern struct ProcCmd ProcScr_IntroT0[];
+extern struct ProcCmd ProcScr_IntroT3Child[];
+extern struct ProcCmd ProcScr_IntroT3[];
+
 #define PROC_HEADER                                                                        \
     const struct ProcCmd * proc_script; /* pointer to proc script */                        \
     const struct ProcCmd * proc_scrCur; /* pointer to currently executing script command */ \

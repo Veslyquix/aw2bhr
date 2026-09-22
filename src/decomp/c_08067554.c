@@ -69,3 +69,19 @@ void IntroT0_IDLE_08067565(struct Unk67564Proc *proc)
 
 asm(".global sub_08067554\n.thumb_set sub_08067554, IntroT0_08067555\n"
     ".global sub_08067564\n.thumb_set sub_08067564, IntroT0_IDLE_08067565\n");
+
+extern void IntroT0_IDLE_080675A1(void);
+extern void IntroT0_08067629(void);
+
+struct ProcCmd CONST_DATA ProcScr_IntroT0[] =
+{
+    PROC_CALL(IntroT0_08067555),
+    PROC_REPEAT(IntroT0_IDLE_08067565),
+    PROC_REPEAT(IntroT0_IDLE_080675A1),
+    PROC_SLEEP(36),
+    PROC_LABEL(0),
+    PROC_CALL(IntroT0_08067629),
+    PROC_END,
+};
+
+asm(".global gUnknown_08580F24\n.set gUnknown_08580F24, ProcScr_IntroT0\n");

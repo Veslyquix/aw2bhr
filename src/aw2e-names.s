@@ -39,7 +39,7 @@
 	.global SoundRoom
 	.set SoundRoom, 0x0849EAAC
 	.global IntroT3_IDLE_08068A01
-	.set IntroT3_IDLE_08068A01, 0x08068A00
+	.set IntroT3_IDLE_08068A01, 0x08068A01
 	.global IntroT3_Child
 	.set IntroT3_Child, 0x08580FCC
 	.global TitleT0_0806C9B5

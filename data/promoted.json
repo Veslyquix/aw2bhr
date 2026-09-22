@@ -23869,7 +23869,14 @@
    "sub_08067554",
    "sub_08067564"
   ],
-  "size": 76
+  "size": 76,
+  "rodata": [
+   {
+    "addr": "0x08580F24",
+    "size": "0x38",
+    "sect": ".data"
+   }
+  ]
  },
  {
   "file": "src/decomp/c_080675A0.c",
@@ -23896,7 +23903,14 @@
   "functions": [
    "sub_08067638"
   ],
-  "size": 88
+  "size": 88,
+  "rodata": [
+   {
+    "addr": "0x08580FCC",
+    "size": "0x18",
+    "sect": ".data"
+   }
+  ]
  },
  {
   "file": "src/decomp/c_08067690.c",
@@ -24264,7 +24278,14 @@
    "sub_080688A8",
    "sub_080688C8"
   ],
-  "size": 60
+  "size": 60,
+  "rodata": [
+   {
+    "addr": "0x08581500",
+    "size": "0xC0",
+    "sect": ".data"
+   }
+  ]
  },
  {
   "file": "src/decomp/c_080688E4.c",

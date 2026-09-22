@@ -19,7 +19,7 @@ void MainMenu2_0806A455(void)
 {
     sub_0803B588();
     gUnknown_0202F204 = 0;
-    Proc_Start(gUnknown_08581500, PROC_TREE_3);
+    Proc_Start(ProcScr_IntroT3, PROC_TREE_3);
 }
 
 asm(".global sub_0806A454\n.thumb_set sub_0806A454, MainMenu2_0806A455\n");
