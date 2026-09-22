@@ -15,7 +15,7 @@
 #include "proc.h"
 /* The menu-input half of the 0x080819A0-0x08084974 block, and the caller of the
  * dispatcher promoted in src/decomp/c_080824D4.c. It runs only while the proc
- * is idle (`unk4e == 0 && unk6a == 0` and no gUnknown_084892C4 proc alive) and
+ * is idle (`unk4e == 0 && unk6a == 0` and no ProcScr_DesignRoomLoad3 proc alive) and
  * then splits on the s16 at +0x64: zero is the outer carousel (Left/Right step
  * gUnknown_0861696C's six-phase permutation at +0x52, A/B commit or cancel),
  * non-zero is the sub-menu on +0x66. Both arms end in the same two
@@ -107,7 +107,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
         b = 1;
     }
 
-    if (p->unk4e == 0 && p->unk6a == 0 && Proc_Find(gUnknown_084892C4) == 0)
+    if (p->unk4e == 0 && p->unk6a == 0 && Proc_Find(ProcScr_DesignRoomLoad3) == 0)
     {
         if (p->unk64 == 0)
         {

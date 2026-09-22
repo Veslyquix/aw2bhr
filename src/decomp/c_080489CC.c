@@ -12,6 +12,7 @@
  */
 
 #include "hardware.h"
+#include "proc.h"
 
 /* MATCHED (wave 60, W60-E), 1088 bytes, size exact, one try_match attempt.
  *
@@ -188,3 +189,58 @@ void BattleMaps_080489CD(void)
 }
 
 asm(".global sub_080489CC\n.thumb_set sub_080489CC, BattleMaps_080489CD\n");
+
+extern bool8 CampaignIntro_WHILE_0803B629(void);
+extern void BattleMaps_08049B15(void);
+extern void BattleMaps_08049B71(void);
+extern void BattleMaps_IDLE_08048FD9(void);
+extern void BattleMaps_IDLE_080490BD(void);
+extern void BattleMaps_08049171(void);
+extern void BattleMaps_IDLE_08049179(void);
+extern void BattleMaps_IDLE_08049361(void);
+extern void BattleMaps_IDLE_08049929(void);
+extern void BattleMaps_08049B81(void);
+extern u8 MainMenu2_GOTO_IF_NO_0803BD6D(void);
+extern void WM_ConfirmExit_08011B19(void);
+extern void BattleMaps_08049B29(void);
+extern void BattleMaps_0803D961(void);
+extern void BattleMaps_0803B83D(void);
+
+struct ProcCmd CONST_DATA ProcScr_BattleMaps[] =
+{
+    PROC_29(1),
+    PROC_1D(30),
+    PROC_WHILE(CampaignIntro_WHILE_0803B629),
+    PROC_START_CHILD(ProcScr_DialogueOnEnd),
+    PROC_CALL(BattleMaps_080489CD),
+    PROC_CALL(BattleMaps_08049B15),
+    PROC_CALL(BattleMaps_08049B71),
+    PROC_1E(30),
+    PROC_SLEEP(10),
+    PROC_REPEAT(BattleMaps_IDLE_08048FD9),
+    PROC_REPEAT(BattleMaps_IDLE_080490BD),
+    PROC_END_EACH(ProcScr_DialogueOnEnd),
+    PROC_CALL(BattleMaps_08049171),
+    PROC_REPEAT(BattleMaps_IDLE_08049179),
+    PROC_REPEAT(BattleMaps_IDLE_08049361),
+    PROC_REPEAT(BattleMaps_IDLE_08049929),
+    PROC_CALL(BattleMaps_08049B81),
+    PROC_GOTO_IF_NO(MainMenu2_GOTO_IF_NO_0803BD6D, 0),
+    PROC_1D(30),
+    PROC_CALL(WM_ConfirmExit_08011B19),
+    PROC_CALL(BattleMaps_08049B29),
+    PROC_CALL(BattleMaps_0803D961),
+    PROC_YIELD,
+    PROC_GOTO(1),
+PROC_LABEL(0),
+    PROC_SLEEP(30),
+    PROC_29(0),
+    PROC_1D(30),
+    PROC_CALL(WM_ConfirmExit_08011B19),
+    PROC_CALL(BattleMaps_08049B29),
+PROC_LABEL(1),
+    PROC_CALL(BattleMaps_0803B83D),
+    PROC_END,
+};
+
+asm(".global gUnknown_084C3138\n.set gUnknown_084C3138, ProcScr_BattleMaps\n");

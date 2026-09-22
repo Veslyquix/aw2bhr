@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -48,3 +49,14 @@ void DesignRoomPlaceUnit_CB_080358B9(ProcPtr proc)
 
 asm(".global sub_080358B8\n.thumb_set sub_080358B8, DesignRoomPlaceUnit_CB_080358B9\n"
     ".global sub_080358AC\n.thumb_set sub_080358AC, DesignRoomPlaceUnit_080358AD\n");
+
+struct ProcCmd CONST_DATA ProcScr_DesignRoomPlaceUnit[] =
+{
+    PROC_ONEND(DesignRoomPlaceUnit_CB_080358B9),
+    PROC_SLEEP(1),
+    PROC_CALL(DesignRoomPlaceUnit_080358AD),
+    PROC_SLEEP(8),
+    PROC_END,
+};
+
+asm(".global gUnknown_0849BDB8\n.set gUnknown_0849BDB8, ProcScr_DesignRoomPlaceUnit\n");

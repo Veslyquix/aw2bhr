@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -33,3 +34,11 @@ void CoDesignC4_IDLE_0808A3A1(struct Unk808A3A0 *proc)
 }
 
 asm(".global sub_0808A3A0\n.thumb_set sub_0808A3A0, CoDesignC4_IDLE_0808A3A1\n");
+
+struct ProcCmd CONST_DATA ProcScr_CoDesignC4[] =
+{
+    PROC_REPEAT(CoDesignC4_IDLE_0808A3A1),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616EFC\n.set gUnknown_08616EFC, ProcScr_CoDesignC4\n");

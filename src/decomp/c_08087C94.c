@@ -155,7 +155,22 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
     sub_0801F234(0x8a);
     sub_0801F234(0x8b);
 
-    Proc_Start(gUnknown_08616EFC, proc);
+    Proc_Start(ProcScr_CoDesignC4, proc);
 }
 
 asm(".global sub_08087C94\n.thumb_set sub_08087C94, CoDesignC1_08087C95\n");
+
+extern void CoDesignC1_08088005(void);
+extern void CoDesignC1_IDLE_08088041(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoDesignC1[] =
+{
+    PROC_1D(30),
+    PROC_CALL(CoDesignC1_08087C95),
+    PROC_1E(30),
+    PROC_CALL(CoDesignC1_08088005),
+    PROC_REPEAT(CoDesignC1_IDLE_08088041),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616DFC\n.set gUnknown_08616DFC, ProcScr_CoDesignC1\n");

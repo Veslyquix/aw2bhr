@@ -76,7 +76,7 @@ ProcPtr sub_08073304(const void * src, void * dst, u16 a3, u16 a4, u16 a5,
         Decompress(gUnknown_081CC038, dst);
         ApplyPaletteExt(gUnknown_081D2224, (u16)((a4 + 0x10) * 0x20), 0x20);
 
-        proc = Proc_Start(gUnknown_086140D4, (ProcPtr)parent);
+        proc = Proc_Start(ProcScr_MainMenuPutSelectModeSprite, (ProcPtr)parent);
 
         sub_08073228(src, dst, a3, proc);
 

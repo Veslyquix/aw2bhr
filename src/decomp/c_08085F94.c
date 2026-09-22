@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -99,3 +100,17 @@ void PutMapPropertiesPreview_08085F95(struct Unk8085F94Proc *proc)
 }
 
 asm(".global sub_08085F94\n.thumb_set sub_08085F94, PutMapPropertiesPreview_08085F95\n");
+
+extern void PutMapPropertiesPreview_IDLE_08086059(void);
+extern void PutMapPropertiesPreview_IDLE_0808603D(void);
+
+struct ProcCmd CONST_DATA ProcScr_PutMapPropertiesPreview[] =
+{
+    PROC_CALL(PutMapPropertiesPreview_08085F95),
+    PROC_REPEAT(PutMapPropertiesPreview_IDLE_08086059),
+    PROC_REPEAT(PutMapPropertiesPreview_IDLE_0808603D),
+    PROC_REPEAT(PutMapPropertiesPreview_IDLE_08086059),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616CF4\n.set gUnknown_08616CF4, ProcScr_PutMapPropertiesPreview\n");

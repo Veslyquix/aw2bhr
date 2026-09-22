@@ -46,7 +46,7 @@ struct UnkB578Proc
  * sub_0803B588 @ 0x0803B588
  */
 
-/* Fade the BGM out over `a` frames and start the gUnknown_0849E750 proc to run
+/* Fade the BGM out over `a` frames and start the ProcScr_FadeSound proc to run
  * the fade down, parking the speed in the proc's +0x64 slot scaled by 16. It
  * no-ops when the requested-song slot still holds the 0xFFFF sentinel, i.e.
  * when there is nothing playing to fade. Its counterpart
@@ -105,7 +105,7 @@ void sub_0803B5A4(int a)
 
         sub_08070610(gUnknown_03005AE0, a);
 
-        proc = Proc_Start(gUnknown_0849E750, PROC_TREE_3);
+        proc = Proc_Start(ProcScr_FadeSound, PROC_TREE_3);
         proc->unk64 = a << 4;
     }
 }

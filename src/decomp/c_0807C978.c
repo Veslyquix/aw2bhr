@@ -16,5 +16,5 @@
 void sub_0807C978(ProcPtr parent)
 {
     sub_0807F238();
-    Proc_Start(gUnknown_08616638, parent);
+    Proc_Start(ProcScr_CoSelect, parent);
 }

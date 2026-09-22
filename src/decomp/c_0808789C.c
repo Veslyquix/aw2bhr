@@ -23,8 +23,8 @@
  *
  * The strongest-evidenced member of the family, because the loop closes: the
  * ROM holds `PROC_CALL(PutEnemyCoMinimug_0808789D)` at 0x08616DA0, which is INSIDE the
- * script gUnknown_08616D94 -- and sub_08087B74, the callee here, is the
- * function that does `Proc_Find(gUnknown_08616D94)` and `str r5,[r0,#0x54]`.
+ * script ProcScr_PutEnemyCoMinimug -- and sub_08087B74, the callee here, is the
+ * function that does `Proc_Find(ProcScr_PutEnemyCoMinimug)` and `str r5,[r0,#0x54]`.
  * So +0x54 of this proc is written by the callee and read back by this
  * wrapper, and it holds sub_08087B74's own `int` parameter (used there as an
  * offset into gUnknown_02027F74 + 4, not as a pointer -- hence `int` and not
@@ -43,3 +43,15 @@ void PutEnemyCoMinimug_0808789D(struct Unk0808789CProc *proc)
 }
 
 asm(".global sub_0808789C\n.thumb_set sub_0808789C, PutEnemyCoMinimug_0808789D\n");
+
+extern void PutEnemyCoMinimug_IDLE_080878A9(void);
+
+struct ProcCmd CONST_DATA ProcScr_PutEnemyCoMinimug[] =
+{
+    PROC_YIELD,
+    PROC_CALL(PutEnemyCoMinimug_0808789D),
+    PROC_REPEAT(PutEnemyCoMinimug_IDLE_080878A9),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616D94\n.set gUnknown_08616D94, ProcScr_PutEnemyCoMinimug\n");

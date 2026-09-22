@@ -56,7 +56,7 @@ void sub_0803B4EC(int a)
 }
 
 /* "Start song id, unless it is already the one playing": compare against the
- * requested slot, and on a change tear down the gUnknown_0849E750 proc, hand
+ * requested slot, and on a change tear down the ProcScr_FadeSound proc, hand
  * the id to ActivateMusicOrSoundId (m4aSongNumStart) and record it in BOTH slots. The
  * 0xFFFF the neighbours write is just a value that never equals a real id.
  *
@@ -97,7 +97,7 @@ void sub_0803B524(a)
 {
     if (gUnknown_030005CA != a)
     {
-        Proc_EndEach(gUnknown_0849E750);
+        Proc_EndEach(ProcScr_FadeSound);
         ActivateMusicOrSoundId(a);
 
         gUnknown_030005C8 = a;

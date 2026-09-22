@@ -20,7 +20,15 @@ void DialogueBlock_CB_08014BB5(void)
 
 void sub_08014BC0(ProcPtr parent)
 {
-    Proc_Start(gUnknown_0848A140, parent);
+    Proc_Start(ProcScr_DialogueOnEnd, parent);
 }
 
 asm(".global sub_08014BB4\n.thumb_set sub_08014BB4, DialogueBlock_CB_08014BB5\n");
+
+struct ProcCmd CONST_DATA ProcScr_DialogueOnEnd[] =
+{
+    PROC_ONEND(DialogueBlock_CB_08014BB5),
+    PROC_BLOCK,
+};
+
+asm(".global gUnknown_0848A140\n.set gUnknown_0848A140, ProcScr_DialogueOnEnd\n");

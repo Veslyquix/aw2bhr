@@ -39,7 +39,7 @@ void sub_080111C8(void *a, void *b, u16 c, u16 d, void (*e)(void))
     struct Unk80111C8Proc *proc;
 
     gUnknown_03001FDC = 0;
-    proc = Proc_Start(gUnknown_0848927C, NULL);
+    proc = Proc_Start(ProcScr_FadeScreenLines, NULL);
     proc->unk2c = a;
     proc->unk30 = b;
     proc->unk34 = c;

@@ -21,7 +21,7 @@
 
 #include "hardware.h"
 #include "proc.h"
-/* The gUnknown_08499E18 proc, started by sub_08027B10: a spinning, shrinking
+/* The ProcScr_DayStart proc, started by sub_08027B10: a spinning, shrinking
  * affine sprite. sub_08027B10 pins every field used here -- +0x2c and +0x30
  * are its first two `int` parameters, +0x34 and +0x38 are both seeded 0x200
  * as words, +0x48 is `strh 0x20` (the angle), +0x4a is `strh (arg2 + 0x1ca) |

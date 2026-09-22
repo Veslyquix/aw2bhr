@@ -127,3 +127,21 @@ void MainMenuC2_0808135D(struct Unk808135C *proc)
 }
 
 asm(".global sub_0808135C\n.thumb_set sub_0808135C, MainMenuC2_0808135D\n");
+
+extern void MainMenuC2_IDLE_080815C1(void);
+extern void MainMenuC2_IDLE_0808177D(void);
+extern void MainMenuC2_IDLE_080819A1(void);
+extern void MainMenuC2_IDLE_08081D31(void);
+
+struct ProcCmd CONST_DATA ProcScr_MainMenuC2[] =
+{
+    PROC_CALL(MainMenuC2_0808135D),
+    PROC_SLEEP(7),
+    PROC_REPEAT(MainMenuC2_IDLE_080815C1),
+    PROC_REPEAT(MainMenuC2_IDLE_0808177D),
+    PROC_REPEAT(MainMenuC2_IDLE_080819A1),
+    PROC_REPEAT(MainMenuC2_IDLE_08081D31),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616A08\n.set gUnknown_08616A08, ProcScr_MainMenuC2\n");

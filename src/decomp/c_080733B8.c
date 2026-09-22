@@ -18,5 +18,5 @@
 
 void sub_080733B8(void)
 {
-    Proc_EndEach(gUnknown_086140D4);
+    Proc_EndEach(ProcScr_MainMenuPutSelectModeSprite);
 }

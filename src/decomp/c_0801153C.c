@@ -35,7 +35,7 @@
 /* The `bl sub_08011218` with r0 still holding the incoming proc looks exactly
  * like an argument pass and is not one: sub_08011218 is
  * `void sub_08011218(void)` in its promoted definition src/decomp/c_08011218.c
- * (`Proc_EndEach(gUnknown_0848927C)`), so it takes nothing. The
+ * (`Proc_EndEach(ProcScr_FadeScreenLines)`), so it takes nothing. The
  * `adds r4, r0, #0` is "save it because the call clobbers r0", exactly the
  * wave-14 F032 trap one shape up.
  */

@@ -195,3 +195,25 @@ void CoSelect_IDLE_0807CAFD(struct Unk807CAFC * proc)
 
 asm(".global sub_0807C9EC\n.thumb_set sub_0807C9EC, CoSelect_0807C9ED\n"
     ".global sub_0807CAFC\n.thumb_set sub_0807CAFC, CoSelect_IDLE_0807CAFD\n");
+
+extern void CoSelect_IDLE_0807CE5D(void);
+extern void sub_0807E980(void);
+extern void CoSelect_IDLE_0807ED91(void);
+extern void CoSelect_IDLE_0807EEED(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoSelect[] =
+{
+    PROC_CALL(CoSelect_0807C9ED),
+    PROC_REPEAT(CoSelect_IDLE_0807CAFD),
+    PROC_REPEAT(CoSelect_IDLE_0807CE5D),
+    PROC_REPEAT(sub_0807E980),
+    PROC_REPEAT(CoSelect_IDLE_0807ED91),
+    PROC_REPEAT(CoSelect_IDLE_0807EEED),
+    PROC_1D(30),
+    PROC_SLEEP(1),
+    PROC_END_EACH((void *)0x086165C0),
+    PROC_END_EACH((void *)0x086166C8),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616638\n.set gUnknown_08616638, ProcScr_CoSelect\n");

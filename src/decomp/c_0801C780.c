@@ -43,3 +43,14 @@ void WaitForLaser_CB_0801C781(struct Unk0801C780Proc *proc)
 }
 
 asm(".global sub_0801C780\n.thumb_set sub_0801C780, WaitForLaser_CB_0801C781\n");
+
+extern void WaitForLaser_IDLE_0801C755(void);
+
+struct ProcCmd CONST_DATA ProcScr_WaitForLaser[] =
+{
+    PROC_ONEND(WaitForLaser_CB_0801C781),
+    PROC_REPEAT(WaitForLaser_IDLE_0801C755),
+    PROC_END,
+};
+
+asm(".global gUnknown_0848B5AC\n.set gUnknown_0848B5AC, ProcScr_WaitForLaser\n");

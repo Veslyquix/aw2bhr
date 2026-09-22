@@ -35,7 +35,7 @@ void sub_08011550(int a)
 
 void sub_0801156C(int a)
 {
-    struct Unk1156CProc *proc = Proc_Start(gUnknown_0848925C, PROC_TREE_3);
+    struct Unk1156CProc *proc = Proc_Start(ProcScr_DesignRoomFadeIn, PROC_TREE_3);
 
     proc->unk64 = a;
 }

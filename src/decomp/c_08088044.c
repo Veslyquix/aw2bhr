@@ -149,3 +149,16 @@ void CoDesignC2_IDLE_080880BD(struct Unk80880BC * proc)
 
 asm(".global sub_08088044\n.thumb_set sub_08088044, CoDesignC2_08088045\n"
     ".global sub_080880BC\n.thumb_set sub_080880BC, CoDesignC2_IDLE_080880BD\n");
+
+extern void CoDesignC2_IDLE_0808844D(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoDesignC2[] =
+{
+    PROC_CALL(CoDesignC2_08088045),
+    PROC_SLEEP(64),
+    PROC_REPEAT(CoDesignC2_IDLE_080880BD),
+    PROC_REPEAT(CoDesignC2_IDLE_0808844D),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616EB4\n.set gUnknown_08616EB4, ProcScr_CoDesignC2\n");

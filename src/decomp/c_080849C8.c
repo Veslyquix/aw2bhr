@@ -37,7 +37,7 @@
  * RULED OUT by compile_probe: binding the script and the function pointer to
  * locals before the loop. It does move `parent` out of r7 -- but into sl, with
  * a THIRD high register saved -- and, worse, it DEFEATS -fforce-addr: agbcc
- * then emits plain `.word gUnknown_08616BE4` / `.word sub_08043590` pool words
+ * then emits plain `.word ProcScr_CoInfo` / `.word sub_08043590` pool words
  * where the ROM has the double indirection through 0x081D93E4/E8. The naming-
  * the-symbol-directly spelling below is the one that reproduces those.
  * NOT tried: decomp-permuter. This is exactly its case (same instructions,
@@ -100,6 +100,6 @@ void sub_080849C8(ProcPtr parent)
     sub_0801F234(0x67);
     sub_0801F234(0x92);
 
-    Proc_Start(gUnknown_08616BE4, savedParent);
+    Proc_Start(ProcScr_CoInfo, savedParent);
     sub_08011B34((void *)sub_08043590);
 }

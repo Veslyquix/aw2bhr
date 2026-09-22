@@ -39,3 +39,52 @@ void DesignRoomFadeIn_080110ED(struct Unk80110ECProc *proc)
 }
 
 asm(".global sub_080110EC\n.thumb_set sub_080110EC, DesignRoomFadeIn_080110ED\n");
+
+extern void DesignRoomFadeIn_IDLE_0801113D(void);
+extern void FadeScreenLines_CB_080111AD(void);
+extern void FadeScreenLines_IDLE_0801117D(void);
+extern void SomeFade_08011299(void);
+extern void SomeFade_IDLE_080113ED(void);
+extern void SomeFade_IDLE_0801153D(void);
+extern void DesignRoomLoad3_0801137D(void);
+extern void DesignRoomLoad3_IDLE_080114A1(void);
+
+struct ProcCmd CONST_DATA ProcScr_DesignRoomFadeIn[] =
+{
+    PROC_CALL(DesignRoomFadeIn_080110ED),
+    PROC_YIELD,
+    PROC_REPEAT(DesignRoomFadeIn_IDLE_0801113D),
+    PROC_END,
+};
+
+struct ProcCmd CONST_DATA ProcScr_FadeScreenLines[] =
+{
+    PROC_2A,
+    PROC_ONEND(FadeScreenLines_CB_080111AD),
+    PROC_REPEAT(FadeScreenLines_IDLE_0801117D),
+    PROC_END,
+};
+
+struct ProcCmd CONST_DATA ProcScr_SomeFade[] =
+{
+    PROC_CALL(SomeFade_08011299),
+    PROC_SLEEP(1),
+    PROC_REPEAT(SomeFade_IDLE_080113ED),
+    PROC_REPEAT(SomeFade_IDLE_0801153D),
+    PROC_END,
+};
+
+struct ProcCmd CONST_DATA ProcScr_DesignRoomLoad3[] =
+{
+    PROC_CALL(DesignRoomLoad3_0801137D),
+    PROC_SLEEP(1),
+    PROC_REPEAT(DesignRoomLoad3_IDLE_080114A1),
+    PROC_REPEAT(SomeFade_IDLE_0801153D),
+    PROC_END,
+};
+
+asm(".global ProcScr_FadeScreenRelated\n.set ProcScr_FadeScreenRelated, ProcScr_DesignRoomLoad3\n"
+    ".global gUnknown_0848925C\n.set gUnknown_0848925C, ProcScr_DesignRoomFadeIn\n"
+    ".global gUnknown_0848927C\n.set gUnknown_0848927C, ProcScr_FadeScreenLines\n"
+    ".global gUnknown_0848929C\n.set gUnknown_0848929C, ProcScr_SomeFade\n"
+    ".global gUnknown_084892C4\n.set gUnknown_084892C4, ProcScr_DesignRoomLoad3\n");

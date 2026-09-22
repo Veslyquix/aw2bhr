@@ -68,7 +68,7 @@ void sub_080339B0(struct Unk339B0Proc *proc)
     sub_08073304(gUnknown_085802F0, gUnknown_02010C50, 0xec, 0xf, 0, 0, (int)proc);
 
     Proc_Start(gUnknown_0849BB80, proc);
-    Proc_Start(gUnknown_08616EFC, proc);
+    Proc_Start(ProcScr_CoDesignC4, proc);
 
     child = Proc_Start(gUnknown_0849BC50, proc);
     child->unk4c = 0;

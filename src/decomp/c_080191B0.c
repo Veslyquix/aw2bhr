@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -50,3 +51,36 @@ void MainMenu_080191B1(void)
 }
 
 asm(".global sub_080191B0\n.thumb_set sub_080191B0, MainMenu_080191B1\n");
+
+extern void MainMenu_08085AF5(void);
+extern void MainMenu_08080F3D(void);
+extern void MainMenu_0803BBD5(void);
+extern void MainMenu2_08034839(void);
+extern void MainMenu2_0803D48D(void);
+extern u8 MainMenu2_GOTO_IF_NO_0803BD6D(void);
+extern void MainMenu2_0803BBA9(void);
+extern void MainMenu2_0806A455(void);
+
+struct ProcCmd CONST_DATA ProcScr_MainMenu[] =
+{
+    PROC_CALL(MainMenu_080191B1),
+    PROC_CALL(MainMenu_08085AF5),
+    PROC_CALL(MainMenu_08080F3D),
+    PROC_CALL(MainMenu_0803BBD5),
+    PROC_GOTO_SCR(ProcScr_MainMenu2),
+};
+
+struct ProcCmd CONST_DATA ProcScr_MainMenu2[] =
+{
+    PROC_CALL(MainMenu2_08034839),
+    PROC_CALL(MainMenu2_0803D48D),
+    PROC_START_CHILD_BLOCKING(ProcScr_MainMenuC1),
+    PROC_GOTO_IF_NO(MainMenu2_GOTO_IF_NO_0803BD6D, 0),
+    PROC_1D(30),
+    PROC_CALL(MainMenu2_0803BBA9),
+    PROC_GOTO(1),
+PROC_LABEL(0),
+    PROC_CALL(MainMenu2_0806A455),
+PROC_LABEL(1),
+    PROC_END,
+};

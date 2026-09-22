@@ -42,3 +42,14 @@ void CoInfo_08084BD5(struct UnkBD4Proc *proc)
 }
 
 asm(".global sub_08084BD4\n.thumb_set sub_08084BD4, CoInfo_08084BD5\n");
+
+extern void sub_08084C14(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoInfo[] =
+{
+    PROC_CALL(CoInfo_08084BD5),
+    PROC_REPEAT(sub_08084C14),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616BE4\n.set gUnknown_08616BE4, ProcScr_CoInfo\n");

@@ -10,7 +10,7 @@
 #include "proc.h"
 
 /* The two-script variant of the bare existence predicate that gUnknown_0849D3BC
- * and gUnknown_0849E750 carry: is either proc running.
+ * and ProcScr_FadeSound carry: is either proc running.
  *
  * The spelling matters and three forms are distinguishable here. `return
  * Proc_Find(a) || Proc_Find(b);` goes through do_store_flag, which presets a

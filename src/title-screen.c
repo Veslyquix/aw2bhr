@@ -113,7 +113,7 @@ void sub_0806CA50(struct ProcTitleScreen * proc)
 
 // clang-format off
 
-struct ProcCmd CONST_DATA ProcScr_Unk_08581C68[] =
+struct ProcCmd CONST_DATA ProcScr_TitleIntro[] =
 {
     PROC_CALL(sub_0806C9B4),
     PROC_REPEAT(sub_0806C9C0),
@@ -238,7 +238,7 @@ void sub_0806CBA8(struct ProcTitleScreen * proc)
 struct ProcCmd CONST_DATA ProcScr_TitleScreen[] =
 {
     PROC_YIELD,
-    PROC_START_BUGGED(ProcScr_Unk_08581C68, 3),
+    PROC_START_BUGGED(ProcScr_TitleIntro, 3),
 
     PROC_CALL(sub_0806CA98),
     PROC_REPEAT(sub_0806CB5C),

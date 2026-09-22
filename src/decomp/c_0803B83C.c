@@ -33,7 +33,7 @@ void BattleMaps_0803B83D(void)
 }
 
 /* Three statements, all results discarded: sub_0803BCA0, then sub_08085AF4,
- * then start the gUnknown_0849EC8C proc on tree 3. The first two are both
+ * then start the ProcScr_Link proc on tree 3. The first two are both
  * declared void(void) already and neither reads r0, so the run of `bl`s is
  * three statements rather than any nesting.
  * `pop {r0}; bx r0` -> void. */
@@ -42,7 +42,18 @@ void sub_0803B858(void)
 {
     sub_0803BCA0();
     sub_08085AF4();
-    Proc_Start(gUnknown_0849EC8C, PROC_TREE_3);
+    Proc_Start(ProcScr_Link, PROC_TREE_3);
 }
 
 asm(".global sub_0803B83C\n.thumb_set sub_0803B83C, BattleMaps_0803B83D\n");
+
+extern void ResetRulesAfterCampaignMap(void);
+
+struct ProcCmd CONST_DATA ProcScr_Link[] =
+{
+    PROC_1D(30),
+    PROC_CALL(ResetRulesAfterCampaignMap),
+    PROC_GOTO_SCR((void *)0x0849ECA4),
+};
+
+asm(".global gUnknown_0849EC8C\n.set gUnknown_0849EC8C, ProcScr_Link\n");

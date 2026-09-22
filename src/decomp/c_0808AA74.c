@@ -11,10 +11,10 @@
 
 void sub_0808AA74(void)
 {
-    Proc_Start(gUnknown_08616FD4, PROC_TREE_3);
+    Proc_Start(ProcScr_CampaignIntro, PROC_TREE_3);
 }
 
 int sub_0808AA88(void)
 {
-    return Proc_Find(gUnknown_08616FD4) != 0;
+    return Proc_Find(ProcScr_CampaignIntro) != 0;
 }

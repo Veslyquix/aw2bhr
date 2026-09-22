@@ -33,7 +33,7 @@ void sub_080115E0(int a, ProcPtr parent)
 
 void sub_080115F8(int a, ProcPtr parent)
 {
-    struct Unk115F8Proc *proc = Proc_StartBlocking(gUnknown_0848925C, parent);
+    struct Unk115F8Proc *proc = Proc_StartBlocking(ProcScr_DesignRoomFadeIn, parent);
 
     proc->unk64 = a;
 }

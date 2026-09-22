@@ -9,7 +9,7 @@
 
 #include "proc.h"
 /* Scans the three gUnknown_03003124 slots for a free one and, if there is one,
- * starts the gUnknown_0849BDB8 proc and seeds it. `i == 3` is the "all busy"
+ * starts the ProcScr_DesignRoomPlaceUnit proc and seeds it. `i == 3` is the "all busy"
  * exit, and the loop is the ordinary rotated form -- the peeled `ldrb [r2]`
  * ahead of the backward branch is the first iteration's test, not a guard.
  *
@@ -39,7 +39,7 @@ void sub_08035850(int a1, int a2, int a3)
 
     if (i != 3)
     {
-        proc = Proc_Start(gUnknown_0849BDB8, PROC_TREE_5);
+        proc = Proc_Start(ProcScr_DesignRoomPlaceUnit, PROC_TREE_5);
         proc->unk42 = a1 * 16;
         proc->unk44 = a2 * 16;
         proc->unk35 = 2;

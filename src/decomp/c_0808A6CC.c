@@ -80,3 +80,29 @@ void CampaignIntro_0808A6CD(ProcPtr proc)
 }
 
 asm(".global sub_0808A6CC\n.thumb_set sub_0808A6CC, CampaignIntro_0808A6CD\n");
+
+extern bool8 CampaignIntro_WHILE_0803B629(void);
+extern void CampaignIntro_0808A821(void);
+extern void CampaignIntro_IDLE_0808A82D(void);
+extern void CampaignIntro_IDLE_0808A845(void);
+extern void CampaignIntro_IDLE_0808A885(void);
+
+struct ProcCmd CONST_DATA ProcScr_CampaignIntro[] =
+{
+    PROC_29(1),
+    PROC_WHILE(CampaignIntro_WHILE_0803B629),
+    PROC_1D(30),
+    PROC_YIELD,
+    PROC_CALL(CampaignIntro_0808A6CD),
+    PROC_1E(5),
+    PROC_YIELD,
+    PROC_1B(425),
+    PROC_CALL(CampaignIntro_0808A821),
+    PROC_REPEAT(CampaignIntro_IDLE_0808A82D),
+    PROC_SLEEP(90),
+    PROC_REPEAT(CampaignIntro_IDLE_0808A845),
+    PROC_REPEAT(CampaignIntro_IDLE_0808A885),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616FD4\n.set gUnknown_08616FD4, ProcScr_CampaignIntro\n");

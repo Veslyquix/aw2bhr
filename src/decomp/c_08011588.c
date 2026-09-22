@@ -36,7 +36,7 @@ void sub_08011588(int a)
 
 void sub_080115B4(int a)
 {
-    struct Unk115B4Proc *proc = Proc_Start(gUnknown_0848925C, PROC_TREE_3);
+    struct Unk115B4Proc *proc = Proc_Start(ProcScr_DesignRoomFadeIn, PROC_TREE_3);
 
     proc->unk64 = a;
     gUnknown_030030E0.bits.effect = 2;

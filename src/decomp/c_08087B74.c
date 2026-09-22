@@ -101,7 +101,7 @@ void sub_08087B74(int a)
     int k;
 
     n = sub_0802490C(gUnknown_02027F74.unk04[a]);
-    proc = Proc_Find(gUnknown_08616D94);
+    proc = Proc_Find(ProcScr_PutEnemyCoMinimug);
 
     if (proc != NULL)
     {

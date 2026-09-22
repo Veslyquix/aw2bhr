@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -30,3 +31,11 @@ void MainMenuC4_IDLE_08084545(struct Unk8084544 *proc)
 }
 
 asm(".global sub_08084544\n.thumb_set sub_08084544, MainMenuC4_IDLE_08084545\n");
+
+struct ProcCmd CONST_DATA ProcScr_MainMenuC4[] =
+{
+    PROC_REPEAT(MainMenuC4_IDLE_08084545),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616A58\n.set gUnknown_08616A58, ProcScr_MainMenuC4\n");

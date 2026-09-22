@@ -132,7 +132,7 @@ void MainMenuC1_08081061(ProcPtr proc)
 
     ApplyPaletteExt(gUnknown_081320AC, 0x100, 0x20);
 
-    Proc_Start(gUnknown_08616A58, proc);
+    Proc_Start(ProcScr_MainMenuC4, proc);
 
     if (gUnknown_030058FC != 0)
     {
@@ -142,3 +142,20 @@ void MainMenuC1_08081061(ProcPtr proc)
 }
 
 asm(".global sub_08081060\n.thumb_set sub_08081060, MainMenuC1_08081061\n");
+
+extern void MainMenuC1_08081335(void);
+extern void MainMenuC1_IDLE_08081359(void);
+
+struct ProcCmd CONST_DATA ProcScr_MainMenuC1[] =
+{
+    PROC_1D(30),
+    PROC_CALL(MainMenuC1_08081061),
+    PROC_1E(30),
+    PROC_CALL(MainMenuC1_08081335),
+    PROC_SLEEP(6),
+    PROC_1B(400),
+    PROC_REPEAT(MainMenuC1_IDLE_08081359),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616990\n.set gUnknown_08616990, ProcScr_MainMenuC1\n");

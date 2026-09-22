@@ -16,7 +16,7 @@ struct Unk80733A0
 
 void sub_080733A0(int arg)
 {
-    struct Unk80733A0 * proc = Proc_Find(gUnknown_086140D4);
+    struct Unk80733A0 * proc = Proc_Find(ProcScr_MainMenuPutSelectModeSprite);
 
     proc->unk_68 = arg;
 }

@@ -29,7 +29,7 @@ void FadeSound_IDLE_0803B609(struct Unk3B608Proc *proc)
 
 bool8 CampaignIntro_WHILE_0803B629(void)
 {
-    return Proc_Find(gUnknown_0849E750) != 0;
+    return Proc_Find(ProcScr_FadeSound) != 0;
 }
 
 asm(".global sub_0803B628\n.thumb_set sub_0803B628, CampaignIntro_WHILE_0803B629\n"

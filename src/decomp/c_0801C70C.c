@@ -32,7 +32,7 @@ struct Unk0801C70CProc
     /* 54 */ int unk54;
     /* 58 */ int unk58;
 };
-/* The per-frame callback of the gUnknown_0848B5AC proc sub_0801C70C starts:
+/* The per-frame callback of the ProcScr_WaitForLaser proc sub_0801C70C starts:
  * the three fields it reads (+0x50, +0x54, +0x58) are exactly the three that
  * function writes, which is what pins the parameter as that proc and fixes the
  * struct below. */
@@ -54,7 +54,7 @@ int sub_0801C70C(const void *a1, int a2, int a3, int a4, int a5, u16 a6)
     sub_0801C4D4(h, a5);
     h->unk22 = a4;
 
-    proc = Proc_Start(gUnknown_0848B5AC, PROC_TREE_3);
+    proc = Proc_Start(ProcScr_WaitForLaser, PROC_TREE_3);
     proc->unk50 = h;
     proc->unk54 = a2;
     proc->unk58 = a3;

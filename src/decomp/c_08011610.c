@@ -47,7 +47,7 @@ void sub_08011610(int a, ProcPtr parent)
 
 void sub_0801163C(int a, ProcPtr parent)
 {
-    struct Unk1163CProc *proc = Proc_StartBlocking(gUnknown_0848925C, parent);
+    struct Unk1163CProc *proc = Proc_StartBlocking(ProcScr_DesignRoomFadeIn, parent);
 
     proc->unk64 = a;
     gUnknown_030030E0.bits.effect = 2;
@@ -55,14 +55,14 @@ void sub_0801163C(int a, ProcPtr parent)
 
 void sub_08011668(int a)
 {
-    struct Unk11668Proc *proc = Proc_Start(gUnknown_0848929C, PROC_TREE_3);
+    struct Unk11668Proc *proc = Proc_Start(ProcScr_SomeFade, PROC_TREE_3);
 
     proc->unk64 = a;
 }
 
 void sub_08011684(int a)
 {
-    struct Unk11684Proc *proc = Proc_Start(gUnknown_084892C4, PROC_TREE_3);
+    struct Unk11684Proc *proc = Proc_Start(ProcScr_DesignRoomLoad3, PROC_TREE_3);
 
     proc->unk64 = a;
 }

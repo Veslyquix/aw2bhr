@@ -36,7 +36,7 @@ void sub_08027DD8(struct Unk27DD8 *e)
 {
     if (gpKeySt->pressed & (A_BUTTON | B_BUTTON | START_BUTTON))
     {
-        Proc_EndEach(gUnknown_08499E18);
+        Proc_EndEach(ProcScr_DayStart);
         sub_0801537C(gUnknown_08499D90);
         gUnknown_03002F1C = 1;
         e->unk08 = 0;

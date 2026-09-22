@@ -14,5 +14,5 @@
  * fall-through of the call's own result. */
 bool8 sub_0801C7B4(void)
 {
-    return Proc_Find(gUnknown_0848B5AC) != NULL;
+    return Proc_Find(ProcScr_WaitForLaser) != NULL;
 }

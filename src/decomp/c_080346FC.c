@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -76,3 +77,12 @@ void ResetRulesAfterCampaignMap(void)
 }
 
 asm(".global sub_080346FC\n.thumb_set sub_080346FC, ResetRulesAfterCampaignMap\n");
+
+struct ProcCmd CONST_DATA ProcScr_WarRoom[] =
+{
+    PROC_1D(30),
+    PROC_CALL(ResetRulesAfterCampaignMap),
+    PROC_GOTO_SCR((void *)0x0849EC34),
+};
+
+asm(".global gUnknown_0849EC1C\n.set gUnknown_0849EC1C, ProcScr_WarRoom\n");

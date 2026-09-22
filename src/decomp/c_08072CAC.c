@@ -276,3 +276,24 @@ asm(".global sub_08072CAC\n.thumb_set sub_08072CAC, MainMenu_PutSelectModeSprite
     ".global sub_08072E70\n.thumb_set sub_08072E70, MainMenu_PutSelectModeSprite_IDLE_08072E71\n"
     ".global sub_08072F04\n.thumb_set sub_08072F04, MainMenu_PutSelectModeSprite_IDLE_08072F05\n"
     ".global sub_08072F70\n.thumb_set sub_08072F70, MainMenu_PutSelectModeSprite_IDLE_08072F71\n");
+
+extern void MainMenu_PutSelectModeSprite_IDLE_080730D1(void);
+
+struct ProcCmd CONST_DATA ProcScr_MainMenuPutSelectModeSprite[] =
+{
+    PROC_YIELD,
+    PROC_END_DUPS,
+    PROC_CALL(MainMenu_PutSelectModeSprite_08072CAD),
+    PROC_REPEAT(MainMenu_PutSelectModeSprite_IDLE_08072CE5),
+    PROC_REPEAT(MainMenu_PutSelectModeSprite_IDLE_08072E71),
+PROC_LABEL(0),
+    PROC_REPEAT(MainMenu_PutSelectModeSprite_IDLE_08072F05),
+    PROC_REPEAT(MainMenu_PutSelectModeSprite_IDLE_08072F71),
+    PROC_REPEAT(MainMenu_PutSelectModeSprite_IDLE_08072F05),
+    PROC_REPEAT(MainMenu_PutSelectModeSprite_IDLE_080730D1),
+    PROC_GOTO(0),
+    PROC_END,
+};
+
+asm(".global ProcScr_MainMenuC3\n.set ProcScr_MainMenuC3, ProcScr_MainMenuPutSelectModeSprite\n"
+    ".global gUnknown_086140D4\n.set gUnknown_086140D4, ProcScr_MainMenuPutSelectModeSprite\n");
