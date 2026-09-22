@@ -34,11 +34,11 @@ gMap = gUnknown_08499590;
  * include/map.h); linker alias for the same reason as gMap. */
 gProperty = gUnknown_03003150;
 
-/* gPlaySt / gActiveMap: typed names for the play-settings block (struct PlaySt)
- * and the design-room active-map pointer (struct ActiveMap); the names follow
- * SRR_AW2's Definitions.s. Linker aliases, same reason as gMap. */
+/* Typed names for the play settings, design-room state pointer, and its
+ * animated terrain/unit selection ring. Linker aliases, same reason as gMap. */
 gPlaySt = gUnknown_03003FC0;
 gActiveMap = gUnknown_0200B0B0;
+gDesignRing = gUnknown_0200B0D0;
 
 /* gPlayers: the five-entry per-army record array (struct PlayerStruct,
  * 0x3c each, based at 0x02023284); SRR_AW2's Definitions.s names the

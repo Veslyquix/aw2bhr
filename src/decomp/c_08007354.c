@@ -23,7 +23,7 @@ void sub_08007354(void)
         if (i > 9)
             i = p->ringIndex - 6;
 
-        p->savedTerrain = gUnknown_0200B0D0[i].unk04;
+        p->savedTerrain = gDesignRing[i].itemId;
         p->savedTerrainListIndex = p->terrainListIndex;
         gActiveMap->savedPropertyArmy = gActiveMap->propertyArmy;
     }
@@ -38,7 +38,7 @@ void sub_08007354(void)
         if (i > 7)
             i = p->ringIndex - 5;
 
-        p->savedUnit = gUnknown_0200B0D0[i].unk04;
+        p->savedUnit = gDesignRing[i].itemId;
         p->savedUnitListIndex = p->unitListIndex;
         gActiveMap->savedUnitArmy = gActiveMap->unitArmy;
     }

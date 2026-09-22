@@ -1051,7 +1051,7 @@ void sub_08002AB0(void) {
   int i;
   int j;
   int flag;
-  struct Unk0200B0D0 *q;
+  struct DesignRingEntry *q;
 
   if (gActiveMap->flags & 0x10) {
     sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
@@ -1062,7 +1062,7 @@ void sub_08002AB0(void) {
         j = gActiveMap->ringIndex + 4;
       if (j > 9)
         j -= 10;
-      switch (gUnknown_0200B0D0[j].unk04 & 0x1F) {
+      switch (gDesignRing[j].itemId & 0x1F) {
       case 6:
       case 8:
       case 10:
@@ -1079,18 +1079,18 @@ void sub_08002AB0(void) {
 
   j = gActiveMap->ringIndex;
   for (i = 9; i >= 0; i--) {
-    q = &gUnknown_0200B0D0[j];
+    q = &gDesignRing[j];
     j++;
     if (j > 9)
       j -= 10;
-    if (q->unk00 & 1) {
-      if (!(q->unk00 & 0x80))
-        sub_08002964(q->unk06 + 1, (q->unk0c >> 8) - 4, (q->unk10 >> 8) + 0x21,
-                     q->unk04, q->unk00 & 0x20, q->unk00 & 8);
-      if (!(q->unk00 & 0x40))
-        sub_0800272C(q->unk06 + 1, q->unk0c >> 8, q->unk10 >> 8, q->unk04,
-                     q->unk00 & 0x10, q->unk00 & 0x100, q->unk00 & 8);
-      q->unk00 &= ~8;
+    if (q->flags & 1) {
+      if (!(q->flags & 0x80))
+        sub_08002964(q->spriteSlot + 1, (q->x >> 8) - 4, (q->y >> 8) + 0x21,
+                     q->itemId, q->flags & 0x20, q->flags & 8);
+      if (!(q->flags & 0x40))
+        sub_0800272C(q->spriteSlot + 1, q->x >> 8, q->y >> 8, q->itemId,
+                     q->flags & 0x10, q->flags & 0x100, q->flags & 8);
+      q->flags &= ~8;
     }
   }
 }
@@ -1098,7 +1098,7 @@ void sub_08002AB0(void) {
 void sub_08002C38(void) {
   int i;
   int j;
-  struct Unk0200B0D0 *q;
+  struct DesignRingEntry *q;
 
   if (gActiveMap->flags & 0x10) {
     sub_0801BD00(0x78, 0x48C, (void *)gUnknown_08485B52, 0);
@@ -1106,7 +1106,7 @@ void sub_08002C38(void) {
       j = gActiveMap->ringIndex + 3;
       if (j > 7)
         j = gActiveMap->ringIndex - 5;
-      if (gUnknown_0200B0D0[j].unk04 != 0x19) {
+      if (gDesignRing[j].itemId != 0x19) {
         if (gActiveMap->spriteId == -1)
           sub_08007B54();
       } else {
@@ -1117,18 +1117,18 @@ void sub_08002C38(void) {
 
   j = gActiveMap->ringIndex;
   for (i = 7; i >= 0; i--) {
-    q = &gUnknown_0200B0D0[j];
+    q = &gDesignRing[j];
     j++;
     if (j > 7)
       j -= 8;
-    if (q->unk00 & 1) {
-      if (!(q->unk00 & 0x80))
-        sub_080029F4(q->unk06 + 1, (q->unk0c >> 8) - 4, (q->unk10 >> 8) + 0x21,
-                     q->unk04, q->unk00 & 0x20, q->unk00 & 8);
-      if (!(q->unk00 & 0x40))
-        sub_08002844(q->unk06 + 1, q->unk0c >> 8, q->unk10 >> 8, q->unk04,
-                     q->unk00 & 0x10, q->unk00 & 0x100, q->unk00 & 8);
-      q->unk00 &= ~8;
+    if (q->flags & 1) {
+      if (!(q->flags & 0x80))
+        sub_080029F4(q->spriteSlot + 1, (q->x >> 8) - 4, (q->y >> 8) + 0x21,
+                     q->itemId, q->flags & 0x20, q->flags & 8);
+      if (!(q->flags & 0x40))
+        sub_08002844(q->spriteSlot + 1, q->x >> 8, q->y >> 8, q->itemId,
+                     q->flags & 0x10, q->flags & 0x100, q->flags & 8);
+      q->flags &= ~8;
     }
   }
 }

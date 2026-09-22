@@ -49,7 +49,7 @@
  * saw this and correctly called it a consequence, not an independent axis.
  *
  * Settled earlier and confirmed unchanged: the wrap is `if (i > 9) i -= 10;`;
- * unk07/unk36/unk38 are s8, unk3a is s16, gUnknown_0200B0D0 has stride 0x1c
+ * unk07/unk36/unk38 are s8, unk3a is s16, gDesignRing has stride 0x1c
  * with u16 unk04 at +4. Nothing needed declaring.
  *
  * The `while` is a VEHICLE, not a claim about the original source: it is the
@@ -80,5 +80,5 @@ void sub_080079B8(int a1)
         m = (s8)p->unitListIndex + 3;
     while (m == 0)
         m = 1;
-    gUnknown_0200B0D0[i].unk04 = a1;
+    gDesignRing[i].itemId = a1;
 }

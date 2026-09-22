@@ -3560,7 +3560,7 @@ void sub_08003910(void);
 int sub_08007328(void);
 /* Wave 56 (W56-D), from the one call site in sub_08005F4C -- still `asm`, not
  * matched, so this is a contract and not a measurement. r0 arrives as a bare
- * `ldrh` of gUnknown_0200B0D0[i].unk04 and r1 as a sign-extended
+ * `ldrh` of gDesignRing[i].itemId and r1 as a sign-extended
  * gActiveMap->selectionAnimKind (s8), which is exactly what two `int` parameters
  * produce; a narrow second parameter would zero-extend under agbcc's
  * PROMOTE_MODE and lose the `lsls #0x18; asrs #0x18`. The caller's next

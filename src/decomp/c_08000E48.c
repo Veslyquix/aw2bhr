@@ -35,7 +35,7 @@ void sub_08000E48(struct Unk03001470 *proc)
     if (a == 0)
     {
         sub_08001124((u8 *)&gUnknown_0200B000, 0xB0);
-        sub_08001124((u8 *)gUnknown_0200B0D0, 0x134);
+        sub_08001124((u8 *)gDesignRing, 0x134);
         sub_080078E4(0, 1);
     }
 

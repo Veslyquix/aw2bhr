@@ -462,8 +462,8 @@ struct ActiveMap /* 0xb0 */
                            * same split unk2a records one field over. */
     /* 0x26 */ u16 savedUnit; /* Wave 37 (W37-D): the sibling of savedTerrain. sub_08007354
                            * writes one or the other with a bare `strh` from
-                           * gUnknown_0200B0D0[i].unk04, picking unk26 when unk07
-                           * is set and unk2c when it is clear. */
+                           * gDesignRing[i].itemId, picking savedUnit when
+                           * editMode is set and savedTerrain when it is clear. */
     /* 0x28 */ u16 selectionIndex; /* index into gUnknown_0200B224 (sub_08001CE8) */
     /* 0x2a */ u16 selectedTerrain; /* The action code sub_080085E0 dispatches on: it
                            * switches on `unk2a & 0x1f` over cases 1..19 and
@@ -800,7 +800,7 @@ struct ActiveMap /* 0xb0 */
  */
 /* Wave 50, W50-G. sub_08002C38 and sub_08002AB0 walk this table eight entries
  * at a time and name four more offsets, which carves filler_00 and filler_06
- * down without moving unk04:
+ * down without moving itemId:
  *   +0x00 a word of flags, tested against 1 / 8 / 0x10 / 0x20 / 0x40 / 0x80 /
  *         0x100 with `ldr`, and cleared `&= ~8` with `str` -- so a full word,
  *         not a halfword.
@@ -810,32 +810,32 @@ struct ActiveMap /* 0xb0 */
  *         being handed to sub_080029F4 / sub_08002844, and an arithmetic shift
  *         is what makes them signed.
  */
-struct Unk0200B0D0 /* 0x1c */
+struct DesignRingEntry /* 0x1c */
 {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ u16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s16 unk08; /* Wave 56 (W56-D), carved out of filler_08 -- the
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ u16 itemId;
+    /* 0x06 */ s16 spriteSlot;
+    /* 0x08 */ s16 targetX; /* Wave 56 (W56-D), carved out of filler_08 -- the
                            * other two bytes stay filler, so the layout is
-                           * unchanged. The target the unk0c fixed-point
+                           * unchanged. The target the x fixed-point
                            * coordinate eases toward: sub_08005F4C computes
-                           * `unk08 - (unk0c >> 8)` every frame and clamps
-                           * unk0c at `unk08 << 8`. SIGNED: every read is
+                           * `targetX - (x >> 8)` every frame and clamps
+                           * x at `targetX << 8`. SIGNED: every read is
                            * `movs rI,#8; ldrsh rD,[rB,rI]`, the register
                            * offset being ldrsh having no immediate form. */
     /* 0x0a */ u8 filler_0a[0x02];
-    /* 0x0c */ s32 unk0c;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14; /* Wave 56 (W56-D), carved out of filler_14 -- the
+    /* 0x0c */ s32 x;
+    /* 0x10 */ s32 y;
+    /* 0x14 */ s32 xVelocity; /* Wave 56 (W56-D), carved out of filler_14 -- the
                            * remaining four bytes stay filler. The velocity
-                           * added to unk0c each frame, a full word (`ldr`/`str`
+                           * added to x each frame, a full word (`ldr`/`str`
                            * throughout) and signed: sub_08005F4C runs it
                            * between -0x480 and +0x480 and eases it with
                            * `v += (K - v) >> 2`, an arithmetic shift. */
     /* 0x18 */ u8 filler_18[0x04];
 };
 
-extern struct Unk0200B0D0 gUnknown_0200B0D0[];
+extern struct DesignRingEntry gDesignRing[11];
 
 /* Wave 42 (W42-B2). A table of halfword PAIRS that sub_080077EC and
  * sub_080078E4 both copy into gUnknown_0200B224's 4-byte entries. Declared
@@ -865,7 +865,7 @@ extern const u16 gUnknown_084887AC[];
  * The other three are indexed `unk07 * 10 + col` with unk07 in {0, 1} -- the
  * same two-sided ring (10 slots when unk07 is clear, 8 when set) unk3a runs
  * over. gUnknown_084886F8's and gUnknown_0848875C's elements are `ldr`, and
- * gUnknown_0848875C's are added to the s16 gUnknown_0200B0D0[].unk08 as
+ * gUnknown_0848875C's are added to the s16 gDesignRing[].targetX as
  * signed. gUnknown_08488748's are bytes read `ldrb` and then sign-extended by
  * an explicit `(s8)` at the one use, which is NOT evidence about the
  * declaration in either direction (see the unk17 note above), so u8 is the

@@ -33,7 +33,7 @@
  *     NOT two statements, it is forced whenever K > 7 (THUMB's 3-operand SUB
  *     takes imm3 only); `a` and `b` are two locals because the ROM holds them in
  *     r1 and r2 at once.
- *   - `b = gUnknown_0200B0D0[b].unk04;` as its OWN statement. Inlined into the
+ *   - `b = gDesignRing[b].itemId;` as its OWN statement. Inlined into the
  *     store, the element load lands in the wrong register in both arms. */
 
 
@@ -63,7 +63,7 @@ void SetSelectedTile(int a1)
         b = gActiveMap->ringIndex + 4;
         if (b > 9)
             b = gActiveMap->ringIndex - 6;
-        b = gUnknown_0200B0D0[b].unk04;
+        b = gDesignRing[b].itemId;
         gActiveMap->selectedTerrain = b;
     }
     else
@@ -79,7 +79,7 @@ void SetSelectedTile(int a1)
         b = gActiveMap->ringIndex + 3;
         if (b > 7)
             b = gActiveMap->ringIndex - 5;
-        b = gUnknown_0200B0D0[b].unk04;
+        b = gDesignRing[b].itemId;
         b = (a1 & 0xC0) | (b & 0x3F);
         gActiveMap->cursorUnit = b;
     }

@@ -28057,7 +28057,7 @@ the loop's second counter):
 `sub_080079B8` has the same thing with the two `unk07` arms spelled out
 (`unk36 + 4` / `unk38 + 3`), joined at a merge point, and then discarded. In
 both, the discarded value is structurally PARALLEL to the value that IS used —
-`unk3a + K` is wrapped and indexes `gUnknown_0200B0D0`, `unk36 + K` is thrown
+`unk3a + K` is wrapped and indexes `gDesignRing`, `unk36 + K` is thrown
 away — which reads like a (row, column) pair where only one coordinate is
 consumed.
 
@@ -33898,7 +33898,7 @@ Cost, exactly as spent:
 second member was written by editing four things in the first's C -- ring size
 8 -> 10, the two callees, a `switch` in place of one `if`, and which of
 `unk3a`'s two neighbours the index comes from -- and matched first time. Both
-members reach the same two objects (`gUnknown_0200B0B0`, `gUnknown_0200B0D0`)
+members reach the same two objects (`gUnknown_0200B0B0`, `gDesignRing`)
 through different `-fforce-addr` pool words, which is what the screen saw.
 
 **Pair 1 refines the claim, and this is the useful half.** 0.893 did NOT beat
@@ -38884,7 +38884,7 @@ complement PLUS ONE.**
 	ldrsh r0, [r1, r2]
 	adds r5, r0, #4
 	b _0800634A
-	@ pool: gUnknown_0200B0D0, gUnknown_0200B224
+	@ pool: gDesignRing, gUnknown_0200B224
 _08006344:
 	movs r2, #0x3a
 	ldrsh r0, [r1, r2]
