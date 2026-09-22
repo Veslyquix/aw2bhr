@@ -1024,21 +1024,6 @@
    ],
    "reason": "Parked wave 58 (W58-B) after wave 41 (W41-B) measured six source spellings and wave 58 re-measured and confirmed the diagnosis. The open question is NAMED and narrow: find a source shape that keeps the two `= 1` blocks distinct through gcc's FIRST jump pass, so that the `= 1` label still has a single use when cse_end_of_basic_block runs. Every shape tried so far is merged before CSE. Do NOT hand this back as a generic near-miss and do NOT re-run the six axes above; full analysis is in work/sub_08020754/sub_08020754.c."
   },
-  "sub_0800401C": {
-   "bytes": 172,
-   "best": "19.8% identical, candidate 176 bytes (+4). The percentage is positional and meaningless here -- the instruction stream is correct end to end.",
-   "remaining_diff": "ONE REGISTER-ALLOCATION CHOICE and the three caller-save insns it drags in. ROM allocates r8=w, sb=h, sl=tt, r4=rx, r5=x, r6=y, r7=ry, [sp]=cx, [sp,#4]=the hoisted y+1. The draft allocates r8=w, sb=tt, sl=y+1, the same r4-r7, [sp]=cx, and leaves h in r3 (call-clobbered), so reload inserts str r3,[sp,#4] before both bl sub_08003F44 sites and ldr r3,[sp,#4] at their join. Both versions want 8 long-lived values and have 7 registers; the ROM spills y + 1, the draft spills h. Nothing about the statements differs.",
-   "why_it_is_close": "Every statement, both loops, the corner test, the five-parameter frame and the pool are the ROM's.",
-   "axes_ruled_out": [
-    "Wave 52: binding the stack-passed 5th parameter to a local (tt = t;) is a real and necessary lever -- without it agbcc leaves t in memory, reloads it at each call site, and has a spare register to LICM-hoist &gUnknown_08499590 into sl, which the ROM does not do.",
-    "Wave 52: binding hh = h (and ww = w) is byte-identical -- agbcc copy-propagates the binding straight back to the incoming r3, so hh never becomes a distinct allocno. Binding locals cannot move h.",
-    "Wave 57: binding ny = y + 1; at the TOP of the outer body, which lengthens its live range and so should LOWER its global.c priority, does NOT move it -- ny still takes sl, h still stays in r3, and reload emits the same three caller-save insns. It is also strictly worse on placement. Live-range lengthening is not the axis.",
-    "Wave 57: THE PERMUTER IS NOT AVAILABLE FOR THIS FUNCTION. mcp permute fails with Error executing tool permute: 'exit_code' (a KeyError in the wrapper, not a permuter result) AND strands raw header-expanded output in work/sub_0800401C/sub_0800401C.c, overwriting the draft. That is the wave-17 permute.py abnormal-exit bug, which the docs and the wave brief both record as FIXED. It is not fixed, or it has regressed. Copy work/<fn>/<fn>.c somewhere before running permute on anything.",
-    "Wave 59 (W59-A): NOT RE-ATTEMPTED, and one correction. The wave-59 brief's headline fact for this function -- that asrs r0, r3, #1 is >> 1 and not / 2 -- was ALREADY APPLIED in the wave-52 draft, which spells both as h >> 1 and w >> 1. There was nothing to collect there.",
-    "WAVE 61: permuter 2400s / 4 threads. TWO THINGS WORTH RECORDING. First, this entry's stated baseline was stale: the work draft actually measures SIZE-EXACT at 172 bytes and 40.1%, not '19.8%, candidate 176 bytes (+4)'. Second, the search went backwards from there -- best returned 180 bytes (+8) at 25.6% -- so it was restored unchanged. A size-exact 40.1% start is a decent base for a future attempt; do not re-derive from the old number."
-   ],
-   "note": "Next attempt should go after y + 1, not after h: find a spelling of the outer-loop increment whose pseudo has a LONGER live range (priority is roughly log2(n_refs) * frequency / live_length, so longer = lower = spilled), or that is not hoisted into the inner preheader at all. Note y + 1 has only 2 refs against h's 5, so it is h's LIVE LENGTH that is losing, and shortening that is the other direction."
-  },
   "sub_080077EC": {
    "bytes": 232,
    "best": "25.9% identical, candidate 224 bytes (-8). Was -20 before wave 59.",
