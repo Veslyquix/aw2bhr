@@ -57,3 +57,47 @@ directory, imposes a time limit, and re-checks every result with
 `tools/trymatch.py`. The permuter scores by diffing objdump text, which is a
 weaker test than byte equality, so its own score is a search signal and not a
 verdict.
+
+## Ghidra
+
+This WSL checkout uses Ghidra 12.1.3 and Adoptium JDK 25.0.4.1+1, extracted
+under `vendor/`. The archives are available from their official releases:
+
+- `https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.3_build`
+- `https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4.1%2B1`
+
+Verified SHA-256 checksums:
+
+- Ghidra ZIP: `93a5d11a9ad510622acaaf908c556a7b9b764d338e78a7567f3689bf5081fd54`
+- JDK tarball: `dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e`
+
+The wrapper sets Java and Ghidra's settings/cache paths without changing the
+system Java installation:
+
+```sh
+bash tools/ghidra.sh gui
+bash tools/ghidra.sh headless <project_location> <project_name> -import <file> \
+    -processor ARM:LE:32:v4t
+```
+
+For the GBA, choose ARM v4T, and check the Thumb context for each code region.
+Ghidra's C is a starting point for understanding a function, not an agbcc
+matching candidate. Rewrite it against the repository's types and verify with
+`tools/trymatch.py`.
+
+An analyzed project for the current `aw2bhr.elf` is already at
+`vendor/ghidra-projects/aw2bhr.gpr`. To print one function's pseudocode from
+that project:
+
+```sh
+bash tools/ghidra.sh headless "$PWD/vendor/ghidra-projects" aw2bhr \
+    -process aw2bhr.elf -noanalysis \
+    -postScript DecompileNamedFunction.java sub_0800E9F4 \
+    -scriptPath "$PWD/tools/ghidra"
+```
+
+The linked ELF has malformed legacy DWARF that Ghidra logs and skips; the
+symbol-table import and ARM v4T analysis still complete. Ghidra can also infer
+incorrect return types from some agbcc epilogues, so check each result against
+`asm/` and the existing headers. Re-import if the linked ELF is rebuilt and its
+contents change.
