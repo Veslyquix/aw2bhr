@@ -48,18 +48,13 @@
  * recorded residual was never fake in the W77-A sense -- but this body is not
  * plausible original source, and promotion should be a coordinator decision.
  *
- * Keep the clean-symbol Unk30013D0 member access and the `||` guard shape;
+ * Keep the clean-symbol BattleUnit member access and the `||` guard shape;
  * both remain required. */
 #include "proc.h"
 struct Tbl49A2A6
 {
     /* 0x00 */ s16 unk00;
     /* 0x02 */ s16 unk02[0x100];
-};
-struct Unk30013D0
-{
-    /* 0x00 */ u8 filler_00[0x14];
-    /* 0x14 */ u16 unk14;
 };
 
 void sub_0802B3AC(s16 a, s16 b, s16 c)
@@ -84,7 +79,7 @@ void sub_0802B3AC(s16 a, s16 b, s16 c)
         sub_080251D8(gUnknown_03003F38);
         x = (u16)gUnknown_0849A2A6[c * 3] + a + 0x18;
         sub_08037200(x, b - 0x14 - (s8)d,
-                     ((struct Unk30013D0 *)gUnknown_030013D0)->unk14, 0x1a6);
+                     gBattleAttacker->displayDamage, 0x1a6);
         return;
     }
 
@@ -93,5 +88,5 @@ void sub_0802B3AC(s16 a, s16 b, s16 c)
                  &gUnknown_03003100.pos);
     x = (u16)((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[c * 3] + a + 0x1b;
     sub_08037200(x, b - 0x14 - (s8)d,
-                 ((struct Unk30013D0 *)gUnknown_030013D0)->unk14, 0x1a6);
+                 gBattleAttacker->displayDamage, 0x1a6);
 }

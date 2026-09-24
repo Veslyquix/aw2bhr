@@ -2657,34 +2657,34 @@ void sub_08023860(void);
  * `ldrb [r3,#4]`, the unk00->unk04_0 chain c_08024DDC.c already models);
  * r1 is compared against 1 with no entry narrowing, so `int`; r2 opens
  * `lsls #0x18; lsrs #0x18`, so `u8`. */
-void sub_08024C58(struct Unk030013D0 *, int, u8);
+void sub_08024C58(struct BattleUnit *, int, u8);
 /* Wave 36 (W36-A). PROMOTED in src/decomp/c_08024A2C.c with no declaration
  * anywhere; signature copied verbatim from that definition, not re-derived.
  * It blocked sub_080251D8 and sub_08024F20. */
-void sub_08024A2C(struct Unk030013D0 *, s16);
+void sub_08024A2C(struct BattleUnit *, s16);
 /* Wave 36 (W36-A). Six more PROMOTED-but-undeclared callees, blocking
  * sub_08024C58. Signatures copied verbatim from src/unit.c.
  * `struct Unk43304` is a FILE-LOCAL tag there; declaring it incomplete
  * here keeps that file compiling unchanged and callers cast onto it -- do not
  * invent a body for it. */
 struct Unk43304;
-struct Unk08024ABCArg;
-void sub_08024ABC(struct Unk08024ABCArg *, struct Unk08024ABCArg *, s16, u8);
+struct BattleUnit;
+void sub_08024ABC(struct BattleUnit *, struct BattleUnit *, s16, u8);
 /* Wave 36 (W36-A) RETYPES sub_08024ED8 from the file-local `struct Unk8024ED8 *`
  * that c_08024ED8.c invented ("the record itself is not modelled -- only +8 is
- * reached here") to the shared struct Unk030013D0, and the evidence is a CALL
+ * reached here") to the shared struct BattleUnit, and the evidence is a CALL
  * SITE, which is the only place it could come from: sub_08024F20 hands it
  * gUnknown_030013D0 and gUnknown_030013B0, the same two records it has just
  * passed to sub_08024A2C, sub_08024ABC, sub_08024C58 and sub_08024E60. The two
  * models agree where they overlap -- Unk8024ED8's `s16 unk08` is
- * Unk030013D0's unk08, the field c_08024DDC.c writes and tests `>= 0`.
+ * BattleUnit's remainingHp, the field c_08024DDC.c writes and tests `>= 0`.
  *   It is BYTE-VISIBLE and that is how it was found: with two different tags
  * naming one symbol, agbcc emits a -fforce-addr .rodata word for one reference
  * and a plain inline pool word for the other, and the ROM shares ONE word
  * (0x08090A38) between them. Same tag on both references, one word, match.
  * c_08024ED8.c is edited to agree and re-verified byte-for-byte. */
-void sub_08024ED8(struct Unk030013D0 *, struct Unk030013D0 *);
-void sub_08024E60(struct Unk030013D0 *, struct Unk030013D0 *);
+void sub_08024ED8(struct BattleUnit *, struct BattleUnit *);
+void sub_08024E60(struct BattleUnit *, struct BattleUnit *);
 int sub_08043304(struct Unk43304 *);
 int sub_0804334C(struct Unk43304 *);
 int sub_0804338C(struct Unk43304 *);
@@ -9826,12 +9826,12 @@ void sub_080439A8(int *, int *, int *, int, int, int, int, int *);
 /* ---- wave 35 (W35-C): blocks 0x08021-0x08025 ---- */
 /* Promoted from the MATCHED sub_08024DDC; declared here so sub_08024E60 (which
  * calls it twice, the second time with its arguments swapped) can see it. Both
- * parameters are the gUnknown_030013D0 record -- see struct Unk030013D0 in
+ * parameters are the gUnknown_030013D0 record -- see struct BattleUnit in
  * unknown-globals.h for how the layout was measured. VOID, and that is settled
  * from the callee rather than guessed: sub_08024DDC ends `pop {r0}; bx r0`,
  * which overwrites any result, and sub_08024E60 reads nothing after either
  * `bl`. */
-void sub_08024DDC(struct Unk030013D0 *, struct Unk030013D0 *);
+void sub_08024DDC(struct BattleUnit *, struct BattleUnit *);
 /* TWO arguments, both materialised immediately before the `bl` as bare
  * `movs rN,#imm` (sub_080246B4 calls it as (1, 8) and (0, 8) from two arms of
  * one switch), and the result is discarded. `int` is the weakest type that

@@ -117,7 +117,7 @@ int GetTerrainDefense(int a1, s8 a2, u8 a3)
 
 asm(".global sub_080249EC\n.thumb_set sub_080249EC, GetTerrainDefense\n");
 
-void sub_08024A2C(struct Unk030013D0 *a1, s16 a2)
+void sub_08024A2C(struct BattleUnit *a1, s16 a2)
 {
     struct Unk08499594 *e;
     struct Map *map;
@@ -125,18 +125,18 @@ void sub_08024A2C(struct Unk030013D0 *a1, s16 a2)
     int t;
 
     e = &gUnits[a2];
-    a1->unk00 = e;
+    a1->unit = e;
 
     map = gMap;
     idx = map->rowOffset[e->unk03] + e->unk02;
     t = map->terrain[idx] & 0x1f;
 
-    a1->unk04 = t;
-    a1->unk06 = (s8)GetTerrainDefense((u16)(((e - gUnits) >> 6) + 1),
+    a1->terrainId = t;
+    a1->terrainDefense = (s8)GetTerrainDefense((u16)(((e - gUnits) >> 6) + 1),
                                  t, e->unk00);
-    a1->unk08 = a1->unk00->unk04_0;
-    a1->unk0a = a1->unk00->unk04_7;
-    a1->unk18 = 0;
-    a1->unk10 = 0;
-    a1->unk12 = 0;
+    a1->remainingHp = a1->unit->unk04_0;
+    a1->ammo = a1->unit->unk04_7;
+    a1->attackType = 0;
+    a1->baseDamage = 0;
+    a1->hpLoss = 0;
 }

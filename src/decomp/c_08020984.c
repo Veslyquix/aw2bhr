@@ -134,7 +134,7 @@ void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
             if (n)
             {
                 sub_080251BC(gUnknown_03003F38, 0, &gUnknown_03003100.pos);
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 != 0)
+                if (gBattleAttacker->attackType != 0)
                     gUnknown_03003340[yy][xx] = v;
             }
             else
@@ -145,7 +145,7 @@ void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
                 if (sub_08026F9C(gUnknown_03003F38, t) == 1)
                     continue;
                 sub_080251BC(gUnknown_03003F38, t, &gUnknown_03003100.pos);
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 != 0)
+                if (gBattleAttacker->attackType != 0)
                     gUnknown_03003340[yy][xx] = v;
             }
         }

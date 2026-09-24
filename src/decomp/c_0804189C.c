@@ -66,7 +66,7 @@ void sub_0804189C(int a1, int a2, int a3)
     v = gUnknown_020288B4[
         gMap->rowOffset[a2] + a1];
 
-    lim = gUnknown_030013D0;
+    lim = (u8 *)gBattleAttacker;
 
     if (v < *(s16 *)(lim + 0x14))
         v = 0;

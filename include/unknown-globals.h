@@ -6079,8 +6079,8 @@ extern u16 gUnknown_03000F7C;
  * gUnknown_030013EC is a separate symbol only 0x1c in. sub_080250E8 calls
  * sub_0802505C twice, on this and on `*gUnknown_08090A40`, so whatever the
  * record is, there is more than one of them and one is reached by pointer.
- * `u8 []` is the weakest model that reproduces the clean pool word; widen it to
- * a struct when sub_0802505C or sub_080250E8 is matched. */
+ * The ABI symbol remains `u8 []` for clean pool words; the typed C views
+ * below share one BattleUnit layout. */
 extern u8 gUnknown_030013D0[];
 /* WAVE 35 (W35-C): the record's layout is now settled for +0x00..+0x14 and the
  * struct below is that model, derived from sub_08024DDC (MATCHED byte-for-byte
@@ -6102,24 +6102,24 @@ extern u8 gUnknown_030013D0[];
  * have given `ldrh` plus an explicit shift pair. +0x08 agrees with the +0x08
  * s16 already recorded for this record via sub_08058A2C.
  *
- * The gaps stay `filler_` because nothing this wave reaches them; +0x04 and
- * +0x0a are known u16 from the note above but are not needed here and are left
- * unsplit rather than guessed at. Extent is still open -- see the paragraph
- * above; this struct models the head of the record only. */
-struct Unk030013D0 /* head only; extent unproved */
+ * Xenesis identifies +0x04 as the terrain ID. The code copies the unit
+ * ammo bitfield into +0x0a, so that field is remaining ammunition. +0x18
+ * records the attack choice used to index presentation data. Only +0x16
+ * remains filler; the full extent is still unproved. */
+struct BattleUnit /* head only; extent unproved */
 {
-    /* 0x00 */ struct Unk08499594 *unk00;
-    /* 0x04 */ u16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s16 unk08;
-    /* 0x0a */ u16 unk0a;
-    /* 0x0c */ s16 unk0c;
-    /* 0x0e */ s16 unk0e;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
+    /* 0x00 */ struct Unk08499594 *unit;
+    /* 0x04 */ u16 terrainId;
+    /* 0x06 */ s16 terrainDefense;
+    /* 0x08 */ s16 remainingHp;
+    /* 0x0a */ u16 ammo;
+    /* 0x0c */ s16 damage;
+    /* 0x0e */ s16 totalDefense;
+    /* 0x10 */ s16 baseDamage;
+    /* 0x12 */ s16 hpLoss;
+    /* 0x14 */ s16 displayDamage;
     /* 0x16 */ u8 filler_16[2];
-    /* 0x18 */ s16 unk18;
+    /* 0x18 */ s16 attackType;
 };
 /* The second record of that same type, and the one that pins them as two
  * instances rather than one object: sub_08041B98 reads +0x18 as `ldrsh` and
@@ -6128,6 +6128,10 @@ struct Unk030013D0 /* head only; extent unproved */
  * sub_080252E8 stub -- gUnknown_030013D0 first, then this one, which is source
  * order and not address order. Same `u8 []` model and the same reason. */
 extern u8 gUnknown_030013B0[];
+
+/* Typed C views; the original linker symbols remain for immutable asm. */
+#define gBattleDefender ((struct BattleUnit *)gUnknown_030013B0)
+#define gBattleAttacker ((struct BattleUnit *)gUnknown_030013D0)
 /* Not a global: the `-fforce-addr` address-constant word for the symbol above,
  * and evidence that code-0801D390.s has a SECOND pool block besides the
  * documented 0x0809092C-0x08090C2x one. 0x0816D938-0x0816D9BC is 35 consecutive

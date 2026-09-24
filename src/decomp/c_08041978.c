@@ -28,7 +28,7 @@
  * for that size.
  *
  * The head's pointer is gUnknown_030040D8 CAST TO struct Unk08499594 *, NOT
- * `((struct Unk030013D0 *)gUnknown_030013D0)->unk00`. Both are the same runtime
+ * `gBattleAttacker->unit`. Both are the same runtime
  * value and both compile, but only gUnknown_030040D8 puts the five force-addr
  * words in the ROM's slots -- and it is what makes the two halves symmetric:
  * `GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00)` against
@@ -150,12 +150,12 @@ void sub_08041978(u8 a1, int a2)
         gUnknown_03004580[gUnknown_03004484][1] = gUnknown_0809131E[unit->unk00];
 
         gUnknown_03004580[gUnknown_03003F50][2] =
-            gUnknown_08091318[((struct Unk030013D0 *)gUnknown_030013D0)->unk18];
+            gUnknown_08091318[gBattleAttacker->attackType];
         gUnknown_03004580[gUnknown_03004484][2] =
-            gUnknown_08091318[((struct Unk030013D0 *)gUnknown_030013B0)->unk18];
+            gUnknown_08091318[gBattleDefender->attackType];
 
-        gUnknown_03004580[gUnknown_03003F50][3] = ((struct Unk030013D0 *)gUnknown_030013D0)->unk04;
-        gUnknown_03004580[gUnknown_03004484][3] = ((struct Unk030013D0 *)gUnknown_030013B0)->unk04;
+        gUnknown_03004580[gUnknown_03003F50][3] = gBattleAttacker->terrainId;
+        gUnknown_03004580[gUnknown_03004484][3] = gBattleDefender->terrainId;
 
         gUnknown_03004580[gUnknown_03003F50][4] =
             gPlayers[(struct Unk41978Army *)sel
@@ -167,11 +167,11 @@ void sub_08041978(u8 a1, int a2)
         gUnknown_03004580[gUnknown_03003F50][5] = sel->unk04_0;
         gUnknown_03004580[gUnknown_03004484][5] = unit->unk04_0;
 
-        gUnknown_03004580[gUnknown_03003F50][6] = ((struct Unk030013D0 *)gUnknown_030013D0)->unk08;
-        gUnknown_03004580[gUnknown_03004484][6] = ((struct Unk030013D0 *)gUnknown_030013B0)->unk08;
+        gUnknown_03004580[gUnknown_03003F50][6] = gBattleAttacker->remainingHp;
+        gUnknown_03004580[gUnknown_03004484][6] = gBattleDefender->remainingHp;
 
-        gUnknown_03004580[gUnknown_03003F50][7] = ((struct Unk030013D0 *)gUnknown_030013D0)->unk06;
-        gUnknown_03004580[gUnknown_03004484][7] = ((struct Unk030013D0 *)gUnknown_030013B0)->unk06;
+        gUnknown_03004580[gUnknown_03003F50][7] = gBattleAttacker->terrainDefense;
+        gUnknown_03004580[gUnknown_03004484][7] = gBattleDefender->terrainDefense;
 
         gUnknown_03004528[gUnknown_03003F50] = (u8 *)sel;
         gUnknown_03004528[gUnknown_03004484] = (u8 *)unit;
@@ -185,11 +185,11 @@ void sub_08041978(u8 a1, int a2)
 
         c = GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00);
 
-        if (((struct Unk030013D0 *)gUnknown_030013D0)->unk08 != 0)
+        if (gBattleAttacker->remainingHp != 0)
         {
             int q;
             int diff;
-            q = Div(((struct Unk030013D0 *)gUnknown_030013D0)->unk08 - 1, 10);
+            q = Div(gBattleAttacker->remainingHp - 1, 10);
             diff = t - 1;
             diff -= q;
             x1 = diff * c;
@@ -204,11 +204,11 @@ void sub_08041978(u8 a1, int a2)
 
         c = GetCoPriceMultiplier(army2, unit->unk00);
 
-        if (((struct Unk030013D0 *)gUnknown_030013B0)->unk08 != 0)
+        if (gBattleDefender->remainingHp != 0)
         {
             int q;
             int diff;
-            q = Div(((struct Unk030013D0 *)gUnknown_030013B0)->unk08 - 1, 10);
+            q = Div(gBattleDefender->remainingHp - 1, 10);
             diff = t - 1;
             diff -= q;
             x2 = diff * c;

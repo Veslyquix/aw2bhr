@@ -100,7 +100,7 @@ int sub_080587FC(int flag)
                 yp = (u32)y << 16;
                 *(int *)&pos = (xp >> 16) | yp;
                 sub_080251BC(gUnknown_03003F38, 0, &pos);
-                lim = gUnknown_030013D0;
+                lim = (u8 *)gBattleAttacker;
                 if (*(s16 *)(lim + 0x18) == 0)
                     continue;
                 if (flag == 0)
@@ -145,7 +145,7 @@ int sub_080587FC(int flag)
                     pos.unk02 = gUnknown_030040D8->unk03;
                 }
                 sub_080251BC(gUnknown_03003F38, u, &pos);
-                lim = gUnknown_030013D0;
+                lim = (u8 *)gBattleAttacker;
                 if (*(s16 *)(lim + 0x18) == 0)
                     continue;
                 if (sub_08058A2C(&w) == -1)

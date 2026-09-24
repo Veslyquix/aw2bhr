@@ -85,7 +85,7 @@ int sub_080413E8(void)
             {
                 sub_080251BC(gUnknown_03003F38, 0, &gUnknown_03003100.pos);
 
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 == 0)
+                if (gBattleAttacker->attackType == 0)
                     continue;
 
                 sub_080413B4(x, y, 0, (u8)v);
@@ -102,7 +102,7 @@ int sub_080413E8(void)
 
                 sub_080251BC(gUnknown_03003F38, t, &gUnknown_03003100.pos);
 
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 == 0)
+                if (gBattleAttacker->attackType == 0)
                     continue;
 
                 sub_080413B4(x, y, t, 0);
