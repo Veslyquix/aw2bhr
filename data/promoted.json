@@ -7289,96 +7289,24 @@
   ]
  },
  {
-  "file": "src/decomp/c_080247A4.c",
-  "obj": "src/decomp/c_080247A4.o",
+  "file": "src/battle.c",
+  "obj": "src/battle.o",
   "addr_hex": "0x080247A4",
   "functions": [
-   "sub_080247A4"
-  ],
-  "size": 120
- },
- {
-  "file": "src/decomp/c_0802481C.c",
-  "obj": "src/decomp/c_0802481C.o",
-  "addr_hex": "0x0802481C",
-  "functions": [
-   "sub_0802481C"
-  ],
-  "size": 20
- },
- {
-  "file": "src/decomp/c_08024830.c",
-  "obj": "src/decomp/c_08024830.o",
-  "addr_hex": "0x08024830",
-  "functions": [
-   "sub_08024830"
-  ],
-  "size": 180
- },
- {
-  "file": "src/decomp/c_080248E4.c",
-  "obj": "src/decomp/c_080248E4.o",
-  "addr_hex": "0x080248E4",
-  "functions": [
-   "sub_080248E4"
-  ],
-  "size": 20
- },
- {
-  "file": "src/decomp/c_080248F8.c",
-  "obj": "src/decomp/c_080248F8.o",
-  "addr_hex": "0x080248F8",
-  "functions": [
-   "sub_080248F8"
-  ],
-  "size": 20
- },
- {
-  "file": "src/decomp/c_0802490C.c",
-  "obj": "src/decomp/c_0802490C.o",
-  "addr_hex": "0x0802490C",
-  "functions": [
+   "sub_080247A4",
+   "sub_0802481C",
+   "sub_08024830",
+   "sub_080248E4",
+   "sub_080248F8",
    "sub_0802490C",
    "sub_08024944",
-   "sub_08024984"
-  ],
-  "size": 188
- },
- {
-  "file": "src/decomp/c_080249C8.c",
-  "obj": "src/decomp/c_080249C8.o",
-  "addr_hex": "0x080249C8",
-  "functions": [
-   "sub_080249C8"
-  ],
-  "size": 36
- },
- {
-  "file": "src/decomp/c_080249EC.c",
-  "obj": "src/decomp/c_080249EC.o",
-  "addr_hex": "0x080249EC",
-  "functions": [
-   "sub_080249EC"
-  ],
-  "size": 64
- },
- {
-  "file": "src/decomp/c_08024A2C.c",
-  "obj": "src/decomp/c_08024A2C.o",
-  "addr_hex": "0x08024A2C",
-  "functions": [
-   "sub_08024A2C"
-  ],
-  "size": 144
- },
- {
-  "file": "src/decomp/c_08024ABC.c",
-  "obj": "src/decomp/c_08024ABC.o",
-  "addr_hex": "0x08024ABC",
-  "functions": [
+   "sub_08024984",
+   "sub_080249C8",
+   "sub_080249EC",
+   "sub_08024A2C",
    "sub_08024ABC"
   ],
-  "size": 412
+  "size": 1204
  },
  {
   "file": "src/decomp/c_08024C58.c",

@@ -5437,7 +5437,7 @@
    ],
    "representative": "sub_0802481C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802481C.c",
+   "exemplar_src": "src/battle.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",

@@ -5177,7 +5177,7 @@ int sub_080433F8(int, int, int);
  * pair and misses by 4 bytes. The call-site narrowing is real but comes from
  * an explicit (u16) cast in sub_08024ABC, which is forced independently: its
  * v1/v3 are compared `bhi`, so they are u32 and cannot themselves narrow.
- * c_08024ABC.c now spells the casts and was re-verified. */
+ * src/battle.c now spells the casts and was re-verified. */
 int sub_08043070(int, int, int, int, int);
 int sub_08042D50(int, int);
 /* Wave 34 (W34-H). A number/icon blitter sub_08039F80 calls four times. The
