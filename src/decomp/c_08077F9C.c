@@ -10,7 +10,7 @@
 #include "proc.h"
 /* A near-copy of sub_08077F30 (src/decomp/c_08077F30.c): the same
  * gUnknown_08615194 record lookup and the same IsHardCampaignMode()-selected
- * unk28/unk24 ternary, published to gUnknown_030046B4. That file's comment
+ * unk28/unk24 ternary, published to gFactoryUnitSchedule. That file's comment
  * works out why the differing 0x24 / 0x28 constant folds into the base pointer
  * rather than staying an `ldr [.., #0x24]` displacement -- the two arms share
  * a tail, so only the base differs.
@@ -34,7 +34,7 @@ void sub_08077F9C(struct Unk8077F9C *proc)
 
     gPlaySt.mapID = gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
 
-    gUnknown_030046B4 = IsHardCampaignMode()
+    gFactoryUnitSchedule = IsHardCampaignMode()
         ? gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptHc
         : gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptNc;
 

@@ -4484,10 +4484,10 @@ struct Unk08615194 /* 0x30 */
                              * dereferences it. */
     /* 0x24 */ void *factoryScriptNc; /* wave 26: a pair of word slots sub_08077F30
                              * selects between with sub_0803866C() and publishes
-                             * as gUnknown_030046B4. Both are plain `ldr`s and
-                             * nothing in the ROM yet dereferences the result,
-                             * so `void *` is a guess at the pointee -- the word
-                             * width is what is proved. */
+                             * as gFactoryUnitSchedule. Both are plain `ldr`s and
+                             * sub_080607E8 dereferences the result as unit-ID bytes,
+                             * `void *` retains the original pointer type; the word
+                             * width and byte-indexed table are now proved. */
     /* 0x28 */ void *factoryScriptHc;
     /* 0x2c */ u8 (*unk2c)(void); /* wave 35 (W35-B): a FUNCTION POINTER, and
                              * sub_08077EDC is decisive about both halves of the
@@ -7258,8 +7258,8 @@ extern volatile u8 *gUnknown_030046B0;
 /* A word slot four bytes past gUnknown_030046B0 and unrelated to it: wave 26's
  * sub_08077F30 publishes gUnknown_08615194[i].unk24 or .unk28 into it, picked
  * by sub_0803866C(). Plain `str`, so a word; `void *` follows the source
- * members and the pointee is unproved -- no reader has been matched yet. */
-extern void *gUnknown_030046B4;
+ * members; sub_080607E8 reads three unit IDs per day slot. */
+extern void *gFactoryUnitSchedule;
 /* 64 bytes, indexed `& 0x3f`. VOLATILE: sub_0805AC88 (`= 0`) and the
  * increment at 0x0805AC28 (`ldrb; adds #1; ldrb; strb`) both emit a dead
  * `ldrb` of the element's own address around the `strb` -- the

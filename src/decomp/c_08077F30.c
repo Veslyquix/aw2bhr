@@ -29,7 +29,7 @@ void sub_08077F30(void)
 
     gPlaySt.mapID = gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
 
-    gUnknown_030046B4 = IsHardCampaignMode()
+    gFactoryUnitSchedule = IsHardCampaignMode()
         ? gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptHc
         : gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptNc;
 

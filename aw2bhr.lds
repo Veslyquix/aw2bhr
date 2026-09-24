@@ -644,7 +644,7 @@ SECTIONS
 		. = 0x004680; gUnknown_03004680 = .;
 		. = 0x0046AC; gUnknown_030046AC = .;
 		. = 0x0046B0; gUnknown_030046B0 = .;
-		. = 0x0046B4; gUnknown_030046B4 = .;
+		. = 0x0046B4; gFactoryUnitSchedule = .; gUnknown_030046B4 = .;
 		. = 0x0046B8; gUnknown_030046B8 = .;
 		. = 0x0046C0; gUnknown_030046C0 = .;
 		. = 0x0046CC; gUnknown_030046CC = .;

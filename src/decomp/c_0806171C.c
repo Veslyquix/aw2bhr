@@ -106,7 +106,7 @@ void sub_08061788(u16 a)
  * separate statements interleave the pool loads with their stores instead. */
 void RunAiTurn(void)
 {
-    gUnknown_030046B4 = IsHardCampaignMode()
+    gFactoryUnitSchedule = IsHardCampaignMode()
         ? gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptHc
         : gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptNc;
 
@@ -122,7 +122,7 @@ void RunAiTurn(void)
     gUnknown_03004780 = 1;
     gUnknown_030044D8 = gUnknown_03004770 = 0;
 
-    if (gPlayers[gUnknown_030033EC].teamColor == 5 && gUnknown_030046B4 != 0)
+    if (gPlayers[gUnknown_030033EC].teamColor == 5 && gFactoryUnitSchedule != 0)
         sub_080607E8();
 }
 
