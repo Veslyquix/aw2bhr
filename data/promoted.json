@@ -16368,38 +16368,14 @@
   ]
  },
  {
-  "file": "src/decomp/c_08042B70.c",
-  "obj": "src/decomp/c_08042B70.o",
+  "file": "src/unit.c",
+  "obj": "src/unit.o",
   "addr_hex": "0x08042B70",
   "functions": [
    "sub_08042B70",
-   "sub_08042B84"
-  ],
-  "size": 44
- },
- {
-  "file": "src/decomp/c_08042B9C.c",
-  "obj": "src/decomp/c_08042B9C.o",
-  "addr_hex": "0x08042B9C",
-  "functions": [
-   "sub_08042B9C"
-  ],
-  "size": 116
- },
- {
-  "file": "src/decomp/c_08042C10.c",
-  "obj": "src/decomp/c_08042C10.o",
-  "addr_hex": "0x08042C10",
-  "functions": [
-   "sub_08042C10"
-  ],
-  "size": 20
- },
- {
-  "file": "src/decomp/c_08042C24.c",
-  "obj": "src/decomp/c_08042C24.o",
-  "addr_hex": "0x08042C24",
-  "functions": [
+   "sub_08042B84",
+   "sub_08042B9C",
+   "sub_08042C10",
    "sub_08042C24",
    "sub_08042C68",
    "sub_08042C9C",
@@ -16407,43 +16383,11 @@
    "sub_08042CF8",
    "sub_08042D1C",
    "sub_08042D50",
-   "sub_08042D84"
-  ],
-  "size": 424
- },
- {
-  "file": "src/decomp/c_08042DCC.c",
-  "obj": "src/decomp/c_08042DCC.o",
-  "addr_hex": "0x08042DCC",
-  "functions": [
-   "sub_08042DCC"
-  ],
-  "size": 20
- },
- {
-  "file": "src/decomp/c_08042DE0.c",
-  "obj": "src/decomp/c_08042DE0.o",
-  "addr_hex": "0x08042DE0",
-  "functions": [
+   "sub_08042D84",
+   "sub_08042DCC",
    "sub_08042DE0",
-   "sub_08042DFC"
-  ],
-  "size": 56
- },
- {
-  "file": "src/decomp/c_08042E18.c",
-  "obj": "src/decomp/c_08042E18.o",
-  "addr_hex": "0x08042E18",
-  "functions": [
-   "sub_08042E18"
-  ],
-  "size": 20
- },
- {
-  "file": "src/decomp/c_08042E2C.c",
-  "obj": "src/decomp/c_08042E2C.o",
-  "addr_hex": "0x08042E2C",
-  "functions": [
+   "sub_08042DFC",
+   "sub_08042E18",
    "sub_08042E2C",
    "sub_08042E64",
    "sub_08042E84",
@@ -16457,117 +16401,29 @@
    "sub_08042FC4",
    "sub_08042FFC",
    "sub_0804301C",
-   "sub_08043050"
-  ],
-  "size": 580
- },
- {
-  "file": "src/decomp/c_08043070.c",
-  "obj": "src/decomp/c_08043070.o",
-  "addr_hex": "0x08043070",
-  "functions": [
-   "sub_08043070"
-  ],
-  "size": 64
- },
- {
-  "file": "src/decomp/c_080430B0.c",
-  "obj": "src/decomp/c_080430B0.o",
-  "addr_hex": "0x080430B0",
-  "functions": [
+   "sub_08043050",
+   "sub_08043070",
    "sub_080430B0",
    "sub_08043120",
    "sub_08043190",
-   "sub_08043200"
-  ],
-  "size": 448
- },
- {
-  "file": "src/decomp/c_08043270.c",
-  "obj": "src/decomp/c_08043270.o",
-  "addr_hex": "0x08043270",
-  "functions": [
+   "sub_08043200",
    "sub_08043270",
-   "sub_080432A8"
-  ],
-  "size": 112
- },
- {
-  "file": "src/decomp/c_080432E0.c",
-  "obj": "src/decomp/c_080432E0.o",
-  "addr_hex": "0x080432E0",
-  "functions": [
-   "sub_080432E0"
-  ],
-  "size": 36
- },
- {
-  "file": "src/decomp/c_08043304.c",
-  "obj": "src/decomp/c_08043304.o",
-  "addr_hex": "0x08043304",
-  "functions": [
+   "sub_080432A8",
+   "sub_080432E0",
    "sub_08043304",
    "sub_0804334C",
-   "sub_0804338C"
-  ],
-  "size": 180
- },
- {
-  "file": "src/decomp/c_080433B8.c",
-  "obj": "src/decomp/c_080433B8.o",
-  "addr_hex": "0x080433B8",
-  "functions": [
+   "sub_0804338C",
    "sub_080433B8",
    "sub_080433C8",
    "sub_080433D8",
-   "sub_080433E8"
-  ],
-  "size": 64
- },
- {
-  "file": "src/decomp/c_080433F8.c",
-  "obj": "src/decomp/c_080433F8.o",
-  "addr_hex": "0x080433F8",
-  "functions": [
-   "sub_080433F8"
-  ],
-  "size": 32
- },
- {
-  "file": "src/decomp/c_08043418.c",
-  "obj": "src/decomp/c_08043418.o",
-  "addr_hex": "0x08043418",
-  "functions": [
-   "sub_08043418"
-  ],
-  "size": 348
- },
- {
-  "file": "src/decomp/c_08043574.c",
-  "obj": "src/decomp/c_08043574.o",
-  "addr_hex": "0x08043574",
-  "functions": [
-   "sub_08043574"
-  ],
-  "size": 28
- },
- {
-  "file": "src/decomp/c_08043590.c",
-  "obj": "src/decomp/c_08043590.o",
-  "addr_hex": "0x08043590",
-  "functions": [
-   "sub_08043590"
-  ],
-  "size": 124
- },
- {
-  "file": "src/decomp/c_0804360C.c",
-  "obj": "src/decomp/c_0804360C.o",
-  "addr_hex": "0x0804360C",
-  "functions": [
+   "sub_080433E8",
+   "sub_080433F8",
+   "sub_08043418",
+   "sub_08043574",
+   "sub_08043590",
    "sub_0804360C"
   ],
-  "size": 36
+  "size": 2752
  },
  {
   "file": "src/decomp/c_08043630.c",

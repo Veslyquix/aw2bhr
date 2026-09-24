@@ -2663,10 +2663,10 @@ void sub_08024C58(struct Unk030013D0 *, int, u8);
  * It blocked sub_080251D8 and sub_08024F20. */
 void sub_08024A2C(struct Unk030013D0 *, s16);
 /* Wave 36 (W36-A). Six more PROMOTED-but-undeclared callees, blocking
- * sub_08024C58. Signatures copied verbatim from src/decomp/c_08043304.c,
- * c_08042C24.c and c_08042E2C.c. `struct Unk43304` is a FILE-LOCAL tag in
- * c_08043304.c; declaring it incomplete here keeps that file compiling
- * unchanged and callers cast onto it -- do not invent a body for it. */
+ * sub_08024C58. Signatures copied verbatim from src/unit.c.
+ * `struct Unk43304` is a FILE-LOCAL tag there; declaring it incomplete
+ * here keeps that file compiling unchanged and callers cast onto it -- do not
+ * invent a body for it. */
 struct Unk43304;
 struct Unk08024ABCArg;
 void sub_08024ABC(struct Unk08024ABCArg *, struct Unk08024ABCArg *, s16, u8);
@@ -3981,7 +3981,7 @@ void sub_08043BF8(int, int);
  * -- and sub_08043AC0 takes it AGAIN on its own parameter, which is why its
  * body opens with two chained __modsi3 calls on one value.
  * sub_08017860, sub_08042FFC and sub_08043D84 are already PROMOTED
- * (src/decomp/c_08017860.c, c_08042E2C.c, c_08043D84.c) and were never
+ * (src/decomp/c_08017860.c, src/unit.c, c_08043D84.c) and were never
  * declared here; the signatures are copied verbatim from those definitions.
  * sub_080436DC's third argument is `strh`-stored into the u16
  * gUnknown_030005D0 and its one readable caller (sub_0804360C) loads a u16
@@ -4735,7 +4735,7 @@ void sub_0804438C(int, int);
  * sub_08025E08 takes three bytes of gUnknown_030046C0 and its result is
  * discarded (sub_080600F0 ends `pop {r0}`). sub_08042634 takes two, sub_08042C24
  * four in registers plus a fifth pushed as `str r4, [sp]` -- that fifth is the
- * `ProcPtr` parent its promoted definition in src/decomp/c_08042C24.c names,
+ * `ProcPtr` parent its promoted definition in src/unit.c names,
  * NOT an int, and sub_08060474 passes it as PROC_TREE_3 (wave 31 declared it
  * `int` first and proto_check caught it). sub_080425FC takes the one u8
  * recorded above with sub_08041978.
@@ -5071,7 +5071,7 @@ void sub_080438FC(int, int, int);
 bool8 sub_080442E4(int);
 
 /* Wave 36 (W36-B), the sub_08042650 group. The first three are copied verbatim
- * out of src/decomp/ (c_08042E2C.c, c_080265B0.c, c_08024058.c) rather than
+ * from src/unit.c and src/decomp/ (c_080265B0.c, c_08024058.c) rather than
  * re-derived -- all three are promoted, byte-verified and were undeclared.
  * sub_080409E8 is the only one derived here, from sub_08042650's call site: it
  * is 0x08042's undeclared callee and nothing in src/decomp defines it. FIVE
@@ -6658,7 +6658,7 @@ void sub_080425B8(void);
  * sub_080433E8 is the one-argument partner whose result is added to it, exactly
  * as sub_080433B8 / sub_080433C8 pair with theirs. sub_08043050's result is
  * masked `& 0x80` by sub_08042C68, so it is at least 8 bits wide; the promoted
- * definition in src/decomp/c_08042E2C.c names `u32`, and u32 vs int is
+ * definition in src/unit.c names `u32`, and u32 vs int is
  * word-width both ways -- byte-neutral at every call site -- so the definition
  * wins. Its argument is forwarded from a bare register. */
 int sub_080432A8(int, int);
@@ -7870,7 +7870,7 @@ void sub_08035760(ProcPtr, void *);
  * Its own fan-in is 0, so nothing constrains this from the caller side.
  *
  * The last three are the "PROMOTED BUT NEVER DECLARED" trap: all are already
- * matched, in src/decomp/c_0801BD00.c and src/decomp/c_08042E2C.c. The types
+ * matched, in src/decomp/c_0801BD00.c and src/unit.c. The types
  * below are COPIED FROM THOSE DEFINITIONS and were not re-derived. */
 void sub_08035850(int, int, int);
 void sub_08035BC4(s16, s16, s16);
@@ -8410,7 +8410,7 @@ void sub_080606A0(void);
  * (cases 0xd and 0xe) that had no declaration and no promoted body -- every
  * other arm of that dispatcher is either declared above or defined in
  * src/decomp (c_080600F0.c, c_080601C8.c, c_080601F0.c, c_080606BC.c,
- * c_0802C16C.c, c_08042B70.c), and all of those are `void (void)`.
+ * c_0802C16C.c, src/unit.c), and all of those are `void (void)`.
  * sub_0805FFA0 reaches both through `mov pc, r0` with no argument setup on
  * any path into the table and discards the result, and the two globals notes
  * on struct Unk08499594.unk09 (W32-A) and gUnknown_030046C0 (W49-E) describe
@@ -8425,7 +8425,7 @@ void sub_08060170(void);
  *   sub_080601F0/08060264/080602C4  src/decomp/c_080601F0.c
  *   sub_080606BC            src/decomp/c_080606BC.c
  *   sub_0802C16C            src/decomp/c_0802C16C.c
- *   sub_08042B84            src/decomp/c_08042B70.c */
+ *   sub_08042B84            src/unit.c */
 void sub_080600F0(void);
 void sub_080601C8(void);
 void sub_080601DC(void);
@@ -9091,9 +9091,9 @@ void sub_0802361C(void);
  * stack word so it is taken wide, and the sixth is a plain count. Arguments 1,
  * 2 and 4 arrive as bare `ldrb`s. */
 /* Wave 33 orchestrator: second parameter is `int`, not `u8` --
- * src/decomp/c_08042C24.c is PROMOTED and defines it that way, and a `u8`
+ * src/unit.c is PROMOTED and defines it that way, and a `u8`
  * declaration makes every caller narrow. Its only promoted caller
- * (src/decomp/c_080433B8.c) re-verified byte-identical after this change. */
+ * (src/unit.c) re-verified byte-identical after this change. */
 int sub_08042D84(int, int);
 /* Wave 36 (W36-L): RETYPED from `void sub_080210C8(u8, u8, s16, u8, int, int)`
  * on the CALLEE's own prologue, which is the only side that can show this.
@@ -9649,7 +9649,7 @@ void sub_08016974(int);
 void sub_08025D20(int);
 void sub_08025D40(int);
 void sub_08026588(u8, u8, u8);
-/* Promoted in src/decomp/c_08042C24.c as `int sub_08042C68(int, int)`; declared
+/* Promoted in src/unit.c as `int sub_08042C68(int, int)`; declared
  * here so sub_080253B0 can see it. */
 int sub_08042C68(int, int);
 void sub_08025B24(struct Unk08499594 *, int);
