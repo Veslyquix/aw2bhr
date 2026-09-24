@@ -16,7 +16,7 @@
  * a tail, so only the base differs.
  *
  * What is new here is the proc tail: a straight branch on +0x3c between
- * calling the proc's own +0x38 hook and going to label 8 after sub_0803BD54.
+ * calling the proc's own +0x38 hook and going to label 8 after LockMainMenu.
  * `bl _call_via_r0` is nullary. The index is re-read from
  * gUnknown_0202FDFC.unk0c after the `bl` because IsHardCampaignMode may write it,
  * while the three pool bases stay in r4/r5/r6 across the call as
@@ -42,7 +42,7 @@ void sub_08077F9C(struct Unk8077F9C *proc)
         proc->unk38();
     else
     {
-        sub_0803BD54();
+        LockMainMenu();
         Proc_Goto(proc, 8);
     }
 }

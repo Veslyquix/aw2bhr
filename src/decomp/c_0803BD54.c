@@ -4,26 +4,32 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803BD54.
- * sub_0803BD54 @ 0x0803BD54, sub_0803BD60 @ 0x0803BD60, sub_0803BD6C @ 0x0803BD6C
+ * LockMainMenu @ 0x0803BD54, UnlockMainMenu @ 0x0803BD60, GetMainMenuLock @ 0x0803BD6C
  *
- * Named per src/aw2e-names.s (proc-table labels auto-generated from
- * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
- * below so every other unit keeps resolving them unchanged.
+ * The mainMenu third of gGameLock (include/lock.h): a plain set/clear/read
+ * trio. GetMainMenuLock is the PROC_GOTO_IF_NO predicate of ProcScr_MainMenu2,
+ * which is where AW2E.lua's MainMenu2_GOTO_IF_NO_0803BD6D came from; the lock
+ * name is kept because the other two thirds of the same aggregate use it and
+ * because the function has callers outside that script. The old sub_XXXXXXXX
+ * symbols are kept as linker aliases below so every other unit keeps resolving
+ * them unchanged.
  */
 
-void sub_0803BD54(void)
+void LockMainMenu(void)
 {
-    gUnknown_030030F0.unk02 = 1;
+    gGameLock.mainMenu = 1;
 }
 
-void sub_0803BD60(void)
+void UnlockMainMenu(void)
 {
-    gUnknown_030030F0.unk02 = 0;
+    gGameLock.mainMenu = 0;
 }
 
-u8 MainMenu2_GOTO_IF_NO_0803BD6D(void)
+u8 GetMainMenuLock(void)
 {
-    return gUnknown_030030F0.unk02;
+    return gGameLock.mainMenu;
 }
 
-asm(".global sub_0803BD6C\n.thumb_set sub_0803BD6C, MainMenu2_GOTO_IF_NO_0803BD6D\n");
+asm(".global sub_0803BD54\n.thumb_set sub_0803BD54, LockMainMenu\n"
+    ".global sub_0803BD60\n.thumb_set sub_0803BD60, UnlockMainMenu\n"
+    ".global sub_0803BD6C\n.thumb_set sub_0803BD6C, GetMainMenuLock\n");

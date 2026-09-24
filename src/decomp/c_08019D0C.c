@@ -80,7 +80,7 @@ void sub_08019DA8(ProcPtr proc)
     sub_0801A538(0, 1, 6, 0xc);
     sub_08022580();
     sub_080227A8();
-    DecrementCoPowerDepthIfNonzero();
+    DecrementMapLock();
 }
 
 /* This call site is the only evidence for sub_08022AD0's parameter widths, and

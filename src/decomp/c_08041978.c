@@ -129,7 +129,7 @@ void sub_08041978(u8 a1, int a2)
     if (a1 == 0)
     {
         ((struct Unk08499594 *)gUnknown_030040D8)->unk04_7--;
-        sub_08034F48();
+        LockUnitSelection();
         sub_080424FC();
     }
     else

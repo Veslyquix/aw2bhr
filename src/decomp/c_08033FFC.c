@@ -83,7 +83,7 @@ void LinkC2_IDLE_08034131(struct Unk34130Proc *proc)
 
     if (gpKeySt->pressed & 2)
     {
-        sub_0803BD60();
+        UnlockMainMenu();
         sub_0803B4DC(0x66);
         Proc_Goto(proc, 2);
     }

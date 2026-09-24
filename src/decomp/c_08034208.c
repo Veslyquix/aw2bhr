@@ -18,7 +18,7 @@
 void LinkC2_08034209(ProcPtr parent)
 {
     Proc_StartBlocking(gUnknown_0849BC44[gUnknown_0849B060->unk0d], parent);
-    sub_0803BD54();
+    LockMainMenu();
 }
 
 asm(".global sub_08034208\n.thumb_set sub_08034208, LinkC2_08034209\n");

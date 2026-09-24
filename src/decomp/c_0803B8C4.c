@@ -17,7 +17,7 @@ void sub_0803B8C4(void)
 
 extern void sub_0803BDBC(void);
 extern void sub_0803BE60(void);
-extern u8 MainMenu2_GOTO_IF_NO_0803BD6D(void);
+extern u8 GetMainMenuLock(void);
 extern void sub_0803BEF8(void);
 extern void sub_08043D5C(void);
 extern void sub_0803BFA4(void);
@@ -49,7 +49,7 @@ struct ProcCmd CONST_DATA ProcScr_Versus[] =
     PROC_GOTO_SCR((void *)0x0849ECF8),
     PROC_CALL(Versus_0803BE61),
     PROC_START_CHILD_BLOCKING((void *)0x08616C54),
-    PROC_GOTO_IF_YES(MainMenu2_GOTO_IF_NO_0803BD6D, 0),
+    PROC_GOTO_IF_YES(GetMainMenuLock, 0),
     PROC_GOTO_SCR((void *)0x0849E7F8),
 PROC_LABEL(0),
     PROC_GOTO_SCR((void *)0x0849ED30),
@@ -61,7 +61,7 @@ PROC_LABEL(0),
     PROC_CALL(Versus_08026291),
     PROC_CALL(Versus_080670A1),
     PROC_WHILE(Versus_WHILE_080670D9),
-    PROC_GOTO_IF_YES(MainMenu2_GOTO_IF_NO_0803BD6D, 0),
+    PROC_GOTO_IF_YES(GetMainMenuLock, 0),
     PROC_GOTO_SCR((void *)0x0849ECF8),
 PROC_LABEL(0),
     PROC_CALL(Versus_0803C1D5),

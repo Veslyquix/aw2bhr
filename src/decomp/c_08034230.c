@@ -33,7 +33,7 @@ void LinkC2_08034231(struct Unk34230Proc *proc)
 {
     struct Unk34230Child *child;
 
-    if (sub_0803BD6C() == 0)
+    if (GetMainMenuLock() == 0)
     {
         if (Proc_Find(gUnknown_0849BB80) != NULL)
         {

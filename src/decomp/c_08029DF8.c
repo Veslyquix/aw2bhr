@@ -97,8 +97,8 @@ void sub_08029DF8(struct Unk03001470 *proc)
       {
         sub_08034534(6, gUnknown_03003F38, 0, 0);
       }
-      sub_08034F48();
-      DecrementCoPowerDepthIfNonzero();
+      LockUnitSelection();
+      DecrementMapLock();
       return;
     }
     if ((gUnknown_03003F40 & ((s16) gUnknown_0849A0D8[proc->unk1e * 3])) != 0)

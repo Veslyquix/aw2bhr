@@ -7,7 +7,7 @@
  * sub_080719D4 @ 0x080719D4
  */
 
-/* Zeroes two words and seeds +0x64 with GetCoPowerDepth()'s frame snapshot --
+/* Zeroes two words and seeds +0x64 with GetMapLock()'s frame snapshot --
  * the same pairing the gUnknown_08614014 note in include/unknown-globals.h
  * records for sub_080729AC, which stashes the identical value at the
  * identical offset. `adds r4,#0x64` before the `strh` is forced: 0x64 is past
@@ -28,5 +28,5 @@ void sub_080719D4(struct Unk80719D4 *proc)
 {
     proc->unk58 = 0;
     proc->unk5c = 0;
-    proc->unk64 = GetCoPowerDepth();
+    proc->unk64 = GetMapLock();
 }

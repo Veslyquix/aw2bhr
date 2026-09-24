@@ -18,7 +18,7 @@ void sub_0802C4F0(ProcPtr proc)
 
     if (gUnknown_03003F40 < 0)
     {
-        DecrementCoPowerDepthIfNonzero();
+        DecrementMapLock();
         Proc_End(proc);
         sub_0802D558();
     }

@@ -7,7 +7,7 @@
  * sub_0802D0F4 @ 0x0802D0F4
  */
 
-/* The same frame-entry shape as c_0802CFFC.c -- open with sub_08034F48 and
+/* The same frame-entry shape as c_0802CFFC.c -- open with LockUnitSelection and
  * sub_0801A168, close with the sub_0802C57C / sub_080424FC / sub_0802C594
  * bracket -- with a different middle and one extra call (sub_08042998) in the
  * tail.
@@ -30,7 +30,7 @@
  * MATCHED first draft. */
 void sub_0802D0F4(void)
 {
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
 
     if (gPlaySt.savingEnabled != 0)

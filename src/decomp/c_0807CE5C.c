@@ -173,7 +173,7 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
                 p->unk4c = 0;
                 p->unk6a = 0;
                 sub_0803BCDC(gUnknown_030058D4);
-                sub_0803BD54();
+                LockMainMenu();
                 Proc_Start(gUnknown_08616690, p);
                 sub_080733A0(0x10);
                 Proc_Break(p);
@@ -274,7 +274,7 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
             {
                 p->unk40--;
                 Proc_Start(gUnknown_086166A8, p);
-                sub_0803BD60();
+                UnlockMainMenu();
             }
         }
         else if (gpKeySt->pressed & R_BUTTON)

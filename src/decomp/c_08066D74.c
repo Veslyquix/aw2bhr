@@ -31,7 +31,7 @@ void sub_08066D74(void)
     if (gpKeySt->pressed & 1)
     {
         sub_0806377C(gUnknown_08580DD8);
-        sub_0803BD54();
+        LockMainMenu();
     }
     else if (gpKeySt->pressed & 2)
     {

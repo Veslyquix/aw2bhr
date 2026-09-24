@@ -200,7 +200,7 @@ extern void BattleMaps_IDLE_08049179(void);
 extern void BattleMaps_IDLE_08049361(void);
 extern void BattleMaps_IDLE_08049929(void);
 extern void BattleMaps_08049B81(void);
-extern u8 MainMenu2_GOTO_IF_NO_0803BD6D(void);
+extern u8 GetMainMenuLock(void);
 extern void WM_ConfirmExit_08011B19(void);
 extern void BattleMaps_08049B29(void);
 extern void BattleMaps_0803D961(void);
@@ -225,7 +225,7 @@ struct ProcCmd CONST_DATA ProcScr_BattleMaps[] =
     PROC_REPEAT(BattleMaps_IDLE_08049361),
     PROC_REPEAT(BattleMaps_IDLE_08049929),
     PROC_CALL(BattleMaps_08049B81),
-    PROC_GOTO_IF_NO(MainMenu2_GOTO_IF_NO_0803BD6D, 0),
+    PROC_GOTO_IF_NO(GetMainMenuLock, 0),
     PROC_1D(30),
     PROC_CALL(WM_ConfirmExit_08011B19),
     PROC_CALL(BattleMaps_08049B29),

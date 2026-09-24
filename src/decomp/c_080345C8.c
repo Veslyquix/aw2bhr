@@ -31,7 +31,7 @@ void MapMainIdle(void)
     u16 *const *state;
     int idle;
 
-    idle = GetCoPowerDepth();
+    idle = GetMapLock();
     state = &gUnknown_08090D88;
 
     if (idle == 0 && gUnknown_030040E4 == 0)
@@ -62,7 +62,7 @@ void MapMainIdle(void)
 
     if (**state == 14 || gUnknown_030044DC == 14)
     {
-        if (sub_08015BD0((s32)gUnknown_0849A00C) != -1 || GetCoPowerDepth() == 0)
+        if (sub_08015BD0((s32)gUnknown_0849A00C) != -1 || GetMapLock() == 0)
             sub_0802776C(3);
     }
 }

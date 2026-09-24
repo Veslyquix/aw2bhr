@@ -26,7 +26,7 @@ void sub_0802D168(void)
 
     sub_08029948(0);
     sub_0801A168();
-    IncrementCoPowerDepth();
+    IncrementMapLock();
 }
 
 /* The unconditional twin of sub_0802D168: the flag is forced to 1 and the
@@ -39,7 +39,7 @@ void sub_0802D1A0(void)
 
     sub_08029948(1);
     sub_0801A168();
-    IncrementCoPowerDepth();
+    IncrementMapLock();
 }
 
 /* See src/decomp/c_0802D064.c: same shape with two of the six calls dropped,
@@ -47,7 +47,7 @@ void sub_0802D1A0(void)
 
 void sub_0802D1C0(void)
 {
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
     sub_08060684();
     sub_080424FC();
@@ -61,7 +61,7 @@ void sub_0802D1C0(void)
 
 void sub_0802D1F8(void)
 {
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
     sub_080606A0();
     sub_080424FC();

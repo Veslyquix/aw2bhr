@@ -4,15 +4,24 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08034F54.
- * sub_08034F54 @ 0x08034F54, sub_08034F60 @ 0x08034F60
+ * UnlockUnitSelection @ 0x08034F54, GetUnitSelectionLock @ 0x08034F60
+ *
+ * INFERRED names -- see the gGameLock.unitSelection note in include/lock.h.
+ * LockUnitSelection is in c_08034F48.c. The old sub_XXXXXXXX symbols are kept
+ * as linker aliases below so every other unit keeps resolving them unchanged.
  */
 
-void sub_08034F54(void)
+void UnlockUnitSelection(void)
 {
-    gUnknown_030030F0.unk01 = 0;
+    gGameLock.unitSelection = 0;
 }
 
-u8 sub_08034F60(void)
+/* u8 and not int: sub_0802E6C0 and sub_0802E278 re-narrow the result with
+ * `lsls #0x18` before testing it, and the body is a single `ldrb`. */
+u8 GetUnitSelectionLock(void)
 {
-    return gUnknown_030030F0.unk01;
+    return gGameLock.unitSelection;
 }
+
+asm(".global sub_08034F54\n.thumb_set sub_08034F54, UnlockUnitSelection\n"
+    ".global sub_08034F60\n.thumb_set sub_08034F60, GetUnitSelectionLock\n");

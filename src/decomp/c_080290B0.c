@@ -139,5 +139,5 @@ void sub_080290B0(int a1, int a2, u8 a3)
     proc = sub_080152EC(gUnknown_0849A00C, 0);
     proc->unk22 = a1 << 4;
     proc->unk24 = a2 << 4;
-    IncrementCoPowerDepth();
+    IncrementMapLock();
 }

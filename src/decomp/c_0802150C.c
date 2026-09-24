@@ -29,7 +29,7 @@ void InitGameSettings(void)
     gUnknown_030040F0 = 0;
     gUnknown_030044A0 = 0;
 
-    sub_08034FA4();
+    RemoveMapLock();
 
     gUnknown_030040E4 = 0;
     gUnknown_030040E8 = 0;

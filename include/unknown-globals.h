@@ -1806,23 +1806,12 @@ struct Unk03002F50 /* 0x08 */
     /* 0x04 */ u32 unk04;
 };
 
-/* Three byte-sized flags reached off one symbol. Not three separate globals:
- * every access goes through one pool word for 0x030030F0 plus a displacement,
- * so the original had a single aggregate here.
- *   unk00  a countdown -- sub_08034F7C bumps it, sub_08034F8C decrements it
- *          with a floor at zero, sub_08034FA4 clears it. SIGNED: sub_08034F8C
- *          reads it with `ldrsb` and sub_08034F6C returns it sign-extended.
- *   unk01  set/cleared by sub_08034F48 / sub_08034F54, read by sub_08034F60
- *   unk02  set/cleared by sub_0803BD54 / sub_0803BD60, read by sub_0803BD6C
- * unk01 and unk02 are only ever read zero-extended, so u8 is the weakest type
- * that fits; s8 fits equally well if a sign-extending read ever turns up.
- */
-struct Unk030030F0 /* 0x03 */
-{
-    /* 0x00 */ s8 unk00;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 unk02;
-};
+/* The three byte-sized locks at 0x030030F0 are `struct GameLock gGameLock` in
+ * include/lock.h, which records the evidence for each field's width and for
+ * their being one aggregate rather than three globals. The accessors are
+ * sub_08034F48 / sub_08034F54 / sub_08034F60 (unitSelection), sub_08034F6C /
+ * sub_08034F7C / sub_08034F8C / sub_08034FA4 (map) and sub_0803BD54 /
+ * sub_0803BD60 / sub_0803BD6C (mainMenu). */
 
 /* 8 bytes exactly: sub_080171B4 and sub_08017540 copy it whole through the
  * two-word thumb_load_double_from_address pair, to and from a caller struct at
@@ -6602,7 +6591,6 @@ extern u16 gUnknown_030030C4;
  * volatile for the reason recorded there. */
 extern volatile u16 gUnknown_030030D0;
 extern volatile u16 gUnknown_030030E8;
-extern struct Unk030030F0 gUnknown_030030F0;
 extern union Unk802C57CBuf gUnknown_03003100;
 /* At least 3 bytes: sub_08035568 clears [0..2] through a variable u16 index
  * (`cmp #2; bls`), so this is an array rather than a struct. `strb`, so the

@@ -16,8 +16,9 @@ alias in [src/aw2e-names.s](src/aw2e-names.s).
 | Address | Name in AW2E.lua | Name in the repo | Defined in |
 | --- | --- | --- | --- |
 | `0x0801153D` | `FadeLoadMap_IDLE_0801153D` | `SomeFade_IDLE_0801153D` | [src/decomp/c_0801153C.c](src/decomp/c_0801153C.c) |
-| `0x08034F7D` | `BlockMapStartCoInfo_08034F7D` | `IncrementCoPowerDepth` | [src/decomp/c_08034F6C.c](src/decomp/c_08034F6C.c) |
-| `0x08034F8D` | `BlockMapStartCoInfo_08034F8D` | `DecrementCoPowerDepthIfNonzero` | [src/decomp/c_08034F8C.c](src/decomp/c_08034F8C.c) |
+| `0x08034F7D` | `BlockMapStartCoInfo_08034F7D` | `IncrementMapLock` | [src/decomp/c_08034F6C.c](src/decomp/c_08034F6C.c) |
+| `0x08034F8D` | `BlockMapStartCoInfo_08034F8D` | `DecrementMapLock` | [src/decomp/c_08034F8C.c](src/decomp/c_08034F8C.c) |
+| `0x0803BD6D` | `MainMenu2_GOTO_IF_NO_0803BD6D` | `GetMainMenuLock` | [src/decomp/c_0803BD54.c](src/decomp/c_0803BD54.c) |
 | `0x080366A5` | `BlockMapStartCoInfo_080366A5` | `InitMainFrameCallbacks` | [src/decomp/c_080366A4.c](src/decomp/c_080366A4.c) |
 
 ### Notes
@@ -29,11 +30,16 @@ alias in [src/aw2e-names.s](src/aw2e-names.s).
   shared and neither owner-prefixed name is right. Left under `SomeFade_` until
   a name that does not imply a single owner is picked.
 * **`0x08034F7D` / `0x08034F8D` / `0x080366A5`.** The repo names describe what
-  the functions do (`IncrementCoPowerDepth`, `DecrementCoPowerDepthIfNonzero`,
+  the functions do (`IncrementMapLock`, `DecrementMapLock`,
   `InitMainFrameCallbacks`) and are shared by more than one caller, so the
   `BlockMapStartCoInfo_`-prefixed Lua names would be narrower than the truth.
   Their sibling `0x08034FD9` had no name yet and *was* wired in as
   `BlockMapStartCoInfo_08034FD9`.
+* **`0x0803BD6D` -- `MainMenu2_GOTO_IF_NO_0803BD6D` vs `GetMainMenuLock`.** The
+  Lua name is positionally correct: this *is* the `PROC_GOTO_IF_NO` predicate of
+  `ProcScr_MainMenu2`. It lost anyway because the function is one third of the
+  `gGameLock` accessor set (see [include/lock.h](include/lock.h)), the other two
+  thirds are named for the lock, and it has callers outside that script.
 
 ## Resolved in favour of the Lua name
 

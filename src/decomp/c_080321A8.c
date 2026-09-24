@@ -27,13 +27,13 @@ void sub_080321A8(ProcPtr proc)
         Proc_Break(proc);
 }
 
-/* `lsls r0, r0, #0x18` before the `cmp` is sub_0803BD6C's u8 return being
+/* `lsls r0, r0, #0x18` before the `cmp` is GetMainMenuLock's u8 return being
  * re-narrowed at the call site; an int-returning predicate emits a bare
  * `cmp r0, #0`. */
 
 void sub_080321D4(ProcPtr proc)
 {
-    if (sub_0803BD6C() != 0)
+    if (GetMainMenuLock() != 0)
         Proc_Goto(proc, 0);
 }
 

@@ -17,8 +17,8 @@ void sub_08029880(void)
     if (gUnknown_03001470[gUnknown_03001FBC].unk24 == 0)
         sub_080428F0(gUnknown_03001470[gUnknown_03001FBC].unk22);
 
-    sub_08034F48();
-    DecrementCoPowerDepthIfNonzero();
+    LockUnitSelection();
+    DecrementMapLock();
 
     if (gUnknown_03001470[gUnknown_03001FBC].unk24 == 0)
     {

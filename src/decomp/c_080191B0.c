@@ -57,7 +57,7 @@ extern void MainMenu_08080F3D(void);
 extern void MainMenu_0803BBD5(void);
 extern void MainMenu2_08034839(void);
 extern void MainMenu2_0803D48D(void);
-extern u8 MainMenu2_GOTO_IF_NO_0803BD6D(void);
+extern u8 GetMainMenuLock(void);
 extern void MainMenu2_0803BBA9(void);
 extern void MainMenu2_0806A455(void);
 
@@ -75,7 +75,7 @@ struct ProcCmd CONST_DATA ProcScr_MainMenu2[] =
     PROC_CALL(MainMenu2_08034839),
     PROC_CALL(MainMenu2_0803D48D),
     PROC_START_CHILD_BLOCKING(ProcScr_MainMenuC1),
-    PROC_GOTO_IF_NO(MainMenu2_GOTO_IF_NO_0803BD6D, 0),
+    PROC_GOTO_IF_NO(GetMainMenuLock, 0),
     PROC_1D(30),
     PROC_CALL(MainMenu2_0803BBA9),
     PROC_GOTO(1),

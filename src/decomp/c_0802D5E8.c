@@ -36,5 +36,5 @@ void sub_0802D5E8(s16 a1, s16 a2)
 
     sub_0802D67C(v);
     sub_080152C0((s32)gUnknown_0849AFE8, 0);
-    IncrementCoPowerDepth();
+    IncrementMapLock();
 }

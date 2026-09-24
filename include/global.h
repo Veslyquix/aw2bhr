@@ -6,6 +6,7 @@
 
 #include "types.h"
 #include "map.h"
+#include "lock.h"
 
 #include "unknown-globals.h"
 #include "unknown-functions.h"

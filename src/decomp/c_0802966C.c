@@ -37,7 +37,7 @@ void sub_0802966C(void)
     if (gpKeySt->pressed & 2)
     {
         sub_08015328(gUnknown_03001FBC);
-        DecrementCoPowerDepthIfNonzero();
+        DecrementMapLock();
         sub_0802D558();
         gUnknown_030033E4.unk00 = gUnknown_03003F24.pos.unk00;
         gUnknown_030033E4.unk02 = gUnknown_03003F24.pos.unk02;

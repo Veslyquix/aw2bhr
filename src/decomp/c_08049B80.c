@@ -19,9 +19,9 @@
 void BattleMaps_08049B81(void)
 {
     if (gUnknown_084C30F8->unk836 == gUnknown_084C30F8->unk837)
-        sub_0803BD60();
+        UnlockMainMenu();
     else
-        sub_0803BD54();
+        LockMainMenu();
 }
 
 asm(".global sub_08049B80\n.thumb_set sub_08049B80, BattleMaps_08049B81\n");

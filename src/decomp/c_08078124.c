@@ -42,7 +42,7 @@ void Campaign_08078125(void)
 asm(".global sub_08078124\n.thumb_set sub_08078124, Campaign_08078125\n");
 
 extern int Campaign_WHILE_08078151(void);
-extern u8 MainMenu2_GOTO_IF_NO_0803BD6D(void);
+extern u8 GetMainMenuLock(void);
 extern void ResetRulesAfterCampaignMap(void);
 
 struct ProcCmd CONST_DATA ProcScr_Campaign[] =
@@ -51,7 +51,7 @@ struct ProcCmd CONST_DATA ProcScr_Campaign[] =
     PROC_START_CHILD_BLOCKING(ProcScr_CampaignIntro),
     PROC_CALL(Campaign_08078125),
     PROC_WHILE(Campaign_WHILE_08078151),
-    PROC_GOTO_IF_NO(MainMenu2_GOTO_IF_NO_0803BD6D, 100),
+    PROC_GOTO_IF_NO(GetMainMenuLock, 100),
     PROC_CALL(ResetRulesAfterCampaignMap),
     PROC_GOTO_SCR((void *)0x0849EBFC),
 };

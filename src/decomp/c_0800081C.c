@@ -190,7 +190,7 @@ void sub_0800081C(void)
             gActiveMap->flags &= 0xDFFF;
     }
 
-    if (sub_0802DBF8() && GetCoPowerDepth() == 0)
+    if (sub_0802DBF8() && GetMapLock() == 0)
     {
         t = gpKeySt->pressed & 4;
         if (t != 0)

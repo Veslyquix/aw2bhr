@@ -43,6 +43,10 @@ gSmoothScroll = gUnknown_03000640;
 gOamTransferTail = gUnknown_03000268;
 gOamTransferHead = gUnknown_03000278;
 
+/* gGameLock: the three byte-sized locks at 0x030030F0 (struct GameLock,
+   include/lock.h); linker alias for the same reason as gMap. */
+gGameLock = gUnknown_030030F0;
+
 /* gPlayers: the five-entry per-army record array (struct PlayerStruct,
  * 0x3c each, based at 0x02023284); SRR_AW2's Definitions.s names the
  * elements gPlayer0..gPlayer4. gGameClock is the frame counter and

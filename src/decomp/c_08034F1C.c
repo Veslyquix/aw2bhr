@@ -12,7 +12,7 @@ void sub_08034F1C(void)
     if (gUnknown_03002F1C != 0)
     {
         sub_0801A664();
-        IncrementCoPowerDepth();
+        IncrementMapLock();
         gUnknown_03002F1C = 0;
     }
 

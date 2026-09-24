@@ -13,7 +13,7 @@ void sub_0802D230(void)
 {
     int v;
 
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
 
     if (((struct Unk08499594 *)gUnknown_030040D8)->unk04_0 != 0)
@@ -38,6 +38,6 @@ void sub_0802D2A0(int a1, int a2, u8 a3)
         Proc_Start(gUnknown_0849A9F8, PROC_TREE_3);
         sub_0801A168();
         sub_08024500();
-        IncrementCoPowerDepth();
+        IncrementMapLock();
     }
 }

@@ -65,7 +65,7 @@ void sub_08078078(void)
     sub_08013AFC();
 }
 
-/* A proc method. sub_0803BD6C returns u8 (promoted in src/decomp/c_0803BD54.c)
+/* A proc method. GetMainMenuLock returns u8 (promoted in src/decomp/c_0803BD54.c)
  * and the ROM re-narrows its result `lsls #0x18; lsrs #0x18` before comparing
  * against 1, which is the caller-side corroboration of that return type.
  *
@@ -75,7 +75,7 @@ void sub_08078078(void)
 
 void sub_080780A0(ProcPtr proc)
 {
-    if (sub_0803BD6C() == 1)
+    if (GetMainMenuLock() == 1)
     {
         Proc_Goto(proc, 3);
     }

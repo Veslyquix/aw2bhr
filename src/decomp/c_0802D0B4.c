@@ -12,7 +12,7 @@
 
 void sub_0802D0B4(void)
 {
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
     sub_0802C57C();
     sub_08042864();

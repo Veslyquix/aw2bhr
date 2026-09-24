@@ -47,9 +47,9 @@ void sub_08032E88(struct Unk32E88Proc *proc)
     if (gpKeySt->pressed & 1)
     {
         if (proc->unk29 != 0)
-            sub_0803BD60();
+            UnlockMainMenu();
         else
-            sub_0803BD54();
+            LockMainMenu();
 
         Proc_Break(proc);
         ((struct Unk49B6B0Proc *)Proc_Find(gUnknown_0849B6B0))->unk58 = 0;

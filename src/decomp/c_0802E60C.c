@@ -22,7 +22,7 @@ void sub_0802E60C(s16 a1, s16 a2)
     gUnknown_03003100.pos.unk00 = a1;
     gUnknown_03003100.pos.unk02 = a2;
 
-    sub_08034F54();
+    UnlockUnitSelection();
     gUnknown_03003334 = 3;
 
     if (gUnknown_03003F24.raw == gUnknown_03003100.raw)

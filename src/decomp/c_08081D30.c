@@ -152,7 +152,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                         gUnknown_03005934 = p->unk52;
                         sub_0803B4DC(0x71);
                         Proc_Start(gUnknown_08616A68, p);
-                        sub_0803BD54();
+                        LockMainMenu();
                     }
                 }
                 else
@@ -186,7 +186,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 gUnknown_03005924 = p->unk66;
                 Proc_Start(gUnknown_08616A68, p);
                 sub_0803B4DC(0x66);
-                sub_0803BD60();
+                UnlockMainMenu();
             }
         }
         else if (p->unk64 > 0)
@@ -287,7 +287,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 gUnknown_03005924 = p->unk66;
                 sub_0803B4DC(0x71);
                 Proc_Start(gUnknown_08616A68, p);
-                sub_0803BD54();
+                LockMainMenu();
             }
             else if (gpKeySt->pressed & (B_BUTTON | DPAD_LEFT))
             {

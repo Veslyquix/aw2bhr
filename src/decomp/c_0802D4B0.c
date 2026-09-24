@@ -27,7 +27,7 @@ void sub_0802D4B0(void)
 
     sub_08024268();
     sub_08019F2C(gUnknown_0849AC60, v, 1, 1, gUnknown_030044A0);
-    IncrementCoPowerDepth();
+    IncrementMapLock();
 }
 
 /* Byte-identical duplicate of sub_0802D4B0 -- see there for the shape. Only
@@ -43,7 +43,7 @@ void sub_0802D504(void)
 
     sub_08024268();
     sub_08019F2C(gUnknown_0849ABC0, v, 1, 1, gUnknown_030040F0);
-    IncrementCoPowerDepth();
+    IncrementMapLock();
 }
 
 /* Byte-identical duplicate of sub_0802D458 -- only the blob differs. */
@@ -58,5 +58,5 @@ void sub_0802D558(void)
 
     sub_08024268();
     sub_0801A104(gUnknown_0849AE28, v, 1, 1);
-    IncrementCoPowerDepth();
+    IncrementMapLock();
 }
