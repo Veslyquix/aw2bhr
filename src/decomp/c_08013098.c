@@ -30,7 +30,7 @@ void sub_08013098(int a, ProcPtr parent)
 
 void sub_080130B0(int a, ProcPtr parent)
 {
-    struct Unk130B0Proc *proc = Proc_StartBlocking(ProcScr_DesignRoomLoad3, parent);
+    struct Unk130B0Proc *proc = Proc_StartBlocking(ProcScr_FadeLoadMap, parent);
 
     proc->unk64 = a;
 }

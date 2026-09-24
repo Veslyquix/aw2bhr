@@ -62,7 +62,7 @@ void sub_08011668(int a)
 
 void sub_08011684(int a)
 {
-    struct Unk11684Proc *proc = Proc_Start(ProcScr_DesignRoomLoad3, PROC_TREE_3);
+    struct Unk11684Proc *proc = Proc_Start(ProcScr_FadeLoadMap, PROC_TREE_3);
 
     proc->unk64 = a;
 }

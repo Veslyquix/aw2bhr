@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08033FFC.
  * sub_08033FFC @ 0x08033FFC, sub_0803405C @ 0x0803405C, sub_08034130 @ 0x08034130
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -37,7 +41,7 @@ struct Unk34130Proc
     /* 0x2c */ struct Unk34130Child *unk2c;
 };
 
-void sub_08033FFC(struct Unk33FFCProc *proc)
+void LinkC3_IDLE_08033FFD(struct Unk33FFCProc *proc)
 {
     PutSpriteExt(0, 0x60, gUnknown_0849BC38[2],
         gUnknown_0849BC18[proc->unk36], (proc->unk36 + 1) << 12);
@@ -53,7 +57,7 @@ void sub_08033FFC(struct Unk33FFCProc *proc)
     }
 }
 
-void sub_0803405C(struct Unk3405CProc *proc)
+void LinkC3_IDLE_0803405D(struct Unk3405CProc *proc)
 {
     int t = Interpolate(0, 0x100, 0x10, proc->unk4c, 0x10);
 
@@ -72,7 +76,7 @@ void sub_0803405C(struct Unk3405CProc *proc)
         proc->unk4c++;
 }
 
-void sub_08034130(struct Unk34130Proc *proc)
+void LinkC2_IDLE_08034131(struct Unk34130Proc *proc)
 {
     struct Unk34130Child *child = proc->unk2c;
     u8 n = child->unk36;
@@ -124,3 +128,7 @@ void sub_08034130(struct Unk34130Proc *proc)
         }
     }
 }
+
+asm(".global sub_08033FFC\n.thumb_set sub_08033FFC, LinkC3_IDLE_08033FFD\n"
+    ".global sub_0803405C\n.thumb_set sub_0803405C, LinkC3_IDLE_0803405D\n"
+    ".global sub_08034130\n.thumb_set sub_08034130, LinkC2_IDLE_08034131\n");

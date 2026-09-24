@@ -66,8 +66,8 @@
 	.set CoDesignC1, 0x08616DFC
 	.global CoDesignC2
 	.set CoDesignC2, 0x08616EB4
-	.global CoDesignC4
-	.set CoDesignC4, 0x08616EFC
+	.global PutFace
+	.set PutFace, 0x08616EFC
 	.global WaitForLaser
 	.set WaitForLaser, 0x0848B5AC
 	.global FadeSound
@@ -76,8 +76,8 @@
 	.set DesignRoomFadeIn, 0x0848925C
 	.global SomeFade
 	.set SomeFade, 0x0848929C
-	.global DesignRoomLoad3
-	.set DesignRoomLoad3, 0x084892C4
+	.global FadeLoadMap
+	.set FadeLoadMap, 0x084892C4
 	.global DesignRoomPlaceUnit
 	.set DesignRoomPlaceUnit, 0x0849BDB8
 	.global MainMenuC1
@@ -108,3 +108,43 @@
 	.set DayStart, 0x08499E18
 	.global SelectUnit
 	.set SelectUnit, 0x0849BE38
+	.global WarRoomScroll
+	.set WarRoomScroll, 0x08616D1C
+	.global PreviewMap
+	.set PreviewMap, 0x08616C54
+	.global PreviewMap_08085B31
+	.set PreviewMap_08085B31, 0x08085B30
+	.global PreviewMapRecords
+	.set PreviewMapRecords, 0x08616DB4
+	.global WarRoomSelectMap
+	.set WarRoomSelectMap, 0x08616CCC
+	.global WarRoomMapSelected
+	.set WarRoomMapSelected, 0x086165C0
+	.global ScrollBG3
+	.set ScrollBG3, 0x08615CA0
+	.global EndCoSelect
+	.set EndCoSelect, 0x08616710
+	.global StartCoInfoScreen
+	.set StartCoInfoScreen, 0x08616B74
+	.global BlockWarRoomSelection
+	.set BlockWarRoomSelection, 0x08616740
+	.global EndCoInfoScreen
+	.set EndCoInfoScreen, 0x08616BFC
+	.global FadePalWhite
+	.set FadePalWhite, 0x08613E54
+	.global FadePalWhite_IDLE_08071B9D
+	.set FadePalWhite_IDLE_08071B9D, 0x08071B9C
+	.global BlockMapStartCoInfo
+	.set BlockMapStartCoInfo, 0x0849AA68
+	.global FadePalBlack
+	.set FadePalBlack, 0x0848923C
+	.global MainMenuC3_Resume
+	.set MainMenuC3_Resume, 0x08616A40
+	.global LinkC2
+	.set LinkC2, 0x0849BC98
+	.global LinkC2_WHILE_EXISTS_0849BC50
+	.set LinkC2_WHILE_EXISTS_0849BC50, 0x0849BC50
+	.global LinkC4
+	.set LinkC4, 0x0849BB50
+	.global LinkC3_Parallel
+	.set LinkC3_Parallel, 0x0849BB80

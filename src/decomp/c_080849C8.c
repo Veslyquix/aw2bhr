@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080849C8.
  * sub_080849C8 @ 0x080849C8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -44,7 +48,7 @@
  * same order, wrong registers) and is the first thing to try on this function.
  */
 
-void sub_080849C8(ProcPtr parent)
+void StartCoInfoScreen_080849C9(ProcPtr parent)
 {
     int i;
     register ProcPtr savedParent asm("r9") = parent;
@@ -103,3 +107,5 @@ void sub_080849C8(ProcPtr parent)
     Proc_Start(ProcScr_CoInfo, savedParent);
     sub_08011B34((void *)sub_08043590);
 }
+
+asm(".global sub_080849C8\n.thumb_set sub_080849C8, StartCoInfoScreen_080849C9\n");

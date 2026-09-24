@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807F8C0.
  * sub_0807F8C0 @ 0x0807F8C0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -23,7 +27,9 @@
  * include/unknown-globals.h.
  */
 
-void sub_0807F8C0(void)
+void EndCoSelect_0807F8C1(void)
 {
     Proc_EndEach(ProcScr_CoSelect);
 }
+
+asm(".global sub_0807F8C0\n.thumb_set sub_0807F8C0, EndCoSelect_0807F8C1\n");

@@ -5,8 +5,14 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08084BD0.
  * sub_08084BD0 @ 0x08084BD0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
-void sub_08084BD0(ProcPtr proc)
+void StartCoInfoScreen_IDLE_08084BD1(ProcPtr proc)
 {
 }
+
+asm(".global sub_08084BD0\n.thumb_set sub_08084BD0, StartCoInfoScreen_IDLE_08084BD1\n");

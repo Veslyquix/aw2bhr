@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08033B3C.
  * sub_08033B3C @ 0x08033B3C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -51,7 +55,7 @@ struct Unk33B3CProc
     /* 0x4c */ u32 unk4c;
 };
 
-void sub_08033B3C(struct Unk33B3CProc *proc)
+void LinkC3_IDLE_08033B3D(struct Unk33B3CProc *proc)
 {
     int i;
     int t;
@@ -112,3 +116,5 @@ void sub_08033B3C(struct Unk33B3CProc *proc)
         Proc_Break(proc);
     }
 }
+
+asm(".global sub_08033B3C\n.thumb_set sub_08033B3C, LinkC3_IDLE_08033B3D\n");

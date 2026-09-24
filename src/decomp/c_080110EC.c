@@ -46,8 +46,8 @@ extern void FadeScreenLines_IDLE_0801117D(void);
 extern void SomeFade_08011299(void);
 extern void SomeFade_IDLE_080113ED(void);
 extern void SomeFade_IDLE_0801153D(void);
-extern void DesignRoomLoad3_0801137D(void);
-extern void DesignRoomLoad3_IDLE_080114A1(void);
+extern void FadeLoadMap_0801137D(void);
+extern void FadeLoadMap_IDLE_080114A1(void);
 
 struct ProcCmd CONST_DATA ProcScr_DesignRoomFadeIn[] =
 {
@@ -74,17 +74,17 @@ struct ProcCmd CONST_DATA ProcScr_SomeFade[] =
     PROC_END,
 };
 
-struct ProcCmd CONST_DATA ProcScr_DesignRoomLoad3[] =
+struct ProcCmd CONST_DATA ProcScr_FadeLoadMap[] =
 {
-    PROC_CALL(DesignRoomLoad3_0801137D),
+    PROC_CALL(FadeLoadMap_0801137D),
     PROC_SLEEP(1),
-    PROC_REPEAT(DesignRoomLoad3_IDLE_080114A1),
+    PROC_REPEAT(FadeLoadMap_IDLE_080114A1),
     PROC_REPEAT(SomeFade_IDLE_0801153D),
     PROC_END,
 };
 
-asm(".global ProcScr_FadeScreenRelated\n.set ProcScr_FadeScreenRelated, ProcScr_DesignRoomLoad3\n"
+asm(".global ProcScr_FadeScreenRelated\n.set ProcScr_FadeScreenRelated, ProcScr_FadeLoadMap\n"
     ".global gUnknown_0848925C\n.set gUnknown_0848925C, ProcScr_DesignRoomFadeIn\n"
     ".global gUnknown_0848927C\n.set gUnknown_0848927C, ProcScr_FadeScreenLines\n"
     ".global gUnknown_0848929C\n.set gUnknown_0848929C, ProcScr_SomeFade\n"
-    ".global gUnknown_084892C4\n.set gUnknown_084892C4, ProcScr_DesignRoomLoad3\n");
+    ".global gUnknown_084892C4\n.set gUnknown_084892C4, ProcScr_FadeLoadMap\n");

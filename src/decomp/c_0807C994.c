@@ -60,7 +60,7 @@ struct Unk807CAFC
  * this is a macro whose argument is evaluated twice. */
 #define SCALE(t, d) (Interpolate(0, 0x10, 0x100, (t), (d)) ? Interpolate(0, 0x10, 0x100, (t), (d)) : 2)
 
-void sub_0807C994(struct Unk807C994 *proc)
+void WarRoomMapSelected_IDLE_0807C995(struct Unk807C994 *proc)
 {
     int i;
 
@@ -193,7 +193,8 @@ void CoSelect_IDLE_0807CAFD(struct Unk807CAFC * proc)
     proc->unk3c--;
 }
 
-asm(".global sub_0807C9EC\n.thumb_set sub_0807C9EC, CoSelect_0807C9ED\n"
+asm(".global sub_0807C994\n.thumb_set sub_0807C994, WarRoomMapSelected_IDLE_0807C995\n"
+    ".global sub_0807C9EC\n.thumb_set sub_0807C9EC, CoSelect_0807C9ED\n"
     ".global sub_0807CAFC\n.thumb_set sub_0807CAFC, CoSelect_IDLE_0807CAFD\n");
 
 extern void CoSelect_IDLE_0807CE5D(void);

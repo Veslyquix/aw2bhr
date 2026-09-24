@@ -21,7 +21,7 @@ struct Unk808A3A0
     u16 unk48;
 };
 
-void CoDesignC4_IDLE_0808A3A1(struct Unk808A3A0 *proc)
+void PutFace_IDLE_0808A3A1(struct Unk808A3A0 *proc)
 {
     if ((proc->unk48 & 1) == 0)
     {
@@ -33,12 +33,12 @@ void CoDesignC4_IDLE_0808A3A1(struct Unk808A3A0 *proc)
     proc->unk48++;
 }
 
-asm(".global sub_0808A3A0\n.thumb_set sub_0808A3A0, CoDesignC4_IDLE_0808A3A1\n");
+asm(".global sub_0808A3A0\n.thumb_set sub_0808A3A0, PutFace_IDLE_0808A3A1\n");
 
-struct ProcCmd CONST_DATA ProcScr_CoDesignC4[] =
+struct ProcCmd CONST_DATA ProcScr_PutFace[] =
 {
-    PROC_REPEAT(CoDesignC4_IDLE_0808A3A1),
+    PROC_REPEAT(PutFace_IDLE_0808A3A1),
     PROC_END,
 };
 
-asm(".global gUnknown_08616EFC\n.set gUnknown_08616EFC, ProcScr_CoDesignC4\n");
+asm(".global gUnknown_08616EFC\n.set gUnknown_08616EFC, ProcScr_PutFace\n");

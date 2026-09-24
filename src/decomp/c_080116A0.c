@@ -20,7 +20,7 @@
  * inside one `if` produces the opposite arrangement. */
 bool8 sub_080116A0(void)
 {
-    if (Proc_Find(ProcScr_DesignRoomLoad3))
+    if (Proc_Find(ProcScr_FadeLoadMap))
         return TRUE;
 
     if (Proc_Find(ProcScr_SomeFade))

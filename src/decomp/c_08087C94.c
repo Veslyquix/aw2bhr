@@ -155,7 +155,7 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
     sub_0801F234(0x8a);
     sub_0801F234(0x8b);
 
-    Proc_Start(ProcScr_CoDesignC4, proc);
+    Proc_Start(ProcScr_PutFace, proc);
 }
 
 asm(".global sub_08087C94\n.thumb_set sub_08087C94, CoDesignC1_08087C95\n");
