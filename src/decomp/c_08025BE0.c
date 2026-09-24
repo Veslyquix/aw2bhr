@@ -58,11 +58,11 @@
  *      shared was touched). Both emit `strb r5,[r3,#9]` -- agbcc's bitfield
  *      store path for a byte-wide, byte-aligned field degenerates to the plain
  *      store and CSEs the constant exactly as the plain member does. So there
- *      is no evidence for reshaping struct Unk08499594.unk09, the single
+ *      is no evidence for reshaping struct Unit.unk09, the single
  *      hypothesis that motivated it is refuted, and the member was left alone.
  *      Recorded in include/unknown-globals.h beside the member. Anyone
  *      reaching for a bitfield here should stop.
- *   4. (W39-D) `a1->unk09 = a1->unk01;`, reading back the sibling zeroed at
+ *   4. (W39-D) `a1->unk09 = a1->flags;`, reading back the sibling zeroed at
  *      the top of the function. Probed: CSE keeps `mem[r3+1] == r5` across the
  *      three intervening bitfield read-modify-writes at +4/+5/+6 and folds it
  *      to `strb r5,[r3,#9]`. Worth knowing for its own sake -- those stores do
@@ -90,14 +90,14 @@
  * 0 at all.
  */
 
-void InitUnit(struct Unk08499594 *a1, u8 a2)
+void InitUnit(struct Unit *a1, u8 a2)
 {
-    a1->unk00 = a2;
-    a1->unk01 = 0;
+    a1->type = a2;
+    a1->flags = 0;
     a1->unk06_7 = 0;
-    a1->unk04_0 = 0x64;
-    a1->unk06_0 = gUnknown_085D5ABC[a2].maxFuel;
-    a1->unk04_7 = gUnknown_085D5ABC[a2].maxAmmo;
+    a1->hp = 0x64;
+    a1->fuel = gUnknown_085D5ABC[a2].maxFuel;
+    a1->ammo = gUnknown_085D5ABC[a2].maxAmmo;
     a1->unk05_3 = 0;
     a1->unk07 = 0;
     a1->unk08 = 0;

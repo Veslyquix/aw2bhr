@@ -42,7 +42,7 @@
 
 void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
 {
-    struct Unk08499594 *u;
+    struct Unit *u;
     u32 best;
     u32 score;
     u16 bestX;
@@ -75,14 +75,14 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
             if (!sub_08020DBC(gUnknown_030033EC, i, j))
                 continue;
             u = &gUnits[gMap->unit[MAP->rowOffset[j] + i]];
-            if (u->unk00 == 0x18)
+            if (u->type == 0x18)
             {
-                if ((u->unk01 & 0x20) != 0)
+                if ((u->flags & 0x20) != 0)
                     continue;
                 if (!sub_080257C0(gMap->unit[MAP->rowOffset[j] + i]))
                     continue;
             }
-            score = u->unk04_0 * (u16)(gUnknown_085D5ABC[u->unk00].cost / 10);
+            score = u->hp * (u16)(gUnknown_085D5ABC[u->type].cost / 10);
             if (best > score)
                 continue;
             best = score;

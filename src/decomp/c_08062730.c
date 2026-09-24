@@ -15,27 +15,27 @@
  * form. Both are the same 24-byte `movs`/`b`/`movs` shape, but agbcc emits the
  * `<=` spelling with `ble` reaching the 1-arm, while the ROM has `bgt` reaching
  * the 0-arm -- i.e. the source's if-body is the ZERO. */
-int sub_08062730(struct Unk08499594 *a, struct Unk08499594 *b)
+int sub_08062730(struct Unit *a, struct Unit *b)
 {
     int dx;
     int dy;
     int dist;
     int cost;
 
-    dx = a->unk02 - b->unk02;
+    dx = a->x - b->x;
     if (dx < 0)
         dx = -dx;
 
-    dy = a->unk03 - b->unk03;
+    dy = a->y - b->y;
     if (dy < 0)
         dy = -dy;
 
     dist = dx + dy;
 
-    if (GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->unk00) == 1)
+    if (GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->type) == 1)
         cost = sub_08058224(a) + sub_08058224(b) + 1;
     else
-        cost = sub_08058224(a) + GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->unk00);
+        cost = sub_08058224(a) + GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->type);
 
     if (dist > cost)
         return 0;

@@ -49,7 +49,7 @@ int sub_0802CA78(void)
 
     FillMovementMap(0xff);
     sub_08020354(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
-        (struct Unk08499594 *)gUnknown_030040D8);
+        (struct Unit *)gUnknown_030040D8);
 
     if (!sub_080413E8())
         return 1;
@@ -80,7 +80,7 @@ int sub_0802CB20(void)
 
     FillMovementMap(0xff);
     sub_08020354(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
-        (struct Unk08499594 *)gUnknown_030040D8);
+        (struct Unit *)gUnknown_030040D8);
 
     if (!sub_080413E8())
         return 2;

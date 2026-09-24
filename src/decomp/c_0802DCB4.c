@@ -12,7 +12,7 @@
 
 void sub_0802DCB4(void)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     sub_08023824();
     sub_0802361C();
@@ -60,7 +60,7 @@ void sub_0802DCB4(void)
 
             if (unit != NULL)
             {
-                sub_08029088(unit->unk02, unit->unk03);
+                sub_08029088(unit->x, unit->y);
 
                 if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
                 {

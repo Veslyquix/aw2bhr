@@ -130,7 +130,7 @@ void sub_0805F4F8(void)
     if (cur.x == 0x270f)
         sub_0805F7B8();
 
-    if ((s8)gUnknown_03003340[cur.y][cur.x] > sub_08058224((struct Unk08499594 *)gUnknown_030040D8))
+    if ((s8)gUnknown_03003340[cur.y][cur.x] > sub_08058224((struct Unit *)gUnknown_030040D8))
     {
         sub_080591E4(&cur);
     }

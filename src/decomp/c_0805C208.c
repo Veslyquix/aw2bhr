@@ -31,8 +31,8 @@ int CopCondUnitsInjured(void)
     {
         for (i = gUnknown_03003F2C + 1; i < gUnknown_03003F2C + 0x40; i++)
         {
-            if (gUnits[i].unk00 != 0
-                && gUnits[i].unk04_0 <= 0x5a)
+            if (gUnits[i].type != 0
+                && gUnits[i].hp <= 0x5a)
                 count++;
         }
 

@@ -389,36 +389,29 @@ int GetUnitCombatClassColumn(int a)
 
 asm(".global sub_080432E0\n.thumb_set sub_080432E0, GetUnitCombatClassColumn\n");
 
-struct Unk43304
+int sub_08043304(struct BattleUnit *p)
 {
-    struct Unk08499594 *unk00;
-    u8 filler_04[0x02];
-    s16 unk06;
-};
+    if ((GetPlayerSpecialAbilities(((p->unit - gUnits) >> 6) + 1) & 0x20) == 0)
+        return p->terrainDefense;
 
-int sub_08043304(struct Unk43304 *p)
-{
-    if ((GetPlayerSpecialAbilities(((p->unk00 - gUnits) >> 6) + 1) & 0x20) == 0)
-        return p->unk06;
-
-    return p->unk06 * 2;
+    return p->terrainDefense * 2;
 }
 
-int sub_0804334C(struct Unk43304 *p)
+int sub_0804334C(struct BattleUnit *p)
 {
     int r;
 
-    if (GetPlayerSpecialAbilities(((p->unk00 - gUnits) >> 6) + 1) & 0x40)
-        r = p->unk06;
+    if (GetPlayerSpecialAbilities(((p->unit - gUnits) >> 6) + 1) & 0x40)
+        r = p->terrainDefense;
     else
         r = 0;
 
     return r;
 }
 
-int sub_0804338C(struct Unk43304 *p)
+int sub_0804338C(struct BattleUnit *p)
 {
-    return GetPlayerCoCounterattackBonus(((p->unk00 - gUnits) >> 6) + 1);
+    return GetPlayerCoCounterattackBonus(((p->unit - gUnits) >> 6) + 1);
 }
 
 int GetUnitBaseMovement(int a)

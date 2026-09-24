@@ -36,7 +36,7 @@ u16 sub_08047740(struct Unk0804769C *p, u16 a2, u16 a3, u16 a4)
     u16 i;
     u16 u;
     u16 v;
-    struct Unk08499594 *r;
+    struct Unit *r;
 
     count = 0;
 
@@ -45,7 +45,7 @@ u16 sub_08047740(struct Unk0804769C *p, u16 a2, u16 a3, u16 a4)
         for (i = 0; i < p->unk21; i++)
         {
             r = &gUnits[gUnknown_03003F2C + gUnknown_02028DD8[i]];
-            if (r->unk01 & 0x10)
+            if (r->flags & 0x10)
             {
                 u = r->unk07 - gUnknown_03003F2C;
                 v = r->unk08 - gUnknown_03003F2C;
@@ -70,7 +70,7 @@ u16 sub_08047740(struct Unk0804769C *p, u16 a2, u16 a3, u16 a4)
         for (i = 0; i < p->unk21; i++)
         {
             r = &gUnits[gUnknown_03003F2C + gUnknown_02028DD8[i]];
-            if (r->unk01 & 0x10)
+            if (r->flags & 0x10)
             {
                 if (a2 == r->unk07 - gUnknown_03003F2C
                  || a2 == r->unk08 - gUnknown_03003F2C)
@@ -80,7 +80,7 @@ u16 sub_08047740(struct Unk0804769C *p, u16 a2, u16 a3, u16 a4)
                     {
                         r = &gUnits[gUnknown_03003F2C
                                                + gUnknown_02028DD8[i]];
-                        if (r->unk01 & 0x10)
+                        if (r->flags & 0x10)
                         {
                             u = r->unk07 - gUnknown_03003F2C;
                             v = r->unk08 - gUnknown_03003F2C;

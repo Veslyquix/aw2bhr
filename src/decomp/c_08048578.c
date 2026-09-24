@@ -23,11 +23,11 @@ struct Unk48578Proc
 
 void sub_08048578(struct Unk48578Proc *proc)
 {
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     if (proc->unk28 != 0)
     {
         u = &gUnits[gUnknown_03003F2C + proc->unk28];
-        sub_08029088(u->unk02, u->unk03);
+        sub_08029088(u->x, u->y);
     }
 }

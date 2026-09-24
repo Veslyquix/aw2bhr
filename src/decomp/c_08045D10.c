@@ -28,10 +28,10 @@ bool8 HasNoPlayer2Battleship(void)
 
     for (i = (u16)gUnknown_084995FE[2] + 1; i < (u16)gUnknown_084995FE[2] + 0x33; i++)
     {
-        if (gUnits[i].unk00 == 0)
+        if (gUnits[i].type == 0)
             continue;
 
-        if (gUnits[i].unk00 == 0x15)
+        if (gUnits[i].type == 0x15)
             return FALSE;
     }
 

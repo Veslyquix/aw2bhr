@@ -37,8 +37,8 @@ void sub_080601F0(void)
 
     map = gMap;
     i = gUnknown_030046C0.unk06;
-    y = gUnits[i].unk03;
-    off = map->rowOffset[y] + (x = gUnits[i].unk02);
+    y = gUnits[i].y;
+    off = map->rowOffset[y] + (x = gUnits[i].x);
 
     if (map->unk234A[off] != 0)
     {
@@ -120,12 +120,12 @@ void sub_080602C4(void)
  * comes out 12 bytes long. c_080601F0.c has no store between its two reads. */
 void sub_08060324(void)
 {
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     u = &gUnits[gUnknown_030046C0.unk06];
 
-    gUnknown_030033E4.unk00 = u->unk02;
-    gUnknown_030033E4.unk02 = u->unk03;
+    gUnknown_030033E4.unk00 = u->x;
+    gUnknown_030033E4.unk02 = u->y;
 
     sub_08023274(2);
 

@@ -19,19 +19,19 @@
  * it is also what moves the merged value into r3 with no extra copy.
  *
  * The parameter is declared `struct Unk030040D8 *` because that is what every
- * caller hands it; the body casts to the identical `struct Unk08499594` to
+ * caller hands it; the body casts to the identical `struct Unit` to
  * reach unk06_0 and the pointer difference, the same way c_08074320.c does. */
 void sub_080202A4(struct Unk030040D8 *a1)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     u16 v;
 
-    e = (struct Unk08499594 *)a1;
+    e = (struct Unit *)a1;
 
-    if (e->unk06_0 < GetUnitMovementWithCoBonus(((e - gUnits) >> 6) + 1, e->unk00))
-        v = e->unk06_0;
+    if (e->fuel < GetUnitMovementWithCoBonus(((e - gUnits) >> 6) + 1, e->type))
+        v = e->fuel;
     else
-        v = GetUnitMovementWithCoBonus(((e - gUnits) >> 6) + 1, e->unk00);
+        v = GetUnitMovementWithCoBonus(((e - gUnits) >> 6) + 1, e->type);
 
-    gUnknown_030013EC(e->unk02, e->unk03, e->unk00, (s16)v, 1);
+    gUnknown_030013EC(e->x, e->y, e->type, (s16)v, 1);
 }

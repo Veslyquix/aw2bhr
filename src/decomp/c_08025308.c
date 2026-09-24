@@ -14,7 +14,7 @@ int CountArmyUnits(int a)
 
     for (i = 1; i <= 50; i++)
     {
-        if (gUnits[(a - 1) * 64 + i].unk00 != 0)
+        if (gUnits[(a - 1) * 64 + i].type != 0)
             count++;
     }
 

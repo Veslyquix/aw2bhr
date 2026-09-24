@@ -12,7 +12,7 @@
  * docs/agbcc-codegen.md describes -- write it as a struct subscript.
  *
  * Binding the element to a local pointer is load-bearing: written inline as
- * `gUnits[a1].unk01 |= 2` agbcc dereferences the pool word FIRST
+ * `gUnits[a1].flags |= 2` agbcc dereferences the pool word FIRST
  * (`ldr r0,[r0]`) and then computes the index, which is the reverse of the ROM.
  * With the local the index is computed while the pool word is still
  * undereferenced in r1, exactly as the ROM has it -- the same ordering effect
@@ -24,9 +24,9 @@
 
 void sub_08025340(u8 a1)
 {
-    struct Unk08499594 *p = &gUnits[a1];
+    struct Unit *p = &gUnits[a1];
 
-    p->unk01 |= 2;
+    p->flags |= 2;
 
     if (gPlaySt.fog != 0)
         sub_080211DC(a1, -1);
@@ -39,9 +39,9 @@ void sub_08025340(u8 a1)
 
 void sub_08025378(u8 a1)
 {
-    struct Unk08499594 *p = &gUnits[a1];
+    struct Unit *p = &gUnits[a1];
 
-    p->unk01 &= ~2;
+    p->flags &= ~2;
 
     if (gPlaySt.fog != 0)
         sub_080211DC(a1, 1);

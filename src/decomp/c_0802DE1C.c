@@ -58,7 +58,7 @@ void sub_0802DEFC(void)
 {
     int off;
     int id;
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     sub_08023824();
     sub_0802361C();
@@ -86,7 +86,7 @@ void sub_0802DEFC(void)
 
     e = &gUnits[id];
 
-    if (e->unk01 & 1)
+    if (e->flags & 1)
         return;
 
     if (!(gpKeySt->pressed & 1))

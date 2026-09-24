@@ -47,7 +47,7 @@
  *     after the drawing arm. */
 void DrawUnitAt(u16 x, u16 y)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     u8 id;
     int cx;
     int cy;
@@ -61,13 +61,13 @@ void DrawUnitAt(u16 x, u16 y)
         || gMap
                ->unk234A[gMap->rowOffset[y] + x] == 0
         || !sub_0802571C(id)
-        || (gUnits[id].unk01 & 4) != 0)
+        || (gUnits[id].flags & 4) != 0)
     {
         sub_080223E0(x, y);
     }
     else
     {
-        if ((gUnits[id].unk01 & 1) != 0)
+        if ((gUnits[id].flags & 1) != 0)
             v = 0x100;
         else
             v = id & 0xc0;
@@ -77,18 +77,18 @@ void DrawUnitAt(u16 x, u16 y)
 
         e = &gUnits[id];
 
-        if (e->unk04_0 != 0)
-            hp = Div(e->unk04_0 - 1, 10) + 1;
+        if (e->hp != 0)
+            hp = Div(e->hp - 1, 10) + 1;
         else
             hp = 0;
 
         sub_0802216C((gUnknown_0849957C + (new_var = cx)) + cy * 32,
-                     gUnits[id].unk00,
+                     gUnits[id].type,
                      v,
                      e->unk07 | e->unk08,
                      e->unk05_3,
                      hp,
-                     (u8)(e->unk01 & 0x20),
+                     (u8)(e->flags & 0x20),
                      GetPlayerSpecialAbilities((id >> 6) + 1) & 1);
     }
 }

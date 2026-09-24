@@ -12,14 +12,14 @@
  * folds to `bne`.
  *
  * The element address has to be bound in a statement of its own. Both
- * `gUnits[v].unk00` and `(gUnits + v)->unk00` put the
+ * `gUnits[v].type` and `(gUnits + v)->unk00` put the
  * pointer global's deref *before* the index math; only splitting the address
  * out defers the `ldr r0, [r0]` past the stride multiply, which is what the
  * ROM has. See the pointer-global table in docs/agbcc-codegen.md. */
 int GetUnitTypeAt(int x, int y)
 {
     int result = 0x19;
-    struct Unk08499594 *e;
+    struct Unit *e;
     int idx;
     int v;
     int hi;
@@ -31,7 +31,7 @@ int GetUnitTypeAt(int x, int y)
     if (v > 0)
     {
         e = &gUnits[v];
-        result = e->unk00 | hi;
+        result = e->type | hi;
     }
 
     return result;

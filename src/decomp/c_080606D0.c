@@ -92,10 +92,10 @@ void sub_08060718(s16 a1)
 
     for (; k < end; k++)
     {
-        if (gUnits[k].unk00 != 0)
+        if (gUnits[k].type != 0)
             gUnknown_03004674++;
 
-        if (gUnknown_08576877[gUnits[k].unk00] != 0)
+        if (gUnknown_08576877[gUnits[k].type] != 0)
             gUnknown_030045D0++;
     }
 

@@ -8,6 +8,10 @@
 #include "map.h"
 #include "lock.h"
 
+#include "unit.h"
+#include "co.h"
+#include "battle.h"
+
 #include "unknown-globals.h"
 #include "unknown-functions.h"
 #include "xenesis-names.h"

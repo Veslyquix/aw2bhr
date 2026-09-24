@@ -18,13 +18,13 @@
  * -fforce-addr's force_reg of the ADDR_EXPR plus a later plus_constant on the
  * register produces, and only the two-statement pointer form gets there.
  *
- * The `(((struct Unk08499594 *)gUnknown_030040D8 - gUnits) & 0xc0)
+ * The `(((struct Unit *)gUnknown_030040D8 - gUnits) & 0xc0)
  * >> 6` army index is copied from the matched c_0802966C.c, which makes the
  * same sub_080357E0 call.
  */
 void sub_0806056C(u8 a1)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     u8 *p;
 
     gUnknown_030045E0[a1] = 0;
@@ -39,8 +39,8 @@ void sub_0806056C(u8 a1)
         gUnknown_03003110[1] = 4;
         gUnknown_030045E0[a1] = (struct Unk35828Proc *)sub_080357E0(
             gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
-            (((struct Unk08499594 *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
-            unit->unk00, gUnknown_03003110);
+            (((struct Unit *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
+            unit->type, gUnknown_03003110);
     }
     else if (p[a1] != 0)
     {
@@ -48,10 +48,10 @@ void sub_0806056C(u8 a1)
         unit = &gUnits[gUnknown_030040D8->unk07[a1]];
         gUnknown_030045E0[a1] = (struct Unk35828Proc *)sub_080357E0(
             gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
-            (((struct Unk08499594 *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
-            unit->unk00, &gUnknown_08576900[gUnknown_03003F40]);
+            (((struct Unit *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
+            unit->type, &gUnknown_08576900[gUnknown_03003F40]);
         sub_080428F0(a1);
         gUnknown_03004774++;
-        sub_08029868(unit->unk00);
+        sub_08029868(unit->type);
     }
 }

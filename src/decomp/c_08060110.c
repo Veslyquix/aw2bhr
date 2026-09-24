@@ -11,8 +11,8 @@
 /* MATCHED. */
 void sub_08060110(void)
 {
-    struct Unk08499594 **tbl;
-    struct Unk08499594 *u;
+    struct Unit **tbl;
+    struct Unit *u;
     int off;
 
     BuyUnit(gUnknown_030046C0.unk02, gUnknown_030046C0.unk03,

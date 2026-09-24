@@ -75,7 +75,7 @@
  */
 void sub_08029FE4(void)
 {
-  struct Unk08499594 *u;
+  struct Unit *u;
   struct Unk802C57C pt;
   u8 *p7;
   u16 i;
@@ -93,21 +93,21 @@ void sub_08029FE4(void)
   {
     p7 = &gUnknown_03004007;
     u = &gUnits[gUnknown_03003F2C + i];
-    if (u->unk00 == 0)
+    if (u->type == 0)
     {
       continue;
     }
-    if ((u->unk01 & 9) != 0)
+    if ((u->flags & 9) != 0)
     {
       continue;
     }
-    idx = gMap->rowOffset[u->unk03] + u->unk02;
+    idx = gMap->rowOffset[u->y] + u->x;
     ;
     if ((gMap->terrain[idx] & 0xE0) != gUnknown_03004084)
     {
       continue;
     }
-    if (gUnknown_085D5ABC[u->unk00].repairTable[gMap->terrain[idx] & 0x1F] == 0)
+    if (gUnknown_085D5ABC[u->type].repairTable[gMap->terrain[idx] & 0x1F] == 0)
     {
       continue;
     }
@@ -132,8 +132,8 @@ void sub_08029FE4(void)
           gPlayers[gUnknown_030033EC].funds = save;
           n = 0;
         }
-        pt.unk00 = u->unk02;
-        pt.unk02 = u->unk03;
+        pt.unk00 = u->x;
+        pt.unk02 = u->y;
         StartSupplyAnimation(&pt, gUnknown_030033EC, m + n, flag);
         gUnknown_03001470[gUnknown_03001FBC].unk38 = i + 1;
         break;

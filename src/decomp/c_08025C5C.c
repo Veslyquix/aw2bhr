@@ -20,17 +20,17 @@
  *
  * The `lsls #0x18; lsrs #0x18` on a3 is the conversion to InitUnit's u8. */
 
-struct Unk08499594 *sub_08025C5C(s16 a1, s16 a2, s16 a3)
+struct Unit *sub_08025C5C(s16 a1, s16 a2, s16 a3)
 {
-    struct Unk08499594 *u = sub_08025AEC();
+    struct Unit *u = sub_08025AEC();
 
     if (u == NULL)
         return NULL;
 
     InitUnit(u, a3);
 
-    u->unk02 = a1;
-    u->unk03 = a2;
+    u->x = a1;
+    u->y = a2;
 
     sub_08025D20(gUnknown_030033EC);
 
@@ -47,12 +47,12 @@ struct Unk08499594 *sub_08025C5C(s16 a1, s16 a2, s16 a3)
 
 void *sub_08025C98(s16 a1, s16 a2, s16 a3)
 {
-    struct Unk08499594 *u = sub_08025C5C(a1, a2, a3);
+    struct Unit *u = sub_08025C5C(a1, a2, a3);
 
     if (u == NULL)
         return NULL;
 
-    u->unk01 |= 1;
+    u->flags |= 1;
     sub_080258CC();
 
     return u;
@@ -61,9 +61,9 @@ void *sub_08025C98(s16 a1, s16 a2, s16 a3)
 /* sub_08025C98 without the `unk01 |= 1` -- see there for the guard-clause
  * shape. */
 
-/* Wave 32 (W32-B) RETYPES the return `void *` -> `struct Unk08499594 *`. It
+/* Wave 32 (W32-B) RETYPES the return `void *` -> `struct Unit *`. It
  * returns sub_08025C5C's result unchanged, and that function is already
- * declared `struct Unk08499594 *` right here -- the `void *` was the weakest
+ * declared `struct Unit *` right here -- the `void *` was the weakest
  * type that fit when nothing read the result. sub_08045564, promoted this
  * wave, writes `->unk04_0 = 0x5a` through it, which is the discriminating use.
  * Byte-neutral; re-verified.
@@ -72,9 +72,9 @@ void *sub_08025C98(s16 a1, s16 a2, s16 a3)
  * input grid co-ordinates (r0 = x, r1 = y, r2 = UID)". The old CreateUnitAt
  * symbol is kept as a linker alias below so every other unit keeps
  * resolving it unchanged. */
-struct Unk08499594 *CreateUnitAt(s16 a1, s16 a2, s16 a3)
+struct Unit *CreateUnitAt(s16 a1, s16 a2, s16 a3)
 {
-    struct Unk08499594 *u = sub_08025C5C(a1, a2, a3);
+    struct Unit *u = sub_08025C5C(a1, a2, a3);
 
     if (u == NULL)
         return NULL;

@@ -22,14 +22,14 @@
 struct Unk2A588Proc
 {
     /* 0x00 */ u8 filler_00[0x4c];
-    /* 0x4c */ struct Unk08499594 *unk4c;
+    /* 0x4c */ struct Unit *unk4c;
 };
 
 void sub_0802A588(struct Unk2A588Proc *proc)
 {
-    struct Unk08499594 *unit = proc->unk4c;
+    struct Unit *unit = proc->unk4c;
 
-    sub_0803FECC(unit->unk02, unit->unk03, proc);
+    sub_0803FECC(unit->x, unit->y, proc);
     sub_08025D60(unit - gUnits);
     sub_080258CC();
 }

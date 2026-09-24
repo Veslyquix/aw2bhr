@@ -91,7 +91,7 @@ int sub_08008928(void)
 
 int RemoveUnitAt(int mode, int x, int y)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     int idx;
     int result;
 
@@ -131,7 +131,7 @@ int RemoveUnitAt(int mode, int x, int y)
         }
         else
         {
-            e->unk00 = 0;
+            e->type = 0;
         }
 
         sub_080088F0();

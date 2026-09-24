@@ -24,8 +24,8 @@
  * re-loaded from memory at every use -- five and four references respectively.
  * gUnknown_085D5ABC, by contrast, is CSEd to a single reference and gets an
  * ordinary inline pool word, which is why there is no local for the table
- * element: writing `t = &gUnknown_085D5ABC[u->unk00];` as its own statement
- * computes the element address BEFORE `u->unk06_0`, and the ROM computes the
+ * element: writing `t = &gUnknown_085D5ABC[u->type];` as its own statement
+ * computes the element address BEFORE `u->fuel`, and the ROM computes the
  * bitfield extract first.
  *
  * THE `do { } while (0)` IS LOAD-BEARING -- it is worth 7 bytes and it is the
@@ -55,7 +55,7 @@ struct Unk080196F4Cmd /* 0x0c */
 void sub_080196F4(void *arg)
 {
     struct Unk080196F4Cmd *p;
-    struct Unk08499594 *u;
+    struct Unit *u;
     u16 saved;
 
     p = arg;
@@ -73,23 +73,23 @@ void sub_080196F4(void *arg)
             u = sub_08025C5C(p->unk00, p->unk01, p->unk02);
             if (u == NULL)
                 break;
-            u->unk04_0 = p->unk04;
-            u->unk06_0 = p->unk06;
+            u->hp = p->unk04;
+            u->fuel = p->unk06;
             do
             {
                 if (p->unk05 == 0x63)
-                    u->unk04_7 = 0xF;
+                    u->ammo = 0xF;
                 else
-                    u->unk04_7 = p->unk05;
-                u->unk01 = p->unk03;
+                    u->ammo = p->unk05;
+                u->flags = p->unk03;
             } while (0);
             u->unk09 = 0;
             u->unk0a = 0;
             u->unk0b = p->unk09;
-            if (u->unk06_0 > gUnknown_085D5ABC[u->unk00].maxFuel)
-                u->unk06_0 = gUnknown_085D5ABC[u->unk00].maxFuel;
-            if (u->unk04_7 > gUnknown_085D5ABC[u->unk00].maxAmmo)
-                u->unk04_7 = gUnknown_085D5ABC[u->unk00].maxAmmo;
+            if (u->fuel > gUnknown_085D5ABC[u->type].maxFuel)
+                u->fuel = gUnknown_085D5ABC[u->type].maxFuel;
+            if (u->ammo > gUnknown_085D5ABC[u->type].maxAmmo)
+                u->ammo = gUnknown_085D5ABC[u->type].maxAmmo;
         }
         p++;
     }

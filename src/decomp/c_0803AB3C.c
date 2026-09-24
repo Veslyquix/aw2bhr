@@ -44,7 +44,7 @@ void sub_0803AB3C(void)
     u8 d;
     s8 e;
 
-    p = gUnknown_084997C8[gUnknown_0849D89C->unk04->unk00];
+    p = gUnknown_084997C8[gUnknown_0849D89C->unk04->type];
 
     i = 0;
     k = 0;

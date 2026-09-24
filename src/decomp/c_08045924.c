@@ -36,7 +36,7 @@ bool8 sub_08045924(void)
     for (i = (u16)gUnknown_084995FE[gUnknown_03003F2C] + 1;
          i < (u16)gUnknown_084995FE[gUnknown_03003F2C] + 0x33; i++)
     {
-        if (gUnits[i].unk00 != 0 && gUnits[i].unk06_0 != 0)
+        if (gUnits[i].type != 0 && gUnits[i].fuel != 0)
             count++;
     }
 

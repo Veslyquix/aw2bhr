@@ -53,7 +53,7 @@ void sub_0803A69C(void)
     {
       gUnknown_0849D89C->unk09 = 0xf;
     }
-    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->unk00] - 1][gUnknown_0849D89C->unk09] == 0)
+    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->type] - 1][gUnknown_0849D89C->unk09] == 0)
     {
       gUnknown_0849D89C->unk09--;
       if (gUnknown_0849D89C->unk09 < 0)
@@ -71,7 +71,7 @@ void sub_0803A69C(void)
     {
       gUnknown_0849D89C->unk09 = 0;
     }
-    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->unk00] - 1][gUnknown_0849D89C->unk09] == 0)
+    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->type] - 1][gUnknown_0849D89C->unk09] == 0)
     {
       gUnknown_0849D89C->unk09++;
       if (gUnknown_0849D89C->unk09 > 0xf)
@@ -100,7 +100,7 @@ void sub_0803A69C(void)
     }
 
     sub_08013AD4(0);
-    sub_080146D4(gUnknown_0849D89C->unk02 + 1, gUnknown_0849D89C->unk03 + 1, gUnknown_08499578, gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->unk00] - 1][gUnknown_0849D89C->unk09], 0x8000, 0xf8);
+    sub_080146D4(gUnknown_0849D89C->unk02 + 1, gUnknown_0849D89C->unk03 + 1, gUnknown_08499578, gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->type] - 1][gUnknown_0849D89C->unk09], 0x8000, 0xf8);
   }
   else
     if (gpKeySt->pressed & 2)

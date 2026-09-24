@@ -39,7 +39,7 @@
  * with a u16 accumulator: the first is a plain assignment and the rest are
  * `+=`, which is what puts the lone `lsls #0x18; lsrs #0x18` on the first call
  * and the `(u16)` re-truncation on the other three. */
-u8 sub_080255F4(struct Unk08499594 *unit, s16 ax, s16 ay)
+u8 sub_080255F4(struct Unit *unit, s16 ax, s16 ay)
 {
     u16 total = 0;
     u16 id = unit - gUnits;
@@ -48,7 +48,7 @@ u8 sub_080255F4(struct Unk08499594 *unit, s16 ax, s16 ay)
     if (unit == NULL)
         return 1;
 
-    if (!(unit->unk01 & 0x20))
+    if (!(unit->flags & 0x20))
         return 1;
 
     if (gPlayers[(id >> 6) + 1].turnState & 2)

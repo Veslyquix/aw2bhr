@@ -50,7 +50,7 @@
  * was right about all six signatures; they are declared file-locally rather
  * than in the header because the promoted definitions in src/decomp/ own them.
  * The casts on gUnknown_030040D8 are because struct Unk030040D8 and
- * struct Unk08499594 are the same object under two names (see the note on
+ * struct Unit are the same object under two names (see the note on
  * Unk030040D8.unk01 in unknown-globals.h); they cost nothing.
  *
  * The map planes are reached as MEMBERS of `gMap` (include/map.h) and INLINE
@@ -64,10 +64,10 @@
 struct Unk0803E9F8;
 void sub_08024404(void);
 void sub_0802E2BC(void);
-void sub_080201E0(s16, s16, struct Unk08499594 *);
+void sub_080201E0(s16, s16, struct Unit *);
 int sub_0803E9F8(struct Unk0803E9F8 *, u8 *, u8, u8);
-int sub_08041FE0(struct Unk08499594 *);
-int sub_0804203C(struct Unk08499594 *);
+int sub_08041FE0(struct Unit *);
+int sub_0804203C(struct Unit *);
 void sub_0801FE68(int);
 
 u8 sub_0802E2D0(s16 x, s16 y)
@@ -98,8 +98,8 @@ u8 sub_0802E2D0(s16 x, s16 y)
             return 1;
         }
 
-        a = sub_08041FE0((struct Unk08499594 *)gUnknown_030040D8);
-        b = sub_0804203C((struct Unk08499594 *)gUnknown_030040D8);
+        a = sub_08041FE0((struct Unit *)gUnknown_030040D8);
+        b = sub_0804203C((struct Unit *)gUnknown_030040D8);
 
         if (a == 0 && b == 0)
         {
@@ -128,7 +128,7 @@ u8 sub_0802E2D0(s16 x, s16 y)
                 FillMovementMap(0xFF);
 
             sub_080201E0(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
-                         (struct Unk08499594 *)gUnknown_030040D8);
+                         (struct Unit *)gUnknown_030040D8);
 
             if (a)
             {

@@ -72,7 +72,7 @@
 int sub_080587FC(int flag)
 {
     struct Unk03003338 *p;
-    struct Unk08499594 *r;
+    struct Unit *r;
     struct Unk802C57C pos;
     u8 *lim;
     int w;
@@ -129,7 +129,7 @@ int sub_080587FC(int flag)
                 if (sub_08026F9C(gUnknown_03003F38, u) == 1)
                     continue;
                 r = &gUnits[u];
-                if (r->unk00 == 0x18 && !sub_080257C0(u))
+                if (r->type == 0x18 && !sub_080257C0(u))
                     continue;
                 if (!sub_08020DBC(gUnknown_030033EC, x, y))
                     continue;

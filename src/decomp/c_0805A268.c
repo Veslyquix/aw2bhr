@@ -19,7 +19,7 @@
  * 0x13 or 0x14 -- spelled as the ROM's `(u8)(c - 0x13) <= 1`, one subtract and
  * a byte truncation rather than two compares. THE EMIT BODY IS WRITTEN OUT
  * TWICE ON PURPOSE: agbcc cross-jumps the two copies and the shared tail it
- * produces (from the second `u->unk03` reload onward, reached by a `b`) is
+ * produces (from the second `u->y` reload onward, reached by a `b`) is
  * exactly the ROM's. A single shared body cannot produce that layout.
  *
  * NEITHER gUnknown_0816D984 NOR gUnknown_0816D988 IS A GLOBAL. The ROM words
@@ -43,7 +43,7 @@ struct Unk5A514Cell
 
 void sub_0805A268(struct Unk5A514Cell *out)
 {
-    struct Unk08499594 *u;
+    struct Unit *u;
     int i;
     int flag;
 
@@ -54,33 +54,33 @@ void sub_0805A268(struct Unk5A514Cell *out)
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
         u = &gUnits[i];
-        if (u->unk00 == 0)
+        if (u->type == 0)
             continue;
 
         if (HasSupplyAbility((u8 *)u) && gUnknown_084995A8[gUnknown_030040D8->unk00] != 0)
         {
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] < 0)
+            if ((s8)gUnknown_03003340[u->y][u->x] < 0)
                 continue;
-            if (u->unk01 & 8)
+            if (u->flags & 8)
                 continue;
-            out->x = u->unk02;
-            out->y = u->unk03;
-            out->v = (s8)gUnknown_03003340[u->unk03][u->unk02];
+            out->x = u->x;
+            out->y = u->y;
+            out->v = (s8)gUnknown_03003340[u->y][u->x];
             out++;
         }
         else
         {
             if (flag == 0)
                 continue;
-            if (u->unk00 != 0x16)
+            if (u->type != 0x16)
                 continue;
             if (u->unk08 != 0)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] < 0)
+            if ((s8)gUnknown_03003340[u->y][u->x] < 0)
                 continue;
-            out->x = u->unk02;
-            out->y = u->unk03;
-            out->v = (s8)gUnknown_03003340[u->unk03][u->unk02];
+            out->x = u->x;
+            out->y = u->y;
+            out->v = (s8)gUnknown_03003340[u->y][u->x];
             out++;
         }
     }
@@ -90,7 +90,7 @@ void sub_0805A268(struct Unk5A514Cell *out)
 
 void sub_0805A388(struct Unk5A514Cell *out)
 {
-    struct Unk08499594 *u;
+    struct Unit *u;
     u8 *tbl;
     int x;
     int y;
@@ -129,7 +129,7 @@ void sub_0805A388(struct Unk5A514Cell *out)
                 {
                     if (flag == 0)
                         continue;
-                    if (u->unk00 != 0x16)
+                    if (u->type != 0x16)
                         continue;
                     if (u->unk07 != 0)
                         continue;

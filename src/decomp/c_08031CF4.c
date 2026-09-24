@@ -47,7 +47,7 @@ void sub_08031D54(struct Unk08031D54Proc *proc)
  * writes two fields on element 1 and two on element 2.
  *
  * THE +0x18 / +0x1C STORES ARE ELEMENT 2, NOT MEMBERS 0x18 AND 0x1C. struct
- * Unk08499594 is 0x0c bytes, so 0x18 == 2 * 0x0c is that element's unk00 and
+ * Unit is 0x0c bytes, so 0x18 == 2 * 0x0c is that element's `type` and
  * 0x1c its unk04_0 -- the `u16 unk04_0:7` bitfield already declared there,
  * which is exactly what the `AND ~0x7f; OR 0x64` store is. agbcc synthesises
  * 0xFFFFFF80 as `subs r0,#0x81` off the `movs r0,#1` the previous statement
@@ -62,7 +62,7 @@ void sub_08031D54(struct Unk08031D54Proc *proc)
  * named directly -- the two spellings sit side by side in this function. */
 void sub_08031DC0(void)
 {
-    struct Unk08499594 *p;
+    struct Unit *p;
 
     p = gUnits;
 
@@ -70,8 +70,8 @@ void sub_08031DC0(void)
 
     sub_08012BC8(gUnknown_08499578, 0xc, 8, 2, 2, 0);
 
-    p[2].unk00 = 1;
-    p[2].unk04_0 = 0x64;
+    p[2].type = 1;
+    p[2].hp = 0x64;
 
     gUnknown_030040D8->unk00 = 0x17;
     gUnknown_030040D8->unk07[0] = 2;

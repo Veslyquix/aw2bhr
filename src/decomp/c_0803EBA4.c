@@ -34,7 +34,7 @@ struct Unk3EBA4Proc
 void sub_0803EBA4(struct Unk3EBA4Proc *proc)
 {
     struct Unk03003338 *p;
-    struct Unk08499594 *u;
+    struct Unit *u;
     struct Unk02028360 *q;
     int i;
 
@@ -55,12 +55,12 @@ void sub_0803EBA4(struct Unk3EBA4Proc *proc)
         break;
     case 3:
         q = sub_0803DE94(p[proc->unk4c].unk04, p[proc->unk4c].unk06);
-        sub_0803F0A4(p[proc->unk4c].unk04, p[proc->unk4c].unk06, u->unk02, u->unk03,
+        sub_0803F0A4(p[proc->unk4c].unk04, p[proc->unk4c].unk06, u->x, u->y,
                      3, q->unk02_e, proc);
         break;
     case 4:
         q = sub_0803DE94(p[proc->unk4c].unk04, p[proc->unk4c].unk06);
-        sub_0803F0A4(p[proc->unk4c].unk04, p[proc->unk4c].unk06, u->unk02, u->unk03,
+        sub_0803F0A4(p[proc->unk4c].unk04, p[proc->unk4c].unk06, u->x, u->y,
                      4, q->unk02_e, proc);
         break;
     case 5:

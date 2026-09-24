@@ -19,7 +19,7 @@ void ClearAllUnits(void)
     int i;
 
     for (i = 0; i < 256; i++)
-        gUnits[i].unk00 = 0;
+        gUnits[i].type = 0;
     gUnknown_030032C0 = 0;
 }
 

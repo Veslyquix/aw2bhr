@@ -76,7 +76,7 @@ void sub_080482D8(struct Unk0804769C *p)
     u16 r;
     int x;
     int y;
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     if (p->unk21 != 0)
     {
@@ -92,12 +92,12 @@ void sub_080482D8(struct Unk0804769C *p)
     {
         v = gUnknown_02028DD8[p->unk20 + i];
         e = &gUnits[gUnknown_03003F2C + v];
-        if (e->unk00 == 0)
+        if (e->type == 0)
             break;
 
         id = v;
         t = sub_0804769C(p, id) + 1;
-        if (e->unk01 & 8)
+        if (e->flags & 8)
         {
             r = sub_08047740(p, id, t - 1, p->unk20 + i);
             switch (r)

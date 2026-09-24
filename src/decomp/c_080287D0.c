@@ -62,7 +62,7 @@ struct Unk080287D0Proc
 
 void sub_080287D0(struct Unk080287D0Proc *proc)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     if (proc->unk66 == 1 || proc->unk66 == 0x10)
     {

@@ -12,10 +12,10 @@
  * pair (0x78, 0).
  *
  * The three `ldrb` at +0, +2 and +3 are what identifies the parameter as
- * `struct Unk08499594 *` -- that struct's unk02 and unk03 are documented as the
+ * `struct Unit *` -- that struct's unk02 and unk03 are documented as the
  * cell column and row, and unk00 as the unit-type id, which is exactly the
  * order they arrive in. */
-void sub_0802032C(struct Unk08499594 *unit)
+void sub_0802032C(struct Unit *unit)
 {
-    gUnknown_030013EC(unit->unk02, unit->unk03, unit->unk00, 0x78, 0);
+    gUnknown_030013EC(unit->x, unit->y, unit->type, 0x78, 0);
 }

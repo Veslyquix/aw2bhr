@@ -9,7 +9,7 @@
 
 /* Wave 52, W52-B.  MATCHED.
  *
- * DO NOT DELETE `u->unk03 += 0;`.  It is a dead store and it is LOAD-BEARING.
+ * DO NOT DELETE `u->y += 0;`.  It is a dead store and it is LOAD-BEARING.
  * See the wave-52 chapter in docs/agbcc-codegen.md: without it agbcc hoists
  * both gUnits and the gUnknown_03003F2C bound out of the loop,
  * check_dbra_loop reverses the loop into a countdown, and the function comes
@@ -28,13 +28,13 @@
 int sub_0805A6DC(u8 *out)
 {
   int new_var;
-  struct Unk08499594 *u;
+  struct Unit *u;
   int i;
   for (i = gUnknown_03003F2C; i < (gUnknown_03003F2C + 0x40); i++)
   {
     u = &gUnits[i];
-    u->unk03 += 0;
-    if (u->unk00 != 0x17)
+    u->y += 0;
+    if (u->type != 0x17)
     {
       continue;
     }
@@ -42,8 +42,8 @@ int sub_0805A6DC(u8 *out)
     {
       continue;
     }
-    *out = u->unk02;
-    *(out + 1) = u->unk03;
+    *out = u->x;
+    *(out + 1) = u->y;
     *((u16 *) (out + 2)) = 0;
     out += 4;
   }

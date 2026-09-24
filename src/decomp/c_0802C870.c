@@ -12,7 +12,7 @@ int sub_0802C870(void)
   s16 i;
   int idx;
   int o;
-  struct Unk08499594 **pu;
+  struct Unit **pu;
   u16 *pg;
   i = 1;
   pu = &gUnits;
@@ -28,9 +28,9 @@ int sub_0802C870(void)
   }
   idx = (*pg) + i;
   test:
-  o = idx * (sizeof(struct Unk08499594));
+  o = idx * (sizeof(struct Unit));
 
-  if ((idx = ((struct Unk08499594 *) (((u8 *) (*pu)) + o))->unk00) == 0)
+  if ((idx = ((struct Unit *) (((u8 *) (*pu)) + o))->type) == 0)
   {
     goto body;
   }

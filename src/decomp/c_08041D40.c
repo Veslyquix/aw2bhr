@@ -22,12 +22,12 @@
  * the same predicate, but only this polarity leaves `return 1` inline ahead of
  * the literal pool with `return 0` after it; the other spelling swaps the two
  * blocks. Same lever c_0804203C.c documents for its own pair of returns. */
-int sub_08041D40(struct Unk08499594 *a, struct Unk08499594 *b)
+int sub_08041D40(struct Unit *a, struct Unit *b)
 {
-    if (a->unk02 > b->unk02)
+    if (a->x > b->x)
         return 1;
 
-    if (a->unk02 != b->unk02)
+    if (a->x != b->x)
         return 0;
 
     if ((gPlayers[((a - gUnits) >> 6) + 1].hqX & 0x7f)

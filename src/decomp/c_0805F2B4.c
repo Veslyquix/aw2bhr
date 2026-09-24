@@ -68,7 +68,7 @@ void AiProtectHq(void)
     u32 yp;
     u16 *p;
     int t;
-    struct Unk085D5ABC *table;
+    struct UnitType *table;
     register u8 type asm("r1");
     u8 tag;
     int a;

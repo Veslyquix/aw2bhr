@@ -37,7 +37,7 @@ int sub_08058254(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
@@ -50,13 +50,13 @@ int sub_08058254(void)
         {
             u = &gUnits[j];
 
-            if (u->unk00 <= 2)
+            if (u->type <= 2)
                 continue;
-            if (gUnknown_0857680F[u->unk00] != 2)
+            if (gUnknown_0857680F[u->type] != 2)
                 continue;
-            if (gUnknown_085D5ABC[u->unk00].maxAmmo == 0)
+            if (gUnknown_085D5ABC[u->type].maxAmmo == 0)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;
@@ -73,7 +73,7 @@ int sub_08058318(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
@@ -86,13 +86,13 @@ int sub_08058318(void)
         {
             u = &gUnits[j];
 
-            if (u->unk00 <= 2)
+            if (u->type <= 2)
                 continue;
-            if (gUnknown_0857680F[u->unk00] != 2)
+            if (gUnknown_0857680F[u->type] != 2)
                 continue;
-            if (gUnknown_085D5ABC[u->unk00].maxAmmo == 0)
+            if (gUnknown_085D5ABC[u->type].maxAmmo == 0)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;

@@ -18,7 +18,7 @@
  */
 void sub_0802966C(void)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     u8 r;
 
     if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_UP))
@@ -67,9 +67,9 @@ void sub_0802966C(void)
         }
 
         sub_080357E0(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
-                     (((struct Unk08499594 *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
-                     unit->unk00, gUnknown_03003110);
+                     (((struct Unit *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
+                     unit->type, gUnknown_03003110);
         sub_08015C30(gUnknown_03001FBC);
-        sub_08029868(unit->unk00);
+        sub_08029868(unit->type);
     }
 }

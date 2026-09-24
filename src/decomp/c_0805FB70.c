@@ -26,7 +26,7 @@ struct Unk5FB70Unit
 void sub_0805FB70(void)
 {
     union Unk802C57CBuf v;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     v.pos.unk00 = 0x270F;
     sub_080202A4(gUnknown_030040D8);

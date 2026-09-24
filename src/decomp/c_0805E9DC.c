@@ -60,28 +60,28 @@ void sub_0805EA54(void)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        struct Unk08499594 *p;
+        struct Unit *p;
 
         p = &gUnits[i];
 
-        if (gUnknown_030040D8->unk00 != p->unk00)
+        if (gUnknown_030040D8->unk00 != p->type)
             continue;
-        if (gUnknown_030040D8->unk04 + p->unk04_0 > 0x64)
+        if (gUnknown_030040D8->unk04 + p->hp > 0x64)
             continue;
         if (gUnknown_030040D8->unk07[0] != -p->unk07)
             continue;
-        if ((struct Unk08499594 *)gUnknown_030040D8 == p)
+        if ((struct Unit *)gUnknown_030040D8 == p)
             continue;
-        if (p->unk01 & 8)
+        if (p->flags & 8)
             continue;
-        if (p->unk04_0 <= best)
+        if (p->hp <= best)
             continue;
-        if ((s8)gUnknown_03003340[p->unk03][p->unk02] <= 0)
+        if ((s8)gUnknown_03003340[p->y][p->x] <= 0)
             continue;
 
-        bestX = p->unk02;
-        bestY = p->unk03;
-        best = p->unk04_0;
+        bestX = p->x;
+        bestY = p->y;
+        best = p->hp;
     }
 
     if (bestX == -1)

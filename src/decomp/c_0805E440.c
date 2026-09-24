@@ -19,7 +19,7 @@
  * off one `ldrb` with two different extractions -- `movs r0,#0x7f; ands` where
  * it is only tested against zero, and `lsls #0x19; lsrs #0x19` where the value
  * reaches Div.  That is exactly the discriminating evidence recorded on
- * struct Unk030040D8's unk04 and struct Unk08499594's unk04_0, and both already
+ * struct Unk030040D8's unk04 and struct Unit's unk04_0, and both already
  * carry it, so nothing needed declaring.
  *
  * THE ONE THING THAT COST ANYTHING: `n + 1 + Div(...)`.  agbcc's fold()
@@ -41,7 +41,7 @@ void sub_0805E440(void)
     int y;
     int id;
     int n;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     sub_080202A4(gUnknown_030040D8);
 
@@ -59,15 +59,15 @@ void sub_0805E440(void)
             if (sub_0804236C(x, y) == 0)
                 continue;
             u = gUnits + id;
-            if (u->unk04_0 != 0)
+            if (u->hp != 0)
             {
-                if (Div(u->unk04_0 - 1, 10) == 9)
+                if (Div(u->hp - 1, 10) == 9)
                     continue;
             }
-            if (u->unk00 != gUnknown_030040D8->unk00)
+            if (u->type != gUnknown_030040D8->unk00)
                 continue;
-            if (u->unk04_0 != 0)
-                n = Div(u->unk04_0 - 1, 10) + 1;
+            if (u->hp != 0)
+                n = Div(u->hp - 1, 10) + 1;
             else
                 n = 0;
             if (gUnknown_030040D8->unk04 != 0)
@@ -95,7 +95,7 @@ void sub_0805E5AC(void)
     s16 x;
     s16 y;
     int id;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     if ((gMap->terrain[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] & 0xe0) != gUnknown_03004084)
         return;
@@ -115,7 +115,7 @@ void sub_0805E5AC(void)
                 u = gUnits + (id = gMap->unit[gMap->rowOffset[y] + x]);
                 if (sub_08026F9C(gUnknown_03003F38, u - gUnits) == 0)
                 {
-                    if (u->unk00 == 1)
+                    if (u->type == 1)
                         sub_0805D648(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, 2, 0, 0);
                 }
             }

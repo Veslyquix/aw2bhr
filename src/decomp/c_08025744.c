@@ -22,7 +22,7 @@ u8 sub_08025744(int a1, int a2)
     if (gMap->visible[off] == 0)
         return 0;
 
-    if (gMap->unit[off] == 0 && (gUnits[id].unk01 & 4) == 0)
+    if (gMap->unit[off] == 0 && (gUnits[id].flags & 4) == 0)
         return 0;
 
     return sub_08026F5C(id);

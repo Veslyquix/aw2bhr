@@ -1,10 +1,6 @@
 #ifndef GUARD_DATA_NAMES_H
 #define GUARD_DATA_NAMES_H
 
-/* The 64-entry-per-army unit table. Keep the address-based symbol available
- * for assembly and historical notes while new C uses the domain name. */
-#define gUnits gUnknown_08499594
-
 /* Friendly names for the small accessors over the ROM data tables in
  * include/unknown-globals.h -- the per-unit-type, per-terrain, per-CO and
  * map-header records. Each name was read off this tree's own C once the
@@ -35,7 +31,7 @@ void CalcRandomWeatherChances(void);
 void DrawDaysRemaining(int x, int y);
 bool8 IsPlayer1TeamAlive(void);
 void DrawOamObject(int a1, int a2, int a3, int a4, int a5);
-int RepairUnit(struct Unk08499594 *p, u16 a2, u8 a3);
+int RepairUnit(struct Unit *p, u16 a2, u8 a3);
 
 int HasNoDeathRay(void);
 int HasNoLaser(void);
@@ -79,7 +75,6 @@ u8 PickWeightedAiUnit(u8 a1);
 
 void CacheUnitMovementCosts(int a1);
 void AnimateUnitCreation(u8 a1, u8 a2, u8 a3);
-void CalcDamage(struct BattleUnit *a, struct BattleUnit *b, s16 c, u8 d);
 int GetFirepowerIcon(int a1, int a2);
 void DrawUnitAt(u16 x, u16 y);
 void RunAiTurn(void);
@@ -112,14 +107,13 @@ void SpendCoPowerCharge(int a1, int a2);
 void ActivateCoPower(int a1, int a2, ProcPtr a3);
 void FillMapBuffer(u8 *dst, int value);
 
-void CalcBattleDamage(s16 a1, s16 a2, struct Unk802C57C *a3);
 void FillMovementMap(u8 a);
 void AiMarkAffordableUnits(void);
 u8 AiSelectBuildUnit(void);
 void DrawCoPowerLabel(int x, int y, int i);
 
 void CopUnitResupply(void *p);
-void InitUnit(struct Unk08499594 *a1, u8 a2);
+void InitUnit(struct Unit *a1, u8 a2);
 /* These two take structs that live in their own .c file; forward-declare the
  * tags so the prototypes below do not introduce them inside a parameter list
  * (agbcc warns, and warnings are errors here). */
@@ -127,7 +121,7 @@ struct Unk40640Proc;
 struct Unk807D800;
 void ApplySiloDamage(struct Unk40640Proc *proc);
 int IsCoSelectionUnique(struct Unk807D800 *p);
-bool8 CanTransportCarry(struct Unk08499594 *a1, u8 a2);
+bool8 CanTransportCarry(struct Unit *a1, u8 a2);
 
 int RandRange(int a, int b);
 void ClearAllUnits(void);

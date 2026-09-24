@@ -34,7 +34,7 @@
 
 u8 sub_0802B6C8(u8 x, u8 y)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     u8 army;
     int idx;
 
@@ -46,7 +46,7 @@ u8 sub_0802B6C8(u8 x, u8 y)
     unit = &gUnits[gMap->unit[idx]];
     army = ((unit - gUnits) >> 6) + 1;
 
-    if (sub_0802706C(unit->unk00, gUnknown_030033EC, army))
+    if (sub_0802706C(unit->type, gUnknown_030033EC, army))
         return 2;
 
     if (unit->unk07 | unit->unk08)

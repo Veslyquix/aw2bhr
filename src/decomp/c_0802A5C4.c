@@ -22,23 +22,23 @@
  * different globals, and one honest spelling produces both.
  *
  * `q` must be its own statement, and it is worth exactly one byte. Writing
- * the scan as `gUnits[i].unk00 != 0 && &gUnits[i] != p
+ * the scan as `gUnits[i].type != 0 && &gUnits[i] != p
  * && ...` is 203 of 204 bytes: the slot address then comes out
  * `adds r1, r0, r2` (index, base) where the ROM has `adds r1, r2, r0`
  * (base, index). Binding the address once puts the base pointer first, which
  * is what expand_expr does for a plain ARRAY_REF that is not already a CSE
  * of three sibling reads. */
 
-void sub_0802A5C4(struct Unk08499594 *p)
+void sub_0802A5C4(struct Unit *p)
 {
-    struct Unk08499594 *q;
+    struct Unit *q;
     int base;
     u16 i;
 
-    if (p->unk01 & 0x40)
+    if (p->flags & 0x40)
         gUnknown_030030F8 = ((p - gUnits) >> 6) + 1;
 
-    if (p->unk01 & 0x80)
+    if (p->flags & 0x80)
     {
         base = (p - gUnits) & 0xc0;
 
@@ -46,7 +46,7 @@ void sub_0802A5C4(struct Unk08499594 *p)
         {
             q = &gUnits[i];
 
-            if (q->unk00 != 0 && q != p && (q->unk01 & 0x80))
+            if (q->type != 0 && q != p && (q->flags & 0x80))
                 return;
         }
 

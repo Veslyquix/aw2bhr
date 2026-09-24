@@ -7,6 +7,6 @@
  * sub_08025B24 @ 0x08025B24
  */
 
-void sub_08025B24(struct Unk08499594 *arg, int value)
+void sub_08025B24(struct Unit *arg, int value)
 {
 }

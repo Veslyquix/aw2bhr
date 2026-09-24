@@ -32,9 +32,9 @@ struct Unk5B980Cell
     /* 01 */ u8 y;
     /* 02 */ s16 v;
 };
-/* The blob struct Unk085D5ABC's unk14 points at; only the +0x1a table of
+/* The blob struct UnitType's unk14 points at; only the +0x1a table of
  * per-terrain-code permission bytes is proved here. */
-struct Unk085D5ABCUnk14
+struct UnitTypeUnk14
 {
     /* 0x00 */ u8 filler_00[0x1a];
     /* 0x1a */ u8 terrainOk[0x20];
@@ -70,8 +70,8 @@ void sub_0805B980(void)
 
 u8 sub_0805BA34(int x, int y, u16 *out)
 {
-    struct Unk08499594 *unit;
-    struct Unk085D5ABCUnk14 *tbl;
+    struct Unit *unit;
+    struct UnitTypeUnk14 *tbl;
     int idx;
     int best;
 
@@ -80,7 +80,7 @@ u8 sub_0805BA34(int x, int y, u16 *out)
     if (gMap->unit[idx] != 0)
         return 0;
 
-    tbl = (struct Unk085D5ABCUnk14 *)gUnknown_085D5ABC[23].transportTable;
+    tbl = (struct UnitTypeUnk14 *)gUnknown_085D5ABC[23].transportTable;
 
     if (tbl->terrainOk[gMap->terrain[idx]
                        & 0x1f] == 0)
@@ -91,10 +91,10 @@ u8 sub_0805BA34(int x, int y, u16 *out)
     best = 9999;
     out[0] = best;
 
-    sub_0805BAFC(x - 1, y, unit->unk00, out);
-    sub_0805BAFC(x + 1, y, unit->unk00, out);
-    sub_0805BAFC(x, y - 1, unit->unk00, out);
-    sub_0805BAFC(x, y + 1, unit->unk00, out);
+    sub_0805BAFC(x - 1, y, unit->type, out);
+    sub_0805BAFC(x + 1, y, unit->type, out);
+    sub_0805BAFC(x, y - 1, unit->type, out);
+    sub_0805BAFC(x, y + 1, unit->type, out);
 
     if (out[0] == best)
         return 0;

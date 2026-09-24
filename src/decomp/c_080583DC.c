@@ -30,7 +30,7 @@ int sub_080583DC(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
@@ -43,11 +43,11 @@ int sub_080583DC(void)
         {
             u = &gUnits[j];
 
-            if (u->unk00 == 0)
+            if (u->type == 0)
                 continue;
-            if (gUnknown_0857680F[u->unk00] != 2)
+            if (gUnknown_0857680F[u->type] != 2)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;
@@ -83,7 +83,7 @@ int sub_0805848C(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
@@ -96,9 +96,9 @@ int sub_0805848C(void)
         {
             u = &gUnits[j];
 
-            if ((u8)(u->unk00 - 1) > 1)
+            if ((u8)(u->type - 1) > 1)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;
@@ -120,7 +120,7 @@ int sub_08058530(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
@@ -133,9 +133,9 @@ int sub_08058530(void)
         {
             u = &gUnits[j];
 
-            if ((u8)(u->unk00 - 1) > 1)
+            if ((u8)(u->type - 1) > 1)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;

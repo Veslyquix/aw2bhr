@@ -16,11 +16,11 @@
  * tree -- the *5 / *17 / *257 / *65537 shift-add chain plus `neg; asr #8` is
  * agbcc's exact division by the 12-byte stride folded together with the `>> 6`
  * that groups 64 slots to an army. */
-void sub_08020354(u16 x, u16 y, struct Unk08499594 *e)
+void sub_08020354(u16 x, u16 y, struct Unit *e)
 {
     sub_0801F9C0(x, y,
-                 GetUnitFiringRangeWithCoBonus(((e - gUnits) >> 6) + 1, e->unk00), 0);
-    sub_0801F9C0(x, y, gUnknown_085D5ABC[e->unk00].minRange - 1, 0xff);
+                 GetUnitFiringRangeWithCoBonus(((e - gUnits) >> 6) + 1, e->type), 0);
+    sub_0801F9C0(x, y, gUnknown_085D5ABC[e->type].minRange - 1, 0xff);
 }
 
 /* Clears the four orthogonal neighbours of cell (x, y) in the

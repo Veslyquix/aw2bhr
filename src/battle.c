@@ -1,12 +1,8 @@
 #include "global.h"
 
-struct ArmyUnitBlock
-{
-    struct Unk08499594 units[64];
-};
 void CalcDamage(struct BattleUnit *a, struct BattleUnit *b, s16 c, u8 d)
 {
-    const struct Unk085D5ABC *t;
+    const struct UnitType *t;
     u16 army;
     u32 v1;
     s16 v2;
@@ -17,38 +13,38 @@ void CalcDamage(struct BattleUnit *a, struct BattleUnit *b, s16 c, u8 d)
     v3 = 0;
     v1 = 0;
     v2 = 0;
-    t = &gUnknown_085D5ABC[a->unit->unk00];
+    t = &gUnknown_085D5ABC[a->unit->type];
 
     if (c == 1)
     {
-        v2 = sub_080433F8(a->unit->unk00, b->unit->unk00, 1);
+        v2 = sub_080433F8(a->unit->type, b->unit->type, 1);
         if (v2 != 0)
             v1 = (u16)sub_08043070(gPlayers[army].co,
                               gPlayers[army].coMode,
-                              a->unit->unk00, b->unit->unk00, c);
-        if (t->minRange == 1 && a->unit->unk04_7 != 0)
+                              a->unit->type, b->unit->type, c);
+        if (t->minRange == 1 && a->unit->ammo != 0)
         {
-            if ((b->unit->unk01 & 0x20) != 0)
+            if ((b->unit->flags & 0x20) != 0)
                 v3 = (u16)sub_08043070(gPlayers[army].co,
                                   gPlayers[army].coMode,
-                                  a->unit->unk00, 0x19, v3);
+                                  a->unit->type, 0x19, v3);
             else
                 v3 = (u16)sub_08043070(gPlayers[army].co,
                                   gPlayers[army].coMode,
-                                  a->unit->unk00, b->unit->unk00, v3);
+                                  a->unit->type, b->unit->type, v3);
         }
     }
-    else if (t->minRange <= c && c <= GetUnitFiringRangeWithCoBonus(army, a->unit->unk00)
-             && a->unit->unk04_7 != 0 && d == 1)
+    else if (t->minRange <= c && c <= GetUnitFiringRangeWithCoBonus(army, a->unit->type)
+             && a->unit->ammo != 0 && d == 1)
     {
-        if ((b->unit->unk01 & 0x20) != 0)
+        if ((b->unit->flags & 0x20) != 0)
             v3 = (u16)sub_08043070(gPlayers[army].co,
                               gPlayers[army].coMode,
-                              a->unit->unk00, 0x19, v3);
+                              a->unit->type, 0x19, v3);
         else
             v3 = (u16)sub_08043070(gPlayers[army].co,
                               gPlayers[army].coMode,
-                              a->unit->unk00, b->unit->unk00, v3);
+                              a->unit->type, b->unit->type, v3);
     }
 
     if (v3 <= v1)
@@ -72,35 +68,45 @@ asm(".global sub_08024ABC\n.thumb_set sub_08024ABC, CalcDamage\n");
 void sub_08024C58(struct BattleUnit *a1, int a2, u8 a3)
 {
     int idx;
-    int x;
-    int y;
+    int firepower;
+    int defense;
     int acc;
     int hp;
     int r;
     int q;
 
     idx = (a1->unit - gUnits) >> 6;
-    x = *(s16 *)((u8 *)&gPlayers[idx] + 0x62);
-    y = *(s16 *)((u8 *)&gPlayers[idx] + 0x64);
+    /* gPlayers[idx + 1].tempFirepower / .tempDefense -- idx is 0-based here and
+     * gPlayers is 1-based, and 0x3c + 0x26 == 0x62, 0x3c + 0x28 == 0x64. The
+     * NAMED spelling does not reproduce and three forms were measured: both
+     * `gPlayers[idx + 1].tempFirepower` and `(&gPlayers[idx])[1].tempFirepower`
+     * put the +1 where agbcc will not fold it into the member displacement, and
+     * a `(struct PlayerStruct *)((u8 *)&gPlayers[idx] + sizeof ...)` cast fails
+     * the same way. The ROM keeps ONE element base in r1 and reaches both
+     * fields off it with `adds r0,r1,#0; adds r0,#0x62` / `adds r1,#0x64`, which
+     * is what a byte-pointer displacement off gPlayers[idx] emits. The s16 on
+     * both members (include/co.h) is what makes these `ldrsh`. */
+    firepower = *(s16 *)((u8 *)&gPlayers[idx] + 0x62);
+    defense = *(s16 *)((u8 *)&gPlayers[idx] + 0x64);
     acc = 100;
 
-    if (a1->unit->unk04_0 != 0)
-        hp = Div(a1->unit->unk04_0 - 1, 10) + 1;
+    if (a1->unit->hp != 0)
+        hp = Div(a1->unit->hp - 1, 10) + 1;
     else
         hp = 0;
 
-    a1->terrainDefense = sub_08043304((struct Unk43304 *)a1);
+    a1->terrainDefense = sub_08043304(a1);
     a1->totalDefense = Div(hp * a1->terrainDefense, 10);
     a1->totalDefense = a1->totalDefense
-              + GetUnitDefenceWithCoBonus(((a1->unit - gUnits) >> 6) + 1, a1->unit->unk00)
-              + y;
+              + GetUnitDefenceWithCoBonus(((a1->unit - gUnits) >> 6) + 1, a1->unit->type)
+              + defense;
     a1->damage = a1->baseDamage;
 
     if (a2 == 1)
-        acc += sub_0804338C((struct Unk43304 *)a1);
+        acc += sub_0804338C(a1);
 
-    acc += sub_0804334C((struct Unk43304 *)a1);
-    acc += x;
+    acc += sub_0804334C(a1);
+    acc += firepower;
 
     a1->damage = Div(acc * a1->damage, 100);
     a1->displayDamage = a1->damage;
@@ -126,8 +132,8 @@ void sub_08024DDC(struct BattleUnit *a1, struct BattleUnit *a2)
 {
     int hp;
 
-    if (a2->unit->unk04_0 != 0)
-        hp = Div(a2->unit->unk04_0 - 1, 10) + 1;
+    if (a2->unit->hp != 0)
+        hp = Div(a2->unit->hp - 1, 10) + 1;
     else
         hp = 0;
 
@@ -138,7 +144,7 @@ void sub_08024DDC(struct BattleUnit *a1, struct BattleUnit *a2)
         a2->displayDamage = 999;
 
     a1->hpLoss = Div((200 - a1->totalDefense) * a2->damage, 100);
-    a1->remainingHp = a1->unit->unk04_0 - a1->hpLoss;
+    a1->remainingHp = a1->unit->hp - a1->hpLoss;
 }
 
 void sub_08024E60(struct BattleUnit *a1, struct BattleUnit *a2)
@@ -146,8 +152,8 @@ void sub_08024E60(struct BattleUnit *a1, struct BattleUnit *a2)
     int v;
     s16 hp;
 
-    if (a1->unit->unk04_0 != 0)
-        v = a1->damage * (Div(a1->unit->unk04_0 - 1, 10) + 1);
+    if (a1->unit->hp != 0)
+        v = a1->damage * (Div(a1->unit->hp - 1, 10) + 1);
     else
         v = 0;
 
@@ -205,21 +211,21 @@ void CalcBattleDamage(s16 a1, s16 a2, struct Unk802C57C *a3)
     int dy;
     int d;
 
-    saved = gUnits[a1].unk02;
-    gUnits[a1].unk02 = a3->unk00;
-    saved |= gUnits[a1].unk03 << 16;
-    gUnits[a1].unk03 = a3->unk02;
+    saved = gUnits[a1].x;
+    gUnits[a1].x = a3->unk00;
+    saved |= gUnits[a1].y << 16;
+    gUnits[a1].y = a3->unk02;
 
     sub_08024A2C(gBattleAttacker, a1);
     sub_08024A2C(gBattleDefender, a2);
 
-    dx = gBattleAttacker->unit->unk02
-       - gBattleDefender->unit->unk02;
+    dx = gBattleAttacker->unit->x
+       - gBattleDefender->unit->x;
     if (dx < 0)
         dx = -dx;
 
-    dy = gBattleAttacker->unit->unk03
-       - gBattleDefender->unit->unk03;
+    dy = gBattleAttacker->unit->y
+       - gBattleDefender->unit->y;
     if (dy < 0)
         dy = -dy;
 
@@ -243,8 +249,8 @@ void CalcBattleDamage(s16 a1, s16 a2, struct Unk802C57C *a3)
     sub_08024ED8(gBattleAttacker,
                  gBattleDefender);
 
-    gUnits[a1].unk02 = saved;
-    gUnits[a1].unk03 = saved >> 16;
+    gUnits[a1].x = saved;
+    gUnits[a1].y = saved >> 16;
 }
 
 asm(".global sub_08024F20\n.thumb_set sub_08024F20, CalcBattleDamage\n");
@@ -259,8 +265,8 @@ void sub_0802505C(void *a1)
     int v;
     u16 w;
 
-    if (p->unit->unk04_0 != 0)
-        v = Div(p->unit->unk04_0 - 1, 10) + 1;
+    if (p->unit->hp != 0)
+        v = Div(p->unit->hp - 1, 10) + 1;
     else
         v = 0;
 
@@ -271,10 +277,10 @@ void sub_0802505C(void *a1)
 
     sub_08025B24(p->unit, w);
 
-    p->unit->unk04_0 = p->remainingHp;
-    p->unit->unk04_7 = p->ammo;
+    p->unit->hp = p->remainingHp;
+    p->unit->ammo = p->ammo;
 
-    if (p->unit->unk04_0 == 0)
+    if (p->unit->hp == 0)
         sub_0804018C(p->unit);
 }
 
@@ -284,13 +290,13 @@ void sub_080250E8(void)
         sub_08026588(
             ((gBattleDefender->unit - gUnits) >> 6) + 1,
             ((gBattleAttacker->unit - gUnits) >> 6) + 1,
-            gBattleAttacker->unit->unk00);
+            gBattleAttacker->unit->type);
 
     if (gBattleDefender->remainingHp <= 0)
         sub_08026588(
             ((gBattleAttacker->unit - gUnits) >> 6) + 1,
             ((gBattleDefender->unit - gUnits) >> 6) + 1,
-            gBattleDefender->unit->unk00);
+            gBattleDefender->unit->type);
 
     sub_0802505C(gBattleAttacker);
     sub_0802505C(gBattleDefender);
@@ -311,7 +317,7 @@ void sub_080251BC(int a1, int a2, struct Unk802C57C *a3)
 
 void sub_080251D8(int a1)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     int a;
     int b;
     int ok;
@@ -325,19 +331,19 @@ void sub_080251D8(int a1)
 
     sub_08024A2C(gBattleAttacker, a1);
 
-    if (e->unk04_7 != 0)
+    if (e->ammo != 0)
     {
         a = sub_08043070(gPlayers[gUnknown_030033EC].co,
                          gPlayers[gUnknown_030033EC].coMode,
-                         e->unk00, 3, 0);
+                         e->type, 3, 0);
     }
     else
     {
-        ok = sub_080433F8(e->unk00, 3, 1);
+        ok = sub_080433F8(e->type, 3, 1);
         if (ok != 0)
             b = sub_08043070(gPlayers[gUnknown_030033EC].co,
                              gPlayers[gUnknown_030033EC].coMode,
-                             e->unk00, 3, 1);
+                             e->type, 3, 1);
     }
 
     if (a <= b)
@@ -357,9 +363,9 @@ void sub_080251D8(int a1)
 
     sub_08024C58(gBattleAttacker, 0, 0);
 
-    if (gBattleAttacker->unit->unk04_0 != 0)
+    if (gBattleAttacker->unit->hp != 0)
         t = gBattleAttacker->displayDamage
-          * (Div(gBattleAttacker->unit->unk04_0 - 1, 10) + 1);
+          * (Div(gBattleAttacker->unit->hp - 1, 10) + 1);
     else
         t = 0;
 

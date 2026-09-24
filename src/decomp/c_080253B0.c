@@ -31,47 +31,47 @@
  * `a8: R_ARM_ABS32 .rodata`; that is the wave-18 honest-spelling flow.
  *
  * Two type findings this function established are in
- * include/unknown-globals.h: struct Unk085D5ABC.unk58 (a `const u8 *`
+ * include/unknown-globals.h: struct UnitType.unk58 (a `const u8 *`
  * per-terrain cost table, carved out of filler_52) and gUnknown_084995DA
  * (one ROM terrain code per unit type).
  */
 
-bool8 sub_080253B0(struct Unk08499594 *a1)
+bool8 sub_080253B0(struct Unit *a1)
 {
     int off;
     u8 cell;
     u8 cost;
     int sum;
 
-    off = gMap->rowOffset[a1->unk03] + a1->unk02;
+    off = gMap->rowOffset[a1->y] + a1->x;
     cell = gMap->terrain[off];
 
-    cost = gUnknown_085D5ABC[a1->unk00].fuelCost[cell & 0x1f];
+    cost = gUnknown_085D5ABC[a1->type].fuelCost[cell & 0x1f];
 
-    if (a1->unk01 & 8)
+    if (a1->flags & 8)
         return FALSE;
 
-    if (gUnknown_03004084 == (cell & 0xe0) && gUnknown_084995DA[a1->unk00] == (cell & 0x1f))
+    if (gUnknown_03004084 == (cell & 0xe0) && gUnknown_084995DA[a1->type] == (cell & 0x1f))
         return FALSE;
 
-    if (a1->unk01 & 0x20)
+    if (a1->flags & 0x20)
         cost = 5;
 
-    sum = (s8)cost + sub_08042C68(gUnknown_030033EC, a1->unk00);
+    sum = (s8)cost + sub_08042C68(gUnknown_030033EC, a1->type);
     cost = sum;
 
     if ((s8)sum < 0)
         cost = 0;
 
-    if (a1->unk06_0 <= (s8)cost)
-        a1->unk06_0 = 0;
+    if (a1->fuel <= (s8)cost)
+        a1->fuel = 0;
     else
-        a1->unk06_0 -= cost;
+        a1->fuel -= cost;
 
-    if (a1->unk06_0 != 0)
+    if (a1->fuel != 0)
         return FALSE;
 
-    if ((gUnknown_085D5ABC[a1->unk00].deployLocation & 0x30) == 0)
+    if ((gUnknown_085D5ABC[a1->type].deployLocation & 0x30) == 0)
         return FALSE;
 
     return TRUE;

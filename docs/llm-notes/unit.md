@@ -409,7 +409,7 @@ Source: [`src/unit.c`](../../src/unit.c). These comments were moved verbatim fro
 ## Note 41 — original line 611
 
 ````c
-/* The pointer parameter's +0x00 is a `struct Unk08499594 *` into the unit
+/* The pointer parameter's +0x00 is a `struct Unit *` into the unit
  * table and +0x06 an s16.  `(p->unk00 - gUnits) >> 6` is the
  * 0-based army number -- the table is grouped 64 entries to an army, the same
  * `>> 6` unknown-globals.h already records -- and the `+ 1` makes it the

@@ -31,7 +31,7 @@
  * 98.0% with the size exact, the relocations exact, the pool exact and all ten
  * words in order -- everything but four instructions:
  *
- *   original            plain `gUnits[c].unk00`
+ *   original            plain `gUnits[c].type`
  *   ldr  r0, [pc,#208]  ldr  r0, [pc,#208]
  *   lsls r1, r4, #1     ldr  r1, [r0]
  *   adds r1, r1, r4     lsls r0, r4, #1
@@ -58,7 +58,7 @@
 void sub_08061B4C(void)
 {
     int i;
-    struct Unk08499594 *u;
+    struct Unit *u;
     int j;
     int k;
     u8 c;
@@ -81,7 +81,7 @@ void sub_08061B4C(void)
                          + gUnknown_084995A0[i].unk01];
 
         if (c != 0 && sub_08026F9C(gUnknown_03003F2C, c) == 1
-            && (*(u = &gUnits[c])).unk00 <= 2)
+            && (*(u = &gUnits[c])).type <= 2)
             continue;
 
         gUnknown_030013EC(gUnknown_084995A0[i].unk01, gUnknown_084995A0[i].unk02, 1, 3, 0);

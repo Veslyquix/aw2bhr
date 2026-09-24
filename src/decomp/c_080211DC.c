@@ -10,29 +10,29 @@
 
 void sub_080211DC(u8 a1, s8 a2)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     struct Map *map;
     int bonus;
 
     e = &gUnits[a1];
     bonus = 0;
 
-    if (e->unk00 == 0)
+    if (e->type == 0)
         return;
 
-    if ((e->unk01 & 6) == 2)
+    if ((e->flags & 6) == 2)
         return;
 
-    if (e->unk00 <= 2)
+    if (e->type <= 2)
     {
         map = gMap;
 
-        if ((map->terrain[map->rowOffset[e->unk03] + e->unk02] & 0x1f) == 3)
+        if ((map->terrain[map->rowOffset[e->y] + e->x] & 0x1f) == 3)
             bonus = 3;
     }
 
-    sub_080210C8(e->unk02, e->unk03,
-                 bonus + GetUnitVisionWithCoBonus(((e - gUnits) >> 6) + 1, e->unk00),
+    sub_080210C8(e->x, e->y,
+                 bonus + GetUnitVisionWithCoBonus(((e - gUnits) >> 6) + 1, e->type),
                  gPlayers[(a1 >> 6) + 1].turnState,
                  a2, (a1 >> 6) + 1);
 }

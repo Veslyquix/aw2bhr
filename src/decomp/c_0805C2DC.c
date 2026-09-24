@@ -41,7 +41,7 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
     int best;
     int score;
     u8 bestN;
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     best = 0;
     bestN = 0;
@@ -54,12 +54,12 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
         for (n = i * 64; n < i * 64 + 64; n++)
         {
             e = &gUnits[n];
-            if (e->unk00 == 0)
+            if (e->type == 0)
                 continue;
 
             score = 0;
             FillMovementMap(0xff);
-            sub_0801F9C0(e->unk02, e->unk03, 2, 0);
+            sub_0801F9C0(e->x, e->y, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
             {
@@ -72,19 +72,19 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
                     e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
-                    if (e->unk00 == 0x18)
+                    if (e->type == 0x18)
                     {
-                        if ((e->unk01 & 0x20) != 0)
+                        if ((e->flags & 0x20) != 0)
                             continue;
                         if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
-                    if (e->unk04_0 <= 10)
+                    if (e->hp <= 10)
                         continue;
                     if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
-                        score -= e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10);
+                        score -= e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10);
                     else
-                        score += e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10);
+                        score += e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10);
                 }
             }
 
@@ -108,7 +108,7 @@ u8 sub_0805C514(u16 a1, u8 a2)
     int best;
     int score;
     u8 bestN;
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     best = 0;
     bestN = 0;
@@ -121,12 +121,12 @@ u8 sub_0805C514(u16 a1, u8 a2)
         for (n = i * 64; n < i * 64 + 64; n++)
         {
             e = &gUnits[n];
-            if (e->unk00 == 0)
+            if (e->type == 0)
                 continue;
 
             score = 0;
             FillMovementMap(0xff);
-            sub_0801F9C0(e->unk02, e->unk03, 2, 0);
+            sub_0801F9C0(e->x, e->y, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
             {
@@ -139,19 +139,19 @@ u8 sub_0805C514(u16 a1, u8 a2)
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
                     e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
-                    if (e->unk00 == 0x18)
+                    if (e->type == 0x18)
                     {
-                        if ((e->unk01 & 0x20) != 0)
+                        if ((e->flags & 0x20) != 0)
                             continue;
                         if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
-                    if (e->unk04_0 <= 10)
+                    if (e->hp <= 10)
                         continue;
                     if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
-                        score -= e->unk04_0;
+                        score -= e->hp;
                     else
-                        score += e->unk04_0;
+                        score += e->hp;
                 }
             }
 
@@ -176,7 +176,7 @@ u8 sub_0805C720(u16 a1, u8 a2)
     int score;
     u8 bestN;
     int mul;
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     best = 0;
     bestN = 0;
@@ -189,12 +189,12 @@ u8 sub_0805C720(u16 a1, u8 a2)
         for (n = i * 64; n < i * 64 + 64; n++)
         {
             e = &gUnits[n];
-            if (e->unk00 == 0)
+            if (e->type == 0)
                 continue;
 
             score = 0;
             FillMovementMap(0xff);
-            sub_0801F9C0(e->unk02, e->unk03, 2, 0);
+            sub_0801F9C0(e->x, e->y, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
             {
@@ -207,22 +207,22 @@ u8 sub_0805C720(u16 a1, u8 a2)
                     if (a2 != 0 && !sub_08020DBC(a1, x, y))
                         continue;
                     e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
-                    if (e->unk00 == 0x18)
+                    if (e->type == 0x18)
                     {
-                        if ((e->unk01 & 0x20) != 0)
+                        if ((e->flags & 0x20) != 0)
                             continue;
                         if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
-                    if (e->unk04_0 <= 10)
+                    if (e->hp <= 10)
                         continue;
                     mul = 1;
-                    if (gUnknown_085D5ABC[e->unk00].minRange > 1)
+                    if (gUnknown_085D5ABC[e->type].minRange > 1)
                         mul = 2;
                     if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
-                        score -= e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10) * mul;
+                        score -= e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10) * mul;
                     else
-                        score += e->unk04_0 * (GetCoPriceMultiplier(gUnknown_030033EC, e->unk00) / 10) * mul;
+                        score += e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10) * mul;
                 }
             }
 

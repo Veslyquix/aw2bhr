@@ -7,17 +7,17 @@
  * sub_08029978 @ 0x08029978, sub_08029A48 @ 0x08029A48
  */
 
-int sub_08029978(struct Unk08499594 *p, u8 a2)
+int sub_08029978(struct Unit *p, u8 a2)
 {
     int acc;
     u16 v;
 
     acc = 0;
-    v = p->unk04_0 != 0
-        ? (Div(p->unk04_0 - 1, 10) + 1) * gUnknown_085D5ABC[p->unk00].unk08
+    v = p->hp != 0
+        ? (Div(p->hp - 1, 10) + 1) * gUnknown_085D5ABC[p->type].unk08
         : 0;
 
-    while (p->unk04_7 != gUnknown_085D5ABC[p->unk00].maxAmmo)
+    while (p->ammo != gUnknown_085D5ABC[p->type].maxAmmo)
     {
         if (a2)
         {
@@ -28,21 +28,21 @@ int sub_08029978(struct Unk08499594 *p, u8 a2)
         }
 
         acc += v;
-        p->unk04_7++;
+        p->ammo++;
     }
 
     return acc;
 }
 
-int sub_08029A48(struct Unk08499594 *p, u8 a2)
+int sub_08029A48(struct Unit *p, u8 a2)
 {
     int acc;
     u16 v;
 
     acc = 0;
-    v = p->unk04_0 != 0 ? Div(p->unk04_0 - 1, 10) + 1 : 0;
+    v = p->hp != 0 ? Div(p->hp - 1, 10) + 1 : 0;
 
-    while (p->unk06_0 != gUnknown_085D5ABC[p->unk00].maxFuel)
+    while (p->fuel != gUnknown_085D5ABC[p->type].maxFuel)
     {
         if (a2)
         {
@@ -53,7 +53,7 @@ int sub_08029A48(struct Unk08499594 *p, u8 a2)
         }
 
         acc += v;
-        p->unk06_0++;
+        p->fuel++;
     }
 
     return acc;

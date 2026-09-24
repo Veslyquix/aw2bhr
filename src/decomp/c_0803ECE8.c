@@ -24,13 +24,13 @@ struct Unk803ECE8
 void sub_0803ECE8(struct Unk803ECE8 *p)
 {
     struct Unk03003338 *tbl = gUnknown_03003338;
-    struct Unk08499594 *unit = &gUnits[tbl[p->unk4c].unk00];
+    struct Unit *unit = &gUnits[tbl[p->unk4c].unk00];
     struct Unk03003338 *rec = &tbl[p->unk4c];
 
-    if (unit->unk04_0 - rec->unk02 > 0)
-        unit->unk04_0 = unit->unk04_0 - rec->unk02;
+    if (unit->hp - rec->unk02 > 0)
+        unit->hp = unit->hp - rec->unk02;
     else
-        unit->unk04_0 = 1;
+        unit->hp = 1;
 
     p->unk4c++;
     sub_08024268();

@@ -31,7 +31,7 @@
  * callee-saved registers. */
 bool8 sub_080459E4(void)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     int i;
     int count;
 
@@ -42,10 +42,10 @@ bool8 sub_080459E4(void)
     {
         unit = &gUnits[i];
 
-        if (unit->unk00 == 0)
+        if (unit->type == 0)
             continue;
 
-        if (unit->unk04_0 == 0 || Div(unit->unk04_0 - 1, 10) + 1 <= 9)
+        if (unit->hp == 0 || Div(unit->hp - 1, 10) + 1 <= 9)
             count++;
     }
 
@@ -77,7 +77,7 @@ bool8 sub_080459E4(void)
  * loop bound is recomputed every iteration. */
 bool8 sub_08045A78(void)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     int i;
     int n;
     int m;
@@ -90,15 +90,15 @@ bool8 sub_08045A78(void)
     {
         unit = &gUnits[i];
 
-        if (unit->unk00 == 0)
+        if (unit->type == 0)
             continue;
 
-        if (unit->unk00 != 0x13)
+        if (unit->type != 0x13)
             continue;
 
         n++;
 
-        if (unit->unk04_0 == 0 || Div(unit->unk04_0 - 1, 10) + 1 <= 9)
+        if (unit->hp == 0 || Div(unit->hp - 1, 10) + 1 <= 9)
             m++;
     }
 

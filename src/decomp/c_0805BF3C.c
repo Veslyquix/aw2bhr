@@ -52,7 +52,7 @@ struct Unk5BFDCCtl
 void sub_0805BF3C(int x, int y, u16 *out)
 {
     u8 buf[28];
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     sub_0808B6C4(buf, 0, 0x19);
     buf[1] = 8;
@@ -61,7 +61,7 @@ void sub_0805BF3C(int x, int y, u16 *out)
     buf[9] = 9;
 
     e = &gUnits[gUnknown_030040D8->unk07[1]];
-    gUnknown_030046D4 = e->unk00;
+    gUnknown_030046D4 = e->type;
 
     if (gUnknown_030040D8->unk07[4] > 7)
         gUnknown_030040D8->unk07[4] = 1;

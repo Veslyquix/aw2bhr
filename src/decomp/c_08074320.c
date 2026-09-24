@@ -18,7 +18,7 @@ u8 sub_08074320(struct Unk030040D8 *a1)
     const struct Unk08074584 *p = sub_08074584();
     int r;
 
-    if ((((struct Unk08499594 *)a1 - gUnits) & 0xC0) == 0
+    if ((((struct Unit *)a1 - gUnits) & 0xC0) == 0
         && p != 0 && p->unk08 != 0)
     {
         r = sub_08074484(p->unk08, a1, 0);

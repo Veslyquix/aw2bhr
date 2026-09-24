@@ -28,7 +28,7 @@ void sub_08045564(struct Unk45564Proc *proc)
     u8 y;
     u8 flag;
 
-    CreateUnitAt(proc->unk2c, proc->unk30, proc->unk54)->unk04_0 = 0x5a;
+    CreateUnitAt(proc->unk2c, proc->unk30, proc->unk54)->hp = 0x5a;
 
     x = proc->unk2c;
     y = proc->unk30;

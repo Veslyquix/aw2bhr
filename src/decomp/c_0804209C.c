@@ -27,8 +27,8 @@ bool8 sub_0804209C(s16 x, s16 y)
     struct Map *p;
     u8 *rows;
     u8 *units;
-    struct Unk08499594 *unit;
-    struct Unk085D5ABC *e;
+    struct Unit *unit;
+    struct UnitType *e;
     int y2;
     int off;
     int id;
@@ -52,18 +52,18 @@ bool8 sub_0804209C(s16 x, s16 y)
 
     unit = &gUnits[id];
 
-    if (unit == (struct Unk08499594 *)gUnknown_030040D8)
+    if (unit == (struct Unit *)gUnknown_030040D8)
         return FALSE;
 
-    if (gUnknown_084995A8[unit->unk00] == 0)
+    if (gUnknown_084995A8[unit->type] == 0)
         return FALSE;
 
-    e = &gUnknown_085D5ABC[unit->unk00];
+    e = &gUnknown_085D5ABC[unit->type];
 
-    if (e->maxAmmo != unit->unk04_7)
+    if (e->maxAmmo != unit->ammo)
         return TRUE;
 
-    if (e->maxFuel != unit->unk06_0)
+    if (e->maxFuel != unit->fuel)
         return TRUE;
 
     return FALSE;
@@ -197,7 +197,7 @@ bool8 sub_080422A8(s16 x, s16 y)
     u8 *cells;
     u8 *costs;
     u8 *t;
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     int y2;
     int off;
     int off2;
@@ -221,7 +221,7 @@ bool8 sub_080422A8(s16 x, s16 y)
     if (CanTransportCarry(&gUnits[id], gUnknown_030040D8->unk00) == 0)
         return FALSE;
 
-    t = gUnknown_085D5ABC[unit->unk00].transportTable;
+    t = gUnknown_085D5ABC[unit->type].transportTable;
 
     p2 = gMap;
     rows2 = (u8 *)p2->rowOffset;

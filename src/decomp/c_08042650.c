@@ -27,7 +27,7 @@
  *     `ldrb r0,[r0,#5]` confirm the layout is unchanged.
  *   - the `<< 25 >> 25` / `* 0x55555555` / `rsbs` / `asrs` chain is an
  *     EXACT_DIV of a pointer difference, not a magic-number division:
- *     `(struct Unk08499594 *)gUnknown_030040D8 - gUnits`. gcc 2.x's
+ *     `(struct Unit *)gUnknown_030040D8 - gUnits`. gcc 2.x's
  *     expand_divmod multiplies by invert_mod2n(d >> post_shift) and shifts
  *     AFTERWARDS, so post_shift = 2 for the 12-byte record, and the extra
  *     6 in `asrs #8` is the caller's own `>> 6`. Both spellings appear here:
@@ -98,10 +98,10 @@ do_body:
             sub_080409E8(gUnknown_03003100.pos.unk00,
                          gUnknown_03003100.pos.unk02,
                          gUnknown_030040D8->unk05 >> 3, n,
-                         ((((struct Unk08499594 *)gUnknown_030040D8
+                         ((((struct Unit *)gUnknown_030040D8
                             - gUnits) & 0xc0) >> 6) + 1);
         else if (n > 0x13)
-            sub_08041258(((((struct Unk08499594 *)gUnknown_030040D8
+            sub_08041258(((((struct Unit *)gUnknown_030040D8
                             - gUnits) & 0xc0) >> 6) + 1, t & 0x1f);
     }
 after_body:
@@ -112,7 +112,7 @@ after_body:
 
     if ((gUnknown_030040D8->unk05 >> 3) > 0x13)
     {
-        sub_080265B0((((struct Unk08499594 *)gUnknown_030040D8
+        sub_080265B0((((struct Unit *)gUnknown_030040D8
                        - gUnits) >> 6) + 1, t >> 5);
         gUnknown_030040D8->unk05 &= 7;
         if ((t & 0x1f) == 8 || (t & 0x1f) == 0x14)

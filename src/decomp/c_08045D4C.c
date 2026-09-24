@@ -20,7 +20,7 @@ int sub_08045D4C(void)
     x = gUnknown_030040D8->unk02;
     y = gUnknown_030040D8->unk03;
 
-    switch (gPlayers[(((struct Unk08499594 *)gUnknown_030040D8
+    switch (gPlayers[(((struct Unit *)gUnknown_030040D8
                                 - gUnits) >> 6) + 1].teamColor)
     {
     case 3:

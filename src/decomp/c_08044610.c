@@ -79,7 +79,7 @@ struct Unk08044610Proc
 };
 void sub_08044610(struct Unk08044610Proc *proc)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     struct Map *m;
     int idx;
     u8 x;
@@ -100,15 +100,15 @@ void sub_08044610(struct Unk08044610Proc *proc)
     {
         unit = &gUnits[gUnknown_03003F2C + proc->unk68];
 
-        if (unit->unk00 != 0
+        if (unit->type != 0
             && gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
                    .power[gPlayers[gUnknown_030033EC].coActivationMode - 1]
                    .animationCondition(unit) != 0)
         {
             m = gMap;
-            idx = m->rowOffset[unit->unk03] + unit->unk02;
+            idx = m->rowOffset[unit->y] + unit->x;
 
-            if (m->unk234A[idx] == 0 || (unit->unk01 & 8) != 0)
+            if (m->unk234A[idx] == 0 || (unit->flags & 8) != 0)
             {
                 gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
                     .power[gPlayers[gUnknown_030033EC].coActivationMode - 1]
@@ -119,7 +119,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
             }
             else
             {
-                sub_08029088(unit->unk02, unit->unk03);
+                sub_08029088(unit->x, unit->y);
 
                 if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
                     return;
@@ -128,8 +128,8 @@ void sub_08044610(struct Unk08044610Proc *proc)
                     .power[gPlayers[gUnknown_030033EC].coActivationMode - 1]
                     .onEachUnit(unit);
 
-                x = unit->unk02;
-                y = unit->unk03;
+                x = unit->x;
+                y = unit->y;
                 flag = 0;
 
                 if (gPlayers[gUnknown_030033EC].coActivationMode == 2)

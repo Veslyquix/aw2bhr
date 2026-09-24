@@ -90,7 +90,7 @@ void sub_0805E160(void)
 
         gUnknown_030013EC(pos.x, pos.y, gUnknown_030040D8->unk00, 0x78, 1);
 
-        if ((s8)gUnknown_03003340[gUnknown_030040D8->unk03][gUnknown_030040D8->unk02] > sub_08058224((struct Unk08499594 *)gUnknown_030040D8))
+        if ((s8)gUnknown_03003340[gUnknown_030040D8->unk03][gUnknown_030040D8->unk02] > sub_08058224((struct Unit *)gUnknown_030040D8))
             sub_080591E4(&pos);
         else
             sub_0805D648(pos.x, pos.y, 2, 0, 0);

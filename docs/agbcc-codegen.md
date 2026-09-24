@@ -8,6 +8,24 @@ The recurring lesson: **when a candidate is semantically right but does not
 match, the cause is usually which register something lands in, and that is
 decided by how the source is *phrased*, not by what it computes.**
 
+**Renamed types and fields.** The wave notes below were written against the old
+address-derived tag names, and they are left as measured rather than rewritten.
+The tags moved to `include/unit.h`, `include/co.h` and `include/battle.h` and
+were renamed; the layouts did not change, and both build routes still reproduce
+the canonical ROM SHA1.
+
+| old | new |
+|---|---|
+| `struct Unk08499594` | `struct Unit` (include/unit.h) |
+| `struct Unk085D5ABC` | `struct UnitType` (include/unit.h) |
+| `struct Unk43304` | retyped to `struct BattleUnit` (include/battle.h) |
+| `Unit.unk00` / `unk01` / `unk02` / `unk03` | `type` / `flags` / `x` / `y` |
+| `Unit.unk04_0` / `unk04_7` / `unk06_0` | `hp` / `ammo` / `fuel` |
+| `PlayerStruct.tempFirepower` / `tempDefense` | same names, retyped `u16` -> `s16` |
+
+`Unit.unk05_3`, `unk06_7` and `unk07`..`unk0b` keep their old names: the
+evidence for them is a store width or a single argument position, not a role.
+
 ---
 
 ## Reading types off the assembly

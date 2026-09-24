@@ -43,14 +43,14 @@
  * not a spelling.
  */
 
-struct Unk08499594 *sub_080254AC(void)
+struct Unit *sub_080254AC(void)
 {
     u16 i;
 
     for (i = gUnknown_030032C0 + 1; i <= 0x32; i++)
     {
-        if (gUnits[i + gUnknown_03003F2C].unk00 != 0
-            && !(gUnits[i + gUnknown_03003F2C].unk01 & 1))
+        if (gUnits[i + gUnknown_03003F2C].type != 0
+            && !(gUnits[i + gUnknown_03003F2C].flags & 1))
         {
             gUnknown_030032C0 = i;
             if ((s16)i > 0x31)
@@ -61,8 +61,8 @@ struct Unk08499594 *sub_080254AC(void)
 
     for (i = 1; i < (s16)gUnknown_030032C0 + 1; i++)
     {
-        if (gUnits[i + gUnknown_03003F2C].unk00 != 0
-            && !(gUnits[i + gUnknown_03003F2C].unk01 & 1))
+        if (gUnits[i + gUnknown_03003F2C].type != 0
+            && !(gUnits[i + gUnknown_03003F2C].flags & 1))
         {
             gUnknown_030032C0 = i;
             if ((s16)i > 0x31)

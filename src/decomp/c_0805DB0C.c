@@ -17,7 +17,7 @@
  *
  * unk07[3] is offset 0x0a. The member array is left as it is rather than split
  * into named bytes -- include/unknown-globals.h records that its extent 5 is
- * corroborated by struct Unk08499594's size, and a constant index folds into
+ * corroborated by struct Unit's size, and a constant index folds into
  * the same `ldrb [rB, #0xa]` a named member would give. */
 void sub_0805DB0C(void)
 {

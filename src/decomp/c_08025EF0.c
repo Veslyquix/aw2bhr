@@ -15,14 +15,14 @@ bool8 sub_08025EF0(int a1, int a2)
     if ((a1 & 0xc0) != (a2 & 0xc0))
         return FALSE;
 
-    t = gUnknown_085D5ABC[gUnits[a1].unk00].transportTable;
+    t = gUnknown_085D5ABC[gUnits[a1].type].transportTable;
 
     if (t == NULL)
         return FALSE;
 
     u = t + 1;
 
-    if (u[gUnits[a2].unk00] == 0)
+    if (u[gUnits[a2].type] == 0)
         return FALSE;
 
     if (t[0] == 1 && gUnits[a1].unk07 != 0)
@@ -34,12 +34,12 @@ bool8 sub_08025EF0(int a1, int a2)
     return TRUE;
 }
 
-bool8 CanTransportCarry(struct Unk08499594 *a1, u8 a2)
+bool8 CanTransportCarry(struct Unit *a1, u8 a2)
 {
     u8 *t;
     u8 *u;
 
-    t = gUnknown_085D5ABC[a1->unk00].transportTable;
+    t = gUnknown_085D5ABC[a1->type].transportTable;
 
     if (t == NULL)
         return FALSE;
@@ -60,9 +60,9 @@ bool8 CanTransportCarry(struct Unk08499594 *a1, u8 a2)
 
 asm(".global sub_08025F74\n.thumb_set sub_08025F74, CanTransportCarry\n");
 
-bool8 sub_08025FC0(struct Unk08499594 *a1, struct Unk08499594 *a2)
+bool8 sub_08025FC0(struct Unit *a1, struct Unit *a2)
 {
-    if (a1->unk00 != a2->unk00)
+    if (a1->type != a2->type)
         return FALSE;
 
     if (((a1 - gUnits) & 0xc0) != ((a2 - gUnits) & 0xc0))
@@ -74,7 +74,7 @@ bool8 sub_08025FC0(struct Unk08499594 *a1, struct Unk08499594 *a2)
     if (a2->unk07 != 0)
         return FALSE;
 
-    if (a2->unk04_0 != 0 && Div(a2->unk04_0 - 1, 10) == 9)
+    if (a2->hp != 0 && Div(a2->hp - 1, 10) == 9)
         return FALSE;
 
     return TRUE;

@@ -26,7 +26,7 @@
  * shift.
  *
  * The unit record is reached through a file-local bitfield view cast onto the
- * shared symbol: struct Unk08499594 declares +0x09 as a plain byte, and only a
+ * shared symbol: struct Unit declares +0x09 as a plain byte, and only a
  * real bitfield produces the ROM's SImode `movs #8; rsbs; ands` clear. Its
  * filler is padded to the shared struct's 12-byte stride, which is what the
  * loop's `adds r5, #0xc` giv confirms.

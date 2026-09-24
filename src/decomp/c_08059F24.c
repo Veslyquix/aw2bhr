@@ -62,7 +62,7 @@
  *
  * MEASURED AND DEAD, so nobody re-spends them:
  *   - `(&gUnits[cell])->unk00` written INLINE is byte-identical to
- *     `gUnits[cell].unk00`. It is the separate STATEMENT that
+ *     `gUnits[cell].type`. It is the separate STATEMENT that
  *     matters here, not the `&`.
  *   - Moving the `out->v` store ahead of `out->x`/`out->y` re-breaks the
  *     barrier, restores the duplicated guard AND the spill, and turns the map
@@ -84,7 +84,7 @@ struct Unk5A514Cell
 void sub_08059F24(void *a1)
 {
   struct Unk5A514Cell *out;
-  struct Unk08499594 *u;
+  struct Unit *u;
   int new_var;
   u8 cell;
   int x;
@@ -112,7 +112,7 @@ void sub_08059F24(void *a1)
         continue;
       }
       u = &gUnits[cell];
-      if (u->unk00 > 2)
+      if (u->type > 2)
       {
         continue;
       }
@@ -138,7 +138,7 @@ void sub_08059F24(void *a1)
 void sub_0805A008(void *a1)
 {
   struct Unk5A514Cell *out;
-  struct Unk08499594 *u;
+  struct Unit *u;
   int new_var;
   u8 cell;
   int x;
@@ -166,7 +166,7 @@ void sub_0805A008(void *a1)
         continue;
       }
       u = &gUnits[cell];
-      if (u->unk00 != 0x17)
+      if (u->type != 0x17)
       {
         continue;
       }

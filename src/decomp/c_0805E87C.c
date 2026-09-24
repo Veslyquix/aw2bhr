@@ -47,7 +47,7 @@
  * bitfield gives the ROM's SImode `movs r3,#0x39; rsbs r3,r3,#0`.  The second
  * mask is derived from the first (`adds r3,#0x31` -> -8), which is CSE on the
  * two constants and confirms both writes are bitfield stores on one container.
- * struct Unk08499594's and struct Unk030040D8's own unk09 are left alone so the
+ * struct Unit's and struct Unk030040D8's own unk09 are left alone so the
  * shared layouts stay shared.
  *
  * struct Unk5A514Cell is repeated here rather than declared in a shared header
@@ -114,7 +114,7 @@ void sub_0805E87C(void)
             if (gMap->unit[gMap->rowOffset[pos.y] + pos.x] != 0)
             {
                 u = (struct Unk5E87CUnit *)(gUnits + (id = gMap->unit[gMap->rowOffset[pos.y] + pos.x]));
-                if ((s8)gUnknown_03003340[pos.y][pos.x] <= sub_08058224((struct Unk08499594 *)gUnknown_030040D8))
+                if ((s8)gUnknown_03003340[pos.y][pos.x] <= sub_08058224((struct Unit *)gUnknown_030040D8))
                 {
                     if (u->unk00 == 0x16)
                     {

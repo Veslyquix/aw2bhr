@@ -33,7 +33,7 @@ void sub_0805E778(void)
       }
     }
     gUnknown_03004784[1] = (new_var = 0, save);
-    if (((s8 *) gUnknown_03003340[v.pos.unk02])[v.pos.unk00] <= sub_08058224((struct Unk08499594 *) gUnknown_030040D8))
+    if (((s8 *) gUnknown_03003340[v.pos.unk02])[v.pos.unk00] <= sub_08058224((struct Unit *) gUnknown_030040D8))
     {
       sub_0805D648(v.spos.unk00, v.spos.unk02, 2, 0, new_var);
     }

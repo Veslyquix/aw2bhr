@@ -13,7 +13,7 @@
 
 void SubtractPlayerFunds(u16 player, u32 amount);
 void AddPlayerFunds(u16 player, u32 amount);
-void SubtractUnitFuel(struct Unk08499594 *unit, u8 amount);
+void SubtractUnitFuel(struct Unit *unit, u8 amount);
 bool8 IsPlayerAliveAndActive(u8 player);
 void AddPlayerIncomeToFunds(void);
 int IsCampaignMapUnlocked(u32 mapId);
@@ -28,7 +28,7 @@ int GetCoMovementBonus(int coId, int coPowerState, int unitType);
 int GetCoRangeBonus(int coId, int coPowerState, int unitType);
 int GetUnitCombatClassColumn(int unitType);
 u32 TrySpendBattleMapPoints(u32 amount);
-struct Unk08499594 *CreateUnitAt(s16 a1, s16 a2, s16 a3);
+struct Unit *CreateUnitAt(s16 a1, s16 a2, s16 a3);
 void *BuyUnit(int a1, int a2, int a3);
 bool8 IsNeotanksUnlocked(int army);
 int IsCampaignCompletionFlagSet(int id);

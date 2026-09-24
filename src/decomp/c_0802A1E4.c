@@ -42,7 +42,7 @@ struct Unk2A258
 
 s16 sub_0802A1E4(s16 x, s16 y)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     unit = &gUnits[gMap->unit[
         gMap->rowOffset[y] + x]];

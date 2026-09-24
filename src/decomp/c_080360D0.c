@@ -17,7 +17,7 @@ struct Unk360D0Proc
     /* 0x00 */ PROC_HEADER;
     /* 0x29 */ STRUCT_PAD(0x29, 0x2c);
     /* 0x2c */ struct Unk0801C210 *unk2c;
-    /* 0x30 */ struct Unk08499594 *unk30;
+    /* 0x30 */ struct Unit *unk30;
     /* 0x34 */ u8 unk34;
     /* 0x35 */ u8 unk35;
     /* 0x36 */ u8 filler_36[0x02];

@@ -22,7 +22,7 @@
 struct Unk401B4Proc
 {
     /* 00 */ u8 filler_00[0x4c];
-    /* 4c */ struct Unk08499594 *unk4c;
+    /* 4c */ struct Unit *unk4c;
 };
 /* Marks the entry's cell as occupied on two planes of the gUnknown_08499590
  * map, then refreshes. The map header is modelled as a struct for the same
@@ -40,9 +40,9 @@ struct Unk401B4Proc
  * parameter is what proves. */
 void sub_080401B4(struct Unk401B4Proc *proc)
 {
-    struct Unk08499594 *ent = proc->unk4c;
+    struct Unit *ent = proc->unk4c;
 
-    sub_0803FF48(ent->unk02, ent->unk03, gUnknown_085D5ABC[ent->unk00].unitClass, proc);
+    sub_0803FF48(ent->x, ent->y, gUnknown_085D5ABC[ent->type].unitClass, proc);
     sub_08025D60(ent - gUnits);
     sub_080258CC();
 }

@@ -31,7 +31,7 @@
  * same idiom src/decomp/c_08061E54.c and c_08061E80.c use for this exact
  * field. It is what produces the ROM's SImode `movs r0,#8; rsbs r0,r0,#0;
  * ands` -- `unk09 &= ~7` on the plain `u8` member shortens the mask to 0xf8
- * and does not match. struct Unk08499594's unk09 is left alone so the layout
+ * and does not match. struct Unit's unk09 is left alone so the layout
  * stays shared.
  *
  * sub_0805D648's first two arguments come out as `movs rK,#0; ldrsh` off the

@@ -16,8 +16,8 @@ void sub_0802D230(void)
     LockUnitSelection();
     sub_0801A168();
 
-    if (((struct Unk08499594 *)gUnknown_030040D8)->unk04_0 != 0)
-        v = (Div(((struct Unk08499594 *)gUnknown_030040D8)->unk04_0 - 1, 10) + 1)
+    if (((struct Unit *)gUnknown_030040D8)->hp != 0)
+        v = (Div(((struct Unit *)gUnknown_030040D8)->hp - 1, 10) + 1)
             * gUnknown_085D5ABC[gUnknown_030040D8->unk00].cost / 2;
     else
         v = 0;
@@ -34,7 +34,7 @@ void sub_0802D2A0(int a1, int a2, u8 a3)
     {
         FillMovementMap(0xff);
         sub_08020D50(gUnknown_03003100.spos.unk00, gUnknown_03003100.spos.unk02,
-            (struct Unk08499594 *)gUnknown_030040D8);
+            (struct Unit *)gUnknown_030040D8);
         Proc_Start(gUnknown_0849A9F8, PROC_TREE_3);
         sub_0801A168();
         sub_08024500();

@@ -11,10 +11,10 @@
  * the guard reads gUnknown_085D5ABC[t].unk0f rather than re-calling
  * GetUnitFiringRangeWithCoBonus, and the ROM keeps the element ADDRESS live across the test to
  * reach .unk0e -- one subscript expression, two members. */
-void sub_08020D50(s16 x, s16 y, struct Unk08499594 *e)
+void sub_08020D50(s16 x, s16 y, struct Unit *e)
 {
     sub_08020B88(x, y,
-                 GetUnitFiringRangeWithCoBonus(((e - gUnits) >> 6) + 1, e->unk00), 0);
-    if (gUnknown_085D5ABC[e->unk00].maxRange != 1)
-        sub_08020B88(x, y, gUnknown_085D5ABC[e->unk00].minRange - 1, -1);
+                 GetUnitFiringRangeWithCoBonus(((e - gUnits) >> 6) + 1, e->type), 0);
+    if (gUnknown_085D5ABC[e->type].maxRange != 1)
+        sub_08020B88(x, y, gUnknown_085D5ABC[e->type].minRange - 1, -1);
 }

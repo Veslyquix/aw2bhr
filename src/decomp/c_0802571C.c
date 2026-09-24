@@ -18,7 +18,7 @@
 
 bool8 sub_0802571C(u16 a1)
 {
-    struct Unk08499594 *unit = &gUnits[a1];
+    struct Unit *unit = &gUnits[a1];
 
-    return sub_080255F4(unit, unit->unk02, unit->unk03);
+    return sub_080255F4(unit, unit->x, unit->y);
 }

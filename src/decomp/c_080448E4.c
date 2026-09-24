@@ -29,11 +29,11 @@ struct UnkP448E4
 void sub_080448E4(struct UnkP448E4 *proc)
 {
     u8 id = sub_0805C290(gUnknown_030033EC, 1);
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     proc->unk66 = id;
     if (id != 0) {
         e = &gUnits[proc->unk66];
-        sub_08029088(e->unk02, e->unk03);
+        sub_08029088(e->x, e->y);
     }
 }

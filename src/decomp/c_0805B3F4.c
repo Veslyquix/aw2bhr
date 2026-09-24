@@ -11,7 +11,7 @@
 void sub_0805B3F4(void)
 {
     u8 buf[0x19];
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     sub_0808B6C4(buf, 0, 0x19);
     buf[1] = 8;
@@ -23,7 +23,7 @@ void sub_0805B3F4(void)
     sub_0801F92C(gMap->move);
 
     u = &gUnits[gUnknown_030040D8->unk07[0]];
-    gUnknown_030046D4 = u->unk00;
+    gUnknown_030046D4 = u->type;
 
     if (gUnknown_030040D8->unk07[4] > 7)
         gUnknown_030040D8->unk07[4] = 1;

@@ -38,7 +38,7 @@
  * view of the coordinate pair): both reads are `ldrh`. */
 void sub_08042864(void)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     int m;
 
     e = &gUnits[
@@ -55,7 +55,7 @@ void sub_08042864(void)
         e->unk07 = gUnknown_03003F38;
 
     gUnknown_030040D8->unk01 |= 8;
-    e->unk01 |= 0x10;
+    e->flags |= 0x10;
 
     m = gUnknown_030040D8->unk00;
     switch (m)

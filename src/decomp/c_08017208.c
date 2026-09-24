@@ -88,10 +88,10 @@ struct SaveBlk
     /* 0x0000 */ u16 unk0000;
     /* 0x0002 */ u16 unk0002;
     /* 0x0004 */ struct Unk802C57C unk0004;
-    /* 0x0008 */ struct Unk08499594 unk0008;
+    /* 0x0008 */ struct Unit unk0008;
     /* 0x0014 */ u8 unk0014[0x140 - 0x14];
     /* 0x0140 */ u8 unk0140[0x48];
-    /* 0x0188 */ struct Unk08499594 unk0188[4 * 51];
+    /* 0x0188 */ struct Unit unk0188[4 * 51];
     /* 0x0b18 */ int unk0b18[4];
     /* 0x0b28 */ u8 filler_0b28[0xb98 - 0xb28];
     /* 0x0b98 */ struct Unk03002F08 unk0b98;
@@ -129,7 +129,7 @@ void sub_08017208(void)
     gUnknown_03003F2C = (gUnknown_030033EC - 1) * 0x40;
     gUnknown_03004480 = v;
     sub_0808B6E8(&gPlaySt, p->unk0140, 0x48);
-    *(struct Unk08499594 *)gUnknown_03004490 = p->unk0008;
+    *(struct Unit *)gUnknown_03004490 = p->unk0008;
     gUnknown_0200C420.unk0e = gPlaySt.animOpts;
     gUnknown_0200C420.unk14 = (gPlaySt.bgmOn == 0);
     for (i = 0; i < 4; i++)

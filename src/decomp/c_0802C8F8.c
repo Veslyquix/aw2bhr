@@ -10,7 +10,7 @@
 
 bool8 sub_0802C8F8(void)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     int off;
 
     off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
@@ -20,7 +20,7 @@ bool8 sub_0802C8F8(void)
 
     e = &gUnits[gMap->unit[off]];
 
-    if (!sub_08025FC0((struct Unk08499594 *)gUnknown_030040D8, e))
+    if (!sub_08025FC0((struct Unit *)gUnknown_030040D8, e))
         return TRUE;
 
     return FALSE;

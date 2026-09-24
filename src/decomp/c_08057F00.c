@@ -53,8 +53,8 @@ int CountUnitsWithTypeTag(int a1)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        if (gUnits[i].unk00 != 0
-         && gUnknown_085D5ABC[gUnits[i].unk00].unk1b == a1)
+        if (gUnits[i].type != 0
+         && gUnknown_085D5ABC[gUnits[i].type].unk1b == a1)
             count++;
     }
 
@@ -72,8 +72,8 @@ int CountUnitsByDeployLocation(int a1)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        if (gUnits[i].unk00 != 0
-         && (gUnknown_085D5ABC[gUnits[i].unk00].deployLocation & a1) != 0)
+        if (gUnits[i].type != 0
+         && (gUnknown_085D5ABC[gUnits[i].type].deployLocation & a1) != 0)
             count++;
     }
 
@@ -91,7 +91,7 @@ int CountUnitsOfType(int a1)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        if (gUnits[i].unk00 == a1)
+        if (gUnits[i].type == a1)
             count++;
     }
 
@@ -114,7 +114,7 @@ int sub_08057FE8(int a1)
         {
             for (j = i * 64; j < i * 64 + 0x40; j++)
             {
-                if (gUnits[j].unk00 == a1)
+                if (gUnits[j].type == a1)
                     count++;
             }
         }
@@ -173,7 +173,7 @@ int sub_08058058(int n)
  * place.  That is what puts the `ldr r6, =...` in the loop preheader: written
  * as a bare `gUnknown_084995A0[v]` the address load stays inside the loop, and
  * the pool word moves with it. */
-struct Unk08499594 *sub_08058144(int a1, int a2)
+struct Unit *sub_08058144(int a1, int a2)
 {
     struct Unk08057EC0Rec *e;
     struct Unk084995A0 **arrp;
@@ -196,5 +196,5 @@ struct Unk08499594 *sub_08058144(int a1, int a2)
 
     q->unk03[a2]++;
 
-    return (struct Unk08499594 *)q;
+    return (struct Unit *)q;
 }

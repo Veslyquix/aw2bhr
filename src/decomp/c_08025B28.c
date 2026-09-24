@@ -48,12 +48,12 @@ void AddPlayerFunds(u16 a, u32 b)
 /* Xenesis's Datasheet: "Fuel Subtraction applicator function (runs after a
  * unit's move is completed). Input of r0 = Unit Pointer, r1 = Fuel to
  * Subtract". */
-void SubtractUnitFuel(struct Unk08499594 *s, u8 b)
+void SubtractUnitFuel(struct Unit *s, u8 b)
 {
-    if (s->unk06_0 >= b)
-        s->unk06_0 -= b;
+    if (s->fuel >= b)
+        s->fuel -= b;
     else
-        s->unk06_0 = 0;
+        s->fuel = 0;
 }
 
 asm(".global sub_08025B28\n.thumb_set sub_08025B28, SubtractPlayerFunds\n"

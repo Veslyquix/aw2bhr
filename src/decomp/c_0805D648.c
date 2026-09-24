@@ -61,7 +61,7 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
     int x;
     int y;
     int count;
-    struct Unk08499594 *e;
+    struct Unit *e;
     struct Unk0805D648Cmd *d;
 
     count = 0;
@@ -84,15 +84,15 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
                 e = &gUnits[gMap->unit[gMap->rowOffset[y] + x]];
                 if (gPlaySt.fog == 0)
                 {
-                    if ((u8)(e->unk00 - 0xa) <= 1)
+                    if ((u8)(e->type - 0xa) <= 1)
                         continue;
-                    if (e->unk00 == 0x11)
+                    if (e->type == 0x11)
                         continue;
-                    if (e->unk00 == 0x15)
+                    if (e->type == 0x15)
                         continue;
-                    if (e->unk00 == 0x16)
+                    if (e->type == 0x16)
                         continue;
-                    if (e->unk00 == 0x18)
+                    if (e->type == 0x18)
                         continue;
                 }
                 count++;

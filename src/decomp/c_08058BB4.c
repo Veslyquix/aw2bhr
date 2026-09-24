@@ -13,7 +13,7 @@
  * fillers -- unitUnk[0x1928] splits at 0x1432 and move[0x1928] splits at
  * 0x3262 -- so the layout is unchanged and the edit is byte-neutral: only a
  * field's START OFFSET enters the address arithmetic, never its length. */
-/* struct Unk085D5ABC's unk14 target, described as a struct so the `(p + 0x1a)
+/* struct UnitType's unk14 target, described as a struct so the `(p + 0x1a)
  * + t` association survives -- `p[0x1a + t]` on a bare `u8 *` folds 0x1a into
  * ldrb's displacement instead. Same reason struct Map's planes are members. */
 struct MoveTbl
@@ -43,7 +43,7 @@ struct MoveTbl
  * MATCHED. */
 int sub_08058BB4(u16 id, u16 * out)
 {
-    struct Unk08499594 * u;
+    struct Unit * u;
     int best;
     int mask;
     int sentinel;
@@ -54,10 +54,10 @@ int sub_08058BB4(u16 id, u16 * out)
     sentinel = 0x270F;
     out[0] = sentinel;
 
-    sub_08058CE8(u->unk02 - 1, u->unk03, mask, &best, out);
-    sub_08058CE8(u->unk02 + 1, u->unk03, mask, &best, out);
-    sub_08058CE8(u->unk02, u->unk03 - 1, mask, &best, out);
-    sub_08058CE8(u->unk02, u->unk03 + 1, mask, &best, out);
+    sub_08058CE8(u->x - 1, u->y, mask, &best, out);
+    sub_08058CE8(u->x + 1, u->y, mask, &best, out);
+    sub_08058CE8(u->x, u->y - 1, mask, &best, out);
+    sub_08058CE8(u->x, u->y + 1, mask, &best, out);
 
     if (out[0] == sentinel)
         return -1;

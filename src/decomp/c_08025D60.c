@@ -9,8 +9,8 @@
 
 void sub_08025D60(int a1)
 {
-    struct Unk08499594 *p;
-    struct Unk08499594 *q;
+    struct Unit *p;
+    struct Unit *q;
     int v;
 
     p = &gUnits[a1];
@@ -22,8 +22,8 @@ void sub_08025D60(int a1)
     {
         q = &gUnits[p->unk07];
 
-        if (q->unk04_0 != 0)
-            v = Div(q->unk04_0 - 1, 10) + 1;
+        if (q->hp != 0)
+            v = Div(q->hp - 1, 10) + 1;
         else
             v = 0;
 
@@ -35,8 +35,8 @@ void sub_08025D60(int a1)
     {
         q = &gUnits[p->unk08];
 
-        if (q->unk04_0 != 0)
-            v = Div(q->unk04_0 - 1, 10) + 1;
+        if (q->hp != 0)
+            v = Div(q->hp - 1, 10) + 1;
         else
             v = 0;
 
@@ -44,7 +44,7 @@ void sub_08025D60(int a1)
         sub_08025D60(p->unk08);
     }
 
-    p->unk00 = 0;
+    p->type = 0;
 }
 
 /* Named per Xenesis's AW2 Subroutine List: "Costs for unit bought". The old

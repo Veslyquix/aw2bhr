@@ -21,7 +21,7 @@
  * about them needs to be authored.
  *
  * The heal is a BITFIELD assignment, not hand-written masking: unk04_0 is the
- * 7-bit field already in include/unknown-globals.h, so `unit->unk04_0 = 100`
+ * 7-bit field already in include/unknown-globals.h, so `unit->hp = 100`
  * emits `(v & ~0x7f) | 100` with the mask on the value folded away (100 fits
  * in 7 bits) while the other arm keeps its `& 0x7f`. That ASYMMETRY between
  * the two arms is the tell for a bitfield store.
@@ -97,7 +97,7 @@ struct Unk08044F24Proc
 void sub_08044E10(struct Unk08044E10Proc *proc)
 {
     int i;
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     if (proc->unk2e == 0)
     {
@@ -125,19 +125,19 @@ void sub_08044E10(struct Unk08044E10Proc *proc)
     {
         unit = &gUnits[(u16)gUnknown_084995FE[proc->unk2c] + i];
 
-        if (unit->unk00 == 0)
+        if (unit->type == 0)
             continue;
 
-        if (unit->unk01 & 8)
+        if (unit->flags & 8)
             continue;
 
-        if (unit->unk04_0 > 100 - proc->unk2e * 10)
-            unit->unk04_0 = 100;
+        if (unit->hp > 100 - proc->unk2e * 10)
+            unit->hp = 100;
         else
-            unit->unk04_0 = unit->unk04_0 + proc->unk2e * 10;
+            unit->hp = unit->hp + proc->unk2e * 10;
 
         sub_08022580();
-        sub_080452C0(unit->unk02, unit->unk03, proc->unk2c);
+        sub_080452C0(unit->x, unit->y, proc->unk2c);
         break;
     }
 
@@ -155,7 +155,7 @@ void sub_08044F24(struct Unk08044F24Proc *proc)
 {
     int i;
     int j;
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     if (proc->unk2d == 0)
     {
@@ -196,22 +196,22 @@ void sub_08044F24(struct Unk08044F24Proc *proc)
     {
         unit = &gUnits[(u16)gUnknown_084995FE[proc->unk2a] + i];
 
-        if (unit->unk00 == 0)
+        if (unit->type == 0)
             continue;
 
-        if (unit->unk01 & 8)
+        if (unit->flags & 8)
             continue;
 
-        if (unit->unk04_0 < proc->unk2d * 10 + 1)
-            unit->unk04_0 = 1;
+        if (unit->hp < proc->unk2d * 10 + 1)
+            unit->hp = 1;
         else
-            unit->unk04_0 = unit->unk04_0 - proc->unk2d * 10;
+            unit->hp = unit->hp - proc->unk2d * 10;
 
         if (proc->unk30 != 0)
-            unit->unk06_0 = unit->unk06_0 >> 1;
+            unit->fuel = unit->fuel >> 1;
 
         sub_08022580();
-        sub_080452C0(unit->unk02, unit->unk03, proc->unk2c);
+        sub_080452C0(unit->x, unit->y, proc->unk2c);
         break;
     }
 

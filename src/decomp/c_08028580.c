@@ -93,7 +93,7 @@ void sub_08028580(struct Unk28580 *p)
     u16 i;
     int team;
     u8 v;
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     sub_08019818(gUnknown_08499FA0[gPlayers[p->unk64].teamColor - 1], 0, 0);
 

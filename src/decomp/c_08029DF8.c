@@ -29,7 +29,7 @@
  *     duplicated one.
  *
  *  3. sub_08029DBC takes TWO arguments and only ONE is set up
- *     (`adds r0, r3, #0; bl`).  r1 already holds u->unk03 from the idx2
+ *     (`adds r0, r3, #0; bl`).  r1 already holds u->y from the idx2
  *     computation, so the second argument is free -- the wave-51 arity rule.
  *     Reading it as a one-argument call is the trap here.
  *
@@ -67,8 +67,8 @@
  * spelling, because only the low half is live there. */
 void sub_08029DF8(struct Unk03001470 *proc)
 {
-  struct Unk08499594 **pp;
-  struct Unk08499594 *u;
+  struct Unit **pp;
+  struct Unit *u;
   struct Unk802C57C *cp;
   struct Unk802C57C pt;
   u16 *ec;
@@ -108,8 +108,8 @@ void sub_08029DF8(struct Unk03001470 *proc)
       idx = new_var2->rowOffset[((s16) gUnknown_0849A0D8[(proc->unk1e * 3) + 2]) + cp->unk02] + (((s16) gUnknown_0849A0D8[(proc->unk1e * 3) + 1]) + (*cp).unk00);
       u = &(*pp)[new_var2->unitUnk[idx]];
       new_var = 0;
-      idx2 = new_var2->rowOffset[u->unk03] + u->unk02;
-      if ((new_var2->unk234A[idx2] == new_var) || (((u8) sub_08029DBC(u->unk02, u->unk03)) == 0))
+      idx2 = new_var2->rowOffset[u->y] + u->x;
+      if ((new_var2->unk234A[idx2] == new_var) || (((u8) sub_08029DBC(u->x, u->y)) == 0))
       {
         sub_08029D1C(u);
       }

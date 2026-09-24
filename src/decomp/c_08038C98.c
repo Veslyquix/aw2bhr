@@ -20,7 +20,7 @@
  * unit's remaining fuel (unk06_0) and its movement allowance, then pushes the
  * unit's own cell as step 0 of the gUnknown_0849D5F8 stack.
  *
- * gUnknown_030040D8 is a `struct Unk08499594 *` in disguise -- the pointer
+ * gUnknown_030040D8 is a `struct Unit *` in disguise -- the pointer
  * SUBTRACTION against gUnits proves it, since the 0x0c-byte
  * reciprocal multiply only comes out of a 12-byte pointee. The declaration
  * keeps its own struct tag, so every use here casts; include/unknown-globals.h
@@ -36,21 +36,21 @@ void sub_08038C98(void)
     ApplyPaletteExt(gUnknown_0809165C, 0x260, 0x20);
     sub_08011E54(gUnknown_080A1C24, (void *)0x06013940, 0xa00);
 
-    if (((struct Unk08499594 *)gUnknown_030040D8)->unk06_0
-        < GetUnitMovementWithCoBonus(((((struct Unk08499594 *)gUnknown_030040D8)
+    if (((struct Unit *)gUnknown_030040D8)->fuel
+        < GetUnitMovementWithCoBonus(((((struct Unit *)gUnknown_030040D8)
                          - gUnits) >> 6) + 1,
-                       ((struct Unk08499594 *)gUnknown_030040D8)->unk00))
+                       ((struct Unit *)gUnknown_030040D8)->type))
         gUnknown_0849D5F8->unk38[0xc]
-            = ((struct Unk08499594 *)gUnknown_030040D8)->unk06_0;
+            = ((struct Unit *)gUnknown_030040D8)->fuel;
     else
         gUnknown_0849D5F8->unk38[0xc]
-            = GetUnitMovementWithCoBonus(((((struct Unk08499594 *)gUnknown_030040D8)
+            = GetUnitMovementWithCoBonus(((((struct Unit *)gUnknown_030040D8)
                              - gUnits) >> 6) + 1,
-                           ((struct Unk08499594 *)gUnknown_030040D8)->unk00);
+                           ((struct Unit *)gUnknown_030040D8)->type);
 
     sub_080386EC(0);
-    sub_08038848(((struct Unk08499594 *)gUnknown_030040D8)->unk02,
-                 ((struct Unk08499594 *)gUnknown_030040D8)->unk03);
+    sub_08038848(((struct Unit *)gUnknown_030040D8)->x,
+                 ((struct Unit *)gUnknown_030040D8)->y);
     gUnknown_0849D5F8->unk38[0] = gUnknown_0849D5F8->unk38[0xc];
     sub_080386DC(0xFFFF, 0xFFFF);
     sub_08038D7C();

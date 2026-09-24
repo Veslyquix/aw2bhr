@@ -20,7 +20,7 @@
  * `(p - gUnits) >> 6`, the record index divided by the 64-entry
  * army group that unknown-globals.h documents.
  *
- * The cast is the struct Unk030040D8 / struct Unk08499594 duplication the note
+ * The cast is the struct Unk030040D8 / struct Unit duplication the note
  * on the former describes: the two are the same object and the difference has
  * to be taken in one of them.
  *
@@ -38,7 +38,7 @@ ProcPtr sub_08035584(struct Unk030040D8 *p)
 
     p->unk01 |= 6;
     proc = sub_080355CC(p->unk02, p->unk03,
-                        ((struct Unk08499594 *)p - gUnits) >> 6,
+                        ((struct Unit *)p - gUnits) >> 6,
                         p->unk00);
     if (proc == NULL)
         return NULL;

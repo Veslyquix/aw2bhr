@@ -5437,7 +5437,7 @@
    ],
    "representative": "sub_0802481C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/map.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -8652,7 +8652,7 @@
    ],
    "representative": "sub_080116E8",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080116E8.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",

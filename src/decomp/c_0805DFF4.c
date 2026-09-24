@@ -27,7 +27,7 @@
  * include/unknown-globals.h because offset 9 falls inside struct
  * Unk030040D8's unk07[5], which c_0802966C.c indexes with a runtime subscript.
  *
- * p->unk01 and p->unk02 are NAMED LOCALS: the ROM loads them once into two
+ * p->flags and p->x are NAMED LOCALS: the ROM loads them once into two
  * callee-saved registers before the sub_0805BFDC branch and reuses them for the
  * `x | (y << 16)` word afterwards. That pair is why this function pushes r7.
  *
@@ -49,7 +49,7 @@ void sub_0805DFF4(void)
 {
     u8 buf;
     union Unk802C57CBuf v;
-    struct Unk08499594 *p;
+    struct Unit *p;
     int q;
     u8 x;
     u8 y;
@@ -72,8 +72,8 @@ void sub_0805DFF4(void)
     if (p != 0)
     {
         ((struct Unk0805DFF4Rec *)gUnknown_030040D8)->unk09_3 = 0;
-        x = p->unk01;
-        y = p->unk02;
+        x = p->flags;
+        y = p->x;
         if (gUnknown_030046B8 & 1)
             sub_0805BFDC(x, y, 0x14, 2);
         else

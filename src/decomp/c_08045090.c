@@ -47,7 +47,7 @@ void sub_08045090(struct Unk45090Proc *proc)
 {
     u8 i;
     u16 j;
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     proc->unk2b++;
 
@@ -81,18 +81,18 @@ void sub_08045090(struct Unk45090Proc *proc)
     {
         unit = &gUnits[(u16)gUnknown_084995FE[proc->unk2a] + j];
 
-        if (unit->unk00 == 0)
+        if (unit->type == 0)
             continue;
 
-        if (unit->unk01 & 8)
+        if (unit->flags & 8)
             continue;
 
-        if (unit->unk04_0 < proc->unk2d * 10 + 1)
-            unit->unk04_0 = 1;
+        if (unit->hp < proc->unk2d * 10 + 1)
+            unit->hp = 1;
         else
-            unit->unk04_0 = unit->unk04_0 - proc->unk2d * 10;
+            unit->hp = unit->hp - proc->unk2d * 10;
 
-        sub_080452C0(unit->unk02, unit->unk03, proc->unk2c);
+        sub_080452C0(unit->x, unit->y, proc->unk2c);
         break;
     }
 
