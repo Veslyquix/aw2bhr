@@ -1,11 +1,8 @@
 #include "global.h"
+#include "hardware.h"
+#include "map.h"
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080030BC.
- * sub_080030BC @ 0x080030BC
- */
+/* Design-room code at 0x080030BC..0x080032EB; grouped at a literal-pool boundary. */
 
 /* MATCHED first attempt, wave 36 (W36-I). PROMOTION NEEDS THE POOL WORD PLACED:
  *     "rodata": ["0x0808D75C"]

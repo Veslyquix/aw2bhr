@@ -1280,3 +1280,29 @@ void sub_08002FE4(void) {
                  (void *)(0x06010000 + (gUnknown_08485C9C[i + 1] << 5)), 1);
   }
 }
+
+/* Editor army-panel state, still in the original contiguous design object. */
+
+void sub_08003040(void)
+{
+    gActiveMap->armyPanelState[0] = 0;
+    gActiveMap->armyPanelState[1] = 0;
+    gActiveMap->armyPanelState[2] = 0;
+    gActiveMap->armyPanelState[3] = 0;
+}
+
+void sub_08003064(void)
+{
+    gActiveMap->armyPanelState[0] = 0x32;
+    gActiveMap->armyPanelState[1] = 0x32;
+    gActiveMap->armyPanelState[2] = 0x32;
+    gActiveMap->armyPanelState[3] = 0x32;
+}
+
+void sub_08003088(int a, int b)
+{
+    sub_080030BC(0, a, b);
+    sub_080030BC(1, a, b);
+    sub_080030BC(2, a, b);
+    sub_080030BC(3, a, b);
+}
