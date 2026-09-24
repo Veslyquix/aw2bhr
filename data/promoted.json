@@ -21253,6 +21253,15 @@
   ]
  },
  {
+  "file": "src/decomp/c_0805B6A0.c",
+  "obj": "src/decomp/c_0805B6A0.o",
+  "addr_hex": "0x0805B6A0",
+  "functions": [
+   "sub_0805B6A0"
+  ],
+  "size": 164
+ },
+ {
   "file": "src/decomp/c_0805B744.c",
   "obj": "src/decomp/c_0805B744.o",
   "addr_hex": "0x0805B744",

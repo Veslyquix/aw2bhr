@@ -1188,20 +1188,6 @@
     "Wave 59 (W59-E): THE TOOLCHAIN. A throwaway data/compiler-overrides.json entry with cc1 old_agbcc and -fprologue-bugfix removed gives the SAME six-pivot tree at the same 25.5%, and additionally gets the gDispIo chain wrong (it emits 'movs r0,#1' before 'ldrb r1,[r2,#1]', where the ROM and default agbcc both load first). So old_agbcc is not the axis and is strictly worse here. Entry reverted."
    ]
   },
-  "sub_0805B6A0": {
-   "bytes": 164,
-   "best": "25.6% identical, candidate 160 bytes (-4), first difference at +0xe. Re-measured by W59-E; unchanged since wave 57.",
-   "remaining_diff": "ONE INSTRUCTION, a register SLOT tie between the function's two address constants. ROM: 'ldr r7,=gUnknown_02029ED8' (base in a LOW callee-saved register, kept all function), 'ldr r0,=gUnknown_030033EC' / 'mov ip,r0' (address in a HI register), and therefore 'adds r3,r5,#0' in the preheader to copy '*a1 * 0x20' out of r5 before r5 is reused as the loop's low copy of the address ('mov r5,ip'). Candidate: base in ip, address in r5, so '*a1 * 0x20' stays in r3 throughout and the copy is never needed. That copy plus the 2 bytes of literal-pool alignment its absence frees is the entire -4.",
-   "why_it_is_close": "Every statement, both out-param stores, the continue re-seed block, the loop rotation and the epilogue are correct; the candidate's allocation is simply the BETTER one. WAVE 59 (W59-E) CONFIRMED THE SPELLING POSITIVELY against the matched twins sub_0805B4D8 / sub_0805B5BC in src/decomp/c_0805B4D8.c, which is worth recording because those twins DO bind p and x locals and this one must not: the ROM loads p->x TWICE from the same register ('ldrb r0,[r1]' for the 0xfe test and again for the *a3 store), which a bound x would collapse to one, and it recomputes the whole p->y address including the gUnknown_030033EC re-read, which a bound p would collapse. The draft's fully-inline spelling is therefore right, not merely untested.",
-   "axes_ruled_out": [
-    "Wave 48 and again wave 57: 'a = *a1;' bound as the first statement. It creates that pseudo first and pushes the base's pool load second, which is backwards from the ROM. There is also nothing for it to prevent -- 'a * 0x20' survives the '++*a2' store without a reload because a1 and a2 are different pointer parameters and agbcc treats two argument-derived bases as non-aliasing.",
-    "Wave 48 and again wave 57: 'u8 *base = gUnknown_02029ED8;' as the first statement. The base still loses the low register.",
-    "Wave 57: the record subscript's operand order. The instruction COUNT is identical either way, so it is not part of the -4.",
-    "Wave 59 (W59-E): THE PERMUTER, which both earlier notes name as the next thing to try, was NOT run and should not be run through the MCP tool. 'mcp permute' is broken this wave (found by W59-A): it fails with a KeyError on 'exit_code' and strands raw header-expanded output in work/<fn>/<fn>.c, destroying the draft. Any permuter negative obtained through that path is worthless. Note also that the residual here is ONE EXTRA INSTRUCTION in the ROM, not a pure order/slot swap, and the brief records the permuter as useless on that case.",
-    "Wave 59 (W59-E): old_agbcc was NOT probed here and is not promising -- this function contains no calls at all, so the documented discriminator for that override (a call inside a loop body, where r0 is both the argument register and the only free scratch) cannot apply.",
-    "WAVE 81 (W81-C): temporary-profile sweep on the unchanged draft, superseding the note above which said 'not probed': default 25.6% (best), no-force 6.7% / +20, o1 and o1-no-force 15.2% / +40, old-agbcc 6.7% / -8, old-agbcc-no-force 13.4% / +8. No profile is even close; the toolchain axis is measured and closed."
-   ]
-  },
   "sub_0805D344": {
    "bytes": 244,
    "best": "13.5% identical, candidate 236 bytes (-8), first difference at +0xf. Re-measured by W59-E; unchanged since wave 57. NOTE work/sub_0805D344/best.json reads 13.9% for a DIFFERENT spelling in best.c -- gate on the draft's exit code, not on that number.",
