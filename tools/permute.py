@@ -214,7 +214,7 @@ def base_score(pdir):
     # Makefile's source discovery (see the comment on C_SRCS). Move them into
     # the permuter directory, where they are still available and harmless.
     rc, so, se = agbenv.run(
-        "python3 vendor/decomp-permuter/permuter.py %s --debug; rc=$?\n"
+        "python3 tools/permuter_entry.py %s --debug; rc=$?\n"
         "mv -f debug_source.c debug_compiled_object.o %s/ 2>/dev/null\n"
         "exit $rc" % (shq(rel), shq(rel)),
         timeout=300)
@@ -236,7 +236,7 @@ def run(pdir, seconds, threads):
     # it had. Whatever swallows the signal -- the multiprocessing pool, most
     # likely -- a wall-clock limit that does not actually stop the process is
     # worse than no limit, because nothing is watching it any more.
-    cmd = ("timeout -s INT -k 30 %d python3 vendor/decomp-permuter/permuter.py "
+    cmd = ("timeout -s INT -k 30 %d python3 tools/permuter_entry.py "
            "%s --better-only --stop-on-zero -j %d"
            % (seconds, shq(rel), threads))
     log = os.path.join(pdir, "permuter.log")
