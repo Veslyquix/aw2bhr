@@ -12474,19 +12474,11 @@
   ]
  },
  {
-  "file": "src/decomp/c_08036B28.c",
-  "obj": "src/decomp/c_08036B28.o",
+  "file": "src/main.c",
+  "obj": "src/main.o",
   "addr_hex": "0x08036B28",
   "functions": [
-   "sub_08036B28"
-  ],
-  "size": 12
- },
- {
-  "file": "src/decomp/c_08036B34.c",
-  "obj": "src/decomp/c_08036B34.o",
-  "addr_hex": "0x08036B34",
-  "functions": [
+   "sub_08036B28",
    "sub_08036B34",
    "sub_08036B4C",
    "sub_08036C08",
@@ -12494,75 +12486,19 @@
    "sub_08036C4C",
    "sub_08036C80",
    "sub_08036CB4",
-   "AgbMain"
-  ],
-  "size": 740
- },
- {
-  "file": "src/decomp/c_08036E18.c",
-  "obj": "src/decomp/c_08036E18.o",
-  "addr_hex": "0x08036E18",
-  "functions": [
+   "AgbMain",
    "sub_08036E18",
-   "sub_08036E54"
-  ],
-  "size": 88
- },
- {
-  "file": "src/decomp/c_08036E70.c",
-  "obj": "src/decomp/c_08036E70.o",
-  "addr_hex": "0x08036E70",
-  "functions": [
-   "sub_08036E70"
-  ],
-  "size": 176
- },
- {
-  "file": "src/decomp/c_08036F20.c",
-  "obj": "src/decomp/c_08036F20.o",
-  "addr_hex": "0x08036F20",
-  "functions": [
+   "sub_08036E54",
+   "sub_08036E70",
    "sub_08036F20",
-   "sub_08036F44"
-  ],
-  "size": 72
- },
- {
-  "file": "src/decomp/c_08036F68.c",
-  "obj": "src/decomp/c_08036F68.o",
-  "addr_hex": "0x08036F68",
-  "functions": [
-   "sub_08036F68"
-  ],
-  "size": 392
- },
- {
-  "file": "src/decomp/c_080370F0.c",
-  "obj": "src/decomp/c_080370F0.o",
-  "addr_hex": "0x080370F0",
-  "functions": [
-   "sub_080370F0"
-  ],
-  "size": 28
- },
- {
-  "file": "src/decomp/c_0803710C.c",
-  "obj": "src/decomp/c_0803710C.o",
-  "addr_hex": "0x0803710C",
-  "functions": [
-   "sub_0803710C"
-  ],
-  "size": 24
- },
- {
-  "file": "src/decomp/c_08037124.c",
-  "obj": "src/decomp/c_08037124.o",
-  "addr_hex": "0x08037124",
-  "functions": [
+   "sub_08036F44",
+   "sub_08036F68",
+   "sub_080370F0",
+   "sub_0803710C",
    "sub_08037124",
    "sub_08037150"
   ],
-  "size": 76
+  "size": 1608
  },
  {
   "file": "src/decomp/c_08037170.c",

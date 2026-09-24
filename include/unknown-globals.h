@@ -15443,7 +15443,7 @@ extern u8 gUnknown_03004094;
  * because the ROM RE-LOADS the word after the increment's `str` (`ldr; adds #1;
  * str; ldr`) instead of reusing the value it just stored. Same pair as the
  * gUnknown_030043F0 / gUnknown_03004078 frame counters sub_08021DD8 drives.
- * The only promoted user, src/decomp/c_08036B34.c, just stores 0 to it, which
+ * The only promoted user, src/main.c, just stores 0 to it, which
  * is one `str` either way; re-verified byte-identical after the change. */
 extern volatile u32 gUnknown_03003330;
 /* Halfword (`strh`); sub_0802BC40 is the other writer. No signed reader. */

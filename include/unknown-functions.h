@@ -862,7 +862,7 @@ void sub_08075AC4(int, int);
  * casts; every call site is byte-identical under both. */
 void sub_080795A8(ProcPtr, u32);
 /* sub_08079B04 IS DELIBERATELY NOT DECLARED HERE. It is `static` inside its
- * own unit -- see the paragraph above and src/decomp/c_08036B34.c's
+ * own unit -- see the paragraph above and src/main.c's
  * sub_08036B48 for the same construction. A non-static declaration would both
  * clash with the definition and, worse, make the assembler keep an
  * R_ARM_THM_CALL on each of the three `bl`s (a global symbol is preemptible),
@@ -7887,11 +7887,11 @@ void sub_08071488(struct MusicPlayerInfo *, u16, s16);
 
 /* Copied from the promoted definitions in src/decomp; the 0x08036000 block is
  * the first cross-file caller each of them has had.
- * sub_08036CB4 lives in the AgbMain unit (c_08036B34.c) but is an ordinary
+ * sub_08036CB4 lives in the AgbMain unit (src/main.c) but is an ordinary
  * global, so the relocation is real -- it is NOT the `static` sub_08036B48
  * hazard that unit carries. */
 bool8 sub_0802759C(void);    /* c_0802759C.c */
-void sub_08036CB4(void);     /* c_08036B34.c */
+void sub_08036CB4(void);     /* src/main.c */
 void sub_0804A010(void);     /* c_0804A010.c */
 /* The heap free's forwarder. Its own definition's comment already records the
  * evidence for `void *`: sub_080363D0 does `ldr r0, [r4, #0x48]` immediately

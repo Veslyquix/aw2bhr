@@ -1,14 +1,15 @@
 #include "global.h"
-
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08036B34.
- * sub_08036B34 @ 0x08036B34, sub_08036B4C @ 0x08036B4C, sub_08036C08 @ 0x08036C08, sub_08036C2C @ 0x08036C2C, sub_08036C4C @ 0x08036C4C, sub_08036C80 @ 0x08036C80, sub_08036CB4 @ 0x08036CB4, AgbMain @ 0x08036D1C
- */
-
 #include "proc.h"
 #include "hardware.h"
+
+/* Main/reset code, contiguous from 0x08036B28 through 0x08037170.
+ * The adjacent source units have their own .rodata placements.
+ * Keep these functions in address order to preserve the ROM layout. */
+
+void sub_08036B28(void)
+{
+    gUnknown_030043F4 = 0;
+}
 
 /* The boot/reset unit's frame-gate reset: clears the mask sub_080369BC ANDs
  * against gGameClock, then re-enters through sub_0801F00C.
@@ -210,4 +211,168 @@ void AgbMain(void)
             gUnknown_030040EC();
         CheckSoftResetCombo();
     }
+}
+
+/* The soft-reset combo check: A+B+Select+Start (the low four KEYINPUT bits)
+ * re-inits the save area unless its 0xAA/0x55 signature is already there.
+ *
+ * `keys` MUST be bound, and bound as `u16`. Written inline as
+ * `((~REG_KEYINPUT & 0x3ff) & 0xf) == 0xf` the two masks fold to a single
+ * `& 0xf` and the 0x3FF pool word disappears -- 8 bytes. Bound as `int` the
+ * masks stay apart but the `adds r0, r2, #0` copy of the pool word does not
+ * appear. `u16` gives both, and it is the same spelling AgbMain already uses
+ * for this register in src/main.c.
+ *
+ * The `||` is a real short-circuit: `bne` on the first byte jumps straight to
+ * the call, `beq` on the second skips it.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Subroutine that checks whether
+ * A, B Start Select is pressed and performs a soft reset." The old
+ * CheckSoftResetCombo symbol is kept as a linker alias below so every other unit
+ * keeps resolving it unchanged. */
+void CheckSoftResetCombo(void)
+{
+    u16 keys;
+
+    keys = ~REG_KEYINPUT & 0x3ff;
+
+    if ((keys & 0xf) == 0xf)
+    {
+        if (gUnknown_02028E41[0] != 0xaa || gUnknown_02028E41[1] != 0x55)
+            sub_0804A010();
+
+        sub_08036CB4();
+    }
+}
+
+asm(".global sub_08036E18\n.thumb_set sub_08036E18, CheckSoftResetCombo\n");
+
+void sub_08036E54(void)
+{
+    sub_08036B4C();
+    sub_0801B780(0);
+    sub_080152EC(gUnknown_0849D1AC, 0);
+}
+
+void sub_08036E70(void)
+{
+    sub_08012C58(gUnknown_0849D16C);
+    gDispIo.disp_ct.forced_blank = 0;
+    sub_0801295C();
+    sub_080128D0();
+    sub_08011C68(gUnknown_08499578, (void *)0x06007000, 0x800);
+    sub_08011C68(gUnknown_0849957C, (void *)0x0600F000, 0x800);
+    sub_08011C68(gUnknown_08499580, (void *)0x06007800, 0x800);
+    sub_08011C68(gUnknown_08499584, (void *)0x0600F800, 0x800);
+    sub_0802465C();
+    sub_0801A5B0(0);
+    ApplyPaletteExt(gUnknown_0809165C, 0x140, 0x20);
+    sub_08011B18();
+    sub_080366C4(sub_080368E8);
+    sub_080366D0(sub_08036884);
+}
+
+/* `>> 6` is `lsrs` because gUnknown_0200C420.unk08 is `u8` -- the wave-27 rule.
+ * The store's destination pool word is loaded BEFORE the source's, which is
+ * what a plain global-to-global assignment gives. */
+void sub_08036F20(void)
+{
+    gUnknown_02028E40 = gUnknown_0200C420.unk08 >> 6;
+    sub_080193B0(gUnknown_0849D34C);
+}
+
+/* TWO separate `orrs` of 1 and 4 into the same byte of gDispIo, not one `orrs`
+ * of 5: two bitfield assignments, each re-materialising its own mask. Byte 1 of
+ * DISPCNT is bits 8..15, so bit 0 is bg0_enable and bit 2 is bg2_enable. */
+void sub_08036F44(void)
+{
+    gDispIo.disp_ct.bg0_enable = 1;
+    gDispIo.disp_ct.bg2_enable = 1;
+
+    sub_08022A34();
+    sub_0801A5B0(0);
+}
+
+void sub_08036F68(u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8,
+                  u8 a9, u8 a10, u8 a11, u8 a12, u8 a13, u8 a14, u8 a15,
+                  u8 a16, u16 a17)
+{
+    gUnknown_03002B5C = 0;
+    gUnknown_0300450C = a15;
+
+    gUnknown_03004580[0][0] = a2 - 1;
+    gUnknown_03004580[1][0] = a9 - 1;
+    gUnknown_03004580[0][1] = a4 - 1;
+    gUnknown_03004580[1][1] = a11 - 1;
+    gUnknown_03004580[0][2] = a5;
+    gUnknown_03004580[1][2] = a12;
+    gUnknown_03004580[0][3] = a3;
+    gUnknown_03004580[1][3] = a10;
+    gUnknown_03004580[0][4] = a1;
+    gUnknown_03004580[1][4] = a8;
+    gUnknown_03004580[0][5] = a6;
+    gUnknown_03004580[1][5] = a13;
+    gUnknown_03004580[0][6] = a7;
+    gUnknown_03004580[1][6] = a14;
+    gUnknown_03004580[0][7] = gUnknown_085D583C[a3].defense * 10;
+    gUnknown_03004580[1][7] = gUnknown_085D583C[a10].defense * 10;
+
+    gUnknown_02027F68[1] = 0;
+    gUnknown_03004528[0] = gUnknown_02027F68;
+    gUnknown_03004528[1] = gUnknown_02027F68;
+    gUnknown_03004520 = a16;
+
+    sub_080546BC();
+
+    gUnknown_03004504.bit0 = 1;
+    gUnknown_03004504.bit1 = 0;
+    gUnknown_03004504.bit2 = 0;
+    gUnknown_03004504.bit3 = 0;
+    gUnknown_03004504.bit4 = 0;
+    gUnknown_03004504.bit5 = 0;
+    gUnknown_03004504.bit6 = 0;
+    gUnknown_03004504.unk02 = a17;
+
+    Proc_Start(gUnknown_0849D3BC, PROC_TREE_3);
+}
+
+/* F010: `push {lr}; ldr r0,=g1; bl S1; ldr r0,=g2; bl S2; pop {r0}; bx r0` --
+ * two statements, each with its own pool word, result of each discarded.
+ * src/decomp/c_08044924.c is the matched exemplar.
+ * Two different callees and two FUNCTION pool words. sub_080366C4/sub_080366D0
+ * are already promoted in src/decomp/c_080366C4.c taking `void (*)(void)`, so
+ * no cast is needed here -- unlike the sub_08011AAC/sub_0801F024 sites, which
+ * take `void *`. sub_0803662C registers the same two slots with a different
+ * pair of handlers, which is what pins the argument order. */
+void sub_080370F0(void)
+{
+    sub_080366D0(sub_08036884);
+    sub_080366C4(sub_080368E8);
+}
+
+int sub_0803710C(void)
+{
+    return Proc_Find(gUnknown_0849D3BC) != 0;
+}
+
+void sub_08037124(void)
+{
+    sub_080169E8();
+    sub_0801537C(gUnknown_08553820);
+    Proc_EndEach(gUnknown_0855379C);
+    Proc_EndEach(gUnknown_0849D3BC);
+    sub_08036B34();
+}
+
+/* The destination is OBJ tile `a & 0x3ff`, i.e. byte offset
+ * `(a & 0x3ff) * TILE_SIZE_4BPP` into OBJ_VRAM0. The honest mask spelling
+ * `(a & 0x3FF) * 32` does NOT match: on THUMB agbcc loads 0x3ff from the pool
+ * and emits `ldr; and; lsl #5`, three instructions and a fourth pool word.
+ * The ROM's `lsl #0x16; lsr #0x11` is the truncate-then-scale form, which is
+ * what a 16-bit intermediate gives -- `(u16)(a * 0x40) / 2` puts the same
+ * bits in the same places in two instructions. Measured with compile_probe,
+ * both spellings side by side. */
+void sub_08037150(int a)
+{
+    Decompress(gUnknown_08124478, (u8 *)OBJ_VRAM0 + (u16)(a * 0x40) / 2);
 }
