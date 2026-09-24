@@ -49,12 +49,12 @@ void sub_080324C4(int a1, int a2, u8 a3)
 
     for (i = 0; i < 0x80; i++)
     {
-        gUnknown_08499584[i + 0x200] = 0x180;
-        gUnknown_08499584[i] = 0x180;
+        gBG3TilemapBuffer[i + 0x200] = 0x180;
+        gBG3TilemapBuffer[i] = 0x180;
     }
 
     for (i = 0x80; i < 0x200; i++)
-        gUnknown_08499584[i] = i - 0x80;
+        gBG3TilemapBuffer[i] = i - 0x80;
 
     sub_08073304(gUnknown_0849B644, gUnknown_02010C50, 0xec, 0xf, 0, a3, a1);
 
@@ -63,7 +63,7 @@ void sub_080324C4(int a1, int a2, u8 a3)
         sub_08072C40(0, 0, 0);
         sub_0802D5CC(0, 3);
         Decompress(gUnknown_081D2660, (void *)0x06006280);
-        sub_08032484(gUnknown_08499578 + 0x221);
+        sub_08032484(gBG0TilemapBuffer + 0x221);
     }
     else
     {

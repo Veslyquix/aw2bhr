@@ -98,7 +98,7 @@ void sub_08036884(void)
         sub_0801F0E0();
         sub_080128D0();
         sub_08011FF0();
-        sub_08013B2C();
+        FlushBgTilemaps();
         sub_08011AD8();
     }
     else
@@ -146,7 +146,7 @@ void sub_08036944(void)
         sub_0801F0E0();
         sub_080128D0();
         sub_08011FF0();
-        sub_08013B2C();
+        FlushBgTilemaps();
         sub_08011AD8();
     }
     else
@@ -203,7 +203,7 @@ void sub_08036A50(void)
         sub_0801F0E0();
         sub_080128D0();
         sub_08011FF0();
-        sub_08013B2C();
+        FlushBgTilemaps();
         sub_08011AD8();
         sub_0801F050();
     }

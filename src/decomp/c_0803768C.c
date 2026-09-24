@@ -1,4 +1,5 @@
 #include "global.h"
+#include "hardware.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -29,6 +30,6 @@ void sub_080376DC(void *a, int b, int c, int d, int e, int f)
     sub_0801B6EC(p);
     sub_0801B6FC(p);
 
-    sub_08037A20(sub_08013D00(c, d, e), (f << 12) | tile);
-    sub_08013AD4(c);
+    sub_08037A20(BG_GetMapTilePointer(c, d, e), (f << 12) | tile);
+    BG_EnableSync(c);
 }

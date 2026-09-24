@@ -29,7 +29,7 @@
  * the first addend creates cx's reference at a point no statement boundary can
  * reach, which flips the two allocnos' priority order without moving either
  * definition. Measured alternatives, wave 52:
- *   - `gUnknown_0849957C + cy * 32 + cx` -- keeps the same registers and
+ *   - `gBG1TilemapBuffer + cy * 32 + cx` -- keeps the same registers and
  *     reorders the two uses instead. Worse.
  *   - swapping the `cx =` and `cy =` statements -- DOES flip r9/sl correctly,
  *     but then loads camY before camX. Trades 4 wrong bytes for 2.
@@ -82,7 +82,7 @@ void DrawUnitAt(u16 x, u16 y)
         else
             hp = 0;
 
-        sub_0802216C((gUnknown_0849957C + (new_var = cx)) + cy * 32,
+        sub_0802216C((gBG1TilemapBuffer + (new_var = cx)) + cy * 32,
                      gUnits[id].type,
                      v,
                      e->unk07 | e->unk08,

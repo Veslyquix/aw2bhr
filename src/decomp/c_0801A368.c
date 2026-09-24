@@ -30,16 +30,16 @@ void DrawWindowBackground(int a1, int a2, int a3, int a4, u16 *a5, int a6)
 
     sub_0801A2E4(dst, a1, a3, a6);
 
-    if (a5 == gUnknown_08499578)
+    if (a5 == gBG0TilemapBuffer)
         sub_08013AD4(0);
 
-    if (a5 == gUnknown_0849957C)
+    if (a5 == gBG1TilemapBuffer)
         sub_08013AD4(1);
 
-    if (a5 == gUnknown_08499580)
+    if (a5 == gBG2TilemapBuffer)
         sub_08013AD4(2);
 
-    if (a5 == gUnknown_08499584)
+    if (a5 == gBG3TilemapBuffer)
         sub_08013AD4(3);
 
     sub_0802465C();

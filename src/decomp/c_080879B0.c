@@ -19,13 +19,13 @@ struct Unk080879D8
 
 void PreviewMapRecords_CB_080879B1(void)
 {
-    sub_08012BC8(gUnknown_08499580, 0xD, 4, 0x12, 0xC, 0);
+    sub_08012BC8(gBG2TilemapBuffer, 0xD, 4, 0x12, 0xC, 0);
     sub_08013B0C();
 }
 
 void PreviewMapRecords_080879D9(struct Unk080879D8 *proc)
 {
-    DrawWindowBackground(0xD, 4, 0x12, 0xC, gUnknown_08499580, 0);
+    DrawWindowBackground(0xD, 4, 0x12, 0xC, gBG2TilemapBuffer, 0);
     sub_08013B0C();
     sub_08085F40();
     sub_08087C14(proc->unk54);

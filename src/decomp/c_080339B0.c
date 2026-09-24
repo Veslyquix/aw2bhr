@@ -66,7 +66,7 @@ void LinkC2_080339B1(struct Unk339B0Proc *proc)
 
     Decompress(gUnknown_0823A3D4,
                BG_CHAR_ADDR(((union BgCntBuf *)&gUnknown_0300251C)->bits.chr_block));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     sub_08013B1C();
 
     sub_08073304(gUnknown_085802F0, gUnknown_02010C50, 0xec, 0xf, 0, 0, (int)proc);

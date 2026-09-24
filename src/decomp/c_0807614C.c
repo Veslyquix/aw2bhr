@@ -42,7 +42,7 @@ struct Unk807614C
  * counter at +0x40 that breaks the proc when it wraps.
  * The two arms differ only in WHICH side carries the moving index: below zero
  * it is the gUnknown_08551A00/04 pair that is indexed by `0x14D - n` and the
- * gUnknown_08499578/80 pair that takes a fixed +0x200, and at or above zero the
+ * gBG0TilemapBuffer/80 pair that takes a fixed +0x200, and at or above zero the
  * roles swap to a fixed +0x140 and `0x21E - n`. All four globals are `u16 *`,
  * so the ROM's byte offsets 0x400 and 0x280 are element counts 0x200 and 0x140.
  * `n` is an int: it is read `ldrsb` and handed to sub_08071900's third
@@ -89,16 +89,16 @@ void WM_Listener_IDLE_080761C9(struct Unk80761C8 *proc)
 
     if (proc->unk3a < 0)
     {
-        sub_08071900(gUnknown_08551A00 + (0x14D - n), gUnknown_08499578 + 0x200,
+        sub_08071900(gUnknown_08551A00 + (0x14D - n), gBG0TilemapBuffer + 0x200,
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + (0x14D - n), gUnknown_08499580 + 0x200,
+        sub_08071900(gUnknown_08551A04 + (0x14D - n), gBG2TilemapBuffer + 0x200,
                      n, 4);
     }
     else
     {
-        sub_08071900(gUnknown_08551A00 + 0x140, gUnknown_08499578 + (0x21E - n),
+        sub_08071900(gUnknown_08551A00 + 0x140, gBG0TilemapBuffer + (0x21E - n),
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + 0x140, gUnknown_08499580 + (0x21E - n),
+        sub_08071900(gUnknown_08551A04 + 0x140, gBG2TilemapBuffer + (0x21E - n),
                      n, 4);
     }
 

@@ -129,7 +129,7 @@ void sub_08004970(void)
 
     if ((gpKeySt->pressed & 7) != 0)
     {
-        sub_08012BC8(gUnknown_08499580, 9, 2, 0xB, 0x11, 0x360);
+        sub_08012BC8(gBG2TilemapBuffer, 9, 2, 0xB, 0x11, 0x360);
         sub_08013B0C();
         sub_08002E5C();
         sub_08002E3C();

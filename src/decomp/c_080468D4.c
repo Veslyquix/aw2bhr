@@ -16,7 +16,7 @@
  * belongs in the source. */
 void sub_080468D4(int x)
 {
-    sub_08012BC8(gUnknown_08499578, (x + gUnknown_084C211C[0] * 8) / 8,
+    sub_08012BC8(gBG0TilemapBuffer, (x + gUnknown_084C211C[0] * 8) / 8,
                  gUnknown_084C211C[1], 8, 8, 0);
     sub_08013AEC();
 }

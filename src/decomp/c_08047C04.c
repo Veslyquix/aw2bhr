@@ -42,7 +42,7 @@
  *    to name the value.
  *
  *  - `v` must be `s16`, not `int`. That one token swapped r5 and r6 across the
- *    whole tail (the gUnknown_08499578 pointer and the 0x8000 constant) and was
+ *    whole tail (the gBG0TilemapBuffer pointer and the 0x8000 constant) and was
  *    worth 9 of the last 17 bytes. Found by the permuter.
  *
  * And the last 8: `base = 0x100;` INSIDE loop 1, binding the first source
@@ -117,24 +117,24 @@ void sub_08047C04(struct Unk08047C04 * a)
     sub_0801B780(0);
     sub_08013C00();
     sub_08013CA8();
-    sub_08071948(gUnknown_08499580, 1, 0, gUnknown_0812A8C8, 0x8360);
+    sub_08071948(gBG2TilemapBuffer, 1, 0, gUnknown_0812A8C8, 0x8360);
     sub_08047190(a, a->unk1e);
-    sub_080149C0(4, 1, gUnknown_08499578,
+    sub_080149C0(4, 1, gBG0TilemapBuffer,
         gTextTable[gUnknown_0849F658[gPlayers[gUnknown_030033EC].teamColor]],
         0x8000, 0);
-    sub_08014A5C(8, 5, gUnknown_08499578, 0x96F, 0x8000, 0);
-    sub_08014A5C(0xF, 5, gUnknown_08499578, 0x970, 0x8000, 0);
-    sub_08014A5C(0x12, 5, gUnknown_08499578, 0x971, 0x8000, 0);
-    sub_08014A5C(0x18, 5, gUnknown_08499578, 0x972, 0x8000, 0);
+    sub_08014A5C(8, 5, gBG0TilemapBuffer, 0x96F, 0x8000, 0);
+    sub_08014A5C(0xF, 5, gBG0TilemapBuffer, 0x970, 0x8000, 0);
+    sub_08014A5C(0x12, 5, gBG0TilemapBuffer, 0x971, 0x8000, 0);
+    sub_08014A5C(0x18, 5, gBG0TilemapBuffer, 0x972, 0x8000, 0);
 
     if (a->unk21 == 0)
         v = a->unk21;
     else
         v = a->unk1f + 1;
 
-    sub_08014B0C(0x18, 1, gUnknown_08499578, v, 0x8000, 0);
-    sub_080149C0(0x19, 1, gUnknown_08499578, gUnknown_084C3F38, 0x8000, 0);
-    sub_08014B0C(0x1B, 1, gUnknown_08499578, a->unk21, 0x8000, 0);
+    sub_08014B0C(0x18, 1, gBG0TilemapBuffer, v, 0x8000, 0);
+    sub_080149C0(0x19, 1, gBG0TilemapBuffer, gUnknown_084C3F38, 0x8000, 0);
+    sub_08014B0C(0x1B, 1, gBG0TilemapBuffer, a->unk21, 0x8000, 0);
     sub_08047920(a);
     sub_08013AEC();
     sub_08013B0C();

@@ -44,7 +44,7 @@ void sub_0807B884(ProcPtr proc)
     sub_0807898C(proc);
 
     Decompress(gUnknown_0822FEF0, (void *)((gUnknown_03001FE8.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0822F9AC, gUnknown_0849957C);
+    Decompress(gUnknown_0822F9AC, gBG1TilemapBuffer);
 
     sub_08013AFC();
 

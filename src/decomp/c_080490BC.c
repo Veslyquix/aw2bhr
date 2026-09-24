@@ -54,7 +54,7 @@ void BattleMaps_IDLE_080490BD(ProcPtr proc)
     gUnknown_084C30F8->unk839++;
 
     if (gUnknown_084C30F8->unk836 != 0)
-        sub_08012BC8(gUnknown_08499578, 7, 0xf, 0x17, 4, v);
+        sub_08012BC8(gBG0TilemapBuffer, 7, 0xf, 0x17, 4, v);
 
     sub_0803B4DC(0x71);
     Proc_Break(proc);

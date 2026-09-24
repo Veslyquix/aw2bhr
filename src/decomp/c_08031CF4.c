@@ -24,7 +24,7 @@ struct Unk08031D54Proc
 
 void sub_08031CF4(struct Unk08031CF4Proc *proc)
 {
-    sub_08012BC8(gUnknown_08499578, 0xc, 8, 2, 2, 0);
+    sub_08012BC8(gBG0TilemapBuffer, 0xc, 8, 2, 2, 0);
     sub_08013AEC();
 
     sub_0801BD00(proc->unk1e, proc->unk20,
@@ -68,7 +68,7 @@ void sub_08031DC0(void)
 
     gUnknown_030040D8 = (struct Unk030040D8 *)&p[1];
 
-    sub_08012BC8(gUnknown_08499578, 0xc, 8, 2, 2, 0);
+    sub_08012BC8(gBG0TilemapBuffer, 0xc, 8, 2, 2, 0);
 
     p[2].type = 1;
     p[2].hp = 0x64;
@@ -76,6 +76,6 @@ void sub_08031DC0(void)
     gUnknown_030040D8->unk00 = 0x17;
     gUnknown_030040D8->unk07[0] = 2;
 
-    sub_080149C0(0x18, 8, gUnknown_08499578, gUnknown_08090D18, 0x8000, 0);
+    sub_080149C0(0x18, 8, gBG0TilemapBuffer, gUnknown_08090D18, 0x8000, 0);
     sub_08013AEC();
 }

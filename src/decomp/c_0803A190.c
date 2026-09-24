@@ -40,10 +40,10 @@ void sub_0803A190(int a1, struct Unit *a2)
   {
     for (x = 0; x < 15; x++)
     {
-      gUnknown_08499578[((y * 32) + (v / 8)) + x] = 0;
+      gBG0TilemapBuffer[((y * 32) + (v / 8)) + x] = 0;
     }
   }
 
-  sub_08014B0C((u8)((v + 0x60) / 8), 1, gUnknown_08499578, GetUnitMovementWithCoBonus(gUnknown_0849D89C->unk08, a2->type), 0x8000, 0);
-  sub_08014B0C((u8)((v + 0x60) / 8), 3, gUnknown_08499578, GetUnitVisionWithCoBonus(gUnknown_0849D89C->unk08, a2->type), 0x8000, 0);
+  sub_08014B0C((u8)((v + 0x60) / 8), 1, gBG0TilemapBuffer, GetUnitMovementWithCoBonus(gUnknown_0849D89C->unk08, a2->type), 0x8000, 0);
+  sub_08014B0C((u8)((v + 0x60) / 8), 3, gBG0TilemapBuffer, GetUnitVisionWithCoBonus(gUnknown_0849D89C->unk08, a2->type), 0x8000, 0);
 }

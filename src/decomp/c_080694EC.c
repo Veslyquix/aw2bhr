@@ -61,9 +61,9 @@ void IntroT3_IDLE_080694ED(struct Unk694ECProc *proc)
         sub_08012C48((struct Unk8012C30 *)&gUnknown_03002B6C, 2);
         sub_08012C1C((struct Unk8012C30 *)&gUnknown_03002B6C, 0x0600D000);
         Decompress(gUnknown_08183CA8, (void *)0x06004800);
-        Decompress(gUnknown_08184A74, gUnknown_08499578);
+        Decompress(gUnknown_08184A74, gBG0TilemapBuffer);
         for (i = 0; i < 0x400; i++)
-            gUnknown_08499578[i] += 0x140;
+            gBG0TilemapBuffer[i] += 0x140;
         sub_08013AEC();
         break;
 

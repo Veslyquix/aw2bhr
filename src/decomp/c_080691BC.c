@@ -72,7 +72,7 @@ void IntroT3_IDLE_080691BD(struct Unk691BCProc *proc)
         break;
 
     case 0xba:
-        Decompress(gUnknown_0817E208, gUnknown_08499580);
+        Decompress(gUnknown_0817E208, gBG2TilemapBuffer);
         ApplyPaletteExt(gUnknown_0817DA18, 0x20, 0x20);
         sub_08013B0C();
         break;

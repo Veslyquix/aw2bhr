@@ -39,9 +39,9 @@ void LoadGameplayGraphics(int a)
     Decompress(gUnknown_080BD1EC, (void *)0x06008000);
 
     sub_08011C68(gUnknown_0809175C + 0xa0, (void *)0x0600E780, 0x20);
-    sub_08011C68(gUnknown_08499578, (void *)0x06007000, 0x800);
-    sub_08011C68(gUnknown_0849957C, (void *)0x0600F000, 0x800);
-    sub_08011C68(gUnknown_08499580, (void *)0x06007800, 0x800);
+    sub_08011C68(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
+    sub_08011C68(gBG1TilemapBuffer, (void *)0x0600F000, 0x800);
+    sub_08011C68(gBG2TilemapBuffer, (void *)0x06007800, 0x800);
 
     ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[1].teamColor - 1) * 0x20), 12);
     ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[2].teamColor - 1) * 0x20), 13);
@@ -57,7 +57,7 @@ void LoadGameplayGraphics(int a)
     sub_08024268();
     sub_08022A08();
 
-    sub_08011C68(gUnknown_08499584, (void *)0x0600F800, 0x800);
+    sub_08011C68(gBG3TilemapBuffer, (void *)0x0600F800, 0x800);
 
     sub_08035568();
     sub_080116E8();

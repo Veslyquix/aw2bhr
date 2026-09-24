@@ -99,11 +99,11 @@ void sub_08076888(ProcPtr proc)
     gUnknown_0300251C.bits.priority = 3;
 
     a = 0;
-    CpuFastSet(&a, gUnknown_08499578, 0x01000200);
+    CpuFastSet(&a, gBG0TilemapBuffer, 0x01000200);
     b = 0;
-    CpuFastSet(&b, gUnknown_0849957C, 0x01000200);
+    CpuFastSet(&b, gBG1TilemapBuffer, 0x01000200);
     c = 0;
-    CpuFastSet(&c, gUnknown_08499580, 0x01000200);
+    CpuFastSet(&c, gBG2TilemapBuffer, 0x01000200);
 
     sub_08013AEC();
     sub_08013AFC();

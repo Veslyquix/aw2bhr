@@ -13,7 +13,7 @@
  * `if`/`else` puts the constant between the sign-extend and the `cmp`, where
  * the ROM has it.
  *
- * `gUnknown_08499578 + (n + 0x200)` with the constant bound to the INDEX, not
+ * `gBG0TilemapBuffer + (n + 0x200)` with the constant bound to the INDEX, not
  * to the pointer: `p + n + 0x200` parses as `(p + n) + 0x200` and adds 0x400 to
  * the pointer after the scaling, where the ROM folds it into the offset
  * (`lsls #1` then `+ 0x400`) before the pointer is even loaded. */
@@ -32,7 +32,7 @@ void sub_0807606C(struct Unk807606C *proc)
     else
         n = 0x11;
 
-    sub_08071900(gUnknown_08551A00 + 0x140, gUnknown_08499578 + (n + 0x200), 0xd, 4);
+    sub_08071900(gUnknown_08551A00 + 0x140, gBG0TilemapBuffer + (n + 0x200), 0xd, 4);
     sub_08013AEC();
     sub_08013B0C();
 }

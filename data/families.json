@@ -6726,7 +6726,7 @@
    ],
    "representative": "sub_08013AEC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08013AD4.c",
+   "exemplar_src": "src/hardware.c",
    "shape": [
     "ldr r0,L",
     "ldrh r1,[r0]",

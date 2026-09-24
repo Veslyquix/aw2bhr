@@ -28,9 +28,9 @@ void WM_Listener_IDLE_08076299(ProcPtr procv)
     u32 b;
 
     a = 0;
-    CpuFastSet(&a, gUnknown_08499578 + 0x200, 0x01000040);
+    CpuFastSet(&a, gBG0TilemapBuffer + 0x200, 0x01000040);
     b = 0;
-    CpuFastSet(&b, gUnknown_08499580 + 0x200, 0x01000040);
+    CpuFastSet(&b, gBG2TilemapBuffer + 0x200, 0x01000040);
 
     sub_08013AEC();
     sub_08013B0C();
@@ -39,16 +39,16 @@ void WM_Listener_IDLE_08076299(ProcPtr procv)
 
     if (proc->unk3a < 0)
     {
-        sub_08071900(gUnknown_08551A00 + (0x14D - n), gUnknown_08499578 + 0x200,
+        sub_08071900(gUnknown_08551A00 + (0x14D - n), gBG0TilemapBuffer + 0x200,
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + (0x14D - n), gUnknown_08499580 + 0x200,
+        sub_08071900(gUnknown_08551A04 + (0x14D - n), gBG2TilemapBuffer + 0x200,
                      n, 4);
     }
     else
     {
-        sub_08071900(gUnknown_08551A00 + 0x140, gUnknown_08499578 + (0x21E - n),
+        sub_08071900(gUnknown_08551A00 + 0x140, gBG0TilemapBuffer + (0x21E - n),
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + 0x140, gUnknown_08499580 + (0x21E - n),
+        sub_08071900(gUnknown_08551A04 + 0x140, gBG2TilemapBuffer + (0x21E - n),
                      n, 4);
     }
 

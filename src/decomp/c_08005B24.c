@@ -10,7 +10,7 @@
 /* Wave 57 (W57-A). The A/B page-flip driver for the two-page help screen whose
  * pages are the promoted sub_080059FC / sub_08005AA0 in
  * src/decomp/c_080059FC.c -- both are this function's own callees, so their
- * prototypes and the gUnknown_08499578 window model came for free.  The nearer
+ * prototypes and the gBG0TilemapBuffer window model came for free.  The nearer
  * exemplar for the KEY handling is src/decomp/c_08004970.c, which carries the
  * identical `(gpKeySt->pressed & 7) != 0` / `(gpKeySt->pressed & 2) == 0` pair and
  * the same trailing sub_08012BC8 / sub_08013B0C / sub_08015C30 teardown.
@@ -67,7 +67,7 @@ void sub_08005B24(void)
         if ((gpKeySt->pressed & DPAD_DOWN) != 0)
         {
             gActiveMap->state = 0xA;
-            sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
+            sub_08012BC8(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
             sub_08013AEC();
             sub_08005F1C();
             sub_0803B4DC(0x67);
@@ -83,7 +83,7 @@ void sub_08005B24(void)
         if ((gpKeySt->pressed & DPAD_UP) != 0)
         {
             gActiveMap->state = 0;
-            sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
+            sub_08012BC8(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
             sub_08013AEC();
             sub_08005F1C();
             sub_0803B4DC(0x67);
@@ -101,8 +101,8 @@ void sub_08005B24(void)
         if ((gpKeySt->pressed & 2) == 0)
             gUnknown_03002F1C = 1;
         sub_08005F1C();
-        sub_08012BC8(gUnknown_08499578, 0, 0, 0x1E, 0x14, 0);
-        sub_08012BC8(gUnknown_08499580, 0, 0, 0x1E, 0x14, 0x360);
+        sub_08012BC8(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
+        sub_08012BC8(gBG2TilemapBuffer, 0, 0, 0x1E, 0x14, 0x360);
         sub_08013AEC();
         sub_08013B0C();
         sub_08015C30(gUnknown_03001FBC);

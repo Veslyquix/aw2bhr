@@ -3625,7 +3625,7 @@ int sub_08009BF4(int, int);
 
 /* ---- wave 23 (W23-C) ----
  * sub_0801A368 draws a box into one of the four 0x800-byte tilemap buffers
- * (gUnknown_08499578/7C/80/84, `u16 *` per src/decomp/c_08023360.c): one call
+ * (gBG0TilemapBuffer/7C/80/84, `u16 *` per src/decomp/c_08023360.c): one call
  * for the top row, `height - 2` calls for the middle rows and one for the
  * bottom, each 32 entries apart, then it marks whichever of the four buffers
  * it wrote with sub_08013AD4(0..3).
@@ -3911,7 +3911,7 @@ void sub_080119D4(u16, u16, u32);
  * caller's second argument (the gUnknown_08580FCC entry noted in
  * unknown-globals.h) and its first argument is a literal 0 at the one call
  * site. sub_080718F8's first argument is a byte cursor into the
- * gUnknown_08499584 buffer, its second a ROM blob and its third a literal 0.
+ * gBG3TilemapBuffer buffer, its second a ROM blob and its third a literal 0.
  *
  * NOTE, so nobody tries to "fix" this: sub_080718F8 is not a function. It is a
  * linker THUMB->ARM interworking veneer for the ARM routine sub_0800043C -- see
@@ -4032,7 +4032,7 @@ void sub_08067898(u32, u32, u32, ProcPtr);
 void sub_080678BC(u32);
 
 /* Three more of the sub_0806B708 group. sub_08072C28's first argument is the
- * gUnknown_0849957C buffer and the other two are byte counts/offsets (0x400
+ * gBG1TilemapBuffer buffer and the other two are byte counts/offsets (0x400
  * and 0x280 at the one call site). sub_0806AF44 takes the caller's proc. */
 void sub_08072C28(u16 *, u32, u16);
 void sub_0806B120(void);
@@ -4210,7 +4210,7 @@ void sub_08073CB8(u8 *, u32 *, int, int);
 /* Takes no arguments -- its first instruction writes r0 -- and `pop {r0}`
  * makes it void. Its one caller, sub_0806C8DC, happens to have a zero in r0 at
  * the call, which is a coincidence of the preceding store and not an argument.
- * It clears a 20x22 halfword window of *gUnknown_08499578 and flushes. */
+ * It clears a 20x22 halfword window of *gBG0TilemapBuffer and flushes. */
 void sub_0806C8A0(void);
 void sub_0806B9CC(int, int, int, int);
 /* Wave 48 (W48-C), matched byte-for-byte, so this is the definition's own
@@ -5448,7 +5448,7 @@ void sub_08019E68(void);
  * emitted "`struct Unk8019A60' declared inside parameter list", and -Werror
  * made it fatal for EVERY compile in the tree. W40-H compiled inside that
  * window and read the state correctly. The struct has been in
- * unknown-globals.h since, next to gUnknown_08499578.
+ * unknown-globals.h since, next to gBG0TilemapBuffer.
  *
  * The forward declaration stays: it costs nothing and it makes this header
  * self-contained, so the same mistake cannot break the tree again if the
@@ -6732,7 +6732,7 @@ void sub_08004DD4(int, int, u8 *, int);
 
 /* Two wide parameters -- `adds r5, r0, #0; mov r8, r1` with no narrowing. The
  * second is a VRAM destination sub_08004D90 computes as
- * `&gUnknown_08499578[...]`. */
+ * `&gBG0TilemapBuffer[...]`. */
 void sub_0801F2AC(int, u16 *);
 
 /* Wave 37, W37-A. The two forwarders described in the note above, declared for
@@ -7243,7 +7243,7 @@ void sub_08066B6C(void);
  * the ARM routine that follows it, and data/asm-resident.json already carries
  * it. Eleven callers, all passing four register arguments. r0 and r1 are
  * addresses (sub_0807606C passes `gUnknown_08551A00 + 0x140` and an offset into
- * gUnknown_08499578), r2 and r3 small counts. The result is discarded
+ * gBG0TilemapBuffer), r2 and r3 small counts. The result is discarded
  * everywhere it is called from so far. */
 void sub_08071900(void *, void *, int, int);
 /* Wave 35 (W35-B). sub_08071900's sibling one entry along, called by
@@ -8343,7 +8343,7 @@ void sub_08040624(int, int, int, ProcPtr);
  * prologue narrows r0, r1, r3 and both stack arguments with `lsls #0x10;
  * lsrs #0x10`, which is PROMOTE_MODE and which an `int` parameter never
  * produces. The third is untouched and is forwarded as a pointer --
- * sub_0808A6A0 passes the dereferenced `u16 *` gUnknown_08499578. */
+ * sub_0808A6A0 passes the dereferenced `u16 *` gBG0TilemapBuffer. */
 void sub_0808A5C4(void);
 /* CORRECTION, wave 32 (W32-A): arguments ONE and TWO are `s16`, not `u16`.
  * The wave-29 reading above is right that the prologue narrows them -- but
@@ -9131,7 +9131,7 @@ void sub_080030BC(int, int, int);
  * (u8), r3 and the stack argument at [sp, #0x28] with `lsls #0x10; lsrs #0x10`
  * (u16). r2 is kept whole and used as the base of `adds r1, r7, r1` after the
  * index is scaled `lsls #1`, so it is a halfword pointer -- and sub_0804931C
- * passes gUnknown_08499578, which is already declared `u16 *`. The stack slot
+ * passes gBG0TilemapBuffer, which is already declared `u16 *`. The stack slot
  * is argument five: `push {r4,r5,r6,r7,lr}` + `push {r5,r6,r7}` + `sub sp,#8`
  * is exactly 0x28. Return unused at all three call sites. */
 void sub_080487B4(u8, u8, u16 *, u16, u16);
@@ -9300,7 +9300,7 @@ void sub_080860DC(ProcPtr);       /* sub_0808603C hands it the same proc it
  * second argument with a bare `adds r6, r1, #0` and never narrows it: a u16
  * parameter would arrive with PROMOTE_MODE's `lsls #0x10; lsrs #0x10` instead,
  * which is +2 bytes and was measured as the function's only diff.
- * (gUnknown_0849957C, 0x6200) */
+ * (gBG1TilemapBuffer, 0x6200) */
 void sub_08037A20(u16 *, int);
 void sub_080620C0(void);
 void sub_080620FC(int, int);      /* (0,1) (1,6) (2,5) from sub_0806209C */
@@ -9359,7 +9359,7 @@ void sub_08077620(int, int);      /* (0, 0xA8 - gUnknown_0300064C), twice */
  * and that definition wins: its parameter is `struct Unk080772B8 *`, a tag
  * defined inside that file. Declared here through an incomplete tag so the
  * declaration cannot disagree with it -- the caller (sub_08077304) passes
- * `gUnknown_08499578 + 0x280`, which is where that struct's +0x92 halfword
+ * `gBG0TilemapBuffer + 0x280`, which is where that struct's +0x92 halfword
  * grid lives. Do NOT retype this to `u16 *` from the call site. */
 struct Unk080772B8;
 void sub_08077140(u16 *, u16, int);
@@ -9599,7 +9599,7 @@ void sub_080577E4(u16 *, int, struct Unk8057Pos *);
 void sub_08057860(u16 *, int, struct Unk8057Pos *);
 void sub_08057A24(u16 *, int, struct Unk8057Pos *);
 /* Wave 48, W48-G. The two per-side fan-outs over the four painters above, both
- * MATCHED with this signature. sub_08057AE8 hands each `gUnknown_08499578`,
+ * MATCHED with this signature. sub_08057AE8 hands each `gBG0TilemapBuffer`,
  * which is already a `u16 *`. */
 void sub_080579B8(u16 *);
 void sub_08057A80(u16 *);
@@ -10334,7 +10334,7 @@ void sub_0803678C(void);
  *                 Nullary for real: sub_08037CF8's `bl sub_080378A8` /
  *                 `bl sub_08037B90` pair with nothing between it is TWO
  *                 statements, not a nested call.
- *   sub_08013D00  selects one of gUnknown_08499578/7C/80/84, derefs it and
+ *   sub_08013D00  selects one of gBG0TilemapBuffer/7C/80/84, derefs it and
  *                 returns `*p + y * 64 + x * 2` -- a u16 * into a tilemap.
  *                 r0 is compared against 1/2/3, r1 is the x term, r2 the y. */
 u16 *sub_08013D00(int, int, int);
@@ -10864,7 +10864,7 @@ void sub_080268F4(void);
 void sub_08044178(int);
 void sub_0802BFBC(void);
 void sub_08034C8C(void);
-/* sub_0803D788 calls it as (gUnknown_08499584, 0, 0x800) with the length built
+/* sub_0803D788 calls it as (gBG3TilemapBuffer, 0, 0x800) with the length built
  * once in a callee-saved register and copied into r2 -- arity 3, no width
  * evidence beyond the register.
  *
@@ -10876,7 +10876,7 @@ void sub_08034C8C(void);
  * error that broke wave 14's first SPLIT=1 build (`void *` declared as the weakest
  * model against a promoted named type).
  *
- * Agreeing costs nothing here and is strictly better: gUnknown_08499584 is itself
+ * Agreeing costs nothing here and is strictly better: gBG3TilemapBuffer is itself
  * declared `u16 *`, so the sole call site now type-checks exactly rather than
  * decaying through void *. */
 void sub_080130C8(u16 *, int, int);
@@ -11664,7 +11664,7 @@ u8 sub_0805BB8C(int, int);
 
 /* Wave 50, W50-D. sub_08032484 is already PROMOTED (src/decomp/c_08032484.c)
  * but was never declared here; sub_080324C4 is its first caller outside its
- * own unit, and passes `gUnknown_08499578 + 0x221`. The promoted definition
+ * own unit, and passes `gBG0TilemapBuffer + 0x221`. The promoted definition
  * names the parameter type, so this must agree with it. */
 void sub_08032484(u16 *);
 /* Wave 50, W50-D. All four are void/void: sub_080324C4 and sub_08032BCC call

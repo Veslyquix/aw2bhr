@@ -53,7 +53,7 @@ void CampaignIntro_0808A6CD(ProcPtr proc)
 
     Decompress(gUnknown_0822FEF0,
         (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06000000));
-    Decompress(gUnknown_0822F9AC, gUnknown_08499584);
+    Decompress(gUnknown_0822F9AC, gBG3TilemapBuffer);
     sub_08013B1C();
     ApplyPaletteExt(gUnknown_0822FE50, 0x20, 0xa0);
     Proc_Start(gUnknown_086170D4, proc);

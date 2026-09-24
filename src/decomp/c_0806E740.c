@@ -81,7 +81,7 @@ void sub_0806E780(struct Unk6E780Proc *proc)
     pal &= -(proc->unk34 != 0);
 
     sub_0803B4DC(0x67);
-    sub_08012BC8(gUnknown_08499578, pal, 0x10, 0x10, 2, 0);
+    sub_08012BC8(gBG0TilemapBuffer, pal, 0x10, 0x10, 2, 0);
     sub_08013AEC();
 }
 

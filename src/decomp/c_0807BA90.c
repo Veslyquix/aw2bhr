@@ -65,7 +65,7 @@ void sub_0807BA90(struct Unk0807BA90Proc * proc)
     struct BgAffineSrcData src;
 
     Decompress(gUnknown_0822BE1C, (void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0822D888, gUnknown_08499580);
+    Decompress(gUnknown_0822D888, gBG2TilemapBuffer);
 
     sub_08013B0C();
 

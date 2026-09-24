@@ -42,7 +42,7 @@ void IntroT3_IDLE_0806A219(struct Unk806A218 *proc)
         CpuFastSet(&zero, (void *)0x0600D000, 0x01000400);
         ApplyPaletteExt(gUnknown_0817C3E8, 0, 0x20);
         Decompress(gUnknown_081866F8, (void *)0x06000000);
-        Decompress(gUnknown_08186D4C, gUnknown_08499578);
+        Decompress(gUnknown_08186D4C, gBG0TilemapBuffer);
         sub_08013AEC();
         break;
 

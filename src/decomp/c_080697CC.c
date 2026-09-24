@@ -33,7 +33,7 @@ struct Unk69864Proc
 
 /* Graphics loader; sub_08069FD0 is its near-twin, differing only in the first
  * Decompress destination (0x06000000 here, 0x06008000 there), one extra blob
- * into *gUnknown_0849957C, and the extra sub_08013AFC call.
+ * into *gBG1TilemapBuffer, and the extra sub_08013AFC call.
  *
  * The zero word CpuFastSet fills from is a STACK local, which is what the
  * `sub sp, #4` and `mov r0, sp` are for. gUnknown_08580E60's address stays in
@@ -47,8 +47,8 @@ void sub_080697CC(void)
     Decompress(gUnknown_08184FF4, (void *)0x06000000);
     Decompress(gUnknown_08185F0C, (void *)0x0600C000);
     ApplyPaletteExt(gUnknown_081866D8, 0xc0, 0x20);
-    Decompress(gUnknown_0818616C, gUnknown_0849957C);
-    Decompress(gUnknown_0818633C, gUnknown_08499580);
+    Decompress(gUnknown_0818616C, gBG1TilemapBuffer);
+    Decompress(gUnknown_0818633C, gBG2TilemapBuffer);
     Decompress(gUnknown_08186460, gUnknown_08580E60);
     sub_08013AFC();
     sub_08013B0C();
@@ -96,12 +96,12 @@ void sub_08069924(u8 a1)
     sub_08063994();
     sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 1);
     zero = 0;
-    CpuFastSet(&zero, gUnknown_08499580, 0x01000200);
+    CpuFastSet(&zero, gBG2TilemapBuffer, 0x01000200);
     gUnknown_030030B4.bits.wrap = 1;
     ApplyPaletteExt(gUnknown_0817DA18, 0x20, 0x20);
     if (a1 != 0)
         Decompress(gUnknown_0817DA38, (void *)0x06008000);
-    Decompress(gUnknown_0817E208, gUnknown_08499580);
+    Decompress(gUnknown_0817E208, gBG2TilemapBuffer);
     sub_08013B0C();
 }
 

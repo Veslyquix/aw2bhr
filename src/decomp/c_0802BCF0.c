@@ -126,7 +126,7 @@ void sub_0802BD54(u16 x, u16 y, u32 value)
 }
 
 /* Paints one column of the wipe transition: a 2x2 tile block per row over ten
- * rows of the gUnknown_08499578 tilemap, `col * 4` bytes in and 0x80 bytes down
+ * rows of the gBG0TilemapBuffer tilemap, `col * 4` bytes in and 0x80 bytes down
  * per iteration. `w` is the H-FLIP flag -- it is both the `<< 10` bit of the map
  * entry and the +0/+1 that swaps the left and right tiles of each pair, which is
  * why it appears twice in every value.
@@ -155,7 +155,7 @@ void sub_0802BDBC(u8 col, s16 phase, u16 w)
         phase = 6;
     if (phase < 0)
         phase = 0;
-    p = gUnknown_08499578 + col * 2;
+    p = gBG0TilemapBuffer + col * 2;
     base = phase * 4 - 0x7D50 + (w << 10);
     for (i = 0; i <= 9; i++)
     {

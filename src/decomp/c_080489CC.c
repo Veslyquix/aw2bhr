@@ -105,14 +105,14 @@ void BattleMaps_080489CD(void)
 
     Decompress(gUnknown_0823A3D4,
                (void *)(0x06000000 + gUnknown_0300251C.bits.chr_block * 0x4000));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     ApplyPaletteExt(gUnknown_0823BE00, 0, 0x20);
     sub_08013B1C();
     sub_0802D5CC(0, 3);
-    Decompress(gUnknown_0823E7D4, gUnknown_08499580);
+    Decompress(gUnknown_0823E7D4, gBG2TilemapBuffer);
 
     for (i = 0; i <= 0x3ff; i++)
-        gUnknown_08499580[i] += 0x1360;
+        gBG2TilemapBuffer[i] += 0x1360;
 
     gUnknown_03001400 = -0x30;
     sub_08013B0C();

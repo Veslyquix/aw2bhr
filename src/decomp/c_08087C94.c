@@ -93,10 +93,10 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
 
     Decompress(gUnknown_0823A3D4,
         (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06000000));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
 
     for (i = 0; i < 0x400; i++)
-        gUnknown_08499584[i] += 0x2000;
+        gBG3TilemapBuffer[i] += 0x2000;
 
     ApplyPaletteExt(gUnknown_0823BE20, 0x40, 0x20);
     sub_08013B1C();
@@ -108,7 +108,7 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
            0x01000800);
     Decompress(gUnknown_0823468C,
         (void *)(gUnknown_03001FE8.bits.chr_block * 0x4000 + 0x06000000));
-    Decompress(gUnknown_0823456C, gUnknown_0849957C);
+    Decompress(gUnknown_0823456C, gBG1TilemapBuffer);
     sub_08013AFC();
     sub_0802D5CC(0, 0);
 

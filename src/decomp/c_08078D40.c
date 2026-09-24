@@ -51,7 +51,7 @@ void sub_08078D40(struct Unk8078D40 *proc)
 void sub_08078D80(ProcPtr parent)
 {
     Decompress(gUnknown_0822FEF0, (void *)((gUnknown_0300251C.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0822F9AC, gUnknown_08499584);
+    Decompress(gUnknown_0822F9AC, gBG3TilemapBuffer);
     sub_08013B1C();
     ApplyPaletteExt(gUnknown_082344CC, 0x20, 0xa0);
     Proc_Start(gUnknown_08615CA0, parent);

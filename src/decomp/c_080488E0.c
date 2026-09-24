@@ -52,7 +52,7 @@
  *
  * What the function does: the switch on unk030 falls 3 -> 2 (case 3 decrements
  * v first, then does case 2's work), then it blits two 20-column rows per pass
- * out of gUnknown_084C30F8->unk032 into *gUnknown_08499578 at rows +0xa0/+0xc0,
+ * out of gUnknown_084C30F8->unk032 into *gBG0TilemapBuffer at rows +0xa0/+0xc0,
  * three passes with y = 2, 4, 6. The destination is `y * 32 + x + 0xa0`, not
  * `(y + 5) * 32 + x`: the ROM adds 0x140/0x180 as BYTE constants to one shared
  * `y * 32 + x`.
@@ -91,9 +91,9 @@ void sub_080488E0(void)
     {
         for (x = 0; x <= 0x13; x++)
         {
-            gUnknown_08499578[y * 32 + x + (c = 0xa0)] =
+            gBG0TilemapBuffer[y * 32 + x + (c = 0xa0)] =
                 gUnknown_084C30F8->unk032[(y + n) * 32 + x];
-            gUnknown_08499578[y * 32 + x + 0xc0] =
+            gBG0TilemapBuffer[y * 32 + x + 0xc0] =
                 gUnknown_084C30F8->unk032[(y + (m = n + 1)) * 32 + x];
         }
     }

@@ -20,7 +20,7 @@ void sub_0806AEC4(int a)
     Decompress(gUnknown_0858178C[a].unk00, (void *)0x06000000);
     Decompress(gUnknown_0858178C[a].unk04, (void *)0x06001B00);
     Decompress(gUnknown_0858178C[a].unk08, (void *)0x06003600);
-    Decompress(gUnknown_0858178C[a].unk0c, gUnknown_08499578);
+    Decompress(gUnknown_0858178C[a].unk0c, gBG0TilemapBuffer);
 
     if (a == 7)
         ApplyPaletteExt(gUnknown_0858178C[a].unk10, 0, 0xe0);

@@ -9,7 +9,7 @@
 
 void sub_0803A338(void)
 {
-    sub_08071948(gUnknown_08499580, gUnknown_0849D89C->unk00 >> 3, 0, gUnknown_080D4228, 0x8360);
+    sub_08071948(gBG2TilemapBuffer, gUnknown_0849D89C->unk00 >> 3, 0, gUnknown_080D4228, 0x8360);
     sub_0801F114();
     sub_0801F150(0, (void *)0x06010000, 0x296, 0x15);
     sub_0801F234(6);

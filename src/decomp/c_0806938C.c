@@ -29,10 +29,10 @@ struct Unk6938CProc
 /* Wave 53, W53-D. MATCHED first attempt; the whole function reads off
  * c_080691BC.c / c_080694EC.c, which are the same subsystem's already-promoted
  * neighbours and carry the identical `for (i = 0; i < 0x400; i++)
- * gUnknown_08499578[i] += 0x140;` loop and the same 10-argument sub_080679D8
+ * gBG0TilemapBuffer[i] += 0x140;` loop and the same 10-argument sub_080679D8
  * call.
  *
- * gUnknown_08499578 and gUnknown_08499580 are REAL ROM pointer variables, not
+ * gBG0TilemapBuffer and gBG2TilemapBuffer are REAL ROM pointer variables, not
  * -fforce-addr pool words: the ROM words at 0x08499578 / 0x08499580 hold two
  * different VRAM-bound addresses and both are already declared `u16 *`. The
  * single `ldr =sym; ldr [sym]` indirection is the honest spelling. (Contrast
@@ -58,14 +58,14 @@ void IntroT3_0806938D(struct Unk6938CProc *proc)
     sub_08063994();
     sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 2);
 
-    Decompress(gUnknown_08183B14, gUnknown_08499580);
+    Decompress(gUnknown_08183B14, gBG2TilemapBuffer);
     ApplyPaletteExt(gUnknown_08183C28, 0, 0x80);
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
     Decompress(gUnknown_0823A3D4, (void *)0x06002800);
-    Decompress(gUnknown_08239FA4, gUnknown_08499578);
+    Decompress(gUnknown_08239FA4, gBG0TilemapBuffer);
 
     for (i = 0; i < 0x400; i++)
-        gUnknown_08499578[i] += 0x140;
+        gBG0TilemapBuffer[i] += 0x140;
 
     sub_08013AEC();
     sub_08013B0C();

@@ -8,10 +8,10 @@
  */
 
 /* Repaint the whole panel for record `p`: refresh from p->unk1e, clear the two
- * text windows of *gUnknown_08499578, blank the two halfwords at +0x6e and
+ * text windows of *gBG0TilemapBuffer, blank the two halfwords at +0x6e and
  * +0xae, redraw the p->unk1f + 1 field and flush.
  *
- * gUnknown_08499578 is `u16 *`, so +0x6e and +0xae are elements 0x37 and 0x57;
+ * gBG0TilemapBuffer is `u16 *`, so +0x6e and +0xae are elements 0x37 and 0x57;
  * both are past `strh`'s imm5 * 2 limit, which is what turns the second into
  * the `adds r0, #0x40` continuation of the first address rather than its own
  * pool word.
@@ -30,11 +30,11 @@ struct Unk08047B98
 void sub_08047B98(struct Unk08047B98 *p)
 {
     sub_08047190(p, p->unk1e);
-    sub_08012BC8(gUnknown_08499578, 0xf, 1, 1, 2, 0);
-    sub_08012BC8(gUnknown_08499578, 1, 7, 0x1c, 0xc, 0);
-    gUnknown_08499578[0x37] = 0;
-    gUnknown_08499578[0x57] = 0;
-    sub_08014B0C(0x18, 1, gUnknown_08499578, p->unk1f + 1, 0x8000, 0);
+    sub_08012BC8(gBG0TilemapBuffer, 0xf, 1, 1, 2, 0);
+    sub_08012BC8(gBG0TilemapBuffer, 1, 7, 0x1c, 0xc, 0);
+    gBG0TilemapBuffer[0x37] = 0;
+    gBG0TilemapBuffer[0x57] = 0;
+    sub_08014B0C(0x18, 1, gBG0TilemapBuffer, p->unk1f + 1, 0x8000, 0);
     sub_08047920(p);
     sub_08013AEC();
 }

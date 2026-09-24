@@ -30,6 +30,15 @@ gMaxLines = 0;
  * type itself can't just change. */
 gMap = gUnknown_08499590;
 
+/* ROM-resident pointers to four 32x32 BG tilemap shadows in EWRAM. */
+gBG0TilemapBuffer = gUnknown_08499578;
+gBG1TilemapBuffer = gUnknown_0849957C;
+gBG2TilemapBuffer = gUnknown_08499580;
+gBG3TilemapBuffer = gUnknown_08499584;
+
+/* FE8-style modified-BG mask; AW2 stores it as a u16. */
+sModifiedBGs = gUnknown_03002F00;
+
 /* gProperty: typed name for the 0x03003150 record list (struct Property,
  * include/map.h); linker alias for the same reason as gMap. */
 gProperty = gUnknown_03003150;

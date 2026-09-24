@@ -5880,6 +5880,7 @@ extern u16 gUnknown_03002EE4;
  * copies it straight into REG_WIN0V's high byte. */
 extern volatile u8 gUnknown_03002EFC;
 extern u16 gUnknown_03002F00;
+extern u16 sModifiedBGs;
 /* volatile is load-bearing: sub_0804BA4C ends with a self-assignment
  * (`ldrh r0,[r1]; strh r0,[r1]` on one address, nothing else), and agbcc drops
  * `g = g` entirely on a plain object -- the whole store disappears from the
@@ -7626,6 +7627,11 @@ extern const u8 gUnknown_0848B5C4[];
  * Proc_Find(0848B5AC) != NULL. */
 extern const struct ProcCmd gUnknown_0848B5AC[];
 extern u16 *gUnknown_08499578;
+/* AW2 stores pointers in ROM; these aliases name the four EWRAM tilemaps. */
+extern u16 *gBG0TilemapBuffer;
+extern u16 *gBG1TilemapBuffer;
+extern u16 *gBG2TilemapBuffer;
+extern u16 *gBG3TilemapBuffer;
 /* Wave 46 (W46-G). Both reached by sub_08086BF8/sub_08086CE0.
  *
  * gUnknown_084C3F50 is handed to sub_080149C0's `u8 *` fourth parameter with NO

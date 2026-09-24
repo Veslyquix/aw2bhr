@@ -1074,7 +1074,7 @@ void sub_08002FE4(void) {
 
   sub_0808B6E8(buf, gUnknown_0808D750, 4);
   sub_0801A444(9, 2, 0xB, 0x11);
-  sub_08013AD4(2);
+  BG_EnableSync(2);
   for (i = 0; i <= 3; i++) {
     sub_0803F6BC(buf[i] & 0x1F, 0,
                  (void *)(0x06010000 + (gUnknown_08485C9C[i + 1] << 5)), 1);

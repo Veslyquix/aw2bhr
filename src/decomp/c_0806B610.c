@@ -29,7 +29,7 @@ void sub_0806B610(struct Unk6B610Proc *proc)
     if (proc->unk58 > 0x3bf)
     {
         zero = 0;
-        CpuFastSet(&zero, gUnknown_08499578, 0x01000200);
+        CpuFastSet(&zero, gBG0TilemapBuffer, 0x01000200);
         sub_08013AEC();
         Proc_Break(proc);
     }

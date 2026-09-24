@@ -25,14 +25,14 @@ void sub_0803D788(void)
     sub_0801295C();
     Decompress(gUnknown_0823A3D4,
                (void *)(0x06000000 + gUnknown_0300251C.bits.chr_block * 0x4000));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
-    sub_080130C8(gUnknown_08499584, 0, 0x800);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
+    sub_080130C8(gBG3TilemapBuffer, 0, 0x800);
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
     sub_08013B1C();
-    sub_08011C68(gUnknown_08499578, (void *)0x06007000, 0x800);
-    sub_08011C68(gUnknown_0849957C, (void *)0x0600F000, 0x800);
-    sub_08011C68(gUnknown_08499580, (void *)0x06007800, 0x800);
-    sub_08011C68(gUnknown_08499584, (void *)0x0600F800, 0x800);
+    sub_08011C68(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
+    sub_08011C68(gBG1TilemapBuffer, (void *)0x0600F000, 0x800);
+    sub_08011C68(gBG2TilemapBuffer, (void *)0x06007800, 0x800);
+    sub_08011C68(gBG3TilemapBuffer, (void *)0x0600F800, 0x800);
     sub_08022A34();
     sub_0801B780(0);
     sub_0801A5B0(0);

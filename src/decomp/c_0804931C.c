@@ -11,7 +11,7 @@ void sub_0804931C(void)
 {
     sub_080487B4(0,
                  (gUnknown_084C30F8->unk01e - gUnknown_084C30F8->unk020) * 2 + 7,
-                 gUnknown_08499578,
+                 gBG0TilemapBuffer,
                  gUnknown_02028E1C[gUnknown_084C30F8->unk01e],
                  3);
     sub_08013AEC();

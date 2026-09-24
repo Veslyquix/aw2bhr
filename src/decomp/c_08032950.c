@@ -105,9 +105,9 @@ void sub_08032A00(void)
 
     if (gUnknown_0849B060->unk10 != 0)
     {
-        sub_08012BC8(gUnknown_08499578, 0x11, 2, 0xc, 2, 0);
-        sub_080149C0(0x11, 2, gUnknown_08499578, v[gUnknown_0849B060->unk04], 0x8000, 0);
-        sub_080149C0(0x13, 2, gUnknown_08499578,
+        sub_08012BC8(gBG0TilemapBuffer, 0x11, 2, 0xc, 2, 0);
+        sub_080149C0(0x11, 2, gBG0TilemapBuffer, v[gUnknown_0849B060->unk04], 0x8000, 0);
+        sub_080149C0(0x13, 2, gBG0TilemapBuffer,
             &gUnknown_02027C2C[gUnknown_0849B060->unk04 * 19], 0x8000, 0);
         sub_08013AEC();
     }

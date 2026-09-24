@@ -35,8 +35,8 @@ void sub_08005080(void)
         t = 0xB;
         break;
     }
-    sub_08012BC8(gUnknown_08499578, 5, t, 9, 2, 0);
-    sub_080149C0(5, t, gUnknown_08499578, gActiveMap->designName, 0x8000, 0);
+    sub_08012BC8(gBG0TilemapBuffer, 5, t, 9, 2, 0);
+    sub_080149C0(5, t, gBG0TilemapBuffer, gActiveMap->designName, 0x8000, 0);
     sub_08013AEC();
     if (gActiveMap->flags & 0x100)
     {

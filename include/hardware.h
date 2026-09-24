@@ -849,6 +849,14 @@ extern u16 gPal[];
     gDispIo.blend_ct.target2_enable_bd = (enable)
 
 
+/* Byte-matched entry points retain their ROM symbol names. These C aliases
+ * describe their BG-specific roles without changing the linked functions. */
+#define BG_EnableSync sub_08013AD4
+/* AW2 has no standalone mask-taking ROM entry point; use the state word. */
+#define BG_EnableSyncByMask(mask) (sModifiedBGs |= (mask))
+#define FlushBgTilemaps sub_08013B2C
+#define BG_GetMapTilePointer sub_08013D00
+
 extern const s16 gSinLut[0x40];
 extern const s16 gCosLut[0x100];
 

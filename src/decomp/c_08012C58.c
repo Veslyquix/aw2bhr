@@ -22,9 +22,9 @@
  * The preheader hoists seven values. Both builds hoist the same seven into the
  * same seven registers; only the position of one pair differs:
  *
- *   ROM   ip=&gUnknown_08499580, r9=0x3ff, sl=s->unk38, r8=&gUnknown_08499584,
+ *   ROM   ip=&gBG2TilemapBuffer, r9=0x3ff, sl=s->unk38, r8=&gBG3TilemapBuffer,
  *         r3=s->unk08, r4=s->unk18, r6=s->unk28
- *   here  ip=&gUnknown_08499580, r9=0x3ff, r8=&gUnknown_08499584,
+ *   here  ip=&gBG2TilemapBuffer, r9=0x3ff, r8=&gBG3TilemapBuffer,
  *         r3=s->unk08, r4=s->unk18, r6=s->unk28, sl=s->unk38
  *
  * i.e. `ldr rN,[r7,#0x38]; mov sl,rN` has to move from LAST to THIRD. The four
@@ -124,10 +124,10 @@ void sub_08012C58(void *arg)
   gUnknown_0300251C.bits.priority = 3;
   for (i = 0; i <= 0x3ff; i++)
   {
-    gUnknown_08499578[i] = s->unk08;
-    gUnknown_0849957C[i] = s->unk18;
-    gUnknown_08499580[i] = s->unk28;
-    gUnknown_08499584[i] = s->unk38;
+    gBG0TilemapBuffer[i] = s->unk08;
+    gBG1TilemapBuffer[i] = s->unk18;
+    gBG2TilemapBuffer[i] = s->unk28;
+    gBG3TilemapBuffer[i] = s->unk38;
   }
 
   p0 = (u16 *) (s->unk00 + (s->unk08 << 5));
@@ -139,8 +139,8 @@ void sub_08012C58(void *arg)
     p0[i] = (p1[i] = (p2[i] = (p3[i] = gUnknown_08489334[i])));
   }
 
-  sub_08011C68(gUnknown_08499578, (void *) s->unk04, 0x800);
-  sub_08011C68(gUnknown_0849957C, (void *) s->unk14, 0x800);
-  sub_08011C68(gUnknown_08499580, (void *) s->unk24, 0x800);
-  sub_08011C68(gUnknown_08499584, (void *) s->unk34, 0x800);
+  sub_08011C68(gBG0TilemapBuffer, (void *) s->unk04, 0x800);
+  sub_08011C68(gBG1TilemapBuffer, (void *) s->unk14, 0x800);
+  sub_08011C68(gBG2TilemapBuffer, (void *) s->unk24, 0x800);
+  sub_08011C68(gBG3TilemapBuffer, (void *) s->unk34, 0x800);
 }

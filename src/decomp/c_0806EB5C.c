@@ -66,9 +66,9 @@ void sub_0806EB5C(struct Unk0806EB5CProc *proc)
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
     sub_0802D5CC(0, 3);
     Decompress(gUnknown_0823A3D4, (void *)0x06008000);
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     Decompress(gUnknown_081A3E28, (void *)0x06000400);
-    sub_080718F8(gUnknown_0849957C, gUnknown_081A3E3C, 0x1020);
+    sub_080718F8(gBG1TilemapBuffer, gUnknown_081A3E3C, 0x1020);
     Decompress(gUnknown_081A4000, (void *)0x06010000);
     Decompress(gUnknown_081A4450, (void *)0x06016000);
     sub_0801A5B0(0);
@@ -133,9 +133,9 @@ void sub_0806ED7C(struct Unk0806ED7CProc *proc)
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
     sub_0802D5CC(0, 3);
     Decompress(gUnknown_0823A3D4, (void *)0x06008000);
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     Decompress(gUnknown_081A3E28, (void *)0x06000400);
-    sub_080718F8(gUnknown_0849957C, gUnknown_081A3E3C, 0x1020);
+    sub_080718F8(gBG1TilemapBuffer, gUnknown_081A3E3C, 0x1020);
     Decompress(gUnknown_081A4000, (void *)0x06010000);
     Decompress(gUnknown_081A4450, (void *)0x06016000);
     sub_0801A5B0(0);

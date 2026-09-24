@@ -19,7 +19,7 @@
  *
  * The other three words this unit carves ARE agbcc -fforce-addr address
  * constants: 0x0812A130 holds &gUnknown_02028DD8, 0x0812A134 holds
- * &gUnknown_08499578 and 0x0812A138 holds &gUnknown_085D5ABC. Naming the real
+ * &gBG0TilemapBuffer and 0x0812A138 holds &gUnknown_085D5ABC. Naming the real
  * globals is what reproduces the double load.
  *
  * `(s16)(i * 2 + 7)` is spelled at every use rather than bound to a local: the
@@ -86,10 +86,10 @@ void sub_08047920(void *arg)
         else
             c = gUnknown_03003F2C;
 
-        sub_0802239C(gUnknown_08499578, n + 3, i * 2 + 7, u->type, c, u->unk07,
+        sub_0802239C(gBG0TilemapBuffer, n + 3, i * 2 + 7, u->type, c, u->unk07,
                      u->unk05_3);
         b = (u->flags >> 3) & m;
-        sub_08014A5C(8, (s16)(i * 2 + 7), gUnknown_08499578,
+        sub_08014A5C(8, (s16)(i * 2 + 7), gBG0TilemapBuffer,
                      gUnknown_085D5ABC[u->type].unk00, 0x8000, pal[b]);
 
         if (u->hp != 0)
@@ -97,31 +97,31 @@ void sub_08047920(void *arg)
         else
             v = 0;
 
-        sub_08014B0C(0x10, (s16)(i * 2 + 7), gUnknown_08499578, v, 0x8000,
+        sub_08014B0C(0x10, (s16)(i * 2 + 7), gBG0TilemapBuffer, v, 0x8000,
                      pal[b]);
-        sub_08014B0C(0x13, (s16)(i * 2 + 7), gUnknown_08499578, u->fuel,
+        sub_08014B0C(0x13, (s16)(i * 2 + 7), gBG0TilemapBuffer, u->fuel,
                      0x8000, pal[b]);
-        sub_080149C0(0x14, (s16)(i * 2 + 7), gUnknown_08499578,
+        sub_080149C0(0x14, (s16)(i * 2 + 7), gBG0TilemapBuffer,
                      gUnknown_084C3F38, 0x8000, pal[b]);
-        sub_08014B0C(0x16, (s16)(i * 2 + 7), gUnknown_08499578,
+        sub_08014B0C(0x16, (s16)(i * 2 + 7), gBG0TilemapBuffer,
                      gUnknown_085D5ABC[u->type].maxFuel, 0x8000, pal[b]);
 
         if (gUnknown_085D5ABC[u->type].maxAmmo == 0)
         {
             if (gUnknown_085D5ABC[u->type].unk11 != 0)
-                sub_08014A5C(0x18, (s16)(i * 2 + 7), gUnknown_08499578, 0x962,
+                sub_08014A5C(0x18, (s16)(i * 2 + 7), gBG0TilemapBuffer, 0x962,
                              0x8000, pal[b]);
             else
-                sub_08014A5C(0x18, (s16)(i * 2 + 7), gUnknown_08499578, 0x966,
+                sub_08014A5C(0x18, (s16)(i * 2 + 7), gBG0TilemapBuffer, 0x966,
                              0x8000, pal[b]);
         }
         else
         {
-            sub_08014B0C(0x19, (s16)(i * 2 + 7), gUnknown_08499578, u->ammo,
+            sub_08014B0C(0x19, (s16)(i * 2 + 7), gBG0TilemapBuffer, u->ammo,
                          0x8000, pal[b]);
-            sub_080149C0(0x1a, (s16)(i * 2 + 7), gUnknown_08499578,
+            sub_080149C0(0x1a, (s16)(i * 2 + 7), gBG0TilemapBuffer,
                          gUnknown_084C3F3C, 0x8000, pal[b]);
-            sub_08014B0C(0x1b, (s16)(i * 2 + 7), gUnknown_08499578,
+            sub_08014B0C(0x1b, (s16)(i * 2 + 7), gBG0TilemapBuffer,
                          gUnknown_085D5ABC[u->type].maxAmmo, 0x8000, pal[b]);
         }
     }

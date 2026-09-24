@@ -85,7 +85,7 @@ void WarRoomMapSelected_0807C615(struct Unk807C614 *proc)
     CpuSet(clear, (void *)((gUnknown_03001FE8.bits.tm_block << 11) + 0x06000000), 0x01000800);
 
     Decompress(gUnknown_0823468C, (void *)((gUnknown_03001FE8.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0823456C, gUnknown_0849957C);
+    Decompress(gUnknown_0823456C, gBG1TilemapBuffer);
     ApplyPaletteExt((u16 *)8, 0, 0x20);
 
     sub_08013AFC();

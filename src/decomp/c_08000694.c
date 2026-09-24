@@ -88,7 +88,7 @@ void sub_08000694(void)
         {
             gActiveMap->state = 90;
             sub_0803CEAC();
-            sub_08012BC8(gUnknown_08499578, 0, 0, 15, 10, 0);
+            sub_08012BC8(gBG0TilemapBuffer, 0, 0, 15, 10, 0);
             sub_08013AEC();
             sub_080039BC();
             sub_0803B4DC(0x66);

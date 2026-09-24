@@ -9,7 +9,7 @@
 
 /* MATCHED, wave 43 (W43-I), first attempt.
  *
- * Blanks the whole 0x400-entry halfword buffer gUnknown_08499578 points at,
+ * Blanks the whole 0x400-entry halfword buffer gBG0TilemapBuffer points at,
  * then kicks the four consumers.
  *
  * THE COUNTER IS `s16`, and the loop bottom says so in one shot: the increment
@@ -18,9 +18,9 @@
  * `lsls #0x10; asrs #0x10`. A `u16` gives `lsrs` in both places and an `int`
  * gives neither pair.
  *
- * gUnknown_08499578 is a POINTER global and is re-`ldr`ed every iteration
+ * gBG0TilemapBuffer is a POINTER global and is re-`ldr`ed every iteration
  * (`ldr r2, [r5]` inside the loop). Do not bind it to a local -- same rule as
- * gUnknown_0849957C in c_08037B90.c. */
+ * gBG1TilemapBuffer in c_08037B90.c. */
 void sub_0803A550(void)
 {
     s16 i;
@@ -28,7 +28,7 @@ void sub_0803A550(void)
     sub_08014878();
 
     for (i = 0; i <= 0x3ff; i++)
-        gUnknown_08499578[i] = 0;
+        gBG0TilemapBuffer[i] = 0;
 
     sub_08013AEC();
     sub_0801A538(0, 0, 0, 0);

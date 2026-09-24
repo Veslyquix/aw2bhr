@@ -31,7 +31,7 @@ void sub_08005874(void)
     gActiveMap->menuCursorX = 0x15;
     gActiveMap->menuCursorY = 0x30;
     sub_0801A444(3, 2, 0xA, 4);
-    sub_080149C0(4, 3, gUnknown_08499578, gActiveMap->designName, 0x8000, 0);
+    sub_080149C0(4, 3, gBG0TilemapBuffer, gActiveMap->designName, 0x8000, 0);
     sub_08013AEC();
 }
 

@@ -12,10 +12,10 @@ void sub_08037DC8(void)
     sub_08012C58(gUnknown_0849D16C);
     sub_0801295C();
     sub_080128D0();
-    sub_08011C68(gUnknown_08499578, (void *)0x06007000, 0x800);
-    sub_08011C68(gUnknown_0849957C, (void *)0x0600F000, 0x800);
-    sub_08011C68(gUnknown_08499580, (void *)0x06007800, 0x800);
-    sub_08011C68(gUnknown_08499584, (void *)0x0600F800, 0x800);
+    sub_08011C68(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
+    sub_08011C68(gBG1TilemapBuffer, (void *)0x0600F000, 0x800);
+    sub_08011C68(gBG2TilemapBuffer, (void *)0x06007800, 0x800);
+    sub_08011C68(gBG3TilemapBuffer, (void *)0x0600F800, 0x800);
     sub_08011C68(gUnknown_080A0F38, (void *)0x06000020, 0x200);
     ApplyPaletteExt(gUnknown_080A1138, 0x20, 0x20);
     sub_08022A34();

@@ -8,7 +8,7 @@
  */
 
 /* MATCHED, and the first of a byte-identical pair with sub_08047094. Clears
- * 0x400 halfwords through the gUnknown_08499578 pointer and restarts four
+ * 0x400 halfwords through the gBG0TilemapBuffer pointer and restarts four
  * subsystems.
  *
  * `s16 i`, not `int` and not `u16`: the ROM re-derives the counter through
@@ -25,7 +25,7 @@ void sub_0803A460(void)
     s16 i;
 
     for (i = 0; i <= 0x3FF; i++)
-        gUnknown_08499578[i] = 0;
+        gBG0TilemapBuffer[i] = 0;
 
     sub_08013AEC();
     sub_0801A538(0, 0, 0, 0);

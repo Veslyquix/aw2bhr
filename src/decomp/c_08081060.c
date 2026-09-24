@@ -82,13 +82,13 @@ void MainMenuC1_08081061(ProcPtr proc)
     gUnknown_03001400 = 0xfff8;
 
     Decompress(gUnknown_0823A3D4, (void *)((gUnknown_0300251C.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
 
     sub_08013B1C();
 
     Decompress(gUnknown_0823BF28, (void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0823BE40, gUnknown_08499580);
+    Decompress(gUnknown_0823BE40, gBG2TilemapBuffer);
     ApplyPaletteExt(gUnknown_0823BFD4, 0x20, 0x20);
 
     sub_08013B0C();

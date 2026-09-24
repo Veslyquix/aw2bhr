@@ -13,7 +13,7 @@ void sub_0807A860(void)
 {
     struct Unk03001470 *p;
 
-    p = sub_08014740(0x10, 0xF, gUnknown_08499578,
+    p = sub_08014740(0x10, 0xF, gBG0TilemapBuffer,
                      sub_0807A3AC(gPlayers[sub_0807A908()].co,
                                   GetCampaignMissionId()),
                      0x8000, 0x41);

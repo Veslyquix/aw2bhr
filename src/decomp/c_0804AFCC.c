@@ -30,8 +30,8 @@ void sub_0804AFCC(void)
     t = ((gUnknown_030030A0 - 0x138) >> 3) + 5;
     t &= 0x1f;
 
-    sub_08012BC8(gUnknown_08499578, t, 0, 3, 0x14, 0);
-    sub_08012BC8(gUnknown_08499580, t, 0, 3, 0x14, 0x360);
+    sub_08012BC8(gBG0TilemapBuffer, t, 0, 3, 0x14, 0);
+    sub_08012BC8(gBG2TilemapBuffer, t, 0, 3, 0x14, 0x360);
     sub_08013AEC();
     sub_08013B0C();
 

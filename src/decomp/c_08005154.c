@@ -22,14 +22,14 @@ void sub_0800517C(void)
     gActiveMap->designName[0] = 0;
 }
 
-/* gUnknown_08499578 and gUnknown_08499580 are POINTER variables, so each
+/* gBG0TilemapBuffer and gBG2TilemapBuffer are POINTER variables, so each
  * argument is `ldr rN, =sym; ldr rN, [rN]`. The 0x14 that goes to [sp] is CSEd
  * into r4 across both calls, which is what costs the function its `push {r4}`;
  * `movs r1,#0xd8; lsls r1,#2` is just the constant 0x360. */
 void sub_0800518C(void)
 {
-    sub_08012BC8(gUnknown_08499578, 0, 0xE, 0x1E, 0x14, 0);
-    sub_08012BC8(gUnknown_08499580, 0, 0xE, 0x1E, 0x14, 0x360);
+    sub_08012BC8(gBG0TilemapBuffer, 0, 0xE, 0x1E, 0x14, 0);
+    sub_08012BC8(gBG2TilemapBuffer, 0, 0xE, 0x1E, 0x14, 0x360);
     sub_08013AEC();
     sub_08013B0C();
 }

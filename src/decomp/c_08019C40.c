@@ -9,7 +9,7 @@
 
 /* MATCHED wave 51 (W51-D).
  *
- * PROMOTION NEEDS A POOL WORD PLACED. gUnknown_08499578 is named twice, which
+ * PROMOTION NEEDS A POOL WORD PLACED. gBG0TilemapBuffer is named twice, which
  * puts its address in this unit own .rodata; asm/ prints that slot as
  * gUnknown_0808E5BC, so this function data/promoted.json entry needs
  *   "rodata": ["0x0808E5BC"]
@@ -67,11 +67,11 @@ void sub_08019C40(struct Unk8019A60 *p)
 
         sub_08014A5C((s16)(p->unk48 + 1),
                      (s16)(p->unk4a + (i * 2 + 1)),
-                     gUnknown_08499578,
+                     gBG0TilemapBuffer,
                      p->unk20[k].unk1c,
                      0x8000,
                      (u32)neg >> 31);
     }
 
-    sub_08011E54(gUnknown_08499578, (void *)0x06007000, 0x800);
+    sub_08011E54(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
 }

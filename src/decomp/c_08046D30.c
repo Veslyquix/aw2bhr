@@ -22,7 +22,7 @@ void sub_08046D30(void)
             sub_080468D4(gUnknown_02028DD5);
             gUnknown_02028DD4 = 2;
             sub_08014878();
-            sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gUnknown_08499578,
+            sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gBG0TilemapBuffer,
                          gUnknown_085D583C[gUnknown_02028DD6].descriptionIndex, 0x8000, 0x100);
         }
         break;
@@ -31,7 +31,7 @@ void sub_08046D30(void)
         if (gpKeySt->pressed & DPAD_UP)
         {
             sub_0803B4DC(0x67);
-            sub_08012BC8(gUnknown_08499578, (gUnknown_02028DD5 >> 3) + 1, 0xb, 0xc, 8, 0);
+            sub_08012BC8(gBG0TilemapBuffer, (gUnknown_02028DD5 >> 3) + 1, 0xb, 0xc, 8, 0);
             sub_08046778(gUnknown_02028DD5, gUnknown_02028DD6);
             gUnknown_02028DD4 = 1;
             sub_08014878();
@@ -58,7 +58,7 @@ void sub_08046E48(void)
 
     sub_0801B780(0);
     sub_08022A34();
-    sub_08071948(gUnknown_08499580, gUnknown_02028DD5 >> 3, 0, gUnknown_0812AF68, 0x8360);
+    sub_08071948(gBG2TilemapBuffer, gUnknown_02028DD5 >> 3, 0, gUnknown_0812AF68, 0x8360);
     sub_08013B0C();
     sub_0801F114();
 
@@ -108,7 +108,7 @@ void sub_08046E48(void)
     case 0:
         sub_08046914(gUnknown_02028DD5, gUnknown_02028DD6);
         sub_08014878();
-        sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gUnknown_08499578,
+        sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gBG0TilemapBuffer,
                      gUnknown_085D583C[gUnknown_02028DD6].descriptionIndex, 0x8000, 0x100);
         break;
 
@@ -119,7 +119,7 @@ void sub_08046E48(void)
 
     case 2:
         sub_08014878();
-        sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gUnknown_08499578,
+        sub_08014668((gUnknown_02028DD5 >> 3) + 1, 0xb, gBG0TilemapBuffer,
                      gUnknown_085D583C[gUnknown_02028DD6].descriptionIndex, 0x8000, 0x100);
         break;
     }

@@ -80,7 +80,7 @@ void sub_0806BD84(struct Unk6BD84Proc *proc)
 
     if (proc->unk58 > 5)
     {
-        sub_0806BD6C(gUnknown_08499578 + ((proc->unk30 >> 3) * 0x20 + (proc->unk2c >> 3)), proc->unk64);
+        sub_0806BD6C(gBG0TilemapBuffer + ((proc->unk30 >> 3) * 0x20 + (proc->unk2c >> 3)), proc->unk64);
         Proc_Break(proc);
     }
     else

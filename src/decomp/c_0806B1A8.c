@@ -33,7 +33,7 @@ struct UnkB1A8Proc
  *
  *  - `gUnknown_0816E170` is NOT a global. The ROM word at 0x0816E170 is
  *    0x08499578, i.e. agbcc's own -fforce-addr address constant for
- *    gUnknown_08499578, which this function reads twice (CpuFastSet and
+ *    gBG0TilemapBuffer, which this function reads twice (CpuFastSet and
  *    sub_08014668). Naming the global directly is what reproduces the
  *    `ldr rN,<pool>; ldr rM,[rN]; ldr rK,[rM]` double indirection. Note this
  *    is TWO uses, not four -- the "it needs four uses to hold" line in
@@ -84,7 +84,7 @@ void sub_0806B1A8(struct UnkB1A8Proc *proc)
     sub_08072C40(0, 0, 0);
 
     zero = 0;
-    CpuFastSet(&zero, gUnknown_08499578, 0x01000200);
+    CpuFastSet(&zero, gBG0TilemapBuffer, 0x01000200);
 
     for (i = 1; i < 0x10; i++)
     {
@@ -100,7 +100,7 @@ void sub_0806B1A8(struct UnkB1A8Proc *proc)
         v = gUnknown_08581984[i & 0x1f] + 0x2280;
         if (gUnknown_08581984[i & 0x1f] > 7)
             v -= 0x1000;
-        gUnknown_0849957C[i] = v;
+        gBG1TilemapBuffer[i] = v;
     }
 
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
@@ -108,9 +108,9 @@ void sub_0806B1A8(struct UnkB1A8Proc *proc)
     ApplyPaletteExt(gUnknown_081320AC, 0x60, 0x20);
     Decompress(gUnknown_0823A3D4, (void *)0x06008000);
     Decompress(gUnknown_081933F4, (void *)0x0600CC00);
-    Decompress(gUnknown_081942A0, gUnknown_08499584);
-    Decompress(gUnknown_081942A0, gUnknown_08499580);
-    sub_08014668(4, 0x14, gUnknown_08499578, 0x873, 0x3000, 0x40);
+    Decompress(gUnknown_081942A0, gBG3TilemapBuffer);
+    Decompress(gUnknown_081942A0, gBG2TilemapBuffer);
+    sub_08014668(4, 0x14, gBG0TilemapBuffer, 0x873, 0x3000, 0x40);
 
     sub_08013AEC();
     sub_08013AFC();

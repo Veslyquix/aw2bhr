@@ -18,9 +18,9 @@ void sub_0808A5C4(void)
     ApplyPaletteExt(gUnknown_081320AC, 0x60, 0x20);
 
     if (gUnknown_03005908 == 0)
-        sub_08014A5C(0, 0x12, gUnknown_08499578, 0x973, 0x3000, 0);
+        sub_08014A5C(0, 0x12, gBG0TilemapBuffer, 0x973, 0x3000, 0);
     else if (gUnknown_03005908 == 1)
-        sub_08014A5C(0, 0x12, gUnknown_08499578, 0x974, 0x3000, 0);
+        sub_08014A5C(0, 0x12, gBG0TilemapBuffer, 0x974, 0x3000, 0);
 
     sub_08013AEC();
 }

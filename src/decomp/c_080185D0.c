@@ -58,7 +58,7 @@ bool8 sub_080185D0(s16 a)
     return result;
 }
 
-/* sub_080185D0's twin, three constants apart: the gUnknown_08499578 tilemap
+/* sub_080185D0's twin, three constants apart: the gBG0TilemapBuffer tilemap
  * buffer instead of gUnknown_08499588, palette 0xf instead of 1, and
  * sub_08013AEC installed as the slot callback instead of sub_080185A0.
  * Everything else -- the signed/unsigned split on the node's unk08, the
@@ -75,7 +75,7 @@ bool8 sub_08018694(s16 a)
 
     if (gUnknown_03002514 != 1)
     {
-        s = sub_08014740(7, 0xf, gUnknown_08499578, gUnknown_0200C528[a].unk04->unk08,
+        s = sub_08014740(7, 0xf, gBG0TilemapBuffer, gUnknown_0200C528[a].unk04->unk08,
                          gUnknown_03002F08.unk00 * 0x1000, 0x100);
         s->unk3c = sub_08013AEC;
         *(u8 *)&s->unk38 = 1;

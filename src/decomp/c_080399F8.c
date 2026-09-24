@@ -41,5 +41,5 @@ void sub_080399F8(int a, int b)
                  (void *)(0x06000000 + gUnknown_03002B6C.bits.chr_block * 0x4000
                           + (a & 0x3ff) * 0x20),
                  0x800);
-    sub_08012B70(gUnknown_08499578, gUnknown_080A31A4, 0, 0, (u16)(b << 12 | a));
+    sub_08012B70(gBG0TilemapBuffer, gUnknown_080A31A4, 0, 0, (u16)(b << 12 | a));
 }

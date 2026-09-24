@@ -48,7 +48,7 @@ void IntroT3_080688E5(struct Unk080688E4 *proc)
     CpuFastSet(&zero, (void *)0x0600F000, 0x01000100);
     gUnknown_030030B4.bits.wrap = 0;
     Decompress(gUnknown_0817DA38, (void *)0x06008000);
-    Decompress(gUnknown_0817E208, gUnknown_08499580);
+    Decompress(gUnknown_0817E208, gBG2TilemapBuffer);
     sub_08013B0C();
     sub_08067898(0xC00, -0x28, 0, proc);
     proc->unk30 = 0;

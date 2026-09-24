@@ -52,8 +52,8 @@ void sub_080452FC(struct Unk452FC *proc)
 void sub_08045358(struct Unk45358Proc *proc)
 {
     Decompress(gUnknown_08112704, (void *)(gUnknown_03002B6C.bits.chr_block * 0x4000 + 0x06005600));
-    Decompress(proc->unk4c, gUnknown_08499578);
-    sub_08012B00(gUnknown_08499578, 0x800, 0x82b0);
+    Decompress(proc->unk4c, gBG0TilemapBuffer);
+    sub_08012B00(gBG0TilemapBuffer, 0x800, 0x82b0);
     ApplyPaletteExt(proc->unk50, 0x100, 0x20);
     sub_08013AEC();
 }

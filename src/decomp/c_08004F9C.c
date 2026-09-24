@@ -16,7 +16,7 @@
  * what puts the low-bound `cmp r0,#1; ble` into the compare tree. Without it
  * agbcc emits three comparisons instead of four.
  *
- * `gUnknown_08499578 + (v * 32 + 3)` must keep the index parenthesised --
+ * `gBG0TilemapBuffer + (v * 32 + 3)` must keep the index parenthesised --
  * `+ v * 32 + 3` adds the base before the constant and costs the ROM's
  * `lsls #6; adds #6` pairing.
  *
@@ -46,9 +46,9 @@ void sub_08004F9C(void)
         break;
     }
 
-    sub_08012BC8(gUnknown_08499578, 3, v, 0xB, 2, 0);
-    sub_0801F2AC(9, gUnknown_08499578 + (v * 32 + 3));
-    sub_080149C0(5, (s16)v, gUnknown_08499578, gActiveMap->designName,
+    sub_08012BC8(gBG0TilemapBuffer, 3, v, 0xB, 2, 0);
+    sub_0801F2AC(9, gBG0TilemapBuffer + (v * 32 + 3));
+    sub_080149C0(5, (s16)v, gBG0TilemapBuffer, gActiveMap->designName,
                  0x8000, 0);
     sub_08013AEC();
 

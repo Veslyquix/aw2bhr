@@ -39,27 +39,27 @@ void sub_080314A4(s16 a)
 
     for (i = 0; i < 4; i++)
     {
-        sub_08012BC8(gUnknown_08499578, 0xe, 2 * i + 6, 8, 2, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0xe, 2 * i + 6, 8, 2, 0);
 
         if (a == 0 || sub_0802F460(i))
         {
             if (gUnknown_0849B018->unk0a[i] <= 4)
             {
-                sub_08014A5C(0xe, (s16)(2 * i + 6), gUnknown_08499578,
+                sub_08014A5C(0xe, (s16)(2 * i + 6), gBG0TilemapBuffer,
                     buf[gUnknown_0849B018->unk0a[i]], 0x8000, 0);
             }
             else
             {
-                sub_080149C0(0xe, (s16)(2 * i + 6), gUnknown_08499578,
+                sub_080149C0(0xe, (s16)(2 * i + 6), gBG0TilemapBuffer,
                     (u8 *)gUnknown_020257E4[i], 0x8000, 0);
 
                 if (a == 1)
                 {
                     if (gUnknown_0300449C[i] != 0)
-                        sub_080149C0(0xe, (s16)(2 * i + 6), gUnknown_08499578,
+                        sub_080149C0(0xe, (s16)(2 * i + 6), gBG0TilemapBuffer,
                             (u8 *)gUnknown_020257E4[i], 0x8000, 0);
                     else
-                        sub_080149C0(0xe, (s16)(2 * i + 6), gUnknown_08499578,
+                        sub_080149C0(0xe, (s16)(2 * i + 6), gBG0TilemapBuffer,
                             (u8 *)gUnknown_020257E4[i], 0x7000, 0);
                 }
             }

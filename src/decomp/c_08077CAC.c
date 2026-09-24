@@ -101,10 +101,10 @@ void sub_08077CAC(struct Unk8077CAC *proc)
         zero_saved = zero;
         zero_cell = zero;
     }
-    CpuFastSet(&zero_cell, gUnknown_0849957C, 0x01000140);
+    CpuFastSet(&zero_cell, gBG1TilemapBuffer, 0x01000140);
 
     sub_08071900(gUnknown_08551A04 + 0x100,
-                 gUnknown_0849957C + (proc->unk4a * 32 + t), n, proc->unk4e);
+                 gBG1TilemapBuffer + (proc->unk4a * 32 + t), n, proc->unk4e);
 
     sub_08013AFC();
 

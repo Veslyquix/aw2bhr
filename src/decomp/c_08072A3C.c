@@ -35,16 +35,16 @@ u16 *sub_08072A3C(int which, int x, int y)
     switch (which)
     {
     case 0:
-        pp = &gUnknown_08499578;
+        pp = &gBG0TilemapBuffer;
         break;
     case 1:
-        pp = &gUnknown_0849957C;
+        pp = &gBG1TilemapBuffer;
         break;
     case 2:
-        pp = &gUnknown_08499580;
+        pp = &gBG2TilemapBuffer;
         break;
     case 3:
-        pp = &gUnknown_08499584;
+        pp = &gBG3TilemapBuffer;
         break;
     default:
         goto fail;

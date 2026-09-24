@@ -45,7 +45,7 @@ void IntroT3_0806A055(struct Unk0806A054 *proc)
     sub_08012358();
     ApplyPalettes(gUnknown_0822FE50, 1, 5);
     Decompress(gUnknown_0822FEF0, (void *)0x06000000);
-    Decompress(gUnknown_0822F9AC, gUnknown_0849957C);
+    Decompress(gUnknown_0822F9AC, gBG1TilemapBuffer);
     sub_08013AFC();
     sub_08069FD0();
     sub_08072C40(0, 0, 0);

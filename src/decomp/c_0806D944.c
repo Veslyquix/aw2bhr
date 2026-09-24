@@ -61,7 +61,7 @@ void sub_0806D944(void)
     gUnknown_03002000 = 0;
 
     Decompress(gUnknown_0822FEF0, (void *)((gUnknown_0300251C.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0822F9AC, gUnknown_08499584);
+    Decompress(gUnknown_0822F9AC, gBG3TilemapBuffer);
     ApplyPaletteExt(gUnknown_082344CC, 0x20, 0xa0);
     sub_08013B1C();
     sub_0802D5A0((void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06006C00), 0, 8);

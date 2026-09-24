@@ -42,16 +42,16 @@ void IntroT3_08068E61(struct Unk08068E60 *proc)
     zero0 = 0;
     CpuFastSet(&zero0, (void *)0x0600E000, 0x01000400);
     zero1 = 0;
-    CpuFastSet(&zero1, gUnknown_08499580, 0x01000400);
+    CpuFastSet(&zero1, gBG2TilemapBuffer, 0x01000400);
     ApplyPalettes(gUnknown_08183C28, 0, 4);
     ApplyPalette((u16 *)gUnknown_0823BDE0, 0);
     Decompress(gUnknown_081837A0, (void *)0x06008000);
-    Decompress(gUnknown_081838EC, gUnknown_08499580);
+    Decompress(gUnknown_081838EC, gBG2TilemapBuffer);
     Decompress(gUnknown_0823A3D4, (void *)0x06002800);
-    Decompress(gUnknown_08239FA4, gUnknown_08499578);
+    Decompress(gUnknown_08239FA4, gBG0TilemapBuffer);
 
     for (i = 0; i < 0x400; i++)
-        gUnknown_08499578[i] += 0x140;
+        gBG0TilemapBuffer[i] += 0x140;
 
     zero2 = 0;
     CpuFastSet(&zero2, (void *)0x06000000, 0x01000008);

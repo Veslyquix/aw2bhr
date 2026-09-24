@@ -32,5 +32,5 @@ void sub_0808A664(void)
  * its +0x3a byte. `adds r0, #0x3a` is strb's 31-byte displacement limit. */
 void sub_0808A6A0(void)
 {
-    sub_08014740(6, 5, gUnknown_08499578, 0, 0x8000, 0x41)->unk3a = 6;
+    sub_08014740(6, 5, gBG0TilemapBuffer, 0, 0x8000, 0x41)->unk3a = 6;
 }

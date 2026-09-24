@@ -125,7 +125,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         sub_080487B4(0,
                      (gUnknown_084C30F8->unk01e - gUnknown_084C30F8->unk020) * 2
                          + 7,
-                     gUnknown_08499578,
+                     gBG0TilemapBuffer,
                      gUnknown_02028E1C[gUnknown_084C30F8->unk01e], 4);
         sub_08013AEC();
         gUnknown_084C30F8->unk834++;
@@ -150,7 +150,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
             TrySpendBattleMapPoints(
                 gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
                     .unk04);
-            sub_08012BC8(gUnknown_08499578, 7, 0xf, 0x17, 4, 0);
+            sub_08012BC8(gBG0TilemapBuffer, 7, 0xf, 0x17, 4, 0);
             sub_0803B4DC(0x6c);
             gUnknown_084C30F8->unk834++;
         }

@@ -53,10 +53,10 @@ void sub_08077B74(struct Unk77B74Proc *proc)
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
 
     zero = 0;
-    CpuFastSet(&zero, gUnknown_0849957C, 0x01000140);
+    CpuFastSet(&zero, gBG1TilemapBuffer, 0x01000140);
 
     sub_08071900(gUnknown_08551A04 + 0x100,
-                 gUnknown_0849957C + (proc->unk4a * 32 + t), n, proc->unk4e);
+                 gBG1TilemapBuffer + (proc->unk4a * 32 + t), n, proc->unk4e);
     sub_08013AFC();
 
     if (proc->unk44 > 4)

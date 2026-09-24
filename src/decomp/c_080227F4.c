@@ -8,7 +8,7 @@
  * sub_080227F4 @ 0x080227F4
  */
 
-/* Writes one 2x2 tile quad into the gUnknown_08499578 tilemap for map cell
+/* Writes one 2x2 tile quad into the gBG0TilemapBuffer tilemap for map cell
  * (x, y): the four halfwords 0x81b0..0x81b3, or four zeroes when the cell's
  * gUnknown_03003340 byte is negative. The screen index is the promoted
  * `(x - camera_x) & 0xF` / `(y - camera_y) & 0xF` pair off gUnknown_08499590's
@@ -20,7 +20,7 @@
  * constant CSE and not a different expression. */
 void sub_080227F4(u16 x, u16 y)
 {
-    u16 *p = gUnknown_08499578
+    u16 *p = gBG0TilemapBuffer
            + ((x - gMap->camX) & 0xF) * 2
            + ((y - gMap->camY) & 0xF) * 64;
 

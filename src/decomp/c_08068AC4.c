@@ -79,7 +79,7 @@ void IntroT3_08068AC5(struct Unk08068AC4 *proc)
     ApplyPalettes(gUnknown_0817DA18, 1, 1);
     ApplyPalettes(gUnknown_0817DA18, 0x10, 1);
     Decompress(gUnknown_0817C408, (void *)0x06008000);
-    sub_080718F8((u8 *)gUnknown_08499584 + 0x20C, gUnknown_0817D874, 0);
+    sub_080718F8((u8 *)gBG3TilemapBuffer + 0x20C, gUnknown_0817D874, 0);
     sub_08013B1C();
     sub_0806775C(0, proc);
     sub_08072C40(2, 0, 0);
@@ -102,7 +102,7 @@ void IntroT3_IDLE_08068BE5(struct Unk08068BE4Proc *proc)
     case 31:
     case 34:
     case 37:
-        sub_080718F8(gUnknown_08499584 + 0x106, gUnknown_0817D910, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x106, gUnknown_0817D910, 0);
         sub_08013B1C();
         break;
     case 0:
@@ -112,19 +112,19 @@ void IntroT3_IDLE_08068BE5(struct Unk08068BE4Proc *proc)
     case 32:
     case 35:
     case 38:
-        sub_080718F8(gUnknown_08499584 + 0x106, gUnknown_0817D874, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x106, gUnknown_0817D874, 0);
         sub_08013B1C();
         break;
     case 52:
     case 55:
     case 58:
-        sub_080718F8(gUnknown_08499584 + 0x104, gUnknown_0817D7B8, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x104, gUnknown_0817D7B8, 0);
         sub_08013B1C();
         break;
     case 53:
     case 56:
     case 59:
-        sub_080718F8(gUnknown_08499584 + 0x104, gUnknown_0817D6FC, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x104, gUnknown_0817D6FC, 0);
         sub_08013B1C();
         break;
     case 102:

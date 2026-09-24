@@ -69,7 +69,7 @@ void WarRoomScroll_08086DD5(void)
  * view explicitly; 0x6200 is `movs #0xc4; lsls #7`. */
 void WarRoomScroll_08086DF5(void)
 {
-    sub_08037A20(gUnknown_0849957C, 0x6200);
+    sub_08037A20(gBG1TilemapBuffer, 0x6200);
     gUnknown_03005918 = ((u8 *)gUnknown_03003F68)[0];
     gUnknown_030058F4 = ((u8 *)gUnknown_03003F68)[1];
     sub_08013AFC();

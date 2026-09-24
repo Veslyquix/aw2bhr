@@ -43,7 +43,7 @@ void BlitMapRow(u16 a1, u16 a2, u16 a3, u16 a4)
     u16 i;
 
     a1 = (a1 & 0xF) * 2;
-    dst = gUnknown_08499584 + (a2 & 0xF) * 64;
+    dst = gBG3TilemapBuffer + (a2 & 0xF) * 64;
 
     for (i = 0; i <= 15; i++)
     {

@@ -16,7 +16,7 @@
  *
  * Scrolls the record list up one row per frame for ten frames. Frame 0 kicks
  * the redraw off; frames 2..9 copy rows 2..limit of the tilemap scratch
- * gUnknown_084C30F8->unk032 into gUnknown_08499578, sliding the destination
+ * gUnknown_084C30F8->unk032 into gBG0TilemapBuffer, sliding the destination
  * row down by `13 - limit`. Frame 10 ends the proc.
  *
  * unk64 is s16 and NOT the u16 that src/decomp/c_08049170.c's own file-local
@@ -53,7 +53,7 @@ struct Unk8049178
  *
  * The downward twin of BattleMaps_IDLE_08049179: while unk1e + 2 is still within 9 it
  * blanks a row and copies rows 0..(5 - unk1e) of the tilemap scratch
- * gUnknown_084C30F8->unk032 into gUnknown_08499578 at a fixed halfword offset
+ * gUnknown_084C30F8->unk032 into gBG0TilemapBuffer at a fixed halfword offset
  * of 0x100; past that it hands off to sub_08015C30 instead. unk1e advances
  * every frame either way.
  *
@@ -63,13 +63,13 @@ struct Unk8049178
  * 16 bits matter, so it does not contradict the sign.
  *
  * Both loops reload unk1e from memory on every iteration because the `strh`
- * into gUnknown_08499578 may alias the proc; that is the ROM's behaviour and
+ * into gBG0TilemapBuffer may alias the proc; that is the ROM's behaviour and
  * falls out of writing the member access in place rather than caching it.
  *
  * THE ONE HARD-WON LINE is the destination index. `0x100 + proc->unk1e * 32 +
  * col` is byte-exact; `proc->unk1e * 32 + col + 0x100` and `col +
  * proc->unk1e * 32 + 0x100` are both 8 bytes wrong in the same way, and the
- * difference is ONLY where the `ldr r0, [gUnknown_08499578]` lands. Leading
+ * difference is ONLY where the `ldr r0, [gBG0TilemapBuffer]` lands. Leading
  * with the constant makes agbcc expand the base pointer load between the
  * `ldrsh` of unk1e and the `lsls #5` that scales it -- the ROM's order. Lead
  * with the index instead and the whole index is computed first and the base
@@ -114,7 +114,7 @@ void BattleMaps_IDLE_08049179(struct Unk8049178 *proc)
 
         for (row = 2; row < limit; row++)
             for (col = 0; col < 0x14; col++)
-                gUnknown_08499578[(row + (13 - limit)) * 32 + col] =
+                gBG0TilemapBuffer[(row + (13 - limit)) * 32 + col] =
                     gUnknown_084C30F8->unk032[row * 32 + col];
         break;
     }
@@ -134,11 +134,11 @@ void sub_08049264(struct Unk8049264 *proc)
 
     if (proc->unk1e + 2 <= 9)
     {
-        sub_08012BC8(gUnknown_08499578, 0, proc->unk1e + 7, 0x12, 1, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0, proc->unk1e + 7, 0x12, 1, 0);
 
         for (row = 0; row < 5 - proc->unk1e; row++)
             for (col = 0; col < 0x14; col++)
-                gUnknown_08499578[0x100 + proc->unk1e * 32 + col] =
+                gBG0TilemapBuffer[0x100 + proc->unk1e * 32 + col] =
                     gUnknown_084C30F8->unk032[row * 32 + col];
     }
     else
