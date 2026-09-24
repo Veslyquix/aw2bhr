@@ -130,7 +130,7 @@
    ],
    "representative": "sub_08004B2C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004A60.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -816,7 +816,7 @@
    ],
    "representative": "sub_08003960",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08003960.c",
+   "exemplar_src": "src/design-editor.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -1262,7 +1262,7 @@
    ],
    "representative": "sub_080039BC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080039BC.c",
+   "exemplar_src": "src/design-editor.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -2436,7 +2436,7 @@
    ],
    "representative": "sub_0800484C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0800484C.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -3480,7 +3480,7 @@
    ],
    "representative": "sub_08004958",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004958.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -6090,7 +6090,7 @@
    ],
    "representative": "sub_08004AA0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004A60.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -7978,7 +7978,7 @@
    ],
    "representative": "sub_08004824",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004824.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -8055,7 +8055,7 @@
    ],
    "representative": "sub_0800483C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0800483C.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",

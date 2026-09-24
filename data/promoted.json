@@ -1364,6 +1364,18 @@
   "size": 180
  },
  {
+  "file": "src/decomp/c_0800E8CC.c",
+  "obj": "src/decomp/c_0800E8CC.o",
+  "addr_hex": "0x0800E8CC",
+  "functions": [
+   "sub_0800E8CC"
+  ],
+  "size": 296,
+  "rodata": [
+   "0x0808D890"
+  ]
+ },
+ {
   "file": "src/decomp/c_0800EAF4.c",
   "obj": "src/decomp/c_0800EAF4.o",
   "addr_hex": "0x0800EAF4",
