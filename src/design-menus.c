@@ -2,7 +2,6 @@
 #include "hardware.h"
 #include "map.h"
 
-#define MAP gMap
 
 void sub_08004724(void)
 {
@@ -17,16 +16,16 @@ void sub_08004724(void)
     c = 7;
     p = gUnknown_08486FC4;
 
-    for (y = 0; y < MAP->height; y++)
-        for (x = 0; x < MAP->width; x++)
+    for (y = 0; y < gMap->height; y++)
+        for (x = 0; x < gMap->width; x++)
         {
-            m = MAP;
-            m->tile[MAP->rowOffset[y] + x] = 0x2A;
-            m->terrain[MAP->rowOffset[y] + x] = c;
+            m = gMap;
+            m->tile[gMap->rowOffset[y] + x] = 0x2A;
+            m->terrain[gMap->rowOffset[y] + x] = c;
         }
 
-    for (y = 0; y < MAP->height; y++)
-        for (x = 0; x < MAP->width; x++)
+    for (y = 0; y < gMap->height; y++)
+        for (x = 0; x < gMap->width; x++)
             sub_08003F44(x, y, tiles[*p++]);
 }
 

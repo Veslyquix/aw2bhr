@@ -2,7 +2,6 @@
 #include "hardware.h"
 #include "map.h"
 
-#define MAP gMap
 
 void sub_08003640(void)
 {
@@ -258,11 +257,11 @@ void GenerateRandomMap(void)
 
     ClearAllUnits();
     gActiveMap->army1UnitCount = 0;
-    MAP->width = 0x1E;
-    MAP->height = 0x14;
-    MAP->unk10 = 0;
-    for (i = 0; i < MAP->height; i++)
-        MAP->rowOffset[i] = i * MAP->width;
+    gMap->width = 0x1E;
+    gMap->height = 0x14;
+    gMap->unk10 = 0;
+    for (i = 0; i < gMap->height; i++)
+        gMap->rowOffset[i] = i * gMap->width;
 
     keys = gpKeySt->held & (R_BUTTON | L_BUTTON);
     if (keys == (R_BUTTON | L_BUTTON))
@@ -311,30 +310,30 @@ void sub_08003C48(int a1)
     ClearAllUnits();
     gActiveMap->army1UnitCount = 0;
 
-    for (x = 0; x < MAP->height; x++)
-        MAP->rowOffset[x] = x * MAP->width;
+    for (x = 0; x < gMap->height; x++)
+        gMap->rowOffset[x] = x * gMap->width;
 
-    for (y = 0; y < MAP->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < MAP->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             switch (a1)
             {
             case 7:
-                MAP->tile[MAP->rowOffset[y] + x] = 0x2A;
-                MAP->terrain[MAP->rowOffset[y] + x] = a1;
+                gMap->tile[gMap->rowOffset[y] + x] = 0x2A;
+                gMap->terrain[gMap->rowOffset[y] + x] = a1;
                 break;
             case 1:
-                MAP->tile[MAP->rowOffset[y] + x] = a1;
-                MAP->terrain[MAP->rowOffset[y] + x] = 1;
+                gMap->tile[gMap->rowOffset[y] + x] = a1;
+                gMap->terrain[gMap->rowOffset[y] + x] = 1;
                 break;
             case 3:
                 SetTerrainAt(x, y, 3);
                 MakeMountain(x, y);
                 break;
             case 4:
-                MAP->tile[MAP->rowOffset[y] + x] = 0x87;
-                MAP->terrain[MAP->rowOffset[y] + x] = a1;
+                gMap->tile[gMap->rowOffset[y] + x] = 0x87;
+                gMap->terrain[gMap->rowOffset[y] + x] = a1;
                 break;
             }
         }
@@ -350,24 +349,24 @@ void FixShorelineAt(int x, int y, int kind)
     switch (kind)
     {
     case 7:
-        if (x < MAP->width - 1)
+        if (x < gMap->width - 1)
         {
             int idx;
 
-            idx = MAP->rowOffset[y];
+            idx = gMap->rowOffset[y];
             idx++;
             idx += x;
-            if (MAP->terrain[idx] == 1 || MAP->terrain[idx] == 0xD)
+            if (gMap->terrain[idx] == 1 || gMap->terrain[idx] == 0xD)
                 sub_08007F9C(x + 1, y);
         }
         if (x > 0)
         {
             int idx;
 
-            idx = MAP->rowOffset[y];
+            idx = gMap->rowOffset[y];
             idx--;
             idx += x;
-            if (MAP->terrain[idx] == 1 || MAP->terrain[idx] == 0xD)
+            if (gMap->terrain[idx] == 1 || gMap->terrain[idx] == 0xD)
                 sub_08007F9C(x - 1, y);
         }
         break;
@@ -377,14 +376,14 @@ void FixShorelineAt(int x, int y, int kind)
         {
             if (y > 0)
             {
-                if (MAP->terrain[MAP->rowOffset[y - 1] + x] == 7
-                 || MAP->terrain[MAP->rowOffset[y - 1] + x] == 0xD)
+                if (gMap->terrain[gMap->rowOffset[y - 1] + x] == 7
+                 || gMap->terrain[gMap->rowOffset[y - 1] + x] == 0xD)
                     sub_08007F9C(x, y);
             }
-            if (y < MAP->height - 1)
+            if (y < gMap->height - 1)
             {
-                if (MAP->terrain[MAP->rowOffset[y + 1] + x] == 7
-                 || MAP->terrain[MAP->rowOffset[y + 1] + x] == 0xD)
+                if (gMap->terrain[gMap->rowOffset[y + 1] + x] == 7
+                 || gMap->terrain[gMap->rowOffset[y + 1] + x] == 0xD)
                     sub_08007F9C(x, y);
             }
         }
@@ -402,9 +401,9 @@ void FixAllShorelines(void)
 {
     int x, y;
 
-    for (y = 0; y < MAP->height; y++)
-        for (x = 0; x < MAP->width; x++)
-            FixShorelineAt(x, y, MAP->terrain[MAP->rowOffset[y] + x]);
+    for (y = 0; y < gMap->height; y++)
+        for (x = 0; x < gMap->width; x++)
+            FixShorelineAt(x, y, gMap->terrain[gMap->rowOffset[y] + x]);
 }
 
 asm(".global sub_08003ED0\n.thumb_set sub_08003ED0, FixAllShorelines\n");
@@ -416,21 +415,21 @@ void sub_08003F44(int x, int y, int v)
     if (y > 0x13)
         y = 0x13;
 
-    MAP->tile[MAP->rowOffset[y] + x] = v;
+    gMap->tile[gMap->rowOffset[y] + x] = v;
 
     switch (v)
     {
     case 1:
-        MAP->terrain[MAP->rowOffset[y] + x] = v;
+        gMap->terrain[gMap->rowOffset[y] + x] = v;
         break;
     case 0x20:
-        MAP->terrain[MAP->rowOffset[y] + x] = 3;
+        gMap->terrain[gMap->rowOffset[y] + x] = 3;
         break;
     case 0x87:
-        if (MAP->terrain[MAP->rowOffset[y] + x] != 4)
+        if (gMap->terrain[gMap->rowOffset[y] + x] != 4)
         {
-            MAP->terrain[MAP->rowOffset[y] + x] = 4;
-            MAP->tile[MAP->rowOffset[y] + x] = v;
+            gMap->terrain[gMap->rowOffset[y] + x] = 4;
+            gMap->tile[gMap->rowOffset[y] + x] = v;
             MakeForest(x, y);
         }
         break;
@@ -499,12 +498,12 @@ void sub_080040C8(void)
     int r;
 
     t = 7;
-    for (y = 0; y < MAP->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < MAP->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
-            MAP->tile[MAP->rowOffset[y] + x] = 0x2A;
-            MAP->terrain[MAP->rowOffset[y] + x] = t;
+            gMap->tile[gMap->rowOffset[y] + x] = 0x2A;
+            gMap->terrain[gMap->rowOffset[y] + x] = t;
         }
     }
 
@@ -534,7 +533,7 @@ void sub_080040C8(void)
     {
         a = RandRange(0x1A, 4);
         b = RandRange(0x10, 4);
-        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
+        if (gMap->terrain[gMap->rowOffset[b] + a] == 1)
         {
             SetTerrainAt(a, b, 3);
             MakeTile2(a, b, 0x20);
@@ -570,7 +569,7 @@ void sub_080040C8(void)
     {
         a = RandRange(0x1A, 4);
         b = RandRange(0x10, 4);
-        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
+        if (gMap->terrain[gMap->rowOffset[b] + a] == 1)
         {
             SetTerrainAt(a, b, 4);
             MakeTile2(a, b, 0x87);
@@ -596,22 +595,22 @@ void sub_080040C8(void)
             break;
     }
 
-    for (y = 1; y < MAP->height - 1; y++)
+    for (y = 1; y < gMap->height - 1; y++)
     {
-        for (x = n = 1; x < MAP->width - 1; x++)
+        for (x = n = 1; x < gMap->width - 1; x++)
         {
             if (RandRange(0xC8, 0x64) > 0x95
-             && MAP->terrain[MAP->rowOffset[y] + x] == 1)
+             && gMap->terrain[gMap->rowOffset[y] + x] == 1)
             {
-                if (MAP->terrain[MAP->rowOffset[y - 1] + x] == 7)
+                if (gMap->terrain[gMap->rowOffset[y - 1] + x] == 7)
                     sub_0800BA9C(x, y - 1);
-                if (MAP->terrain[MAP->rowOffset[y + 1] + x] == 7)
+                if (gMap->terrain[gMap->rowOffset[y + 1] + x] == 7)
                     sub_0800BA9C(x, y + 1);
-                r = MAP->rowOffset[y] - 1;
-                if (MAP->terrain[r + x] == 7)
+                r = gMap->rowOffset[y] - 1;
+                if (gMap->terrain[r + x] == 7)
                     sub_0800BA9C(x - 1, y);
-                r = MAP->rowOffset[y] + 1;
-                if (MAP->terrain[r + x] == 7)
+                r = gMap->rowOffset[y] + 1;
+                if (gMap->terrain[r + x] == 7)
                     sub_0800BA9C(x + 1, y);
             }
         }
@@ -627,12 +626,12 @@ void sub_0800449C(void)
     int t;
 
     t = 7;
-    for (y = 0; y < MAP->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < MAP->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
-            MAP->tile[MAP->rowOffset[y] + x] = 0x2A;
-            MAP->terrain[MAP->rowOffset[y] + x] = t;
+            gMap->tile[gMap->rowOffset[y] + x] = 0x2A;
+            gMap->terrain[gMap->rowOffset[y] + x] = t;
         }
     }
 
@@ -660,7 +659,7 @@ void sub_0800449C(void)
     {
         a = RandRange(0x1D, 0);
         b = RandRange(0x13, 0);
-        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
+        if (gMap->terrain[gMap->rowOffset[b] + a] == 1)
         {
             SetTerrainAt(a, b, 3);
             MakeTile2(a, b, 0x20);
@@ -695,7 +694,7 @@ void sub_0800449C(void)
     {
         a = RandRange(0x1A, 4);
         b = RandRange(0x10, 4);
-        if (MAP->terrain[MAP->rowOffset[b] + a] == 1)
+        if (gMap->terrain[gMap->rowOffset[b] + a] == 1)
         {
             SetTerrainAt(a, b, 4);
             MakeTile2(a, b, 0x87);
