@@ -49641,3 +49641,40 @@ merge. The source computes the full pointer separately in each arm, and
 cross-jumping merges the common tail (scale, dereference, add). Hoisting the
 arithmetic out of the arms, as wave 26 and the 2026-09-25 drafts did, never
 reproduced it.
+
+
+## Inline session, 2026-09-25: four parked map-predicate functions matched
+
+These are all small `gMap` neighbour predicates. The levers that closed them:
+
+- **sub_0800E9F4: write neighbours as `rowOffset[y + dy] + (x + dx)`.** Using
+  c_0800CFDC's `TILE(xx, yy)` macro with `TILE(x + 1, y + 1)` matched outright.
+  The same reads spelled `rowOffset[..] + 1 + x` let fold reassociate, and CSE
+  shares `x + 1` (-8 bytes). The long-parked "x/rows/cells three-register
+  cycle" had nothing to do with allocation; it was this spelling.
+- **sub_08009310: one variable, one register.** The ROM puts both
+  `sub_08008D70`'s result and the later vertical-neighbour flag in r6, so they
+  are the same C variable. With that change the `register asm("r6")` pin was no
+  longer needed. The right neighbour's row index needs its own local, since
+  reusing the left one's lands the `ldrh` in r0 instead of r1. The final test
+  `if (x >= w - 1) break; if (... != 0xC) break; goto success;` gives the ROM's
+  `bne break; b success` pair, which `&&` in one `if` does not.
+- **sub_08009918 (twin of sub_0800977C): row temp versus index.** Where the ROM
+  shows `ldrh r0; subs r0,#1; adds r1,r0,r4`, the row and the index are
+  separate locals (`row = ...; row--; idx = row + x;`). Where it shows
+  `ldrh r0; adds r2,r0,r4`, the index is one expression (`idx = row + x`).
+  Staging in place (`idx = row; idx--; idx += x`) keeps a single register.
+- **sub_08009538 matched only with `register int keep asm("r8")`.** Waves 37 and
+  80 exhausted the unpinned spellings. This was a coordinator decision; pinned
+  promoted files already exist.
+- **sub_0800F8D4 (not matched, +4 to 81.7%): shared `yes:` label.** Each arm
+  ends `if (FAMILY(n)) goto yes; return 0;` with `yes: return 1;` as the last
+  block. This lets cross-jumping merge the arms' identical compare-chain tails,
+  as the ROM does. `return FAMILY(n);` builds a boolean the ROM lacks, and
+  per-arm `return 1` costs about 140 bytes.
+
+- **sub_080077EC (not matched, 96.6%): `do { } while (0)` around a goto-loop
+  body.** Wrapping the first loop's two table copies in a zero-trip-condition
+  `do/while(0)` fixed the loop's whole register assignment, taking it from 89.7%
+  to 96.6%. The permuter found this within 20 s once it could run. Try it early
+  on register-swap residuals inside hand-written goto loops.
