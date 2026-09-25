@@ -9036,7 +9036,9 @@ void sub_080145BC(void);
  * `!= -1` gate is in the caller, not here -- and the caller's own argument
  * untouched in r1. sub_08014DCC's result is what sub_08014E44 returns, so
  * `void *`; sub_08014ED4 discards sub_08014E68's and ends `pop {r0}`. */
-void *sub_08014DCC(int, int);
+void *sub_08014DCC(int, u32);
+void *HeapAlloc(int, u32); /* sub_08014DCC's readable name; see
+                           * src/decomp/c_08014DCC.c. */
 /* Wave 40 (W40-D): sub_08014E68 RETURNS int, corrected from the body. It sets
  * r0 to 1 on both refusal paths (null pointer, or a header already marked
  * free) and to 0 on the path that actually frees, and its epilogue is

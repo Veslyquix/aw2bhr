@@ -3009,6 +3009,15 @@
   "size": 36
  },
  {
+  "file": "src/decomp/c_08014DCC.c",
+  "obj": "src/decomp/c_08014DCC.o",
+  "addr_hex": "0x08014DCC",
+  "functions": [
+   "sub_08014DCC"
+  ],
+  "size": 120
+ },
+ {
   "file": "src/decomp/c_08014E44.c",
   "obj": "src/decomp/c_08014E44.o",
   "addr_hex": "0x08014E44",

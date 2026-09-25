@@ -49810,3 +49810,39 @@ won sl. It went 31% -> 72.9% in one step. Three smaller settlements followed:
 
 **Read-out:** when a ROM arm pre-computes an address and branches into the
 middle of a sibling's tail, write the tail out in each arm. Do not factor it.
+
+## Reusing a live loop cursor for a later pointer keeps `p = next` from coalescing (sub_08014DCC)
+
+sub_08014DCC (now `HeapAlloc`) was parked at 71.7% with its loop cursor `p`
+and `next` in the ROM's r2/r3, joined by a `p = next` copy in a latch placed
+ahead of the loop header. Every `while (1)` / `for (;; p = next)` spelling
+with a trailing `break` coalesced the copy away. The `goto` spelling kept the
+copy but put the latch after the body.
+
+The fix was after the loop. The ROM builds the split-off free block with
+`adds r0, r5, r7; str r0, [r5]; ...; adds r2, r0, #0` and stores through r2,
+which is `p`'s register. So the source reuses the scan cursor:
+
+    best->next = (struct MemBlock *)((u8 *)best + total);
+    best->size = size;
+    best->used = 1;
+    p = best->next;          /* cse reuses the stored value, then copies it */
+    p->next = bestNext;
+    p->size = bestSize - total;
+    p->used = 0;             /* reload_cse reuses r3 (next == 0) */
+
+With `p` live after the loop, global alloc cannot fold `next` into `p`. The
+plain `break` loop then rotates exactly as the ROM does and keeps the copy.
+A separate `rest` local, or `p = (...)` before the `best->next` store, is
+8 and 4 bytes short.
+
+The last residual was the guard: `bne <loop>; b <ret0>` against the
+candidate's `beq <ret0>; b <loop>`. An early `if (size == 0) return NULL;`
+together with a nested `if (bestSize != 0) { ... return best + 1; }` and a
+trailing `return NULL;` matches. jump cross-jumps the early
+`movs r0, #0; b end` into the trailing one. A shared `goto fail` for both
+exits keeps the `beq` form. Two early returns leave the zero block mid-body.
+
+**Read-out:** when the ROM keeps a loop copy that every loop shape coalesces,
+look for the cursor's register being reused after the loop. Reuse the
+variable there instead of adding a new local.
