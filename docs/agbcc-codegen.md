@@ -49522,6 +49522,80 @@ flat <=+4 over configured; all exits non-zero everywhere):**
 | sub_0808AAF4 | 152 | 59.9 | 59.9 | 59.9 | 34.2 | 34.2 | 59.9 | 59.9 | flat |
 | sub_0808BBA4 | 24 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | flat |
 
+## The `sub_08004D90` row above is STALE: the survey ran against a pre-fix draft; the real residual is a `X - (-Y)` vs `X + Y` add-destination tie, reachable WITHOUT a toolchain override
+
+The wave-81 table lists `sub_08004D90` at 19.1/19.1/19.1/20.6/20.6/19.1/19.1
+("flat") because the survey ran against whatever draft existed at the time --
+one that had not yet bound `dst = &gUnknown_08499578` (now `gBG0TilemapBuffer`)
+inside each `if`/`else` arm. **A stale row in this survey is scoped to the
+draft it measured, not to the function**; re-run `trymatch.py --profile` on any
+row before trusting it once the draft has moved.
+
+Re-measured on the current draft (`offset`/`dst` bound as above): `configured`
+(the canonical toolchain) gives 85.3%, 10 differing bytes, a whole-function
+`r0`/`r1` swap from the first branch onward. `o1`/`o1-no-force` jump to 98.5%,
+1 differing byte -- but so does `configured` itself, with **no profile change
+at all**, once the final statement is spelled as a subtraction of a negation
+instead of a plain sum:
+
+```c
+sub_0801F2AC(9, *dst + offset);        /* configured: 85.3%, whole-fn r0/r1 swap */
+sub_0801F2AC(9, (*dst) - (-offset));   /* configured: 98.5%, size-exact, 1 byte   */
+```
+
+Both spell the identical value. The second removes the ENTIRE register swap
+under the real toolchain -- not just the final add -- landing on exactly the
+same one-byte residual `o1` reaches by changing optimisation level instead.
+Confirms a second, independent mechanism reaches the same wall, and this one
+needs no `data/compiler-overrides.json` entry to use.
+
+**The exact spelling matters, and it is not just "subtraction instead of
+addition".** `-(-offset) + (*dst)` -- mathematically and by C's `+`/unary-`-`
+precedence identical to `(*dst) - (-offset)` -- compiles back to the 85.3%
+swapped form. Only `pointer_expr - (-int_expr)`, pointer side first as the
+minuend, negated int side second, gets the fix; simplifying the double
+negation early (by writing the `+` form, however the double-negative is
+arranged around it) loses it. This was found already sitting in
+`work/sub_08004D90/best.c` from an earlier permuter run (`prefer_best`
+default), predating the `gBG0TilemapBuffer` rename -- **always diff a
+function's own `best.c` against its current draft before writing off a
+residual**; a tied or higher score there can carry a lever the live draft
+never tried.
+
+The one byte still open after the subtraction trick (`configured`, size-exact,
+first diff at +0x24) is the same one `o1` alone reaches:
+
+```
+ROM   adds r1, r0, r1      @ result = (loaded *dst) + offset
+cand  adds r1, r1, r0      @ same operands, destination tied to the OTHER one
+```
+
+**This last byte resisted every lever tried, including two independent real
+permuter runs (~29,500 iterations against the o1-compiled target, ~30,000
+against the `(*dst) - (-offset)` configured-toolchain target, 240s x 8 threads
+each, `--better-only --stop-on-zero`, zero candidates beat either base score),
+plus a from-scratch TILEMAP_LOCATED/TILEMAP_INDEX-macro rewrite permuted for
+240s more (53 candidates tried, best only 47.1% -- the macro folds the `+3`/
+`*0x20` constants into the shift/add pair at the SOURCE level, discarding the
+structure a mutator would need to reconstruct; not a useful starting point for
+this residual).** Also ruled out directly on the subtraction-form base:
+reordering the C operands both ways (`*dst + offset` and `offset + *dst`
+compile byte-identical -- combine's commutative canonicalisation erases the
+source order once both operands are already loaded into bare `REG`s), a
+zero-trip `do { } while (0)` wrapped around the branch, around the `offset`
+arithmetic alone, around the call alone, and around the subtraction-form call
+specifically (no effect in any position -- consistent with the wave-38/60 rule
+that the zero-trip lever moves `allocno_compare` PRIORITY across a whole
+variable's live range, not a single instruction's dead-operand reload tie),
+binding `*dst` to a local either before the `offset` arithmetic (regresses to
+79.4%, extra live range) or as the call argument (no change), and a self-tying
+`offset = offset + (int)*dst` cast (loses the implicit `u16` pointer-arithmetic
+`lsls #1` scale entirely -- regresses further). Both operands are dead after
+this one instruction, so reload's usual "tie to whichever operand is dead"
+rule does not discriminate -- this reads as the same class of case as the
+`orrs` destination chapter above ("no source form found controls it"), except
+now on the LAST byte only, with the swap itself solved.
+
 ## WHICH SIDE OF THE try_match DIFF IS WHICH: `-` lines are the ROM (TARGET), `+` lines are your CANDIDATE (wave 81, W81-B)
 
 `-` lines carry absolute labels (`_08086xxx`); `+` lines carry `<fn+off>` labels.
@@ -49549,3 +49623,21 @@ equal to idx and therefore missed; the disagreeing-value spelling produced the
 copy on the first attempt (42.4% -> 90.2%, size-exact). When a loop pool looks
 like it needs an instruction nobody authored, ask what second value flows to
 that use.
+
+
+## An unsigned cast on a pointer index blocks scale distribution (sub_08004D90)
+
+`gBG0TilemapBuffer + ((y + 5) * 32 + 3)` compiles to `lsls #6; adds #6`:
+fold distributes the `u16` element scale over the signed index. The ROM keeps
+`lsls #5; adds #3; lsls #1`. Casting the whole index to `u32`,
+`gBG0TilemapBuffer + (u32)((y + 5) * 32 + 3)`, stops the distribution and
+matched. Making only `y` unsigned was not enough, and neither was a `3u`
+constant. This is a lighter fold barrier than wave 35's comma trick, so try it
+first whenever a scaled `a * K + c` index loses its inner shift.
+
+The same function also shows a placement pattern. The ROM loads
+`ldr =gBG0TilemapBuffer` in both arms of an if and dereferences once after the
+merge. The source computes the full pointer separately in each arm, and
+cross-jumping merges the common tail (scale, dereference, add). Hoisting the
+arithmetic out of the arms, as wave 26 and the 2026-09-25 drafts did, never
+reproduced it.

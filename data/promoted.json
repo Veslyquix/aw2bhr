@@ -377,6 +377,15 @@
   ]
  },
  {
+  "file": "src/decomp/c_08004D90.c",
+  "obj": "src/decomp/c_08004D90.o",
+  "addr_hex": "0x08004D90",
+  "functions": [
+   "sub_08004D90"
+  ],
+  "size": 68
+ },
+ {
   "file": "src/decomp/c_08004DD4.c",
   "obj": "src/decomp/c_08004DD4.o",
   "addr_hex": "0x08004DD4",

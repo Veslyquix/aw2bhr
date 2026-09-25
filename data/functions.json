@@ -3859,7 +3859,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": "19.1% by byte score, but 62 of 68 bytes are solved -- the low score is the cascade from one early difference; best spelling is in work/sub_08004D90/sub_08004D90.c. Remaining diff is PLACEMENT, not shape: the ROM materialises `ldr rN, =gUnknown_08499578` inside BOTH arms of the if (two pool words at 0x08004DA4/0x08004DD0 holding the SAME address) and dereferences once after the merge; every candidate emits one address load after the merge. Ruled out: source ordering, exhaustively -- putting the array reference in both arms drags the deref into the arms, or cross-jumping re-merges the whole suffix. It is a -fforce-addr placement artefact with no source-level lever found in wave 26. The arithmetic half is solved and reusable: stage `&g[(x+K)*32+3]` through an int local one step at a time (i = b*2; i += K; i = i*32+3) to block agbcc's tree-level refold; any two steps written as one expression refold. Next attempt: start at the pool-word duplication, not the arithmetic; re-test whenever a -fforce-addr duplication rule lands in docs/agbcc-codegen.md.",
   "named": false,
