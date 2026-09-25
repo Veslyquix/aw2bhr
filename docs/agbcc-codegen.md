@@ -6595,6 +6595,19 @@ tail (one `try_match` spent proving that). The binding has to be *inside* the
 expression. decomp-permuter found the identical fix independently, spelled
 `*(new_var = &pos[i])`.
 
+**The converse: a `dst` local reverses the ROM's index-first order, and the
+direct address expression restores it.** `sub_08013D7C` stores into a tilemap
+with `adds r1, r1, r0` where r1 = `i * 2` and r0 = `pos * 2 + tilemap`. The
+readable `dst = tilemap + pos + i; dst[0] = ...; dst[32] = ...;` expands as a
+plain binop, pointer first (`adds r2, r0, r1`), and the extra pseudo
+re-allocates the whole surrounding branch; that was the -4 residual waves 55
+and 78 parked. Writing each store as `(tilemap + pos + i)[k] = ...` expands the
+address in `EXPAND_SUM` context, gives the ROM's index-first `adds`, and lets
+CSE share it without a named pseudo. The table read on the right needed the same
+treatment, `tbl[idx]` then `(tbl + idx)[k]`, because `lsls r2,r1,#1; adds
+r2,r2,r0` is also index-first. **Tell: a pointer that is recomputed in every
+arm, index-first, and dead after its last store was never a local.**
+
 **A global stored the same constant twice with code in between, where the ROM
 keeps BOTH stores, is a `volatile` proof on its own.** Non-volatile, CSE knows
 the memory already holds the value and deletes the second store outright, so the

@@ -13184,7 +13184,7 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
   "parked_reason": "PARKED Wave 78 at 624/628 (-4), 73.1%. The empty-asm i*2 anchor is byte-neutral; the residual remains one missing four-byte allocation/scheduling effect. Preserve the verified readable draft.",
   "named": false,
