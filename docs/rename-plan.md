@@ -40,9 +40,12 @@ Add one row per symbol. Keep proposals in `Proposed` until reviewed together.
 |---|---|---|---|---|---|---|
 | Struct | `struct UnitType` | — | The 0x5c per-unit-type record has many evidence-backed fields; the record's overall domain is clear, but no better whole-record name has been established yet. | `include/unit.h`, all declarations and uses of `gUnknown_085D5ABC`; changing the tag would touch shared headers and promoted functions. | High that current name is serviceable; no replacement proposed | Hold |
 | Field | `UnitType.unitClass` | Keep | AW2-InfiniteCOs names the gathered field at offset `0x18` `GatherUnitClass` and defines its values as Soldier, Vehicle, Plane, Copter, and Naval; its unit records assign those categories explicitly. This independently supports the existing `unitClass` field name. The value domain should not be conflated with the separate 5/6/7 bonus-table columns returned by `sub_080432E0`. | `include/unit.h`; AW2-InfiniteCOs `common/definitions_unit.asm` (`GatherUnitClass`, `Class*`), `common/macros_unit.asm` (`setUnitClass`), and `units/aw2/*.asm` | High | Keep |
-| Struct | `struct Unk085D3DD0` | — | CO-indexed record (0x104 bytes) with three power-state subrecords and observed CO bonuses. Xenesis's Subroutine List calls address `0x085D3DD0` a routine checking allegiance/HQ type; this conflicts with its observed use as a data table and is not support for a routine-style rename. Candidate semantic name needs review against complete table usage. | `include/co.h`, `include/unit.h`, `gUnknown_085D3DD0` users and prototypes; Xenesis `AW2 Subroutine List.txt` line 365 and `AW2 Datasheet.txt` line 5952 | Medium | Research |
+| Field | `UnitType.unk1b` | `aiUnitType` (candidate) | AW2-InfiniteCOs places `setUnitAIType` at offset `0x1b`, with values named `AICaptureUnit`, `AIIndirectCombat`, `AIDirectCombat`, and carrier roles. The current tree independently observes values 1..6 used as categories by unit-list builders, consistent with an AI classification field, but needs a complete value-to-unit map before choosing the exact semantic label. | `include/unit.h`; `src/decomp/c_0805*.c`; AW2-InfiniteCOs `common/macros_unit.asm` lines 118-122 and `common/definitions_unit.asm` lines 53-60 | Medium | Research |
+| Field | `UnitType.unk1d` | `aiUnitTargetMask` (candidate) | AW2-InfiniteCOs labels offset `0x1d` "AI Unit Classification" and writes target-domain bits (`AITargetGround`, `AITargetAir`, `AITargetSea`, `AITargetSub`). The current tree observes this byte used as a mask against a map plane. This is promising evidence for a target-category mask, but audit the in-tree consumers and whether values combine before adopting the name. | `include/unit.h`; `src/decomp/c_08058BB4.c` (`sub_08058BB4` and `sub_08058C54`); AW2-InfiniteCOs `common/macros_unit.asm` lines 130-134 and `common/definitions_unit.asm` lines 89-93 | Medium | Research |
+| Global table | `gUnknown_085D3DD0` | `gCOStatsAbilities` (candidate) | CO-indexed data table, one 0x104-byte record per CO. AW2-InfiniteCOs calls its corresponding table `COStatsAbilitiesDatatable` and defines each CO stats record as 260 bytes, exactly 0x104. This strongly supports a CO stats/abilities table name; its address-specific Subroutine List entry is contradicted by both repositories' data-table use. | `include/co.h`; table references; AW2-InfiniteCOs `main-generated.asm`, `common/definitions_romallocation.asm` (`coData_Length = 260`), `datatables/hookcounitstats.asm` | Medium-high | Proposed |
+| Struct | `struct Unk085D3DD0` | `struct COStatsAbilities` (candidate) | CO-indexed record (0x104 bytes) with three power-state subrecords and observed CO bonuses. The InfiniteCOs label `COStatsAbilitiesDatatable` for the equivalent 260-byte-per-CO table independently supports this broad name. Xenesis's Subroutine List entry calls `0x085D3DD0` a routine checking allegiance/HQ type, but that conflicts with direct data-table use. | `include/co.h`, `include/unit.h`, `gUnknown_085D3DD0` users and prototypes; InfiniteCOs `main-generated.asm`, `common/definitions_romallocation.asm`; Xenesis `AW2 Subroutine List.txt` line 365 and `AW2 Datasheet.txt` line 5952 | Medium-high | Proposed |
 | Struct | `struct Unk085D3DD0Entry` | — | 0x44-byte per-power subrecord. It contains observed luck, capture, combat bonus, movement, and other data; avoid naming it only for the bonus rows. | `include/co.h`; `struct Unk085D3DD0::power[]` users | Medium | Research |
-| Field | `Unk085D3DD0Entry.unk24` | `unitStatBonusColumns` (candidate) | Eight pointers to four-s16 bonus vectors; family F049 reads vector elements at offsets 0, 2, 4, and 6 for attack, defence, movement, and range. AW2-InfiniteCOs uses that same four-stat vocabulary for its per-unit CO stat data and distinguishes D2D, CO Power, and Super CO Power layers. Its layout is a separate expansion, so it corroborates field vocabulary but does not prove the original table's column labels or all eight index meanings. | `include/co.h`; readers in `src/unit.c`; AW2-InfiniteCOs `common/macros_co.asm` lines 566-577 and `cos/aw2/max.asm` lines 26-31 | Medium | Research |
+| Field | `Unk085D3DD0Entry.unk24` | `pUnitStatBonus` (candidate) | Eight pointers to four-s16 bonus vectors; family F049 reads vector elements at offsets 0, 2, 4, and 6 for attack, defence, movement, and range. AW2-InfiniteCOs explicitly describes its per-unit table as an alternative to the original per-unit-class boost table, corroborating the class-oriented nature of the original data but not the meanings of all eight slots. Its layout differs, so keep the name generic to the observed pointer array. | `include/co.h`; readers in `src/unit.c`; AW2-InfiniteCOs `datatables/hookcounitstats.asm`, `common/macros_co.asm` lines 566-577, and `cos/aw2/max.asm` lines 26-31 | Medium | Research |
 | Function | `GetUnitCombatClassColumn` | `GetCoBonusUnitClassColumn` (candidate) | At `0x080432E0`, maps `UnitType.minRange` values 0, 1, and >1 to indices 7, 5, and 6. Four CO bonus readers use the result as an index into the `unk24` rows of `struct Unk085D3DD0Entry`. Xenesis's datasheet independently identifies `0x080432E0` as a common subroutine in that CO stat-loading path, and describes the 5/6 results as direct/indirect classes; it does not document the 0-to-7 case. The proposed name makes the table-specific use explicit without treating `minRange` itself as a class field. | `src/unit.c`; `.thumb_set sub_080432E0`; bonus readers in `src/unit.c`; `include/co.h`; Xenesis `AW2 Datasheet.txt` lines 2728-2748 and 3518-3527 | Medium-high | Proposed |
 | Function | `GetCoAttackBonus` (`sub_080430B0`) | Keep | The older transcription supplies useful parameter meanings: `coId`, `coPowerState`, and `unitType`. These match the current table indexing and `gPlayers[].coMode` model. Existing name already states the returned quantity. | `src/unit.c`; `include/co.h`; aliases/prototypes in `include/xenesis-names.h`; family F049 peers at `0x08043120`, `0x08043190`, and `0x08043200` | High | Keep; parameter names are a cleanup candidate |
 
@@ -92,6 +95,16 @@ This independently supports the existing `UnitType.unitClass` label and
 reinforces keeping it conceptually distinct from the original game's helper
 that derives a CO bonus-table column from `minRange`.
 
+InfiniteCOs also gives separate names to the neighboring fields: `setUnitAIType`
+at offset `0x1b` uses role-like categories (capture, direct/indirect combat,
+and transport roles), while `setUnitAIUnitClass` at offset `0x1d` writes
+ground/air/sea/sub target bits. That is useful evidence for investigating
+`UnitType.unk1b` and `UnitType.unk1d`, but the repository's own users remain the
+authority for their names: retain `aiUnitType` and `aiUnitTargetMask` as
+candidates pending a complete value and consumer audit. In particular, do not
+confuse the field at `0x1d` with `unitClass` at `0x18`, or with the role-like
+field at `0x1b`.
+
 The README also means that names such as "direct unit" and "indirect unit"
 should be treated as attack-range classifications, not automatically as
 synonyms for the AW2-InfiniteCOs `unitClass` categories. Its `setCOD2DDirectStat`
@@ -99,10 +112,19 @@ and `setCOD2DIndirectStat` macros encode different hand-curated unit lists;
 they don't establish that `GetUnitCombatClassColumn` returns a stored class.
 
 For the CO stat readers, `common/macros_co.asm` names the four per-unit values
-`Attack`, `Defence`, `Movement`, and `Range`. `setCOD2DUnitStat`,
+`Attack`, `Defence`, `Movement`, and `Range`. More directly, the comment in
+`datatables/hookcounitstats.asm` says its replacement table is tabulated per
+unit "instead of per unit-class"; its replacement for `0x080430B0` still
+calls `0x080432E0` and indexes the same eight-slot-per-CO stats table shape.
+The InfiniteCOs allocation defines `coData_Length` as 260 bytes, matching
+the original `0x104` stride. Together these support a CO stats/abilities table
+name for `gUnknown_085D3DD0` / `struct Unk085D3DD0`, and class-oriented bonus
+lookup, while leaving individual fields and slot meanings to in-tree evidence.
+
+`setCOD2DUnitStat`,
 `setCOPowerUnitStat`, and `setCOSuperUnitStat` place those four halfwords in
 separate day-to-day, CO Power, and Super CO Power blocks. This makes
-`unitStatBonusColumns` a plausible descriptive name for the original entry's
+`unitStatBonusPointers` a plausible descriptive name for the original entry's
 eight pointers, whose pointees the existing code reads at the same four
 halfword offsets. Keep it at Research: InfiniteCOs stores a flat per-unit
 matrix (`PHackUltraPointer`) and therefore does not establish how the original
@@ -147,4 +169,6 @@ semantic symbol name without resolving the conflict.
 | 2026-09-25 | Is the Xenesis label for `0x085D3DD0` suitable for renaming the struct/table? | No: it calls the address a routine checking allegiance/HQ type, while repository users treat it as a CO-indexed bonus table. Retain the conflict as a source-quality caution. |
 | 2026-09-25 | Which names from the older `sub_080430B0` transcription are reusable? | Record `coId`, `coPowerState`, `unitType`, and prefer `combatClassColumn` for the helper result. Keep established `UnitType` / `unitClass` and explicit `gUnknown_085D3DD0[a].power[b].unk24[]`; the old generic struct and flattened-offset spellings add no stronger evidence. |
 | 2026-09-25 | Does AW2-InfiniteCOs clarify `UnitType.unitClass` and the helper's class terminology? | Yes: its offset-`0x18` gather and explicit Soldier/Vehicle/Plane/Copter/Naval values support `unitClass`. Its README distinguishes indirect classification from minimum range, so document the helper result as a CO bonus-table column and avoid equating it with the stored unit class. |
-| 2026-09-25 | Does InfiniteCOs suggest semantic names for `Unk085D3DD0Entry.unk24[]`? | It uses the same four stat terms (Attack, Defence, Movement, Range) in D2D/Power/Super per-unit data. Candidate `unitStatBonusColumns`; keep under research because InfiniteCOs uses a separate flat table and does not prove the original eight-slot index semantics. |
+| 2026-09-25 | Does InfiniteCOs suggest semantic names for `Unk085D3DD0Entry.unk24[]`? | It uses the same four stat terms (Attack, Defence, Movement, Range) in D2D/Power/Super per-unit data, and describes its flat matrix as an alternative to per-unit-class boosts. Candidate `unitStatBonusPointers`; keep under research because InfiniteCOs does not prove the original eight-slot index semantics. |
+| 2026-09-25 | Do InfiniteCOs' unit macros clarify adjacent unit-type bytes? | They distinguish the role-like `AI Type` byte at `0x1b` from the target-category bitmask byte at `0x1d`, separate from unit class at `0x18`. Added `aiUnitType` and `aiUnitTargetMask` as candidates; both need an in-tree consumer/value audit before approval. |
+| 2026-09-25 | Does InfiniteCOs identify the `0x085D3DD0` table? | Yes: it calls the corresponding table `COStatsAbilitiesDatatable`, gives each CO record a 260-byte stride (`0x104`), and labels the 0x080430B0 replacement as switching from per-unit-class to per-unit boosts. Added `gCOStatsAbilities` / `struct COStatsAbilities` candidates and kept the exact unknown. |

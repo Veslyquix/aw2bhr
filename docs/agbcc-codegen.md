@@ -49713,3 +49713,27 @@ These are all small `gMap` neighbour predicates. The levers that closed them:
   broke semantics (moved a `goto`, read an uninitialised local, assigned
   `result` inside a condition) or found a small lever (`j = army * 2; a2 = j`).
   Always read its diff before trusting a score.
+
+
+## Inline session, 2026-09-25 (round 4): three long-parked functions
+
+- **sub_080363F8: shifts that keep `x << 22` live across a call are bitfield
+  reads.** `lsls r5,r1,#22` kept across `__umodsi3`, then `lsrs #22` and
+  `lsrs #17` from it, is a 10-bit bitfield (OAM attr2 tileNum) read three
+  times out of a 32-bit container. Waves 45-57 had it as a masked `u16` local,
+  and CSE merged that. A local union viewing the returned `struct UnkVec` as
+  `{ u32; u32 tileNum:10; }` matched once the operands were ordered as the ROM
+  evaluates them (read `attributes[2]` inside the expressions, sum
+  `& 0xfc00` + remainder + tile).
+- **sub_0807F57C: an assembler-label alias expresses a per-file prototype.**
+  The ROM tests `sub_0803CAB8`'s result with no `lsls #24`, so this file saw
+  it as returning `int`, while every other caller needs the header's `u8`.
+  `extern int sub_0803CAB8_int(u32) asm("sub_0803CAB8");` gives a direct `bl`
+  with an int return. A function-pointer cast gives an indirect call (+16).
+  This closes the wave-73 "cross-TU prototype contract" residual kind without
+  reshaping the header.
+- **sub_080373F0: to pick which cross-jumped copy survives, write it once.**
+  Three `return 0`s leave the last copy standing, and the ROM kept the middle
+  one. One `fail: return 0;` placed at the middle position, reached by goto
+  from the other two, matched, together with `if (x == a2) goto ok; goto fail;`
+  for the ROM's `beq ok; b fail` pair.

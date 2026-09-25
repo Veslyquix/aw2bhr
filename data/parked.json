@@ -425,24 +425,6 @@
    "reason": "Wave 58 (W58-A), carried from waves 33/36/40/42. Constant placement: a DImode mask's high-word all-ones constant that CSE re-spends on the `== -1` compare. Type model confirmed against a matched twin, so allocation and typing are both excluded.",
    "wave81": "WAVE 81 (D): interleaving t=a6 BETWEEN the two DImode masks refuted by probe. The masks do split into two separate ANDs, but the 0xFFFFFFFF high word is created BEFORE the first mask regardless (its ldr/adds pair sits above the ANDs) and the ==-1 compare still consumes it; three pool constants persist. High-word materialisation follows from ANY DImode AND against a negative int constant, not from statement adjacency or evaluation window."
   },
-  "sub_080373F0": {
-   "bytes": 88,
-   "best": "73.9% identical, SIZE-EXACT and instruction MULTISET exact",
-   "remaining_diff": "Basic-block layout only. Three source-level `return 0`s compile to three identical `movs r0,#0; b <epilogue>` blocks; cross-jumping keeps exactly ONE and redirects the other two. The residual is entirely WHICH copy it keeps. The ROM keeps the MIDDLE one. Register allocation, pool contents and instruction order within every block are already correct, so there is nothing for a one-register or one-constant lever to move.",
-   "why_it_is_close": "Nothing about the C is wrong in the ordinary sense -- no wrong shape, no wrong type, no missing statement, no misread idiom. Size is exact and the multiset of emitted instructions is exact. Only the surviving cross-jump target differs.",
-   "axes_ruled_out": [
-    "decomp-permuter -- 300 s, 19,619 iterations from the 73.9% draft: ceiling 73.9%, no byte match, best three candidates 73.9 / 40.9 / 61.4. Wave 37's 'order-wrong and slot-wrong are precisely its cases' means INSTRUCTION order within a block, not which block survives cross-jumping. This was the ideal case on paper (size-exact, multiset-exact, permuter never previously tried) and it produced nothing.",
-    "Nine wave-43 spellings -- all put the surviving copy LAST.",
-    "One wave-51 spelling -- put it FIRST.",
-    "Register-allocation levers generally -- allocation is already byte-correct; there is no residual for them to act on.",
-    "WAVE 81 (W81-C): temporary-profile sweep on the unchanged draft -- configured 73.9% is the best; no-force 73.9% identical, o1/o1-no-force 28.4%, old-agbcc/old-agbcc-no-force 71.6%. The toolchain axis is measured and closed here too."
-   ],
-   "settled_by_this_attempt": [
-    "The surviving copy is the one entered by FALL-THROUGH; the other two are branch-only and therefore deletable outright. No spelling found so far makes the MIDDLE site the fall-through-entered one, and that -- not the number or order of the returns -- is the thing a candidate has to control.",
-    "A size-exact, multiset-exact near-miss can still be unreachable by every allocation lever. Classify the residual before spending a budget: this is a fourth residual kind (basic-block layout), alongside shape, type and allocation/constant-placement."
-   ],
-   "reason": "Wave 57 (W57-E). Residual is cross-jumping block selection, not source shape, types or allocation. Needs a spelling that makes the middle `return 0` the fall-through-entered block; the permuter provably cannot reach it."
-  },
   "sub_08039188": {
    "bytes": 220,
    "best": "31.8% identical, +4 bytes",
@@ -871,23 +853,6 @@
    ],
    "note": "Wave 79 (W79-C) -- RESIDUAL RECLASSIFIED. The whole 63-byte diff reduces to ONE decision and it is a CSE BASE CHOICE, the wave-77 -does not convert- class: the candidate has ONE pseudo for &gUnknown_03003FC0.unk2f used on both sides of the sub_08035080 call, the ROM has TWO. Everything else follows from that -- because the ROM re-derives post-call it needs the .LC word-s address after a call, so that address takes a callee-saved register and pays the adds r5,r1,#0 at +0xc, which is the first differing instruction. The post-call block is DOMINATED by the pre-call read and both name the same member at the same offset, so the two address computations are unconditionally equivalent and CSE is entitled to unify them; no C text distinguishes them. Fifteen spellings across waves 45/51/57/59/79 have failed. The old wave-59 NEXT LEVER line is WITHDRAWN -- it restated the diff rather than naming a lever. Reminder that has now caught two waves: the DRAFT scores 50.8%, the 85.2% trymatch prints is best.c-s, and best.c reads an UNINITIALISED pointer on the case 1/2 path and must never be promoted. OLD NOTE FOLLOWS. Wave 59 (W59-B). NEXT LEVER: something that makes the tail's address expression re-expand from the .LC word rather than reuse the pre-call pseudo. The address is referenced twice across one call and gcc keeps it; the ROM does not. This is a register-allocation/GCSE question, not a shape question. Binding the struct address to a local is what moves the permuter's score, which is the strongest lead, but the only shape found that way is semantically indefensible."
   },
-  "sub_080363F8": {
-   "bytes": 132,
-   "best": "The DRAFT scores 22.7%, candidate 136 bytes (+4). The 23.5% that trymatch prints as 'best so far' is best.c's score and is NOT the draft. Carried from waves 45/51/57; NOT re-measured in wave 59 (W59-B).",
-   "remaining_diff": "ONE LIVE VALUE TOO MANY ACROSS __umodsi3. The ROM keeps only v.unk04 << 22 (r5) live and RE-DERIVES the >> 22 afterwards; the candidate lets CSE merge the two >> 22 uses so that both the shifted value and the extracted one are live, which pulls in r9 and costs the extra push/pop pair. ROM: lsls r5,r1,#22 ; lsrs r0,r5,#22 ... bl ... lsrs r1,r5,#22. Draft: lsls r0,r1,#22 ; mov r9,r0 ; lsrs r5,r0,#22 ... bl ... (r5 kept). Counted across the call the ROM has FIVE live values (b->unk04, the <<22, off, a, b) and the draft has SIX. Every other byte follows from that.",
-   "why_it_is_close": "The instruction stream is otherwise correct end to end. Settled: s16 first parameter (lsls #16 / asrs #16 at entry, and it indexes gUnknown_03001470); `off` must be UNSIGNED or the modulo goes to __modsi3 instead of __umodsi3; idx is u16; gUnknown_03001470[a].unk18 points at an object carrying another pointer at +0x48, and its declared int is why the cast is there; the dead ldr r0,[sp] is agbcc's own two-word struct-return load and appears either way.",
-   "axes_ruled_out": [
-    "Wave 51: breaking the CSE with a NO-OP WIDTH CAST -- b->unk04 = (u16)(v.unk04 << 22 >> 22) + ... produces byte-for-byte the same output, same +4, same r9. The value already fits in 10 bits so the cast is folded away in the front end long before CSE sees two expressions to compare. To break a CSE the two spellings must differ in a way that SURVIVES folding.",
-    "Wave 45: the 10-bit BITFIELD reading. The evidence for it is real (this body masks with 0x3ff BOTH ways in one function, ldr =0x3FF/ands for off and lsls #0x16/lsrs #0x16 for the coordinate, and agbcc does not spell one & 0x3ff two different ways, so the shift pair is a type conversion and not a mask) but struct UnkVec's unk04 is a shared plain u32, so the only way to apply it is a cast on &v -- and taking a second differently-typed address of the struct-return local makes agbcc copy all eight bytes to a fresh stack slot and RELOAD the member with ldrh, four instructions worse. Testing it properly needs sub_08015638's return type retyped, which is a shared-tag change.",
-    "Wave 45: & 0x3ff for the coordinate (emits the pool word where the ROM has the shift pair, and makes the modulo SIGNED unless off is u32); binding v.unk04 << 22 to its own local (keeps t >> 22 in a second callee-saved register); reassociating the store's three addends.",
-    "Wave 59 (W59-B): the wave-59 loop-rotation lever does NOT apply -- this function contains no loop."
-   ],
-   "settled_by_this_attempt": [
-    "Wave 51: EVALUATION ORDER. The ROM computes the shift pair BEFORE it loads b->unk04 (lsls r5,r1,#22 ; lsrs r0,r5,#22 ; mov r1,r8 ; ldrh r4,[r1,#4] ; subs r6,r4,r0) while the candidate loads b->unk04 first. Written as (b->unk04 - c) the left operand is expanded first, so the ROM's order points at c having been bound in a PRECEDING STATEMENT rather than computed inline.",
-    "Wave 57: what the lever would have to be, stated so it is not re-derived. cse merges the two >> 22 because they are the same expression in one extended basic block and a bl does not invalidate a pseudo, so the two source expressions must differ in a way that survives fold. & 0x3ff IS such a spelling (agbcc does not fold (x<<22)>>22 into a mask -- this draft proves it) but it costs a pool word load plus an ands where the ROM has a single lsrs, so it is 2 bytes worse wherever it is placed. No third spelling of a 10-bit extraction is known, and that is the WHOLE function."
-   ],
-   "note": "Wave 59 (W59-B) -- carried, not attempted; W59-B had no lever the wave-45/51/57 lists had not already ruled out and spent its budget where the evidence pointed. NOT TRIED anywhere: decomp-permuter. There is no permuter import for this function and best.c is only 23.5%, a poor starting point, but the residual is exactly 'one value too many in a callee-saved register', which wave 37 lists as the permuter's own case. Note W59-A reports mcp permute failing with a KeyError on 'exit_code' and STRANDING raw header-expanded output in work/<fn>/<fn>.c; W59-B ran it successfully on sub_08035080 the same wave, so the failure is conditional rather than universal -- copy the draft first either way."
-  },
   "sub_08039588": {
    "bytes": 172,
    "best": "87.2% identical, SIZE-EXACT at 172 bytes, 22 of 172 bytes differ (wave 73, W73-D). Was 43.0% at 164 bytes (-8).",
@@ -1064,18 +1029,6 @@
     "Wave 59 (W59-F): the permuter is unavailable -- mcp permute fails with Error executing tool permute: 'exit_code' and destroys the draft."
    ],
    "note": "Wave 59 (W59-F). Fourth member of W58-B's HOLD / REMATERIALISE chapter (with three at +12, +8 and +4) and the cleanest, because W51-O's five probes box it in from both sides: one reference is too few pool words, two is too many. There is no third option in the reference-count axis and that axis is exhausted."
-  },
-  "sub_0807F57C": {
-   "bytes": 156,
-   "best": "48.7% identical, candidate 160 bytes (+4). ONE INSTRUCTION. The percentage is the positional artefact of one extra halfword shifting everything after +0x32.",
-   "remaining_diff": "The candidate emits lsls r0, r0, #24 immediately after bl sub_0803CAB8 and the ROM does not. That is the whole residual: two bytes for the shift and two for the pool's realignment (.short 0x0000). Every other instruction, every pool word, every relocation and their ORDER are identical -- the five R_ARM_ABS32 entries are gUnknown_03005944 / 086166F0 / 030058E0 / 03005958 / 03005948 in that sequence in both, at addresses differing by exactly 4.",
-   "why_it_is_close": "Everything else matches, including the shared [sp] / [sp,#4] caller-save pair around the call, both 0xFF sentinel tests and the gUnknown_03005944 cursor writes.",
-   "axes_ruled_out": [
-    "Wave 4: four spellings of the test, all producing the identical shift -- if (sub_0803CAB8(x)), if (sub_0803CAB8(x) != 0), if (sub_0803CAB8(x) > 0), and u8 t = sub_0803CAB8(x); if (t). The last is the interesting negative: a promoted-unsigned u8 local does NOT absorb a callee's return narrowing the way it absorbs a load's.",
-    "Wave 59 (W59-F): NOT ATTEMPTED, and the wave-59 batch note's reading of it is WRONG. It was ranked as an extra or mis-ordered literal-pool word because every ldr [pc,#N] is off by exactly 4. The pool is not the residual -- its contents and order are identical and the offsets shift because of the one extra instruction ahead of them. A uniform +4 on every pc-relative load is a downstream symptom of an insertion, never evidence about the pool itself.",
-    "WAVE 73 (W73-A): re-verified unchanged at 48.7% / +4 bytes and re-classified. NO new spelling was attempted and none should be. This is RESIDUAL KIND 5 (cross-TU prototype contract) under the wave-73 taxonomy, which says explicitly to stop and add the documented example rather than spend attempts. The single 'lsls r0,r0,#24' is agbcc re-narrowing a u8-returning callee's result at a call site, and no spelling of THIS caller reaches it -- the fix is to retype sub_0803CAB8 as int in this translation unit only, which a single shared include/unknown-functions.h cannot express. ORCHESTRATOR DECISION, not an agent one."
-   ],
-   "note": "Wave 59 (W59-F). RESIDUAL KIND 5 -- CROSS-TU PROTOTYPE CONTRACT, and only the second one documented after sub_08039188. The shift is agbcc re-narrowing a u8-returning callee's result. sub_0803CAB8 is not the suspect: TEN of its eleven callers DO narrow, including the promoted, matched src/decomp/c_0803C354.c (nine sites) and c_08043CA0.c, and c_0803CA9C.c defines it u8. This one caller is the outlier, so the original source declared sub_0803CAB8 int in THIS translation unit and u8 in the others -- a per-file prototype divergence that a single shared include/unknown-functions.h cannot express. Retyping it to int and casting (u8) at the ten other sites would match all eleven and is an ORCHESTRATOR decision, not an agent one: it reshapes a settled, high-fan-in declaration to suit one function."
   },
   "sub_08071B9C": {
    "bytes": 232,
