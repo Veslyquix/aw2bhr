@@ -8,10 +8,10 @@
  */
 
 /* Rebuilds the whole save-slot table: clears the 16 words at
- * gUnknown_0200CC88[0x10..0x1f], then for each of the 16 slots loads it with
+ * gUnknown_0200CC88.slotGeneration, then for each of the 16 slots loads it with
  * sub_0801B018 and records its id/size/flags, tracking the NEWEST valid slot
  * (`best`) by the u32 at buf+8 with buf[0xc] as the tie-break. The winner's
- * 16-word block at buf+0x10 is copied over gUnknown_0200CC88[0x10..0x1f] and
+ * 16-word block at buf+0x10 is copied over gUnknown_0200CC88.slotGeneration and
  * gUnknown_0200CD08 gets its counter + 1.
  *
  * With no valid slot at all it calls sub_0801ADC8 (unless a1 is set) and
@@ -51,7 +51,7 @@ void sub_0801B2FC(int a1)
     best = -1;
 
     for (j = 0; j < 0x10; j++)
-        gUnknown_0200CC88[0x10 + j] = 0;
+        gUnknown_0200CC88.slotGeneration[j] = 0;
 
     gUnknown_0200CD08 = 0;
 
@@ -64,21 +64,21 @@ void sub_0801B2FC(int a1)
 
         if (sub_0801B018(i) == 0)
         {
-            gUnknown_0200CC88[i] = BUF->unk008;
+            gUnknown_0200CC88.sectorGeneration[i] = BUF->unk008;
             gUnknown_0200CC38.unk10[i] = BUF->unk00d;
             *unk00 = BUF->unk00d;
             gUnknown_0200CC38.unk30[i] = BUF->unk00c;
 
             if (best == -1
                 || (best > -1
-                    && (gUnknown_0200CC88[best] < BUF->unk008
-                        || (gUnknown_0200CC88[best] == BUF->unk008
+                    && (gUnknown_0200CC88.sectorGeneration[best] < BUF->unk008
+                        || (gUnknown_0200CC88.sectorGeneration[best] == BUF->unk008
                             && gUnknown_0200CC38.unk30[best] > BUF->unk00c))))
             {
                 best = i;
 
                 for (j = 0; j < 0x10; j++)
-                    gUnknown_0200CC88[0x10 + j] = BUF->unk010[j];
+                    gUnknown_0200CC88.slotGeneration[j] = BUF->unk010[j];
 
                 gUnknown_0200CD08 = BUF->unk008 + 1;
             }

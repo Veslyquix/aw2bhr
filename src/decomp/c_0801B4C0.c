@@ -75,8 +75,7 @@ int sub_0801B4C0(void)
       gUnknown_0200CC38.unk00[i] = (gUnknown_0200CC38.unk10[i] |= 0xff);
       gUnknown_0200CC38.unk20[i] = 0;
       gUnknown_0200CC38.unk30[i] = 0;
-      gUnknown_0200CC88[i + 0x10] = 0;
-      gUnknown_0200CC88[i] = 0;
+      gUnknown_0200CC88.sectorGeneration[i] = gUnknown_0200CC88.slotGeneration[i] = 0;
       sub_0801B6A8(gUnknown_02002000, 0x1000);
       for (j = 0; j < 4; j++)
       {

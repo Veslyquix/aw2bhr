@@ -49750,3 +49750,29 @@ These are all small `gMap` neighbour predicates. The levers that closed them:
   one. One `fail: return 0;` placed at the middle position, reached by goto
   from the other two, matched, together with `if (x == a2) goto ok; goto fail;`
   for the ROM's `beq ok; b fail` pair.
+
+## A struct MEMBER hoists its base register; an array subscript does not (0x0200CC88)
+
+`gUnknown_0200CC88` is now `struct SaveSlotGenerations { u32
+sectorGeneration[0x10]; u32 slotGeneration[0x10]; }`. The three spellings of
+the upper table are three different codegens:
+
+- `(&g[16])[i]` folds 0x0200CCC8 into one pool constant.
+- `g[i + 16]` loads the symbol into a register inside the inner loop, whose own
+  LICM moves it to the inner preheader. The outer loop then cannot move it
+  again: `reg_in_basic_block_p` fails on the stale REGNO_FIRST_UID.
+- `g.slotGeneration[i]` forms `(base_reg + 0x40)` via the COMPONENT_REF path.
+  The outer loop hoists the base register and spills it. This is what
+  sub_0801A7D8's ROM does: `ldr r2, [sp, #0xb4]; adds r2, #0x40` feeds the copy
+  loop. The member spelling alone fixed that function's frame (204 -> 208) and
+  every spill slot, 53.7% -> 81.2%.
+
+**Read-out:** a spilled symbol base followed by `adds #<member offset>` in the
+ROM means a struct member access, not an array subscript.
+
+The member spelling has a price where the ROM shares ONE induction variable
+across both tables. In sub_0801B4C0, `g.slotGeneration[i] = 0;
+g.sectorGeneration[i] = 0;` builds a second giv (+4 bytes). The chained
+assignment `g.sectorGeneration[i] = g.slotGeneration[i] = 0;` restores the
+ROM's `str r0, [r1, #0x40]; str r0, [r1]` pair off one pointer and matches.
+The same file already writes `unk00[i] = (unk10[i] |= 0xff)`.

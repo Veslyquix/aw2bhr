@@ -15008,12 +15008,29 @@ extern struct Unk0200CC38 gUnknown_0200CC38;
 
 /* Wave 40 (W40-F). 0x0200CC88 -- two more per-slot arrays alongside
  * gUnknown_0200CC38 above, whole words this time and 0x10 slots each, cleared
- * together by sub_0801B4C0's reset loop. ONE declaration of 0x20 words rather
- * than two of 0x10: the ROM reaches both through a single induction variable
- * stepping by 4, with the upper array as a `str [rN, #0x40]` displacement off
- * it, which is what strength reduction does to two subscripts of one array and
- * not to two objects. Nothing types the contents beyond the store width. */
-extern u32 gUnknown_0200CC88[];
+ * together by sub_0801B4C0's reset loop. ONE object rather than two: the ROM
+ * reaches both through a single induction variable stepping by 4, with the
+ * upper array as a `str [rN, #0x40]` displacement off it, which is what
+ * strength reduction does to two subscripts of one object and not to two
+ * objects.
+ *
+ * A struct, not `u32 [0x20]`. sub_0801B2FC fills sectorGeneration[i] with the
+ * generation word (+8) of slot i's own sector header, and slotGeneration with
+ * the newest sector's copy of the whole table (its +0x10 block);
+ * sub_0801A7D8 bumps slotGeneration[slot] per write attempt and writes the
+ * table back into every sector. The struct spelling is measured, not
+ * cosmetic: sub_0801A7D8's copy loop reads slotGeneration through the
+ * object's base register + 0x40, hoisted out of its segment loop and spilled
+ * at sp+0xb4. `(&gUnknown_0200CC88[16])[i]` folds 0x0200CCC8 into one pool
+ * constant and `gUnknown_0200CC88[i + 16]` never hoists the base; only the
+ * member access reproduces the ROM's frame. */
+struct SaveSlotGenerations
+{
+    /* 0x00 */ u32 sectorGeneration[0x10];
+    /* 0x40 */ u32 slotGeneration[0x10];
+};
+
+extern struct SaveSlotGenerations gUnknown_0200CC88;
 
 /* Wave 50 (W50-K). 0x0200CD08 -- a single WORD, written by sub_0801B2FC and by
  * nothing else that has been read: cleared to 0 before the slot scan, then set
