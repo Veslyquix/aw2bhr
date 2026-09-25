@@ -49846,3 +49846,29 @@ exits keeps the `beq` form. Two early returns leave the zero block mid-body.
 **Read-out:** when the ROM keeps a loop copy that every loop shape coalesces,
 look for the cursor's register being reused after the loop. Reuse the
 variable there instead of adding a new local.
+
+## The cursor-reuse lever carries to the aligned sibling (sub_08014FF8)
+
+sub_08014FF8 (now `HeapAllocAligned`) was parked at 348/352 (-4). Its
+residual was a missing `mov r2, r8` in the `best == head` arm. The draft
+compared `best` against a `prev` variable loaded from gUnknown_03000050.
+cse's jump equivalence then knew `prev == best` in that arm and used
+`prev`'s low register directly.
+
+Reusing one cursor `p` as in sub_08014DCC closed it. The gap arms become
+`p = best; p->next = ...`, the split tail is `p = hdr->next; p->next = ...`,
+and the best == head test compares against a fresh
+`(struct MemBlock *)gUnknown_03000050` instead of `p`. The list walk starts
+its own `for (p = (struct MemBlock *)gUnknown_03000050; ...)`. With nothing
+equating `p` and `best`, the `p = best` copy survives as the ROM's
+`mov r2, r8`.
+
+Two traps from the cleanup pass:
+
+- `* sizeof(u32)` is `size_t` (unsigned). In `(data - best) * 4 <= 32` it
+  turns the ROM's `bgt` into an unsigned test (+4 bytes). In the large-gap
+  arm's size it stops cse from reusing the signed byte gap, and the two arms
+  cross-jump one instruction earlier. Keep `* 4` where the ROM value is the
+  signed int gap.
+- `next = cur; best = next;` in the scan is still load-bearing. Plain
+  `best = cur;` is -4.
