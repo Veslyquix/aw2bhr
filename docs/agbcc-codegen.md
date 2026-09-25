@@ -49667,14 +49667,49 @@ These are all small `gMap` neighbour predicates. The levers that closed them:
 - **sub_08009538 matched only with `register int keep asm("r8")`.** Waves 37 and
   80 exhausted the unpinned spellings. This was a coordinator decision; pinned
   promoted files already exist.
-- **sub_0800F8D4 (not matched, +4 to 81.7%): shared `yes:` label.** Each arm
-  ends `if (FAMILY(n)) goto yes; return 0;` with `yes: return 1;` as the last
-  block. This lets cross-jumping merge the arms' identical compare-chain tails,
-  as the ROM does. `return FAMILY(n);` builds a boolean the ROM lacks, and
-  per-arm `return 1` costs about 140 bytes.
+- **sub_0800F8D4 (MATCHED later the same day): `else if` arms ending
+  `if (FAMILY(n)) return 1;`, one `return 0;` closing the function.** jump.c
+  cross-jumps every arm's `return 1` and the arms' identical compare-chain tails
+  into the last arm, giving the ROM's `movs r0,#1; b` block before the final
+  `movs r0,#0`. `return FAMILY(n);` builds a boolean the ROM lacks. A shared
+  `goto yes` label reaches +4 only. Separate `if`s (not `else if`) re-test the
+  tile and cost +148.
 
-- **sub_080077EC (not matched, 96.6%): `do { } while (0)` around a goto-loop
-  body.** Wrapping the first loop's two table copies in a zero-trip-condition
+- **sub_080077EC (MATCHED later the same day; see below): `do { } while (0)`
+  around a goto-loop body.** Wrapping the first loop's two table copies in a zero-trip-condition
   `do/while(0)` fixed the loop's whole register assignment, taking it from 89.7%
   to 96.6%. The permuter found this within 20 s once it could run. Try it early
   on register-swap residuals inside hand-written goto loops.
+
+
+## Inline session, 2026-09-25 (round 3): four more, all by loop.c / jump.c mechanics
+
+- **sub_080073F8: write a copy in both arms to make loop.c reduce its address.**
+  The ROM walks `gUnknown_0200B224[list]` as a pointer (+4, then -0x44 or -0x50
+  when the list wraps) initialised after the loop guard, i.e. a strength-reduced
+  giv. With the copy written once, the giv's benefit (two insns) does not beat
+  the biv's three increments (+1/-17/-20), so it is not reduced (-40 bytes).
+  Written in both `editMode` arms, the two identical givs combine and are
+  reduced. jump.c then cross-jumps the two stores back into one block. That
+  merge point has two predecessors, which ends CSE's extended block, so the
+  following `(entry->itemId & 0x1F) | army` re-reads memory exactly like the ROM.
+  **When the ROM shows a pointer the loop "shouldn't" have reduced, look for a
+  duplicated use that jump.c later merged.** The spilled-stack-slot order
+  followed declaration order (army/armyIndex before count/limit).
+- **sub_080077EC: a separate index biv puts the preheader in the ROM's order.**
+  `for (j = 0; j < 5; j++) { ... g[k].x; i++; k++; }` with `k = 9` gives:
+  movables, the reversed counter `movs r5,#4`, then the reduced giv init.
+  Indexing by `[j + 9]` emits the giv init before the counter. Increment order
+  in the body follows source order (`i++` before `k++`). Routing `army * 2`
+  through the then-unused `j` fixed the allocation; the permuter found that one.
+- **sub_0800CAA0: spell every access to one table block the same way.**
+  Reading all four tables as `ROW1(sym)[i]` (the member reference
+  c_0800CB30.c documents) matched. The parked record had tried the member
+  reference only on the fourth table, next to the row-1 symbols
+  gUnknown_084888B0/D0/F0, and concluded "false in a loop". It was the mix that
+  failed, not the member reference: the three row-1 symbols fold into pool
+  words and hoist, while only the member form keeps `sym + 0x10` in the loop.
+- **Permuter caveat:** in all four functions its best "improvements" either
+  broke semantics (moved a `goto`, read an uninitialised local, assigned
+  `result` inside a condition) or found a small lever (`j = army * 2; a2 = j`).
+  Always read its diff before trusting a score.

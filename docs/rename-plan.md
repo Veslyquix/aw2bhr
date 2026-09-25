@@ -39,9 +39,12 @@ Add one row per symbol. Keep proposals in `Proposed` until reviewed together.
 | Kind | Current name | Proposed name | Evidence / meaning | References and dependencies | Confidence | Status |
 |---|---|---|---|---|---|---|
 | Struct | `struct UnitType` | — | The 0x5c per-unit-type record has many evidence-backed fields; the record's overall domain is clear, but no better whole-record name has been established yet. | `include/unit.h`, all declarations and uses of `gUnknown_085D5ABC`; changing the tag would touch shared headers and promoted functions. | High that current name is serviceable; no replacement proposed | Hold |
+| Field | `UnitType.unitClass` | Keep | AW2-InfiniteCOs names the gathered field at offset `0x18` `GatherUnitClass` and defines its values as Soldier, Vehicle, Plane, Copter, and Naval; its unit records assign those categories explicitly. This independently supports the existing `unitClass` field name. The value domain should not be conflated with the separate 5/6/7 bonus-table columns returned by `sub_080432E0`. | `include/unit.h`; AW2-InfiniteCOs `common/definitions_unit.asm` (`GatherUnitClass`, `Class*`), `common/macros_unit.asm` (`setUnitClass`), and `units/aw2/*.asm` | High | Keep |
 | Struct | `struct Unk085D3DD0` | — | CO-indexed record (0x104 bytes) with three power-state subrecords and observed CO bonuses. Xenesis's Subroutine List calls address `0x085D3DD0` a routine checking allegiance/HQ type; this conflicts with its observed use as a data table and is not support for a routine-style rename. Candidate semantic name needs review against complete table usage. | `include/co.h`, `include/unit.h`, `gUnknown_085D3DD0` users and prototypes; Xenesis `AW2 Subroutine List.txt` line 365 and `AW2 Datasheet.txt` line 5952 | Medium | Research |
 | Struct | `struct Unk085D3DD0Entry` | — | 0x44-byte per-power subrecord. It contains observed luck, capture, combat bonus, movement, and other data; avoid naming it only for the bonus rows. | `include/co.h`; `struct Unk085D3DD0::power[]` users | Medium | Research |
+| Field | `Unk085D3DD0Entry.unk24` | `unitStatBonusColumns` (candidate) | Eight pointers to four-s16 bonus vectors; family F049 reads vector elements at offsets 0, 2, 4, and 6 for attack, defence, movement, and range. AW2-InfiniteCOs uses that same four-stat vocabulary for its per-unit CO stat data and distinguishes D2D, CO Power, and Super CO Power layers. Its layout is a separate expansion, so it corroborates field vocabulary but does not prove the original table's column labels or all eight index meanings. | `include/co.h`; readers in `src/unit.c`; AW2-InfiniteCOs `common/macros_co.asm` lines 566-577 and `cos/aw2/max.asm` lines 26-31 | Medium | Research |
 | Function | `GetUnitCombatClassColumn` | `GetCoBonusUnitClassColumn` (candidate) | At `0x080432E0`, maps `UnitType.minRange` values 0, 1, and >1 to indices 7, 5, and 6. Four CO bonus readers use the result as an index into the `unk24` rows of `struct Unk085D3DD0Entry`. Xenesis's datasheet independently identifies `0x080432E0` as a common subroutine in that CO stat-loading path, and describes the 5/6 results as direct/indirect classes; it does not document the 0-to-7 case. The proposed name makes the table-specific use explicit without treating `minRange` itself as a class field. | `src/unit.c`; `.thumb_set sub_080432E0`; bonus readers in `src/unit.c`; `include/co.h`; Xenesis `AW2 Datasheet.txt` lines 2728-2748 and 3518-3527 | Medium-high | Proposed |
+| Function | `GetCoAttackBonus` (`sub_080430B0`) | Keep | The older transcription supplies useful parameter meanings: `coId`, `coPowerState`, and `unitType`. These match the current table indexing and `gPlayers[].coMode` model. Existing name already states the returned quantity. | `src/unit.c`; `include/co.h`; aliases/prototypes in `include/xenesis-names.h`; family F049 peers at `0x08043120`, `0x08043190`, and `0x08043200` | High | Keep; parameter names are a cleanup candidate |
 
 ### Struct notes
 
@@ -54,6 +57,56 @@ does not establish every field's semantics.
 For each function, record address or stable identifier, behavior, callers,
 related data/types, and evidence supporting the verb and object in the name.
 Distinguish observed behavior from inferred purpose.
+
+### Names extracted from the older `sub_080430B0` transcription
+
+The transcription's `coID`, `coPowerState`, and `unitType` are useful parameter
+names for the existing `GetCoAttackBonus` implementation. Its `combatClass`
+temporary is more precisely `combatClassColumn`: `sub_080432E0` returns an
+index into `Unk085D3DD0Entry.unk24[]`, not a value stored as a class on the
+unit type. Its `classOff` is likewise an index/byte offset derived from
+`UnitType.unitClass`; retain the established field name `unitClass` rather
+than reviving the transcription's generic `class`.
+
+`UnitTypeRecord` is a useful descriptive synonym from the old notes, but the
+repository already uses `struct UnitType` consistently and this transcription
+does not establish a reason to rename that type. The transcription's
+`gUnknown_085D3E2C` expression also differs from the current source's explicit
+`gUnknown_085D3DD0[a].power[b].unk24[...]`; do not reuse that spelling as a
+table rename based on this snippet. The old `classOff` / `powerOff` / `coOff`
+arithmetic describes flattened equivalent addressing (power stride 17 words,
+CO stride 65 words), not independently named semantic objects.
+
+### AW2-InfiniteCOs cross-check
+
+The local checkout at `/home/vesly/AW2-InfiniteCOs` is a community expansion
+and partial reimplementation, so use it as corroborating evidence rather than
+as authority for the original ROM. Its README explicitly describes an
+"Indirect Classification" fix: applying the indirect-unit flag from class
+data rather than minimum range. Its `common/definitions_unit.asm` sets
+`GatherUnitClass` to decimal 24 (`0x18`) and defines `ClassSoldier` through
+`ClassNaval` as values 0 through 4; `common/macros_unit.asm` writes those
+categories into unit records, and `units/aw2/*.asm` assigns examples such as
+Infantry -> Soldier, Tank -> Vehicle, Fighter -> Plane, and Sub -> Naval.
+This independently supports the existing `UnitType.unitClass` label and
+reinforces keeping it conceptually distinct from the original game's helper
+that derives a CO bonus-table column from `minRange`.
+
+The README also means that names such as "direct unit" and "indirect unit"
+should be treated as attack-range classifications, not automatically as
+synonyms for the AW2-InfiniteCOs `unitClass` categories. Its `setCOD2DDirectStat`
+and `setCOD2DIndirectStat` macros encode different hand-curated unit lists;
+they don't establish that `GetUnitCombatClassColumn` returns a stored class.
+
+For the CO stat readers, `common/macros_co.asm` names the four per-unit values
+`Attack`, `Defence`, `Movement`, and `Range`. `setCOD2DUnitStat`,
+`setCOPowerUnitStat`, and `setCOSuperUnitStat` place those four halfwords in
+separate day-to-day, CO Power, and Super CO Power blocks. This makes
+`unitStatBonusColumns` a plausible descriptive name for the original entry's
+eight pointers, whose pointees the existing code reads at the same four
+halfword offsets. Keep it at Research: InfiniteCOs stores a flat per-unit
+matrix (`PHackUltraPointer`) and therefore does not establish how the original
+table's eight pointer slots divide between unit-class and combat-column uses.
 
 ## Dependency and ordering notes
 
@@ -92,3 +145,6 @@ semantic symbol name without resolving the conflict.
 |---|---|---|
 | 2026-09-25 | Does Xenesis's `0x080432E0` note clarify `GetUnitCombatClassColumn`? | It corroborates that the helper belongs to the CO stat-loading path and describes columns 5/6 as direct/indirect. Proposed `GetCoBonusUnitClassColumn` for review; retain the observed third mapping (0 -> 7) as an unresolved/special case. |
 | 2026-09-25 | Is the Xenesis label for `0x085D3DD0` suitable for renaming the struct/table? | No: it calls the address a routine checking allegiance/HQ type, while repository users treat it as a CO-indexed bonus table. Retain the conflict as a source-quality caution. |
+| 2026-09-25 | Which names from the older `sub_080430B0` transcription are reusable? | Record `coId`, `coPowerState`, `unitType`, and prefer `combatClassColumn` for the helper result. Keep established `UnitType` / `unitClass` and explicit `gUnknown_085D3DD0[a].power[b].unk24[]`; the old generic struct and flattened-offset spellings add no stronger evidence. |
+| 2026-09-25 | Does AW2-InfiniteCOs clarify `UnitType.unitClass` and the helper's class terminology? | Yes: its offset-`0x18` gather and explicit Soldier/Vehicle/Plane/Copter/Naval values support `unitClass`. Its README distinguishes indirect classification from minimum range, so document the helper result as a CO bonus-table column and avoid equating it with the stored unit class. |
+| 2026-09-25 | Does InfiniteCOs suggest semantic names for `Unk085D3DD0Entry.unk24[]`? | It uses the same four stat terms (Attack, Defence, Movement, Range) in D2D/Power/Super per-unit data. Candidate `unitStatBonusColumns`; keep under research because InfiniteCOs uses a separate flat table and does not prove the original eight-slot index semantics. |
