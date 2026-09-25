@@ -5,17 +5,17 @@ Hole Rising. A function is complete only when agbcc reproduces the original
 bytes and the integrated ROM still has SHA1
 `14dd0b22c894865867aff89e8116b2dffae25605`.
 
-This file is the Codex-facing counterpart to the existing Claude workflow.
-Do not remove or replace anything under `../.claude/`. The detailed canonical
-wave protocol remains:
+The upstream Claude wave documents were not published with the repository.
+Use these preliminary, tracked replacements so a fresh checkout is sufficient:
 
-- `../.claude/skills/decomp-wave/SKILL.md`
-- `../.claude/skills/decomp-wave/brief-template.md`
-- `../.claude/skills/decomp-wave/agent-prompts.md`
+- `docs/decomp-wave/SKILL.md`
+- `docs/decomp-wave/brief-template.md`
+- `docs/decomp-wave/agent-prompts.md`
 
-Read those files before orchestrating or participating in a decompilation
-wave. If this file and the detailed protocol differ, follow the newest
-measured rule in the detailed protocol and record the correction durably.
+Read them before orchestrating or participating in a decompilation wave.
+They summarize this guide; this guide remains authoritative unless the user
+instructs otherwise. Record measured workflow corrections durably. Do not
+remove or replace any existing files under `../.claude/`.
 
 ## Repository boundaries
 
@@ -24,7 +24,7 @@ measured rule in the detailed protocol and record the correction durably.
 - Never edit `asm/`; it remains the immutable reference.
 - Preserve unrelated user changes and inspect `git status` before integration.
 - Builds run in WSL. Per-function matching tools run from the project-local MCP
-  server or the Windows Python environment.
+  server, Windows Python, or directly with `python3` in Linux/WSL.
 
 ## Current operating model
 
