@@ -39030,14 +39030,40 @@ at 38%. Using the function-wide `n` that the ROM keeps in r7 elsewhere moved
 it to 75.7% in one step, because global allocation is driven by the whole
 function's pseudo census.
 
-**Open residual.** The gSinLut PRE reaching register gets a hard-reg
-preference for r4, via global.c's `set_preference` on
-`(set V (mem R))` with V local-allocated to r4. It conflicts with `e`, `slot`
-and `i` in the final switch, so `e` skips r4 and the three rotate
-(`e r5 / slot r6 / i r4` against the ROM's `r4 / r5 / r6`). An unfaithful
-`n = SIN_Q12(0);` before state 0x28's SetObjAffine removes that preference
-and fixes the rotation everywhere (size-exact, 77.4%). A faithful spelling
-with the same effect has not been found. Declaration order has no effect.
+**RESOLVED (2026-09-25): the function now matches** (`trymatch` exit 0; needs
+`"rodata": ["0x0808D7D8", "0x0808D7DC", "0x0808D7E0", "0x0808D7E4"]` at
+promotion). The last three residuals, and the mechanism behind each:
+
+- **Ring loops index `gDesignRing[slot]` directly; there is no walking
+  pointer.** `slot++; if (slot > visible) slot = 0;` is a biv update to
+  loop.c: the set-to-constant is recorded with `mult_val == 0`. So
+  `&gDesignRing[slot]` is strength-reduced into the ROM's walking pointer,
+  and the reset becomes `mov r4, r8` from a hoisted base. The giv init is
+  emitted after the reversed counter's init, which is the only way to get the
+  ROM's `movs r6,#9` *before* the pointer init in the call-free loops. Every
+  hand-written `e++` / `e = ring` spelling, in any statement order, emits the
+  pointer init first, plus an extra `mov r2,r8` in the call-bearing loops (the
+  whole +4). Read `ldrh r3,[r2,#4]` against `(itemId & 0x3F) == 1 || == 2`
+  the same way: re-read the member, do not cache it in a local.
+- **The e/slot/i rotation was the gSinLut preference, and the loop form above
+  removes it.** Pass 0 of `find_reg` skips any register preferred by a
+  *lower-priority conflicting* allocno. The gSinLut PRE reaching register
+  prefers r4 (from `set_preference` on `(set V (mem R))` with V local-allocated
+  to r4) and conflicted with the function-wide `e` only through the 0x2C mark
+  loops. Once those loops stopped using `e`, `e`/`slot`/`i`/`frame` landed in
+  r4/r5/r6/r7. Merging the case-4/0x36 delta and the 0x51/0x5B scale into
+  `frame` (all r7 in the ROM) was the other half.
+- **`ldrh r0; adds r1,r0,#0; cmp r1,#0x19; beq; movs r1,#63; ands r1,r0; ...
+  orrs r1,r0; strh r1`** needed three locals: `int v = itemId; x = (u16)v;`
+  (the conversion stops CSE merging x into v, so the copy and the compare on
+  it survive), then-arm stores `x`, else `y = v & 0x3F; y |= army;` then
+  stores `y`. `y` is set twice, so regmove cannot rename the AND output into
+  the dying `v`; reload then ties it to the constant (`movs r1,#63`). With a
+  single `x` for both arms, `x` outranks `v` in allocation, and `v`'s r1
+  preference pushes `x` to r2. Stores stay in the arms: a store after the
+  join keeps CSE's knowledge and drops the ROM's reload of `gActiveMap`.
+  Found with an exact-byte scorer over about 6,000 spellings; the RTL dumps
+  (`-da`) are what narrowed the search.
 
 ## A u16 STEP DONE IN THE SHIFTED DOMAIN (`lsls #16; adds <K<<16>; lsrs #16`) IS NOT `v++` ON A u16 (wave 56, W56-E)
 

@@ -5156,22 +5156,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "bytes": 5084,
-   "best": "Wave 74 semantic draft: 5116/5084 (+32), 29.2% identical, 3598 differing bytes, first difference +0xf8.",
-   "remaining_diff": "The two-level state-machine body is transcribed, but case-4 allocation begins with ROM ip/r9 versus candidate r9/r7 and the final switch still differs in address placement; the candidate also emits a spurious force-address word for gUnknown_0200B0D0.",
-   "why_it_is_close": "Wave 74 recovered the ROM's 20-byte frame, sl entry allocation, caller-save spill around sub_0800C7E8, and an exact case-2 element loop.",
-   "axes_ruled_out": [
-    "Re-transcribing the six switches: their structure and the 0x46..0x5b / 0x28..0x30 ranges are settled.",
-    "The fixed-d probe that scored 29.3% was semantically invalid and was reverted; alternate compiler profiles were worse."
-   ],
-   "settled_by_this_attempt": [
-    "Block-scoped final-switch pointer temporaries are the frame lever; preserve the dead conditional assignment and identical-q spelling."
-   ],
-   "reason": "Wave 74 W74-A. Resume at the case-4 ip/r9 allocation and final-switch address lifetimes, not semantics."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
