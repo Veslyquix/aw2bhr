@@ -1379,6 +1379,18 @@
   "size": 180
  },
  {
+  "file": "src/decomp/c_0800CFDC.c",
+  "obj": "src/decomp/c_0800CFDC.o",
+  "addr_hex": "0x0800CFDC",
+  "functions": [
+   "sub_0800CFDC"
+  ],
+  "size": 6384,
+  "rodata": [
+   "0x0808D88C"
+  ]
+ },
+ {
   "file": "src/decomp/c_0800E8CC.c",
   "obj": "src/decomp/c_0800E8CC.o",
   "addr_hex": "0x0800E8CC",

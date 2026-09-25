@@ -6286,11 +6286,12 @@ void sub_0800EAF4(int, int);
 void sub_0800EB5C(int, int);
 
 /* Wave 50 (W50-I). sub_0800CFDC itself, the 6,384-byte driver the four helpers
- * above belong to, was never declared. It is parked, not matched, but
- * work/sub_0800CFDC/sub_0800CFDC.c settled its shape as `void (int, int)` and
- * its ONE caller sub_0800CF28 agrees: `adds r0,r4,#0; adds r1,r5,#0;
- * bl sub_0800CFDC` with nothing read out of r0 afterwards. */
-void sub_0800CFDC(int, int);
+ * above belong to. Its ONE caller sub_0800CF28 (`adds r0,r4,#0; adds r1,r5,#0;
+ * bl sub_0800CFDC`) reads nothing out of r0 afterwards, which is why earlier
+ * drafts called it `void`. It is `int`: every exit, including the early
+ * returns, goes through a shared `movs r0, #0` epilogue at 0x0800E8BA.
+ * Changing the prototype does not change sub_0800CF28's code. */
+int sub_0800CFDC(int, int);
 
 /* ---- wave 21 (W21-A): the gUnknown_0200C020 pair ----
  * sub_08014074 is already matched in src/decomp/c_08014074.c and was simply

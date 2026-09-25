@@ -39065,6 +39065,65 @@ promotion). The last three residuals, and the mechanism behind each:
   Found with an exact-byte scorer over about 6,000 spellings; the RTL dumps
   (`-da`) are what narrowed the search.
 
+## sub_0800CFDC, 2026-09-25: THE 6,384-BYTE "ALLOCATION RESIDUAL" WAS ELEVEN TRANSCRIPTION ERRORS
+
+Waves 50 and 68-70 parked this bridge auto-tiler as a register-allocation and
+cross-jump residual (best: 6368 bytes, -16, 14.3%). It now matches
+(`trymatch` exit 0, `"rodata": ["0x0808D88C"]`). Most of the residual was
+**wrong source semantics**, not compiler behaviour. Eight calls passed the
+wrong row: `sub_0800EB5C(x, y)` where the ROM passes `y - 2`, `(x - 1, y)`
+where it passes `y - 1`, and so on. Three cell reads used the wrong column. One
+region was an if/else chain where the ROM has a sparse `switch`. Wrong call
+arguments made different case tails identical, so cross-jumping merged them.
+That produced the "EB5C 20 vs 21" and "bridge 160 vs 159" counts the waves
+kept chasing.
+
+**Read the call arguments off the ROM before tuning allocation.** In a tail
+like `adds r0, r5, #0; bl sub_0800EB5C` with no `r1` setup, `r1` still holds
+a value computed earlier in the case (`subs r1, r6, #2` feeding a `lsls`
+for `rowOffset[]`). That value, not `y`, is the second argument. Check every
+call site this way. A draft that "has every call" can still give each call
+the wrong argument.
+
+Method that worked: a per-region mismatch table. Take the ROM's case/region
+labels as bounds and align the normalized instruction streams with difflib,
+blanking jump tables. Then fix one region at a time, largest mismatch first.
+These fixes, plus the levers below, took the size from -500 to exact, and each region went to
+zero independently.
+
+Other levers found along the way:
+
+- **`rowOffset[y] + (x - 1)`, not `rowOffset[y] + x - 1`.** The ROM computes
+  `subs r0, row, #1; adds r0, r0, x`. The unparenthesised form reassociates to
+  `(row + x) - 1` and CSEs `row + x` across checks. A `TILE(xx, yy)` macro with
+  `(xx)` parenthesised gives the ROM form everywhere.
+- **Why the entry read is three-level and every later read is direct.** gcse
+  PRE sees the entry's `(symbol_ref .LC)` as available everywhere after it,
+  marks every later gMap read redundant, and inserts a copy at the end of the
+  entry block ("PRE/HOIST: end of bb 0 ... copying expression 0"). The entry's
+  own `&.LC` pseudo then has two uses, so it is not folded: that gives the
+  ROM's `ldr r3,=word; ldr r0,[r3]; ldr r1,[r0]`. If the copy's pseudo *gets*
+  a hard register, every later read becomes `mov rN, sl; ldr r0,[rN]; ldr
+  r1,[r0]`. If it loses the allocation contest, reload substitutes its REG_EQUIV
+  constant and every read becomes direct (`ldr r0,=gMap`). The ROM's `sl`
+  belongs to a `wroteLeft` flag set to 0 *after* the entry test. With the flag
+  in the source (and the ROM's other long-lived pseudos right), the PRE copy
+  loses. Forcing spills with `-ffixed-*` does not reproduce this, because
+  spilling gives stack reloads, not direct loads.
+- **Case bodies go in the ROM's layout order.** Both jump-table switches
+  emit their bodies in source order: 28-31, 7/23, 12/13, 6/22 on the left;
+  28/29, 15/31, 30, 7/23, 12/13, 6/22 on the right. A sparse switch whose
+  first-tested case's head appears right after the decision tree, followed by
+  `b` to its tail at the end (E336's 0x24/0x25), is ordinary agbcc output for
+  source order 0x27, 0x67, 0x24/0x25. It is not evidence of a goto.
+- **`if (v == 1) { if (...) } else if (v == 2) { if (...) }`**, not
+  `if (v == 1 && ...) else if (v == 2 && ...)`. In the second form a failed
+  `v == 1` chain falls into the `v == 2` test. `v` then stays live across the
+  whole chain and takes `r7` from the pseudo the ROM keeps there.
+- **Function returning `int 0` with an unread result.** The epilogue at
+  0x0800E8BA is `movs r0, #0` before the pops. The caller ignores `r0`, so
+  earlier drafts declared the function `void` and lost two bytes.
+
 ## A u16 STEP DONE IN THE SHIFTED DOMAIN (`lsls #16; adds <K<<16>; lsrs #16`) IS NOT `v++` ON A u16 (wave 56, W56-E)
 
 `sub_0802E7C8` steps a coordinate four ways and every arm reads
