@@ -878,9 +878,19 @@ extern const u16 gUnknown_084887AC[];
  * and the column contributing an already-scaled constant. Only the nested
  * ARRAY_REF goes through get_inner_reference, which sums `row * 40` and
  * `col * 4` separately and adds the symbol register last -- which is the
- * ROM. Wave 56 (W56-D) measured both spellings. */
+ * ROM. Wave 56 (W56-D) measured both spellings.
+ *
+ * gUnknown_084886F8 is VOLATILE (2026-09-24). sub_08005F4C's state 0x35 loads
+ * `tbl[unk07][0]`, then RE-LOADS unk07 (`movs r0,#7; ldrsb`) for a `?:` that
+ * picks the -0x18 / -0x21 adjustment. With a plain const table agbcc either
+ * reuses the unk07 it already has or, for `tbl[..][0] - (unk07 == 0 ? ..)`,
+ * duplicates the table load into both arms. A volatile element read gives the
+ * MINUS_EXPR side effects, so fold evaluates it once through a SAVE_EXPR
+ * before the test and CSE cannot reuse the earlier unk07 -- exactly the ROM,
+ * including the table base being loaded before gActiveMap. Its other three
+ * reads (states 0x32 and 0x34) compile byte-identically either way. */
 extern const s16 gUnknown_084886DC[];
-extern const s32 gUnknown_084886F8[][10];
+extern const volatile s32 gUnknown_084886F8[][10];
 extern const u8 gUnknown_08488748[][10];
 extern const s32 gUnknown_0848875C[][10];
 

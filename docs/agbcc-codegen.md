@@ -38981,6 +38981,64 @@ reproduces it. **A jump table costs nothing extra to order: gcc fills the gaps
 in the case range with the default label, so a 22-entry table for five live
 cases is normal output and not a sign of missing cases.**
 
+## sub_08005F4C, 2026-09-24: `-fforce-addr` `.rodata` WORDS ARE gcse PRE INSERTIONS, AND THREE MORE LEVERS
+
+Measured on the 5084-byte design-room state machine, which went from a
+3560-byte (-1524) draft to size-exact / +4 at 77-80% in one session.
+
+**Every `-fforce-addr` `.rodata` word in a function is a gcse PRE artifact.**
+Compiling the draft with `-fno-gcse` removes ALL of its `.rodata` words,
+including the ones the ROM has. With `-da`, `gccdump.gcse` shows why: under
+`-fforce-addr` each global address is expanded as
+`(set t (symbol_ref .LCn)); (set r (mem t))`, and PRE treats `(symbol_ref .LCn)`
+as an ordinary expression that nothing kills. Most PRE copies land in the same
+extended block as their use, and CSE2 folds `(mem t)` back into a direct
+`ldr r, =sym`. A word survives only where a PRE insertion or a redundant use is
+separated from its fold by a join, so the pseudo that holds `&.LCn` lives
+across it. `PRE/HOIST: end of bb N ... copying expression K to reg R` in the
+gcse dump names the insertion, and `PRE: redundant insn` names the victims.
+So an extra or missing word is a question about **which references PRE
+considers the same expression**, not about spelling that one access.
+
+- **Two names for one object split the PRE expression.** State 0x2C passes
+  `gDesignRing[slot].itemId` to `sub_080077EC` and then runs ring loops over
+  `gDesignRing`. With one name, PRE hoisted `&.LC(gDesignRing)` above the
+  `frame < 0` test: a stray `.rodata` word, a spilled pointer and a 24-byte
+  frame. Spelling that ONE argument through the linker's other name for the
+  same address (`gUnknown_0200B0D0`; aw2bhr.lds has
+  `gDesignRing = gUnknown_0200B0D0`) removes the word and restores the ROM's
+  20-byte frame. Bisecting with `-da` needed all three of: the argument, the
+  frame==0 set loops and the mark loops. Removing any one also removed the
+  hoist.
+- **A reset base kept apart from the walking pointer.**
+  `e = &gDesignRing[slot]; ring = gDesignRing;` with `e = ring` as the
+  wrap-around reset gives the ROM's `ldr r2,=sym; mov r8,r2` (the base in a
+  high callee-saved register). Writing `e = &ring[slot]` (ring used for the
+  add) gives `ring` a LO_REGS preference, so global alloc takes caller-save r3
+  first and spills it around every call.
+
+**A volatile table read is how the ROM re-loads a `?:` test operand.** See
+the note on `gUnknown_084886F8` in include/unknown-globals.h. The ROM loads
+`tbl[m][0]` and then reloads `m` for `m == 0 ? x - 0x18 : x - 0x21`. Every
+non-volatile spelling either reuses `m` or duplicates the table load into
+both arms. agbcc's fold distributes `a - (c ? k1 : k2)` without a SAVE_EXPR
+unless `a` has side effects.
+
+**Merge a block-local into the function-wide variable when the ROM's register
+says so.** A block-local delta (`int d;`) in states 4 and 0x36 left the draft
+at 38%. Using the function-wide `n` that the ROM keeps in r7 elsewhere moved
+it to 75.7% in one step, because global allocation is driven by the whole
+function's pseudo census.
+
+**Open residual.** The gSinLut PRE reaching register gets a hard-reg
+preference for r4, via global.c's `set_preference` on
+`(set V (mem R))` with V local-allocated to r4. It conflicts with `e`, `slot`
+and `i` in the final switch, so `e` skips r4 and the three rotate
+(`e r5 / slot r6 / i r4` against the ROM's `r4 / r5 / r6`). An unfaithful
+`n = SIN_Q12(0);` before state 0x28's SetObjAffine removes that preference
+and fixes the rotation everywhere (size-exact, 77.4%). A faithful spelling
+with the same effect has not been found. Declaration order has no effect.
+
 ## A u16 STEP DONE IN THE SHIFTED DOMAIN (`lsls #16; adds <K<<16>; lsrs #16`) IS NOT `v++` ON A u16 (wave 56, W56-E)
 
 `sub_0802E7C8` steps a coordinate four ways and every arm reads

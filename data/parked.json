@@ -127,17 +127,25 @@
   },
   "sub_08005F4C": {
    "bytes": 5084,
-   "best": "Wave 74 semantic draft: 5116/5084 (+32), 29.2% identical, 3598 differing bytes, first difference +0xf8.",
-   "remaining_diff": "The two-level state-machine body is transcribed, but case-4 allocation begins with ROM ip/r9 versus candidate r9/r7 and the final switch still differs in address placement; the candidate also emits a spurious force-address word for gUnknown_0200B0D0.",
-   "why_it_is_close": "Wave 74 recovered the ROM's 20-byte frame, sl entry allocation, caller-save spill around sub_0800C7E8, and an exact case-2 element loop.",
+   "best": "2026-09-24 rewrite: 5088/5084 (+4), 79.8% identical, 21 register-agnostic instruction differences (work/sub_08005F4C/sub_08005F4C.c). best.c holds a permuter variant at 5084/5084, 87.4% (a 40-minute run from this draft). Its exact size is coincidental: it has a 24-byte frame and 40 structural differences, so it is a worse base than the draft.",
+   "remaining_diff": "(1) The two mark-0 ring loops (states 0x2C/0x2D) each carry one extra `mov r2,r8` giv init, which is the whole +4. The ROM orders the gSinLut PRE insert, then `ldr r2,=gDesignRing; mov r8,r2`, then the e init, then the counter. (2) Global allocation rotates e/slot/i (r5/r6/r4 against the ROM's r4/r5/r6) because the gSinLut PRE reaching register takes a hard-reg preference for r4 and conflicts with all three in the final switch. (3) Small: the case-2 preheader order of `adds r6,r0,#0`, and the cursorUnit copy in state 0x41.",
+   "why_it_is_close": "Every state is transcribed and semantically checked against the listing. The .rodata pool words match (gActiveMap, gpKeySt, gSinLut, gUnknown_084886DC), as do the 20-byte frame, the dead ringIndex+4/+3 block (wave-72 identical-arms trick), the 0x35 editMode reload (volatile gUnknown_084886F8) and case-4/0x36 register use. An unfaithful `n = SIN_Q12(0)` before state 0x28's SetObjAffine removes the r4 preference and fixes the rotation everywhere (5084/5084, 77.4%), which shows (2) is purely that preference.",
    "axes_ruled_out": [
-    "Re-transcribing the six switches: their structure and the 0x46..0x5b / 0x28..0x30 ranges are settled.",
-    "The fixed-d probe that scored 29.3% was semantically invalid and was reverted; alternate compiler profiles were worse."
+    "Pointer-?: for the army argument: folds to base+47 with a conditional adjust. The value ?: is right (wave 56).",
+    "A single `(flags & ~0x20) & ~3` expression folds to one mask. Two statements are right (per-block DSE).",
+    "Every spelling of the 0x2C sub_080077EC argument that uses the gDesignRing symbol (direct, via e, via a temp, byte arithmetic) still lets PRE hoist &.LC(gDesignRing).",
+    "Mark-0 spellings with an explicit walking pointer f instead of gDesignRing[i] cost +92 bytes. e/ring init order and for-init placement change nothing (a 5x5 matrix).",
+    "Splitting i into j/k in the final or middle switch makes it worse. Renaming e/slot/i in the final switch alone makes it worse. Declaration order has no effect (60 random orders).",
+    "Cursor-unit value as ?: is +4. Block-local d in cases 4/0x36 drops to 38%; function-wide n is right.",
+    "Permuter: 20 minutes from the 75.7% draft and 40 minutes from this draft (base score 4780, best 2825). Neither produced a structural improvement: the best candidate adds an `if (1) goto` and reorders stores, spilling one more stack slot."
    ],
    "settled_by_this_attempt": [
-    "Block-scoped final-switch pointer temporaries are the frame lever; preserve the dead conditional assignment and identical-q spelling."
+    "State 0x2C's sub_080077EC argument names gUnknown_0200B0D0 (gDesignRing's linker alias). With one name, gcse PRE hoists &.LC above `frame < 0`, adding a .rodata word and a 24-byte frame.",
+    "Mark loops: `e = &gDesignRing[slot]; ring = gDesignRing;` with `e = ring` as the reset keeps ring out of caller-save r3 and gives the ROM's r8.",
+    "gUnknown_084886F8 is declared volatile (see include/unknown-globals.h). sub_080078D4 takes s8 (the call site sign-extends). The promoted body is re-verified and both ROM routes pass.",
+    "Block-local x in case 0x35, i for sub_08007328's result in 0x33/0x34/0x35, kind for the army value in 0x28, done in cases 4/0x36."
    ],
-   "reason": "Wave 74 W74-A. Resume at the case-4 ip/r9 allocation and final-switch address lifetimes, not semantics."
+   "reason": "2026-09-24 session. Resume at the gSinLut PRE reaching register's r4 preference (docs/agbcc-codegen.md, 'sub_08005F4C, 2026-09-24'). Find a faithful spelling of states 0x28/0x2B/0x2C that stops `(set V (mem R))` tying R to r4, then retry the mark-0 order."
   },
   "sub_0802AA78": {
    "bytes": 2356,

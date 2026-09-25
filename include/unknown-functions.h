@@ -3569,9 +3569,12 @@ int sub_08007328(void);
  * PROMOTE_MODE and lose the `lsls #0x18; asrs #0x18`. The caller's next
  * instruction is `bl sub_08007B74`, so r0 is dead and the return is void. */
 void sub_080077EC(int, int);
-/* Matched and promoted in src/decomp/c_080078D4.c as `void sub_080078D4(u8)`;
- * declared in wave 56 (W56-D) because sub_08005F4C calls it. */
-void sub_080078D4(u8);
+/* Matched and promoted in src/decomp/c_080078D4.c; declared in wave 56 (W56-D)
+ * because sub_08005F4C calls it. SIGNED (2026-09-24): sub_08005F4C's call site
+ * passes gActiveMap->selectionAnimKind as `ldrb; lsls #0x18; asrs #0x18`, and
+ * a u8 parameter would zero-extend instead. The callee is a bare `strb` either
+ * way, so the promoted body is byte-identical as s8 (re-verified). */
+void sub_080078D4(s8);
 void sub_080078E4(int, int);
 void sub_08002EB4(void);
 
