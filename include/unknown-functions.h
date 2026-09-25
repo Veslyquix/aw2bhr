@@ -10051,6 +10051,8 @@ int sub_0801B018(u16);
  * tested for equality -- against 0xff and against a u8 array element -- so
  * nothing here discriminates its signedness; u16 agrees with the return. */
 u16 sub_0801B120(u16);
+u16 FindNewestCompleteSave(u16); /* sub_0801B120's readable name; see
+                                  * src/decomp/c_0801B120.c. */
 void sub_08022AF8(u8, u8, u8, u8); /* W35-E: signature copied from the
                                     * promoted definition in c_08022AF8.c. */
 

@@ -5120,6 +5120,15 @@
   ]
  },
  {
+  "file": "src/decomp/c_0801B120.c",
+  "obj": "src/decomp/c_0801B120.o",
+  "addr_hex": "0x0801B120",
+  "functions": [
+   "sub_0801B120"
+  ],
+  "size": 476
+ },
+ {
   "file": "src/decomp/c_0801B2FC.c",
   "obj": "src/decomp/c_0801B2FC.o",
   "addr_hex": "0x0801B2FC",

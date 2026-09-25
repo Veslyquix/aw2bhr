@@ -49776,3 +49776,37 @@ g.sectorGeneration[i] = 0;` builds a second giv (+4 bytes). The chained
 assignment `g.sectorGeneration[i] = g.slotGeneration[i] = 0;` restores the
 ROM's `str r0, [r1, #0x40]; str r0, [r1]` pair off one pointer and matches.
 The same file already writes `unk00[i] = (unk10[i] |= 0xff)`.
+
+## Cross-jumped duplicate tails decide which loop invariant gets the callee-saved register (sub_0801B120)
+
+sub_0801B120 (now `FindNewestCompleteSave`) was parked at 47.3% with the
+residual labelled "base allocation": the ROM holds `gUnknown_0200CC58 + 0x10`
+(the unk30 base) in sl across its outer loop, while every single-tail source
+hoisted `gUnknown_0200CC88` into sl instead. Pointer locals, `unk20[i + 0x10]`
+and `(unk20 + 0x10)[i]` all miss.
+
+The tell was in the ROM's control flow. The equal-generation arm computes
+`mov r1, sl; adds r0, r4, r1` itself and then branches into the MIDDLE of the
+shared "count this part" tail, one instruction past where the other two arms
+join it. That is jump2 cross-jumping identical tails and stopping at the first
+register-differing insn. So the source repeats the tail once per arm:
+
+    if (best == -1)        { best = i; clear(); TAIL; }
+    else if (best > -1)    { if (g[best] > g[i]) continue;
+                             if (g[best] == g[i]) TAIL;
+                             else { best = i; clear(); TAIL; } }
+
+Duplicating the tail also changed loop.c's movables enough that the unk30 base
+won sl. It went 31% -> 72.9% in one step. Three smaller settlements followed:
+
+- `best > -1`, not `best >= 0`: the ROM compares against the -1 still live from
+  the `best == -1` test (`cmp r8, r0; ble`), 72.9% -> 79.6%.
+- The key copy of the u16 parameter must itself be `u16`. A `u32` key is
+  exact-size but misassigns the tail's registers, 79.6% -> 94.5%.
+- `n = x & 0xf; n++;` rather than `n = (x & 0xf) + 1;`, and the SAME variable
+  as the clear loops' counter. Sharing one pseudo is what puts the count in r3.
+  The permuter found the sharing (`n = j; counts[n] = 0;`). The readable
+  equivalent is to count the clear loops with `n` directly.
+
+**Read-out:** when a ROM arm pre-computes an address and branches into the
+middle of a sibling's tail, write the tail out in each arm. Do not factor it.

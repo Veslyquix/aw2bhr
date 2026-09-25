@@ -15,8 +15,8 @@
  * gUnknown_0200CD08 gets its counter + 1.
  *
  * With no valid slot at all it calls sub_0801ADC8 (unless a1 is set) and
- * stops. Otherwise sub_0801B120(0) picks the active slot; 0xffff means "none",
- * which invalidates every entry. The final pass re-selects among the slots
+ * stops. Otherwise FindNewestCompleteSave(0) picks the active slot; 0xffff
+ * means "none", which invalidates every entry. The final pass re-selects among the slots
  * flagged 0x10 by the smallest unk30 and reloads that one.
  *
  * WAVE 74: configured MATCH, 444/444 bytes. Reusing `j` for the initial clear
@@ -95,7 +95,7 @@ void sub_0801B2FC(int a1)
         return;
     }
 
-    best = sub_0801B120(0);
+    best = FindNewestCompleteSave(0);
 
     if (best == 0xffff)
     {
