@@ -722,6 +722,16 @@ extern struct KeySt * gpKeySt;
 
 extern u16 gPal[];
 
+// Utility macros and constants
+
+// Some functions only match with one of the macros.
+// NOTE: TILEMAP_INDEX2 is TM_OFFSET in fe6
+#define TILEMAP_INDEX(aX, aY) (0x20 * (aY) + (aX))
+#define TILEMAP_INDEX2(aX, aY) (((aY) << 5) + (aX))
+
+#define TILEMAP_LOCATED(aMap, aX, aY) (TILEMAP_INDEX((aX), (aY)) + (aMap))
+
+
 #define RGB_GET_RED(color) ((color) & 0x1F)
 #define RGB_GET_GREEN(color) (((color) >> 5) & 0x1F)
 #define RGB_GET_BLUE(color) (((color) >> 10) & 0x1F)
