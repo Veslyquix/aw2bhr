@@ -32,9 +32,33 @@ rather than produce numbers that cannot be trusted.
     python tools/permute.py sub_08001158 --setup-only   # inspect, do not run
 
 The vendored permuter is not committed; see vendor/README.md.
+
+**Output (wave 90).** The search's progress is no longer echoed: the
+permuter's carriage-return counter is ~400 KB a minute and several agents
+redirect it into their own logs. It goes to work/<fn>/permuter/permuter.log,
+compacted (every message kept; the iteration counter as one snapshot a minute
+plus the final one). Each candidate's full trymatch report goes to
+permuter/verify.log; the console gets one line per candidate. `--live` restores
+the old raw echo. The run ends with one line to read:
+
+    PERMUTE MATCH sub_X
+    PERMUTE IMPROVED sub_X 93.68 -> 95.11 (kept in work/sub_X/sub_X.c)
+    PERMUTE NO-IMPROVEMENT sub_X
+    PERMUTE SETUP-FAILED sub_X
+
+**Threads default to 4**, not every core: agents share this machine and each
+runs up to three searches.
+
+**Only a readable candidate is kept in the draft.** An improvement is written
+to <fn>.c only in its spliced form (the draft's own includes plus the new
+function). If only the header-expanded raw form improves, it goes to
+permuter/best-raw.c and best.c/best.json are put back as they were -- that path
+is how 36 best.c files became 190 KB blobs (preflight's BLOB list).
 """
 
 import argparse
+import contextlib
+import io
 import json
 import os
 import re
@@ -96,7 +120,24 @@ def pick_source(workdir, name, prefer_best):
     best.c is the highest byte score ever reached, which is not necessarily the
     file left behind by the last iteration; starting anywhere else throws away
     the work that got us close enough for this to be worth running.
+
+    `<name>.perm.c`, if present, wins over both. That file is the ONLY way to
+    reach the permuter's directed search: PERM_GENERAL / PERM_RANDOMIZE /
+    PERM_LINESWAP / PERM_INT and the rest (ten forms, src/perm/parse.py) are
+    scanned TEXTUALLY out of base.c, so they survive `cpp -P` -- but they are
+    not valid C, so a draft carrying them cannot be compiled or trymatched.
+    They therefore cannot live in <name>.c, and until this existed there was
+    nowhere else to put them. The measured consequence: zero PERM_ macros
+    anywhere in the project, so _rec_perm_parse always yielded a single
+    TextPerm and EVERY permuter result ever banked here came from undirected
+    random fallback -- including the 26,041- and 23,107-iteration runs.
+
+    Candidates come back as ordinary C (the permuter resolves the macros when
+    it emits), so the rest of the pipeline is unchanged.
     """
+    perm = os.path.join(workdir, name + ".perm.c")
+    if os.path.exists(perm):
+        return perm, name + ".perm.c"
     cur = os.path.join(workdir, name + ".c")
     best = os.path.join(workdir, "best.c")
     if prefer_best and os.path.exists(best):
@@ -188,6 +229,8 @@ def setup(rec, unit, prefer_best):
     awlib.write_text(os.path.join(pdir, "settings.toml"),
                      'func_name = "%s"\ncompiler_type = "gcc"\n' % name)
 
+    check_scorer_patch()
+
     rel_pdir = os.path.relpath(pdir, awlib.REPO).replace(os.sep, "/")
     # The permuter checks the executable bit itself and refuses to start
     # without it. NTFS under WSL usually reports 0777 anyway, but not when the
@@ -196,6 +239,10 @@ def setup(rec, unit, prefer_best):
 
     print("set up %s" % rel_pdir)
     print("  source   %s" % which)
+    if which.endswith(".perm.c"):
+        print("  NOTE     %s is used INSTEAD of --current / best.c while it exists;"
+              % which)
+        print("           rename or delete it when this directed search is done.")
     print("  target   %s (%d bytes, %d function)"
           % (unit_o, rec["size"], len(unit["functions"])))
     return pdir
@@ -228,7 +275,7 @@ def base_score(pdir):
     return int(m.group(1))
 
 
-def run(pdir, seconds, threads):
+def run(pdir, seconds, threads, live=False):
     rel = os.path.relpath(pdir, awlib.REPO).replace(os.sep, "/")
     # SIGINT first, so the permuter's own handler shuts the workers down and the
     # output directories are left complete. `-k 30` is not optional: measured, a
@@ -236,14 +283,35 @@ def run(pdir, seconds, threads):
     # it had. Whatever swallows the signal -- the multiprocessing pool, most
     # likely -- a wall-clock limit that does not actually stop the process is
     # worse than no limit, because nothing is watching it any more.
+    # --stack-diffs: without it the scorer normalises stack offsets away, so a
+    # candidate that puts a spill at sp+16 instead of sp+24 scores as a tie.
+    # Those are real byte differences and at least one park (sub_080627F4,
+    # 99.2%, six differing bytes) is nothing BUT a stack-slot transposition --
+    # a residual the permuter was structurally unable to see until now.
     cmd = ("timeout -s INT -k 30 %d python3 tools/permuter_entry.py "
-           "%s --better-only --stop-on-zero -j %d"
+           "%s --better-only --stop-on-zero --stack-diffs -j %d"
            % (seconds, shq(rel), threads))
     log = os.path.join(pdir, "permuter.log")
-    print("\nrunning for up to %ds with %d threads; live output below, also"
-          % (seconds, threads))
-    print("logged to %s\n" % os.path.relpath(log, awlib.REPO))
-    rc, _ = agbenv.stream(cmd, log_path=log)
+    if live:
+        print("\nrunning for up to %ds with %d threads; live output below, also"
+              % (seconds, threads))
+        print("logged to %s\n" % os.path.relpath(log, awlib.REPO))
+        rc, _ = agbenv.stream(cmd, log_path=log)
+        return rc
+    print("\nrunning for up to %ds with %d threads; progress is in %s"
+          % (seconds, threads, os.path.relpath(log, awlib.REPO).replace(os.sep, "/")),
+          flush=True)
+    rc, kept = agbenv.stream_compact(cmd, log)
+    lines = kept.splitlines()
+    final = next((ln for ln in reversed(lines) if "iteration" in ln), None)
+    news = [ln for ln in lines if "new best score" in ln or "better score" in ln]
+    # 124 is `timeout` reaching the wall-clock limit: the normal end of a run.
+    how = "at the time limit" if rc == 124 else "with exit %d" % rc
+    print("search ended %s: %s; %d improving candidate(s) reported"
+          % (how, final.split("] ", 1)[-1] if final else "no iterations recorded",
+             len(news)))
+    for ln in news[-5:]:
+        print("  " + ln)
     return rc
 
 
@@ -265,47 +333,198 @@ def harvest(pdir):
     return sorted(out, key=lambda t: t[0])
 
 
+def check_scorer_patch():
+    """Warn if the vendored scorer still carries upstream's penalty weights.
+
+    vendor/ is gitignored, so a re-clone silently restores PENALTY_REGALLOC = 5
+    and the search goes back to treating a wrong register as a twelfth of a
+    reordering -- which for a byte verdict is the wrong objective and produced
+    two documented cases where the best-SCORING candidate was a byte-level
+    regression. A run under the wrong objective still looks like it worked, so
+    this has to be checked rather than assumed.
+    """
+    p = os.path.join(PERMUTER_DIR, "src", "scorer.py")
+    try:
+        with open(p, encoding="utf-8") as fh:
+            text = fh.read()
+    except OSError:
+        return
+    if "AW2_PENALTY_REGALLOC" in text:
+        return
+    print("\n  !! vendor/decomp-permuter/src/scorer.py is UNPATCHED --")
+    print("     PENALTY_REGALLOC is upstream's 5 against PENALTY_REORDERING 60,")
+    print("     so this search will trade register correctness for ordering and")
+    print("     its best-scoring candidate may be a byte-level regression.")
+    print("     See vendor/README.md; re-apply the patch before trusting a result.\n")
+
+
+def helper_run_start(cand_lines, b):
+    """Index of the first line of the helper run directly above `b`, or `b`.
+
+    The randomizer's perm_inline pass EXTRACTS an expression into a synthesized
+    function and inserts it with `ast.ext.insert(ast.ext.index(fn), fn_def)` --
+    at the target's own index, so immediately above it, every time. Repeated
+    applications stack into a contiguous run. The winning candidate then CALLS
+    those helpers, so a graft that starts at the target's definition drops them
+    and the result fails to compile with `implicit declaration of inline_fn`.
+
+    That was the whole defect: the spliced form died, the raw header-expanded
+    form was the only one left that scored, and best.c became 60-200KB of
+    preprocessed source for 23 parked functions -- unpromotable, while the
+    working draft had already been rolled back to the worse form.
+
+    Upstream has the identical bug in trim_source() (src/helpers.py), a textual
+    cut at the first mention of the function name; it escapes notice only
+    because --no-context-output is off by default. There is no fix to inherit.
+
+    Walk upward over whole definitions while the name looks synthesized. Names
+    come from get_noncolliding_name, so they are inline_fn, inline_fn2, ...;
+    match the prefix rather than the literal string.
+    """
+    i = b
+    while i > 0:
+        j = _definition_above(cand_lines, i)
+        if j is None:
+            break
+        m = re.match(r'^[A-Za-z_][^;()]*?\b(\w+)\s*\(', cand_lines[j])
+        if not m or not m.group(1).startswith("inline_fn"):
+            break
+        i = j
+    return i
+
+
+def _definition_above(lines, i):
+    """Index of the definition whose body ends just above line `i`, or None."""
+    k = i - 1
+    while k >= 0 and not lines[k].strip():
+        k -= 1
+    if k < 0 or lines[k].rstrip() != "}":
+        return None
+    depth = 0
+    while k >= 0:
+        depth += lines[k].count("}") - lines[k].count("{")
+        if depth == 0:
+            # Walk back over the signature's own continuation lines.
+            while k > 0 and not re.match(r'^[A-Za-z_]', lines[k]):
+                k -= 1
+            return k
+        k -= 1
+    return None
+
+
 def splice(orig_lines, cand_lines, name):
-    """The original file's preamble plus the permuted function.
+    """The original file's preamble plus the permuted function and its helpers.
 
     The permuter's output is base.c -- every header expanded -- with the
     function rewritten. That compiles, but it is not something anyone would
     commit. Grafting the new function onto the original's includes and externs
     gives back a normal source file. Returns None if either side cannot be
     split, in which case the caller falls back to the raw output.
+
+    NOT byte-neutral in general: the candidate's expanded preamble may also
+    carry a DECLARATION the randomizer mutated in place -- perm_randomize_
+    external_type and perm_randomize_function_type rewrite a global's or a
+    function's type at an arbitrary index, weight 5 each under [gcc]. Those
+    rewrites are deliberately NOT carried across: the project's real headers
+    are the environment we have to match in. A candidate whose score depended
+    on one will score lower here than it did in the permuter, and that is the
+    correct answer -- the recorded score was never reachable. The 2026-08-29
+    review measured this at 7 of 53 affected parks.
     """
     a = definition_line(orig_lines, name)
     b = definition_line(cand_lines, name)
     if a is None or b is None:
         return None
-    return orig_lines[:a] + cand_lines[b:]
+    return orig_lines[:a] + cand_lines[helper_run_start(cand_lines, b):]
+
+
+def _check_quietly(name, log):
+    """trymatch.check with its report appended to `log`; (rc, result dict)."""
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = trymatch.check(name)
+    with open(log, "a", encoding="utf-8") as fh:
+        fh.write(buf.getvalue() + "\n")
+    return rc, dict(trymatch.LAST_RESULT or {"state": "ERROR"})
+
+
+def _snapshot(paths):
+    out = {}
+    for p in paths:
+        try:
+            with open(p, "rb") as fh:
+                out[p] = fh.read()
+        except OSError:
+            out[p] = None
+    return out
+
+
+def _restore(snap):
+    """Put files back exactly as snapshotted (absent files removed)."""
+    changed = False
+    for p, data in snap.items():
+        try:
+            with open(p, "rb") as fh:
+                now = fh.read()
+        except OSError:
+            now = None
+        if now == data:
+            continue
+        changed = True
+        if data is None:
+            os.remove(p)
+        else:
+            tmp = "%s.tmp%d" % (p, os.getpid())
+            with open(tmp, "wb") as fh:
+                fh.write(data)
+            os.replace(tmp, p)
+    return changed
 
 
 def verify(rec, pdir, keep_all):
-    """Run every candidate past trymatch and keep the first that matches."""
+    """Run every candidate past trymatch and keep the first that matches.
+
+    Returns (exit status, final-line state, detail).
+    """
     name = rec["name"]
     workdir = os.path.join(WORK, name)
     csrc = os.path.join(workdir, name + ".c")
     orig = awlib.read_lines(csrc)
+    vlog = os.path.join(pdir, "verify.log")
+    open(vlog, "w").close()
 
     cands = harvest(pdir)
     if not cands:
         print("\nno candidate scored better than the starting point.")
-        return 1
+        return 1, "NO-IMPROVEMENT", "no candidate scored better in the permuter"
 
-    print("\n%d candidate(s) to check against trymatch:" % len(cands))
+    print("\n%d candidate(s) to check against trymatch (full reports: %s):"
+          % (len(cands), os.path.relpath(vlog, awlib.REPO).replace(os.sep, "/")))
 
     # The loop below leaves each candidate in csrc while trymatch judges it, so
     # ANY abnormal exit -- timeout, Ctrl-C, an exception out of trymatch --
-    # strands the last form written there. That form is usually the
-    # header-expanded permuter output, which compiles cleanly and would be
-    # promoted silently as if it were the draft. Restore unless we matched.
+    # strands the last form written there. That form may be the header-expanded
+    # permuter output, which compiles cleanly and would be promoted silently as
+    # if it were the draft. So the draft is always restored to a KNOWN form on
+    # the way out -- but which form is the point below.
+    # One compile to establish where the draft actually stands. Deliberately
+    # not read from best.json: that file is what this whole mechanism has been
+    # corrupting, and a baseline taken from it would compare a candidate
+    # against a number describing some other source.
+    _, base = _check_quietly(name, vlog)
+    base_pct = trymatch.LAST_PCT
+    print("  baseline  %s" % trymatch.format_result(base))
+    if base_pct is None:
+        print("  draft does not compile or cannot be scored; improvements "
+              "cannot be judged, so the original will be restored as before.")
+    best_pct, best_lines, best_label = base_pct, None, None
+    raw_pct, raw_lines = base_pct, None
+    best_files = [os.path.join(workdir, "best.c"), os.path.join(workdir, "best.json")]
     matched = False
     try:
         for score, src in cands:
             rel = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
             cand = awlib.read_lines(src)
-            print("\n  permuter score %d  (%s)" % (score, rel))
 
             # Try the tidy form first. If the graft is wrong in any way the raw
             # output still holds the real result, so a failure here costs one
@@ -313,68 +532,173 @@ def verify(rec, pdir, keep_all):
             forms = []
             grafted = splice(orig, cand, name)
             if grafted is not None:
-                forms.append(("spliced onto the original preamble", grafted))
-            forms.append(("raw permuter output (headers expanded)", cand))
+                forms.append(("spliced", grafted))
+            forms.append(("raw", cand))
 
             for label, lines in forms:
                 awlib.write_text(csrc, "".join(lines))
-                print("  checking: %s" % label)
-                rc = trymatch.check(name)
+                # A raw form must never become best.c: that is how 36 best.c
+                # files turned into 190 KB header-expanded blobs. Its score is
+                # kept in permuter/best-raw.c instead.
+                snap = _snapshot(best_files) if label == "raw" else None
+                rc, r = _check_quietly(name, vlog)
+                if snap is not None and _restore(snap):
+                    r["note"] = "best.c left as it was"
+                print("  score %-6d %-7s %s%s" % (score, label, trymatch.format_result(r),
+                                                  "  (" + r["note"] + ")" if r.get("note") else ""))
                 if rc == 0:
                     matched = True
-                    print("\nMATCH from the permuter -- %s is written to %s"
+                    print("\nMATCH from the permuter -- the %s form is written to %s"
                           % (label, os.path.relpath(csrc, awlib.REPO)))
                     if lines is cand:
                         print("      this is the header-expanded form; reduce it to")
                         print("      an include plus externs before promoting.")
-                    return 0
+                    return 0, "MATCH", "%s form, permuter output %s" % (label, rel)
+                # Not a match, but it may still be an IMPROVEMENT, and until
+                # 2026-08-29 that was thrown away: the finally block restored
+                # the pre-run draft unconditionally. 53 of 123 parked functions
+                # ended up with a live draft scoring below their own recorded
+                # best, one of them by 54 points across 26,041 iterations. Keep
+                # the best SPLICED form in the draft; a raw-only improvement is
+                # saved beside it, never written over the readable draft.
+                pct = trymatch.LAST_PCT
+                if pct is None or base_pct is None:
+                    continue
+                if label == "spliced" and pct > best_pct:
+                    best_pct, best_lines, best_label = pct, lines, rel
+                    print("             improvement: %.2f%% -> %.2f%% (kept)" % (base_pct, pct))
+                    break   # the raw form of this candidate is the same code
+                if label == "raw" and pct > raw_pct:
+                    raw_pct, raw_lines = pct, lines
     finally:
         if not matched:
-            awlib.write_text(csrc, "".join(orig))
+            if best_lines is not None:
+                awlib.write_text(csrc, "".join(best_lines))
+            else:
+                awlib.write_text(csrc, "".join(orig))
 
-    print("\nno candidate matched at the byte level; %s restored unchanged."
-          % os.path.relpath(csrc, awlib.REPO))
+    if raw_lines is not None and (best_lines is None or raw_pct > best_pct):
+        raw_path = os.path.join(pdir, "best-raw.c")
+        awlib.write_text(raw_path, "".join(raw_lines))
+        print("\nonly the HEADER-EXPANDED form of a candidate reached %.2f%%; it is in %s,"
+              % (raw_pct, os.path.relpath(raw_path, awlib.REPO).replace(os.sep, "/")))
+        print("not in the draft. Its gain usually rests on a declaration the permuter")
+        print("retyped in the expanded headers, which the real headers will not allow.")
+        print("Read what it changed before building on it.")
+    if best_lines is not None:
+        print("\nno candidate matched at the byte level, but %s IMPROVED "
+              "%.2f%% -> %.2f%% and is kept (from %s)."
+              % (os.path.relpath(csrc, awlib.REPO), base_pct, best_pct, best_label))
+        print("      read what the mutation did before building on it: an")
+        print("      improvement can be semantically wrong C.")
+        detail = "%.2f -> %.2f (kept in %s)" % (
+            base_pct, best_pct, os.path.relpath(csrc, awlib.REPO).replace(os.sep, "/"))
+        state = "IMPROVED"
+    else:
+        print("\nno candidate matched or improved; %s restored unchanged."
+              % os.path.relpath(csrc, awlib.REPO))
+        state, detail = "NO-IMPROVEMENT", ("raw form only: %.2f in permuter/best-raw.c"
+                                           % raw_pct if raw_lines is not None else "")
     if not keep_all:
         print("output directories kept under %s for inspection."
               % os.path.relpath(pdir, awlib.REPO))
-    return 1
+    return 1, state, detail
+
+
+def self_test():
+    """The parts that need no compile: the log compactor, the splice, the
+    thread default. Writes nothing under work/."""
+    ok = True
+    # 1. Carriage-return progress is compacted; messages survive whole.
+    stream = ("Loading...\\n[f] base score = 720\\n"
+              + "".join("iteration %d, 0 errors, score = 720\\b\\b\\b   \\r" % i
+                        for i in range(1, 400))
+              + "\\x1b[32;1m[f] found new best score! (500 vs 720)\\x1b[0m\\n"
+              + "iteration 400, 1 errors, score = 500")
+    log = os.path.join(awlib.REPO, "build", "permute-selftest.log")
+    os.makedirs(os.path.dirname(log), exist_ok=True)
+    rc, kept = agbenv.stream_compact("printf '%s'" % stream, log)
+    lines = kept.splitlines()
+    good = (rc == 0 and "[f] found new best score! (500 vs 720)" in lines
+            and lines[-1].endswith("iteration 400, 1 errors, score = 500  (final)")
+            and len(lines) <= 5)
+    print("[self-test] progress compacted to %d line(s), messages kept: %s"
+          % (len(lines), "PASS" if good else "FAIL"))
+    ok &= good
+
+    # 2. The splice keeps the synthesized inline_fn helpers above the function.
+    orig = ['#include "global.h"\n', "\n", "int f(int a)\n", "{\n", "    return a;\n", "}\n"]
+    cand = ["typedef int s32;\n", "int g;\n", "\n",
+            "int inline_fn(int a)\n", "{\n", "    return a + 1;\n", "}\n", "\n",
+            "int f(int a)\n", "{\n", "    return inline_fn(a);\n", "}\n"]
+    out = splice(orig, cand, "f")
+    good = (out is not None and out[0] == '#include "global.h"\n'
+            and "int inline_fn(int a)\n" in out and "typedef int s32;\n" not in out)
+    print("[self-test] splice keeps the draft's includes and the inline_fn helper: %s"
+          % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    # 3. The default thread count is a share of the machine, not all of it.
+    good = DEFAULT_THREADS == 4
+    print("[self-test] default threads = %d: %s" % (DEFAULT_THREADS, "PASS" if good else "FAIL"))
+    ok &= good
+    print("[self-test] %s" % ("PASS" if ok else "FAIL"))
+    return 0 if ok else 1
+
+
+# Several agents share the machine and each runs up to three searches; the
+# 2026-08-29 default of os.cpu_count() (32 here) put ~200 workers on 32 cores.
+DEFAULT_THREADS = 4
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("name", help="function name or address")
+    ap.add_argument("name", nargs="?", help="function name or address")
     ap.add_argument("--seconds", type=int, default=300,
                     help="wall-clock limit for the search (default 300)")
-    ap.add_argument("-j", "--threads", type=int, default=4)
+    ap.add_argument("-j", "--threads", type=int, default=DEFAULT_THREADS,
+                    help="permuter worker processes (default %d)" % DEFAULT_THREADS)
     ap.add_argument("--setup-only", action="store_true",
                     help="build the permuter directory and stop")
     ap.add_argument("--current", action="store_true",
                     help="start from <name>.c rather than best.c")
     ap.add_argument("--keep", action="store_true",
                     help="keep output directories even on success")
+    ap.add_argument("--live", action="store_true",
+                    help="echo the permuter's raw progress (the pre-wave-90 output)")
+    ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
+    if args.self_test:
+        return self_test()
+    if not args.name:
+        ap.error("give a function name or address")
+    rc, state, detail = _main(args)
+    print("\nPERMUTE %s %s%s" % (state, args.name, (" " + detail) if detail else ""))
+    return rc
 
+
+def _main(args):
     if not os.path.isdir(PERMUTER_DIR):
         print(CLONE_HINT)
-        return 2
+        return 2, "SETUP-FAILED", "vendor/decomp-permuter missing"
 
     rec, unit = trymatch.resolve(args.name)
     if rec is None or unit is None:
-        return 2
+        return 2, "SETUP-FAILED", "unknown function"
 
     pdir = setup(rec, unit, prefer_best=not args.current)
     if pdir is None:
-        return 2
+        return 2, "SETUP-FAILED", "see above"
 
     score = base_score(pdir)
     if score is None:
-        return 2
+        return 2, "SETUP-FAILED", "the permuter could not score the starting point"
     print("  base score %d  (0 would mean the starting point already matches)"
           % score)
     if score == 0:
         print("\nthe starting point already scores 0 -- run trymatch to see")
         print("whether it matches at the byte level.")
-        return 0
+        return 0, "BASE-SCORES-ZERO", "run trymatch"
 
     if args.setup_only:
         rel = os.path.relpath(pdir, awlib.REPO).replace(os.sep, "/")
@@ -382,9 +706,9 @@ def main():
         print("    wsl -d %s -e bash -c 'cd %s && "
               "python3 vendor/decomp-permuter/permuter.py %s'"
               % (agbenv.DISTRO, shq(agbenv.REPO_POSIX), shq(rel)))
-        return 0
+        return 0, "SETUP-ONLY", ""
 
-    run(pdir, args.seconds, args.threads)
+    run(pdir, args.seconds, args.threads, live=args.live)
     return verify(rec, pdir, args.keep)
 
 

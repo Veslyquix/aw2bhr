@@ -651,12 +651,16 @@ def permute(name_or_addr: str, seconds: int = 300, threads: int = 4) -> dict:
     instructions in the same order. It cannot fix a wrong struct layout or a
     wrong control-flow shape, and running it on one wastes the whole budget.
 
-    It starts from `work/<fn>/best.c`, so get the score as high as you can by
-    hand first. Every result is re-checked with the same byte-level test
+    It starts from `work/<fn>/<fn>.perm.c` if that exists (directed search),
+    else `work/<fn>/best.c`, so get the score as high as you can by hand
+    first. Every result is re-checked with the same byte-level test
     `try_match` uses, because the permuter's own score only diffs objdump text.
 
-    Blocks for up to `seconds`. Returns matched=false with the best score
-    reached if the search came up empty, which is a common and normal outcome.
+    Blocks for up to `seconds` -- the whole run. Agents running several
+    searches should use the shell instead (`python tools/permute.py <fn>
+    --seconds N --threads 4 --current`, backgrounded). Returns matched=false
+    if nothing matched; the report's last line says whether the draft was
+    IMPROVED (kept in work/<fn>/<fn>.c) or left unchanged.
     """
     rec = _resolve(name_or_addr)
     if rec is None:
@@ -677,10 +681,17 @@ def permute(name_or_addr: str, seconds: int = 300, threads: int = 4) -> dict:
     if res["stderr"].strip():
         out["stderr"] = res["stderr"][-1500:]
     if not out["matched"]:
+        improved = "PERMUTE IMPROVED" in res["stdout"]
+        out["improved"] = improved
         out["next"] = ("The search found nothing that matches at the byte "
-                       "level. work/<fn>/<fn>.c is unchanged. Re-running with "
-                       "a longer --seconds sometimes helps, but a different "
-                       "starting point usually helps more.")
+                       "level. " + (
+                           "It DID improve the draft: the better candidate is "
+                           "now work/<fn>/<fn>.c. Read what the mutation did "
+                           "before building on it, then chain another run from it."
+                           if improved else
+                           "work/<fn>/<fn>.c is unchanged. A different starting "
+                           "point (or a .perm.c directing the search) usually "
+                           "helps more than a longer run."))
     return out
 
 
