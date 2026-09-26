@@ -1,0 +1,36 @@
+# sub_0805D344
+
+0x0805D344, 244 bytes, THUMB, parked.
+
+Best score so far: 16.4%, -8 bytes.
+
+## Files
+
+- `sub_0805D344.c`: the current draft
+- `target.s`: the original assembly
+
+## What has been tried
+
+From `data/parked.json`.
+
+### Best so far
+
+13.5% identical, candidate 236 bytes (-8), first difference at +0xf. Re-measured by W59-E; unchanged since wave 57. NOTE work/sub_0805D344/best.json reads 13.9% for a DIFFERENT spelling in best.c -- gate on the draft's exit code, not on that number.
+
+### What still differs
+
+FOUR INSTRUCTIONS, all in the FILL loop, all one coupled decision. The ROM keeps the counter n in r8 (a HI register) and therefore pays 'mov r8,r0' for 'n = 0', 'movs r1,#1' / 'add r8,r1' for 'n++', 'mov r2,r8' before the guard's cmp and 'mov r0,r8' after it -- exactly the -8. The candidate keeps n in r5 and pays none of them. Freeing r5 is what lets the ROM LICM-hoist &gUnknown_08499594 into it ('ldr r5,=gUnknown_08499594' in the preheader, 'ldr r1,[r5]' in the body) where the candidate reloads that pool word inline every iteration. The hoist and n's register are the same fact; do not chase them separately.
+
+### Why it is close
+
+Everything from 'if (n > 1)' onward is byte-exact -- both loop guards, the stack spills, the ?: with its arms the right way round, the duplicated in-loop direction test, the inner descending loop, both six-access swaps including all four dead volatile loads, and the epilogue. The 'volatile u8 []' typing of gUnknown_030045F0 that this needs was made and re-verified in wave 57 against the twelve promoted builders (sub_0805CA60, sub_0805D2A0, sub_0805CDF0, sub_0805CE20 all still match after it).
+
+### Already ruled out
+
+- Wave 57: binding 'u8 id = gUnknown_030045F0[n];' in the loop body. It does move the ldrb ahead of the gUnknown_030033EC read as the ROM has it, but leaves both the pool ordering and n's register unchanged. Strictly worse at 13.1%.
+- Wave 59 (W59-E): writing the id list as an explicit POINTER WALK ('volatile u8 *p = gUnknown_030045F0; while (*p != 0) { ...; p++; n++; }') to force the ROM's split between a pointer for gUnknown_030045F0 and an integer index for gUnknown_030046E0, and so push n out of the low registers. This is the obvious remaining idea and it is WRONG BY THE REPO'S OWN RULE, so it was not spent as an attempt: in the ROM's preheader the pointer's init 'adds r4,r1,#0' sits AFTER the LICM hoist 'ldr r5,=gUnknown_08499594', and per the wave-58 giv rule (the preheader is written by three passes in a fixed order: source, then LICM hoists, then strength_reduce's inits) anything after a hoisted invariant was written by the loop optimiser and must not be authored. The pointer is a giv. Authoring it would reproduce the wave-58 sub_0800CAA0 failure in reverse.
+- Wave 59 (W59-E): what is left to explain is therefore an ASYMMETRY, not a source shape -- gcc gives gUnknown_030045F0 a pointer giv (r4, 'adds r4,#1') and gives gUnknown_030046E0 none (its base is rematerialised from the pool and added to n every iteration). Whatever makes the second array ineligible is the thing that frees r5 and pushes n to r8. Both arrays are volatile u8 and both are indexed by n; the visible difference is that gUnknown_030045F0 is also read by the loop's exit test.
+
+### Wave 87
+
+WAVE 87 (W87-A): 13.5% -> 16.4%, still 236/244 (-8), draft REPLACED (wave-57 draft in w87-start.c). The pre-registered giv-asymmetry probe was MOOT: the wave-57 draft ALREADY reproduces the ROM's split (pointer giv `add r4,#1` for gUnknown_030045F0, gUnknown_030046E0 rematerialised from the pool each iteration) and nobody had checked. Park claim REFUTED: the &gUnknown_08499594 hoist and n's register are TWO facts -- the hoist is now in the ROM's preheader position with n still in r5. What moved it: a VOLATILE-qualified read of the pointer global, `(*(struct Unk08499594 *volatile *)&g)[k].unk00` -- a non-volatile read of a pointer global leaves the address folded into the load (re-emitted every iteration, no invariant pseudo for LICM); a volatile read force_regs the address into its own pseudo, which LICM hoists (`ldr r5,=g` preheader, `ldr r1,[r5]` body, the ROM's form). Taking the address is not the lever; the qualifier is (doc chapter). Also required: bind the second call argument to a local before the call (`u8 x = ...; f(g, x)`) -- without it agbcc emits arg1 first and the body is 11 insns vs the ROM's 10. Header deliberately NOT retyped (20+ promoted users; the local cast gives the same code). Remaining -8 is ENTIRELY n's register (ROM r8, candidate r5): four 2-byte items. PERMUTER, first ever run here: `tools/permute.py --seconds 480 -j 4 --current` from the 16.4% draft ran to completion (exit 0) -- one candidate at permuter score 1400 re-checks at 16.0% (worse); a genuine negative for THIS draft, single run from one base (weak; wave 83 needed a chain of three). Next: chained runs from best.c; do NOT author the pointer walk (W59-E: a giv).

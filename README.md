@@ -107,6 +107,7 @@ include/    headers: types, hardware, and the structs recovered so far
 src/        C. src/decomp/ holds functions promoted out of assembly.
 tools/      the pipeline
 progress/   generated progress views
+wip/        drafts for functions that don't match yet, regenerated each wave
 ```
 
 `asm/` is never edited. Decompiling a function doesn't delete its assembly — the
@@ -127,6 +128,7 @@ working.
 | `promote.py` | Moves matched C into `src/decomp/`. Refuses anything `trymatch.py` doesn't accept. |
 | `progress_map.py` | Generates `progress/index.html`. |
 | `memory_map.py` | Generates `progress/memory-map.svg` for this README. |
+| `export_wip.py` | Copies the unmatched drafts from `work/` into `wip/`, with what has been tried on each. `--restore` copies them back. |
 
 If you want to match functions, read `docs/agbcc-codegen.md` first. It collects
 what this compiler does and why candidates fail. The usual reason correct-looking
@@ -136,7 +138,9 @@ on how the code is written rather than on what it calculates.
 ## Contributing
 
 1. Pick a function that is still assembly. `data/functions.json` lists the state,
-   size and shape of every one.
+   size and shape of every one. For the ones already attempted, `wip/` has the
+   drafts and what has been tried, closest first; `python3 tools/export_wip.py
+   --restore <name>` copies a draft into `work/` so you can start from it.
 2. `python3 tools/newfunc.py sub_0801XXXX` scaffolds `work/<name>/` with the
    target assembly and a stub signature.
 3. Write C, then `python3 tools/trymatch.py sub_0801XXXX --diff` until it exits 0.
