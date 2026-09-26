@@ -6,7 +6,7 @@ Best score so far: 77.3%.
 
 ## What it does
 
-Builds the current army's sorted unit list in gUnknown_02028DD8 (unit numbers 1-63 within the army's 64-unit block at gUnknown_03003F2C), ending with 0xff, and stores its length in byte 0x21 of arg. Units are ordered by a per-type rank from gUnknown_081BA068, ascending or descending by the gUnknown_02028E18 toggle, then optionally by HP (a2 = 1), fuel (2) or ammo (3). Finally the list is rewritten so that units with flag 8 are skipped at the top level and each unit with flag 0x10 is followed directly by the units in its cargo bytes (7 and 8), two levels deep.
+Builds the current army's sorted unit list in gUnknown_02028DD8, ended by 0xff. Units are sorted by a per-type rank, then optionally by HP, fuel or ammo, and each transport is followed directly by the units it carries.
 
 ## How close it is
 

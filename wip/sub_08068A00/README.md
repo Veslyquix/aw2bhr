@@ -4,14 +4,36 @@
 
 Best score so far: 25.5%, -20 bytes.
 
+## What it does
+
+Per-frame step of a cutscene proc that counts down its word unk2c and acts on particular values: at 0xc7 it turns on BG0 to BG2 and sprites and decompresses gUnknown_0817DE24 into BG VRAM; at 0xb4 it decompresses gUnknown_0818E364 into sprite VRAM; at 0x80 it calls sub_080678D4(-1); at 0x60 sub_080673D0(0x40, 1, proc); at 0 it ends two other proc scripts and breaks this proc's current step. Then it decrements the countdown.
+
+## How close it is
+
+Compiles 20 bytes short of 196, 25.5% of bytes in place. Every case body is right; the whole difference is the switch's comparison tree: the ROM tests nine values, four of which lead nowhere, and splits first at 0x4e, while the draft's compiler drops the four empty cases, tests six values and splits at 0x60.
+
+## What is left
+
+The ROM's tree implies the original switch had more case values than the nine it tests, at least three of them below 0x4e. Try constructs that add case values: one between 0 and 0x26, a negative one, or a `case A ... B:` range.
+
+## Already tried
+
+- An explicit empty `default: break;`: the same six-value tree.
+- A throwaway statement in each empty case that the compiler deletes later: the same tree.
+- The four empty values grouped on one `break`, or sharing the `default:` label (three spellings): the same tree.
+- Empty cases that survive (`proc->unk2c--; return;`): all nine values are tested, but the first split is at 0x60 and each case costs an extra instruction.
+- The older compiler: the same tree, and the display-flag code comes out wrong.
+- Measured: this compiler picks the first split from the number of case values alone, and with nine it always splits at the fifth (0x60), so no nine-case switch gives the ROM's tree.
+
 ## Files
 
 - `sub_08068A00.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -37,3 +59,5 @@ Every body is right and every constant agrees; the residual is entirely the disp
 ### Wave 87
 
 WAVE 87 (W87-A): pre-registered shared-label form (`case 0x4e: default: break;`, `default: case 0x4e:`, and all four dead values + `default:` on one break) REFUTED -- all three give the SAME six-pivot tree rooted at 0x60: `default:` is not a case node and cannot keep a dead node alive; the dead nodes are deleted before balance_case_nodes runs. Fifth spelling of 'keep the dead arms alive' across three waves, one identical tree; W59-E's closure stands. NEW INDEPENDENT STRUCTURAL RESULT: the ROM's LEFT subtree is rooted at 0x26 with 0 as its left child (cmp #0x26/beq default; cmp #0x26/bgt default; cmp #0/beq body0) -- balance_case_nodes only splits a sublist when i > 2, so a two-node sublist stays a chain tested head-first (0 first, blt default). Hence the sublist below 0x4e held THREE OR MORE case nodes of which only two survive as pivots: the original switch had MORE case values than the nine the tree tests. estimate_case_costs' cost-table path is unreachable (needs every value in [-1,127]; 0x80/0xb4/0xc7 are not). The top split cannot be an `if (x == 0x4e)` guard before an eight-case switch (eight nodes root at 0x60, and the ROM's second instruction is `cmp 0x4e / bgt`, a case node's own right branch). Live leads are about node COUNT: a construct leaving >= 3 nodes below 0x4e (a value in (0,0x26), a negative value, or a `case A ... B:` range). Configured, 176/196 (-20), 25.5%, unchanged, 0 try_match.
+
+</details>

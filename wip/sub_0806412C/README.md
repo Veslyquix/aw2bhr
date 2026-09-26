@@ -4,14 +4,36 @@
 
 Best score so far: 85.3% (preprocessed form, not included).
 
+## What it does
+
+Initialises two tables, gUnknown_0202F140 and gUnknown_0202F110, from ROM data (the first scaled to 20.12 fixed point), then stores its eight u16 arguments in the second table and two globals.
+
+## How close it is
+
+Right size (232 bytes), 56.9% of bytes in place. Two differences: the first loop ends with a `!= 8` test where the ROM tests `<= 7`, and its counter and row pointer sit in each other's registers; and the second loop's base comes from its own constant (table plus 2) where the ROM reuses the one table address for the loop and the six stores, so the draft has 7 constants to the ROM's 6.
+
+## What is left
+
+Find what keeps the first loop's counter counting up with a `<= 7` test while the compiler still builds the 0x18-byte stride pointer itself; every relational test tried so far makes it count down. Separately, get the second loop's base as the table address plus 2 computed in a register.
+
+## Already tried
+
+- Every relational form of the first loop (`i <= 7`, `i < 8`, do/while, the `i = 0` before or after the v7/v8 lines): the compiler rewrites the counter to count down. Only `i != 8` keeps it counting up (kept).
+- A goto loop: keeps the counter counting up but loses the compiler-built stride pointer, and writing the stride as a source variable costs 8 bytes.
+- Using i after the loop: the compiler substitutes its final value 8; no effect.
+- Binding gUnknown_0202F110's base to a local: much worse, an extra read-only constant and indirect loads at every use.
+- Writing `a7 * 0x1000` and `a8 * 0x1000` inline at their stores: a bigger stack frame; binding them to locals first is required (kept).
+- The permuter's saved best (best.c): shares the table constant as the ROM does, but compiled, its first loop counts down again.
+
 ## Files
 
 - `sub_0806412C.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -49,3 +71,5 @@ Everything else is exact: the eight-parameter prologue with four u16s spilled to
 ### Why it is parked
 
 Two loop-optimiser facts, not source semantics. WAVE 77 (W77-J) moved this from 52.2% to 56.9% and split the first defect in two. The counter reversal is now KNOWN to be blockable -- an `i != 8` exit test blocks check_dbra_loop and produces the ROM's ascending counter next to the giv -- and the init position, previously believed unreachable, falls out of hoisting `i = 0;` above the v7/v8 statements once the init exists. What is left of defect (a) is exactly two things: the exit test is `cmp #8 / bne` where the ROM has `cmp #7 / ble`, and the outer loop's counter and row pointer hold the OPPOSITE registers from the ROM (candidate counter r3 / rowptr r1, ROM counter r1 / rowptr r3). The one question is what suppresses check_dbra_loop with a RELATIONAL test still in place; every relational form (`<= 7`, `< 8`, do/while, init hoisted or not) reverses, and NE is the only thing measured that does not. Defect (b), the `gUnknown_0202F110+0x2` pool word, is untouched and independent.
+
+</details>

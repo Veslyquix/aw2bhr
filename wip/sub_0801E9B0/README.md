@@ -6,7 +6,7 @@ Best score so far: 27.8%, -12 bytes.
 
 ## What it does
 
-Copies a sprite's list of OAM entries (a count, then three halfwords per entry from a4) into the OAM buffer gUnknown_03002520 starting at slot a1. Each entry is combined with the OAM template a5 and moved to (a2, a3); the template's flip bits mirror the entry using the sprite width and height tables, and when its affine bit is set the offset is scaled by the owning object's scale (found through a6, full or half offset by the double-size bit). Each finished entry goes to sub_080169A4, which calls the owning object's callback; returns 1 without writing if the entries would run past slot 0x80, otherwise 0.
+Copies a sprite's list of OAM entries into the OAM buffer, combining each with the template a5, moving it to (a2, a3) and applying flips and the owning object's scale. Each entry is passed to its object's callback; returns 1 without writing if the entries would not fit.
 
 ## How close it is
 

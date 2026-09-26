@@ -6,7 +6,7 @@ Best score so far: 93.9% (preprocessed form, not included).
 
 ## What it does
 
-Draws the map information panel for the cell under the cursor: the terrain box with its defence value and, if a unit stands there, its picture, army palette, HP, fuel, ammo and any units it carries. It then sets display window 0 around the panel and shows one of three small icons with a number: a value from an object at the cell (sub_0803DF54) or from gUnknown_020288B4, otherwise a count that starts at 20 on six terrain types and is reduced by a unit field, blinking with the game clock.
+Draws the map information panel for the cell under the cursor: the terrain box, and the unit standing there with its HP, fuel, ammo and cargo. It then shows one of three small icons with a number, and sets display window 0 around the panel.
 
 ## How close it is
 

@@ -6,7 +6,7 @@ Best score so far: 39.5%, -8 bytes.
 
 ## What it does
 
-Writes a 2x2 block of background tilemap entries at dst (the map is 32 entries wide, so dst[0x20] is the row below). a3 is an army's first unit slot (0x00, 0x40, 0x80 or 0xC0, or 0x100 for the army whose turn it is), so (a3 >> 6) + 1 is the army number; the top two tiles are a per-army base tile (gUnknown_0809097C) plus a graphic index from sub_080261A4(army, a2), and the bottom two show one of several alternative tiles chosen by sub_0802706C and the flags a4, a5, a7, a8 and a6. When a3 is 0 or 0x80 the block is drawn mirrored, with the horizontal-flip bit 0x400 set; what the picture is (probably a unit icon with status marks) is not confirmed.
+Writes a 2x2 block of background tilemap entries for one army: a per-army base tile plus a graphic from sub_080261A4 on top, and status tiles chosen by flags below. Two of the army slots are drawn mirrored. What the picture shows (probably a unit icon with status marks) is not confirmed.
 
 ## How close it is
 

@@ -6,7 +6,7 @@ Best score so far: 87.2% (best.c).
 
 ## What it does
 
-Copies a text string's glyphs into sprite tile memory. It gets a 0x3000-byte block from sub_08014E44, and for each character of `str` outside the range 0x18-0x20 it finds the character in the table gUnknown_08090F30 and copies that entry's 0x100-byte run from the block to the next glyph slot in VRAM, starting at 0x06016140; then it frees the block with sub_08014ED4. Nothing in this function fills the block, so where its contents come from is unknown.
+Copies a text string's glyphs into sprite tile memory starting at 0x06016140, looking each character up in the table gUnknown_08090F30. The glyph data comes from a 0x3000-byte block returned by sub_08014E44; where that block's contents come from is unknown.
 
 ## How close it is
 

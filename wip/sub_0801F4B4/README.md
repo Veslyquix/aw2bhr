@@ -6,7 +6,7 @@ Best score so far: 58.7%, -8 bytes (best.c).
 
 ## What it does
 
-Runs the movement-range flood fill for a unit starting at cell (a1, a2). It fills the cost map with 0xFF, loads the move-cost table for unit type a3 and seeds a queue with the start cell at cost 0; then it repeatedly swaps two queues of 4-byte {x, y, direction, cost} records (at offsets 0x2c and 0x5a4 of the work area gUnknown_084999C8) and, for each record, tries a step in every direction except straight back (sub_0801F6F0), stopping when a pass finds the read queue empty. a4 and a5 are only stored into the work area here.
+Computes a unit's movement range with a flood fill from cell (a1, a2). It seeds a queue at cost 0, then repeatedly takes cells from one queue and steps in every direction except straight back into the other, until no cells are left.
 
 ## How close it is
 

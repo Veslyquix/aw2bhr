@@ -6,7 +6,7 @@ Best score so far: 59.1%.
 
 ## What it does
 
-Inserts an entry into a linked list kept sorted by a signed 16-bit key. It takes the next free 12-byte node from the pool at gUnknown_0200C624 (indexed by the count in the list header gUnknown_030020A8), stores the pointer argument and the key in it, links it in before the first node whose key is not smaller, increments the count and refreshes the header's head pointer. Returns -1 without inserting when the pool is full (count above 0x80), otherwise 0.
+Inserts an entry into a linked list kept sorted by a signed 16-bit key, taking a free 12-byte node from the pool at gUnknown_0200C624 (list header gUnknown_030020A8). Returns -1 when the pool is full, otherwise 0.
 
 ## How close it is
 

@@ -6,7 +6,7 @@ Best score so far: 14.7% (best.c).
 
 ## What it does
 
-A smaller copy of the script interpreter in sub_0801D390: it runs the command script of animated object a1 in gUnknown_0200E438 until a wait or end command, with only the wait, jump, show-frame, set-field and end commands. It draws frames with sub_0801ECE8 instead of sub_0801D348, and when bit 13 of the unk30 template is set it draws only on odd values of gGameClock (a flicker). a2 picks the pass: 1 counts down waits and runs end actions without drawing, 0 draws.
+A cut-down copy of sub_0801D390's script interpreter for the same animated objects, with fewer commands. It draws with sub_0801ECE8 and can make the object flicker by drawing only on odd frames.
 
 ## How close it is
 

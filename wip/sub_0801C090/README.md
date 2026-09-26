@@ -6,7 +6,7 @@ Best score so far: 45.8% (preprocessed form, not included).
 
 ## What it does
 
-Copies a sprite's list of OAM entries (a count, then three halfwords per entry from a3) into the OAM buffer at the write cursor gUnknown_03002F2C, advancing the cursor by 8 per entry. Each entry is moved by (a1, a2) and a4 is added to its tile number; when bit 12 of a1 (the horizontal-flip bit) is set, the entry's X is mirrored using its width from the OAM size table gUnknown_0848B56C, otherwise the offsets gUnknown_03002B20 and gUnknown_030030D0 are added to Y and X.
+Copies a sprite's list of OAM entries into the OAM buffer at the write cursor gUnknown_03002F2C, moving each entry by (a1, a2) and adding a4 to its tile number. When the horizontal-flip bit is set in a1, each entry's X is mirrored.
 
 ## How close it is
 

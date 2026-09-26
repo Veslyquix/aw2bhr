@@ -6,7 +6,7 @@ Best score so far: 22.6%, -28 bytes.
 
 ## What it does
 
-Copies a sprite's list of OAM entries (a count, then three halfwords per entry from a4) into the OAM buffer gUnknown_03002520 starting at slot a1, rotating and scaling each entry's position about (a2, a3) with the scale and angle in affine record gUnknown_0200F720[a5]. The maths is software floating point with sin and cos (sub_0808B710 and sub_0808B91C) and the sprite size from sub_0801E3B4, halved unless the entry is double-size; affine entries are also pointed at matrix a5. Returns 1 without writing if the entries would run past slot 0x80, otherwise 0.
+Copies a sprite's list of OAM entries into the OAM buffer, rotating and scaling each entry's position about (a2, a3) using the scale and angle in affine record gUnknown_0200F720[a5]. Returns 1 without writing if the entries would not fit, otherwise 0.
 
 ## How close it is
 

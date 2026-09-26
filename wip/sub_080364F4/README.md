@@ -6,7 +6,7 @@ Best score so far: 9.5% (best.c).
 
 ## What it does
 
-Sets up the players for the current map from its chapter record gUnknown_085C77A0[gPlaySt.mapID] (0x5c-byte records), after calling sub_080191B0. In game modes 1 and 2 it copies, for each of the four armies, a byte from the record's offset-0x44 run, the army colour (offset 0x40) and the CO (offset 0x3c) into gPlaySt's per-army arrays, with CO 0xff meaning 'use gUnknown_030058D4's choice' for the first three armies; in mode 0 it copies only the COs. It then starts the record's pre-placed-unit script with sub_080193B0 if there is one and the map category is 2 or less, and otherwise calls sub_080364E0.
+Sets up the players for the current map from its chapter record gUnknown_085C77A0[mapID]: each army's colour, CO and one more per-army byte are copied into gPlaySt. It then starts the map's pre-placed-unit script, or calls sub_080364E0 if there is none.
 
 ## How close it is
 

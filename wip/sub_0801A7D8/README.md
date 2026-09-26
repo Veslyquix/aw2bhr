@@ -6,7 +6,7 @@ Best score so far: 23.2%, +12 bytes (best.c).
 
 ## What it does
 
-Saves a block of game data (a3 bytes from gUnknown_0200CC2C) to backup memory in 4 KiB sectors. It sorts the free sector slots by their generation counters, splits the data into pieces of at most 0xFAD bytes, and for each piece fills the 0x02002000 buffer with a header (signature word, flags, generation, piece number and count, offset, the slot-generation table, length), the data and a checksum byte plus its complement, then writes and checks the sector, moving to another slot if the check fails. Returns 1 if it runs out of slots, otherwise 0; when a1 is non-zero it repeats the whole job once more with a1 = 0 and a new size from a function pointer.
+Saves a block of game data to flash memory in 4 KiB sectors. It splits the data into pieces, writes each piece with a header and checksum to a free slot chosen by its generation counter, and checks it, moving to another slot if the check fails. Returns 1 if it runs out of slots, otherwise 0.
 
 ## How close it is
 

@@ -6,7 +6,7 @@ Best score so far: 45.1%, -4 bytes.
 
 ## What it does
 
-Shows a map proc's unit sprite if it is on screen. It returns early unless the proc's pixel position (offsets 0x42 and 0x44) is inside the visible window of the map camera (the map object gMap); when the proc's byte 0x35 is 2 (and a condition on gPlaySt and gUnknown_030032D8 holds) it scrolls the camera to follow it with sub_080358C4. It then skips cells whose byte in the map's per-cell plane at offset 0x234A is 0 (unless the current player's turn-state byte has flag 2), asks sub_080255F4 whether the unit may be shown in that cell, and places the sprite object (proc offset 0x2c) at the screen position with sub_0801C254.
+Shows a map unit's sprite if its position is inside the visible part of the map, scrolling the camera to follow it in one mode. It skips cells whose byte in the map's unk234A plane is 0, asks sub_080255F4 whether the unit may be shown, and places the sprite with sub_0801C254.
 
 ## How close it is
 

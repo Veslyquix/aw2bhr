@@ -6,7 +6,7 @@ Best score so far: 49.5%, +4 bytes (best.c).
 
 ## What it does
 
-Draws the graphics of the same info panel for entry b at x position a: it calls sub_0801BD00, passes the pointer at offset 8 of b's record to sub_0801C7DC (the record comes from one of three tables, chosen by whether b is 6, 8 or anything else), draws sprite 0xA8, and draws an icon for each of the three unit types in gUnknown_084C20C0 whose repairTable entry for b is set. Then, by gUnknown_02028DD4: in mode 1 it draws one sprite per point of b's defence value, calls sub_08043418, and draws an icon for each of seven movement types whose movement cost onto b is not -1 under the current CO, CO power and weather; in mode 2 it draws the defence sprites and calls sub_08043418 with a smaller size.
+Draws the graphics of the terrain info panel for terrain b: its picture, an icon for each unit type that can be repaired there, and, depending on the panel mode, one sprite per point of defence and an icon for each movement type that can enter it.
 
 ## How close it is
 

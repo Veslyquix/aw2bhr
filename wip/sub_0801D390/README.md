@@ -6,7 +6,7 @@ Best score so far: 63.0% (best.c).
 
 ## What it does
 
-Runs the command script of animated object a1 (a 0x4C-byte record in gUnknown_0200E438) until it reaches a wait or an end command. Each 16-bit command has its type in the top 4 bits: wait N frames, jump within the script, show frame N (drawn with sub_0801D348 from the frame table at unk20 unless bit 12 of the unk30 template is set), pass one or two values to sub_0801E248/E264/E27C/E294 (the 0x6xxx forms convert percentages to 1/256 units first), set a field, or end. a2 picks the pass: 1 counts down waits and runs end actions without drawing, 0 draws.
+Runs the command script of one animated object (a 0x4C-byte record in gUnknown_0200E438) until it reaches a wait or an end command. Commands include wait, jump, show a frame, set a field and end. a2 picks the pass: 1 counts down waits without drawing, 0 draws.
 
 ## How close it is
 

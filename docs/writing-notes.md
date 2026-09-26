@@ -97,7 +97,9 @@ illustrative):
 }
 ```
 
-Update `status`, `left` and `tried` whenever you work on the function. When it
+Keep `does` to three sentences at most: what the function is for, then its
+key steps. A field-by-field walkthrough belongs in a comment in the draft, not
+here. Update `status`, `left` and `tried` whenever you work on the function. When it
 matches, delete the whole entry.
 
 ## Glossary

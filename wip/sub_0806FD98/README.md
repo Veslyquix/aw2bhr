@@ -4,14 +4,35 @@
 
 Best score so far: 9.2%, +24 bytes.
 
+## What it does
+
+m4aSoundVSync from the MP2K sound library, called once per frame. If the sound info block that gUnknown_03007FF0 points at has a valid ident, it counts pcmDmaCounter down and, when it reaches zero, reloads it from pcmDmaPeriod and restarts the two sound DMA channels (DMA1 and DMA2).
+
+## How close it is
+
+Cannot be scored on its own: its first two constants sit in a later function's constant pool, more than 600 bytes past its end, which a function compiled alone cannot reproduce. Apart from that the draft is 24 bytes longer than the ROM's 76.
+
+## What is left
+
+Unpark it when this sound-library region is promoted as one file. Before then: settle whether pcmDmaCounter is really volatile (check that the matched sub_08070AF8 still matches with a plain u8; plain u8 here removes 4 of the 24 bytes), and find spellings for the bit-25 test (the ROM shifts the bit into the carry flag) and for the ident check (the ROM subtracts a positive constant, which suggests the source held it in a variable).
+
+## Already tried
+
+- A local temporary for the counter decrement, with the shared volatile type: still an extra dead load. `--p->pcmDmaCounter` is worse, three loads.
+- The older compiler: bit-identical output; -O1: 4 bytes worse.
+- hardware.h's separate DMA1CNT/DMA2CNT macros: two base addresses instead of the ROM's one (the local DMA struct is kept).
+- The bit-25 test: every spelling tried gives a mask and compare instead of the ROM's shift.
+- `p->ident - MPLAY_ID_NUMBER` written plainly: the compiler stores the negated constant and adds it.
+
 ## Files
 
 - `sub_0806FD98.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -39,3 +60,5 @@ The C is believed right -- it is the m4aSoundVSync shape, the fe_matches index a
 ### Why it is parked
 
 Blocked by a literal pool that sits outside the function's own extent. Not a source problem and not scorable per-function; it needs whole-file promotion of the region.
+
+</details>

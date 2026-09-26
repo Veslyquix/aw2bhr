@@ -6,7 +6,7 @@ Best score so far: 32.5% (best.c).
 
 ## What it does
 
-Loads the tile graphics for sprite id a into the next free place in a tile area. It picks the area record in gUnknown_0200F920 with sub_0801F3D4, takes the next free tile number from that record's list, and copies n tiles (width times height from gUnknown_0848B780[a]) with CpuFastSet from the graphics sub_0801F444 returns to the area's memory at that tile. It then records a in the list, advances the list cursor and stores tile + n as the next free tile.
+Loads the tile graphics for sprite id `a` into the next free place in a tile area (records in gUnknown_0200F920), copying width x height tiles with CpuFastSet. It then records the id and advances the area's next-free-tile cursor.
 
 ## How close it is
 

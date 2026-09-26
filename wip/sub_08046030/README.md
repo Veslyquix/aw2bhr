@@ -6,7 +6,7 @@ Best score so far: 42.7%, +4 bytes (best.c).
 
 ## What it does
 
-Sets up a per-army statistics screen (the draft calls it the results screen): loads its graphics and palettes, counts cells whose terrain kind is 6, 8, 10, 11 or 14 per owner over the whole map, and draws a header. It then draws one row per army with its unit count and units lost, followed by either captures, income and funds or placeholder text depending on defeat, AI control and fog, and stores each army's share of the counted terrain as a percentage in gUnknown_084C1430.
+Sets up a per-army statistics screen (the draft calls it the results screen). It draws one row per army with its unit count and units lost, then captures, income and funds or placeholder text depending on defeat, AI control and fog, and stores each army's share of the counted terrain as a percentage.
 
 ## How close it is
 

@@ -6,7 +6,7 @@ Best score so far: 60.1%, +4 bytes (best.c).
 
 ## What it does
 
-Per-frame input handler for an on-screen character grid, apparently a text-entry keyboard (state in gUnknown_030044E0: cursor column 0-14 and row 0-5; sub_0804A18C gives the key under the cursor). A types the character if it fits the width and length limits or acts on the special keys 0x23-0x25 and 0x40 (0x25 deletes, 0x40 toggles a mode byte, 0x23 calls sub_0804A6D8, which Start also reaches), B deletes, and the d-pad moves the cursor with wrap-around, stepping over multi-cell keys, then plays a sound and recolours the highlighted special key. A pending state byte can first copy the entered text out and end the proc.
+The per-frame input handler for an on-screen character grid, apparently a text-entry keyboard. A types the character under the cursor or acts on a special key, B deletes, Start calls sub_0804A6D8, and the d-pad moves the cursor with wrap-around.
 
 ## How close it is
 

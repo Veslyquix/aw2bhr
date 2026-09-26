@@ -6,7 +6,7 @@ Best score so far: 19.6% (best.c).
 
 ## What it does
 
-Exchanges this frame's key input for link play. If gPlaySt.savingEnabled is 0 (field name unverified) or the link record's mode byte is not 2, it returns the local keys (gpKeySt->previous). Otherwise it waits for a handshake flag, sends the local keys packed with a 3-bit field from gUnknown_0849B01C and marker bit 0x8000, then checks each connected player's received word: a bad word marks the result invalid and returns the local keys, a word whose 3-bit field does not match counts an error and returns 0, and otherwise the key bits of all players are ORed together, stored and returned.
+Exchanges this frame's key input with the other players in link play and returns all players' keys ORed together. When link play is off it returns the local keys; a bad word from another player makes it fall back to the local keys or return 0.
 
 ## How close it is
 

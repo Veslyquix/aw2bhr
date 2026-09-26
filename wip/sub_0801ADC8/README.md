@@ -6,7 +6,7 @@ Best score so far: 64.6% (best.c).
 
 ## What it does
 
-Tidies the save slots in flash memory. It clears every slot's bit 3 in gUnknown_0200CC38.unk20 (apparently a 'keep' flag), then asks FindNewestCompleteSave (sub_0801B120) for a complete save with id 0xFF: if there is none it writes a fresh one with sub_0801A7D8, otherwise it sets bit 3 on that save's parts. It then wipes the unkept slots whose tag (unk00) is 0, calling sub_0801B5E8 up to four times until sub_0801B018 no longer reads the slot back as valid, and marks every other unkept slot as free (0xFF).
+Tidies the save slots in flash memory. It marks the parts of the newest complete save as kept (writing a fresh save with sub_0801A7D8 if there is none), then wipes or frees every slot that is not kept.
 
 ## How close it is
 

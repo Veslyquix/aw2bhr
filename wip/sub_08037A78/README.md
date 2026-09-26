@@ -6,7 +6,7 @@ Best score so far: 27.6%, -4 bytes.
 
 ## What it does
 
-For every map cell whose byte in the map's per-cell plane at offset 0x12 is non-zero (sub_0803CFA4 treats that byte as a unit id), merges a small tile into the buffer a1. The tile is chosen by the unit's army colour (gUnknown_030040F8, then gUnknown_08582E74, tile data in gUnknown_080A0F38); four halfwords of the destination are ANDed with the mask gUnknown_0849D534 and then ORed with the tile, at a position taken from the per-column and per-row offset tables gUnknown_03004010 and gUnknown_030032E0. What screen this draws is not confirmed.
+For every map cell that holds a unit, draws a small tile chosen by the unit's army colour into the buffer a1, masking out what was there first. What screen this draws is not confirmed.
 
 ## How close it is
 

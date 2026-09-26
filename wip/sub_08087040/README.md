@@ -4,14 +4,37 @@
 
 Best score so far: 55.8% (preprocessed form, not included).
 
+## What it does
+
+Draws four pairs of sprites in a row with PutSprite: for i from 0 to 3, one sprite at y 0 and one at y 16, at x = 0x97 + 24 * i, using the sprite data gUnknown_0848B690 and gUnknown_0848B6A8 with tile numbers stepping by 8.
+
+## How close it is
+
+Compiles 4 bytes short (116 against 120), 23% of bytes match; the score means little because the difference starts in the opening lines and shifts everything after it. The original keeps one of the three stepping coordinates on the stack and loads the sprite-data pointer last before each call; the draft keeps everything in registers.
+
+## What is left
+
+First, name the sprite data directly: 0x081D9440 and 0x081D9444 are this function's own compiler-made address words (they hold the addresses of the already-declared sprite blobs gUnknown_0848B690 and gUnknown_0848B6A8), so pass those arrays to PutSprite and drop the two pointer locals, as fixed several drafts of the same kind. If a gap remains, look for the extra live value that makes the original keep one coordinate on the stack.
+
+## Already tried
+
+- Naming gUnknown_081D9440/44 directly as pointer variables: an extra data word and a double load per use, and the loop counter no longer counts down.
+- Accumulators instead of coordinates computed from the counter, or one x value with x + 4: fewer live values, moves the wrong way.
+- volatile on the pointer objects or on the loads: no fix.
+- Binding the sprite word to a local before each call: reorders the whole body.
+- A descending counter in the source: its set-up lands first, where the original's comes last.
+- Swapping the declaration order of the two pointer locals: no change.
+- Automatic permuter, 900 seconds over two runs: no match; the 55.8% best.c it left reads locals before assigning them and is not a real candidate.
+
 ## Files
 
 - `sub_08087040.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -36,3 +59,5 @@ W46-J's only contribution is verification: the draft was re-run from scratch and
 ### Why it is parked
 
 Two independent agents (W46-C, W46-J) reached the same 4-byte spill residual with the same source shape; the permuter has been run and failed.
+
+</details>
