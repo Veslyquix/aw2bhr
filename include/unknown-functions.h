@@ -2809,6 +2809,7 @@ void *sub_0802813C(void);
  * sub_08035760 as a pointer. */
 void sub_08015328(s16);
 void sub_08015C30(u8);
+void DebugVersusPauseScreen(void); /* sub_080283E4; see src/decomp/c_080283E4.c. */
 void sub_080294FC(void);
 void sub_08029570(void);
 void sub_08029868(u8);

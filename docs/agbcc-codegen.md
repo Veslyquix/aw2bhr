@@ -53588,3 +53588,25 @@ direct-symbol spelling rather than a pointer local bumped in place. The
 header comment on struct Unk02027F74.unk04 records that the member array
 "does NOT match" sub_08087104; it does match here, so the choice is per
 function.
+
+## Check the ROM's string bytes before blaming .rodata layout (sub_080283E4)
+
+sub_080283E4 (now `DebugVersusPauseScreen`) sat at 90.7% from wave 36. Its
+notes gave half of the residual to a ".rodata padding word the source does
+not produce" after "R: SAKUTEKI OFF". Dumping 0x08090B04.. showed the real
+cause: both fog strings have TWO spaces, "R: SAKUTEKI  ON" (16 bytes) and
+"R: SAKUTEKI  OFF" (17). With one space every later literal lands 4 bytes
+early and trymatch cannot equate the pool words. Always compare literals
+against the ROM bytes, not against a disassembly comment.
+
+The code residual closed with readable spellings:
+
+- `gPlayers[1].aiControlled = gPlaySt.aiControlled[1];` instead of
+  `((u8 *)gPlayers)[0x57] = ...` fixes the first block's load order
+  (90.7% -> 95.4%).
+- The Up/Down toggle is `play = &gPlaySt; cursor = slot->unk38;
+  play->aiControlled[cursor + 1] = ...`. The pointer local is load-bearing:
+  it creates the &gPlaySt register before the slot address, and CSE reuses
+  it for the toggle. Through gPlaySt directly it is +4 bytes. The
+  `(u8 *)&gPlaySt + side + 0x39` byte-offset forms either cost 4 bytes or
+  reverse one `adds` operand order (96.9%).
