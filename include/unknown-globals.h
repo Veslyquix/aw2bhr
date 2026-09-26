@@ -154,6 +154,19 @@ struct SpriteEntry /* 0x10 */
     /* 0x0c */ u16 *object;
 };
 
+/* The two draw-gate flags in the first word of Unk0200E438.unk30, bits 12
+ * and 13 (byte +0x31, bits 4 and 5). Signed one-bit fields: the ROM tests them
+ * with `lsls #0x1b` / `lsls #0x1a` sign tests, which only a signed bitfield
+ * produces (docs/agbcc-codegen.md, W56-H). A view cast onto the shared member
+ * rather than a reshape of it: sub_0801D390 and sub_0801DCD4 read it as
+ * `((struct SpriteScriptFlags *)&e->unk30)->hidden`. */
+struct SpriteScriptFlags
+{
+    u32 unk00_0 : 12;
+    s32 hidden : 1;
+    s32 flicker : 1;
+};
+
 /* Merged from six variants. unk30 was `u32 unk30; u32 unk34` in the setters
  * and `struct UnkVec unk30` in sub_08015608/sub_08015638, which return it by
  * value; the pair form was never actually read, so the vector form wins.

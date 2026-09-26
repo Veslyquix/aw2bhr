@@ -10,18 +10,6 @@
  * linker alias below so every other unit keeps resolving it unchanged.
  */
 
-/* The two draw-gate flags in the first word of Unk0200E438.unk30, bits 12
- * and 13 (byte +0x31, bits 4 and 5). Signed one-bit fields: the ROM tests them
- * with `lsls #0x1b` / `lsls #0x1a` sign tests, which only a signed bitfield
- * produces (docs/agbcc-codegen.md, W56-H). A local view, cast onto the shared
- * member rather than reshaping it. */
-struct SpriteScriptFlags
-{
-    u32 unk00_0 : 12;
-    s32 hidden : 1;
-    s32 flicker : 1;
-};
-
 /* Steps the animation script of sprite entry `id` in gUnknown_0200E438, the
  * smaller sibling of sub_0801D390 (no 0x5/0x6/0xd effect opcodes). Each u16
  * command's top nibble is the opcode and its low 12 bits the argument:

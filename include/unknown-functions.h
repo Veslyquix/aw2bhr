@@ -485,6 +485,8 @@ void sub_0801D924(void);
  * Both bodies are still unmatched assembly, so this is a floor, not a reading
  * of their prologues. */
 void sub_0801D390(int, int);
+void RunSpriteScript(int, int); /* sub_0801D390's readable name; see
+                                 * src/decomp/c_0801D390.c. */
 void sub_0801DCD4(int, int);
 void RunSimpleSpriteScript(int, int); /* sub_0801DCD4's readable name; see
                                       * src/decomp/c_0801DCD4.c. */

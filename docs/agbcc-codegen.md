@@ -53492,6 +53492,10 @@ into the wrong register.
 
 ## sub_0801D390's remaining residual is global-alloc order, not source shape
 
+**Resolved (matched as `RunSpriteScript`).** The allocation below was a
+property of the fresh draft, not of the source spellings. See "sub_0801D390
+matched: the allocation came from the older draft's shape" further down.
+
 With the mask residual solved (section above), sub_0801D390 is 800/856
 (-56). The whole deficit is register assignment:
 
@@ -53522,3 +53526,39 @@ Ruled out:
   into sb. Hoisting that pointer by hand is +28.
 - Three 120 s permuter runs from the corrected draft. The best valid result
   is still the draft.
+
+## sub_0801D390 matched: the allocation came from the older draft's shape
+
+sub_0801D390 (now `RunSpriteScript`) matched by combining two drafts that each
+had half of the answer:
+
+- The wave-56 draft (published in `wip/`) was 852/856. It already had the
+  ROM's allocation: `e` in r8, `p` in r7, the 0x6000 argument copy in r6. Its
+  whole residual was the loop-top mask.
+- RunSimpleSpriteScript's spellings fix the mask: an opcode of
+  `(u16)((s16)*p & ~0xfff)` and `*p` re-read at every use, with no command
+  local.
+
+Applied to the wave-56 draft, those two changes matched outright. The same
+spellings on a fresh draft had given 800/856 with `e` in r7.
+The allocation difference is in the older draft's shape. It has `n`/`t` int
+locals for the argument and first operand, `frame` built as
+`q = base; q += i;`, and each latched-effect skip written as its own
+`p++; break;` rather than a shared `goto`.
+
+The steps, measured:
+
+| wave-56 draft plus | result |
+|---|---|
+| nothing | 852 (-4) |
+| `switch ((u16)((s16)v & ~0xFFF))`, `u16 v` kept | 856, 25.4% |
+| ... and `*p` re-read everywhere, `p = base; p += n;` | match |
+
+A `u16 op = v & 0xF000;` spelling is also size-exact (17.1%), but it is
+SImode and does not produce the copies.
+
+**Read-out:** when a fresh transcription lands on the right instructions but
+the wrong allocation, and an older draft had the right allocation but the
+wrong instructions, port the instruction fix onto the older draft first.
+Global-alloc priorities follow block structure and local counts that a
+rewrite silently changes.
