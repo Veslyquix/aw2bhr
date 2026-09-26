@@ -5710,6 +5710,7 @@ void sub_080616F0(void);
  * onwards). Void: it ends `pop {r0}; bx r0`, so r0 carries the return address
  * and cannot carry a value, and sub_0802D0F4's `bl` discards it. */
 void sub_08042998(void);
+void JoinUnits(void); /* sub_08042998's readable name; see src/decomp/c_08042998.c. */
 
 /* ---- family F059's two undeclared callees (wave 15, C) ----
  *

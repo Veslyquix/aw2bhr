@@ -53610,3 +53610,25 @@ The code residual closed with readable spellings:
   it for the toggle. Through gPlaySt directly it is +4 bytes. The
   `(u8 *)&gPlaySt + side + 0x39` byte-offset forms either cost 4 bytes or
   reverse one `adds` operand order (96.9%).
+
+## A fresh readable draft beat a long-parked obfuscated one (sub_08042998)
+
+sub_08042998 (now `JoinUnits`) had been parked since wave 15 at 14.2%,
+28 bytes short. Its draft reached the unit pointer and the unit-type table
+through their -fforce-addr pool words as pointer-to-pointer locals
+(`**pp`, `(*pp2)[i]`). A rewrite from the ROM matched in five measured
+steps:
+
+| change | result |
+|---|---|
+| name gUnknown_030040D8 (viewed as `struct Unit *`) and gUnknown_085D5ABC directly; gMap / gUnits member access | 33.5%, -12 |
+| ammo sum `u8`: unsigned `bls` compares and un-merged per-branch bitfield stores | 35.0%, size-exact |
+| HP total as a conditional expression (both arms into one temporary, copied after the join) | 90.5%, +4 |
+| fuel sum `u8` too | 98.1%, size-exact |
+| ONE `u8 sum` reused for ammo and then fuel (found by decomp-permuter) | match |
+
+Two general points. Naming a global that -fforce-addr reaches through a
+.rodata address word reproduces the whole `ldr; ldr; ldr` chain; the pool
+word never needs a C name. And a narrow sum of two small bitfields needs no
+truncation (combine knows the value fits), so `u8` costs nothing and is
+what gives the unsigned compare.
