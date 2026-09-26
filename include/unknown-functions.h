@@ -5003,6 +5003,8 @@ void sub_080872D0(int);
  * (sub_0808606C, three call sites) and the work draft work/sub_08085B30 (two
  * call sites). */
 void sub_08086A58(int, int, int);
+void DrawMapList(int, int, int); /* sub_08086A58's readable name; see
+                                 * src/decomp/c_08086A58.c. */
 /* Wave 54 (W54-D). Defined in src/decomp/c_08087548.c as void(int,int,int) and
  * never declared until sub_08086A58 became its first C caller; the DEFINITION
  * is what is published here. sub_08086A58 forwards its own three parameters

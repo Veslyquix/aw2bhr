@@ -53562,3 +53562,29 @@ the wrong allocation, and an older draft had the right allocation but the
 wrong instructions, port the instruction fix onto the older draft first.
 Global-alloc priorities follow block structure and local counts that a
 rewrite silently changes.
+
+## A struct's member array can fix giv order where a pointer local cannot (sub_08086A58)
+
+sub_08086A58 (now `DrawMapList`) was parked at 97.6%, size-exact, with a
+10-byte "allocno-order" residual. The ROM's loop preheader loads
+`&gUnknown_02027F74` first, then zeroes the row giv, then adds 4. The draft
+zeroed the giv first.
+
+The draft read the list through `q = (u8 *)&gUnknown_02027F74; q += 4;
+q[a + i]`, the spelling that matched sibling sub_08087104. Here strength
+reduction folds that base load into the entry pointer's giv initialisation,
+which is emitted after the row giv's. Reading the struct's own member array,
+`gUnknown_02027F74.unk04[a + i]`, keeps the base a separate loop invariant.
+loop.c moves invariants before it emits giv initialisations, which is the
+ROM's order. That one change matched the function. The permuted twin
+sub_08086BF8 already used this spelling.
+
+`list = gUnknown_02027F74.unk04;` as a local is 4 bytes short. Only the
+subscripted member works.
+
+**Read-out:** when the preheader has a hoisted base load *before* a giv's
+`movs #0`, the base was a separate invariant. Look for a member-array or
+direct-symbol spelling rather than a pointer local bumped in place. The
+header comment on struct Unk02027F74.unk04 records that the member array
+"does NOT match" sub_08087104; it does match here, so the choice is per
+function.
