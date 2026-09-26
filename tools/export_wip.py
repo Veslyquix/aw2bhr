@@ -61,7 +61,16 @@ HEADINGS = [
     ("open_question", "Open question"),
     ("reason", "Why it is parked"),
 ]
-SKIP_KEYS = {"bytes"}
+SKIP_KEYS = {"bytes", "summary"}
+
+# The plain-language `summary` object in a parked entry (docs/writing-notes.md),
+# in the order the README shows it.
+SUMMARY_HEADINGS = [
+    ("does", "What it does"),
+    ("status", "How close it is"),
+    ("left", "What is left"),
+    ("tried", "Already tried"),
+]
 
 
 def load_state():
@@ -119,6 +128,14 @@ def render_value(v):
     if isinstance(v, dict):
         return "\n".join("- **%s:** %s" % (k, render_value(x)) for k, x in v.items())
     return str(v).strip()
+
+
+def render_summary(summary):
+    out = []
+    for key, heading in SUMMARY_HEADINGS:
+        if summary.get(key):
+            out.append("## %s\n\n%s\n" % (heading, render_value(summary[key])))
+    return out
 
 
 def render_parked(entry):
@@ -195,15 +212,26 @@ def export_one(name, rec, entry, broken=None):
         warn = ("**This draft does not compile against the current headers.** "
                 "The score below is from before the break. Fix it first:\n\n"
                 "    %s\n" % broken)
+    summary = entry.get("summary") if isinstance(entry, dict) else None
     body = ["# %s\n" % name,
             "%s, %d bytes, %s, %s.\n" % (rec["addr_hex"], rec["size"],
                                          rec["mode"], status),
             warn,
-            "Best score so far: %s.\n" % label,
-            "## Files\n", "\n".join(files) + "\n",
-            "## What has been tried\n",
-            "From `data/parked.json`.\n" if entry is not None else "",
-            render_parked(entry)]
+            "Best score so far: %s.\n" % label]
+    if summary:
+        # The plain-language summary (docs/writing-notes.md) leads; the full
+        # technical record stays available but collapsed.
+        body += render_summary(summary)
+        body += ["## Files\n", "\n".join(files) + "\n",
+                 "## Technical history\n",
+                 "<details>\n<summary>The full record from `data/parked.json`: "
+                 "every attempt, with compiler detail.</summary>\n",
+                 render_parked(entry), "</details>\n"]
+    else:
+        body += ["## Files\n", "\n".join(files) + "\n",
+                 "## What has been tried\n",
+                 "From `data/parked.json`.\n" if entry is not None else "",
+                 render_parked(entry)]
     awlib.write_text(os.path.join(dst, "README.md"),
                      "\n".join(b for b in body if b))
     return label, pct, status

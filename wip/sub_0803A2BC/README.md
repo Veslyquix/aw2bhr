@@ -4,14 +4,35 @@
 
 Best score so far: 78.2% (preprocessed form, not included).
 
+## What it does
+
+Draws two text items for a unit's type at column (a1 + 8) / 8: the text ids at offsets 2 and 4 of the unit-type record gUnknown_085D5ABC[a2->type] (0x5c-byte records), on rows 7 and 13, through the text drawer sub_08014A5C with the buffer gUnknown_08499578.
+
+## How close it is
+
+Compiles 4 bytes short (120 of 124 bytes); 23.4% of bytes line up, which means little because a missing instruction near the start shifts everything after it. From the first table load onward the code is instruction-for-instruction right. The saved 78.2% 'best' is permuter output with a nonsense signature and is not usable.
+
+## What is left
+
+The original computes the column in seven instructions with two extra copies, and copies a2 out before touching a1; every C spelling gives six, which leaves each later register one off. If resumed, try a statement order that uses a2 before a1, which the original's first instruction hints at.
+
+## Already tried
+
+- About a dozen ways of splitting `(a1 + 8) >> 3` into locals (in place, three single-use locals, bound once, inline at both calls, reverse declaration order, an int parameter with a cast): all give the same six-instruction start.
+- Loading `a2->type` into a local first, or aliasing a2: moves the load earlier, the wrong way.
+- The automatic permuter, about 140,000 tries over three runs: reaches the right size (78.2%) only with a nonsense signature, then stalls.
+- Looking at other callers of the same text function for a solved example: they pass only constants, nothing to copy.
+- Checking the text function's prototype for an argument narrowing: all parameters are full width, so there is nothing to exploit.
+
 ## Files
 
 - `sub_0803A2BC.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -38,3 +59,5 @@ Wave 79 (W79-C) -- THIS IS NOW AN INVESTIGATED PARK; the position-only wave-59 t
 ### Wave 87
 
 WAVE 87 (W87-C, unnamed-twin axis): twins sub_080059FC / sub_08005AA0 (src/decomp/c_080059FC.c, shared callee sub_08014A5C + gUnknown_08499578) LACK the construct -- all eleven of their sub_08014A5C calls pass integer LITERALS in argument 1, both are `void f(void)`, no computed argument anywhere. Prototype check also negative: include/unknown-functions.h:6450 `void sub_08014A5C(int, int, void *, int, int, int)` (all six wide, read off the callee's prologue) agrees with the promoted callers, so `(a1 + 8u) >> 3` is passed with no narrowing and there is no argument-narrowing lever. Clean NO, 0 probes, 0 try_match. DO NOT batch this on the shared callee again: the sub_08014A5C / gUnknown_08499578 vocabulary is a UI-drawing hub shared by dozens of literal-argument functions and carries no information about the head residual. Configured, 120/124 (-4), 23.4%, unchanged.
+
+</details>

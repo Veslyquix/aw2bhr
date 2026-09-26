@@ -4,6 +4,25 @@
 
 Best score so far: 79.7% (best.c).
 
+## What it does
+
+Writes a number into a tilemap buffer as decimal digits, right to left. It starts at `dest + x + 32` (one 32-entry row down, x cells across) and, for each digit, stores the digit plus the base tile of the digit glyphs (the first u16 of gUnknown_0300308C, reached through a pointer word at 0x0808DF8C), dividing by 10 until the number reaches 0. The second parameter is never read.
+
+## How close it is
+
+Compiles to the right size (64 bytes); 13 bytes differ. All of the difference is where one load sits: the original re-reads the pointer to the digit base tile on every loop pass, while our build reads it once before the loop.
+
+## What is left
+
+Get the compiler to keep that pointer read inside the loop instead of moving it out (loop hoisting). Every way of declaring the global gives the same code, so this is thought to have no fix in the C source.
+
+## Already tried
+
+- Using the plain name `gUnknown_0300308C[0]`: one instruction short, because the compiler loads the address directly instead of through the pointer word.
+- Ten declarations of the pointer word (const pointer, plain pointer, volatile pointer, pointer array, const pointer array, sized array and more): all move the read out of the loop, and the volatile and plain-pointer forms also add an extra load.
+- Copying the global into a local inside the loop, or indexing it with a variable (`g[value % 10]`): no change.
+- Blaming the two division calls or the store through `dest` for the reload: ruled out, because our build has both and the compiler still moves the read out.
+
 ## Files
 
 - `sub_08010EF8.c`: the current draft
@@ -11,9 +30,10 @@ Best score so far: 79.7% (best.c).
 - `NOTES.md`: working notes
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -42,3 +62,5 @@ The body is not in question -- prologue, the `dest + x + 0x20` start cell, both 
 ### Why it is parked
 
 Wave 58 (W58-A), carried from waves 42 and 51. Ten spellings measured; the residual is an LICM hoist, which is instruction order across a loop boundary and has no source lever.
+
+</details>

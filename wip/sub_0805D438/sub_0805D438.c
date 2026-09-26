@@ -1,5 +1,34 @@
 #include "global.h"
+#include "map.h"
 
+/*
+ * sub_0805D438 -- AI: run one step of the current army's unit list.
+ *
+ * gUnknown_030046B0 walks a list of unit indices. 0 ends the list and 0x40
+ * is a special entry with no unit. Nothing happens while gUnknown_030044D8
+ * is set.
+ *   1. End of list: set gUnknown_03004780 to 1 and stop.
+ *   2. Unit entry: make it the active unit (gUnknown_03003F38 index,
+ *      gUnknown_030040D8 pointer, gUnknown_03004784 its class row). Skip a
+ *      unit with flag bit 0 set or type 0. Otherwise save its position in
+ *      gUnknown_03003F24, clear some AI state, lift it off the map's unit
+ *      layer, set flag bit 2, store a random 0..99 in byte 0x0A and call
+ *      sub_0805A95C.
+ *   3. If sub_08071908(gUnknown_03004680) returns 0, call sub_0805E9DC (unit
+ *      entries only) and then the handler in gUnknown_03004778.
+ *   4. If gUnknown_030046C0.unk13 is still 0, put the unit back on the map,
+ *      clear flag bit 2 and advance the list. Otherwise advance the list and
+ *      set gUnknown_03004780 to 3.
+ *
+ * Why the C looks odd:
+ *   - The class row is written as byte arithmetic, `base + (type * 12 + 4)`.
+ *     The rows are 12 bytes, and the header's struct for this table is
+ *     bigger. Indexing a 12-byte struct adds the 4 at a different point.
+ *
+ * This matches the original only when the compiler's global
+ * common-subexpression pass is turned off (-O2 -fno-gcse). With the build's
+ * normal flags it does not match. See work/sub_0805D438/NOTES.md.
+ */
 void sub_0805D438(void)
 {
     if (gUnknown_030044D8 != 0)
@@ -15,7 +44,7 @@ void sub_0805D438(void)
     {
         gUnknown_03003F38 = *gUnknown_030046B0;
         gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
-        gUnknown_03004784 = gUnknown_085766E0[gUnknown_030040D8->unk00].unk04;
+        gUnknown_03004784 = (u8 *)gUnknown_085766E0 + (gUnknown_030040D8->unk00 * 12 + 4);
 
         if ((gUnknown_030040D8->unk01 & 1) || gUnknown_030040D8->unk00 == 0)
         {
@@ -34,9 +63,7 @@ void sub_0805D438(void)
         gUnknown_030046C0.unk06 = 0;
         gUnknown_030046C0.unk07 = 0;
 
-        gUnknown_08499590[0x12
-            + *(u16 *)(gUnknown_08499590 + 0x417A + gUnknown_030040D8->unk03 * 2)
-            + gUnknown_030040D8->unk02] = 0;
+        ((struct Map *)gUnknown_08499590)->unit[((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] = 0;
 
         gUnknown_030040D8->unk01 |= 4;
         gUnknown_030040D8->unk07[3] = sub_080129E0() % 100;
@@ -59,9 +86,7 @@ void sub_0805D438(void)
     if (gUnknown_030046C0.unk13 == 0)
     {
         if (*gUnknown_030046B0 != 0x40)
-            gUnknown_08499590[0x12
-                + *(u16 *)(gUnknown_08499590 + 0x417A + gUnknown_030040D8->unk03 * 2)
-                + gUnknown_030040D8->unk02] = gUnknown_03003F38;
+            ((struct Map *)gUnknown_08499590)->unit[((struct Map *)gUnknown_08499590)->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02] = gUnknown_03003F38;
 
         gUnknown_030040D8->unk01 &= ~4;
         gUnknown_030046B0++;

@@ -4,14 +4,35 @@
 
 Best score so far: 97.3%.
 
+## What it does
+
+Fills the record gUnknown_02025764: copies 2, 3 and 24 header bytes from gUnknown_02028040, gUnknown_0202805A and gUnknown_02028042, then for each of three 28-byte slots stores the byte from sub_0803CD14(slot), a 17-byte block from sub_0803CCB8 (zeros if it fails), 5 bytes from gUnknown_020280D4 and two bytes from gUnknown_020280C0[slot]. What the record is for is not known.
+
+## How close it is
+
+Compiles to the right size (292 bytes); 8 bytes differ (97.3% identical), all at three places where the compiler picks a different temporary register. Every instruction is otherwise the original's.
+
+## What is left
+
+At each of the three places a value held in a high register must pass through a low one for one instruction, and the compiler takes the lowest free register. The original's higher choice means some other value was still alive there in the original source; find which value, and keep it alive across those three places.
+
+## Already tried
+
+- Writing the else-arm clearing loop counting down by hand: same loop body, but its setup lands in the wrong order. The source loop counts up and the compiler reverses it.
+- One local for both bytes copied at the end of the loop: the original clearly uses two.
+- Permuter with the old scoring: two chained 5-minute runs, about 30,600 attempts; nothing past 97.3%.
+- Permuter with corrected scoring: a free 15-minute run (11,049 attempts) and a directed one shuffling all declarations, the function's start and the copy setup (10,679 attempts): nothing better.
+- Other compiler settings: none match.
+
 ## Files
 
 - `sub_08031824.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -45,3 +66,5 @@ Parked in wave 90 (W90-A) after W88, W89 and W90 worked it. Four permuter runs a
 ### Wave 90
 
 W90-A: unchanged 97.3%/8 bytes. The fixed-objective permuter found nothing in 2 x 900 s (11,049 undirected, 10,679 directed). The .greg dump shows that the three residual picks W88/W89 called bare local_alloc scratch picks are reload spill registers (find_reg: spill_cost, then REG_ALLOC_ORDER from r0). The next attempt should make a pseudo that lives in r0 stay live across loop 1's r8 read, the gUnknown_020280C0 bind, and the copy setup.
+
+</details>

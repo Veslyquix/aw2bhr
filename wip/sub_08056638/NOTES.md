@@ -50,7 +50,8 @@ Wave 52 ran four sessions, ~85k iterations, three starting points. It moves
 registers; it cannot move an insn across the loop boundary.
 
 ## Wave 81 (W81-B)
-Deferring the gUnknown_02029822[side][j] = b; store past both payload writes (semantically free -- different arrays) so the payload base pseudos are created first: 85.4% / 21 bytes, first difference +0x26. The write order inside the swap block is also load-bearing. Park stands as classified.## W90-A (wave 90) -- still 95.8%, 6 bytes; the residual is now a NUMBER
+Deferring the gUnknown_02029822[side][j] = b; store past both payload writes (semantically free -- different arrays) so the payload base pseudos are created first: 85.4% / 21 bytes, first difference +0x26. The write order inside the swap block is also load-bearing. Park stands as classified.
+## W90-A (wave 90) -- still 95.8%, 6 bytes; the residual is now a NUMBER
 
 Draft unchanged (`w90-start.c` == draft, re-verified by the permuter's
 baseline each run).

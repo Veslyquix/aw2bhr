@@ -4,14 +4,34 @@
 
 Best score so far: 59.1%.
 
+## What it does
+
+Inserts an entry into a linked list kept sorted by a signed 16-bit key. It takes the next free 12-byte node from the pool at gUnknown_0200C624 (indexed by the count in the list header gUnknown_030020A8), stores the pointer argument and the key in it, links it in before the first node whose key is not smaller, increments the count and refreshes the header's head pointer. Returns -1 without inserting when the pool is full (count above 0x80), otherwise 0.
+
+## How close it is
+
+Compiles to the right size (132 bytes), but 54 bytes differ. They all come from one extra load in the last statement: the list's sentinel node at 0x0200C618 has no symbol, so the draft reaches it through a pointer word in ROM, and the extra load moves registers through the rest of the function.
+
+## What is left
+
+Add a symbol for the sentinel node at 0x0200C618 to the linker script (aw2bhr.lds) and use it in the last statement. A test compile with that name gives the original's loads and the right size, but only a full build can confirm it. One small register-copy difference in how `cur` is first set may then remain.
+
+## Already tried
+
+- Reaching the sentinel as `gUnknown_0200C624 - 1` in the last statement: the compiler reuses the array's address and subtracts from it, so the instructions still differ.
+- Declaring the sentinel in include/unknown-globals.h without adding it to the linker script: the split build fails with an undefined reference.
+- Declaring the ROM pointer word `const`: still one load too many.
+- Reading through the ROM pointer word gUnknown_0808E5D0 (the current draft): correct everywhere except the one extra load, because inside a loop the compiler adds its own address word on top.
+
 ## Files
 
 - `sub_0801A718.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -40,3 +60,5 @@ The shape is solved and verified against the listing, including the double `node
 ### Why it is parked
 
 Wave 58 (W58-A), carried from wave 41. Blocked on a linker symbol at 0x0200C618, not on C. The fix is verified by probe and is one line of aw2bhr.lds plus one declaration; it needs a full split build to confirm, which an agent cannot run.
+
+</details>

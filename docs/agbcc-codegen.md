@@ -1820,6 +1820,68 @@ the member spelling before trusting any "pointer must be" note.
 
 ---
 
+## A store block AFTER the loop's bottom test is a `goto found` label, and two inline `return`s cost a hoist elsewhere (wave 91, W91-B)
+
+`sub_0805FC1C` was parked for thirteen waves as "the single-use
+gUnknown_085D5AD0 base is not LICM-hoisted by the tested bindings". The hoist
+was a symptom. Its ROM puts the "found" store block (`strh x,[a2]; strh
+y,[a2,#2]`) after the loop's bottom test, falling into the epilogue, and BOTH
+switch arms `beq` to it. That layout is `goto found;` in each arm with
+`return; found: ...` after the loop. Writing a store-and-`return` in each arm
+kept rec->x in two registers (r6 and r9), pushed the counter out of r7, and
+left no register for the invariant base, so LICM never hoisted it: +8 bytes,
+42.4%. The goto alone gave 97.9% size-exact. **Read the placement of the
+early-exit block first. If it is after the loop, write a label there.**
+
+The last 7 bytes were the wave-90 member lever on a pointer to a blob rather
+than on a global: `e = tbl + 0x1a; if (e[t] == 0)` against
+`((struct T *)tbl)->unk1a[t]`. The pointer local swapped r0/r1 across the
+`ldrb; movs #31; ands; adds` of the index. `tbl[t + 0x1a]` and
+`(tbl + 0x1a)[t]` are not the same code as the member: both are -4 bytes. So
+the member lever also applies when the base is a loaded pointer, not only a
+global.
+
+## The `.rodata` force-addr word is made by GCSE's PRE, and `-O2 -fno-gcse` matches sub_0805D438 exactly (wave 91, W91-B, PROVISIONAL)
+
+Read off `-da` dumps of sub_0805A9AC and sub_0805D438. At expand, EVERY
+global access goes through the constant pool: `(set P (symbol_ref .LCn))`
+then `(set Q (mem/u P))` with `REG_EQUAL (symbol_ref g)`. When P has one use,
+the pair becomes a plain `ldr rQ, =g` later on. The `.LCn` word survives
+into `.rodata` only when P has MORE than one use. What gives P several uses
+is gcse's PRE: it treats `(symbol_ref .LCn)` as an ordinary expression and
+unifies every occurrence into one new pseudo. The dumps show it directly: the
+`.LC` count per pass drops through cse and rises again in `.gcse`, where new
+`(set (reg N) (symbol_ref .LCn))` insns appear (A9AC insn 987 after the
+n-loop init; D438 insns 741-746). The later sites become `(set R (reg N))`
+copies. This explains the older rules:
+
+- "a loop containing a call": PRE hoists the partially redundant `.LC`
+  load into the preheader, and the call makes the pseudo live in a
+  callee-saved register.
+- "LICM hoisting cancels the word": the same unification, seen from loop.c.
+- "reference count across a MERGE": PRE also unifies a fully redundant
+  occurrence after a join. sub_0805D438 has no loop, but its top-of-function
+  `gUnknown_030046B0` / `030040D8` / `030046C0` accesses dominate the
+  post-call accesses. PRE unified them and left three `.rodata` words. The
+  ROM has none.
+
+**sub_0805D438 matches byte-for-byte with `-O2 -fno-gcse`**, with and without
+`-fforce-addr` (without gcse no `.LC` word survives, so force-addr has no
+effect). This was measured through a temporary profile added from
+`w91b_tm.py` in the W91-B scratchpad; `tools/agbenv.py` was not edited. The
+source is `work/sub_0805D438/sub_0805D438.c`: struct Map members for the map
+store, and `(u8 *)gUnknown_085766E0 + (type * 12 + 4)`. **Do not record an
+override on this alone.** Its neighbours sub_0805D5EC and sub_0805D648 FAIL
+under `-fno-gcse` (-4 and -8 bytes), and so do sub_0805D1F0 / D2A0 / CF0C /
+D078 / D134 / E160 / E2AC. sub_0805D338, sub_0805DA84 and sub_0805DB0C match
+both ways. A flag on the translation unit therefore needs a unit boundary
+between D438 and D5EC. The other explanation is a source construct that stops
+gcse for one function, and none is known. sub_0805D888 points the same way:
+without its asm barrier it is +36 / 33.1% configured, but size-exact and
+64.8% under `-fno-gcse`, with ONE 2-byte residual (the y-loop guard; see
+work/sub_0805D888/NOTES.md). **`--profile o1` is NOT this test**, because it
+changes ten flags. Test with `-fno-gcse` alone.
+
 ## Six parks closed by W90-C, and what each one teaches (wave 90)
 
 W90-C matched sub_080283E4, sub_08020EDC, sub_0803D558, sub_080620FC,
@@ -53761,3 +53823,51 @@ sub_0807E980 from 10 to 6 bytes. The remaining `movs r6, #7` is the section-1
 counter rule: the ROM's destination init comes after the reversed counter, so
 the original reduced it in loop pass 2, and no spelling measured (144
 variants) delays it that far.
+
+## The wave-15 `pp = &<force-addr word>` spelling was the lever, more than the member form (wave 91, W91-A)
+
+Wave 91 tested the wave-90 member-form lever as a pre-registered bet on five
+parks whose drafts dated from wave 15 or wave 38. Four of the five also named an
+agbcc force-addr `.rodata` word as though it were a global: `pp =
+&gUnknown_0816D948; u = *(struct Unit **)*pp;`, `(**pp)->hp` through
+`gUnknown_08091364`, `*gUnknown_080912FC` as the map pointer. Those drafts were
+written before wave 18 made the build able to PLACE a `.rodata` word, and the
+header notes recording "naming the word IS required" were measured against the
+raw byte-offset spelling. Measured this wave, keeping everything else fixed:
+
+| function | member form only | + the global named honestly |
+|---|---|---|
+| sub_08022618 | -4 -> size-exact, 13.8% | size-exact 29.0% (with the `id` readout below) |
+| sub_08058A2C | +8 -> size-exact, 81.9% | 87.0%, then MATCHED |
+| sub_0803E6C4 | byte-identical (-4) | size-exact 97.5%, then MATCHED |
+| sub_08042998 | byte-identical (-28) | -12, 33.5% |
+| sub_08020754 | byte-identical (already a local-struct member form) | n/a |
+
+So on this batch the member form moved two functions and the HONEST force-addr
+spelling moved three. **Any draft still spelling `pp = &gUnknown_08xxxxxx` /
+`**pp` / `*gUnknown_0809xxxx` for an address word is carrying a wave-15
+workaround: name the global the word holds, spell the access as a member, and
+let `trymatch` print the `"rodata"` entry.** The wrong-symbol relocation it then
+reports (`original gUnknown_0816D948  candidate .rodata`) is the placement
+note, not a residual.
+
+Three statement-level readouts from the same batch, each measured:
+
+- **`if ((id = m->unitUnk[off]) == 0 || ...)` is not `id = ...; if (id == 0
+  ...)` for an s16 `id`** (sub_08022618). The embedded assignment keeps the
+  def's `lsls r0,#16` shared by the store (`lsrs rV,r0,#16`) and the test
+  (`cmp r0,#0`), and the later u16 argument / s16 index re-narrow from the
+  variable (`lsls r6,rV,#16`) -- the ROM's shape. The separate statement lets
+  combine fold the def to the bare `ldrb` and CSE shares one `id << 16` between
+  the test and the call. Read `ldrb; lsls r0; lsrs rV,r0; cmp r0,#0` as an
+  assignment inside a condition.
+- **A narrowing `?:` copies its result at the join** (sub_08042998). With
+  `u8 n`, `n = c ? a + 1 + Div(...) : a;` narrows in EACH arm into a temporary
+  and then emits `adds r5,r0,#0` into n after the join; `if (c) n = ...; else
+  n = a;` writes n directly in both arms. A u8 value narrowed in both arms of a
+  diamond and then copied is a conditional expression.
+- **A parameter's entry copy can be moved after a later parameter's by one
+  assignment** (sub_0803E6C4). `col = a1;` as the first statement: combine
+  folds a1's assign_parms copy into it and emits it at the assignment, i.e.
+  after a3's copy. That is the ROM's `adds r3,r2,#0; mov sl,r0` order, which
+  had been parked as "no source distinction" for three waves.

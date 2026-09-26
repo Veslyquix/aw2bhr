@@ -48,3 +48,17 @@ compare (`k = key;` and `(k = key)` inline) -- cse propagates the copy away.
 A from-scratch rewrite in the matched sibling's (c_0805A268.c sub_0805A388)
 gMap-> member spelling is 356 bytes (-24), a different shape; not pursued.
 The draft is restored to the port.
+
+## Wave 91 (W91-B) -- member form, NEGATIVE
+
+- `->height` / `->width` for the loop bounds, and `->terrain` / `->unit` /
+  `(u8 *)->rowOffset` through the `q` cast: BYTE-IDENTICAL (98.95%).
+- `rowp = (u8 *)&((struct Map *)q)->rowOffset[y]`: 95.79%. The member
+  computes (y*2 + 0x417A) + q, and the ROM has (q + 0x417A) + t. The byte
+  pointer is what gives the ROM's order.
+- Dropping `q` for member access off the global (cast or gMap): 33.68%.
+  The row address hoists into the outer loop.
+- 900 s permuter from --current (35,635 iterations): no candidate better
+  than the start.
+- Temporary -O2 -fno-gcse profile: the configured-tuned draft goes -16.
+Residual unchanged: the zero-store r0/r3 reload tie, 2 code bytes.

@@ -6056,9 +6056,7 @@ extern u8 *gUnknown_03003340[];
  * table -- and neither symbol needed declaring: writing `gUnknown_08499590`
  * plainly produced the ROM's `ldr rN,=<word>; ldr rM,[rN]; ldr rK,[rM]` chain
  * exactly, with `relocs: different symbols that resolve to the same address`.
- * Contrast gUnknown_080912FC below, where naming the word IS required; the
- * discriminator is whether the ROM materialises the address at a point the
- * honest spelling's lazy single materialisation cannot reach.
+ * gUnknown_080912FC below is the same kind of word.
  *
  * The u8 width/height pair at gUnknown_084999C8 +0x28/+0x29 now has a PRODUCER
  * as well as the flood fill's consumer: sub_0801F92C stores the map's +0x00 and
@@ -8218,24 +8216,10 @@ extern u16 gUnknown_0809139C[];
  * and does NOT write it, which is one of the three differences between them.
  * No matched reader, so the width is proved and the signedness is not. */
 extern u32 gUnknown_030033F8;
-/* Wave 38, W38-C. A ROM word at 0x080912FC holding &gUnknown_08499590, so
- * `*gUnknown_080912FC` IS the map pointer. sub_0803E6C4 reads its outer loop's
- * bound through it with a THREE-level chain -- `ldr r1,=gUnknown_080912FC;
- * ldr r0,[r1]; ldr r0,[r0]; ldrh r0,[r0,#2]` -- while the SAME bound at the
- * loop bottom and the plane reads in the loop body all name gUnknown_08499590
- * directly with the ordinary two-level chain.
- *   This looks like agbcc's -fforce-addr .rodata pool and the wave-18 rule says
- * to name the global honestly and let the build place the word. That was tried
- * FIRST here and does not reproduce: the honest spelling emits the two-level
- * read at the guard as well, one `ldr` short, and the missing register also
- * shifts the whole allocation (the ROM spends r1 on this address, which pushes
- * the loop counter to r2 and costs an `adds r3,r2,#0` copy of the third
- * argument that the honest spelling does not have). Naming the word is what
- * matches. Recorded as UNPROVEN whether the original source named a real
- * `u8 **` global here or whether agbcc force-addr'd only this one reference of
- * the three; the ROM cannot tell those apart, and the neighbouring 0x08091338 /
- * 0x0809133C / 0x08091364 words in this same range ARE documented as pool
- * words. */
+/* Not a real global: a pool word in ROM that holds &gUnknown_08499590 (the
+ * map pointer). The compiler created it when sub_0803E6C4 read the map height;
+ * C code should name gUnknown_08499590 and never this word. The declaration
+ * stays only because older drafts still name it. */
 extern u8 **gUnknown_080912FC;
 /* Wave 55, W55-G. The three Shift-JIS tile-source pointers sub_08013D7C picks
  * between on the character's code range: `ldr r0,=gUnknown_0808F380; ldr r0,[r0]`
