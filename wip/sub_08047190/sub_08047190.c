@@ -35,7 +35,7 @@
 void sub_08047190(void *arg, int a2)
 {
     u8 list[0x40];
-    struct Unk08499594 *e;
+    struct Unit *e;
     s8 rank;
     s8 i;
     s8 k;
@@ -79,7 +79,7 @@ void sub_08047190(void *arg, int a2)
                 {
                     for (s = 1; s <= 0x3f; s++)
                     {
-                        if (gUnknown_08499594[gUnknown_03003F2C + s].unk00 == t)
+                        if (gUnknown_08499594[gUnknown_03003F2C + s].type == t)
                         {
                             gUnknown_02028DD8[n] = s;
                             n++;
@@ -106,29 +106,29 @@ void sub_08047190(void *arg, int a2)
                     v = gUnknown_02028DD8[q];
                     e = &gUnknown_08499594[gUnknown_03003F2C + v];
 
-                    if (a2 == 1 && e->unk04_0 != g)
+                    if (a2 == 1 && e->hp != g)
                         continue;
-                    if (a2 == 2 && e->unk06_0 != g)
+                    if (a2 == 2 && e->fuel != g)
                         continue;
                     if (a2 == 3)
                     {
                         if (g == 0)
                         {
-                            if (e->unk04_7 != 0)
+                            if (e->ammo != 0)
                                 continue;
-                            if (gUnknown_085D5ABC[e->unk00].unk11 == 0)
+                            if (gUnknown_085D5ABC[e->type].unk11 == 0)
                                 continue;
                         }
                         else if (g == 0x64)
                         {
-                            if (e->unk04_7 != 0)
+                            if (e->ammo != 0)
                                 continue;
-                            if (gUnknown_085D5ABC[e->unk00].unk11 != 0)
+                            if (gUnknown_085D5ABC[e->type].unk11 != 0)
                                 continue;
                         }
                         else
                         {
-                            if (e->unk04_7 != g)
+                            if (e->ammo != g)
                                 continue;
                         }
                     }
@@ -149,7 +149,7 @@ void sub_08047190(void *arg, int a2)
                 {
                     for (s = 1; s <= 0x3f; s++)
                     {
-                        if (gUnknown_08499594[gUnknown_03003F2C + s].unk00 == t)
+                        if (gUnknown_08499594[gUnknown_03003F2C + s].type == t)
                         {
                             gUnknown_02028DD8[n] = s;
                             n++;
@@ -176,29 +176,29 @@ void sub_08047190(void *arg, int a2)
                     v = gUnknown_02028DD8[q];
                     e = &gUnknown_08499594[gUnknown_03003F2C + v];
 
-                    if (a2 == 1 && e->unk04_0 != g)
+                    if (a2 == 1 && e->hp != g)
                         continue;
-                    if (a2 == 2 && e->unk06_0 != g)
+                    if (a2 == 2 && e->fuel != g)
                         continue;
                     if (a2 == 3)
                     {
                         if (g == 0)
                         {
-                            if (e->unk04_7 != 0)
+                            if (e->ammo != 0)
                                 continue;
-                            if (gUnknown_085D5ABC[e->unk00].unk11 == 0)
+                            if (gUnknown_085D5ABC[e->type].unk11 == 0)
                                 continue;
                         }
                         else if (g == 0x64)
                         {
-                            if (e->unk04_7 != 0)
+                            if (e->ammo != 0)
                                 continue;
-                            if (gUnknown_085D5ABC[e->unk00].unk11 != 0)
+                            if (gUnknown_085D5ABC[e->type].unk11 != 0)
                                 continue;
                         }
                         else
                         {
-                            if (e->unk04_7 != g)
+                            if (e->ammo != g)
                                 continue;
                         }
                     }
@@ -219,14 +219,14 @@ void sub_08047190(void *arg, int a2)
             continue;
 
         e = &gUnknown_08499594[gUnknown_03003F2C + v];
-        if (e->unk01 & 8)
+        if (e->flags & 8)
             continue;
 
         gUnknown_02028DD8[o] = v;
         list[q] = 0xff;
         o++;
 
-        if (!(e->unk01 & 0x10))
+        if (!(e->flags & 0x10))
             continue;
 
         c1 = e->unk07 - gUnknown_03003F2C;
@@ -242,7 +242,7 @@ void sub_08047190(void *arg, int a2)
             list[q2] = 0xff;
             o++;
 
-            if (!(e->unk01 & 0x10))
+            if (!(e->flags & 0x10))
                 continue;
 
             d1 = e->unk07 - gUnknown_03003F2C;

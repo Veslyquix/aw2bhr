@@ -107,10 +107,11 @@ void sub_0807E980(struct Unk807E980 *proc)
     Decompress(gUnknown_08234B10, gUnknown_0200FC50);
     for (i = 0; i < 4; i++)
     {
-      for (j = 0; j < 8; j++)
+      for (j = 0, new_var = 0; j < 8; j++)
       {
-        new_var = (0x06015000 + (i * 0x800)) + (j * 0x100);
-        CpuFastSet(&gUnknown_0200FC50[(i * 0x100) + (j * 0x400)], (void *) new_var, 0x40);
+        x = (0x06015000 + (i * 0x800)) + new_var;
+        CpuFastSet(&gUnknown_0200FC50[(i * 0x100) + (j * 0x400)], (void *) x, 0x40);
+        new_var += 0x100;
       }
 
     }

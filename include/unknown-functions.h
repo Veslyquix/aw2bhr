@@ -10581,16 +10581,16 @@ void sub_080200EC(s16, s16, s16, s16);
  * as `movs #1; rsbs` -- so signed. Byte-neutral there; c_08020D50 re-verified
  * by try_match exit code after the change. */
 void sub_08020B88(s16, s16, s16, s16);
-/* Wave 73, W73-F: the prose above says arguments 5 AND 6 are `int`, which
- * CONTRADICTS this declaration and is the stale half. The 6th is `u8` and the
- * caller settles it: src/decomp/c_080210C8.c is matched, holds its own sixth
- * parameter as `int a6`, and passes it through `lsls #0x18; lsrs #0x18` -- that
- * truncation is the int->u8 conversion this declaration's 6th parameter
- * requires, and it disappears if the parameter is widened, costing the matched
- * caller 4 bytes. decomp-permuter reaches 91.5% on the definition (against
- * 90.7%) with `unsigned int` here; it rewrites the prototype block and so never
- * compiles that against this header. Do not widen it. */
-void sub_08020EDC(s16, s16, s16, u8 *, int, u8);
+/* Wave 90, W90-C: the 6th parameter is `int`, as the prose above says, and
+ * the definition proves it. Its prologue narrows the 6th only at the
+ * `f = flags;` copy, AFTER the `d = delta;` group; a `u8` formal would be
+ * narrowed first by PROMOTE_MODE, which put one `lsls` a slot early and was
+ * the last residual of sub_08020EDC. The matched caller
+ * src/decomp/c_080210C8.c keeps its `lsls #0x18; lsrs #0x18` with an explicit
+ * `(u8)a6` at each call, which is the same tree the old prototype built, and
+ * was re-verified by trymatch exit code. (Wave 73 read that narrowing as
+ * proof of a `u8` formal; a cast at the call site gives it too.) */
+void sub_08020EDC(s16, s16, s16, u8 *, int, int);
 
 /* Wave 36, W36-M. Every signature below is COPIED VERBATIM from a byte-verified
  * definition in src/decomp/ -- none of them had a declaration in any header,

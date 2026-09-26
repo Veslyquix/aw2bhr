@@ -28,34 +28,23 @@ it yourself as described under Contributing in the main README.
 
 ## Functions
 
-102 functions, 47396 bytes, closest first. The score is the share of
+89 functions, 40120 bytes, closest first. The score is the share of
 bytes identical to the original. A byte count after it means the attempt
 compiles to a different size.
 
 | function | bytes | best so far | state |
 |---|---|---|---|
-| [sub_080627F4](sub_080627F4/) | 752 | 99.2% | parked |
-| [sub_08085B30](sub_08085B30/) | 1040 | 99.1% | parked |
-| [sub_0807E980](sub_0807E980/) | 1040 | 99.0% (best.c) | parked |
+| [sub_0807E980](sub_0807E980/) | 1040 | 99.4% | parked |
 | [sub_0805A0EC](sub_0805A0EC/) | 380 | 99.0% (best.c) | parked |
-| [sub_080860DC](sub_080860DC/) | 1452 | 98.9% (best.c) | parked |
-| [sub_08086A58](sub_08086A58/) | 416 | 97.6% (best.c) | parked |
-| [sub_08031824](sub_08031824/) | 292 | 97.3% | queued |
-| [sub_08037FD0](sub_08037FD0/) | 496 | 96.8% | parked |
+| [sub_08031824](sub_08031824/) | 292 | 97.3% | parked |
 | [sub_08055940](sub_08055940/) | 248 | 96.4% | parked |
 | [sub_08056638](sub_08056638/) | 144 | 95.8% | parked |
-| [sub_0803D558](sub_0803D558/) | 352 | 95.5%, +4 bytes | parked |
-| [sub_0804E7A8](sub_0804E7A8/) | 328 | 94.2% (best.c) | parked |
-| [sub_08066874](sub_08066874/) | 428 | 93.9% (best.c) | parked |
-| [sub_08020EDC](sub_08020EDC/) | 492 | 93.9%, +4 bytes (preprocessed form, not included) | parked |
 | [sub_0802AA78](sub_0802AA78/) | 2356 | 93.9% (preprocessed form, not included) | parked |
-| [sub_08062C94](sub_08062C94/) | 348 | 93.7% (best.c) | parked |
-| [sub_08054C5C](sub_08054C5C/) | 560 | 93.2% (preprocessed form, not included) | parked |
+| [sub_08054C5C](sub_08054C5C/) | 560 | 93.4% | parked |
 | [sub_0802F03C](sub_0802F03C/) | 512 | 93.2% | parked |
 | [sub_0808AAF4](sub_0808AAF4/) | 152 | 92.8% | parked |
 | [sub_08049944](sub_08049944/) | 180 | 92.2% | parked |
 | [sub_08073480](sub_08073480/) | 244 | 91.4% (preprocessed form, not included) | parked |
-| [sub_080283E4](sub_080283E4/) | 388 | 90.7% | parked |
 | [sub_0803E6C4](sub_0803E6C4/) | 160 | 90.6% (preprocessed form, not included) | parked |
 | [sub_08012B70](sub_08012B70/) | 88 | 87.5% (best.c) | parked |
 | [sub_08039588](sub_08039588/) | 172 | 87.2% (best.c) | parked |
@@ -70,7 +59,6 @@ compiles to a different size.
 | [sub_080611D8](sub_080611D8/) | 304 | 75.0% (best.c) | parked |
 | [sub_08070F44](sub_08070F44/) | 104 | 73.1% (best.c) | parked |
 | [sub_0804FA2C](sub_0804FA2C/) | 632 | 72.9% (preprocessed form, not included) | parked |
-| [sub_080620FC](sub_080620FC/) | 564 | 72.7% (best.c) | parked |
 | [sub_0805FC1C](sub_0805FC1C/) | 328 | 71.7%, +4 bytes (best.c) | parked |
 | [sub_0801FAC4](sub_0801FAC4/) | 540 | 65.9% (best.c) | parked |
 | [sub_0803CFA4](sub_0803CFA4/) | 660 | 65.2% | queued |
@@ -100,7 +88,6 @@ compiles to a different size.
 | [sub_0805634C](sub_0805634C/) | 364 | 38.2% (best.c) | parked |
 | [sub_0805A9AC](sub_0805A9AC/) | 732 | 37.6%, +28 bytes (best.c) | parked |
 | [sub_08068038](sub_08068038/) | 172 | 36.6% (best.c) | parked |
-| [sub_08039188](sub_08039188/) | 220 | 33.6%, +4 bytes (best.c) | parked |
 | [sub_08045FC8](sub_08045FC8/) | 104 | 32.7% | parked |
 | [sub_0801F234](sub_0801F234/) | 120 | 32.5% (best.c) | parked |
 | [sub_08055768](sub_08055768/) | 472 | 31.8%, -4 bytes (best.c) | parked |
@@ -112,16 +99,16 @@ compiles to a different size.
 | [sub_0801E9B0](sub_0801E9B0/) | 824 | 27.8%, -12 bytes | parked |
 | [sub_08037A78](sub_08037A78/) | 268 | 27.6%, -4 bytes | parked |
 | [sub_0801C01C](sub_0801C01C/) | 116 | 27.6%, -8 bytes (best.c) | parked |
-| [sub_08061DCC](sub_08061DCC/) | 136 | 27.2% | parked |
+| [sub_08061DCC](sub_08061DCC/) | 136 | 27.2% (best.c) | parked |
 | [sub_080546F0](sub_080546F0/) | 1060 | 26.8%, +8 bytes | parked |
 | [sub_08068A00](sub_08068A00/) | 196 | 25.5%, -20 bytes | parked |
 | [sub_080560A4](sub_080560A4/) | 680 | 25.4%, +4 bytes | parked |
+| [sub_0801A7D8](sub_0801A7D8/) | 1056 | 23.2%, +12 bytes (best.c) | parked |
 | [sub_0801E508](sub_0801E508/) | 976 | 22.6%, -28 bytes | parked |
 | [sub_08057164](sub_08057164/) | 268 | 22.4%, -4 bytes (best.c) | parked |
 | [sub_08062FF4](sub_08062FF4/) | 1008 | 22.3%, -8 bytes | parked |
 | [sub_08050FF8](sub_08050FF8/) | 804 | 21.5% (best.c) | queued |
 | [sub_08022BB8](sub_08022BB8/) | 540 | 21.1%, -24 bytes | parked |
-| [sub_0801A7D8](sub_0801A7D8/) | 1056 | 20.0%, +12 bytes | parked |
 | [sub_080303C8](sub_080303C8/) | 428 | 19.6% (best.c) | parked |
 | [sub_08071B9C](sub_08071B9C/) | 232 | 19.4%, +8 bytes (best.c) | parked |
 | [sub_0807F434](sub_0807F434/) | 240 | 18.3%, +8 bytes | parked |

@@ -63,7 +63,7 @@ void sub_08054C5C(void)
   }
 
   CpuFastSet(gUnknown_08540F7C, (void *) 0x05000300, 0x10);
-  t = sub_08055058(a[side], b[side], c[side], d[side ^ 1]);
+  t = sub_08055058(a[side], b[side], c[side], i = d[side ^ 1]);
   t = sub_08055374(a[side], t);
   t = sub_0805521C(side, a[side], b[side], t);
   t = sub_08055288(side, a[side], e[side], b[side], t);

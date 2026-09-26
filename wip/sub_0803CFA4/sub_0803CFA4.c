@@ -93,7 +93,7 @@
  *     number of spill slots, different choice of what lives in one.
  *   - The mid-body re-chase of the pointer global IS reproduced
  *     (`mov r3,sl / ldr r0,[r3] / ldr r5,[r0]`, the W86-F force-addr reload).
- *     The `*((u8 *)gUnknown_08499598) += 0;` line is what defeats cse's merge
+ *     The `*((u8 *)gPlayers) += 0;` line is what defeats cse's merge
  *     of the two chases and costs zero bytes -- do NOT delete it as dead code.
  *
  * Toolchain axis not re-swept (W81-E: 155 drafts x 7 profiles, zero flips). */
@@ -161,7 +161,7 @@ void sub_0803CFA4(const void *a1, u8 *a2, u8 a3)
     u8 *q;
     u8 *rows;
     u8 *cells;
-    struct Unk08499594 *e;
+    struct Unit *e;
     sub_0803CC84(a2 + 0x4B2, a1);
 
     a2[0x4C2] = 0;
@@ -193,7 +193,7 @@ void sub_0803CFA4(const void *a1, u8 *a2, u8 a3)
             if (v != 0)
             {
                 e = &gUnknown_08499594[v];
-                a2[0x4CB + k] = tbl[(v >> 6) + 1] | e->unk00;
+                a2[0x4CB + k] = tbl[(v >> 6) + 1] | e->type;
             }
             else
             {
@@ -205,7 +205,7 @@ void sub_0803CFA4(const void *a1, u8 *a2, u8 a3)
             idx = *(u16 *)(rows + y * 2) + x;
             cells = p + 0xA22;
             *(u16 *)(a2 + 2 + k++ * 2) = ((u16 *)cells)[idx];
-            *((u8 *)gUnknown_08499598) += 0;
+            *((u8 *)gPlayers) += 0;
 
             idx = *(u16 *)(rows + y * 2) + x;
             cells = p + 0x1432;
@@ -316,7 +316,7 @@ void sub_0803CFA4(const void *a1, u8 *a2, u8 a3)
  * 65.2% until the slot count matches. Do NOT add an address local (W89-E,
  * -20 bytes) and do NOT remove binds (W89-G, the frame drops to 28).
  *
- * Still true: *((u8 *)gUnknown_08499598) += 0; defeats cse's merge of the two
+ * Still true: *((u8 *)gPlayers) += 0; defeats cse's merge of the two
  * pointer-global chases and costs zero bytes -- do NOT delete it as dead code.
  * Toolchain axis not re-swept (W81-E: zero exit-0 flips across 155 drafts). */
 
@@ -368,7 +368,7 @@ void sub_0803CFA4(const void *a1, u8 *a2, u8 a3)
  * MEASURE k's REGISTER in a free compile_probe: the frame and the score are
  * both frozen behind it.
  *
- * Still true: `*((u8 *)gUnknown_08499598) += 0;` compiles to NOTHING but defeats
+ * Still true: `*((u8 *)gPlayers) += 0;` compiles to NOTHING but defeats
  * cse's merge of the two pointer-global chases -- confirmed again in both probes
  * -- do NOT delete it as dead code. The pool word at b8 relocating against
  * `.rodata` where the ROM names gUnknown_08091144 is agbcc's own force-addr word

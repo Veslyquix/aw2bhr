@@ -3,7 +3,7 @@
 int sub_08058A2C(int *out)
 {
     u8 *const *pp;
-    struct Unk08499594 *u;
+    struct Unit *u;
     s16 *e;
     u8 *p;
     u8 *rows;
@@ -21,7 +21,7 @@ int sub_08058A2C(int *out)
 
     v = 1;
     pp = &gUnknown_0816D948;
-    u = *(struct Unk08499594 **)*pp;
+    u = *(struct Unit **)*pp;
     e = (s16 *)gUnknown_030013D0;
     atk = e[9];
     if (e[4] == 0)
@@ -29,12 +29,12 @@ int sub_08058A2C(int *out)
     if (atk >= *gUnknown_03004784)
         return -1;
 
-    if (u->unk00 <= 2)
+    if (u->type <= 2)
     {
         p = gUnknown_08499590;
-        t = u->unk03 * 2;
+        t = u->y * 2;
         rows = p + 0x417A;
-        off = *(u16 *)(rows + t) + u->unk02;
+        off = *(u16 *)(rows + t) + u->x;
         q = p + 0x193A;
         if (*(s8 *)(q + off) != -1)
         {
@@ -44,9 +44,9 @@ int sub_08058A2C(int *out)
             if (!sub_08026FD0(n, p[off]))
             {
                 p = gUnknown_08499590;
-                t = u->unk03 * 2;
+                t = u->y * 2;
                 rows = p + 0x417A;
-                off = *(u16 *)(rows + t) + u->unk02;
+                off = *(u16 *)(rows + t) + u->x;
                 p += 0x1432;
                 n = p[off] & 0x1F;
                 if (n == 8)
@@ -54,9 +54,9 @@ int sub_08058A2C(int *out)
                 if (n == 0xE || n == 0xA || n == 0xB)
                     v = v * 8;
                 t = u->unk05_3;
-                if (u->unk04_0 != 0)
+                if (u->hp != 0)
                 {
-                    d = Div(u->unk04_0 - 1, 10);
+                    d = Div(u->hp - 1, 10);
                     t2 = t + 1;
                     n = t2 + d;
                 }
@@ -69,7 +69,7 @@ int sub_08058A2C(int *out)
         }
     }
     v = v * 10;
-    if (sub_08042D50(gUnknown_030033EC, u->unk00) == 1)
+    if (sub_08042D50(gUnknown_030033EC, u->type) == 1)
         v = v * 10;
     else
         v = v * 15;
@@ -78,7 +78,7 @@ merge:
     def = ((s16 *)*pp)[9];
     if (((s16 *)*pp)[4] == 0 && def <= 0x31)
         def = 0x32;
-    if (gUnknown_085D5ABC[u->unk00].unk1b == 2)
+    if (gUnknown_085D5ABC[u->type].unk1b == 2)
     {
         if (u->unk08 != 0)
             v = v * 2;

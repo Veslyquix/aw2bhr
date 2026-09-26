@@ -5187,6 +5187,13 @@ extern u16 gUnknown_0202F8DC[];
  *     the gUnknown_08499590 comment records, and it applies here because 0x60
  *     is past `ldrb`'s 5-bit displacement. Do NOT reshape the symbol -- both
  *     spellings are per-.c casts onto the flat `u8 []` and rescale nothing. */
+/* Wave 90 (W90-C), sub_080620FC: a THIRD record spelling. When one function
+ * writes several fields of the same element and the ROM computes the index as
+ * (n * 8 + a * 0x3e0) + g * 0xc00 with n first, only a struct chain gives that
+ * order: `((struct Buf *)gUnknown_02029ED8)->blk[g].rec[a][n].x`, where Buf
+ * wraps the 0xC00 block in an array member so `blk[g]` is a real ARRAY_REF.
+ * The flat cast above computes the g term first. It is still a per-.c cast and
+ * the symbol stays `u8 []`. See the W90-C section of docs/agbcc-codegen.md. */
 extern u8 gUnknown_02029ED8[];
 /* Wave 50, W50-A.  gUnknown_02029F3C is 0x02029F3C == gUnknown_02029ED8 + 0x64,
  * i.e. offset 4 INSIDE the same `rec[]` element the comment above describes, and

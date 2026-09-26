@@ -20,7 +20,7 @@
  *     `cmp #0/beq low; cmp #4/bne default` exactly. Worth 8 bytes.
  *   - `list[n] = i; n++;` as two statements, not `list[n++] = i;` -- the
  *     compound form increments before storing, the ROM stores first.
- *   - `gUnknown_0200CC88[16 + x]` is WRONG and `(&gUnknown_0200CC88[16])[x]` is
+ *   - `gUnknown_0200CC88[16 + x]` is WRONG and `(&gUnknown_0200CC88.slotGeneration[0])[x]` is
  *     right: the first keeps `16 + x` as an integer and emits `adds #16; lsls
  *     #2`, the second folds &g[16] into the address constant asm/ prints as
  *     gUnknown_0200CCC8 and leaves `lsls #2; add base`. Worth ~12 bytes.
@@ -100,7 +100,7 @@ int sub_0801A7D8(u8 a1, void *a2, int a3)
     {
         for (k = j + 1; k < n; k++)
         {
-            if ((&gUnknown_0200CC88[16])[list[j]] < (&gUnknown_0200CC88[16])[list[k]])
+            if ((&gUnknown_0200CC88.slotGeneration[0])[list[j]] < (&gUnknown_0200CC88.slotGeneration[0])[list[k]])
             {
                 u8 t;
 
@@ -162,8 +162,8 @@ int sub_0801A7D8(u8 a1, void *a2, int a3)
 
             retry++;
 
-            if ((&gUnknown_0200CC88[16])[cur] != -1)
-                (&gUnknown_0200CC88[16])[cur]++;
+            if ((&gUnknown_0200CC88.slotGeneration[0])[cur] != -1)
+                (&gUnknown_0200CC88.slotGeneration[0])[cur]++;
 
             gUnknown_0200CC38.unk10[cur] = a1;
 
@@ -192,7 +192,7 @@ int sub_0801A7D8(u8 a1, void *a2, int a3)
             *(u16 *)(gUnknown_02002000 + 0xe) = offs[idx];
 
             for (i = 0; i < 16; i++)
-                ((u32 *)(gUnknown_02002000 + 0x10))[i] = (&gUnknown_0200CC88[16])[i];
+                ((u32 *)(gUnknown_02002000 + 0x10))[i] = (&gUnknown_0200CC88.slotGeneration[0])[i];
 
             *(u16 *)(gUnknown_02002000 + 0x50) = lens[idx];
 
@@ -236,7 +236,7 @@ int sub_0801A7D8(u8 a1, void *a2, int a3)
                 gUnknown_0200CC38.unk20[cur] = (gUnknown_0200CC38.unk20[cur] | 8 | tag) & 0xfb;
                 gUnknown_0200CC38.unk30[cur] = gUnknown_02002000[0xc];
                 gUnknown_0200CC38.unk40[cur] = gUnknown_02002000[0xfff];
-                (&gUnknown_0200CC88[16])[cur] = *(u32 *)(gUnknown_02002000 + 8);
+                (&gUnknown_0200CC88.slotGeneration[0])[cur] = *(u32 *)(gUnknown_02002000 + 8);
                 retry = 0;
                 flags[cur] = 1;
                 idx--;

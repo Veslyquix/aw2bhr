@@ -84,7 +84,7 @@
  * plane at +0x1432, the u16 row-offset table at +0x417A, all indexed
  * `rowOffset[y] + x`. `(u8)(unk00 - 0x10) > 4` is the range test written with
  * the explicit u8 cast -- the `subs #0x10; lsls #0x18; lsrs #0x18; cmp #4`
- * shape that the note on struct Unk08499594.unk00 already documents for
+ * shape that the note on struct Unit.unk00 already documents for
  * sub_0805CC88. The 32-bit spelling `(u32)(unk00 - 0x10) > 4` drops the two
  * shifts and does not match. */
 
@@ -110,7 +110,7 @@ void sub_08020754(u8 *dst)
             if (((MAP->cell[MAP->rowOffset[y] + x] & 0x1f) == 4
               || (MAP->cell[MAP->rowOffset[y] + x] & 0x1f) == 0x13)
              && (MAP->unit[MAP->rowOffset[y] + x] == 0
-              || (u8)(gUnknown_08499594[MAP->unit[MAP->rowOffset[y] + x]].unk00 - 0x10) > 4))
+              || (u8)(gUnknown_08499594[MAP->unit[MAP->rowOffset[y] + x]].type - 0x10) > 4))
                 dst[MAP->rowOffset[y] + x] = 0;
             else
                 dst[MAP->rowOffset[y] + x] = 1;

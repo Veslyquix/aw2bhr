@@ -18,7 +18,10 @@
  * root at 2. The fourth node is `case 0:` sharing `default:`, the recipe
  * docs/agbcc-codegen.md records from waves 28 and 29; it is invisible in the
  * branch targets because it shares the end label, so only the TEST COUNT shows
- * it. */
+ * it.
+ *
+ * `(u8)a6` (wave 90, W90-C): sub_08020EDC's 6th parameter is `int`, and
+ * this cast is the `lsls #0x18; lsrs #0x18` each call site emits. */
 void sub_080210C8(s16 a1, s16 a2, s16 a3, s16 kind, s8 a5, int a6)
 {
     switch (kind)
@@ -29,16 +32,16 @@ void sub_080210C8(s16 a1, s16 a2, s16 a3, s16 kind, s8 a5, int a6)
     case 1:
         sub_08020EDC(a1, a2, a3,
                      &gMap->visible[gUnknown_03004070 * 1288],
-                     a5, a6);
+                     a5, (u8)a6);
         break;
     case 3:
         sub_08020EDC(a1, a2, a3,
                      &gMap->visible[gUnknown_03004070 * 1288],
-                     a5, a6);
+                     a5, (u8)a6);
     case 2:
         sub_08020EDC(a1, a2, a3,
                      &gMap->visible[gUnknown_03004088 * 1288],
-                     a5, a6);
+                     a5, (u8)a6);
         break;
     }
 }

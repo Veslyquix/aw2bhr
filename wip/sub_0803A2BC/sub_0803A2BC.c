@@ -53,7 +53,7 @@
  *   - the asymmetric best.c shape written honestly: `y = a1 + 8u` used by one
  *     call, `(a1 + 8u) >> 3` inline at the other
  *   - u8 v = a2->unk00 hoisted   (moves the `ldrb` EARLIER -- wrong direction)
- *   - struct Unk08499594 *p = a2 alias
+ *   - struct Unit *p = a2 alias
  *   - u32 a1 with ((u8)a1 + 8u) >> 3
  *
  * CLASSIFICATION: a COPY-COALESCING decision with NO SOURCE HANDLE. Every C
@@ -77,7 +77,7 @@
  * EVERYTHING FROM THE FIRST POOL LOAD ONWARD IS INSTRUCTION-EXACT -- both
  * sub_08014A5C calls, the 0x5c stride kept in r8, the gUnknown_085D5ABC and
  * gUnknown_08499578 bases in sl/sb, the 0x8000 and the 0 kept across the pair,
- * and the `ldrh` at +2 / +4 (which is why struct Unk085D5ABC now has unk02 and
+ * and the `ldrh` at +2 / +4 (which is why struct UnitType now has unk02 and
  * unk04 carved out of its old filler_00[6]).
  *
  * THE WHOLE REMAINING DIFF IS THE FIRST ARGUMENT'S SEVEN-INSTRUCTION HEAD:
@@ -136,10 +136,10 @@
  * NEXT AGENT: do not re-run the permuter from best.c -- that basin is
  * exhausted. Attack the a2/0x8000 register pair directly, or find a statement
  * order that names a2 first. */
-void sub_0803A2BC(u8 a1, struct Unk08499594 *a2)
+void sub_0803A2BC(u8 a1, struct Unit *a2)
 {
     sub_08014A5C((a1 + 8u) >> 3, 7, gUnknown_08499578,
-                 gUnknown_085D5ABC[a2->unk00].unk02, 0x8000, 0);
+                 gUnknown_085D5ABC[a2->type].unk02, 0x8000, 0);
     sub_08014A5C((a1 + 8u) >> 3, 0xd, gUnknown_08499578,
-                 gUnknown_085D5ABC[a2->unk00].unk04, 0x8000, 0);
+                 gUnknown_085D5ABC[a2->type].unk04, 0x8000, 0);
 }

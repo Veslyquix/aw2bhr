@@ -41,7 +41,7 @@
  *   - `old-agbcc`: byte-for-byte the SAME output as the default profile.
  *     156/160, 16.9%, first difference at +0xa. Not one byte moved.
  *   - `no-force`: also 156/160 and 16.9%, but structurally WORSE. The
- *     gUnknown_08499598[(t >> 6) + 1].unk1a access decays from the ROM's folded
+ *     gPlayers[(t >> 6) + 1].unk1a access decays from the ROM's folded
  *     `adds r0,#86; ldrb r0,[r0,#0]` to `adds r0,#60; ldrb r0,[r0,#26]`, and
  *     the guard's pool word stops being materialised into its own register.
  * Consistent with data/compiler-overrides.json's own header: this address is
@@ -72,7 +72,7 @@
  * shifts the allocation, and naming gUnknown_080912FC in both places makes
  * agbcc force-addr it as well and adds a third level. Also in the codegen doc.
  *
- * gUnknown_08499598[(t >> 6) + 1].unk1a is right and the `+ 1` is real: the ROM
+ * gPlayers[(t >> 6) + 1].unk1a is right and the `+ 1` is real: the ROM
  * folds it into `adds r0,#0x56` on a 0x3c-byte element, i.e. 0x3c + 0x1a. The
  * `asrs` (not `lsrs`) on that shift is what makes `t` a signed `int` local.
  *
@@ -106,7 +106,7 @@ void sub_0803E6C4(int a1, int a2, int a3)
                 if (((struct Unk3E6C4Map *)gUnknown_08499590)->unit[((struct Unk3E6C4Map *)gUnknown_08499590)->rowOffset[row] + (a1 + i)] != 0)
                 {
                     t = ((struct Unk3E6C4Map *)gUnknown_08499590)->unit[((struct Unk3E6C4Map *)gUnknown_08499590)->rowOffset[row] + (a1 + i)];
-                    if (gUnknown_08499598[(t >> 6) + 1].unk1a != 5)
+                    if (gPlayers[(t >> 6) + 1].teamColor != 5)
                         sub_0803E560(a1 + i, row, t, a3);
                 }
             }

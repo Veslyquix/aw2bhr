@@ -2,12 +2,11 @@
 
 0x0807E980, 1040 bytes, THUMB, parked.
 
-Best score so far: 99.0% (best.c).
+Best score so far: 99.4%.
 
 ## Files
 
 - `sub_0807E980.c`: the current draft
-- `best.c`: the closest attempt, when it is not the draft
 - `NOTES.md`: working notes
 - `target.s`: the original assembly
 
@@ -59,3 +58,7 @@ WAVE 82 (W82-C): W81-B do/while spelling reconstructed from the parked text and 
 ### Wave 84
 
 WAVE 84 (W84-A): the staged comma-depth lead was MEASURED AND REJECTED twice. Anchor inside the first sub_08043BA4 third argument = miss (base materialises ~4 instructions early as ldr r3/mov sl,r3 before both calls, shifts +4, flips the 08234B10/0200FC50 pool order, swaps globals r4<->r5). Corrected anchor at Decompress's second argument also misses: an explicit int local crossing bl Decompress gets its callee-saved home AT THE ASSIGNMENT, while the ROM homes its CSE pseudo to sl only via the late movs r5,#0; mov sl,r4 pair. The unification mechanism is real; NO binding placement reproduces that home-timing. Comma-depth axis CLOSED on this function.
+
+### Wave 90
+
+WAVE 90 (W90-A): 99.0% -> 99.4%, 10 -> 6 bytes, size-exact, first difference +0x370 (draft = work/sub_0807E980/w90-R6-994.c). The inner loop is a WALKER plus a GIV OF THE WALKER: `for (j = 0, new_var = 0; j < 8; j++) { x = (0x06015000 + (i * 0x800)) + new_var; CpuFastSet(&gUnknown_0200FC50[(i * 0x100) + (j * 0x400)], (void *) x, 0x40); new_var += 0x100; }`. The dst giv's increment then goes before the walker's body increment, i.e. before the src giv's (which goes before j++): the ROM's dst-then-src loop bottom, which two givs of one biv can never give (they increment in init order). The D sum in its own statement before the call puts i<<11 ahead of i<<8 as in the ROM (inline in the call: 8 bytes). ONLY RESIDUAL: `movs r6,#7` after the dst init instead of between src and dst. RTL dumps (-dL/-dG, recipe in NOTES.md) pin it: i+1 and i<<8 are GCSE/PRE insertions; src is a pass-1 giv init; `j = 7` is check_dbra_loop in the SECOND loop pass, which runs before that pass's giv reduction; so the ROM's dst init is a giv first reduced in PASS 2, and every spelling measured reduces it in pass 1. 144 compiled variants (D temp x/fresh/inline x walker increment end/for-increment/first x init for-init/statement x do/while(0) on each of three statements) all emit the counter last. Ruled out this wave: the matched twin c_080790D0.c's walker form (+12, proc evicted to r9 and p rematerialised per outer iteration; with/without p, int walkers, off walker all the same), dst-walker-only (96.5%, dst init is SOURCE and lands first), src as a source walker with dst a giv (85.7%), do/while(0) anywhere in the body (byte-identical to R6). Permuter: directed 9,242 it from the old base, directed 14,347 it from R6 (PERM_GENERAL walker forms + RANDOMIZE; w90-R6-directed.perm.txt), and undirected 13,173 it from R6: nothing.

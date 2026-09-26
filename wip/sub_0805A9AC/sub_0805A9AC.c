@@ -89,7 +89,7 @@ void sub_0805A9AC(int a1, void *a2)
 {
     struct Unk802C57C *cur;
     union Unk802C57CBuf best;
-    struct Unk08499594 *p;
+    struct Unit *p;
     u8 t[2][4];
     s16 bv;
     s16 bestv;
@@ -101,25 +101,25 @@ void sub_0805A9AC(int a1, void *a2)
     bv = 0x7fff;
     sub_0808B6E8(t, gUnknown_0816D9AC, 8);
     sub_0801F92C(gUnknown_08499590 + 0x2852);
-    sub_08058224((struct Unk08499594 *)gUnknown_030040D8);
+    sub_08058224((struct Unit *)gUnknown_030040D8);
 
     for (n = gUnknown_03003F2C; n < gUnknown_03003F2C + 0x40; n++)
     {
         p = &gUnknown_08499594[n];
-        if (p->unk00 == 0)
+        if (p->type == 0)
             continue;
-        if (p->unk00 > 2)
+        if (p->type > 2)
             continue;
         if (gUnknown_03004730[n & 0x3f] != 0)
             continue;
         if (t[a1][((struct Unk5A9ACUnit *)p)->unk09_3] == 0)
             continue;
         if ((s8)((struct Map5A9AC *)gUnknown_08499590)->unk2D5A[
-                ((struct Map5A9AC *)gUnknown_08499590)->unk417A[p->unk03] + p->unk02] > bv)
+                ((struct Map5A9AC *)gUnknown_08499590)->unk417A[p->y] + p->x] > bv)
             continue;
 
-        gUnknown_030013EC(p->unk02, p->unk03, 1,
-                          sub_08042D1C(gUnknown_030033EC, p->unk00), -1);
+        gUnknown_030013EC(p->x, p->y, 1,
+                          sub_08042D1C(gUnknown_030033EC, p->type), -1);
 
         bestv = 0x7fff;
         best.pos.unk00 = 0x270f;
@@ -136,7 +136,7 @@ void sub_0805A9AC(int a1, void *a2)
                 if ((*(struct Map5A9AC * volatile *)&gUnknown_08499590)->unk12[
                         ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j] != 0)
                     continue;
-                if (((struct Unk5A9ACTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14)->unk1a[
+                if (((struct Unk5A9ACTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable)->unk1a[
                         ((struct Map5A9AC *)gUnknown_08499590)->unk1432[
                             ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j] & 0x1f] == 0)
                     continue;

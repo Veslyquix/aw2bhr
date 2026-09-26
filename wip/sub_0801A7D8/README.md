@@ -2,11 +2,13 @@
 
 0x0801A7D8, 1056 bytes, THUMB, parked.
 
-Best score so far: 20.0%, +12 bytes.
+Best score so far: 23.2%, +12 bytes (best.c).
 
 ## Files
 
 - `sub_0801A7D8.c`: the current draft
+- `best.c`: the closest attempt, when it is not the draft
+- `NOTES.md`: working notes
 - `target.s`: the original assembly
 
 ## What has been tried

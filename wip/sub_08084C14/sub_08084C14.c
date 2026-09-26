@@ -20,7 +20,7 @@
  *  - Pool words, all dereferenced in baserom.gba and all -fforce-addr, NOT
  *    objects: 0x081D93EC -> gUnknown_03005940, 0x081D93F0 -> gUnknown_08616C24,
  *    0x081D93F4 -> &gpKeySt (so the triple `ldr; ldr; ldrh [r0,#4]` is just
- *    `gpKeySt->held`).
+ *    `gpKeySt->pressed`).
  *  - The switch's DEFAULT ARM MUST COME FIRST in the source. Written with the
  *    `case 0: case 1: default:` arm last, gcc lays the four arms out in source
  *    order and the jump table's five entries point the other way round; the
@@ -34,7 +34,7 @@
  *    lvalue: `*(u16 *)&p[0x27] = 0xFFFF;`. The ROM also emits a DEAD
  *    `ldrh r3,[r1]` there that nothing reproduces -- same open case as
  *    src/decomp/c_08078xxx's dead sign-extended load (wave 52, W52-A).
- *  - `t = gUnknown_08499598;` in the 0x20 arm and the zero-trip
+ *  - `t = gPlayers;` in the 0x20 arm and the zero-trip
  *    `do { } while (0);` on `case 0:` are decomp-permuter finds and are
  *    LOAD-BEARING, worth 36 bytes between them. Without the `t` binding the
  *    two arms' sub_08043FA8 blocks are register-identical and the post-reload
@@ -58,7 +58,7 @@
 
 void sub_08084C14(s16 *p)
 {
-    struct Unk08499598 *t;
+    struct PlayerStruct *t;
     u8 v;
 
     if (p[0x32] != 0)
@@ -97,7 +97,7 @@ void sub_08084C14(s16 *p)
     if (Proc_Find(gUnknown_08616C24) != 0)
         return;
 
-    if ((gpKeySt->held & 0x40) && p[0x27] >= 0)
+    if ((gpKeySt->pressed & 0x40) && p[0x27] >= 0)
     {
         if (gUnknown_03005940 <= 0)
             return;
@@ -108,7 +108,7 @@ void sub_08084C14(s16 *p)
         p[0x32] = 1;
         sub_0803B4DC(0x64);
     }
-    else if ((gpKeySt->held & 0x80) && p[0x27] >= 0)
+    else if ((gpKeySt->pressed & 0x80) && p[0x27] >= 0)
     {
         if (gUnknown_03005940 > 3)
             return;
@@ -119,31 +119,31 @@ void sub_08084C14(s16 *p)
         p[0x32] = 1;
         sub_0803B4DC(0x64);
     }
-    else if ((gpKeySt->held & 0x20) && p[0x27] == 0)
+    else if ((gpKeySt->pressed & 0x20) && p[0x27] == 0)
     {
         v = p[0x33] == 1
-                ? (gUnknown_03003FC0.unk01 == 2
-                       ? sub_0802490C(gUnknown_03003FC0.unk02)
+                ? (gPlaySt.gameMode == 2
+                       ? sub_0802490C(gPlaySt.mapID)
                        : sub_080248F8())
                 : p[0x33] - 1;
         p[0x33] = v;
 
         p[0x26] = 0;
         p[0x27] = 1;
-        sub_08043B14(gUnknown_08499598[p[0x33]].unk1d, 0xAB * 4);
-        sub_08043FA8(gUnknown_08499598[p[0x33]].unk1d, (void *)0x06015700, 0x16);
-        t = gUnknown_08499598;
-        sub_0802D5CC(gUnknown_08616B1C[t[p[0x33]].unk1a], 0);
+        sub_08043B14(gPlayers[p[0x33]].co, 0xAB * 4);
+        sub_08043FA8(gPlayers[p[0x33]].co, (void *)0x06015700, 0x16);
+        t = gPlayers;
+        sub_0802D5CC(gUnknown_08616B1C[t[p[0x33]].teamColor], 0);
         sub_08043834(p[0x33]);
         sub_08085950(0, p[0x33]);
         sub_08085298(p);
         p[0x32] = 1;
         sub_0803B4DC(0x64);
     }
-    else if ((gpKeySt->held & 0x10) && p[0x27] == 0)
+    else if ((gpKeySt->pressed & 0x10) && p[0x27] == 0)
     {
-        if (p[0x33] == (gUnknown_03003FC0.unk01 == 2
-                            ? sub_0802490C(gUnknown_03003FC0.unk02)
+        if (p[0x33] == (gPlaySt.gameMode == 2
+                            ? sub_0802490C(gPlaySt.mapID)
                             : sub_080248F8()))
             p[0x33] = 1;
         else
@@ -151,23 +151,23 @@ void sub_08084C14(s16 *p)
 
         p[0x26] = 0;
         p[0x27] = 1;
-        sub_08043B14(gUnknown_08499598[p[0x33]].unk1d, 0xAB * 4);
-        sub_08043FA8(gUnknown_08499598[p[0x33]].unk1d, (void *)0x06015700, 0x16);
-        sub_0802D5CC(gUnknown_08616B1C[gUnknown_08499598[p[0x33]].unk1a], 0);
+        sub_08043B14(gPlayers[p[0x33]].co, 0xAB * 4);
+        sub_08043FA8(gPlayers[p[0x33]].co, (void *)0x06015700, 0x16);
+        sub_0802D5CC(gUnknown_08616B1C[gPlayers[p[0x33]].teamColor], 0);
         sub_08043834(p[0x33]);
         sub_08085950(0, p[0x33]);
         sub_08085298(p);
         p[0x32] = 1;
         sub_0803B4DC(0x64);
     }
-    else if ((gpKeySt->held & 3) && p[0x27] == 0)
+    else if ((gpKeySt->pressed & 3) && p[0x27] == 0)
     {
         *(u16 *)&p[0x27] = 0xFFFF;
         Proc_Start(gUnknown_08616BFC, p);
         sub_0803B4DC(0x66);
         sub_08011B5C((void *)sub_08043590);
     }
-    else if ((gpKeySt->held & 0x100) && p[0x27] == 0 && gUnknown_03005940 == 4)
+    else if ((gpKeySt->pressed & 0x100) && p[0x27] == 0 && gUnknown_03005940 == 4)
     {
         sub_0803B4DC(0x76);
         Proc_Start(gUnknown_08616C24, p);

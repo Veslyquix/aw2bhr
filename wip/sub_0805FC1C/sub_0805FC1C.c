@@ -27,7 +27,7 @@
  *   +2 B  the loop counter is pushed out of r7 into ip, so the increment is
  *         `movs r1,#1 ; add ip,r1` instead of `adds r7,#1`;
  *   +2 B  the class-table base is a pool load rather than `add r0, sl`;
- *   +4 B  rec->unk02 splits across r6 AND r9 (the ROM keeps it only in ip), so
+ *   +4 B  rec->x splits across r6 AND r9 (the ROM keeps it only in ip), so
  *         the two `return` blocks stop being identical and cross-jumping merges
  *         only their TAIL instead of the whole block.
  * None of that is a control-flow or type error. It is one allocation fact.
@@ -39,7 +39,7 @@
  * .rodata` is agbcc's own -fforce-addr word for &gUnknown_03003F2C (the loop's
  * first reference; the loop-BOTTOM reference names the symbol directly, and the
  * honest spelling reproduces both). Promotion would need
- * "rodata": ["0x0816DAC0"]. gUnknown_085D5AD0 is &gUnknown_085D5ABC[0].unk14 --
+ * "rodata": ["0x0816DAC0"]. gUnknown_085D5AD0 is &gUnknown_085D5ABC[0].transportTable --
  * the same address the candidate spells as gUnknown_085D5ABC+0x14, NOT a
  * separate object.
  *
@@ -55,11 +55,11 @@
  *     `ldr r2,[pc,#136]` at the top of the loop body.
  *  3. BINDING THE BASE AS THE FIRST STATEMENT OF THE LOOP BODY -- the wave-50
  *     W50-L lever, `cls = (u8 *)gUnknown_085D5ABC + 0x14;` then
- *     `tbl = *(u8 **)(cls + rec->unk00 * 0x5c)` -- compiles byte-for-byte
+ *     `tbl = *(u8 **)(cls + rec->type * 0x5c)` -- compiles byte-for-byte
  *     identically to this draft. CSE folds the bind away completely, so W50-L
  *     does NOT transfer from a pointer global's LOAD to an ADDRESS CONSTANT.
  *  4. decomp-permuter, 300 s from best.c: nothing matched, best stayed 69.2%.
- *  5. Wave 63 duplicated the honest `gUnknown_085D5ABC[rec->unk00].unk14`
+ *  5. Wave 63 duplicated the honest `gUnknown_085D5ABC[rec->type].transportTable`
  *     expression at both use sites. CSE merged the pointer load, but the base
  *     address still remained in the loop body; duplication did not raise the
  *     single address pseudo's LICM savings.
@@ -74,7 +74,7 @@
  *  - the +0x1432 plane is an ordinary struct member (K > 31 cannot fold into an
  *    ldrb displacement), so the two spellings coexist in one statement.
  *  - `cmp #0x14/beq; cmp #0x14/bgt; cmp #7/beq; b` is the ROM's switch on
- *    rec->unk00, and this draft reproduces it exactly.
+ *    rec->type, and this draft reproduces it exactly.
  */
 #include "global.h"
 
@@ -89,7 +89,7 @@ void sub_0805FC1C(int a1, void *a2)
 {
     int i;
     int t;
-    struct Unk08499594 *rec;
+    struct Unit *rec;
     struct Unk030040D8 *p;
     u8 *tbl;
     u8 *e;
@@ -97,32 +97,32 @@ void sub_0805FC1C(int a1, void *a2)
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
         rec = &gUnknown_08499594[i];
-        if (rec->unk00 == 0)
+        if (rec->type == 0)
             continue;
-        if (rec->unk01 & 8)
+        if (rec->flags & 8)
             continue;
-        if ((s8)gUnknown_03003340[rec->unk03][rec->unk02] < 0)
+        if ((s8)gUnknown_03003340[rec->y][rec->x] < 0)
             continue;
-        tbl = gUnknown_085D5ABC[rec->unk00].unk14;
+        tbl = gUnknown_085D5ABC[rec->type].transportTable;
         p = gUnknown_030040D8;
         e = tbl + 1;
         if (e[p->unk00] == 0)
             continue;
         t = ((struct Unk5FC1CMap *)gUnknown_08499590)->terrain[
-                ((struct Unk5FC1CMap *)gUnknown_08499590)->rows[rec->unk03]
-                + rec->unk02] & 0x1f;
+                ((struct Unk5FC1CMap *)gUnknown_08499590)->rows[rec->y]
+                + rec->x] & 0x1f;
         e = tbl + 0x1a;
         if (e[t] == 0)
             continue;
 
-        switch (rec->unk00)
+        switch (rec->type)
         {
         case 7:
         case 0x14:
             if ((rec->unk09 & 0xc0) == 0 && rec->unk07 == 0)
             {
-                ((union Unk802C57CBuf *)a2)->pos.unk00 = rec->unk02;
-                ((union Unk802C57CBuf *)a2)->pos.unk02 = rec->unk03;
+                ((union Unk802C57CBuf *)a2)->pos.unk00 = rec->x;
+                ((union Unk802C57CBuf *)a2)->pos.unk02 = rec->y;
                 return;
             }
             rec->unk09 = (rec->unk09 & 0x3f) | 0x40;
@@ -132,8 +132,8 @@ void sub_0805FC1C(int a1, void *a2)
                 continue;
             if ((rec->unk09 & 0xc0) != 0x80 && rec->unk08 == 0)
             {
-                ((union Unk802C57CBuf *)a2)->pos.unk00 = rec->unk02;
-                ((union Unk802C57CBuf *)a2)->pos.unk02 = rec->unk03;
+                ((union Unk802C57CBuf *)a2)->pos.unk00 = rec->x;
+                ((union Unk802C57CBuf *)a2)->pos.unk02 = rec->y;
                 return;
             }
             rec->unk09 = (rec->unk09 & 0x3f) | 0x80;

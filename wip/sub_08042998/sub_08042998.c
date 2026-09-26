@@ -1,7 +1,7 @@
 #include "global.h"
 
 /* PARKED at 444 of 472 bytes (wave 15, C). Every statement is identified and
- * the bitfield model is the one struct Unk08499594 already documents; the
+ * the bitfield model is the one struct Unit already documents; the
  * candidate is 28 bytes SHORT and all of it is redundancy the ROM has and
  * agbcc removes here.
  *
@@ -63,12 +63,12 @@
 
 void sub_08042998(void)
 {
-    struct Unk08499594 **const *pp;
-    struct Unk08499594 **anchor;
-    const struct Unk085D5ABC *const *pp2;
-    struct Unk08499594 **w;
-    struct Unk08499594 *u;
-    struct Unk08499594 *q;
+    struct Unit **const *pp;
+    struct Unit **anchor;
+    const struct UnitType *const *pp2;
+    struct Unit **w;
+    struct Unit *u;
+    struct Unit *q;
     u8 *p;
     u8 *rows;
     int off;
@@ -86,16 +86,16 @@ void sub_08042998(void)
     off = *(u16 *)(rows + t) + gUnknown_03003100.pos.unk00;
     p += 0x51A;
     u = &gUnknown_08499594[p[off]];
-    if (u->unk04_0 != 0)
-        a = Div(u->unk04_0 - 1, 10) + 1;
+    if (u->hp != 0)
+        a = Div(u->hp - 1, 10) + 1;
     else
         a = 0;
 
     pp = &gUnknown_08091364;
     pp2 = &gUnknown_08091368;
-    if ((**pp)->unk04_0 != 0)
+    if ((**pp)->hp != 0)
     {
-        d = Div((**pp)->unk04_0 - 1, 10);
+        d = Div((**pp)->hp - 1, 10);
         t2 = a + 1;
         n = t2 + d;
     }
@@ -105,35 +105,35 @@ void sub_08042998(void)
     if (n > 10)
     {
         m = gUnknown_030033EC;
-        sub_08025B58(m, sub_08042C9C(m, (**pp)->unk00) * (n - 10));
+        sub_08025B58(m, sub_08042C9C(m, (**pp)->type) * (n - 10));
         n = 10;
     }
 
     w = *pp;
-    (*w)->unk04_0 = n * 10;
+    (*w)->hp = n * 10;
     (*w)->unk05_3 = u->unk05_3;
     if ((*w)->unk06_7 < u->unk06_7)
         (*w)->unk06_7 = u->unk06_7;
 
     q = *w;
-    sum = q->unk04_7 + u->unk04_7;
-    if (sum > (*pp2)[q->unk00].unk0b)
-        q->unk04_7 = (*pp2)[q->unk00].unk0b;
+    sum = q->ammo + u->ammo;
+    if (sum > (*pp2)[q->type].maxAmmo)
+        q->ammo = (*pp2)[q->type].maxAmmo;
     else
-        q->unk04_7 = sum;
+        q->ammo = sum;
 
-    if (gUnknown_03003FC0.unk32 == 0 && gUnknown_03003FC0.unk0d == 0)
+    if (gPlaySt.savingEnabled == 0 && gPlaySt.fog == 0)
     {
         sub_08025B80(**pp, gUnknown_03004074);
         gUnknown_03004074 = 0;
     }
 
     q = **pp;
-    sum = q->unk06_0 + u->unk06_0;
-    if (sum > (*pp2)[q->unk00].unk10)
-        q->unk06_0 = (*pp2)[q->unk00].unk10;
+    sum = q->fuel + u->fuel;
+    if (sum > (*pp2)[q->type].maxFuel)
+        q->fuel = (*pp2)[q->type].maxFuel;
     else
-        q->unk06_0 = sum;
-    u->unk00 = 0;
+        q->fuel = sum;
+    u->type = 0;
     sub_080424E4();
 }

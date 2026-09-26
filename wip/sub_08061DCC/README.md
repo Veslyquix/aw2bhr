@@ -2,11 +2,12 @@
 
 0x08061DCC, 136 bytes, THUMB, parked.
 
-Best score so far: 27.2%.
+Best score so far: 27.2% (best.c).
 
 ## Files
 
 - `sub_08061DCC.c`: the current draft
+- `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
 ## What has been tried
