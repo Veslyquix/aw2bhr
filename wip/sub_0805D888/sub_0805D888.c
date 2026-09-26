@@ -22,7 +22,6 @@
  * question is narrowed to: what source form keeps the exit conversion out of
  * cse's reach while reading raw x/y. */
 #include "global.h"
-#include "map.h"
 
 /* Wave 77 (W77-C): SIZE-EXACT AT LAST -- 508/508, 45.3% -> 52.2%, and the
  * lever was one line. The `found:` exit block was reusing the loop body's `sx`

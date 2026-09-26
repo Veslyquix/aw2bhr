@@ -2,16 +2,37 @@
 
 0x0807F434, 240 bytes, THUMB, parked.
 
-Best score so far: 18.3%, +8 bytes.
+Best score so far: not measured.
+
+## What it does
+
+Sets up a screen's sprites. It copies a per-entry list and loads graphics for each entry (sub_08043B14, sub_08043BA4), then decompresses one graphics blob and copies it to sprite VRAM at 0x06015000 in rearranged 256-byte blocks, and loads one sprite palette.
+
+## How close it is
+
+Compiles 8 bytes too long (248 against 240), 18% of bytes match; the score means little because the difference starts in the opening lines and shifts everything after it. The root cause is one extra instruction: in the second loop the compiler computes `i + 1` once at the top of the body (it is both the call's third argument and the loop step), which takes the register the original uses for a buffer address word, and the other extra bytes follow from that.
+
+## What is left
+
+Find a way to write the second loop so `i + 1` is not one shared expression computed at the top of the body; everything else should follow. The permuter has never been run on this draft and is the other open step (copy the draft first).
+
+## Already tried
+
+- `if (i != 2)` versus `if (i == 2) continue;`: identical.
+- A separate counter for the third argument: worse, the body gets two increments.
+- Naming gUnknown_0200FC50 directly in the copy loop instead of binding it to p: the stepping pointer is lost and one of the three compiler-made address words disappears.
+- Assigning p in a statement before the Decompress call: also drops the third address word; the assignment inside the argument is kept.
+- `do { } while (0)` in six places around the loops and calls: byte-identical; the shared `i + 1` is decided before register allocation, the only thing this trick can affect.
 
 ## Files
 
 - `sub_0807F434.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -39,3 +60,5 @@ THE SINGLE HIGHEST-VALUE UNTRIED AXIS ON THIS FUNCTION IS A PERMUTER RUN, AND IT
 ### Wave 87
 
 WAVE 87 (W87-F, do{}while(0) transfer test): pre-registered 'a wrapper around the then-block is a loop boundary for the i+1 hoist' REFUTED, cleanly -- SIX placements (then-block; whole loop-2 body; Decompress call; blit nest; then-block + Decompress composed) ALL BYTE-IDENTICAL to the baseline after label normalisation; draft unchanged (18.3%, 248/240 +8, first difference +0xe), 0 try_match. Mechanism: the hoist of `i + 1` is NOT LICM and NOT an allocation decision -- it is a GCSE common subexpression of the then-block and the loop increment hoisted to the dominating block; a wrapper leaves that block dominated by the loop head, and the wrapper's only effect (REG_N_REFS loop-depth weighting for allocno_compare) happens in global.c AFTER gcse. RULE: a do{}while(0) cannot move a value that a PRE-ALLOCATION pass (cse/gcse/loop.c) put where it is; it re-ranks allocnos only. The pool address going to r8 is a consequence of the hoist taking r6, so it is unreachable too -- transfer rate here is exactly zero on six placements. Next: the permuter, named by waves 54 and 59 and still NEVER run (wave 59 was blocked by the broken mcp permute; the shell tool works, waves 83-87) -- snapshot first. Beyond that, a source form in which `i + 1` is not a common subexpression of the then-block and the increment (the park already rules out `if (i == 2) continue;` and a separate counter). Do not spend another do/while probe here.
+
+</details>

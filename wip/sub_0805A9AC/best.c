@@ -33,6 +33,13 @@
  *     the narrowest selective-rematerialisation probe. It compiled
  *     byte-identically to this +28, 35.7% draft, so that access is not the
  *     pseudo keeping the force-addr value live.
+ *   - Wave 72 made only the inner `unk12` read use a volatile view of the map
+ *     pointer. It remains 760/732 (+28), but improves configured identity to
+ *     37.6%, so that strongest draft is retained below. Volatile views of all
+ *     `unk1432`, `unk2D5A`, or `unk417A` reads regress to +32/35.0%,
+ *     +32/27.0%, and +68/27.3%; combining `unk12` with `unk1432` is +40/35.8%.
+ *     Selective volatility can rotate the allocation, but none removes the
+ *     surplus force-address word or spill cascade.
  *
  * SETTLED AND WORTH KEEPING, all read off the assembly:
  *   - unk09 bits 3..5 is a BITFIELD, not `(x >> 3) & 7`. The ROM's
@@ -80,91 +87,43 @@ struct Unk5A9ACUnit
 
 void sub_0805A9AC(int a1, void *a2)
 {
-    struct Unk802C57C *cur;
-    union Unk802C57CBuf best;
-    struct Unit *p;
-    u8 t[2][4];
-    s16 bv;
-    s16 bestv;
-    int n;
-    int i;
-    int j;
-
-    cur = a2;
-    bv = 0x7fff;
-    sub_0808B6E8(t, gUnknown_0816D9AC, 8);
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
-    sub_08058224((struct Unit *)gUnknown_030040D8);
-
-    for (n = gUnknown_03003F2C; n < gUnknown_03003F2C + 0x40; n++)
+  struct Unk802C57C *cur;
+  u8 **new_var;
+  union Unk802C57CBuf best;
+  struct Unit *p;
+  u8 t[2][4];
+  s16 bv;
+  s16 bestv;
+  int n;
+  int i;
+  int j;
+  cur = a2;
+  bv = 0x7fff;
+  sub_0808B6E8(t, gUnknown_0816D9AC, 8);
+  sub_0801F92C(gUnknown_08499590 + 0x2852);
+  sub_08058224((struct Unit *) gUnknown_030040D8);
+  for (n = gUnknown_03003F2C; n < (gUnknown_03003F2C + 0x40); n++)
+  {
+    p = &gUnknown_08499594[n];
+    if (p->type == 0)
     {
-        p = &gUnknown_08499594[n];
-        if (p->type == 0)
-            continue;
-        if (p->type > 2)
-            continue;
-        if (gUnknown_03004730[n & 0x3f] != 0)
-            continue;
-        if (t[a1][((struct Unk5A9ACUnit *)p)->unk09_3] == 0)
-            continue;
-        if ((s8)((struct Map5A9AC *)gUnknown_08499590)->unk2D5A[
-                ((struct Map5A9AC *)gUnknown_08499590)->unk417A[p->y] + p->x] > bv)
-            continue;
-
-        gUnknown_030013EC(p->x, p->y, 1,
-                          sub_08042D1C(gUnknown_030033EC, p->type), -1);
-
-        bestv = 0x7fff;
-        best.pos.unk00 = 0x270f;
-
-        for (i = 0; i < ((struct Map5A9AC *)gUnknown_08499590)->unk02; i++)
-        {
-            for (j = 0; j < ((struct Map5A9AC *)gUnknown_08499590)->unk00; j++)
-            {
-                if ((s8)gUnknown_03003340[i][j] < 0)
-                    continue;
-                if ((s8)((struct Map5A9AC *)gUnknown_08499590)->unk2D5A[
-                        ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j] > bestv)
-                    continue;
-                if ((*(struct Map5A9AC * volatile *)&gUnknown_08499590)->unk12[
-                        ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j] != 0)
-                    continue;
-                if (((struct Unk5A9ACTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable)->unk1a[
-                        ((struct Map5A9AC *)gUnknown_08499590)->unk1432[
-                            ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j] & 0x1f] == 0)
-                    continue;
-                if (sub_08026FD0(gUnknown_03003F38,
-                        ((struct Map5A9AC *)gUnknown_08499590)->unk1432[
-                            ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j]) == 1
-                 && gUnknown_085767B8[((struct Map5A9AC *)gUnknown_08499590)->unk1432[
-                        ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j] & 0x1f] != 0)
-                    continue;
-                best.raw = (u16)j | (i << 16);
-                bestv = (s8)((struct Map5A9AC *)gUnknown_08499590)->unk2D5A[
-                        ((struct Map5A9AC *)gUnknown_08499590)->unk417A[i] + j];
-            }
-        }
-
-        if (best.pos.unk00 == 0x270f)
-            continue;
-        cur->unk00 = best.pos.unk00;
-        cur->unk02 = best.pos.unk02;
-        bv = (s8)((struct Map5A9AC *)gUnknown_08499590)->unk2D5A[
-                ((struct Map5A9AC *)gUnknown_08499590)->unk417A[best.pos.unk02] + best.pos.unk00];
+      continue;
     }
+    if (p->type > 2)
+    {
+      continue;
+    }
+    if (gUnknown_03004730[n & 0x3f] != 0)
+    {
+      continue;
+    }
+ do { if (t[a1][((struct Unk5A9ACUnit *) p)->unk09_3] == 0) { continue; } if (((s8) ((struct Map5A9AC *) gUnknown_08499590)->unk2D5A[((struct Map5A9AC *) gUnknown_08499590)->unk417A[p->y] + p->x]) > bv) { continue; } gUnknown_030013EC(p->x, p->y, 1, sub_08042D1C(gUnknown_030033EC, p->type), -1); bestv = 0x7fff; best.pos.unk00 = 0x270f; for (i = 0; i < ((struct Map5A9AC *) gUnknown_08499590)->unk02; i++) { new_var = &gUnknown_08499590; for (j = 0; j < ((struct Map5A9AC *) gUnknown_08499590)->unk00; j++) { if (((s8) gUnknown_03003340[i][j]) < 0) { continue; } if (((s8) ((struct Map5A9AC *) gUnknown_08499590)->unk2D5A[((struct Map5A9AC *) gUnknown_08499590)->unk417A[i] + j]) > bestv) { continue; } if ((*((struct Map5A9AC * volatile *) new_var))->unk12[((struct Map5A9AC *) gUnknown_08499590)->unk417A[i] + j] != 0) { continue; } if (((struct Unk5A9ACTbl *) gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable)->unk1a[((struct Map5A9AC *) gUnknown_08499590)->unk1432[((struct Map5A9AC *) gUnknown_08499590)->unk417A[i] + j] & 0x1f] == 0) { continue; } if ((sub_08026FD0(gUnknown_03003F38, ((struct Map5A9AC *) gUnknown_08499590)->unk1432[((struct Map5A9AC *) gUnknown_08499590)->unk417A[i] + j]) == 1) && (gUnknown_085767B8[((struct Map5A9AC *) gUnknown_08499590)->unk1432[((struct Map5A9AC *) gUnknown_08499590)->unk417A[i] + j] & 0x1f] != 0)) { continue; } best.raw = ((u16) j) | (i << 16); bestv = (s8) ((struct Map5A9AC *) gUnknown_08499590)->unk2D5A[((struct Map5A9AC *) gUnknown_08499590)->unk417A[i] + j]; } } if (best.pos.unk00 == 0x270f) { continue; } cur->unk00 = best.pos.unk00; } while (0);
+    cur->unk02 = best.pos.unk02;
+    bv = (s8) ((struct Map5A9AC *) gUnknown_08499590)->unk2D5A[((struct Map5A9AC *) gUnknown_08499590)->unk417A[best.pos.unk02] + best.pos.unk00];
+  }
 
-    if (cur->unk00 != 0x270f)
-        gUnknown_03004730[((struct Map5A9AC *)gUnknown_08499590)->unk12[
-            ((struct Map5A9AC *)gUnknown_08499590)->unk417A[cur->unk02] + cur->unk00] & 0x3f]++;
+  if (cur->unk00 != 0x270f)
+  {
+    gUnknown_03004730[((struct Map5A9AC *) gUnknown_08499590)->unk12[((struct Map5A9AC *) gUnknown_08499590)->unk417A[cur->unk02] + cur->unk00] & 0x3f]++;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-

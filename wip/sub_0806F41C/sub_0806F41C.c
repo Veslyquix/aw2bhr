@@ -29,7 +29,7 @@ int *piVar1;
   int iVar6;
 
   int local_18;
-  
+
   *(u8 *)((u32)&REG_DISPCNT + 1) = *(u8 *)((u32)&REG_DISPCNT + 1) & 0x1f;
   sub_08012358();
   uVar3 = IsCampaignCompletionFlagSet(0x22);

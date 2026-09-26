@@ -2,7 +2,29 @@
 
 0x08049944, 180 bytes, THUMB, parked.
 
-Best score so far: 92.2%.
+Best score so far: not measured.
+
+## What it does
+
+Draws the number a1 at (a2, a3) with sub_08014B0C when a4 is non-zero, after calling sub_08012BC8 on a 6 by 2 area starting 5 columns to the left (probably clearing it); the zero and non-zero cases are separate calls. It also counts a1's decimal digits in a loop whose result is never used, then calls sub_08013AFC.
+
+## How close it is
+
+Compiles to the right size (180 bytes); 14 bytes differ (92.2% line up).
+
+## What is left
+
+The draft copies a1 inside the first `if` (`if ((new_var = a1) == 0)`), which gets the original's register assignment but costs one extra copy; to pay for it the draft uses a different scratch register for the two stack arguments, which is the other half of the difference. A spelling that gets the same register assignment without the copy would close it; nothing tried so far does.
+
+## Already tried
+
+- No copy at all (six variants: duplicated tails, both `if (a4)` polarities, a goto, 0 instead of a1, `a1 - a1`): a1 and a4 swap registers.
+- The copy as its own statement before the `if`: 12 bytes too long, 5%.
+- Changing local declaration order or statement order: byte-neutral.
+- Writing the two draw calls differently from each other: byte-neutral.
+- Reaching the text buffer through a pointer local: 4 bytes too long, 8.9%.
+- The automatic permuter, four runs (about 30 minutes): found the copy, then plateaued.
+- All seven compiler profiles: identical output.
 
 ## Files
 
@@ -10,9 +32,10 @@ Best score so far: 92.2%.
 - `NOTES.md`: working notes
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -55,3 +78,5 @@ SPLITTING THE PARAMETER'S LIVE RANGE, found by decomp-permuter run 1 and semanti
 ### Wave 89
 
 WAVE 89 (W89-D): SCREENED OUT before any probe, and the wave-89 routing premise for it was wrong. The entry's 'the ROM reloads a3' is `mov r2,r8`, a HI-TO-LO REGISTER MOVE, not a memory re-read -- the ROM rebuilds r2 only because it picked r2 as the scratch for the two stack-slot constants and clobbered the prologue's copy. No memory is involved, so no re-read lever (volatile, static-inline helper) can act here. Separately, W86's bound DISQUALIFIES the live-range split this entry's remaining_diff is built around: a1 does NOT die at `(new_var = a1)` -- it is used at both later call sites -- so W73-B's split adds a FOURTH allocno rather than re-cutting a live range, and the copy it costs is not coalescable. Re-measured 92.2% size-exact by exit code. Evidence: work/sub_08049944/W89-notes.md.
+
+</details>

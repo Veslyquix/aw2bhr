@@ -51,3 +51,47 @@ registers; it cannot move an insn across the loop boundary.
 
 ## Wave 81 (W81-B)
 Deferring the gUnknown_02029822[side][j] = b; store past both payload writes (semantically free -- different arrays) so the payload base pseudos are created first: 85.4% / 21 bytes, first difference +0x26. The write order inside the swap block is also load-bearing. Park stands as classified.
+## W90-A (wave 90) -- still 95.8%, 6 bytes; the residual is now a NUMBER
+
+Draft unchanged (`w90-start.c` == draft, re-verified by the permuter's
+baseline each run).
+
+**Mechanism, read straight off an RTL dump (`agbcc ... -dg`; recipe in
+`work/sub_0807E980/NOTES.md`).** The `.greg` dump prints every allocno's
+`refs` and `live_length`; global.c sorts by
+`floor_log2(refs) * refs / live_length`. For the draft:
+
+| pseudo | what | refs | live | priority | gets |
+|---|---|---|---|---|---|
+| 36 | side*0x6c | 7 | 42 | 0.333 | r8 |
+| 109 | &gUnknown_0202980A | 8 | 80 | 0.300 | sb |
+| 169 | i+1 | 4 | 35 | 0.229 | sl |
+| 31 | &gUnknown_02029822 | 7 | 88 | 0.159 | nothing -> rematerialised from the pool |
+
+REFS ARE LOOP-DEPTH WEIGHTED, AND A `do { } while (0)` COUNTS AS A LOOP LEVEL
+in flow (its NOTE_INSN_LOOP_BEG survives to flow here): 109's 8 is
+1 (set) + 3 (use at depth 3) + 4 (use inside the swap do/while). THAT is why the
+do/while(0) is load-bearing -- it is worth exactly one ref, and one ref crosses
+the floor_log2 step at 8. The ROM therefore needs refs(22) in {8, 9} and
+refs(0A) <= 7 with every other allocno's order unchanged.
+
+**Exhaustive search of the obvious lever (1,024 variants):** every combination
+of wrapping / not wrapping each of the ten inner-loop statements in its own
+do/while(0) was compiled with `-dg` (scratch `e638/combo`), and the same space
+was run through the permuter as a pure PERM_GENERAL enumeration
+(`w90-dowhile.perm.txt`, 1,024 iterations, best = the draft, 95.8%).
+320 combinations DO put gUnknown_02029822 in sb and rematerialise
+gUnknown_0202980A exactly as the ROM does -- and in every one of them
+side*0x6c (36) goes to ip instead of r8, because the only statements that
+reference 22's pseudo also reference 36, so any depth bump that lifts 22 to 8
+refs lifts 36 to 8 or more, moving it up to or past the j+1 copy (170, 6/21 =
+0.571), which then no longer takes ip first (one-wrap variant, `a = ...` wrapped
+and the swap do/while removed: 36 is 8/42 = 0.571 exactly and wins the tie on
+the lower allocno number). So the next lever has to raise 22's refs WITHOUT
+touching side*0x6c's -- or raise the j+1 copy's (170) with it. Not a
+statement-wrap question any more.
+
+Permuter, fixed scorer: perm-w90-1 undirected 900 s (11,720 it) and
+perm-w90-2 directed 900 s (10,674 it; `w90-directed.perm.txt`: LINESWAP of the
+locals, RANDOMIZE of the body, five PERM_GENERAL swap-block shapes) -- nothing
+better than the base (720).

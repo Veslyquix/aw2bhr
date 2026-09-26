@@ -21,6 +21,11 @@ Two constraints the linker imposes, both enforced here:
 
 Nothing is promoted unless tools/trymatch.py currently says it matches.
 
+A draft may define its function under a new name (wave 90): through a
+`.thumb_set sub_XXXXXXXX, NewName` line or a `#define NewName sub_XXXXXXXX`
+header macro. split_source() finds it by that name, so merge() and
+`trymatch --unit` accept such drafts.
+
     python tools/promote.py sub_08013AEC sub_08013AFC
     python tools/promote.py --all-matched
 """
@@ -169,19 +174,69 @@ def refresh_promoted(names, index, existing):
     return refreshed
 
 
+# Wave 90: PR #3 renamed functions in C, in two ways. Old name first here:
+#     asm(".global sub_08078E14\n.thumb_set sub_08078E14, GetCampaignMissionId\n");
+# and new name first in a header macro:
+#     #define BG_EnableSync sub_08013AD4
+THUMB_SET = re.compile(r'\.thumb_set\s+(\w+)\s*,\s*(\w+)')
+JOINED_STR = re.compile(r'"\s*\n\s*"')
+DEFINE_ALIAS = re.compile(r'^\s*#\s*define\s+([A-Za-z_]\w*)\s+(sub_[0-9A-F]{8})\s*$',
+                          re.M)
+
+
+def macro_aliases():
+    """old name -> new name for renames done with a macro in include/ or src/."""
+    if macro_aliases.cache is None:
+        out = {}
+        for top in ("include", "src"):
+            for root, _, files in os.walk(os.path.join(awlib.REPO, top)):
+                for f in files:
+                    if f.endswith((".h", ".c")):
+                        with open(os.path.join(root, f), encoding="utf-8",
+                                  errors="replace") as fh:
+                            for new, old in DEFINE_ALIAS.findall(fh.read()):
+                                out.setdefault(old, new)
+        macro_aliases.cache = out
+    return macro_aliases.cache
+
+
+macro_aliases.cache = None
+
+
+def definition_names(name, text):
+    """Every name `name` may be DEFINED under in `text`: itself first, then a
+    `.thumb_set name, New` alias in the text, then a header macro. A string
+    literal broken across lines is joined first (src/design.c splits one)."""
+    names = [name]
+    for old, new in THUMB_SET.findall(JOINED_STR.sub("", text)):
+        if old == name and new not in names:
+            names.append(new)
+    new = macro_aliases().get(name)
+    if new and new not in names:
+        names.append(new)
+    return names
+
+
 def split_source(name, text):
     """(declarations, body) for one work file.
 
     The body starts at the function's definition line; everything above it is
     includes, externs and struct definitions, which are merged and de-duplicated
     across the files sharing a translation unit.
+
+    A function renamed in C (see definition_names) is found by its new name
+    when its old one is not there. Only a DEFINITION counts for the new name,
+    because a header section may declare it first.
     """
     lines = text.splitlines(keepends=True)
-    pat = re.compile(r'^\S.*\b%s\s*\(' % re.escape(name))
-    for i, ln in enumerate(lines):
-        if pat.match(ln):
-            j = doc_comment_start(lines, i)
-            return lines[:j], lines[j:]
+    for k, nm in enumerate(definition_names(name, text)):
+        pat = re.compile(r'^\S.*\b%s\s*\(' % re.escape(nm))
+        for i, ln in enumerate(lines):
+            if pat.match(ln):
+                if k and ln.split("//")[0].rstrip().endswith(";"):
+                    continue    # a prototype of the new name
+                j = doc_comment_start(lines, i)
+                return lines[:j], lines[j:]
     return None, None
 
 

@@ -97,6 +97,13 @@ correct under a different compiler or optimization level.
   match; only an independently observed zero exit status is.
 - Record durable code-generation discoveries in `docs/agbcc-codegen.md` and
   evidence-backed type/prototype corrections in the appropriate header.
+- Write every comment and parked `summary` to `docs/writing-notes.md`: say what
+  the code does, in plain words, for a programmer new to the project. Match
+  history (wave numbers, agent names, scores, register diffs, failed
+  spellings) goes in the commit message, never in `src/` or `include/`. After
+  editing comments in a promoted file, run `python tools/sync_work.py <fn>`,
+  or `promote.py` will restore the old text from the draft, and prove the edit
+  touched comments only with `python tools/comment_check.py`.
 - Preserve the starting draft before any permuter run and re-run `trymatch.py`
   on any reported result. The MCP wrapper's missing-`exit_code` timeout crash
   was fixed after Wave 61; a server-side timeout is now an ordinary exit 124

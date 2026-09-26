@@ -1,17 +1,6 @@
 #include "global.h"
-#include "map.h"
 #include "hardware.h"
 
-/* WAVE 35: CANONICAL `struct Map`. Eight drafts across blocks 0x08029-0x0802B
- * each invented their own body for this tag, with 2 to 7 named fields. Every
- * one compiles and byte-matches ALONE, so trymatch cannot see the problem;
- * merged into a promoted unit it is a hard `redefinition of struct Map`.
- * All seven distinct bodies describe the SAME layout at different
- * resolutions -- the offsets reconcile exactly -- so this is their union, the
- * most refined reading of each region. Byte-neutral: only a field's START
- * OFFSET enters the address arithmetic, never its declared length, and no
- * draft referenced any filler. Keep the drafts in sync; sync_work.py
- * reintroduces whatever the drafts say. */
 /* The +2 and +4 must ride on the loaded BASE, not on the index. Offset-
  * compatible with c_0802AA14.c's `struct Tbl49A2A6` -- unk02 starts at the same
  * +2 there, only its declared LENGTH differs, and a declared length never

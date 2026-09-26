@@ -2,16 +2,39 @@
 
 0x08061DCC, 136 bytes, THUMB, parked.
 
-Best score so far: 27.2%.
+Best score so far: 27.2% (best.c).
+
+## What it does
+
+Checks one unit (a struct Unit) against two thresholds in the byte row that gUnknown_03004784 points at. If its HP is below entry 3, it sets the 3-bit field in the unit's byte 9 to 2. Otherwise, if its type carries ammo and it has none left, or its fuel as a percentage of the type's maxFuel is below entry 2, it sets that field to 1; otherwise it leaves the unit alone.
+
+## How close it is
+
+Compiles to 136 bytes, the ROM's size, but only because 2 bytes of alignment padding fill the gap: the code is one instruction short. 27.2% of bytes are in place. The missing instruction is a copy of the unit-type table's address into a saved register, which the ROM makes and the draft does not.
+
+## What is left
+
+First, name the two globals directly (gUnknown_03004784 and the unit-type table gUnknown_085D5ABC) instead of reading them through gUnknown_0816DB08 and gUnknown_0816DB0C, which are the compiler's own pointer words; that fixed four similar drafts, and the one measurement against it was taken on a much earlier draft. Otherwise the draft holds five values across the branches where the ROM holds four, because it keeps the constant 0x5c in a register instead of loading it at each multiply.
+
+## Already tried
+
+- Naming the two globals directly, on an early draft: 16 bytes short, because the compiler merged the two table reads across the division call.
+- Binding both table addresses to locals and using them everywhere: needs one more saved register (120 bytes at the time). Binding the first one but leaving its first use as the plain global gained one of the two missing copies (kept).
+- Five respellings of the unit-type index (a local, an assignment inside the subscript, two locals and so on): all byte-identical.
+- `& 0xff` on the index: byte-identical. A shift-mask-shift on the second use made the compiler recompute the multiply as the ROM does (kept).
+- Binding the masked index to a local before the `if`: 2 bytes too long.
+- `const` on the two pointer-word declarations: no effect.
 
 ## Files
 
 - `sub_08061DCC.c`: the current draft
+- `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -41,3 +64,5 @@ WAVE 87 (W87-D): pre-registered W81-C two-definition / W86-G join re-derivation 
 ### Wave 89
 
 WAVE 89 (W89-D then W89-H): 15.4% -> 19.1% -> 27.2%, size delta -8 -> size-exact header with code -4 -> -2. TWO levers landed. (1) W89-D, the FIFTH SPLITTER: a bare `& 0xff` is byte-identical (fold discharges it before cse numbers the multiply) but `(((u32)p->unk00 << 24) & 0xff000000) >> 24` on the SECOND reference survives to cse and dies in combine, so the product is no longer available at the join -- the ROM's recomputed multiply, its live bare index and its {r4,r5,r6,lr} push mask all reproduced for the first time in five waves; binding the quotient to a u8 local also fixes the post-call block. The prompt's premise (wave 88's static-inline helper, on the ground that p->unk00 is a memory read) was REFUTED without a probe: the disputed value is `p->unk00 * 0x5c`, an address-arithmetic pseudo, the class the helper is inert on. (2) W89-H: bind the symbol's ADDRESS to a local AND LEAVE THE FIRST REFERENCE BARE -- the bind creates the cross-block pseudo (a block-local and a global allocno cannot coalesce, so the copy survives) and the bare reference stops the allocator collapsing them, reproducing the ROM's `ldr r0,=X / adds r6,r0,#0`. THIS OVERTURNS THE STANDING WAVE-37 `c_local` NEGATIVE AND NAMES ITS CAUSE: that measurement bound locals at EVERY reference, and re-running it reproduces the regression exactly (push mask grows to {r4,r5,r6,r7,lr}). It was the leave-one-bare rule all along, not a fact about binding -- worth re-testing every park whose ruled-out list contains a bind-the-address negative. Evidence: work/sub_08061DCC/W89-notes.md.
+
+</details>

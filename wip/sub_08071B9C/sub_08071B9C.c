@@ -26,7 +26,7 @@ u16 uVar1;
 
   int local_2c;
   u16 *local_24;
-  
+
   iVar5 = *(int *)(a1 + 0x2c);
   iVar6 = *(int *)(iVar5 + 0x20);
   local_24 = *(u16 **)(iVar5 + 0x24);

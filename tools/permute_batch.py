@@ -5,6 +5,10 @@ The normal tools/permute.py wrapper remains the only scorer/verifier. This
 driver merely inventories safe targets, apportions a wall-clock budget, and
 keeps a durable per-target log. It always starts from the readable current
 draft: a saved best.c may be a semantically invalid permuter mutation.
+
+A run that ends `PERMUTE IMPROVED` (permute.py keeps a measured improvement in
+the draft) is recorded as an `improved` event and the next pass starts from
+it; any OTHER change to a draft without a verified match still stops the batch.
 """
 
 import argparse
@@ -190,6 +194,16 @@ def main():
                     if check.returncode == 0:
                         matched.add(name)
                         continue
+                # Since 2026-08-29 permute.py KEEPS a measured improvement in
+                # the draft and says so on its last line. That is the chaining
+                # this driver exists for, not corruption; without this branch
+                # the first improvement anywhere stopped the whole batch.
+                if rc == 1 and "PERMUTE IMPROVED" in log.read_text(errors="replace"):
+                    record(events, {"event": "improved", "name": name,
+                                    "pass": pass_no, "log": str(log)})
+                    print("  improved; the next pass starts from it", flush=True)
+                    searchable += 1
+                    continue
                 print("source changed without a verified match; stopping to protect it",
                       flush=True)
                 return 3

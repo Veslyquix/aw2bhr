@@ -14,9 +14,34 @@ function's address and size from the index.
     python tools/trymatch.py sub_08013AEC [--diff]
 
 Exit status is 0 only on a match, so this can gate a loop.
+
+The LAST line of every per-function run is one machine-readable verdict, so no
+caller has to re-parse the prose above it (wave 90's orchestrator did, to rank
+102 drafts, and preflight printed `still-fails` for 46 drafts that did not
+even compile):
+
+    TRYMATCH MATCH sub_X
+    TRYMATCH MISMATCH sub_X pct=97.26 size=+0 first=+0x14
+    TRYMATCH COMPILE-FAIL sub_X
+    TRYMATCH NO-DRAFT sub_X
+    TRYMATCH ERROR sub_X
+
+Exit 1 still covers both MISMATCH and COMPILE-FAIL; the line tells them apart.
+parse_result(text) reads it back. A failed compile now DELETES the previous
+_cand.bin and candidate object first, so nothing stale is left that a hand
+`cmp` could mistake for this run's output (wave 90, W90-P1).
+
+Renamed symbols are the same symbol (wave 90). A relocation against a new
+name matches one against the old name when both link to one address: the
+`X = Y;` aliases in aw2bhr.lds (`gPlaySt` for gUnknown_03003FC0) and the
+`.thumb_set sub_XXXXXXXX, NewName` lines in src/**/*.c
+(`GetCampaignMissionId` for sub_08078E14). This holds for `bl` calls as well
+as pool words, and in both the per-function and the --unit path. Before
+this, `--unit` rejected any unit that used a PR #3 name.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -28,6 +53,10 @@ import agbenv
 import awlib
 
 WORK = os.path.join(awlib.REPO, "work")
+# check() compiles <WORK_REL>/<fn>/<fn>.c. Always "work" in real use; only
+# the self-test points it (and WORK) at a scratch copy under build/, so the
+# mismatch and compile-failure paths can be exercised without touching work/.
+WORK_REL = "work"
 FUNC_DIR = os.path.join(awlib.REPO, "build", "functions")
 
 
@@ -242,11 +271,64 @@ def symbol_addresses():
     # The script's value WINS over the ELF's, because a stale ELF is exactly
     # what this overlay exists to correct.
     syms.update(lds_absolute_symbols())
+    # Wave 90: NAMES, not values. PR #3 renamed globals in aw2bhr.lds
+    # (`gPlaySt = gUnknown_03003FC0;`) and functions in promoted C
+    # (`.thumb_set sub_08078E14, GetCampaignMissionId`). The ELF comes from the
+    # assembly build, so a function renamed only in C is not in it, and a
+    # call spelled with the new name could not be resolved at all. Each alias
+    # gets its target's address. An existing entry is never overwritten.
+    for new, old in symbol_aliases().items():
+        if new not in syms and old in syms:
+            syms[new] = syms[old]
     symbol_addresses.cache = syms
     return syms
 
 
 symbol_addresses.cache = None
+
+
+LDS_ALIAS = re.compile(r"^([A-Za-z_]\w*)\s*=\s*([A-Za-z_]\w*)\s*;")
+THUMB_SET = re.compile(r"\.(?:thumb_set|set)\s+([A-Za-z_]\w*)\s*,\s*([A-Za-z_]\w*)")
+
+
+def symbol_aliases():
+    """new name -> old name, for every alias the build defines by name.
+
+    Two sources: column-0 `X = Y;` lines in aw2bhr.lds, and
+    `.thumb_set sub_XXXXXXXX, NewName` in src/**/*.c. The second has the old
+    name first. Both link the two names to one address, so a relocation
+    against either one produces the same bytes.
+    """
+    if symbol_aliases.cache is None:
+        out = {}
+        try:
+            with open(os.path.join(awlib.REPO, "aw2bhr.lds"),
+                      encoding="utf-8", errors="replace") as fh:
+                for ln in fh:
+                    m = LDS_ALIAS.match(ln)
+                    if m:
+                        out[m.group(1)] = m.group(2)
+        except OSError:
+            pass
+        for root, _, files in os.walk(os.path.join(awlib.REPO, "src")):
+            for f in files:
+                if not f.endswith(".c"):
+                    continue
+                try:
+                    text = open(os.path.join(root, f), encoding="utf-8",
+                                errors="replace").read()
+                except OSError:
+                    continue
+                # A string literal broken across lines is joined first;
+                # src/design.c splits one between the two names.
+                text = re.sub(r'"\s*\n\s*"', "", text)
+                for old, new in THUMB_SET.findall(text):
+                    out.setdefault(new, old)
+        symbol_aliases.cache = out
+    return symbol_aliases.cache
+
+
+symbol_aliases.cache = None
 
 
 def sym_addr(name, syms):
@@ -310,6 +392,9 @@ def _thumb_functions():
                     names.add(f["name"])
         except (OSError, ValueError, KeyError, TypeError):
             pass
+        # A renamed THUMB function (`GetCampaignMissionId` for sub_08078E14)
+        # carries the T bit too.
+        names.update(new for new, old in symbol_aliases().items() if old in names)
         _thumb_functions.cache = names
     return _thumb_functions.cache
 
@@ -356,13 +441,25 @@ def pool_word_equivalent(cand_o, rodata_off, rom_addr):
         return None
     rel = {o: (t, s) for o, t, s in section_relocs(cand_o, ".rodata")}
     prefix = agbenv.makefile_var("PREFIX") or "arm-none-eabi-"
-    out_rel = "build/probe/_cand_rodata.bin"
+    # One file PER PROCESS. This was a single shared build/probe/_cand_rodata.bin,
+    # so two agents' trymatch runs in the same second could read each other's
+    # .rodata and reject a real match.
+    out_rel = "build/probe/_cand_rodata.%d.bin" % os.getpid()
+    out_abs = os.path.join(awlib.REPO, out_rel.replace("/", os.sep))
     os.makedirs(os.path.join(awlib.REPO, "build", "probe"), exist_ok=True)
     rc, _, _ = agbenv.run('%sobjcopy -O binary --only-section=.rodata "%s" "%s"'
                           % (prefix, cand_o, out_rel))
     if rc != 0:
         return None
-    data = open(os.path.join(awlib.REPO, out_rel.replace("/", os.sep)), "rb").read()
+    try:
+        data = open(out_abs, "rb").read()
+    except OSError:
+        return None
+    finally:
+        try:
+            os.remove(out_abs)
+        except OSError:
+            pass
     if not data or len(data) % 4 or rodata_off >= len(data):
         return None
     syms = symbol_addresses()
@@ -499,18 +596,18 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o=None):
             # instruction-for-instruction identical and linking to the same
             # ROM.
             #
-            # A `bl` may name a different symbol when both names are the same
-            # function: a readable name plus the old sub_XXXXXXXX kept as a
-            # `.thumb_set` alias (LoadMapData / sub_080247A4, memcpy /
-            # sub_0808B6E8). asm/ still spells the call with the old name.
-            # Accept it only when BOTH names are in the real symbol table --
-            # the linked ELF or the map, not sym_addr()'s name fallback -- at
-            # the same address. The `bl` bytes themselves are still compared
-            # by the loop below.
+            # Wave 90: the same symbol under another NAME is also the same
+            # call. PR #3 renamed functions in C (`bl GetCampaignMissionId`
+            # where the original has `bl sub_08078E14`), and both names link
+            # to one address. Only names in the real symbol table count, and
+            # the addend stays in the instruction bytes, which the loop below
+            # still compares.
             if t_sym != c_sym:
-                if (t_typ != "R_ARM_THM_CALL"
-                        or syms.get(t_sym) is None
-                        or syms.get(t_sym) != syms.get(c_sym)):
+                t_name, t_extra = _split_sym(t_sym)
+                c_name, c_extra = _split_sym(c_sym)
+                if (t_typ != "R_ARM_THM_CALL" or t_extra != c_extra
+                        or syms.get(t_name) is None
+                        or syms.get(t_name) != syms.get(c_name)):
                     return False
             continue
         t_name, t_extra = _split_sym(t_sym)
@@ -609,7 +706,16 @@ def disassemble(obj_rel, lo, hi):
     return keep
 
 
-def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None):
+def _write_atomic(path, text):
+    """awlib.write_text through a temp file and os.replace, so a concurrent
+    reader of best.c / best.json never sees a half-written file."""
+    tmp = "%s.tmp%d" % (path, os.getpid())
+    awlib.write_text(tmp, text)
+    os.replace(tmp, path)
+
+
+def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None,
+                compiled=None):
     """Keep the highest-scoring candidate seen, beside the current one.
 
     An iteration that scores worse overwrites the source that scored better, so
@@ -617,6 +723,12 @@ def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None):
     88.2% and left a 25% regression behind it, with no way back. best.c is never
     read by the build; it exists so a handoff starts from the best known point
     rather than the last one.
+
+    `compiled` is the draft's text as read BEFORE the compile that produced
+    `pct`. If the file on disk differs now, something rewrote it during the
+    compile (the MCP server rewrites <fn>.c on every try_match; permute.py's
+    verify loop does too), and saving it would file one source under another
+    source's score. That is skipped with a note instead.
     """
     meta = os.path.join(workdir, "best.json")
     prev = -1.0
@@ -630,9 +742,25 @@ def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None):
         print("  best so far: %.1f%% (kept in best.c)" % prev)
         return
     src = os.path.join(workdir, name + ".c")
-    awlib.write_text(os.path.join(workdir, "best.c"),
-                     "".join(awlib.read_lines(src)))
-    payload = {"percent": round(pct, 2)}
+    text = "".join(awlib.read_lines(src))
+    if compiled is not None and text != compiled:
+        print("  NOTE: %s.c changed while it was compiling; best.c NOT updated "
+              "(the %.1f%% belongs to the earlier text)" % (name, pct))
+        return
+    _write_atomic(os.path.join(workdir, "best.c"), text)
+    # source_sha1 is the only thing that makes an entry self-verifying. Without
+    # it best.json is five bare numbers, and nothing links them to the file
+    # sitting beside them -- record_best is a non-atomic read-modify-write, and
+    # mcp_server.py rewrites <fn>.c at the start of every try_match, so with
+    # parallel agents run A can save run B's source under A's score. The
+    # 2026-08-29 review could only ever prove that NEGATIVELY, by mtime
+    # inversion, and found two (sub_0807E980, sub_0805A0EC) among the top five
+    # parked functions. Hash exactly the bytes written: write_text encodes with
+    # surrogateescape, and a plain .encode("utf-8") raises on any non-UTF-8
+    # byte in a draft instead of hashing it.
+    payload = {"percent": round(pct, 2),
+               "source_sha1": hashlib.sha1(
+                   text.encode("utf-8", errors="surrogateescape")).hexdigest()}
     if candidate_bytes is not None and target_bytes is not None:
         payload.update({
             "candidate_bytes": candidate_bytes,
@@ -640,7 +768,7 @@ def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None):
             "size_delta": candidate_bytes - target_bytes,
             "exact_size": candidate_bytes == target_bytes,
         })
-    awlib.write_text(meta, json.dumps(payload, sort_keys=True) + "\n")
+    _write_atomic(meta, json.dumps(payload, sort_keys=True) + "\n")
     print("  new best: %.1f%% (saved to best.c)" % pct)
 
 
@@ -657,15 +785,78 @@ def _looks_like_torn_header(text):
         text))
 
 
+# Byte score of the most recent check(), or None if it never got as far as
+# comparing bytes (compile failure, no draft, unreadable unit). check() returns
+# only 0/1, and callers that need to know whether a NON-matching candidate was
+# an improvement would otherwise have to recompile to find out -- at ~5s each,
+# inside a loop over every harvested candidate. Read it immediately after the
+# call; anything else that compiles will overwrite it.
+LAST_PCT = None
+
+# The whole verdict of the most recent check(), as printed on its TRYMATCH
+# line: {"state", "fn", and for MISMATCH "pct", "size", "first"}.
+LAST_RESULT = None
+
+
+def format_result(r):
+    """The one machine-readable line check() ends with."""
+    line = "TRYMATCH %s %s" % (r["state"], r.get("fn"))
+    if r["state"] == "MISMATCH":
+        line += " pct=%.2f size=%+d first=+0x%x" % (r["pct"], r["size"], r["first"])
+    if r.get("profile") and r["profile"] != "configured":
+        line += " profile=%s" % r["profile"]
+    return line
+
+
+def parse_result(text):
+    """The verdict dict from the LAST `TRYMATCH` line in text, or None.
+
+    For callers that run trymatch as a subprocess (verify_batch.py,
+    preflight.py). None means the run died before it could print one -- treat
+    that as ERROR, never as a pass.
+    """
+    for ln in reversed((text or "").splitlines()):
+        m = re.match(r'^TRYMATCH (\S+) (\S+)(.*)$', ln.strip())
+        if not m:
+            continue
+        r = {"state": m.group(1), "fn": m.group(2)}
+        for k, v in re.findall(r'(\w+)=(\S+)', m.group(3)):
+            try:
+                r[k] = (float(v) if k == "pct" else int(v, 16) if k == "first"
+                        else int(v) if k == "size" else v)
+            except ValueError:
+                r[k] = v
+        return r
+    return None
+
+
 def check(name, want_diff=False, keep_going=False, profile="configured"):
+    """Judge work/<fn>/<fn>.c; 0 = match, 1 = no match or no compile, 2 = cannot test.
+
+    Ends with the TRYMATCH line (format_result); LAST_RESULT holds the same.
+    """
+    global LAST_RESULT
+    LAST_RESULT = {"state": "ERROR", "fn": name, "profile": profile}
+    rc = _check(name, want_diff, keep_going, profile)
+    if rc == 0:
+        LAST_RESULT["state"] = "MATCH"
+    print(format_result(LAST_RESULT))
+    return rc
+
+
+def _check(name, want_diff=False, keep_going=False, profile="configured"):
+    global LAST_PCT
+    LAST_PCT = None          # a stale score is worse than no score
     rec, unit = resolve(name)
     if rec is None or unit is None:
         return 2
 
     fn = rec["name"]
+    LAST_RESULT["fn"] = fn
     workdir = os.path.join(WORK, fn)
     csrc = os.path.join(workdir, fn + ".c")
     if not os.path.exists(csrc):
+        LAST_RESULT["state"] = "NO-DRAFT"
         print("error: %s missing -- run `python tools/newfunc.py %s` first"
               % (os.path.relpath(csrc, awlib.REPO), fn))
         return 2
@@ -691,8 +882,21 @@ def check(name, want_diff=False, keep_going=False, profile="configured"):
 
     # Candidate.
     profile_suffix = "" if profile == "configured" else "." + profile
-    cand_o = "work/%s/%s%s.o" % (fn, fn, profile_suffix)
-    rc, so, se = agbenv.compile_c("work/%s/%s.c" % (fn, fn), cand_o, fn=fn,
+    cand_o = "%s/%s/%s%s.o" % (WORK_REL, fn, fn, profile_suffix)
+    cand_bin = "%s/%s/_cand%s.bin" % (WORK_REL, fn, profile_suffix)
+    # A failed compile used to leave the PREVIOUS object and _cand.bin in
+    # place. Wave 90's hand check `cmp`'d that stale _cand.bin against a
+    # snapshot and passed a draft that did not compile. None of this run's
+    # outputs may exist until this run writes them.
+    for stale in (cand_o, cand_bin):
+        try:
+            os.remove(os.path.join(awlib.REPO, stale.replace("/", os.sep)))
+        except OSError:
+            pass
+    # The text actually compiled, so record_best can refuse to file a
+    # different text (rewritten mid-compile) under this compile's score.
+    compiled = "".join(awlib.read_lines(csrc))
+    rc, so, se = agbenv.compile_c("%s/%s/%s.c" % (WORK_REL, fn, fn), cand_o, fn=fn,
                                   profile=profile)
     if rc != 0 and _looks_like_torn_header(se or so):
         # Mid-wave, several agents append to include/unknown-globals.h and
@@ -703,11 +907,12 @@ def check(name, want_diff=False, keep_going=False, profile="configured"):
         # retry has to live here, once, not in every caller's shell loop.
         time.sleep(0.5)
         rc, so, se = agbenv.compile_c(
-            "work/%s/%s.c" % (fn, fn), cand_o, fn=fn, profile=profile)
+            "%s/%s/%s.c" % (WORK_REL, fn, fn), cand_o, fn=fn, profile=profile)
         if rc == 0:
             print("note: first compile hit a torn header read "
                   "(concurrent include/ edit); clean on retry")
     if rc != 0:
+        LAST_RESULT["state"] = "COMPILE-FAIL"
         print("COMPILE FAILED")
         msg = (se or so).strip().splitlines()
         for ln in msg[-25:]:
@@ -721,11 +926,10 @@ def check(name, want_diff=False, keep_going=False, profile="configured"):
                   "settled the signature, sync the draft to it.")
         return 1
 
-    tgt, err = section_bytes(unit_o, "work/%s/_target.bin" % fn)
+    tgt, err = section_bytes(unit_o, "%s/%s/_target.bin" % (WORK_REL, fn))
     if tgt is None:
         print("error: could not read target .text: %s" % err)
         return 2
-    cand_bin = "work/%s/_cand%s.bin" % (fn, profile_suffix)
     cand, err = section_bytes(cand_o, cand_bin)
     if cand is None:
         print("error: could not read candidate .text: %s" % err)
@@ -823,6 +1027,7 @@ def check(name, want_diff=False, keep_going=False, profile="configured"):
                   " the literal the ROM already holds.")
         else:
             print("\nMATCH -- byte-for-byte identical to the original")
+        LAST_PCT = 100.0
         if profile != "configured":
             print("\nPROVISIONAL PROFILE MATCH -- not promotion-ready.")
             print("  Record an evidence-backed compiler override, regenerate "
@@ -833,12 +1038,15 @@ def check(name, want_diff=False, keep_going=False, profile="configured"):
     n_diff = sum(1 for a, b in zip(tgt_fn, cand_fn) if a != b)
     common = min(len(tgt_fn), len(cand_fn))
     pct = (common - n_diff) / size * 100 if size else 0
+    LAST_PCT = pct
     print("  bytes: %d of %d differ  (%.1f%% identical)" % (n_diff, common, pct))
     if profile == "configured":
-        record_best(workdir, fn, pct, len(cand), size)
+        record_best(workdir, fn, pct, len(cand), size, compiled=compiled)
     else:
         print("  temporary profile result: best.c/best.json not updated")
     first = next((i for i, (a, b) in enumerate(zip(tgt_fn, cand_fn)) if a != b), common)
+    LAST_RESULT.update({"state": "MISMATCH", "pct": pct, "size": len(cand) - size,
+                        "first": first})
     print("  first difference at +0x%x" % first)
 
     if want_diff:
@@ -967,11 +1175,13 @@ def check_unit(name, want_diff=False):
             print("error: could not assemble the original unit\n%s" % ase[-1500:])
             return 2
 
-    tgt, err = section_bytes(unit_o, "build/unitcheck/_target.bin")
+    # Per unit, not one shared _target.bin/_cand.bin: two --unit runs on
+    # different units at once read each other's bytes (wave 90).
+    tgt, err = section_bytes(unit_o, "build/unitcheck/%s_target.bin" % stem)
     if tgt is None:
         print("error: could not read target .text: %s" % err)
         return 2
-    cand, err = section_bytes(obj_rel, "build/unitcheck/_cand.bin")
+    cand, err = section_bytes(obj_rel, "build/unitcheck/%s_cand.bin" % stem)
     if cand is None:
         print("error: could not read candidate .text: %s" % err)
         return 2
@@ -1118,14 +1328,12 @@ def self_test():
 
     # The exemption must not become a hole: it is scoped to members named in
     # data/asm-resident.json, and every OTHER missing draft is still a hard
-    # failure. sub_08079EA4's unit holds five functions, four undrafted and
-    # none asm-resident, so it must still refuse to give a verdict.
+    # failure. This used to name sub_08079EA4's unit, which was later drafted
+    # whole and CLOSED -- after which the assertion failed on every run and
+    # tested nothing. Now WORK points at an empty scratch directory, so every
+    # member of a real multi-function unit is missing by construction.
     print()
-    rc = check_unit("sub_08079EA4")
-    good = (rc == 2)
-    print("\n[self-test] an ordinary missing draft is still a hard failure "
-          "(sub_08079EA4's 5-member unit): %s" % ("PASS" if good else "FAIL"))
-    ok &= good
+    ok &= _self_test_missing_draft()
 
     # Wave 39: a MULTI-WORD .rodata blob (sub_0802CDA4's function-pointer
     # initialiser template -- four `.word sub_XXXX` entries whose linked
@@ -1159,9 +1367,115 @@ def self_test():
     print("\n[self-test] a jump table does not mask a .rodata pool word "
           "(sub_080389D8): %s" % ("PASS" if good else "FAIL"))
     ok &= good
+    ok &= _self_test_verdict_line()
+    ok &= _self_test_alias_call()
 
     print("\n[self-test] %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
+
+
+def _self_test_missing_draft():
+    global WORK
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import index_functions as ixf
+    resident = set(ixf.asm_resident())
+    units = load(os.path.join(FUNC_DIR, "units.json"), "run tools/split_asm.py") or []
+    unit = next((u for u in units if len(u["functions"]) >= 2
+                 and not set(u["functions"]) & resident), None)
+    if unit is None:
+        print("[self-test] an ordinary missing draft is still a hard failure: "
+              "SKIPPED (no multi-function unit)")
+        return True
+    saved = WORK
+    WORK = os.path.join(awlib.REPO, "build", "trymatch-selftest", "empty")
+    try:
+        os.makedirs(WORK, exist_ok=True)
+        rc = check_unit(unit["functions"][0])
+    finally:
+        WORK = saved
+    good = (rc == 2)
+    print("\n[self-test] an ordinary missing draft is still a hard failure "
+          "(%s, drafts hidden): %s" % (unit["file"], "PASS" if good else "FAIL"))
+    return good
+
+
+def _self_test_alias_call():
+    """Wave 90: a `bl` to a renamed function is the same call; a `bl` to a
+    different function is not. sub_0802C604's unit (above) is the positive
+    case in real objects; this pins the negative, on identical bytes."""
+    code = bytes(8)
+    alias = next(((new, old) for new, old in sorted(symbol_aliases().items())
+                  if old.startswith("sub_") and new in symbol_addresses()
+                  and old in symbol_addresses()), None)
+    if alias is None:
+        print("\n[self-test] a renamed call target is accepted: SKIPPED "
+              "(no .thumb_set alias in src/)")
+        return True
+    new, old = alias
+    other = "sub_08078E20" if old != "sub_08078E20" else "sub_08078E14"
+    t_rel = [(4, "R_ARM_THM_CALL", old)]
+    same = reloc_equivalent(code, code, t_rel, [(4, "R_ARM_THM_CALL", new)])
+    diff = reloc_equivalent(code, code, t_rel, [(4, "R_ARM_THM_CALL", other)])
+    good = same and not diff
+    print("\n[self-test] `bl %s` equals `bl %s`, and `bl %s` does not: %s"
+          % (new, old, other, "PASS" if good else "FAIL"))
+    return good
+
+
+def _self_test_verdict_line():
+    """Wave 90: the TRYMATCH line, stale-output deletion and best.json's hash.
+
+    Runs on COPIES under build/trymatch-selftest/ (WORK/WORK_REL redirected),
+    so the mismatch and compile-failure paths are exercised without writing
+    to work/. Built from a matched draft so it cannot rot: one extra function
+    after it makes the size +N (MISMATCH), an #error makes it COMPILE-FAIL.
+    """
+    global WORK, WORK_REL
+    fn = "sub_080389D8"
+    base = "".join(awlib.read_lines(os.path.join(WORK, fn, fn + ".c")))
+    saved = (WORK, WORK_REL)
+    WORK_REL = "build/trymatch-selftest"
+    WORK = os.path.join(awlib.REPO, "build", "trymatch-selftest")
+    d = os.path.join(WORK, fn)
+    ok = True
+    try:
+        os.makedirs(d, exist_ok=True)
+        for f in ("best.c", "best.json"):
+            if os.path.exists(os.path.join(d, f)):
+                os.remove(os.path.join(d, f))
+
+        awlib.write_text(os.path.join(d, fn + ".c"),
+                         base + "\nvoid trymatch_selftest_pad(void) {}\n")
+        print()
+        rc = check(fn)
+        r = LAST_RESULT
+        meta = json.load(open(os.path.join(d, "best.json"), encoding="utf-8"))
+        best = open(os.path.join(d, "best.c"), "rb").read()
+        good = (rc == 1 and r["state"] == "MISMATCH" and r["size"] > 0
+                and parse_result(format_result(r))["size"] == r["size"]
+                and meta.get("source_sha1") == hashlib.sha1(best).hexdigest())
+        print("\n[self-test] MISMATCH line, size delta and best.json source_sha1 "
+              "(padded copy of %s): %s" % (fn, "PASS" if good else "FAIL"))
+        ok &= good
+
+        # A C error, not `#error`: the Makefile's recipe (and so compile_c)
+        # pipes cpp into agbcc without pipefail, so a preprocessor error does
+        # not fail the build. That is faithful to `make`, and left alone.
+        awlib.write_text(os.path.join(d, fn + ".c"),
+                         base + "\nint trymatch_selftest = trymatch_selftest_undeclared;\n")
+        stale = os.path.join(d, "_cand.bin")
+        awlib.write_text(stale, "stale")
+        print()
+        rc = check(fn)
+        good = (rc == 1 and LAST_RESULT["state"] == "COMPILE-FAIL"
+                and not os.path.exists(stale) and LAST_PCT is None)
+        print("\n[self-test] COMPILE-FAIL line, and the previous _cand.bin is "
+              "deleted, not left to be mistaken for this run's: %s"
+              % ("PASS" if good else "FAIL"))
+        ok &= good
+    finally:
+        WORK, WORK_REL = saved
+    return ok
 
 
 def main():

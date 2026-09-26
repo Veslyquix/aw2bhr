@@ -2,16 +2,38 @@
 
 0x08020754, 208 bytes, THUMB, parked.
 
-Best score so far: 38.5%, +8 bytes.
+Best score so far: 45.7%, +8 bytes (best.c).
+
+## What it does
+
+Fills a map-sized byte buffer with 0 or 1 per tile: 0 where the terrain is wood (4) or reef (0x13) and the tile has no unit or a unit whose type is outside 0x10-0x14; 1 everywhere else.
+
+## How close it is
+
+The retained draft compiles 8 bytes too long and matches 38.46% of the bytes. Its branch layout still differs from the original; the earlier draft was 12 bytes too long.
+
+## What is left
+
+Find how the original wrote the if/else so that the compiler's common-subexpression pass reaches the '= 1' branch and not the '= 0' branch. The RTL dumps show it currently reaches '= 0' by skipping around the unit-type check.
+
+## Already tried
+
+- The map through the shared struct Map or gMap: identical output (the draft already used members).
+- Negated tests, nested ifs, else-if chains, goto labels for either branch, continue in the '= 0' branch: no match; the closest is 8 bytes too long with the branches in the wrong order.
+- Binding the tile index to a local: removes too much register pressure.
+- A 40-minute permuter run (earlier wave): no match.
 
 ## Files
 
 - `sub_08020754.c`: the current draft
+- `best.c`: the closest attempt, when it is not the draft
+- `NOTES.md`: working notes
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -49,3 +71,9 @@ Parked wave 58 (W58-B) after wave 41 (W41-B) measured six source spellings and w
 ### Wave 87
 
 WAVE 87 (W87-C, unnamed-twin axis, J = 1.00 on the two map globals but no loops): twins c_08044854.c / c_08026100.c (byte-identical pair) and c_08025744.c all LACK the construct. sub_08026100/sub_08044854 have an if/else with a `= 1` arm but the index is computed ONCE before it and the arms store to a struct field (no duplicated block, no two-use label); sub_08025744 has no if/else over a map store. c_08026100.c's own recorded cost is a comma-chain pool-order anchor (`pp = &gUnknown_08499594`, embedded `t = y * 2`, `idx` before `(cells = p + 0x51A)[idx]`) -- an address-load-position technique that cannot address which block cse_end_of_basic_block may walk into. Clean NO, 0 probes. The two rule-outs close against each other: the nested-if near-miss is merged by the first jump pass before CSE, and binding the offset to a local relieves a register's worth of pressure; any future attempt must make the two `= 1` blocks differ WITHOUT a pressure-relieving local. Do not re-batch on vocabulary overlap. Configured, 220/208 (+12), 27.9%, unchanged.
+
+### Wave 91
+
+WAVE 91 (W91-A), pre-registered member-form test: NEGATIVE, BYTE-IDENTICAL. This draft was already a member form through its local struct Unk20754Map; respelled through the shared struct Map (`((struct Map *)gUnknown_08499590)->terrain[->rowOffset[y] + x]`, `->unitUnk[...]`) and through gMap, _cand.bin is cmp-identical to the wave-90 draft (220/208, +12, 27.9%). NEW MECHANISM READ OFF `rtldump.py --flags="-da -dp"` (dump.cse): the candidate's `= 0` arm reuses the index (reg 47) because CSE reaches that arm by -fcse-skip-blocks -- the `unit == 0` jump branches AROUND the unit-type block (no other entry) to a single-use label -- not by fall-through as this entry's why_it_is_close says; the `= 1` label has two uses, so it starts a fresh block and recomputes with a reload of gUnknown_08499590. The ROM is the mirror, so its source must at CSE time deny the skip-blocks path into `= 0` (a second use of that label, or a second entry into the type block) AND give `= 1` a single-use label behind a barrier. Measured, all byte-identical to the draft: negated tests each `goto one;` then `= 0; continue; one: = 1;`; nested ifs with a shared `zero:` label inside the inner if; `... && !(unit != 0 && (u8)(type - 0x10) <= 4)`. `if (cond) goto zero; = 1; continue; zero: = 0;` is +8/45.7% but puts `= 1` first, recomputes there, and grows the frame to sub sp,#8. Evidence: work/sub_08020754/NOTES.md.
+
+</details>

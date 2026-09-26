@@ -10593,15 +10593,9 @@ void sub_080200EC(s16, s16, s16, s16);
  * as `movs #1; rsbs` -- so signed. Byte-neutral there; c_08020D50 re-verified
  * by try_match exit code after the change. */
 void sub_08020B88(s16, s16, s16, s16);
-/* The prose above is right: arguments 5 AND 6 are `int`. Wave 73 (W73-F) read
- * sub_080210C8's `lsls #0x18; lsrs #0x18` on its sixth argument as a u8
- * parameter's conversion and pinned this declaration to u8. The caller's
- * truncation is an explicit `(u8)a6` cast, and the callee's own prologue only
- * matches with an int sixth parameter (a u8 one narrows twice). Both
- * functions verified by trymatch exit code with the cast and this
- * declaration. */
+/* Arguments 5 and 6 are int; callers narrow flags explicitly to u8. */
 void sub_08020EDC(s16, s16, s16, u8 *, int, int);
-void AddValueInRange(s16, s16, s16, u8 *, int, int); /* sub_08020EDC; see src/decomp/c_08020EDC.c. */
+void AddValueInRange(s16, s16, s16, u8 *, int, int);
 
 /* Wave 36, W36-M. Every signature below is COPIED VERBATIM from a byte-verified
  * definition in src/decomp/ -- none of them had a declaration in any header,

@@ -2,16 +2,39 @@
 
 0x0804FA2C, 632 bytes, THUMB, parked.
 
-Best score so far: 72.9% (preprocessed form, not included).
+Best score so far: not measured.
+
+## What it does
+
+Sets up the current sprite object (gUnknown_03001FBC) for one side and slot: its flip, palette, tile number and priority. It then places the sprite at the slot's starting position from the table sub_08057D44 returns.
+
+## How close it is
+
+Compiles 4 bytes too long (636 against 632). 340 of 632 bytes differ (46.2% identical), which means little because the extra bytes come early. The instructions are otherwise in the original's order; the difference is that gUnknown_03004580's address is loaded one instruction too early into a different register, which also costs two register copies at the tile-number multiply.
+
+## What is left
+
+Find what makes the compiler load gUnknown_03004580's address one step later, into the register the original uses. Two matched sibling functions (sub_0804D290, sub_0804DCA8) had the same problem and were fixed with a comma expression, but here that fix costs gUnknown_0300453C its register because one more value is live.
+
+## Already tried
+
+- The siblings' exact fix (a comma expression naming gUnknown_03004580 inside sub_08057D44's first argument, plus a `do { } while (0)` around that call): 20 bytes too long, 16.6% identical.
+- The comma expression alone, placed where the original loads the address or in the call: same size, 20 points worse.
+- `do { } while (0)` around the tile-number statement, the call, the last statement or the four position writes: 8 to 20 bytes too long.
+- Changing which variable the comma expression names (pos, row, an int, a register local): no effect; only its position matters.
+- A pointer local for the gUnknown_03004580 reads: loses the shared base the original reuses across the four position writes.
+- The older compiler build: worse. Turning off force-addr: identical output.
+- Two permuter runs of over 300 seconds: only meaningless edits, both worse than the draft.
 
 ## Files
 
 - `sub_0804FA2C.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -48,3 +71,5 @@ This was the same failure mode that sub_0804D290 and sub_0804DCA8 had, and both 
 ### Why it is parked
 
 Register allocation with NO source construct behind it. The instruction stream, the type model and every read form are settled; what remains is one address constant landing one slot early in a function that is one live value tighter than its two matched twins, and wave 79 measured that the twins' own lever does not transfer in either of its two forms. Wave-77 class: register numbers with nothing behind them.
+
+</details>

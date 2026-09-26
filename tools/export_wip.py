@@ -24,6 +24,15 @@ something anyone can edit or promote, so its score is shown but flagged.
 --restore never overwrites a file already in work/. best.json travels with
 best.c for the same reason: without it, trymatch's first compile of the draft
 replaces best.c.
+
+Every draft is also COMPILED (read-only, through tools/drafts.py, into
+build/drafts/) and one that does not compile against today's headers is
+flagged in its README and in the table. Wave 90 found that after PR #3's
+renames 46 of 101 exported drafts did not compile, and wip/ had been handing
+them to contributors as if they did.
+
+    python tools/export_wip.py --check-only        # list non-compiling drafts, write nothing
+    python tools/export_wip.py --no-compile-check  # skip the compile (fast)
 """
 
 import argparse
@@ -52,7 +61,16 @@ HEADINGS = [
     ("open_question", "Open question"),
     ("reason", "Why it is parked"),
 ]
-SKIP_KEYS = {"bytes"}
+SKIP_KEYS = {"bytes", "summary"}
+
+# The plain-language `summary` object in a parked entry (docs/writing-notes.md),
+# in the order the README shows it.
+SUMMARY_HEADINGS = [
+    ("does", "What it does"),
+    ("status", "How close it is"),
+    ("left", "What is left"),
+    ("tried", "Already tried"),
+]
 
 
 def load_state():
@@ -112,6 +130,14 @@ def render_value(v):
     return str(v).strip()
 
 
+def render_summary(summary):
+    out = []
+    for key, heading in SUMMARY_HEADINGS:
+        if summary.get(key):
+            out.append("## %s\n\n%s\n" % (heading, render_value(summary[key])))
+    return out
+
+
 def render_parked(entry):
     if entry is None:
         return ("Not parked. This one is still in the queue and has not been "
@@ -137,7 +163,27 @@ def pretty_key(key):
     return key[:1].upper() + key[1:]
 
 
-def export_one(name, rec, entry):
+def compile_states(names, workers=4):
+    """{fn: first error} for every draft that does NOT compile today.
+
+    Compiles into build/drafts/ (tools/drafts.py), never into work/, so it is
+    safe to run while agents are working.
+    """
+    import concurrent.futures
+    import drafts
+
+    def one(n):
+        b = drafts.build(n, drafts.draft_rel(n), "export-check")
+        return n, (None if b.ok else drafts.first_error(b.err))
+    bad = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+        for n, err in ex.map(one, names):
+            if err is not None:
+                bad[n] = err
+    return bad
+
+
+def export_one(name, rec, entry, broken=None):
     src, dst = os.path.join(WORK, name), os.path.join(WIP, name)
     if os.path.isdir(dst):
         shutil.rmtree(dst)
@@ -160,22 +206,48 @@ def export_one(name, rec, entry):
                         os.path.join(dst, "best.json"))
 
     status = "parked" if entry is not None else "queued"
+    warn = ""
+    if broken:
+        status += ", does not compile"
+        warn = ("**This draft does not compile against the current headers.** "
+                "The score below is from before the break. Fix it first:\n\n"
+                "    %s\n" % broken)
+    summary = entry.get("summary") if isinstance(entry, dict) else None
     body = ["# %s\n" % name,
             "%s, %d bytes, %s, %s.\n" % (rec["addr_hex"], rec["size"],
                                          rec["mode"], status),
-            "Best score so far: %s.\n" % label,
-            "## Files\n", "\n".join(files) + "\n",
-            "## What has been tried\n",
-            "From `data/parked.json`.\n" if entry is not None else "",
-            render_parked(entry)]
+            warn,
+            "Best score so far: %s.\n" % label]
+    if summary:
+        # The plain-language summary (docs/writing-notes.md) leads; the full
+        # technical record stays available but collapsed.
+        body += render_summary(summary)
+        body += ["## Files\n", "\n".join(files) + "\n",
+                 "## Technical history\n",
+                 "<details>\n<summary>The full record from `data/parked.json`: "
+                 "every attempt, with compiler detail.</summary>\n",
+                 render_parked(entry), "</details>\n"]
+    else:
+        body += ["## Files\n", "\n".join(files) + "\n",
+                 "## What has been tried\n",
+                 "From `data/parked.json`.\n" if entry is not None else "",
+                 render_parked(entry)]
     awlib.write_text(os.path.join(dst, "README.md"),
                      "\n".join(b for b in body if b))
     return label, pct, status
 
 
-def export():
+def export(compile_check=True, check_only=False):
     funcs, parked = load_state()
     names = wip_names(funcs, parked)
+    have = [n for n in names if os.path.exists(os.path.join(WORK, n, n + ".c"))]
+    broken = compile_states(have) if compile_check else {}
+    if compile_check:
+        print("compile check: %d of %d drafts do not compile" % (len(broken), len(have)))
+        for n in sorted(broken):
+            print("  %-16s %s" % (n, broken[n][:140]))
+    if check_only:
+        return
     os.makedirs(WIP, exist_ok=True)
     for d in os.listdir(WIP):
         if FN_DIR_RE.match(d) and d not in names:
@@ -186,15 +258,22 @@ def export():
         if not os.path.exists(os.path.join(WORK, n, n + ".c")):
             missing.append(n)
             continue
-        label, pct, status = export_one(n, funcs[n], parked.get(n))
+        label, pct, status = export_one(n, funcs[n], parked.get(n), broken.get(n))
         rows.append((pct, funcs[n]["addr"], n, funcs[n]["size"], label, status))
     rows.sort(key=lambda r: (-r[0], r[1]))
 
     total = sum(r[3] for r in rows)
     table = "\n".join("| [%s](%s/) | %d | %s | %s |" % (n, n, size, label, status)
                       for _, _, n, size, label, status in rows)
+    note = ""
+    if broken:
+        note = ("\n**%d of these drafts do not compile** against the current "
+                "headers (marked `does not compile` below). A header rename broke "
+                "them; each one's README gives the first error.\n" % len(broken))
+    elif not compile_check:
+        note = "\n(Not compile-checked in this export.)\n"
     awlib.write_text(os.path.join(WIP, "README.md"), README % {
-        "count": len(rows), "bytes": total, "table": table})
+        "count": len(rows), "bytes": total, "table": table, "broken_note": note})
     print("wip/: %d functions, %d bytes" % (len(rows), total))
     if missing:
         print("  no draft in work/, not exported: %s" % ", ".join(missing))
@@ -252,7 +331,7 @@ it yourself as described under Contributing in the main README.
 %(count)d functions, %(bytes)d bytes, closest first. The score is the share of
 bytes identical to the original. A byte count after it means the attempt
 compiles to a different size.
-
+%(broken_note)s
 | function | bytes | best so far | state |
 |---|---|---|---|
 %(table)s
@@ -264,13 +343,17 @@ def main():
     ap.add_argument("--restore", action="store_true",
                     help="copy wip/ drafts into work/ instead of exporting")
     ap.add_argument("names", nargs="*", help="with --restore: just these")
+    ap.add_argument("--no-compile-check", action="store_true",
+                    help="do not compile the drafts (no 'does not compile' flags)")
+    ap.add_argument("--check-only", action="store_true",
+                    help="only report drafts that do not compile; write nothing")
     args = ap.parse_args()
     if args.restore:
         restore(args.names)
     elif args.names:
         ap.error("names are only used with --restore")
     else:
-        export()
+        export(compile_check=not args.no_compile_check, check_only=args.check_only)
 
 
 if __name__ == "__main__":

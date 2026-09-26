@@ -2,16 +2,37 @@
 
 0x08026290, 176 bytes, THUMB, parked.
 
-Best score so far: 30.1%, +8 bytes.
+Best score so far: not measured.
+
+## What it does
+
+Gives every army slot that is not yet set up a random value in gPlaySt.co[] (the field name suggests the commanding officer) that no other occupied slot already has. For each slot 1..n (n from sub_0802490C with the map id) whose aiControlled byte is 0, it sets that byte to 2, then draws values from sub_08026254 (a pick from a 0xFF-terminated list) until none of the other occupied slots has the same co[] value, and stores it.
+
+## How close it is
+
+Compiles 8 bytes too long (184 against 176). 30.1% of bytes are identical, which means little because the extra bytes shift everything after them. Both loops, the retry loop, the types and the test order are the original's.
+
+## What is left
+
+The original reaches gPlaySt through a compiler-made address word once, before the loops, and reloads the plain address inside them; our build keeps the address in a register the whole time, which pushes another value into a 4-byte stack frame the original does not have. The best lead is that one more value may be alive across the loops in the original source; look for it in the original's instructions.
+
+## Already tried
+
+- Ten ways of writing the gPlaySt references (pointer locals inside or outside the loops, per-element pointers, a pointer global, pointer arithmetic on the bare symbol, a one-element struct array): none stops the address being kept in a register, and some move the address word onto the wrong reads.
+- Pointer locals for the two arrays, set inside the outer loop: the closest yet (both address words come out plain), but the compiler moves both out of the outer loop.
+- Writing the outer test as `continue` or as a nested `if`: identical output.
+- Writing the inner loop with a hand-made jump to its test: 32 bytes too short, because the compiler no longer makes its automatic copy of the first inner iteration, which the original has.
+- Declaring gUnknown_08090A60 (the compiler's address word) as a real pointer global: matches the first three instructions but is almost certainly the wrong model and fixes nothing else.
 
 ## Files
 
 - `sub_08026290.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -43,3 +64,5 @@ Wave 59 (W59-B). THIRD EXAMPLE OF A KNOWN-UNREACHABLE CLASS, with sub_0800CAA0 (
 ### Wave 87
 
 WAVE 87 (W87-A): pre-registered W86-F bare-symbol pointer arithmetic in the loop body (`*((u8 *)&gUnknown_03003FC0 + (i + 0x38))` at all four sites) REFUTED -- it INVERTS the ROM's split: the pre-loop unk02 read becomes a direct pool load and the loop sites acquire `.rodata` force-addr words (`.LC2: .word g+0x3d`) with an extra indirection per iteration. New -fforce-addr fact: the force-addr word FOLLOWS THE POINTER-ARITHMETIC REFERENCE, not the member reference. That form preserves the duplicated first inner iteration (wave-59 settled) but drops to two hi registers (`push {r6,r7}` vs the ROM's and baseline's three) -- loses a live value instead of gaining one. Second form (W86-C array tell, since the ROM's `ldr r2,=g` + runtime `adds r3,#0x38` matches that chapter's exemplar): `extern struct Unk03003FC0 g[]; g[0].unk38[i]` -- BYTE-IDENTICAL to the baseline (word still emitted, base still held in r9, `sl = 0x38 + r9` still hoisted out of the outer loop, frame still present). Reference-form axis now has TEN measurements (wave 41 six, wave 59 one, wave 87 three) and no movement: STOP RESPELLING THE REFERENCE. The one pointer this wave: sub_0800CAA0's accident (same hold/rematerialise class) flipped when ONE MORE VALUE was live across the loop -- the axis is move_movables' pressure test driven by live-value count. Configured, 184/176 (+8), 30.1%, unchanged, 0 try_match.
+
+</details>

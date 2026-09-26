@@ -2,16 +2,39 @@
 
 0x08073480, 244 bytes, THUMB, parked.
 
-Best score so far: 91.4% (preprocessed form, not included).
+Best score so far: not measured.
+
+## What it does
+
+A per-scanline wave effect on background 3. It fills a scanline buffer with a horizontal and vertical scroll value for each of the 160 lines (a base scroll plus a sine wobble), then sets DMA channel 0 to copy one entry into BG3's scroll registers at every horizontal blank.
+
+## How close it is
+
+Compiles to the right size (244 bytes) with the same instructions in the same order; 31 bytes differ (87% match), all register names: two scratch registers (the row pointer and a multiply temporary) are swapped throughout the loop body.
+
+## What is left
+
+Nothing in the source has reached the swap, and it is decided inside one loop body with no calls, where the usual register-ranking tricks have no effect. Next: a permuter run from this draft (the last run started from an older, worse version), or reading the allocator's choice in the compiler's per-pass debug dumps.
+
+## Already tried
+
+- Automatic permuter, three runs: took an older draft from 50% to 76%, then found nothing; the last produced only invalid code that reused the loop counter as a temporary (the 91% in best.json is also inflated by scoring header-expanded output).
+- Giving the second store's product its own dead variable (`a`) instead of `b`: much worse (46%).
+- A fresh variable for the product, or a named local for the sine value: the compiler merges it back and the two copies the original has disappear.
+- Adding the global first in each sum: much worse (47%); it moves the global's address out of the loop.
+- Adding the row index to the base in integer space: matches the original's operand order but is one byte worse; the swap stays.
+- Every compiler configuration: none matches; the older compiler is one byte better (30 differ) but still not a match.
+- `do { } while (0)` in five places: no effect on the swap; it only moved registers that were already right the wrong way.
 
 ## Files
 
 - `sub_08073480.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -59,3 +82,5 @@ A pure register-name residual on a 1:1 instruction stream. The type model, the s
 ### Wave 87
 
 WAVE 87 (W87-F, do{}while(0) transfer test): NO EFFECT on the residual, control case of the batch -- clean negative, 0 try_match, draft unchanged (87.3%, 244/244, first difference +0x52). Five placements (both stores; one per store; whole loop body inside the for; the a/b accumulator pair; the `dst = g; dst += i*2` pair): NOT ONE moved r1/r3. Every placement that did anything moved the same four global.c allocnos (0xff, gSinLut, unk34>>16, unk2c>>16 in r8/ip/sl/sb) -- and the baseline ALREADY holds the ROM's four hi registers, so each wrapper moved them the wrong way. Mechanism: the wrapper raises the loop-depth weighting of REG_N_REFS, an input to allocno_compare in global.c; `dst` and the chain temp are born and die inside one basic block with no call and are handed out by local-alloc/reload, which runs after global.c and never reads allocno priorities. THE LEVER'S REACHABLE SET IS VALUES WHOSE LIVE RANGE SPANS A LOOP OR A CALL (the r4-r7 / r8-sl values); a permutation of low scratch registers inside one block is outside it. Next (unchanged from W77-K): a permuter run from the CURRENT 87.3% draft (the wave-73 run started from the 76.2% best.c; the draft has moved since). Do not spend another do/while probe here.
+
+</details>

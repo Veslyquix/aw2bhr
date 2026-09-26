@@ -4,15 +4,37 @@
 
 Best score so far: 60.0% (best.c).
 
+## What it does
+
+Builds a BG screen from compressed data. It clears the tilemap buffer, decompresses the tile graphics into VRAM and the tilemap into the buffer, adds a tile and palette offset (0x1020) to every entry, and copies the finished map to the BG's screen block.
+
+## How close it is
+
+Measured with the settings the neighbouring flash code uses (-O1, force-addr off; no override entry yet): right size (160 bytes), 55.6% of bytes match, differing from the first instruction because the original saves two more registers. The one real difference: the original reaches gUnknown_0849957C and gUnknown_03001FE8 through this function's own compiler-made address words (one more load each) and holds the word addresses in saved registers, where the draft reaches the globals directly.
+
+## What is left
+
+Make the code use those address words: the compiler builds them under every spelling tried but leaves them unused. Untested idea: the ROM words from 0x08499578 on are a table of EWRAM buffer pointers 0x800 apart and gUnknown_0849957C is its second entry, so reading it as element 1 of an array at 0x08499578 would make the table's address the value used, the only case in which such words have been seen in use.
+
+## Already tried
+
+- Default -O2 and the older compiler: worse (the older compiler 71 against 64 differing bytes at -O2).
+- A plain u16 fill value instead of volatile: the compiler computes the stack address once where the original computes it twice.
+- Non-volatile element access in the loop: 12 bytes too long (172).
+- `*(u16 **)&gUnknown_0849957C` at every use: fixes the pool word order but is still one load short.
+- Binding both addresses to local pointers: the original's register use, but 4 bytes short (22.5%).
+- Mixing a bound local and the plain name: the address word is still built and ignored.
+
 ## Files
 
 - `sub_0808A3DC.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -33,3 +55,5 @@ WAVE 60: MEASURED AT -O1, WHICH IS THE CORRECT CONFIGURATION FOR THIS BLOCK. The
 ### Wave 88
 
 WAVE 88 (W88-A then W88-D): the brief's 60.0% was stale; current is 55.6% size-exact under BOTH `o1` and `o1-no-force`. Residual isolated to the address-constant indirection. Wave-60 note REFUTED: agbcc builds the two-level `.rodata` block every time and leaves it dead; a load-base use never triggers the indirection at any count, only an address VALUE does -- and (W88-D) the doc's mixed-spelling rule is a PRESERVATION rule, not a creation rule: the ROM's mixed shape still emits .LC0 and ignores it. Settled from data/promoted.json: the function's two words are the gap between c_08089C14.c's and c_0808A978.c's carved blocks in a run of seven, so they are compiler-generated and must NOT be declared as variables. Evidence: work/sub_0808A3DC/W88-notes.md.
+
+</details>

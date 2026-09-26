@@ -4,15 +4,36 @@
 
 Best score so far: 52.2% (best.c).
 
+## What it does
+
+AI: chooses where the active unit moves. If the unit can use its own tile (sub_0804236C), it calls sub_0805D648 there first. Then it scans every reachable free tile that sub_0804236C accepts. It scores terrain type 8 at +8, terrain in the gUnknown_085767F2 table at +4 and any other tile at +0, and keeps the best. If a helper unit exists (sub_0805C290) and a free tile of terrain type 0x11 turns up, it stops at once and calls sub_0805D648 with mode 0x14 and the helper's position. Otherwise it calls sub_0805D648 with the best tile.
+
+## How close it is
+
+Compiles to the right size but only 52% identical, and the draft needs an empty asm statement to get that far. Without the asm statement and with the compiler's gcse pass turned off (-fno-gcse), every byte matches except 2.
+
+## What is left
+
+Either establish that this part of the game was built without gcse, or find source that stops the 'found' call after the loop from sharing work with the call inside the loop. Under -fno-gcse the 2 remaining bytes are the first test of the y loop: the original compares against bestY (known to be 0 there), the draft against y.
+
+## Already tried
+
+- Loop counters as s16, cast spellings at the calls, copies of x and y before the found call: all still share the work.
+- A 'found' flag with break instead of goto: loop body right, but 8 bytes too long from leftover flag tests.
+- Calling the found case inside the loop: fixes the y-loop test but brings back the extra loop variable (4 bytes too long).
+- Other compiler profiles (-O1, no force-addr, the older compiler): no match.
+
 ## Files
 
 - `sub_0805D888.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
+- `NOTES.md`: working notes
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -45,3 +66,9 @@ THE BARRIER IS MASKING A CORRECT LAYOUT (W80-E, all by compile_probe). Deleting 
 ### Wave 86
 
 WAVE 86 (W86-D, constant-twin axis): twin c_0805E440.c (three shared callees) supplies NO new construct -- it does the OPPOSITE of what this park needs: it calls sub_0804236C(x, y) and sub_0805D648(x, y, 10, 0, 0) from inside one loop with plain int counters and its header states the x<<16 in r8 IS strength_reduce's giv for the s16 conversion, i.e. it wants the CSE-merged givs this function must avoid. No probe spent. Configured, 508/508, 52.2%, unchanged.
+
+### Wave 91
+
+W91-B. Member form: the draft already uses struct Map members, so it is a NEGATIVE by construction. NEW, and it changes the park reason: the found block's conversions are merged by GCSE (PRE), not by CSE. Under a temporary -O2 -fno-gcse profile the barrier-free draft (work/sub_0805D888/w91-nogcse.c) is SIZE-EXACT at 64.76%, with no giv, the mask in sl and the ROM frame. The ONE residual is 2 bytes at the y-loop guard: the ROM compares bestY's slot (ldr r3,[sp,#8]) where the candidate compares y. The -da trace puts it in cse2's class-head choice (make_regs_eqv): y's REGNO_LAST_UID is the found block at the textual end, which is later than bestY's last use. cse1 forwards goto-site fx/fy copies, so they do not help. The inline found call fixes the guard but brings back the y<<16 giv (+4). Under the configured flags, a found flag (fnd=1; break; if (fnd) break;) removes the giv (first diff +0xa -> +0x33) but costs +8 in dead flag tests (w91-flag.c). The barrier draft stays the configured best. Settle -fno-gcse together with sub_0805D438.
+
+</details>

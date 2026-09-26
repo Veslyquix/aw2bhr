@@ -2,16 +2,38 @@
 
 0x0802F03C, 512 bytes, THUMB, parked.
 
-Best score so far: 93.2%.
+Best score so far: not measured.
+
+## What it does
+
+Resets the link-cable communication state. It clears the counters and flags in the link record gUnknown_0849B018, sets the per-player tables in gUnknown_0849B01C to 0xFFFF, zeroes several 4- and 128-entry tables, clears the 48 packet buffers (0x88 bytes each), and empties the send ring (512 entries) and the four players' receive rings (1024 entries each) along with their cursors.
+
+## How close it is
+
+Compiles to the right size (512 bytes); 35 bytes differ (93.2% identical). No instruction is missing, extra or out of order: the two loop counters i and j sit in each other's registers throughout, plus a few temporary-register choices that follow from that.
+
+## What is left
+
+Make the compiler give i and j the opposite registers. Its choice is a tie between the two counters and no known source change breaks it, so this needs a new idea rather than more rewording.
+
+## Already tried
+
+- Changing the declaration order, scope and which loops share a counter: the swap stays.
+- Making either counter unsigned: the counting-down loops change shape and the function shrinks to 324 bytes.
+- A separate counter just for the 16-buffer loop: that loop and the one before it both change form and the function grows to 516 bytes.
+- Pinning the counters to fixed registers: adds entry checks and is worse.
+- Chained permuter runs: improved 46 to 35 differing bytes, then stalled. The odd `new_var`, `new_var2` and empty do/while in the draft come from these runs.
+- Every other compiler setting: wrong size (496 to 516 bytes).
 
 ## Files
 
 - `sub_0802F03C.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -39,3 +61,5 @@ All ten loops and total size match; Wave 74 reproduced the strongest valid candi
 ### Why it is parked
 
 Wave 74 W74-C, re-confirmed wave 79 W79-E. Resume only with a new register-priority lever. Classified NO-CONSTRUCT: allocno tie plus reload scratch picks. Do not give this function a spelling budget again until such a lever exists.
+
+</details>

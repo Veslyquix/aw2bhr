@@ -2,16 +2,40 @@
 
 0x0808AAF4, 152 bytes, THUMB, parked.
 
-Best score so far: 92.8%.
+Best score so far: not measured.
+
+## What it does
+
+Reads the save flash chip's ID. It sends the flash chip's enter-ID-mode command sequence, waits, reads the device and maker codes through a tiny read routine it copied onto the stack, sends the exit sequence, waits again, and returns (device << 8) | maker.
+
+## How close it is
+
+Measured with the settings its flash-code neighbours use (-O1, force-addr off; no override entry yet): 148 bytes against 152 (4 short), 28% of bytes match; the score means little because the gap starts in the first delay loop and shifts everything after it. The whole difference is one register copy per delay loop: the original loads 20000 into one register and copies it into the loop's register.
+
+## What is left
+
+No source spelling reaches that copy: with the constant used once the compiler drops the copy, and with it used twice it keeps the constant in an extra saved register across the calls; the original is neither. This needs a reading of how the compiler treats a single-use constant (per-pass debug dumps), not more spellings, and once it matches the function needs the flash block's -O1 override.
+
+## Already tried
+
+- Default -O2 settings: right size, but the address of the delay counter is kept across both calls in an extra saved register (59.9%); -O1 removes that.
+- Starting the delay with `i = 20000; goto test;`: a separate first store, 4 bytes longer; a goto into the body so one store does both is kept.
+- A separate counter variable for each delay loop: two stack slots, 4 bytes longer.
+- Passing the constant through an extra variable (int or u16, either role, with a dead extra assignment or a dead copy): the copy disappears.
+- One constant variable shared by both loops: the copies appear, but it takes an extra saved register.
+- Storing 20000 through the pointer and reading it back: the copy appears but costs an extra store and load per loop.
+- `do { } while (0)` between the two loops: no change.
+- A plain static delay helper: not inlined; the caller then saves more registers.
 
 ## Files
 
 - `sub_0808AAF4.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -44,3 +68,5 @@ THIS IS SELF-RELOCATING CODE: it calls sub_0808AD6C, which copies four bytes of 
 ### Wave 88
 
 WAVE 88 (W88-A then W88-D): the park's central claim is REFUTED -- this is NOT the flash block's -O2 exception. The 'gets +8 longer at -O1' note was measured on a draft whose `u16 v` was itself the +8. Under `o1-no-force` (the profile ALL sixteen matched flash entries actually use: -O1 with -fforce-addr removed) the residual is ONE register-copy of the delay constant per loop, everything else byte-identical; W88-D measured 148 B (-4) / 28.3% under o1-no-force. Mechanism settled: nothing is coalesced -- `update_equiv_regs` DELETES a single-use constant pseudo's defining insn, so agbcc has exactly two states (one use: def deleted, no copy, push {r4,r5,lr}; two uses: copies survive but the pseudo crosses the calls, takes r6, pool load hoists to one) and the ROM is neither. Nine spellings measured; the `do { } while (0)` lever was an exact no-op (not a regression); dead second def, dead copy-out and role-swap are exact no-ops (confirms the W80-F bound). Evidence: work/sub_0808AAF4/W88-notes.md.
+
+</details>

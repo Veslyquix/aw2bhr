@@ -4,15 +4,38 @@
 
 Best score so far: 85.2% (best.c).
 
+## What it does
+
+Decides the weather for the next turn and returns it. It starts from gPlaySt.weather: if that is 0 (any other value is treated as 0) and the random-weather mode is 1, it rolls a percentage chance for weather 1 and then for weather 2 (sub_080129F8, with chances from gUnknown_03004490); if it is 1 or 2, it may switch back to the map's defaultWeather when sub_08035080 says so, depending on the random-weather mode.
+
+## How close it is
+
+Reports 128 of 128 bytes, but only because of alignment padding at the end: the code itself is 4 bytes short (one register copy near the start and one instruction at the end). 50.8% identical. The 85.2% that trymatch prints belongs to best.c, a different draft that reads an uninitialised pointer and must never be promoted.
+
+## What is left
+
+Across the call to sub_08035080 the original keeps the address of a compiler-made address word in a saved register and reloads through it afterwards; ours keeps the finished field address instead. That word has no name in C, so this is believed unreachable from source. The current draft carries no inline helper, so the permuter can run on it; no run on this exact draft is recorded.
+
+## Already tried
+
+- About twenty ways of writing the reads (plain or volatile at each site, reshaping the case 1/2 test, reading into locals or pointer locals, a pointer to the struct everywhere): the field address is still kept across the call.
+- A static inline helper to re-read the field: identical output.
+- Making the field offset volatile so the address cannot be reused: the compiler then keeps the struct's base address instead, still not the original's choice. The reuse was never the real problem.
+- Width casts to break the reuse: folded away, no effect.
+- Permuter, 19,333 attempts from best.c: no match (best 83.6%), and best.c is itself invalid.
+- Declaring the address word as a real pointer global: adds a third load.
+- Matching the callee sub_08035080 first: this function did not change at all.
+
 ## Files
 
 - `sub_08035170.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -55,3 +78,5 @@ WAVE 89 (W89-C then W89-H): *** CLASSIFIED FINAL -- DO NOT PRE-REGISTER ANOTHER 
 ### Wave 89 permuter blocked
 
 WAVE89 PERMUTER-BLOCKED: this draft currently carries a wave-88-style `static inline` helper written with `__inline__`/`__typeof__`, which PYCPARSER REJECTS -- permute.py reports 'could not score the starting point', which is a SYNTAX ERROR, not a result. So no permuter run on the CURRENT draft has ever actually executed, and any permuter negative recorded against a draft carrying the helper is void. `static inline` plus the explicit struct tag is BYTE-IDENTICAL and parses (W89-F, measured). Re-spell before recording any permuter verdict here.
+
+</details>

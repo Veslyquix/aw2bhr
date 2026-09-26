@@ -2,16 +2,40 @@
 
 0x080726E8, 216 bytes, THUMB, parked.
 
-Best score so far: 56.9% (preprocessed form, not included).
+Best score so far: not measured.
+
+## What it does
+
+Copies a w-by-h block of tilemap entries into a 32-wide BG tilemap at (x, y), adding `base` to each entry and clipping to the 32x32 map. When `flip` is set it mirrors the block left to right and toggles each entry's horizontal-flip bit.
+
+## How close it is
+
+Compiles 12 bytes too long (228 against 216), 18.5% of bytes match; the score means little because the extra code starts near the top (a bigger stack frame) and shifts everything after it. Everything outside the flipped loop is right, including the unflipped loop.
+
+## What is left
+
+In the flipped loop the compiler turns both the source and the destination address into pointers that step each iteration (two extra stack slots, and x loses its register), where the original recomputes both addresses every time. The untried idea is to keep one more value live inside that inner loop so the compiler declines to do this, as the matched sub_0806B120 did by turning two stores into bitfield stores.
+
+## Already tried
+
+- Four other spellings of the source index: all compile the same way.
+- The destination as one folded index: wrong for both loops; separate row and column terms are kept.
+- Reusing the src parameter instead of the local copy p: the local is right, it puts the load where the original has it.
+- `int flip` instead of `u8 flip`: u8 is right.
+- One loop nest with the flip test inside: the original has two nests.
+- Writing `w - (ix + 1)` explicitly: still makes both stepping pointers and also moves x out of its register; worse.
+- Keeping extra pointers live across the two halves: no change, or a bigger stack frame.
+- Automatic permuter, 300 seconds x 4 threads: no match (the 57% best.c it left is unreadable output, not this draft).
 
 ## Files
 
 - `sub_080726E8.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -45,3 +69,5 @@ Everything else is byte-exact and must be kept: the UNFLIPPED arm (which the ROM
 ### Notes
 
 Wave 73 (W73-C). The open lever is register PRESSURE, not spelling -- the ROM's flipped arm reads like a loop strength_reduce declined to reduce because too much was already live. Wave 72 ruled out the cross-arm form of that; what remains untried is pressure INSIDE the flipped inner loop itself. Compare sub_0806B120, matched in wave 73, where switching two stores to bitfields added exactly one live constant and that alone stopped strength_reduce from making an element address a pointer giv -- the same mechanism, in the direction this function needs.
+
+</details>

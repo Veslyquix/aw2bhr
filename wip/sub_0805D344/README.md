@@ -2,16 +2,36 @@
 
 0x0805D344, 244 bytes, THUMB, parked.
 
-Best score so far: 16.4%, -8 bytes.
+Best score so far: not measured.
+
+## What it does
+
+Sorts the zero-terminated list of unit ids in gUnknown_030045F0 that the list builders just filled. For each unit it stores a key, GetUnitMovementWithCoBonus(player gUnknown_030033EC, the unit's type), in gUnknown_030046E0, then bubble-sorts the two arrays together by that key: largest first when the argument is 0, smallest first otherwise.
+
+## How close it is
+
+Compiles 8 bytes short of 244; 16.4% of bytes are in place, low only because the shortfall starts near the top. The only difference is where the list length n lives: the ROM keeps it in a high register and pays four extra 2-byte moves to use it, the draft keeps it in a low register.
+
+## What is left
+
+Get n into a high register with every instruction around it unchanged. The recorded next step is a chain of permuter runs starting from best.c (currently the same as the draft); do not write the id list as a walking pointer, because in the ROM that pointer is one the compiler made itself.
+
+## Already tried
+
+- Reading the unit table pointer gUnknown_08499594 plainly, through a pointer cast, or as `(&g)[0]`: its address is reloaded on every pass. Only a volatile-qualified read makes the compiler load it once before the loop as the ROM does (kept).
+- Binding the unit id to a local in the fill loop: moves one load to where the ROM has it but is worse overall (13.1%).
+- Passing the second call argument inline instead of through a local: the loop body is one instruction longer (the local is kept).
+- One 8-minute permuter run from the current draft: its best candidate scored 16.0%, worse than the draft.
 
 ## Files
 
 - `sub_0805D344.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -34,3 +54,5 @@ Everything from 'if (n > 1)' onward is byte-exact -- both loop guards, the stack
 ### Wave 87
 
 WAVE 87 (W87-A): 13.5% -> 16.4%, still 236/244 (-8), draft REPLACED (wave-57 draft in w87-start.c). The pre-registered giv-asymmetry probe was MOOT: the wave-57 draft ALREADY reproduces the ROM's split (pointer giv `add r4,#1` for gUnknown_030045F0, gUnknown_030046E0 rematerialised from the pool each iteration) and nobody had checked. Park claim REFUTED: the &gUnknown_08499594 hoist and n's register are TWO facts -- the hoist is now in the ROM's preheader position with n still in r5. What moved it: a VOLATILE-qualified read of the pointer global, `(*(struct Unk08499594 *volatile *)&g)[k].unk00` -- a non-volatile read of a pointer global leaves the address folded into the load (re-emitted every iteration, no invariant pseudo for LICM); a volatile read force_regs the address into its own pseudo, which LICM hoists (`ldr r5,=g` preheader, `ldr r1,[r5]` body, the ROM's form). Taking the address is not the lever; the qualifier is (doc chapter). Also required: bind the second call argument to a local before the call (`u8 x = ...; f(g, x)`) -- without it agbcc emits arg1 first and the body is 11 insns vs the ROM's 10. Header deliberately NOT retyped (20+ promoted users; the local cast gives the same code). Remaining -8 is ENTIRELY n's register (ROM r8, candidate r5): four 2-byte items. PERMUTER, first ever run here: `tools/permute.py --seconds 480 -j 4 --current` from the 16.4% draft ran to completion (exit 0) -- one candidate at permuter score 1400 re-checks at 16.0% (worse); a genuine negative for THIS draft, single run from one base (weak; wave 83 needed a chain of three). Next: chained runs from best.c; do NOT author the pointer walk (W59-E: a giv).
+
+</details>

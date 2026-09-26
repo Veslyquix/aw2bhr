@@ -1744,6 +1744,241 @@ offset first.
 
 ---
 
+## A RELOAD register is chosen ROUND-ROBIN in insn order — two arms trading r0/r1 on spilled locals is an ORDER readout (wave 90, W90-B)
+
+**Where a spilled pseudo (a local living in a stack slot) is tested or copied,
+the register it is loaded into is chosen by reload, and reload hands out its
+spill registers round-robin in insn order** (`last_spill_reg` in reload1.c).
+With a spill set of {r0, r1}, consecutive reloads alternate r0, r1, r0, r1
+across the whole function. The register a test gets therefore says nothing
+about the test itself — it says how many reloads came before it.
+
+`sub_08037FD0` (parked four waves as "which predecessor keeps the coalesced
+load", retired as having no source handle) matched on this. Its tail tests
+spilled `a`, `d`, `c`: the ROM gives them r1, r1, r0, and every draft gave r1,
+r0, r1 — pure alternation in layout order. The ROM's registers are pure
+alternation in the order a, **c**, d. So reload saw the c-arm first, and a
+later pass moved the d-arm up.
+
+**That later pass is jump2's "if (foo) bar; else break;" range swap** (jump.c,
+runs after reload too). Shape it needs: `condjump L1; range1 (no labels); jump
+L2; L1: range2; jump elsewhere; barrier; L2:`. It inverts the condjump and puts
+range2 first. The source that gets there writes the c-arm first **with its own
+fail call in each arm**:
+
+    if (a != 0) { if (c != 0) { call(c); return; } fail(); return; }
+    else        { if (d != 0) { call(d); return; } fail(); return; }
+
+After cross-jumping merges the calls, the c-arm is `bne CALL; b FAIL` and FAIL
+is the label right after the d-arm, so the swap applies. With ONE shared fail
+call after the `if`/`else` (W79's "inverted arms" probe, 96.4%), the c-arm
+simplifies to `beq FAIL; b CALL`, the shape test fails, and you get the ROM's
+registers in the wrong layout.
+
+**How to read it:** if two blocks trade r0/r1 (or any pair) on `ldr rN,[sp,#k]`
+reloads and everything else matches, count the reloads in layout order. If the
+ROM's registers are pure alternation in some OTHER order of the blocks, that
+other order is the source order, and something after reload moved a block.
+Round-robin also means one extra or one missing reload ANYWHERE earlier flips
+every later choice, which is why these parks looked immune to local edits.
+
+**How to see it:** compile with `-dg` and read the `.greg` dump. `Spilling for
+insn N. Spilling reg R.` lists the spill set, and the post-reload RTL shows
+each reload insn (numbered above the function's own insns) and its register.
+`python tools/rtldump.py <fn> --flags=-dg` writes the dumps to
+`work/<fn>/rtl/` with the same cpp/cc1 command line trymatch uses.
+
+---
+
+## `g.arr[i]` is NOT `q = (u8 *)&g; q += 4; q[i]` -- and a wrong register can come from a DIFFERENT ARM (wave 90, W90-B)
+
+Two parks closed on the same one-line respelling: `sub_08086A58` (97.6%) and
+`sub_080860DC` (98.8%) both read `gUnknown_02027F74`'s byte list through a
+pointer local bumped by 4. Both match when it is read as the member
+`gUnknown_02027F74.unk04[i]`, which is how the matched sibling
+`c_08086BF8.c` already spelled it. Earlier drafts had recorded "the pointer
+must be bumped by 4 in a statement of its own" as settled. That was measured
+against other pointer forms only, never against the member.
+
+The two failures looked different:
+- In `sub_08086A58` it was loop-preheader ORDER (the `ldr` of the base came
+  after the giv's zero init). The three wrong scratch registers were reloads
+  and followed the order (see the round-robin section above).
+- In `sub_080860DC` the wrong registers were in two clamp windows that never
+  touch the pointer. `rtldump.py --flags="-dl -dg"` showed why: in the .greg
+  conflict listing, the clamp's `unk37` pseudo had `preferences: 4`. global.c's
+  `expand_preferences` shares preferences between a set's destination and a
+  source register that dies in it. That chains `unk37` <- `&unk37` <- the
+  loaded base <- gcse's function-wide pseudo for the `.LC` word of
+  &gUnknown_02027F74, which the A-button arm's `q` also loaded from. Removing
+  `q` broke the chain.
+
+**Rule:** when a register is wrong and the window itself has no handle, read
+`;; N preferences:` for the pseudo in the .greg dump and follow the chain
+back. The fix can be in another arm of the function. Grep matched siblings for
+the member spelling before trusting any "pointer must be" note.
+
+---
+
+## A store block AFTER the loop's bottom test is a `goto found` label, and two inline `return`s cost a hoist elsewhere (wave 91, W91-B)
+
+`sub_0805FC1C` was parked for thirteen waves as "the single-use
+gUnknown_085D5AD0 base is not LICM-hoisted by the tested bindings". The hoist
+was a symptom. Its ROM puts the "found" store block (`strh x,[a2]; strh
+y,[a2,#2]`) after the loop's bottom test, falling into the epilogue, and BOTH
+switch arms `beq` to it. That layout is `goto found;` in each arm with
+`return; found: ...` after the loop. Writing a store-and-`return` in each arm
+kept rec->x in two registers (r6 and r9), pushed the counter out of r7, and
+left no register for the invariant base, so LICM never hoisted it: +8 bytes,
+42.4%. The goto alone gave 97.9% size-exact. **Read the placement of the
+early-exit block first. If it is after the loop, write a label there.**
+
+The last 7 bytes were the wave-90 member lever on a pointer to a blob rather
+than on a global: `e = tbl + 0x1a; if (e[t] == 0)` against
+`((struct T *)tbl)->unk1a[t]`. The pointer local swapped r0/r1 across the
+`ldrb; movs #31; ands; adds` of the index. `tbl[t + 0x1a]` and
+`(tbl + 0x1a)[t]` are not the same code as the member: both are -4 bytes. So
+the member lever also applies when the base is a loaded pointer, not only a
+global.
+
+## The `.rodata` force-addr word is made by GCSE's PRE, and `-O2 -fno-gcse` matches sub_0805D438 exactly (wave 91, W91-B, PROVISIONAL)
+
+Read off `-da` dumps of sub_0805A9AC and sub_0805D438. At expand, EVERY
+global access goes through the constant pool: `(set P (symbol_ref .LCn))`
+then `(set Q (mem/u P))` with `REG_EQUAL (symbol_ref g)`. When P has one use,
+the pair becomes a plain `ldr rQ, =g` later on. The `.LCn` word survives
+into `.rodata` only when P has MORE than one use. What gives P several uses
+is gcse's PRE: it treats `(symbol_ref .LCn)` as an ordinary expression and
+unifies every occurrence into one new pseudo. The dumps show it directly: the
+`.LC` count per pass drops through cse and rises again in `.gcse`, where new
+`(set (reg N) (symbol_ref .LCn))` insns appear (A9AC insn 987 after the
+n-loop init; D438 insns 741-746). The later sites become `(set R (reg N))`
+copies. This explains the older rules:
+
+- "a loop containing a call": PRE hoists the partially redundant `.LC`
+  load into the preheader, and the call makes the pseudo live in a
+  callee-saved register.
+- "LICM hoisting cancels the word": the same unification, seen from loop.c.
+- "reference count across a MERGE": PRE also unifies a fully redundant
+  occurrence after a join. sub_0805D438 has no loop, but its top-of-function
+  `gUnknown_030046B0` / `030040D8` / `030046C0` accesses dominate the
+  post-call accesses. PRE unified them and left three `.rodata` words. The
+  ROM has none.
+
+**sub_0805D438 matches byte-for-byte with `-O2 -fno-gcse`**, with and without
+`-fforce-addr` (without gcse no `.LC` word survives, so force-addr has no
+effect). This was measured through a temporary profile added from
+`w91b_tm.py` in the W91-B scratchpad; `tools/agbenv.py` was not edited. The
+source is `work/sub_0805D438/sub_0805D438.c`: struct Map members for the map
+store, and `(u8 *)gUnknown_085766E0 + (type * 12 + 4)`. **Do not record an
+override on this alone.** Its neighbours sub_0805D5EC and sub_0805D648 FAIL
+under `-fno-gcse` (-4 and -8 bytes), and so do sub_0805D1F0 / D2A0 / CF0C /
+D078 / D134 / E160 / E2AC. sub_0805D338, sub_0805DA84 and sub_0805DB0C match
+both ways. A flag on the translation unit therefore needs a unit boundary
+between D438 and D5EC. The other explanation is a source construct that stops
+gcse for one function, and none is known. sub_0805D888 points the same way:
+without its asm barrier it is +36 / 33.1% configured, but size-exact and
+64.8% under `-fno-gcse`, with ONE 2-byte residual (the y-loop guard; see
+work/sub_0805D888/NOTES.md). **`--profile o1` is NOT this test**, because it
+changes ten flags. Test with `-fno-gcse` alone.
+
+## Six parks closed by W90-C, and what each one teaches (wave 90)
+
+W90-C matched sub_080283E4, sub_08020EDC, sub_0803D558, sub_080620FC,
+sub_08066874 and sub_08062C94, all parked for 5 to 20 waves. The
+struct-member respelling from the W90-B section above moved the first four.
+It did not finish any of them, and the last two did not need it.
+
+**1. A loop-invariant constant can be hoisted by the SECOND loop pass.**
+agbcc runs `loop_optimize` twice (`flag_rerun_loop_opt`), and the second
+run sees a smaller loop, because the first run has already hoisted insns
+out of it. `move_movables` moves an insn only if
+`threshold * savings * lifetime >= insn_count`. Here `threshold` is 26 on
+entry, drops by 3 after each move, and a one-use constant has savings 1 and
+lifetime 1. So a constant used once hoists out of a loop of 26 insns or
+fewer, but only when it is the first movable in that loop. sub_0803D558's
+`0x417A` was "not desirable" in pass 1 (29 insns) and was moved in pass 2
+(24 insns). To see this, run `python tools/rtldump.py <fn> --flags=-dL
+--src work/<fn>/<file>.c`. The dump has one block per loop per pass, and
+each block lists the insn count and a moved or "not desirable" line for
+each movable. **Pass `--src` as a repo-relative path.** With a path outside
+the repo, `in.i` comes out empty and every dump is 0 bytes, with no error
+message. The lever is to add insns to the loop that exist at loop time and
+are gone by the final code. In sub_0803D558, narrowing the value through
+two u8 temps (`cnt = v & 0x1f; v = cnt + b[v >> 5];`) took the loop from
+24 to 28 insns and the output was otherwise unchanged. The last register
+tie, the ROM's order for &G and y+1, then fell to the permuter's
+`do { } while (0)` around the inner loop. The extra loop depth raises the
+weighted ref count of &G, so global.c allocates it first.
+
+**2. A flat byte subscript and a struct chain order the offset terms
+differently.** `&buf[n * 8 + a * 0x3e0 + g * 0xc00]` computes the `g` term
+first. `->blk[g].rec[a][n]` builds its offset in `get_inner_reference`,
+innermost index first: `(n * 8 + a * 0x3e0) + g * 0xc00`. sub_080620FC's ROM
+has the second order. The first index must be a real ARRAY_REF, and
+c-typeck's `build_array_ref` turns a subscript on an INDIRECT_REF
+(`(*(T (*)[])p)[g]`) into pointer arithmetic. So wrap the array in a
+struct: `((struct Buf *)gUnknown_02029ED8)->blk[g]`. The pointer field at
++4 of the same chain then takes the pool word `gUnknown_02029ED8 + 0x64`,
+which is the symbol the splitter named `gUnknown_02029F3C`.
+
+**3. A narrowing in the prologue is a narrow formal. A narrowing at a copy
+statement is an `int` formal.** sub_08020EDC's 6th parameter was declared
+`u8` because the matched caller narrows the value it passes. A `u8` formal
+is narrowed by PROMOTE_MODE before any statement runs, and that put one
+`lsls` a slot ahead of the ROM's order. The ROM narrows the parameter at
+`f = flags;`, after `d = delta;`, so the formal is `int`. The caller keeps
+its `lsls #0x18; lsrs #0x18` when it passes `(u8)a6` explicitly, because
+that builds the same tree the old prototype built. **A narrowing at a call
+site therefore does not show the callee's formal type.** A cast at the call
+site produces it too. Re-verify the caller by exit code when you change a
+prototype.
+
+**4. The operand order of a `+=` can come from the addend's type.** In
+sub_08020EDC, `buf[k] += d` gave `adds rX, d, v` with `u8 d` and gave the
+ROM's `adds rX, v, d` with `s8 d`. The stored low byte is the same either
+way.
+
+**5. Read string literals from `baserom.gba` byte by byte.** sub_080283E4
+was parked at 90.7% partly because "R: SAKUTEKI  ON" and "R: SAKUTEKI  OFF"
+each contain two spaces. The 17-byte OFF string pads to 20 bytes, and that
+was the "unexplained zero word of padding" in `.rodata` that three waves
+had recorded.
+
+**6. A value that the ROM re-derives after a call means that code starts a
+new CSE block, and that point needs a label with uses.** agbcc's `-fforce-addr`
+address of a global is a load from its `.rodata` word, `(mem/u (reg .LC))`.
+cse.c's `invalidate_memory` does not remove unchanging MEMs at a call. Inside
+one extended basic block, CSE therefore reuses the address across a `bl`, and
+the pseudo has to take a callee-saved register. The ROM re-derives it at every
+CODE_LABEL (`mov rN, r8; ldr rN, [rN]`, with r8 holding the `.LC` word's
+address for the whole function). In sub_08066874 the arm after
+`bl sub_0806377C` re-derives &gUnknown_08580934 in the ROM, so in the original
+the arm began at a label. The same arm written out twice is fall-through code
+in the dispatch block's EBB, so CSE carried the address in r5, and 93.9% was a
++2/+2/-4 cancellation. The match writes the arm ONCE, after a label that two
+gotos reach. The ROM's `bne F; b ARM; <loop break block>; F:` layout needs
+the jumps spelled out: `if (x != 1) goto call; goto arm;`, with the loop's
+`cnt = 0` break block placed in the source between that `goto arm` and the
+`call:` label. jump1 turns `bne L1; b L2; L1:` into `beq L2` only when L1
+directly follows. In the ROM, loop.c's exit-block move put the break block
+between them. Written in the source, it is there before jump1 runs.
+
+**7. A register tie can be moved by which variable counts a loop.** global.c
+ranks allocnos by `floor_log2(refs) * refs / live_length`. A fresh counter
+for a short inner loop has few refs over a short range, so in sub_08062C94
+the table address and the loc giv (priority 1.1) outranked the inner loop's
+counter (0.66) and took r5 ahead of it. Counting that loop with `t`, a
+variable that is dead there but used elsewhere, gives the counter a longer
+and busier range, and it takes r5 as in the ROM. The same function's first
+loop needed the ROM's giv order (table address, then loc) with the table
+store still first in the body. `expand_assignment` expands the offset of an
+ARRAY_REF target before the right-hand side, so the one statement
+`loc[u] = (TAB->v[u] = 0, 0);` records the loc giv first and emits the
+table store first. The comma's `0` matters: the value of a volatile
+assignment is read back, and the chained form `loc[u] = TAB->v[u] = 0`
+regressed in wave 79 for that reason.
+
 ## A word READ-MODIFY-WRITE to a stack slot is a 4-BYTE STRUCT, not a bitfield (wave 48, W48-B)
 
 `ldr rT,[sp,#N] / and rT,#0xFFFF0000 / orr rT,#K / str rT,[sp,#N]` storing a
@@ -7080,6 +7315,19 @@ Workaround, measured and it works:
 
 Worth fixing properly in the permuter's fake headers, because the workaround is
 three steps and step 2 is easy to miss.
+
+### `--stack-diffs` closed a pure spill-slot swap on its first run (wave 90, W90-B)
+
+`sub_080627F4` (752 B) was size-exact at 99.2% for eight waves. Its whole
+residual was two compiler temps trading stack slots. Every earlier permuter
+run normalised stack offsets away, so a fix scored as a TIE and could never
+win. The first run with the fixed scorer (`--stack-diffs`, PENALTY_REGALLOC
+60, 4 threads, from the port) went 168 -> 160 -> 120 -> match in about 8,500
+iterations. Rebuilt as plain C, the match is two declaration edits: `int u;`
+moved above `int t;`, and `c` declared `s16`. Each alone is 8 or 6 bytes off.
+Two waves of hand work had gone into the gcse-pre insn count, which moves the
+slots but never to the ROM's order. **For a slot-only residual, run the
+permuter before anything else.**
 
 ### Read a losing permuter run for its diff, not its verdict
 
@@ -53452,6 +53700,177 @@ Two traps from the cleanup pass:
   signed int gap.
 - `next = cur; best = next;` in the scan is still load-bearing. Plain
   `best = cur;` is -4.
+
+
+## RTL dumps name the pass that owns a residual; the fixed-objective permuter on six allocation parks (wave 90, W90-A)
+
+### 1. agbcc writes gcc 2.95's RTL dumps -- use them before spending a probe
+
+`tools/agbcc/bin/agbcc` accepts the `-d` flags. Preprocess exactly as
+`work/<fn>/permuter/compile.sh` does, into a FILE (the dump names derive from
+the input name), then compile in a scratch directory:
+
+    arm-none-eabi-cpp -I tools/agbcc/include -iquote include -iquote . -nostdinc -undef work/<fn>/<fn>.c | iconv -f UTF-8 -t CP932 > x.i
+    tools/agbcc/bin/agbcc x.i -mthumb-interwork -fhex-asm -fforce-addr -fprologue-bugfix -O2 -dr -dG -dL -dc -dl -dg -o x.s
+
+(run inside WSL; from Git Bash prefix `MSYS_NO_PATHCONV=1 wsl bash ...`).
+You get `x.i.rtl` (expand), `x.i.gcse`, `x.i.loop`, `x.i.combine`,
+`x.i.lreg`, `x.i.greg`. What each one settled this wave:
+
+- **`.loop`** logs BOTH loop passes (`flag_rerun_loop_opt` is on at -O2):
+  every LICM move (`moved to`, `not desirable`), every biv/giv, `giv ...
+  reduced to`, `not worth while`, and `Can reverse loop`. On sub_0807E980 it
+  showed that **check_dbra_loop reverses the counter in the SECOND pass, and
+  runs BEFORE that pass's own giv reduction**. So a preheader reads, in
+  emission order: source inits, GCSE/PRE insertions, pass-1 LICM hoists,
+  pass-1 giv inits, the pass-2 rewritten counter init (`movs rN,#7`), then any
+  pass-2 giv inits. A value initialised AFTER the counter must be a giv first
+  reduced in pass 2 -- that is a reading rule, and it is how the remaining
+  sub_0807E980 residual was pinned.
+- **`.gcse`** showed that the `i + 1` / `i << 8` pair at the top of that outer
+  loop body are PRE insertions (they exist in the gcse dump, created before any
+  loop pass), placed at the END of the block before the inner loop -- after
+  every source statement in that block. So "a compiler value sits before my
+  source statement" means the statement is not in that block.
+- **`.combine`** showed on sub_0804E7A8 that combine never merges an argument
+  computation into its hard-register copy there (the three `(set (reg r0..r2)
+  (reg N))` copies survive; local-alloc ties them instead) -- which retired
+  the "load_register_parameters defers the asr" explanation in the W79 park.
+- **`.greg`** prints `Register N, refs = R, live_length = L` for every allocno
+  in sorted order and the final dispositions. See 2.
+- **`.greg` also prints `Spilling for insn N. Spilling reg K.`** -- on
+  sub_08031824 the three "bare local_alloc scratch picks" W88/W89 recorded are
+  RELOAD spill registers (a hi-reg pseudo needing a lo register for one insn),
+  chosen by reload1.c's find_reg: lowest spill cost, ties broken by
+  REG_ALLOC_ORDER (r0 first). The ROM's r1/r3 there mean a pseudo allocated to
+  r0 was live across those insns in the original.
+
+### 2. The allocno priority is a number you can compute -- and a do/while(0) is worth exactly one ref per level
+
+global.c sorts allocnos by `floor_log2(refs) * refs / live_length`, and the
+`.greg` dump gives both inputs. `refs` are LOOP-DEPTH WEIGHTED (a use at
+depth d counts d), and **a `do { } while (0)` counts as a loop level** when its
+NOTE_INSN_LOOP_BEG survives to flow. That is the whole mechanism behind the
+W73-A chapter's do/while lever, and it is quantitative: on sub_08056638 the
+swap block's do/while lifts `&gUnknown_0202980A` from 7 to 8 refs, which
+crosses the floor_log2 step at 8 (priority 14/80 -> 24/80) and beats
+`&gUnknown_02029822` (14/88). The ROM needs the opposite pair of numbers.
+
+A two-line script (scratch `prio.py`: parse the `Register N, refs, live_length`
+lines, compute the priority, join the dispositions) turns an allocation-tie
+park into arithmetic. For sub_08056638 all 1,024 combinations of wrapping each
+inner-loop statement in its own do/while(0) were compiled with `-dg` (about
+five minutes, three WSL processes): 320 of them put gUnknown_02029822 in sb as
+the ROM does, and every one of those also lifts `side * 0x6c` (it is referenced
+by the same statements) to or past the `j + 1` copy, which then loses ip. The
+statement-wrap lever cannot separate the two pseudos; the next lever has to.
+
+### 3. The permuter with the corrected objective, on six allocation-class parks
+
+All runs `--threads 4`, 900 s unless stated, PENALTY_REGALLOC 60 and
+`--stack-diffs` (verified in `vendor/decomp-permuter/src/scorer.py`).
+
+| function | base | runs | result |
+|---|---|---|---|
+| sub_0804E7A8 | 94.2% `s16 x, y` draft (NOT the park's preferred 91.2%) | 1 directed (LINESWAP decls + RANDOMIZE tail), 11,391 it | **MATCH**. Tidied and re-verified by exit code. |
+| sub_08054C5C | 92.5% | 1 undirected 11,558 it; 1 undirected chained 16,819 it; 1 directed (LINESWAP decls + RANDOMIZE setup loop) 13,564 it | 92.5 -> **93.4%** (`i = d[side ^ 1]` as an argument); the chained run's best permuter score (2300) was 69.3% by bytes |
+| sub_0807E980 | 99.0%, then the hand-found 99.4% | directed 9,242 it (old base); directed 14,347 it (99.4% base); undirected 13,173 it (99.4% base) | nothing; the 10 -> 6 byte gain came from reading the `.loop` dump |
+| sub_08031824 | 97.3% | undirected 11,049 it; directed (LINESWAP 14 decls, RANDOMIZE prologue + copy setup) 10,679 it | nothing (base 480 both) |
+| sub_08056638 | 95.8% | undirected 11,720 it; directed 10,674 it; exhaustive 1,024-way PERM_GENERAL do/while enumeration | nothing |
+| sub_08055940 | 96.4% | undirected 11,463 it; directed (PERM_GENERAL over the park's row spellings x block orders) 11,636 it; undirected from W87-E variant A (92.7%) 15,557 it | permuter score 680 -> 420, but EVERY improved candidate was WORSE by bytes (89.1-95.6%); run 3 lifted variant A to 95.97%, still below the draft |
+
+Findings, each measured above:
+
+- **On the two pure register residuals (sub_08031824, sub_08056638) the fixed
+  objective found nothing in 2 x 900 s each (~22k iterations apiece), undirected
+  or directed.** The old objective's blind spot was not why these parks
+  stalled. Wave 17's and W43-H's rule stands with the new scorer: when the
+  instruction stream is already the ROM's and only the register names differ,
+  budget the time elsewhere -- here, the dumps in 1 and 2 turned both into
+  specific, checkable statements about priorities and reload spill costs.
+- **The corrected score can disagree with the byte verdict in BOTH
+  directions.** sub_08055940 (preheader instruction ORDER residual): six
+  candidates with lower permuter scores, all with more differing bytes.
+  sub_08054C5C: a 2420 -> 2300 "gain" that is 69.3% by bytes. `permute.py`'s
+  verify phase already gates on bytes; read the `bytes:` lines, not the score.
+- **Directed vs undirected, same base and budget:** no difference on
+  sub_08031824 or sub_08056638 (both null). On sub_08055940 the directed run
+  moved the permuter score further (420 vs 640) and the bytes no better. On
+  sub_08054C5C the one real gain came from the UNDIRECTED run; the directed
+  run from the improved base found nothing. On sub_0807E980 two directed runs
+  and one undirected run were all null. The one match (sub_0804E7A8) came from
+  a directed run confined to the last 20% of the function; there was no
+  undirected control on that base, so it does not prove directed search
+  better. Across 13 runs this wave, directed search did not beat undirected. What PERM_GENERAL clearly IS good for is
+  exhaustive enumeration of a small named space (1,024 do/while placements in
+  ~10 minutes) -- it turns "we tried some" into "none of these".
+- **A permuter win's source can be tidied, but not its load-bearing parts.**
+  sub_0804E7A8's winner assigns `x`/`y` and then passes the same expressions
+  inline; the dead assignments are what makes cse hand the call the def-site
+  `lsl`. Its declaration shuffle and `new_var` copy were byte-neutral and
+  removed; removing either assignment drops back to 91.2%.
+
+### 4. Two givs of one biv step in init order; a walker plus a giv of the walker does not (sub_0807E980)
+
+The ROM's inner loop bottom advances the destination pointer before the
+source pointer. Written as two givs of the counter `j` (`&src[j * 0x400]`,
+`dst + j * 0x100`), loop.c emits the two increments in the order it made
+the givs, which is source first. Making the destination offset a source
+walker (`new_var`, stepped at the bottom of the body) and the source a giv of
+`j` reverses them: the walker's own increment is a source statement in the
+body, so it lands before the reduced giv's increment and `j++`. That took
+sub_0807E980 from 10 to 6 bytes. The remaining `movs r6, #7` is the section-1
+counter rule: the ROM's destination init comes after the reversed counter, so
+the original reduced it in loop pass 2, and no spelling measured (144
+variants) delays it that far.
+
+## The wave-15 `pp = &<force-addr word>` spelling was the lever, more than the member form (wave 91, W91-A)
+
+Wave 91 tested the wave-90 member-form lever as a pre-registered bet on five
+parks whose drafts dated from wave 15 or wave 38. Four of the five also named an
+agbcc force-addr `.rodata` word as though it were a global: `pp =
+&gUnknown_0816D948; u = *(struct Unit **)*pp;`, `(**pp)->hp` through
+`gUnknown_08091364`, `*gUnknown_080912FC` as the map pointer. Those drafts were
+written before wave 18 made the build able to PLACE a `.rodata` word, and the
+header notes recording "naming the word IS required" were measured against the
+raw byte-offset spelling. Measured this wave, keeping everything else fixed:
+
+| function | member form only | + the global named honestly |
+|---|---|---|
+| sub_08022618 | -4 -> size-exact, 13.8% | size-exact 29.0% (with the `id` readout below) |
+| sub_08058A2C | +8 -> size-exact, 81.9% | 87.0%, then MATCHED |
+| sub_0803E6C4 | byte-identical (-4) | size-exact 97.5%, then MATCHED |
+| sub_08042998 | byte-identical (-28) | -12, 33.5% |
+| sub_08020754 | byte-identical (already a local-struct member form) | n/a |
+
+So on this batch the member form moved two functions and the HONEST force-addr
+spelling moved three. **Any draft still spelling `pp = &gUnknown_08xxxxxx` /
+`**pp` / `*gUnknown_0809xxxx` for an address word is carrying a wave-15
+workaround: name the global the word holds, spell the access as a member, and
+let `trymatch` print the `"rodata"` entry.** The wrong-symbol relocation it then
+reports (`original gUnknown_0816D948  candidate .rodata`) is the placement
+note, not a residual.
+
+Three statement-level readouts from the same batch, each measured:
+
+- **`if ((id = m->unitUnk[off]) == 0 || ...)` is not `id = ...; if (id == 0
+  ...)` for an s16 `id`** (sub_08022618). The embedded assignment keeps the
+  def's `lsls r0,#16` shared by the store (`lsrs rV,r0,#16`) and the test
+  (`cmp r0,#0`), and the later u16 argument / s16 index re-narrow from the
+  variable (`lsls r6,rV,#16`) -- the ROM's shape. The separate statement lets
+  combine fold the def to the bare `ldrb` and CSE shares one `id << 16` between
+  the test and the call. Read `ldrb; lsls r0; lsrs rV,r0; cmp r0,#0` as an
+  assignment inside a condition.
+- **A narrowing `?:` copies its result at the join** (sub_08042998). With
+  `u8 n`, `n = c ? a + 1 + Div(...) : a;` narrows in EACH arm into a temporary
+  and then emits `adds r5,r0,#0` into n after the join; `if (c) n = ...; else
+  n = a;` writes n directly in both arms. A u8 value narrowed in both arms of a
+  diamond and then copied is a conditional expression.
+- **A parameter's entry copy can be moved after a later parameter's by one
+  assignment** (sub_0803E6C4). `col = a1;` as the first statement: combine
+  folds a1's assign_parms copy into it and emits it at the assignment, i.e.
+  after a3's copy. That is the ROM's `adds r3,r2,#0; mov sl,r0` order, which
+  had been parked as "no source distinction" for three waves.
 
 ## The W56-H loop-top residual is a `cmd` LOCAL: re-read `*p` instead (sub_0801DCD4)
 
