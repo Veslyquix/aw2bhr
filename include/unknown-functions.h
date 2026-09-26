@@ -4643,6 +4643,7 @@ void sub_080745C0(void);
  * ignores whatever sub_0801F024 hands it, so the `(void *)` cast at the call
  * site is the honest spelling and not a workaround. */
 void sub_08039188(void);
+void DrawMarkerSprites(void); /* sub_08039188; see src/decomp/c_08039188.c. */
 
 /* Walks the byte-stream script in r0 until it sees a 1, calling
  * sub_0801B7C0(cursor, arg) on each opcode and advancing by

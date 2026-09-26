@@ -13127,6 +13127,18 @@
   "size": 72
  },
  {
+  "file": "src/decomp/c_08039188.c",
+  "obj": "src/decomp/c_08039188.o",
+  "addr_hex": "0x08039188",
+  "functions": [
+   "sub_08039188"
+  ],
+  "size": 220,
+  "rodata": [
+   "0x08090F2C"
+  ]
+ },
+ {
   "file": "src/decomp/c_08039264.c",
   "obj": "src/decomp/c_08039264.o",
   "addr_hex": "0x08039264",

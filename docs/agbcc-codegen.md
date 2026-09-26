@@ -53717,3 +53717,14 @@ in the unk08 test.
 Together with the CompactMapArmies note above: the movable threshold works
 in both directions, and the lever is the loop's real-insn count at loop
 time. Add statements to stop a hoist, share tails to allow one.
+
+## Re-measure a park whose blocker was a callee's prototype (sub_08039188)
+
+sub_08039188 (now `DrawMarkerSprites`) was parked from wave 57 to wave 88 at
++4. The recorded blockers were a cross-TU conflict over sub_08039140's
+narrow first parameter and an `ldrsb` fold. Since then sub_08039140 was
+promoted as an old-style (K&R) definition, and the header declares it
+unprototyped, `u8 sub_08039140();`. The caller now passes its `x * 16` as a
+plain int. The published draft matches unchanged, and the `ldrsb` residual
+went with the narrowing. When a park names a callee's prototype, re-run the
+draft after that callee is promoted before reading its old notes.
