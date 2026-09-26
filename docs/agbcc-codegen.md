@@ -53728,3 +53728,27 @@ unprototyped, `u8 sub_08039140();`. The caller now passes its `x * 16` as a
 plain int. The published draft matches unchanged, and the `ldrsb` residual
 went with the narrowing. When a park names a callee's prototype, re-run the
 draft after that callee is promoted before reading its old notes.
+
+## Strict aliasing is on at -O2, and a "pointer global" pool word is still force-addr (sub_08010EF8)
+
+sub_08010EF8 (now `DrawNumberRightAligned`) was parked from wave 42 to wave
+79 as "an LICM hoist with no source lever". The ROM reads
+`ldr r6,=0x0808DF8C` before the loop, then `ldr r1,[r6]; ldrh r1,[r1]` in
+it. Ten declarations of a pointer global at 0x0808DF8C were tried, and every
+one hoisted the middle `ldr`. Two facts explain why:
+
+- agbcc's -O2 sets `flag_strict_aliasing` (toplev.c). Every pointer type gets
+  its own alias set (c-common.c `c_get_alias_set`). So a load of a `u16 *`
+  never conflicts with a `u16` store, and LICM hoists it whether or not it
+  is const. `-fno-strict-aliasing` keeps it in the loop. That is a probe to
+  explain a hoist, not a fix.
+- 0x0808DF8C holds 0x0300308C, the -fforce-addr word for
+  gUnknown_0300308C. The source is the honest `gUnknown_0300308C[0]`, and
+  the word appears because of the W49-M operand-order lever:
+  `value % 10 + gUnknown_0300308C[0]` gives the .rodata word re-read every
+  iteration, while `gUnknown_0300308C[0] + value % 10` gives one text-pool
+  word hoisted out of the loop.
+
+So when a parked draft declares a pointer global to reach a `.rodata` word,
+dereference the word in the ROM first. If it holds a RAM address, that word
+is force-addr, and the lever is operand order, not a declaration.

@@ -10826,6 +10826,10 @@ int sub_0800F8D4(int, int);
 int sub_0800FD44(int, int, int);
 int sub_08010604(int, int);
 int sub_08010B34(int, int);
+
+/* Right-aligned decimal number into a tilemap; see src/decomp/c_08010EF8.c. */
+void sub_08010EF8(u16 x, int unused, u16 value, u16 *dest);
+void DrawNumberRightAligned(u16 x, int unused, u16 value, u16 *dest); /* sub_08010EF8 */
 int sub_08010DD4(int, int);
 bool8 sub_0801659C(u8);
 void sub_080179AC(void);

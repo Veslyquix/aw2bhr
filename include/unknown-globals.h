@@ -18183,34 +18183,10 @@ extern const s16 gUnknown_08488986[];
  * linker script already places it (aw2bhr.lds: `. = 0x00308C;`).
  * 0x0808DF8C is the -fforce-addr word holding 0x0300308C, not an object: its
  * neighbours at +4 and +8 BOTH hold 0x03001408, and one word per
- * (function, symbol) pair is what marks the whole run as address constants. */
+ * (function, symbol) pair is what marks the whole run as address constants.
+ * sub_08010EF8 (DrawNumberRightAligned) reaches it through that word with the
+ * honest `value % 10 + gUnknown_0300308C[0]`; see src/decomp/c_08010EF8.c. */
 extern u16 gUnknown_0300308C[];
-/* ...and this is the c_local workaround for that word, needed by sub_08010EF8.
- * MEASURED, because the wave brief says to write the honest name first: the
- * honest `gUnknown_0300308C[0]` spelling reproduces sub_08010EF8 exactly except
- * that it is ONE INSTRUCTION short -- agbcc materialises the symbol with an
- * inline text pool word and reads `ldrh r1,[r6]`, where the ROM holds the
- * rodata word's address in r6 and reloads `ldr r1,[r6]; ldrh r1,[r1]` every
- * iteration. Four spellings were probed and none moves it: a `volatile` array,
- * a sized array, a variable index, and a plain pointer global (that one
- * overshoots to FOUR levels, the trap the wave-36 note warns about).
- * sub_08010F38 reads the same symbol at +0 and +2 and DOES take the honest
- * inline spelling -- it is matched -- so the two spellings coexist in one
- * original .c file and the choice is per (function, symbol), not per symbol.
- *
- * Wave 51 (W51-J) re-measured this and CORRECTS the sentence above about the
- * plain pointer global. "Any non-const spelling overshoots to four levels" was
- * generalised from SCALAR probes only, and it is false for the array form:
- * `extern u16 *gUnknown_0808DF8C[];` is non-const and still keeps the plain
- * inline pool word, so it is the closest shape anyone has produced -- three
- * levels, correct address handling, and only the LICM hoist wrong. It is where
- * the next attempt should start. What was also measured: const-ness and
- * volatile-ness do NOT decide the hoist. All four spellings hoist the pointer
- * load, so the lever is not this declaration at all -- see
- * work/sub_08010EF8/NOTES.md and the wave-51 W51-J chapter in
- * docs/agbcc-codegen.md. */
-extern u16 *const gUnknown_0808DF8C;
-
 /* Wave 43, W43-K -- blocks 0x0804A / 0x0804B.
  *
  * gUnknown_084C3D12 is a single ROM byte (0x20) read with a bare `ldrb` off a
