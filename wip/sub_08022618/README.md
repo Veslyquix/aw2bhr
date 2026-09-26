@@ -2,7 +2,7 @@
 
 0x08022618, 400 bytes, THUMB, parked.
 
-Best score so far: 51.2%, +20 bytes (best.c).
+Best score so far: 31.0% (best.c).
 
 ## What it does
 
@@ -10,7 +10,7 @@ Draws the 2 x 2 status icon for the unit on map tile (x, y) into a background ti
 
 ## How close it is
 
-Compiles to the right size (400 bytes) but only 29% of bytes match. The logic and the order of the code are right; the difference is register allocation: x and y should sit in r5/r4 and the two screen offsets in high registers, and the compiler swaps them.
+The current draft compiles to the original size (400 bytes), matching 29% of the bytes. The retained best.c is also size-exact and matches 31%; register allocation still differs.
 
 ## What is left
 

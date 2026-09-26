@@ -159,7 +159,7 @@
  * (The wrapper was fixed after wave 61.)
  *
  * Everything else is settled and should not be re-derived:
- *   - the parameter is a unit record with struct Unk08499594's layout; the
+ *   - the parameter is a unit record with struct Unit's layout; the
  *     bitfields are what produce the ROM's SImode `movs #8; negs; ands` mask.
  *     A hand-written `(p->unk09 & ~7) | K` narrows to `movs #0xf8; ands` and is
  *     one instruction shorter -- measured, so the field really is a bitfield.

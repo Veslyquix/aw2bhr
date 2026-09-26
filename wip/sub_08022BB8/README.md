@@ -2,7 +2,7 @@
 
 0x08022BB8, 540 bytes, THUMB, parked.
 
-Best score so far: 21.1%, -24 bytes.
+Best score so far: not measured.
 
 ## What it does
 

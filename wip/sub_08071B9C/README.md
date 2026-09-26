@@ -2,7 +2,7 @@
 
 0x08071B9C, 232 bytes, THUMB, parked.
 
-Best score so far: 19.4%, +8 bytes (best.c).
+Best score so far: not measured.
 
 ## What it does
 
@@ -28,7 +28,6 @@ In four of the six mask steps (red and green of each colour) the original loads 
 ## Files
 
 - `sub_08071B9C.c`: the current draft
-- `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
 ## Technical history

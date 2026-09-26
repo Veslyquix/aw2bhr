@@ -8791,36 +8791,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "summary": {
-    "does": "Writes a number into a tilemap buffer as decimal digits, right to left. It starts at `dest + x + 32` (one 32-entry row down, x cells across) and, for each digit, stores the digit plus the base tile of the digit glyphs (the first u16 of gUnknown_0300308C, reached through a pointer word at 0x0808DF8C), dividing by 10 until the number reaches 0. The second parameter is never read.",
-    "status": "Compiles to the right size (64 bytes); 13 bytes differ. All of the difference is where one load sits: the original re-reads the pointer to the digit base tile on every loop pass, while our build reads it once before the loop.",
-    "left": "Get the compiler to keep that pointer read inside the loop instead of moving it out (loop hoisting). Every way of declaring the global gives the same code, so this is thought to have no fix in the C source.",
-    "tried": [
-     "Using the plain name `gUnknown_0300308C[0]`: one instruction short, because the compiler loads the address directly instead of through the pointer word.",
-     "Ten declarations of the pointer word (const pointer, plain pointer, volatile pointer, pointer array, const pointer array, sized array and more): all move the read out of the loop, and the volatile and plain-pointer forms also add an extra load.",
-     "Copying the global into a local inside the loop, or indexing it with a variable (`g[value % 10]`): no change.",
-     "Blaming the two division calls or the store through `dest` for the reload: ruled out, because our build has both and the compiler still moves the read out."
-    ]
-   },
-   "bytes": 64,
-   "best": "79.7% identical, SIZE-EXACT, 13 differing bytes",
-   "remaining_diff": "One instruction's POSITION, across a loop boundary. The ROM keeps `ldr r6,<pool>` in the preheader and re-reads BOTH levels inside the loop (`ldr r1,[r6]; ldrh r1,[r1]`); every candidate hoists the middle `ldr` into the preheader and leaves only the `ldrh` in the body. Same instruction count, hence the exact size.",
-   "why_it_is_close": "The body is not in question -- prologue, the `dest + x + 0x20` start cell, both libgcc calls, the digit arithmetic, the u16 re-narrowing and the exit test are byte-exact, and wave 51 re-derived the same body independently from the assembly.",
-   "axes_ruled_out": [
-    "TEN declaration spellings across waves 42, 51 and 58: honest `gUnknown_0300308C[0]`; volatile array; sized array [2]; base bound to a local inside the loop; variable index `g[value % 10]`; `u16 *const` scalar; `u16 *`; `u16 *volatile`; `u16 *const volatile`; and (wave 58) `u16 *g[]` and `u16 *const g[]` measured side by side in one probe. The last two are byte-identical to each other AND to the scalar draft, which closes the wave-51 row that called the non-const array 'one LICM decision away'.",
-    "Wave 58: call-clobbering and store aliasing as explanations. This loop contains TWO calls (__umodsi3, __udivsi3) and a store through a pointer parameter, and agbcc hoists a non-const, non-volatile global load out of it regardless. The two compilations differ in neither, so neither can be the mechanism.",
-    "Not a permuter case: the difference is instruction ORDER across a loop boundary, not a register assignment.",
-    "Wave 79 (W79-C) re-measured and CONFIRMED this entry unchanged: 64/64 size-exact, 79.7%, 13 differing bytes, first difference at +0x11. No new axis was opened, and the smallest budget in the batch was spent here deliberately. Two candidates were checked on paper and neither reaches it: the wave-79 u32-pointer-arithmetic lever that closed sub_080228D8 moves a pool ldr past an index scaling and says nothing about an LICM hoist; and the W40-J / W43-A chapters of docs/agbcc-codegen.md already explain why a constant subscript cannot be talked into the reloaded form -- in sub_08010ADC, the function that DOES get the reload, the index is an INDUCTION VARIABLE with strength reduction in play, which g[value % 10] is not. Treat this entry as closed."
-   ],
-   "settled_by_this_attempt": [
-    "Classification: constant placement realised as an LICM decision -- instruction ORDER across a loop boundary. This is the same unreachable family as sub_080373F0's basic-block layout: a choice made inside a compiler pass with no source-level handle, and no spelling of the declaration reaches it.",
-    "`const`ness and `volatile`ness do not decide the hoist; all ten spellings hoist. The question was never how to spell the global."
-   ],
-   "reason": "Wave 58 (W58-A), carried from waves 42 and 51. Ten spellings measured; the residual is an LICM hoist, which is instruction order across a loop boundary and has no source lever."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -27095,23 +27068,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "summary": {
-    "does": "Runs the command script of one animated object (a 0x4C-byte record in gUnknown_0200E438) until it reaches a wait or an end command. Commands include wait, jump, show a frame, set a field and end. a2 picks the pass: 1 counts down waits without drawing, 0 draws.",
-    "status": "Compiles 4 bytes too short (852 against 856). Everything lines up instruction for instruction except at the top of the loop, where the original copies the 0xFFFFF000 mask through two extra registers before the AND; those 4 bytes shift everything after them, so the byte score (under 10%) means little.",
-    "left": "Find C that makes the compiler copy the mask constant twice before the AND, as the original does. The same fix should also close sub_0801DCD4, which has exactly this difference.",
-    "tried": [
-     "Seventeen spellings of the mask and the switch value (operand order, `~0xFFF` or `-0x1000`, the mask or the value in a local inside or outside the loop, `&=` forms, re-reading `*p`, different types for v): all give one direct AND. Writing the mask as `0xFFFFF000` also makes it unsigned, which turns every case comparison unsigned.",
-     "Two chained mask locals, nested inline identity functions, locals pinned to a register, and empty or volatile barriers around them: all compile to the same single AND.",
-     "The permuter for 600 seconds: nothing better.",
-     "A `do { } while` loop with an extra `if (p == NULL) return;` guard (kept in best.c): right size and 63% of bytes matching, but only because the redundant guard adds 4 bytes; it moves the first literal pool and is further from the original.",
-     "Dropping the `end` flag that nothing sets: 6 bytes shorter, so the flag stays."
-    ]
-   },
-   "note": "PARKED Wave 71 at 852/856 (-4). The whole residual is the shared loop-top mask routed through two missing copies. Seventeen mask spellings, chained locals, fixed-register qualifiers, barriers, inline identity calls and long permuter searches are ruled out."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,
@@ -27814,22 +27773,9 @@
   "mode": "THUMB",
   "directive": "thumb_func_start",
   "src": "code-0801D390.s",
-  "status": "parked",
+  "status": "matched",
   "asm_resident_reason": null,
-  "parked_reason": {
-   "summary": {
-    "does": "A cut-down copy of sub_0801D390's script interpreter for the same animated objects, with fewer commands. It draws with sub_0801ECE8 and can make the object flicker by drawing only on odd frames.",
-    "status": "Compiles 4 bytes too short (512 against 516). The difference is the same one as in sub_0801D390: at the top of the loop the original copies the 0xFFFFF000 mask through two extra registers before the AND. Everything after it is shifted, so the byte score (about 12%) means little.",
-    "left": "Find C that makes the compiler copy the mask constant twice before the AND. Solve it in either this function or sub_0801D390 and the fix should carry to the other.",
-    "tried": [
-     "Seventeen spellings of the mask and the switch value, tried on both functions (operand order, `~0xFFF` or `-0x1000`, the mask or the value in a local, `&=` forms, re-reading `*p`, different types for v): all give one direct AND. `0xFFFFF000` also makes every case comparison unsigned.",
-     "Two chained mask locals, nested inline identity functions, locals pinned to a register, and empty or volatile barriers: all compile to the same single AND.",
-     "The permuter: nothing close. Its best result (in best.c, about 15%) only adds meaningless edits such as subtracting a variable that holds 1.",
-     "A `do { } while` loop with an extra null guard: reaches the right size in sub_0801D390 only by adding a redundant check, so it was not used here."
-    ]
-   },
-   "note": "PARKED Wave 71 at 512/516 (-4). Exact twin of sub_0801D390's loop-top mask-copy residual. Direct, chained, fixed-register and barrier vehicles all collapse to the same one-pseudo AND; CFG and semantic body are settled."
-  },
+  "parked_reason": null,
   "named": false,
   "kind": "game",
   "trivial": false,

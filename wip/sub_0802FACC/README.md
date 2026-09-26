@@ -2,7 +2,7 @@
 
 0x0802FACC, 1388 bytes, THUMB, parked.
 
-Best score so far: 31.1% (preprocessed form, not included).
+Best score so far: not measured.
 
 ## What it does
 

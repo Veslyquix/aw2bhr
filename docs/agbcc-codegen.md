@@ -53871,3 +53871,303 @@ Three statement-level readouts from the same batch, each measured:
   folds a1's assign_parms copy into it and emits it at the assignment, i.e.
   after a3's copy. That is the ROM's `adds r3,r2,#0; mov sl,r0` order, which
   had been parked as "no source distinction" for three waves.
+
+## The W56-H loop-top residual is a `cmd` LOCAL: re-read `*p` instead (sub_0801DCD4)
+
+Solves the "UNSOLVED 4-byte residual" recorded under W56-H for
+`sub_0801DCD4` (now `RunSimpleSpriteScript`). It transfers to its twin
+`sub_0801D390`: with the same three spellings, that function's loop-top
+sequence and every constant-first AND match the ROM too. sub_0801D390 is
+still unmatched (800/856, -56), but for an unrelated reason. See
+"sub_0801D390's remaining residual" below.
+
+Three pieces, measured in this order:
+
+1. **The opcode is `(u16)((s16)*p & ~0xfff)`.** The `(s16)` makes the AND
+   HImode, so the mask is the pool word 0xFFFFF000 routed through the
+   `ldr rA; adds r0, rA; adds rB, r0` subreg copies. That settles the size:
+   512 (-4) -> 516. With a `u16` command and no `(s16)`, the AND is SImode
+   with `movs #0xf0; lsls #8`. With an `int` command, the never-set `end`
+   flag takes sl away from the hoisted 0xfff (+12).
+2. **Put it in an `int` local, not a `u16` one.** A `u16 op` makes the switch
+   subject a second pseudo, and the ROM has no such `adds r3, r2, #0` copy
+   (85.1% -> 89.5%).
+3. **Do not hold the command in a local at all; write `*p` at every use.**
+   With `u16 cmd = *p`, every `cmd & 0xfff` / `cmd & 0xff` / `cmd & 0xf00` is
+   the last use of a dying user variable. regmove then rewrites the AND to
+   clobber it (`mov r3, sl; ands r2, r3`). The ROM always ANDs into a copy
+   of the constant and leaves the command register alone
+   (`mov r0, sl; ands r0, r2`). With `*p` re-read, CSE keeps one temp that
+   regmove does not retarget (92.8% -> 97.3%).
+
+**Read-out:** when every AND in a function writes the CONSTANT's register
+while the variable operand is dead anyway, the variable was not a named
+local. Look for a re-read memory operand that CSE merged.
+
+The last 14 bytes were a load-order effect. Build pointer + index in two
+statements: `p = base; p += off;` and `frame = (u32 *)e->unk20; frame +=
+e->unk24;`. The one-expression `&base[i]` loads the base after the index,
+into the wrong register.
+
+## sub_0801D390's remaining residual is global-alloc order, not source shape
+
+**Resolved (matched as `RunSpriteScript`).** The allocation below was a
+property of the fresh draft, not of the source spellings. See "sub_0801D390
+matched: the allocation came from the older draft's shape" further down.
+
+With the mask residual solved (section above), sub_0801D390 is 800/856
+(-56). The whole deficit is register assignment:
+
+| value | ROM | candidate |
+|---|---|---|
+| script pointer `p` | r7 | r6 |
+| entry pointer `e` | r8 | r7 |
+| 0x6000 case's call-argument copy of `arg` | r6 | r8 |
+
+With `e` in r8, the ROM reaches it through a `mov rN, r8` reload at each
+access, and those reloads are the -56.
+
+From `-dg`, global-alloc priority is `e` (97 refs / 318 live, 18301) >
+`p` (74 / 289, 15363) > the arg copy (pseudo 240, block-local, 4 / 19, 4210).
+The arg copy is not local-allocated here. It reaches global alloc and loses.
+`p`'s and `e`'s use counts match the ROM exactly (the same eleven `p += 2`
+and the same `e` accesses), so the ROM's order has to come from elsewhere.
+The likeliest source is local-alloc taking the call-crossing arg copy into
+r6 before global alloc runs. That is unverified without compiler source.
+
+Ruled out:
+
+- Declaring `p` before `e`. The pseudo numbers swap; the allocation does not.
+- Direct `gUnknown_0200E438[id].field` indexing: +180.
+- `do`/`while` and `for (;;)` loop shapes.
+- `register ... asm("r8")` on `e`. It gets `e` and `p` right, but a hard
+  register is not a loop invariant, so loop.c stops hoisting `&e->unk28`
+  into sb. Hoisting that pointer by hand is +28.
+- Three 120 s permuter runs from the corrected draft. The best valid result
+  is still the draft.
+
+## sub_0801D390 matched: the allocation came from the older draft's shape
+
+sub_0801D390 (now `RunSpriteScript`) matched by combining two drafts that each
+had half of the answer:
+
+- The wave-56 draft (published in `wip/`) was 852/856. It already had the
+  ROM's allocation: `e` in r8, `p` in r7, the 0x6000 argument copy in r6. Its
+  whole residual was the loop-top mask.
+- RunSimpleSpriteScript's spellings fix the mask: an opcode of
+  `(u16)((s16)*p & ~0xfff)` and `*p` re-read at every use, with no command
+  local.
+
+Applied to the wave-56 draft, those two changes matched outright. The same
+spellings on a fresh draft had given 800/856 with `e` in r7.
+The allocation difference is in the older draft's shape. It has `n`/`t` int
+locals for the argument and first operand, `frame` built as
+`q = base; q += i;`, and each latched-effect skip written as its own
+`p++; break;` rather than a shared `goto`.
+
+The steps, measured:
+
+| wave-56 draft plus | result |
+|---|---|
+| nothing | 852 (-4) |
+| `switch ((u16)((s16)v & ~0xFFF))`, `u16 v` kept | 856, 25.4% |
+| ... and `*p` re-read everywhere, `p = base; p += n;` | match |
+
+A `u16 op = v & 0xF000;` spelling is also size-exact (17.1%), but it is
+SImode and does not produce the copies.
+
+**Read-out:** when a fresh transcription lands on the right instructions but
+the wrong allocation, and an older draft had the right allocation but the
+wrong instructions, port the instruction fix onto the older draft first.
+Global-alloc priorities follow block structure and local counts that a
+rewrite silently changes.
+
+## A struct's member array can fix giv order where a pointer local cannot (sub_08086A58)
+
+sub_08086A58 (now `DrawMapList`) was parked at 97.6%, size-exact, with a
+10-byte "allocno-order" residual. The ROM's loop preheader loads
+`&gUnknown_02027F74` first, then zeroes the row giv, then adds 4. The draft
+zeroed the giv first.
+
+The draft read the list through `q = (u8 *)&gUnknown_02027F74; q += 4;
+q[a + i]`, the spelling that matched sibling sub_08087104. Here strength
+reduction folds that base load into the entry pointer's giv initialisation,
+which is emitted after the row giv's. Reading the struct's own member array,
+`gUnknown_02027F74.unk04[a + i]`, keeps the base a separate loop invariant.
+loop.c moves invariants before it emits giv initialisations, which is the
+ROM's order. That one change matched the function. The permuted twin
+sub_08086BF8 already used this spelling.
+
+`list = gUnknown_02027F74.unk04;` as a local is 4 bytes short. Only the
+subscripted member works.
+
+**Read-out:** when the preheader has a hoisted base load *before* a giv's
+`movs #0`, the base was a separate invariant. Look for a member-array or
+direct-symbol spelling rather than a pointer local bumped in place. The
+header comment on struct Unk02027F74.unk04 records that the member array
+"does NOT match" sub_08087104; it does match here, so the choice is per
+function.
+
+## Check the ROM's string bytes before blaming .rodata layout (sub_080283E4)
+
+sub_080283E4 (now `DebugVersusPauseScreen`) sat at 90.7% from wave 36. Its
+notes gave half of the residual to a ".rodata padding word the source does
+not produce" after "R: SAKUTEKI OFF". Dumping 0x08090B04.. showed the real
+cause: both fog strings have TWO spaces, "R: SAKUTEKI  ON" (16 bytes) and
+"R: SAKUTEKI  OFF" (17). With one space every later literal lands 4 bytes
+early and trymatch cannot equate the pool words. Always compare literals
+against the ROM bytes, not against a disassembly comment.
+
+The code residual closed with readable spellings:
+
+- `gPlayers[1].aiControlled = gPlaySt.aiControlled[1];` instead of
+  `((u8 *)gPlayers)[0x57] = ...` fixes the first block's load order
+  (90.7% -> 95.4%).
+- The Up/Down toggle is `play = &gPlaySt; cursor = slot->unk38;
+  play->aiControlled[cursor + 1] = ...`. The pointer local is load-bearing:
+  it creates the &gPlaySt register before the slot address, and CSE reuses
+  it for the toggle. Through gPlaySt directly it is +4 bytes. The
+  `(u8 *)&gPlaySt + side + 0x39` byte-offset forms either cost 4 bytes or
+  reverse one `adds` operand order (96.9%).
+
+## A fresh readable draft beat a long-parked obfuscated one (sub_08042998)
+
+sub_08042998 (now `JoinUnits`) had been parked since wave 15 at 14.2%,
+28 bytes short. Its draft reached the unit pointer and the unit-type table
+through their -fforce-addr pool words as pointer-to-pointer locals
+(`**pp`, `(*pp2)[i]`). A rewrite from the ROM matched in five measured
+steps:
+
+| change | result |
+|---|---|
+| name gUnknown_030040D8 (viewed as `struct Unit *`) and gUnknown_085D5ABC directly; gMap / gUnits member access | 33.5%, -12 |
+| ammo sum `u8`: unsigned `bls` compares and un-merged per-branch bitfield stores | 35.0%, size-exact |
+| HP total as a conditional expression (both arms into one temporary, copied after the join) | 90.5%, +4 |
+| fuel sum `u8` too | 98.1%, size-exact |
+| ONE `u8 sum` reused for ammo and then fuel (found by decomp-permuter) | match |
+
+Two general points. Naming a global that -fforce-addr reaches through a
+.rodata address word reproduces the whole `ldr; ldr; ldr` chain; the pool
+word never needs a C name. And a narrow sum of two small bitfields needs no
+truncation (combine knows the value fits), so `u8` costs nothing and is
+what gives the unsigned compare.
+
+## A constant LICM should NOT hoist: pad the loop with statements, measured with -dL (sub_0803D558)
+
+sub_0803D558 (now `CompactMapArmies`) was parked from wave 55 to wave 80
+with the diagnosis complete. The row read must go through the struct member
+(`gMap->rowOffset[y]`) for the ROM's (base + 0x417A) + y*2 grouping, but
+that form let loop.c hoist the 0x417A constant out of the inner loop (+4).
+The ROM materialises it inside the loop.
+
+`agbcc -dL` shows the decision. move_movables moves a constant when
+`threshold * savings * lifetime >= insn_count`, and threshold is
+2 * (1 + n_non_fixed_regs), about 26 here. The one-expression recolour,
+`terrain[i] = (v & 0x1f) + b[v >> 5]`, left the inner loop at 24 real insns
+on the SECOND loop pass (29 on the first, where it was "not desirable"), so
+pass 2 moved it. Splitting the body into statements
+(`m = v & 0x1f; c = v >> 5; colors = b; i = rowOffset[y] + x;
+terrain[i] = m + colors[c];`) keeps the loop over threshold, and the later
+passes still reduce it to the ROM's instructions. The `m` statement is also
+what orders `movs #0x1f` ahead of `lsrs`.
+
+**Read-out:** a hoisted constant the ROM keeps in the loop is a loop-size
+question, not a spelling one. Check `-dL` for "not desirable" against
+"moved to", compare the loop's "real insns" with the threshold, and add or
+split statements that later passes remove.
+
+A second trap from the same function: mixing `gMap->` with
+`((struct Map *)gUnknown_08499590)->` in one function emits two pool words
+for the same address (+4).
+
+## A caller's narrowing can be a cast, not the callee's parameter type (sub_08020EDC)
+
+sub_08020EDC (now `AddValueInRange`) sat from wave 49 as a "cross-TU
+prototype contract". The permuter kept reaching past the draft only by
+widening the sixth parameter from `u8` to an int type. Wave 73 ruled that
+out: the matched caller sub_080210C8 truncates its `int a6` with
+`lsls #0x18; lsrs #0x18` before the call, and widening the prototype would
+delete that truncation.
+
+It doesn't have to. The caller's truncation reads just as well as an
+explicit `(u8)a6` at the call site, and with that cast the caller is
+unchanged byte for byte under an `int` prototype. The callee needs the int.
+With a u8 parameter it narrows the incoming word itself at entry, and that
+extra narrowing is what interleaved `lsls r4, #24` into the fifth
+parameter's conversion group. Both functions match with the cast plus
+`void sub_08020EDC(s16, s16, s16, u8 *, int, int)`.
+
+The rest of the match was readable spellings. gMap members replaced the raw
+byte offsets (90.7% -> 92.3%). The centre cell is indexed
+`buf[gMap->rowOffset[y] + x]` and the swept cell reads its row into a u16
+first (98.4%). The added amount is a word-wide `u32 d = (u8)delta;`; a u8
+local swaps the add's operands (99.2%).
+
+**Read-out:** a narrowing in a matched caller settles the VALUE passed, not
+the callee's parameter type. If the callee only matches wide, try a cast in
+the caller before calling the prototype a contract.
+
+## Name gMap, not its -fforce-addr word, even for a first-use-only access (sub_0803E6C4)
+
+sub_0803E6C4 (now `ScanUnitsBelowStrip`) sat at 156/160 (-4) from wave 38.
+Its first height check reaches the map through the .rodata address word
+gUnknown_080912FC (`ldr; ldr; ldr`), and the loop through the plain pool
+symbol, so the draft spelled the first access `*gUnknown_080912FC` by hand.
+Writing `gMap->height` there as well is 160/160 at 97.5%: -fforce-addr emits
+the address word by itself, placed as the ROM has it. The last 2.5% was
+parameter-move order in the prologue. Copying the first parameter into a
+local (`left = x;`) before the loop puts a3's copy ahead of x's move to sl.
+decomp-permuter found that in one 5-minute run.
+
+## The reverse case: make the loop SMALLER so LICM hoists (sub_0805FC1C)
+
+sub_0805FC1C (now `FindTransportForSelectedUnit`) was parked with "the
+single-use gUnknown_085D5AD0 base is not LICM-hoisted", where
+gUnknown_085D5AD0 is &gUnknown_085D5ABC[0].transportTable. `-dL` showed a
+153-insn loop in which that movable (savings 2, life 5) was "not
+desirable". The ROM's two switch arms share ONE "write position, return"
+block and one `unk09` store. Writing the exit as a `goto found;` shared by
+both arms shrank the loop enough for the table base to hoist into sl as in
+the ROM (336 -> 320). With each table row pointer in its own statement
+(`entry = table + 1;`) it was 328/328 at 97.9%. decomp-permuter closed the
+last r0/r1 swap: `types = table + 0x1a; entry = types;` and a `zero` local
+in the unk08 test.
+
+Together with the CompactMapArmies note above: the movable threshold works
+in both directions, and the lever is the loop's real-insn count at loop
+time. Add statements to stop a hoist, share tails to allow one.
+
+## Re-measure a park whose blocker was a callee's prototype (sub_08039188)
+
+sub_08039188 (now `DrawMarkerSprites`) was parked from wave 57 to wave 88 at
++4. The recorded blockers were a cross-TU conflict over sub_08039140's
+narrow first parameter and an `ldrsb` fold. Since then sub_08039140 was
+promoted as an old-style (K&R) definition, and the header declares it
+unprototyped, `u8 sub_08039140();`. The caller now passes its `x * 16` as a
+plain int. The published draft matches unchanged, and the `ldrsb` residual
+went with the narrowing. When a park names a callee's prototype, re-run the
+draft after that callee is promoted before reading its old notes.
+
+## Strict aliasing is on at -O2, and a "pointer global" pool word is still force-addr (sub_08010EF8)
+
+sub_08010EF8 (now `DrawNumberRightAligned`) was parked from wave 42 to wave
+79 as "an LICM hoist with no source lever". The ROM reads
+`ldr r6,=0x0808DF8C` before the loop, then `ldr r1,[r6]; ldrh r1,[r1]` in
+it. Ten declarations of a pointer global at 0x0808DF8C were tried, and every
+one hoisted the middle `ldr`. Two facts explain why:
+
+- agbcc's -O2 sets `flag_strict_aliasing` (toplev.c). Every pointer type gets
+  its own alias set (c-common.c `c_get_alias_set`). So a load of a `u16 *`
+  never conflicts with a `u16` store, and LICM hoists it whether or not it
+  is const. `-fno-strict-aliasing` keeps it in the loop. That is a probe to
+  explain a hoist, not a fix.
+- 0x0808DF8C holds 0x0300308C, the -fforce-addr word for
+  gUnknown_0300308C. The source is the honest `gUnknown_0300308C[0]`, and
+  the word appears because of the W49-M operand-order lever:
+  `value % 10 + gUnknown_0300308C[0]` gives the .rodata word re-read every
+  iteration, while `gUnknown_0300308C[0] + value % 10` gives one text-pool
+  word hoisted out of the loop.
+
+So when a parked draft declares a pointer global to reach a `.rodata` word,
+dereference the word in the ROM first. If it holds a RAM address, that word
+is force-addr, and the lever is operand order, not a declaration.

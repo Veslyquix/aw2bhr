@@ -2,7 +2,7 @@
 
 0x080607E8, 172 bytes, THUMB, parked.
 
-Best score so far: 54.6%, -8 bytes.
+Best score so far: 86.6% (best.c).
 
 ## What it does
 
@@ -28,6 +28,7 @@ Find a way of writing b (the row plus 4) whose 16-bit narrowing the compiler can
 ## Files
 
 - `sub_080607E8.c`: the current draft
+- `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
 ## Technical history

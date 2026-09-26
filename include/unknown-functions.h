@@ -485,7 +485,11 @@ void sub_0801D924(void);
  * Both bodies are still unmatched assembly, so this is a floor, not a reading
  * of their prologues. */
 void sub_0801D390(int, int);
+void RunSpriteScript(int, int); /* sub_0801D390's readable name; see
+                                 * src/decomp/c_0801D390.c. */
 void sub_0801DCD4(int, int);
+void RunSimpleSpriteScript(int, int); /* sub_0801DCD4's readable name; see
+                                      * src/decomp/c_0801DCD4.c. */
 /* Wave 40, W40-I: both are already DEFINED in src/decomp (c_0801DB04.c and
  * c_0801DC50.c) and were simply never declared, because until now every caller
  * was still assembly. The signatures are copied from those definitions, not
@@ -2805,6 +2809,7 @@ void *sub_0802813C(void);
  * sub_08035760 as a pointer. */
 void sub_08015328(s16);
 void sub_08015C30(u8);
+void DebugVersusPauseScreen(void); /* sub_080283E4; see src/decomp/c_080283E4.c. */
 void sub_080294FC(void);
 void sub_08029570(void);
 void sub_08029868(u8);
@@ -4638,6 +4643,7 @@ void sub_080745C0(void);
  * ignores whatever sub_0801F024 hands it, so the `(void *)` cast at the call
  * site is the honest spelling and not a workaround. */
 void sub_08039188(void);
+void DrawMarkerSprites(void); /* sub_08039188; see src/decomp/c_08039188.c. */
 
 /* Walks the byte-stream script in r0 until it sees a 1, calling
  * sub_0801B7C0(cursor, arg) on each opcode and advancing by
@@ -4999,6 +5005,8 @@ void sub_080872D0(int);
  * (sub_0808606C, three call sites) and the work draft work/sub_08085B30 (two
  * call sites). */
 void sub_08086A58(int, int, int);
+void DrawMapList(int, int, int); /* sub_08086A58's readable name; see
+                                 * src/decomp/c_08086A58.c. */
 /* Wave 54 (W54-D). Defined in src/decomp/c_08087548.c as void(int,int,int) and
  * never declared until sub_08086A58 became its first C caller; the DEFINITION
  * is what is published here. sub_08086A58 forwards its own three parameters
@@ -5703,6 +5711,7 @@ void sub_080616F0(void);
  * onwards). Void: it ends `pop {r0}; bx r0`, so r0 carries the return address
  * and cannot carry a value, and sub_0802D0F4's `bl` discards it. */
 void sub_08042998(void);
+void JoinUnits(void); /* sub_08042998's readable name; see src/decomp/c_08042998.c. */
 
 /* ---- family F059's two undeclared callees (wave 15, C) ----
  *
@@ -6029,6 +6038,8 @@ void sub_080162A4(u8);
  * arity- and width-blind. The return is UNPROVED: sub_08016D30 is its only
  * caller and discards r0, so `void` is the weakest type that fits. W35-I. */
 void sub_08016F38(u8);
+void CaptureBattleSaveState(u8); /* sub_08016F38's readable name; see
+                                  * src/decomp/c_08016F38.c. */
 /* The free half of sub_0801DAB0's affine-matrix slot allocator (sub_0801DAB0
  * scans gUnknown_03001430[0..0x1f] for a zero entry, this one releases). `s16`
  * from its own prologue in asm/code-0801D390.s -- `lsls #0x10; asrs #0x10` and
@@ -6116,6 +6127,7 @@ void sub_0803E310(int, int, int, int, int, int);
 void sub_0803E554(void);
 void sub_0803E594(int, int, int);
 void sub_0803E6C4(int, int, int);
+void ScanUnitsBelowStrip(int, int, int); /* sub_0803E6C4; see src/decomp/c_0803E6C4.c. */
 void sub_0803E764(struct Unk02028360Pos *, int);
 void sub_0803E808(int, int, int, int, int);
 void sub_0803EF44(int, int, ProcPtr);
@@ -10581,16 +10593,9 @@ void sub_080200EC(s16, s16, s16, s16);
  * as `movs #1; rsbs` -- so signed. Byte-neutral there; c_08020D50 re-verified
  * by try_match exit code after the change. */
 void sub_08020B88(s16, s16, s16, s16);
-/* Wave 90, W90-C: the 6th parameter is `int`, as the prose above says, and
- * the definition proves it. Its prologue narrows the 6th only at the
- * `f = flags;` copy, AFTER the `d = delta;` group; a `u8` formal would be
- * narrowed first by PROMOTE_MODE, which put one `lsls` a slot early and was
- * the last residual of sub_08020EDC. The matched caller
- * src/decomp/c_080210C8.c keeps its `lsls #0x18; lsrs #0x18` with an explicit
- * `(u8)a6` at each call, which is the same tree the old prototype built, and
- * was re-verified by trymatch exit code. (Wave 73 read that narrowing as
- * proof of a `u8` formal; a cast at the call site gives it too.) */
+/* Arguments 5 and 6 are int; callers narrow flags explicitly to u8. */
 void sub_08020EDC(s16, s16, s16, u8 *, int, int);
+void AddValueInRange(s16, s16, s16, u8 *, int, int);
 
 /* Wave 36, W36-M. Every signature below is COPIED VERBATIM from a byte-verified
  * definition in src/decomp/ -- none of them had a declaration in any header,
@@ -10815,6 +10820,10 @@ int sub_0800F8D4(int, int);
 int sub_0800FD44(int, int, int);
 int sub_08010604(int, int);
 int sub_08010B34(int, int);
+
+/* Right-aligned decimal number into a tilemap; see src/decomp/c_08010EF8.c. */
+void sub_08010EF8(u16 x, int unused, u16 value, u16 *dest);
+void DrawNumberRightAligned(u16 x, int unused, u16 value, u16 *dest); /* sub_08010EF8 */
 int sub_08010DD4(int, int);
 bool8 sub_0801659C(u8);
 void sub_080179AC(void);
@@ -11217,6 +11226,7 @@ void sub_0805FB70(void);
  * sign-extended for its own map arithmetic, so CSE supplies the `asrs` either
  * way and `s16` would emit the same bytes. `int` is the weakest fit. */
 void sub_0805FC1C(int, void *);
+void FindTransportForSelectedUnit(int, void *); /* sub_0805FC1C; see src/decomp/c_0805FC1C.c. */
 int sub_0805C988(int, int);
 /* sub_0805A8C0 IS DELIBERATELY NOT DECLARED HERE. Wave 51, W51-N measured both
  * sides and they genuinely disagree, so the original cannot have had a
@@ -11855,3 +11865,4 @@ int sub_0800AEAC(int, int);
 int sub_0800105C(void);
 void sub_08004D10(void);
 int sub_0800BC5C(int, int);
+void CompactMapArmies(void); /* sub_0803D558; see src/decomp/c_0803D558.c. */

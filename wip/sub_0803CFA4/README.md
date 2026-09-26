@@ -2,7 +2,7 @@
 
 0x0803CFA4, 660 bytes, THUMB, parked.
 
-Best score so far: 65.2%.
+Best score so far: not measured.
 
 ## What it does
 
