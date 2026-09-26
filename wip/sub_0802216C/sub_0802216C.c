@@ -16,7 +16,7 @@
  *     `mov ip, r2` and comes out as `lsrs r0, r3, #0x16` -- the u16 parameter's
  *     entry shift fused with the >> 6. After the reassignment it is a plain
  *     `lsrs r4, r2, #6`. Both fall out of just writing `a3 >> 6` twice.
- *   - `gUnknown_08499598[(a3 >> 6) + 1].unk1c` folds the `+ 1` into the
+ *   - `gPlayers[(a3 >> 6) + 1].unk1c` folds the `+ 1` into the
  *     constant: stride 60 gives `lsls #4; subs; lsls #2` and 0x3C + 0x1C = 0x58.
  *   - `if (a4 != 0) a4 = 1;` is a real statement, not a `!!` inside a test.
  *
@@ -89,7 +89,7 @@ void sub_0802216C(u16 *dst, u8 a2, u16 a3, u8 a4, u8 a5, u16 a6, u16 a7, u8 a8)
         else
             dst[0x20] = t + (r + 3) + base;
 
-        if (!(gUnknown_08499598[(a3 >> 6) + 1].unk1c & 2) && a8)
+        if (!(gPlayers[(a3 >> 6) + 1].turnState & 2) && a8)
             dst[0x21] = t + 0x7A;
         else if (gUnknown_08090986[a6] < 0)
             dst[0x21] = t + r + 0x402;
@@ -112,7 +112,7 @@ void sub_0802216C(u16 *dst, u8 a2, u16 a3, u8 a4, u8 a5, u16 a6, u16 a7, u8 a8)
         else
             dst[0x20] = r + (t + 2);
 
-        if (!(gUnknown_08499598[(a3 >> 6) + 1].unk1c & 2) && a8)
+        if (!(gPlayers[(a3 >> 6) + 1].turnState & 2) && a8)
             dst[0x21] = t + 0x7A;
         else if (gUnknown_08090986[a6] < 0)
             dst[0x21] = r + (t + 3);

@@ -31,14 +31,14 @@ void sub_080860DC(ProcPtr procp)
   {
     return;
   }
-  if (gpKeySt->unk02 & 0x40)
+  if (gpKeySt->repeated & 0x40)
   {
     if (p->unk58 <= gUnknown_02027F74.unk36)
     {
       return;
     }
     p->unk58--;
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
       sub_08087B60(p->unk58);
       if ((gUnknown_03005930 > 1) || (p->unk5c == 0))
@@ -85,14 +85,14 @@ void sub_080860DC(ProcPtr procp)
     return;
   }
   else
-    if (gpKeySt->unk02 & 0x80)
+    if (gpKeySt->repeated & 0x80)
   {
     if (p->unk58 >= gUnknown_02027F74.unk37)
     {
       return;
     }
     p->unk58++;
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
       sub_08087B60(p->unk58);
       if ((gUnknown_03005930 < ((g = gUnknown_03005928) - 2)) || (p->unk5c == ((gUnknown_02027F74.unk37 - g) + 1)))
@@ -138,7 +138,7 @@ void sub_080860DC(ProcPtr procp)
     return;
   }
   else
-    if (((gpKeySt->held & 1) && (p->unk4e == 0)) && (Proc_Find(gUnknown_084892C4) == 0))
+    if (((gpKeySt->pressed & 1) && (p->unk4e == 0)) && (Proc_Find(gUnknown_084892C4) == 0))
   {
     q = (u8 *) (&gUnknown_02027F74);
     q += 4;
@@ -146,7 +146,7 @@ void sub_080860DC(ProcPtr procp)
     {
       return;
     }
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
       gUnknown_03005900 = p->unk5c;
     }
@@ -167,7 +167,7 @@ void sub_080860DC(ProcPtr procp)
     return;
   }
   else
-    if (((gpKeySt->held & 2) && (Proc_Find(gUnknown_084892C4) == 0)) && (Proc_Find(gUnknown_08616CCC) == 0))
+    if (((gpKeySt->pressed & 2) && (Proc_Find(gUnknown_084892C4) == 0)) && (Proc_Find(gUnknown_08616CCC) == 0))
   {
     sub_0803B4DC(0x66);
     sub_0803BD60();
@@ -179,9 +179,9 @@ void sub_080860DC(ProcPtr procp)
     return;
   }
   else
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
   {
-    if (!(gpKeySt->held & 0x100))
+    if (!(gpKeySt->pressed & 0x100))
     {
       return;
     }
@@ -199,7 +199,7 @@ void sub_080860DC(ProcPtr procp)
     return;
   }
   else
-    if (gpKeySt->held & 0x220)
+    if (gpKeySt->pressed & 0x220)
   {
     gUnknown_03005990[gUnknown_0300596C] = p->unk5c;
     gUnknown_0300596C--;
@@ -242,7 +242,7 @@ void sub_080860DC(ProcPtr procp)
     return;
   }
   else
-    if (gpKeySt->held & 0x110)
+    if (gpKeySt->pressed & 0x110)
   {
     gUnknown_03005990[gUnknown_0300596C] = p->unk5c;
     gUnknown_0300596C++;

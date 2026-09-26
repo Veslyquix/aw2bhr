@@ -21,15 +21,15 @@
  *
  * WHAT CLOSED THE HOIST -- a VOLATILE-QUALIFIED READ OF THE POINTER GLOBAL:
  *
- *     x = (*(struct Unk08499594 *volatile *)&gUnknown_08499594)
+ *     x = (*(struct Unit *volatile *)&gUnknown_08499594)
  *             [gUnknown_030045F0[n]].unk00;
  *     gUnknown_030046E0[n] = sub_08042D1C(gUnknown_030033EC, x);
  *
  * Measured, all four, in this function:
  *     plain `gUnknown_08499594[k].unk00`                -> address NOT hoisted
- *     `(*(struct Unk08499594 **)&g)[k].unk00`           -> address NOT hoisted
+ *     `(*(struct Unit **)&g)[k].unk00`           -> address NOT hoisted
  *     `(&g)[0][k].unk00`                                -> address NOT hoisted
- *     `(*(struct Unk08499594 *volatile *)&g)[k].unk00`  -> address HOISTED into
+ *     `(*(struct Unit *volatile *)&g)[k].unk00`  -> address HOISTED into
  *                                                          the preheader, in
  *                                                          the ROM's position
  * A non-volatile load of a pointer global keeps the global's address folded
@@ -44,7 +44,7 @@
  * include/unknown-globals.h was NOT retyped. `gUnknown_08499594` has 20+
  * promoted users and the ROM does not force the retype -- the local cast gets
  * the same code. If a later wave wants the natural spelling
- * (`extern struct Unk08499594 *volatile gUnknown_08499594;`) it must re-verify
+ * (`extern struct Unit *volatile gUnknown_08499594;`) it must re-verify
  * every one of those units with tools/verify_batch.py first.
  *
  * ALSO SETTLED (w87): binding the second call argument to a local BEFORE the
@@ -92,7 +92,7 @@ void sub_0805D344(u32 a1)
 
     while (gUnknown_030045F0[n] != 0)
     {
-        x = (*(struct Unk08499594 *volatile *)&gUnknown_08499594)[gUnknown_030045F0[n]].unk00;
+        x = (*(struct Unit *volatile *)&gUnknown_08499594)[gUnknown_030045F0[n]].type;
         gUnknown_030046E0[n] = sub_08042D1C(gUnknown_030033EC, x);
         n++;
     }

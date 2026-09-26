@@ -14,7 +14,7 @@
  *    `--profile o1` sets flag_gcse = 0 and flag_cse_follow_jumps = 0 while
  *    KEEPING -fforce-addr, so it moves the optimisation level and nothing else.
  *    The unmodified draft under `o1` builds the post-call address INDEPENDENTLY
- *    (`ldr r0,.L19+0x4`, a separate `.word gUnknown_03003FC0+0x2f`); under -O2
+ *    (`ldr r0,.L19+0x4`, a separate `.word gPlaySt+0x2f`); under -O2
  *    it reuses the guard's pseudo. cse runs at -O1 and did NOT unify them, so
  *    the unifier is an -O2-only pass, and the only one that crosses a join is
  *    gcse. The join is visible in the assembly, as the W89-D screening rule
@@ -29,7 +29,7 @@
  *    real code, not a splitter), and the offset is a constant (every mask over
  *    it is discharged by fold before cse numbers anything). MEASURED, not
  *    assumed: probe V_FOLD carried the offset in a `u8 off = 0x2f;` local and
- *    read `*((vu8 *)&gUnknown_03003FC0 + ((((u32)off << 24) & 0xff000000)
+ *    read `*((vu8 *)&gPlaySt + ((((u32)off << 24) & 0xff000000)
  *    >> 24))` -- BYTE-IDENTICAL to the plain draft, the same output as all
  *    twenty-two earlier spellings.
  *      THE TRANSFERABLE RULE: the fifth splitter's reachable set is address
@@ -72,14 +72,14 @@
  * after six other levers failed, so it was pre-registered for this function.
  * Four spellings, all four in one compile_probe:
  *
- *   P1  static __inline__ u8 rd2f(void) { return gUnknown_03003FC0.unk2f; }
+ *   P1  static __inline__ u8 rd2f(void) { return gPlaySt.unk2f; }
  *       called at BOTH unk2f sites, every other reference left bare
  *   P4  the same helper at the POST-CALL site ONLY
  *   P2  helpers (rd2c/rd2d/rd2f) at EVERY reference
- *   P3  static __inline__ struct Unk03003FC0 *adr(void)
- *         { return &gUnknown_03003FC0; }  at every reference
+ *   P3  static __inline__ struct PlaySt *adr(void)
+ *         { return &gPlaySt; }  at every reference
  *
- * P1 and P4 KEEP the two-level force-addr word (.LC -> gUnknown_03003FC0) and
+ * P1 and P4 KEEP the two-level force-addr word (.LC -> gPlaySt) and
  * still emit, byte for byte, what every one of the previous eighteen
  * spellings emitted:
  *       add r5,r2,#0 ; add r5,r5,#0x2f     (before the bl)
@@ -88,7 +88,7 @@
  * ADDRESS one. Nothing moved.
  *
  * P2 and P3 are a WRONG MECHANISM outright, and this is new: they COLLAPSE the
- * force-addr word. The literal pool holds `.word gUnknown_03003FC0` directly,
+ * force-addr word. The literal pool holds `.word gPlaySt` directly,
  * with no .LC indirection at all -- the same failure W86-G recorded for its V2
  * `p->everywhere` variant, now shown to be caused by the absence of any BARE
  * symbol reference rather than by the pointer bind.
@@ -99,7 +99,7 @@
  * and held in a pseudo across a call -- with a re-read at each use. A `bl`
  * kills memory, so gcse cannot forward the re-read, and the bind disappeared.
  * Here there is no source bind to remove: both occurrences are ALREADY written
- * independently as `gUnknown_03003FC0.unk2f`, and what gcse unifies is not a
+ * independently as `gPlaySt.unk2f`, and what gcse unifies is not a
  * memory value but an ADDRESS-ARITHMETIC pseudo, `base + 0x2f`, which is a
  * register value that no call invalidates. The helper has no bind to delete
  * and no memory read to make unforwardable.
@@ -122,13 +122,13 @@
  * unchanged. Full measurements in work/sub_08035170/W86-notes.md.
  *
  * Three inline variants in one compile_probe, none of which the park had:
- *  V1 `struct Unk03003FC0 *p = &gUnknown_03003FC0;` at the TOP, used for the
+ *  V1 `struct PlaySt *p = &gPlaySt;` at the TOP, used for the
  *     entry unk2c read and the case 1/2 pre-call reads, with the PLAIN global
  *     in case 0 and for the post-call assignment -- keeps the two-level
  *     force-addr word, reproduces the case 0 reload, and STILL ends with
  *     `ldrb r4,[r5]` off the pre-call `base + 0x2f` pseudo.
  *  V2 `p->` for EVERY reference -- COLLAPSES the pool word to one level
- *     (`.word gUnknown_03003FC0`, no .LC indirection). Wrong mechanism.
+ *     (`.word gPlaySt`, no .LC indirection). Wrong mechanism.
  *  V3 post-call read through a FRESH pointer local bound AFTER the call --
  *     byte-identical tail to V1.
  * That is eighteen spellings across waves 45/51/57/59/86.
@@ -170,7 +170,7 @@
  * pointer on the case 1/2 path and must never be promoted.)
  *
  * THE WHOLE 63-BYTE DIFF IS ONE DECISION: the candidate has ONE pseudo for
- * `&gUnknown_03003FC0.unk2f` used on both sides of the sub_08035080 call; the
+ * `&gPlaySt.unk2f` used on both sides of the sub_08035080 call; the
  * ROM has TWO. Everything else follows -- because the ROM re-derives the
  * address after the call it needs the .LC word's address to survive that call,
  * so the address takes a callee-saved register and pays `adds r5,r1,#0` at
@@ -189,7 +189,7 @@
  *   4. the case 1/2 arm restructured from one && chain into four early-exit
  *      `if (...) break;` statements -- changes the CFG, changes zero bytes
  *   5. the guard's unk2f read bound to a `u8 w` local in the case block
- *   6. ((volatile struct Unk03003FC0 *)&gUnknown_03003FC0)->unk2f post-call
+ *   6. ((volatile struct PlaySt *)&gPlaySt)->unk2f post-call
  *
  * DO NOT re-derive the pointer-global reading of the pool word. The wave-43
  * W43-A chapter of docs/agbcc-codegen.md measured 0x08090E3C specifically:
@@ -239,7 +239,7 @@
  *
  * WAVE 57 -- THE PLAIN (NON-VOLATILE) READ IS RE-CONFIRMED BY compile_probe,
  * and it fails for a reason worth writing down. Spelling both reads as plain
- * `gUnknown_03003FC0.unk2f` still emits `add r5,r2,#0 ; add r5,r5,#0x2f` before
+ * `gPlaySt.unk2f` still emits `add r5,r2,#0 ; add r5,r5,#0x2f` before
  * the call and a bare `ldrb r4,[r5]` after it -- i.e. the ADDRESS pseudo
  * survives the call in both spellings, and only the VALUE differs. A plausible
  * theory going in was that the -fforce-addr word is ordinary (not
@@ -264,8 +264,8 @@
  *  - plain non-volatile reads at both sites (wave 57, above): 124 bytes, and
  *    the address is cached exactly as it is here.
  *
- * best.c holds an 85.2% permuter shape that binds `struct Unk03003FC0 *new_var
- * = &gUnknown_03003FC0;` inside `case 0:` and then reads `(*new_var).unk2d` /
+ * best.c holds an 85.2% permuter shape that binds `struct PlaySt *new_var
+ * = &gPlaySt;` inside `case 0:` and then reads `(*new_var).unk2d` /
  * `(*new_var).unk2f` from `case 1/2:` -- i.e. it USES THE POINTER
  * UNINITIALISED on that path. It is bytewise informative and semantically
  * indefensible; do not promote it as-is, but the fact that binding the struct
@@ -277,14 +277,14 @@ u8 sub_08035170(void)
 {
     int v;
 
-    v = gUnknown_03003FC0.unk2c;
+    v = gPlaySt.weather;
 
     switch (v)
     {
     default:
         v = 0;
     case 0:
-        if (gUnknown_03003FC0.unk2d == 1)
+        if (gPlaySt.randomWeatherOn == 1)
         {
             if (sub_080129F8(gUnknown_03004490[2]))
                 v = 1;
@@ -295,10 +295,10 @@ u8 sub_08035170(void)
 
     case 1:
     case 2:
-        if (gUnknown_03003FC0.unk2d != 2
-            && (v != *(vu8 *)&gUnknown_03003FC0.unk2f || gUnknown_03003FC0.unk2d != 3)
+        if (gPlaySt.randomWeatherOn != 2
+            && (v != *(vu8 *)&gPlaySt.defaultWeather || gPlaySt.randomWeatherOn != 3)
             && sub_08035080())
-            v = *(vu8 *)&gUnknown_03003FC0.unk2f;
+            v = *(vu8 *)&gPlaySt.defaultWeather;
         break;
     }
 

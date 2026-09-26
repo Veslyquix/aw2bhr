@@ -64,7 +64,7 @@ struct Unk61308Cell
 u8 sub_08061308(u8 a1, u8 a2, u16 *a3)
 {
     struct Unk61308Cell *p;
-    struct Unk08499594 *q;
+    struct Unit *q;
     int k;
     int i;
     int j;
@@ -119,7 +119,7 @@ u8 sub_08061308(u8 a1, u8 a2, u16 *a3)
                             continue;
                         q = &gUnknown_08499594[((struct Map61308 *)gUnknown_08499590)->unk12[
                                 ((struct Map61308 *)gUnknown_08499590)->unk417A[i] + j]];
-                        if (q->unk00 != 0x14)
+                        if (q->type != 0x14)
                             continue;
                         if (q->unk07 != 0)
                             continue;
@@ -145,9 +145,9 @@ u8 sub_08061308(u8 a1, u8 a2, u16 *a3)
                             continue;
                         q = &gUnknown_08499594[((struct Map61308 *)gUnknown_08499590)->unk12[
                                 ((struct Map61308 *)gUnknown_08499590)->unk417A[i] + j]];
-                        if (q->unk00 > 2)
+                        if (q->type > 2)
                             continue;
-                        if (q->unk01 & 8)
+                        if (q->flags & 8)
                             continue;
                         break;
                     case 4:
@@ -160,9 +160,9 @@ u8 sub_08061308(u8 a1, u8 a2, u16 *a3)
                             continue;
                         q = &gUnknown_08499594[((struct Map61308 *)gUnknown_08499590)->unk12[
                                 ((struct Map61308 *)gUnknown_08499590)->unk417A[i] + j]];
-                        if (gUnknown_085767A0[q->unk00] == 0)
+                        if (gUnknown_085767A0[q->type] == 0)
                             continue;
-                        if (q->unk01 & 8)
+                        if (q->flags & 8)
                             continue;
                         break;
                     default:

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 #include "hardware.h"
 
 /* WAVE 35: CANONICAL `struct Map`. Eight drafts across blocks 0x08029-0x0802B
@@ -11,22 +12,6 @@
  * OFFSET enters the address arithmetic, never its declared length, and no
  * draft referenced any filler. Keep the drafts in sync; sync_work.py
  * reintroduces whatever the drafts say. */
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x1928];
-    /* 0x417A */ u16 unk417A[0x100];
-};
-
 /* The +2 and +4 must ride on the loaded BASE, not on the index. Offset-
  * compatible with c_0802AA14.c's `struct Tbl49A2A6` -- unk02 starts at the same
  * +2 there, only its declared LENGTH differs, and a declared length never
@@ -62,7 +47,7 @@ struct Tbl49A2A6
  * the header-expanded best.c/best.json score; it is not this translation unit. */
 void sub_0802AA78(void)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     int zero;
     struct Unk02028360 *obj;
     u8 z;
@@ -86,8 +71,8 @@ void sub_0802AA78(void)
     y = gUnknown_03003130.unk11;
     v = sub_0802B6C8(x, y);
 
-    unit = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk0012[
-        ((struct Map *)gUnknown_08499590)->unk417A[y] + x]];
+    unit = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unit[
+        ((struct Map *)gUnknown_08499590)->rowOffset[y] + x]];
     army = ((unit - gUnknown_08499594) >> 6) + 1;
 
     cx = *(u16 *)&gUnknown_03003130.unk0c;
@@ -117,7 +102,7 @@ void sub_0802AA78(void)
 
     sub_0802BAFC(gUnknown_0849A2A6[(s16)sel * 3] + cx + gUnknown_0849A284[0x18],
                  cy + gUnknown_0849A284[0x19],
-                 (s16)Div(gUnknown_085D583C[k].unk10 * 10, 10));
+                 (s16)Div(gUnknown_085D583C[k].defense * 10, 10));
 
     acc = 0;
 
@@ -135,23 +120,23 @@ void sub_0802AA78(void)
 
     if ((u16)v != 0)
     {
-        sub_0802AA14(unit->unk00, cx, (s16)cy, (s16)sel);
+        sub_0802AA14(unit->type, cx, (s16)cy, (s16)sel);
 
         ApplyPaletteExt((u16 *)(gUnknown_0810E6E0
-                            + (gUnknown_08499598[army].unk1a - 1) * 0x20),
+                            + (gPlayers[army].teamColor - 1) * 0x20),
                         0x3e0, 0x20);
 
         sub_0802B91C((((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[(s16)sel * 3]
                           + cx + gUnknown_0849A284[0]) & 0x1ff,
                      cy + gUnknown_0849A284[1],
-                     unit->unk00,
+                     unit->type,
                      army,
                      unit->unk07 | unit->unk08,
                      unit->unk05_3,
-                     unit->unk01,
+                     unit->flags,
                      0);
 
-        if (gUnknown_085D5ABC[unit->unk00].unk0b != 0)
+        if (gUnknown_085D5ABC[unit->type].maxAmmo != 0)
             sub_0801C7DC(gUnknown_081243C4, 3, 1,
                          (cx
                               + ((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[(s16)sel * 3]
@@ -179,28 +164,28 @@ void sub_0802AA78(void)
             sub_0802BAFC(gUnknown_0849A284[6] + (cx
                              + ((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[(s16)sel * 3]),
                          cy + gUnknown_0849A284[7],
-                         unit->unk04_0 != 0
-                             ? (s16)(Div(unit->unk04_0 - 1, 10) + 1)
+                         unit->hp != 0
+                             ? (s16)(Div(unit->hp - 1, 10) + 1)
                              : 0);
         }
 
         sub_0802BAFC(((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[(s16)sel * 3]
                          + cx + gUnknown_0849A284[8],
                      cy + gUnknown_0849A284[9],
-                     unit->unk06_0);
+                     unit->fuel);
 
-        if (gUnknown_085D5ABC[unit->unk00].unk0b != 0)
+        if (gUnknown_085D5ABC[unit->type].maxAmmo != 0)
             sub_0802BAFC(((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[(s16)sel * 3]
                              + cx + gUnknown_0849A284[0xa],
                          cy + gUnknown_0849A284[0xb],
-                         unit->unk04_7);
+                         unit->ammo);
 
-        z = sub_0802706C(unit->unk00, gUnknown_030033EC,
+        z = sub_0802706C(unit->type, gUnknown_030033EC,
                          ((unit - gUnknown_08499594) >> 6) + 1);
 
         if (z != 0)
         {
-            if (gUnknown_085D5ABC[unit->unk00].unk14[0] == 1)
+            if (gUnknown_085D5ABC[unit->type].transportTable[0] == 1)
             {
                 sub_0802B8C4((((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk04[(s16)sel * 3]
                                   + cx + gUnknown_0849A284[0xc]) & 0x1ff,
@@ -218,31 +203,31 @@ void sub_0802AA78(void)
         }
         else if (unit->unk08 != 0)
         {
-            struct Unk08499594 *e1;
-            struct Unk08499594 *e2;
+            struct Unit *e1;
+            struct Unit *e2;
 
             e1 = &gUnknown_08499594[unit->unk07];
             sub_0802B91C((((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk04[(s16)sel * 3]
                               + cx + gUnknown_0849A284[0xe]) & 0x1ff,
                          cy + gUnknown_0849A284[0xf],
-                         e1->unk00, army, e1->unk07 | e1->unk08, 0, 0, 1);
+                         e1->type, army, e1->unk07 | e1->unk08, 0, 0, 1);
 
             e2 = &gUnknown_08499594[unit->unk08];
             sub_0802B91C((((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk04[(s16)sel * 3]
                               + cx + gUnknown_0849A284[0x10]) & 0x1ff,
                          cy + gUnknown_0849A284[0x11],
-                         e2->unk00, army, e2->unk07 | e2->unk08, 0, 0, 2);
+                         e2->type, army, e2->unk07 | e2->unk08, 0, 0, 2);
         }
         else if (unit->unk07 != 0)
         {
-            struct Unk08499594 *e1;
+            struct Unit *e1;
 
             t = unit->unk07;
             e1 = &gUnknown_08499594[t];
             sub_0802B91C((((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk04[(s16)sel * 3]
                               + cx + gUnknown_0849A284[0xc]) & 0x1ff,
                          cy + gUnknown_0849A284[0xd],
-                         e1->unk00, army, e1->unk07 | e1->unk08, 0, 0, 1);
+                         e1->type, army, e1->unk07 | e1->unk08, 0, 0, 1);
         }
 
         acc = (u16)(acc - unit->unk05_3);
@@ -296,8 +281,8 @@ void sub_0802AA78(void)
     if (obj != 0)
         q = obj->unk04;
 
-    if (gUnknown_020288B4[((struct Map *)gUnknown_08499590)->unk417A[(s16)y] + (s16)x] != 0)
-        q = gUnknown_020288B4[((struct Map *)gUnknown_08499590)->unk417A[(s16)y] + (s16)x];
+    if (gUnknown_020288B4[((struct Map *)gUnknown_08499590)->rowOffset[(s16)y] + (s16)x] != 0)
+        q = gUnknown_020288B4[((struct Map *)gUnknown_08499590)->rowOffset[(s16)y] + (s16)x];
 
     if ((s16)q != 0)
     {
@@ -307,7 +292,7 @@ void sub_0802AA78(void)
                      (((s16)cy + gUnknown_0849A284[0x17]) & 0xff) | 0x400,
                      0x1352, 0);
 
-        if ((u32)gUnknown_03004008 % 0x1e > 9)
+        if ((u32)gGameClock % 0x1e > 9)
             sub_0802BAFC(gUnknown_0849A2A6[(s16)sel * 3] + cx
                              + gUnknown_0849A284[0x1a],
                          cy + gUnknown_0849A284[0x1b], q);
@@ -324,7 +309,7 @@ void sub_0802AA78(void)
                          (((s16)cy + gUnknown_0849A284[0x17]) & 0xff) | 0x400,
                          0x1352, 0);
 
-            if ((u16)(accv - 1) > 0x12 || (u32)gUnknown_03004008 % 0x1e > 9)
+            if ((u16)(accv - 1) > 0x12 || (u32)gGameClock % 0x1e > 9)
                 sub_0802BAFC(gUnknown_0849A2A6[(s16)sel * 3] + cx
                                  + gUnknown_0849A284[0x1a],
                              cy + gUnknown_0849A284[0x1b], accv);

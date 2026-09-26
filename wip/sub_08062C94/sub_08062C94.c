@@ -127,13 +127,13 @@ void sub_08062C94(void)
 
   for (t = 0; t <= 3; t++)
   {
-    if (((gUnknown_08499598[gUnknown_030033EC].unk2c >> t) & 1) == 0)
+    if (((gPlayers[gUnknown_030033EC].unk2c >> t) & 1) == 0)
     {
       for (u = t * 0x40; u < ((t * 0x40) + 0x40); u++)
       {
-        if (gUnknown_08499594[u].unk00 != 0)
+        if (gUnknown_08499594[u].type != 0)
         {
-          loc[gUnknown_08499594[u].unk00] += gUnknown_08499594[u].unk04_0;
+          loc[gUnknown_08499594[u].type] += gUnknown_08499594[u].hp;
         }
       }
 
@@ -143,9 +143,9 @@ void sub_08062C94(void)
       k = t * 0x40;
       for (u = k; u < (k + 0x40); u++)
       {
-        if (gUnknown_08499594[u].unk00 != 0)
+        if (gUnknown_08499594[u].type != 0)
         {
-          ((struct Unk62C94Tab *) gUnknown_02029C20)->v[gUnknown_08499594[u].unk00] += gUnknown_08499594[u].unk04_0;
+          ((struct Unk62C94Tab *) gUnknown_02029C20)->v[gUnknown_08499594[u].type] += gUnknown_08499594[u].hp;
         }
       }
 
@@ -158,7 +158,7 @@ void sub_08062C94(void)
     {
       for (m = 1; m <= 0x18; m++)
       {
-        ((struct Unk62C94Tab *) gUnknown_02029C20)->v[k] -= sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d, gUnknown_08499598[gUnknown_030033EC].unk1e, m, k, 0) * loc[m];
+        ((struct Unk62C94Tab *) gUnknown_02029C20)->v[k] -= sub_08043070(gPlayers[gUnknown_030033EC].co, gPlayers[gUnknown_030033EC].coMode, m, k, 0) * loc[m];
       }
 
     }

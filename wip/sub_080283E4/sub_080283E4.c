@@ -1,7 +1,7 @@
 /* WAVE 87 (W87-F) -- `do { } while (0)` TRANSFER TEST: NEGATIVE, 5 placements.
  * The five pool pointers (live across seven bl's) ARE global.c allocnos and the
  * wrapper does move them -- but the BASELINE already holds the ROM's assignment
- * (gpKeySt r4, &gUnknown_03003FC0 r5, &gUnknown_03001FBC r7, gUnknown_08499598
+ * (gpKeySt r4, &gPlaySt r5, &gUnknown_03001FBC r7, gPlayers
  * r3, &gUnknown_03001470 r6) and all four wrappers break it. The actual
  * residual, the r2/r3 destination pair inside the `& 0xc0` block, is INVARIANT
  * across every placement. ALSO: the park's `remaining_diff` is out of date --
@@ -13,7 +13,7 @@
 /* PARKED at 388/388 bytes (wave 36, W36-M). SIZE-EXACT, and every instruction
  * is the ROM's instruction -- what differs is which register holds what in two
  * blocks, plus the `.rodata` addends.
- *   - `gUnknown_08090B44/B48/B4C` are force-addr words for &gUnknown_03003FC0,
+ *   - `gUnknown_08090B44/B48/B4C` are force-addr words for &gPlaySt,
  *     &gUnknown_03001FBC and &gUnknown_03001470; this draft reproduces all three
  *     (they land in r5/r7/r6 exactly as the ROM does). Benign.
  *   - the nine string literals reproduce the ROM's `.rodata` layout offset from
@@ -45,23 +45,23 @@ void sub_080283E4(void)
     struct Unk03001470 *ent;
     u8 *q;
 
-    if (gpKeySt->held & 9)
+    if (gpKeySt->pressed & 9)
     {
-        ((u8 *)gUnknown_08499598)[0x57] = gUnknown_03003FC0.unk38[1];
-        ((u8 *)gUnknown_08499598)[0x93] = gUnknown_03003FC0.unk38[2];
+        ((u8 *)gPlayers)[0x57] = gPlaySt.aiControlled[1];
+        ((u8 *)gPlayers)[0x93] = gPlaySt.aiControlled[2];
         sub_08015C30(gUnknown_03001FBC);
     }
 
-    if (gpKeySt->held & 0x100)
-        gUnknown_03003FC0.unk0d = 1 - gUnknown_03003FC0.unk0d;
+    if (gpKeySt->pressed & 0x100)
+        gPlaySt.fog = 1 - gPlaySt.fog;
 
-    if (gpKeySt->held & 0x30)
+    if (gpKeySt->pressed & 0x30)
         gUnknown_03001470[gUnknown_03001FBC].unk38
             = 1 - gUnknown_03001470[gUnknown_03001FBC].unk38;
 
-    if (gpKeySt->held & 0xc0)
+    if (gpKeySt->pressed & 0xc0)
     {
-        q = (u8 *)&gUnknown_03003FC0;
+        q = (u8 *)&gPlaySt;
         ent = &gUnknown_03001470[gUnknown_03001FBC];
         q += *(s16 *)&ent->unk38;
         q += 0x39;
@@ -72,17 +72,17 @@ void sub_080283E4(void)
             *q = 1;
     }
 
-    if (gUnknown_03003FC0.unk0d == 1)
+    if (gPlaySt.fog == 1)
         sub_08013428(8, 0xd, "R: SAKUTEKI ON");
     else
         sub_08013428(8, 0xd, "R: SAKUTEKI OFF");
 
-    if (gUnknown_03003FC0.unk38[1] == 1)
+    if (gPlaySt.aiControlled[1] == 1)
         sub_08013428(0xb, 0xa, "1P");
     else
         sub_08013428(0xb, 0xa, "CP");
 
-    if (gUnknown_03003FC0.unk38[2] == 1)
+    if (gPlaySt.aiControlled[2] == 1)
         sub_08013428(0x11, 0xa, "2P");
     else
         sub_08013428(0x11, 0xa, "CP");

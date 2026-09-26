@@ -49,7 +49,7 @@
  * The ROM's literal pool carries TWO WORDS FOR ONE OBJECT:
  *      .word R_ARM_ABS32 gUnknown_08090A60   <- a .rodata force-addr word,
  *            DEREFERENCED, used ONCE, only for the pre-loop unk02 read
- *      .word R_ARM_ABS32 gUnknown_03003FC0   <- a PLAIN symbol address, loaded
+ *      .word R_ARM_ABS32 gPlaySt   <- a PLAIN symbol address, loaded
  *            fresh at each of the two in-loop sites
  * The candidate emits only the first (`R_ARM_ABS32 .rodata`) and then holds it
  * in a register for the whole function, reaching the struct as `ldr r2,[r7]`
@@ -61,7 +61,7 @@
  *
  * WHAT THE FUNCTION DOES
  * Deals each player slot a distinct random value. For every slot i in 1..n
- * (n = sub_0802490C(gUnknown_03003FC0.unk02)) whose unk38 flag is still clear,
+ * (n = sub_0802490C(gPlaySt.unk02)) whose unk38 flag is still clear,
  * mark it 2, then re-pick sub_08026254()'s value until no OTHER marked slot
  * already holds it, and store it at unk3d[i].
  *
@@ -72,7 +72,7 @@
  * const-propagates the address and emits the pool word twice"). The ROM behaves
  * like a function with ONE force-addr reference plus TWO plain ones; the
  * candidate behaves like one with 4+. The lever is therefore the NUMBER of
- * source-level references to gUnknown_03003FC0, and the ROM's count is what has
+ * source-level references to gPlaySt, and the ROM's count is what has
  * to be reproduced -- the in-loop sites must reach the struct through something
  * that is not a fifth mention of the symbol.
  *   The body below is the wave-45 rewrite (outer test as a nested `if` rather
@@ -94,7 +94,7 @@
  * 0x08090A64 -> 0x08499598 (sub_08026424's): one word per function, laid out in
  * FUNCTION ADDRESS ORDER. A force-addr pool is private to one function, so that
  * run is the signature of three private words and not of a shared table.
- * Declaring it as a `struct Unk03003FC0 *` global reproduces the first three
+ * Declaring it as a `struct PlaySt *` global reproduces the first three
  * instructions exactly (wave 41 measured that) but is very likely the WRONG
  * model, and it does not fix the other five references anyway.
  *
@@ -111,15 +111,15 @@
  *   - `u8 *flag = &...unk38[i]; u8 *slot = &...unk3d[i];`: emits BOTH pool words
  *     in the ROM's order and drops the frame, but still hoists the two bases.
  *   - the same through a pointer global: agbcc starts emitting
- *     `gUnknown_03003FC0+0x38` and `+0x3d` as their own pool words. Worst tried.
- *   - `struct Unk03003FC0 *p = &gUnknown_03003FC0;` for the body: p is kept in
+ *     `gPlaySt+0x38` and `+0x3d` as their own pool words. Worst tried.
+ *   - `struct PlaySt *p = &gPlaySt;` for the body: p is kept in
  *     one register for the whole function, the opposite of the ROM.
  *   - the outer `continue` vs a nested `if` (wave 45): byte-identical.
  *   - the inner loop in entry-`goto` form (wave 59): -32 bytes, see above.
  *
  * WAVE 87 (W87-A). Still +8, draft unchanged, 0 try_match spent. Two more
  * reference forms measured; see W87-notes.md.
- *   - `*((u8 *)&gUnknown_03003FC0 + (i + 0x38))` at all four loop-body sites
+ *   - `*((u8 *)&gPlaySt + (i + 0x38))` at all four loop-body sites
  *     (W86-F's bare-symbol-in-loop-body construct) INVERTS the ROM's pool
  *     split rather than reproducing it: the pre-loop `.unk02` read goes
  *     DIRECT and the loop sites acquire .rodata force-addr words reached by an
@@ -128,7 +128,7 @@
  *     member reference. (It does preserve the duplicated first inner
  *     iteration, and it drops the prologue to TWO hi registers where the ROM
  *     and this draft both push three.)
- *   - `extern struct Unk03003FC0 g[]; g[0].unk38[i]` -- a constant-indexed
+ *   - `extern struct PlaySt g[]; g[0].unk38[i]` -- a constant-indexed
  *     STRUCT-ARRAY subscript, the form that produces W86-C's array tell
  *     (bare pool word + runtime `adds #0x38`, which is exactly what the ROM
  *     has) -- is BYTE-FOR-BYTE IDENTICAL to this draft. Force-addr word still
@@ -150,13 +150,13 @@ void sub_08026290(void)
     u8 j;
     u8 v;
 
-    n = sub_0802490C(gUnknown_03003FC0.unk02);
+    n = sub_0802490C(gPlaySt.mapID);
 
     for (i = 1; i <= n; i++)
     {
-        if (gUnknown_03003FC0.unk38[i] == 0)
+        if (gPlaySt.aiControlled[i] == 0)
         {
-            gUnknown_03003FC0.unk38[i] = 2;
+            gPlaySt.aiControlled[i] = 2;
 
             do
             {
@@ -164,13 +164,13 @@ void sub_08026290(void)
 
                 for (j = 1; j < n + 1; j++)
                 {
-                    if (i != j && gUnknown_03003FC0.unk38[j] != 0
-                        && gUnknown_03003FC0.unk3d[j] == v)
+                    if (i != j && gPlaySt.aiControlled[j] != 0
+                        && gPlaySt.co[j] == v)
                         break;
                 }
             } while (j != n + 1);
 
-            gUnknown_03003FC0.unk3d[i] = v;
+            gPlaySt.co[i] = v;
         }
     }
 }

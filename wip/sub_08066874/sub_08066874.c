@@ -184,7 +184,7 @@ void sub_08066874(void)
         if (((s8) gUnknown_08580934->unk70[i]) == 0)
         {
           key = &((struct KeySt *) (&gUnknown_03002040))[i];
-          sub_080660BC(key->unk02, i, i == gUnknown_08580934->unk25);
+          sub_080660BC(key->repeated, i, i == gUnknown_08580934->unk25);
         }
       }
 

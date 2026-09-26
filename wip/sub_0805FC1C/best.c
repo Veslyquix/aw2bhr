@@ -75,7 +75,7 @@ void sub_0805FC1C(int a1, void *a2)
   int i;
   int t;
   u8 **new_var;
-  struct Unk08499594 *rec;
+  struct Unit *rec;
   struct Unk030040D8 *p;
   u8 *tbl;
   u8 *e;
@@ -84,32 +84,32 @@ void sub_0805FC1C(int a1, void *a2)
   for (i = gUnknown_03003F2C; i < (gUnknown_03003F2C + 0x40); i++)
   {
     rec = &gUnknown_08499594[i];
-    if (rec->unk00 == 0)
+    if (rec->type == 0)
     {
       continue;
     }
-    if (rec->unk01 & 8)
+    if (rec->flags & 8)
     {
       continue;
     }
-    if (((s8) new_var[rec->unk03][rec->unk02]) < 0)
+    if (((s8) new_var[rec->y][rec->x]) < 0)
     {
       continue;
     }
-    tbl = gUnknown_085D5ABC[rec->unk00].unk14;
+    tbl = gUnknown_085D5ABC[rec->type].transportTable;
     p = gUnknown_030040D8;
     e = tbl - (-1);
     if (e[p->unk00] == 0)
     {
       continue;
     }
-    t = ((struct Unk5FC1CMap *) gUnknown_08499590)->terrain[((struct Unk5FC1CMap *) gUnknown_08499590)->rows[rec->unk03] + rec->unk02] & 0x1f;
+    t = ((struct Unk5FC1CMap *) gUnknown_08499590)->terrain[((struct Unk5FC1CMap *) gUnknown_08499590)->rows[rec->y] + rec->x] & 0x1f;
     e2 = tbl + 0x1a;
     if (e2[t] == 0)
     {
       continue;
     }
-    switch (rec->unk00)
+    switch (rec->type)
     {
       case 7:
 
@@ -117,8 +117,8 @@ void sub_0805FC1C(int a1, void *a2)
         if (((rec->unk09 & 0xc0) == 0) && (rec->unk07 == 0))
       {
         break;
-        ((union Unk802C57CBuf *) a2)->pos.unk00 = rec->unk02;
-        ((union Unk802C57CBuf *) a2)->pos.unk02 = rec->unk03;
+        ((union Unk802C57CBuf *) a2)->pos.unk00 = rec->x;
+        ((union Unk802C57CBuf *) a2)->pos.unk02 = rec->y;
         return;
       }
         rec->unk09 = (rec->unk09 & 0x3f) | 0x40;
@@ -130,8 +130,8 @@ void sub_0805FC1C(int a1, void *a2)
       }
         if (((rec->unk09 & 0xc0) != 0x80) && (rec->unk08 == 0))
       {
-        ((union Unk802C57CBuf *) a2)->pos.unk00 = rec->unk02;
-        ((union Unk802C57CBuf *) a2)->pos.unk02 = rec->unk03;
+        ((union Unk802C57CBuf *) a2)->pos.unk00 = rec->x;
+        ((union Unk802C57CBuf *) a2)->pos.unk02 = rec->y;
         return;
       }
         rec->unk09 = (rec->unk09 & 0x3f) | 0x80;

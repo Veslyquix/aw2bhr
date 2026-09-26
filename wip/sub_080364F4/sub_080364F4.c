@@ -1,6 +1,6 @@
 #include "global.h"
 
-/* Reseed gUnknown_03003FC0's per-slot arrays from the chapter record
+/* Reseed gPlaySt's per-slot arrays from the chapter record
  * gUnknown_085C77A0[unk02], then start whichever proc-list script that record
  * names.
  *
@@ -28,7 +28,7 @@ void sub_080364F4(void)
 
     sub_080191B0();
 
-    mode = gUnknown_03003FC0.unk01;
+    mode = gPlaySt.gameMode;
 
     switch (mode)
     {
@@ -36,30 +36,30 @@ void sub_080364F4(void)
     case 2:
         for (i = 0; i < 4; i++)
         {
-            gUnknown_03003FC0.unk42[i + 1] =
-                ((const u8 *)&gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk44)[i];
-            gUnknown_03003FC0.unk33[i + 1] =
-                gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk40[i];
+            gPlaySt.unk42[i + 1] =
+                ((const u8 *)&gUnknown_085C77A0[gPlaySt.mapID].unk44)[i];
+            gPlaySt.armyColor[i + 1] =
+                gUnknown_085C77A0[gPlaySt.mapID].unk40[i];
 
-            if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i] == 0xff
+            if (gUnknown_085C77A0[gPlaySt.mapID].unk3c[i] == 0xff
                 && i + 1 <= 3)
-                gUnknown_03003FC0.unk3d[i + 1] = gUnknown_030058D4[i];
+                gPlaySt.co[i + 1] = gUnknown_030058D4[i];
             else
-                gUnknown_03003FC0.unk3d[i + 1] =
-                    gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i];
+                gPlaySt.co[i + 1] =
+                    gUnknown_085C77A0[gPlaySt.mapID].unk3c[i];
         }
         break;
 
     case 0:
         for (i = 0; i < 4; i++)
-            gUnknown_03003FC0.unk3d[i + 1] =
-                gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i];
+            gPlaySt.co[i + 1] =
+                gUnknown_085C77A0[gPlaySt.mapID].unk3c[i];
         break;
     }
 
-    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk0c != NULL
-        && gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk1a <= 2)
-        sub_080193B0(gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk0c);
+    if (gUnknown_085C77A0[gPlaySt.mapID].hardcodedUnits != NULL
+        && gUnknown_085C77A0[gPlaySt.mapID].category <= 2)
+        sub_080193B0(gUnknown_085C77A0[gPlaySt.mapID].hardcodedUnits);
     else
         sub_080364E0();
 }

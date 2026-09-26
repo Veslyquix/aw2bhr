@@ -27,7 +27,7 @@ void sub_08086A58(int a, int n, int b)
 
     sub_08013C00();
 
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
         for (i = 0; i < n; i++)
         {

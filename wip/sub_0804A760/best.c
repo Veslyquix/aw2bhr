@@ -86,7 +86,7 @@
  *    condition is `unk5c == 0 && sub_0804A18C(...) == 0x24`. This body spells
  *    it that way and gcc still laid the second conjunct out in the wrong place,
  *    so the candidate is longer. The `_0804A946` target is the
- *    `gpKeySt->unk02 & 0x30` test, NOT the `& 0xf0` guard above it -- the
+ *    `gpKeySt->repeated & 0x30` test, NOT the `& 0xf0` guard above it -- the
  *    `& 0xf0` guard is outside the loop and is only tested once. Getting the
  *    loop's TOP right is the whole of this defect; suspect a `goto`-shaped
  *    source here, since the doc's "A GOTO LOOP IS INVISIBLE TO loop.c" chapter
@@ -157,7 +157,7 @@ void sub_0804A760(void)
         break;
     }
 
-    switch (gpKeySt->held & 0xf)
+    switch (gpKeySt->pressed & 0xf)
     {
     case 8:
         ((struct Unk030044E0View *)gUnknown_030044E0)->unk1e = 0xe;
@@ -215,12 +215,12 @@ void sub_0804A760(void)
         return;
     }
 
-    if ((gpKeySt->unk00 & 0xf0) == 0)
+    if ((gpKeySt->held & 0xf0) == 0)
         return;
 
 key_loop:
     {
-        if (gpKeySt->unk02 & 0x30)
+        if (gpKeySt->repeated & 0x30)
         {
             u = sub_0804A18C(gUnknown_030044E0->unk20 * 15 + gUnknown_030044E0->unk1e);
             switch (u)
@@ -237,7 +237,7 @@ key_loop:
 
             do
             {
-                if (gpKeySt->unk02 & 0x10)
+                if (gpKeySt->repeated & 0x10)
                     ((struct Unk030044E0View *)gUnknown_030044E0)->unk1e =
                         (((struct Unk030044E0View *)gUnknown_030044E0)->unk1e > 0xd)
                             ? 0
@@ -270,9 +270,9 @@ key_loop:
             flag = 1;
         }
 
-        if (gpKeySt->unk02 & 0xc0)
+        if (gpKeySt->repeated & 0xc0)
         {
-            if (gpKeySt->unk02 & 0x80)
+            if (gpKeySt->repeated & 0x80)
                 gUnknown_030044E0->unk20 = (gUnknown_030044E0->unk20 > 4)
                     ? 0 : gUnknown_030044E0->unk20 + 1;
             else

@@ -1,6 +1,6 @@
 /* PARKED at 96.8%, wave 56 W56-I.  SIZE IS EXACT (496 bytes) and 16 bytes
  * differ, all of them in ONE basic block -- the `c != 0` arm of the
- * `gUnknown_03003FC0.unk32 != 0` tail.  Everything else is byte-identical.
+ * `gPlaySt.unk32 != 0` tail.  Everything else is byte-identical.
  *
  * THE RESIDUAL IS A SINGLE COALESCING DECISION, AND IT IS SWAPPED BETWEEN TWO
  * ADJACENT BLOCKS.  The ROM spends the copy on the `d` test and not on the `c`
@@ -29,7 +29,7 @@
  *     96.8%.  gcc cross-jumps the two tests onto the single call block either
  *     way, but the duplicate changes where that block is PLACED.
  *
- * ONE THING RULED OUT: binding `e = gUnknown_08499598;` before the outer loop.
+ * ONE THING RULED OUT: binding `e = gPlayers;` before the outer loop.
  * WAVE 79 (W79-A) RE-MEASURED THIS: still SIZE-EXACT 496/496, 96.8%, 16 bytes,
  * first difference at +0x188. THREE MORE AXES RULED OUT, do not re-derive:
  *  5. Inverting the two tested arms -- `if (a != 0) { if (c != 0) ... }
@@ -82,15 +82,15 @@ void sub_08037FD0(ProcPtr parent)
     for (i = 1; i <= 4; i++)
     {
         if (sub_080266DC(i))
-            sub_080265D0(i, gUnknown_03003FC0.unk02);
+            sub_080265D0(i, gPlaySt.mapID);
     }
     sub_08026520();
-    sub_08017720(gUnknown_08499598[sub_0807A908()].unk1d,
-                 gUnknown_03003FC0.unk02,
-                 gUnknown_08499598[sub_0807A908()].unk38,
+    sub_08017720(gPlayers[sub_0807A908()].co,
+                 gPlaySt.mapID,
+                 gPlayers[sub_0807A908()].totalScore,
                  gUnknown_03004080);
     sub_08030574();
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 0:
     case 1:
@@ -105,16 +105,16 @@ void sub_08037FD0(ProcPtr parent)
         flag = 0;
         for (i = 1; i <= 4; i++)
         {
-            if (gUnknown_08499598[i].unk1b != 0)
+            if (gPlayers[i].aiControlled != 0)
             {
-                if (gUnknown_08499598[i].unk14 == 0)
+                if (gPlayers[i].defeated == 0)
                 {
                     for (j = 1; j <= 4; j++)
                     {
                         if (i != j
-                         && gUnknown_08499598[j].unk1b != 0
-                         && gUnknown_08499598[j].unk14 == 0
-                         && gUnknown_08499598[i].unk2a != gUnknown_08499598[j].unk2a)
+                         && gPlayers[j].aiControlled != 0
+                         && gPlayers[j].defeated == 0
+                         && gPlayers[i].team != gPlayers[j].team)
                         {
                             do { } while (0);
                             flag = 1;
@@ -133,7 +133,7 @@ void sub_08037FD0(ProcPtr parent)
         }
         for (m = 1; m <= 4; m++)
         {
-            switch (gUnknown_08499598[m].unk1b)
+            switch (gPlayers[m].aiControlled)
             {
             case 0:
                 break;
@@ -153,7 +153,7 @@ void sub_08037FD0(ProcPtr parent)
                 break;
             }
         }
-        if (gUnknown_03003FC0.unk32 != 0)
+        if (gPlaySt.savingEnabled != 0)
         {
             if (a == 0)
             {

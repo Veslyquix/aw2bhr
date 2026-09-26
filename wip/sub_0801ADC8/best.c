@@ -93,7 +93,7 @@ void sub_0801ADC8(void)
                     gUnknown_0200CC38.unk10[i] = 0xff;
                     gUnknown_0200CC38.unk00[i] = -1;
                     gUnknown_0200CC38.unk20[i] |= 4;
-                    gUnknown_0200CC88[i] = 0;
+                    gUnknown_0200CC88.sectorGeneration[i] = 0;
                     break;
                 }
             }
@@ -116,7 +116,7 @@ void sub_0801ADC8(void)
                     gUnknown_0200CC38.unk10[i] = 0xff;
                     gUnknown_0200CC38.unk00[i] = -1;
                     gUnknown_0200CC38.unk20[i] |= 4;
-                    gUnknown_0200CC88[i] = 0;
+                    gUnknown_0200CC88.sectorGeneration[i] = 0;
                     break;
                 }
             }

@@ -27,8 +27,8 @@ void sub_08022618(u16 x, u16 y)
 {
   u16 ** const *pp;
   int new_var;
-  const struct Unk085D5ABC * const *pp2;
-  struct Unk08499594 *rec;
+  const struct UnitType * const *pp2;
+  struct Unit *rec;
   u8 *p;
   u8 *rows;
   u8 *q;
@@ -55,7 +55,7 @@ void sub_08022618(u16 x, u16 y)
   id = q[off];
   q = p + 0x234A;
   new_var = (id == 0) || (q[off] == 0);
-  if ((new_var || (!sub_0802571C(id))) || (gUnknown_08499594[id].unk01 & 4))
+  if ((new_var || (!sub_0802571C(id))) || (gUnknown_08499594[id].flags & 4))
   {
     sub_080225CC(x, y);
   }
@@ -67,13 +67,13 @@ void sub_08022618(u16 x, u16 y)
     tile[0] = 0x360;
     flags = 0;
     pp2 = &gUnknown_080909AC;
-    cap = (*pp2)[rec->unk00].unk0b;
-    if ((cap != 0) && (rec->unk04_7 <= Div(cap, 3)))
+    cap = (*pp2)[rec->type].maxAmmo;
+    if ((cap != 0) && (rec->ammo <= Div(cap, 3)))
     {
       flags = 1;
     }
-    cap = (*pp2)[rec->unk00].unk10;
-    if ((cap != 0) && (rec->unk06_0 <= Div(cap, 3)))
+    cap = (*pp2)[rec->type].maxFuel;
+    if ((cap != 0) && (rec->fuel <= Div(cap, 3)))
     {
       flags += 2;
     }

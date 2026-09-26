@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Wave 80 (W80-D): 352/352, 20 bytes, unchanged; the mechanism is now known
  * and the residual is a LICM decision, not a spelling. (1) Every raw pointer
@@ -58,7 +59,7 @@
  * The whole structure is settled and every instruction except two is
  * byte-exact: the four `i` loops, the two map scans, the `a[n++] = i`
  * compaction, the `if (++cnt == 4) return;` early exit out of the nest, and
- * the trailing `gUnknown_08499598[i].unk1a = a[i]` store all reproduce.
+ * the trailing `gPlayers[i].unk1a = a[i]` store all reproduce.
  *
  * THE ENTIRE RESIDUAL: in the SECOND map loop the candidate hoists the
  * 0x417A address constant out of the inner loop --
@@ -96,23 +97,6 @@
  * gUnknown_08499590 is reached through the shared `(struct Map *)` cast, the
  * same idiom as src/decomp/c_08000BF8.c. */
 
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x0A10];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
-
 inline int inline_fn(int arg0, int arg1)
 {
   return arg0 + arg1;
@@ -135,12 +119,12 @@ void sub_0803D558(void)
   }
 
   cnt = 0;
-  for (y = 0; y < ((struct Map *) gUnknown_08499590)->unk02; y++)
+  for (y = 0; y < ((struct Map *) gUnknown_08499590)->height; y++)
   {
-    for (x = 0; x < ((struct Map *) gUnknown_08499590)->unk00; x++)
+    for (x = 0; x < ((struct Map *) gUnknown_08499590)->width; x++)
     {
       i = x;
-      v = ((struct Map *) gUnknown_08499590)->unk1432[((struct Map *) gUnknown_08499590)->unk417A[y] + i];
+      v = ((struct Map *) gUnknown_08499590)->terrain[((struct Map *) gUnknown_08499590)->rowOffset[y] + i];
       if ((v & 0x1f) == 8)
       {
         a[v >> 5] = 1;
@@ -171,9 +155,9 @@ void sub_0803D558(void)
     }
   }
 
-  for (y = 0; y < ((struct Map *) gUnknown_08499590)->unk02; y++)
+  for (y = 0; y < ((struct Map *) gUnknown_08499590)->height; y++)
   {
-    for (x = 0; x < ((struct Map *) gUnknown_08499590)->unk00; x++)
+    for (x = 0; x < ((struct Map *) gUnknown_08499590)->width; x++)
     {
       v = gUnknown_08499590[inline_fn(inline_fn(0x1432, ((u16 *) (gUnknown_08499590 + 0x417A))[y]), x)];
       gUnknown_08499590[inline_fn(0x1432, ((u16 *) (gUnknown_08499590 + 0x417A))[y]) + x] = inline_fn(v & 0x1f, b[v >> 5]);
@@ -183,7 +167,7 @@ void sub_0803D558(void)
 
   for (i = 0; i <= 4; i++)
   {
-    gUnknown_08499598[i].unk1a = a[i];
+    gPlayers[i].teamColor = a[i];
   }
 
 }

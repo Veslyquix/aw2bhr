@@ -25,6 +25,6 @@
  * so the screens stop reporting this as an unmeasured draft. */
 void sub_08071918(void *a, int b, int c, int d)
 {
-    if ((gpKeySt->unk00 & 0x200) && (gpKeySt->held & 2))
+    if ((gpKeySt->held & 0x200) && (gpKeySt->pressed & 2))
         sub_0803DDF4();
 }

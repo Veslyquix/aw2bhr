@@ -47,7 +47,7 @@
  *    declared with exactly the right types. See include/unknown-globals.h.
  *    This match will need
  *      "rodata": ["0x081D93FC", "0x081D9400", "0x081D9404", "0x081D9408"]
- *    plus the words for gUnknown_03003FC0 and gUnknown_03005928's own pool
+ *    plus the words for gPlaySt and gUnknown_03005928's own pool
  *    entries that try_match lists.
  *  - The fifth counted loop MUST be spelled `+ (i + 3) * 0x20` and not
  *    `+ 0x60 + i * 0x20`. The two are the same value; the second folds the
@@ -110,7 +110,7 @@ void sub_08085B30(struct Unk8085B30 *proc)
     sub_0801B780(0);
     sub_08037750(6);
 
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
         gUnknown_03005928 = 7;
         sub_080375A4(2);
@@ -145,7 +145,7 @@ void sub_08085B30(struct Unk8085B30 *proc)
 
     sub_0802D5A0((void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06006C00), 0, 0);
 
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
         sub_0801A368(-1, 4, 0xe, gUnknown_03005928 * 2 + 2, gUnknown_08499580, 0);
         sub_0801A368(0x12, 0, 0xd, 4, gUnknown_08499580, 0);

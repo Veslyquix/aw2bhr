@@ -79,7 +79,7 @@ void sub_08020EDC(s16 x, s16 y, s16 r, u8 *buf, int delta, u8 flags)
     int off;
     int ty;
     int t;
-    struct Unk08499594 *unit;
+    struct Unit *unit;
 
     d = delta;
     f = flags;
@@ -127,7 +127,7 @@ void sub_08020EDC(s16 x, s16 y, s16 r, u8 *buf, int delta, u8 flags)
                     ids = p + 0x51a;
                     if (ids[off] == 0)
                         continue;
-                    if ((u8)((unit = &gUnknown_08499594[ids[off]])->unk00 - 0x10) > 4)
+                    if ((u8)((unit = &gUnknown_08499594[ids[off]])->type - 0x10) > 4)
                         continue;
                 }
             }

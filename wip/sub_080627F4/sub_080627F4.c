@@ -26,7 +26,7 @@ void sub_080627F4(u8 a1)
     int t;
     int u;
     int m;
-    struct Unk08499594 *e;
+    struct Unit *e;
     int bit;
     int c;
     int x;
@@ -34,17 +34,17 @@ void sub_080627F4(u8 a1)
     u32 v;
 
     for (t = 0; t <= 3; t++) {
-        bit = (gUnknown_08499598[gUnknown_030033EC].unk2c >> t) & 1;
+        bit = (gPlayers[gUnknown_030033EC].unk2c >> t) & 1;
         if (a1 == 1 && bit == 1)
             continue;
         if (a1 == 0 && bit == 0)
             continue;
         for (u = t * 0x40; u < t * 0x40 + 0x40; u++) {
             e = &gUnknown_08499594[u];
-            if (e->unk00 == 0)
+            if (e->type == 0)
                 continue;
             for (m = 1; m <= 0x18; m++) {
-                switch (gUnknown_085D5ABC[e->unk00].unk1a - 1) {
+                switch (gUnknown_085D5ABC[e->type].deployLocation - 1) {
                 case 0:
                     c = 0;
                     break;
@@ -63,13 +63,13 @@ void sub_080627F4(u8 a1)
                 default:
                     continue;
                 }
-                v = e->unk04_0
-                    * sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                                   gUnknown_08499598[gUnknown_030033EC].unk1e,
-                                   m, e->unk00, 0);
-                x = e->unk02 >> 2;
-                y = e->unk03 >> 2;
-                if (gUnknown_085D5ABC[e->unk00].unk0e == 1) {
+                v = e->hp
+                    * sub_08043070(gPlayers[gUnknown_030033EC].co,
+                                   gPlayers[gUnknown_030033EC].coMode,
+                                   m, e->type, 0);
+                x = e->x >> 2;
+                y = e->y >> 2;
+                if (gUnknown_085D5ABC[e->type].minRange == 1) {
                     gUnknown_0202DAD8[y][x].unk00[bit * 5 + c] += v;
                     if (y > 0)
                         gUnknown_0202DAD8[y - 1][x].unk00[bit * 5 + c] += v >> 1;

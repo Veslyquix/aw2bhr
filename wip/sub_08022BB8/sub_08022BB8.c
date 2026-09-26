@@ -24,7 +24,7 @@ void sub_08022BB8(s16 x, s16 y, s16 kind)
     u32 sx;
     u32 sy;
 
-    i = (u32)gUnknown_03004008 % 0x21;
+    i = (u32)gGameClock % 0x21;
 
     if (i <= 4)
     {

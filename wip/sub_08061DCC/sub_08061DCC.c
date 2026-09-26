@@ -159,7 +159,7 @@
  * (The wrapper was fixed after wave 61.)
  *
  * Everything else is settled and should not be re-derived:
- *   - the parameter is a unit record with struct Unk08499594's layout; the
+ *   - the parameter is a unit record with struct Unit's layout; the
  *     bitfields are what produce the ROM's SImode `movs #8; negs; ands` mask.
  *     A hand-written `(p->unk09 & ~7) | K` narrows to `movs #0xf8; ands` and is
  *     one instruction shorter -- measured, so the field really is a bitfield.
@@ -191,7 +191,7 @@ struct Unk8061DCC
 void sub_08061DCC(struct Unk8061DCC *p)
 {
     u8 **volatile *pa;
-    struct Unk085D5ABC *volatile *pb;
+    struct UnitType *volatile *pb;
 
     pa = &gUnknown_0816DB08;
     if (p->unk04_0 < (*gUnknown_0816DB08)[3])
@@ -201,9 +201,9 @@ void sub_08061DCC(struct Unk8061DCC *p)
     }
 
     pb = &gUnknown_0816DB0C;
-    if (gUnknown_0816DB0C[p->unk00].unk0b == 0 || p->unk04_7 != 0)
+    if (gUnknown_0816DB0C[p->unk00].maxAmmo == 0 || p->unk04_7 != 0)
     {
-        u8 q = 100 * p->unk06_0 / (*pb)[(((u32)p->unk00 << 24) & 0xff000000) >> 24].unk10;
+        u8 q = 100 * p->unk06_0 / (*pb)[(((u32)p->unk00 << 24) & 0xff000000) >> 24].maxFuel;
 
         if (q >= (*(*pa))[2])
             return;
