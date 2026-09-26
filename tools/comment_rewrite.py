@@ -95,7 +95,6 @@ def apply(path, blocks_path):
     if doc["sha1"] != hashlib.sha1(raw).hexdigest():
         print("REFUSED: %s changed since extraction; extract again" % path)
         return 2
-    nl = "\r\n" if "\r\n" in text else "\n"
     changed = deleted = 0
     for b in sorted(doc["blocks"], key=lambda b: -b["start"]):
         if "new" not in b:
@@ -104,6 +103,10 @@ def apply(path, blocks_path):
         if text[s:e].replace("\r\n", "\n") != b["old"]:
             print("REFUSED: block %d no longer matches its text" % b["id"])
             return 2
+        # Some headers mix CRLF and LF lines, so take the ending of the line
+        # the comment ends on, not one style for the whole file.
+        eol = text.find("\n", e)
+        nl = "\r\n" if eol > 0 and text[eol - 1] == "\r" else "\n"
         new = b["new"].replace("\r\n", "\n").replace("\n", nl)
         if new == "":
             # Take the whole line(s) when the comment stood alone on them.
