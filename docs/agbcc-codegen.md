@@ -49876,8 +49876,11 @@ Two traps from the cleanup pass:
 ## The W56-H loop-top residual is a `cmd` LOCAL: re-read `*p` instead (sub_0801DCD4)
 
 Solves the "UNSOLVED 4-byte residual" recorded under W56-H for
-`sub_0801DCD4` (now `RunSimpleSpriteScript`). It should transfer to its twin
-`sub_0801D390`, but that is not yet measured.
+`sub_0801DCD4` (now `RunSimpleSpriteScript`). It transfers to its twin
+`sub_0801D390`: with the same three spellings, that function's loop-top
+sequence and every constant-first AND match the ROM too. sub_0801D390 is
+still unmatched (800/856, -56), but for an unrelated reason. See
+"sub_0801D390's remaining residual" below.
 
 Three pieces, measured in this order:
 
@@ -49906,3 +49909,36 @@ The last 14 bytes were a load-order effect. Build pointer + index in two
 statements: `p = base; p += off;` and `frame = (u32 *)e->unk20; frame +=
 e->unk24;`. The one-expression `&base[i]` loads the base after the index,
 into the wrong register.
+
+## sub_0801D390's remaining residual is global-alloc order, not source shape
+
+With the mask residual solved (section above), sub_0801D390 is 800/856
+(-56). The whole deficit is register assignment:
+
+| value | ROM | candidate |
+|---|---|---|
+| script pointer `p` | r7 | r6 |
+| entry pointer `e` | r8 | r7 |
+| 0x6000 case's call-argument copy of `arg` | r6 | r8 |
+
+With `e` in r8, the ROM reaches it through a `mov rN, r8` reload at each
+access, and those reloads are the -56.
+
+From `-dg`, global-alloc priority is `e` (97 refs / 318 live, 18301) >
+`p` (74 / 289, 15363) > the arg copy (pseudo 240, block-local, 4 / 19, 4210).
+The arg copy is not local-allocated here. It reaches global alloc and loses.
+`p`'s and `e`'s use counts match the ROM exactly (the same eleven `p += 2`
+and the same `e` accesses), so the ROM's order has to come from elsewhere.
+The likeliest source is local-alloc taking the call-crossing arg copy into
+r6 before global alloc runs. That is unverified without compiler source.
+
+Ruled out:
+
+- Declaring `p` before `e`. The pseudo numbers swap; the allocation does not.
+- Direct `gUnknown_0200E438[id].field` indexing: +180.
+- `do`/`while` and `for (;;)` loop shapes.
+- `register ... asm("r8")` on `e`. It gets `e` and `p` right, but a hard
+  register is not a loop invariant, so loop.c stops hoisting `&e->unk28`
+  into sb. Hoisting that pointer by hand is +28.
+- Three 120 s permuter runs from the corrected draft. The best valid result
+  is still the draft.
