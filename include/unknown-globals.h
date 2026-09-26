@@ -6244,7 +6244,17 @@ struct Unk03003F58
 };
 extern struct Unk03003F58 gUnknown_03003F58;
 extern int gUnknown_03003F40;
-extern void *gUnknown_03003F68;
+/* The current map's base tile layout: LoadMapData (sub_080247A4) allocates it
+ * with sub_08014E44 and decompresses the map into it. Byte width and height,
+ * then width * height u16 tiles. sub_08016F38 diffs gMap->tile against it to
+ * save only the changed cells. The tile count is not fixed. */
+struct MapLayout
+{
+    /* 0x00 */ u8 width;
+    /* 0x01 */ u8 height;
+    /* 0x02 */ u16 tile[1];
+};
+extern struct MapLayout *gUnknown_03003F68;
 extern struct Unk0202575C gUnknown_0202575C;
 /* Wave 30, W30-A. sub_08032048 is `gUnknown_03003F1C = gUnknown_030044C4 = 0;`
  * -- ONE chained assignment, proved by the pool order: gUnknown_03003F1C's

@@ -6033,6 +6033,8 @@ void sub_080162A4(u8);
  * arity- and width-blind. The return is UNPROVED: sub_08016D30 is its only
  * caller and discards r0, so `void` is the weakest type that fits. W35-I. */
 void sub_08016F38(u8);
+void CaptureBattleSaveState(u8); /* sub_08016F38's readable name; see
+                                  * src/decomp/c_08016F38.c. */
 /* The free half of sub_0801DAB0's affine-matrix slot allocator (sub_0801DAB0
  * scans gUnknown_03001430[0..0x1f] for a zero entry, this one releases). `s16`
  * from its own prologue in asm/code-0801D390.s -- `lsls #0x10; asrs #0x10` and

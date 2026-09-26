@@ -498,8 +498,20 @@ def reloc_equivalent(tgt_fn, cand_fn, t_rel, c_rel, cand_o=None):
             # functions reported at 99.1% with one differing byte, all four
             # instruction-for-instruction identical and linking to the same
             # ROM.
+            #
+            # A `bl` may name a different symbol when both names are the same
+            # function: a readable name plus the old sub_XXXXXXXX kept as a
+            # `.thumb_set` alias (LoadMapData / sub_080247A4, memcpy /
+            # sub_0808B6E8). asm/ still spells the call with the old name.
+            # Accept it only when BOTH names are in the real symbol table --
+            # the linked ELF or the map, not sym_addr()'s name fallback -- at
+            # the same address. The `bl` bytes themselves are still compared
+            # by the loop below.
             if t_sym != c_sym:
-                return False
+                if (t_typ != "R_ARM_THM_CALL"
+                        or syms.get(t_sym) is None
+                        or syms.get(t_sym) != syms.get(c_sym)):
+                    return False
             continue
         t_name, t_extra = _split_sym(t_sym)
         c_name, c_extra = _split_sym(c_sym)
