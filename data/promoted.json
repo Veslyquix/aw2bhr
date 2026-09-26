@@ -5984,15 +5984,6 @@
   "size": 132
  },
  {
-  "file": "src/decomp/c_0801DCD4.c",
-  "obj": "src/decomp/c_0801DCD4.o",
-  "addr_hex": "0x0801DCD4",
-  "functions": [
-   "sub_0801DCD4"
-  ],
-  "size": 516
- },
- {
   "file": "src/decomp/c_0801DED8.c",
   "obj": "src/decomp/c_0801DED8.o",
   "addr_hex": "0x0801DED8",
