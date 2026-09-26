@@ -53687,3 +53687,15 @@ local swaps the add's operands (99.2%).
 **Read-out:** a narrowing in a matched caller settles the VALUE passed, not
 the callee's parameter type. If the callee only matches wide, try a cast in
 the caller before calling the prototype a contract.
+
+## Name gMap, not its -fforce-addr word, even for a first-use-only access (sub_0803E6C4)
+
+sub_0803E6C4 (now `ScanUnitsBelowStrip`) sat at 156/160 (-4) from wave 38.
+Its first height check reaches the map through the .rodata address word
+gUnknown_080912FC (`ldr; ldr; ldr`), and the loop through the plain pool
+symbol, so the draft spelled the first access `*gUnknown_080912FC` by hand.
+Writing `gMap->height` there as well is 160/160 at 97.5%: -fforce-addr emits
+the address word by itself, placed as the ROM has it. The last 2.5% was
+parameter-move order in the prologue. Copying the first parameter into a
+local (`left = x;`) before the loop puts a3's copy ahead of x's move to sl.
+decomp-permuter found that in one 5-minute run.

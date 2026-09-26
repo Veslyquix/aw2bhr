@@ -6126,6 +6126,7 @@ void sub_0803E310(int, int, int, int, int, int);
 void sub_0803E554(void);
 void sub_0803E594(int, int, int);
 void sub_0803E6C4(int, int, int);
+void ScanUnitsBelowStrip(int, int, int); /* sub_0803E6C4; see src/decomp/c_0803E6C4.c. */
 void sub_0803E764(struct Unk02028360Pos *, int);
 void sub_0803E808(int, int, int, int, int);
 void sub_0803EF44(int, int, ProcPtr);

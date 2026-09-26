@@ -15393,6 +15393,18 @@
   "size": 304
  },
  {
+  "file": "src/decomp/c_0803E6C4.c",
+  "obj": "src/decomp/c_0803E6C4.o",
+  "addr_hex": "0x0803E6C4",
+  "functions": [
+   "sub_0803E6C4"
+  ],
+  "size": 160,
+  "rodata": [
+   "0x080912FC"
+  ]
+ },
+ {
   "file": "src/decomp/c_0803E764.c",
   "obj": "src/decomp/c_0803E764.o",
   "addr_hex": "0x0803E764",
