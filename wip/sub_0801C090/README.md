@@ -2,11 +2,12 @@
 
 0x0801C090, 360 bytes, THUMB, parked.
 
-Best score so far: 45.8% (preprocessed form, not included).
+Best score so far: 75.6% (best.c).
 
 ## Files
 
 - `sub_0801C090.c`: the current draft
+- `best.c`: the closest attempt, when it is not the draft
 - `NOTES.md`: working notes
 - `target.s`: the original assembly
 

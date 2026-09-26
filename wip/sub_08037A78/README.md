@@ -2,7 +2,7 @@
 
 0x08037A78, 268 bytes, THUMB, parked.
 
-Best score so far: 27.6%, -4 bytes.
+Best score so far: 41.0%, +4 bytes.
 
 ## Files
 

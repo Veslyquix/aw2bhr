@@ -7,23 +7,22 @@ struct SpriteTemplateEntry
     u16 attr0;
     u16 attr1;
     u16 attr2;
-} __attribute__((packed, aligned(2)));
+};
 
 /* Copies a counted sprite template to the OAM shadow. When the caller requests
  * horizontal mirroring, the X position is adjusted by the sprite's width. */
 void sub_0801C090(s32 x, s32 y, void *template, s32 tileOffset)
 {
-  u16 *header;
-  struct SpriteTemplateEntry *src;
+  u16 *src;
   u16 *dst;
   u32 count;
   u32 remaining;
   u16 attr0;
   u16 attr1;
   u16 sourceAttr0;
-  header = template;
-  count = *header;
-  src = (struct SpriteTemplateEntry *)(header + 1);
+  src = template;
+  count = *src;
+  src++;
   dst = gUnknown_03002F2C;
   remaining = count;
   while (remaining != 0)
@@ -31,11 +30,12 @@ void sub_0801C090(s32 x, s32 y, void *template, s32 tileOffset)
     if (x & 0x1000)
     {
       u16 negWidth;
-      attr1 = src->attr1;
+      attr1 = ((struct SpriteTemplateEntry *) src)->attr1;
       /* Shape and size index the width/height table. Keep the attr0 read in
        * this expression so agbcc can reuse it for the output attribute. */
-      negWidth = -gUnknown_0848B56C[((attr1 >> 14) * 2)
-                                      + (((sourceAttr0 = src->attr0) >> 14) * 8)];
+      negWidth = -*(s16 *)(((u32)(attr1 >> 14) * 4)
+                 + ((u32)((sourceAttr0 = ((struct SpriteTemplateEntry *)src)->attr0) >> 14) * 16)
+                 + (u32)gUnknown_0848B56C);
       remaining = 0x1ff & attr1;
       if (attr1 & 0x100)
       {
@@ -49,20 +49,20 @@ void sub_0801C090(s32 x, s32 y, void *template, s32 tileOffset)
     {
       /* The same temporary holds the unmirrored first attribute and later
        * becomes the loop's 16-bit countdown word. */
-      remaining = ((y | src->attr0) & ~0xff)
-                | (((src->attr0 + y)
+      remaining = ((y | ((struct SpriteTemplateEntry *)src)->attr0) & ~0xff)
+                | (((((struct SpriteTemplateEntry *)src)->attr0 + y)
                     + gUnknown_03002B20) & 0xff);
       attr0 = remaining;
-      attr1 = ((x | src->attr1) & ~0x1ff)
-            | (((src->attr1 + x)
+      attr1 = ((x | ((struct SpriteTemplateEntry *)src)->attr1) & ~0x1ff)
+            | (((((struct SpriteTemplateEntry *)src)->attr1 + x)
                 + gUnknown_030030D0) & 0x1ff);
     }
     *(dst++) = attr0;
-    *(dst++) = (attr1 & 0xcfff) | ((x ^ src->attr1) & 0x3000);
-    *dst = src->attr2 + tileOffset;
+    *(dst++) = (attr1 & 0xcfff) | ((x ^ ((struct SpriteTemplateEntry *) src)->attr1) & 0x3000);
+    *dst = ((struct SpriteTemplateEntry *) src)->attr2 + tileOffset;
     dst += 2;
     gUnknown_03002F2C = ((u8 *) gUnknown_03002F2C) + 8;
-    src++;
+    src += 3;
     remaining = (count * 0x10000) + 0xffff0000;
     count = remaining >> 16;
   }

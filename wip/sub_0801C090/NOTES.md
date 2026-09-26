@@ -163,3 +163,27 @@ active draft was restored after the verdict.
    somewhere in the arms than anything about `count` itself.
 3. Do NOT try to fix the mask narrowing again — it is solved. Do not remove the
    `u32 t` intermediates.
+
+## Local notes from a separate pre-merge pass (2026-09-25)
+
+These came from a checkout that had not yet seen the notes above. Its
+`best.c` (75.6%, size-exact) is the one published here.
+
+
+- The starting Ghidra draft was 360/360 bytes but only 15.0% byte identical.
+- The readable `sub_0801C090.c` is 360/360 bytes, 75.56% identical, and does
+  not match. `python3 tools/trymatch.py sub_0801C090 --diff` is the verdict.
+- The sprite template is a count followed by three `u16` OAM attributes per
+  entry. The output cursor advances by four halfwords per entry. Shape and
+  size index `gUnknown_0848B56C` for the horizontal mirror width.
+- Two 120-second permuter runs produced no byte match. The second run briefly
+  reached 78.33%, but its 364-byte candidate added a preprocessed `inline_fn`
+  helper. Its output remains under `permuter/` for inspection. The clean,
+  size-exact draft is retained as `best.c`.
+- The remaining diff starts with the tile-offset store before the source
+  pointer copy. In the mirror branch, the ROM uses `r4` for source attr1,
+  computes the table address in `r1`, then retains the sign extension in `r3`.
+  The draft puts source attr1 in `r3`, computes the address in `r0`, and places
+  the sign extension in `r4`. The ordinary branch and loop tail also have
+  register assignments that differ, despite the same control flow and size.
+- `sub_0801C090.md` is the decomp.me packet generated from the retained draft.

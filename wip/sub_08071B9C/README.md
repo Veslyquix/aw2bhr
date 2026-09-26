@@ -2,12 +2,11 @@
 
 0x08071B9C, 232 bytes, THUMB, parked.
 
-Best score so far: 19.4%, +8 bytes (best.c).
+Best score so far: 19.8%, +8 bytes.
 
 ## Files
 
 - `sub_08071B9C.c`: the current draft
-- `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
 ## What has been tried
