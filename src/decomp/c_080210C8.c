@@ -29,16 +29,16 @@ void sub_080210C8(s16 a1, s16 a2, s16 a3, s16 kind, s8 a5, int a6)
     case 1:
         sub_08020EDC(a1, a2, a3,
                      &gMap->visible[gUnknown_03004070 * 1288],
-                     a5, a6);
+                     a5, (u8)a6);
         break;
     case 3:
         sub_08020EDC(a1, a2, a3,
                      &gMap->visible[gUnknown_03004070 * 1288],
-                     a5, a6);
+                     a5, (u8)a6);
     case 2:
         sub_08020EDC(a1, a2, a3,
                      &gMap->visible[gUnknown_03004088 * 1288],
-                     a5, a6);
+                     a5, (u8)a6);
         break;
     }
 }

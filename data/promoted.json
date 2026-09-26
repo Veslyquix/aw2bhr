@@ -6691,6 +6691,15 @@
   "size": 288
  },
  {
+  "file": "src/decomp/c_08020EDC.c",
+  "obj": "src/decomp/c_08020EDC.o",
+  "addr_hex": "0x08020EDC",
+  "functions": [
+   "sub_08020EDC"
+  ],
+  "size": 492
+ },
+ {
   "file": "src/decomp/c_080210C8.c",
   "obj": "src/decomp/c_080210C8.o",
   "addr_hex": "0x080210C8",

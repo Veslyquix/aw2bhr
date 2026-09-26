@@ -53660,3 +53660,30 @@ split statements that later passes remove.
 A second trap from the same function: mixing `gMap->` with
 `((struct Map *)gUnknown_08499590)->` in one function emits two pool words
 for the same address (+4).
+
+## A caller's narrowing can be a cast, not the callee's parameter type (sub_08020EDC)
+
+sub_08020EDC (now `AddValueInRange`) sat from wave 49 as a "cross-TU
+prototype contract". The permuter kept reaching past the draft only by
+widening the sixth parameter from `u8` to an int type. Wave 73 ruled that
+out: the matched caller sub_080210C8 truncates its `int a6` with
+`lsls #0x18; lsrs #0x18` before the call, and widening the prototype would
+delete that truncation.
+
+It doesn't have to. The caller's truncation reads just as well as an
+explicit `(u8)a6` at the call site, and with that cast the caller is
+unchanged byte for byte under an `int` prototype. The callee needs the int.
+With a u8 parameter it narrows the incoming word itself at entry, and that
+extra narrowing is what interleaved `lsls r4, #24` into the fifth
+parameter's conversion group. Both functions match with the cast plus
+`void sub_08020EDC(s16, s16, s16, u8 *, int, int)`.
+
+The rest of the match was readable spellings. gMap members replaced the raw
+byte offsets (90.7% -> 92.3%). The centre cell is indexed
+`buf[gMap->rowOffset[y] + x]` and the swept cell reads its row into a u16
+first (98.4%). The added amount is a word-wide `u32 d = (u8)delta;`; a u8
+local swaps the add's operands (99.2%).
+
+**Read-out:** a narrowing in a matched caller settles the VALUE passed, not
+the callee's parameter type. If the callee only matches wide, try a cast in
+the caller before calling the prototype a contract.
