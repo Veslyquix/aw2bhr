@@ -53632,3 +53632,31 @@ Two general points. Naming a global that -fforce-addr reaches through a
 word never needs a C name. And a narrow sum of two small bitfields needs no
 truncation (combine knows the value fits), so `u8` costs nothing and is
 what gives the unsigned compare.
+
+## A constant LICM should NOT hoist: pad the loop with statements, measured with -dL (sub_0803D558)
+
+sub_0803D558 (now `CompactMapArmies`) was parked from wave 55 to wave 80
+with the diagnosis complete. The row read must go through the struct member
+(`gMap->rowOffset[y]`) for the ROM's (base + 0x417A) + y*2 grouping, but
+that form let loop.c hoist the 0x417A constant out of the inner loop (+4).
+The ROM materialises it inside the loop.
+
+`agbcc -dL` shows the decision. move_movables moves a constant when
+`threshold * savings * lifetime >= insn_count`, and threshold is
+2 * (1 + n_non_fixed_regs), about 26 here. The one-expression recolour,
+`terrain[i] = (v & 0x1f) + b[v >> 5]`, left the inner loop at 24 real insns
+on the SECOND loop pass (29 on the first, where it was "not desirable"), so
+pass 2 moved it. Splitting the body into statements
+(`m = v & 0x1f; c = v >> 5; colors = b; i = rowOffset[y] + x;
+terrain[i] = m + colors[c];`) keeps the loop over threshold, and the later
+passes still reduce it to the ROM's instructions. The `m` statement is also
+what orders `movs #0x1f` ahead of `lsrs`.
+
+**Read-out:** a hoisted constant the ROM keeps in the loop is a loop-size
+question, not a spelling one. Check `-dL` for "not desirable" against
+"moved to", compare the loop's "real insns" with the threshold, and add or
+split statements that later passes remove.
+
+A second trap from the same function: mixing `gMap->` with
+`((struct Map *)gUnknown_08499590)->` in one function emits two pool words
+for the same address (+4).

@@ -11865,3 +11865,4 @@ int sub_0800AEAC(int, int);
 int sub_0800105C(void);
 void sub_08004D10(void);
 int sub_0800BC5C(int, int);
+void CompactMapArmies(void); /* sub_0803D558; see src/decomp/c_0803D558.c. */
