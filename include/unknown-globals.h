@@ -2636,7 +2636,7 @@ struct Unk0849A354
  * unk00 (`strb r0, [r1, #8]` off the same `n * 8` product), which is where the
  * 0x08 stride is confirmed independently of the +3 subscript evidence in
  * unknown-functions.h. */
-struct Unk084995A0 /* 0x08 */
+struct PropertyListEntry /* 0x08 */
 {
     /* 0x00 */ u8 unk00; /* tile id / slot tag; 0 is empty and 0xFF terminates
                           * the list, matching Property's flags byte */
@@ -8362,7 +8362,7 @@ extern u8 gUnknown_08499B84[];
  * over all of it byte by byte. The deref is hoisted out of that loop despite
  * the `strb`, so the source bound it to a local. */
 extern u8 *gUnknown_0849959C;
-extern struct Unk084995A0 *gUnknown_084995A0;
+extern struct PropertyListEntry *gUnknown_084995A0;
 /* A ROM byte per unit type, indexed by struct Unit's unk00 and only ever
  * tested against zero -- sub_0804209C rejects a unit whose entry is 0 before
  * looking at anything else about it, so a per-type "eligible" flag in the same
@@ -11184,7 +11184,7 @@ struct Unk085D583C /* 0x14 */
                              * sub_08046914 as a word subscript into
                              * gTextTable[] -- `lsls #2; adds` off that
                              * table's base, the same role struct
-                             * Unk085D3DD0Entry.unk00 plays. */
+                             * CoModeData.unk00 plays. */
     /* 0x0e */ u16 descriptionIndex; /* wave 13 (A2): sub_08046D30 reads it `ldrh [.,#0xe]`
                            * and passes it as sub_08014668's tile argument */
     /* 0x10 */ int defense;
@@ -16772,7 +16772,7 @@ extern u8 gUnknown_084C211C[];
  *     into sub_0801F34C coordinates; the bound is
  *     gUnknown_085D583C[unit].unk10.
  *   gUnknown_084C212A[i], i <= 6 -- a slot index scaled by 32 into a
- *     struct Unk085D3DD0Entry.unk18 movement-cost row.
+ *     struct CoModeData.unk18 movement-cost row.
  *   gUnknown_084C2131[] -- the same (x, y) pair layout as gUnknown_084C2112,
  *     indexed by a separate counter that only advances on drawn slots.
  * Nothing settles the signedness of any of them; `ldrb` alone is byte-neutral

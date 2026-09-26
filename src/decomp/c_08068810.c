@@ -38,7 +38,7 @@ struct Unk68810Proc
 void sub_08068810(int a1, int a2, int a3, int a4, u16 a5, u8 a6, ProcPtr parent)
 {
     struct Unk68810Proc *proc;
-    const struct Unk085D3DD0 *tbl;
+    const struct CoData *tbl;
 
     proc = Proc_Start(gUnknown_08581264, parent);
     proc->unk29 = a1;

@@ -9,7 +9,7 @@
 
 void sub_08061CDC(void)
 {
-    struct Unk084995A0 *p;
+    struct PropertyListEntry *p;
     int i;
 
     p = gUnknown_084995A0;

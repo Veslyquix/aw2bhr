@@ -5916,7 +5916,7 @@ spellings were measured against the same target:
   that gives the ROM its `adds r0, r1, #0` return of the already-computed
   element pointer.
 - **Binding the ADDRESS to a local before the loop** —
-  `struct Unk084995A0 **arrp = &gUnknown_084995A0;` then `q = &(*arrp)[v];` —
+  `struct PropertyListEntry **arrp = &gUnknown_084995A0;` then `q = &(*arrp)[v];` —
   puts the `ldr` in the preheader, gives it a callee-saved register, and leaves
   the value load at the use. **Match.**
 
@@ -9954,7 +9954,7 @@ would have to be a negative member offset. Slide the array base down and rename
 every member up by the same amount, and the absolute offset of every existing
 access is unchanged, so the change is byte-neutral by construction and the
 edits to the promoted files are mechanical. Wave 9 did this to
-`struct Unk085D3DD0`: `sub_08039F18` reaches `base + a*0x104 + b*0x44 + 0x38`
+`struct CoData`: `sub_08039F18` reaches `base + a*0x104 + b*0x44 + 0x38`
 and the sub-array was declared at +0x40, so it moved to +0x38 and
 `unk40[b].unk06` became `unk38[b].unk0e` in five places. All fourteen functions
 in `c_08042E2C.c` plus `c_08042DCC.c`, `c_08042E18.c` and `c_08043D84.c` still
@@ -9969,7 +9969,7 @@ match. Two things worth carrying:
   wave 17 fixed a boundary bug in that splitter; see the wave-17 section in the
   large-function chapter.)
 - **A re-base often falls out exactly, and that is corroboration.** At +0x38 the
-  record array covers `struct Unk085D3DD0` to the byte (`0x38 + 3*0x44 == 0x104`)
+  record array covers `struct CoData` to the byte (`0x38 + 3*0x44 == 0x104`)
   and the old `filler_c8[0x3c]` tail disappears — the trailing filler was itself
   an artefact of the wrong base. An extent that had been guessed became proved.
 
@@ -23261,7 +23261,7 @@ different paths, which is why the outer symbol leads and the inner trails.
 plus's second operand by ASSIGNING it to a local inside the subscript:
 
 ```c
-    const struct Unk085D3DD0 *tbl;                    /* dead everywhere else */
+    const struct CoData *tbl;                    /* dead everywhere else */
 
     proc->unk2a = sub_08068038(gUnknown_08610A38[(tbl = gUnknown_085D3DD0)[a2].unk00], a3);
 ```

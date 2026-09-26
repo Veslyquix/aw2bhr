@@ -11162,10 +11162,10 @@ int sub_080587FC(int);
  * WAVE 45, W45-E: the `struct Unit *` here is WRONG and I left it alone
  * rather than break a promoted file. The matched body returns
  * `&gUnknown_084995A0[v]` -- the ROM scales v by 8 (`lsls #3`) and reads
- * `unk03[a2]` at +3, which is struct Unk084995A0 (0x08), not Unit
+ * `unk03[a2]` at +3, which is struct PropertyListEntry (0x08), not Unit
  * (0x0c, and it is reached by a *3*4 chain everywhere else). The +1/+2 evidence
- * above does not discriminate: Unk084995A0's filler_00[3] covers those bytes
- * too. Fixing this means retyping to `struct Unk084995A0 *`, naming
+ * above does not discriminate: PropertyListEntry's filler_00[3] covers those bytes
+ * too. Fixing this means retyping to `struct PropertyListEntry *`, naming
  * filler_00's three bytes, and editing src/decomp/c_0805DFF4.c (its local `p`)
  * -- byte-neutral in both, but it touches a promoted file, so it wants an
  * orchestrator's re-sweep rather than a mid-wave unilateral edit.

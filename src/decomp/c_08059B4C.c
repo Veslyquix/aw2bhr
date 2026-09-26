@@ -34,7 +34,7 @@
 void sub_08059B4C(int a1, int a2, int a3, void *a4, void *a5)
 {
     union Unk802C57CBuf v;
-    struct Unk084995A0 *arr;
+    struct PropertyListEntry *arr;
     u8 k;
     int w;
     int n;

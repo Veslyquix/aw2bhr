@@ -222,7 +222,7 @@ struct UnitType /* 0x5c */
                            * an address rather than an int. Carved out of
                            * filler_12, which used to span 0x12..0x17. */
     /* 0x18 */ u8 unitClass; /* plain `ldrb`, used by family F049 as an index into
-                          * struct Unk085D3DD0Entry.unk24[] and separately
+                          * struct CoModeData.unk24[] and separately
                           * tested against 0. Signedness unproved: both uses
                           * are u8-context (a subscript and a `cmp #0`), so a
                           * signed object would be byte-identical here. */
@@ -276,7 +276,7 @@ struct UnitType /* 0x5c */
                            * to SIGNED bytes indexed by a small id and tested
                            * `!= 0`: the load is `ldrb` + `lsls #0x18; asrs
                            * #0x18`, which is the same spelling agbcc gives the
-                           * proven-`s8 *` Unk085D3DD0Entry.unk18 in
+                           * proven-`s8 *` CoModeData.unk18 in
                            * sub_08046778, so the shifts are NOT evidence of an
                            * unsigned pointee. The pointee's meaning is
                            * unproved. */

@@ -22,7 +22,7 @@
  * The table selection is c_08038848.c's expression with a different army
  * index (gUnknown_03004480, no `+ 1`): the `?:` picks row unk1d or the literal
  * 1, which is why the else arm is the bare 0x104 == 1 * sizeof(struct
- * Unk085D3DD0), and `(unk1e * 17 + unk2c) << 2` is unk38's 0x44 stride sharing
+ * CoData), and `(unk1e * 17 + unk2c) << 2` is unk38's 0x44 stride sharing
  * an `lsls #2` with unk18's 4-byte element stride off the +0x50 member base.
  *
  * THE THREE LOCALS ARE LOAD-BEARING, in this order, and each was measured
