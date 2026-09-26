@@ -11227,6 +11227,7 @@ void sub_0805FB70(void);
  * sign-extended for its own map arithmetic, so CSE supplies the `asrs` either
  * way and `s16` would emit the same bytes. `int` is the weakest fit. */
 void sub_0805FC1C(int, void *);
+void FindTransportForSelectedUnit(int, void *); /* sub_0805FC1C; see src/decomp/c_0805FC1C.c. */
 int sub_0805C988(int, int);
 /* sub_0805A8C0 IS DELIBERATELY NOT DECLARED HERE. Wave 51, W51-N measured both
  * sides and they genuinely disagree, so the original cannot have had a

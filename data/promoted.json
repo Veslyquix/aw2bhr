@@ -21612,6 +21612,18 @@
   "size": 172
  },
  {
+  "file": "src/decomp/c_0805FC1C.c",
+  "obj": "src/decomp/c_0805FC1C.o",
+  "addr_hex": "0x0805FC1C",
+  "functions": [
+   "sub_0805FC1C"
+  ],
+  "size": 328,
+  "rodata": [
+   "0x0816DAC0"
+  ]
+ },
+ {
   "file": "src/decomp/c_0805FD64.c",
   "obj": "src/decomp/c_0805FD64.o",
   "addr_hex": "0x0805FD64",

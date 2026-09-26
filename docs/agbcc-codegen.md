@@ -53699,3 +53699,21 @@ the address word by itself, placed as the ROM has it. The last 2.5% was
 parameter-move order in the prologue. Copying the first parameter into a
 local (`left = x;`) before the loop puts a3's copy ahead of x's move to sl.
 decomp-permuter found that in one 5-minute run.
+
+## The reverse case: make the loop SMALLER so LICM hoists (sub_0805FC1C)
+
+sub_0805FC1C (now `FindTransportForSelectedUnit`) was parked with "the
+single-use gUnknown_085D5AD0 base is not LICM-hoisted", where
+gUnknown_085D5AD0 is &gUnknown_085D5ABC[0].transportTable. `-dL` showed a
+153-insn loop in which that movable (savings 2, life 5) was "not
+desirable". The ROM's two switch arms share ONE "write position, return"
+block and one `unk09` store. Writing the exit as a `goto found;` shared by
+both arms shrank the loop enough for the table base to hoist into sl as in
+the ROM (336 -> 320). With each table row pointer in its own statement
+(`entry = table + 1;`) it was 328/328 at 97.9%. decomp-permuter closed the
+last r0/r1 swap: `types = table + 0x1a; entry = types;` and a `zero` local
+in the unk08 test.
+
+Together with the CompactMapArmies note above: the movable threshold works
+in both directions, and the lever is the loop's real-insn count at loop
+time. Add statements to stop a hoist, share tails to allow one.
