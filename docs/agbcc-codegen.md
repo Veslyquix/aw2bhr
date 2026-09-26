@@ -49872,3 +49872,37 @@ Two traps from the cleanup pass:
   signed int gap.
 - `next = cur; best = next;` in the scan is still load-bearing. Plain
   `best = cur;` is -4.
+
+## The W56-H loop-top residual is a `cmd` LOCAL: re-read `*p` instead (sub_0801DCD4)
+
+Solves the "UNSOLVED 4-byte residual" recorded under W56-H for
+`sub_0801DCD4` (now `RunSimpleSpriteScript`). It should transfer to its twin
+`sub_0801D390`, but that is not yet measured.
+
+Three pieces, measured in this order:
+
+1. **The opcode is `(u16)((s16)*p & ~0xfff)`.** The `(s16)` makes the AND
+   HImode, so the mask is the pool word 0xFFFFF000 routed through the
+   `ldr rA; adds r0, rA; adds rB, r0` subreg copies. That settles the size:
+   512 (-4) -> 516. With a `u16` command and no `(s16)`, the AND is SImode
+   with `movs #0xf0; lsls #8`. With an `int` command, the never-set `end`
+   flag takes sl away from the hoisted 0xfff (+12).
+2. **Put it in an `int` local, not a `u16` one.** A `u16 op` makes the switch
+   subject a second pseudo, and the ROM has no such `adds r3, r2, #0` copy
+   (85.1% -> 89.5%).
+3. **Do not hold the command in a local at all; write `*p` at every use.**
+   With `u16 cmd = *p`, every `cmd & 0xfff` / `cmd & 0xff` / `cmd & 0xf00` is
+   the last use of a dying user variable. regmove then rewrites the AND to
+   clobber it (`mov r3, sl; ands r2, r3`). The ROM always ANDs into a copy
+   of the constant and leaves the command register alone
+   (`mov r0, sl; ands r0, r2`). With `*p` re-read, CSE keeps one temp that
+   regmove does not retarget (92.8% -> 97.3%).
+
+**Read-out:** when every AND in a function writes the CONSTANT's register
+while the variable operand is dead anyway, the variable was not a named
+local. Look for a re-read memory operand that CSE merged.
+
+The last 14 bytes were a load-order effect. Build pointer + index in two
+statements: `p = base; p += off;` and `frame = (u32 *)e->unk20; frame +=
+e->unk24;`. The one-expression `&base[i]` loads the base after the index,
+into the wrong register.
