@@ -167,7 +167,7 @@ int sub_08058058(int n)
  * gUnknown_084995A0 record. The first
  * record whose unk03[a2] is not above a1 wins: the counter is bumped and the
  * record returned.  NOTE the return type -- the object really is a
- * `struct Unk084995A0 *`; see the comment in include/unknown-functions.h.
+ * `struct PropertyListEntry *`; see the comment in include/unknown-functions.h.
  *
  * `arrp` binds gUnknown_084995A0's ADDRESS rather than dereferencing it in
  * place.  That is what puts the `ldr r6, =...` in the loop preheader: written
@@ -176,8 +176,8 @@ int sub_08058058(int n)
 struct Unit *sub_08058144(int a1, int a2)
 {
     struct Unk08057EC0Rec *e;
-    struct Unk084995A0 **arrp;
-    struct Unk084995A0 *q;
+    struct PropertyListEntry **arrp;
+    struct PropertyListEntry *q;
     int idx;
     int v;
 

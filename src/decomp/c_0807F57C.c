@@ -7,46 +7,76 @@
  * sub_0807F57C @ 0x0807F57C
  */
 
-/* This translation unit saw sub_0803CAB8 returning `int`: the ROM tests its
- * result with a bare `cmp r0, #0` after the `bl`. Everywhere else it is `u8`
- * (include/unknown-functions.h), and a `u8` return makes agbcc re-narrow
- * with `lsls r0, r0, #24`. The assembler-label alias gives this file the int
- * view of the same symbol with a direct call; a function-pointer cast would
- * compile to an indirect call instead. */
-extern int sub_0803CAB8_int(u32) asm("sub_0803CAB8");
-
-/* Rebuilds the list of available entries from gUnknown_086166F0, a run
- * of 0xFF-terminated groups, each followed by one tag byte and ending at a
- * second 0xFF. Entries sub_0803CAB8 accepts are appended to
- * gUnknown_030058E0. Each non-empty group records its tag and accepted
- * count at index gUnknown_03005944 of gUnknown_03005958 / gUnknown_03005948. */
+/* MATCHED, wave 88 (W88-A). 156 bytes, byte-for-byte, relocs match, first
+ * attempt -- and with NOT ONE CHARACTER of this function changed. Parked since
+ * wave 4 and classified in wave 73 as residual kind 5, "cross-TU prototype
+ * contract, no spelling of this caller reaches it, ORCHESTRATOR DECISION".
+ * The classification was right; the conclusion that it was unreachable was not.
+ *
+ * Walks gUnknown_086166F0, a run of byte ids split into groups by an 0xFF
+ * sentinel with one label byte after each sentinel and a second 0xFF ending
+ * the run. Each group's unlocked members (sub_0803CAB8) are appended to the
+ * gUnknown_030058E0 display list; a non-empty group also records its label in
+ * gUnknown_03005958 and its count in gUnknown_03005948 at the
+ * gUnknown_03005944 cursor.
+ *
+ * WHAT CLOSED IT -- the bounded contract change, not a spelling:
+ *   1. include/unknown-functions.h: `u8 sub_0803CAB8(u32)` -> `int` (that
+ *      symbol only; sub_0803CA9C and the rest of the bit-reader family stay u8)
+ *   2. src/decomp/c_0803CA9C.c: the definition retyped to `int`, BYTE-UNCHANGED
+ *      -- it returns `(1 << (id & 7)) & *p`, whose nonzero_bits are provably
+ *      <= 0xff, so no narrowing is emitted at either width. That is the body
+ *      evidence, and it permits int.
+ *   3. the ten callers that DO narrow now say `(u8)sub_0803CAB8(...)`: nine
+ *      sites in c_0803C354.c and one in c_08043CA0.c.
+ *
+ * ALL THIRTEEN affected functions verify byte-for-byte by exit code
+ * (sub_0803C474/C48C/C4B4/C4DC/C504/C52C/C598/C5C0/C5E8, sub_08043CA0,
+ * sub_0803CA9C, sub_0803CAB8, and this one); proto_check is clean. Details in
+ * work/sub_0807F57C/W88-notes.md.
+ *
+ * THE RULE: `(u8)f(x)` and an implicit u8 return emit the SAME narrowing, so a
+ * wide declaration plus explicit casts is byte-neutral in both directions and
+ * a single shared header CAN express a per-file prototype divergence. The
+ * wave-59/73 claim that it cannot was about the implicit form only. Do not park
+ * a residual as kind 5 before measuring the cast form.
+ */
 void sub_0807F57C(void)
 {
-    int offset = 0;
-    int output = 0;
-    int count;
+    int i;
+    int k;
+    int n;
 
+    i = 0;
+    k = 0;
     gUnknown_03005944 = 0;
     sub_08078758();
-    while (gUnknown_086166F0[offset] != 0xff)
+
+    while (gUnknown_086166F0[i] != 0xff)
     {
-        count = 0;
-        while (gUnknown_086166F0[offset] != 0xff)
+        n = 0;
+
+        while (gUnknown_086166F0[i] != 0xff)
         {
-            if (sub_0803CAB8_int(gUnknown_086166F0[offset]))
+            if (sub_0803CAB8(gUnknown_086166F0[i]))
             {
-                count++;
-                gUnknown_030058E0[output++] = gUnknown_086166F0[offset];
+                n++;
+                gUnknown_030058E0[k] = gUnknown_086166F0[i];
+                k++;
             }
-            offset++;
+
+            i++;
         }
-        offset++;
-        if (count)
+
+        i++;
+
+        if (n != 0)
         {
-            gUnknown_03005958[gUnknown_03005944] = gUnknown_086166F0[offset];
-            gUnknown_03005948[gUnknown_03005944] = count;
+            gUnknown_03005958[gUnknown_03005944] = gUnknown_086166F0[i];
+            gUnknown_03005948[gUnknown_03005944] = n;
             gUnknown_03005944++;
         }
-        offset++;
+
+        i++;
     }
 }

@@ -27,7 +27,7 @@
  * one-based indexing src/decomp/c_080211DC.c uses on that array. `row` is
  * e->unk1d normally and the literal 1 when gPlaySt.coAbilities is clear,
  * which is why the else arm is the bare constant 0x104 == 1 * sizeof(entry).
- * Unk085D3DD0Entry.unk18 was a scalar `s8 *` until this wave; the
+ * CoModeData.unk18 was a scalar `s8 *` until this wave; the
  * `(unk1e * 17 + unk2c) << 2` off the +0x50 member base is a 4-byte stride
  * INSIDE the 0x44 entry stride, so it is `s8 *[3]`.
  *

@@ -296,7 +296,7 @@ Source: [`src/unit.c`](../../src/unit.c). These comments were moved verbatim fro
  *
  * Three things had to be read off the ROM rather than guessed:
  *
- * 1. struct Unk085D3DD0Entry.unk24 is an array of POINTERS. The ROM does
+ * 1. struct CoModeData.unk24 is an array of POINTERS. The ROM does
  *    `ldr r7,[r3]` on the table word and then `ldrsh r0,[r7,r2]` through the
  *    result. 0x24 + 8*4 == 0x44 fills the record exactly, and the two indices
  *    in use (gUnknown_085D5ABC[c].unk18, and GetUnitCombatClassColumn's 5/6/7) span it.
@@ -353,7 +353,7 @@ Source: [`src/unit.c`](../../src/unit.c). These comments were moved verbatim fro
 ````c
 /* Family F038, the shape of the dozen accessors in src/decomp/c_08042E2C.c.
  * The address arithmetic `(a * 65 + b * 17) * 4` is already encoded by
- * struct Unk085D3DD0 (0x104) holding struct Unk085D3DD0Entry unk38[3] (0x44),
+ * struct CoData (0x104) holding struct CoModeData unk38[3] (0x44),
  * so the only thing to read out of the assembly is the member: the ROM's
  * `adds r0, #0x4c` is 0x38 + 0x14, i.e. unk14.
  *

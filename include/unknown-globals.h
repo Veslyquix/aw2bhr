@@ -2636,7 +2636,7 @@ struct Unk0849A354
  * unk00 (`strb r0, [r1, #8]` off the same `n * 8` product), which is where the
  * 0x08 stride is confirmed independently of the +3 subscript evidence in
  * unknown-functions.h. */
-struct Unk084995A0 /* 0x08 */
+struct PropertyListEntry /* 0x08 */
 {
     /* 0x00 */ u8 unk00; /* tile id / slot tag; 0 is empty and 0xFF terminates
                           * the list, matching Property's flags byte */
@@ -8362,7 +8362,7 @@ extern u8 gUnknown_08499B84[];
  * over all of it byte by byte. The deref is hoisted out of that loop despite
  * the `strb`, so the source bound it to a local. */
 extern u8 *gUnknown_0849959C;
-extern struct Unk084995A0 *gUnknown_084995A0;
+extern struct PropertyListEntry *gUnknown_084995A0;
 /* A ROM byte per unit type, indexed by struct Unit's unk00 and only ever
  * tested against zero -- sub_0804209C rejects a unit whose entry is 0 before
  * looking at anything else about it, so a per-type "eligible" flag in the same
@@ -11184,7 +11184,7 @@ struct Unk085D583C /* 0x14 */
                              * sub_08046914 as a word subscript into
                              * gTextTable[] -- `lsls #2; adds` off that
                              * table's base, the same role struct
-                             * Unk085D3DD0Entry.unk00 plays. */
+                             * CoModeData.unk00 plays. */
     /* 0x0e */ u16 descriptionIndex; /* wave 13 (A2): sub_08046D30 reads it `ldrh [.,#0xe]`
                            * and passes it as sub_08014668's tile argument */
     /* 0x10 */ int defense;
@@ -13735,6 +13735,21 @@ extern const u8 gUnknown_0816DB20[5];
 extern s16 *const gUnknown_081360A0;
 extern u16 *const gUnknown_081360A4;
 extern u16 *const gUnknown_081360A8;
+/* Wave 85, W85-C (sub_08050FF8). Four more cells from the 0x08136050-0x081360E0
+ * run, read with a genuine DOUBLE load in the ROM -- `ldr r4,=gUnknown_081360E0
+ * ; ldr r2,[r4] ; ... adds r0,r0,r2 ; ldrh r0,[r0,#4]` -- the loaded value is
+ * used as a BASE, which a -fforce-addr word never is (force-addr words are used
+ * directly as the address). The wave-37 note in work/sub_08050FF8 called all
+ * four force-addr constants and the draft built on that; it missed by -20
+ * bytes. Contents confirmed by the strides the ROM applies after each chase:
+ *   0x081360D8 -> 0x020298E0  (+ side*0x90, .unk8c at 0x8c)
+ *   0x081360DC -> 0x0300453C  (plain u16)
+ *   0x081360E0 -> 0x085D6A48  (+ row*24, columns 4 and 8)
+ *   0x081360E4 -> 0x03004580  (+ row*16, columns 1 and 2) */
+extern struct Unk020298E0 *const gUnknown_081360D8;
+extern u16 *const gUnknown_081360DC;
+extern u16 (*const gUnknown_081360E0)[12];
+extern u16 (*const gUnknown_081360E4)[8];
 /* TWO halfwords, not one. sub_0804F18C writes [0] with a bare `strh` (it
  * stores OamData.priority into it straight after setting that field), and
  * sub_08050958 writes BOTH -- `strh r3,[r6]` and `strh r0,[r6,#2]` off a
@@ -13779,19 +13794,29 @@ extern const u16 gUnknown_0855380A[];
  * SIGNED on the `ldrsh`, which is also the only evidence of the width. */
 /* Wave 36, W36-C. The 8 bytes immediately before gUnknown_085643B0, holding two
  * halfword pairs on the same "alternating phase bit" index gUnknown_085643B0's
- * innermost subscript uses. sub_08053520 reads unk04[phase & 1] with a bare
+ * innermost subscript uses. sub_08053520 reads [1][phase & 1] with a bare
  * `movs r1,#0; ldrsh r0,[r0,r1]` into sub_0803B48C's s16 parameter, which is
- * what signs it. A STRUCT and not `s16 [][2]` with a constant outer index: the
- * ROM adds the 4 to the BASE register at run time (`adds r1,#4`) and leaves the
- * `ldrsh` index at zero, which only a struct member array gives -- the flat
- * spelling sinks the same constant into the pool word's relocation. Same
- * distinction struct Unk085D6C88 records. unk00 has no reader yet. */
-struct Unk085643A8 /* 0x08 */
-{
-    /* 0x00 */ const s16 unk00[2];
-    /* 0x04 */ const s16 unk04[2];
-};
-extern struct Unk085643A8 gUnknown_085643A8;
+ * what signs it. c_08051454.c reads [0][phase & 1].
+ * WAVE 86 (W86-C): THIS WAS `struct Unk085643A8 { const s16 unk00[2]; const
+ * s16 unk04[2]; }` AND THE COMMENT HERE HAD ITS MEASUREMENT BACKWARDS. It
+ * said "A STRUCT and not `s16 [][2]` with a constant outer index ... which
+ * only a struct member array gives". A controlled probe of the two spellings
+ * over identical address arithmetic (constant 4 plus a variable m*2) says the
+ * exact opposite:
+ *   ARRAY  gUnknown_085643B0[0][1][m] -> ldr r2,=sym / adds r2,#4 /
+ *                                       adds r0,r0,r2 / movs r1,#0 / ldrsh
+ *   STRUCT gUnknown_085643A8.unk04[m] -> ldr r3,=sym / adds r0,r0,r3 /
+ *                                       movs r1,#4 / ldrsh
+ * -fforce-addr FORCE_REGs an ARRAY's address BARE at the subscript, so a
+ * later constant offset has to be a runtime add on that register and the
+ * ldrsh indexes with zero; a scalar struct's member offset stays a link-time
+ * constant and folds into the ldrsh index instead. The ROM has the FIRST
+ * form, so this object is an array. The 'the flat spelling sinks it into the
+ * relocation' observation the old comment rested on was measured on
+ * `const s16 *p = g.unk04;` -- a POINTER TO THE MEMBER, which is a different
+ * construct from a 2-D array with a constant outer index. Extent unproved;
+ * only rows 0 and 1 are reached. */
+extern const s16 gUnknown_085643A8[][2];
 extern const s16 gUnknown_085643B0[][3][2];
 /* A ROM halfword per side, indexed [gUnknown_0300453C]. Two readers,
  * sub_0804F658 and sub_0804E584, and both do nothing but pass it as
@@ -16747,7 +16772,7 @@ extern u8 gUnknown_084C211C[];
  *     into sub_0801F34C coordinates; the bound is
  *     gUnknown_085D583C[unit].unk10.
  *   gUnknown_084C212A[i], i <= 6 -- a slot index scaled by 32 into a
- *     struct Unk085D3DD0Entry.unk18 movement-cost row.
+ *     struct CoModeData.unk18 movement-cost row.
  *   gUnknown_084C2131[] -- the same (x, y) pair layout as gUnknown_084C2112,
  *     indexed by a separate counter that only advances on drawn slots.
  * Nothing settles the signedness of any of them; `ldrb` alone is byte-neutral

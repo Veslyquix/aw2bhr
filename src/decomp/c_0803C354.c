@@ -122,7 +122,7 @@ int sub_0803C45C(u32 id)
 
 int sub_0803C474(u32 id)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
     return 1;
 }
@@ -134,7 +134,7 @@ int sub_0803C474(u32 id)
 
 int sub_0803C48C(u32 id)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
     if (!IsCampaignCompletionFlagSet(0x23))
         return 0;
@@ -148,7 +148,7 @@ int sub_0803C48C(u32 id)
 
 int sub_0803C4B4(u32 id)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
     if (!IsCampaignCompletionFlagSet(0x24))
         return 0;
@@ -162,7 +162,7 @@ int sub_0803C4B4(u32 id)
 
 int sub_0803C4DC(u32 id)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
     if (!IsCampaignCompletionFlagSet(0x25))
         return 0;
@@ -176,7 +176,7 @@ int sub_0803C4DC(u32 id)
 
 int sub_0803C504(u32 id)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
     if (!IsCampaignCompletionFlagSet(0x26))
         return 0;
@@ -201,7 +201,7 @@ int sub_0803C504(u32 id)
 
 int sub_0803C52C(u32 id, int n)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
 
     if (IsCampaignCompletionFlagSet(0x21))
@@ -255,7 +255,7 @@ int sub_0803C58C(u32 id)
 
 int sub_0803C598(u32 id)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
     if (!IsCampaignCompletionFlagSet(0x21))
         return 0;
@@ -269,7 +269,7 @@ int sub_0803C598(u32 id)
 
 int sub_0803C5C0(u32 id)
 {
-    if (sub_0803CAB8(id))
+    if ((u8)sub_0803CAB8(id))
         return -1;
     if (!IsCampaignCompletionFlagSet(0x22))
         return 0;
@@ -295,7 +295,7 @@ int sub_0803C5E8(u32 id)
     if (sub_0803CAD4(id))
         return -1;
 
-    if (!sub_0803CAB8(id))
+    if (!(u8)sub_0803CAB8(id))
         return 0;
 
     return 1;

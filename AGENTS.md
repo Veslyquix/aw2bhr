@@ -143,7 +143,8 @@ be silently normalized or discarded.
    `rom_compare` tool instead; it runs those same two fixed routes, deletes the
    shared outputs before each, and reports the exit/SHA1 result separately.
 7. Only after both builds pass, run `index_functions.py`, `families.py`, and
-   `progress_map.py`; reconcile parked entries and inspect the final diff.
+   `progress_map.py`; reconcile parked entries, run `export_wip.py` to refresh
+   the tracked `wip/` drafts, and inspect the final diff.
 
 The checked-in README progress can lag the machine tracker. Use
 `data/functions.json`, the generated progress page, and the latest wave commit

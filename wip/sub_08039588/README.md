@@ -1,0 +1,47 @@
+# sub_08039588
+
+0x08039588, 172 bytes, THUMB, parked.
+
+Best score so far: 87.2% (best.c).
+
+## Files
+
+- `sub_08039588.c`: the current draft
+- `best.c`: the closest attempt, when it is not the draft
+- `target.s`: the original assembly
+
+## What has been tried
+
+From `data/parked.json`.
+
+### Best so far
+
+87.2% identical, SIZE-EXACT at 172 bytes, 22 of 172 bytes differ (wave 73, W73-D). Was 43.0% at 164 bytes (-8).
+
+### What still differs
+
+22 bytes, TWO facts, and they are one cause. (a) POSITION: the ROM computes `dst` as an LICM HOIST in the inner loop's preheader -- AFTER the zero-trip guard (ldrb/cmp/beq) and AFTER the table-base hoist `ldr r3,[pc,#36]`. The draft computes it as a source statement in the outer loop body, so the three instructions (`lsls r0,rJ,#8`, `ldr r1,=0x6140`, `adds r4,r0,r1`) land BEFORE the guard. (b) SLOTS: the ROM shares r4 between `j` and `dst` -- `adds r6,r4,#1` saves j+1 before the reuse -- so `movs r4,#0`, `lsls r0,r4,#8` and `lsrs r4,r0,#16` all name r4; the draft has j in r3 and dst in r4, which also shifts both `ldr [pc,#N]` displacements. (b) FOLLOWS FROM (a): while `dst` is a source statement its live range starts before the guard and cannot overlap j's. IGNORE the branch lines in --diff -- `<_08039620>` against `<sub_08039588+0x98>` is the same encoding.
+
+### Why it is close
+
+THE CONSTANT MERGE, which was the whole park for four waves, IS SOLVED. cse merges `dst + 0x06010000` into `dst = (j << 8) + 0x6140` whenever both sit in the same extended basic block, collapsing the ROM's two pool words into one `=0x06016140` and costing 8 bytes. Assigning `dst` in the OUTER loop body, before the inner `for`, puts the definition behind the inner loop's back edge where cse cannot reach it, and both pool words survive: 164 bytes (-8) at 43.0% becomes size-exact at 87.2%. The open question has MOVED and is now a positioning question: what source form keeps the definition out of the use's extended basic block (which the pool words require) while still presenting it to loop.c as an invariant OF THE INNER LOOP (which the hoist position requires)? Those are the two ends of one span and every spelling measured so far sits at one end or the other.
+
+### Already ruled out
+
+- the expression inline, `(void *)(0x06010000 + j * 0x100 + 0x6140)`, and `(u8 *)0x06010000 + (j * 0x100 + 0x6140)`: fold/cse merge the two literals, 164 bytes
+- `dst = ...` as the first statement of the inner loop body: still merged, and it also hoists BEFORE the table base, reversing the preheader
+- `dst = ...` inside the `if`, i.e. at the use: merged. THIS WAS THE KEPT DRAFT FOR FOUR WAVES at 43.0% / -8 bytes
+- hand-rotating the inner loop into `k = 0; if (tbl[k]) do {...} while;` so the assignment sits in the preheader: much worse -- it spills the table base to a -fforce-addr .rodata word and moves str into r9
+- WAVE 73 (W73-G): DEFINING `dst` IN THE OUTER BODY *AND* REDUNDANTLY AT THE END OF THE INNER BODY -- the one spelling that looked like it reached both ends of the span. It reaches neither. The two pool words survive, but the inner def is NEITHER HOISTED NOR DELETED (it sits at the loop bottom costing two instructions an iteration) and the outer def still lands ahead of the zero-trip guard. The reason is a precondition of gcc's move_movables this project had not recorded: A MOVABLE'S REGISTER MUST NOT BE LIVE ON ENTRY TO THE LOOP. Defining dst anywhere outside the inner loop makes it live at entry and FORECLOSES THE HOIST BY CONSTRUCTION, so no outer position can ever work and the whole `where outside` axis is closed. What remains is to split the def and the use into different extended basic blocks with BOTH inside the loop, without adding control flow. See the new chapter in docs/agbcc-codegen.md.
+- WAVE 73 (W73-D): decomp-permuter, 300 s / 4 threads, from the new 87.2% best.c. No match, and every candidate it scored regressed TOWARDS the merged -8 spelling (best 40.7% at 164 bytes) -- the tool confirming from the other side that the size-exact spelling is the right branch. Wave 57 had closed this axis BY ARGUMENT ('the residual is a missing INSTRUCTION, wave 37's one useless case for the permuter'); that was correct for the OLD draft and does not apply to this one, which is size-exact. Now measured rather than reasoned about.
+- WAVE 79 (W79-E): `dst` defined ONLY at the BOTTOM of the inner loop body (after the `if`, so the def is outside the use's forward cse reach and its pseudo is created after the exit test's). This was the one point of the span wave 73 left untried -- W73-G kept the outer def as well, and blamed the failure on that. It fails on its own too, and the reason CLOSES THE SPAN BY PROOF rather than leaving it open: the def is NOT hoisted (it stays at the loop bottom as `lsl r0,r6,#8; ldr r1,=0x6140; add r1,r1,r0; mov r8,r1`, and dst is pushed out to r8). loop.c's `loop_reg_used_before_p` refuses to hoist a movable whose register is READ BEFORE THE SET INSIDE THE LOOP, exactly as it refuses one live on entry. So hoisting requires the def to DOMINATE the use, and the pool split requires the def to be OUTSIDE the use's extended basic block; inside a loop body with no join those two are mutually exclusive. THE `both inside the loop` AXIS IS NOW CLOSED AS WELL, and with W73-G's `outside the loop` result that is the whole span.
+
+### Settled
+
+- WAVE 43 (W43-I), still valid: THE DEF/USE SPLIT IS STRUCTURAL. Both `dst` and `dst + 0x06010000` are invariant in the inner loop, yet the ROM hoists only the first -- the second's destination is r1, set immediately before the `bl`, and loop.c will not move an invariant whose register is call-clobbered out past the call. `dst` lands in callee-saved r4 and hoists freely. A non-trapping invariant inside a conditional still hoists, so both may legitimately be written inside the `if`.
+- WAVE 73: the merge is an EXTENDED-BASIC-BLOCK property of cse, not a tree-level fold. `dst` is a VAR_DECL, so `0x06010000 + dst` cannot be folded at tree level at all; what merges the literals is cse propagating the definition into the use, and it can only do that while the two are in one EBB. Putting the definition behind a back edge is what stops it. This is the general lever for a 'two pool words became one' residual.
+- WAVE 73 PROCEDURAL: this entry previously read 'NOT CHARACTERISED', 'W59-B did not open this function' and 'NOTHING WAS RULED OUT IN WAVE 59'. All three were misleading -- work/sub_08039588/sub_08039588.c carried three waves of measured evidence (W43-I, W57-E) the whole time. A position-only entry written as though the function were unexamined cost this function two waves of being read as either exhausted or untouched, and it was neither. If an entry records position only, say where the evidence actually lives.
+
+### Why it is parked
+
+Wave 79 W79-E: THE SPAN IS CLOSED AT BOTH ENDS AND THERE IS NO POINT LEFT IN IT. The hoist needs the def to dominate the use (loop.c will not move a movable whose register is read before its set, nor one live on loop entry); the two-pool-word split needs the def to sit outside the use's extended basic block. The inner loop body contains no control-flow join, so no position satisfies both, and every position has now been measured: outside the loop (W73-G, foreclosed by liveness), top of the body (hoisted but merged, and ahead of the table base), inside the `if` at the use (merged), bottom of the body (W79-E, not hoisted at all). A SOURCE CONSTRUCT IS BEHIND THIS RESIDUAL -- the LICM hoist position of `dst` -- but it is not reachable from C without adding control flow the ROM does not have. Do not spend another wave on positioning. If this function is resumed, the only untried direction is that the ROM's `dst` is not this expression at all.

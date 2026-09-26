@@ -8,6 +8,32 @@
  * gPlayers is 1-based: slots 1..4 are the four armies and slot 0 is unused.
  */
 
+/* CO ids: PlayerStruct.co, and the row index into gUnknown_085D3DD0. Each
+ * value was checked against its row's nameIndex in gTextTable in the ROM.
+ * From npiriou's PR #1. */
+enum CoId
+{
+    CO_NELL = 0,
+    CO_ANDY = 1,
+    CO_MAX = 2,
+    CO_OLAF = 3,
+    CO_SAMI = 4,
+    CO_GRIT = 5,
+    CO_KANBEI = 6,
+    CO_SONJA = 7,
+    CO_EAGLE = 8,
+    CO_DRAKE = 9,
+    CO_STURM = 10,
+    CO_FLAK = 11,
+    CO_LASH = 12,
+    CO_ADDER = 13,
+    CO_HAWKE = 14,
+    CO_HACHI = 15,
+    CO_COLIN = 16,
+    CO_JESS = 17,
+    CO_SENSEI = 18,
+};
+
 /* Merged from eight variants -- the widest disagreement in the tree. Every
  * variant agreed on 0x3c total; they differed only in which bytes they had
  * bothered to name.
@@ -171,7 +197,7 @@ struct PlayerStruct /* 0x3c */
     /* 0x3b */ u8 unitsLost;
 };
 
-/* The 0x44-byte sub-record at +0x38 of struct Unk085D3DD0. Stride proved by
+/* The 0x44-byte sub-record at +0x38 of struct CoData. Stride proved by
  * `lsls #4; adds` (x17) sharing the outer `lsls #2` with the x65 outer index in
  * sub_08042E2C, sub_08042E84, sub_08042EDC, sub_08042FC4 and sub_0804301C --
  * i.e. base + a*0x104 + b*0x44 + K, with K running 0x40, 0x46, 0x48, 0x4a,
@@ -184,7 +210,7 @@ struct PlayerStruct /* 0x3c */
  * struct exactly: 0x38 + 3 * 0x44 == 0x104, so the extent is 3 and the old
  * `filler_c8[0x3c]` tail is gone -- that tail was itself an artefact of the
  * wrong base. Anything citing the old numbering wants +8 added to it. */
-struct Unk085D3DD0Entry /* 0x44 */
+struct CoModeData /* 0x44 */
 {
     /* 0x00 */ u32 powerNameId; /* indexes gTextTable (sub_08039F18) */
     /* 0x04 */ void (*powerAssembly)(void *); /* wave 32 (W32-C): sub_08044B28 loads it
@@ -235,13 +261,13 @@ struct Unk085D3DD0Entry /* 0x44 */
 /* The per-CO data table, indexed by gPlayers[].co. Field names nameIndex,
  * music, snowBringerPercent, rainBringerPercent, coPowerStars,
  * superCoPowerStars, copQuote, victoryQuote and power, and every name on
- * struct Unk085D3DD0Entry, come from the 'aw2co' Nightmare module -- a
+ * struct CoModeData, come from the 'aw2co' Nightmare module -- a
  * community ROM-editor definition, not this tree's work and not SRR_AW2's;
  * that repo only carries a copy of the module set.
  *
  * The module's flat offsets are what revealed the shape this tree had already
  * found: its three named groups at 0x38, 0x7C and 0xC0 are 0x44 apart, which
- * is exactly unk38[3] -- one Unk085D3DD0Entry per power level, day-to-day,
+ * is exactly unk38[3] -- one CoModeData per power level, day-to-day,
  * CO power and super CO power, the same 0/1/2 that gPlayers[].coMode holds.
  * unk20[6] likewise lines up with its six COP quotes and Entry's
  * movementChart[3] with its normal/snow/rain movement charts, all three of
@@ -250,7 +276,7 @@ struct Unk085D3DD0Entry /* 0x44 */
  * NOT applied: the module calls +0x14 'Army Sprites' (two bytes), but
  * sub_08039948 reads +0x14 as a bare `ldrb` switched over 0..3, so that one
  * is left alone. +0x16 'Colour' has no corroboration here either. */
-struct Unk085D3DD0 /* 0x104 */
+struct CoData /* 0x104 */
 {
     /* 0x00 */ u32 nameIndex; /* Wave 36, W36-K: carved out of filler_00[0x04]. A
                            * subscript into gTextTable[] (the same role
@@ -328,9 +354,9 @@ struct Unk085D3DD0 /* 0x104 */
                            * only -- a `ldrh` feeding an `int` return signs
                            * nothing. */
     /* 0x36 */ u8 filler_36[0x02];
-    /* 0x38 */ struct Unk085D3DD0Entry power[3];
+    /* 0x38 */ struct CoModeData power[3];
 };
-extern const struct Unk085D3DD0 gUnknown_085D3DD0[];
+extern const struct CoData gUnknown_085D3DD0[];
 
 /* Wave 41, W41-B. THE ROM WORD AT 0x08090940 (gen_lds.py's gUnknown_08090940)
  * HOLDS 0x08499598, i.e. &gPlayers, and it must NOT be declared as a

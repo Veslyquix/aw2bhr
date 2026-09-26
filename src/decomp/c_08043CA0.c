@@ -33,7 +33,7 @@ u8 sub_08043CA0(void)
     n = 0;
     for (i = 0; i < 19; i++)
     {
-        if (sub_0803CAB8(gUnknown_084A077C[i]))
+        if ((u8)sub_0803CAB8(gUnknown_084A077C[i]))
             gUnknown_020288A0[n++] = gUnknown_084A077C[i];
     }
     gUnknown_020288A0[n] = 0xff;

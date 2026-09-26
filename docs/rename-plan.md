@@ -18,7 +18,7 @@ Current conventions visible in the tree (to use as a starting point for review):
 - Struct/type names use `struct` tags in PascalCase (`Unit`, `UnitType`,
   `BattleUnit`); names should describe the represented object, not just its
   address. Unknown records retain address-derived tags such as
-  `Unk085D3DD0Entry` until their role is well enough established.
+  `Unk802C57C` until their role is well enough established.
 - Readable functions use PascalCase verbs (`GetUnitCombatClassColumn`,
   `CreateUnitAt`). Address names (`sub_XXXXXXXX`) remain the stable fallback.
   Existing address symbols can be kept as linker aliases with `.thumb_set`;
@@ -232,3 +232,4 @@ semantic symbol name without resolving the conflict.
 | 2026-09-25 | What hides PPSWC (player-phase side windows + cursor) when a window opens? | No dedicated "hide" call found yet. Leading hypothesis: it is a side effect of leaving `MapMainIdle` case 13 (`sub_0802D458`'s `IncrementMapLock()` is the concrete lead), not an explicit flag write. `sub_0802C2B4`'s BG0 disable on the Start/minimap path is a second, narrower lead. Needs confirmation from whatever reads the map lock or `gUnknown_030032D8` to gate rendering. |
 | 2026-09-25 | Does `gUnknown_030040D8->unk01 & 1` gate "units you do not control" in `sub_0802E4B4`'s A-button handler? | Plausible given the user's report that A on an uncontrolled unit behaves differently, but not confirmed from the field's own evidence trail — the branch it gates (fall through to `OpenMapMenu`) doesn't obviously match "starts movement selection but can't confirm placement." Keep at Research; do not adopt an `isEnemyOrDone`-style name without auditing other `unk01` bit-0 readers. |
 | 2026-09-25 | Is `gUnknown_03003334` one semantic "input/select mode" variable? | Unconfirmed. It is written `1` by the A-handler (`sub_0802E4B4`), `6` by the B-handler (`sub_0802E2D0`), and separately to `gpKeySt->held & 2` by an unrelated function (`sub_0802E278`). Do not treat these as the same use without a full writer/reader audit. |
+| 2026-09-26 | Were `Unk085D3DD0`, `Unk085D3DD0Entry` and `Unk084995A0` renamed? | Yes, to `CoData`, `CoModeData` and `PropertyListEntry`, the names from npiriou's PR #1. Tag renames only; both builds reproduce the ROM. The rows above still use the old tags. `COStatsAbilities` remains a candidate for `CoData` if the evidence here favours it. |

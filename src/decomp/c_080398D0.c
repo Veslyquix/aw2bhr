@@ -23,7 +23,7 @@ struct Unk398D0Proc
 };
 
 /* One of six random lines for the army's terrain type. `lsls #6; adds; lsls #2`
- * is the 0x104 stride of struct Unk085D3DD0 and `adds r4, #0x20` on the bare
+ * is the 0x104 stride of struct CoData and `adds r4, #0x20` on the bare
  * table symbol -- kept live in r4 across the __umodsi3 call -- is the
  * member-array hoist for unk20[], the same idiom sub_08039F18 uses for unk38.
  *
