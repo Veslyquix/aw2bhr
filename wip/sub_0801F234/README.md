@@ -4,15 +4,38 @@
 
 Best score so far: 32.5% (best.c).
 
+## What it does
+
+Loads the tile graphics for sprite id `a` into the next free place in a tile area (records in gUnknown_0200F920), copying width x height tiles with CpuFastSet. It then records the id and advances the area's next-free-tile cursor.
+
+## How close it is
+
+Compiles 4 bytes too long (124 against 120). Every statement is present and in the original's order; the difference is register choice. The draft puts the tile count in a high register, which costs extra save, restore and move instructions, where the original uses the last free low register (r7). A smaller second difference, the original moving the graphics-source result into a spare register and back, partly cancels it.
+
+## What is left
+
+Find out why the compiler will not use r7 for the tile count, even though neither version needs a frame pointer. Once that is fixed, a known trick for the second difference (a dead assignment of the call result, which works on the sibling sub_0801F19C) can be applied.
+
+## Already tried
+
+- All four declaration orders of the locals, and swapping the order of the `tile` and `n` statements: identical code.
+- Storing the graphics-source call result in its own local before the CpuFastSet call: identical, because the compiler merges the copy.
+- Integer arithmetic for the CpuFastSet destination (the trick that matched sub_0801FD9C): identical.
+- The older compiler build: right size but a worse match, because it merges a re-read of the list cursor that the original really does, and it still uses the high register.
+- The dead-assignment trick on the call result (`i = sub_0801F444(a, i)`) applied now: 4 more bytes, because `i` stays live longer here than in the sibling.
+- Different ways of writing the copy-size arithmetic: no change.
+- A `do { } while (0)` around the tile-count statement (in best.c): same size, slightly more bytes line up.
+
 ## Files
 
 - `sub_0801F234.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -56,3 +79,5 @@ WAVE 86 (W86-F, vocabulary-twin axis): twin sub_0801F34C (src/decomp/c_0801F34C.
 ### Wave 89
 
 WAVE 89 (W89-D): SCREENED OUT before any probe. Residual (1) is a register assignment and residual (2) parks a call result; the one genuine memory re-read (`e->unk05`) is ALREADY REPRODUCED and sits in settled_by_this_attempt, not in the residual -- so the re-read lever family has no target here. W77-K's stated reason for withholding the parking lever was re-checked and still holds. HANDOFF FOR THE NEXT ATTEMPT: neither build has a stack frame, so r7 is not reserved as a frame pointer in either, yet the draft pays four instructions for an r8 round trip (plus a fifth to move the `muls` product out of a lo scratch) with r7 SITTING UNUSED. The question is what makes r7 unavailable to that compilation, not why `n` prefers r8. Evidence: work/sub_0801F234/W89-notes.md.
+
+</details>

@@ -4,15 +4,38 @@
 
 Best score so far: 32.7%.
 
+## What it does
+
+Draws a list of sprites: for each army 1..sub_080248F8() that is not defeated, draws sprite (team colour + 0x3d) at x 8 and y = army * 16 + 0x30 with sub_0801F34C, then draws two fixed sprites (2 and 0xa9).
+
+## How close it is
+
+Reports the right size (104 bytes), but that is a coincidence: the code is one instruction (2 bytes) short and literal-pool alignment padding makes up the difference. 70 of 104 bytes differ (32.7% line up).
+
+## What is left
+
+The original computes `i << 4` twice; our compiler reuses the first result for the y argument. Every spelling that stops the reuse costs more than 2 bytes, so the one idea left is a wider source context (a macro or inline boundary shared with neighbouring functions), which cannot be tested from inside this function.
+
+## Already tried
+
+- Ten plain rewrites of the y value and loop body (`i * 16 + 0x30`, `i << 4`, `(i - 1) * 16 + 0x40`, a temporary, if/else, continue, switch, an element pointer): all byte-identical.
+- `(u16)` casts or a u16 temporary for y: they stop the reuse but add 4 bytes.
+- A volatile copy of i for the second use: stops the reuse and gives the original's instructions there, but costs a stack slot, a register and memory traffic.
+- A `static inline` helper for the y value or the record index: byte-neutral.
+- An `int zero` local passed as the last two arguments (worse), or the defeated flag read into a local (neutral).
+- The automatic permuter, about 22,000 tries: nothing better.
+- All seven compiler profiles: identical result.
+
 ## Files
 
 - `sub_08045FC8.c`: the current draft
 - `NOTES.md`: working notes
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -57,3 +80,5 @@ WAVE 89 (W89-C, then W89-H's diagnostic): the wave-88 levers are REFUTED and the
 ### Wave 89 permuter blocked
 
 WAVE89 PERMUTER-BLOCKED: this draft currently carries a wave-88-style `static inline` helper written with `__inline__`/`__typeof__`, which PYCPARSER REJECTS -- permute.py reports 'could not score the starting point', which is a SYNTAX ERROR, not a result. So no permuter run on the CURRENT draft has ever actually executed, and any permuter negative recorded against a draft carrying the helper is void. `static inline` plus the explicit struct tag is BYTE-IDENTICAL and parses (W89-F, measured). Re-spell before recording any permuter verdict here.
+
+</details>

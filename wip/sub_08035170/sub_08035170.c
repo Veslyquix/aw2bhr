@@ -277,14 +277,14 @@ u8 sub_08035170(void)
 {
     int v;
 
-    v = gUnknown_03003FC0.unk2c;
+    v = gPlaySt.weather;
 
     switch (v)
     {
     default:
         v = 0;
     case 0:
-        if (gUnknown_03003FC0.unk2d == 1)
+        if (gPlaySt.randomWeatherOn == 1)
         {
             if (sub_080129F8(gUnknown_03004490[2]))
                 v = 1;
@@ -295,10 +295,10 @@ u8 sub_08035170(void)
 
     case 1:
     case 2:
-        if (gUnknown_03003FC0.unk2d != 2
-            && (v != *(vu8 *)&gUnknown_03003FC0.unk2f || gUnknown_03003FC0.unk2d != 3)
+        if (gPlaySt.randomWeatherOn != 2
+            && (v != *(vu8 *)&gPlaySt.defaultWeather || gPlaySt.randomWeatherOn != 3)
             && sub_08035080())
-            v = *(vu8 *)&gUnknown_03003FC0.unk2f;
+            v = *(vu8 *)&gPlaySt.defaultWeather;
         break;
     }
 

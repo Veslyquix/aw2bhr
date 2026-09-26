@@ -68,7 +68,7 @@
  *
  * EVERYTHING matches except this: the ROM computes `i << 4` TWICE --
  *
- *     lsls r0, r4, #4      <- for gUnknown_08499598[i]'s * 0x3c synthesis,
+ *     lsls r0, r4, #4      <- for gPlayers[i]'s * 0x3c synthesis,
  *     subs r0, r0, r4         which agbcc expands as ((i << 4) - i) << 2
  *     lsls r0, r0, #2
  *     ...
@@ -90,10 +90,10 @@
  *   - `if (...) call;`, `if (... != 0) continue; call;`, `if/else` both ways,
  *     `switch (unk14) { case 0: }` -- none of them puts a label between the two
  *     shifts, which is the only thing that would end the CSE block
- *   - element bound as `p = &gUnknown_08499598[i]` (hoists the pool address into
- *     r5 and costs a register -- strictly worse) and as `p = gUnknown_08499598`
+ *   - element bound as `p = &gPlayers[i]` (hoists the pool address into
+ *     r5 and costs a register -- strictly worse) and as `p = gPlayers`
  *     (no change at all)
- *   - naming `gUnknown_08499598[i].unk14` again as the fifth argument: the load
+ *   - naming `gPlayers[i].unk14` again as the fifth argument: the load
  *     is RE-EMITTED, so the fifth argument is a literal 0 and gcc's reuse of r1
  *     for it is its own knowledge that r1 == 0 on that path
  *   - `(u16)(i * 16 + 0x30)` and a `u16 y` temporary: these DO break the CSE,
@@ -120,8 +120,8 @@ void sub_08045FC8(void)
 
     for (i = 1; i <= sub_080248F8(); i++)
     {
-        if (gUnknown_08499598[i].unk14 == 0)
-            sub_0801F34C(gUnknown_08499598[i].unk1a + 0x3d, 8, i * 16 + 0x30, 0, 0);
+        if (gPlayers[i].defeated == 0)
+            sub_0801F34C(gPlayers[i].teamColor + 0x3d, 8, i * 16 + 0x30, 0, 0);
     }
 
     sub_0801F34C(2, 8, 0x10, 0, 0);
@@ -164,7 +164,7 @@ void sub_08045FC8(void)
  *     the zero-cost pressure lever from the wave-43 W43-C chapter. It costs a
  *     register rather than nothing: r5 is burned for the whole function and
  *     the push list grows to {r4, r5, lr}. Strictly worse.
- *   - `e = gUnknown_08499598[i].unk14; if (e == 0) ... , 0, e);` -- reading
+ *   - `e = gPlayers[i].unk14; if (e == 0) ... , 0, e);` -- reading
  *     unk14 into a local and passing that local as the fifth argument. Neutral
  *     on the residual, but it is worth recording that it reproduces the ROM's
  *     `str r1, [sp]` (the fifth argument sharing the register the unk14 load
@@ -187,7 +187,7 @@ void sub_08045FC8(void)
  *
  * Screened twin sub_080853B0 (src/decomp/c_080853B0.c, matched, 96B). Pair
  * class: SAME-VOCABULARY NEIGHBOUR. It shares sub_0801F34C, sub_080248F8,
- * gUnknown_08499598, the unk1a + 0x3d draw argument, the 0x3c stride and the
+ * gPlayers, the unk1a + 0x3d draw argument, the 0x3c stride and the
  * bound re-evaluated in the for condition -- and differs in exactly the place
  * this residual lives.
  *

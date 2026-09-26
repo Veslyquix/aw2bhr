@@ -4,15 +4,35 @@
 
 Best score so far: 60.1%, +4 bytes (best.c).
 
+## What it does
+
+The per-frame input handler for an on-screen character grid, apparently a text-entry keyboard. A types the character under the cursor or acts on a special key, B deletes, Start calls sub_0804A6D8, and the d-pad moves the cursor with wrap-around.
+
+## How close it is
+
+Compiles 4 bytes too long (924 against 920); 374 bytes differ (59.3% line up). The draft pins four variables to fixed registers, which is not real source but scores far better than without the pins (12.4%).
+
+## What is left
+
+Two things remain: the construct that naturally gives flag, t, u and c the original's registers (the pins stand in for it), and the key-repeat do/while loop, where the original re-reads the gUnknown_030044E0 pointer in each branch but our compiler merges the loads into one copy before the loop, costing an extra literal-pool word (the 4 extra bytes). A spelling that blocks that merge in the loop only has not been tested.
+
+## Already tried
+
+- Removing the four register pins (with the other fixes in place): 924 bytes, 12.4%.
+- Reading the pointer through a pointer alias to stop the merge: it stops it everywhere in the function, 10 bytes too long.
+- About twenty variants (barriers, other pins, volatile views, reordering, signed and unsigned types, switch guards): none closer.
+- All seven compiler profiles: no match.
+
 ## Files
 
 - `sub_0804A760.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -47,3 +67,5 @@ Two residuals left, both allocation-adjacent: the pins stand in for an unknown c
 ### Wave 86
 
 WAVE 86 (W86-D, constant-twin axis): the screen's twin c_0804A260.c IS already cited in the draft (its struct view is imported verbatim), so the axis supplies nothing new; the one untried inversion -- the bare `*(s16 *)&p->m` alias that kills PRE's hoisted address pseudo, read backwards -- was probed and REGRESSED 924 -> 930 (+10 vs baseline +4), restored. Mechanism CONFIRMED (the alias really does control reload-vs-hoist), transplant REFUTED: the lever is all-or-nothing at function scope and the ROM has NO hoist at all (reloads in each do-while arm and once after the shared strh into r5, which the post-loop switch arms reuse) -- the draft's single hoisted pool word is one decision, not two, and the alias overshoots it by four reloads. Open question, unmeasured: a spelling that scopes the PRE barrier to the loop only. Configured, 924/920, unchanged.
+
+</details>

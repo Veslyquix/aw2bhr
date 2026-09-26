@@ -101,6 +101,78 @@ def stream(script, log_path=None, cwd=None):
     return proc.wait(), "".join(chunks)
 
 
+_PROGRESS_RE = re.compile(r'^iteration \d+')
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*[A-Za-z]')
+
+
+def stream_compact(script, log_path, echo=False, every=60, cwd=None):
+    """Like stream(), but keep the log READABLE and the caller's output quiet.
+
+    The permuter redraws `iteration N, E errors, score = S` with carriage
+    returns and backspaces, never a newline: about 400 KB a minute, all of it
+    one "line" to `tail`. Here every CR/LF-terminated segment is cleaned of
+    ANSI colour and backspaces; progress segments are kept only as a snapshot
+    every `every` seconds plus the final one, and every other message (new
+    best score, errors, the permuter's own report) is kept whole. A 15-minute
+    run's log drops from ~6 MB to a few KB and `tail -25` means something.
+
+    echo=True also prints the kept lines. Returns (returncode, kept text).
+    """
+    import time
+    root = cwd or REPO_POSIX
+    full = "cd %s || exit 1\n%s" % (shlex.quote(root), script)
+    argv = (["wsl", "-d", DISTRO, "-e", "bash", "-c", full]
+            if os.name == "nt" else ["bash", "-c", full])
+    proc = subprocess.Popen(argv, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
+    kept, latest = [], None
+    start = last = time.time()
+    log = open(log_path, "w", encoding="utf-8") if log_path else None
+
+    def emit(line):
+        kept.append(line)
+        if log:
+            log.write(line + "\n")
+            log.flush()
+        if echo:
+            sys.stdout.write(line + "\n")
+            sys.stdout.flush()
+
+    def feed(seg):
+        nonlocal latest, last
+        seg = _ANSI_RE.sub("", seg).replace("\b", "").strip()
+        if not seg:
+            return
+        if _PROGRESS_RE.match(seg):
+            latest = seg
+            now = time.time()
+            if now - last >= every:
+                emit("[%5ds] %s" % (now - start, seg))
+                last = now
+            return
+        emit(seg)
+
+    buf = ""
+    try:
+        while True:
+            chunk = proc.stdout.read1(4096)
+            if not chunk:
+                break
+            buf += chunk.decode("utf-8", errors="replace")
+            parts = re.split(r'[\r\n]', buf)
+            buf = parts.pop()
+            for seg in parts:
+                feed(seg)
+        feed(buf)
+        if latest:
+            emit("[%5ds] %s  (final)" % (time.time() - start, latest))
+    finally:
+        if log:
+            log.close()
+        proc.stdout.close()
+    return proc.wait(), "\n".join(kept)
+
+
 _VAR_RE_CACHE = {}
 
 

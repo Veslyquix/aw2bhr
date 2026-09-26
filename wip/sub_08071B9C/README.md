@@ -4,15 +4,37 @@
 
 Best score so far: 19.4%, +8 bytes (best.c).
 
+## What it does
+
+One frame of a 16-colour palette fade run by a proc. It blends each colour's red, green and blue from start to target by step / step count (via Interpolate), writes the result and uploads the palette, then advances the step; when the fade is finished it ends the proc instead.
+
+## How close it is
+
+Compiles 8 bytes too long (240 against 232), 19% of bytes match; the score means little because the difference starts near the top and shifts everything after it. The loop shape and the registers of the main pointers are right; the extra bytes are in four colour-mask steps.
+
+## What is left
+
+In four of the six mask steps (red and green of each colour) the original loads the mask into the result register and ANDs the colour into it, while the draft copies the colour and ANDs it with a mask kept in another register, because the compiler shares the 0x1f mask across both colours. Change what is live around the mask code so the compiler stops holding 0x1f in one register across both colours; respelling the constants cannot do it.
+
+## Already tried
+
+- A for or while loop: the compiler turns all three arrays into stepping pointers and counts down; the original counts up with one stepping pointer, which only a goto loop reproduces (kept).
+- `*dst++` inside a real for loop: the other two arrays still become stepping pointers.
+- Changing the declaration order: fixes the stack-slot order (already right), not the registers.
+- `do { } while (0)` around the three Interpolate calls: gives the proc and fade-record pointers the original's registers (15% to 19%) but leaves the mask copies unchanged; kept.
+- `do { } while (0)` around the whole goto loop: breaks the loop shape.
+- Six separate constant locals, one per mask: byte-identical, the compiler folds them away.
+
 ## Files
 
 - `sub_08071B9C.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -39,3 +61,5 @@ THE TENSION THAT HAS TO BE BROKEN, stated plainly by W57-D because it is the act
 ### Wave 87
 
 WAVE 87 (W87-D): 15.1% -> 19.4%, still 240/232 (+8), first difference +0xc -> +0x16, draft REPLACED (old in w87-start.c). W80-C `do { } while (0)` lever CONFIRMED: a wrapper around the three Interpolate calls puts proc in r7 and data in sl (the ROM's assignment) and removes all four `mov rN,sl` reads (baseline re-measured this wave: `mov sl,r0 / ldr r7,[r0,#44]` vs ROM `adds r7,r0,#0 / ldr r0,[r7,#44] / mov sl,r0`). Three separate per-call wrappers = same code. Around the whole goto loop with the label inside BREAKS the settled shape (data becomes a second walking pointer `add sl,sl,#2`, shared `lsls r2,r1,#1` destroyed). PARK'S CAUSAL CLAIM REFUTED: the swap is fixed and the constant sharing is UNCHANGED -- two facts. Remaining +8: the ROM lets the two-address `ands` CONSUME a rematerialised mask (`movs r1,#31; ands r1,r0`) for ar/ag/br/bg; the draft copies the value and ands against a separate constant register; only 0x1f is genuinely CSE-shared (r3 spans both groups), 0x3e0 is rematerialised per group yet still takes its own register; the two 0x7c00 results already match. Six constant locals, one per mask assigned right before use: byte-identical (19.4%) -- they fold away. New bound on W86-A: a constant local cannot pin a register for a constant cse has already merged BY VALUE (no distinct pseudo, no live-range start). Next: change what is LIVE at the mask block so cse cannot keep 0x1f in r3 across the two groups; no source respelling of the constant can do it. The park's row (a) (reference counts for the swap) is moot.
+
+</details>

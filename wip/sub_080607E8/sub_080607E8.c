@@ -5,7 +5,7 @@
  *
  * Places up to three units for scenario slot 7: read the slot's (x, y) out of
  * sub_0803E354, then for each of three columns check that the map cell is empty
- * and that the per-terrain-band table gUnknown_030046B4 names a unit type for
+ * and that the per-terrain-band table gFactoryUnitSchedule names a unit type for
  * that column, and if so spawn it and seed its three state bytes.
  *
  * Settled, and each of these reproduces exactly:
@@ -24,7 +24,7 @@
  *
  *  - `b` is the slot's second byte PLUS 4, computed once and kept in r8.
  *
- * RESIDUAL, two spots, both in the gUnknown_030046B4 lookup and both one fact:
+ * RESIDUAL, two spots, both in the gFactoryUnitSchedule lookup and both one fact:
  * the ROM recomputes `band * 3` INSIDE the loop (`mov r3, sb; lsls r0, r3, #1;
  * add r0, sb`) with `band` itself living in sb, while agbcc hoists `band * 3`
  * to the preheader and parks it in sb, leaving `band` in the low r4. That
@@ -69,7 +69,7 @@ void sub_080607E8(void)
     int v;
     u8 c;
     u8 d;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     band = gUnknown_03004080 & 0x1f;
     p = sub_0803E354(7);
@@ -88,7 +88,7 @@ _loop:
 
         if (c == 0)
         {
-            d = ((u8 *)gUnknown_030046B4)[band * 3 + i];
+            d = ((u8 *)gFactoryUnitSchedule)[band * 3 + i];
 
             if (d != 0)
             {

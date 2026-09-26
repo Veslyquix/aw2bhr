@@ -45,3 +45,72 @@ Conclusions:
 - Draft restored to the champion (verified by hash). best.json untouched
   (99.04). Park entry stands; nothing new beyond the two measured numbers
   above to add to it.
+
+## W90-A (wave 90, agent A) -- 99.0% -> 99.4%, 10 -> 6 bytes, size-exact
+
+Active draft = `w90-R6-994.c` (configured: 1040/1040, 6 of 1040 differ, first
+difference +0x370). `w90-start.c` is the 99.0% champion this wave began from.
+
+**The inner loop is a WALKER + GIV pair, not two givs of j.** New source:
+
+    for (j = 0, new_var = 0; j < 8; j++)
+    {
+        x = (0x06015000 + (i * 0x800)) + new_var;
+        CpuFastSet(&gUnknown_0200FC50[(i * 0x100) + (j * 0x400)], (void *) x, 0x40);
+        new_var += 0x100;
+    }
+
+- `new_var` is a source walker (biv, step 0x100) and the VRAM address is a
+  GIV OF THE WALKER, not of j. strength_reduce then inserts the dst increment
+  before the walker's own (body) increment, i.e. BEFORE the src giv's increment
+  (which goes before `j++`). That reproduces the ROM's dst-then-src loop bottom,
+  which no two-givs-of-j spelling can (both givs of one biv always increment in
+  giv-list order, the same order as their inits). R1 (the walker sum inline in
+  the call) = 8 bytes; R6 (the sum in its own statement BEFORE the call) = 6
+  bytes, because computing `i * 0x800` first puts `lsls r1,r5,#11` ahead of
+  `lsls r0,r5,#8` as in the ROM.
+- The ONLY residual left: `movs r6,#7` (counter init) sits after the dst init
+  where the ROM has it between src and dst. RTL dumps (`-dL`) settle where
+  each preheader insn comes from: `i + 1` and `i << 8` are GCSE/PRE insertions
+  (present in the `.gcse` dump) at the end of the block before the inner loop;
+  the src init is a RUN-1 giv init; the counter `j = 7` is written by
+  check_dbra_loop in the SECOND loop pass (`flag_rerun_loop_opt`), and
+  check_dbra_loop runs BEFORE that pass's own giv reduction. So in the ROM the
+  dst init, emitted after `j = 7`, must be a giv reduced in RUN 2, and its
+  increment still precedes src's, so its biv is not j. In every spelling
+  measured here dst is reduced in run 1. That is the open question, and it is
+  now narrow: what makes the walker's giv "not worth while" (or not a giv) in
+  pass 1 but reduced in pass 2? LICM's threshold test (13 x savings x life vs
+  insn_count 19 -> 16) has no integer landing between the two passes for a
+  life-1 movable, so it is not the obvious one.
+
+Measured, all configured, all worse or equal (drafts in the scratch variants,
+not kept): the matched twin `c_080790D0.c`'s full walker form (src/dst walkers,
+`k = i * 0x800`, descending source `j = 7`) = +12, 54.1%: the three extra user
+pseudos push `proc` out of r7 (r9) and `p = gUnknown_0200FC50` is
+rematerialised from the pool every outer iteration instead of held in sl; with
+p / without p / int walkers / `off` walker all identical or worse. dst walker
+only, src giv of j (`I`) = 96.5% but dst init is SOURCE (first in the
+preheader); walker counting by 1 (`* 0x100` at the use) = R1; walker in the
+for-increment = 98.0%; do/while(0) around any one of the three body statements
+or the whole body = byte-identical to R6 (jump deletes the zero-trip loop
+before loop opt, so it cannot defer a reduction to pass 2); src as a source
+walker with dst a giv of the walker (descending or ascending j) = 85.7%.
+
+Permuter: directed run from the old 99.0% base (96 PERM_GENERAL bases x
+randomize over the loop, 9,242 iterations, 900 s) found nothing; the walker
+form was found by hand after reading the RTL dumps.
+
+**Tooling added this wave: RTL dumps.** `agbcc` accepts gcc 2.95's `-d`
+flags. Preprocess with the same cpp line as `permuter/compile.sh` into a file
+and run `agbcc x.i ... -O2 -dr -dL -dG -dc -o x.s` in a scratch dir: you get
+`x.i.rtl` (expand), `x.i.gcse`, `x.i.loop` (with the per-loop biv/giv log for
+BOTH loop passes: "giv ... reduced to", "Can reverse loop", "not worth
+while"), `x.i.combine`. This answers "which pass wrote this insn" directly.
+
+**Run 3 (wave 90, W90-A):** undirected 900 s from the 99.4% R6 draft
+(`w90-R6-994.c`, base score 60), 13,173 iterations: nothing better. Totals on
+this function this wave: three runs, ~36.8k iterations, no permuter gain; the
+10 -> 6 byte step was the hand-found walker form. The directed sources are kept
+as `w90-directed.perm.txt` and `w90-R6-directed.perm.txt`. Draft left at 99.4%
+(`sub_0807E980.c` == `w90-R6-994.c`).

@@ -4,14 +4,37 @@
 
 Best score so far: 83.2%, +4 bytes (preprocessed form, not included).
 
+## What it does
+
+Loads the sprite graphics for a text string into sprite VRAM. For each character it looks the code up in the glyph table gUnknown_08614024 and copies that glyph's 256 bytes to the character's slot in VRAM, recording an x position and a running total per character in the proc. At the end it stores the character count in the proc.
+
+## How close it is
+
+Compiles to the right size (220 bytes) with the original's stack frame; 76% of bytes match and every remaining difference is inside the character search loop (its shape and register choice). The draft is raw permuter output: it reads and writes the search index j inside one call's argument list, which standard C leaves undefined, though agbcc computes the right values.
+
+## What is left
+
+The original has a leftover copy of the table offset at the top of the search loop; try a goto loop that recomputes the offset (k = j * 8) at the top of each pass instead of only stepping it, starting from this draft. Before promoting any match, rewrite the reuse of j in the CpuFastSet call as defined C and re-check it.
+
+## Already tried
+
+- for and while search loops: the compiler moves the test to the bottom and precomputes the stride; the original tests at the top, which only a goto loop gives (kept).
+- Indexing the table as flat bytes, or swapping the compare's operands: the compare order is right but the stack frame shrinks by 4 bytes.
+- Local aliases for the string and proc parameters: the string pointer stays in a register instead of being saved on the stack; casting the parameters at each use is kept.
+- `u16 acc` with a cast at the read: the narrowing disappears; a signed `short acc` is right.
+- An extra `inext = i + 1`, `x10 = i * 16` or `m = k`: no help; the compiler already does the first and merges the others away.
+- Taking the string parameter's address, or static inline helpers, to push it onto the stack: folded away.
+- Automatic permuter, four chained runs from the goto-loop draft: 21% to 76% at the right size (this draft), then no further gain.
+
 ## Files
 
 - `sub_08073228.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -54,3 +77,5 @@ WAVE 86 (W86-C then W86-G): the pre-registered hypothesis 'the inner search is a
 ### Wave 87
 
 WAVE 87 (W87-B): 21.8%/216 (-4) -> 76.4% SIZE-EXACT 220/220 (draft; best.c 83.2%), first difference +0x19; draft REPLACED (goto-loop wave-86 draft in w87-start.c / _w87_gotoloop.c; the tidy 76.4% splice in _w87_76pct.c). THE RESIDUAL WAS NOT THE i*2 / i*0x10 SPILL TIE: read off target.s, the ROM SPILLS the PARAMETER a1 to [sp,#0] and reloads it at both uses while the candidate kept a1 in sl for the whole function -- that was the entire -4 and the +0xa first difference (`sub sp,#0x20` vs `#0x1c`). Both use exactly three hi registers (ROM r8=i*0x10, sb=acc<<16, sl=i+1; candidate r8=acc<<16, r9=i+1, sl=a1, i*0x10 on the stack): a THREE-WAY contest for the third hi register between a1 and i*0x10, and the loser's slot shifts the whole stack map. W86-C second delay lever (`t = i * 0x10;`) REFUTED: it MOVES the computation to the top of the body and does not touch the a1 decision. `*&a1`, `*(const void *const *)&a1` inline and a dead `ap = &a1;` all fold away (the address must be READ THROUGH); a static-inline helper around `i * 0x10 + 4` or around the whole indexed store leaves a1 in sl (that lever re-cuts live ranges among locals/temporaries, it does not dislodge a PARAMETER). Four chained permuter links from the goto-loop draft (first ever on it): 21.4 -> 83.2, fourth link flat -- the frame, the parameter spill order and the size are now the ROM's and what is left is 52 bytes INSIDE the loop (loop shape and in-loop allocation). remaining_diff/axes_ruled_out above are superseded. Next is a CONSTRUCT, not permuter time: the ROM's dead `adds r0,r4,#0` at the top of the search loop -- wave 46 produced exactly it with `k = j * 8;` as the first statement of a `for(;;)` body, the wave-86 goto rewrite dropped it, the permuter's `j = j * 8; k = j;` echoes it. Untested: a goto loop that RE-DERIVES k at the top of each pass rather than only stepping it, tried on top of the 76.4% draft (whose old negatives are void).
+
+</details>

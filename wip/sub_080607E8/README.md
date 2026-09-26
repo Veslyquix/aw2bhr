@@ -4,14 +4,36 @@
 
 Best score so far: 54.6%, -8 bytes.
 
+## What it does
+
+Spawns up to three units in a row. It looks up record 7 with sub_0803E354 to get a cell (x, y + 4); for each of the cells x, x + 1 and x + 2 on that row, if no unit stands there and the factory schedule gFactoryUnitSchedule (three unit-type bytes per row, row chosen by the low five bits of gUnknown_03004080) names a type, it creates that unit with sub_08025CC8, clears the unit's bytes 9 and 10, and sets byte 11 from PickWeightedAiUnit(type - 1).
+
+## How close it is
+
+Compiles 8 bytes short of 172; 54.7% of bytes are in place. Three instructions are missing, all around the unit-creation call: the ROM re-narrows the second argument to 16 bits where the draft's compiler proves that unnecessary, and the ROM loads a fresh 0 for byte 9 where the draft reuses a register already known to hold 0.
+
+## What is left
+
+Find a way of writing b (the row plus 4) whose 16-bit narrowing the compiler cannot prove redundant; the other missing instruction and the swapped registers should follow. The permuter has never actually searched this function: the inline-asm line that made it refuse is no longer in the draft, so a run is now possible.
+
+## Already tried
+
+- Seven spellings of the table index (`band * 3 + i`, a two-dimensional array view, a struct wrapper and others): all let the compiler move `band * 3` out of the loop, which the ROM does not. Writing the loop as a plain goto loop fixed that (kept; do not turn it back into a for loop).
+- A packed 3-byte row struct: gives the right row size but the multiply is still moved out of the loop.
+- u8 or int for band, c and d; `continue` against nested ifs; merging the two tests with &&: no help. d must stay u8.
+- `u16 b` instead of int: byte-identical.
+- Splitting b's definition into two statements: gets 4 bytes back but moves b and the loop counter into other registers, 30.2% overall.
+- Raw byte arithmetic on gUnknown_08499590 for the map reads: adds the offsets in the wrong order; the file-local struct cast is right (kept).
+
 ## Files
 
 - `sub_080607E8.c`: the current draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -41,3 +63,5 @@ The shape is fully derived and exactly ONE compiler decision is wrong. The lever
 ### Notes
 
 The gUnknown_08499590 access is settled and must not be re-litigated: the file-local `struct Map7E8` cast reproduces the ROM's `adds r0,r1,r3(=0x417A); adds r0,r0,r2` and `adds r1,#0x12; adds r1,r1,r0` associations exactly, per the wave-34 rule in include/unknown-globals.h. Byte arithmetic on the u8 * does not. WAVE 77: the goto-loop form is now load-bearing and must not be tidied back into a `for`. W73-D's test for the goto lever -- does the body need a giv? -- is NEGATIVE here: the ROM rematerialises every address from band and i each iteration and carries no strength-reduced giv at all, which is why the lever that is mutually exclusive with a giv on sub_0806412C is free on this function.
+
+</details>

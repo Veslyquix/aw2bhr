@@ -4,15 +4,38 @@
 
 Best score so far: 87.5% (best.c).
 
+## What it does
+
+Copies a rectangular block of tilemap entries into a tilemap buffer (callers pass gBG0TilemapBuffer) at column x, row y, adding `add` (a palette and tile-base offset) to every entry. The block's first u16 holds the width in its low byte and the height in its high byte; the entries follow row by row, and the destination rows are 32 entries apart.
+
+## How close it is
+
+Compiles to the right size (88 bytes); 11 bytes differ. The instructions are the same as the original in the same order; only the register numbers differ, for four values: `dst`, `src`, the row base and the row pointer.
+
+## What is left
+
+The original keeps `dst` alive only until the row base is computed and then reuses its register for the row pointer. The draft needs a way to copy `dst` early (as the original does) without making that copy the long-lived row base.
+
+## Already tried
+
+- Giving the row base its own local (five spellings): the registers split the right way, but the early copy of `dst` disappears and the code is 4 bytes short.
+- The permuter, four runs of about 43,000 tries in total plus two more later: it stopped improving at the current draft. Its two useful edits (a `do { } while (0)` wrapper and `y * 0x20` in an `int` local) are kept.
+- The older compiler build and every other compiler profile: worse, or the same at best.
+- Taking parameter 2 as `void *` and walking a `u16 *` local: the copy of `src` moves to the wrong place.
+- Declaring parameters 3 to 5 as `int` with casts at each use: loses the narrowing at entry that the original has.
+- Writing the offsets as subtraction of a negative (the trick that matched sub_0802FA64): worse, loses the copy of `src`.
+- Reordering `*p = *src + add` or the two pointer increments: no change.
+
 ## Files
 
 - `sub_08012B70.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -50,3 +73,5 @@ The type model and the statement order are settled and independently corroborate
 ### Why it is parked
 
 Register allocation, not source semantics. The instruction stream, the type model and every read form are settled; what remains is which hard register the row base and the row pointer land in, and that is coupled to whether dst survives as a pseudo of its own. Both sides of that coupling have been probed to exhaustion from source, the toolchain axis is measured and worse, and the permuter has converged. Unparking needs a construct that keeps dst alive across the stack-parameter load WITHOUT making it the row base. WAVE 73: still the correct diagnosis. This was the ONE function in the wave-73 pure-register-name batch that no lever moved, and it is also the only one of the six that had ALREADY had the permuter run on it before this wave.
+
+</details>

@@ -4,15 +4,38 @@
 
 Best score so far: 87.2% (best.c).
 
+## What it does
+
+Copies a text string's glyphs into sprite tile memory starting at 0x06016140, looking each character up in the table gUnknown_08090F30. The glyph data comes from a 0x3000-byte block returned by sub_08014E44; where that block's contents come from is unknown.
+
+## How close it is
+
+Compiles to the right size (172 bytes); 22 of 172 bytes differ, 87.2% line up.
+
+## What is left
+
+The original computes the VRAM destination once per character in the setup of the search loop, after that loop's first test, and shares one register between the slot counter and the destination; every position for that assignment has now been measured and none gives both. The only direction left is that the original wrote the destination as a different expression altogether.
+
+## Already tried
+
+- The destination written inline in the call: the compiler merges its two constants into one and the function is 8 bytes short (43%).
+- Assigning the destination inside the `if`, at its use: same merge, 8 bytes short.
+- Assigning it as the first statement of the search loop: still merged, and computed before the table address instead of after.
+- Assigning it at the bottom of the search loop body: the compiler will not move it out of the loop, so it costs instructions on every pass.
+- Assigning it both before the search loop and again at its bottom: both constants survive but neither assignment moves.
+- Rewriting the search loop by hand as a do/while with a first test: much worse (an extra constant word and different registers).
+- The automatic permuter for 5 minutes: every candidate drifted back toward the merged, 8-byte-short form.
+
 ## Files
 
 - `sub_08039588.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
 - `target.s`: the original assembly
 
-## What has been tried
+## Technical history
 
-From `data/parked.json`.
+<details>
+<summary>The full record from `data/parked.json`: every attempt, with compiler detail.</summary>
 
 ### Best so far
 
@@ -45,3 +68,5 @@ THE CONSTANT MERGE, which was the whole park for four waves, IS SOLVED. cse merg
 ### Why it is parked
 
 Wave 79 W79-E: THE SPAN IS CLOSED AT BOTH ENDS AND THERE IS NO POINT LEFT IN IT. The hoist needs the def to dominate the use (loop.c will not move a movable whose register is read before its set, nor one live on loop entry); the two-pool-word split needs the def to sit outside the use's extended basic block. The inner loop body contains no control-flow join, so no position satisfies both, and every position has now been measured: outside the loop (W73-G, foreclosed by liveness), top of the body (hoisted but merged, and ahead of the table base), inside the `if` at the use (merged), bottom of the body (W79-E, not hoisted at all). A SOURCE CONSTRUCT IS BEHIND THIS RESIDUAL -- the LICM hoist position of `dst` -- but it is not reachable from C without adding control flow the ROM does not have. Do not spend another wave on positioning. If this function is resumed, the only untried direction is that the ROM's `dst` is not this expression at all.
+
+</details>

@@ -52,6 +52,32 @@ route:
 PATH="$(pwd)/vendor/permuter-venv/bin:$PATH" python3 tools/permute.py <name> --seconds 300
 ```
 
+### Required local patch: scorer penalties
+
+`vendor/` is gitignored, so this does **not** survive a re-clone. Re-apply it,
+or `tools/permute.py` will warn on every run.
+
+In `src/scorer.py`, upstream ships:
+
+```python
+PENALTY_REGALLOC = 5
+PENALTY_REORDERING = 60
+```
+
+Change `PENALTY_REGALLOC` to **60**. Upstream's weights say a wrong register is
+a twelfth of a reordering, which is right for a human reading a diff and wrong
+for our verdict: we judge exact bytes, and a wrong register changes its
+instruction's encoding just as a reordering does. At 5, trading one reordering
+for eleven register differences is a score *win* and a byte disaster — which is
+exactly the anomaly `tools/permute.py`'s header records as unexplained
+("35 -> 30 while bytes went 80% -> 75%").
+
+Keep it overridable so the weight can be A/B'd without another edit:
+
+```python
+PENALTY_REGALLOC = int(__import__("os").environ.get("AW2_PENALTY_REGALLOC", "60"))
+```
+
 Do not invoke `permuter.py` directly — `tools/permute.py` builds the input
 directory, imposes a time limit, and re-checks every result with
 `tools/trymatch.py`. The permuter scores by diffing objdump text, which is a

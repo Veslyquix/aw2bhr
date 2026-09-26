@@ -35,7 +35,7 @@ struct Unk359A4Proc
     /* 0x00 */ PROC_HEADER;
     /* 0x29 */ STRUCT_PAD(0x29, 0x2c);
     /* 0x2c */ struct Unk0801C210 *unk2c;
-    /* 0x30 */ struct Unk08499594 *unk30;
+    /* 0x30 */ struct Unit *unk30;
     /* 0x34 */ u8 filler_34[0x01];
     /* 0x35 */ u8 unk35;
     /* 0x36 */ u8 filler_36[0x0c];
@@ -68,10 +68,10 @@ void sub_080359A4(ProcPtr procArg)
     py2 = py;
 
     if (proc->unk35 == 2
-        && (gUnknown_03003FC0.unk32 == 0 || gUnknown_030032D8 != 0x13))
+        && (gPlaySt.savingEnabled == 0 || gUnknown_030032D8 != 0x13))
         sub_080358C4(*px, y);
 
-    if ((gUnknown_08499598[gUnknown_030033EC].unk1c & 2) == 0)
+    if ((gPlayers[gUnknown_030033EC].turnState & 2) == 0)
     {
         if (((struct Unk359A4Map *)**screen)->unk234A[
                 ((struct Unk359A4Map *)**screen)->unk417A[(*py2 + 8) / 16]

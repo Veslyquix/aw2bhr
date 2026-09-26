@@ -17,6 +17,13 @@ So: run this after changing a shared type, then trymatch is meaningful again.
 
     python tools/sync_work.py                 # every promoted function
     python tools/sync_work.py sub_08016E74    # just these
+    python tools/sync_work.py --dry-run       # count stale drafts, write nothing
+
+RUN IT AFTER EVERY HEADER RENAME OR MERGE (wave 90). PR #3 renamed globals and
+struct tags in src/decomp/ but not in the promoted functions' work/ drafts, so
+trymatch's own --self-test failed on three promoted functions (AgbMain's unit,
+sub_0802C604, sub_0802CDA4) with `undeclared` errors, and every regression
+sweep over promoted units read as broken.
 
 Multi-function files are handled too. That used to be impossible here -- the
 claim was that a promoted file could not be split back without re-deriving
@@ -25,6 +32,15 @@ boundaries on the way in, so this just runs its splitter backwards. It matters
 more than it sounds: a third of promoted functions live in multi-function
 files, so leaving them out meant the check that is supposed to prove a header
 change safe silently skipped a third of the corpus.
+
+Hand-written files in src/*.c are covered as well as src/decomp/, because
+both are listed in data/promoted.json (wave 90: 12 units, 318 functions, among
+them AgbMain's in src/main.c). PR #3 renamed functions there and in src/decomp/.
+A renamed function is found by its `.thumb_set sub_XXXXXXXX, NewName` line,
+or by a `#define NewName sub_XXXXXXXX` macro in include/ or src/, and its
+draft defines it under the new name, with that line kept. Before this,
+any file holding a renamed function was reported as "could not be located"
+and all of its drafts were left stale.
 
 `make SPLIT=1 compare` is still the check that cannot be fooled, and is worth
 running after any shared-type change regardless.
@@ -115,12 +131,19 @@ def split_unit(text, fns):
         code.append(not in_comment and not s.startswith(("/*", "//", "*")))
         _, in_comment = promote.strip_comments(ln, in_comment)
 
+    # A function renamed in C is defined under its new name, with
+    # `asm(".thumb_set sub_XXXXXXXX, NewName")` after it or a header macro
+    # `#define NewName sub_XXXXXXXX` (wave 90); promote.definition_names.
     starts = {}
     for fn in fns:
-        pat = re.compile(r'^\S.*\b%s\s*\(' % re.escape(fn))
-        hit = next((i for i, ln in enumerate(lines)
-                    if code[i] and pat.match(ln) and _is_definition(lines, i)),
-                   None)
+        hit = None
+        for name in promote.definition_names(fn, text):
+            pat = re.compile(r'^\S.*\b%s\s*\(' % re.escape(name))
+            hit = next((i for i, ln in enumerate(lines)
+                        if code[i] and pat.match(ln) and _is_definition(lines, i)),
+                       None)
+            if hit is not None:
+                break
         if hit is None:
             return None, None
         starts[fn] = promote.doc_comment_start(lines, hit)
@@ -135,7 +158,8 @@ def split_unit(text, fns):
 
 
 def main(argv):
-    wanted = set(argv[1:])
+    dry = "--dry-run" in argv
+    wanted = set(a for a in argv[1:] if a != "--dry-run")
     with open(PROMOTED, encoding="utf-8") as fh:
         units = json.load(fh)
 
@@ -167,12 +191,14 @@ def main(argv):
             if os.path.isfile(dst) and open(dst, encoding="utf-8",
                                             newline="").read() == body:
                 continue
-            os.makedirs(dst_dir, exist_ok=True)
-            with open(dst, "w", encoding="utf-8", newline="\n") as fh:
-                fh.write(body)
+            if not dry:
+                os.makedirs(dst_dir, exist_ok=True)
+                with open(dst, "w", encoding="utf-8", newline="\n") as fh:
+                    fh.write(body)
             synced.append(fn)
 
-    print("synced %d draft(s) from src/decomp/" % len(synced))
+    print("%s %d draft(s) from src/"
+          % ("would sync (dry run, nothing written)" if dry else "synced", len(synced)))
     for fn in synced[:20]:
         print("  " + fn)
     if len(synced) > 20:
