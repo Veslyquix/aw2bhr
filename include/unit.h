@@ -9,6 +9,34 @@
  * original wave note, unchanged.
  */
 
+/* Unit-type ids: Unit.type, and the row index into gUnknown_085D5ABC. Each
+ * value was checked against its row's name string and cost in the ROM. The
+ * gaps (0, 4, 9, 12, 13, 18) are unused rows: copies of another unit's row
+ * with a cost of 0. `UnitTypeId` rather than `UnitType`, which is already the
+ * table's struct tag. From npiriou's PR #1. */
+enum UnitTypeId
+{
+    UNIT_INFANTRY = 1,
+    UNIT_MECH = 2,
+    UNIT_MEDIUM_TANK = 3,
+    UNIT_TANK = 5,
+    UNIT_RECON = 6,
+    UNIT_APC = 7,
+    UNIT_NEOTANK = 8,
+    UNIT_ARTILLERY = 10,
+    UNIT_ROCKETS = 11,
+    UNIT_ANTI_AIR = 14,
+    UNIT_MISSILES = 15,
+    UNIT_FIGHTER = 16,
+    UNIT_BOMBER = 17,
+    UNIT_BATTLE_COPTER = 19,
+    UNIT_TRANSPORT_COPTER = 20,
+    UNIT_BATTLESHIP = 21,
+    UNIT_CRUISER = 22,
+    UNIT_LANDER = 23,
+    UNIT_SUBMARINE = 24,
+};
+
 /* The bitfields at 0x04..0x06 come from sub_08042998, which reads the same
  * three offsets with the same widths off BOTH gUnknown_08499594[i] (stride
  * 0x0c, so this type) and **gUnknown_08091364 -- so the two are one type, and

@@ -8,6 +8,32 @@
  * gPlayers is 1-based: slots 1..4 are the four armies and slot 0 is unused.
  */
 
+/* CO ids: PlayerStruct.co, and the row index into gUnknown_085D3DD0. Each
+ * value was checked against its row's nameIndex in gTextTable in the ROM.
+ * From npiriou's PR #1. */
+enum CoId
+{
+    CO_NELL = 0,
+    CO_ANDY = 1,
+    CO_MAX = 2,
+    CO_OLAF = 3,
+    CO_SAMI = 4,
+    CO_GRIT = 5,
+    CO_KANBEI = 6,
+    CO_SONJA = 7,
+    CO_EAGLE = 8,
+    CO_DRAKE = 9,
+    CO_STURM = 10,
+    CO_FLAK = 11,
+    CO_LASH = 12,
+    CO_ADDER = 13,
+    CO_HAWKE = 14,
+    CO_HACHI = 15,
+    CO_COLIN = 16,
+    CO_JESS = 17,
+    CO_SENSEI = 18,
+};
+
 /* Merged from eight variants -- the widest disagreement in the tree. Every
  * variant agreed on 0x3c total; they differed only in which bytes they had
  * bothered to name.
