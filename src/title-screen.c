@@ -41,7 +41,7 @@ struct ProcTitlePressStartDraw
 
 extern u32 gUnknown_0202F2C4;
 
-extern s32 gUnknown_03004008;
+extern s32 gGameClock;
 
 extern u16 Pal_TitleScreenSprites[];
 extern u16 Pal_TitleScreenBg[];
@@ -78,7 +78,7 @@ void sub_0806C9C0(struct ProcTitleScreen * proc)
         Proc_Break(proc);
     }
 
-    if ((proc->unk_2C <= (2700 - gUnknown_0202F2C4)) && (gpKeySt->held & 9))
+    if ((proc->unk_2C <= (2700 - gUnknown_0202F2C4)) && (gpKeySt->pressed & 9))
     {
         sub_0803B4DC(0x71);
         sub_08030ED4();
@@ -94,7 +94,7 @@ void sub_0806CA38(struct ProcTitleScreen * proc)
 
 void sub_0806CA50(struct ProcTitleScreen * proc)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
     {
         return;
     }
@@ -113,7 +113,7 @@ void sub_0806CA50(struct ProcTitleScreen * proc)
 
 // clang-format off
 
-struct ProcCmd CONST_DATA ProcScr_Unk_08581C68[] =
+struct ProcCmd CONST_DATA ProcScr_TitleIntro[] =
 {
     PROC_CALL(sub_0806C9B4),
     PROC_REPEAT(sub_0806C9C0),
@@ -238,7 +238,7 @@ void sub_0806CBA8(struct ProcTitleScreen * proc)
 struct ProcCmd CONST_DATA ProcScr_TitleScreen[] =
 {
     PROC_YIELD,
-    PROC_START_BUGGED(ProcScr_Unk_08581C68, 3),
+    PROC_START_BUGGED(ProcScr_TitleIntro, 3),
 
     PROC_CALL(sub_0806CA98),
     PROC_REPEAT(sub_0806CB5C),
@@ -497,7 +497,7 @@ void TitleSpriteDraw_StartIdle(struct ProcTitleSpriteDraw * proc)
 
 void TitleSpriteDraw_Loop_Idle(struct ProcTitleSpriteDraw * proc)
 {
-    if (!(gUnknown_03004008 & 3) && (proc->unk_30 > 0))
+    if (!(gGameClock & 3) && (proc->unk_30 > 0))
     {
         sub_080718F0();
         sub_080135A4();

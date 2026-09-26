@@ -8,7 +8,7 @@
  */
 
 /* The cursor-position predicate the whole 0x0802CB-0x0802CD cluster is built
- * on. sub_0802CC90, sub_0802CCCC, sub_0802CBC8 and sub_0802CC04 all call it.
+ * on. CanShowSubMenuItem, sub_0802CCCC, sub_0802CBC8 and sub_0802CC04 all call it.
  *
  * `movs r2,#0; ldrsh r0,[r1,r2]` and `movs r2,#2; ldrsh r1,[r1,r2]` is the
  * s16-OBJECT tell, and it is why union Unk802C57CBuf gained a signed view: the

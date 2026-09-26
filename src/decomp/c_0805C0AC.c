@@ -45,12 +45,12 @@ void sub_0805C0AC(void *a1)
 
     for (; i < end; i++)
     {
-        if (gUnknown_08499594[i].unk00 == 0x14
-            && gUnknown_08499594[i].unk07 == 0
-            && (s8)gUnknown_03003340[gUnknown_08499594[i].unk03][gUnknown_08499594[i].unk02] != -1)
+        if (gUnits[i].type == 0x14
+            && gUnits[i].unk07 == 0
+            && (s8)gUnknown_03003340[gUnits[i].y][gUnits[i].x] != -1)
         {
-            out->unk00 = gUnknown_08499594[i].unk02;
-            out->unk02 = gUnknown_08499594[i].unk03;
+            out->unk00 = gUnits[i].x;
+            out->unk02 = gUnits[i].y;
         }
     }
 }

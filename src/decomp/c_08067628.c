@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08067628.
  * sub_08067628 @ 0x08067628
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -23,7 +27,9 @@ struct Unk67628Proc
  * sub_0806CC00 is defined in src/title-screen.c, which is upstream's own
  * matching source and must not be edited; its prototype in
  * include/unknown-functions.h is the contract. */
-void sub_08067628(struct Unk67628Proc *proc)
+void IntroT0_08067629(struct Unk67628Proc *proc)
 {
     sub_0806CC00(proc->unk64);
 }
+
+asm(".global sub_08067628\n.thumb_set sub_08067628, IntroT0_08067629\n");

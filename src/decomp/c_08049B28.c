@@ -5,9 +5,13 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08049B28.
  * sub_08049B28 @ 0x08049B28
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
-void sub_08049B28(void)
+void BattleMaps_08049B29(void)
 {
     sub_080733B8();
     sub_0801930C(gUnknown_084C30E8[gUnknown_084C30F8->unk83a]);
@@ -16,3 +20,5 @@ void sub_08049B28(void)
     if (gUnknown_0200C420.unk0f != 0xFF)
         gUnknown_0200C420.unk0f++;
 }
+
+asm(".global sub_08049B28\n.thumb_set sub_08049B28, BattleMaps_08049B29\n");

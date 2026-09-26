@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08043834.
- * sub_08043834 @ 0x08043834, sub_08043898 @ 0x08043898, sub_080438FC @ 0x080438FC
+ * sub_08043834 @ 0x08043834, DrawCoPowerLabel @ 0x08043898, sub_080438FC @ 0x080438FC
  */
 
 void sub_08043834(int a)
@@ -15,14 +15,14 @@ void sub_08043834(int a)
     gUnknown_030005D0 = 0;
     sub_08011E54(gUnknown_08102824, (void *)0x06010000, 0x740);
     tbl = gUnknown_08104264;
-    i = gUnknown_08499598[a].unk1a - 1;
+    i = gPlayers[a].teamColor - 1;
     ApplyPaletteExt(tbl[i], 0x2e0, 0x20);
     sub_08011E54(gUnknown_081259CC, (void *)0x06010840, 0xc0);
 }
 
-void sub_08043898(int x, int y, int i)
+void DrawCoPowerLabel(int x, int y, int i)
 {
-    switch (gUnknown_08499598[i].unk1e)
+    switch (gPlayers[i].coMode)
     {
     case 1:
     default:
@@ -34,6 +34,8 @@ void sub_08043898(int x, int y, int i)
     }
 }
 
+asm(".global sub_08043898\n.thumb_set sub_08043898, DrawCoPowerLabel\n");
+
 void sub_080438FC(int a, int b, int c)
 {
     int va;
@@ -44,11 +46,11 @@ void sub_080438FC(int a, int b, int c)
     int hi;
     int m;
 
-    vu = gUnknown_08499598[c].unk20;
-    lo = sub_080441D4(c);
-    hi = sub_08044208(c) - lo;
-    m = sub_0804419C(c);
-    vt = gUnknown_03004008;
+    vu = gPlayers[c].coCharge;
+    lo = GetCoPowerCost(c);
+    hi = GetSuperCoPowerCost(c) - lo;
+    m = GetCoPowerStarCost(c);
+    vt = gGameClock;
     va = a;
     vy = b + 0x18;
 

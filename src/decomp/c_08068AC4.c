@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08068AC4.
  * sub_08068AC4 @ 0x08068AC4, sub_08068BE4 @ 0x08068BE4
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -60,7 +64,7 @@ struct Unk08068BE4Proc
     /* 0x2c */ int unk2c;
 };
 
-void sub_08068AC4(struct Unk08068AC4 *proc)
+void IntroT3_08068AC5(struct Unk08068AC4 *proc)
 {
     proc->unk2c = sub_080674F4(gUnknown_0202F204++);
     sub_0801237C();
@@ -75,7 +79,7 @@ void sub_08068AC4(struct Unk08068AC4 *proc)
     ApplyPalettes(gUnknown_0817DA18, 1, 1);
     ApplyPalettes(gUnknown_0817DA18, 0x10, 1);
     Decompress(gUnknown_0817C408, (void *)0x06008000);
-    sub_080718F8((u8 *)gUnknown_08499584 + 0x20C, gUnknown_0817D874, 0);
+    sub_080718F8((u8 *)gBG3TilemapBuffer + 0x20C, gUnknown_0817D874, 0);
     sub_08013B1C();
     sub_0806775C(0, proc);
     sub_08072C40(2, 0, 0);
@@ -85,7 +89,7 @@ void sub_08068AC4(struct Unk08068AC4 *proc)
     sub_0803B524(0x12C);
 }
 
-void sub_08068BE4(struct Unk08068BE4Proc *proc)
+void IntroT3_IDLE_08068BE5(struct Unk08068BE4Proc *proc)
 {
     int t;
 
@@ -98,7 +102,7 @@ void sub_08068BE4(struct Unk08068BE4Proc *proc)
     case 31:
     case 34:
     case 37:
-        sub_080718F8(gUnknown_08499584 + 0x106, gUnknown_0817D910, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x106, gUnknown_0817D910, 0);
         sub_08013B1C();
         break;
     case 0:
@@ -108,19 +112,19 @@ void sub_08068BE4(struct Unk08068BE4Proc *proc)
     case 32:
     case 35:
     case 38:
-        sub_080718F8(gUnknown_08499584 + 0x106, gUnknown_0817D874, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x106, gUnknown_0817D874, 0);
         sub_08013B1C();
         break;
     case 52:
     case 55:
     case 58:
-        sub_080718F8(gUnknown_08499584 + 0x104, gUnknown_0817D7B8, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x104, gUnknown_0817D7B8, 0);
         sub_08013B1C();
         break;
     case 53:
     case 56:
     case 59:
-        sub_080718F8(gUnknown_08499584 + 0x104, gUnknown_0817D6FC, 0);
+        sub_080718F8(gBG3TilemapBuffer + 0x104, gUnknown_0817D6FC, 0);
         sub_08013B1C();
         break;
     case 102:
@@ -133,3 +137,6 @@ void sub_08068BE4(struct Unk08068BE4Proc *proc)
     sub_08072C40(3, gUnknown_08581414[t % 5], (u16)gUnknown_08581414[t % 5 + 1]);
     proc->unk2c--;
 }
+
+asm(".global sub_08068AC4\n.thumb_set sub_08068AC4, IntroT3_08068AC5\n"
+    ".global sub_08068BE4\n.thumb_set sub_08068BE4, IntroT3_IDLE_08068BE5\n");

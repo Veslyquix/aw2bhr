@@ -12,5 +12,5 @@ void sub_080616F0(void)
     u16 i;
 
     for (i = 0; i < 0x400; i++)
-        gUnknown_08499584[i] = 0;
+        gBG3TilemapBuffer[i] = 0;
 }

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08060FFC.
- * sub_08060FFC @ 0x08060FFC
+ * AiSelectBuildUnit @ 0x08060FFC
  */
 
 struct Unk60FFCRow
@@ -19,7 +19,7 @@ struct Unk60FFCTbl
     /* 0x14 */ struct Unk60FFCRow rows[1];
 };
 
-u8 sub_08060FFC(void)
+u8 AiSelectBuildUnit(void)
 {
     int v;
     u8 best;
@@ -67,3 +67,5 @@ u8 sub_08060FFC(void)
 
     return best;
 }
+
+asm(".global sub_08060FFC\n.thumb_set sub_08060FFC, AiSelectBuildUnit\n");

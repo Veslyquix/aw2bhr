@@ -16,6 +16,6 @@
 
 void sub_0800056C(u16 a)
 {
-    gUnknown_0200B0B0->unk04 = a;
-    gUnknown_0200B0B0->unk06 = 1;
+    gActiveMap->mode = a;
+    gActiveMap->stateChanged = 1;
 }

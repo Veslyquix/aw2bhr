@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08029AF8.
- * sub_08029AF8 @ 0x08029AF8
+ * RepairUnit @ 0x08029AF8
  */
 
 /* MATCHED in wave 73 (W73-H), 248/248 bytes. Previously parked at 240/248 (-8)
@@ -108,7 +108,7 @@
  * sub_08029FE4 and did not move sub_080290B0 -- so a chained run is worth the
  * budget if anyone has it.
  *
- * SETTLED, keep as-is: `gUnknown_08499598` is a POINTER to an array of 60-byte
+ * SETTLED, keep as-is: `gPlayers` is a POINTER to an array of 60-byte
  * elements (`ldr r1,[r0]` then index*60) and `.unk00` is a 32-bit member.
  * `[r5,#4]` is a 7-bit count plus a preserved top bit (the header's `unk04_0`)
  * -- the `!= 0` test compiles to `movs #0x7f ; ands` while the VALUE read
@@ -117,35 +117,35 @@
  * `acc` is int in r8, `v` is u16.
  */
 
-int sub_08029AF8(struct Unk08499594 *p, u16 a2, u8 a3)
+int RepairUnit(struct Unit *p, u16 a2, u8 a3)
 {
     int acc;
     u16 v;
     int t;
 
     acc = 0;
-    v = sub_08042C9C(gUnknown_030033EC, p->unk00);
+    v = GetCoPriceMultiplier(gUnknown_030033EC, p->type);
 
     if (a2 != 0)
     {
         do
         {
-            if (p->unk04_0 != 0 && Div(p->unk04_0 - 1, 10) == 9)
+            if (p->hp != 0 && Div(p->hp - 1, 10) == 9)
                 goto _done;
 
             if (a3)
             {
-                if (gUnknown_08499598[gUnknown_030033EC].unk00 < v)
+                if (gPlayers[gUnknown_030033EC].funds < v)
                     goto _done;
 
-                sub_08025B28(gUnknown_030033EC, v);
+                SubtractPlayerFunds(gUnknown_030033EC, v);
             }
 
             acc += v;
-            p->unk04_0 += 10;
+            p->hp += 10;
 
-            if (p->unk04_0 > 100)
-                p->unk04_0 = 100;
+            if (p->hp > 100)
+                p->hp = 100;
 
             t = (int)(((u32)a2 << 16) - 0x10000);
             a2 = (u32)t >> 16;
@@ -153,7 +153,9 @@ int sub_08029AF8(struct Unk08499594 *p, u16 a2, u8 a3)
     }
 
 _done:
-    p->unk04_0 = p->unk04_0 != 0 ? (Div(p->unk04_0 - 1, 10) + 1) * 10 : 0;
+    p->hp = p->hp != 0 ? (Div(p->hp - 1, 10) + 1) * 10 : 0;
 
     return acc;
 }
+
+asm(".global sub_08029AF8\n.thumb_set sub_08029AF8, RepairUnit\n");

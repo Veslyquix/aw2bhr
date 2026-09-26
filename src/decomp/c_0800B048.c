@@ -1,14 +1,15 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800B048.
- * sub_0800B048 @ 0x0800B048
+ * MakeMountain @ 0x0800B048
  */
 
-/* The vertical-connector re-tile for cell (x, y): picks the sub_08001158 tile
- * id from what sub_0800119C reports about the cells above (y-1, y-2) and below
+/* The vertical-connector re-tile for cell (x, y): picks the MakeTileSimple tile
+ * id from what IsTerrainAtCoordsType reports about the cells above (y-1, y-2) and below
  * (y+1, y+2), then does the one-cell-right fixup c_0800CEF8.c also does.
  *
  * The struct is c_0800AF24.c's -- this function is that file's neighbour and
@@ -40,89 +41,82 @@
  * and the width test uses the OLD x -- `cmp r5, width-2` comes before
  * `adds r5, #1`. */
 
-struct MapScreen
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 4];
-    /* 0x0A22 */ u16 cells[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct MapScreen *)gUnknown_08499590)
+#define MAP gMap
 
-void sub_0800B048(int x, int y)
+void MakeMountain(int x, int y)
 {
-    if (sub_0800119C(x, y - 1, 1) == 0 && sub_0800119C(x, y - 1, 3) == 0)
+    if (IsTerrainAtCoordsType(x, y - 1, 1) == 0 && IsTerrainAtCoordsType(x, y - 1, 3) == 0)
     {
-        if (sub_0800119C(x, y + 1, 3))
+        if (IsTerrainAtCoordsType(x, y + 1, 3))
         {
-            sub_08001158(x, y, 2);
-            if (sub_0800119C(x, y + 2, 3))
-                sub_08001158(x, y + 1, 0x22);
+            MakeTileSimple(x, y, 2);
+            if (IsTerrainAtCoordsType(x, y + 2, 3))
+                MakeTileSimple(x, y + 1, 0x22);
             else
-                sub_08001158(x, y + 1, 0x23);
+                MakeTileSimple(x, y + 1, 0x23);
         }
         else
         {
-            sub_08001158(x, y, 0x20);
+            MakeTileSimple(x, y, 0x20);
         }
     }
-    else if (sub_0800119C(x, y - 1, 1))
+    else if (IsTerrainAtCoordsType(x, y - 1, 1))
     {
-        sub_08001158(x, y - 1, sub_0800AFCC(x - 1, y - 1) ? 3 : 0x43);
+        MakeTileSimple(x, y - 1, sub_0800AFCC(x - 1, y - 1) ? 3 : 0x43);
 
-        if (sub_0800119C(x, y - 1, 3))
+        if (IsTerrainAtCoordsType(x, y - 1, 3))
         {
-            if (sub_0800119C(x, y - 2, 3) == 0 && sub_0800119C(x, y - 2, 1) == 0)
-                sub_08001158(x, y - 1, 2);
+            if (IsTerrainAtCoordsType(x, y - 2, 3) == 0 && IsTerrainAtCoordsType(x, y - 2, 1) == 0)
+                MakeTileSimple(x, y - 1, 2);
             else
-                sub_08001158(x, y - 1, 0x22);
+                MakeTileSimple(x, y - 1, 0x22);
         }
 
-        if (sub_0800119C(x, y + 1, 3))
+        if (IsTerrainAtCoordsType(x, y + 1, 3))
         {
-            sub_08001158(x, y, 0x22);
-            if (sub_0800119C(x, y + 2, 3))
-                sub_08001158(x, y + 1, 0x22);
+            MakeTileSimple(x, y, 0x22);
+            if (IsTerrainAtCoordsType(x, y + 2, 3))
+                MakeTileSimple(x, y + 1, 0x22);
             else
-                sub_08001158(x, y + 1, 0x23);
+                MakeTileSimple(x, y + 1, 0x23);
         }
         else
         {
-            sub_08001158(x, y, 0x23);
+            MakeTileSimple(x, y, 0x23);
         }
     }
     else
     {
-        if (sub_0800119C(x, y - 2, 3) == 0 && sub_0800119C(x, y - 2, 1) == 0)
-            sub_08001158(x, y - 1, 2);
+        if (IsTerrainAtCoordsType(x, y - 2, 3) == 0 && IsTerrainAtCoordsType(x, y - 2, 1) == 0)
+            MakeTileSimple(x, y - 1, 2);
         else
-            sub_08001158(x, y - 1, 0x22);
+            MakeTileSimple(x, y - 1, 0x22);
 
-        if (sub_0800119C(x, y + 1, 3))
+        if (IsTerrainAtCoordsType(x, y + 1, 3))
         {
-            sub_08001158(x, y, 0x22);
-            if (sub_0800119C(x, y + 2, 3))
-                sub_08001158(x, y + 1, 0x22);
+            MakeTileSimple(x, y, 0x22);
+            if (IsTerrainAtCoordsType(x, y + 2, 3))
+                MakeTileSimple(x, y + 1, 0x22);
             else
-                sub_08001158(x, y + 1, 0x23);
+                MakeTileSimple(x, y + 1, 0x23);
         }
         else
         {
-            sub_08001158(x, y, 0x23);
+            MakeTileSimple(x, y, 0x23);
         }
     }
 
     if (x < MAP->width - 2)
     {
         x++;
-        if (sub_0800119C(x, y, 1) && y < MAP->height - 1)
+        if (IsTerrainAtCoordsType(x, y, 1) && y < MAP->height - 1)
         {
-            if (sub_0800119C(x, y + 1, 3))
-                sub_08001158(x, y, 3);
+            if (IsTerrainAtCoordsType(x, y + 1, 3))
+                MakeTileSimple(x, y, 3);
             else
-                sub_08001158(x, y, 0x21);
+                MakeTileSimple(x, y, 0x21);
         }
     }
 }
+
+asm(".global sub_0800B048\n.thumb_set sub_0800B048, MakeMountain\n");

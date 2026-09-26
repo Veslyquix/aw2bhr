@@ -30,11 +30,11 @@
  * materialises it but the RTL still has it as operand 2. The `+ 0x3E` cannot
  * fold into the load either, because ldrb's immediate offset caps at 31.
  *
- * SO: with gUnknown_03003FC0 reached as `&object` this cannot match, and no
+ * SO: with gPlaySt reached as `&object` this cannot match, and no
  * eleventh rewrite of the address expression will change that -- fourteen
  * spellings across two waves now agree. The open question is a TYPE-MODEL one:
  * what pointer object does the byte at +0x3E actually arrive through? The ROM
- * has a single `ldr rN, =gUnknown_03003FC0` with no load through it, so it is
+ * has a single `ldr rN, =gPlaySt` with no load through it, so it is
  * not simply a pointer global; something about this object's declaration is
  * still wrong. That is where the next look should go.
  *
@@ -46,7 +46,7 @@ void sub_0802FA64(void)
   u8 *p;
   gUnknown_0202575C.unk00 = 0xA9;
   gUnknown_0202575C.unk01 = gUnknown_0849B018->unk06;
-  p = ((u8 *) (&gUnknown_03003FC0)) - (-gUnknown_0849B018->unk06);
+  p = ((u8 *) (&gPlaySt)) - (-gUnknown_0849B018->unk06);
   gUnknown_0202575C.unk02 = p[0x3E];
   sub_0802F588(&gUnknown_0202575C, 4);
 }

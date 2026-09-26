@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807610C.
  * sub_0807610C @ 0x0807610C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* `v` must be an `int` LOCAL and the OR must be its own statement. Written as
@@ -41,7 +45,7 @@ struct Unk807610C
     /* 0x3a */ s8 unk3a;
 };
 
-void sub_0807610C(struct Unk807610C *proc)
+void WM_Listener_0807610D(struct Unk807610C *proc)
 {
     int v = sub_08075EC4();
     int m = 0xFF;
@@ -58,3 +62,5 @@ void sub_0807610C(struct Unk807610C *proc)
     proc->unk36 = gUnknown_0202FDFC.unk04 + gUnknown_0202FDFC.unk00;
     proc->unk38 = gUnknown_0202FDFC.unk06 + gUnknown_0202FDFC.unk02;
 }
+
+asm(".global sub_0807610C\n.thumb_set sub_0807610C, WM_Listener_0807610D\n");

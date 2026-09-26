@@ -11,7 +11,7 @@
 
 bool8 sub_08014BE8(void)
 {
-    if (Proc_Find(gUnknown_0848A140))
+    if (Proc_Find(ProcScr_DialogueOnEnd))
         return TRUE;
 
     if (Proc_Find(gUnknown_0848A150))

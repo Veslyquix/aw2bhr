@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -54,7 +55,7 @@
  *    ROM's `adds r1,r0,#0 / movs r0,#1 / rsbs r0,r0,#0 / cmp r1,r0`, unbound
  *    gives `movs r1,#1 / rsbs / cmp r0,r1`. Both spellings appear in this one
  *    function and the ROM uses each exactly where written here.
- *  - `r = &gUnknown_08499594[u];` is bound: inline, the pointer global is
+ *  - `r = &gUnits[u];` is bound: inline, the pointer global is
  *    dereferenced before the `u * 12` is computed and the final `adds` operands
  *    swap.
  *  - `lim = gUnknown_030013D0;` before each `*(s16 *)(lim + 0x18)`. Inline off
@@ -68,19 +69,10 @@
  * first write to `pos` really is one word store of `(u16)x | (y << 16)`, which
  * is why it is spelled through the `int *` cast rather than as two `strh`. */
 
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x0e];
-    /* 0x0012 */ u8 unk0012[0x4168];
-    /* 0x417a */ u16 unk417A[0x100];
-};
-
 int sub_080587FC(int flag)
 {
     struct Unk03003338 *p;
-    struct Unk08499594 *r;
+    struct Unit *r;
     struct Unk802C57C pos;
     u8 *lim;
     int w;
@@ -94,21 +86,21 @@ int sub_080587FC(int flag)
 
     p = gUnknown_03003338;
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
-            if ((sub_08035000(gUnknown_03003FC0.unk02)->unk28 & 1) == 0
-             && gUnknown_020288B4[((struct Map *)gUnknown_08499590)->unk417A[y] + x] != 0)
+            if ((sub_08035000(gPlaySt.mapID)->unk28 & 1) == 0
+             && gUnknown_020288B4[gMap->rowOffset[y] + x] != 0)
             {
                 xp = (u32)x << 16;
                 yp = (u32)y << 16;
                 *(int *)&pos = (xp >> 16) | yp;
                 sub_080251BC(gUnknown_03003F38, 0, &pos);
-                lim = gUnknown_030013D0;
+                lim = (u8 *)gBattleAttacker;
                 if (*(s16 *)(lim + 0x18) == 0)
                     continue;
                 if (flag == 0)
@@ -130,14 +122,14 @@ int sub_080587FC(int flag)
             }
             else
             {
-                idx = ((struct Map *)gUnknown_08499590)->unk417A[y] + x;
-                u = ((struct Map *)gUnknown_08499590)->unk0012[idx];
+                idx = gMap->rowOffset[y] + x;
+                u = gMap->unit[idx];
                 if (u == 0)
                     continue;
                 if (sub_08026F9C(gUnknown_03003F38, u) == 1)
                     continue;
-                r = &gUnknown_08499594[u];
-                if (r->unk00 == 0x18 && !sub_080257C0(u))
+                r = &gUnits[u];
+                if (r->type == 0x18 && !sub_080257C0(u))
                     continue;
                 if (!sub_08020DBC(gUnknown_030033EC, x, y))
                     continue;
@@ -153,7 +145,7 @@ int sub_080587FC(int flag)
                     pos.unk02 = gUnknown_030040D8->unk03;
                 }
                 sub_080251BC(gUnknown_03003F38, u, &pos);
-                lim = gUnknown_030013D0;
+                lim = (u8 *)gBattleAttacker;
                 if (*(s16 *)(lim + 0x18) == 0)
                     continue;
                 if (sub_08058A2C(&w) == -1)

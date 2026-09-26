@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -8,41 +9,35 @@
  */
 
 /* MATCHED. Byte-for-byte the same function as sub_08026100. Read that one --
- * the comma chain in the index expression is three separate position readouts
- * and none of them is guessable. */
+ * the comma chain in the index expression is a position readout that no
+ * statement boundary reaches. */
 void sub_08044854(int x, int y, int c)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int idx;
-    struct Unk08499594 *u;
-    struct Unk08499594 **pp;
+    struct Unit *u;
+    struct Unit **pp;
 
     if (x < 0)
         return;
     if (y < 0)
         return;
 
-    p = gUnknown_08499590;
-
-    if (x >= *(u16 *)p)
+    if (x >= gMap->width)
         return;
-    if (y >= *(u16 *)(p + 2))
+    if (y >= gMap->height)
         return;
 
-    u = &gUnknown_08499594[(pp = &gUnknown_08499594, t = y * 2,
-        idx = *(u16 *)((rows = p + 0x417A) + t) + x,
-        (cells = p + 0x51A)[idx])];
+    u = &gUnits[(pp = &gUnits,
+        idx = gMap->rowOffset[y] + x,
+        gMap->unitUnk[idx])];
 
-    if (u->unk00 == 0)
+    if (u->type == 0)
         return;
-    if ((u->unk01 & 8) != 0)
+    if ((u->flags & 8) != 0)
         return;
 
-    if (u->unk04_0 < c + 1)
-        u->unk04_0 = 1;
+    if (u->hp < c + 1)
+        u->hp = 1;
     else
-        u->unk04_0 = u->unk04_0 - c;
+        u->hp = u->hp - c;
 }

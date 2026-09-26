@@ -74,34 +74,34 @@ void sub_0803AFA0(struct Unk0803AFA0 *p)
     sub_080119A0(0, p->unk20 * 8 + 8, gUnknown_08091064);
     switch (p->unk20) {
     case 0:
-        if (gpKeySt->held & 1) {
+        if (gpKeySt->pressed & 1) {
             sub_0803AF84();
             return;
         }
         break;
     case 1:
-        if ((gpKeySt->unk00 & 0x300) == 0x300 && (gpKeySt->held & 4)) {
+        if ((gpKeySt->held & (R_BUTTON | L_BUTTON)) == 0x300 && (gpKeySt->pressed & 4)) {
             sub_0803AF78();
             return;
         }
         break;
     case 2:
-        if ((gpKeySt->unk00 & 0x300) == 0x300 && (gpKeySt->held & 4)) {
+        if ((gpKeySt->held & (R_BUTTON | L_BUTTON)) == 0x300 && (gpKeySt->pressed & 4)) {
             sub_0803AF90();
             sub_08036CB4();
             return;
         }
         break;
     }
-    if (gpKeySt->held & 2) {
+    if (gpKeySt->pressed & 2) {
         p->unk08 = 0;
         return;
     }
-    if (gpKeySt->unk02 & 0x40) {
+    if (gpKeySt->repeated & DPAD_UP) {
         if (p->unk20 > 0)
             p->unk20--;
     }
-    if (gpKeySt->unk02 & 0x80) {
+    if (gpKeySt->repeated & DPAD_DOWN) {
         if (p->unk20 <= 1)
             p->unk20++;
     }

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -17,8 +18,10 @@
  * buffer; gUnknown_03003F20 stays declared `struct Unk03003338 *` and is cast
  * here, exactly as the promoted readers do. Do NOT reshape struct Unk03003338.
  *
- * Cell addressing is sub_080415E4's idiom -- p, then t, then rows, then off,
- * then cells -- with 0x3C72 in place of 0x12. `t = y * 2` and
+ * `gMap->unk3C72[gMap->rowOffset[y] + x]` (include/map.h) reproduces
+ * sub_080415E4's cell-addressing idiom without naming p/rows/off/cells by
+ * hand -- the struct member keeps the same `(base + 0x3C72) + idx`
+ * association those intermediates existed to force. `t = y * 2` and
  * `&gUnknown_03003340[y]` both end up in the OUTER loop's preheader (sl and r4);
  * that is LICM, not source, and neither is authored.
  */
@@ -29,18 +32,9 @@ struct Unk5B980Cell
     /* 01 */ u8 y;
     /* 02 */ s16 v;
 };
-struct Unk41EA8Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0e];
-    /* 0x0012 */ u8 unit[0x1420];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
-/* The blob struct Unk085D5ABC's unk14 points at; only the +0x1a table of
+/* The blob struct UnitType's unk14 points at; only the +0x1a table of
  * per-terrain-code permission bytes is proved here. */
-struct Unk085D5ABCUnk14
+struct UnitTypeUnk14
 {
     /* 0x00 */ u8 filler_00[0x1a];
     /* 0x1a */ u8 terrainOk[0x20];
@@ -49,28 +43,18 @@ struct Unk085D5ABCUnk14
 void sub_0805B980(void)
 {
     struct Unk5B980Cell *out;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
-    int off;
     int x;
     int y;
 
     out = (struct Unk5B980Cell *)gUnknown_03003F20;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0)
             {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x3c72;
-                if (cells[off] != 0)
+                if (gMap->unk3C72[gMap->rowOffset[y] + x] != 0)
                 {
                     out->x = x;
                     out->y = y;
@@ -86,31 +70,31 @@ void sub_0805B980(void)
 
 u8 sub_0805BA34(int x, int y, u16 *out)
 {
-    struct Unk08499594 *unit;
-    struct Unk085D5ABCUnk14 *tbl;
+    struct Unit *unit;
+    struct UnitTypeUnk14 *tbl;
     int idx;
     int best;
 
-    idx = ((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x;
+    idx = gMap->rowOffset[y] + x;
 
-    if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return 0;
 
-    tbl = (struct Unk085D5ABCUnk14 *)gUnknown_085D5ABC[23].unk14;
+    tbl = (struct UnitTypeUnk14 *)gUnknown_085D5ABC[23].transportTable;
 
-    if (tbl->terrainOk[((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx]
+    if (tbl->terrainOk[gMap->terrain[idx]
                        & 0x1f] == 0)
         return 0;
 
-    unit = &gUnknown_08499594[gUnknown_030040D8->unk07[0]];
+    unit = &gUnits[gUnknown_030040D8->unk07[0]];
 
     best = 9999;
     out[0] = best;
 
-    sub_0805BAFC(x - 1, y, unit->unk00, out);
-    sub_0805BAFC(x + 1, y, unit->unk00, out);
-    sub_0805BAFC(x, y - 1, unit->unk00, out);
-    sub_0805BAFC(x, y + 1, unit->unk00, out);
+    sub_0805BAFC(x - 1, y, unit->type, out);
+    sub_0805BAFC(x + 1, y, unit->type, out);
+    sub_0805BAFC(x, y - 1, unit->type, out);
+    sub_0805BAFC(x, y + 1, unit->type, out);
 
     if (out[0] == best)
         return 0;
@@ -129,20 +113,20 @@ void sub_0805BAFC(int x, int y, int t, u16 *out)
     if (y < 0)
         return;
 
-    if (x >= ((struct Unk41EA8Map *)gUnknown_08499590)->width)
+    if (x >= gMap->width)
         return;
-    if (y >= ((struct Unk41EA8Map *)gUnknown_08499590)->height)
-        return;
-
-    idx = ((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x;
-
-    if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
+    if (y >= gMap->height)
         return;
 
-    costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+    idx = gMap->rowOffset[y] + x;
 
-    c = (((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx] & 0x1f)
-        + gUnknown_085D5ABC[t].unk19 * 32;
+    if (gMap->unit[idx] != 0)
+        return;
+
+    costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
+
+    c = (gMap->terrain[idx] & 0x1f)
+        + gUnknown_085D5ABC[t].movementType * 32;
 
     if (costs[c] == -1)
         return;
@@ -155,8 +139,8 @@ u8 sub_0805BB8C(int x, int y)
 {
     int n;
 
-    if (((struct Unk41EA8Map *)gUnknown_08499590)
-            ->unit[((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x]
+    if (gMap
+            ->unit[gMap->rowOffset[y] + x]
         != 0)
         return 0;
 
@@ -180,20 +164,20 @@ int sub_0805BBF8(int x, int y)
     if (y < 0)
         return 0;
 
-    if (x >= ((struct Unk41EA8Map *)gUnknown_08499590)->width)
+    if (x >= gMap->width)
         return 0;
-    if (y >= ((struct Unk41EA8Map *)gUnknown_08499590)->height)
-        return 0;
-
-    idx = ((struct Unk41EA8Map *)gUnknown_08499590)->rowOffset[y] + x;
-
-    if (((struct Unk41EA8Map *)gUnknown_08499590)->unit[idx] != 0)
+    if (y >= gMap->height)
         return 0;
 
-    costs = gUnknown_085D3DD0[1].unk38[0].unk18[0];
+    idx = gMap->rowOffset[y] + x;
 
-    c = (((struct Unk41EA8Map *)gUnknown_08499590)->terrain[idx] & 0x1f)
-        + gUnknown_085D5ABC[1].unk19 * 32;
+    if (gMap->unit[idx] != 0)
+        return 0;
+
+    costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
+
+    c = (gMap->terrain[idx] & 0x1f)
+        + gUnknown_085D5ABC[1].movementType * 32;
 
     if (costs[c] == -1)
         return 0;

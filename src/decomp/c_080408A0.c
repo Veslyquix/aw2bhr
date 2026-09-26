@@ -14,7 +14,7 @@
  * sub_0804087C installs: A commits the picked square, B restores the saved
  * cursor and restarts the script.
  *
- * gpKeySt->held is NAMED TWICE rather than bound to a local. CSE collapses the
+ * gpKeySt->pressed is NAMED TWICE rather than bound to a local. CSE collapses the
  * two reads to the single `ldrh r1,[r0,#4]` the ROM has either way, but the
  * liveness differs: with a local the value is dead after the second mask and
  * agbcc reuses its register as the AND's destination (`ands r1,r0`), where the
@@ -38,19 +38,19 @@ void sub_080408A0(ProcPtr proc)
     if (sub_0802DBF8() == 0)
         return;
 
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         sub_0804096C(proc);
         sub_08042C24(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
                      gUnknown_030033E4.unk00, gUnknown_030033E4.unk02, proc);
 
-        if (gUnknown_03003FC0.unk32 != 0)
+        if (gPlaySt.savingEnabled != 0)
             sub_08034534(0x14, gUnknown_03003F38,
                          gUnknown_030033E4.unk00, gUnknown_030033E4.unk02);
 
         Proc_Break(proc);
     }
-    else if (gpKeySt->held & 2)
+    else if (gpKeySt->pressed & 2)
     {
         gUnknown_030033E4.unk00 = gUnknown_03003100.pos.unk00;
         gUnknown_030033E4.unk02 = gUnknown_03003100.pos.unk02;

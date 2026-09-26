@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801113C.
  * sub_0801113C @ 0x0801113C, sub_0801117C @ 0x0801117C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -39,7 +43,7 @@ struct Unk801117C
     /* 0x38 */ void (*unk38)(void);
 };
 
-void sub_0801113C(struct Unk801113C *proc)
+void DesignRoomFadeIn_IDLE_0801113D(struct Unk801113C *proc)
 {
     if (gUnknown_03001FFC == 0)
     {
@@ -55,7 +59,7 @@ void sub_0801113C(struct Unk801113C *proc)
     gUnknown_03001FFC = proc->unk66 >> 8;
 }
 
-void sub_0801117C(struct Unk801117C *dma)
+void FadeScreenLines_IDLE_0801117D(struct Unk801117C *dma)
 {
     REG_DMA0CNT_H = 0;
     REG_DMA0SAD = (u32)dma->unk2c;
@@ -65,3 +69,6 @@ void sub_0801117C(struct Unk801117C *dma)
 
     dma->unk38();
 }
+
+asm(".global sub_0801113C\n.thumb_set sub_0801113C, DesignRoomFadeIn_IDLE_0801113D\n"
+    ".global sub_0801117C\n.thumb_set sub_0801117C, FadeScreenLines_IDLE_0801117D\n");

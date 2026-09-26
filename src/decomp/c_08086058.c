@@ -5,13 +5,17 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08086058.
  * sub_08086058 @ 0x08086058
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file .text as one
  * contiguous block at 0x08086058.
- * sub_08086058 @ 0x08086058
+ * PutMapPropertiesPreview_IDLE_08086059 @ 0x08086058
  */
 
 /* Family F062 (data/families.json): `push {r4,lr}; adds r4,r0,#0; bl A;
@@ -38,8 +42,10 @@
  * byte-for-byte identical. Re-verified with the new declaration in place.
  */
 
-void sub_08086058(ProcPtr proc)
+void PutMapPropertiesPreview_IDLE_08086059(ProcPtr proc)
 {
     sub_0808606C(proc);
     sub_08086688(proc);
 }
+
+asm(".global sub_08086058\n.thumb_set sub_08086058, PutMapPropertiesPreview_IDLE_08086059\n");

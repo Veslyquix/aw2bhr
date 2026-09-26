@@ -8,14 +8,14 @@
  */
 
 /* The deref stays live across all three stores, so the source held it in a
- * local; spelled `gUnknown_0200B0B0->unkNN` throughout it reloads between the
+ * local; spelled `gActiveMap->unkNN` throughout it reloads between the
  * stores, as its neighbour sub_08003040 does.
  */
 void sub_08005D50(void)
 {
-    struct Unk0200B0B0 *p = gUnknown_0200B0B0;
+    struct ActiveMap *p = gActiveMap;
 
-    p->unk6e = 0x100;
-    p->unk70 = 0x800;
-    p->unk6c = 0;
+    p->overlayX = 0x100;
+    p->overlayY = 0x800;
+    p->overlayState = 0;
 }

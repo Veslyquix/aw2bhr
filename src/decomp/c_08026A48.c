@@ -23,7 +23,7 @@
  *
  * gUnknown_08090A80 in the asm is NOT a global: the ROM word at 0x08090A80
  * holds 0x08499598, agbcc's -fforce-addr address constant for
- * gUnknown_08499598. (Contrast gUnknown_08090A84 in sub_08026B28, which IS a
+ * gPlayers. (Contrast gUnknown_08090A84 in sub_08026B28, which IS a
  * real table -- the prefix decides nothing.)
  *
  * The 0x3c running offset is strength reduction of the element stride. */
@@ -31,12 +31,12 @@ void sub_08026A48(void)
 {
     int i;
 
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 1:
     case 2:
         for (i = 1; i <= 4; i++)
-            gUnknown_08499598[i].unk1a = sub_08026AC0(i, sub_08042DFC(i));
+            gPlayers[i].teamColor = sub_08026AC0(i, sub_08042DFC(i));
         break;
     }
 }
@@ -55,7 +55,7 @@ bool8 sub_08026A88(int n, int v)
 
     for (i = 1; i < n; i++)
     {
-        if (gUnknown_08499598[i].unk1a == v)
+        if (gPlayers[i].teamColor == v)
             return 0;
     }
 
@@ -75,10 +75,10 @@ int sub_08026AC0(int slot, int fallback)
 {
     int v;
 
-    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[slot - 1] == 0xff)
+    if (gUnknown_085C77A0[gPlaySt.mapID].unk3c[slot - 1] == 0xff)
         v = fallback;
     else
-        v = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk40[slot - 1];
+        v = gUnknown_085C77A0[gPlaySt.mapID].unk40[slot - 1];
 
     if (!sub_08026A88(slot, v))
     {
@@ -104,7 +104,7 @@ int sub_08026AC0(int slot, int fallback)
  * words, so the shared prefix means nothing; the tell is that this one is
  * indexed straight off the symbol with no load through it.
  *
- * The two `ldr rN,=gUnknown_08499598` are one global read twice, not two
+ * The two `ldr rN,=gPlayers` are one global read twice, not two
  * globals: the outer level parks the address in sb and the inner level needs
  * its own copy in r8.
  *
@@ -118,12 +118,12 @@ void sub_08026B28(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b != 0)
+        if (gPlayers[i].aiControlled != 0)
         {
             for (j = 1; j <= 4; j++)
             {
-                if (i != j && gUnknown_08499598[i].unk2a != gUnknown_08499598[j].unk2a)
-                    gUnknown_08499598[i].unk2c |= gUnknown_08090A84[j];
+                if (i != j && gPlayers[i].team != gPlayers[j].team)
+                    gPlayers[i].unk2c |= gUnknown_08090A84[j];
             }
         }
     }

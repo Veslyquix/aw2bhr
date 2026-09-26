@@ -7,11 +7,13 @@
  * sub_080366A4 @ 0x080366A4
  */
 
-/* Installs the block's two frame hooks. The order is the ROM's: sub_080366D0
- * (gUnknown_030040D0) first, then sub_080366C4 (gUnknown_030040EC). */
-void sub_080366A4(void)
+/* Restores the ordinary frame callbacks: the VBlank-side hook first, then the
+ * main-loop hook AgbMain calls forever from 0x08036D1C. */
+void InitMainFrameCallbacks(void)
 {
     sub_08011B18();
-    sub_080366D0(sub_08036884);
-    sub_080366C4(sub_080368E8);
+    SetVBlankCallback(sub_08036884);
+    SetMainLoopCallback(sub_080368E8);
 }
+
+asm(".global sub_080366A4\n.thumb_set sub_080366A4, InitMainFrameCallbacks\n");

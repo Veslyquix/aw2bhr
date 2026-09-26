@@ -16,5 +16,5 @@
  * wave. See the wave-21 list. */
 void sub_08038548(void)
 {
-    sub_0803D73C(sub_08016D04(gUnknown_03003FC0.unk01), sub_0803BA00);
+    sub_0803D73C(sub_08016D04(gPlaySt.gameMode), sub_0803BA00);
 }

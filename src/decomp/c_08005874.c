@@ -16,22 +16,22 @@ void sub_08005874(void)
 {
     sub_0801F150(0, (void *)(0x06000000 + (gUnknown_03002B6C.bits.chr_block << 14)), 0x2FC, 10);
     sub_0801F234(9);
-    if (sub_0803CCB8(0, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(0, gDesignRoomName) != 1)
         sub_08004D74(1, 0);
     else
-        sub_08004D90(1, 0, gUnknown_0200B204);
-    if (sub_0803CCB8(1, gUnknown_0200B204) != 1)
+        sub_08004D90(1, 0, gDesignRoomName);
+    if (sub_0803CCB8(1, gDesignRoomName) != 1)
         sub_08004D74(1, 1);
     else
-        sub_08004D90(1, 1, gUnknown_0200B204);
-    if (sub_0803CCB8(2, gUnknown_0200B204) != 1)
+        sub_08004D90(1, 1, gDesignRoomName);
+    if (sub_0803CCB8(2, gDesignRoomName) != 1)
         sub_08004D74(1, 2);
     else
-        sub_08004D90(1, 2, gUnknown_0200B204);
-    gUnknown_0200B0B0->unk46 = 0x15;
-    gUnknown_0200B0B0->unk48 = 0x30;
+        sub_08004D90(1, 2, gDesignRoomName);
+    gActiveMap->menuCursorX = 0x15;
+    gActiveMap->menuCursorY = 0x30;
     sub_0801A444(3, 2, 0xA, 4);
-    sub_080149C0(4, 3, gUnknown_08499578, &gUnknown_0200B0B0->unk9c, 0x8000, 0);
+    sub_080149C0(4, 3, gBG0TilemapBuffer, gActiveMap->designName, 0x8000, 0);
     sub_08013AEC();
 }
 
@@ -41,7 +41,7 @@ void sub_08005964(void)
 {
     sub_0801B780(0x70);
     sub_08019F2C(gUnknown_08488514, 2, 6, 0,
-                 (s8)gUnknown_0200B0B0->unk10 < 0 ? 0 : (s8)gUnknown_0200B0B0->unk10);
+                 (s8)gActiveMap->designSlot < 0 ? 0 : (s8)gActiveMap->designSlot);
     sub_08005874();
-    gUnknown_0200B0B0->unk02 = 4;
+    gActiveMap->state = 4;
 }

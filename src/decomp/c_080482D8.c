@@ -76,7 +76,7 @@ void sub_080482D8(struct Unk0804769C *p)
     u16 r;
     int x;
     int y;
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     if (p->unk21 != 0)
     {
@@ -85,19 +85,19 @@ void sub_080482D8(struct Unk0804769C *p)
     }
 
     sub_08048158((struct Unk08047B98 *)p);
-    sub_0801F34C(gUnknown_08499598[gUnknown_030033EC].unk1a + 0x3d, 0xf, 8, 0, 0);
-    sub_0801F34C(1, 0xaa, 8, 0, 0);
+    DrawOamObject(gPlayers[gUnknown_030033EC].teamColor + 0x3d, 0xf, 8, 0, 0);
+    DrawOamObject(1, 0xaa, 8, 0, 0);
 
     for (i = 0; i <= 5 && gUnknown_02028DD8[p->unk20 + i] != 0xff; i++)
     {
         v = gUnknown_02028DD8[p->unk20 + i];
-        e = &gUnknown_08499594[gUnknown_03003F2C + v];
-        if (e->unk00 == 0)
+        e = &gUnits[gUnknown_03003F2C + v];
+        if (e->type == 0)
             break;
 
         id = v;
         t = sub_0804769C(p, id) + 1;
-        if (e->unk01 & 8)
+        if (e->flags & 8)
         {
             r = sub_08047740(p, id, t - 1, p->unk20 + i);
             switch (r)

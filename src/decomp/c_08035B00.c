@@ -35,7 +35,7 @@ struct Unk35B3CProc
  * rule). */
 s16 sub_08035B00(u16 i)
 {
-    if (gUnknown_03003FC0.unk09 == 1)
+    if (gPlaySt.animOpts == 1)
         return gUnknown_0849CD88[i].unk18;
     else
         return gUnknown_0849CD88[i].unk18 * 2;

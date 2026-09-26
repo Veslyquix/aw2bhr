@@ -8,7 +8,7 @@
  */
 
 /* MATCHED wave 51 (W51-D). Redraws the unit-info panel: a stat pair, a label,
- * and -- only when the unit has more than one of whatever sub_08042D50 counts
+ * and -- only when the unit has more than one of whatever GetUnitFiringRangeWithCoBonus counts
  * -- a second row of the same three. Every row x is gUnknown_0849D89C->unk00
  * plus a fixed column, nudged 4 left when the value shown is a single digit.
  *
@@ -40,32 +40,32 @@
  */
 void sub_08039F80(void)
 {
-    struct Unk08499594 *q;
+    struct Unit *q;
     int k;
     struct Unk0849D89C *p;
 
     q = gUnknown_0849D89C->unk04;
 
-    if (gUnknown_085D5ABC[q->unk00].unk0b != 0)
+    if (gUnknown_085D5ABC[q->type].maxAmmo != 0)
     {
-        k = q->unk04_7 <= 9 ? 0xFC : 0;
-        sub_0802BCF0((u16)((s8)k + 0x40 + gUnknown_0849D89C->unk00), 0x38, q->unk04_7);
+        k = q->ammo <= 9 ? 0xFC : 0;
+        sub_0802BCF0((u16)((s8)k + 0x40 + gUnknown_0849D89C->unk00), 0x38, q->ammo);
 
-        k = gUnknown_085D5ABC[q->unk00].unk0b <= 9 ? 0xFC : 0;
+        k = gUnknown_085D5ABC[q->type].maxAmmo <= 9 ? 0xFC : 0;
         p = gUnknown_0849D89C;
         sub_0802BCF0((u16)((s8)k + 0x49 + p->unk00), 0x40,
-                     gUnknown_085D5ABC[q->unk00].unk0b);
+                     gUnknown_085D5ABC[q->type].maxAmmo);
 
         sub_0801BD00(gUnknown_0849D89C->unk00 + 0x41, 0x3c, gUnknown_0849D8A0, 0x13CA);
 
-        if (sub_08042D50(gUnknown_0849D89C->unk08, q->unk00) > 1)
+        if (GetUnitFiringRangeWithCoBonus(gUnknown_0849D89C->unk08, q->type) > 1)
         {
-            sub_0801F34C(0x3b, gUnknown_0849D89C->unk00 + 0x4c, 0x38, 0, 0);
+            DrawOamObject(0x3b, gUnknown_0849D89C->unk00 + 0x4c, 0x38, 0, 0);
             sub_0802BCF0(gUnknown_0849D89C->unk00 + 0x50, 0x40,
-                         gUnknown_085D5ABC[q->unk00].unk0e);
+                         gUnknown_085D5ABC[q->type].minRange);
             sub_0801BD00(gUnknown_0849D89C->unk00 + 0x58, 0x41, gUnknown_0849D8A0, 0x13CB);
             sub_0802BCF0(gUnknown_0849D89C->unk00 + 0x60, 0x40,
-                         sub_08042D50(gUnknown_0849D89C->unk08, q->unk00));
+                         GetUnitFiringRangeWithCoBonus(gUnknown_0849D89C->unk08, q->type));
         }
     }
 }

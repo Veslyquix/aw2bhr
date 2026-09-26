@@ -12,7 +12,7 @@
 void sub_08075314(void)
 {
     Decompress(gUnknown_081D1398, (void *)0x06000800);
-    Decompress(gUnknown_081D13E0, gUnknown_0849957C);
+    Decompress(gUnknown_081D13E0, gBG1TilemapBuffer);
     sub_08013AFC();
 }
 

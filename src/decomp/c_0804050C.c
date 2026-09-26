@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -48,7 +49,7 @@ struct Unk40554Proc
 };
 /* The proc's init: it converts the cell coordinates at unk2c/unk30 into the
  * pixel pair at unk54/unk58 (the same `cell * 16 + halfTile` the matched
- * sub_08040640 then reads back against gUnknown_08499590), snapshots the
+ * ApplySiloDamage then reads back against gUnknown_08499590), snapshots the
  * screen's y scroll into unk66, and installs the animation.
  *
  * `proc->unk50 = sub_0801C210(...)` followed by `sub_0801C4D4(proc->unk50, 2)`
@@ -72,12 +73,12 @@ struct Unk40590Proc
 void sub_0804050C(struct Unk4050CProc *proc)
 {
     sub_0801C254(proc->unk50,
-                 proc->unk2c - *(s16 *)(gUnknown_08499590 + 4),
-                 proc->unk30 - *(s16 *)(gUnknown_08499590 + 6));
+                 proc->unk2c - gMap->scrollX,
+                 proc->unk30 - gMap->scrollY);
 
     proc->unk30 -= 5;
 
-    if (proc->unk30 - *(s16 *)(gUnknown_08499590 + 6) < 0)
+    if (proc->unk30 - gMap->scrollY < 0)
     {
         sub_0801C240(proc->unk50);
         Proc_Break(proc);
@@ -98,7 +99,7 @@ void sub_08040590(struct Unk40590Proc *proc)
 {
     proc->unk54 = (proc->unk2c << 4) + 8;
     proc->unk58 = (proc->unk30 << 4) + 0x10;
-    proc->unk66 = *(u16 *)(gUnknown_08499590 + 6);
+    proc->unk66 = gMap->scrollY;
 
     proc->unk50 = sub_0801C210((void *)gUnknown_08111D94, 1, 1);
     sub_0801C4D4(proc->unk50, 2);

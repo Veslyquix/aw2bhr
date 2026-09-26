@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807C994.
  * sub_0807C994 @ 0x0807C994, sub_0807C9EC @ 0x0807C9EC, sub_0807CAFC @ 0x0807CAFC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -56,7 +60,7 @@ struct Unk807CAFC
  * this is a macro whose argument is evaluated twice. */
 #define SCALE(t, d) (Interpolate(0, 0x10, 0x100, (t), (d)) ? Interpolate(0, 0x10, 0x100, (t), (d)) : 2)
 
-void sub_0807C994(struct Unk807C994 *proc)
+void WarRoomMapSelected_IDLE_0807C995(struct Unk807C994 *proc)
 {
     int i;
 
@@ -69,7 +73,7 @@ void sub_0807C994(struct Unk807C994 *proc)
     proc->unk48++;
 }
 
-void sub_0807C9EC(struct Unk0807C9EC *proc)
+void CoSelect_0807C9ED(struct Unk0807C9EC *proc)
 {
     sub_08043B44(9);
 
@@ -118,7 +122,7 @@ void sub_0807C9EC(struct Unk0807C9EC *proc)
     sub_08073304(gUnknown_085802D8 + 0xC, gUnknown_0200FC50, 0x2DC, 0xB, 0, 1, (int)proc);
 }
 
-void sub_0807CAFC(struct Unk807CAFC * proc)
+void CoSelect_IDLE_0807CAFD(struct Unk807CAFC * proc)
 {
     int i;
 
@@ -161,14 +165,14 @@ void sub_0807CAFC(struct Unk807CAFC * proc)
             sub_08043B60(0x2A, 0x100 | (0x68 + i * 0x10), 0x9000 | (0x3C0 + i * 0xC), 0);
 
             if (gUnknown_030059C0[i] != 0)
-                sub_0801F34C(gUnknown_03005958[gUnknown_0300599C[i]] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
+                DrawOamObject(gUnknown_03005958[gUnknown_0300599C[i]] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
             else
-                sub_0801F34C(gUnknown_03005958[i] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
+                DrawOamObject(gUnknown_03005958[i] + 0x3E, 0x14, 0x68 + i * 0x10, 0, 2);
         }
 
-        sub_0801F34C(0x54, 0x5C, 0x68, 0, 0);
-        sub_0801F34C(sub_0803BD14() + 0x55, 0x65, 0x70, 0, 0);
-        sub_0801F34C(0x5F, 0x6D, 0x70, 0, 0);
+        DrawOamObject(0x54, 0x5C, 0x68, 0, 0);
+        DrawOamObject(sub_0803BD14() + 0x55, 0x65, 0x70, 0, 0);
+        DrawOamObject(0x5F, 0x6D, 0x70, 0, 0);
     }
 
     proc->unk4c++;
@@ -188,3 +192,29 @@ void sub_0807CAFC(struct Unk807CAFC * proc)
     sub_08043C28(proc->unk34 + 0xB0, 0xA0, 0x1040, 0, 1);
     proc->unk3c--;
 }
+
+asm(".global sub_0807C994\n.thumb_set sub_0807C994, WarRoomMapSelected_IDLE_0807C995\n"
+    ".global sub_0807C9EC\n.thumb_set sub_0807C9EC, CoSelect_0807C9ED\n"
+    ".global sub_0807CAFC\n.thumb_set sub_0807CAFC, CoSelect_IDLE_0807CAFD\n");
+
+extern void CoSelect_IDLE_0807CE5D(void);
+extern void sub_0807E980(void);
+extern void CoSelect_IDLE_0807ED91(void);
+extern void CoSelect_IDLE_0807EEED(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoSelect[] =
+{
+    PROC_CALL(CoSelect_0807C9ED),
+    PROC_REPEAT(CoSelect_IDLE_0807CAFD),
+    PROC_REPEAT(CoSelect_IDLE_0807CE5D),
+    PROC_REPEAT(sub_0807E980),
+    PROC_REPEAT(CoSelect_IDLE_0807ED91),
+    PROC_REPEAT(CoSelect_IDLE_0807EEED),
+    PROC_1D(30),
+    PROC_SLEEP(1),
+    PROC_END_EACH((void *)0x086165C0),
+    PROC_END_EACH((void *)0x086166C8),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616638\n.set gUnknown_08616638, ProcScr_CoSelect\n");

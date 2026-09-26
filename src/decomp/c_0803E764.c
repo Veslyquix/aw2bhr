@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -32,13 +33,6 @@
  * sub_0803E560's u16 parameters are why `a2` is narrowed (`lsls #0x10` hoisted
  * into the preheader, `lsrs #0x10` at the call) while x, y and t are not --
  * see the note on that prototype in include/unknown-functions.h. */
-struct Unk3E764Map
-{
-    /* 0x0000 */ u8 filler_0000[0x12];
-    /* 0x0012 */ u8 unit[0x417A - 0x12];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_0803E764(struct Unk02028360Pos *p, int a2)
 {
     int x;
@@ -49,9 +43,9 @@ void sub_0803E764(struct Unk02028360Pos *p, int a2)
     {
         x = p->unk00;
         y = p->unk02;
-        if (((struct Unk3E764Map *)gUnknown_08499590)->unit[((struct Unk3E764Map *)gUnknown_08499590)->rowOffset[y] + x] != 0)
+        if (gMap->unit[gMap->rowOffset[y] + x] != 0)
         {
-            t = ((struct Unk3E764Map *)gUnknown_08499590)->unit[((struct Unk3E764Map *)gUnknown_08499590)->rowOffset[y] + x];
+            t = gMap->unit[gMap->rowOffset[y] + x];
             sub_0803E560(x, y, t, a2);
         }
         p++;

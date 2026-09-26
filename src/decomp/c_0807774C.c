@@ -21,6 +21,6 @@ struct Unk7774CProc
 
 void sub_0807774C(struct Unk7774CProc *proc)
 {
-    sub_08077214(gUnknown_08499578, 8, 6, 0x16, 4, 0xFFFF, proc->unk30, 1);
+    sub_08077214(gBG0TilemapBuffer, 8, 6, 0x16, 4, 0xFFFF, proc->unk30, 1);
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
 }

@@ -8,7 +8,7 @@
  */
 
 /* A callback handed to sub_0802A38C beside sub_0802A2E4, so its parameter is
- * the same object: a struct Unk08499594 unit record. It is NOT spelled that
+ * the same object: a struct Unit unit record. It is NOT spelled that
  * way here on purpose. The loop reads the bytes at +7 and +8 through a
  * VARIABLE index, which the shared struct cannot express (they are the
  * separate scalars unk07/unk08 there), and widening them into a member array
@@ -41,12 +41,12 @@ int sub_0802A304(void *arg)
 
     sum = 0;
 
-    for (i = 0; i < gUnknown_085D5ABC[p->unk00].unk14[0]; i++)
+    for (i = 0; i < gUnknown_085D5ABC[p->unk00].transportTable[0]; i++)
     {
         if (p->unk07[i] != 0)
         {
-            sum += sub_08029978(&gUnknown_08499594[p->unk07[i]], 0);
-            sum += sub_08029A48(&gUnknown_08499594[p->unk07[i]], 0);
+            sum += sub_08029978(&gUnits[p->unk07[i]], 0);
+            sum += sub_08029A48(&gUnits[p->unk07[i]], 0);
         }
     }
 

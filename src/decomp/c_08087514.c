@@ -46,5 +46,5 @@ void sub_08087514(u32 a, int b, int c)
     a = 5 - a;
 
     sub_0801F2AC(a + 0xB8,
-                 gUnknown_08499578 + ((b * 2 + 5 + c) * 32 + 9));
+                 gBG0TilemapBuffer + ((b * 2 + 5 + c) * 32 + 9));
 }

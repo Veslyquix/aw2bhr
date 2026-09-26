@@ -23,7 +23,7 @@ void sub_0803EAD0(void)
         case 3:
         case 4:
         case 5:
-            if (gUnknown_08499598[gUnknown_030033EC].unk1a == 5)
+            if (gPlayers[gUnknown_030033EC].teamColor == 5)
                 p->unk06--;
             break;
         }

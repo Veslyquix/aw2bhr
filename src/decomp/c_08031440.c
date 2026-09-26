@@ -19,7 +19,7 @@ void sub_08031440(ProcPtr proc)
     if (sub_08015BD0((s32)gUnknown_0849B048) == -1)
         Proc_Goto(proc, 0);
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_0803B4DC(0x66);
         sub_0801537C(gUnknown_0849B048);

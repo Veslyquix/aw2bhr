@@ -51,7 +51,7 @@ void sub_08084700(struct Unk08084700 *proc)
                 + (((s16)proc->unk4a >> 2) & 0xf),
             0x31E, 2);
 
-        if (sub_0803CBD8(0x20) != 0)
+        if (IsCampaignCompletionFlagSet(0x20) != 0)
         {
             offset = DivRem(Div(proc->unk4a, 2), 0x10);
             offset <<= 1;

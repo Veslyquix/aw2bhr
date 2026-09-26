@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08087A10.
  * sub_08087A10 @ 0x08087A10
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 struct Unk08087A10
@@ -13,18 +17,18 @@ struct Unk08087A10
     /* 0x54 */ int unk54;
 };
 
-void sub_08087A10(struct Unk08087A10 *proc)
+void PreviewMapRecords_IDLE_08087A11(struct Unk08087A10 *proc)
 {
     int v;
     int i;
 
     v = proc->unk54;
 
-    sub_0801F34C(0x61, 0xb8, 0x20, 0, 2);
-    sub_0801F34C(0x60, 0xd8, 0x20, 0, 2);
+    DrawOamObject(0x61, 0xb8, 0x20, 0, 2);
+    DrawOamObject(0x60, 0xd8, 0x20, 0, 2);
 
     for (i = 0; i <= 4; i++)
-        sub_0801F34C(i + 0x6a, 0x70, i * 0x10 + 0x28, 0, 2);
+        DrawOamObject(i + 0x6a, 0x70, i * 0x10 + 0x28, 0, 2);
 
     if (gUnknown_0200C078[gUnknown_02027F74.unk04[v] - 0x6c].unk00[0].unk00_08 == 0)
         return;
@@ -44,3 +48,5 @@ void sub_08087A10(struct Unk08087A10 *proc)
         }
     }
 }
+
+asm(".global sub_08087A10\n.thumb_set sub_08087A10, PreviewMapRecords_IDLE_08087A11\n");

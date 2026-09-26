@@ -13,6 +13,6 @@
  * gUnknown_08580934->unk44[]. */
 void sub_08064BF4(struct Unk08580934_Obj *obj)
 {
-    sub_0801F34C(gUnknown_08580934->unk11[obj->unk1c] + 0xBD, obj->unk28 & 0x1FF,
+    DrawOamObject(gUnknown_08580934->unk11[obj->unk1c] + 0xBD, obj->unk28 & 0x1FF,
                  (obj->unk2a + 0xC) & 0xFF, 0, 0);
 }

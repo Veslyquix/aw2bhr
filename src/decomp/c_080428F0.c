@@ -22,13 +22,13 @@
  * loads. The byte access is not evidence of a byte type. */
 void sub_080428F0(s16 a1)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
 
-    e = &gUnknown_08499594[gUnknown_030040D8->unk07[a1]];
-    e->unk01 &= ~8;
-    e->unk01 &= ~2;
-    e->unk02 = gUnknown_03003100.pos.unk00 + gUnknown_0849FFF8[gUnknown_03003F40 * 2];
-    e->unk03 = gUnknown_03003100.pos.unk02 + gUnknown_0849FFF8[gUnknown_03003F40 * 2 + 1];
+    e = &gUnits[gUnknown_030040D8->unk07[a1]];
+    e->flags &= ~8;
+    e->flags &= ~2;
+    e->x = gUnknown_03003100.pos.unk00 + gUnknown_0849FFF8[gUnknown_03003F40 * 2];
+    e->y = gUnknown_03003100.pos.unk02 + gUnknown_0849FFF8[gUnknown_03003F40 * 2 + 1];
     gUnknown_030040D8->unk07[a1] = 0;
     if (a1 == 0 && gUnknown_030040D8->unk07[1] != 0)
     {

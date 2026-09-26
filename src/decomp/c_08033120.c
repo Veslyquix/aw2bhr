@@ -35,7 +35,7 @@ void sub_08033150(void)
     sub_08031E6C();
     sub_08032D60();
     sub_08032468();
-    sub_0803BD60();
+    UnlockMainMenu();
 }
 
 /* 0xFFD0 is a POSITIVE literal and not -48: sub_08072C40's second parameter is

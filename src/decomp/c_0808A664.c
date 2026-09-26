@@ -12,12 +12,12 @@
  * That is what `g++; DivRem(g, 2)` produces, where `DivRem(++g, 2)` would keep
  * the value in the register.
  *
- * The gate is a bare `& 1` on the `s32` gUnknown_03004008, so this runs on
+ * The gate is a bare `& 1` on the `s32` gGameClock, so this runs on
  * alternate frames of an alternate condition -- the half-rate idiom the
  * gUnknown_081A47E4 readers use with `/2` instead. */
 void sub_0808A664(void)
 {
-    if (gUnknown_03004008 & 1)
+    if (gGameClock & 1)
     {
         gUnknown_0300200C++;
 
@@ -32,5 +32,5 @@ void sub_0808A664(void)
  * its +0x3a byte. `adds r0, #0x3a` is strb's 31-byte displacement limit. */
 void sub_0808A6A0(void)
 {
-    sub_08014740(6, 5, gUnknown_08499578, 0, 0x8000, 0x41)->unk3a = 6;
+    sub_08014740(6, 5, gBG0TilemapBuffer, 0, 0x8000, 0x41)->unk3a = 6;
 }

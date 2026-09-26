@@ -23,10 +23,10 @@
 
 
 /* The stop half of a start/stop pair: sub_080111C8 Proc_Start's
- * gUnknown_0848927C and this ends every instance of it.
+ * ProcScr_FadeScreenLines and this ends every instance of it.
  */
 
 void sub_08011218(void)
 {
-    Proc_EndEach(gUnknown_0848927C);
+    Proc_EndEach(ProcScr_FadeScreenLines);
 }

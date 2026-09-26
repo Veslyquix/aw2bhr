@@ -1,10 +1,11 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08040640.
- * sub_08040640 @ 0x08040640
+ * ApplySiloDamage @ 0x08040640
  */
 
 #include "proc.h"
@@ -31,7 +32,7 @@ struct Unk40640Proc
     /* 58 */ int unk58;
 };
 
-void sub_08040640(struct Unk40640Proc *proc)
+void ApplySiloDamage(struct Unk40640Proc *proc)
 {
     sub_08026100(proc->unk2c,     proc->unk30 - 2, proc->unk44);
     sub_08026100(proc->unk2c - 1, proc->unk30 - 1, proc->unk44);
@@ -48,8 +49,10 @@ void sub_08040640(struct Unk40640Proc *proc)
     sub_08026100(proc->unk2c,     proc->unk30 + 2, proc->unk44);
     sub_08024268();
     sub_0801C70C(gUnknown_08111D94,
-                 proc->unk54 - *(s16 *)(gUnknown_08499590 + 4),
-                 proc->unk58 - *(s16 *)(gUnknown_08499590 + 6),
+                 proc->unk54 - gMap->scrollX,
+                 proc->unk58 - gMap->scrollY,
                  proc->unk4a, 3, 1);
     sub_0803B4DC(0x1C7);
 }
+
+asm(".global sub_08040640\n.thumb_set sub_08040640, ApplySiloDamage\n");

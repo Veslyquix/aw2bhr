@@ -45,7 +45,7 @@ int sub_080319AC(void)
 
     gUnknown_0849B060->unk02 = 2;
 
-    if ((gUnknown_03004008 & 0xf) == 0)
+    if ((gGameClock & 0xf) == 0)
     {
         gUnknown_02025760.unk00 = 0xab;
         gUnknown_02025760.unk01 = gUnknown_0849B018->unk06;

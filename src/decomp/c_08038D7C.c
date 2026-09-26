@@ -118,18 +118,18 @@ void sub_08038D7C(void)
     stack = gUnknown_0849D5F8->unk38;
     cur = &stack[i];
 
-    costs = gUnknown_085D3DD0[gUnknown_03003FC0.unk08
-                ? gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].unk1d
+    costs = gUnknown_085D3DD0[gPlaySt.coAbilities
+                ? gPlayers[(gUnknown_03003F38 >> 6) + 1].co
                 : 1]
-            .unk38[gUnknown_08499598[(gUnknown_03003F38 >> 6) + 1].unk1e]
-            .unk18[gUnknown_03003FC0.unk2c];
+            .power[gPlayers[(gUnknown_03003F38 >> 6) + 1].coMode]
+            .movementChart[gPlaySt.weather];
 
     map = (struct Unk38848Map *)gUnknown_08499590;
 
     c = (map->plane[map->rowOffset[gUnknown_030033E4.unk02]
                     + gUnknown_030033E4.unk00]
          & 0x1f)
-        + gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk19 * 32;
+        + gUnknown_085D5ABC[gUnknown_030040D8->unk00].movementType * 32;
 
     if (*cur >= costs[c]
         && ((ABS(gUnknown_0849D5F8->unk20[gUnknown_0849D5F8->unk45]

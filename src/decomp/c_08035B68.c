@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08035B68.
- * sub_08035B68 @ 0x08035B68
+ * GetUnitSpriteFormat @ 0x08035B68
  */
 
 /* Returns `void *` and not the `u32` this was first promoted as: the only
@@ -15,7 +15,9 @@
  * codegen one. Reconciled at wave 13 promotion, where the `u32` definition and
  * a `void *` prototype added for the new caller collided at link time; a
  * per-function check cannot see that conflict because it compiles one unit. */
-void *sub_08035B68(u16 i)
+void *GetUnitSpriteFormat(u16 i)
 {
-    return (void *)gUnknown_0849CD88[i].unk14;
+    return (void *)gUnknown_0849CD88[i].spriteFormat;
 }
+
+asm(".global sub_08035B68\n.thumb_set sub_08035B68, GetUnitSpriteFormat\n");

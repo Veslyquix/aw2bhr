@@ -35,20 +35,20 @@ void sub_08074754(s16 id)
 
   mode = 1;
   r = &gUnknown_08615194[id];
-  if (r->unk02 & 4)
+  if (r->specialProperty & 4)
   {
     mode = 2;
   }
-  if (r->unk02 & 8)
+  if (r->specialProperty & 8)
   {
     mode = 3;
   }
   sprite = sub_0801C210(gUnknown_081D2930, 1, 1);
   sub_0801C4D4(sprite, mode);
   p->unk08 = sprite;
- do { p->unk02 = r->unk06; p->unk04 = r->unk08; } while (0);
+ do { p->unk02 = r->flagX; p->unk04 = r->flagY; } while (0);
   p->unk00 = id;
-  gUnknown_0202FDFC.unk12[id] |= r->unk02;
+  gUnknown_0202FDFC.unk12[id] |= r->specialProperty;
   p[1].unk00 = -1;
 }
 

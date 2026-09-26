@@ -38,11 +38,11 @@ void sub_08067B6C(void)
  * The destinations are spelled differently on purpose: the first is a raw
  * VRAM address the ROM stores as a bare `.word 0x06001400` with no relocation,
  * so `(void *)0x06001400` per the c_080116E8.c/c_0803A174.c precedent, while
- * the second goes through the gUnknown_0849957C tilemap POINTER and is a real
+ * the second goes through the gBG1TilemapBuffer tilemap POINTER and is a real
  * relocation plus a deref. */
 void sub_08067B90(struct Unk67B90Proc *proc)
 {
     Decompress(gUnknown_08581050[proc->unk2c], (void *)0x06001400);
-    Decompress(gUnknown_0858105C[proc->unk2c], gUnknown_0849957C);
+    Decompress(gUnknown_0858105C[proc->unk2c], gBG1TilemapBuffer);
     sub_08013AFC();
 }

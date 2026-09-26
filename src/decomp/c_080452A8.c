@@ -23,7 +23,7 @@ struct Unk452A8
 void sub_080452A8(struct Unk452A8 *p)
 {
     if (p->unk2f != 0xff)
-        sub_08035144(p->unk2f);
+        ChangeGameWeather(p->unk2f);
 
     sub_08039F58();
 }

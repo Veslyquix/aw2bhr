@@ -484,7 +484,7 @@ void sub_08079FAC(struct Unk8079FACProc *proc)
     if (proc->unk4c > 0x3B)
         proc->unk4c = 0x3C;
 
-    if ((gpKeySt->held & 9) && proc->unk4c == 0x3C)
+    if ((gpKeySt->pressed & 9) && proc->unk4c == 0x3C)
     {
         proc->unk4c = 0;
 

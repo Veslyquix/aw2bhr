@@ -17,7 +17,7 @@ void sub_08065F88(void)
     sub_08065EB4();
     sub_08065EF4();
 
-    v = gpKeySt->held & 2;
+    v = gpKeySt->pressed & 2;
 
     if (v != 0)
     {
@@ -29,7 +29,7 @@ void sub_08065F88(void)
 
         sub_0803B4DC(0x66);
     }
-    else if (gpKeySt->held & 1)
+    else if (gpKeySt->pressed & 1)
     {
         sub_0803B4DC(0x71);
 

@@ -63,7 +63,7 @@ void sub_08065990(void)
     gUnknown_03002000 = 0;
 
     Decompress(gUnknown_0822FEF0, (void *)((gUnknown_0300251C.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0822F9AC, gUnknown_08499584);
+    Decompress(gUnknown_0822F9AC, gBG3TilemapBuffer);
     ApplyPaletteExt(gUnknown_082344CC, 0x20, 0xa0);
     sub_08013B1C();
     sub_0802D5A0((void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06006C00), 0, 8);
@@ -132,8 +132,8 @@ void sub_08065990(void)
 
     sub_080152EC(gUnknown_08580CC4, 3);
     gUnknown_08580934->unk30 = 0;
-    gpKeySt->held = 0x200;
+    gpKeySt->pressed = L_BUTTON;
     sub_08065238();
     gUnknown_08580934->unk30 = 1;
-    gpKeySt->held = 0;
+    gpKeySt->pressed = 0;
 }

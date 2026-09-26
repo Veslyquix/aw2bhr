@@ -17,9 +17,9 @@
  *
  * So 0x081253F0 is a 0x40-byte palette: sub_08037750 applies its first half
  * wholesale and this picks one colour out of the second half, phase
- * `(gUnknown_03004008 & 0x3c) >> 2`, a 16-step cycle off the frame counter. */
+ * `(gGameClock & 0x3c) >> 2`, a 16-step cycle off the frame counter. */
 void sub_08037790(void)
 {
-    sub_0801368C(&gUnknown_081253F0[16 + ((gUnknown_03004008 & 0x3c) >> 2)],
+    sub_0801368C(&gUnknown_081253F0[16 + ((gGameClock & 0x3c) >> 2)],
         gUnknown_0300057C * 0x20 + 0x1c, 2);
 }

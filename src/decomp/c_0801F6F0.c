@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -29,22 +30,6 @@
  * signed `bge`. `v` is u16 and the two views of the same sum (`lsrs #0x10` for
  * the stored byte, `asrs #0x10` for the two signed compares) fall out of that
  * one declaration. */
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x0A10];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 
 void sub_0801F6F0(u8 a1, u8 a2, u8 a3)
 {
@@ -56,17 +41,17 @@ void sub_0801F6F0(u8 a1, u8 a2, u8 a3)
     x = a2 + gUnknown_0300409C->unk00;
     y = a3 + gUnknown_0300409C->unk01;
 
-    v = gUnknown_084999C8->unk00[((struct Map *)gUnknown_08499590)->unk1432[
-            idx = ((struct Map *)gUnknown_08499590)->unk417A[y] + x] & 0x1F]
+    v = gUnknown_084999C8->unk00[gMap->terrain[
+            idx = gMap->rowOffset[y] + x] & 0x1F]
         + (s8)gUnknown_03003340[gUnknown_0300409C->unk01][gUnknown_0300409C->unk00];
 
     if ((s16)v >= gUnknown_03003340[y][x])
         return;
 
     if (gUnknown_084999C8->unk22 != 0
-        && ((struct Map *)gUnknown_08499590)->unk0012[idx] != 0
+        && gMap->unit[idx] != 0
         && (gUnknown_084999C8->unk2a
-            & gUnknown_084999C8->unk24[((struct Map *)gUnknown_08499590)->unk0012[idx] >> 6]))
+            & gUnknown_084999C8->unk24[gMap->unit[idx] >> 6]))
         return;
 
     if ((s16)v > gUnknown_084999C8->unk20)

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,16 +8,7 @@
  * sub_0800F77C @ 0x0800F77C
  */
 
-struct Unk3F44Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 plane[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 cell[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3F44Map *)gUnknown_08499590)
+#define MAP gMap
 
 int sub_0800F77C(int x, int y, int dir)
 {
@@ -39,12 +31,12 @@ int sub_0800F77C(int x, int y, int dir)
     if (ny >= MAP->height)
         return 2;
 
-    if (MAP->plane[MAP->rowOffset[ny] + nx] == 0x162
-     || MAP->plane[MAP->rowOffset[ny] + nx] == 0x163)
+    if (MAP->tile[MAP->rowOffset[ny] + nx] == 0x162
+     || MAP->tile[MAP->rowOffset[ny] + nx] == 0x163)
     {
         if (dir == 0 || dir == 1)
         {
-            if (MAP->plane[MAP->rowOffset[ny] + nx] == 0x163)
+            if (MAP->tile[MAP->rowOffset[ny] + nx] == 0x163)
             {
                 if (sub_0800F564(nx, ny, 2) == 2)
                     return 2;
@@ -55,7 +47,7 @@ int sub_0800F77C(int x, int y, int dir)
         }
         else if (dir == 2 || dir == 3)
         {
-            if (MAP->plane[MAP->rowOffset[ny] + nx] == 0x162)
+            if (MAP->tile[MAP->rowOffset[ny] + nx] == 0x162)
             {
                 if (sub_0800F564(nx, ny, 0) == 2)
                     return 2;

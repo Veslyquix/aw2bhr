@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807614C.
  * sub_0807614C @ 0x0807614C, sub_080761C8 @ 0x080761C8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -38,7 +42,7 @@ struct Unk807614C
  * counter at +0x40 that breaks the proc when it wraps.
  * The two arms differ only in WHICH side carries the moving index: below zero
  * it is the gUnknown_08551A00/04 pair that is indexed by `0x14D - n` and the
- * gUnknown_08499578/80 pair that takes a fixed +0x200, and at or above zero the
+ * gBG0TilemapBuffer/80 pair that takes a fixed +0x200, and at or above zero the
  * roles swap to a fixed +0x140 and `0x21E - n`. All four globals are `u16 *`,
  * so the ROM's byte offsets 0x400 and 0x280 are element counts 0x200 and 0x140.
  * `n` is an int: it is read `ldrsb` and handed to sub_08071900's third
@@ -51,7 +55,7 @@ struct Unk80761C8
     /* 0x40 */ int unk40;
 };
 
-void sub_0807614C(struct Unk807614C *proc)
+void WM_Listener_IDLE_0807614D(struct Unk807614C *proc)
 {
     s16 ox;
     s16 oy;
@@ -79,22 +83,22 @@ void sub_0807614C(struct Unk807614C *proc)
     }
 }
 
-void sub_080761C8(struct Unk80761C8 *proc)
+void WM_Listener_IDLE_080761C9(struct Unk80761C8 *proc)
 {
     int n = gUnknown_08614458[proc->unk40];
 
     if (proc->unk3a < 0)
     {
-        sub_08071900(gUnknown_08551A00 + (0x14D - n), gUnknown_08499578 + 0x200,
+        sub_08071900(gUnknown_08551A00 + (0x14D - n), gBG0TilemapBuffer + 0x200,
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + (0x14D - n), gUnknown_08499580 + 0x200,
+        sub_08071900(gUnknown_08551A04 + (0x14D - n), gBG2TilemapBuffer + 0x200,
                      n, 4);
     }
     else
     {
-        sub_08071900(gUnknown_08551A00 + 0x140, gUnknown_08499578 + (0x21E - n),
+        sub_08071900(gUnknown_08551A00 + 0x140, gBG0TilemapBuffer + (0x21E - n),
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + 0x140, gUnknown_08499580 + (0x21E - n),
+        sub_08071900(gUnknown_08551A04 + 0x140, gBG2TilemapBuffer + (0x21E - n),
                      n, 4);
     }
 
@@ -109,3 +113,6 @@ void sub_080761C8(struct Unk80761C8 *proc)
         Proc_Break(proc);
     }
 }
+
+asm(".global sub_080761C8\n.thumb_set sub_080761C8, WM_Listener_IDLE_080761C9\n"
+    ".global sub_0807614C\n.thumb_set sub_0807614C, WM_Listener_IDLE_0807614D\n");

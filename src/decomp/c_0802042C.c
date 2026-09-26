@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -12,7 +13,7 @@
  * sub_08020634 to reverse in place. Each step samples the four orthogonal
  * neighbours (0 = +x, 1 = -x, 2 = -y, 3 = +y; off-map reads as 0xff), takes the
  * minimum, collects every neighbour tied for it, and breaks the tie with
- * sub_080129E0. `dir` survives across steps because the switch has no default
+ * GetNextRandomNumber. `dir` survives across steps because the switch has no default
  * arm -- a tie count of 0 leaves the previous direction standing.
  *
  * The neighbour stores and the step switch are both written 0, 1, 3, 2; that is
@@ -49,7 +50,7 @@ void sub_0802042C(int x, int y, u8 *p)
 
     while (c != 0)
     {
-        if (x + 1 == *(u16 *)gUnknown_08499590)
+        if (x + 1 == gMap->width)
             nb[0] = 0xff;
         else
             nb[0] = gUnknown_03003340[y][x + 1];
@@ -57,7 +58,7 @@ void sub_0802042C(int x, int y, u8 *p)
             nb[1] = 0xff;
         else
             nb[1] = gUnknown_03003340[y][x - 1];
-        if (y + 1 == *(u16 *)(gUnknown_08499590 + 2))
+        if (y + 1 == gMap->height)
             nb[3] = 0xff;
         else
             nb[3] = gUnknown_03003340[y + 1][x];
@@ -83,13 +84,13 @@ void sub_0802042C(int x, int y, u8 *p)
             dir = sel[0];
             break;
         case 2:
-            dir = sel[(sub_080129E0() >> 14) & 1];
+            dir = sel[(GetNextRandomNumber() >> 14) & 1];
             break;
         case 3:
-            dir = sel[sub_080129E0() % 3];
+            dir = sel[GetNextRandomNumber() % 3];
             break;
         case 4:
-            dir = sel[sub_080129E0() & 3];
+            dir = sel[GetNextRandomNumber() & 3];
             break;
         }
 

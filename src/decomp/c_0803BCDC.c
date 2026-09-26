@@ -12,7 +12,7 @@
  *
  * gUnknown_0809112C is NOT a global. The word at 0x0809112C in baserom.gba is
  * 0x03003FC0, i.e. it is agbcc's own -fforce-addr address-constant pool entry
- * for &gUnknown_03003FC0, and gen_lds.py invents a symbol name for it. The
+ * for &gPlaySt, and gen_lds.py invents a symbol name for it. The
  * honest spelling names the struct directly and the build places the word;
  * trymatch reports `relocs: name different symbols that resolve to the same
  * address`, which is the done signal.
@@ -37,7 +37,7 @@ void sub_0803BCDC(u8 *src)
     n = sub_0803BD14();
 
     for (i = 0; i < n; i++)
-        gUnknown_03003FC0.unk3d[i + 1] = src[i];
+        gPlaySt.co[i + 1] = src[i];
 
-    gUnknown_03003FC0.unk3d[0] = 0;
+    gPlaySt.co[0] = 0;
 }

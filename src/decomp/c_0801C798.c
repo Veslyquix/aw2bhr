@@ -39,11 +39,11 @@ void sub_0801C798(ProcPtr proc)
     Proc_End(proc);
 }
 
-/* gUnknown_0848B5AC was already typed `const struct ProcCmd []` by
+/* ProcScr_WaitForLaser was already typed `const struct ProcCmd []` by
  * sub_0801C7B4, the "is it running" predicate on the same script.
  */
 
 void sub_0801C7A4(void)
 {
-    Proc_EndEach(gUnknown_0848B5AC);
+    Proc_EndEach(ProcScr_WaitForLaser);
 }

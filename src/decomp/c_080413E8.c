@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -50,15 +51,7 @@
  * gUnknown_020288B4 / unk02_6 / sub_08026F9C / sub_080251BC sequence over the
  * same map -- and settled the unk18 and unk02_6 spellings. */
 
-struct Unk413E8Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0012 - 0x0004];
-    /* 0x0012 */ u8 unit[0x417A - 0x0012];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk413E8Map *)gUnknown_08499590)
+#define MAP gMap
 
 int sub_080413E8(void)
 {
@@ -92,14 +85,14 @@ int sub_080413E8(void)
             {
                 sub_080251BC(gUnknown_03003F38, 0, &gUnknown_03003100.pos);
 
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 == 0)
+                if (gBattleAttacker->attackType == 0)
                     continue;
 
                 sub_080413B4(x, y, 0, (u8)v);
             }
             else
             {
-                t = MAP->unit[MAP->rowOffset[y] + x];
+                t = gMap->unit[MAP->rowOffset[y] + x];
 
                 if (t == 0)
                     continue;
@@ -109,7 +102,7 @@ int sub_080413E8(void)
 
                 sub_080251BC(gUnknown_03003F38, t, &gUnknown_03003100.pos);
 
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 == 0)
+                if (gBattleAttacker->attackType == 0)
                     continue;
 
                 sub_080413B4(x, y, t, 0);

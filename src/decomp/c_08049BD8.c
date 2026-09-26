@@ -18,5 +18,5 @@
 
 void sub_08049BD8(void)
 {
-    Proc_Start(gUnknown_084C3138, PROC_TREE_3);
+    Proc_Start(ProcScr_BattleMaps, PROC_TREE_3);
 }

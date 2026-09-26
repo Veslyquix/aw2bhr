@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0805C208.
- * sub_0805C208 @ 0x0805C208
+ * CopCondUnitsInjured @ 0x0805C208
  */
 
 /* Next door to src/decomp/c_0805C1D8.c and guarded the same way: the
@@ -20,7 +20,7 @@
  * The tail is the 24-byte `if (...) return 1; ... return 0;` split across a `b`
  * with the two `movs` in different blocks, not a returned comparison. */
 
-int sub_0805C208(void)
+int CopCondUnitsInjured(void)
 {
     int count;
     int i;
@@ -31,8 +31,8 @@ int sub_0805C208(void)
     {
         for (i = gUnknown_03003F2C + 1; i < gUnknown_03003F2C + 0x40; i++)
         {
-            if (gUnknown_08499594[i].unk00 != 0
-                && gUnknown_08499594[i].unk04_0 <= 0x5a)
+            if (gUnits[i].type != 0
+                && gUnits[i].hp <= 0x5a)
                 count++;
         }
 
@@ -42,3 +42,5 @@ int sub_0805C208(void)
 
     return 0;
 }
+
+asm(".global sub_0805C208\n.thumb_set sub_0805C208, CopCondUnitsInjured\n");

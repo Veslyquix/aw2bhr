@@ -5,13 +5,17 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808A6CC.
  * sub_0808A6CC @ 0x0808A6CC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0808A6CC.
- * sub_0808A6CC @ 0x0808A6CC
+ * CampaignIntro_0808A6CD @ 0x0808A6CC
  */
 
 #include "proc.h"
@@ -23,7 +27,7 @@
  * sub_0807898C(void)` and promoted that way; it actually takes one argument.
  * The body never reads r0, so at every previously-matched call site the
  * argument was already in the right register and cost zero instructions --
- * the wave-51 arity rule exactly. sub_0808A6CC is the differently-shaped
+ * the wave-51 arity rule exactly. CampaignIntro_0808A6CD is the differently-shaped
  * caller that exposes it: it SPILLS its proc to [sp] because the two
  * CpuFastSet loops use every callee-saved register including r8/sb/sl, and
  * then reloads it into r0 for nothing but the `bl` --
@@ -40,7 +44,7 @@
  * c_08039A5C.c, c_08040430.c and c_08087B74.c, and writing it that way is
  * what produces the `lsl; and; lsl; add` group and the four separate givs
  * (8+4i, 0x40+8i, 0x28+4i, 0x44+8i) of the second loop. */
-void sub_0808A6CC(ProcPtr proc)
+void CampaignIntro_0808A6CD(ProcPtr proc)
 {
     int i;
 
@@ -49,7 +53,7 @@ void sub_0808A6CC(ProcPtr proc)
 
     Decompress(gUnknown_0822FEF0,
         (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06000000));
-    Decompress(gUnknown_0822F9AC, gUnknown_08499584);
+    Decompress(gUnknown_0822F9AC, gBG3TilemapBuffer);
     sub_08013B1C();
     ApplyPaletteExt(gUnknown_0822FE50, 0x20, 0xa0);
     Proc_Start(gUnknown_086170D4, proc);
@@ -74,3 +78,31 @@ void sub_0808A6CC(ProcPtr proc)
     ApplyPaletteExt(gUnknown_081320AC, 0x100, 0x20);
     sub_08013AEC();
 }
+
+asm(".global sub_0808A6CC\n.thumb_set sub_0808A6CC, CampaignIntro_0808A6CD\n");
+
+extern bool8 CampaignIntro_WHILE_0803B629(void);
+extern void CampaignIntro_0808A821(void);
+extern void CampaignIntro_IDLE_0808A82D(void);
+extern void CampaignIntro_IDLE_0808A845(void);
+extern void CampaignIntro_IDLE_0808A885(void);
+
+struct ProcCmd CONST_DATA ProcScr_CampaignIntro[] =
+{
+    PROC_29(1),
+    PROC_WHILE(CampaignIntro_WHILE_0803B629),
+    PROC_1D(30),
+    PROC_YIELD,
+    PROC_CALL(CampaignIntro_0808A6CD),
+    PROC_1E(5),
+    PROC_YIELD,
+    PROC_1B(425),
+    PROC_CALL(CampaignIntro_0808A821),
+    PROC_REPEAT(CampaignIntro_IDLE_0808A82D),
+    PROC_SLEEP(90),
+    PROC_REPEAT(CampaignIntro_IDLE_0808A845),
+    PROC_REPEAT(CampaignIntro_IDLE_0808A885),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616FD4\n.set gUnknown_08616FD4, ProcScr_CampaignIntro\n");

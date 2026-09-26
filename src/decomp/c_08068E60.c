@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08068E60.
  * sub_08068E60 @ 0x08068E60
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -15,7 +19,7 @@ struct Unk08068E60
     /* 0x2c */ u32 unk2c;
 };
 
-void sub_08068E60(struct Unk08068E60 *proc)
+void IntroT3_08068E61(struct Unk08068E60 *proc)
 {
     int i;
     u32 zero0;
@@ -38,16 +42,16 @@ void sub_08068E60(struct Unk08068E60 *proc)
     zero0 = 0;
     CpuFastSet(&zero0, (void *)0x0600E000, 0x01000400);
     zero1 = 0;
-    CpuFastSet(&zero1, gUnknown_08499580, 0x01000400);
+    CpuFastSet(&zero1, gBG2TilemapBuffer, 0x01000400);
     ApplyPalettes(gUnknown_08183C28, 0, 4);
     ApplyPalette((u16 *)gUnknown_0823BDE0, 0);
     Decompress(gUnknown_081837A0, (void *)0x06008000);
-    Decompress(gUnknown_081838EC, gUnknown_08499580);
+    Decompress(gUnknown_081838EC, gBG2TilemapBuffer);
     Decompress(gUnknown_0823A3D4, (void *)0x06002800);
-    Decompress(gUnknown_08239FA4, gUnknown_08499578);
+    Decompress(gUnknown_08239FA4, gBG0TilemapBuffer);
 
     for (i = 0; i < 0x400; i++)
-        gUnknown_08499578[i] += 0x140;
+        gBG0TilemapBuffer[i] += 0x140;
 
     zero2 = 0;
     CpuFastSet(&zero2, (void *)0x06000000, 0x01000008);
@@ -62,3 +66,5 @@ void sub_08068E60(struct Unk08068E60 *proc)
     sub_080677BC(0, 4, 4, proc);
     sub_080679D8(1, 1, 0, 0x88, 0x3800, 0, 0xc0, 0x100, 0xe, proc);
 }
+
+asm(".global sub_08068E60\n.thumb_set sub_08068E60, IntroT3_08068E61\n");

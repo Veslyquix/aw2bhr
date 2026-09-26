@@ -11,11 +11,11 @@ void sub_0803FD80(int a1, int a2)
 {
     u8 *src;
 
-    src = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk10;
+    src = gUnknown_085C77A0[gPlaySt.mapID].tileGraphic4x4;
     Decompress(gUnknown_080D24E0, (void *)(0x06010000 + (((a2 + 0x7C) & 0x3FF) << 5)));
     if (sub_0803E354(5) != NULL)
     {
-        if (sub_0803866C())
+        if (IsHardCampaignMode())
             Decompress(gUnknown_080D2AE8, (void *)(0x06010000 + (((a2 + 0xA0) & 0x3FF) << 5)));
         else
             Decompress(gUnknown_080D2AE8, (void *)(0x06010000 + (((a2 + 0xC4) & 0x3FF) << 5)));

@@ -9,7 +9,7 @@
 
 /* The unit-record dispatch of sub_0802032C's family, with the fourth argument
  * clamped: the record's own 7-bit unk06_0 unless that is already at or above
- * the type's sub_08042D1C ceiling, in which case the ceiling.
+ * the type's GetUnitMovementWithCoBonus ceiling, in which case the ceiling.
  *
  * The clamp has to land in a `u16` LOCAL rather than in the argument
  * expression. Written as one `(s16)(a < f() ? a : (u16)f())` the compiler folds
@@ -19,19 +19,19 @@
  * it is also what moves the merged value into r3 with no extra copy.
  *
  * The parameter is declared `struct Unk030040D8 *` because that is what every
- * caller hands it; the body casts to the identical `struct Unk08499594` to
+ * caller hands it; the body casts to the identical `struct Unit` to
  * reach unk06_0 and the pointer difference, the same way c_08074320.c does. */
 void sub_080202A4(struct Unk030040D8 *a1)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     u16 v;
 
-    e = (struct Unk08499594 *)a1;
+    e = (struct Unit *)a1;
 
-    if (e->unk06_0 < sub_08042D1C(((e - gUnknown_08499594) >> 6) + 1, e->unk00))
-        v = e->unk06_0;
+    if (e->fuel < GetUnitMovementWithCoBonus(((e - gUnits) >> 6) + 1, e->type))
+        v = e->fuel;
     else
-        v = sub_08042D1C(((e - gUnknown_08499594) >> 6) + 1, e->unk00);
+        v = GetUnitMovementWithCoBonus(((e - gUnits) >> 6) + 1, e->type);
 
-    gUnknown_030013EC(e->unk02, e->unk03, e->unk00, (s16)v, 1);
+    gUnknown_030013EC(e->x, e->y, e->type, (s16)v, 1);
 }

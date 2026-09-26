@@ -9,7 +9,7 @@
 
 void sub_08085244(s16 *p)
 {
-    sub_0801F34C(0x67, 0xBD, 0x98, 0, 1);
+    DrawOamObject(0x67, 0xBD, 0x98, 0, 1);
     sub_08085708(p, p[0x33]);
     sub_080853B0();
     sub_08043B60(0x78, 8, 0x82AC, 3);

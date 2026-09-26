@@ -53,9 +53,9 @@
  * moving the statement itself moves the `strh` with it.
  *
  * SETTLED, and all of it converted:
- *   - `if (sub_0803866C() == 0)` with the gUnknown_081D208C arm as the
+ *   - `if (IsHardCampaignMode() == 0)` with the gUnknown_081D208C arm as the
  *     FALLTHROUGH. agbcc lays the then-arm out as the fallthrough and the
- *     else-arm at the branch target, so `if (sub_0803866C())` with the arms
+ *     else-arm at the branch target, so `if (IsHardCampaignMode())` with the arms
  *     the natural way round is backwards. The 208C arm also re-uses r4 from
  *     the ApplyPaletteExt two statements earlier, which is what identifies it.
  *   - gUnknown_081CC588 and gUnknown_081CC58C are FORCE-ADDR POOL WORDS, not
@@ -67,8 +67,9 @@
  *   - `.bits.priority = 3` emits a bare `orrs #3` with no AND: a bitfield set
  *     to all ones drops the mask (store_fixed_bit_field's all_one case), the
  *     same fold c_080039E4.c records for `effect = 3`.
- *   - gUnknown_03000640's five zero stores really are in ROM order
- *     unk08, unk06, unk04, unk02, unk00 -- reverse declaration order.
+ *   - gSmoothScroll's five zero stores really are in ROM order
+ *     frameCounter, currentY, currentX, targetY, targetX -- reverse
+ *     declaration order.
  *   - sub_08074714 takes a ProcPtr (promoted in c_08074714.c) and is called
  *     with a literal 4, hence the cast. */
 void sub_08076888(ProcPtr proc)
@@ -98,11 +99,11 @@ void sub_08076888(ProcPtr proc)
     gUnknown_0300251C.bits.priority = 3;
 
     a = 0;
-    CpuFastSet(&a, gUnknown_08499578, 0x01000200);
+    CpuFastSet(&a, gBG0TilemapBuffer, 0x01000200);
     b = 0;
-    CpuFastSet(&b, gUnknown_0849957C, 0x01000200);
+    CpuFastSet(&b, gBG1TilemapBuffer, 0x01000200);
     c = 0;
-    CpuFastSet(&c, gUnknown_08499580, 0x01000200);
+    CpuFastSet(&c, gBG2TilemapBuffer, 0x01000200);
 
     sub_08013AEC();
     sub_08013AFC();
@@ -115,7 +116,7 @@ void sub_08076888(ProcPtr proc)
     Decompress(gUnknown_081D2A54, (void *)0x06010000);
     ApplyPaletteExt(gUnknown_081D208C, 0x200, 0x20);
 
-    if (sub_0803866C() == 0)
+    if (IsHardCampaignMode() == 0)
         ApplyPaletteExt(gUnknown_081D208C, 0x220, 0x20);
     else
         ApplyPaletteExt(gUnknown_081D20CC, 0x220, 0x20);
@@ -133,11 +134,11 @@ void sub_08076888(ProcPtr proc)
     end = 0xFFFF;
     *list = end;
 
-    gUnknown_03000640.unk08 = 0;
-    gUnknown_03000640.unk06 = 0;
-    gUnknown_03000640.unk04 = 0;
-    gUnknown_03000640.unk02 = 0;
-    gUnknown_03000640.unk00 = 0;
+    gSmoothScroll.frameCounter = 0;
+    gSmoothScroll.currentY = 0;
+    gSmoothScroll.currentX = 0;
+    gSmoothScroll.targetY = 0;
+    gSmoothScroll.targetX = 0;
 
     sub_08074714((ProcPtr)4);
     sub_0801237C();

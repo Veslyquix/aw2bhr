@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -16,8 +17,8 @@ void sub_08035224(void)
 
     for (i = 0; i <= 0x1f; i++)
     {
-        gUnknown_02027C68[i].unk00 = (sub_080129E0() % 0xff) << 8;
-        gUnknown_02027C68[i].unk02 = (sub_080129E0() % 0xff) << 8;
+        gUnknown_02027C68[i].unk00 = (GetNextRandomNumber() % 0xff) << 8;
+        gUnknown_02027C68[i].unk02 = (GetNextRandomNumber() % 0xff) << 8;
         j = i % 0x10;
         gUnknown_02027C68[i].unk04 = gUnknown_08090E40[j * 3];
         gUnknown_02027C68[i].unk06 = gUnknown_08090E40[j * 3 + 1];
@@ -43,13 +44,13 @@ void sub_080352B4(void)
         gUnknown_02027C68[i].unk02 = gUnknown_02027C68[i].unk02 + gUnknown_02027C68[i].unk06;
     }
 
-    k = gUnknown_03004008 & 1;
+    k = gGameClock & 1;
     i = k * 0x10;
 
     for (j = i; j < i + 0x10; j++)
     {
-        sub_0801BDB4(((gUnknown_02027C68[j].unk00 >> 8) - *(s16 *)(gUnknown_08499590 + 4)) & 0xff,
-                     ((gUnknown_02027C68[j].unk02 >> 8) - *(s16 *)(gUnknown_08499590 + 6)) & 0xff,
+        sub_0801BDB4(((gUnknown_02027C68[j].unk00 >> 8) - gMap->scrollX) & 0xff,
+                     ((gUnknown_02027C68[j].unk02 >> 8) - gMap->scrollY) & 0xff,
                      gUnknown_0849BD98,
                      gUnknown_02027C68[j].unk08);
     }
@@ -64,8 +65,8 @@ void sub_08035354(void)
 
     for (i = 0; i <= 0x1f; i++)
     {
-        gUnknown_02027DE8[i].unk00 = (sub_080129E0() % 0xff) << 8;
-        gUnknown_02027DE8[i].unk02 = (sub_080129E0() % 0xff) << 8;
+        gUnknown_02027DE8[i].unk00 = (GetNextRandomNumber() % 0xff) << 8;
+        gUnknown_02027DE8[i].unk02 = (GetNextRandomNumber() % 0xff) << 8;
         j = i % 0x10;
         gUnknown_02027DE8[i].unk04 = gUnknown_08090E40[j * 3] * 3;
         gUnknown_02027DE8[i].unk06 = gUnknown_08090E40[j * 3 + 1] * 8;

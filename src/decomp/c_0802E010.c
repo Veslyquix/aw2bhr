@@ -72,14 +72,14 @@
  * loop bound, which took this from 13 differing bytes to 8) stands unchanged
  * and is still in the source below.
  *
- * gUnknown_0849957C is a POINTER global, not an array. gUnknown_08090C28 is
+ * gBG1TilemapBuffer is a POINTER global, not an array. gUnknown_08090C28 is
  * not a global at all: the ROM word holds 0x03003F68, this function's own
  * -fforce-addr copy of &gUnknown_03003F68. The promotion needs
  * rodata: ["0x08090C28"] (["0x08090C2C"] for sub_0802E130); trymatch reports
  * the reloc as "different symbols that resolve to the same address", which is
  * the wave-21 artefact and not a difference.
  *
- * sub_0802E130 is this function with gUnknown_08499578 for gUnknown_0849957C
+ * sub_0802E130 is this function with gBG0TilemapBuffer for gBG1TilemapBuffer
  * and sub_08013AEC for sub_08013AFC, and nothing else. It matched on pure
  * substitution of this body, with no probe of its own -- the sixth and final
  * confirmation of the callee-normalised pair reading. Before the fix, both
@@ -101,14 +101,14 @@ void sub_0802E010(void)
   }
   for (i = 0, half = n >> 1; i <= 0x3FF; i++)
   {
-    gUnknown_0849957C[i] = 0;
+    gBG1TilemapBuffer[i] = 0;
   }
 
   for (i = 0; i < ((u16) half); i++)
   {
     for (j = 0; j < ((((u8 *) gUnknown_03003F68)[1] >> 1) << 4); j += 0x10)
     {
-      gUnknown_0849957C[(j * 2) + i] = (j + i) + 0x5000;
+      gBG1TilemapBuffer[(j * 2) + i] = (j + i) + 0x5000;
     }
 
   }
@@ -121,7 +121,7 @@ void sub_0802E010(void)
       {
         int k;
         k = j * 2;
-        row = gUnknown_0849957C;
+        row = gBG1TilemapBuffer;
         row[(i + k) + 0x10] = (i + (j + 0x100)) + 0x5000;
       }
 
@@ -195,14 +195,14 @@ void sub_0802E010(void)
  * loop bound, which took this from 13 differing bytes to 8) stands unchanged
  * and is still in the source below.
  *
- * gUnknown_0849957C is a POINTER global, not an array. gUnknown_08090C28 is
+ * gBG1TilemapBuffer is a POINTER global, not an array. gUnknown_08090C28 is
  * not a global at all: the ROM word holds 0x03003F68, this function's own
  * -fforce-addr copy of &gUnknown_03003F68. The promotion needs
  * rodata: ["0x08090C28"] (["0x08090C2C"] for sub_0802E130); trymatch reports
  * the reloc as "different symbols that resolve to the same address", which is
  * the wave-21 artefact and not a difference.
  *
- * THIS FILE IS sub_0802E010 WITH gUnknown_08499578 FOR gUnknown_0849957C AND
+ * THIS FILE IS sub_0802E010 WITH gBG0TilemapBuffer FOR gBG1TilemapBuffer AND
  * sub_08013AEC FOR sub_08013AFC, AND NOTHING ELSE. Nothing was derived here.
  * It matched on pure substitution -- the sixth and final
  * confirmation of the callee-normalised pair reading. Before the fix, both
@@ -224,14 +224,14 @@ void sub_0802E130(void)
   }
   for (i = 0, half = n >> 1; i <= 0x3FF; i++)
   {
-    gUnknown_08499578[i] = 0;
+    gBG0TilemapBuffer[i] = 0;
   }
 
   for (i = 0; i < ((u16) half); i++)
   {
     for (j = 0; j < ((((u8 *) gUnknown_03003F68)[1] >> 1) << 4); j += 0x10)
     {
-      gUnknown_08499578[(j * 2) + i] = (j + i) + 0x5000;
+      gBG0TilemapBuffer[(j * 2) + i] = (j + i) + 0x5000;
     }
 
   }
@@ -244,7 +244,7 @@ void sub_0802E130(void)
       {
         int k;
         k = j * 2;
-        row = gUnknown_08499578;
+        row = gBG0TilemapBuffer;
         row[(i + k) + 0x10] = (i + (j + 0x100)) + 0x5000;
       }
 

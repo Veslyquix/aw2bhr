@@ -16,7 +16,7 @@ void sub_0802CEB0(void)
     p = gUnknown_030044B0;
     *(u32 *)(p + 8) = gUnknown_03001FD4;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0xf, 0, gUnknown_030033EC, 0);
 
     sub_0804438C(gUnknown_030033EC, 1);
@@ -32,7 +32,7 @@ void sub_0802CEFC(void)
     p = gUnknown_030044B0;
     *(u32 *)(p + 8) = gUnknown_03001FD4;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0x10, 0, gUnknown_030033EC, 0);
 
     sub_0804438C(gUnknown_030033EC, 2);

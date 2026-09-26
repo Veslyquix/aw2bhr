@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,14 +8,9 @@
  * sub_0800977C @ 0x0800977C
  */
 
-/* Returns whether the cell at (x, y) is a join candidate.
- *
- * This names gUnknown_08499590 DIRECTLY, which is what the original source did,
- * so agbcc's -fforce-addr parks the address in this unit's own .rodata.  That
- * word is the ROM's gUnknown_0808D81C and the build now places it there --
- * see tools/split_rodata.py.  The `c_local` workaround spelling is NOT used
- * here: it is what held this function parked, at 75.2% / 38.6% on a register
- * allocation inversion, and naming the global directly is byte-exact.
+/* Returns whether the cell at (x, y) is a join candidate. The typed gMap
+ * spelling is byte-exact here as long as the rowOffset/terrain/tile
+ * byte-pointer locals stay scoped per use.
  */
 int sub_0800977C(int x, int y)
 {
@@ -23,16 +19,16 @@ int sub_0800977C(int x, int y)
     u8 ok = 0;
 
     {
-        u8 *p;
+        struct Map *p;
         u8 *rows;
         u8 *cells;
         int idx;
 
-        p = gUnknown_08499590;
+        p = gMap;
         t = y * 2;
-        rows = p + 0x417A;
+        rows = (u8 *)p->rowOffset;
         idx = *(u16 *)(rows + t) + x;
-        cells = p + 0x1432;
+        cells = p->terrain;
         terrain = *(cells + idx);
     }
 
@@ -43,15 +39,15 @@ int sub_0800977C(int x, int y)
         ok = sub_08009BF4(x, y) != 0;
 
         {
-            u8 *p;
+            struct Map *p;
             u8 *rows;
             u8 *tiles;
             int off;
 
-            p = gUnknown_08499590;
-            rows = p + 0x417A;
+            p = gMap;
+            rows = (u8 *)p->rowOffset;
             off = (*(u16 *)(rows + t) + x) * 2;
-            tiles = p + 0xA22;
+            tiles = (u8 *)p->tile;
             tile = *(u16 *)(tiles + off);
         }
 
@@ -59,36 +55,36 @@ int sub_0800977C(int x, int y)
         {
             if (x > 0 && sub_08009720(x - 1, y))
                 ok = 0;
-            if (x < *(u16 *)gUnknown_08499590 - 1 && sub_08009720(x + 1, y))
+            if (x < gMap->width - 1 && sub_08009720(x + 1, y))
                 ok = 0;
 
             if (ok)
             {
-                u8 *pe;
+                struct Map *pe;
                 int cnt = 0;
 
                 if (x > 0)
                 {
-                    u8 *p;
+                    struct Map *p;
                     u8 *rows;
                     u8 *cells;
                     int t2;
                     int idx;
 
-                    p = gUnknown_08499590;
+                    p = gMap;
                     t2 = y * 2;
-                    rows = p + 0x417A;
+                    rows = (u8 *)p->rowOffset;
                     idx = *(u16 *)(rows + t2);
                     idx--;
                     idx += x;
-                    cells = p + 0x1432;
+                    cells = p->terrain;
                     if (*(cells + idx) == 0xC)
                         cnt = 1;
                 }
 
-                pe = gUnknown_08499590;
+                pe = gMap;
 
-                if (x < *(u16 *)pe - 1)
+                if (x < pe->width - 1)
                 {
                     u8 *rows;
                     u8 *cells;
@@ -96,11 +92,11 @@ int sub_0800977C(int x, int y)
                     int idx;
 
                     t2 = y * 2;
-                    rows = pe + 0x417A;
+                    rows = (u8 *)pe->rowOffset;
                     idx = *(u16 *)(rows + t2);
                     idx++;
                     idx += x;
-                    cells = pe + 0x1432;
+                    cells = pe->terrain;
                     if (*(cells + idx) == 0xC)
                         cnt++;
                 }
@@ -112,35 +108,35 @@ int sub_0800977C(int x, int y)
         {
             if (y > 0 && sub_08009720(x, y - 1))
                 ok = 0;
-            if (y < *(u16 *)(gUnknown_08499590 + 2) - 1 && sub_08009720(x, y + 1))
+            if (y < gMap->height - 1 && sub_08009720(x, y + 1))
                 ok = 0;
 
             if (ok)
             {
-                u8 *pe;
+                struct Map *pe;
                 int cnt = 0;
 
                 if (y > 0)
                 {
-                    u8 *p;
+                    struct Map *p;
                     u8 *rows;
                     u8 *cells;
                     int t2;
                     int idx;
 
-                    p = gUnknown_08499590;
+                    p = gMap;
                     t2 = (y - 1) * 2;
-                    rows = p + 0x417A;
+                    rows = (u8 *)p->rowOffset;
                     idx = *(u16 *)(rows + t2);
                     idx += x;
-                    cells = p + 0x1432;
+                    cells = p->terrain;
                     if (*(cells + idx) == 0xC)
                         cnt = 1;
                 }
 
-                pe = gUnknown_08499590;
+                pe = gMap;
 
-                if (y < *(u16 *)(pe + 2) - 1)
+                if (y < pe->height - 1)
                 {
                     u8 *rows;
                     u8 *cells;
@@ -148,10 +144,10 @@ int sub_0800977C(int x, int y)
                     int idx;
 
                     t2 = (y + 1) * 2;
-                    rows = pe + 0x417A;
+                    rows = (u8 *)pe->rowOffset;
                     idx = *(u16 *)(rows + t2);
                     idx += x;
-                    cells = pe + 0x1432;
+                    cells = pe->terrain;
                     if (*(cells + idx) == 0xC)
                         cnt++;
                 }

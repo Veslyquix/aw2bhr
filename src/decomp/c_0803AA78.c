@@ -15,7 +15,7 @@
 void sub_0803AA78(u8 a)
 {
     sub_08015BD0((s32)gUnknown_0849E280);
-    sub_08025BE0(&gUnknown_03004100, a);
+    InitUnit(&gUnknown_03004100, a);
     gUnknown_0849D89C->unk04 = &gUnknown_03004100;
     sub_0803A190(gUnknown_0849D89C->unk00, &gUnknown_03004100);
     sub_0803A2BC(gUnknown_0849D89C->unk00, gUnknown_0849D89C->unk04);

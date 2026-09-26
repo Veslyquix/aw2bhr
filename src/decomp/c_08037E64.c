@@ -9,7 +9,7 @@
 
 void sub_08037E64(void)
 {
-    sub_080375A4(gUnknown_03003FC0.unk01);
+    sub_080375A4(gPlaySt.gameMode);
     sub_08037DC8();
     sub_080366C4(sub_080368E8);
     sub_080366D0(sub_08036884);

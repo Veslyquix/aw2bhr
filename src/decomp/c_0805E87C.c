@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -25,9 +26,9 @@
  * THE ONE THING THAT COST ANYTHING: the ROM's `adds r1,r0,#0` before the *12.
  * That copy is CSE substituting the map-cell load into a SECOND local, so the
  * cell expression is written TWICE -- once in the `if` and once as the unit
- * id -- and the id's assignment has to sit INSIDE the `u = gUnknown_08499594 +
+ * id -- and the id's assignment has to sit INSIDE the `u = gUnits +
  * ...` expression.  Bound as its own preceding statement (`id = cell; u = g +
- * id;`) the copy appears but lands BEFORE gUnknown_08499594's pool `ldr`
+ * id;`) the copy appears but lands BEFORE gUnits's pool `ldr`
  * instead of after it.  Wave 27 (W27-A) predicted the copy correctly; what is
  * new is that its POSITION is set by which statement the assignment belongs to.
  *
@@ -46,7 +47,7 @@
  * bitfield gives the ROM's SImode `movs r3,#0x39; rsbs r3,r3,#0`.  The second
  * mask is derived from the first (`adds r3,#0x31` -> -8), which is CSE on the
  * two constants and confirms both writes are bitfield stores on one container.
- * struct Unk08499594's and struct Unk030040D8's own unk09 are left alone so the
+ * struct Unit's and struct Unk030040D8's own unk09 are left alone so the
  * shared layouts stay shared.
  *
  * struct Unk5A514Cell is repeated here rather than declared in a shared header
@@ -62,21 +63,6 @@ struct Unk5A514Cell
 };
 void sub_0805A268(struct Unk5A514Cell *);
 void sub_0805A388(struct Unk5A514Cell *);
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x1928];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 struct CellXY
 {
     /* 0x00 */ u16 x;
@@ -125,10 +111,10 @@ void sub_0805E87C(void)
         }
         else
         {
-            if (((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[pos.y] + pos.x] != 0)
+            if (gMap->unit[gMap->rowOffset[pos.y] + pos.x] != 0)
             {
-                u = (struct Unk5E87CUnit *)(gUnknown_08499594 + (id = ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[pos.y] + pos.x]));
-                if ((s8)gUnknown_03003340[pos.y][pos.x] <= sub_08058224((struct Unk08499594 *)gUnknown_030040D8))
+                u = (struct Unk5E87CUnit *)(gUnits + (id = gMap->unit[gMap->rowOffset[pos.y] + pos.x]));
+                if ((s8)gUnknown_03003340[pos.y][pos.x] <= sub_08058224((struct Unit *)gUnknown_030040D8))
                 {
                     if (u->unk00 == 0x16)
                     {

@@ -19,16 +19,16 @@
  * front of each of the three `bl`s. Widened and re-verified in wave 36. */
 void sub_080055B8(int a, int b, int c)
 {
-    if (sub_0803CCB8(0, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(0, gDesignRoomName) != 1)
     {
         sub_0803CEAC();
-        sub_08012BC8(gUnknown_08499578, 0xE, 4, 0xF, 0xA, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0xE, 4, 0xF, 0xA, 0);
         sub_08013AEC();
     }
     else
     {
         sub_0803CEAC();
-        sub_08012BC8(gUnknown_08499578, 0xE, 4, 0xF, 0xA, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0xE, 4, 0xF, 0xA, 0);
         sub_0803CDBC(0xE, 4, 0);
         gUnknown_03001418 = 0;
         gUnknown_03001FF8 = 0;
@@ -43,16 +43,16 @@ void sub_080055B8(int a, int b, int c)
  * zeroes in the then-arm and so lands in r4 there and r1 in the else-arm. */
 void sub_08005634(int a, int b, int c)
 {
-    if (sub_0803CCB8(1, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(1, gDesignRoomName) != 1)
     {
         sub_0803CEAC();
-        sub_08012BC8(gUnknown_08499578, 0xE, 4, 0xF, 0xA, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0xE, 4, 0xF, 0xA, 0);
         sub_08013AEC();
     }
     else
     {
         sub_0803CEAC();
-        sub_08012BC8(gUnknown_08499578, 0xE, 4, 0xF, 0xA, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0xE, 4, 0xF, 0xA, 0);
         sub_0803CDBC(0xE, 4, 1);
         gUnknown_03001418 = 0;
         gUnknown_03001FF8 = 0;
@@ -67,16 +67,16 @@ void sub_08005634(int a, int b, int c)
  * zeroes in the then-arm and so lands in r4 there and r1 in the else-arm. */
 void sub_080056B0(int a, int b, int c)
 {
-    if (sub_0803CCB8(2, gUnknown_0200B204) != 1)
+    if (sub_0803CCB8(2, gDesignRoomName) != 1)
     {
         sub_0803CEAC();
-        sub_08012BC8(gUnknown_08499578, 0xE, 4, 0xF, 0xA, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0xE, 4, 0xF, 0xA, 0);
         sub_08013AEC();
     }
     else
     {
         sub_0803CEAC();
-        sub_08012BC8(gUnknown_08499578, 0xE, 4, 0xF, 0xA, 0);
+        sub_08012BC8(gBG0TilemapBuffer, 0xE, 4, 0xF, 0xA, 0);
         sub_0803CDBC(0xE, 4, 2);
         gUnknown_03001418 = 0;
         gUnknown_03001FF8 = 0;

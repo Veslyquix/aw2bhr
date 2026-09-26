@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -69,8 +70,8 @@ void sub_08039C70(struct Unk39C70Proc *proc)
         return;
     }
 
-    x = (proc->unk29 << 4) - *(s16 *)(gUnknown_08499590 + 4) + 8;
-    y = (proc->unk2a << 4) - *(s16 *)(gUnknown_08499590 + 6) + 8;
+    x = (proc->unk29 << 4) - gMap->scrollX + 8;
+    y = (proc->unk2a << 4) - gMap->scrollY + 8;
 
     if ((u8)sub_0801306C(x, y, 0x40))
         sub_0801BD00((x & 0x1ff) | (proc->unk32 << 9),

@@ -59,7 +59,7 @@ void sub_0807B574(struct Unk0807B574Proc * proc)
             Proc_Break(proc);
         }
 
-        if (gpKeySt->held & 1)
+        if (gpKeySt->pressed & 1)
         {
             proc->unk5c = proc->unk5c + proc->unk58;
             proc->unk58 = 0;

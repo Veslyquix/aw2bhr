@@ -13,7 +13,7 @@
  *
  *  - The army-mask test is INVERTED (`cmp r1,#0; beq` where the exemplar has
  *    `bne`), so this counts the armies whose bit in
- *    gUnknown_08499598[gUnknown_030033EC].unk2c is SET.
+ *    gPlayers[gUnknown_030033EC].unk2c is SET.
  *  - The unit predicate is `unk00 == 0` (`ldrb; cmp #0; beq`), not `<= 2`.
  *  - The gUnknown_085D5ABC[unk00].unk0b cap test is absent, which is why this
  *    function carries five pool words to the exemplar's six.
@@ -30,24 +30,24 @@ int sub_080583DC(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
     for (i = 0; i < 4; i++)
     {
-        if (((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1) == 0)
+        if (((gPlayers[gUnknown_030033EC].unk2c >> i) & 1) == 0)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
-            if (u->unk00 == 0)
+            if (u->type == 0)
                 continue;
-            if (gUnknown_0857680F[u->unk00] != 2)
+            if (gUnknown_0857680F[u->type] != 2)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;
@@ -73,7 +73,7 @@ int sub_080583DC(void)
  * its whole address computation into the preheader: that hoist is gcc's own
  * LICM, not a source-level local. Binding it to a local before the loop is
  * observably different code -- it sinks the `movs r5, #0` loop init BELOW the
- * hoisted block and moves gUnknown_08499594's address into a callee-saved
+ * hoisted block and moves gUnits's address into a callee-saved
  * register. The ROM's order (`movs r7,#0; movs r5,#0` and only then the mask
  * expression) is the tell that the for-init precedes the preheader.
  *
@@ -83,22 +83,22 @@ int sub_0805848C(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
-            if ((u8)(u->unk00 - 1) > 1)
+            if ((u8)(u->type - 1) > 1)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;
@@ -120,22 +120,22 @@ int sub_08058530(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
     for (i = 0; i < 4; i++)
     {
-        if (((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1) == 0)
+        if (((gPlayers[gUnknown_030033EC].unk2c >> i) & 1) == 0)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
-            if ((u8)(u->unk00 - 1) > 1)
+            if ((u8)(u->type - 1) > 1)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;

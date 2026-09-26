@@ -16,5 +16,5 @@
 
 void sub_0803D54C(void)
 {
-    gUnknown_03003FC0.unk02 = 0xb4;
+    gPlaySt.mapID = 0xb4;
 }

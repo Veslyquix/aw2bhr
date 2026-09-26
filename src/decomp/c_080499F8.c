@@ -21,7 +21,7 @@ void sub_080499F8(void)
         sub_08013AEC();
     }
 
-    sub_0801F34C(0x51, 4, 0x20, 0, 0);
+    DrawOamObject(0x51, 4, 0x20, 0, 0);
 
     PutSprite(1, 0x00, 0x1c, gUnknown_0848B6C6, 0x8c9b);
     PutSprite(1, 0x20, 0x1c, gUnknown_0848B6C6, 0x8c9b);

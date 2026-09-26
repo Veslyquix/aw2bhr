@@ -56,7 +56,7 @@ void sub_0802DA18(void)
 
     ent = &gUnknown_03001470[gUnknown_03001FBC];
 
-    if (gpKeySt->held & 1)
+    if (gpKeySt->pressed & 1)
     {
         if ((tbl = (struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk01 == 2)
         {
@@ -72,23 +72,23 @@ void sub_0802DA18(void)
             return;
         }
 
-        p = sub_08025E08(gUnknown_030040A4.unk00, gUnknown_030040A4.unk02,
+        p = BuyUnit(gUnknown_030040A4.unk00, gUnknown_030040A4.unk02,
                          ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00);
 
         gUnknown_03003100.pos.unk00 = gUnknown_030040A4.unk00;
         gUnknown_03003100.pos.unk02 = gUnknown_030040A4.unk02;
 
-        if (gUnknown_03003FC0.unk32 != 0)
+        if (gPlaySt.savingEnabled != 0)
             sub_08034534(1, ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00,
                          0, 0);
 
         sub_08074410(0xe, p);
     }
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0803B4DC(0x66);
 
-    if (gpKeySt->held & 3)
+    if (gpKeySt->pressed & 3)
     {
         sub_08015C30(gUnknown_03001FBC);
         sub_0802D76C();
@@ -96,7 +96,7 @@ void sub_0802DA18(void)
         return;
     }
 
-    if (gpKeySt->unk02 & 0x80)
+    if (gpKeySt->repeated & DPAD_DOWN)
     {
         int v;
 
@@ -110,7 +110,7 @@ void sub_0802DA18(void)
         }
     }
 
-    if (gpKeySt->unk02 & 0x40)
+    if (gpKeySt->repeated & DPAD_UP)
     {
         int v;
 

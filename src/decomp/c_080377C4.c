@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -59,15 +60,6 @@
  * cse keeps the pointer live. Binding it to a local instead loads it before the
  * store's own address and reverses that pool pair. */
 
-struct Map377C4
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0xa22 - 0x04];
-    /* 0x0a22 */ u16 unk0a22[(0x417a - 0xa22) / 2];
-    /* 0x417a */ u16 unk417a[1];
-};
-
 void sub_080377C4(void *a1)
 {
     u16 *dst;
@@ -76,17 +68,17 @@ void sub_080377C4(void *a1)
 
     sub_08037B84(sub_08014E44(0xa14));
 
-    ((u8 *)gUnknown_03003F68)[0] = ((struct Map377C4 *)gUnknown_08499590)->unk00;
-    ((u8 *)gUnknown_03003F68)[1] = ((struct Map377C4 *)gUnknown_08499590)->unk02;
+    ((u8 *)gUnknown_03003F68)[0] = gMap->width;
+    ((u8 *)gUnknown_03003F68)[1] = gMap->height;
 
-    for (y = 0; y < ((struct Map377C4 *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Map377C4 *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             dst = gUnknown_03003F68;
-            dst += ((struct Map377C4 *)gUnknown_08499590)->unk417a[y] + x;
-            dst[1] = ((struct Map377C4 *)gUnknown_08499590)->unk0a22[
-                ((struct Map377C4 *)gUnknown_08499590)->unk417a[y] + x];
+            dst += gMap->rowOffset[y] + x;
+            dst[1] = gMap->tile[
+                gMap->rowOffset[y] + x];
         }
     }
 

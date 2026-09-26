@@ -23,18 +23,18 @@
  *
  * The magic ladder (`* 0x55555555; rsbs; asrs #8`) is the pointer-difference
  * chapter of docs/agbcc-codegen.md: post_shift 8 and the inverse of 3 means a
- * 768-byte stride, i.e. 64 struct Unk08499594 records = one army, and the `+ 1`
- * makes it a 1-based gUnknown_08499598 index. struct Unk41978Army exists purely
+ * 768-byte stride, i.e. 64 struct Unit records = one army, and the `+ 1`
+ * makes it a 1-based gPlayers index. struct Unk41978Army exists purely
  * for that size.
  *
- * The head's pointer is gUnknown_030040D8 CAST TO struct Unk08499594 *, NOT
- * `((struct Unk030013D0 *)gUnknown_030013D0)->unk00`. Both are the same runtime
+ * The head's pointer is gUnknown_030040D8 CAST TO struct Unit *, NOT
+ * `gBattleAttacker->unit`. Both are the same runtime
  * value and both compile, but only gUnknown_030040D8 puts the five force-addr
  * words in the ROM's slots -- and it is what makes the two halves symmetric:
- * `sub_08042C9C(army1, gUnknown_030040D8->unk00)` against
- * `sub_08042C9C(army2, unit->unk00)`. The cast is the merge
+ * `GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00)` against
+ * `GetCoPriceMultiplier(army2, unit->type)`. The cast is the merge
  * include/unknown-globals.h already records for gUnknown_08091364, which is
- * typed `struct Unk08499594 **` for exactly this reason. Spelling the head
+ * typed `struct Unit **` for exactly this reason. Spelling the head
  * through gUnknown_030013D0 instead cost 8 bytes and two pool words.
  *
  * gUnknown_03004580's rows are a PLAIN u16 ARRAY, so `g[i][k]` is right and a
@@ -51,10 +51,10 @@
  * The five `.rodata` words are this unit's -fforce-addr pool and they land
  * exactly on the ROM's, verified positionally by trymatch:
  *     .rodata+0x00 -> 0x08091340   &gUnknown_030040D8
- *     .rodata+0x04 -> 0x08091344   &gUnknown_08499598
+ *     .rodata+0x04 -> 0x08091344   &gPlayers
  *     .rodata+0x08 -> 0x08091348   &gUnknown_030013D0
  *     .rodata+0x0c -> 0x0809134C   &gUnknown_030013B0
- *     .rodata+0x10 -> 0x08091350   &gUnknown_03003FC0
+ *     .rodata+0x10 -> 0x08091350   &gPlaySt
  * The last one agrees with the block listing already in
  * docs/agbcc-codegen.md, which is an independent check on the other four.
  * These are the documented false-mismatch class; the promotion must carry them.
@@ -87,7 +87,7 @@
 
 struct Unk41978Army
 {
-    struct Unk08499594 unk00[64];
+    struct Unit unk00[64];
 };
 struct Unk41978Cmd
 {
@@ -101,13 +101,13 @@ struct Unk41978Proc
 };
 /* Promoted but undeclared; signatures taken from src/decomp/c_08041D40.c and
  * src/decomp/c_080440A8.c, not derived. */
-int sub_08041D40(struct Unk08499594 *, struct Unk08499594 *);
+int sub_08041D40(struct Unit *, struct Unit *);
 void sub_080440E0(int, int);
 
 void sub_08041978(u8 a1, int a2)
 {
-    struct Unk08499594 *unit;
-    struct Unk08499594 *sel;
+    struct Unit *unit;
+    struct Unit *sel;
     u8 b;
     u8 army1;
     u8 army2;
@@ -120,16 +120,16 @@ void sub_08041978(u8 a1, int a2)
 
     b = a2;
 
-    unit = &gUnknown_08499594[a1];
+    unit = &gUnits[a1];
 
-    army1 = (struct Unk41978Army *)(struct Unk08499594 *)gUnknown_030040D8
-          - (struct Unk41978Army *)gUnknown_08499594 + 1;
-    army2 = (struct Unk41978Army *)unit - (struct Unk41978Army *)gUnknown_08499594 + 1;
+    army1 = (struct Unk41978Army *)(struct Unit *)gUnknown_030040D8
+          - (struct Unk41978Army *)gUnits + 1;
+    army2 = (struct Unk41978Army *)unit - (struct Unk41978Army *)gUnits + 1;
 
     if (a1 == 0)
     {
-        ((struct Unk08499594 *)gUnknown_030040D8)->unk04_7--;
-        sub_08034F48();
+        ((struct Unit *)gUnknown_030040D8)->ammo--;
+        LockUnitSelection();
         sub_080424FC();
     }
     else
@@ -138,58 +138,58 @@ void sub_08041978(u8 a1, int a2)
         sub_080251BC(gUnknown_03003F38, a1, &gUnknown_03003100.pos);
 
         gUnknown_03003F50 =
-            (r = sub_08041D40((struct Unk08499594 *)gUnknown_030040D8, unit));
+            (r = sub_08041D40((struct Unit *)gUnknown_030040D8, unit));
         gUnknown_03004484 = 1 - r;
         gUnknown_0300450C = gUnknown_03003F50;
 
-        gUnknown_03004580[gUnknown_03003F50][0] = gUnknown_08499598[army1].unk1a - 1;
-        gUnknown_03004580[gUnknown_03004484][0] = gUnknown_08499598[army2].unk1a - 1;
+        gUnknown_03004580[gUnknown_03003F50][0] = gPlayers[army1].teamColor - 1;
+        gUnknown_03004580[gUnknown_03004484][0] = gPlayers[army2].teamColor - 1;
 
         gUnknown_03004580[gUnknown_03003F50][1] =
-            gUnknown_0809131E[(sel = (struct Unk08499594 *)gUnknown_030040D8)->unk00];
-        gUnknown_03004580[gUnknown_03004484][1] = gUnknown_0809131E[unit->unk00];
+            gUnknown_0809131E[(sel = (struct Unit *)gUnknown_030040D8)->type];
+        gUnknown_03004580[gUnknown_03004484][1] = gUnknown_0809131E[unit->type];
 
         gUnknown_03004580[gUnknown_03003F50][2] =
-            gUnknown_08091318[((struct Unk030013D0 *)gUnknown_030013D0)->unk18];
+            gUnknown_08091318[gBattleAttacker->attackType];
         gUnknown_03004580[gUnknown_03004484][2] =
-            gUnknown_08091318[((struct Unk030013D0 *)gUnknown_030013B0)->unk18];
+            gUnknown_08091318[gBattleDefender->attackType];
 
-        gUnknown_03004580[gUnknown_03003F50][3] = ((struct Unk030013D0 *)gUnknown_030013D0)->unk04;
-        gUnknown_03004580[gUnknown_03004484][3] = ((struct Unk030013D0 *)gUnknown_030013B0)->unk04;
+        gUnknown_03004580[gUnknown_03003F50][3] = gBattleAttacker->terrainId;
+        gUnknown_03004580[gUnknown_03004484][3] = gBattleDefender->terrainId;
 
         gUnknown_03004580[gUnknown_03003F50][4] =
-            gUnknown_08499598[(struct Unk41978Army *)sel
-                              - (struct Unk41978Army *)gUnknown_08499594 + 1].unk1d;
+            gPlayers[(struct Unk41978Army *)sel
+                              - (struct Unk41978Army *)gUnits + 1].co;
         gUnknown_03004580[gUnknown_03004484][4] =
-            gUnknown_08499598[(struct Unk41978Army *)unit
-                              - (struct Unk41978Army *)gUnknown_08499594 + 1].unk1d;
+            gPlayers[(struct Unk41978Army *)unit
+                              - (struct Unk41978Army *)gUnits + 1].co;
 
-        gUnknown_03004580[gUnknown_03003F50][5] = sel->unk04_0;
-        gUnknown_03004580[gUnknown_03004484][5] = unit->unk04_0;
+        gUnknown_03004580[gUnknown_03003F50][5] = sel->hp;
+        gUnknown_03004580[gUnknown_03004484][5] = unit->hp;
 
-        gUnknown_03004580[gUnknown_03003F50][6] = ((struct Unk030013D0 *)gUnknown_030013D0)->unk08;
-        gUnknown_03004580[gUnknown_03004484][6] = ((struct Unk030013D0 *)gUnknown_030013B0)->unk08;
+        gUnknown_03004580[gUnknown_03003F50][6] = gBattleAttacker->remainingHp;
+        gUnknown_03004580[gUnknown_03004484][6] = gBattleDefender->remainingHp;
 
-        gUnknown_03004580[gUnknown_03003F50][7] = ((struct Unk030013D0 *)gUnknown_030013D0)->unk06;
-        gUnknown_03004580[gUnknown_03004484][7] = ((struct Unk030013D0 *)gUnknown_030013B0)->unk06;
+        gUnknown_03004580[gUnknown_03003F50][7] = gBattleAttacker->terrainDefense;
+        gUnknown_03004580[gUnknown_03004484][7] = gBattleDefender->terrainDefense;
 
         gUnknown_03004528[gUnknown_03003F50] = (u8 *)sel;
         gUnknown_03004528[gUnknown_03004484] = (u8 *)unit;
 
-        gUnknown_03004520 = gUnknown_03003FC0.unk2c;
+        gUnknown_03004520 = gPlaySt.weather;
 
-        if (sel->unk04_0 != 0)
-            t = Div(sel->unk04_0 - 1, 10) + 1;
+        if (sel->hp != 0)
+            t = Div(sel->hp - 1, 10) + 1;
         else
             t = 0;
 
-        c = sub_08042C9C(army1, gUnknown_030040D8->unk00);
+        c = GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00);
 
-        if (((struct Unk030013D0 *)gUnknown_030013D0)->unk08 != 0)
+        if (gBattleAttacker->remainingHp != 0)
         {
             int q;
             int diff;
-            q = Div(((struct Unk030013D0 *)gUnknown_030013D0)->unk08 - 1, 10);
+            q = Div(gBattleAttacker->remainingHp - 1, 10);
             diff = t - 1;
             diff -= q;
             x1 = diff * c;
@@ -197,18 +197,18 @@ void sub_08041978(u8 a1, int a2)
         else
             x1 = t * c;
 
-        if (unit->unk04_0 != 0)
-            t = Div(unit->unk04_0 - 1, 10) + 1;
+        if (unit->hp != 0)
+            t = Div(unit->hp - 1, 10) + 1;
         else
             t = 0;
 
-        c = sub_08042C9C(army2, unit->unk00);
+        c = GetCoPriceMultiplier(army2, unit->type);
 
-        if (((struct Unk030013D0 *)gUnknown_030013B0)->unk08 != 0)
+        if (gBattleDefender->remainingHp != 0)
         {
             int q;
             int diff;
-            q = Div(((struct Unk030013D0 *)gUnknown_030013B0)->unk08 - 1, 10);
+            q = Div(gBattleDefender->remainingHp - 1, 10);
             diff = t - 1;
             diff -= q;
             x2 = diff * c;
@@ -219,10 +219,10 @@ void sub_08041978(u8 a1, int a2)
         sub_080440E0(army1, x1 + Div(x2, 2));
         sub_080440E0(army2, x2 + Div(x1, 2));
 
-        v = gUnknown_03003FC0.unk09;
+        v = gPlaySt.animOpts;
 
         if (v == 3)
-            v = (gUnknown_08499598[gUnknown_030033EC].unk1b == 1) ? 2 : 0;
+            v = (gPlayers[gUnknown_030033EC].aiControlled == 1) ? 2 : 0;
 
         if (v != 0)
         {

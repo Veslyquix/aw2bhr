@@ -16,7 +16,7 @@
  * not reorderable, which is what fixes this as one statement per line. */
 void sub_08034534(int a, u8 b, u8 c, u8 d)
 {
-    struct Unk08499594 *unit = &gUnknown_08499594[b];
+    struct Unit *unit = &gUnits[b];
 
     gUnknown_030044B0[0] = a;
     gUnknown_030044B0[2] = gUnknown_03003100.pos.unk00;
@@ -26,7 +26,7 @@ void sub_08034534(int a, u8 b, u8 c, u8 d)
     gUnknown_030044B0[1] = b;
     gUnknown_030044B0[6] = c;
     gUnknown_030044B0[7] = d;
-    gUnknown_030044B0[0x12] = unit->unk06_0;
+    gUnknown_030044B0[0x12] = unit->fuel;
     sub_08034400(gUnknown_03003110, gUnknown_030044B0 + 0xc);
     sub_080308B4(gUnknown_030044B0);
 }
@@ -38,7 +38,7 @@ void sub_08034598(void)
     sub_08023518();
     sub_08023908(4);
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0802FA64();
 
     sub_0802776C(3);

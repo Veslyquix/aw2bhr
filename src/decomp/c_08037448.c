@@ -29,14 +29,14 @@ u8 sub_08037448(u8 a1)
     u8 v;
 
     v = sub_08026340();
-    if (gUnknown_03003FC0.unk01 != 2 && gUnknown_03003FC0.unk01 != 4
+    if (gPlaySt.gameMode != 2 && gPlaySt.gameMode != 4
         && sub_0803CA9C(a1) == 0)
         return 0;
 
     count = 0;
     for (i = 0; i < 0xc0; i++)
     {
-        if (gUnknown_085C77A0[i].unk1a == a1 && sub_080373F0(i, v))
+        if (gUnknown_085C77A0[i].category == a1 && sub_080373F0(i, v))
             gUnknown_02027F78[count++] = i;
         if (count > 0x31)
             break;

@@ -4,14 +4,14 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801A368.
- * sub_0801A368 @ 0x0801A368
+ * DrawWindowBackground @ 0x0801A368
  */
 
 /* Draws a box `a4` rows tall into the tilemap buffer `a5` at column a1, row a2:
  * one top row, a4-2 middle rows alternating between two forms, one bottom row,
  * each 32 entries further on. If the buffer is one of the four known BG maps,
  * flag that BG for upload. */
-void sub_0801A368(int a1, int a2, int a3, int a4, u16 *a5, int a6)
+void DrawWindowBackground(int a1, int a2, int a3, int a4, u16 *a5, int a6)
 {
     u16 *dst;
     u16 i, alt;
@@ -30,17 +30,19 @@ void sub_0801A368(int a1, int a2, int a3, int a4, u16 *a5, int a6)
 
     sub_0801A2E4(dst, a1, a3, a6);
 
-    if (a5 == gUnknown_08499578)
+    if (a5 == gBG0TilemapBuffer)
         sub_08013AD4(0);
 
-    if (a5 == gUnknown_0849957C)
+    if (a5 == gBG1TilemapBuffer)
         sub_08013AD4(1);
 
-    if (a5 == gUnknown_08499580)
+    if (a5 == gBG2TilemapBuffer)
         sub_08013AD4(2);
 
-    if (a5 == gUnknown_08499584)
+    if (a5 == gBG3TilemapBuffer)
         sub_08013AD4(3);
 
     sub_0802465C();
 }
+
+asm(".global sub_0801A368\n.thumb_set sub_0801A368, DrawWindowBackground\n");

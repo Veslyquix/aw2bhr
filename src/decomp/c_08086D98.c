@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08086D98.
  * sub_08086D98 @ 0x08086D98, sub_08086DB4 @ 0x08086DB4, sub_08086DD4 @ 0x08086DD4, sub_08086DF4 @ 0x08086DF4, sub_08086E2C @ 0x08086E2C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* One table lookup handed straight on: the s16 at +0x66 of the proc indexes a
@@ -23,7 +27,7 @@ struct Unk86D98Proc
 };
 #include "hardware.h"
 
-void sub_08086D98(struct Unk86D98Proc *proc)
+void WarRoomScroll_08086D99(struct Unk86D98Proc *proc)
 {
     u8 *p;
     int i;
@@ -31,7 +35,7 @@ void sub_08086D98(struct Unk86D98Proc *proc)
     p = (u8 *)&gUnknown_02027F74;
     i = proc->unk66;
     p += 4;
-    sub_080247A4(p[i]);
+    LoadMapData(p[i]);
 }
 
 /* `0x06004000 + chr_block * 0x4000` is the tile block BG1 is pointed at.
@@ -42,17 +46,17 @@ void sub_08086D98(struct Unk86D98Proc *proc)
  * bit 2 comes out as `ldr` plus `lsls #0x1c; lsrs #0x1e`. Reading it as a mask
  * and a shift instead would be three instructions.
  *
- * sub_08086DD4 and sub_08086E2C repeat the same address expression with a
- * different consumer. */
-void sub_08086DB4(void)
+ * WarRoomScroll_08086DD5 and sub_08086E2C repeat the same address expression
+ * with a different consumer. */
+void WarRoomScroll_08086DB5(void)
 {
     sub_0801B6EC((void *)(0x06004000 + gUnknown_03001FE8.bits.chr_block * 0x4000));
 }
 
-/* sub_08086DB4 with sub_0801B6FC instead of sub_0801B6EC, and nothing else --
- * diffed against it rather than derived from it. See that file for why the
- * bitfield read is a word load. */
-void sub_08086DD4(void)
+/* WarRoomScroll_08086DB5 with sub_0801B6FC instead of sub_0801B6EC, and
+ * nothing else -- diffed against it rather than derived from it. See that
+ * file for why the bitfield read is a word load. */
+void WarRoomScroll_08086DD5(void)
 {
     sub_0801B6FC((void *)(0x06004000 + gUnknown_03001FE8.bits.chr_block * 0x4000));
 }
@@ -63,19 +67,25 @@ void sub_08086DD4(void)
  *
  * gUnknown_03003F68 is declared `void *`, so the two reads spell out the byte
  * view explicitly; 0x6200 is `movs #0xc4; lsls #7`. */
-void sub_08086DF4(void)
+void WarRoomScroll_08086DF5(void)
 {
-    sub_08037A20(gUnknown_0849957C, 0x6200);
+    sub_08037A20(gBG1TilemapBuffer, 0x6200);
     gUnknown_03005918 = ((u8 *)gUnknown_03003F68)[0];
     gUnknown_030058F4 = ((u8 *)gUnknown_03003F68)[1];
     sub_08013AFC();
 }
 
-/* The third user of sub_08086DB4's address expression: unpack a blob into the
- * tile block BG1 currently points at. Decompress takes the destination second,
- * so the address arithmetic lands in r1 here rather than r0. */
+/* The third user of WarRoomScroll_08086DB5's address expression: unpack a
+ * blob into the tile block BG1 currently points at. Decompress takes the
+ * destination second, so the address arithmetic lands in r1 here rather than
+ * r0. */
 void sub_08086E2C(void)
 {
     Decompress(gUnknown_0823FD7C,
                (void *)(0x06004000 + gUnknown_03001FE8.bits.chr_block * 0x4000));
 }
+
+asm(".global sub_08086D98\n.thumb_set sub_08086D98, WarRoomScroll_08086D99\n"
+    ".global sub_08086DB4\n.thumb_set sub_08086DB4, WarRoomScroll_08086DB5\n"
+    ".global sub_08086DD4\n.thumb_set sub_08086DD4, WarRoomScroll_08086DD5\n"
+    ".global sub_08086DF4\n.thumb_set sub_08086DF4, WarRoomScroll_08086DF5\n");

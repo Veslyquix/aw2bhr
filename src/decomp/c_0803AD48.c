@@ -47,40 +47,40 @@ void sub_0803AD48(struct Unk0803AD48 *p)
         sub_0802BD54(0x68, i * 8 + 8, p->unk20[i]);
     }
     sub_080119A0(0, p->unk1e * 8 + 8, gUnknown_08091064);
-    if (gpKeySt->held & 1) {
+    if (gpKeySt->pressed & 1) {
         p->unk08 = 0;
         return;
     }
-    if (gpKeySt->held & 2) {
+    if (gpKeySt->pressed & 2) {
         gUnknown_03002F1C = 1;
         p->unk08 = 0;
         return;
     }
-    if (gpKeySt->unk02 & 0x40) {
+    if (gpKeySt->repeated & DPAD_UP) {
         if (p->unk1e != 0)
             p->unk1e--;
     }
-    if (gpKeySt->unk02 & 0x80) {
+    if (gpKeySt->repeated & DPAD_DOWN) {
         if (p->unk1e <= 6)
             p->unk1e++;
     }
-    if (gpKeySt->held & 0x100) {
+    if (gpKeySt->pressed & R_BUTTON) {
         for (i = 0; i <= 8; i++)
             p->unk20[i] = gUnknown_08091038[i];
     }
-    if (gpKeySt->held & 0x200) {
+    if (gpKeySt->pressed & L_BUTTON) {
         for (i = 0; i <= 8; i++)
             p->unk20[i] = 0;
         sub_0803C670();
         sub_0803BA1C();
     }
-    if (gpKeySt->unk02 & 0x10) {
+    if (gpKeySt->repeated & DPAD_RIGHT) {
         if (gUnknown_08091038[p->unk1e] - gUnknown_0809104A[p->unk1e] < p->unk20[p->unk1e])
             p->unk20[p->unk1e] = gUnknown_08091038[p->unk1e];
         else
             p->unk20[p->unk1e] += gUnknown_0809104A[p->unk1e];
     }
-    if (gpKeySt->unk02 & 0x20) {
+    if (gpKeySt->repeated & DPAD_LEFT) {
         if (gUnknown_0809104A[p->unk1e] > p->unk20[p->unk1e])
             p->unk20[p->unk1e] = 0;
         else

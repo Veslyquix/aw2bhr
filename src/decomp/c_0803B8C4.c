@@ -11,6 +11,65 @@
 
 void sub_0803B8C4(void)
 {
-    gUnknown_03003FC0.unk01 = 3;
-    Proc_Start(gUnknown_0849ECE0, PROC_TREE_3);
+    gPlaySt.gameMode = 3;
+    Proc_Start(ProcScr_Versus, PROC_TREE_3);
 }
+
+extern void sub_0803BDBC(void);
+extern void sub_0803BE60(void);
+extern u8 GetMainMenuLock(void);
+extern void sub_0803BEF8(void);
+extern void sub_08043D5C(void);
+extern void sub_0803BFA4(void);
+extern void sub_08026290(void);
+extern void sub_080670A0(void);
+extern int sub_080670D8(void);
+extern void sub_0803C1D4(void);
+extern void sub_0803BF98(void);
+extern void sub_08037F70(void);
+extern void sub_080364F4(void);
+
+#define Versus_0803BDBD sub_0803BDBC
+#define Versus_0803BE61 sub_0803BE60
+#define Versus_0803BEF9 sub_0803BEF8
+#define Versus_08043D5D sub_08043D5C
+#define Versus_0803BFA5 sub_0803BFA4
+#define Versus_08026291 sub_08026290
+#define Versus_080670A1 sub_080670A0
+#define Versus_WHILE_080670D9 sub_080670D8
+#define Versus_0803C1D5 sub_0803C1D4
+#define Versus_0803BF99 sub_0803BF98
+#define Versus_08037F71 sub_08037F70
+#define Versus_080364F5 sub_080364F4
+
+struct ProcCmd CONST_DATA ProcScr_Versus[] =
+{
+    PROC_1D(5),
+    PROC_CALL(Versus_0803BDBD),
+    PROC_GOTO_SCR((void *)0x0849ECF8),
+    PROC_CALL(Versus_0803BE61),
+    PROC_START_CHILD_BLOCKING((void *)0x08616C54),
+    PROC_GOTO_IF_YES(GetMainMenuLock, 0),
+    PROC_GOTO_SCR((void *)0x0849E7F8),
+PROC_LABEL(0),
+    PROC_GOTO_SCR((void *)0x0849ED30),
+    PROC_END,
+    PROC_CALL(Versus_0803BEF9),
+    PROC_CALL(Versus_08043D5D),
+    PROC_CALL(Versus_0803BFA5),
+    PROC_GOTO_SCR((void *)0x0849ED50),
+    PROC_CALL(Versus_08026291),
+    PROC_CALL(Versus_080670A1),
+    PROC_WHILE(Versus_WHILE_080670D9),
+    PROC_GOTO_IF_YES(GetMainMenuLock, 0),
+    PROC_GOTO_SCR((void *)0x0849ECF8),
+PROC_LABEL(0),
+    PROC_CALL(Versus_0803C1D5),
+    PROC_GOTO_SCR((void *)0x0849ED90),
+    PROC_CALL(Versus_0803BF99),
+    PROC_CALL(Versus_08037F71),
+    PROC_CALL(Versus_080364F5),
+    PROC_END,
+};
+
+asm(".global gUnknown_0849ECE0\n.set gUnknown_0849ECE0, ProcScr_Versus\n");

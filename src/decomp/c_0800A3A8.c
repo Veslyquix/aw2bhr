@@ -22,7 +22,7 @@ void sub_0800A3A8(int x, int y)
 
     if (v > 0)
     {
-        sub_080011F4(x, y, 2);
-        sub_08001158(x, y, v);
+        SetTerrainAt(x, y, 2);
+        MakeTileSimple(x, y, v);
     }
 }

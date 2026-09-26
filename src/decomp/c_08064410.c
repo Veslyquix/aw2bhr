@@ -27,7 +27,7 @@
  * (both measured, wave 34). */
 void sub_08064410(void)
 {
-    if (gpKeySt->unk00 & 0x200)
+    if (gpKeySt->held & L_BUTTON)
     {
         struct KeySt *dst;
 
@@ -35,7 +35,7 @@ void sub_08064410(void)
         dst[1] = *gpKeySt;
     }
 
-    if (gpKeySt->unk00 & 0x100)
+    if (gpKeySt->held & R_BUTTON)
     {
         struct KeySt *dst;
 
@@ -43,7 +43,7 @@ void sub_08064410(void)
         dst[2] = *gpKeySt;
     }
 
-    if ((gpKeySt->unk00 & 0x300) == 0)
+    if ((gpKeySt->held & (R_BUTTON | L_BUTTON)) == 0)
     {
         struct KeySt *dst;
 
@@ -54,15 +54,15 @@ void sub_08064410(void)
 
 void sub_08064474(int a1, int a2)
 {
-    if (gUnknown_030005FC == gUnknown_03004008 - 1)
+    if (gUnknown_030005FC == gGameClock - 1)
     {
         a1 = (gUnknown_03000600 + a1) / 2;
         a2 = (gUnknown_03000602 + a2) / 2;
     }
 
-    sub_0801F34C(0x43, a1 & 0x1ff, a2 & 0xff, 0, 0);
+    DrawOamObject(0x43, a1 & 0x1ff, a2 & 0xff, 0, 0);
 
-    gUnknown_030005FC = gUnknown_03004008;
+    gUnknown_030005FC = gGameClock;
     gUnknown_03000600 = a1;
     gUnknown_03000602 = a2 + 1;
 }

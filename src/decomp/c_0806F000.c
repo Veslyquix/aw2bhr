@@ -29,8 +29,8 @@ void sub_0806F000(int a1, int a2)
         if ((a1 & 1) == 0)
             v = 0x10;
 
-        sub_08012BC8(gUnknown_08499578, v, 0x10, 0x10, 2, 0);
-        sub_08014668(v, 0x10, gUnknown_08499578, gUnknown_08582764[a1].unk00, 0x3000, a2);
+        sub_08012BC8(gBG0TilemapBuffer, v, 0x10, 0x10, 2, 0);
+        sub_08014668(v, 0x10, gBG0TilemapBuffer, gUnknown_08582764[a1].unk00, 0x3000, a2);
         sub_08013AEC();
     }
 }

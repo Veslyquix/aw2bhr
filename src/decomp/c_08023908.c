@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -21,158 +22,158 @@
  * flag and output pseudos to retain the ROM's reload destinations.
  *
  * The `.rodata` relocation at +0x13c is the expected private force-address
- * word for gUnknown_08499590 (original symbol gUnknown_08090A18). */
+ * word for gMap (original symbol gUnknown_08090A18). */
 
 void sub_08023908(int a1)
 {
     {
-        register u8 *map0 asm("r3");
+        register struct Map *map0 asm("r3");
         register u16 flag0 asm("r4");
 
-        map0 = gUnknown_08499590;
-        flag0 = *(u16 *)(map0 + 0x10);
+        map0 = gMap;
+        flag0 = map0->unk10;
         if ((flag0 & 3) == 0)
         {
             u16 d;
 
-            d = gUnknown_030033E4.unk00 - ((s16)*(u16 *)(map0 + 4) >> 4);
+            d = gUnknown_030033E4.unk00 - (map0->scrollX >> 4);
             if (d <= 1)
             {
                 register u16 out0 asm("r0");
                 out0 = flag0;
                 out0 |= 2;
-                *(u16 *)(map0 + 0x10) = out0;
+                map0->unk10 = out0;
             }
             if (d > 0xc)
             {
-                register u8 *map2 asm("r2");
+                register struct Map *map2 asm("r2");
                 register u16 flag2 asm("r1");
                 register u16 out2 asm("r0");
-                map2 = gUnknown_08499590;
-                flag2 = *(u16 *)(map2 + 0x10);
+                map2 = gMap;
+                flag2 = map2->unk10;
                 out2 = 1;
                 out2 |= flag2;
-                *(u16 *)(map2 + 0x10) = out2;
+                map2->unk10 = out2;
             }
         }
     }
 
     {
-        register u8 *map1 asm("r3");
+        register struct Map *map1 asm("r3");
         register u16 flag1 asm("r4");
 
-        map1 = gUnknown_08499590;
-        flag1 = *(u16 *)(map1 + 0x10);
+        map1 = gMap;
+        flag1 = map1->unk10;
         if ((flag1 & 0xc) == 0)
         {
             u16 d;
 
-            d = gUnknown_030033E4.unk02 - ((s16)*(u16 *)(map1 + 6) >> 4);
+            d = gUnknown_030033E4.unk02 - (map1->scrollY >> 4);
             if (d <= 1)
             {
                 register u16 out1 asm("r0");
                 out1 = flag1;
                 out1 |= 4;
-                *(u16 *)(map1 + 0x10) = out1;
+                map1->unk10 = out1;
             }
             if (d > 7)
             {
-                register u8 *map2 asm("r2");
+                register struct Map *map2 asm("r2");
                 register u16 flag2 asm("r1");
                 register u16 out2 asm("r0");
-                map2 = gUnknown_08499590;
-                flag2 = *(u16 *)(map2 + 0x10);
+                map2 = gMap;
+                flag2 = map2->unk10;
                 out2 = 8;
                 out2 |= flag2;
-                *(u16 *)(map2 + 0x10) = out2;
+                map2->unk10 = out2;
             }
         }
     }
 
     {
-        u8 *map;
+        struct Map *map;
         register u16 f asm("r4");
         register u16 mask asm("r5");
         register u16 out asm("r0");
 
-        map = gUnknown_08499590;
-        f = *(u16 *)(map + 0x10);
+        map = gMap;
+        f = map->unk10;
         mask = 1;
         asm("" : "+r" (mask));
         if ((f & 1) != 0)
         {
-            if (*(u16 *)map - ((s16)*(u16 *)(map + 4) >> 4) == 0xf
-             || ((*(u16 *)(map + 4) += a1) & 0xf) == 0)
+            if (map->width - (map->scrollX >> 4) == 0xf
+             || ((map->scrollX += a1) & 0xf) == 0)
                 {
                     out = f;
                     out ^= mask;
-                    *(u16 *)(map + 0x10) = out;
+                    map->unk10 = out;
                 }
         }
     }
 
     {
-        u8 *map;
+        struct Map *map;
         register u16 f asm("r3");
         register u16 mask asm("r4");
         register u16 out asm("r0");
 
-        map = gUnknown_08499590;
-        f = *(u16 *)(map + 0x10);
+        map = gMap;
+        f = map->unk10;
         mask = 2;
         asm("" : "+r" (mask));
         if ((f & 2) != 0)
         {
-            if (*(s16 *)(map + 4) == 0
-             || ((*(u16 *)(map + 4) -= a1) & 0xf) == 0)
+            if (map->scrollX == 0
+             || ((map->scrollX -= a1) & 0xf) == 0)
                 {
                     out = f;
                     out ^= mask;
-                    *(u16 *)(map + 0x10) = out;
+                    map->unk10 = out;
                 }
         }
     }
 
     {
-        u8 *map;
+        struct Map *map;
         register u16 f asm("r3");
         register u16 mask asm("r4");
         register u16 out asm("r0");
 
-        map = gUnknown_08499590;
-        f = *(u16 *)(map + 0x10);
+        map = gMap;
+        f = map->unk10;
         mask = 4;
         asm("" : "+r" (mask));
         if ((f & 4) != 0)
         {
-            if (*(s16 *)(map + 6) == 0
-             || ((*(u16 *)(map + 6) -= a1) & 0xf) == 0)
+            if (map->scrollY == 0
+             || ((map->scrollY -= a1) & 0xf) == 0)
                 {
                     out = f;
                     out ^= mask;
-                    *(u16 *)(map + 0x10) = out;
+                    map->unk10 = out;
                 }
         }
     }
 
     {
-        u8 *map;
+        struct Map *map;
         register u16 f asm("r4");
         register u16 mask asm("r5");
         register u16 out asm("r0");
 
-        map = gUnknown_08499590;
-        f = *(u16 *)(map + 0x10);
+        map = gMap;
+        f = map->unk10;
         mask = 8;
         asm("" : "+r" (mask));
         if ((f & 8) != 0)
         {
-            if (*(u16 *)(map + 2) - ((s16)*(u16 *)(map + 6) >> 4) == 0xa
-             || ((*(u16 *)(map + 6) += a1) & 0xf) == 0)
+            if (map->height - (map->scrollY >> 4) == 0xa
+             || ((map->scrollY += a1) & 0xf) == 0)
                 {
                     out = f;
                     out ^= mask;
-                    *(u16 *)(map + 0x10) = out;
+                    map->unk10 = out;
                 }
         }
     }

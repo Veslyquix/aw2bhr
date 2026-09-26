@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -35,21 +36,14 @@
  * over gUnknown_08499590 (the wave-34 W34-F rule) -- `(map + K) + idx` only
  * survives as a COMPONENT_REF. gUnknown_03003100 is read `.pos` (the UNSIGNED
  * view of the coordinate pair): both reads are `ldrh`. */
-struct Unk42864Map
-{
-    /* 0x0000 */ u8 filler_0000[0x12];
-    /* 0x0012 */ u8 unit[0x4168];
-    /* 0x417a */ u16 rowOffset[1];
-};
-
 void sub_08042864(void)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     int m;
 
-    e = &gUnknown_08499594[
-        ((struct Unk42864Map *)gUnknown_08499590)->unit[
-            ((struct Unk42864Map *)gUnknown_08499590)
+    e = &gUnits[
+        gMap->unit[
+            gMap
                 ->rowOffset[gUnknown_03003100.pos.unk02]
             + gUnknown_03003100.pos.unk00]];
 
@@ -61,7 +55,7 @@ void sub_08042864(void)
         e->unk07 = gUnknown_03003F38;
 
     gUnknown_030040D8->unk01 |= 8;
-    e->unk01 |= 0x10;
+    e->flags |= 0x10;
 
     m = gUnknown_030040D8->unk00;
     switch (m)

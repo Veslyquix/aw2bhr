@@ -4,13 +4,13 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803861C.
- * sub_0803861C @ 0x0803861C
+ * IsPlayer1TeamAlive @ 0x0803861C
  */
 
 /* MATCHED byte-for-byte (wave 43, W43-E). relocs: match.
  *
- * `r1 + 0x66` is not a member of the outer object: gUnknown_08499598's record
- * stride is 0x3c and 0x3c + 0x2a = 0x66, so it is gUnknown_08499598[1].unk2a,
+ * `r1 + 0x66` is not a member of the outer object: gPlayers's record
+ * stride is 0x3c and 0x3c + 0x2a = 0x66, so it is gPlayers[1].unk2a,
  * the same member the loop reads at index i. The function counts the armies
  * whose unk2a agrees with army 1's.
  *
@@ -28,7 +28,7 @@
  * by side; see docs/agbcc-codegen.md.
  */
 
-bool8 sub_0803861C(void)
+bool8 IsPlayer1TeamAlive(void)
 {
     u8 count;
     u8 i;
@@ -36,10 +36,12 @@ bool8 sub_0803861C(void)
     count = 0;
     for (i = 1; i <= 4; i++)
     {
-        if (sub_080266DC(i) && gUnknown_08499598[1].unk2a == gUnknown_08499598[i].unk2a)
+        if (IsPlayerAliveAndActive(i) && gPlayers[1].team == gPlayers[i].team)
             count++;
     }
     if (count != 0)
         return 1;
     return 0;
 }
+
+asm(".global sub_0803861C\n.thumb_set sub_0803861C, IsPlayer1TeamAlive\n");

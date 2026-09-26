@@ -23,9 +23,9 @@
    "detail": "5 clusters, sizes [14, 11, 8, 6, 1], 40/41 clustered"
   },
   {
-   "check": "Proc_Find predicate family -> 29 members",
+   "check": "Proc_Find predicate family -> 30 members",
    "pass": true,
-   "detail": "29 members, 0x0801C7B4-0x0808AA88"
+   "detail": "30 members, 0x0801C7B4-0x0808AA88"
   },
   {
    "check": "44-byte bitfield family not merged by size",
@@ -34,16 +34,16 @@
   }
  ],
  "counts": {
-  "families": 98,
-  "members": 698,
+  "families": 102,
+  "members": 724,
   "unmatched_members": 0,
   "entirely_unmatched_families": 3,
-  "fuzzy_clusters": 20
+  "fuzzy_clusters": 22
  },
  "batching_plan": {
   "cold": [
    {
-    "id": "F039",
+    "id": "F041",
     "n_members": 5,
     "n_unmatched": 0,
     "n_insns": 9,
@@ -68,7 +68,7 @@
     ]
    },
    {
-    "id": "F096",
+    "id": "F100",
     "n_members": 3,
     "n_unmatched": 0,
     "n_insns": 8,
@@ -92,7 +92,7 @@
     ]
    },
    {
-    "id": "F097",
+    "id": "F101",
     "n_members": 3,
     "n_unmatched": 0,
     "n_insns": 9,
@@ -130,7 +130,7 @@
    ],
    "representative": "sub_08004B2C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004A60.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -807,16 +807,16 @@
   },
   {
    "id": "F001",
-   "n_members": 50,
+   "n_members": 52,
    "n_unmatched": 0,
-   "n_matched": 50,
+   "n_matched": 52,
    "n_insns": 4,
    "sizes": [
     12
    ],
    "representative": "sub_08003960",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08003960.c",
+   "exemplar_src": "src/design-editor.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -841,6 +841,8 @@
       "sub_0801A168",
       "sub_0801A168",
       "Proc_End",
+      "Proc_End",
+      "Proc_Break",
       "sub_080258CC",
       "sub_08024584",
       "sub_080267AC",
@@ -879,7 +881,7 @@
       "sub_0802481C",
       "sub_0808A6A0"
      ],
-     "distinct": 47
+     "distinct": 48
     }
    ],
    "members": [
@@ -970,6 +972,20 @@
     {
      "name": "sub_0801C798",
      "addr": "0x0801C798",
+     "size": 12,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "EndProc",
+     "addr": "0x0801CD08",
+     "size": 12,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "BreakProc",
+     "addr": "0x0801CD24",
      "size": 12,
      "src": "code.s",
      "status": "matched"
@@ -1237,16 +1253,16 @@
   },
   {
    "id": "F002",
-   "n_members": 50,
+   "n_members": 51,
    "n_unmatched": 0,
-   "n_matched": 50,
+   "n_matched": 51,
    "n_insns": 6,
    "sizes": [
     20
    ],
    "representative": "sub_080039BC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080039BC.c",
+   "exemplar_src": "src/design-editor.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -1296,6 +1312,7 @@
       "gUnknown_084C3824",
       "gUnknown_084C3D6C",
       "gUnknown_08581AC8",
+      "ProcScr_MainMenu",
       "gUnknown_08613E08",
       "gUnknown_0861418C",
       "gUnknown_08614894",
@@ -1354,6 +1371,7 @@
       "#1",
       "#3",
       "#3",
+      "#3",
       "#0",
       "#3",
       "#3",
@@ -1409,6 +1427,7 @@
       "Proc_Start",
       "sub_080152EC",
       "sub_080152EC",
+      "Proc_Start",
       "Proc_Start",
       "Proc_Start",
       "Proc_Start",
@@ -1677,6 +1696,13 @@
     {
      "name": "sub_0806C874",
      "addr": "0x0806C874",
+     "size": 20,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "Title_StartMainMenu",
+     "addr": "0x0806CA84",
      "size": 20,
      "src": "code-0801D390.s",
      "status": "matched"
@@ -2127,9 +2153,9 @@
   },
   {
    "id": "F004",
-   "n_members": 29,
+   "n_members": 30,
    "n_unmatched": 0,
-   "n_matched": 29,
+   "n_matched": 30,
    "n_insns": 8,
    "sizes": [
     24
@@ -2164,6 +2190,7 @@
       "gUnknown_08581500",
       "gUnknown_0858168C",
       "gUnknown_08581AC8",
+      "ProcScr_TitleScreen",
       "gUnknown_086141B4",
       "gUnknown_086141DC",
       "gUnknown_086147FC",
@@ -2182,7 +2209,7 @@
       "gUnknown_08616DFC",
       "gUnknown_08616FD4"
      ],
-     "distinct": 29
+     "distinct": 30
     }
    ],
    "members": [
@@ -2266,6 +2293,13 @@
     {
      "name": "sub_0806C888",
      "addr": "0x0806C888",
+     "size": 24,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_0806CC34",
+     "addr": "0x0806CC34",
      "size": 24,
      "src": "code-0801D390.s",
      "status": "matched"
@@ -2402,7 +2436,7 @@
    ],
    "representative": "sub_0800484C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0800484C.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -3282,7 +3316,7 @@
    ],
    "representative": "sub_080252EC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080252EC.c",
+   "exemplar_src": "src/battle.c",
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -3446,7 +3480,7 @@
    ],
    "representative": "sub_08004958",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004958.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -3853,7 +3887,7 @@
    ],
    "representative": "sub_08002EB4",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08002EB4.c",
+   "exemplar_src": "src/design.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -4290,6 +4324,116 @@
    "n_members": 8,
    "n_unmatched": 0,
    "n_matched": 8,
+   "n_insns": 5,
+   "sizes": [
+    16
+   ],
+   "representative": "sub_0801B6EC",
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0801B6EC.c",
+   "shape": [
+    "push {lr}",
+    "ldr r1,L",
+    "bl S",
+    "pop {r0}",
+    "bx r0"
+   ],
+   "varies": [
+    {
+     "index": 1,
+     "insn": "ldr r1,L",
+     "values": [
+      "gUnknown_0300619D",
+      "gUnknown_03006511",
+      "EndProc",
+      "BreakProc",
+      "gUnknown_08580C00",
+      "gUnknown_08580C20",
+      "gUnknown_08580B18",
+      "gUnknown_08580A68"
+     ],
+     "distinct": 8
+    },
+    {
+     "index": 2,
+     "insn": "bl S",
+     "values": [
+      "_call_via_r1",
+      "_call_via_r1",
+      "Proc_ForEach",
+      "Proc_ForEach",
+      "sub_08063A30",
+      "sub_08063A30",
+      "sub_08063A30",
+      "sub_08063A30"
+     ],
+     "distinct": 3
+    }
+   ],
+   "members": [
+    {
+     "name": "sub_0801B6EC",
+     "addr": "0x0801B6EC",
+     "size": 16,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_0801B6FC",
+     "addr": "0x0801B6FC",
+     "size": 16,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "Proc_EndEach",
+     "addr": "0x0801CD14",
+     "size": 16,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "Proc_BreakEach",
+     "addr": "0x0801CD30",
+     "size": 16,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08065F68",
+     "addr": "0x08065F68",
+     "size": 16,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08065F78",
+     "addr": "0x08065F78",
+     "size": 16,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08066200",
+     "addr": "0x08066200",
+     "size": 16,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_08066210",
+     "addr": "0x08066210",
+     "size": 16,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    }
+   ]
+  },
+  {
+   "id": "F019",
+   "n_members": 8,
+   "n_unmatched": 0,
+   "n_matched": 8,
    "n_insns": 8,
    "sizes": [
     24
@@ -4414,7 +4558,102 @@
    ]
   },
   {
-   "id": "F019",
+   "id": "F020",
+   "n_members": 7,
+   "n_unmatched": 0,
+   "n_matched": 7,
+   "n_insns": 13,
+   "sizes": [
+    28
+   ],
+   "representative": "ProcCmd_29_0801CF90",
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/proc.c",
+   "shape": [
+    "push {r4,lr}",
+    "adds r4,r0,#",
+    "ldr r0,[r4,#]",
+    "movs r1,#",
+    "ldrsh r0,[r0,r1]",
+    "bl S",
+    "ldr r0,[r4,#]",
+    "adds r0,#",
+    "str r0,[r4,#]",
+    "movs r0,#",
+    "pop {r4}",
+    "pop {r1}",
+    "bx r1"
+   ],
+   "varies": [
+    {
+     "index": 5,
+     "insn": "bl S",
+     "values": [
+      "sub_0803B5A4",
+      "sub_0803B524",
+      "sub_0803B4DC",
+      "sub_08011550",
+      "sub_0801156C",
+      "sub_08011588",
+      "sub_080115B4"
+     ],
+     "distinct": 7
+    }
+   ],
+   "members": [
+    {
+     "name": "ProcCmd_29_0801CF90",
+     "addr": "0x0801CF90",
+     "size": 28,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_1B_0801D0AC",
+     "addr": "0x0801D0AC",
+     "size": 28,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_1C_0801D0C8",
+     "addr": "0x0801D0C8",
+     "size": 28,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_1F_0801D124",
+     "addr": "0x0801D124",
+     "size": 28,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_20_0801D140",
+     "addr": "0x0801D140",
+     "size": 28,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_21_0801D15C",
+     "addr": "0x0801D15C",
+     "size": 28,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_22_0801D178",
+     "addr": "0x0801D178",
+     "size": 28,
+     "src": "code.s",
+     "status": "matched"
+    }
+   ]
+  },
+  {
+   "id": "F021",
    "n_members": 7,
    "n_unmatched": 0,
    "n_matched": 7,
@@ -4506,7 +4745,7 @@
    ]
   },
   {
-   "id": "F020",
+   "id": "F022",
    "n_members": 7,
    "n_unmatched": 0,
    "n_matched": 7,
@@ -4642,7 +4881,7 @@
    ]
   },
   {
-   "id": "F021",
+   "id": "F023",
    "n_members": 7,
    "n_unmatched": 0,
    "n_matched": 7,
@@ -4652,7 +4891,7 @@
    ],
    "representative": "sub_08042E64",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08042E2C.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r1,L",
@@ -4736,7 +4975,7 @@
    ]
   },
   {
-   "id": "F022",
+   "id": "F024",
    "n_members": 7,
    "n_unmatched": 0,
    "n_matched": 7,
@@ -4935,7 +5174,95 @@
    ]
   },
   {
-   "id": "F023",
+   "id": "F025",
+   "n_members": 6,
+   "n_unmatched": 0,
+   "n_matched": 6,
+   "n_insns": 14,
+   "sizes": [
+    32
+   ],
+   "representative": "ProcCmd_1D_0801D0E4",
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/proc.c",
+   "shape": [
+    "push {r4,lr}",
+    "adds r4,r0,#",
+    "ldr r0,[r4,#]",
+    "movs r1,#",
+    "ldrsh r0,[r0,r1]",
+    "adds r1,r4,#",
+    "bl S",
+    "ldr r0,[r4,#]",
+    "adds r0,#",
+    "str r0,[r4,#]",
+    "movs r0,#",
+    "pop {r4}",
+    "pop {r1}",
+    "bx r1"
+   ],
+   "varies": [
+    {
+     "index": 6,
+     "insn": "bl S",
+     "values": [
+      "sub_08013098",
+      "sub_080130B0",
+      "sub_080115E0",
+      "sub_080115F8",
+      "sub_08011610",
+      "sub_0801163C"
+     ],
+     "distinct": 6
+    }
+   ],
+   "members": [
+    {
+     "name": "ProcCmd_1D_0801D0E4",
+     "addr": "0x0801D0E4",
+     "size": 32,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_1E_0801D104",
+     "addr": "0x0801D104",
+     "size": 32,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_23_0801D194",
+     "addr": "0x0801D194",
+     "size": 32,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_24_0801D1B4",
+     "addr": "0x0801D1B4",
+     "size": 32,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_25_0801D1D4",
+     "addr": "0x0801D1D4",
+     "size": 32,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_26_0801D1F4",
+     "addr": "0x0801D1F4",
+     "size": 32,
+     "src": "code.s",
+     "status": "matched"
+    }
+   ]
+  },
+  {
+   "id": "F026",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5008,99 +5335,7 @@
    ]
   },
   {
-   "id": "F024",
-   "n_members": 6,
-   "n_unmatched": 0,
-   "n_matched": 6,
-   "n_insns": 5,
-   "sizes": [
-    16
-   ],
-   "representative": "sub_0801B6EC",
-   "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801B6EC.c",
-   "shape": [
-    "push {lr}",
-    "ldr r1,L",
-    "bl S",
-    "pop {r0}",
-    "bx r0"
-   ],
-   "varies": [
-    {
-     "index": 1,
-     "insn": "ldr r1,L",
-     "values": [
-      "gUnknown_0300619D",
-      "gUnknown_03006511",
-      "gUnknown_08580C00",
-      "gUnknown_08580C20",
-      "gUnknown_08580B18",
-      "gUnknown_08580A68"
-     ],
-     "distinct": 6
-    },
-    {
-     "index": 2,
-     "insn": "bl S",
-     "values": [
-      "_call_via_r1",
-      "_call_via_r1",
-      "sub_08063A30",
-      "sub_08063A30",
-      "sub_08063A30",
-      "sub_08063A30"
-     ],
-     "distinct": 2
-    }
-   ],
-   "members": [
-    {
-     "name": "sub_0801B6EC",
-     "addr": "0x0801B6EC",
-     "size": 16,
-     "src": "code.s",
-     "status": "matched"
-    },
-    {
-     "name": "sub_0801B6FC",
-     "addr": "0x0801B6FC",
-     "size": 16,
-     "src": "code.s",
-     "status": "matched"
-    },
-    {
-     "name": "sub_08065F68",
-     "addr": "0x08065F68",
-     "size": 16,
-     "src": "code-0801D390.s",
-     "status": "matched"
-    },
-    {
-     "name": "sub_08065F78",
-     "addr": "0x08065F78",
-     "size": 16,
-     "src": "code-0801D390.s",
-     "status": "matched"
-    },
-    {
-     "name": "sub_08066200",
-     "addr": "0x08066200",
-     "size": 16,
-     "src": "code-0801D390.s",
-     "status": "matched"
-    },
-    {
-     "name": "sub_08066210",
-     "addr": "0x08066210",
-     "size": 16,
-     "src": "code-0801D390.s",
-     "status": "matched"
-    }
-   ]
-  },
-  {
-   "id": "F025",
+   "id": "F027",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5110,7 +5345,7 @@
    ],
    "representative": "sub_0801C780",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801C780.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,[r0,#]",
@@ -5192,7 +5427,7 @@
    ]
   },
   {
-   "id": "F026",
+   "id": "F028",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5202,7 +5437,7 @@
    ],
    "representative": "sub_0802481C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802481C.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -5285,7 +5520,7 @@
    ]
   },
   {
-   "id": "F027",
+   "id": "F029",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5406,7 +5641,7 @@
    ]
   },
   {
-   "id": "F028",
+   "id": "F030",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5491,7 +5726,7 @@
    ]
   },
   {
-   "id": "F029",
+   "id": "F031",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5576,7 +5811,7 @@
    ]
   },
   {
-   "id": "F030",
+   "id": "F032",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5667,7 +5902,7 @@
    ]
   },
   {
-   "id": "F031",
+   "id": "F033",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5760,7 +5995,7 @@
    ]
   },
   {
-   "id": "F032",
+   "id": "F034",
    "n_members": 6,
    "n_unmatched": 0,
    "n_matched": 6,
@@ -5770,7 +6005,7 @@
    ],
    "representative": "sub_0803CA54",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803CA54.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "lsrs r2,r0,#",
@@ -5845,7 +6080,7 @@
    ]
   },
   {
-   "id": "F033",
+   "id": "F035",
    "n_members": 5,
    "n_unmatched": 0,
    "n_matched": 5,
@@ -5855,7 +6090,7 @@
    ],
    "representative": "sub_08004AA0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004A60.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -5919,7 +6154,7 @@
    ]
   },
   {
-   "id": "F034",
+   "id": "F036",
    "n_members": 5,
    "n_unmatched": 0,
    "n_matched": 5,
@@ -6030,7 +6265,7 @@
    ]
   },
   {
-   "id": "F035",
+   "id": "F037",
    "n_members": 5,
    "n_unmatched": 0,
    "n_matched": 5,
@@ -6127,7 +6362,7 @@
    ]
   },
   {
-   "id": "F036",
+   "id": "F038",
    "n_members": 5,
    "n_unmatched": 0,
    "n_matched": 5,
@@ -6184,7 +6419,7 @@
    ]
   },
   {
-   "id": "F037",
+   "id": "F039",
    "n_members": 5,
    "n_unmatched": 0,
    "n_matched": 5,
@@ -6254,7 +6489,7 @@
    ]
   },
   {
-   "id": "F038",
+   "id": "F040",
    "n_members": 5,
    "n_unmatched": 0,
    "n_matched": 5,
@@ -6264,7 +6499,7 @@
    ],
    "representative": "sub_08042E2C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08042E2C.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -6355,7 +6590,7 @@
    ]
   },
   {
-   "id": "F039",
+   "id": "F041",
    "n_members": 5,
    "n_unmatched": 0,
    "n_matched": 0,
@@ -6430,7 +6665,58 @@
    ]
   },
   {
-   "id": "F040",
+   "id": "F042",
+   "n_members": 4,
+   "n_unmatched": 0,
+   "n_matched": 4,
+   "n_insns": 5,
+   "sizes": [
+    12
+   ],
+   "representative": "ProcCmd_01_0801CD90",
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/proc.c",
+   "shape": [
+    "ldr r1,[r0,#]",
+    "adds r1,#",
+    "str r1,[r0,#]",
+    "movs r0,#",
+    "bx lr"
+   ],
+   "varies": [],
+   "members": [
+    {
+     "name": "ProcCmd_01_0801CD90",
+     "addr": "0x0801CD90",
+     "size": 12,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_Label",
+     "addr": "0x0801CEF8",
+     "size": 12,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_13_Nop",
+     "addr": "0x0801D000",
+     "size": 12,
+     "src": "code.s",
+     "status": "matched"
+    },
+    {
+     "name": "ProcCmd_15_Nop",
+     "addr": "0x0801D088",
+     "size": 12,
+     "src": "code.s",
+     "status": "matched"
+    }
+   ]
+  },
+  {
+   "id": "F043",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -6440,7 +6726,7 @@
    ],
    "representative": "sub_08013AEC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08013AD4.c",
+   "exemplar_src": "src/hardware.c",
    "shape": [
     "ldr r0,L",
     "ldrh r1,[r0]",
@@ -6494,7 +6780,7 @@
    ]
   },
   {
-   "id": "F041",
+   "id": "F044",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -6583,7 +6869,7 @@
    ]
   },
   {
-   "id": "F042",
+   "id": "F045",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -6669,7 +6955,7 @@
    ]
   },
   {
-   "id": "F043",
+   "id": "F046",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -6780,7 +7066,7 @@
    ]
   },
   {
-   "id": "F044",
+   "id": "F047",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -6856,7 +7142,7 @@
    ]
   },
   {
-   "id": "F045",
+   "id": "F048",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -6934,7 +7220,7 @@
    ]
   },
   {
-   "id": "F046",
+   "id": "F049",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7011,7 +7297,7 @@
    ]
   },
   {
-   "id": "F047",
+   "id": "F050",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7021,7 +7307,7 @@
    ],
    "representative": "sub_08034838",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08034838.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "adds r0,#",
@@ -7085,7 +7371,7 @@
    ]
   },
   {
-   "id": "F048",
+   "id": "F051",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7161,7 +7447,7 @@
    ]
   },
   {
-   "id": "F049",
+   "id": "F052",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7171,7 +7457,7 @@
    ],
    "representative": "sub_080430B0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080430B0.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "ldr r7,L",
@@ -7288,7 +7574,7 @@
    ]
   },
   {
-   "id": "F050",
+   "id": "F053",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7298,7 +7584,7 @@
    ],
    "representative": "sub_080457D0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080457A4.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -7357,7 +7643,7 @@
    ]
   },
   {
-   "id": "F051",
+   "id": "F054",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7442,7 +7728,7 @@
    ]
   },
   {
-   "id": "F052",
+   "id": "F055",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7526,7 +7812,7 @@
    ]
   },
   {
-   "id": "F053",
+   "id": "F056",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7593,7 +7879,7 @@
    ]
   },
   {
-   "id": "F054",
+   "id": "F057",
    "n_members": 4,
    "n_unmatched": 0,
    "n_matched": 4,
@@ -7682,7 +7968,7 @@
    ]
   },
   {
-   "id": "F055",
+   "id": "F058",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -7692,7 +7978,7 @@
    ],
    "representative": "sub_08004824",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004824.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -7759,7 +8045,7 @@
    ]
   },
   {
-   "id": "F056",
+   "id": "F059",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -7769,7 +8055,7 @@
    ],
    "representative": "sub_0800483C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0800483C.c",
+   "exemplar_src": "src/design-menus.c",
    "shape": [
     "push {lr}",
     "bl S",
@@ -7835,7 +8121,7 @@
    ]
   },
   {
-   "id": "F057",
+   "id": "F060",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -7921,7 +8207,7 @@
    ]
   },
   {
-   "id": "F058",
+   "id": "F061",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -7976,7 +8262,7 @@
    ]
   },
   {
-   "id": "F059",
+   "id": "F062",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8081,7 +8367,7 @@
    ]
   },
   {
-   "id": "F060",
+   "id": "F063",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8168,7 +8454,7 @@
    ]
   },
   {
-   "id": "F061",
+   "id": "F064",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8288,7 +8574,7 @@
    ]
   },
   {
-   "id": "F062",
+   "id": "F065",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8298,7 +8584,7 @@
    ],
    "representative": "sub_0801153C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801153C.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -8356,7 +8642,7 @@
    ]
   },
   {
-   "id": "F063",
+   "id": "F066",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8366,7 +8652,7 @@
    ],
    "representative": "sub_080116E8",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080116E8.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -8454,7 +8740,7 @@
    ]
   },
   {
-   "id": "F064",
+   "id": "F067",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8520,7 +8806,7 @@
    ]
   },
   {
-   "id": "F065",
+   "id": "F068",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8574,7 +8860,7 @@
    ]
   },
   {
-   "id": "F066",
+   "id": "F069",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8630,7 +8916,7 @@
    ]
   },
   {
-   "id": "F067",
+   "id": "F070",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8699,7 +8985,7 @@
    ]
   },
   {
-   "id": "F068",
+   "id": "F071",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8775,7 +9061,7 @@
    ]
   },
   {
-   "id": "F069",
+   "id": "F072",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8864,7 +9150,7 @@
    ]
   },
   {
-   "id": "F070",
+   "id": "F073",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8934,7 +9220,7 @@
    ]
   },
   {
-   "id": "F071",
+   "id": "F074",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -8992,7 +9278,7 @@
    ]
   },
   {
-   "id": "F072",
+   "id": "F075",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9079,7 +9365,7 @@
    ]
   },
   {
-   "id": "F073",
+   "id": "F076",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9138,7 +9424,7 @@
    ]
   },
   {
-   "id": "F074",
+   "id": "F077",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9202,7 +9488,7 @@
    ]
   },
   {
-   "id": "F075",
+   "id": "F078",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9281,7 +9567,7 @@
    ]
   },
   {
-   "id": "F076",
+   "id": "F079",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9370,7 +9656,7 @@
    ]
   },
   {
-   "id": "F077",
+   "id": "F080",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9447,7 +9733,7 @@
    ]
   },
   {
-   "id": "F078",
+   "id": "F081",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9535,7 +9821,7 @@
    ]
   },
   {
-   "id": "F079",
+   "id": "F082",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9601,7 +9887,7 @@
    ]
   },
   {
-   "id": "F080",
+   "id": "F083",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9693,7 +9979,7 @@
    ]
   },
   {
-   "id": "F081",
+   "id": "F084",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9754,7 +10040,7 @@
    ]
   },
   {
-   "id": "F082",
+   "id": "F085",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9814,7 +10100,7 @@
    ]
   },
   {
-   "id": "F083",
+   "id": "F086",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9872,7 +10158,7 @@
    ]
   },
   {
-   "id": "F084",
+   "id": "F087",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9927,7 +10213,7 @@
    ]
   },
   {
-   "id": "F085",
+   "id": "F088",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -9937,7 +10223,7 @@
    ],
    "representative": "sub_0803D960",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803D960.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "adds r1,r0,#",
@@ -9996,7 +10282,73 @@
    ]
   },
   {
-   "id": "F086",
+   "id": "F089",
+   "n_members": 3,
+   "n_unmatched": 0,
+   "n_matched": 3,
+   "n_insns": 6,
+   "sizes": [
+    24
+   ],
+   "representative": "sub_0803F374",
+   "exemplar_is_matched": true,
+   "exemplar_src": "src/decomp/c_0803F374.c",
+   "shape": [
+    "push {lr}",
+    "ldr r0,L",
+    "ldr r1,L",
+    "bl S",
+    "pop {r0}",
+    "bx r0"
+   ],
+   "varies": [
+    {
+     "index": 1,
+     "insn": "ldr r0,L",
+     "values": [
+      "gUnknown_081169D0",
+      "Img_TitleScreenSprites",
+      "gUnknown_0823D980"
+     ],
+     "distinct": 3
+    },
+    {
+     "index": 2,
+     "insn": "ldr r1,L",
+     "values": [
+      "0x06013940",
+      "0x06010000",
+      "0x06015300"
+     ],
+     "distinct": 3
+    }
+   ],
+   "members": [
+    {
+     "name": "sub_0803F374",
+     "addr": "0x0803F374",
+     "size": 24,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_0806CC64",
+     "addr": "0x0806CC64",
+     "size": 24,
+     "src": "code-0801D390.s",
+     "status": "matched"
+    },
+    {
+     "name": "sub_080845E8",
+     "addr": "0x080845E8",
+     "size": 24,
+     "src": "code-0806CFC8.s",
+     "status": "matched"
+    }
+   ]
+  },
+  {
+   "id": "F090",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10052,7 +10404,7 @@
    ]
   },
   {
-   "id": "F087",
+   "id": "F091",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10132,7 +10484,7 @@
    ]
   },
   {
-   "id": "F088",
+   "id": "F092",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10274,7 +10626,7 @@
    ]
   },
   {
-   "id": "F089",
+   "id": "F093",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10426,7 +10778,7 @@
    ]
   },
   {
-   "id": "F090",
+   "id": "F094",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10472,7 +10824,7 @@
    ]
   },
   {
-   "id": "F091",
+   "id": "F095",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10518,7 +10870,7 @@
    ]
   },
   {
-   "id": "F092",
+   "id": "F096",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10618,7 +10970,7 @@
    ]
   },
   {
-   "id": "F093",
+   "id": "F097",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10699,7 +11051,7 @@
    ]
   },
   {
-   "id": "F094",
+   "id": "F098",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10762,7 +11114,7 @@
    ]
   },
   {
-   "id": "F095",
+   "id": "F099",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 3,
@@ -10840,7 +11192,7 @@
    ]
   },
   {
-   "id": "F096",
+   "id": "F100",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 0,
@@ -10908,7 +11260,7 @@
    ]
   },
   {
-   "id": "F097",
+   "id": "F101",
    "n_members": 3,
    "n_unmatched": 0,
    "n_matched": 0,
@@ -10980,7 +11332,7 @@
  "fuzzy_clusters": [
   {
    "id": "Z000",
-   "anchor": "F067",
+   "anchor": "F070",
    "n_members": 15,
    "n_exact": 3,
    "n_added": 12,
@@ -11010,7 +11362,70 @@
   },
   {
    "id": "Z001",
-   "anchor": "F050",
+   "anchor": "F025",
+   "n_members": 17,
+   "n_exact": 6,
+   "n_added": 11,
+   "n_insns": 14,
+   "sizes": [
+    28,
+    32
+   ],
+   "representative": "ProcCmd_1D_0801D0E4",
+   "members": [
+    "ProcCmd_SetEndFunc@0x0801CE24",
+    "ProcCmd_SpawnChild@0x0801CE40",
+    "ProcCmd_SpawnBlockingChild@0x0801CE5C",
+    "ProcCmd_SpawnBugged@0x0801CE78",
+    "ProcCmd_29_0801CF90@0x0801CF90",
+    "ProcCmd_1B_0801D0AC@0x0801D0AC",
+    "ProcCmd_1C_0801D0C8@0x0801D0C8",
+    "ProcCmd_1D_0801D0E4@0x0801D0E4",
+    "ProcCmd_1E_0801D104@0x0801D104",
+    "ProcCmd_1F_0801D124@0x0801D124",
+    "ProcCmd_20_0801D140@0x0801D140",
+    "ProcCmd_21_0801D15C@0x0801D15C",
+    "ProcCmd_22_0801D178@0x0801D178",
+    "ProcCmd_23_0801D194@0x0801D194",
+    "ProcCmd_24_0801D1B4@0x0801D1B4",
+    "ProcCmd_25_0801D1D4@0x0801D1D4",
+    "ProcCmd_26_0801D1F4@0x0801D1F4"
+   ]
+  },
+  {
+   "id": "Z002",
+   "anchor": "F020",
+   "n_members": 16,
+   "n_exact": 7,
+   "n_added": 9,
+   "n_insns": 13,
+   "sizes": [
+    28,
+    32
+   ],
+   "representative": "ProcCmd_29_0801CF90",
+   "members": [
+    "ProcCmd_SpawnBugged@0x0801CE78",
+    "ProcCmd_EndEach@0x0801CEC0",
+    "ProcCmd_BreakEach@0x0801CEDC",
+    "ProcCmd_29_0801CF90@0x0801CF90",
+    "ProcCmd_1B_0801D0AC@0x0801D0AC",
+    "ProcCmd_1C_0801D0C8@0x0801D0C8",
+    "ProcCmd_1D_0801D0E4@0x0801D0E4",
+    "ProcCmd_1E_0801D104@0x0801D104",
+    "ProcCmd_1F_0801D124@0x0801D124",
+    "ProcCmd_20_0801D140@0x0801D140",
+    "ProcCmd_21_0801D15C@0x0801D15C",
+    "ProcCmd_22_0801D178@0x0801D178",
+    "ProcCmd_23_0801D194@0x0801D194",
+    "ProcCmd_24_0801D1B4@0x0801D1B4",
+    "ProcCmd_25_0801D1D4@0x0801D1D4",
+    "ProcCmd_26_0801D1F4@0x0801D1F4"
+   ]
+  },
+  {
+   "id": "Z003",
+   "anchor": "F053",
    "n_members": 13,
    "n_exact": 4,
    "n_added": 9,
@@ -11036,8 +11451,8 @@
    ]
   },
   {
-   "id": "Z002",
-   "anchor": "F081",
+   "id": "Z004",
+   "anchor": "F084",
    "n_members": 11,
    "n_exact": 3,
    "n_added": 8,
@@ -11061,7 +11476,7 @@
    ]
   },
   {
-   "id": "Z003",
+   "id": "Z005",
    "anchor": "F016",
    "n_members": 15,
    "n_exact": 8,
@@ -11091,8 +11506,8 @@
    ]
   },
   {
-   "id": "Z004",
-   "anchor": "F030",
+   "id": "Z006",
+   "anchor": "F032",
    "n_members": 12,
    "n_exact": 6,
    "n_added": 6,
@@ -11117,8 +11532,8 @@
    ]
   },
   {
-   "id": "Z005",
-   "anchor": "F048",
+   "id": "Z007",
+   "anchor": "F051",
    "n_members": 10,
    "n_exact": 4,
    "n_added": 6,
@@ -11141,8 +11556,8 @@
    ]
   },
   {
-   "id": "Z006",
-   "anchor": "F019",
+   "id": "Z008",
+   "anchor": "F021",
    "n_members": 11,
    "n_exact": 7,
    "n_added": 4,
@@ -11168,8 +11583,8 @@
    ]
   },
   {
-   "id": "Z007",
-   "anchor": "F021",
+   "id": "Z009",
+   "anchor": "F023",
    "n_members": 11,
    "n_exact": 7,
    "n_added": 4,
@@ -11195,8 +11610,8 @@
    ]
   },
   {
-   "id": "Z008",
-   "anchor": "F028",
+   "id": "Z010",
+   "anchor": "F030",
    "n_members": 9,
    "n_exact": 6,
    "n_added": 3,
@@ -11220,8 +11635,8 @@
    ]
   },
   {
-   "id": "Z009",
-   "anchor": "F041",
+   "id": "Z011",
+   "anchor": "F044",
    "n_members": 6,
    "n_exact": 4,
    "n_added": 2,
@@ -11242,8 +11657,8 @@
    ]
   },
   {
-   "id": "Z010",
-   "anchor": "F023",
+   "id": "Z012",
+   "anchor": "F026",
    "n_members": 7,
    "n_exact": 6,
    "n_added": 1,
@@ -11263,8 +11678,8 @@
    ]
   },
   {
-   "id": "Z011",
-   "anchor": "F029",
+   "id": "Z013",
+   "anchor": "F031",
    "n_members": 7,
    "n_exact": 6,
    "n_added": 1,
@@ -11284,8 +11699,8 @@
    ]
   },
   {
-   "id": "Z012",
-   "anchor": "F031",
+   "id": "Z014",
+   "anchor": "F033",
    "n_members": 7,
    "n_exact": 6,
    "n_added": 1,
@@ -11306,8 +11721,8 @@
    ]
   },
   {
-   "id": "Z013",
-   "anchor": "F032",
+   "id": "Z015",
+   "anchor": "F034",
    "n_members": 7,
    "n_exact": 6,
    "n_added": 1,
@@ -11328,8 +11743,8 @@
    ]
   },
   {
-   "id": "Z014",
-   "anchor": "F038",
+   "id": "Z016",
+   "anchor": "F040",
    "n_members": 6,
    "n_exact": 5,
    "n_added": 1,
@@ -11348,8 +11763,8 @@
    ]
   },
   {
-   "id": "Z015",
-   "anchor": "F046",
+   "id": "Z017",
+   "anchor": "F049",
    "n_members": 5,
    "n_exact": 4,
    "n_added": 1,
@@ -11367,8 +11782,8 @@
    ]
   },
   {
-   "id": "Z016",
-   "anchor": "F051",
+   "id": "Z018",
+   "anchor": "F054",
    "n_members": 5,
    "n_exact": 4,
    "n_added": 1,
@@ -11386,8 +11801,8 @@
    ]
   },
   {
-   "id": "Z017",
-   "anchor": "F061",
+   "id": "Z019",
+   "anchor": "F064",
    "n_members": 4,
    "n_exact": 3,
    "n_added": 1,
@@ -11405,8 +11820,8 @@
    ]
   },
   {
-   "id": "Z018",
-   "anchor": "F093",
+   "id": "Z020",
+   "anchor": "F097",
    "n_members": 4,
    "n_exact": 3,
    "n_added": 1,
@@ -11423,8 +11838,8 @@
    ]
   },
   {
-   "id": "Z019",
-   "anchor": "F094",
+   "id": "Z021",
+   "anchor": "F098",
    "n_members": 4,
    "n_exact": 3,
    "n_added": 1,

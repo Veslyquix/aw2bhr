@@ -17,7 +17,7 @@ ARMv4T/agbcc fork rather than upstream `simonlindholm/decomp-permuter`; the
 difference that matters is `ARM32_SETTINGS` in `src/objdump.py`, without which
 the scorer cannot read our objects at all.
 
-Needs three Python packages inside WSL, none of them installed by default:
+Needs three Python packages, none of them installed by default:
 
 ```sh
 wsl -d Ubuntu -u root -e bash -c \
@@ -27,8 +27,77 @@ wsl -d Ubuntu -u root -e bash -c \
 `python3-levenshtein` is only used by `--algorithm levenshtein`; the default is
 difflib. The other two are required.
 
+**If you don't have root** (no sudo password, `apt-get` unavailable), use a venv
+under `vendor/` instead -- it survives a reboot same as `vendor/decomp-permuter`
+itself, just not committed:
+
+```sh
+python3 -m venv vendor/permuter-venv
+vendor/permuter-venv/bin/pip install "pycparser==2.22" toml python-Levenshtein
+```
+
+`pycparser==2.22` is pinned deliberately: the current release (3.00) dropped the
+`pycparser.plyparser` module this permuter fork imports, so a plain
+`pip install pycparser` breaks it with `ModuleNotFoundError: No module named
+'pycparser.plyparser'`. `apt`'s `python3-pycparser` happens to package an
+older version that still has it, which is why the apt route above doesn't need
+this pin.
+
+`tools/permute.py` invokes `python3 vendor/decomp-permuter/permuter.py` as a
+bare shell command, so whichever `python3` is first on `PATH` is the one that
+runs -- the venv is not picked up automatically. Put it first when using this
+route:
+
+```sh
+PATH="$(pwd)/vendor/permuter-venv/bin:$PATH" python3 tools/permute.py <name> --seconds 300
+```
+
 Do not invoke `permuter.py` directly — `tools/permute.py` builds the input
 directory, imposes a time limit, and re-checks every result with
 `tools/trymatch.py`. The permuter scores by diffing objdump text, which is a
 weaker test than byte equality, so its own score is a search signal and not a
 verdict.
+
+## Ghidra
+
+This WSL checkout uses Ghidra 12.1.3 and Adoptium JDK 25.0.4.1+1, extracted
+under `vendor/`. The archives are available from their official releases:
+
+- `https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.3_build`
+- `https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4.1%2B1`
+
+Verified SHA-256 checksums:
+
+- Ghidra ZIP: `93a5d11a9ad510622acaaf908c556a7b9b764d338e78a7567f3689bf5081fd54`
+- JDK tarball: `dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e`
+
+The wrapper sets Java and Ghidra's settings/cache paths without changing the
+system Java installation:
+
+```sh
+bash tools/ghidra.sh gui
+bash tools/ghidra.sh headless <project_location> <project_name> -import <file> \
+    -processor ARM:LE:32:v4t
+```
+
+For the GBA, choose ARM v4T, and check the Thumb context for each code region.
+Ghidra's C is a starting point for understanding a function, not an agbcc
+matching candidate. Rewrite it against the repository's types and verify with
+`tools/trymatch.py`.
+
+An analyzed project for the current `aw2bhr.elf` is already at
+`vendor/ghidra-projects/aw2bhr.gpr`. To print one function's pseudocode from
+that project:
+
+```sh
+bash tools/ghidra.sh headless "$PWD/vendor/ghidra-projects" aw2bhr \
+    -process aw2bhr.elf -noanalysis \
+    -postScript DecompileNamedFunction.java sub_0800E9F4 \
+    -scriptPath "$PWD/tools/ghidra"
+```
+
+The linked ELF has malformed legacy DWARF that Ghidra logs and skips; the
+symbol-table import and ARM v4T analysis still complete. Ghidra can also infer
+incorrect return types from some agbcc epilogues, so check each result against
+`asm/` and the existing headers. Re-import if the linked ELF is rebuilt and its
+contents change.

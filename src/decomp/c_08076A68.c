@@ -11,7 +11,7 @@
 
 /* PARKED at 69.8%, candidate 112 bytes vs 116 (-4). The STATEMENT STRUCTURE is
  * settled and the whole residual is ONE instruction plus the alignment padding
- * it pulls in. Everything up to and including `bl sub_0803866C` -- every store,
+ * it pulls in. Everything up to and including `bl IsHardCampaignMode` -- every store,
  * both pool-loaded calls, the flag test -- is byte-identical.
  *
  * The ROM has one extra register-to-register COPY at the merge point:
@@ -50,7 +50,7 @@
  * byte-for-byte after the change.
  *
  * Resets gUnknown_0202FDFC's camera block, reloads the shared tile buffer, then
- * marks one of two fixed slots busy depending on sub_0803866C. The `movs r7, #0`
+ * marks one of two fixed slots busy depending on IsHardCampaignMode. The `movs r7, #0`
  * at the top is one constant serving both the three `strh` zeroes and v's
  * initialiser, which is ordinary CSE and not a shared local. */
 void sub_08076A68(ProcPtr proc)
@@ -69,7 +69,7 @@ void sub_08076A68(ProcPtr proc)
     sub_08011E54(gUnknown_08614280, (void *)0x0600F000, 0x1000);
     sub_08076888(proc);
 
-    if (sub_0803866C())
+    if (IsHardCampaignMode())
         v = 0x22;
 
     sub_08074754(v);

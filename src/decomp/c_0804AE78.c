@@ -34,7 +34,7 @@ void sub_0804AE78(void)
         v = k;
 
         for (j = v; j < (v + 3); j++)
-            gUnknown_08499580[(i * 0x20) + j] = gUnknown_0849957C[(i * 0x20) + j];
+            gBG2TilemapBuffer[(i * 0x20) + j] = gBG1TilemapBuffer[(i * 0x20) + j];
     }
 
     sub_08013B0C();

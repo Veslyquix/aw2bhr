@@ -8,18 +8,18 @@
  */
 
 /* The deref is bound to a LOCAL: both `strh`s come off one `ldr` of
- * gUnknown_0200B0B0, the same idiom src/decomp/c_08005D50.c records for its
+ * gActiveMap, the same idiom src/decomp/c_08005D50.c records for its
  * three stores. +0x46 and +0x48 are past `strh`'s imm5*2 range, which is why
  * each needs its own `adds`. */
 void sub_08005D14(void)
 {
-    struct Unk0200B0B0 *p;
+    struct ActiveMap *p;
 
     sub_0800056C(8);
 
-    p = gUnknown_0200B0B0;
-    p->unk46 = 0x15;
-    p->unk48 = 0x10;
+    p = gActiveMap;
+    p->menuCursorX = 0x15;
+    p->menuCursorY = 0x10;
 
     sub_0801A614();
     sub_0801A168();

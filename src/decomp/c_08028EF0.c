@@ -39,6 +39,7 @@
  * terms sum to the larger delta, with the remainder as a final short step.
  * p->unk2a ends holding the number of steps written. */
 #include "global.h"
+#include "map.h"
 struct Unk08028EF0
 {
     /* 0x00 */ u8 filler_00[0x1e];
@@ -58,10 +59,10 @@ void sub_08028EF0(struct Unk08028EF0 *p)
     u16 d;
     u16 step;
 
-    p->unk1e = *(u16 *)(gUnknown_08499590 + 4);
-    p->unk20 = *(u16 *)(gUnknown_08499590 + 6);
-    p->unk26 = p->unk22 - *(u16 *)(gUnknown_08499590 + 4);
-    p->unk28 = p->unk24 - *(u16 *)(gUnknown_08499590 + 6);
+    p->unk1e = gMap->scrollX;
+    p->unk20 = gMap->scrollY;
+    p->unk26 = p->unk22 - gMap->scrollX;
+    p->unk28 = p->unk24 - gMap->scrollY;
 
     t = ABS(p->unk26) > ABS(p->unk28) ? p->unk26 : p->unk28;
     d = ABS(t);

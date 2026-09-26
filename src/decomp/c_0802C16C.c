@@ -25,7 +25,7 @@ void sub_0802C16C(void)
  * `adds r0, #0x32; ldrb r0, [r0]` rather than `ldrb r0, [r0, #0x32]` is not a
  * member-array tell here -- 0x32 is simply past the 5-bit displacement `ldrb`
  * offers, so the base has to be advanced first. It is the scalar
- * gUnknown_03003FC0.unk32.
+ * gPlaySt.unk32.
  *
  * The four `mov #imm8` argument setups are in argument order because they are
  * all one operand class; sub_08034534's declared (int, u8, int, int) costs
@@ -36,6 +36,6 @@ void sub_0802C184(void)
 {
     sub_0802C154(gUnknown_030033EC);
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0x13, 0, 0, 0);
 }

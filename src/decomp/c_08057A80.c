@@ -46,7 +46,7 @@ void sub_08057A80(u16 *dst)
  * 0x030005E0, i.e. they are agbcc's own -fforce-addr address constants for the
  * four arrays this loop walks.  Naming the real symbols is what reproduces the
  * double indirection (`ldr rX, =pool; ldr rY, [rX]`).  Same trap as
- * gUnknown_081D943C / gUnknown_08499578; see include/unknown-globals.h.
+ * gUnknown_081D943C / gBG0TilemapBuffer; see include/unknown-globals.h.
  *
  * Two evaluation-order facts carry the loop body, and both are visible only as
  * instruction ORDER, never as a wrong instruction:
@@ -88,6 +88,6 @@ void sub_08057AE8(void)
         gUnknown_030005E0[i] = ((s16)d << 16) / ((s16)((s16)d / 5) + 20);
     }
 
-    sub_080579B8(gUnknown_08499578);
-    sub_08057A80(gUnknown_08499578);
+    sub_080579B8(gBG0TilemapBuffer);
+    sub_08057A80(gBG0TilemapBuffer);
 }

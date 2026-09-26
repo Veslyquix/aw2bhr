@@ -12,7 +12,7 @@ void sub_08019C24(void)
     u16 *p;
     int i;
 
-    p = gUnknown_08499578;
+    p = gBG0TilemapBuffer;
 
     for (i = 0; i < 0x400; i++)
         p[i] = 0;

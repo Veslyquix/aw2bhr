@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -19,15 +20,6 @@
  *   "rodata": ["0x0816D9C0"]   (that word holds &gUnknown_030033EC)
  */
 
-struct Unk41EA8Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0e];
-    /* 0x0012 */ u8 unit[0x1420];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
 struct Unk2029ED8Rec
 {
     /* 0x00 */ u8 filler_00[0x60];
@@ -65,17 +57,16 @@ u8 sub_0805B4D8(int a1, int *outX, int *outY)
 
         y = p->y;
 
-        if ((((struct Unk41EA8Map *)gUnknown_08499590)
-                 ->terrain[((struct Unk41EA8Map *)gUnknown_08499590)
+        if ((gMap
+                 ->terrain[gMap
                                ->rowOffset[y]
                            + x]
              & 0x1f)
             == 8)
         {
             if (sub_08026FD0(gUnknown_03003F38,
-                             ((struct Unk41EA8Map *)gUnknown_08499590)
-                                 ->terrain[((struct Unk41EA8Map *)
-                                                gUnknown_08499590)
+                             gMap
+                                 ->terrain[gMap
                                                ->rowOffset[y]
                                            + x])
                 == 0)
@@ -121,8 +112,8 @@ int sub_0805B5BC(int *a1, int *a2, int *outX, int *outY)
         y = p->y;
 
         if (sub_08026FD0(gUnknown_03003F38,
-                         ((struct Unk41EA8Map *)gUnknown_08499590)
-                             ->terrain[((struct Unk41EA8Map *)gUnknown_08499590)
+                         gMap
+                             ->terrain[gMap
                                            ->rowOffset[y]
                                        + x])
             == 0)

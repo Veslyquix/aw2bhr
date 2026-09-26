@@ -8,7 +8,7 @@
  */
 
 #include "proc.h"
-/* Family F025 with one extra leading call. sub_08034F8C is `void (void)`, so
+/* Family F025 with one extra leading call. DecrementMapLock is `void (void)`, so
  * the untouched r0 at that `bl` carries nothing -- the proc is saved in r4
  * only because it is needed after. */
 struct Unk27414Proc
@@ -20,6 +20,6 @@ struct Unk27414Proc
 
 void sub_08027414(struct Unk27414Proc *proc)
 {
-    sub_08034F8C();
+    DecrementMapLock();
     sub_0801C240(proc->unk50);
 }

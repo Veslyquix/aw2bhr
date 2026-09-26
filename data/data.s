@@ -3887,3 +3887,7 @@ gUnknown_0848B5AC:  @ 0x0848B5AC
 	.global gUnknown_0848B5C4
 gUnknown_0848B5C4:  @ 0x0848B5C4
 	.incbin "baserom.gba", 0x48B5C4, 0x18    @ 0x48B5DC - 0x48B5C4
+
+	.global gProcCmdTable
+gProcCmdTable:  @ 0x0848B5DC
+	.incbin "baserom.gba", 0x48B5DC, 0xAC    @ 0x48B688 - 0x48B5DC

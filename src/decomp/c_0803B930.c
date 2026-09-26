@@ -23,9 +23,9 @@
  * the then-arm as the constant `unk38[1]` stores the same value -- agbcc knows
  * i == 1 there and reuses r2 rather than materialising a constant either way --
  * but it is not the same code. With `unk38[1]` agbcc folds the offset into the
- * literal pool (`.word gUnknown_03003FC0+0x38`) and derives 0x3d and 0x39 from
+ * literal pool (`.word gPlaySt+0x38`) and derives 0x3d and 0x39 from
  * that with one `adds #imm3` each; with `unk38[i]` in both arms it emits the
- * UNBIASED `.word gUnknown_03003FC0` and pays `adds rX,r0,#0; adds rX,#K` for
+ * UNBIASED `.word gPlaySt` and pays `adds rX,r0,#0; adds rX,#K` for
  * all three offsets. The ROM has the unbiased form, which is 8 bytes longer
  * and takes four callee-saved registers instead of three. See the "Loops"
  * chapter of docs/agbcc-codegen.md.
@@ -45,11 +45,11 @@ void sub_0803B930(u8 a)
 
     for (i = 1; i <= a; i++)
     {
-        gUnknown_03003FC0.unk3d[i] = gUnknown_0849EA78[i - 1];
+        gPlaySt.co[i] = gUnknown_0849EA78[i - 1];
         if (i == 1)
-            gUnknown_03003FC0.unk38[i] = 1;
+            gPlaySt.aiControlled[i] = 1;
         else
-            gUnknown_03003FC0.unk38[i] = 2;
+            gPlaySt.aiControlled[i] = 2;
     }
 
     sub_0803B8C4();

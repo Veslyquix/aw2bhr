@@ -12,6 +12,6 @@
 
 void sub_0806C76C(ProcPtr proc)
 {
-    if (gpKeySt->held & 9)
+    if (gpKeySt->pressed & 9)
         Proc_Break(proc);
 }

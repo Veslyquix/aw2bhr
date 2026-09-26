@@ -10,7 +10,7 @@
 #include "proc.h"
 /* MATCHED (wave 38, W38-E), first attempt. Unassigned extra.
  *
- * Broadcasts a new value to the gUnknown_08614390 proc (sub_0807519C is its
+ * Broadcasts a new value to ProcScr_WM_MoveScope (sub_0807519C is its
  * body) and to each of the up-to-ten children it has parked in its +0x3c table,
  * skipping the null slots. The proc and child layouts are sub_0807519C's,
  * unchanged -- that function fills the same +0x3c[10] table.
@@ -50,7 +50,7 @@ void sub_080752D8(int a1)
 
     v = a1;
 
-    proc = Proc_Find(gUnknown_08614390);
+    proc = Proc_Find(ProcScr_WM_MoveScope);
     proc->unk38 = v;
 
     for (i = 0; i <= 9; i++)

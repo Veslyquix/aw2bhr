@@ -8,7 +8,7 @@
  */
 
 /* Family F057: one body three times, differing only in which bit of
- * gUnknown_0200B0B0->unk00 it tests (0x200 / 0x400 / 0x800) and which value it
+ * gActiveMap->flags it tests (0x200 / 0x400 / 0x800) and which value it
  * stores into ->unk10 (0 / 1 / 2). data/families.json's `varies` has exactly
  * those two entries; everything else -- both callees, the script global and
  * the trailing `unk02 = 7` -- is shared by all three members.
@@ -31,17 +31,17 @@
 
 void sub_08004EDC(int a, int b, u8 c)
 {
-    if ((gUnknown_0200B0B0->unk00 & 0x200) && c != 2)
+    if ((gActiveMap->flags & 0x200) && c != 2)
     {
         sub_0801A168();
-        gUnknown_0200B0B0->unk10 = 0;
+        gActiveMap->designSlot = 0;
         sub_080152EC(gUnknown_08487E14, 0);
-        gUnknown_0200B0B0->unk02 = 7;
+        gActiveMap->state = 7;
     }
 }
 
 /* Family F057: one body three times, differing only in which bit of
- * gUnknown_0200B0B0->unk00 it tests (0x200 / 0x400 / 0x800) and which value it
+ * gActiveMap->flags it tests (0x200 / 0x400 / 0x800) and which value it
  * stores into ->unk10 (0 / 1 / 2). data/families.json's `varies` has exactly
  * those two entries; everything else -- both callees, the script global and
  * the trailing `unk02 = 7` -- is shared by all three members.
@@ -64,17 +64,17 @@ void sub_08004EDC(int a, int b, u8 c)
 
 void sub_08004F1C(int a, int b, u8 c)
 {
-    if ((gUnknown_0200B0B0->unk00 & 0x400) && c != 2)
+    if ((gActiveMap->flags & 0x400) && c != 2)
     {
         sub_0801A168();
-        gUnknown_0200B0B0->unk10 = 1;
+        gActiveMap->designSlot = 1;
         sub_080152EC(gUnknown_08487E14, 0);
-        gUnknown_0200B0B0->unk02 = 7;
+        gActiveMap->state = 7;
     }
 }
 
 /* Family F057: one body three times, differing only in which bit of
- * gUnknown_0200B0B0->unk00 it tests (0x200 / 0x400 / 0x800) and which value it
+ * gActiveMap->flags it tests (0x200 / 0x400 / 0x800) and which value it
  * stores into ->unk10 (0 / 1 / 2). data/families.json's `varies` has exactly
  * those two entries; everything else -- both callees, the script global and
  * the trailing `unk02 = 7` -- is shared by all three members.
@@ -97,11 +97,11 @@ void sub_08004F1C(int a, int b, u8 c)
 
 void sub_08004F5C(int a, int b, u8 c)
 {
-    if ((gUnknown_0200B0B0->unk00 & 0x800) && c != 2)
+    if ((gActiveMap->flags & 0x800) && c != 2)
     {
         sub_0801A168();
-        gUnknown_0200B0B0->unk10 = 2;
+        gActiveMap->designSlot = 2;
         sub_080152EC(gUnknown_08487E14, 0);
-        gUnknown_0200B0B0->unk02 = 7;
+        gActiveMap->state = 7;
     }
 }

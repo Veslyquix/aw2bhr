@@ -39,12 +39,12 @@
  * test is `lsls r0, #0x10`, where a bool8/u8 return gives `lsls #0x18`. The
  * work/ draft declares it `bool8`; that is refuted. It is declared locally
  * for the same file-local-tag reason. */
-s16 sub_0802A258(struct Unk08499594 *);
+s16 sub_0802A258(struct Unit *);
 bool8 sub_0802A38C(void *, int (*)(void *));
 
 void sub_0802A3FC(void)
 {
-    struct Unk08499594 *p;
+    struct Unit *p;
     u16 i;
 
     if (sub_08015BD0((s32)gUnknown_0849A0A8) != -1)
@@ -52,15 +52,15 @@ void sub_0802A3FC(void)
 
     for (i = gUnknown_03001470[gUnknown_03001FBC].unk38; i <= 0x32; i++)
     {
-        p = &gUnknown_08499594[gUnknown_03003F2C + i];
+        p = &gUnits[gUnknown_03003F2C + i];
 
-        if (p->unk00 == 0)
+        if (p->type == 0)
             continue;
 
-        if (p->unk01 & 9)
+        if (p->flags & 9)
             continue;
 
-        if (p->unk00 == 0x16 && sub_0802A38C(p, sub_0802A304))
+        if (p->type == 0x16 && sub_0802A38C(p, sub_0802A304))
         {
             gUnknown_03001470[gUnknown_03001FBC].unk38 = i + 1;
             break;

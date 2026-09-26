@@ -20,6 +20,57 @@ ENTRY(Init)
 gNumMusicPlayers = 11;
 gMaxLines = 0;
 
+/* gMap: a second, typed name for the same 4-byte data slot as
+ * gUnknown_08499590 (include/unknown-globals.h) -- a plain `.set`/`.thumb_set`
+ * alias cannot reach across translation units at assembly time (the target
+ * symbol is still undefined then), so the alias has to be a linker symbol
+ * instead. gUnknown_08499590 stays declared `u8 *`; gMap is declared
+ * `struct Map *` in include/map.h for new code that wants field access
+ * without casting -- see the comment there for why the canonical symbol's
+ * type itself can't just change. */
+gMap = gUnknown_08499590;
+
+/* ROM-resident pointers to four 32x32 BG tilemap shadows in EWRAM. */
+gBG0TilemapBuffer = gUnknown_08499578;
+gBG1TilemapBuffer = gUnknown_0849957C;
+gBG2TilemapBuffer = gUnknown_08499580;
+gBG3TilemapBuffer = gUnknown_08499584;
+
+/* FE8-style modified-BG mask; AW2 stores it as a u16. */
+sModifiedBGs = gUnknown_03002F00;
+
+/* gProperty: typed name for the 0x03003150 record list (struct Property,
+ * include/map.h); linker alias for the same reason as gMap. */
+gProperty = gUnknown_03003150;
+
+/* Typed names for the play settings, design-room state pointer, and its
+ * animated terrain/unit selection ring. Linker aliases, same reason as gMap. */
+gPlaySt = gUnknown_03003FC0;
+gActiveMap = gUnknown_0200B0B0;
+gDesignRing = gUnknown_0200B0D0;
+gSmoothScroll = gUnknown_03000640;
+gOamTransferTail = gUnknown_03000268;
+gOamTransferHead = gUnknown_03000278;
+
+/* gGameLock: the three byte-sized locks at 0x030030F0 (struct GameLock,
+   include/lock.h); linker alias for the same reason as gMap. */
+gGameLock = gUnknown_030030F0;
+
+/* gPlayers: the five-entry per-army record array (struct PlayerStruct,
+ * 0x3c each, based at 0x02023284); SRR_AW2's Definitions.s names the
+ * elements gPlayer0..gPlayer4. gGameClock is the frame counter and
+ * gDesignRoomName the design-map name buffer LoadDesignRoomName fills.
+ * Linker aliases, same reason as gMap. */
+gPlayers = gUnknown_08499598;
+gGameClock = gUnknown_03004008;
+gDesignRoomName = gUnknown_0200B204;
+
+/* gTextTable: the 3316-entry string table at 0x08610A38 that every *NameIndex
+ * in this tree subscripts -- struct Unk085D3DD0's nameIndex and its power
+ * blocks' powerNameId, and the map header's nameIndex. Named from the Xenesis
+ * datasheet ('Text Table Starts', 3316 entries). Linker alias, as gMap. */
+gTextTable = gUnknown_08610A38;
+
 SECTIONS
 {
 	. = 0x02000000;
@@ -68,8 +119,18 @@ SECTIONS
 		. = 0x00CD0C; gUnknown_0200CD0C = .;
 		. = 0x00CD10; gUnknown_0200CD10 = .;
 		. = 0x00D510; gUnknown_0200D510 = .;
-		. = 0x00D610;
-		. = ALIGN(4); src/proc.o(ewram_data);
+		/* SPLIT_RAM_OBJ: src/proc.o(ewram_data)
+		 * These four are proc.c's own EWRAM_DATA globals (sProcArray and
+		 * friends): the default build has no C, so this placeholder gives
+		 * them the same addresses proc.c's compile does. Under SPLIT=1
+		 * proc.c really is compiled, so gen_lds.py replaces this whole
+		 * block with the real `src/proc.o(ewram_data)` placement instead --
+		 * keeping both would double-define every symbol here. */
+		. = 0x00D610; sProcArray = .; gUnknown_0200D610 = .;
+		. = 0x00E390; sProcAllocList = .;
+		. = 0x00E414; sProcAllocListHead = .; gUnknown_0200E414 = .;
+		. = 0x00E418; gProcTreeRootArray = .; gUnknown_0200E418 = .;
+		/* END_SPLIT_RAM_OBJ */
 		. = 0x00E438; gUnknown_0200E438 = .;
 		. = 0x00E440; gUnknown_0200E440 = .;
 		. = 0x00ED20; gUnknown_0200ED20 = .;
@@ -318,8 +379,12 @@ SECTIONS
 		. = 0x001FD0; gUnknown_03001FD0 = .;
 		. = 0x001FD4; gUnknown_03001FD4 = .;
 		. = 0x001FD8; gUnknown_03001FD8 = .;
-		. = 0x001FDC;
-		. = ALIGN(4); src/proc.o(.bss);
+		/* SPLIT_RAM_OBJ: src/proc.o(.bss)
+		 * proc.c's one plain (non-EWRAM_DATA) global; see the ewram_data
+		 * SPLIT_RAM_OBJ block above for why gen_lds.py replaces this under
+		 * SPLIT=1 instead of layering the real object on top of it. */
+		. = 0x001FDC; gUnknown_03001FDC = .;
+		/* END_SPLIT_RAM_OBJ */
 		. = 0x001FE0; gUnknown_03001FE0 = .;
 		. = 0x001FE4; gUnknown_03001FE4 = .;
 		. = 0x001FE8; gUnknown_03001FE8 = .;
@@ -348,6 +413,7 @@ SECTIONS
 		. = 0x0020B0; gUnknown_030020B0 = .;
 		. = 0x0020B4; gUnknown_030020B4 = .;
 		. = 0x0020B8; gUnknown_030020B8 = .;
+		. = 0x0020C0; gUnknown_030020C0 = .;
 		. = 0x0020C0; gPal = .;
 		. = 0x0024C0; gUnknown_030024C0 = .;
 		. = 0x0024C4; gUnknown_030024C4 = .;
@@ -386,7 +452,7 @@ SECTIONS
 		. = 0x002B70; gUnknown_03002B70 = .;
 		. = 0x002B80; gUnknown_03002B80 = .;
 		. = 0x002EDC; gUnknown_03002EDC = .;
-		. = 0x002EE0; gpKeySt = .;
+		. = 0x002EE0; gpKeySt = .; gUnknown_03002EE0 = .;
 		. = 0x002EE4; gUnknown_03002EE4 = .;
 		. = 0x002EE8; gUnknown_03002EE8 = .;
 		. = 0x002EEC; gUnknown_03002EEC = .;
@@ -438,6 +504,7 @@ SECTIONS
 		. = 0x0030C0; gUnknown_030030C0 = .;
 		. = 0x0030C4; gUnknown_030030C4 = .;
 		. = 0x0030C8; gUnknown_030030C8 = .;
+		. = 0x0030CC; gUnknown_030030CC = .;
 		. = 0x0030CC; gDispIo = .;
 		. = 0x0030D0; gUnknown_030030D0 = .;
 		. = 0x0030D4; gUnknown_030030D4 = .;
@@ -590,7 +657,7 @@ SECTIONS
 		. = 0x004680; gUnknown_03004680 = .;
 		. = 0x0046AC; gUnknown_030046AC = .;
 		. = 0x0046B0; gUnknown_030046B0 = .;
-		. = 0x0046B4; gUnknown_030046B4 = .;
+		. = 0x0046B4; gFactoryUnitSchedule = .; gUnknown_030046B4 = .;
 		. = 0x0046B8; gUnknown_030046B8 = .;
 		. = 0x0046C0; gUnknown_030046C0 = .;
 		. = 0x0046CC; gUnknown_030046CC = .;
@@ -683,9 +750,7 @@ SECTIONS
 		src/crt0.o(.text);
 
 		asm/code.o(.text);
-		src/proc.o(.text);
 		asm/code-0801D390.o(.text);
-		src/title-screen.o(.text);
 		asm/code-0806CFC8.o(.text);
 		*libgcc.a:_call_via_rX.o(.text);
 		*libgcc.a:_divsi3.o(.text);
@@ -703,14 +768,11 @@ SECTIONS
 
 		/* .rodata */
 		. = ALIGN(4); data/rodata.o(.rodata)
-		. = ALIGN(4); src/proc.o(.rodata)
 		. = ALIGN(4); data/rodata-0808F098.o(.rodata)
 
 		/* .data */
 		. = ALIGN(4); data/data.o(.data)
-		. = ALIGN(4); src/proc.o(.data)
 		. = ALIGN(4); data/data-0848B688.o(.data)
-		. = ALIGN(4); src/title-screen.o(.data)
 		. = ALIGN(4); data/data-08581E70.o(.data)
 	}
 }

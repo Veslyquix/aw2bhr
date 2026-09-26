@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801137C.
  * sub_0801137C @ 0x0801137C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -16,7 +20,7 @@ struct Unk801137CProc
 
 /* sub_08011298's twin: Proc_End instead of sub_080153B8 on the already-in-state
  * path, and the cursor seeded at 0x140 instead of 0. */
-void sub_0801137C(struct Unk801137CProc *proc)
+void FadeLoadMap_0801137D(struct Unk801137CProc *proc)
 {
     if (gUnknown_03002B5C == 0)
     {
@@ -32,3 +36,5 @@ void sub_0801137C(struct Unk801137CProc *proc)
     gUnknown_03002F3C = 0;
     sub_080111C8(gUnknown_0200B274, (void *)0x04000040, 1, 0xA240, sub_08011228);
 }
+
+asm(".global sub_0801137C\n.thumb_set sub_0801137C, FadeLoadMap_0801137D\n");

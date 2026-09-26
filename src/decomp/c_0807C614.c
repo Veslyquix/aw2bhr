@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807C614.
  * sub_0807C614 @ 0x0807C614
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -59,7 +63,7 @@ struct Unk807C614
     /* 64 */ s16 unk64;
 };
 
-void sub_0807C614(struct Unk807C614 *proc)
+void WarRoomMapSelected_0807C615(struct Unk807C614 *proc)
 {
     int i;
     u8 v;
@@ -81,7 +85,7 @@ void sub_0807C614(struct Unk807C614 *proc)
     CpuSet(clear, (void *)((gUnknown_03001FE8.bits.tm_block << 11) + 0x06000000), 0x01000800);
 
     Decompress(gUnknown_0823468C, (void *)((gUnknown_03001FE8.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0823456C, gUnknown_0849957C);
+    Decompress(gUnknown_0823456C, gBG1TilemapBuffer);
     ApplyPaletteExt((u16 *)8, 0, 0x20);
 
     sub_08013AFC();
@@ -148,3 +152,5 @@ void sub_0807C614(struct Unk807C614 *proc)
     sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52 + 1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014680, 0x17);
     sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52 + 2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014B00, 0x18);
 }
+
+asm(".global sub_0807C614\n.thumb_set sub_0807C614, WarRoomMapSelected_0807C615\n");

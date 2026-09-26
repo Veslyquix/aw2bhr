@@ -16,7 +16,7 @@
 
 #include "hardware.h"
 
-/* A per-frame hook: run sub_080116E8, then on L (0x200 in gpKeySt->unk00, the
+/* A per-frame hook: run sub_080116E8, then on L (0x200 in gpKeySt->held, the
  * same slot and the same test as sub_0803B1CC's 0x100/R next door) start the
  * gUnknown_0849E610 proc through sub_0803AF5C and raise gUnknown_03002F1C.
  *
@@ -30,7 +30,7 @@ void sub_0803B0EC(void)
 {
     sub_080116E8();
 
-    if (gpKeySt->unk00 & 0x200)
+    if (gpKeySt->held & L_BUTTON)
     {
         sub_0803AF5C();
         gUnknown_03002F1C = 1;
@@ -52,7 +52,7 @@ void sub_0803B0EC(void)
 
 void sub_0803B118(struct Unk03001470 *a)
 {
-    if (gpKeySt->unk00 & 4)
+    if (gpKeySt->held & 4)
     {
         if (++a->unk1e > 0x5a)
         {

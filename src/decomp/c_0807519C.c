@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807519C.
  * sub_0807519C @ 0x0807519C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -54,7 +58,7 @@
  * proc->unk30 is re-`ldr`ed three times because each read sits in a different
  * basic block and gcc 2.9's CSE table resets at a label. It is NOT a local.
  *
- * The body of gUnknown_08614390's proc: it spawns one child per step until
+ * The body of ProcScr_WM_MoveScope: it spawns one child per step until
  * unk30 catches up with unk2c, parking each child's proc in the ten-entry table
  * at +0x3c, then breaks. The two `unk2c == unk30` tests are ONE shared break
  * block that agbcc cross-jumps, which is why the ROM has a single _08075230. */
@@ -70,7 +74,7 @@ struct Unk807519C
     /* 0x3c */ void *unk3c[10];
 };
 
-void sub_0807519C(struct Unk807519C *proc)
+void WM_MoveScope_IDLE_0807519D(struct Unk807519C *proc)
 {
     PutSprite(1, proc->unk34, proc->unk36, gUnknown_081CC4F0,
               gUnknown_0861433C[proc->unk38]);
@@ -123,3 +127,5 @@ void sub_0807519C(struct Unk807519C *proc)
 
     proc->unk3a++;
 }
+
+asm(".global sub_0807519C\n.thumb_set sub_0807519C, WM_MoveScope_IDLE_0807519D\n");

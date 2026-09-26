@@ -77,16 +77,16 @@ void sub_0803446C(void)
 
 /* The sibling of sub_08034534: same command block, command id hard-coded to 8.
  * `unit` is bound before the block is filled -- the ROM computes
- * &gUnknown_08499594[a] into r5 first and keeps it live across the four stores,
+ * &gUnits[a] into r5 first and keeps it live across the four stores,
  * which is what a local declared here gives. */
 void sub_080344B4(u8 a, int b, int c)
 {
-    struct Unk08499594 *unit = &gUnknown_08499594[a];
+    struct Unit *unit = &gUnits[a];
 
     gUnknown_030044B0[0] = 8;
     gUnknown_030044B0[1] = a;
     gUnknown_030044B0[6] = b;
     gUnknown_030044B0[7] = c;
-    gUnknown_030044B0[0x12] = unit->unk06_0;
+    gUnknown_030044B0[0x12] = unit->fuel;
     sub_080308B4(gUnknown_030044B0);
 }

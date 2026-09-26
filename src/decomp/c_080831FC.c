@@ -117,7 +117,7 @@ void sub_080831FC(struct Unk80831FC *p, int t)
         PutSprite(3, p->unk34 + 0x90, 0x58, gUnknown_08615C04, 0x5ABC);
     }
 
-    if (gUnknown_03005968 != 0 && sub_0803CBD8(0x20) != 0
+    if (gUnknown_03005968 != 0 && IsCampaignCompletionFlagSet(0x20) != 0
         && gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0)
     {
         p->unk34 = Interpolate(4, 0x10, 0x100, t, 4);
@@ -169,7 +169,7 @@ void sub_08083484(struct Unk8083484 *p, int t)
         PutSprite(3, p->unk34 + 0x90, 0x58, gUnknown_08615C04, 0x5ABC);
     }
 
-    if (gUnknown_03005968 != 0 && sub_0803CBD8(0x20) != 0
+    if (gUnknown_03005968 != 0 && IsCampaignCompletionFlagSet(0x20) != 0
         && gUnknown_0861696C[DivRem(p->unk52 + 2 + p->unk4e, 6)] == 0)
     {
         p->unk34 = Interpolate(1, 0x100, 0x10, t, 4);
@@ -234,7 +234,7 @@ void sub_08083738(struct Unk8083738 *p)
 
         PutSpriteExt(1, 0x25B, 0x153, gUnknown_0848B6CE, 0xD2C8);
     }
-    else if (gUnknown_03005968 != 0 && sub_0803CBD8(0x20) != 0
+    else if (gUnknown_03005968 != 0 && IsCampaignCompletionFlagSet(0x20) != 0
              && gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0)
     {
         SetObjAffine(1,

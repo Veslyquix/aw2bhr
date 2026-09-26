@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08023360.
- * sub_08023360 @ 0x08023360
+ * LoadGameplayGraphics @ 0x08023360
  */
 
 #include "hardware.h"
@@ -18,7 +18,7 @@
  * whole difference on this function. (s16) is byte-identical here, so the
  * signedness is not settled -- only the presence of the cast is.
  */
-void sub_08023360(int a)
+void LoadGameplayGraphics(int a)
 {
     sub_08011B18();
 
@@ -39,14 +39,14 @@ void sub_08023360(int a)
     Decompress(gUnknown_080BD1EC, (void *)0x06008000);
 
     sub_08011C68(gUnknown_0809175C + 0xa0, (void *)0x0600E780, 0x20);
-    sub_08011C68(gUnknown_08499578, (void *)0x06007000, 0x800);
-    sub_08011C68(gUnknown_0849957C, (void *)0x0600F000, 0x800);
-    sub_08011C68(gUnknown_08499580, (void *)0x06007800, 0x800);
+    sub_08011C68(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
+    sub_08011C68(gBG1TilemapBuffer, (void *)0x0600F000, 0x800);
+    sub_08011C68(gBG2TilemapBuffer, (void *)0x06007800, 0x800);
 
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[1].unk1a - 1) * 0x20), 12);
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[2].unk1a - 1) * 0x20), 13);
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[3].unk1a - 1) * 0x20), 14);
-    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gUnknown_08499598[4].unk1a - 1) * 0x20), 15);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[1].teamColor - 1) * 0x20), 12);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[2].teamColor - 1) * 0x20), 13);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[3].teamColor - 1) * 0x20), 14);
+    ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[4].teamColor - 1) * 0x20), 15);
 
     sub_0803F80C(8);
     sub_0802D2EC();
@@ -57,15 +57,17 @@ void sub_08023360(int a)
     sub_08024268();
     sub_08022A08();
 
-    sub_08011C68(gUnknown_08499584, (void *)0x0600F800, 0x800);
+    sub_08011C68(gBG3TilemapBuffer, (void *)0x0600F800, 0x800);
 
     sub_08035568();
     sub_080116E8();
-    sub_080354FC();
-    sub_08035020(gUnknown_03003FC0.unk2c);
+    LoadWeatherData();
+    sub_08035020(gPlaySt.weather);
     sub_08022A34();
 
     sub_0801A5B0(gUnknown_030033EC);
     sub_08043834(gUnknown_030033EC);
     sub_0801A57C(gUnknown_030033EC);
 }
+
+asm(".global sub_08023360\n.thumb_set sub_08023360, LoadGameplayGraphics\n");

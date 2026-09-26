@@ -16,5 +16,5 @@
 
 u16 sub_0801BCF4(void)
 {
-    return gUnknown_03000278.unk0a;
+    return gOamTransferHead.objectCount;
 }

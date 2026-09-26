@@ -23,7 +23,7 @@ void sub_0807FE90(void)
     sub_08011E54(gUnknown_080A29A4,
                  (void *)(0x06005600 + gUnknown_03002B6C.bits.chr_block * 0x4000),
                  0x800);
-    sub_08012B70(gUnknown_08499578, gUnknown_080A31A4, 0, 0, 0x82B0);
+    sub_08012B70(gBG0TilemapBuffer, gUnknown_080A31A4, 0, 0, 0x82B0);
     ApplyPalettes(gUnknown_080A36C8, 8, 1);
     sub_08013AEC();
 }

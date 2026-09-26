@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -25,13 +26,12 @@
  * 99.4 -> 99.8; a single long run from the draft found nothing, replicating
  * wave 59's 87.3 -> 94.3 -> 98.2 -> match):
  *
- *  1. THE `cell` LOCAL IS NOT IN THE ORIGINAL.  `terr[idx]` is read inline at
- *     both uses -- `(terr[idx] & 0xE0)` and `terr[idx] & 0x1F`.  The park's
- *     "NEXT THING TO TRY" note guessed this correctly: `cell` was the one extra
- *     live pseudo taking r4 ahead of `u`, and deleting it is what unwound the
- *     r3/r4/r5 rotation the park had classified as the whole residual.
+ *  1. THERE IS NO `cell` LOCAL.  `gMap->terrain[idx]` is read inline at
+ *     both uses -- `(gMap->terrain[idx] & 0xE0)` and `gMap->terrain[idx] & 0x1F`;
+ *     a `cell` pseudo took r4 ahead of `u` and rotated r3/r4/r5.
  *
- *  2. `marks = 0x234A + map;` with the CONSTANT FIRST, not `map + 0x234A`.
+ *  2. The row/cell/mark planes are read straight through gMap->rowOffset[],
+ *     gMap->terrain[] and gMap->unk234A[], with no pointer locals bound.
  *
  *  3. THE TWO-CALL SUM MUST BE SPLIT, AND 978 EVALUATED FIRST:
  *         n = sub_08029978(u, 0);
@@ -43,7 +43,7 @@
  *     it.  A 99.8%-identical candidate can still have two calls swapped.
  *
  *  4. `u8 flag`, NOT `int flag`.  This is the last two bytes and it is a
- *     general rule (written up in docs/agbcc-codegen.md).  sub_08029CB8's
+ *     general rule (written up in docs/agbcc-codegen.md).  StartSupplyAnimation's
  *     fourth parameter is `u8` -- and that is right, it agrees with the
  *     promoted definition in src/decomp/c_08029C38.c.  With an `int` local the
  *     int->u8 conversion at the call emits no instruction of its own (gcc
@@ -54,7 +54,7 @@
  *
  * A TRAP WORTH KNOWING (wave 60, W60-D): decomp-permuter's type randomizer
  * MUTATES PROTOTYPES inside its own expanded translation unit.  Its 99.8%
- * best.c had silently rewritten sub_08029CB8's fourth parameter from `u8` to
+ * best.c had silently rewritten StartSupplyAnimation's fourth parameter from `u8` to
  * `int` -- which reproduces the ROM's argument order, but is a change we
  * cannot legally adopt, because the promoted body in src/decomp/c_08029C38.c
  * defines it `u8`.  The legal spelling with the SAME effect is the `u8 flag`
@@ -67,24 +67,18 @@
  *    it is the only reason sl holds the right symbol.  Its position does not
  *    matter, only its presence.
  *  - `n != 0 || m != 0` is the right spelling of the early-out, and the
- *    `if (m != 0)` arm really does zero `n` before sub_08029CB8.
- *  - the `marks[idx] == 0` arm (three calls, results discarded) must be the
+ *    `if (m != 0)` arm really does zero `n` before StartSupplyAnimation.
+ *  - the `gMap->unk234A[idx] == 0` arm (three calls, results discarded) must be the
  *    fall-through, and both arms are genuine source call sites.
  *  - `pt` is a 4-byte struct, so both member stores are SImode bitfield
  *    inserts on one stack word.
- *  - `t = u->unk03 * 2;` must be its own statement before `rows = map+0x417A`.
  */
 void sub_08029FE4(void)
 {
-  struct Unk08499594 *u;
+  struct Unit *u;
   struct Unk802C57C pt;
   u8 *p7;
-  u8 *map;
-  u8 *rows;
-  u8 *terr;
-  u8 *marks;
   u16 i;
-  int t;
   int idx;
   u32 save;
   int n;
@@ -98,54 +92,49 @@ void sub_08029FE4(void)
   for (; i <= 0x32; i++)
   {
     p7 = &gUnknown_03004007;
-    u = &gUnknown_08499594[gUnknown_03003F2C + i];
-    if (u->unk00 == 0)
+    u = &gUnits[gUnknown_03003F2C + i];
+    if (u->type == 0)
     {
       continue;
     }
-    if ((u->unk01 & 9) != 0)
+    if ((u->flags & 9) != 0)
     {
       continue;
     }
-    map = gUnknown_08499590;
-    t = u->unk03 * 2;
-    rows = map + 0x417A;
-    idx = (*((u16 *) (rows + t))) + u->unk02;
-    terr = map + 0x1432;
+    idx = gMap->rowOffset[u->y] + u->x;
     ;
-    if ((terr[idx] & 0xE0) != gUnknown_03004084)
+    if ((gMap->terrain[idx] & 0xE0) != gUnknown_03004084)
     {
       continue;
     }
-    if (gUnknown_085D5ABC[u->unk00].unk54[terr[idx] & 0x1F] == 0)
+    if (gUnknown_085D5ABC[u->type].repairTable[gMap->terrain[idx] & 0x1F] == 0)
     {
       continue;
     }
-    marks = 0x234A + map;
-    if (marks[idx] == 0)
+    if (gMap->unk234A[idx] == 0)
     {
       sub_08029978(u, 0);
       sub_08029A48(u, 0);
-      sub_08029AF8(u, 2, 1 - (*p7));
+      RepairUnit(u, 2, 1 - (*p7));
     }
     else
     {
-      save = gUnknown_08499598[gUnknown_030033EC].unk00;
+      save = gPlayers[gUnknown_030033EC].funds;
       n = sub_08029978(u, 0);
       n = sub_08029A48(u, 0) + n;
-      m = sub_08029AF8(u, 2, 1 - (*p7));
+      m = RepairUnit(u, 2, 1 - (*p7));
       if ((n != 0) || (m != 0))
       {
         flag = 0;
         if (m != 0)
         {
           flag = 1;
-          gUnknown_08499598[gUnknown_030033EC].unk00 = save;
+          gPlayers[gUnknown_030033EC].funds = save;
           n = 0;
         }
-        pt.unk00 = u->unk02;
-        pt.unk02 = u->unk03;
-        sub_08029CB8(&pt, gUnknown_030033EC, m + n, flag);
+        pt.unk00 = u->x;
+        pt.unk02 = u->y;
+        StartSupplyAnimation(&pt, gUnknown_030033EC, m + n, flag);
         gUnknown_03001470[gUnknown_03001FBC].unk38 = i + 1;
         break;
       }

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,13 +10,13 @@
 
 /* The per-turn refresh: repaint the two 0x508-byte overlay planes at
  * gUnknown_08499590 + 0x1E42 for the two cursor slots gUnknown_03004070 and
- * gUnknown_03004088, then -- only in the gUnknown_03003FC0.unk0d mode -- re-run
+ * gUnknown_03004088, then -- only in the gPlaySt.unk0d mode -- re-run
  * every army's turn-start pass and stamp sub_080210C8 over each record
  * sub_0803F5C8 hands back.
  *
  * gUnknown_08090964 and gUnknown_08090968 in the asm are NOT globals: the ROM
  * words there hold 0x03003FC0 and 0x08499590, so they are agbcc's own
- * -fforce-addr address constants for gUnknown_03003FC0 and gUnknown_08499590.
+ * -fforce-addr address constants for gPlaySt and gUnknown_08499590.
  * Both are named several times across a control-flow merge here, which is the
  * documented trigger; the honest spelling reproduces them.
  *
@@ -31,12 +32,6 @@
  * `lsls r7,r2,#0x10` in the inner preheader is the loop optimiser hoisting the
  * (s16) cast of x; x and y are plain ints. */
 
-struct Unk213ACMap
-{
-    /* 0x0000 */ u8 filler_0000[0x1E42];
-    /* 0x1E42 */ u8 unk1E42[1];
-};
-
 void sub_080213AC(void)
 {
     struct Unk02028360 *p;
@@ -45,24 +40,24 @@ void sub_080213AC(void)
     int xend;
     int yend;
 
-    if (gUnknown_03003FC0.unk0d != 0
-        && gUnknown_08499598[gUnknown_030033EC].unk1b == 2)
+    if (gPlaySt.fog != 0
+        && gPlayers[gUnknown_030033EC].aiControlled == 2)
     {
-        sub_08020754(&((struct Unk213ACMap *)gUnknown_08499590)->unk1E42[
+        sub_08020754(&gMap->visible[
                          gUnknown_03004070 * 0x508]);
     }
     else
     {
-        sub_080206E4(&((struct Unk213ACMap *)gUnknown_08499590)->unk1E42[
+        FillMapBuffer(&gMap->visible[
                          gUnknown_03004070 * 0x508],
-                     1 - gUnknown_03003FC0.unk0d);
+                     1 - gPlaySt.fog);
     }
 
-    sub_080206E4(&((struct Unk213ACMap *)gUnknown_08499590)->unk1E42[
+    FillMapBuffer(&gMap->visible[
                      gUnknown_03004088 * 0x508],
-                 1 - gUnknown_03003FC0.unk0d);
+                 1 - gPlaySt.fog);
 
-    if (gUnknown_03003FC0.unk0d != 0)
+    if (gPlaySt.fog != 0)
     {
         sub_080212AC(1);
         sub_080212AC(2);

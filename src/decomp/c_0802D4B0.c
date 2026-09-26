@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -21,12 +22,12 @@ void sub_0802D4B0(void)
 
     v = 1;
 
-    if (gUnknown_030033E4.unk00 - *(s16 *)(gUnknown_08499590 + 4) / 16 <= 6)
+    if (gUnknown_030033E4.unk00 - gMap->scrollX / 16 <= 6)
         v = 0x14;
 
     sub_08024268();
     sub_08019F2C(gUnknown_0849AC60, v, 1, 1, gUnknown_030044A0);
-    sub_08034F7C();
+    IncrementMapLock();
 }
 
 /* Byte-identical duplicate of sub_0802D4B0 -- see there for the shape. Only
@@ -37,12 +38,12 @@ void sub_0802D504(void)
 
     v = 1;
 
-    if (gUnknown_030033E4.unk00 - *(s16 *)(gUnknown_08499590 + 4) / 16 <= 6)
+    if (gUnknown_030033E4.unk00 - gMap->scrollX / 16 <= 6)
         v = 0x14;
 
     sub_08024268();
     sub_08019F2C(gUnknown_0849ABC0, v, 1, 1, gUnknown_030040F0);
-    sub_08034F7C();
+    IncrementMapLock();
 }
 
 /* Byte-identical duplicate of sub_0802D458 -- only the blob differs. */
@@ -52,10 +53,10 @@ void sub_0802D558(void)
 
     v = 1;
 
-    if (gUnknown_030033E4.unk00 - *(s16 *)(gUnknown_08499590 + 4) / 16 <= 6)
+    if (gUnknown_030033E4.unk00 - gMap->scrollX / 16 <= 6)
         v = 0x14;
 
     sub_08024268();
     sub_0801A104(gUnknown_0849AE28, v, 1, 1);
-    sub_08034F7C();
+    IncrementMapLock();
 }

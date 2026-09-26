@@ -8,10 +8,10 @@
  */
 
 /* sub_08018800's twin, differing only in the constant stored to
- * gUnknown_03003FC0.unk05. */
+ * gPlaySt.dispMiniPanel. */
 bool8 sub_080187C8(s16 a)
 {
-    gUnknown_03003FC0.unk05 = 1;
+    gPlaySt.dispMiniPanel = 1;
     sub_0802DCA4();
     gUnknown_0200C528[a].unk04++;
     return TRUE;
@@ -19,7 +19,7 @@ bool8 sub_080187C8(s16 a)
 
 bool8 sub_08018800(s16 a)
 {
-    gUnknown_03003FC0.unk05 = 0;
+    gPlaySt.dispMiniPanel = 0;
     sub_0802DCA4();
     gUnknown_0200C528[a].unk04++;
     return TRUE;

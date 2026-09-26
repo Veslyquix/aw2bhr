@@ -1,10 +1,15 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803D3F0.
  * sub_0803D3F0 @ 0x0803D3F0, sub_0803D48C @ 0x0803D48C, sub_0803D4A8 @ 0x0803D4A8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* The local `struct Map` cast is load-bearing, not decoration: the ROM
@@ -18,17 +23,6 @@
  *
  * The member set is written to match sub_0803D2F8's copy of this declaration
  * exactly, so the two survive being promoted into one translation unit. */
-struct Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_04[0x0A22 - 0x0004];
-    /* 0x0A22 */ u16 tile[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[(0x4232 - 0x417A) / 2];
-    /* 0x4232 */ u8 filler_4232[1];
-    /* 0x4233 */ u8 unk4233;
-};
 /* The 0x02000000 staging record. Declared locally and cast onto the `u8 []`
  * global for the same reason src/decomp's `struct Map` files do it: the ROM
  * computes the copy loop's source as `(rec + 0x4C4) + i`, and only a
@@ -53,15 +47,15 @@ void sub_0803D3F0(void)
 {
     int x, y;
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++) {
-        for (x = 0; x < ((struct Map *)gUnknown_08499590)->width; x++) {
-            int idx = ((struct Map *)gUnknown_08499590)->rowOffset[y] + x;
+    for (y = 0; y < gMap->height; y++) {
+        for (x = 0; x < gMap->width; x++) {
+            int idx = gMap->rowOffset[y] + x;
 
-            ((struct Map *)gUnknown_08499590)->terrain[idx] =
-                gUnknown_0849959C[((struct Map *)gUnknown_08499590)->tile[idx]];
+            gMap->terrain[idx] =
+                gUnknown_0849959C[gMap->tile[idx]];
         }
     }
-    sub_080219AC();
+    RecountArmyProperties();
     sub_08024268();
 }
 
@@ -70,7 +64,7 @@ void sub_0803D3F0(void)
  * which an `int` would not do, and `cmp r4,#0xb; bls` is the unsigned test
  * `i < 12` on that width. The result of each call is discarded, so nothing
  * here settles sub_0803D4A8's return type. */
-void sub_0803D48C(void)
+void MainMenu2_0803D48D(void)
 {
     u8 i;
 
@@ -100,7 +94,7 @@ int sub_0803D4A8(u8 a)
         return 0;
     }
     sub_0801AC58(b, (u8 *)p);
-    sub_0803CC84(gUnknown_020280C0[a].unk02, p->name);
+    CopyString(gUnknown_020280C0[a].unk02, p->name);
     gUnknown_020280C0[a].unk13 = p->unk4C3;
     gUnknown_020280C0[a].filler_14[5] = p->unk4C9;
     gUnknown_020280C0[a].filler_14[6] = p->unk4CA;
@@ -108,3 +102,5 @@ int sub_0803D4A8(u8 a)
         gUnknown_020280C0[a].filler_14[i] = p->unk4C4[i];
     return 1;
 }
+
+asm(".global sub_0803D48C\n.thumb_set sub_0803D48C, MainMenu2_0803D48D\n");

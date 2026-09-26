@@ -31,19 +31,19 @@ void sub_08028894(int a1, int a2)
 }
 
 /* u16 parameter (`lsls #0x10; lsrs #0x10` in place at entry, PROMOTE_MODE),
- * narrowed again to a byte for sub_080266DC and compared whole against the u8
+ * narrowed again to a byte for IsPlayerAliveAndActive and compared whole against the u8
  * gUnknown_030030F8. */
 u8 sub_080288D8(u16 a1)
 {
-    if (sub_080266DC(a1) && gUnknown_030030F8 != a1)
+    if (IsPlayerAliveAndActive(a1) && gUnknown_030030F8 != a1)
         return 1;
     else
         return 0;
 }
 
 /* `lsls r0,#4; subs r0,r0,r4; lsls r0,#2` is a MULTIPLY by 0x3c, i.e. the
- * stride of gUnknown_08499598's elements -- written as a subscript, not as
- * hand-rolled arithmetic. gUnknown_08499598 is a POINTER variable in ROM, so
+ * stride of gPlayers's elements -- written as a subscript, not as
+ * hand-rolled arithmetic. gPlayers is a POINTER variable in ROM, so
  * the base arrives through `ldr r1, [r0]`.
  *
  * BOTH FAILING PATHS RETURN 0 AND THE SUCCESS IS THE LAST STATEMENT. The ROM
@@ -53,10 +53,10 @@ u8 sub_080288D8(u16 a1)
  * the two blocks, because gcc lays the last-written return out last. */
 u8 sub_08028904(u16 a1)
 {
-    if (sub_080266DC(a1) == 0)
+    if (IsPlayerAliveAndActive(a1) == 0)
         return 0;
 
-    if (gUnknown_08499598[a1].unk14 == 0 && gUnknown_08499598[a1].unk31 != 0)
+    if (gPlayers[a1].defeated == 0 && gPlayers[a1].unk31 != 0)
         return 0;
 
     return 1;

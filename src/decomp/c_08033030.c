@@ -14,17 +14,17 @@ void sub_08033030(ProcPtr proc)
 {
     u8 v[0x34];
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0803B4DC(0x68);
 
-    if ((gpKeySt->held & 9)
+    if ((gpKeySt->pressed & 9)
      && Proc_Find(gUnknown_0849B688) == NULL
      && Proc_Find(gUnknown_0849B670) == NULL)
     {
         if (gUnknown_0849B060->unk09 == gUnknown_0849B018->unk06
          || sub_0803CCB8((u8)gUnknown_0849B060->unk04, v) != 1)
         {
-            sub_0803BD54();
+            LockMainMenu();
             Proc_Goto(proc, 0xb);
         }
         else
@@ -38,7 +38,7 @@ void sub_080330C0(ProcPtr proc)
 {
     sub_0803B4DC(0x71);
 
-    if (sub_0803BD6C())
+    if (GetMainMenuLock())
     {
         sub_08032D60();
         Proc_EndEach(gUnknown_0849B688);

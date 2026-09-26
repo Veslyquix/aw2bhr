@@ -16,5 +16,5 @@
 
 void sub_08012E74(u16 x, u16 y, u16 c)
 {
-    gUnknown_08499578[y * 32 + x] = c | 0xC000;
+    gBG0TilemapBuffer[y * 32 + x] = c | 0xC000;
 }

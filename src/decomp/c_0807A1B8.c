@@ -46,7 +46,7 @@ void sub_0807A1B8(struct Unk0807A1B8Proc *proc)
     if (proc->unk4c > 0x30)
         proc->unk4c = 0x30;
 
-    if ((gpKeySt->held & 9) && proc->unk4c == 0x30)
+    if ((gpKeySt->pressed & 9) && proc->unk4c == 0x30)
     {
         proc->unk4c = 0;
         gUnknown_03001400 = 0xFF10;

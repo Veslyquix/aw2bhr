@@ -49,8 +49,8 @@ void sub_0806F0EC(struct Unk6F0ECProc *proc)
     u16 held;
     u16 keys;
 
-    held = gpKeySt->held;
-    keys = gpKeySt->unk02;
+    held = gpKeySt->pressed;
+    keys = gpKeySt->repeated;
 
     if (held & 8)
     {

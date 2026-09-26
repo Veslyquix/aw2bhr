@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,15 +8,7 @@
  * sub_08009DFC @ 0x08009DFC
  */
 
-struct Map08009DFC
-{
-    u16 width;
-    u16 height;
-    u8 filler_0004[0x1432 - 4];
-    u8 terrain[0x417A - 0x1432];
-    u16 rowOffset[1];
-};
-#define MAP08009DFC ((struct Map08009DFC *)gUnknown_08499590)
+#define MAP08009DFC gMap
 
 /* MATCHED in wave 67 (276/276).  The aggregate map view fixes the address
  * pseudo ordering and the ROM's r2-to-r7 copy.  The x-neighbour indices must

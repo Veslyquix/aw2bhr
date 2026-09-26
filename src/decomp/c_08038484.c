@@ -10,7 +10,7 @@
 /* THE 0x10 TABLE IS AN ARRAY, AND THE SHARED STRUCT SAYS IT IS TWO SCALARS.
  * gUnknown_0200C420's +0x10 and +0x12 are declared `u16 unk10; u16 unk12;` in
  * unknown-globals.h, but this function subscripts that pair with the runtime
- * value sub_0803866C() returns. The difference is visible in the pool word and
+ * value IsHardCampaignMode() returns. The difference is visible in the pool word and
  * is worth 3 instructions: `&gUnknown_0200C420.unk10` const-folds to the single
  * address constant `gUnknown_0200C420+0x10`, while the ROM's word is a BARE
  * `gUnknown_0200C420` with `adds r5,r4,#0; adds r5,#0x10` computing the member
@@ -41,29 +41,29 @@ void sub_08038484(void)
 
     ok = 0;
 
-    if (sub_0803861C())
+    if (IsPlayer1TeamAlive())
     {
-        sub_08038368(gUnknown_03003FC0.unk02 - 0x8a, gUnknown_03004080,
-                     gUnknown_08499598[sub_0807A908()].unk38);
-        sub_0807823C(gUnknown_03003FC0.unk02 - 0x8a);
-        gUnknown_0202FDFC.unk0c = gUnknown_03003FC0.unk02 - 0x8a;
+        sub_08038368(gPlaySt.mapID - 0x8a, gUnknown_03004080,
+                     gPlayers[sub_0807A908()].totalScore);
+        CampaignMapNoOp(gPlaySt.mapID - 0x8a);
+        gUnknown_0202FDFC.unk0c = gPlaySt.mapID - 0x8a;
         gUnknown_0202FDFC.unk11 = 1;
-        ok = sub_0807821C(gUnknown_03003FC0.unk02 - 0x8a);
+        ok = sub_0807821C(gPlaySt.mapID - 0x8a);
     }
     else
     {
-        gUnknown_0202FDFC.unk0c = gUnknown_03003FC0.unk02 - 0x8a;
+        gUnknown_0202FDFC.unk0c = gPlaySt.mapID - 0x8a;
         gUnknown_0202FDFC.unk11 = ok;
     }
 
-    sub_080346FC();
+    ResetRulesAfterCampaignMap();
 
     if (ok)
     {
         tbl = (struct Unk38484Tbl *)&gUnknown_0200C420;
 
-        if (tbl->unk10[sub_0803866C()] < sub_08038434())
-            tbl->unk10[sub_0803866C()] = sub_08038434();
+        if (tbl->unk10[IsHardCampaignMode()] < sub_08038434())
+            tbl->unk10[IsHardCampaignMode()] = sub_08038434();
 
         sub_08045790();
     }

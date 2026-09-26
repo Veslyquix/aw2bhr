@@ -4,47 +4,53 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08034780.
- * sub_08034780 @ 0x08034780
+ * SetDefaultRules @ 0x08034780
  */
 
-void sub_08034780(void)
+/* Named per Xenesis's AW2 Subroutine List: "Sets the default rules (Used
+ * for War Room, used to clear after a campaign map)". The old SetDefaultRules
+ * symbol is kept as a linker alias below so every other unit keeps
+ * resolving it unchanged. */
+void SetDefaultRules(void)
 {
     gUnknown_030040F0 = 0;
     gUnknown_030044A0 = 0;
 
-    gUnknown_03003FC0.unk38[1] = 1;
-    gUnknown_03003FC0.unk38[2] = 1;
-    gUnknown_03003FC0.unk38[3] = 1;
-    gUnknown_03003FC0.unk38[4] = 1;
-    gUnknown_03003FC0.unk33[1] = 1;
-    gUnknown_03003FC0.unk33[2] = 2;
-    gUnknown_03003FC0.unk33[3] = 3;
-    gUnknown_03003FC0.unk33[4] = 4;
-    gUnknown_03003FC0.unk3d[1] = 1;
-    gUnknown_03003FC0.unk3d[2] = 2;
-    gUnknown_03003FC0.unk3d[3] = 4;
-    gUnknown_03003FC0.unk3d[4] = 0xb;
+    gPlaySt.aiControlled[1] = 1;
+    gPlaySt.aiControlled[2] = 1;
+    gPlaySt.aiControlled[3] = 1;
+    gPlaySt.aiControlled[4] = 1;
+    gPlaySt.armyColor[1] = 1;
+    gPlaySt.armyColor[2] = 2;
+    gPlaySt.armyColor[3] = 3;
+    gPlaySt.armyColor[4] = 4;
+    gPlaySt.co[1] = 1;
+    gPlaySt.co[2] = 2;
+    gPlaySt.co[3] = 4;
+    gPlaySt.co[4] = 0xb;
 
     sub_08026900();
 
-    gUnknown_03003FC0.unk30 = 0;
-    gUnknown_03003FC0.unk31 = 0;
-    gUnknown_03003FC0.unk28 = 1000;
-    gUnknown_03003FC0.unk24 = 0;
-    gUnknown_03003FC0.unk10[1] = 0;
-    gUnknown_03003FC0.unk10[2] = 0;
-    gUnknown_03003FC0.unk10[3] = 0;
-    gUnknown_03003FC0.unk10[4] = 0;
-    gUnknown_03003FC0.unk0d = 0;
-    gUnknown_03003FC0.unk2f = 0;
-    gUnknown_03003FC0.unk2c = 0;
-    gUnknown_03003FC0.unk2d = 0;
-    gUnknown_03003FC0.unk2e = 0;
-    gUnknown_03003FC0.unk04 = 3;
-    gUnknown_03003FC0.unk05 = 1;
-    gUnknown_03003FC0.unk06 = 0;
-    gUnknown_03003FC0.unk08 = 1;
-    gUnknown_03003FC0.unk07 = 1;
-    gUnknown_03003FC0.unk09 = gUnknown_0200C420.unk0e;
-    gUnknown_03003FC0.unk0c = (gUnknown_0200C420.unk14 == 0);
+    gPlaySt.turnLimit = 0;
+    gPlaySt.captureLimit = 0;
+    gPlaySt.propertyFunds = 1000;
+    gPlaySt.unk24 = 0;
+    gPlaySt.unk10[1] = 0;
+    gPlaySt.unk10[2] = 0;
+    gPlaySt.unk10[3] = 0;
+    gPlaySt.unk10[4] = 0;
+    gPlaySt.fog = 0;
+    gPlaySt.defaultWeather = 0;
+    gPlaySt.weather = 0;
+    gPlaySt.randomWeatherOn = 0;
+    gPlaySt.unk2e = 0;
+    gPlaySt.event20 = 3;
+    gPlaySt.dispMiniPanel = 1;
+    gPlaySt.campaignRelated = 0;
+    gPlaySt.coAbilities = 1;
+    gPlaySt.coPowersEnabled = 1;
+    gPlaySt.animOpts = gUnknown_0200C420.unk0e;
+    gPlaySt.bgmOn = (gUnknown_0200C420.unk14 == 0);
 }
+
+asm(".global sub_08034780\n.thumb_set sub_08034780, SetDefaultRules\n");

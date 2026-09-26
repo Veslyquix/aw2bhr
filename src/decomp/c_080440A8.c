@@ -4,41 +4,43 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080440A8.
- * sub_080440A8 @ 0x080440A8, sub_080440E0 @ 0x080440E0
+ * SpendCoPowerCharge @ 0x080440A8, sub_080440E0 @ 0x080440E0
  */
 
-void sub_080440A8(int a1, int a2)
+void SpendCoPowerCharge(int a1, int a2)
 {
     int v;
 
     switch (a2) {
     default:
     case 1:
-        v = sub_080441D4(a1);
+        v = GetCoPowerCost(a1);
         break;
     case 2:
-        v = sub_08044208(a1);
+        v = GetSuperCoPowerCost(a1);
         break;
     }
-    v = sub_08044094(a1) - v;
+    v = GetCoPowerCharge(a1) - v;
     if (v < 0)
         v = 0;
     sub_08044080(a1, v);
 }
 
+asm(".global sub_080440A8\n.thumb_set sub_080440A8, SpendCoPowerCharge\n");
+
 void sub_080440E0(int a1, int a2)
 {
     int v;
 
-    if (gUnknown_03003FC0.unk07 == 0)
+    if (gPlaySt.coPowersEnabled == 0)
         return;
     if (sub_0804415C(a1))
         return;
-    v = gUnknown_08499598[a1].unk20;
+    v = gPlayers[a1].coCharge;
     if (v < 0)
         return;
-    if (v + a2 > sub_08044208(a1))
-        gUnknown_08499598[a1].unk20 = sub_08044208(a1);
+    if (v + a2 > GetSuperCoPowerCost(a1))
+        gPlayers[a1].coCharge = GetSuperCoPowerCost(a1);
     else
-        gUnknown_08499598[a1].unk20 = gUnknown_08499598[a1].unk20 + a2;
+        gPlayers[a1].coCharge = gPlayers[a1].coCharge + a2;
 }

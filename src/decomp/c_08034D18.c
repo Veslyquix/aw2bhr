@@ -11,14 +11,14 @@ void sub_08034D18(void)
 {
     sub_0802776C(0);
 
-    switch (gUnknown_08499598[gUnknown_030033EC].unk1b)
+    switch (gPlayers[gUnknown_030033EC].aiControlled)
     {
     case 1:
         gUnknown_030032D8 = 0xd;
         break;
 
     case 2:
-        if (gUnknown_03003FC0.unk32 == 0 || !sub_0802F4F4())
+        if (gPlaySt.savingEnabled == 0 || !sub_0802F4F4())
         {
             gUnknown_03004780 = 0;
             gUnknown_030032D8 = 0xe;

@@ -4,10 +4,10 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800C874.
- * sub_0800C874 @ 0x0800C874, sub_0800C8A0 @ 0x0800C8A0, sub_0800C8D8 @ 0x0800C8D8, sub_0800C958 @ 0x0800C958, sub_0800C9E8 @ 0x0800C9E8
+ * CountProperties @ 0x0800C874, sub_0800C8A0 @ 0x0800C8A0, RegisterArmyHqs @ 0x0800C8D8, sub_0800C958 @ 0x0800C958, sub_0800C9E8 @ 0x0800C9E8
  */
 
-/* Counts the live entries in the gUnknown_03003150 list: 4-byte records whose
+/* Counts the live entries in the gProperty list: 4-byte records whose
  * first byte is 0 when the slot is empty and 0xFF when the list ends.
  *
  * The list bound and the sentinel are TWO exits and their order is readable
@@ -20,7 +20,7 @@
  *
  * A leaf with no `push`: the counter, the pointer giv and the limit fit in
  * r0..r3. */
-int sub_0800C874(void)
+int CountProperties(void)
 {
     int i;
     int n;
@@ -29,22 +29,24 @@ int sub_0800C874(void)
 
     for (i = 0; i <= 0x5B; i++)
     {
-        if (gUnknown_03003150[i].flags == 0xFF)
+        if (gProperty[i].flags == 0xFF)
             break;
-        if (gUnknown_03003150[i].flags != 0)
+        if (gProperty[i].flags != 0)
             n++;
     }
 
     return n;
 }
 
-/* sub_0800C874 with one more conjunct: the same bounded scan of
- * gUnknown_03003150, counting only the live records whose flags byte equals
+asm(".global sub_0800C874\n.thumb_set sub_0800C874, CountProperties\n");
+
+/* CountProperties with one more conjunct: the same bounded scan of
+ * gProperty, counting only the live records whose flags byte equals
  * the caller's.  The `cmp r0,#0` survives beside `cmp r0,r3` even though a
  * zero argument would make it redundant, so the emptiness test really is
  * written separately in the source and is not folded into the equality.
  *
- * The extra `push {r4, lr}` over sub_0800C874 is the parameter occupying r3,
+ * The extra `push {r4, lr}` over CountProperties is the parameter occupying r3,
  * which pushes the giv limit into r4. */
 u32 sub_0800C8A0(int a)
 {
@@ -55,16 +57,16 @@ u32 sub_0800C8A0(int a)
 
     for (i = 0; i <= 0x5B; i++)
     {
-        if (gUnknown_03003150[i].flags == 0xFF)
+        if (gProperty[i].flags == 0xFF)
             break;
-        if (gUnknown_03003150[i].flags != 0 && gUnknown_03003150[i].flags == a)
+        if (gProperty[i].flags != 0 && gProperty[i].flags == a)
             n++;
     }
 
     return n;
 }
 
-int sub_0800C8D8(void)
+int RegisterArmyHqs(void)
 {
     int i;
     int n;
@@ -73,24 +75,24 @@ int sub_0800C8D8(void)
 
     for (i = 0; i <= 3; i++)
     {
-        gUnknown_0200B0B0->unk17[i] |= 0xFF;
-        gUnknown_0200B0B0->unk1b[i] |= 0xFF;
+        gActiveMap->hqX[i] |= 0xFF;
+        gActiveMap->hqY[i] |= 0xFF;
     }
 
     for (i = 0; i <= 0x5B; i++)
     {
-        if (gUnknown_03003150[i].flags == 0xFF)
+        if (gProperty[i].flags == 0xFF)
             break;
-        if (gUnknown_03003150[i].flags != 0)
+        if (gProperty[i].flags != 0)
         {
-            switch (gUnknown_03003150[i].flags)
+            switch (gProperty[i].flags)
             {
             case 0x28:
             case 0x48:
             case 0x68:
             case 0x88:
-                sub_0800C75C(gUnknown_03003150[i].flags, gUnknown_03003150[i].x,
-                             gUnknown_03003150[i].y);
+                sub_0800C75C(gProperty[i].flags, gProperty[i].x,
+                             gProperty[i].y);
                 n++;
                 break;
             }
@@ -99,6 +101,8 @@ int sub_0800C8D8(void)
 
     return n;
 }
+
+asm(".global sub_0800C8D8\n.thumb_set sub_0800C8D8, RegisterArmyHqs\n");
 
 /* Totals three sub_0800C8A0 counts for whichever id the caller names, after
  * checking the id is currently valid.  Undeclared before this wave.
@@ -154,7 +158,7 @@ int sub_0800C958(int a)
     return n;
 }
 
-/* Asks sub_0800C958 about all four ids, falling back to sub_08025308(team) when
+/* Asks sub_0800C958 about all four ids, falling back to CountArmyUnits(team) when
  * an id is not currently registered, and answers whether ALL four are present
  * and more than one of them is non-empty.
  *
@@ -185,7 +189,7 @@ int sub_0800C9E8(void)
     a = sub_0800C958(0x28);
     if (a == 0)
     {
-        if (sub_08025308(1) > 0)
+        if (CountArmyUnits(1) > 0)
         {
             n++;
             a = 1;
@@ -199,7 +203,7 @@ int sub_0800C9E8(void)
     b = sub_0800C958(0x48);
     if (b == 0)
     {
-        if (sub_08025308(2) > 0)
+        if (CountArmyUnits(2) > 0)
         {
             n++;
             b = 1;
@@ -213,7 +217,7 @@ int sub_0800C9E8(void)
     c = sub_0800C958(0x68);
     if (c == 0)
     {
-        if (sub_08025308(3) > 0)
+        if (CountArmyUnits(3) > 0)
         {
             n++;
             c = 1;
@@ -227,7 +231,7 @@ int sub_0800C9E8(void)
     d = sub_0800C958(0x88);
     if (d == 0)
     {
-        if (sub_08025308(4) > 0)
+        if (CountArmyUnits(4) > 0)
         {
             n++;
             d = 1;

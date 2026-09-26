@@ -33,7 +33,7 @@ void sub_08086688(ProcPtr arg)
     sub_08087168(p->unk5c);
     sub_080872D0(p->unk5c);
 
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
         sub_08087220(gUnknown_03005930, 0x28);
     else
         sub_08087220(gUnknown_03005980, 0x48);

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -24,24 +25,6 @@
  * folded into the load displacement, i.e. a member array and not `+ 1` on a
  * bare u16 pointer. */
 
-struct Unk2163CMap
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u16 unk08;
-    /* 0x000a */ u16 unk0a;
-    /* 0x000c */ u16 unk0c;
-    /* 0x000e */ u16 unk0e;
-    /* 0x0010 */ u16 unk10;
-    /* 0x0012 */ u8 filler_0012[0x0A22 - 0x12];
-    /* 0x0A22 */ u16 tile[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[(0x421A - 0x417A) / 2];
-    /* 0x421A */ u8 name[0x4233 - 0x421A];
-    /* 0x4233 */ u8 unk4233;
-};
 struct Unk2163CSrc
 {
     /* 0x00 */ u8 width;
@@ -61,36 +44,36 @@ void sub_0802163C(int a)
         return;
     }
 
-    sub_080247A4(a);
+    LoadMapData(a);
 
-    ((struct Unk2163CMap *)gUnknown_08499590)->width =
+    gMap->width =
         ((struct Unk2163CSrc *)gUnknown_03003F68)->width;
-    ((struct Unk2163CMap *)gUnknown_08499590)->height =
+    gMap->height =
         ((struct Unk2163CSrc *)gUnknown_03003F68)->height;
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk04 = 0;
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk06 = 0;
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk08 = 0;
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk0a = 0;
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk0c = 0;
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk0e = 0;
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk10 = 0;
+    gMap->scrollX = 0;
+    gMap->scrollY = 0;
+    gMap->unk08 = 0;
+    gMap->unk0a = 0;
+    gMap->camX = 0;
+    gMap->camY = 0;
+    gMap->unk10 = 0;
 
-    sub_0803CC84(((struct Unk2163CMap *)gUnknown_08499590)->name,
+    CopyString(gMap->unk421a,
                  sub_08024944(a));
-    ((struct Unk2163CMap *)gUnknown_08499590)->unk4233 = sub_0802490C(a);
+    gMap->unk4233 = sub_0802490C(a);
 
     sub_080215FC();
 
-    for (y = 0; y < ((struct Unk2163CMap *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk2163CMap *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             t = ((struct Unk2163CSrc *)gUnknown_03003F68)->tile[
-                    ((struct Unk2163CMap *)gUnknown_08499590)->rowOffset[y] + x];
-            ((struct Unk2163CMap *)gUnknown_08499590)->tile[
-                ((struct Unk2163CMap *)gUnknown_08499590)->rowOffset[y] + x] = t;
-            ((struct Unk2163CMap *)gUnknown_08499590)->plane[
-                ((struct Unk2163CMap *)gUnknown_08499590)->rowOffset[y] + x] =
+                    gMap->rowOffset[y] + x];
+            gMap->tile[
+                gMap->rowOffset[y] + x] = t;
+            gMap->terrain[
+                gMap->rowOffset[y] + x] =
                 gUnknown_0849959C[t];
         }
     }

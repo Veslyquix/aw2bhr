@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080697CC.
  * sub_080697CC @ 0x080697CC, sub_08069864 @ 0x08069864, sub_08069924 @ 0x08069924
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -29,7 +33,7 @@ struct Unk69864Proc
 
 /* Graphics loader; sub_08069FD0 is its near-twin, differing only in the first
  * Decompress destination (0x06000000 here, 0x06008000 there), one extra blob
- * into *gUnknown_0849957C, and the extra sub_08013AFC call.
+ * into *gBG1TilemapBuffer, and the extra sub_08013AFC call.
  *
  * The zero word CpuFastSet fills from is a STACK local, which is what the
  * `sub sp, #4` and `mov r0, sp` are for. gUnknown_08580E60's address stays in
@@ -43,15 +47,15 @@ void sub_080697CC(void)
     Decompress(gUnknown_08184FF4, (void *)0x06000000);
     Decompress(gUnknown_08185F0C, (void *)0x0600C000);
     ApplyPaletteExt(gUnknown_081866D8, 0xc0, 0x20);
-    Decompress(gUnknown_0818616C, gUnknown_0849957C);
-    Decompress(gUnknown_0818633C, gUnknown_08499580);
+    Decompress(gUnknown_0818616C, gBG1TilemapBuffer);
+    Decompress(gUnknown_0818633C, gBG2TilemapBuffer);
     Decompress(gUnknown_08186460, gUnknown_08580E60);
     sub_08013AFC();
     sub_08013B0C();
     sub_08011E54(gUnknown_08580E60, (void *)0x0600F000, 0x1000);
 }
 
-void sub_08069864(struct Unk69864Proc *proc)
+void IntroT3_08069865(struct Unk69864Proc *proc)
 {
     proc->unk2c = sub_080674F4(gUnknown_0202F204++);
     sub_080670F8(gUnknown_08581438);
@@ -69,7 +73,7 @@ void sub_08069864(struct Unk69864Proc *proc)
     sub_08072C40(3, 0, 0);
 }
 
-/* The mode-1 counterpart of sub_08069864's setup: reorder the four BG
+/* The mode-1 counterpart of IntroT3_08069865's setup: reorder the four BG
  * priorities, hand gUnknown_030030B4 to sub_08012C48, clear the tile buffer and
  * load graphics. The one blob is conditional on the argument.
  *
@@ -92,11 +96,13 @@ void sub_08069924(u8 a1)
     sub_08063994();
     sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 1);
     zero = 0;
-    CpuFastSet(&zero, gUnknown_08499580, 0x01000200);
+    CpuFastSet(&zero, gBG2TilemapBuffer, 0x01000200);
     gUnknown_030030B4.bits.wrap = 1;
     ApplyPaletteExt(gUnknown_0817DA18, 0x20, 0x20);
     if (a1 != 0)
         Decompress(gUnknown_0817DA38, (void *)0x06008000);
-    Decompress(gUnknown_0817E208, gUnknown_08499580);
+    Decompress(gUnknown_0817E208, gBG2TilemapBuffer);
     sub_08013B0C();
 }
+
+asm(".global sub_08069864\n.thumb_set sub_08069864, IntroT3_08069865\n");

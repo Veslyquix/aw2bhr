@@ -26,7 +26,7 @@ void sub_0802D168(void)
 
     sub_08029948(0);
     sub_0801A168();
-    sub_08034F7C();
+    IncrementMapLock();
 }
 
 /* The unconditional twin of sub_0802D168: the flag is forced to 1 and the
@@ -39,7 +39,7 @@ void sub_0802D1A0(void)
 
     sub_08029948(1);
     sub_0801A168();
-    sub_08034F7C();
+    IncrementMapLock();
 }
 
 /* See src/decomp/c_0802D064.c: same shape with two of the six calls dropped,
@@ -47,12 +47,12 @@ void sub_0802D1A0(void)
 
 void sub_0802D1C0(void)
 {
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
     sub_08060684();
     sub_080424FC();
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0xB, gUnknown_03003F38, 0, 0);
 }
 
@@ -61,11 +61,11 @@ void sub_0802D1C0(void)
 
 void sub_0802D1F8(void)
 {
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
     sub_080606A0();
     sub_080424FC();
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0xC, gUnknown_03003F38, 0, 0);
 }

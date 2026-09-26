@@ -38,13 +38,13 @@ void sub_08074A28(struct Unk8074AAC *proc)
     child->unk2a = id;
 
     r = &gUnknown_08615194[id];
-    child->unk2c = r->unk06;
-    child->unk2e = r->unk08;
+    child->unk2c = r->flagX;
+    child->unk2e = r->flagY;
 
-    if (r->unk02 & 4)
+    if (r->specialProperty & 4)
         v = 0x28;
 
-    if (r->unk02 & 8)
+    if (r->specialProperty & 8)
         v = 0x38;
 
     child->unk30 = v;

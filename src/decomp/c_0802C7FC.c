@@ -9,7 +9,7 @@
 
 bool8 sub_0802C7FC(void)
 {
-    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk08 != 0)
+    if (gUnknown_085C77A0[gPlaySt.mapID].unk08 != 0)
         return FALSE;
 
     return TRUE;

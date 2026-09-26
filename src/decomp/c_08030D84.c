@@ -83,7 +83,7 @@ void sub_08030DEC(void)
             gUnknown_03003FF8[i + 1] = 0;
     }
 
-    gUnknown_03003FC0.unk38[gUnknown_0849B018->unk06 + 1] = 1;
+    gPlaySt.aiControlled[gUnknown_0849B018->unk06 + 1] = 1;
 }
 
 /* MATCHED (wave 42, W42-K). Needs its .rodata pool word placed:
@@ -122,5 +122,5 @@ void sub_08030E40(void)
         }
     }
 
-    gUnknown_0849B018->unk1ab0 = gUnknown_03004008;
+    gUnknown_0849B018->unk1ab0 = gGameClock;
 }

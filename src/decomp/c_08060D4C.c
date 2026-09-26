@@ -4,22 +4,24 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08060D4C.
- * sub_08060D4C @ 0x08060D4C, sub_08060D78 @ 0x08060D78
+ * AiPickUnitToBuild @ 0x08060D4C, sub_08060D78 @ 0x08060D78
  */
 
-void sub_08060D4C(void)
+void AiPickUnitToBuild(void)
 {
     u8 v;
 
     if (gUnknown_030046C0.unk06 == 0)
     {
-        sub_08060F00();
-        sub_08060F74();
-        v = sub_08060FFC();
+        AiCalcBuildPriorities();
+        AiMarkAffordableUnits();
+        v = AiSelectBuildUnit();
         if (v != 0xff)
             gUnknown_030046C0.unk06 = v;
     }
 }
+
+asm(".global sub_08060D4C\n.thumb_set sub_08060D4C, AiPickUnitToBuild\n");
 
 void sub_08060D78(s16 *p)
 {

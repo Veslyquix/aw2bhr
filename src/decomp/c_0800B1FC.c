@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -26,18 +27,10 @@
  *
  * The struct extents are inferred from the adjacent offsets this block reaches
  * and are NOT proved; only the three member positions are. */
-struct MapScreen
-{
-    /* 0x0000 */ u8 filler_0000[0x0A22];
-    /* 0x0A22 */ u16 cells[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 int sub_0800B1FC(int x, int y)
 {
-    struct MapScreen *s = (struct MapScreen *)gUnknown_08499590;
-    int cell = s->cells[s->rowOffset[y] + x];
+    struct Map *s = gMap;
+    int cell = s->tile[s->rowOffset[y] + x];
 
     if (cell == 2 || cell == 0x20)
         return 0;

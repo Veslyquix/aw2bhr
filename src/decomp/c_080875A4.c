@@ -50,18 +50,18 @@ void sub_080875A4(int a, int n, struct Unk80875A4Proc *proc)
     int u;
     int t;
 
-    sub_0801F34C(0x52, 0xd0, 0x88, 0, 2);
-    sub_0801F34C(0x53, 0, 0x88, 0, 2);
-    sub_0801F34C(0x60, 0x4e, 0x94, 0, 2);
+    DrawOamObject(0x52, 0xd0, 0x88, 0, 2);
+    DrawOamObject(0x53, 0, 0x88, 0, 2);
+    DrawOamObject(0x60, 0x4e, 0x94, 0, 2);
 
     if (gUnknown_0200C078[gUnknown_02027F74.unk04[a] - 0x6c].unk00[0].unk00_08 != 0)
     {
         if (n > 0x63)
-            sub_0801F34C(Div(DivRem(n, 1000), 100) + 0x55, 0x36, 0x94, 0, 2);
+            DrawOamObject(Div(DivRem(n, 1000), 100) + 0x55, 0x36, 0x94, 0, 2);
         if (n > 9)
-            sub_0801F34C(Div(DivRem(n, 100), 10) + 0x55, 0x3e, 0x94, 0, 2);
+            DrawOamObject(Div(DivRem(n, 100), 10) + 0x55, 0x3e, 0x94, 0, 2);
         if (n >= 0)
-            sub_0801F34C(DivRem(n, 10) + 0x55, 0x46, 0x94, 0, 2);
+            DrawOamObject(DivRem(n, 10) + 0x55, 0x46, 0x94, 0, 2);
 
         sub_0804402C(0x18, 0xa0, 0x7490, 6);
     }

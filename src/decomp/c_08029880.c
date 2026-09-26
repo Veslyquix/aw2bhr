@@ -17,8 +17,8 @@ void sub_08029880(void)
     if (gUnknown_03001470[gUnknown_03001FBC].unk24 == 0)
         sub_080428F0(gUnknown_03001470[gUnknown_03001FBC].unk22);
 
-    sub_08034F48();
-    sub_08034F8C();
+    LockUnitSelection();
+    DecrementMapLock();
 
     if (gUnknown_03001470[gUnknown_03001FBC].unk24 == 0)
     {
@@ -37,6 +37,6 @@ void sub_08029880(void)
     gUnknown_03003334 = 0;
     sub_080424FC();
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_080344B4(gUnknown_03003F38, gUnknown_030033E8[0], gUnknown_030033E8[1]);
 }

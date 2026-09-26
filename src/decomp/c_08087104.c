@@ -8,7 +8,7 @@
  */
 
 /* Reads the candidate-list byte at gUnknown_02027F74 + 4 + proc->unk58 and, when
- * sub_0803CA54 accepts it, copies the four bytes at gUnknown_02027F74 +0..+3 into
+ * IsCampaignMapUnlocked accepts it, copies the four bytes at gUnknown_02027F74 +0..+3 into
  * the proc's four halfwords at +0x64; otherwise fills all four with -1.
  *
  * THE ADDRESS ARITHMETIC IS src/decomp/c_08086E54.c's IDIOM, not a member array.
@@ -30,8 +30,8 @@
  * member array is the one that does NOT match.
  *
  * The `lsls #0x18` after the `bl` is NOT a narrow return type: src/decomp/c_0803CA54.c
- * is promoted and defines `int sub_0803CA54(u32)`, so the byte test belongs to
- * this caller and is spelled `(u8)sub_0803CA54(...)`. try_match compiles one unit
+ * is promoted and defines `int IsCampaignMapUnlocked(u32)`, so the byte test belongs to
+ * this caller and is spelled `(u8)IsCampaignMapUnlocked(...)`. try_match compiles one unit
  * and cannot see that; proto_check.py is what catches it.
  *
  * The two spellings of -1 in the else arm are NOT interchangeable: unk64 gets
@@ -57,7 +57,7 @@ void sub_08087104(void *arg)
     q = (u8 *)&gUnknown_02027F74;
     q += 4;
 
-    if (q[p->unk58] <= 0xb3 && (u8)sub_0803CA54(q[p->unk58]))
+    if (q[p->unk58] <= 0xb3 && (u8)IsCampaignMapUnlocked(q[p->unk58]))
     {
         p->unk64 = gUnknown_02027F74.unk00;
         p->unk66 = gUnknown_02027F74.unk01;
@@ -73,7 +73,7 @@ void sub_08087104(void *arg)
     }
 }
 
-/* Draws up to four HUD elements, in two layouts chosen by gUnknown_03003FC0.unk01.
+/* Draws up to four HUD elements, in two layouts chosen by gPlaySt.gameMode.
  *
  * THE CONDITION IS TWO STATEMENTS, NOT ONE EXPRESSION, and that is what wave 34
  * parked this function on at 92.4%. The ROM's window is
@@ -124,29 +124,29 @@ void sub_08087168(int a)
     int n;
     int g;
 
-    m = gUnknown_03003FC0.unk01;
+    m = gPlaySt.gameMode;
 
     if (m == 2)
     {
         if (a != 0)
-            sub_0801F34C(0x43, 0x24, 0x20, 0, m);
+            DrawOamObject(0x43, 0x24, 0x20, 0, m);
 
         n = gUnknown_02027F74.unk37 - a;
         g = gUnknown_03005928;
         if (g != n + 1)
-            sub_0801F34C(0x44, 0x24, 0x98, 0, m);
+            DrawOamObject(0x44, 0x24, 0x98, 0, m);
     }
     else
     {
         if (a != 0)
-            sub_0801F34C(0x43, 0x20, 0x40, 0, 2);
+            DrawOamObject(0x43, 0x20, 0x40, 0, 2);
 
         n = (g = gUnknown_02027F74.unk37 - a);
         g = gUnknown_03005928;
         if (g != n + 1 && gUnknown_02027F74.unk37 > g)
-            sub_0801F34C(0x44, 0x20, 0x98, 0, 2);
+            DrawOamObject(0x44, 0x20, 0x98, 0, 2);
 
-        sub_0801F34C(0x45, 0, 0x28, 0, 2);
-        sub_0801F34C(0x46, 0x48, 0x28, 0, 2);
+        DrawOamObject(0x45, 0, 0x28, 0, 2);
+        DrawOamObject(0x46, 0x48, 0x28, 0, 2);
     }
 }

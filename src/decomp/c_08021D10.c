@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,12 +29,10 @@ void sub_08021D10(void)
 
     for (y = 0; y <= 0xf; y++)
     {
-        sub_08023BAC((u16)(((s16)*(u16 *)(gUnknown_08499590 + 4) >> 4)
-                           - *(u16 *)(gUnknown_08499590 + 0xc)),
-                     (u16)(y + (((s16)*(u16 *)(gUnknown_08499590 + 6) >> 4)
-                                - *(u16 *)(gUnknown_08499590 + 0xe))),
-                     (u16)((s16)*(u16 *)(gUnknown_08499590 + 4) >> 4),
-                     (u16)(y + ((s16)*(u16 *)(gUnknown_08499590 + 6) >> 4)));
+        BlitMapRow((u16)((gMap->scrollX >> 4) - gMap->camX),
+                     (u16)(y + ((gMap->scrollY >> 4) - gMap->camY)),
+                     (u16)(gMap->scrollX >> 4),
+                     (u16)(y + (gMap->scrollY >> 4)));
     }
 
     sub_08013B1C();

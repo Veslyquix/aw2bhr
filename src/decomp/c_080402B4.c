@@ -1,10 +1,11 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080402B4.
- * sub_080402B4 @ 0x080402B4, sub_08040380 @ 0x08040380
+ * DestroyPipeSeam @ 0x080402B4, sub_08040380 @ 0x08040380
  */
 
 #include "proc.h"
@@ -23,14 +24,7 @@
  * Plane addresses go through a struct laid over gUnknown_08499590 for the usual
  * reason: the ROM computes `(map + K) + idx`, which only a COMPONENT_REF
  * preserves. */
-struct Unk402B4Map
-{
-    /* 0x0000 */ u8 filler_0000[0x0A22];
-    /* 0x0A22 */ u16 unkA22[0x508];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
-/* The sibling of sub_080402B4 next door: same snapshot-then-rewrite shape on
+/* The sibling of DestroyPipeSeam next door: same snapshot-then-rewrite shape on
  * the two map planes, but keyed on tile 0x180 and driving the 0x0849FB8C
  * loader pair (sub_08040430 / sub_0804046C) instead of sub_0803FF48.
  *
@@ -41,55 +35,53 @@ struct Unk402B4Map
  *
  * Plane addresses go through a struct laid over gUnknown_08499590: the ROM
  * computes `(map + K) + idx`, which only a COMPONENT_REF preserves. */
-struct Unk40380Map
+/* Named per Xenesis's AW2 Subroutine List: "Subroutine that changes Tile
+ * Type Map (0201F882) after a pipe seam is destroyed. Input: r0 = x-coord,
+ * r1 = y-coord". The old DestroyPipeSeam symbol is kept as a linker alias
+ * below so every other unit keeps resolving it unchanged. */
+void DestroyPipeSeam(int x, int y, ProcPtr parent)
 {
-    /* 0x0000 */ u8 filler_0000[0x0A22];
-    /* 0x0A22 */ u16 unkA22[0x508];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
-void sub_080402B4(int x, int y, ProcPtr parent)
-{
-    u16 v = ((struct Unk402B4Map *)gUnknown_08499590)->unkA22[
-        ((struct Unk402B4Map *)gUnknown_08499590)->rowOffset[y] + x];
+    u16 v = gMap->tile[
+        gMap->rowOffset[y] + x];
 
     sub_0803FF48(x, y, -3, parent);
 
     if (v == 0x162)
     {
-        ((struct Unk402B4Map *)gUnknown_08499590)->terrain[
-            ((struct Unk402B4Map *)gUnknown_08499590)->rowOffset[y] + x] = 1;
-        ((struct Unk402B4Map *)gUnknown_08499590)->unkA22[
-            ((struct Unk402B4Map *)gUnknown_08499590)->rowOffset[y] + x] = 0x122;
+        gMap->terrain[
+            gMap->rowOffset[y] + x] = 1;
+        gMap->tile[
+            gMap->rowOffset[y] + x] = 0x122;
     }
 
     if (v == 0x163)
     {
-        ((struct Unk402B4Map *)gUnknown_08499590)->terrain[
-            ((struct Unk402B4Map *)gUnknown_08499590)->rowOffset[y] + x] = 1;
-        ((struct Unk402B4Map *)gUnknown_08499590)->unkA22[
-            ((struct Unk402B4Map *)gUnknown_08499590)->rowOffset[y] + x] = 0x123;
+        gMap->terrain[
+            gMap->rowOffset[y] + x] = 1;
+        gMap->tile[
+            gMap->rowOffset[y] + x] = 0x123;
     }
 
     sub_08024268();
-    sub_080219AC();
+    RecountArmyProperties();
 }
+
+asm(".global sub_080402B4\n.thumb_set sub_080402B4, DestroyPipeSeam\n");
 
 void sub_08040380(int x, int y, ProcPtr parent)
 {
-    u16 v = ((struct Unk40380Map *)gUnknown_08499590)->unkA22[
-        ((struct Unk40380Map *)gUnknown_08499590)->rowOffset[y] + x];
+    u16 v = gMap->tile[
+        gMap->rowOffset[y] + x];
 
     sub_08040430(0x1CA, 5);
     sub_0804046C(x, y, 0x1CA, 5, parent);
 
     if (v == 0x180)
     {
-        ((struct Unk40380Map *)gUnknown_08499590)->terrain[
-            ((struct Unk40380Map *)gUnknown_08499590)->rowOffset[y] + x] = 0x12;
-        ((struct Unk40380Map *)gUnknown_08499590)->unkA22[
-            ((struct Unk40380Map *)gUnknown_08499590)->rowOffset[y] + x] = 0x1A0;
+        gMap->terrain[
+            gMap->rowOffset[y] + x] = 0x12;
+        gMap->tile[
+            gMap->rowOffset[y] + x] = 0x1A0;
     }
 
     sub_08021CB4();

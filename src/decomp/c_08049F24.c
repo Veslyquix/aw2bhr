@@ -53,7 +53,7 @@
  *    `(sel + 2) << 12 | i * 16` and `(sel + 2) * 0x1000` are byte-identical to
  *    the spelling below.
  *
- * Proved: gUnknown_03004008 is read UNSIGNED (two __umodsi3 calls and a `lsrs`
+ * Proved: gGameClock is read UNSIGNED (two __umodsi3 calls and a `lsrs`
  * for the /4) although it is declared s32; `lsls #0x10; lsrs #0xf` is the u16
  * truncation folded with the u16 array subscript's *2 and NOT a mask (the
  * wave-16 rule); the trailing sprite's attribute is
@@ -68,7 +68,7 @@ void sub_08049F24(void)
     int off;
     s16 j;
 
-    t = (u32)gUnknown_03004008 % 0x78 / 4 % 0xf;
+    t = (u32)gGameClock % 0x78 / 4 % 0xf;
     off = t * 2;
     sub_08013664((u16 *)((u8 *)gUnknown_08131DEC + off), 0x26a, 2);
 

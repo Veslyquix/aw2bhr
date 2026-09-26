@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08026424.
- * sub_08026424 @ 0x08026424
+ * GetPowerScore @ 0x08026424
  */
 
 /* A percentage, capped at 100: this army's unk18 measured against the summed
@@ -18,28 +18,34 @@
  *
  * `sum` is UNSIGNED and the Div result is assigned back INTO it. Both are
  * load-bearing: a fresh local puts the clamp in r0 and costs the
- * `adds r5, r0, #0`, and a signed `sum` turns the ROM's `bls` into `ble`. */
-u8 sub_08026424(u8 a)
+ * `adds r5, r0, #0`, and a signed `sum` turns the ROM's `bls` into `ble`.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Power Scoring Subroutine". The
+ * old GetPowerScore symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
+u8 GetPowerScore(u8 a)
 {
     u32 sum;
     u16 i;
 
-    if (!sub_080266DC(a))
+    if (!IsPlayerAliveAndActive(a))
         return 0;
 
     sum = 0;
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b != 0
-         && gUnknown_08499598[a].unk2a != gUnknown_08499598[i].unk2a)
+        if (gPlayers[i].aiControlled != 0
+         && gPlayers[a].team != gPlayers[i].team)
             sum += sub_08025CF0(i);
     }
 
     if (sum == 0)
         return 0;
 
-    sum = Div(gUnknown_08499598[a].unk18 * 1000, sum);
+    sum = Div(gPlayers[a].totalDestroyed * 1000, sum);
     if (sum > 100)
         sum = 100;
     return sum;
 }
+
+asm(".global sub_08026424\n.thumb_set sub_08026424, GetPowerScore\n");

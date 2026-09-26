@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080339B0.
  * sub_080339B0 @ 0x080339B0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -31,7 +35,7 @@ struct Unk339B0Child
     /* 4c */ int unk4c;
 };
 
-void sub_080339B0(struct Unk339B0Proc *proc)
+void LinkC2_080339B1(struct Unk339B0Proc *proc)
 {
     struct Unk339B0Child *child;
 
@@ -62,13 +66,13 @@ void sub_080339B0(struct Unk339B0Proc *proc)
 
     Decompress(gUnknown_0823A3D4,
                BG_CHAR_ADDR(((union BgCntBuf *)&gUnknown_0300251C)->bits.chr_block));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     sub_08013B1C();
 
     sub_08073304(gUnknown_085802F0, gUnknown_02010C50, 0xec, 0xf, 0, 0, (int)proc);
 
     Proc_Start(gUnknown_0849BB80, proc);
-    Proc_Start(gUnknown_08616EFC, proc);
+    Proc_Start(ProcScr_PutFace, proc);
 
     child = Proc_Start(gUnknown_0849BC50, proc);
     child->unk4c = 0;
@@ -83,3 +87,5 @@ void sub_080339B0(struct Unk339B0Proc *proc)
     sub_08085AF4();
     sub_0803D48C();
 }
+
+asm(".global sub_080339B0\n.thumb_set sub_080339B0, LinkC2_080339B1\n");

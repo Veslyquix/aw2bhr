@@ -9,11 +9,11 @@
 
 void sub_08034A7C(int y, int b)
 {
-    char *s = (char *)gUnknown_08610A38[gUnknown_08499CCC[b]];
+    char *s = (char *)gTextTable[gUnknown_08499CCC[b]];
     int x = sub_08034A44(s);
 
     sub_08034A58(y, s);
 
-    sub_0801F34C(b + 0x3d, x - 0x10, y - 4, 0, 0);
-    sub_0801F34C(b + 0x3d, x + sub_0808B6B0(s) * 8, y - 4, 0, 0);
+    DrawOamObject(b + 0x3d, x - 0x10, y - 4, 0, 0);
+    DrawOamObject(b + 0x3d, x + sub_0808B6B0(s) * 8, y - 4, 0, 0);
 }

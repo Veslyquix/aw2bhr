@@ -18,13 +18,13 @@
  */
 void sub_0802966C(void)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     u8 r;
 
-    if (gpKeySt->unk02 & 0x50)
+    if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_UP))
         sub_080294FC();
 
-    if (gpKeySt->unk02 & 0xa0)
+    if (gpKeySt->repeated & (DPAD_LEFT | DPAD_DOWN))
         sub_08029570();
 
     gUnknown_030033E4.unk00 = gUnknown_03003100.pos.unk00
@@ -34,19 +34,19 @@ void sub_0802966C(void)
 
     sub_08023274(1);
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_08015328(gUnknown_03001FBC);
-        sub_08034F8C();
+        DecrementMapLock();
         sub_0802D558();
         gUnknown_030033E4.unk00 = gUnknown_03003F24.pos.unk00;
         gUnknown_030033E4.unk02 = gUnknown_03003F24.pos.unk02;
     }
-    else if (gpKeySt->held & 1)
+    else if (gpKeySt->pressed & 1)
     {
         gUnknown_03003F40 = gUnknown_03001470[gUnknown_03001FBC].unk20;
 
-        unit = &gUnknown_08499594[gUnknown_030040D8->unk07[
+        unit = &gUnits[gUnknown_030040D8->unk07[
                    gUnknown_03001470[gUnknown_03001FBC].unk22]];
 
         gUnknown_030033E8[gUnknown_03000558] =
@@ -67,9 +67,9 @@ void sub_0802966C(void)
         }
 
         sub_080357E0(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
-                     (((struct Unk08499594 *)gUnknown_030040D8 - gUnknown_08499594) & 0xc0) >> 6,
-                     unit->unk00, gUnknown_03003110);
+                     (((struct Unit *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
+                     unit->type, gUnknown_03003110);
         sub_08015C30(gUnknown_03001FBC);
-        sub_08029868(unit->unk00);
+        sub_08029868(unit->type);
     }
 }

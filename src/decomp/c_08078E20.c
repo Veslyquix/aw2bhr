@@ -22,7 +22,7 @@
 
 u8 sub_08078E20(void)
 {
-    s32 x = sub_08078E14();
+    s32 x = GetCampaignMissionId();
 
     if (x == 8 || x == 0x10 || x == 0x18 || x == 0x20 || x == 0x22 || x == 0x2a)
         return 1;
@@ -51,7 +51,7 @@ void sub_08078E48(ProcPtr proc)
     gDispIo.disp_ct.bg1_enable = 0;
     sub_08013B0C();
     sub_0801A5B0(sub_0807A908());
-    sub_0807A99C(gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk16, 0);
+    sub_0807A99C(gUnknown_085C77A0[gPlaySt.mapID].unk16, 0);
 }
 
 /* `movs r0, #0xd1; lsls r0, r0, #1` is a plain 0x1a2 -- minimal shift, one

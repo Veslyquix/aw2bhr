@@ -7,12 +7,15 @@
  * sub_080366C4 @ 0x080366C4, sub_080366D0 @ 0x080366D0
  */
 
-void sub_080366C4(void (*fn)(void))
+void SetMainLoopCallback(void (*fn)(void))
 {
     gUnknown_030040EC = fn;
 }
 
-void sub_080366D0(void (*fn)(void))
+void SetVBlankCallback(void (*fn)(void))
 {
     gUnknown_030040D0 = fn;
 }
+
+asm(".global sub_080366C4\n.thumb_set sub_080366C4, SetMainLoopCallback\n"
+    ".global sub_080366D0\n.thumb_set sub_080366D0, SetVBlankCallback\n");

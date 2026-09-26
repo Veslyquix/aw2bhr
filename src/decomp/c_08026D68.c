@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -25,15 +26,6 @@
  * The `lsls #0x18` on `b & 0xe0` before the zero test is the u8 local `t`, and
  * `lsrs #0x1d` on that same shifted value is `t >> 5`: read the pair as
  * `(u32)x << 24 >> 29`, a net right shift of 5, not as a mask plus a shift. */
-struct Unk26D68Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_04[0x142e];
-    /* 0x1432 */ u8 cells[0x2d48];
-    /* 0x417a */ u16 rowOffset[1];
-};
-
 void sub_08026D68(void)
 {
     int i;
@@ -42,57 +34,57 @@ void sub_08026D68(void)
     u8 b;
     u8 t;
     int kind;
-    struct Unk08499598 *army;
+    struct PlayerStruct *army;
 
     for (i = 0; i <= 4; i++)
     {
-        gUnknown_08499598[i].unk08 = 0;
-        gUnknown_08499598[i].unk0c = 0;
-        gUnknown_08499598[i].unk0d = 0;
-        gUnknown_08499598[i].unk0e = 0;
-        gUnknown_08499598[i].unk0f = 0;
-        gUnknown_08499598[i].unk2d |= 0x80;
+        gPlayers[i].income = 0;
+        gPlayers[i].bases = 0;
+        gPlayers[i].cities = 0;
+        gPlayers[i].airports = 0;
+        gPlayers[i].ports = 0;
+        gPlayers[i].hqX |= 0x80;
     }
 
-    for (j = 0; j < ((struct Unk26D68Map *)gUnknown_08499590)->height; j++)
+    for (j = 0; j < gMap->height; j++)
     {
-        for (k = 0; k < ((struct Unk26D68Map *)gUnknown_08499590)->width; k++)
+        for (k = 0; k < gMap->width; k++)
         {
-            b = ((struct Unk26D68Map *)gUnknown_08499590)->cells[
-                    ((struct Unk26D68Map *)gUnknown_08499590)->rowOffset[j] + k];
+            b = gMap->terrain[
+                    gMap->rowOffset[j] + k];
 
             t = b & 0xe0;
             if (t != 0)
             {
-                army = &gUnknown_08499598[t >> 5];
+                army = &gPlayers[t >> 5];
                 kind = b & 0x1f;
 
                 switch (kind)
                 {
                 case 8:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk2d = k;
-                    army->unk2e = j;
+                    army->income += sub_08026C6C(kind);
+                    army->hqX = k;
+                    army->hqY = j;
                     break;
                 case 14:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0c++;
+                    army->income += sub_08026C6C(kind);
+                    army->bases++;
                     break;
                 case 20:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk10++;
+                    army->income += sub_08026C6C(kind);
+                    army->labs++;
                     break;
                 case 6:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0d++;
+                    army->income += sub_08026C6C(kind);
+                    army->cities++;
                     break;
                 case 10:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0e++;
+                    army->income += sub_08026C6C(kind);
+                    army->airports++;
                     break;
                 case 11:
-                    army->unk08 += sub_08026C6C(kind);
-                    army->unk0f++;
+                    army->income += sub_08026C6C(kind);
+                    army->ports++;
                     break;
                 }
             }

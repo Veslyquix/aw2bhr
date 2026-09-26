@@ -123,6 +123,72 @@ def o1_dead_rodata_objects(by_src):
     return sorted(objs)
 
 
+# e.g. "\t\t/* SPLIT_RAM_OBJ: src/proc.o(ewram_data)"
+RAM_OBJ_START_RE = re.compile(
+    r'^(\s*)/\* SPLIT_RAM_OBJ:\s*(\S+)\(([.\w]+)\)')
+RAM_OBJ_END_RE = re.compile(r'END_SPLIT_RAM_OBJ')
+RAM_OBJ_ADDR_RE = re.compile(r'\.\s*=\s*(0x[0-9A-Fa-f]+)\s*;')
+
+
+def expand_split_ram_objs(lines):
+    """Swap a base-build RAM placeholder block for the real object under SPLIT.
+
+    src/decomp/*.c never declares its own RAM storage -- every global it
+    touches is already an `extern` into a symbol the base build's aw2bhr.lds
+    places by address (the giant `. = ADDR; NAME = .;` list in EWRAM/IWRAM).
+    A file promoted directly under src/ (design.c, proc.c, ...) can instead be
+    the ORIGINAL definition of an EWRAM_DATA/IWRAM_DATA global -- proc.c's
+    sProcArray is one -- and the base build still needs SOME placeholder for
+    it there, since it has no C at all. Under SPLIT=1 the promoted file really
+    is compiled, so its own `ewram_data`/`.bss` section is the authoritative
+    definition; keeping the placeholder too would double-define every symbol
+    in it (or, discarded, leave the object's own surviving sections referring
+    to a symbol GNU ld now considers undefined -- "referenced ... defined in
+    discarded section").
+
+    A `SPLIT_RAM_OBJ: OBJ(SECTION)` marker comment through a matching
+    `END_SPLIT_RAM_OBJ` marks exactly one such placeholder block; this
+    replaces the whole span with `. = ALIGN(4); OBJ(SECTION);` so the promoted
+    object supplies it instead. Base aw2bhr.lds keeps the placeholder verbatim
+    -- this only runs when building aw2bhr.split.lds.
+    """
+    out = []
+    i = 0
+    n = 0
+    while i < len(lines):
+        m = RAM_OBJ_START_RE.match(lines[i])
+        if not m:
+            out.append(lines[i])
+            i += 1
+            continue
+        indent, obj, sect = m.group(1), m.group(2), m.group(3)
+        j = i + 1
+        addr = None
+        while j < len(lines) and not RAM_OBJ_END_RE.search(lines[j]):
+            if addr is None:
+                am = RAM_OBJ_ADDR_RE.search(lines[j])
+                if am:
+                    addr = am.group(1)
+            j += 1
+        if j >= len(lines):
+            print("error: SPLIT_RAM_OBJ marker for %s(%s) has no matching "
+                  "END_SPLIT_RAM_OBJ" % (obj, sect))
+            return None, 0
+        if addr is None:
+            print("error: SPLIT_RAM_OBJ marker for %s(%s) has no `. = ADDR;` "
+                  "line to anchor the real object's placement" % (obj, sect))
+            return None, 0
+        # The placeholder block's own leading `. = ADDR;` is the object's real
+        # start address -- without re-asserting it here, the object would
+        # instead land wherever the PRECEDING placeholder line left the
+        # location counter (measured: it is not the same address).
+        out.append("%s. = %s;\n" % (indent, addr))
+        out.append("%s. = ALIGN(4); %s(%s);\n" % (indent, obj, sect))
+        n += 1
+        i = j + 1
+    return out, n
+
+
 def generate():
     by_src = load_units()
     if by_src is None:
@@ -146,7 +212,12 @@ def generate():
                 # A promoted unit's pool word is in .rodata whichever blob it
                 # was carved out of, because that is the section agbcc emits it
                 # into; the surviving blob pieces keep the blob's own section.
-                sect = ".rodata" if e["kind"] == "c" else blobs[blob]["sect"]
+                # A "c" piece defaults to .rodata (agbcc's -fforce-addr pool
+                # words always land there regardless of the source blob's own
+                # section), but split_rodata.py's dict-form carve entries can
+                # override it per address -- e.g. a CONST_DATA table that
+                # agbcc places in .data instead.
+                sect = e.get("sect", ".rodata") if e["kind"] == "c" else blobs[blob]["sect"]
                 out.append("%s. = ALIGN(4); %s(%s)  /* %s */\n"
                            % (indent, e["obj"], sect, e["addr_hex"]))
             continue
@@ -181,6 +252,13 @@ def generate():
         print(f"error: split produced units for {sorted(missing)} but the "
               f"linker script never references them")
         return None, 0
+
+    out, n_ram = expand_split_ram_objs(out)
+    if out is None:
+        return None, 0
+    if n_ram:
+        print("      swapped %d SPLIT_RAM_OBJ placeholder block(s) for the "
+              "real object" % n_ram)
 
     text = "".join(out)
 

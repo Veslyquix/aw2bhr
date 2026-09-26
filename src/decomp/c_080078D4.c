@@ -14,7 +14,7 @@
  * sub_080078D4 @ 0x080078D4
  */
 
-void sub_080078D4(u8 a)
+void sub_080078D4(s8 a)
 {
-    gUnknown_0200B0B0->unk2f = a;
+    gActiveMap->unitArmy = a;
 }

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -21,9 +22,16 @@
  * What DID transfer between them is the whole loop body verbatim; each was
  * matched separately and neither derived from the other.
  *
+ * Uses `gMap` (include/map.h), but the `sub_0801F92C` setup calls must also
+ * pass `gMap->danger` / `gMap->move` (the plane's own array member,
+ * decays to `u8 *`), not `gUnknown_08499590 + offset` or a cast -- agbcc's
+ * CSE only reuses a pointer load across identical symbols, and mixing in the
+ * raw name anywhere forces a second pool load (see sub_08057D90 for the
+ * fuller writeup of this).
+ *
  * `mask` MUST BE A BYTE, and this was the entire residual: with `int mask` the
  * function is 640 bytes with every instruction in the right place, and only
- * `y` and the loop's `&gUnknown_08499590` pointer have r8 and sb swapped
+ * `y` and the loop's `&gMap` pointer have r8 and sb swapped
  * (`mov r9,r4` / `mov r8,r3` instead of `mov r8,r4` / `mov sb,r3`, with the
  * three reads following). Narrowing the local changes nothing in the emitted
  * stream -- it lives in a stack slot at [sp,#0x10] either way, and THUMB's
@@ -50,7 +58,7 @@
  *     shorten_compare then makes the comparison unsigned. Adding `(u8)` or
  *     `100u` breaks it.
  *   - the pre-loop `best` read comes out `ldrsb` here and `ldrb; lsl; asr` in
- *     sub_08059464 from the SAME `(s8)map->unk2D5A[...]` source: `ldrsb` needs
+ *     sub_08059464 from the SAME `(s8)map->danger[...]` source: `ldrsb` needs
  *     a spare register for the zero index, and here the address landed in r2
  *     leaving r0 free while there it landed in r0.
  *   - the 5th argument to the gUnknown_030013EC indirect call is the literal 0
@@ -68,16 +76,6 @@
  * matches the four register arguments plus one stack word here.
  */
 
-struct Map591E4
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142E];
-    /* 0x1432 */ u8 unk1432[0x1928];
-    /* 0x2D5A */ u8 unk2D5A[0x0508];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 /* sub_08059464 @ 0x08059464, 528 bytes. MATCHED (first attempt).
  *
  * The sibling of sub_080591E4 at 0x080591E4: the same "walk every cell, keep
@@ -114,17 +112,6 @@ struct Map591E4
  * sign-extend.
  */
 
-struct Map59464
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142E];
-    /* 0x1432 */ u8 unk1432[0x1928];
-    /* 0x2D5A */ u8 unk2D5A[0x0508];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
-
 void sub_080591E4(void *a1)
 {
     u16 *cur;
@@ -139,7 +126,7 @@ void sub_080591E4(void *a1)
     bestY = 0;
     mask = 0;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2D5A);
+    sub_0801F92C(gMap->danger);
     gUnknown_030013EC(cur[0], cur[1], gUnknown_030040D8->unk00, 0x78, 0);
 
     if (gUnknown_03004784[1] >= gUnknown_030040D8->unk07[3] % 100)
@@ -148,32 +135,32 @@ void sub_080591E4(void *a1)
         mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     }
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->move);
     sub_080202A4(gUnknown_030040D8);
 
     if (gUnknown_03004784[1] == 100)
         best = 0x7fff;
     else
-        best = (s8)((struct Map591E4 *)gUnknown_08499590)->unk2D5A[((struct Map591E4 *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+        best = gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
 
     bestX = -1;
 
-    for (y = 0; y < ((struct Map591E4 *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Map591E4 *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (((struct Map591E4 *)gUnknown_08499590)->unk2D5A[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x] > best)
+            if ((u8)gMap->danger[gMap->rowOffset[y] + x] > best)
                 continue;
-            if (((struct Map591E4 *)gUnknown_08499590)->unk3262[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x] & mask)
+            if (gMap->dangerMask[gMap->rowOffset[y] + x] & mask)
                 continue;
             if (!sub_08059674(x, y))
                 continue;
-            if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x20
-             && (((struct Map591E4 *)gUnknown_08499590)->unk1432[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x] & 0x1f) == 0xb)
+            if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x20
+             && (gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)((struct Map591E4 *)gUnknown_08499590)->unk2D5A[((struct Map591E4 *)gUnknown_08499590)->unk417A[y] + x];
+            best = gMap->danger[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }
@@ -209,27 +196,27 @@ void sub_08059464(void *a1)
         mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     }
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->move);
     sub_080202A4(gUnknown_030040D8);
 
-    best = (s8)((struct Map59464 *)gUnknown_08499590)->unk2D5A[((struct Map59464 *)gUnknown_08499590)->unk417A[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
+    best = gMap->danger[gMap->rowOffset[gUnknown_030040D8->unk03] + gUnknown_030040D8->unk02];
     bestX = -1;
 
-    for (y = 0; y < ((struct Map59464 *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Map59464 *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
-            if (((struct Map59464 *)gUnknown_08499590)->unk2D5A[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x] > best)
+            if ((u8)gMap->danger[gMap->rowOffset[y] + x] > best)
                 continue;
-            if (((struct Map59464 *)gUnknown_08499590)->unk3262[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x] & mask)
+            if (gMap->dangerMask[gMap->rowOffset[y] + x] & mask)
                 continue;
             if (!sub_08059674(x, y))
                 continue;
-            if ((((struct Map59464 *)gUnknown_08499590)->unk1432[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x] & 0x1f) == 0xb)
+            if ((gMap->terrain[gMap->rowOffset[y] + x] & 0x1f) == 0xb)
                 continue;
-            best = (s8)((struct Map59464 *)gUnknown_08499590)->unk2D5A[((struct Map59464 *)gUnknown_08499590)->unk417A[y] + x];
+            best = gMap->danger[gMap->rowOffset[y] + x];
             bestX = x;
             bestY = y;
         }

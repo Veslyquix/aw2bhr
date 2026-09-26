@@ -7,7 +7,7 @@
  * sub_08039F18 @ 0x08039F18
  */
 
-/* One nested expression, which is what loads gUnknown_08610A38's address first
+/* One nested expression, which is what loads gTextTable's address first
  * into the callee-saved r4 and keeps it live to the end. The `adds r3, #0x38`
  * on the base rather than a folded displacement is the `g[i].member` hoist for
  * a word access on an array global.
@@ -16,7 +16,7 @@
  * it straight to sub_08039544, which copies bytes until the first zero. */
 u8 *sub_08039F18(int a)
 {
-    return gUnknown_08610A38[gUnknown_085D3DD0[gUnknown_08499598[a].unk1d]
-                                 .unk38[gUnknown_08499598[a].unk1e]
-                                 .unk00];
+    return gTextTable[gUnknown_085D3DD0[gPlayers[a].co]
+                                 .power[gPlayers[a].coMode]
+                                 .powerNameId];
 }

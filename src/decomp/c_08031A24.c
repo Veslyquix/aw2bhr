@@ -11,7 +11,7 @@ int sub_08031A24(void)
 {
     int r;
 
-    if ((gUnknown_03004008 & 0xf) == 0)
+    if ((gGameClock & 0xf) == 0)
     {
         gUnknown_02025760.unk00 = 0xab;
         gUnknown_02025760.unk01 = gUnknown_0849B018->unk06;

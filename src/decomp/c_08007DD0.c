@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,16 +8,7 @@
  * sub_08007DD0 @ 0x08007DD0
  */
 
-struct MapScreen
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 4];
-    /* 0x0A22 */ u16 cells[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct MapScreen *)gUnknown_08499590)
+#define MAP gMap
 
 s16 sub_08007DD0(int x, int y)
 {
@@ -27,24 +19,24 @@ s16 sub_08007DD0(int x, int y)
     {
         int ny = y - 1;
         if (x > 0)
-            mask |= sub_080015E4(x - 1, ny) << 8;
-        mask |= sub_080015E4(x, ny) << 7;
+            mask |= IsTerrainLand(x - 1, ny) << 8;
+        mask |= IsTerrainLand(x, ny) << 7;
         if (x < MAP->width - 1)
-            mask |= sub_080015E4(x + 1, ny) << 6;
+            mask |= IsTerrainLand(x + 1, ny) << 6;
     }
     if (x > 0)
-        mask |= sub_080015E4(x - 1, y) << 5;
-    mask |= sub_080015E4(x, y) << 4;
+        mask |= IsTerrainLand(x - 1, y) << 5;
+    mask |= IsTerrainLand(x, y) << 4;
     if (x < MAP->width - 1)
-        mask |= sub_080015E4(x + 1, y) << 3;
+        mask |= IsTerrainLand(x + 1, y) << 3;
     if (y < MAP->height - 1)
     {
         int ny = y + 1;
         if (x > 0)
-            mask |= sub_080015E4(x - 1, ny) << 2;
-        mask |= sub_080015E4(x, ny) << 1;
+            mask |= IsTerrainLand(x - 1, ny) << 2;
+        mask |= IsTerrainLand(x, ny) << 1;
         if (x < MAP->width - 1)
-            mask |= sub_080015E4(x + 1, ny);
+            mask |= IsTerrainLand(x + 1, ny);
     }
 
     t = MAP->terrain[MAP->rowOffset[y] + x];

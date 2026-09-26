@@ -82,9 +82,9 @@ int sub_0803C3F4(u32 id)
 
 int sub_0803C40C(void)
 {
-    if (sub_0803CBD8(0x20))
+    if (IsCampaignCompletionFlagSet(0x20))
         return -1;
-    if (!sub_0803CBD8(0x21))
+    if (!IsCampaignCompletionFlagSet(0x21))
         return 0;
     return 1;
 }
@@ -96,9 +96,9 @@ int sub_0803C40C(void)
 
 int sub_0803C434(void)
 {
-    if (sub_0803CBD8(0x28))
+    if (IsCampaignCompletionFlagSet(0x28))
         return -1;
-    if (!sub_0803CBD8(0x21))
+    if (!IsCampaignCompletionFlagSet(0x21))
         return 0;
     return 1;
 }
@@ -136,7 +136,7 @@ int sub_0803C48C(u32 id)
 {
     if ((u8)sub_0803CAB8(id))
         return -1;
-    if (!sub_0803CBD8(0x23))
+    if (!IsCampaignCompletionFlagSet(0x23))
         return 0;
     return 1;
 }
@@ -150,7 +150,7 @@ int sub_0803C4B4(u32 id)
 {
     if ((u8)sub_0803CAB8(id))
         return -1;
-    if (!sub_0803CBD8(0x24))
+    if (!IsCampaignCompletionFlagSet(0x24))
         return 0;
     return 1;
 }
@@ -164,7 +164,7 @@ int sub_0803C4DC(u32 id)
 {
     if ((u8)sub_0803CAB8(id))
         return -1;
-    if (!sub_0803CBD8(0x25))
+    if (!IsCampaignCompletionFlagSet(0x25))
         return 0;
     return 1;
 }
@@ -178,7 +178,7 @@ int sub_0803C504(u32 id)
 {
     if ((u8)sub_0803CAB8(id))
         return -1;
-    if (!sub_0803CBD8(0x26))
+    if (!IsCampaignCompletionFlagSet(0x26))
         return 0;
     return 1;
 }
@@ -188,13 +188,13 @@ int sub_0803C504(u32 id)
  * -1 while gUnknown_02028030.unk2a already has the bit set, 0 when unlock 0x21
  * is not held or the rank is below n, and 1 otherwise.
  *
- * `n` is signed: the compare against sub_08037DA4's result is `blt`.
- * sub_0803CBD8's result is tested with a bare `cmp r0, #0` while
+ * `n` is signed: the compare against GetCampaignScoreRank's result is `blt`.
+ * IsCampaignCompletionFlagSet's result is tested with a bare `cmp r0, #0` while
  * sub_0803CAB8's needs `lsls r0, r0, #0x18` -- the two return widths side by
  * side in one function, which is the control the note on those prototypes in
  * unknown-functions.h cites.
  *
- * sub_08037DA4 is called TWICE on the same unk10, with the store to
+ * GetCampaignScoreRank is called TWICE on the same unk10, with the store to
  * gUnknown_030040D4 in between; the second `ldrh` is a genuine reload (the
  * store can alias), so this is two source expressions and not one CSE'd value.
  */
@@ -204,11 +204,11 @@ int sub_0803C52C(u32 id, int n)
     if ((u8)sub_0803CAB8(id))
         return -1;
 
-    if (sub_0803CBD8(0x21))
+    if (IsCampaignCompletionFlagSet(0x21))
     {
-        gUnknown_030040D4 = sub_08037DA4(gUnknown_0200C420.unk10);
+        gUnknown_030040D4 = GetCampaignScoreRank(gUnknown_0200C420.unk10);
 
-        if (sub_08037DA4(gUnknown_0200C420.unk10) >= n)
+        if (GetCampaignScoreRank(gUnknown_0200C420.unk10) >= n)
             return 1;
     }
 
@@ -257,7 +257,7 @@ int sub_0803C598(u32 id)
 {
     if ((u8)sub_0803CAB8(id))
         return -1;
-    if (!sub_0803CBD8(0x21))
+    if (!IsCampaignCompletionFlagSet(0x21))
         return 0;
     return 1;
 }
@@ -271,7 +271,7 @@ int sub_0803C5C0(u32 id)
 {
     if ((u8)sub_0803CAB8(id))
         return -1;
-    if (!sub_0803CBD8(0x22))
+    if (!IsCampaignCompletionFlagSet(0x22))
         return 0;
     return 1;
 }

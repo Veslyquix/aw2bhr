@@ -19,7 +19,7 @@
  * with sub_08019260's declared `bool8`. */
 void sub_08034CD4(void)
 {
-    switch (gUnknown_03003FC0.unk02)
+    switch (gPlaySt.mapID)
     {
     case 0x8a:
     case 0x8b:

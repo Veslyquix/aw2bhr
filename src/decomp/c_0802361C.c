@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -10,7 +11,7 @@
 #include "hardware.h"
 
 /* Steps the gUnknown_030033E4 cursor cell one square in the direction the high
- * nibble of gpKeySt->unk02's low byte selects, using W33-D's gUnknown_08499C7C
+ * nibble of gpKeySt->repeated's low byte selects, using W33-D's gUnknown_08499C7C
  * (dx, dy) table, and drags the pixel-space gUnknown_030032C4 four times as far
  * -- the same pairing sub_0800105C uses. Each axis is bounds-checked against
  * the map header's own width/height and beeps only when the axis actually
@@ -30,13 +31,13 @@ void sub_0802361C(void)
     int dir;
     int n;
 
-    if ((*(u16 *)(gUnknown_08499590 + 0x10) & 0xf) != 0)
+    if ((gMap->unk10 & 0xf) != 0)
         return;
 
-    dir = (gpKeySt->unk02 >> 4) & 0xf;
+    dir = (gpKeySt->repeated >> 4) & 0xf;
 
     n = gUnknown_030033E4.unk00 + gUnknown_08499C7C[dir][0];
-    if (n >= 0 && n < *(u16 *)gUnknown_08499590)
+    if (n >= 0 && n < gMap->width)
     {
         gUnknown_030032C4.unk00 += gUnknown_08499C7C[dir][0] * 4;
         gUnknown_030033E4.unk00 = n;
@@ -45,7 +46,7 @@ void sub_0802361C(void)
     }
 
     n = gUnknown_030033E4.unk02 + gUnknown_08499C7C[dir][1];
-    if (n >= 0 && n < *(u16 *)(gUnknown_08499590 + 2))
+    if (n >= 0 && n < gMap->height)
     {
         gUnknown_030032C4.unk02 += gUnknown_08499C7C[dir][1] * 4;
         gUnknown_030033E4.unk02 = n;

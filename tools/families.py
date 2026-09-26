@@ -7,10 +7,11 @@ different constants works the shape out once and instantiates the rest, and
 clears three to five times what a hand-picked list of unrelated functions yields.
 Every family used that way so far was found by eye, by scanning for runs of equal
 size at equal address spacing. That misses everything scattered: the `Proc_Find`
-existence-predicate family has 29 members spread from 0x0801C7B4 to 0x0808AA88,
-and the header in docs/agbcc-codegen.md claimed 13 because 13 of them happened to
-be adjacent. This tool finds families by shape rather than by address, so
-scattered ones cost nothing extra.
+existence-predicate family has 30 members spread from 0x0801C7B4 to 0x0808AA88
+(29 before proc.c itself -- Proc_Find's own defining shape -- was promoted and
+became visible to this scan), and the header in docs/agbcc-codegen.md claimed
+13 because 13 of them happened to be adjacent. This tool finds families by
+shape rather than by address, so scattered ones cost nothing extra.
 
 The normaliser is fe_signatures.signature()'s `full` signature with ONE axis
 flipped: register numbers are kept. That single change is the whole design, and
@@ -399,7 +400,7 @@ def fuzzy_link(families, pool, loose, min_members):
 # --------------------------------------------------------------------------
 
 FORWARDER_LO, FORWARDER_HI = 0x08071F88, 0x08072288
-PROC_FIND_PROBE = "sub_08078150"       # a known member; the family is 29 wide
+PROC_FIND_PROBE = "sub_08078150"       # a known member; the family is 30 wide
 BITFIELD_PROBE = "sub_08045848"        # 5 x 44 bytes, one of them reordered
 
 
@@ -422,13 +423,14 @@ def validate(families, fuzzy, verbose=True):
                     f"{len(fwd)} clusters, sizes {sorted(fwd.values(), reverse=True)}, "
                     f"{sum(fwd.values())}/41 clustered"))
 
-    # 2. Proc_Find existence predicates: 29, scattered across 0x0801C7B4-0x0808AA88.
-    #    docs/agbcc-codegen.md said 13 because 13 are adjacent.
+    # 2. Proc_Find existence predicates: 30, scattered across 0x0801C7B4-0x0808AA88.
+    #    docs/agbcc-codegen.md said 13 because 13 are adjacent. Was 29 before
+    #    proc.c -- Proc_Find's own shape -- was promoted and became visible.
     fam = by_member.get(PROC_FIND_PROBE, (None, 0))[0]
     n = fam["n_members"] if fam else 0
     span = f"{fam['members'][0]['addr']}-{fam['members'][-1]['addr']}" if fam else ""
-    ok2 = n == 29
-    results.append(("Proc_Find predicate family -> 29 members", ok2,
+    ok2 = n == 30
+    results.append(("Proc_Find predicate family -> 30 members", ok2,
                     f"{n} members, {span}"))
 
     # 3. The 44-byte bitfield family must stay separate from unrelated 44-byte

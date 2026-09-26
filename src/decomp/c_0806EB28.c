@@ -29,7 +29,7 @@ struct Unk6EB28Proc
 void sub_0806EB28(ProcPtr procArg)
 {
     struct Unk6EB28Proc *proc = procArg;
-    int index = gUnknown_03004008 & 3;
+    int index = gGameClock & 3;
 
     if (proc->unk36 == index)
         index++;

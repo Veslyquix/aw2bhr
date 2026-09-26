@@ -8,9 +8,9 @@
  */
 
 /* One statement: a `?:` picking the script blob, then the s8 slot id
- * sub_080152C0 returns parked in gUnknown_0200B0B0->unk6b. */
+ * sub_080152C0 returns parked in gActiveMap->spriteId. */
 void sub_08005EF0(int a1)
 {
-    gUnknown_0200B0B0->unk6b =
+    gActiveMap->spriteId =
         sub_080152C0((s32)(a1 != 0 ? gUnknown_084886CC : gUnknown_084886BC), 0);
 }

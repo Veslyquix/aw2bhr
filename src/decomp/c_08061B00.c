@@ -13,7 +13,7 @@
  * ordinary indirect-call trampoline and its register index is the arity. */
 void sub_08061B00(void)
 {
-    if (gUnknown_03003FC0.unk0d == 0)
+    if (gPlaySt.fog == 0)
         gUnknown_085766E8[gUnknown_03004770++]();
     else
         gUnknown_08576738[gUnknown_03004770++]();

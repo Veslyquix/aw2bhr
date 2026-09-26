@@ -10,17 +10,17 @@
 /* +0x06 is a 7-BIT BITFIELD, not a byte masked at the use: `ldrb; lsls #0x19;
  * lsrs #0x19` is extract_bit_field's shape for bitsize 7 at bit 0, and the
  * shifted intermediate is CSEd into the else arm's `lsrs r0, r2, #0x19`.
- * sub_08042D1C is called twice on purpose -- the ROM recomputes it rather than
+ * GetUnitMovementWithCoBonus is called twice on purpose -- the ROM recomputes it rather than
  * keeping it live across the compare. */
-/* Wave 32 (W32-B) UNIFIES the local struct with struct Unk08499594: the two
+/* Wave 32 (W32-B) UNIFIES the local struct with struct Unit: the two
  * members this body reads -- unk00 at +0x00 and the 7-bit bitfield at +0x06 --
  * are that type's unk00 and unk06_0 at the identical offsets and widths, and
- * sub_08062730 (promoted this wave) passes gUnknown_08499594 entries straight
+ * sub_08062730 (promoted this wave) passes gUnits entries straight
  * in. Byte-neutral; re-verified. The local model is removed rather than kept
  * so the shared type is the only one a future caller can see. */
-int sub_08058224(struct Unk08499594 *p)
+int sub_08058224(struct Unit *p)
 {
-    if (sub_08042D1C(gUnknown_030033EC, p->unk00) > p->unk06_0)
-        return p->unk06_0;
-    return sub_08042D1C(gUnknown_030033EC, p->unk00);
+    if (GetUnitMovementWithCoBonus(gUnknown_030033EC, p->type) > p->fuel)
+        return p->fuel;
+    return GetUnitMovementWithCoBonus(gUnknown_030033EC, p->type);
 }

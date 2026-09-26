@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08029C38.
- * sub_08029C38 @ 0x08029C38, sub_08029CB8 @ 0x08029CB8
+ * sub_08029C38 @ 0x08029C38, StartSupplyAnimation @ 0x08029CB8
  */
 
 /* `proc->unk2c` must NOT be bound to a local first: as `d = proc->unk2c;` its
@@ -46,31 +46,38 @@ void sub_08029C38(struct Unk29C38Proc *proc)
     if (proc->unk24 > 0)
     {
         if (proc->unk30 == 1)
-            gUnknown_08499598[gUnknown_030033EC].unk00 -= proc->unk2c;
+            gPlayers[gUnknown_030033EC].funds -= proc->unk2c;
 
         return;
     }
 
     if (proc->unk30 == 1)
-        gUnknown_08499598[gUnknown_030033EC].unk00 = proc->unk28;
+        gPlayers[gUnknown_030033EC].funds = proc->unk28;
 
     sub_080272B4();
     sub_08015328(gUnknown_03001FBC);
     sub_0803B4DC(0x6c);
 }
 
-void sub_08029CB8(struct Unk802C57C *a1, u8 a2, int a3, u8 a4)
+/* Named per Xenesis's AW2 Subroutine List: "Animates Supply? (0802A182)" --
+ * sets up the proc sub_08029C38 ticks each frame (funds delta, screen
+ * position, whether to actually deduct funds). The old StartSupplyAnimation symbol
+ * is kept as a linker alias below so every other unit keeps resolving it
+ * unchanged. */
+void StartSupplyAnimation(struct Unk802C57C *a1, u8 a2, int a3, u8 a4)
 {
     struct Unk29CB8Proc *proc;
 
     proc = (struct Unk29CB8Proc *)sub_080152EC(gUnknown_0849A0A8, 0);
     proc->unk24 = a3;
-    proc->unk28 = gUnknown_08499598[gUnknown_030033EC].unk00 - a3;
+    proc->unk28 = gPlayers[gUnknown_030033EC].funds - a3;
     proc->unk20 = a1->unk00;
     proc->unk22 = a1->unk02;
 
-    if (gUnknown_03003FC0.unk47 != 0)
+    if (gPlaySt.unk47 != 0)
         proc->unk30 = 0;
     else
         proc->unk30 = a4;
 }
+
+asm(".global sub_08029CB8\n.thumb_set sub_08029CB8, StartSupplyAnimation\n");

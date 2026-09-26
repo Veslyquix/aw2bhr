@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -71,28 +72,11 @@
  *     gUnknown_03004084 in between is what kills the CSE entry.
  *
  * The `.rodata` relocation against gUnknown_0808E554 is the -fforce-addr pool
- * word for &gUnknown_03003FC0 (0x0808E554 holds 0x03003FC0 in baserom.gba), not
+ * word for &gPlaySt (0x0808E554 holds 0x03003FC0 in baserom.gba), not
  * a global and not a difference -- see work/sub_08016F38/. */
 
 extern u8 gUnknown_02023284[];
 void sub_080456B8(u8 *);
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ s16 unk04;
-    /* 0x0006 */ s16 unk06;
-    /* 0x0008 */ s16 unk08;
-    /* 0x000a */ s16 unk0a;
-    /* 0x000c */ s16 unk0c;
-    /* 0x000e */ s16 unk0e;
-    /* 0x0010 */ u16 unk10;
-    /* 0x0012 */ u8 filler_12[0xa22 - 0x12];
-    /* 0x0a22 */ u16 unk0a22[(0x417a - 0xa22) / 2];
-    /* 0x417a */ u16 unk417a[(0x421a - 0x417a) / 2];
-    /* 0x421a */ u8 unk421a[0x4233 - 0x421a];
-    /* 0x4233 */ u8 unk4233;
-};
 struct SaveBlkRec
 {
     /* 0x00 */ u8 unk00;
@@ -104,10 +88,10 @@ struct SaveBlk
     /* 0x0000 */ u16 unk0000;
     /* 0x0002 */ u16 unk0002;
     /* 0x0004 */ struct Unk802C57C unk0004;
-    /* 0x0008 */ struct Unk08499594 unk0008;
+    /* 0x0008 */ struct Unit unk0008;
     /* 0x0014 */ u8 unk0014[0x140 - 0x14];
     /* 0x0140 */ u8 unk0140[0x48];
-    /* 0x0188 */ struct Unk08499594 unk0188[4 * 51];
+    /* 0x0188 */ struct Unit unk0188[4 * 51];
     /* 0x0b18 */ int unk0b18[4];
     /* 0x0b28 */ u8 filler_0b28[0xb98 - 0xb28];
     /* 0x0b98 */ struct Unk03002F08 unk0b98;
@@ -144,50 +128,50 @@ void sub_08017208(void)
     gUnknown_03004084 = v * 0x20;
     gUnknown_03003F2C = (gUnknown_030033EC - 1) * 0x40;
     gUnknown_03004480 = v;
-    sub_0808B6E8(&gUnknown_03003FC0, p->unk0140, 0x48);
-    *(struct Unk08499594 *)gUnknown_03004490 = p->unk0008;
-    gUnknown_0200C420.unk0e = gUnknown_03003FC0.unk09;
-    gUnknown_0200C420.unk14 = (gUnknown_03003FC0.unk0c == 0);
+    sub_0808B6E8(&gPlaySt, p->unk0140, 0x48);
+    *(struct Unit *)gUnknown_03004490 = p->unk0008;
+    gUnknown_0200C420.unk0e = gPlaySt.animOpts;
+    gUnknown_0200C420.unk14 = (gPlaySt.bgmOn == 0);
     for (i = 0; i < 4; i++)
         gUnknown_030033F4[i] = p->unk0b18[i];
     gUnknown_03002F08 = p->unk0b98;
     gUnknown_03002F20 = p->unk0ba0;
     gUnknown_03001FF0 = p->unk0ba4;
-    map = (struct Map *)gUnknown_08499590;
-    map->unk00 = p->unk0bae;
-    map->unk02 = p->unk0bb0;
-    map->unk04 = a = p->unk0bb2;
-    map->unk06 = b = p->unk0bb4;
-    map->unk0c = map->unk04 / 16;
-    map->unk0e = map->unk06 / 16;
+    map = gMap;
+    map->width = p->unk0bae;
+    map->height = p->unk0bb0;
+    map->scrollX = a = p->unk0bb2;
+    map->scrollY = b = p->unk0bb4;
+    map->camX = map->scrollX / 16;
+    map->camY = map->scrollY / 16;
     map->unk08 = a;
     map->unk0a = b;
     map->unk10 = p->unk0bb6;
-    if (gUnknown_03003FC0.unk02 < 0xb4 || gUnknown_03003FC0.unk02 > 0xbf)
+    if (gPlaySt.mapID < 0xb4 || gPlaySt.mapID > 0xbf)
     {
-        ((struct Map *)gUnknown_08499590)->unk4233 = sub_0802490C(gUnknown_03003FC0.unk02);
-        sub_0803CC84(((struct Map *)gUnknown_08499590)->unk421a,
-                     sub_08024944(gUnknown_03003FC0.unk02));
-        sub_080247A4(gUnknown_03003FC0.unk02);
+        gMap->unk4233 = sub_0802490C(gPlaySt.mapID);
+        CopyString(gMap->unk421a,
+                     sub_08024944(gPlaySt.mapID));
+        LoadMapData(gPlaySt.mapID);
         sub_080215FC();
-        for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk00; y++)
+        for (y = 0; y < gMap->width; y++)
         {
-            for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk02; x++)
+            for (x = 0; x < gMap->height; x++)
             {
-                idx = ((struct Map *)gUnknown_08499590)->unk417a[x] + y;
+                idx = gMap->rowOffset[x] + y;
                 off = idx * 2;
-                ((struct Map *)gUnknown_08499590)->unk0a22[idx] =
+                gMap->tile[idx] =
                     *(u16 *)((u8 *)gUnknown_03003F68 + off + 2);
             }
         }
         sub_0802481C();
     }
-    if (gUnknown_03003FC0.unk02 < 0xb4 || gUnknown_03003FC0.unk02 > 0xbf)
+    if (gPlaySt.mapID < 0xb4 || gPlaySt.mapID > 0xbf)
     {
         for (i = 0; p->unk0bb8[i].unk02 != 0xffff; i++)
         {
-            ((struct Map *)gUnknown_08499590)->unk0a22[
-                ((struct Map *)gUnknown_08499590)->unk417a[p->unk0bb8[i].unk01]
+            gMap->tile[
+                gMap->rowOffset[p->unk0bb8[i].unk01]
                 + p->unk0bb8[i].unk00] = p->unk0bb8[i].unk02;
         }
     }

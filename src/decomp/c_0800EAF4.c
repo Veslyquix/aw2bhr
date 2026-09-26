@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -27,25 +28,15 @@
  * before or after the first call. */
 void sub_0800EAF4(int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
-    int idx;
     u16 v;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    idx = (*(u16 *)(rows + t) + x) * 2;
-    cells = p + 0xA22;
-    v = *(u16 *)(cells + idx);
+    v = gMap->tile[gMap->rowOffset[y] + x];
 
     if (v == 0x86 || v == 0x87)
     {
         sub_0800EBFC(x, y, 0x25);
         sub_0800EBFC(x, y + 1, 0x65);
-        sub_08001158(x + 1, y, 0x27);
-        sub_08001158(x + 1, y + 1, 0x67);
+        MakeTileSimple(x + 1, y, 0x27);
+        MakeTileSimple(x + 1, y + 1, 0x67);
     }
 }

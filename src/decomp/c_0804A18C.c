@@ -48,9 +48,9 @@ void sub_0804A1E4(u8 a1)
     int v;
 
     sub_0801B768(0xb0);
-    sub_08012BC8(gUnknown_08499578, gUnknown_030044E0->unk61, 2,
+    sub_08012BC8(gBG0TilemapBuffer, gUnknown_030044E0->unk61, 2,
                  gUnknown_030044E0->unk5e + 1, 2, 0);
-    sub_080149C0(gUnknown_030044E0->unk61, 2, gUnknown_08499578,
+    sub_080149C0(gUnknown_030044E0->unk61, 2, gBG0TilemapBuffer,
                  gUnknown_030044E0->unk2c, 0x8000, 0);
 
     v = sub_08014CEC(gUnknown_030044E0->unk2c);

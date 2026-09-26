@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08000CCC.
- * sub_08000CCC @ 0x08000CCC
+ * SetSelectedTile @ 0x08000CCC
  */
 
 /* Wave 37 (W37-E). PARKED at 97.6% -- SIZE EXACT (208 bytes), 5 bytes differ,
@@ -33,7 +33,7 @@
  *     NOT two statements, it is forced whenever K > 7 (THUMB's 3-operand SUB
  *     takes imm3 only); `a` and `b` are two locals because the ROM holds them in
  *     r1 and r2 at once.
- *   - `b = gUnknown_0200B0D0[b].unk04;` as its OWN statement. Inlined into the
+ *   - `b = gDesignRing[b].itemId;` as its OWN statement. Inlined into the
  *     store, the element load lands in the wrong register in both arms. */
 
 
@@ -47,42 +47,44 @@
  * all leave the 0x3F half coalescing into r2. Only the reuse of `b` for the
  * OR result gives both halves the ROM's constant-tied registers. */
 
-void sub_08000CCC(int a1)
+void SetSelectedTile(int a1)
 {
     int a;
     int b;
 
-    if (gUnknown_0200B0B0->unk07 == 0)
+    if (gActiveMap->editMode == 0)
     {
         a = sub_08001D24(a1);
         a -= 4;
         if (a < 0)
             a += 0x11;
-        gUnknown_0200B0B0->unk36 = a;
-        sub_080073F8(gUnknown_0200B0B0->unk07, a1);
-        b = gUnknown_0200B0B0->unk3a + 4;
+        gActiveMap->terrainListIndex = a;
+        sub_080073F8(gActiveMap->editMode, a1);
+        b = gActiveMap->ringIndex + 4;
         if (b > 9)
-            b = gUnknown_0200B0B0->unk3a - 6;
-        b = gUnknown_0200B0D0[b].unk04;
-        gUnknown_0200B0B0->unk2a = b;
+            b = gActiveMap->ringIndex - 6;
+        b = gDesignRing[b].itemId;
+        gActiveMap->selectedTerrain = b;
     }
     else
     {
         if (a1 != 0x19)
-            gUnknown_0200B0B0->unk2f = (a1 >> 6) + 1;
+            gActiveMap->unitArmy = (a1 >> 6) + 1;
         a = sub_08001D24(a1);
         a -= 3;
         if (a < 0)
             a += 0x14;
-        gUnknown_0200B0B0->unk38 = a;
-        sub_080073F8(gUnknown_0200B0B0->unk07, a1);
-        b = gUnknown_0200B0B0->unk3a + 3;
+        gActiveMap->unitListIndex = a;
+        sub_080073F8(gActiveMap->editMode, a1);
+        b = gActiveMap->ringIndex + 3;
         if (b > 7)
-            b = gUnknown_0200B0B0->unk3a - 5;
-        b = gUnknown_0200B0D0[b].unk04;
+            b = gActiveMap->ringIndex - 5;
+        b = gDesignRing[b].itemId;
         b = (a1 & 0xC0) | (b & 0x3F);
-        gUnknown_0200B0B0->unk24 = b;
+        gActiveMap->cursorUnit = b;
     }
 
     sub_08011E54(gUnknown_0808D8AC, (void *)0x06014D40, 0x8C << 3);
 }
+
+asm(".global sub_08000CCC\n.thumb_set sub_08000CCC, SetSelectedTile\n");

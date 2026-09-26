@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,27 +8,13 @@
  * sub_08042650 @ 0x08042650
  */
 
-struct Unk42650Map
-{
-    u8 filler_0000[0x1432];
-    u8 terrain[0x234A - 0x1432];
-    u8 flag[0x417A - 0x234A];
-    u16 rowOffset[1];
-};
-
 /* MATCHED (wave 66, W66-B), 532/532 bytes. Separate block-scoped volatile
  * reads of the map pointer keep the two cell-address chains independent;
- * COMPONENT_REF access for both the row table and the 0x1432/0x234A planes
+ * struct Map field access for the row table and the terrain/unk234A planes
  * preserves `(map + field) + index`. Binding `&gUnknown_030040D8`, then its
  * pointee, emits both pointer loads before `n << 3` and retains the outer
  * pointer for the ROM's later reload. Promotion needs .rodata words
  * 0x08091354, 0x08091358 and 0x0809135C.
- *
- * Historical wave-36 diagnosis follows. It was parked at 72.2%.
- * SIZE IS EXACT (532/532) in every attempt, both pool blocks are the ROM's,
- * every `bl`, every branch and the whole control-flow skeleton are right.
- * First difference at +0x4b. What is left is address-expression ASSOCIATION in
- * one basic block plus its register-numbering fallout.
  *
  * SETTLED HERE, and none of it should be re-derived:
  *   - gUnknown_030040D8->unk04 is a 7-BIT BITFIELD. sub_08042650 reads it
@@ -40,7 +27,7 @@ struct Unk42650Map
  *     `ldrb r0,[r0,#5]` confirm the layout is unchanged.
  *   - the `<< 25 >> 25` / `* 0x55555555` / `rsbs` / `asrs` chain is an
  *     EXACT_DIV of a pointer difference, not a magic-number division:
- *     `(struct Unk08499594 *)gUnknown_030040D8 - gUnknown_08499594`. gcc 2.x's
+ *     `(struct Unit *)gUnknown_030040D8 - gUnits`. gcc 2.x's
  *     expand_divmod multiplies by invert_mod2n(d >> post_shift) and shifts
  *     AFTERWARDS, so post_shift = 2 for the 12-byte record, and the extra
  *     6 in `asrs #8` is the caller's own `>> 6`. Both spellings appear here:
@@ -57,36 +44,9 @@ struct Unk42650Map
  *     OPPOSITE of the neighbouring sub_08045BF0, whose `>> 6` is `asrs` and
  *     needs an `int`; check the shift before copying that note.
  *   - `t & 0x1f` must be written INLINE at all three comparison sites. Bound
- *     to a `terr` local it hoists above the `gUnknown_03003FC0.unk09` test;
+ *     to a `terr` local it hoists above the `gPlaySt.unk09` test;
  *     inline, CSE keeps it in r3 exactly where the ROM has it.
- *
- * REMAINING DIFF -- one thing and its consequences. The SECOND cell read (the
- * +0x234A plane, inside the third arm of the `||` chain) associates its
- * address differently from the ROM, even though it is the SAME TEXT as the
- * first cell read (+0x1432), which matches:
- *     ROM    ldr r2,=map; ldrh r1,[r6,#2]; lsls r1,#1; mov r4,sb;
- *            adds r0,r2,r4; adds r0,r0,r1          <- (map + 0x417A) + y*2
- *     draft  ldrh r0,[r6,#2]; ldr r2,=map; lsls r0,#1;
- *            adds r0,r0,r2; add r0,sb              <- (y*2 + map) + 0x417A
- * i.e. the map pointer is loaded second and 0x417A is added last, through the
- * high-register `add r0,sb` form instead of a `mov` into a low register. That
- * reorders the two force-addr pool words against gUnknown_08499590 and shifts
- * every register number in the block. The only difference between the two
- * sites is that by the second one the constant 0x417A has been CSE'd into a
- * pseudo (sb) by the first, so this is a CSE-vs-fold interaction, not a
- * spelling: block one proves the spelling is right.
- * TRIED AND WORSE: `((u16 *)(gUnknown_08499590 + 0x417A))[y]` for both sites.
- * It does not fix the second site and it BREAKS the first, which the flat
- * `*(u16 *)(gUnknown_08499590 + 0x417A + y * 2)` above gets exactly right.
- *
- * SECOND, SMALLER: the bitfield-byte store wants `lsls r3,r5,#3` AFTER the two
- * pointer loads and the `orrs` tied to the AND's register. Measured:
- *     `(unk05 & 7) | (n << 3)`      -> `ldrb` first, orrs dest = AND  (half)
- *     `(n << 3) | (unk05 & 7)`      -> `lsls` first, orrs dest = shift (half)
- *     `v = n << 3;` then `... | v`  -> `lsls` hoisted ABOVE the pointer loads,
- *                                      orrs dest = AND (this file, closest)
- * None of the three puts the shift between the loads and the `ldrb`. Whatever
- * does that is the last thing this function needs. */
+ */
 void sub_08042650(void)
 {
     u8 t;
@@ -103,10 +63,10 @@ void sub_08042650(void)
     n = Div(n * sub_08042F14(gUnknown_030033EC), 100);
 
     {
-        u8 *map;
-        map = *(u8 *volatile *)&gUnknown_08499590;
-        t = ((struct Unk42650Map *)map)->terrain[
-                ((struct Unk42650Map *)map)
+        struct Map *map;
+        map = *(struct Map *volatile *)&gMap;
+        t = map->terrain[
+                map
                     ->rowOffset[gUnknown_03003100.pos.unk02]
                 + gUnknown_03003100.pos.unk00];
     }
@@ -117,15 +77,15 @@ void sub_08042650(void)
     if (n > 0x13)
         n = 0x14;
 
-    if (gUnknown_03003FC0.unk0d == 0
-        || (gUnknown_08499598[gUnknown_030033EC].unk1c & 2) != 0)
+    if (gPlaySt.fog == 0
+        || (gPlayers[gUnknown_030033EC].turnState & 2) != 0)
         goto do_body;
 
     {
-        u8 *map;
-        map = *(u8 *volatile *)&gUnknown_08499590;
-        if (((struct Unk42650Map *)map)->flag[
-                ((struct Unk42650Map *)map)
+        struct Map *map;
+        map = *(struct Map *volatile *)&gMap;
+        if (map->unk234A[
+                map
                     ->rowOffset[gUnknown_03003100.pos.unk02]
                 + gUnknown_03003100.pos.unk00] == 0)
             goto after_body;
@@ -133,16 +93,16 @@ void sub_08042650(void)
 
 do_body:
     {
-       if (gUnknown_03003FC0.unk09 == 1 || (t & 0x1f) == 8
+       if (gPlaySt.animOpts == 1 || (t & 0x1f) == 8
             || (t & 0x1f) == 0x14)
             sub_080409E8(gUnknown_03003100.pos.unk00,
                          gUnknown_03003100.pos.unk02,
                          gUnknown_030040D8->unk05 >> 3, n,
-                         ((((struct Unk08499594 *)gUnknown_030040D8
-                            - gUnknown_08499594) & 0xc0) >> 6) + 1);
+                         ((((struct Unit *)gUnknown_030040D8
+                            - gUnits) & 0xc0) >> 6) + 1);
         else if (n > 0x13)
-            sub_08041258(((((struct Unk08499594 *)gUnknown_030040D8
-                            - gUnknown_08499594) & 0xc0) >> 6) + 1, t & 0x1f);
+            sub_08041258(((((struct Unit *)gUnknown_030040D8
+                            - gUnits) & 0xc0) >> 6) + 1, t & 0x1f);
     }
 after_body:
     unitp = &gUnknown_030040D8;
@@ -152,11 +112,11 @@ after_body:
 
     if ((gUnknown_030040D8->unk05 >> 3) > 0x13)
     {
-        sub_080265B0((((struct Unk08499594 *)gUnknown_030040D8
-                       - gUnknown_08499594) >> 6) + 1, t >> 5);
+        sub_080265B0((((struct Unit *)gUnknown_030040D8
+                       - gUnits) >> 6) + 1, t >> 5);
         gUnknown_030040D8->unk05 &= 7;
         if ((t & 0x1f) == 8 || (t & 0x1f) == 0x14)
-            gUnknown_08499598[t >> 5].unk32 = 1;
+            gPlayers[t >> 5].killOnEndTurn = 1;
         sub_08024058(gUnknown_03003100.spos.unk00,
                      gUnknown_03003100.spos.unk02);
     }

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -35,11 +36,11 @@ void sub_0806AA80(int a1, int a2)
     proc = Proc_Start(gUnknown_0858168C, PROC_TREE_3);
 
     x = a1 * 16;
-    dx = *(s16 *)(gUnknown_08499590 + 4) - 8;
+    dx = gMap->scrollX - 8;
     x -= dx;
 
     y = a2 * 16;
-    dy = *(s16 *)(gUnknown_08499590 + 6) - 8;
+    dy = gMap->scrollY - 8;
     y -= dy;
 
     sub_0806A6F0(proc, x, y);

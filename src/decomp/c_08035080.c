@@ -72,7 +72,7 @@ u8 sub_08035080(void)
         {
             continue;
         }
-        if (!sub_080266DC(i))
+        if (!IsPlayerAliveAndActive(i))
         {
             continue;
         }

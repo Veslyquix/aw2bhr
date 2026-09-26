@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -13,19 +14,11 @@
  * back with a plain `ldrh`, which is the union's `pos` view and not `spos`. */
 bool8 sub_0802C8BC(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
-    t = gUnknown_03003100.pos.unk02 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + gUnknown_03003100.pos.unk00;
-    tiles = p + 0x12;
+    off = gMap->rowOffset[gUnknown_03003100.pos.unk02] + gUnknown_03003100.pos.unk00;
 
-    if (tiles[off] == 0)
+    if (gMap->unit[off] == 0)
         return FALSE;
 
     return TRUE;

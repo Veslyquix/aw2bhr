@@ -7,13 +7,13 @@
  * sub_08043AA0 @ 0x08043AA0, sub_08043AC0 @ 0x08043AC0, sub_08043AFC @ 0x08043AFC, sub_08043B14 @ 0x08043B14, sub_08043B44 @ 0x08043B44, sub_08043B60 @ 0x08043B60, sub_08043BA4 @ 0x08043BA4, sub_08043BC8 @ 0x08043BC8, sub_08043BF8 @ 0x08043BF8
  */
 
-/* sub_08017860's result reaches sub_08043AC0's third parameter with a bare
- * `adds r2, r0, #0` and no re-narrowing, which is what forced sub_08017860's
+/* GetLoadedCoPalette's result reaches sub_08043AC0's third parameter with a bare
+ * `adds r2, r0, #0` and no re-narrowing, which is what forced GetLoadedCoPalette's
  * return type from `u8` to `int` (wave 28, W28-B).
  */
 void sub_08043AA0(int a, int b)
 {
-    sub_08043AC0(a % 24, b, sub_08017860(a % 24));
+    sub_08043AC0(a % 24, b, GetLoadedCoPalette(a % 24));
 }
 
 /* Loads one 16-colour palette out of the slot's palette run.
@@ -33,7 +33,7 @@ void sub_08043AC0(int a, int b, int c)
 {
     int i = a % 24;
 
-    ApplyPaletteExt(gUnknown_084A0090[i % 24].unk08 + c * 16, (u16)(b * 0x20), 0x20);
+    ApplyPaletteExt(gUnknown_084A0090[i % 24].palette + c * 16, (u16)(b * 0x20), 0x20);
 }
 
 void sub_08043AFC(int a, int b)
@@ -47,7 +47,7 @@ void sub_08043AFC(int a, int b)
  */
 void sub_08043B14(int a, int b)
 {
-    Decompress(gUnknown_084A0090[a].unk04, (void *)(0x06010000 + (b & 0x3ff) * 32));
+    Decompress(gUnknown_084A0090[a].nameGraphic, (void *)(0x06010000 + (b & 0x3ff) * 32));
 }
 
 void sub_08043B44(int a)
@@ -89,10 +89,10 @@ void sub_08043BA4(int a, int b, int c)
  */
 void sub_08043BC8(int a, int b)
 {
-    Decompress(gUnknown_084A0090[a].unk00[0], (void *)(0x06010000 + (b & 0x3ff) * 32));
+    Decompress(gUnknown_084A0090[a].fullBody[0], (void *)(0x06010000 + (b & 0x3ff) * 32));
 }
 
 void sub_08043BF8(int a, int b)
 {
-    Decompress(gUnknown_084A0090[a].unk00[1], (void *)(0x06010000 + ((b + 0x80) & 0x3ff) * 32));
+    Decompress(gUnknown_084A0090[a].fullBody[1], (void *)(0x06010000 + ((b + 0x80) & 0x3ff) * 32));
 }

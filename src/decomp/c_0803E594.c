@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -34,15 +35,7 @@
  *    spelling -- reproduces neither and costs the address register besides.
  */
 
-struct Unk3E594Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_0004[0x12 - 0x04];
-    /* 0x0012 */ u8 unit[0x417A - 0x12];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3E594Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_0803E594(int a1, int a2, int a3)
 {
@@ -53,25 +46,25 @@ void sub_0803E594(int a1, int a2, int a3)
     y = a2;
     for (; y >= 0; y--)
     {
-        if (MAP->unit[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unit[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
     y = a2;
-    for (; x < MAP->unk00; x++)
+    for (; x < MAP->width; x++)
     {
-        if (MAP->unit[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unit[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
     x = a1;
-    for (; y < MAP->unk02; y++)
+    for (; y < MAP->height; y++)
     {
-        if (MAP->unit[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unit[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
     y = a2;
     for (; x >= 0; x--)
     {
-        if (MAP->unit[MAP->rowOffset[y] + x] != 0)
-            sub_0803E560(x, y, MAP->unit[MAP->rowOffset[y] + x], a3);
+        if (gMap->unit[MAP->rowOffset[y] + x] != 0)
+            sub_0803E560(x, y, gMap->unit[MAP->rowOffset[y] + x], a3);
     }
 }

@@ -19,6 +19,6 @@ void sub_0803D92C(void)
     v = sub_08016D04(1);
     if (v != 0)
         sub_08016CEC(v, 0);
-    if (sub_0803861C())
+    if (IsPlayer1TeamAlive())
         sub_080193B0(gUnknown_0849F3A8)->unk10 = v;
 }

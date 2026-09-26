@@ -18,7 +18,7 @@
  * different objects.  The honest spelling (name the real global, never the
  * 0x08090Cxx slot) is what produced this match.
  *
- * gUnknown_08610A38 is NOT a pool slot -- a scaled index is added before the
+ * gTextTable is NOT a pool slot -- a scaled index is added before the
  * load, so it is a genuine array base and is referenced normally.
  *
  * Three readings that each cost an attempt:
@@ -67,7 +67,7 @@ void sub_0802D7B4(int a1)
             v = 0x100;
         }
 
-        s = gUnknown_08610A38[*(u16 *)&gUnknown_085D5ABC[
+        s = gTextTable[*(u16 *)&gUnknown_085D5ABC[
                 gUnknown_02023830[((s16)base + i) * 4]]];
 
         buf[0] = 0x19;
@@ -80,12 +80,12 @@ void sub_0802D7B4(int a1)
 
         row = i * 2 + 5;
 
-        sub_080149C0(4, row, gUnknown_08499578, buf, 0x8000, flag);
-        sub_08014B0C(0xe, row, gUnknown_08499578,
-                     sub_08042C9C(gUnknown_030033EC,
+        sub_080149C0(4, row, gBG0TilemapBuffer, buf, 0x8000, flag);
+        sub_08014B0C(0xe, row, gBG0TilemapBuffer,
+                     GetCoPriceMultiplier(gUnknown_030033EC,
                                   gUnknown_02023830[((s16)base + i) * 4]) * 10,
                      0x8000, flag);
-        sub_0802239C(gUnknown_08499578, 2, row,
+        sub_0802239C(gBG0TilemapBuffer, 2, row,
                      gUnknown_02023830[((s16)base + i) * 4], v, 0, 0);
     }
 

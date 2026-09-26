@@ -17,16 +17,16 @@
  * stored halfword, so the return costs nothing. */
 int sub_08007328(void)
 {
-    struct Unk0200B0B0 *p = gUnknown_0200B0B0;
+    struct ActiveMap *p = gActiveMap;
     int n;
     int m;
     int v;
 
-    n = (p->unk07 == 0) ? 10 : 8;
+    n = (p->editMode == 0) ? 10 : 8;
     m = n - 1;
-    v = p->unk3a + m;
+    v = p->ringIndex + m;
     if (v >= n)
         v -= n;
-    p->unk3c = v;
+    p->previousRingIndex = v;
     return v;
 }

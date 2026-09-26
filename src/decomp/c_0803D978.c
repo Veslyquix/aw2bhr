@@ -11,6 +11,6 @@
 
 void sub_0803D978(void)
 {
-    if (Proc_Find(gUnknown_084C3138) == NULL)
+    if (Proc_Find(ProcScr_BattleMaps) == NULL)
         sub_0803B7B4();
 }

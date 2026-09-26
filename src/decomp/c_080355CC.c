@@ -19,7 +19,7 @@
  *     `strh` anyway) and comes out `lsls #12`; the multiply keeps it and gives
  *     the ROM's `lsls #0x10; asrs #4`.
  *   - `tbl = gUnknown_0810EA60;` as its own statement. The palette base has to
- *     be materialised BEFORE the gUnknown_08499598 index chain, which is where
+ *     be materialised BEFORE the gPlayers index chain, which is where
  *     agbcc puts it only when it is a statement of its own.
  *   - `pal = ... - 1;` as its own statement, and gUnknown_0810EA60 declared
  *     `[][16]`. Fold the `- 1` into the subscript and agbcc reassociates it
@@ -61,8 +61,8 @@ ProcPtr sub_080355CC(u16 x, u16 y, u16 a3, u16 a4)
 
     gUnknown_03003124[slot] = 1;
 
-    gfx = sub_08035B68(a4);
-    proc = Proc_Start(gUnknown_0849BE38, PROC_TREE_5);
+    gfx = GetUnitSpriteFormat(a4);
+    proc = Proc_Start(ProcScr_SelectUnit, PROC_TREE_5);
     proc->unk2c = sub_0801C210(gfx, 2, 1);
     proc->unk3a = slot;
     proc->unk48 = sub_080364C4();
@@ -87,7 +87,7 @@ ProcPtr sub_080355CC(u16 x, u16 y, u16 a3, u16 a4)
     proc->unk2c->unk22 = (proc->unk3a * 9 + 0x29A) | (sub_08035AE8(proc->unk3a) * 0x1000);
 
     tbl = gUnknown_0810EA60;
-    pal = gUnknown_08499598[proc->unk37 + 1].unk1a - 1;
+    pal = gPlayers[proc->unk37 + 1].teamColor - 1;
     ApplyPaletteExt(tbl[pal],
                     (u16)(0x20 * (sub_08035AE8(proc->unk3a) + 0x10)), 0x20);
 

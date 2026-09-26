@@ -5,9 +5,14 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080489CC.
  * sub_080489CC @ 0x080489CC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
+#include "proc.h"
 
 /* MATCHED (wave 60, W60-E), 1088 bytes, size exact, one try_match attempt.
  *
@@ -60,7 +65,7 @@
  * load/store with three ANDs, and gUnknown_030030E0's `& 0x3f` is
  * `union BlendCntBuf`'s two-bit `effect` field. */
 
-void sub_080489CC(void)
+void BattleMaps_080489CD(void)
 {
     struct Unk084C30F8 *p;
     u32 v;
@@ -100,14 +105,14 @@ void sub_080489CC(void)
 
     Decompress(gUnknown_0823A3D4,
                (void *)(0x06000000 + gUnknown_0300251C.bits.chr_block * 0x4000));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     ApplyPaletteExt(gUnknown_0823BE00, 0, 0x20);
     sub_08013B1C();
     sub_0802D5CC(0, 3);
-    Decompress(gUnknown_0823E7D4, gUnknown_08499580);
+    Decompress(gUnknown_0823E7D4, gBG2TilemapBuffer);
 
     for (i = 0; i <= 0x3ff; i++)
-        gUnknown_08499580[i] += 0x1360;
+        gBG2TilemapBuffer[i] += 0x1360;
 
     gUnknown_03001400 = -0x30;
     sub_08013B0C();
@@ -127,7 +132,7 @@ void sub_080489CC(void)
                    (void *)(0x06010000 + ((i * 8 + 0x1ab) & 0x3ff) * 32), 0x40);
     }
 
-    ApplyPaletteExt(gUnknown_0823FB7C[sub_08017860(0xf)], 0x2c0, 0x20);
+    ApplyPaletteExt(gUnknown_0823FB7C[GetLoadedCoPalette(0xf)], 0x2c0, 0x20);
 
     gUnknown_084C30F8->unk835 = 1;
 
@@ -182,3 +187,60 @@ void sub_080489CC(void)
     gUnknown_03002F18 = -2;
     gUnknown_03002B34 = 0;
 }
+
+asm(".global sub_080489CC\n.thumb_set sub_080489CC, BattleMaps_080489CD\n");
+
+extern bool8 CampaignIntro_WHILE_0803B629(void);
+extern void BattleMaps_08049B15(void);
+extern void BattleMaps_08049B71(void);
+extern void BattleMaps_IDLE_08048FD9(void);
+extern void BattleMaps_IDLE_080490BD(void);
+extern void BattleMaps_08049171(void);
+extern void BattleMaps_IDLE_08049179(void);
+extern void BattleMaps_IDLE_08049361(void);
+extern void BattleMaps_IDLE_08049929(void);
+extern void BattleMaps_08049B81(void);
+extern u8 GetMainMenuLock(void);
+extern void WM_ConfirmExit_08011B19(void);
+extern void BattleMaps_08049B29(void);
+extern void BattleMaps_0803D961(void);
+extern void BattleMaps_0803B83D(void);
+
+struct ProcCmd CONST_DATA ProcScr_BattleMaps[] =
+{
+    PROC_29(1),
+    PROC_1D(30),
+    PROC_WHILE(CampaignIntro_WHILE_0803B629),
+    PROC_START_CHILD(ProcScr_DialogueOnEnd),
+    PROC_CALL(BattleMaps_080489CD),
+    PROC_CALL(BattleMaps_08049B15),
+    PROC_CALL(BattleMaps_08049B71),
+    PROC_1E(30),
+    PROC_SLEEP(10),
+    PROC_REPEAT(BattleMaps_IDLE_08048FD9),
+    PROC_REPEAT(BattleMaps_IDLE_080490BD),
+    PROC_END_EACH(ProcScr_DialogueOnEnd),
+    PROC_CALL(BattleMaps_08049171),
+    PROC_REPEAT(BattleMaps_IDLE_08049179),
+    PROC_REPEAT(BattleMaps_IDLE_08049361),
+    PROC_REPEAT(BattleMaps_IDLE_08049929),
+    PROC_CALL(BattleMaps_08049B81),
+    PROC_GOTO_IF_NO(GetMainMenuLock, 0),
+    PROC_1D(30),
+    PROC_CALL(WM_ConfirmExit_08011B19),
+    PROC_CALL(BattleMaps_08049B29),
+    PROC_CALL(BattleMaps_0803D961),
+    PROC_YIELD,
+    PROC_GOTO(1),
+PROC_LABEL(0),
+    PROC_SLEEP(30),
+    PROC_29(0),
+    PROC_1D(30),
+    PROC_CALL(WM_ConfirmExit_08011B19),
+    PROC_CALL(BattleMaps_08049B29),
+PROC_LABEL(1),
+    PROC_CALL(BattleMaps_0803B83D),
+    PROC_END,
+};
+
+asm(".global gUnknown_084C3138\n.set gUnknown_084C3138, ProcScr_BattleMaps\n");

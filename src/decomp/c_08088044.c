@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08088044.
  * sub_08088044 @ 0x08088044, sub_080880BC @ 0x080880BC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -48,7 +52,7 @@ struct Unk80880BC
  * this is a macro whose argument is evaluated twice. */
 #define SCALE(t, d) (Interpolate(0, 0x10, 0x100, (t), (d)) ? Interpolate(0, 0x10, 0x100, (t), (d)) : 2)
 
-void sub_08088044(struct Unk08088044 *proc)
+void CoDesignC2_08088045(struct Unk08088044 *proc)
 {
     int i;
 
@@ -74,7 +78,7 @@ void sub_08088044(struct Unk08088044 *proc)
     sub_08073304(gUnknown_085802C0, gUnknown_0200FC50, 0x27c, 9, 0, 0, (int)proc);
 }
 
-void sub_080880BC(struct Unk80880BC * proc)
+void CoDesignC2_IDLE_080880BD(struct Unk80880BC * proc)
 {
     if (proc->unk4c <= 0x18)
     {
@@ -122,7 +126,7 @@ void sub_080880BC(struct Unk80880BC * proc)
                 Div(COS_Q12(0) * 0x10, 0x100));
         }
 
-        sub_0801F34C(gUnknown_03005958[proc->unk58] + 0x3E, 0x220, 0x178, 0, 0);
+        DrawOamObject(gUnknown_03005958[proc->unk58] + 0x3E, 0x220, 0x178, 0, 0);
     }
 
     proc->unk4c++;
@@ -142,3 +146,19 @@ void sub_080880BC(struct Unk80880BC * proc)
     sub_08043C28(proc->unk34 + 0xB0, 0xA0, 0x1040, 2, 1);
     proc->unk3c--;
 }
+
+asm(".global sub_08088044\n.thumb_set sub_08088044, CoDesignC2_08088045\n"
+    ".global sub_080880BC\n.thumb_set sub_080880BC, CoDesignC2_IDLE_080880BD\n");
+
+extern void CoDesignC2_IDLE_0808844D(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoDesignC2[] =
+{
+    PROC_CALL(CoDesignC2_08088045),
+    PROC_SLEEP(64),
+    PROC_REPEAT(CoDesignC2_IDLE_080880BD),
+    PROC_REPEAT(CoDesignC2_IDLE_0808844D),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616EB4\n.set gUnknown_08616EB4, ProcScr_CoDesignC2\n");

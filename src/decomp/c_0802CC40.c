@@ -15,10 +15,10 @@ int sub_0802CC40(void)
     if (!sub_0802CBA0())
         return 1;
 
-    if (!sub_08042084((u8 *)gUnknown_030040D8))
+    if (!HasSupplyAbility((u8 *)gUnknown_030040D8))
         return 1;
 
-    sub_0801F838(0xff);
+    FillMovementMap(0xff);
     sub_080203C0(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02);
 
     if (sub_080416A4())

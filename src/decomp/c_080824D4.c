@@ -62,7 +62,7 @@ void sub_08083EE0(struct Unk80824D4 *);
 void sub_08084600(struct Unk80824D4 *);
 /* The first of the block's two dispatchers: a five-arm state machine on the s16
  * at +0x4c that runs one of the four sprite builders per arm, reads the D-pad
- * out of gpKeySt->unk02 to set a +1/-1 direction at +0x5c, and steps
+ * out of gpKeySt->repeated to set a +1/-1 direction at +0x5c, and steps
  * the phase counter at +0x52 around its period of six. Its own sprite loop is
  * sub_080829B0's with the phase expression `p->unk52 + i + p->unk4e` and six
  * iterations instead of five; see work/sub_080829B0/ for the OAM-word spelling.
@@ -256,9 +256,9 @@ void sub_08082660(struct Unk8082660 *p)
     {
         sub_08082C0C((struct Unk8082C0C *)p, p->unk4c - 4);
 
-        if ((gpKeySt->unk02 & 0x40) && p->unk4c > 7 && p->unk4c <= 0xD)
+        if ((gpKeySt->repeated & DPAD_UP) && p->unk4c > 7 && p->unk4c <= 0xD)
             p->unk5c = -1;
-        else if ((gpKeySt->unk02 & 0x80) && p->unk4c > 7 && p->unk4c <= 0xD)
+        else if ((gpKeySt->repeated & DPAD_DOWN) && p->unk4c > 7 && p->unk4c <= 0xD)
             p->unk5c = 1;
     }
     else if (p->unk4c <= 0x17)
@@ -298,9 +298,9 @@ void sub_08082660(struct Unk8082660 *p)
                 gUnknown_03005920 = 0;
             }
 
-            if ((gpKeySt->unk02 & 0x40) && p->unk4c > 0xD && p->unk4c <= 0x17)
+            if ((gpKeySt->repeated & DPAD_UP) && p->unk4c > 0xD && p->unk4c <= 0x17)
                 p->unk5c = -1;
-            else if ((gpKeySt->unk02 & 0x80) && p->unk4c > 0xD && p->unk4c <= 0x17)
+            else if ((gpKeySt->repeated & DPAD_DOWN) && p->unk4c > 0xD && p->unk4c <= 0x17)
                 p->unk5c = 1;
 
             if (p->unk5c != 0 && p->unk4c == 0x17)
@@ -311,12 +311,12 @@ void sub_08082660(struct Unk8082660 *p)
     {
         sub_080829B0((struct Unk80831FC *)p, p->unk4c - 0x18);
 
-        if ((gpKeySt->unk02 & 0x40) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
+        if ((gpKeySt->repeated & DPAD_UP) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
         {
             p->unk5c = -1;
             p->unk4c = 0xD;
         }
-        else if ((gpKeySt->unk02 & 0x80) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
+        else if ((gpKeySt->repeated & DPAD_DOWN) && p->unk4c > 0x17 && p->unk4c <= 0x1B)
         {
             p->unk5c = 1;
             p->unk4c = 0xD;

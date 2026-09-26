@@ -27,6 +27,10 @@ The shape is fully derived and exactly ONE compiler decision is wrong. The lever
 
 ### Already ruled out
 
+- WAVE 61 -- THE PERMUTER CANNOT RUN ON THIS FUNCTION AS DRAFTED. permute.py aborts during setup with `Syntax error in base.c` at the `asm("" : "+r"(bb));` barrier: decomp-permuter parses the source with pycparser, which does not accept that extended-asm form. The run exits before any search happens, so an empty permuter log here means REFUSED, not SEARCHED-AND-FAILED. To permute this one, first find a spelling of the barrier the parser accepts (or drop it and re-measure from whatever that costs).
+
+### Already ruled out
+
 - SEVEN index spellings, all reassociating to the identical tree and ALL hoisting: `[band * 3 + i]`, `[i + band * 3]`, `[band * 2 + band + i]`, `[(band << 1) + band + i]`, `*(base + band * 3 + i)`, `((u8 (*)[3])base)[band][i]`, and `((struct T *)base)->rows[band][i]` (the struct-wrapped-array lever from the .rodata chapter). The struct wrapper only flipped the operand order of one `add`.
 - u8 / int for band (u8 band also breaks the `ldrh` of gUnknown_03004080 down to a `ldrb`), for c, and for d -- d must stay u8, because the third sub_08025CC8 argument is a bare `adds r2, r5, #0` with no sign extension, which an int would need.
 - the `continue` form against the nested-if form; `0x1f & g` against `g & 0x1f`; merging the two guards into one `&&`.

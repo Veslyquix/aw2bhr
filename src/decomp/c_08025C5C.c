@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08025C5C.
- * sub_08025C5C @ 0x08025C5C, sub_08025C98 @ 0x08025C98, sub_08025CC8 @ 0x08025CC8
+ * sub_08025C5C @ 0x08025C5C, sub_08025C98 @ 0x08025C98, CreateUnitAt @ 0x08025CC8
  */
 
 /* An early `return NULL` and not `if (u != NULL) { ...; return u; }`: the
@@ -15,22 +15,22 @@
  * The three parameters are `s16`. Nothing in this body can tell s16 from u16 --
  * PROMOTE_MODE emits the same `lsls #0x10; lsrs #0x10` for both (probed) and
  * the values only ever reach a `strb` -- so the evidence is entirely at the two
- * callers, sub_08025C98 and sub_08025CC8, which SIGN-extend all three before
+ * callers, sub_08025C98 and CreateUnitAt, which SIGN-extend all three before
  * the `bl`. `u16` here makes both of them emit `lsrs` instead.
  *
- * The `lsls #0x18; lsrs #0x18` on a3 is the conversion to sub_08025BE0's u8. */
+ * The `lsls #0x18; lsrs #0x18` on a3 is the conversion to InitUnit's u8. */
 
-struct Unk08499594 *sub_08025C5C(s16 a1, s16 a2, s16 a3)
+struct Unit *sub_08025C5C(s16 a1, s16 a2, s16 a3)
 {
-    struct Unk08499594 *u = sub_08025AEC();
+    struct Unit *u = sub_08025AEC();
 
     if (u == NULL)
         return NULL;
 
-    sub_08025BE0(u, a3);
+    InitUnit(u, a3);
 
-    u->unk02 = a1;
-    u->unk03 = a2;
+    u->x = a1;
+    u->y = a2;
 
     sub_08025D20(gUnknown_030033EC);
 
@@ -47,12 +47,12 @@ struct Unk08499594 *sub_08025C5C(s16 a1, s16 a2, s16 a3)
 
 void *sub_08025C98(s16 a1, s16 a2, s16 a3)
 {
-    struct Unk08499594 *u = sub_08025C5C(a1, a2, a3);
+    struct Unit *u = sub_08025C5C(a1, a2, a3);
 
     if (u == NULL)
         return NULL;
 
-    u->unk01 |= 1;
+    u->flags |= 1;
     sub_080258CC();
 
     return u;
@@ -61,15 +61,20 @@ void *sub_08025C98(s16 a1, s16 a2, s16 a3)
 /* sub_08025C98 without the `unk01 |= 1` -- see there for the guard-clause
  * shape. */
 
-/* Wave 32 (W32-B) RETYPES the return `void *` -> `struct Unk08499594 *`. It
+/* Wave 32 (W32-B) RETYPES the return `void *` -> `struct Unit *`. It
  * returns sub_08025C5C's result unchanged, and that function is already
- * declared `struct Unk08499594 *` right here -- the `void *` was the weakest
+ * declared `struct Unit *` right here -- the `void *` was the weakest
  * type that fit when nothing read the result. sub_08045564, promoted this
  * wave, writes `->unk04_0 = 0x5a` through it, which is the discriminating use.
- * Byte-neutral; re-verified. */
-struct Unk08499594 *sub_08025CC8(s16 a1, s16 a2, s16 a3)
+ * Byte-neutral; re-verified.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Attempts to create a unit at the
+ * input grid co-ordinates (r0 = x, r1 = y, r2 = UID)". The old CreateUnitAt
+ * symbol is kept as a linker alias below so every other unit keeps
+ * resolving it unchanged. */
+struct Unit *CreateUnitAt(s16 a1, s16 a2, s16 a3)
 {
-    struct Unk08499594 *u = sub_08025C5C(a1, a2, a3);
+    struct Unit *u = sub_08025C5C(a1, a2, a3);
 
     if (u == NULL)
         return NULL;
@@ -78,3 +83,5 @@ struct Unk08499594 *sub_08025CC8(s16 a1, s16 a2, s16 a3)
 
     return u;
 }
+
+asm(".global sub_08025CC8\n.thumb_set sub_08025CC8, CreateUnitAt\n");

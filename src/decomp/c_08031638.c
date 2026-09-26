@@ -42,11 +42,11 @@ void sub_08031638(ProcPtr proc)
         return;
     }
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
         sub_0803B4DC(0x68);
 
     if (sub_0802F4A0() == 1 && gUnknown_0849B018->unk06 == 0
-        && (gpKeySt->held & 9))
+        && (gpKeySt->pressed & 9))
     {
         gUnknown_0300410C = gUnknown_030040CC;
 

@@ -17,7 +17,7 @@ struct Unk59C60Cell
 void sub_08059C60(void *a1)
 {
     struct Unk59C60Cell *out;
-    struct Unk08499594 *p;
+    struct Unit *p;
     int i;
     int j;
     int k;
@@ -29,34 +29,34 @@ void sub_08059C60(void *a1)
     k = (gUnknown_03003F38 >> 6) + 1;
     for (i = 0; i < 4; i++)
     {
-        if (!((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1))
+        if (!((gPlayers[gUnknown_030033EC].unk2c >> i) & 1))
             continue;
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            p = &gUnknown_08499594[j];
-            if (p->unk00 == 0)
+            p = &gUnits[j];
+            if (p->type == 0)
                 continue;
-            if ((s8)gUnknown_03003340[p->unk03][p->unk02] <= 0)
+            if ((s8)gUnknown_03003340[p->y][p->x] <= 0)
                 continue;
-            if (p->unk00 == 0x18 && !sub_080257C0(j))
+            if (p->type == 0x18 && !sub_080257C0(j))
                 continue;
-            if (!sub_08020DBC(gUnknown_030033EC, p->unk02, p->unk03))
+            if (!sub_08020DBC(gUnknown_030033EC, p->x, p->y))
                 continue;
-            x = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
-                             gUnknown_030040D8->unk00, p->unk00, 0);
-            y = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
-                             gUnknown_030040D8->unk00, p->unk00, 1);
+            x = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
+                             gUnknown_030040D8->unk00, p->type, 0);
+            y = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
+                             gUnknown_030040D8->unk00, p->type, 1);
             if (x < y)
-                z = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
-                                 gUnknown_030040D8->unk00, p->unk00, 1);
+                z = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
+                                 gUnknown_030040D8->unk00, p->type, 1);
             else
-                z = sub_08043070(gUnknown_08499598[k].unk1d, gUnknown_08499598[k].unk1e,
-                                 gUnknown_030040D8->unk00, p->unk00, 0);
+                z = sub_08043070(gPlayers[k].co, gPlayers[k].coMode,
+                                 gUnknown_030040D8->unk00, p->type, 0);
             if (z <= 0x31)
                 continue;
-            out->x = p->unk02;
-            out->y = p->unk03;
-            out->v = (s8)gUnknown_03003340[p->unk03][p->unk02];
+            out->x = p->x;
+            out->y = p->y;
+            out->v = (s8)gUnknown_03003340[p->y][p->x];
             out++;
         }
     }

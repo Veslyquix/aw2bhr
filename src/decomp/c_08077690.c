@@ -21,14 +21,14 @@ void sub_08077690(struct Unk77690Proc *proc)
 {
     int x;
 
-    sub_08071918(gUnknown_08499578 + 0x80, 0x1E, 7, 0);
-    sub_08071918(gUnknown_08499580 + 0x80, 0x1E, 7, 0);
+    sub_08071918(gBG0TilemapBuffer + 0x80, 0x1E, 7, 0);
+    sub_08071918(gBG2TilemapBuffer + 0x80, 0x1E, 7, 0);
     sub_08013AEC();
     sub_08013B0C();
 
     x = gUnknown_086145D8[proc->unk44];
-    sub_08071900(gUnknown_08551A00, gUnknown_08499578 + (0x9E - x), x, 7);
-    sub_08071900(gUnknown_08551A04, gUnknown_08499580 + (0x9E - x), x, 7);
+    sub_08071900(gUnknown_08551A00, gBG0TilemapBuffer + (0x9E - x), x, 7);
+    sub_08071900(gUnknown_08551A04, gBG2TilemapBuffer + (0x9E - x), x, 7);
 
     gUnknown_0300064C = (s8)gUnknown_086145DD[proc->unk44];
     sub_08077620(0, 0xA8 - gUnknown_0300064C);

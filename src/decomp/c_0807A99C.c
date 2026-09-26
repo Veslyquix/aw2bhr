@@ -14,7 +14,7 @@ void sub_0807A99C(s32 a1, u8 a2)
     if (a1 != 0)
         a1--;
     else
-        a1 = DivRem(gUnknown_03004008, 0x12);
+        a1 = DivRem(gGameClock, 0x12);
 
     Decompress(gUnknown_08615E4C[a1].unk00,
                (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06000000));
@@ -22,7 +22,7 @@ void sub_0807A99C(s32 a1, u8 a2)
                (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06001B00));
     Decompress(gUnknown_08615E4C[a1].unk08,
                (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06003600));
-    Decompress(gUnknown_08615E4C[a1].unk0c, gUnknown_08499584);
+    Decompress(gUnknown_08615E4C[a1].unk0c, gBG3TilemapBuffer);
 
     sub_08013B1C();
 

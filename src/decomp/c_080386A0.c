@@ -9,7 +9,7 @@
 
 int sub_080386A0(void)
 {
-    if (gUnknown_03003FC0.unk01 == 1)
+    if (gPlaySt.gameMode == 1)
         return 1;
 
     return 0;
@@ -17,7 +17,7 @@ int sub_080386A0(void)
 
 int sub_080386B4(void)
 {
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
         return 1;
 
     return 0;
@@ -25,7 +25,7 @@ int sub_080386B4(void)
 
 int sub_080386C8(void)
 {
-    if (gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.gameMode == 3)
         return 1;
 
     return 0;

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,26 +10,10 @@
 
 /* WAVE 35: CANONICAL `struct Map`, extended by W36-D with the two plane starts
  * this block reads (+0x1432 and +0x3262). Both are carved out of existing
- * fillers -- unk051A[0x1928] splits at 0x1432 and unk2852[0x1928] splits at
+ * fillers -- unitUnk[0x1928] splits at 0x1432 and move[0x1928] splits at
  * 0x3262 -- so the layout is unchanged and the edit is byte-neutral: only a
  * field's START OFFSET enters the address arithmetic, never its length. */
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x0A10];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
-/* struct Unk085D5ABC's unk14 target, described as a struct so the `(p + 0x1a)
+/* struct UnitType's unk14 target, described as a struct so the `(p + 0x1a)
  * + t` association survives -- `p[0x1a + t]` on a bare `u8 *` folds 0x1a into
  * ldrb's displacement instead. Same reason struct Map's planes are members. */
 struct MoveTbl
@@ -58,21 +43,21 @@ struct MoveTbl
  * MATCHED. */
 int sub_08058BB4(u16 id, u16 * out)
 {
-    struct Unk08499594 * u;
+    struct Unit * u;
     int best;
     int mask;
     int sentinel;
 
-    u = &gUnknown_08499594[id];
+    u = &gUnits[id];
     best = 0;
     mask = gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1d;
     sentinel = 0x270F;
     out[0] = sentinel;
 
-    sub_08058CE8(u->unk02 - 1, u->unk03, mask, &best, out);
-    sub_08058CE8(u->unk02 + 1, u->unk03, mask, &best, out);
-    sub_08058CE8(u->unk02, u->unk03 - 1, mask, &best, out);
-    sub_08058CE8(u->unk02, u->unk03 + 1, mask, &best, out);
+    sub_08058CE8(u->x - 1, u->y, mask, &best, out);
+    sub_08058CE8(u->x + 1, u->y, mask, &best, out);
+    sub_08058CE8(u->x, u->y - 1, mask, &best, out);
+    sub_08058CE8(u->x, u->y + 1, mask, &best, out);
 
     if (out[0] == sentinel)
         return -1;
@@ -137,27 +122,27 @@ void sub_08058CE8(int x, int y, int mask, int * pBest, u16 * out)
     if (y < 0)
         return;
 
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
 
-    if (x >= map->unk00)
+    if (x >= map->width)
         return;
-    if (y >= map->unk02)
+    if (y >= map->height)
         return;
 
-    idx = map->unk417A[y] + x;
+    idx = map->rowOffset[y] + x;
 
-    if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != gUnknown_03003F38 && gMap->unit[idx] != 0)
         return;
 
     if (gUnknown_03003340[y][x] > 0x78)
         return;
 
     if (gUnknown_030040D8->unk00 == 0
-     || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
-        score = gUnknown_085D583C[map->unk1432[idx] & 0x1f].unk10 * 10;
+     || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x10)
+        score = gUnknown_085D583C[map->terrain[idx] & 0x1f].defense * 10;
 
-    if ((((struct Map *)gUnknown_08499590)->unk3262[
-            ((struct Map *)gUnknown_08499590)->unk417A[y] + x] & mask) == 0)
+    if ((gMap->dangerMask[
+            gMap->rowOffset[y] + x] & mask) == 0)
         score += 100;
 
     if (score < *pBest)
@@ -185,10 +170,10 @@ int sub_08058DEC(int x, int y, u16 * out)
     struct Map * map;
     int sentinel;
 
-    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
-    map = (struct Map *)gUnknown_08499590;
+    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable;
+    map = gMap;
 
-    if (tbl->unk1a[map->unk1432[map->unk417A[y] + x] & 0x1f] == 0)
+    if (tbl->unk1a[map->terrain[map->rowOffset[y] + x] & 0x1f] == 0)
         return -1;
 
     sentinel = 0x270F;
@@ -222,16 +207,16 @@ void sub_08058E88(int x, int y, u16 * out)
     if (y < 0)
         return;
 
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
 
-    if (x >= map->unk00)
+    if (x >= map->width)
         return;
-    if (y >= map->unk02)
+    if (y >= map->height)
         return;
 
-    idx = map->unk417A[y] + x;
+    idx = map->rowOffset[y] + x;
 
-    if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != gUnknown_03003F38 && gMap->unit[idx] != 0)
         return;
 
     t = (s8)gUnknown_03003340[y][x];
@@ -241,9 +226,9 @@ void sub_08058E88(int x, int y, u16 * out)
     if (t == 0x79)
         return;
 
-    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk14;
+    tbl = (struct MoveTbl *)gUnknown_085D5ABC[gUnknown_030040D8->unk00].transportTable;
 
-    if (tbl->unk1a[map->unk1432[idx] & 0x1f] == 0)
+    if (tbl->unk1a[map->terrain[idx] & 0x1f] == 0)
         return;
 
     out[0] = x;
@@ -257,7 +242,7 @@ void sub_08058E88(int x, int y, u16 * out)
  * the just-stored value through CSE and only has to re-apply the QImode
  * truncation, which is the `lsls #0x18; lsrs #0x18` pair the ROM carries. A
  * separate local would have needed its own truncation at the store as well.
- * gUnknown_030040D8->unk00 is read once and CSEd into sub_08042D1C's second
+ * gUnknown_030040D8->unk00 is read once and CSEd into GetUnitMovementWithCoBonus's second
  * argument, which is why r2 survives the stride multiply.
  *
  * MATCHED first draft. */
@@ -268,10 +253,10 @@ void sub_08058F30(u8 * out)
     if ((gUnknown_030046B8 & 2) == 0)
         return;
 
-    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 7)
+    if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 7)
         return;
 
-    *out = sub_08042D1C(gUnknown_030033EC, gUnknown_030040D8->unk00)
+    *out = GetUnitMovementWithCoBonus(gUnknown_030033EC, gUnknown_030040D8->unk00)
          * gUnknown_085766E0->unk0e;
 
     if (*out > 0x78)
@@ -279,7 +264,7 @@ void sub_08058F30(u8 * out)
 }
 
 /* Runs sub_08059050 once per set bit of the current army's four-bit mask at
- * gUnknown_08499598[gUnknown_030033EC].unk2c, passing the 1-based army index
+ * gPlayers[gUnknown_030033EC].unk2c, passing the 1-based army index
  * and a shared s16 sentinel. Returns -1 if nothing wrote the sentinel.
  *
  * The sentinel really is `s16` and not `u16`: the final read is
@@ -306,16 +291,16 @@ int sub_08058F90(void * arg)
 
     best = 0x7FFF;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 1)
+    if (gPlayers[gUnknown_030033EC].unk2c & 1)
         sub_08059050(1, &best, arg);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 2)
+    if (gPlayers[gUnknown_030033EC].unk2c & 2)
         sub_08059050(2, &best, arg);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 4)
+    if (gPlayers[gUnknown_030033EC].unk2c & 4)
         sub_08059050(3, &best, arg);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 8)
+    if (gPlayers[gUnknown_030033EC].unk2c & 8)
         sub_08059050(4, &best, arg);
 
     if (best != 0x7FFF)

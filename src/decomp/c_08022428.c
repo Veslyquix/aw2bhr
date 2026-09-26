@@ -1,24 +1,12 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08022428.
- * sub_08022428 @ 0x08022428
+ * DrawUnitAt @ 0x08022428
  */
-
-struct Unk22428Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x000C - 0x0004];
-    /* 0x000C */ u16 camX;
-    /* 0x000E */ u16 camY;
-    /* 0x0010 */ u8 filler_0010[0x051A - 0x0010];
-    /* 0x051A */ u8 unitId[0x234A - 0x051A];
-    /* 0x234A */ u8 flag234A[0x417A - 0x234A];
-    /* 0x417A */ u16 rowOffset[1];
-};
 
 /* MATCHED (wave 52, W52-E), by decomp-permuter at iteration 553 from the 98.5%
  * hand draft. PROMOTION MUST CARRY THE POOL WORDS:
@@ -27,7 +15,7 @@ struct Unk22428Map
  *
  * then re-run tools/split_rodata.py and tools/gen_lds.py. gUnknown_0809099C
  * and gUnknown_080909A0 are agbcc's own -fforce-addr words for
- * gUnknown_08499590 and gUnknown_08499594; the honest spelling names the
+ * gUnknown_08499590 and gUnits; the honest spelling names the
  * objects and the build places the two words (addends 0 and 4).
  *
  * THE WHOLE RESIDUAL WAS ONE REGISTER SWAP, and `(new_var = cx)` is what
@@ -41,7 +29,7 @@ struct Unk22428Map
  * the first addend creates cx's reference at a point no statement boundary can
  * reach, which flips the two allocnos' priority order without moving either
  * definition. Measured alternatives, wave 52:
- *   - `gUnknown_0849957C + cy * 32 + cx` -- keeps the same registers and
+ *   - `gBG1TilemapBuffer + cy * 32 + cx` -- keeps the same registers and
  *     reorders the two uses instead. Worse.
  *   - swapping the `cx =` and `cy =` statements -- DOES flip r9/sl correctly,
  *     but then loads camY before camX. Trades 4 wrong bytes for 2.
@@ -57,9 +45,9 @@ struct Unk22428Map
  *   - the guards must be ONE `||` chain with the drawing arm as the `else`;
  *     five separate `if (...) { blank; return; }` blocks lay the blank arm out
  *     after the drawing arm. */
-void sub_08022428(u16 x, u16 y)
+void DrawUnitAt(u16 x, u16 y)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     u8 id;
     int cx;
     int cy;
@@ -67,40 +55,42 @@ void sub_08022428(u16 x, u16 y)
     u16 hp;
     unsigned char new_var;
 
-    if (y >= ((struct Unk22428Map *)gUnknown_08499590)->height
-        || (id = ((struct Unk22428Map *)gUnknown_08499590)
-                     ->unitId[((struct Unk22428Map *)gUnknown_08499590)->rowOffset[y] + x]) == 0
-        || ((struct Unk22428Map *)gUnknown_08499590)
-               ->flag234A[((struct Unk22428Map *)gUnknown_08499590)->rowOffset[y] + x] == 0
+    if (y >= gMap->height
+        || (id = gMap
+                     ->unitUnk[gMap->rowOffset[y] + x]) == 0
+        || gMap
+               ->unk234A[gMap->rowOffset[y] + x] == 0
         || !sub_0802571C(id)
-        || (gUnknown_08499594[id].unk01 & 4) != 0)
+        || (gUnits[id].flags & 4) != 0)
     {
         sub_080223E0(x, y);
     }
     else
     {
-        if ((gUnknown_08499594[id].unk01 & 1) != 0)
+        if ((gUnits[id].flags & 1) != 0)
             v = 0x100;
         else
             v = id & 0xc0;
 
-        cx = ((x - ((struct Unk22428Map *)gUnknown_08499590)->camX) & 0xf) * 2;
-        cy = ((y - ((struct Unk22428Map *)gUnknown_08499590)->camY) & 0xf) * 2;
+        cx = ((x - gMap->camX) & 0xf) * 2;
+        cy = ((y - gMap->camY) & 0xf) * 2;
 
-        e = &gUnknown_08499594[id];
+        e = &gUnits[id];
 
-        if (e->unk04_0 != 0)
-            hp = Div(e->unk04_0 - 1, 10) + 1;
+        if (e->hp != 0)
+            hp = Div(e->hp - 1, 10) + 1;
         else
             hp = 0;
 
-        sub_0802216C((gUnknown_0849957C + (new_var = cx)) + cy * 32,
-                     gUnknown_08499594[id].unk00,
+        sub_0802216C((gBG1TilemapBuffer + (new_var = cx)) + cy * 32,
+                     gUnits[id].type,
                      v,
                      e->unk07 | e->unk08,
                      e->unk05_3,
                      hp,
-                     (u8)(e->unk01 & 0x20),
-                     sub_08043050((id >> 6) + 1) & 1);
+                     (u8)(e->flags & 0x20),
+                     GetPlayerSpecialAbilities((id >> 6) + 1) & 1);
     }
 }
+
+asm(".global sub_08022428\n.thumb_set sub_08022428, DrawUnitAt\n");

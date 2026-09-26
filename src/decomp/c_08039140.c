@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -42,16 +43,20 @@
  * `u16` produces both. Full evidence in include/unknown-functions.h above the
  * declaration, and in work/sub_08039188/W88-notes.md. */
 
-u8 sub_08039140(u16 x, s16 y, u8 w, u8 h)
+u8 sub_08039140(x, y, w, h)
+u16 x;
+s16 y;
+u8 w;
+u8 h;
 {
     int dx;
     int dy;
 
-    dy = y - *(s16 *)(gUnknown_08499590 + 6);
+    dy = y - gMap->scrollY;
 
     if (dy > -h && dy <= 0x9f)
     {
-        dx = (s16)x - *(s16 *)(gUnknown_08499590 + 4);
+        dx = (s16)x - gMap->scrollX;
 
         if (dx > -w && dx <= 0xef)
             return 1;

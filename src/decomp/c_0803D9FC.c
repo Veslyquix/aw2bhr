@@ -85,19 +85,19 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
     sub_080119A0(8, 0x38, "TURN");
     sub_080119A0(8, 0x40, "COLOR");
 
-    sub_0802BD54(0x50, 0x00, sub_0802490C(gUnknown_03003FC0.unk02));
+    sub_0802BD54(0x50, 0x00, sub_0802490C(gPlaySt.mapID));
     sub_0802BD54(0x40, 0x00, proc->unk1E);
-    sub_080119A0(0x40, 0x08, sCtrl[gUnknown_08499598[army].unk1b]);
-    sub_0802BD54(0x68, 0x10, gUnknown_08499598[army].unk00);
-    sub_0802BD54(0x68, 0x18, gUnknown_08499598[army].unk20);
-    sub_080119A0(0x40, 0x20, sCoNames[gUnknown_08499598[army].unk1d]);
-    sub_0802BD54(0x68, 0x28, gUnknown_08499598[army].unk2a);
-    sub_080119A0(0x50, 0x30, sOnOff[gUnknown_03003FC0.unk0d]);
+    sub_080119A0(0x40, 0x08, sCtrl[gPlayers[army].aiControlled]);
+    sub_0802BD54(0x68, 0x10, gPlayers[army].funds);
+    sub_0802BD54(0x68, 0x18, gPlayers[army].coCharge);
+    sub_080119A0(0x40, 0x20, sCoNames[gPlayers[army].co]);
+    sub_0802BD54(0x68, 0x28, gPlayers[army].team);
+    sub_080119A0(0x50, 0x30, sOnOff[gPlaySt.fog]);
     sub_0802BD54(0x40, 0x38, gUnknown_03004080);
-    sub_080119A0(0x40, 0x40, sColors[gUnknown_08499598[army].unk1a]);
+    sub_080119A0(0x40, 0x40, sColors[gPlayers[army].teamColor]);
     sub_080119A0(0, proc->unk20 * 8, "/");
 
-    if (gpKeySt->held & 0x100)
+    if (gpKeySt->pressed & R_BUTTON)
     {
         do
         {
@@ -105,10 +105,10 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
 
             if (proc->unk1E > 4)
                 proc->unk1E = 1;
-        } while (gUnknown_08499598[proc->unk1E].unk1b == 0);
+        } while (gPlayers[proc->unk1E].aiControlled == 0);
     }
 
-    if (gpKeySt->held & 0x200)
+    if (gpKeySt->pressed & L_BUTTON)
     {
         do
         {
@@ -116,61 +116,61 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
 
             if (proc->unk1E <= 0)
                 proc->unk1E = 4;
-        } while (gUnknown_08499598[proc->unk1E].unk1b == 0);
+        } while (gPlayers[proc->unk1E].aiControlled == 0);
     }
 
-    if (gpKeySt->unk02 & 0x40)
+    if (gpKeySt->repeated & DPAD_UP)
     {
         if (proc->unk20 > 1)
             proc->unk20--;
     }
 
-    if (gpKeySt->unk02 & 0x80)
+    if (gpKeySt->repeated & DPAD_DOWN)
     {
         if (proc->unk20 <= 6)
             proc->unk20++;
     }
 
-    if (gpKeySt->unk02 & 0x20)
+    if (gpKeySt->repeated & DPAD_LEFT)
         delta = 0xFF;
 
-    if (gpKeySt->unk02 & 0x10)
+    if (gpKeySt->repeated & DPAD_RIGHT)
         delta = 1;
 
-    if (gpKeySt->unk02 & 0x30)
+    if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_LEFT))
     {
         switch ((s16)(proc->unk20 - 1))
         {
         case 0:
-            gUnknown_08499598[army].unk1b =
-                sub_0803D990(gUnknown_08499598[army].unk1b, (s8)delta, 1, 2, 1);
+            gPlayers[army].aiControlled =
+                sub_0803D990(gPlayers[army].aiControlled, (s8)delta, 1, 2, 1);
             break;
 
         case 1:
-            gUnknown_08499598[army].unk00 =
-                sub_0803D990(gUnknown_08499598[army].unk00,
+            gPlayers[army].funds =
+                sub_0803D990(gPlayers[army].funds,
                              (s8)delta * 0xC350, 0, 0xF423F, 0);
             break;
 
         case 2:
-            gUnknown_08499598[army].unk20 =
-                sub_0803D990(gUnknown_08499598[army].unk20,
-                             (s8)delta * 0x2710, 0, sub_08044208(army), 0);
+            gPlayers[army].coCharge =
+                sub_0803D990(gPlayers[army].coCharge,
+                             (s8)delta * 0x2710, 0, GetSuperCoPowerCost(army), 0);
             break;
 
         case 3:
-            gUnknown_08499598[army].unk1d =
-                sub_0803D990(gUnknown_08499598[army].unk1d, (s8)delta, 0, 0x12, 1);
+            gPlayers[army].co =
+                sub_0803D990(gPlayers[army].co, (s8)delta, 0, 0x12, 1);
             break;
 
         case 4:
-            gUnknown_08499598[army].unk2a =
-                sub_0803D990(gUnknown_08499598[army].unk2a, (s8)delta, 0, 3, 0);
+            gPlayers[army].team =
+                sub_0803D990(gPlayers[army].team, (s8)delta, 0, 3, 0);
             break;
 
         case 5:
-            gUnknown_03003FC0.unk0d =
-                sub_0803D990(gUnknown_03003FC0.unk0d, (s8)delta, 0, 1, 1);
+            gPlaySt.fog =
+                sub_0803D990(gPlaySt.fog, (s8)delta, 0, 1, 1);
             break;
 
         case 6:
@@ -180,7 +180,7 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
         }
     }
 
-    if (gpKeySt->held & 3)
+    if (gpKeySt->pressed & 3)
     {
         sub_08026B28();
         sub_08015C30(gUnknown_03001FBC);

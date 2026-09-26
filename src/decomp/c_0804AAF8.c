@@ -32,7 +32,7 @@ void sub_0804AAF8(void)
         case 3:
         case 4:
             sub_080149C0(6, (s16)(gUnknown_030044E0->unk67 * 2 + 6),
-                         gUnknown_08499578,
+                         gBG0TilemapBuffer,
                          gUnknown_084C3B3C[gUnknown_030044E0->unk67
                                            + (gUnknown_030044E0->unk66 & 1) * 5],
                          0x8000, 0);

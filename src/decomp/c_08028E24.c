@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -35,12 +36,6 @@ struct Unk08028E24Sprite
     /* 0x04 */ u16 unk04;
     /* 0x06 */ u16 unk06;
 };
-struct Unk08028E24Map
-{
-    /* 0x00 */ u8 filler_00[0x04];
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-};
 struct Unk08028E24Proc
 {
     /* 0x00 */ PROC_HEADER;
@@ -73,8 +68,8 @@ void sub_08028E24(struct Unk08028E24Proc *proc)
         s[i].unk00 += s[i].unk04;
         s[i].unk02 += s[i].unk06;
         PutSprite(0,
-                  s[i].unk00 - ((struct Unk08028E24Map *)gUnknown_08499590)->unk04,
-                  s[i].unk02 - ((struct Unk08028E24Map *)gUnknown_08499590)->unk06,
+                  s[i].unk00 - gMap->scrollX,
+                  s[i].unk02 - gMap->scrollY,
                   gUnknown_08499FE4, 0);
     }
 }

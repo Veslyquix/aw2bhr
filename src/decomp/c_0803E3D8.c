@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -32,15 +33,7 @@
  * grouped case label.
  */
 
-struct Unk3E3D8Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_0004[0x1432 - 0x04];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct Unk3E3D8Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_0803E3D8(void)
 {
@@ -49,48 +42,48 @@ void sub_0803E3D8(void)
     int a;
     int b;
 
-    a = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk1c;
-    b = gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk1e;
+    a = gUnknown_085C77A0[gPlaySt.mapID].unk1c;
+    b = gUnknown_085C77A0[gPlaySt.mapID].unk1e;
     sub_0803DE14();
-    for (y = 0; y < MAP->unk02; y++)
+    for (y = 0; y < MAP->height; y++)
     {
-        for (x = 0; x < MAP->unk00; x++)
+        for (x = 0; x < MAP->width; x++)
         {
             if (sub_0803DE94(x, y))
                 continue;
             switch (MAP->terrain[MAP->rowOffset[y] + x] & 0x1f)
             {
-            case 0x19:
+            case TERRAIN_LASER:
                 sub_0803E158(x, y, a, b);
                 break;
-            case 0x16:
+            case TERRAIN_MINICANNON_N:
                 sub_0803E260(x, y, a, b, 1);
                 break;
-            case 0x15:
+            case TERRAIN_MINICANNON_S:
                 sub_0803E260(x, y, a, b, 0);
                 break;
-            case 0x17:
+            case TERRAIN_MINICANNON_W:
                 sub_0803E260(x, y, a, b, 2);
                 break;
-            case 0x18:
+            case TERRAIN_MINICANNON_E:
                 sub_0803E260(x, y, a, b, 3);
                 break;
-            case 0x1c:
+            case TERRAIN_VOLCANO:
                 sub_0803E1B0(x, y, 4, 4, 2, 1);
                 break;
-            case 0x1b:
+            case TERRAIN_CANNON_N:
                 sub_0803E208(x, y, 3, 3, a, 2, 1);
                 break;
-            case 0x1a:
+            case TERRAIN_CANNON_S:
                 sub_0803E208(x, y, 3, 3, a, b, 0);
                 break;
-            case 0x1d:
+            case TERRAIN_FACTORY:
                 sub_0803E310(x, y, 3, 4, 1, 1);
                 break;
-            case 0x1f:
+            case TERRAIN_BLOCKED:
                 sub_0803E108(x, y, 4, 4);
                 break;
-            case 0x1e:
+            case TERRAIN_DEATHRAY:
                 sub_0803E2B8(x, y, 3, 3, 7, 7);
                 break;
             }

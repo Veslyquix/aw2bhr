@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,7 +8,7 @@
  * sub_080094EC @ 0x080094EC
  */
 
-/* Same screen-struct address computation as sub_08001158, reading the tile
+/* Same screen-struct address computation as MakeTileSimple, reading the tile
  * instead of writing it. The two 0xFC/0xFD tests merge into the unsigned
  * range compare `t - 0xfc <= 1`; 0x11C/0x11D stay separate because they are
  * materialised by `movs #0x8e; lsls #1` and then `adds #1`.
@@ -17,19 +18,9 @@
  * nothing narrows it and there is no evidence for a u8/bool8 return. */
 int sub_080094EC(int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
-    int off;
     int tile;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = (*(u16 *)(rows + t) + x) * 2;
-    tiles = p + 0xA22;
-    tile = *(u16 *)(tiles + off);
+    tile = gMap->tile[gMap->rowOffset[y] + x];
 
     return tile == 0xFC || tile == 0xFD || tile == 0x11C || tile == 0x11D;
 }

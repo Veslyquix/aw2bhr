@@ -8,6 +8,24 @@ The recurring lesson: **when a candidate is semantically right but does not
 match, the cause is usually which register something lands in, and that is
 decided by how the source is *phrased*, not by what it computes.**
 
+**Renamed types and fields.** The wave notes below were written against the old
+address-derived tag names, and they are left as measured rather than rewritten.
+The tags moved to `include/unit.h`, `include/co.h` and `include/battle.h` and
+were renamed; the layouts did not change, and both build routes still reproduce
+the canonical ROM SHA1.
+
+| old | new |
+|---|---|
+| `struct Unk08499594` | `struct Unit` (include/unit.h) |
+| `struct Unk085D5ABC` | `struct UnitType` (include/unit.h) |
+| `struct Unk43304` | retyped to `struct BattleUnit` (include/battle.h) |
+| `Unit.unk00` / `unk01` / `unk02` / `unk03` | `type` / `flags` / `x` / `y` |
+| `Unit.unk04_0` / `unk04_7` / `unk06_0` | `hp` / `ammo` / `fuel` |
+| `PlayerStruct.tempFirepower` / `tempDefense` | same names, retyped `u16` -> `s16` |
+
+`Unit.unk05_3`, `unk06_7` and `unk07`..`unk0b` keep their old names: the
+evidence for them is a store width or a single argument position, not a role.
+
 ---
 
 ## Reading types off the assembly
@@ -6576,6 +6594,19 @@ NOT work** — it makes `e` live across statements and re-allocates the entire
 tail (one `try_match` spent proving that). The binding has to be *inside* the
 expression. decomp-permuter found the identical fix independently, spelled
 `*(new_var = &pos[i])`.
+
+**The converse: a `dst` local reverses the ROM's index-first order, and the
+direct address expression restores it.** `sub_08013D7C` stores into a tilemap
+with `adds r1, r1, r0` where r1 = `i * 2` and r0 = `pos * 2 + tilemap`. The
+readable `dst = tilemap + pos + i; dst[0] = ...; dst[32] = ...;` expands as a
+plain binop, pointer first (`adds r2, r0, r1`), and the extra pseudo
+re-allocates the whole surrounding branch; that was the -4 residual waves 55
+and 78 parked. Writing each store as `(tilemap + pos + i)[k] = ...` expands the
+address in `EXPAND_SUM` context, gives the ROM's index-first `adds`, and lets
+CSE share it without a named pseudo. The table read on the right needed the same
+treatment, `tbl[idx]` then `(tbl + idx)[k]`, because `lsls r2,r1,#1; adds
+r2,r2,r0` is also index-first. **Tell: a pointer that is recomputed in every
+arm, index-first, and dead after its last store was never a local.**
 
 **A global stored the same constant twice with code in between, where the ROM
 keeps BOTH stores, is a `volatile` proof on its own.** Non-volatile, CSE knows
@@ -21709,7 +21740,7 @@ resolutions** and their offsets reconcile exactly, so the fix is their union,
 written into every draft. **Byte-neutral, and the reason is worth stating:
 only a field's START OFFSET enters the address arithmetic — an array's
 declared LENGTH never does.** So refining `unk0012[0x1E30]` into
-`unk0012[0x508] + unk051A[0x1928]` cannot change a single instruction in a
+`unk0012[0x508] + unitUnk[0x1928]` cannot change a single instruction in a
 function that indexes `unk0012[]`. All nine functions re-verified byte-for-byte
 after the rewrite.
 
@@ -22996,12 +23027,12 @@ documented single-reference case, visible side by side in one 328-byte function.
 
 ## `struct Map` gained a plane at +0x1432 (wave 36, W36-H)
 
-The canonical body's `u8 unk051A[0x1928]` blob is FIVE 0x508-byte planes; the
+The canonical body's `u8 unitUnk[0x1928]` blob is FIVE 0x508-byte planes; the
 one at 0x051A + 3 * 0x508 = 0x1432 is a terrain-attribute plane
 (`plane[idx] & 0x1F` indexes gUnknown_084999C8's cost table). It is now split as
-`unk051A[0x0F18]` + `unk1432[0x0A10]` in all seven promoted copies and the
+`unitUnk[0x0F18]` + `unk1432[0x0A10]` in all seven promoted copies and the
 work drafts. Byte-neutral, as the wave-35 note says: only a field's start offset
-enters the address arithmetic, and the one promoted reader of `unk051A`
+enters the address arithmetic, and the one promoted reader of `unitUnk`
 (c_080293C8.c) indexes it with a map cell index, far below 0xF18.
 
 ## A PRE-SCALED index local moves the `lsls` AHEAD of the table's pool `ldr` — and it closes a park three waves old (wave 36, W36-J)
@@ -28057,7 +28088,7 @@ the loop's second counter):
 `sub_080079B8` has the same thing with the two `unk07` arms spelled out
 (`unk36 + 4` / `unk38 + 3`), joined at a merge point, and then discarded. In
 both, the discarded value is structurally PARALLEL to the value that IS used —
-`unk3a + K` is wrapped and indexes `gUnknown_0200B0D0`, `unk36 + K` is thrown
+`unk3a + K` is wrapped and indexes `gDesignRing`, `unk36 + K` is thrown
 away — which reads like a (row, column) pair where only one coordinate is
 consumed.
 
@@ -33898,7 +33929,7 @@ Cost, exactly as spent:
 second member was written by editing four things in the first's C -- ring size
 8 -> 10, the two callees, a `switch` in place of one `if`, and which of
 `unk3a`'s two neighbours the index comes from -- and matched first time. Both
-members reach the same two objects (`gUnknown_0200B0B0`, `gUnknown_0200B0D0`)
+members reach the same two objects (`gUnknown_0200B0B0`, `gDesignRing`)
 through different `-fforce-addr` pool words, which is what the screen saw.
 
 **Pair 1 refines the claim, and this is the useful half.** 0.893 did NOT beat
@@ -38884,7 +38915,7 @@ complement PLUS ONE.**
 	ldrsh r0, [r1, r2]
 	adds r5, r0, #4
 	b _0800634A
-	@ pool: gUnknown_0200B0D0, gUnknown_0200B224
+	@ pool: gDesignRing, gUnknown_0200B224
 _08006344:
 	movs r2, #0x3a
 	ldrsh r0, [r1, r2]
@@ -38962,6 +38993,149 @@ cross-jumping, not a shared source label, and writing the body out twice
 reproduces it. **A jump table costs nothing extra to order: gcc fills the gaps
 in the case range with the default label, so a 22-entry table for five live
 cases is normal output and not a sign of missing cases.**
+
+## sub_08005F4C, 2026-09-24: `-fforce-addr` `.rodata` WORDS ARE gcse PRE INSERTIONS, AND THREE MORE LEVERS
+
+Measured on the 5084-byte design-room state machine, which went from a
+3560-byte (-1524) draft to size-exact / +4 at 77-80% in one session.
+
+**Every `-fforce-addr` `.rodata` word in a function is a gcse PRE artifact.**
+Compiling the draft with `-fno-gcse` removes ALL of its `.rodata` words,
+including the ones the ROM has. With `-da`, `gccdump.gcse` shows why: under
+`-fforce-addr` each global address is expanded as
+`(set t (symbol_ref .LCn)); (set r (mem t))`, and PRE treats `(symbol_ref .LCn)`
+as an ordinary expression that nothing kills. Most PRE copies land in the same
+extended block as their use, and CSE2 folds `(mem t)` back into a direct
+`ldr r, =sym`. A word survives only where a PRE insertion or a redundant use is
+separated from its fold by a join, so the pseudo that holds `&.LCn` lives
+across it. `PRE/HOIST: end of bb N ... copying expression K to reg R` in the
+gcse dump names the insertion, and `PRE: redundant insn` names the victims.
+So an extra or missing word is a question about **which references PRE
+considers the same expression**, not about spelling that one access.
+
+- **Two names for one object split the PRE expression.** State 0x2C passes
+  `gDesignRing[slot].itemId` to `sub_080077EC` and then runs ring loops over
+  `gDesignRing`. With one name, PRE hoisted `&.LC(gDesignRing)` above the
+  `frame < 0` test: a stray `.rodata` word, a spilled pointer and a 24-byte
+  frame. Spelling that ONE argument through the linker's other name for the
+  same address (`gUnknown_0200B0D0`; aw2bhr.lds has
+  `gDesignRing = gUnknown_0200B0D0`) removes the word and restores the ROM's
+  20-byte frame. Bisecting with `-da` needed all three of: the argument, the
+  frame==0 set loops and the mark loops. Removing any one also removed the
+  hoist.
+- **A reset base kept apart from the walking pointer.**
+  `e = &gDesignRing[slot]; ring = gDesignRing;` with `e = ring` as the
+  wrap-around reset gives the ROM's `ldr r2,=sym; mov r8,r2` (the base in a
+  high callee-saved register). Writing `e = &ring[slot]` (ring used for the
+  add) gives `ring` a LO_REGS preference, so global alloc takes caller-save r3
+  first and spills it around every call.
+
+**A volatile table read is how the ROM re-loads a `?:` test operand.** See
+the note on `gUnknown_084886F8` in include/unknown-globals.h. The ROM loads
+`tbl[m][0]` and then reloads `m` for `m == 0 ? x - 0x18 : x - 0x21`. Every
+non-volatile spelling either reuses `m` or duplicates the table load into
+both arms. agbcc's fold distributes `a - (c ? k1 : k2)` without a SAVE_EXPR
+unless `a` has side effects.
+
+**Merge a block-local into the function-wide variable when the ROM's register
+says so.** A block-local delta (`int d;`) in states 4 and 0x36 left the draft
+at 38%. Using the function-wide `n` that the ROM keeps in r7 elsewhere moved
+it to 75.7% in one step, because global allocation is driven by the whole
+function's pseudo census.
+
+**RESOLVED (2026-09-25): the function now matches** (`trymatch` exit 0; needs
+`"rodata": ["0x0808D7D8", "0x0808D7DC", "0x0808D7E0", "0x0808D7E4"]` at
+promotion). The last three residuals, and the mechanism behind each:
+
+- **Ring loops index `gDesignRing[slot]` directly; there is no walking
+  pointer.** `slot++; if (slot > visible) slot = 0;` is a biv update to
+  loop.c: the set-to-constant is recorded with `mult_val == 0`. So
+  `&gDesignRing[slot]` is strength-reduced into the ROM's walking pointer,
+  and the reset becomes `mov r4, r8` from a hoisted base. The giv init is
+  emitted after the reversed counter's init, which is the only way to get the
+  ROM's `movs r6,#9` *before* the pointer init in the call-free loops. Every
+  hand-written `e++` / `e = ring` spelling, in any statement order, emits the
+  pointer init first, plus an extra `mov r2,r8` in the call-bearing loops (the
+  whole +4). Read `ldrh r3,[r2,#4]` against `(itemId & 0x3F) == 1 || == 2`
+  the same way: re-read the member, do not cache it in a local.
+- **The e/slot/i rotation was the gSinLut preference, and the loop form above
+  removes it.** Pass 0 of `find_reg` skips any register preferred by a
+  *lower-priority conflicting* allocno. The gSinLut PRE reaching register
+  prefers r4 (from `set_preference` on `(set V (mem R))` with V local-allocated
+  to r4) and conflicted with the function-wide `e` only through the 0x2C mark
+  loops. Once those loops stopped using `e`, `e`/`slot`/`i`/`frame` landed in
+  r4/r5/r6/r7. Merging the case-4/0x36 delta and the 0x51/0x5B scale into
+  `frame` (all r7 in the ROM) was the other half.
+- **`ldrh r0; adds r1,r0,#0; cmp r1,#0x19; beq; movs r1,#63; ands r1,r0; ...
+  orrs r1,r0; strh r1`** needed three locals: `int v = itemId; x = (u16)v;`
+  (the conversion stops CSE merging x into v, so the copy and the compare on
+  it survive), then-arm stores `x`, else `y = v & 0x3F; y |= army;` then
+  stores `y`. `y` is set twice, so regmove cannot rename the AND output into
+  the dying `v`; reload then ties it to the constant (`movs r1,#63`). With a
+  single `x` for both arms, `x` outranks `v` in allocation, and `v`'s r1
+  preference pushes `x` to r2. Stores stay in the arms: a store after the
+  join keeps CSE's knowledge and drops the ROM's reload of `gActiveMap`.
+  Found with an exact-byte scorer over about 6,000 spellings; the RTL dumps
+  (`-da`) are what narrowed the search.
+
+## sub_0800CFDC, 2026-09-25: THE 6,384-BYTE "ALLOCATION RESIDUAL" WAS ELEVEN TRANSCRIPTION ERRORS
+
+Waves 50 and 68-70 parked this bridge auto-tiler as a register-allocation and
+cross-jump residual (best: 6368 bytes, -16, 14.3%). It now matches
+(`trymatch` exit 0, `"rodata": ["0x0808D88C"]`). Most of the residual was
+**wrong source semantics**, not compiler behaviour. Eight calls passed the
+wrong row: `sub_0800EB5C(x, y)` where the ROM passes `y - 2`, `(x - 1, y)`
+where it passes `y - 1`, and so on. Three cell reads used the wrong column. One
+region was an if/else chain where the ROM has a sparse `switch`. Wrong call
+arguments made different case tails identical, so cross-jumping merged them.
+That produced the "EB5C 20 vs 21" and "bridge 160 vs 159" counts the waves
+kept chasing.
+
+**Read the call arguments off the ROM before tuning allocation.** In a tail
+like `adds r0, r5, #0; bl sub_0800EB5C` with no `r1` setup, `r1` still holds
+a value computed earlier in the case (`subs r1, r6, #2` feeding a `lsls`
+for `rowOffset[]`). That value, not `y`, is the second argument. Check every
+call site this way. A draft that "has every call" can still give each call
+the wrong argument.
+
+Method that worked: a per-region mismatch table. Take the ROM's case/region
+labels as bounds and align the normalized instruction streams with difflib,
+blanking jump tables. Then fix one region at a time, largest mismatch first.
+These fixes, plus the levers below, took the size from -500 to exact, and each region went to
+zero independently.
+
+Other levers found along the way:
+
+- **`rowOffset[y] + (x - 1)`, not `rowOffset[y] + x - 1`.** The ROM computes
+  `subs r0, row, #1; adds r0, r0, x`. The unparenthesised form reassociates to
+  `(row + x) - 1` and CSEs `row + x` across checks. A `TILE(xx, yy)` macro with
+  `(xx)` parenthesised gives the ROM form everywhere.
+- **Why the entry read is three-level and every later read is direct.** gcse
+  PRE sees the entry's `(symbol_ref .LC)` as available everywhere after it,
+  marks every later gMap read redundant, and inserts a copy at the end of the
+  entry block ("PRE/HOIST: end of bb 0 ... copying expression 0"). The entry's
+  own `&.LC` pseudo then has two uses, so it is not folded: that gives the
+  ROM's `ldr r3,=word; ldr r0,[r3]; ldr r1,[r0]`. If the copy's pseudo *gets*
+  a hard register, every later read becomes `mov rN, sl; ldr r0,[rN]; ldr
+  r1,[r0]`. If it loses the allocation contest, reload substitutes its REG_EQUIV
+  constant and every read becomes direct (`ldr r0,=gMap`). The ROM's `sl`
+  belongs to a `wroteLeft` flag set to 0 *after* the entry test. With the flag
+  in the source (and the ROM's other long-lived pseudos right), the PRE copy
+  loses. Forcing spills with `-ffixed-*` does not reproduce this, because
+  spilling gives stack reloads, not direct loads.
+- **Case bodies go in the ROM's layout order.** Both jump-table switches
+  emit their bodies in source order: 28-31, 7/23, 12/13, 6/22 on the left;
+  28/29, 15/31, 30, 7/23, 12/13, 6/22 on the right. A sparse switch whose
+  first-tested case's head appears right after the decision tree, followed by
+  `b` to its tail at the end (E336's 0x24/0x25), is ordinary agbcc output for
+  source order 0x27, 0x67, 0x24/0x25. It is not evidence of a goto.
+- **`if (v == 1) { if (...) } else if (v == 2) { if (...) }`**, not
+  `if (v == 1 && ...) else if (v == 2 && ...)`. In the second form a failed
+  `v == 1` chain falls into the `v == 2` test. `v` then stays live across the
+  whole chain and takes `r7` from the pseudo the ROM keeps there.
+- **Function returning `int 0` with an unread result.** The epilogue at
+  0x0800E8BA is `movs r0, #0` before the pops. The caller ignores `r0`, so
+  earlier drafts declared the function `void` and lost two bytes.
 
 ## A u16 STEP DONE IN THE SHIFTED DOMAIN (`lsls #16; adds <K<<16>; lsrs #16`) IS NOT `v++` ON A u16 (wave 56, W56-E)
 
@@ -49361,6 +49535,80 @@ flat <=+4 over configured; all exits non-zero everywhere):**
 | sub_0808AAF4 | 152 | 59.9 | 59.9 | 59.9 | 34.2 | 34.2 | 59.9 | 59.9 | flat |
 | sub_0808BBA4 | 24 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | 83.3 | flat |
 
+## The `sub_08004D90` row above is STALE: the survey ran against a pre-fix draft; the real residual is a `X - (-Y)` vs `X + Y` add-destination tie, reachable WITHOUT a toolchain override
+
+The wave-81 table lists `sub_08004D90` at 19.1/19.1/19.1/20.6/20.6/19.1/19.1
+("flat") because the survey ran against whatever draft existed at the time --
+one that had not yet bound `dst = &gUnknown_08499578` (now `gBG0TilemapBuffer`)
+inside each `if`/`else` arm. **A stale row in this survey is scoped to the
+draft it measured, not to the function**; re-run `trymatch.py --profile` on any
+row before trusting it once the draft has moved.
+
+Re-measured on the current draft (`offset`/`dst` bound as above): `configured`
+(the canonical toolchain) gives 85.3%, 10 differing bytes, a whole-function
+`r0`/`r1` swap from the first branch onward. `o1`/`o1-no-force` jump to 98.5%,
+1 differing byte -- but so does `configured` itself, with **no profile change
+at all**, once the final statement is spelled as a subtraction of a negation
+instead of a plain sum:
+
+```c
+sub_0801F2AC(9, *dst + offset);        /* configured: 85.3%, whole-fn r0/r1 swap */
+sub_0801F2AC(9, (*dst) - (-offset));   /* configured: 98.5%, size-exact, 1 byte   */
+```
+
+Both spell the identical value. The second removes the ENTIRE register swap
+under the real toolchain -- not just the final add -- landing on exactly the
+same one-byte residual `o1` reaches by changing optimisation level instead.
+Confirms a second, independent mechanism reaches the same wall, and this one
+needs no `data/compiler-overrides.json` entry to use.
+
+**The exact spelling matters, and it is not just "subtraction instead of
+addition".** `-(-offset) + (*dst)` -- mathematically and by C's `+`/unary-`-`
+precedence identical to `(*dst) - (-offset)` -- compiles back to the 85.3%
+swapped form. Only `pointer_expr - (-int_expr)`, pointer side first as the
+minuend, negated int side second, gets the fix; simplifying the double
+negation early (by writing the `+` form, however the double-negative is
+arranged around it) loses it. This was found already sitting in
+`work/sub_08004D90/best.c` from an earlier permuter run (`prefer_best`
+default), predating the `gBG0TilemapBuffer` rename -- **always diff a
+function's own `best.c` against its current draft before writing off a
+residual**; a tied or higher score there can carry a lever the live draft
+never tried.
+
+The one byte still open after the subtraction trick (`configured`, size-exact,
+first diff at +0x24) is the same one `o1` alone reaches:
+
+```
+ROM   adds r1, r0, r1      @ result = (loaded *dst) + offset
+cand  adds r1, r1, r0      @ same operands, destination tied to the OTHER one
+```
+
+**This last byte resisted every lever tried, including two independent real
+permuter runs (~29,500 iterations against the o1-compiled target, ~30,000
+against the `(*dst) - (-offset)` configured-toolchain target, 240s x 8 threads
+each, `--better-only --stop-on-zero`, zero candidates beat either base score),
+plus a from-scratch TILEMAP_LOCATED/TILEMAP_INDEX-macro rewrite permuted for
+240s more (53 candidates tried, best only 47.1% -- the macro folds the `+3`/
+`*0x20` constants into the shift/add pair at the SOURCE level, discarding the
+structure a mutator would need to reconstruct; not a useful starting point for
+this residual).** Also ruled out directly on the subtraction-form base:
+reordering the C operands both ways (`*dst + offset` and `offset + *dst`
+compile byte-identical -- combine's commutative canonicalisation erases the
+source order once both operands are already loaded into bare `REG`s), a
+zero-trip `do { } while (0)` wrapped around the branch, around the `offset`
+arithmetic alone, around the call alone, and around the subtraction-form call
+specifically (no effect in any position -- consistent with the wave-38/60 rule
+that the zero-trip lever moves `allocno_compare` PRIORITY across a whole
+variable's live range, not a single instruction's dead-operand reload tie),
+binding `*dst` to a local either before the `offset` arithmetic (regresses to
+79.4%, extra live range) or as the call argument (no change), and a self-tying
+`offset = offset + (int)*dst` cast (loses the implicit `u16` pointer-arithmetic
+`lsls #1` scale entirely -- regresses further). Both operands are dead after
+this one instruction, so reload's usual "tie to whichever operand is dead"
+rule does not discriminate -- this reads as the same class of case as the
+`orrs` destination chapter above ("no source form found controls it"), except
+now on the LAST byte only, with the swap itself solved.
+
 ## WHICH SIDE OF THE try_match DIFF IS WHICH: `-` lines are the ROM (TARGET), `+` lines are your CANDIDATE (wave 81, W81-B)
 
 `-` lines carry absolute labels (`_08086xxx`); `+` lines carry `<fn+off>` labels.
@@ -52969,3 +53217,238 @@ rung, still climbing when the budget ran out.
 **Generally: before recording a permuter negative, confirm the permuter PARSED
 the base.** "Could not score the starting point" is a syntax error, not a
 result.
+
+## An unsigned cast on a pointer index blocks scale distribution (sub_08004D90)
+
+`gBG0TilemapBuffer + ((y + 5) * 32 + 3)` compiles to `lsls #6; adds #6`:
+fold distributes the `u16` element scale over the signed index. The ROM keeps
+`lsls #5; adds #3; lsls #1`. Casting the whole index to `u32`,
+`gBG0TilemapBuffer + (u32)((y + 5) * 32 + 3)`, stops the distribution and
+matched. Making only `y` unsigned was not enough, and neither was a `3u`
+constant. This is a lighter fold barrier than wave 35's comma trick, so try it
+first whenever a scaled `a * K + c` index loses its inner shift.
+
+The same function also shows a placement pattern. The ROM loads
+`ldr =gBG0TilemapBuffer` in both arms of an if and dereferences once after the
+merge. The source computes the full pointer separately in each arm, and
+cross-jumping merges the common tail (scale, dereference, add). Hoisting the
+arithmetic out of the arms, as wave 26 and the 2026-09-25 drafts did, never
+reproduced it.
+
+
+## Inline session, 2026-09-25: four parked map-predicate functions matched
+
+These are all small `gMap` neighbour predicates. The levers that closed them:
+
+- **sub_0800E9F4: write neighbours as `rowOffset[y + dy] + (x + dx)`.** Using
+  c_0800CFDC's `TILE(xx, yy)` macro with `TILE(x + 1, y + 1)` matched outright.
+  The same reads spelled `rowOffset[..] + 1 + x` let fold reassociate, and CSE
+  shares `x + 1` (-8 bytes). The long-parked "x/rows/cells three-register
+  cycle" had nothing to do with allocation; it was this spelling.
+- **sub_08009310: one variable, one register.** The ROM puts both
+  `sub_08008D70`'s result and the later vertical-neighbour flag in r6, so they
+  are the same C variable. With that change the `register asm("r6")` pin was no
+  longer needed. The right neighbour's row index needs its own local, since
+  reusing the left one's lands the `ldrh` in r0 instead of r1. The final test
+  `if (x >= w - 1) break; if (... != 0xC) break; goto success;` gives the ROM's
+  `bne break; b success` pair, which `&&` in one `if` does not.
+- **sub_08009918 (twin of sub_0800977C): row temp versus index.** Where the ROM
+  shows `ldrh r0; subs r0,#1; adds r1,r0,r4`, the row and the index are
+  separate locals (`row = ...; row--; idx = row + x;`). Where it shows
+  `ldrh r0; adds r2,r0,r4`, the index is one expression (`idx = row + x`).
+  Staging in place (`idx = row; idx--; idx += x`) keeps a single register.
+- **sub_08009538 matched only with `register int keep asm("r8")`.** Waves 37 and
+  80 exhausted the unpinned spellings. This was a coordinator decision; pinned
+  promoted files already exist.
+- **sub_0800F8D4 (MATCHED later the same day): `else if` arms ending
+  `if (FAMILY(n)) return 1;`, one `return 0;` closing the function.** jump.c
+  cross-jumps every arm's `return 1` and the arms' identical compare-chain tails
+  into the last arm, giving the ROM's `movs r0,#1; b` block before the final
+  `movs r0,#0`. `return FAMILY(n);` builds a boolean the ROM lacks. A shared
+  `goto yes` label reaches +4 only. Separate `if`s (not `else if`) re-test the
+  tile and cost +148.
+
+- **sub_080077EC (MATCHED later the same day; see below): `do { } while (0)`
+  around a goto-loop body.** Wrapping the first loop's two table copies in a zero-trip-condition
+  `do/while(0)` fixed the loop's whole register assignment, taking it from 89.7%
+  to 96.6%. The permuter found this within 20 s once it could run. Try it early
+  on register-swap residuals inside hand-written goto loops.
+
+
+## Inline session, 2026-09-25 (round 3): four more, all by loop.c / jump.c mechanics
+
+- **sub_080073F8: write a copy in both arms to make loop.c reduce its address.**
+  The ROM walks `gUnknown_0200B224[list]` as a pointer (+4, then -0x44 or -0x50
+  when the list wraps) initialised after the loop guard, i.e. a strength-reduced
+  giv. With the copy written once, the giv's benefit (two insns) does not beat
+  the biv's three increments (+1/-17/-20), so it is not reduced (-40 bytes).
+  Written in both `editMode` arms, the two identical givs combine and are
+  reduced. jump.c then cross-jumps the two stores back into one block. That
+  merge point has two predecessors, which ends CSE's extended block, so the
+  following `(entry->itemId & 0x1F) | army` re-reads memory exactly like the ROM.
+  **When the ROM shows a pointer the loop "shouldn't" have reduced, look for a
+  duplicated use that jump.c later merged.** The spilled-stack-slot order
+  followed declaration order (army/armyIndex before count/limit).
+- **sub_080077EC: a separate index biv puts the preheader in the ROM's order.**
+  `for (j = 0; j < 5; j++) { ... g[k].x; i++; k++; }` with `k = 9` gives:
+  movables, the reversed counter `movs r5,#4`, then the reduced giv init.
+  Indexing by `[j + 9]` emits the giv init before the counter. Increment order
+  in the body follows source order (`i++` before `k++`). Routing `army * 2`
+  through the then-unused `j` fixed the allocation; the permuter found that one.
+- **sub_0800CAA0: spell every access to one table block the same way.**
+  Reading all four tables as `ROW1(sym)[i]` (the member reference
+  c_0800CB30.c documents) matched. The parked record had tried the member
+  reference only on the fourth table, next to the row-1 symbols
+  gUnknown_084888B0/D0/F0, and concluded "false in a loop". It was the mix that
+  failed, not the member reference: the three row-1 symbols fold into pool
+  words and hoist, while only the member form keeps `sym + 0x10` in the loop.
+- **Permuter caveat:** in all four functions its best "improvements" either
+  broke semantics (moved a `goto`, read an uninitialised local, assigned
+  `result` inside a condition) or found a small lever (`j = army * 2; a2 = j`).
+  Always read its diff before trusting a score.
+
+
+## Inline session, 2026-09-25 (round 4): three long-parked functions
+
+- **sub_080363F8: shifts that keep `x << 22` live across a call are bitfield
+  reads.** `lsls r5,r1,#22` kept across `__umodsi3`, then `lsrs #22` and
+  `lsrs #17` from it, is a 10-bit bitfield (OAM attr2 tileNum) read three
+  times out of a 32-bit container. Waves 45-57 had it as a masked `u16` local,
+  and CSE merged that. A local union viewing the returned `struct UnkVec` as
+  `{ u32; u32 tileNum:10; }` matched once the operands were ordered as the ROM
+  evaluates them (read `attributes[2]` inside the expressions, sum
+  `& 0xfc00` + remainder + tile).
+- **sub_0807F57C: an assembler-label alias expresses a per-file prototype.**
+  The ROM tests `sub_0803CAB8`'s result with no `lsls #24`, so this file saw
+  it as returning `int`, while every other caller needs the header's `u8`.
+  `extern int sub_0803CAB8_int(u32) asm("sub_0803CAB8");` gives a direct `bl`
+  with an int return. A function-pointer cast gives an indirect call (+16).
+  This closes the wave-73 "cross-TU prototype contract" residual kind without
+  reshaping the header.
+- **sub_080373F0: to pick which cross-jumped copy survives, write it once.**
+  Three `return 0`s leave the last copy standing, and the ROM kept the middle
+  one. One `fail: return 0;` placed at the middle position, reached by goto
+  from the other two, matched, together with `if (x == a2) goto ok; goto fail;`
+  for the ROM's `beq ok; b fail` pair.
+
+## A struct MEMBER hoists its base register; an array subscript does not (0x0200CC88)
+
+`gUnknown_0200CC88` is now `struct SaveSlotGenerations { u32
+sectorGeneration[0x10]; u32 slotGeneration[0x10]; }`. The three spellings of
+the upper table are three different codegens:
+
+- `(&g[16])[i]` folds 0x0200CCC8 into one pool constant.
+- `g[i + 16]` loads the symbol into a register inside the inner loop, whose own
+  LICM moves it to the inner preheader. The outer loop then cannot move it
+  again: `reg_in_basic_block_p` fails on the stale REGNO_FIRST_UID.
+- `g.slotGeneration[i]` forms `(base_reg + 0x40)` via the COMPONENT_REF path.
+  The outer loop hoists the base register and spills it. This is what
+  sub_0801A7D8's ROM does: `ldr r2, [sp, #0xb4]; adds r2, #0x40` feeds the copy
+  loop. The member spelling alone fixed that function's frame (204 -> 208) and
+  every spill slot, 53.7% -> 81.2%.
+
+**Read-out:** a spilled symbol base followed by `adds #<member offset>` in the
+ROM means a struct member access, not an array subscript.
+
+The member spelling has a price where the ROM shares ONE induction variable
+across both tables. In sub_0801B4C0, `g.slotGeneration[i] = 0;
+g.sectorGeneration[i] = 0;` builds a second giv (+4 bytes). The chained
+assignment `g.sectorGeneration[i] = g.slotGeneration[i] = 0;` restores the
+ROM's `str r0, [r1, #0x40]; str r0, [r1]` pair off one pointer and matches.
+The same file already writes `unk00[i] = (unk10[i] |= 0xff)`.
+
+## Cross-jumped duplicate tails decide which loop invariant gets the callee-saved register (sub_0801B120)
+
+sub_0801B120 (now `FindNewestCompleteSave`) was parked at 47.3% with the
+residual labelled "base allocation": the ROM holds `gUnknown_0200CC58 + 0x10`
+(the unk30 base) in sl across its outer loop, while every single-tail source
+hoisted `gUnknown_0200CC88` into sl instead. Pointer locals, `unk20[i + 0x10]`
+and `(unk20 + 0x10)[i]` all miss.
+
+The tell was in the ROM's control flow. The equal-generation arm computes
+`mov r1, sl; adds r0, r4, r1` itself and then branches into the MIDDLE of the
+shared "count this part" tail, one instruction past where the other two arms
+join it. That is jump2 cross-jumping identical tails and stopping at the first
+register-differing insn. So the source repeats the tail once per arm:
+
+    if (best == -1)        { best = i; clear(); TAIL; }
+    else if (best > -1)    { if (g[best] > g[i]) continue;
+                             if (g[best] == g[i]) TAIL;
+                             else { best = i; clear(); TAIL; } }
+
+Duplicating the tail also changed loop.c's movables enough that the unk30 base
+won sl. It went 31% -> 72.9% in one step. Three smaller settlements followed:
+
+- `best > -1`, not `best >= 0`: the ROM compares against the -1 still live from
+  the `best == -1` test (`cmp r8, r0; ble`), 72.9% -> 79.6%.
+- The key copy of the u16 parameter must itself be `u16`. A `u32` key is
+  exact-size but misassigns the tail's registers, 79.6% -> 94.5%.
+- `n = x & 0xf; n++;` rather than `n = (x & 0xf) + 1;`, and the SAME variable
+  as the clear loops' counter. Sharing one pseudo is what puts the count in r3.
+  The permuter found the sharing (`n = j; counts[n] = 0;`). The readable
+  equivalent is to count the clear loops with `n` directly.
+
+**Read-out:** when a ROM arm pre-computes an address and branches into the
+middle of a sibling's tail, write the tail out in each arm. Do not factor it.
+
+## Reusing a live loop cursor for a later pointer keeps `p = next` from coalescing (sub_08014DCC)
+
+sub_08014DCC (now `HeapAlloc`) was parked at 71.7% with its loop cursor `p`
+and `next` in the ROM's r2/r3, joined by a `p = next` copy in a latch placed
+ahead of the loop header. Every `while (1)` / `for (;; p = next)` spelling
+with a trailing `break` coalesced the copy away. The `goto` spelling kept the
+copy but put the latch after the body.
+
+The fix was after the loop. The ROM builds the split-off free block with
+`adds r0, r5, r7; str r0, [r5]; ...; adds r2, r0, #0` and stores through r2,
+which is `p`'s register. So the source reuses the scan cursor:
+
+    best->next = (struct MemBlock *)((u8 *)best + total);
+    best->size = size;
+    best->used = 1;
+    p = best->next;          /* cse reuses the stored value, then copies it */
+    p->next = bestNext;
+    p->size = bestSize - total;
+    p->used = 0;             /* reload_cse reuses r3 (next == 0) */
+
+With `p` live after the loop, global alloc cannot fold `next` into `p`. The
+plain `break` loop then rotates exactly as the ROM does and keeps the copy.
+A separate `rest` local, or `p = (...)` before the `best->next` store, is
+8 and 4 bytes short.
+
+The last residual was the guard: `bne <loop>; b <ret0>` against the
+candidate's `beq <ret0>; b <loop>`. An early `if (size == 0) return NULL;`
+together with a nested `if (bestSize != 0) { ... return best + 1; }` and a
+trailing `return NULL;` matches. jump cross-jumps the early
+`movs r0, #0; b end` into the trailing one. A shared `goto fail` for both
+exits keeps the `beq` form. Two early returns leave the zero block mid-body.
+
+**Read-out:** when the ROM keeps a loop copy that every loop shape coalesces,
+look for the cursor's register being reused after the loop. Reuse the
+variable there instead of adding a new local.
+
+## The cursor-reuse lever carries to the aligned sibling (sub_08014FF8)
+
+sub_08014FF8 (now `HeapAllocAligned`) was parked at 348/352 (-4). Its
+residual was a missing `mov r2, r8` in the `best == head` arm. The draft
+compared `best` against a `prev` variable loaded from gUnknown_03000050.
+cse's jump equivalence then knew `prev == best` in that arm and used
+`prev`'s low register directly.
+
+Reusing one cursor `p` as in sub_08014DCC closed it. The gap arms become
+`p = best; p->next = ...`, the split tail is `p = hdr->next; p->next = ...`,
+and the best == head test compares against a fresh
+`(struct MemBlock *)gUnknown_03000050` instead of `p`. The list walk starts
+its own `for (p = (struct MemBlock *)gUnknown_03000050; ...)`. With nothing
+equating `p` and `best`, the `p = best` copy survives as the ROM's
+`mov r2, r8`.
+
+Two traps from the cleanup pass:
+
+- `* sizeof(u32)` is `size_t` (unsigned). In `(data - best) * 4 <= 32` it
+  turns the ROM's `bgt` into an unsigned test (+4 bytes). In the large-gap
+  arm's size it stops cse from reusing the signed byte gap, and the two arms
+  cross-jump one instruction earlier. Keep `* 4` where the ROM value is the
+  signed int gap.
+- `next = cur; best = next;` in the scan is still load-bearing. Plain
+  `best = cur;` is -4.

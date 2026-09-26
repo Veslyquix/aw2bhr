@@ -70,12 +70,12 @@ void sub_0803BFBC(void *a1)
   int t;
   u8 *dst;
   u8 *tbl;
-  d->unk00 = gUnknown_03003FC0.unk0d;
-  d->unk01 = gUnknown_03003FC0.unk08;
-  d->unk03 = gUnknown_03003FC0.unk30;
-  d->unk04 = gUnknown_03003FC0.unk28;
-  d->unk07 = gUnknown_03003FC0.unk31;
-  if (gUnknown_03003FC0.unk32)
+  d->unk00 = gPlaySt.fog;
+  d->unk01 = gPlaySt.coAbilities;
+  d->unk03 = gPlaySt.turnLimit;
+  d->unk04 = gPlaySt.propertyFunds;
+  d->unk07 = gPlaySt.captureLimit;
+  if (gPlaySt.savingEnabled)
   {
     d->unk02 = 1;
   }
@@ -83,13 +83,13 @@ void sub_0803BFBC(void *a1)
   {
     d->unk02 = gUnknown_0200C420.unk0e;
   }
-  if (gUnknown_03003FC0.unk2d == 1)
+  if (gPlaySt.randomWeatherOn == 1)
   {
     v = 0;
   }
   else
   {
-    v = gUnknown_03003FC0.unk2f;
+    v = gPlaySt.defaultWeather;
     switch (v)
     {
       case 0:
@@ -113,21 +113,21 @@ void sub_0803BFBC(void *a1)
   d->unk18 = sub_08043C98();
   for (i = 0; i <= 3; i++)
   {
-    d->unk09[i] = gUnknown_03003FC0.unk38[i + 1];
-    d->unk11[i] = gUnknown_03003FC0.unk42[i + 1];
+    d->unk09[i] = gPlaySt.aiControlled[i + 1];
+    d->unk11[i] = gPlaySt.unk42[i + 1];
   }
 
   if (d->unk2c == 1)
   {
-    d->unk02 = gUnknown_03003FC0.unk09;
+    d->unk02 = gPlaySt.animOpts;
     for (i = 0; i <= 3; i++)
     {
-      d->unk20[i] = gUnknown_08499598[i + 1].unk1d;
+      d->unk20[i] = gPlayers[i + 1].co;
     }
 
     for (i = 0; i <= 3; i++)
     {
-      d->unk0d[i] = gUnknown_08499598[i + 1].unk1a;
+      d->unk0d[i] = gPlayers[i + 1].teamColor;
     }
 
  do { d->unk08 = sub_080248F8(); d->unk15 = 0; } while (0);
@@ -139,7 +139,7 @@ void sub_0803BFBC(void *a1)
     {
       for (j = 0; gUnknown_020288A0[j] != 0xFF; j++)
       {
-        if (gUnknown_020288A0[j] == gUnknown_03003FC0.unk3d[i + 1])
+        if (gUnknown_020288A0[j] == gPlaySt.co[i + 1])
         {
           d->unk1c[i] = j;
           break;
@@ -148,13 +148,13 @@ void sub_0803BFBC(void *a1)
 
     }
 
-    if (((u8) (gUnknown_03003FC0.unk02 + 0x4c)) <= 0xb)
+    if (((u8) (gPlaySt.mapID + 0x4c)) <= 0xb)
     {
       i = 0;
       if (i <= 3)
       {
         dst = d->unk0d;
-        t = gUnknown_03003FC0.unk02 - 0xb4;
+        t = gPlaySt.mapID - 0xb4;
         tbl = gUnknown_020280D4;
         k = t * 28 + 1;
         do
@@ -171,7 +171,7 @@ void sub_0803BFBC(void *a1)
       if (i <= 3)
       {
         dst = d->unk0d;
-        k = gUnknown_03003FC0.unk02 * 0x5c;
+        k = gPlaySt.mapID * 0x5c;
         tbl = ((u8 *) gUnknown_085C77DC) + 4;
         do
         {
@@ -181,7 +181,7 @@ void sub_0803BFBC(void *a1)
       }
 
     }
-    d->unk08 = sub_0802490C(gUnknown_03003FC0.unk02);
+    d->unk08 = sub_0802490C(gPlaySt.mapID);
     sub_08021810(&d->unk15, &d->unk16);
   }
 }

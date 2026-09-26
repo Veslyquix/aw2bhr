@@ -9,7 +9,7 @@
 
 void sub_0802F348(void)
 {
-    gUnknown_03003FC0.unk32 = 0;
+    gPlaySt.savingEnabled = 0;
     gUnknown_0849B018->unk00 = 0;
     gUnknown_0849B018->unk01 = 0;
     gUnknown_0849B018->unk04 = 0;

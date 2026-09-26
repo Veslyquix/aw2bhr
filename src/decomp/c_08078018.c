@@ -25,8 +25,8 @@ void sub_08078018(void)
 }
 
 /* Two CpuFastSet FILL calls (0x01000200 = the fill bit plus a 0x200-word
- * count) clearing the two tilemap buffers gUnknown_08499578 and
- * gUnknown_08499580 point at, then two `void (void)` calls.
+ * count) clearing the two tilemap buffers gBG0TilemapBuffer and
+ * gBG2TilemapBuffer point at, then two `void (void)` calls.
  *
  * The two zero sources are separate stack slots and the SECOND assignment is
  * written AFTER the first call, not beside the first assignment. That is
@@ -44,15 +44,15 @@ void sub_08078038(void)
     u32 fill2;
 
     fill1 = 0;
-    CpuFastSet(&fill1, gUnknown_08499578, 0x01000200);
+    CpuFastSet(&fill1, gBG0TilemapBuffer, 0x01000200);
     fill2 = 0;
-    CpuFastSet(&fill2, gUnknown_08499580, 0x01000200);
+    CpuFastSet(&fill2, gBG2TilemapBuffer, 0x01000200);
     sub_08013AEC();
     sub_08013B0C();
 }
 
 /* The one-buffer version of sub_08078038: a single CpuFastSet FILL of the
- * gUnknown_0849957C tilemap buffer and one `void (void)` call. With only one
+ * gBG1TilemapBuffer tilemap buffer and one `void (void)` call. With only one
  * store the zero never crosses a call, so it stays in r0 and 0x01000200 is
  * loaded straight into r2 -- the plain `= 0` initialiser is right here and is
  * wrong in sub_08078038, which is why the two are written differently. */
@@ -61,11 +61,11 @@ void sub_08078078(void)
 {
     u32 fill = 0;
 
-    CpuFastSet(&fill, gUnknown_0849957C, 0x01000200);
+    CpuFastSet(&fill, gBG1TilemapBuffer, 0x01000200);
     sub_08013AFC();
 }
 
-/* A proc method. sub_0803BD6C returns u8 (promoted in src/decomp/c_0803BD54.c)
+/* A proc method. GetMainMenuLock returns u8 (promoted in src/decomp/c_0803BD54.c)
  * and the ROM re-narrows its result `lsls #0x18; lsrs #0x18` before comparing
  * against 1, which is the caller-side corroboration of that return type.
  *
@@ -75,7 +75,7 @@ void sub_08078078(void)
 
 void sub_080780A0(ProcPtr proc)
 {
-    if (sub_0803BD6C() == 1)
+    if (GetMainMenuLock() == 1)
     {
         Proc_Goto(proc, 3);
     }

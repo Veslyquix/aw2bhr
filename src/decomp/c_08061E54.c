@@ -25,6 +25,6 @@ struct Unk61E54
 
 void sub_08061E54(struct Unk61E54 *p)
 {
-    if (gUnknown_085D5ABC[p->unk00].unk10 - 5 < p->unk06_0)
+    if (gUnknown_085D5ABC[p->unk00].maxFuel - 5 < p->unk06_0)
         p->unk09_0 = 0;
 }

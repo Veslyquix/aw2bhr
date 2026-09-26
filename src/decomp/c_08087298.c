@@ -9,7 +9,7 @@
 
 u16 sub_08087298(void)
 {
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
         return gUnknown_030058F4 * 2 - 0x54;
 
     return gUnknown_030058F4 * 2 - 0x5f;

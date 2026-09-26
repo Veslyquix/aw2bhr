@@ -34,7 +34,7 @@ void sub_0803BA88(void)
     }
     else
     {
-        gUnknown_03003FC0.unk01 = 1;
+        gPlaySt.gameMode = 1;
         Proc_Start(gUnknown_0849EB7C, PROC_TREE_3);
     }
 }

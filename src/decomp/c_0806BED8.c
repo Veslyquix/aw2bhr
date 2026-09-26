@@ -40,8 +40,8 @@ struct Unk6BE7CParent
  * the tag before each test and every arm falls through into the next.
  *
  * THE ONE LEVER, and it is worth 8 bytes plus the whole register assignment:
- * the row cursor must be written `gUnknown_08499578 + (i * 0x60 + 0x29)`, with
- * the integer arithmetic PARENTHESISED, not `gUnknown_08499578 + i * 0x60 +
+ * the row cursor must be written `gBG0TilemapBuffer + (i * 0x60 + 0x29)`, with
+ * the integer arithmetic PARENTHESISED, not `gBG0TilemapBuffer + i * 0x60 +
  * 0x29`. The latter parses as `((p + i * 0x60) + 0x29)`, which gives
  * strength_reduce a giv of `i * 0xc0` and leaves an `adds r0, #0x52` at each of
  * the two use sites; grouping the index folds the constant INTO the giv's init,
@@ -104,27 +104,27 @@ void sub_0806BF40(ProcPtr a1)
     {
         if (t->unk00[i].unk00 == 1)
         {
-            sub_0806BD1C(gUnknown_08499578 + (i * 0x60 + 0x29), t->unk00[i].unk04);
+            sub_0806BD1C(gBG0TilemapBuffer + (i * 0x60 + 0x29), t->unk00[i].unk04);
             count++;
         }
 
         if (t->unk00[i].unk00 == 3)
         {
-            sub_080718F8(gUnknown_08499578 + (i * 0x60 + 0x49), gUnknown_081B9BC8, 0xe0);
+            sub_080718F8(gBG0TilemapBuffer + (i * 0x60 + 0x49), gUnknown_081B9BC8, 0xe0);
             sub_08013AEC();
             count++;
         }
 
         if (t->unk00[i].unk00 == 4)
         {
-            sub_080718F8(gUnknown_08499578 + (i * 0x60 + 0x49), gUnknown_081B9C3C, 0xe0);
+            sub_080718F8(gBG0TilemapBuffer + (i * 0x60 + 0x49), gUnknown_081B9C3C, 0xe0);
             sub_08013AEC();
             count++;
         }
 
         if (t->unk00[i].unk00 == 5)
         {
-            sub_080718F8(gUnknown_08499578 + (i * 0x60 + 0x29), gUnknown_081B9CC0, 0xe0);
+            sub_080718F8(gBG0TilemapBuffer + (i * 0x60 + 0x29), gUnknown_081B9CC0, 0xe0);
             sub_08013AEC();
             count++;
         }

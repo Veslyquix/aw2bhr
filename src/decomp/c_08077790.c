@@ -44,14 +44,14 @@ struct Unk77954Proc
 
 /* Wave 35 (W35-B). The "press anything" front end of the same screen
  * sub_08077C70 drives: B breaks the proc, A and R jump to two different labels,
- * and sub_08014824 gates both of the latter. gpKeySt->held is re-loaded after
+ * and sub_08014824 gates both of the latter. gpKeySt->pressed is re-loaded after
  * that call because the call clobbers it, and the two remaining bit tests share
  * the one reload. */
 void sub_08077790(ProcPtr proc)
 {
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_08014878();
         sub_080733A0(5);
@@ -60,13 +60,13 @@ void sub_08077790(ProcPtr proc)
     }
     else if (!sub_08014824())
     {
-        if (gpKeySt->held & 1)
+        if (gpKeySt->pressed & 1)
         {
             sub_08014878();
             sub_0803B4DC(0x1CE);
             Proc_Goto(proc, 1);
         }
-        else if (gpKeySt->held & 0x100)
+        else if (gpKeySt->pressed & R_BUTTON)
         {
             sub_08014878();
             Proc_Goto(proc, 2);
@@ -77,8 +77,8 @@ void sub_08077790(ProcPtr proc)
 void sub_08077818(struct Unk77818Proc *proc)
 {
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
-    sub_08071900(gUnknown_08499578 + 0x80, gUnknown_08551A00, 0x1E, 7);
-    sub_08071900(gUnknown_08499580 + 0x80, gUnknown_08551A04, 0x1E, 7);
+    sub_08071900(gBG0TilemapBuffer + 0x80, gUnknown_08551A00, 0x1E, 7);
+    sub_08071900(gBG2TilemapBuffer + 0x80, gUnknown_08551A04, 0x1E, 7);
     proc->unk44 = 0;
 }
 
@@ -89,15 +89,15 @@ void sub_08077870(struct Unk77870Proc *proc)
     int x;
 
     a = 0;
-    CpuFastSet(&a, gUnknown_08499578 + 0x80, 0x01000070);
+    CpuFastSet(&a, gBG0TilemapBuffer + 0x80, 0x01000070);
     b = 0;
-    CpuFastSet(&b, gUnknown_08499580 + 0x80, 0x01000070);
+    CpuFastSet(&b, gBG2TilemapBuffer + 0x80, 0x01000070);
     sub_08013AEC();
     sub_08013B0C();
 
     x = gUnknown_086145E2[proc->unk44];
-    sub_08071900(gUnknown_08551A00, gUnknown_08499578 + (0x9E - x), x, 7);
-    sub_08071900(gUnknown_08551A04, gUnknown_08499580 + (0x9E - x), x, 7);
+    sub_08071900(gUnknown_08551A00, gBG0TilemapBuffer + (0x9E - x), x, 7);
+    sub_08071900(gUnknown_08551A04, gBG2TilemapBuffer + (0x9E - x), x, 7);
 
     gUnknown_0300064C = (s8)gUnknown_086145E7[proc->unk44];
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
@@ -119,15 +119,15 @@ void sub_08077954(struct Unk77954Proc *proc)
     int x;
 
     a = 0;
-    CpuFastSet(&a, gUnknown_08499578 + 0x80, 0x01000070);
+    CpuFastSet(&a, gBG0TilemapBuffer + 0x80, 0x01000070);
     b = 0;
-    CpuFastSet(&b, gUnknown_08499580 + 0x80, 0x01000070);
+    CpuFastSet(&b, gBG2TilemapBuffer + 0x80, 0x01000070);
     sub_08013AEC();
     sub_08013B0C();
 
     x = gUnknown_086145E2[proc->unk44];
-    sub_08071900(gUnknown_08551A00, gUnknown_08499578 + (0x9E - x), x, 7);
-    sub_08071900(gUnknown_08551A04, gUnknown_08499580 + (0x9E - x), x, 7);
+    sub_08071900(gUnknown_08551A00, gBG0TilemapBuffer + (0x9E - x), x, 7);
+    sub_08071900(gUnknown_08551A04, gBG2TilemapBuffer + (0x9E - x), x, 7);
 
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
 

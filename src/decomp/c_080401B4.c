@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -16,12 +17,12 @@
  * up -- the declared `ProcPtr` fourth parameter is what proves it is there.
  *
  * The magic-number chain ends `asr #2` and NOT `asr #8`, so this is the bare
- * pointer subtraction `ent - gUnknown_08499594` with no `>> 6`: it is the unit
+ * pointer subtraction `ent - gUnits` with no `>> 6`: it is the unit
  * index, not the army number that sub_0804203C and sub_08041FE0 derive. */
 struct Unk401B4Proc
 {
     /* 00 */ u8 filler_00[0x4c];
-    /* 4c */ struct Unk08499594 *unk4c;
+    /* 4c */ struct Unit *unk4c;
 };
 /* Marks the entry's cell as occupied on two planes of the gUnknown_08499590
  * map, then refreshes. The map header is modelled as a struct for the same
@@ -37,20 +38,12 @@ struct Unk401B4Proc
  * sub_0803FECC's third argument is invisible at the call -- r1 still holds this
  * function's own second parameter -- which its declared `ProcPtr` third
  * parameter is what proves. */
-struct Unk40200Map
-{
-    /* 0x0000 */ u8 filler_0000[0x0A22];
-    /* 0x0A22 */ u16 unkA22[0x508];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_080401B4(struct Unk401B4Proc *proc)
 {
-    struct Unk08499594 *ent = proc->unk4c;
+    struct Unit *ent = proc->unk4c;
 
-    sub_0803FF48(ent->unk02, ent->unk03, gUnknown_085D5ABC[ent->unk00].unk18, proc);
-    sub_08025D60(ent - gUnknown_08499594);
+    sub_0803FF48(ent->x, ent->y, gUnknown_085D5ABC[ent->type].unitClass, proc);
+    sub_08025D60(ent - gUnits);
     sub_080258CC();
 }
 
@@ -58,15 +51,15 @@ void sub_08040200(struct Unk02028360 *ent, ProcPtr a2)
 {
     sub_0803FECC(ent->unk00, ent->unk01, a2);
 
-    ((struct Unk40200Map *)gUnknown_08499590)->terrain[
-        ((struct Unk40200Map *)gUnknown_08499590)->rowOffset[ent->unk01]
+    gMap->terrain[
+        gMap->rowOffset[ent->unk01]
         + ent->unk00] = 1;
 
-    ((struct Unk40200Map *)gUnknown_08499590)->unkA22[
-        ((struct Unk40200Map *)gUnknown_08499590)->rowOffset[ent->unk01]
+    gMap->tile[
+        gMap->rowOffset[ent->unk01]
         + ent->unk00] = 4;
 
     sub_08024268();
     sub_0803E0D0((struct Unk3E0D0 *)ent);
-    sub_080219AC();
+    RecountArmyProperties();
 }

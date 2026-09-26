@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08081060.
  * sub_08081060 @ 0x08081060
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -42,7 +46,7 @@
  * is a third, also-wrong shape: it truncates at the INCREMENT instead.
  */
 
-void sub_08081060(ProcPtr proc)
+void MainMenuC1_08081061(ProcPtr proc)
 {
     int i;
 
@@ -78,13 +82,13 @@ void sub_08081060(ProcPtr proc)
     gUnknown_03001400 = 0xfff8;
 
     Decompress(gUnknown_0823A3D4, (void *)((gUnknown_0300251C.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
 
     sub_08013B1C();
 
     Decompress(gUnknown_0823BF28, (void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0823BE40, gUnknown_08499580);
+    Decompress(gUnknown_0823BE40, gBG2TilemapBuffer);
     ApplyPaletteExt(gUnknown_0823BFD4, 0x20, 0x20);
 
     sub_08013B0C();
@@ -113,7 +117,7 @@ void sub_08081060(ProcPtr proc)
         sub_080845E8(3, 0x20c);
     }
 
-    if (sub_0803CBD8(0x20) != 0)
+    if (IsCampaignCompletionFlagSet(0x20) != 0)
         ApplyPaletteExt(gUnknown_0823DC38, 0x3a0, 0x20);
 
     sub_08084804();
@@ -128,7 +132,7 @@ void sub_08081060(ProcPtr proc)
 
     ApplyPaletteExt(gUnknown_081320AC, 0x100, 0x20);
 
-    Proc_Start(gUnknown_08616A58, proc);
+    Proc_Start(ProcScr_MainMenuC4, proc);
 
     if (gUnknown_030058FC != 0)
     {
@@ -136,3 +140,22 @@ void sub_08081060(ProcPtr proc)
         Proc_Start(gUnknown_08616A40, proc);
     }
 }
+
+asm(".global sub_08081060\n.thumb_set sub_08081060, MainMenuC1_08081061\n");
+
+extern void MainMenuC1_08081335(void);
+extern void MainMenuC1_IDLE_08081359(void);
+
+struct ProcCmd CONST_DATA ProcScr_MainMenuC1[] =
+{
+    PROC_1D(30),
+    PROC_CALL(MainMenuC1_08081061),
+    PROC_1E(30),
+    PROC_CALL(MainMenuC1_08081335),
+    PROC_SLEEP(6),
+    PROC_1B(400),
+    PROC_REPEAT(MainMenuC1_IDLE_08081359),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616990\n.set gUnknown_08616990, ProcScr_MainMenuC1\n");

@@ -38,7 +38,7 @@
  * docs/agbcc-codegen.md. Grep the doc for `case` before deriving a switch.
  *
  * Settled by W35-C and unchanged here: gUnknown_08090A2C is a force-addr word
- * over the s32 gUnknown_03004008; the shift is LOGICAL (`(u32)g >> 2`; a plain
+ * over the s32 gGameClock; the shift is LOGICAL (`(u32)g >> 2`; a plain
  * `>> 2` emits `asrs`); `Div(g, 20) % 4` is a signed remainder and its
  * round-toward-zero correction is byte-exact. */
 
@@ -46,7 +46,7 @@ void sub_080246B4(void)
 {
     int mode;
 
-    mode = gUnknown_08499CBC[((u32)gUnknown_03004008 >> 2) & 0xf];
+    mode = gUnknown_08499CBC[((u32)gGameClock >> 2) & 0xf];
 
     switch (mode)
     {
@@ -62,6 +62,6 @@ void sub_080246B4(void)
         break;
     }
 
-    sub_0803F8E0(0x48, Div(gUnknown_03004008, 20) % 4);
-    sub_0803FE50(0x48, gUnknown_03004008);
+    sub_0803F8E0(0x48, Div(gGameClock, 20) % 4);
+    sub_0803FE50(0x48, gGameClock);
 }

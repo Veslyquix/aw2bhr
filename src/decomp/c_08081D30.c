@@ -5,17 +5,21 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08081D30.
  * sub_08081D30 @ 0x08081D30
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
 #include "proc.h"
 /* The menu-input half of the 0x080819A0-0x08084974 block, and the caller of the
  * dispatcher promoted in src/decomp/c_080824D4.c. It runs only while the proc
- * is idle (`unk4e == 0 && unk6a == 0` and no gUnknown_084892C4 proc alive) and
+ * is idle (`unk4e == 0 && unk6a == 0` and no ProcScr_FadeLoadMap proc alive) and
  * then splits on the s16 at +0x64: zero is the outer carousel (Left/Right step
  * gUnknown_0861696C's six-phase permutation at +0x52, A/B commit or cancel),
  * non-zero is the sub-menu on +0x66. Both arms end in the same two
- * "toggle a word and reset the timer" clauses on sub_0803CBD8(0x20)/(0x28),
+ * "toggle a word and reset the timer" clauses on IsCampaignCompletionFlagSet(0x20)/(0x28),
  * and the function closes by running sub_080824D4 and sub_08084700.
  *
  * Promotion must carry rodata: ["0x081D93AC"], the -fforce-addr copy of
@@ -87,7 +91,7 @@ void sub_080824D4(struct Unk8081D30 *);
 void sub_08084700(struct Unk8081D30 *);
 void sub_08084974(void);
 
-void sub_08081D30(struct Unk8081D30 *p)
+void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
 {
     int a;
     int b;
@@ -96,18 +100,18 @@ void sub_08081D30(struct Unk8081D30 *p)
     b = 0;
 
     if (p->unk4e != 0 && p->unk64 == 0 && p->unk68 == 0 && p->unk4c > 0x1B
-        && (gpKeySt->unk02 & 0xC0))
+        && (gpKeySt->repeated & (DPAD_UP | DPAD_DOWN)))
     {
         p->unk4e = b;
         a = p->unk4c;
         b = 1;
     }
 
-    if (p->unk4e == 0 && p->unk6a == 0 && Proc_Find(gUnknown_084892C4) == 0)
+    if (p->unk4e == 0 && p->unk6a == 0 && Proc_Find(ProcScr_FadeLoadMap) == 0)
     {
         if (p->unk64 == 0)
         {
-            if (gpKeySt->unk02 & 0x40)
+            if (gpKeySt->repeated & DPAD_UP)
             {
                 if (p->unk52 == 5)
                     p->unk52 = 0;
@@ -119,7 +123,7 @@ void sub_08081D30(struct Unk8081D30 *p)
                 sub_0803B4DC(0x67);
                 gUnknown_03005920 = 0;
             }
-            else if (gpKeySt->unk02 & 0x80)
+            else if (gpKeySt->repeated & DPAD_DOWN)
             {
                 if (p->unk52 == 0)
                     p->unk52 = 5;
@@ -131,12 +135,12 @@ void sub_08081D30(struct Unk8081D30 *p)
                 sub_0803B4DC(0x67);
                 gUnknown_03005920 = 0;
             }
-            else if (gpKeySt->held & 0x11)
+            else if (gpKeySt->pressed & (A_BUTTON | DPAD_RIGHT))
             {
                 if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 2
                     || gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 4)
                 {
-                    if (gpKeySt->held & 1)
+                    if (gpKeySt->pressed & 1)
                     {
                         p->unk6a = 1;
 
@@ -148,7 +152,7 @@ void sub_08081D30(struct Unk8081D30 *p)
                         gUnknown_03005934 = p->unk52;
                         sub_0803B4DC(0x71);
                         Proc_Start(gUnknown_08616A68, p);
-                        sub_0803BD54();
+                        LockMainMenu();
                     }
                 }
                 else
@@ -168,13 +172,13 @@ void sub_08081D30(struct Unk8081D30 *p)
                     if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5 && sub_0803BC94() == 0)
                         p->unk66 = 7;
 
-                    if (gpKeySt->held & 1)
+                    if (gpKeySt->pressed & 1)
                         sub_0803B4DC(0x71);
-                    else if (gpKeySt->held & 0x10)
+                    else if (gpKeySt->pressed & DPAD_RIGHT)
                         sub_0803B4DC(0x67);
                 }
             }
-            else if (gpKeySt->held & 2)
+            else if (gpKeySt->pressed & 2)
             {
                 p->unk6a = 0xFFFF;
                 gUnknown_030033FC = 0xD;
@@ -182,12 +186,12 @@ void sub_08081D30(struct Unk8081D30 *p)
                 gUnknown_03005924 = p->unk66;
                 Proc_Start(gUnknown_08616A68, p);
                 sub_0803B4DC(0x66);
-                sub_0803BD60();
+                UnlockMainMenu();
             }
         }
         else if (p->unk64 > 0)
         {
-            if (gpKeySt->held & 0x40)
+            if (gpKeySt->pressed & DPAD_UP)
             {
                 if (p->unk66 == 6)
                     p->unk66 = 0xB;
@@ -206,7 +210,7 @@ void sub_08081D30(struct Unk8081D30 *p)
                     gUnknown_03005920 = 0;
                 }
             }
-            else if (gpKeySt->held & 0x80)
+            else if (gpKeySt->pressed & DPAD_DOWN)
             {
                 if (p->unk66 == 0xB)
                     p->unk66 = 6;
@@ -225,7 +229,7 @@ void sub_08081D30(struct Unk8081D30 *p)
                     gUnknown_03005920 = 0;
                 }
             }
-            else if (gpKeySt->held & 1)
+            else if (gpKeySt->pressed & 1)
             {
                 p->unk6a = 1;
 
@@ -283,22 +287,22 @@ void sub_08081D30(struct Unk8081D30 *p)
                 gUnknown_03005924 = p->unk66;
                 sub_0803B4DC(0x71);
                 Proc_Start(gUnknown_08616A68, p);
-                sub_0803BD54();
+                LockMainMenu();
             }
-            else if (gpKeySt->held & 0x22)
+            else if (gpKeySt->pressed & (B_BUTTON | DPAD_LEFT))
             {
                 p->unk68 = 0xFFFF;
                 p->unk4c = 0;
                 p->unk4e = p->unk4e + 1;
 
-                if (gpKeySt->held & 2)
+                if (gpKeySt->pressed & 2)
                     sub_0803B4DC(0x66);
-                else if (gpKeySt->held & 0x20)
+                else if (gpKeySt->pressed & DPAD_LEFT)
                     sub_0803B4DC(0x67);
             }
         }
 
-        if ((gpKeySt->held & 4) && sub_0803CBD8(0x20) != 0
+        if ((gpKeySt->pressed & 4) && IsCampaignCompletionFlagSet(0x20) != 0
             && gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0)
         {
             gUnknown_03005968 = ~gUnknown_03005968 & 1;
@@ -306,7 +310,7 @@ void sub_08081D30(struct Unk8081D30 *p)
             p->unk4c = 0;
         }
 
-        if ((gpKeySt->held & 4) && sub_0803CBD8(0x28) != 0
+        if ((gpKeySt->pressed & 4) && IsCampaignCompletionFlagSet(0x28) != 0
             && gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 2)
         {
             gUnknown_03005920 = ~gUnknown_03005920 & 1;
@@ -339,3 +343,5 @@ void sub_08081D30(struct Unk8081D30 *p)
     else if (p->unk4c == 8)
         p->unk58 = 0;
 }
+
+asm(".global sub_08081D30\n.thumb_set sub_08081D30, MainMenuC2_IDLE_08081D31\n");

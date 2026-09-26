@@ -34,7 +34,7 @@ struct Proc7B2B8
 
 void sub_0807B288(struct Proc7B288 *proc)
 {
-    if (gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.gameMode == 3)
     {
         proc->unk_30 = 9;
         proc->unk_64 = 4;

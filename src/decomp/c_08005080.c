@@ -21,10 +21,10 @@ void sub_08005080(void)
     s16 t;
 
     a = sub_0800CB30(0, 0);
-    sub_0803CF54(gUnknown_0200B0B0->unk10, &gUnknown_0200B0B0->unk9c, sub_0800C9E8());
+    sub_0803CF54(gActiveMap->designSlot, gActiveMap->designName, sub_0800C9E8());
     sub_0800CB30(1, a);
     t = 7;
-    switch ((s8)gUnknown_0200B0B0->unk10)
+    switch ((s8)gActiveMap->designSlot)
     {
     case 0:
         break;
@@ -35,13 +35,13 @@ void sub_08005080(void)
         t = 0xB;
         break;
     }
-    sub_08012BC8(gUnknown_08499578, 5, t, 9, 2, 0);
-    sub_080149C0(5, t, gUnknown_08499578, &gUnknown_0200B0B0->unk9c, 0x8000, 0);
+    sub_08012BC8(gBG0TilemapBuffer, 5, t, 9, 2, 0);
+    sub_080149C0(5, t, gBG0TilemapBuffer, gActiveMap->designName, 0x8000, 0);
     sub_08013AEC();
-    if (gUnknown_0200B0B0->unk00 & 0x100)
+    if (gActiveMap->flags & 0x100)
     {
-        gUnknown_0200B0B0->unk00 &= 0xFEFF;
-        gUnknown_0200B0B0->unk9c = 0;
+        gActiveMap->flags &= 0xFEFF;
+        gActiveMap->designName[0] = 0;
     }
-    gUnknown_0200B0B0->unk00 &= 0xEFFF;
+    gActiveMap->flags &= 0xEFFF;
 }

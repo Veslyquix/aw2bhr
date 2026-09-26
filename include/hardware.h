@@ -645,27 +645,60 @@ extern union BlendCntBuf gUnknown_030030E0;
 #define INTR_FLAG_TIMER3  0x0040
 #define INTR_FLAG_SERIAL  0x0080
 
+/* GBA key bits, as REG_KEYINPUT and every gpKeySt mask use them. Names match
+ * the FE8 decomp's, which is where struct KeySt below came from. */
+#define A_BUTTON        0x0001
+#define B_BUTTON        0x0002
+#define SELECT_BUTTON   0x0004
+#define START_BUTTON    0x0008
+#define DPAD_RIGHT      0x0010
+#define DPAD_LEFT       0x0020
+#define DPAD_UP         0x0040
+#define DPAD_DOWN       0x0080
+#define R_BUTTON        0x0100
+#define L_BUTTON        0x0200
+#define KEYS_MASK       0x03FF
+#define KEY_INTR_ENABLE 0x0400
+#define KEY_OR_INTR     0x0000
+#define KEY_AND_INTR    0x8000
+#define DPAD_ANY        0x00F0
+#define JOY_EXCL_DPAD   0x030F
+
+/* The pad state at 0x03002090, filled once a frame by sub_0801348C.  That
+ * function is what fixes every name here -- it writes, in order:
+ *     unk0e = unk08                 previous <- current
+ *     unk08 = keys                  the raw mask, opposing d-pad pairs cancelled
+ *     unk0a = unk0c = unk08 & ~unk0e    newly pressed
+ *     ...repeat timer in unk10; on expiry unk0a = unk08...
+ *     held = unk08   pressed = unk0c   repeated = unk0a   previous = unk0e
+ *
+ * SO THE FIRST FOUR ARE FE8's FOUR, IN FE8's ORDER, SHIFTED BACK BY FOUR.
+ * FE8 leads with three u8 repeat timers and puts heldKeys at 0x04; AW2 keeps
+ * its repeat delay/interval/clock in the working set at 0x10 instead, so the
+ * published masks start at 0x00.  An earlier pass here mapped FE8's offsets
+ * straight across, which named 0x04 `held` when it is the newly-pressed set
+ * and 0x06 `repeated` when it is last frame's.  The three usage patterns agree
+ * with the corrected names: held takes the L/R and camera-ease tests, repeated
+ * takes the d-pad cursor stepping that wants auto-repeat, and pressed takes
+ * the one-shot menu checks.
+ *
+ * 0x08 onward is sub_0801348C's own working set, which is why almost nothing
+ * outside it reads those; struct Unk03002090 is the same memory under the
+ * names that function uses. */
 struct KeySt
 {
-    /* 00 */ u16 unk00; // a key bitmask, read with `ldrh [r0]` and tested against
-                        // key bits: sub_0803B0EC uses 0x200 (L), sub_0803B1CC
-                        // 0x100 (R). This slot was inherited from FE8's
-                        // KeyStatusBuffer, where 00/01/02 are repeat_delay /
-                        // repeat_interval / repeat_clock; AW2 disagrees, and
-                        // nothing in this tree ever named those three.
-    /* 02 */ u16 unk02; // a second key bitmask, distinct from unk00 and from
-                        // `held`: sub_0802966C tests it against 0x50
-                        // (Right|Up) and 0xa0 (Left|Down) to step a cursor
-                        // forwards and backwards. Was filler until wave 13.
-    /* 04 */ u16 held; // keys that are currently held down
-    /* 06 */ u16 repeated; // auto-repeated keys
-    /* 08 */ u16 pressed; // keys that went down this frame
-    /* 0A */ u16 previous; // keys that were held down last frame
-    /* 0C */ u16 last;
-    /* 0E */ u16 ablr_pressed; // 1 for Release (A B L R Only), 0 Otherwise
-    /* 10 */ u16 pressed2;
-    /* 12 */ u16 time_since_start_select; // Time since last Non-Start Non-Select Button was pressed
+    /* 00 */ u16 held;      // keys currently down
+    /* 02 */ u16 repeated;  // newly pressed, plus auto-repeat when the timer fires
+    /* 04 */ u16 pressed;   // keys that went down this frame
+    /* 06 */ u16 previous;  // keys that were down last frame
+    /* 08 */ u16 unk08;     // working: the raw mask this frame
+    /* 0A */ u16 unk0a;     // working: the repeat output
+    /* 0C */ u16 unk0c;     // working: newly pressed
+    /* 0E */ u16 unk0e;     // working: previous
+    /* 10 */ u16 unk10;     // working: the repeat countdown
+    /* 12 */ u16 unk12;
 };
+
 
 enum
 {
@@ -688,6 +721,16 @@ enum
 extern struct KeySt * gpKeySt;
 
 extern u16 gPal[];
+
+// Utility macros and constants
+
+// Some functions only match with one of the macros.
+// NOTE: TILEMAP_INDEX2 is TM_OFFSET in fe6
+#define TILEMAP_INDEX(aX, aY) (0x20 * (aY) + (aX))
+#define TILEMAP_INDEX2(aX, aY) (((aY) << 5) + (aX))
+
+#define TILEMAP_LOCATED(aMap, aX, aY) (TILEMAP_INDEX((aX), (aY)) + (aMap))
+
 
 #define RGB_GET_RED(color) ((color) & 0x1F)
 #define RGB_GET_GREEN(color) (((color) >> 5) & 0x1F)
@@ -815,6 +858,14 @@ extern u16 gPal[];
 #define SetBlendBackdropB(enable) \
     gDispIo.blend_ct.target2_enable_bd = (enable)
 
+
+/* Byte-matched entry points retain their ROM symbol names. These C aliases
+ * describe their BG-specific roles without changing the linked functions. */
+#define BG_EnableSync sub_08013AD4
+/* AW2 has no standalone mask-taking ROM entry point; use the state word. */
+#define BG_EnableSyncByMask(mask) (sModifiedBGs |= (mask))
+#define FlushBgTilemaps sub_08013B2C
+#define BG_GetMapTilePointer sub_08013D00
 
 extern const s16 gSinLut[0x40];
 extern const s16 gCosLut[0x100];

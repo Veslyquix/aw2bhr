@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -23,22 +24,6 @@
  * The single `lsls #0x18; asrs #0x18` serves all three compares, so it is an
  * int local carrying one explicit (s8) cast, not an s8 local -- the same
  * reading c_08058BB4.c records for sub_08058E88. */
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x0A10];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 
 /* Offers the four cells orthogonally adjacent to (x, y) to sub_0805ACFC and
  * reports whether any of them was accepted. The exact shape of sub_08058C54
@@ -89,16 +74,16 @@ void sub_0805ACFC(int x, int y, u16 * out)
     if (y < 0)
         return;
 
-    map = (struct Map *)gUnknown_08499590;
+    map = gMap;
 
-    if (x >= map->unk00)
+    if (x >= map->width)
         return;
-    if (y >= map->unk02)
+    if (y >= map->height)
         return;
 
-    idx = map->unk417A[y] + x;
+    idx = map->rowOffset[y] + x;
 
-    if (map->unk0012[idx] != gUnknown_03003F38 && map->unk0012[idx] != 0)
+    if (gMap->unit[idx] != gUnknown_03003F38 && gMap->unit[idx] != 0)
         return;
 
     t = (s8)gUnknown_03003340[y][x];
@@ -110,7 +95,7 @@ void sub_0805ACFC(int x, int y, u16 * out)
     if (t == 0x79)
         return;
 
-    terrain = map->unk1432[idx] & 0x1f;
+    terrain = map->terrain[idx] & 0x1f;
 
     if (terrain != 0xd && terrain != 0xb)
         return;

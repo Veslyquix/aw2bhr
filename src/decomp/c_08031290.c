@@ -22,5 +22,5 @@
 
 void sub_08031290(void)
 {
-    sub_0801F34C(0x4f, 0x8c, 0x70, 0, 0);
+    DrawOamObject(0x4f, 0x8c, 0x70, 0, 0);
 }

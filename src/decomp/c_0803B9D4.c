@@ -32,5 +32,26 @@
 void sub_0803B9D4(void)
 {
     sub_08044BB0();
-    Proc_Start(gUnknown_0849EA94, PROC_TREE_3);
+    Proc_Start(ProcScr_CoDesign, PROC_TREE_3);
 }
+
+extern void BattleMaps_0803B83D(void);
+extern void SoundRoom_0806F711(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoDesign[] =
+{
+    PROC_START_CHILD_BLOCKING(ProcScr_CoDesignC1),
+    PROC_CALL(BattleMaps_0803B83D),
+    PROC_END,
+};
+
+struct ProcCmd CONST_DATA ProcScr_SoundRoom[] =
+{
+    PROC_CALL(SoundRoom_0806F711),
+    PROC_YIELD,
+    PROC_CALL(BattleMaps_0803B83D),
+    PROC_END,
+};
+
+asm(".global gUnknown_0849EA94\n.set gUnknown_0849EA94, ProcScr_CoDesign\n"
+    ".global gUnknown_0849EAAC\n.set gUnknown_0849EAAC, ProcScr_SoundRoom\n");

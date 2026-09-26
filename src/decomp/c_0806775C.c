@@ -30,7 +30,7 @@ struct Unk6775CProc
 
 void sub_0806775C(int a, ProcPtr parent)
 {
-    struct Unk6775CProc *proc = Proc_Start(gUnknown_08580FCC, parent);
+    struct Unk6775CProc *proc = Proc_Start(ProcScr_IntroT3Child, parent);
 
     proc->unk2c = gUnknown_08580FC0[a];
     proc->unk38 = 0;

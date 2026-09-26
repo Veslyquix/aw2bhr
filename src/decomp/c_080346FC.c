@@ -1,10 +1,11 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080346FC.
- * sub_080346FC @ 0x080346FC
+ * ResetRulesAfterCampaignMap @ 0x080346FC
  */
 
 /* MATCHED, wave 43 (W43-C), first attempt.
@@ -13,7 +14,7 @@
  * data/promoted.json entry:
  *     "rodata": ["0x08090D8C"]
  * then re-run tools/split_rodata.py and tools/gen_lds.py before building.
- * 0x08090D8C holds 0x03003FC0, i.e. &gUnknown_03003FC0. The honest spelling
+ * 0x08090D8C holds 0x03003FC0, i.e. &gPlaySt. The honest spelling
  * reproduces it exactly, including the reload of the address after the loop
  * (`ldr r3, [r7]`) that the -fforce-addr indirection forces. See the
  * non-consecutive-words promotion warning in sub_08033F1C's note.
@@ -35,36 +36,53 @@
  * gUnknown_085C77E0 is NOT a global: it is `gUnknown_085C77A0 + 0x40`, and
  * `gUnknown_085C77A0[n].unk40[i]` emits that base as an LICM-hoisted address
  * constant, which trymatch reports as resolving to the same address.
- * gUnknown_03003FC0.unk02 is reloaded every iteration rather than hoisted
+ * gPlaySt.mapID is reloaded every iteration rather than hoisted
  * because the loop stores into unk38 of the same struct and agbcc cannot
- * prove the two do not alias. */
+ * prove the two do not alias.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Clears RAM after a campaign map
+ * completion" -- calls SetDefaultRules (the actual reset) and then applies
+ * mode-specific overrides on top, rather than clearing memory directly. The
+ * old ResetRulesAfterCampaignMap symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
 
-void sub_080346FC(void)
+void ResetRulesAfterCampaignMap(void)
 {
     int i;
 
-    sub_08034780();
+    SetDefaultRules();
 
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 2:
-        gUnknown_03003FC0.unk38[1] = 1;
-        gUnknown_03003FC0.unk38[2] = 2;
-        gUnknown_03003FC0.unk38[3] = 2;
-        gUnknown_03003FC0.unk38[4] = 2;
+        gPlaySt.aiControlled[1] = 1;
+        gPlaySt.aiControlled[2] = 2;
+        gPlaySt.aiControlled[3] = 2;
+        gPlaySt.aiControlled[4] = 2;
         break;
 
     case 1:
         for (i = 0; i < 4; i++)
         {
-            if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk40[i] == 5)
-                gUnknown_03003FC0.unk38[i + 1] = 2;
+            if (gUnknown_085C77A0[gPlaySt.mapID].unk40[i] == 5)
+                gPlaySt.aiControlled[i + 1] = 2;
             else
-                gUnknown_03003FC0.unk38[i + 1] = 1;
+                gPlaySt.aiControlled[i + 1] = 1;
         }
 
-        if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk17 != 0)
-            gUnknown_03003FC0.unk0d = 1;
+        if (gUnknown_085C77A0[gPlaySt.mapID].fogOfWar != 0)
+            gPlaySt.fog = 1;
         break;
     }
 }
+
+asm(".global sub_080346FC\n.thumb_set sub_080346FC, ResetRulesAfterCampaignMap\n");
+
+struct ProcCmd CONST_DATA ProcScr_WarRoom[] =
+{
+    PROC_1D(30),
+    PROC_CALL(ResetRulesAfterCampaignMap),
+    PROC_GOTO_SCR((void *)0x0849EC34),
+};
+
+asm(".global gUnknown_0849EC1C\n.set gUnknown_0849EC1C, ProcScr_WarRoom\n");

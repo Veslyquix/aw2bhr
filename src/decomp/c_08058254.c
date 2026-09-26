@@ -10,7 +10,7 @@
 /* MATCHED, first draft, one attempt, and the first of a byte-identical pair
  * with sub_08058318. Counts the deployed units of every army that is not masked
  * out: for each of the four armies, skip it if bit i of
- * gUnknown_08499598[gUnknown_030033EC].unk2c is set, then scan that army's 64
+ * gPlayers[gUnknown_030033EC].unk2c is set, then scan that army's 64
  * slots and count the ones that are a real unit of class 2, whose type has a
  * non-zero gUnknown_085D5ABC cap, and that are actually standing on the map.
  *
@@ -30,33 +30,33 @@
  *    it.
  *
  * gUnknown_030033EC's load is hoisted out of the outer loop and
- * gUnknown_08499598's deref is NOT, although both are invariant. That falls out
+ * gPlayers's deref is NOT, although both are invariant. That falls out
  * of gcc's own invariant motion and needs nothing in the source. */
 int sub_08058254(void)
 {
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
-            if (u->unk00 <= 2)
+            if (u->type <= 2)
                 continue;
-            if (gUnknown_0857680F[u->unk00] != 2)
+            if (gUnknown_0857680F[u->type] != 2)
                 continue;
-            if (gUnknown_085D5ABC[u->unk00].unk0b == 0)
+            if (gUnknown_085D5ABC[u->type].maxAmmo == 0)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;
@@ -73,26 +73,26 @@ int sub_08058318(void)
     int count;
     int i;
     int j;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     count = 0;
 
     for (i = 0; i < 4; i++)
     {
-        if ((gUnknown_08499598[gUnknown_030033EC].unk2c >> i) & 1)
+        if ((gPlayers[gUnknown_030033EC].unk2c >> i) & 1)
             continue;
 
         for (j = i * 64; j < i * 64 + 64; j++)
         {
-            u = &gUnknown_08499594[j];
+            u = &gUnits[j];
 
-            if (u->unk00 <= 2)
+            if (u->type <= 2)
                 continue;
-            if (gUnknown_0857680F[u->unk00] != 2)
+            if (gUnknown_0857680F[u->type] != 2)
                 continue;
-            if (gUnknown_085D5ABC[u->unk00].unk0b == 0)
+            if (gUnknown_085D5ABC[u->type].maxAmmo == 0)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] == -1)
+            if ((s8)gUnknown_03003340[u->y][u->x] == -1)
                 continue;
 
             count++;

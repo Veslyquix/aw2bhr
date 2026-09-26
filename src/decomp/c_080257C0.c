@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -46,33 +47,25 @@
  *    (the load has one use and nothing writes memory in between). The commas
  *    are almost certainly a macro in the original; what matters is that they
  *    are the only spelling found that emits the LOAD where the ROM has it. The
- *    map itself still needs its own locals -- see src/decomp/c_0800F564.c for
- *    why `rows` and `t` cannot be folded away. */
+ *    map lookup is gMap->terrain[gMap->rowOffset[y] + x]. */
 u8 sub_080257C0(u16 id)
 {
-    struct Unk08499594 *unit = &gUnknown_08499594[id];
+    struct Unit *unit = &gUnits[id];
     u16 total = 0;
-    s16 x = unit->unk02;
-    s16 y = unit->unk03;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
-    int idx;
+    s16 x = unit->x;
+    s16 y = unit->y;
 
     if (unit == NULL)
         return 1;
 
-    if (!(unit->unk01 & 0x20))
+    if (!(unit->flags & 0x20))
         return 1;
 
-    if (sub_08026F5C(unit - gUnknown_08499594))
+    if (sub_08026F5C(unit - gUnits))
         return 1;
 
     if (sub_08026FD0(gUnknown_084995FE[gUnknown_030033EC],
-                     (p = gUnknown_08499590, t = y * 2, rows = p + 0x417A,
-                      idx = *(u16 *)(rows + t) + x, cells = p + 0x1432,
-                      *(cells + idx))))
+                     gMap->terrain[gMap->rowOffset[y] + x]))
         return 1;
 
     if (x > 0)
@@ -81,10 +74,10 @@ u8 sub_080257C0(u16 id)
     if (y > 0)
         total += sub_08025744(x, y - 1);
 
-    if (x < *(u16 *)gUnknown_08499590 - 1)
+    if (x < gMap->width - 1)
         total += sub_08025744(x + 1, y);
 
-    if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+    if (y < gMap->height - 1)
         total += sub_08025744(x, y + 1);
 
     if (total != 0)

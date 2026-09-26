@@ -32,7 +32,7 @@
 
 void sub_08023348(void)
 {
-    sub_08023360(1);
+    LoadGameplayGraphics(1);
 }
 
 /* Family F003 (data/families.json): 34 twelve-byte forwarders shaped
@@ -45,5 +45,5 @@ void sub_08023348(void)
 
 void sub_08023354(void)
 {
-    sub_08023360(0);
+    LoadGameplayGraphics(0);
 }

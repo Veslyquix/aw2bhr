@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -42,10 +43,6 @@ int sub_08059A0C(void *a1)
 {
     struct Unk59A0CCell *out;
     struct Unk59A0CCell *start;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
     int x;
     int y;
@@ -53,19 +50,15 @@ int sub_08059A0C(void *a1)
     out = (struct Unk59A0CCell *)a1;
     start = out;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0)
             {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x1432;
-                if (gUnknown_085767D5[cells[off] & 0x1f] != 0
-                    && sub_08026FD0(gUnknown_03003F38, cells[off]) != 1)
+                off = gMap->rowOffset[y] + x;
+                if (gUnknown_085767D5[gMap->terrain[off] & 0x1f] != 0
+                    && sub_08026FD0(gUnknown_03003F38, gMap->terrain[off]) != 1)
                 {
                     out->x = x;
                     out->y = y;

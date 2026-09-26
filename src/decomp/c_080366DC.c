@@ -14,7 +14,9 @@
  * sub_080366DC @ 0x080366DC
  */
 
-void (*sub_080366DC(void))(void)
+void (*GetMainLoopCallback(void))(void)
 {
     return gUnknown_030040EC;
 }
+
+asm(".global sub_080366DC\n.thumb_set sub_080366DC, GetMainLoopCallback\n");

@@ -41,7 +41,7 @@
  *   the call (agbcc folds the local away and emits the identical stream).
  *
  * REMAINING DIFF 2 -- a high-register swap in the tail, size-neutral, about
- * eight bytes: the ROM puts the -fforce-addr word for gUnknown_08499578 in
+ * eight bytes: the ROM puts the -fforce-addr word for gBG0TilemapBuffer in
  * `sb` and `&c` (the third CpuFastSet fill scalar) in `sl`; this candidate has
  * them the other way round, so every `mov rN, sb` reads `mov rN, sl`. Both
  * pseudos are created in the same preheader in the same order in both, so this
@@ -55,7 +55,7 @@
  *
  * EVERYTHING ELSE IS SETTLED AND SHOULD NOT BE RE-DERIVED:
  *  - The four pool words 0x081CC5A0/5A4/5A8/5AC are -fforce-addr words holding
- *    &gUnknown_0202FDFC, &gUnknown_03002B6C, &gUnknown_08499578 and
+ *    &gUnknown_0202FDFC, &gUnknown_03002B6C, &gBG0TilemapBuffer and
  *    &gUnknown_086145CE (read out of baserom.gba). Naming the objects directly
  *    reproduces every indirection level. A match needs
  *    "rodata": ["0x081CC5A0", "0x081CC5A4", "0x081CC5A8", "0x081CC5AC"].
@@ -67,7 +67,7 @@
  *    ldrsh, so the declared signedness is irrelevant).
  *  - unk10 and unk20 of struct Unk08615194 were carved out of filler here.
  *  - BOTH halfword store loops must bind the pointer global to a LOCAL first
- *    (W44-D). Written as `gUnknown_08499578[0x29a + k]` the load is repeated
+ *    (W44-D). Written as `gBG0TilemapBuffer[0x29a + k]` the load is repeated
  *    inside the loop, strength reduction never fires and the loop stays
  *    ascending; bound to a local it collapses to the ROM's descending
  *    `strh / subs / subs / subs / cmp / bge`.
@@ -113,11 +113,11 @@ void sub_08077304(struct Unk8077304Proc * proc)
     sub_08072C40(0, 0, 0);
     sub_08072C40(2, 0, 0);
 
-    proc->unk34 = (s16)gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk00;
+    proc->unk34 = (s16)gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
     proc->unk2c = gUnknown_085C77A0[proc->unk34].unk18;
     proc->unk30 = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk10;
 
-    if (gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk20 == NULL)
+    if (gUnknown_08615194[gUnknown_0202FDFC.unk0c].coSelect == NULL)
     {
         arg = gUnknown_085C77A0[proc->unk34].unk3c[0];
         sub_08043E3C(arg,
@@ -130,7 +130,7 @@ void sub_08077304(struct Unk8077304Proc * proc)
         Decompress(gUnknown_081D1F74,
                    (void *)(0x060008C0 + (gUnknown_03002B6C.bits.chr_block << 14)));
         ApplyPaletteExt(gUnknown_081D208C, 0x20, 0x20);
-        proc->unk38 = gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk20;
+        proc->unk38 = gUnknown_08615194[gUnknown_0202FDFC.unk0c].coSelect;
         proc->unk3c = 0;
     }
 
@@ -154,14 +154,14 @@ void sub_08077304(struct Unk8077304Proc * proc)
     b = 0;
     CpuFastSet(&b, gUnknown_08551A04, 0x01000070);
     c = 0;
-    CpuFastSet(&c, gUnknown_08499578, 0x01000200);
+    CpuFastSet(&c, gBG0TilemapBuffer, 0x01000200);
     d = 0;
-    CpuFastSet(&d, gUnknown_08499580, 0x01000200);
+    CpuFastSet(&d, gBG2TilemapBuffer, 0x01000200);
 
-    if (gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c].unk00[sub_0803866C()].unk00_08 != 0)
+    if (gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c].unk00[IsHardCampaignMode()].unk00_08 != 0)
     {
-        j = 6 - sub_08037D80(gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c]
-                                 .unk00[sub_0803866C()].unk00_14);
+        j = 6 - GetRankFromScore(gUnknown_0200C2D0[gUnknown_0202FDFC.unk0c]
+                                 .unk00[IsHardCampaignMode()].unk00_14);
 
         if (j != 0)
         {
@@ -171,12 +171,12 @@ void sub_08077304(struct Unk8077304Proc * proc)
                          0x6a, 2);
             sub_0801F234(gUnknown_086145CE[j]);
 
-            p = gUnknown_08499578;
+            p = gBG0TilemapBuffer;
 
             for (k = 0; k < 4; k++)
                 p[0x29a + k] = 0x29 + k;
 
-            sub_0801F2AC(gUnknown_086145CE[j], gUnknown_08499578 + 0x2bc);
+            sub_0801F2AC(gUnknown_086145CE[j], gBG0TilemapBuffer + 0x2bc);
         }
     }
 
@@ -185,14 +185,14 @@ void sub_08077304(struct Unk8077304Proc * proc)
     else
         sub_08077180(gUnknown_08551A00 + 0x41, 0x46, 1);
 
-    q = gUnknown_08499578;
+    q = gBG0TilemapBuffer;
 
     for (m = 0; m < 4; m++)
         q[0x281 + m] = 0x2e + m;
 
-    sub_080772B8((struct Unk080772B8 *)(gUnknown_08499578 + 0x280));
+    sub_080772B8((struct Unk080772B8 *)(gBG0TilemapBuffer + 0x280));
     sub_080718F8(gUnknown_08551A04 + 0x20, gUnknown_081D2330, 0x360);
-    sub_080718F8(gUnknown_08499580 + 0x280, gUnknown_081D249C, 0x360);
+    sub_080718F8(gBG2TilemapBuffer + 0x280, gUnknown_081D249C, 0x360);
 
     proc->unk44 = 0;
 }

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -14,16 +15,6 @@
  * permuter pass at iteration 28; do not simplify the sentinel assignment
  * without re-running try_match. */
 
-struct Unk590DCMap
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_04[0x12 - 0x04];
-    /* 0x0012 */ u8 unit[0x1420];
-    /* 0x1432 */ u8 terrain[0x2d48];
-    /* 0x417a */ u16 rows[1];
-};
-
 void sub_080590DC(void *a1)
 {
   union Unk802C57CBuf v;
@@ -37,9 +28,9 @@ void sub_080590DC(void *a1)
   j = (v.raw & 0xFFFF0000) | 0x270F;
   v.raw = j;
   gUnknown_030013EC(in->pos.unk00, in->pos.unk02, 0x10, 7, 0);
-  for (i = 0; i < ((struct Unk590DCMap *) gUnknown_08499590)->height; i++)
+  for (i = 0; i < gMap->height; i++)
   {
-    for (j = 0; j < ((struct Unk590DCMap *) gUnknown_08499590)->width; j++)
+    for (j = 0; j < gMap->width; j++)
     {
       if (((s8) gUnknown_03003340[i][j]) < 0)
       {
@@ -49,13 +40,13 @@ void sub_080590DC(void *a1)
       {
         continue;
       }
-      switch (((struct Unk590DCMap *) gUnknown_08499590)->terrain[((struct Unk590DCMap *) gUnknown_08499590)->rows[i] + j] & 0x1f)
+      switch (gMap->terrain[gMap->rowOffset[i] + j] & 0x1f)
       {
-        case 7:
+        case TERRAIN_SEA:
 
-        case 0xb:
+        case TERRAIN_PORT:
 
-        case 0xd:
+        case TERRAIN_SHOAL:
           t = gUnknown_03003340[i][j];
           best = t;
           v.raw = (i << 16) | ((u16) j);

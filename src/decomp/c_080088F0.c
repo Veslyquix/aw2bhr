@@ -9,8 +9,8 @@
 
 void sub_080088F0(void)
 {
-    gUnknown_0200B0B0->unk13 = sub_08025308(1);
-    gUnknown_0200B0B0->unk14 = sub_08025308(2);
-    gUnknown_0200B0B0->unk15 = sub_08025308(3);
-    gUnknown_0200B0B0->unk16 = sub_08025308(4);
+    gActiveMap->army1UnitCount = CountArmyUnits(1);
+    gActiveMap->army2UnitCount = CountArmyUnits(2);
+    gActiveMap->army3UnitCount = CountArmyUnits(3);
+    gActiveMap->army4UnitCount = CountArmyUnits(4);
 }

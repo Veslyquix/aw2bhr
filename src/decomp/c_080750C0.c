@@ -5,11 +5,15 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080750C0.
  * sub_080750C0 @ 0x080750C0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
 #include "proc.h"
-/* The body of the gUnknown_08614370 child sub_08075058 starts. The scale
+/* The body of the ProcScr_WM_DrawDifficultyStars child sub_08075058 starts. The scale
  * denominator is a single Interpolate ramp 8 -> 0x100 over 10 frames, and the
  * affine block is c_0807662C.c's zero-angle shape with the roles swapped: pa/pc
  * take the ramp and pb/pd the fixed 0x100. 0x100 is ONE constant in the source
@@ -25,7 +29,7 @@ struct Unk80750C0
     /* 0x3a */ u16 unk3a;
 };
 
-void sub_080750C0(struct Unk80750C0 *proc)
+void WM_MoveScope_IDLE_080750C1(struct Unk80750C0 *proc)
 {
     int t = Interpolate(4, 8, 0x100, proc->unk3a, 10);
 
@@ -46,3 +50,5 @@ void sub_080750C0(struct Unk80750C0 *proc)
 
     proc->unk3a++;
 }
+
+asm(".global sub_080750C0\n.thumb_set sub_080750C0, WM_MoveScope_IDLE_080750C1\n");

@@ -43,14 +43,14 @@ struct Unk397CCProc
  */
 
 
-/* The proc is sub_08044B28's third argument. `adds r2, r0, #0` BEFORE either
+/* The proc is ActivateCoPower's third argument. `adds r2, r0, #0` BEFORE either
  * load is the whole evidence: r2 is the third argument register, and a
  * two-argument call keeps the base in r0 and moves the first argument in last
  * instead. */
 
 void sub_080397BC(struct Unk397BCProc *proc)
 {
-    sub_08044B28(proc->unk54, proc->unk58, proc);
+    ActivateCoPower(proc->unk54, proc->unk58, proc);
 }
 
 /* No `adds rN, r0, #0` here, unlike its two neighbours: the base stays in r0
@@ -73,13 +73,13 @@ void sub_080397DC(void)
 }
 
 /* The record for the current army -- gUnknown_030033EC indexes
- * gUnknown_08499598[] at stride 0x3c -- supplies sub_08019818's terrain byte.
+ * gPlayers[] at stride 0x3c -- supplies sub_08019818's terrain byte.
  * The entry `lsls #0x10; lsrs #0x10` is the u16 parameter's own declaration:
  * sub_08019818's first parameter is u16 too, so nothing narrows it again. */
 
 void sub_080397F4(u16 a)
 {
-    sub_08019818(a, gUnknown_08499598[gUnknown_030033EC].unk1d, 0);
+    sub_08019818(a, gPlayers[gUnknown_030033EC].co, 0);
 }
 
 /* In mode 1 the scripted line (sub_08039850) is tried first and the random
@@ -89,7 +89,7 @@ void sub_080397F4(u16 a)
 
 void sub_08039820(ProcPtr proc)
 {
-    if (gUnknown_03003FC0.unk01 == 1)
+    if (gPlaySt.gameMode == 1)
     {
         if (sub_08039850(proc) == 0)
             sub_080398D0(proc);

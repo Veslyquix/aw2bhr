@@ -26,19 +26,19 @@
 
 void sub_0802A6B0(void)
 {
-    struct Unk08499594 *p;
+    struct Unit *p;
 
     if (Proc_Find(gUnknown_0849FB44))
         return;
 
     while ((s16)gUnknown_03001470[gUnknown_03001FBC].unk38 <= 0x32)
     {
-        p = &gUnknown_08499594[(s16)gUnknown_03001470[gUnknown_03001FBC].unk38
+        p = &gUnits[(s16)gUnknown_03001470[gUnknown_03001FBC].unk38
                                + gUnknown_03003F2C];
 
-        if (p->unk00 != 0 && sub_080253B0(p))
+        if (p->type != 0 && sub_080253B0(p))
         {
-            sub_08025B24(p, p->unk04_0 ? Div(p->unk04_0 - 1, 10) + 1 : 0);
+            sub_08025B24(p, p->hp ? Div(p->hp - 1, 10) + 1 : 0);
             sub_0804018C(p);
             return;
         }

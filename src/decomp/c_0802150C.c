@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0802150C.
- * sub_0802150C @ 0x0802150C
+ * InitGameSettings @ 0x0802150C
  */
 
 /* The between-maps reset: seventeen globals cleared or seeded, with four
@@ -17,7 +17,7 @@
  * the `strb` into the u8 gUnknown_030030F8 at the end. agbcc keeps a separate
  * QImode copy of the constant, so the second `movs` is not a spare statement.
  * The 1 stored into gUnknown_03003F3C is reused for gUnknown_03004080. */
-void sub_0802150C(void)
+void InitGameSettings(void)
 {
     gUnknown_030033E4.unk00 = 0;
     gUnknown_030033E4.unk02 = 0;
@@ -29,7 +29,7 @@ void sub_0802150C(void)
     gUnknown_030040F0 = 0;
     gUnknown_030044A0 = 0;
 
-    sub_08034FA4();
+    RemoveMapLock();
 
     gUnknown_030040E4 = 0;
     gUnknown_030040E8 = 0;
@@ -41,6 +41,8 @@ void sub_0802150C(void)
     gUnknown_03004080 = 1;
     gUnknown_030030F8 = 0;
 
-    sub_08025E74();
+    ClearAllUnits();
     sub_0803DE68();
 }
+
+asm(".global sub_0802150C\n.thumb_set sub_0802150C, InitGameSettings\n");

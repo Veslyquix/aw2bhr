@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,14 +10,20 @@
 
 /* MATCHED.
  *
- * The map planes go through the `struct Map` cast idiom of c_08000BF8.c. Plain
- * `u8 *` arithmetic on gUnknown_08499590 reassociates the 0x1432 / 0x417A /
- * 0x12 constants PAST the index -- the ROM adds the plane constant to the base
- * first, then the index -- and costs far more than the tail below.
- * gUnknown_08499590 is named directly at every use rather than bound to a local:
- * the ROM keeps only its ADDRESS in sl and re-loads the pointer each time.
+ * The map planes go through `gMap` (include/map.h), the typed linker alias
+ * for gUnknown_08499590. Plain `u8 *` arithmetic on it reassociates the
+ * 0x1432 / 0x417A / 0x12 constants PAST the index -- the ROM adds the plane
+ * constant to the base first, then the index -- and costs far more than the
+ * tail below. `gMap` is named directly at every use rather than bound to a
+ * local: the ROM keeps only its ADDRESS in sl and re-loads the pointer each
+ * time. The two `sub_0801F92C`/`sub_080581A4` setup calls must also pass
+ * `gMap->move` / `gMap->unk376A` (the plane's own array member, decays to
+ * `u8 *`), not `gUnknown_08499590 + offset` or a cast -- agbcc's CSE only
+ * reuses a pointer load across identical symbols, and mixing in the raw name
+ * anywhere forces a second pool load (see sub_08057D90 for the fuller
+ * writeup of this).
  *
- * gUnknown_08499594 is a REAL declared global, not a pool word, and so is
+ * gUnits is a REAL declared global, not a pool word, and so is
  * gUnknown_08499590 -- both trip the "named pointer whose target is also named"
  * false positive in the pool-word screen.
  *
@@ -24,7 +31,7 @@
  * 98.0% with the size exact, the relocations exact, the pool exact and all ten
  * words in order -- everything but four instructions:
  *
- *   original            plain `gUnknown_08499594[c].unk00`
+ *   original            plain `gUnits[c].type`
  *   ldr  r0, [pc,#208]  ldr  r0, [pc,#208]
  *   lsls r1, r4, #1     ldr  r1, [r0]
  *   adds r1, r1, r4     lsls r0, r4, #1
@@ -32,7 +39,7 @@
  *   ldr  r0, [r0]       lsls r0, r0, #2
  *   adds r0, r0, r1     adds r0, r0, r1
  *
- * The ROM computes `c * 12` BETWEEN the pool load of &gUnknown_08499594 and the
+ * The ROM computes `c * 12` BETWEEN the pool load of &gUnits and the
  * `ldr r0,[r0]` that dereferences it, hiding the load in the multiply, and gives
  * the multiply r1 rather than r0. No statement boundary reaches inside that
  * address expression, so no rewriting of the `&&` chain moves it.
@@ -46,63 +53,45 @@
  * -- and it behaved exactly as advertised.
  */
 
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x0A10];
-    /* 0x3262 */ u8 unk3262[0x0508];
-    /* 0x376A */ u8 unk376A[0x0508];
-    /* 0x3C72 */ u8 unk3C72[0x0508];
-    /* 0x417A */ u16 unk417A[0x100];
-};
-#define MAP ((struct Map *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_08061B4C(void)
 {
     int i;
-    struct Unk08499594 *u;
+    struct Unit *u;
     int j;
     int k;
     u8 c;
 
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
-    sub_080581A4(gUnknown_08499590 + 0x376A, 0);
+    sub_0801F92C(gMap->move);
+    sub_080581A4(gMap->unk376A, 0);
 
     for (i = 0; gUnknown_084995A0[i].unk00 != 0xFF; i++)
     {
-        if ((MAP->unk1432[MAP->unk417A[gUnknown_084995A0[i].unk02]
+        if ((MAP->terrain[MAP->rowOffset[gUnknown_084995A0[i].unk02]
                           + gUnknown_084995A0[i].unk01] & 0x1F) == 0x13)
             continue;
 
         if (sub_08026FD0(gUnknown_03003F2C,
-                         MAP->unk1432[MAP->unk417A[gUnknown_084995A0[i].unk02]
+                         MAP->terrain[MAP->rowOffset[gUnknown_084995A0[i].unk02]
                                       + gUnknown_084995A0[i].unk01]) == 1)
             continue;
 
-        c = MAP->unk0012[MAP->unk417A[gUnknown_084995A0[i].unk02]
+        c = gMap->unit[MAP->rowOffset[gUnknown_084995A0[i].unk02]
                          + gUnknown_084995A0[i].unk01];
 
         if (c != 0 && sub_08026F9C(gUnknown_03003F2C, c) == 1
-            && (*(u = &gUnknown_08499594[c])).unk00 <= 2)
+            && (*(u = &gUnits[c])).type <= 2)
             continue;
 
         gUnknown_030013EC(gUnknown_084995A0[i].unk01, gUnknown_084995A0[i].unk02, 1, 3, 0);
 
-        for (j = 0; j < MAP->unk02; j++)
+        for (j = 0; j < MAP->height; j++)
         {
-            for (k = 0; k < MAP->unk00; k++)
+            for (k = 0; k < MAP->width; k++)
             {
                 if ((s8)gUnknown_03003340[j][k] >= 0)
-                    MAP->unk376A[MAP->unk417A[j] + k]++;
+                    MAP->unk376A[MAP->rowOffset[j] + k]++;
             }
         }
     }

@@ -48,20 +48,20 @@ void sub_08085044(struct Unk8085044 *p)
         p->unk30 = Interpolate(1, 4, 0, DivRem(p->unk58, 0x10), 0x10);
     }
 
-    sub_0801F34C(0x50, ((p->unk66 - 1) * 0x18 + (t = p->unk2c - 4)) & 0x1FF,
+    DrawOamObject(0x50, ((p->unk66 - 1) * 0x18 + (t = p->unk2c - 4)) & 0x1FF,
                  (0x14 - p->unk30) & 0xFF, 0, 1);
 
     switch (gUnknown_03005940)
     {
     case 0:
-        sub_0801F34C(0x44, 0x64, 0x98, 0, 1);
+        DrawOamObject(0x44, 0x64, 0x98, 0, 1);
         break;
     case 4:
-        sub_0801F34C(0x43, 0xDC, 0x20, 0, 1);
+        DrawOamObject(0x43, 0xDC, 0x20, 0, 1);
         break;
     default:
-        sub_0801F34C(0x43, 0x64, 0x20, 0, 1);
-        sub_0801F34C(0x44, 0x64, 0x98, 0, 1);
+        DrawOamObject(0x43, 0x64, 0x20, 0, 1);
+        DrawOamObject(0x44, 0x64, 0x98, 0, 1);
         break;
     }
 

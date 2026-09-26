@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,8 +10,8 @@
 
 /* Grows the gUnknown_03003340 reachability plane by one cell in each of the
  * four directions: every cell that is set (>= 0), is not already flagged 0x40
- * and -- when it is non-zero -- sits on terrain byte 0 of the map's +0x12
- * plane, bumps each orthogonal neighbour's counter and stamps 0x40 on it. The
+ * and -- when it is non-zero -- sits on an empty (0) cell of gMap->unit,
+ * bumps each orthogonal neighbour's counter and stamps 0x40 on it. The
  * second pass then clears every cell that did NOT get the 0x40 flag to -1.
  *
  * gUnknown_0809093C is NOT a global: the ROM word there holds 0x08499590, i.e.
@@ -48,31 +49,23 @@ void sub_0801FE68(void)
     u8 x;
     u8 y;
     int c;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++) {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++) {
+    for (y = 0; y < gMap->height; y++) {
+        for (x = 0; x < gMap->width; x++) {
             c = (s8)gUnknown_03003340[y][x];
             if (c < 0 || c == 0x40)
                 continue;
             if (c != 0) {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x12;
-                if (cells[off] != 0)
+                off = gMap->rowOffset[y] + x;
+                if (gMap->unit[off] != 0)
                     continue;
             }
             if (x != 0 && (s8)gUnknown_03003340[y][x - 1] != 0x40) {
                 gUnknown_03003340[y][x - 1]++;
                 gUnknown_03003340[y][x - 1] |= 0x40;
             }
-            if (x != *(u16 *)gUnknown_08499590 - 1
+            if (x != gMap->width - 1
                 && (s8)gUnknown_03003340[y][x + 1] != 0x40) {
                 gUnknown_03003340[y][x + 1]++;
                 gUnknown_03003340[y][x + 1] |= 0x40;
@@ -81,7 +74,7 @@ void sub_0801FE68(void)
                 gUnknown_03003340[y - 1][x]++;
                 gUnknown_03003340[y - 1][x] |= 0x40;
             }
-            if (y != *(u16 *)(gUnknown_08499590 + 2) - 1
+            if (y != gMap->height - 1
                 && (s8)gUnknown_03003340[y + 1][x] != 0x40) {
                 gUnknown_03003340[y + 1][x]++;
                 gUnknown_03003340[y + 1][x] |= 0x40;
@@ -89,9 +82,9 @@ void sub_0801FE68(void)
         }
     }
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++) {
+    for (y = 0; y < gMap->height; y++) {
         do {
-            for (x = 0; x < *(u16 *)gUnknown_08499590; x++) {
+            for (x = 0; x < gMap->width; x++) {
                 if ((gUnknown_03003340[y][x] & 0x40) == 0)
                     ((s8 *)gUnknown_03003340[y])[x] = -1;
             }

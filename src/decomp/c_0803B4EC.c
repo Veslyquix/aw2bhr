@@ -23,7 +23,7 @@
 
 #include "proc.h"
 
-/* "Play song id, unless sound is suppressed": when gUnknown_03003FC0.unk0c is
+/* "Play song id, unless sound is suppressed": when gPlaySt.unk0c is
  * set the id goes to sub_0803B524 and actually starts; otherwise it is only
  * PARKED in gUnknown_030005C8 with the requested slot gUnknown_030005CA blanked
  * to 0xFFFF, which is precisely the state sub_0803B640 next door later drains
@@ -44,7 +44,7 @@ void sub_0803B4EC(int a)
 {
     u16 v = a;
 
-    if (gUnknown_03003FC0.unk0c != 0)
+    if (gPlaySt.bgmOn != 0)
     {
         sub_0803B524((s16)v);
     }
@@ -56,8 +56,8 @@ void sub_0803B4EC(int a)
 }
 
 /* "Start song id, unless it is already the one playing": compare against the
- * requested slot, and on a change tear down the gUnknown_0849E750 proc, hand
- * the id to sub_08070478 (m4aSongNumStart) and record it in BOTH slots. The
+ * requested slot, and on a change tear down the ProcScr_FadeSound proc, hand
+ * the id to ActivateMusicOrSoundId (m4aSongNumStart) and record it in BOTH slots. The
  * 0xFFFF the neighbours write is just a value that never equals a real id.
  *
  * THE DEFINITION IS OLD-STYLE ON PURPOSE AND THE `s16` IS NOT A PROTOTYPE
@@ -72,7 +72,7 @@ void sub_0803B4EC(int a)
  *  - CALLEE side: the ROM materialises `(u16)a` into r4 at entry
  *    (`lsls #0x10; lsrs #0x10`) and then derives BOTH later forms from r4 --
  *    `lsls r5,r4,#0x10; asrs r0,r5,#0x10` for the compare and `lsrs r0,r5,#0x10`
- *    for sub_08070478's `u16` argument, spending a third callee-saved register
+ *    for ActivateMusicOrSoundId's `u16` argument, spending a third callee-saved register
  *    on r5. That two-chain shape is PROMOTE_MODE on a NARROW parameter: the
  *    promoted pseudo is the parameter's home, so combine cannot fold the later
  *    casts back onto the raw incoming r0. Probed: `int a` with `u16 v = a`,
@@ -97,8 +97,8 @@ void sub_0803B524(a)
 {
     if (gUnknown_030005CA != a)
     {
-        Proc_EndEach(gUnknown_0849E750);
-        sub_08070478(a);
+        Proc_EndEach(ProcScr_FadeSound);
+        ActivateMusicOrSoundId(a);
 
         gUnknown_030005C8 = a;
         gUnknown_030005CA = a;

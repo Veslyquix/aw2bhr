@@ -21,22 +21,22 @@ struct Unk0806DD34
     /* 0x4b */ u8 unk4b;
 };
 
-/* Byte-identical twin of sub_08066BF4 -- SAME SOURCE, not a variant. The two
+/* Byte-identical twin of HandleRulesMenuInput -- SAME SOURCE, not a variant. The two
  * differ in asm/ only because each owns a private -fforce-addr .rodata word
  * for &gUnknown_08580934 and &gpKeySt (0x0816E1AC/0x0816E1B0 here,
  * 0x0816E158/0x0816E15C there); the ROM images of all four words are
- * 0x08580934 and 0x03002EE0. See sub_08066BF4 for the shape notes. */
+ * 0x08580934 and 0x03002EE0. See HandleRulesMenuInput for the shape notes. */
 void sub_0806DCB8(void)
 {
     int i;
 
     i = gUnknown_08580934->unk33;
 
-    if (gpKeySt->unk02 & 0x20)
+    if (gpKeySt->repeated & DPAD_LEFT)
     {
         if (i == 0)
         {
-            if (gpKeySt->unk02 == gpKeySt->held)
+            if (gpKeySt->repeated == gpKeySt->pressed)
                 i = 6;
         }
         else
@@ -45,11 +45,11 @@ void sub_0806DCB8(void)
         }
     }
 
-    if (gpKeySt->unk02 & 0x10)
+    if (gpKeySt->repeated & DPAD_RIGHT)
     {
         if (i == 6)
         {
-            if (gpKeySt->unk02 == gpKeySt->held)
+            if (gpKeySt->repeated == gpKeySt->pressed)
                 i = 0;
         }
         else
@@ -73,13 +73,13 @@ void sub_0806DD34(struct Unk0806DD34 *p)
 
     if (p->unk47 == 0)
     {
-        if (gpKeySt->unk02 & 0x40)
+        if (gpKeySt->repeated & DPAD_UP)
         {
             if (p->unk48 != 0)
                 p->unk48 = p->unk48 - 1;
         }
 
-        if (gpKeySt->unk02 & 0x80)
+        if (gpKeySt->repeated & DPAD_DOWN)
         {
             if (p->unk48 < p->unk4b - 1)
                 p->unk48 = p->unk48 + 1;
@@ -87,7 +87,7 @@ void sub_0806DD34(struct Unk0806DD34 *p)
     }
     else
     {
-        if (gpKeySt->unk02 & 0x40)
+        if (gpKeySt->repeated & DPAD_UP)
         {
             if (p->unk48 == 0)
                 p->unk48 = p->unk4b - 1;
@@ -95,7 +95,7 @@ void sub_0806DD34(struct Unk0806DD34 *p)
                 p->unk48 = p->unk48 - 1;
         }
 
-        if (gpKeySt->unk02 & 0x80)
+        if (gpKeySt->repeated & DPAD_DOWN)
         {
             if (p->unk48 == p->unk4b - 1)
                 p->unk48 = 0;

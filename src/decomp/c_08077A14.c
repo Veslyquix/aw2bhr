@@ -22,7 +22,7 @@
  * operand of the add. The +0x40 folds into the pool word's addend, which is the
  * symbol the splitter calls gUnknown_085C77E0.
  *
- * The destination is gUnknown_08499598[i + 1] -- slots 1..4, the army slots --
+ * The destination is gPlayers[i + 1] -- slots 1..4, the army slots --
  * and fold turns (i + 1) * 0x3c + 0x1a into the ROM's i * 0x3c + 0x56.
  *
  * gUnknown_081CC5EC is not an object: it is the -fforce-addr word holding
@@ -51,7 +51,7 @@ void sub_08077A14(struct Unk8077A14Proc * proc)
     sub_080755E0();
     sub_08013C54();
     sub_08072C40(1, 0, 0);
-    sub_08025E74();
+    ClearAllUnits();
     sub_08011C68(gUnknown_080A0F38,
                  (void *)(0x06001000 + (gUnknown_03002B6C.bits.chr_block << 14)),
                  0x200);
@@ -59,7 +59,7 @@ void sub_08077A14(struct Unk8077A14Proc * proc)
     sub_08037750(4);
 
     for (i = 0; i < 4; i++)
-        gUnknown_08499598[i + 1].unk1a = gUnknown_085C77A0[proc->unk34].unk40[i];
+        gPlayers[i + 1].teamColor = gUnknown_085C77A0[proc->unk34].unk40[i];
 
     sub_0803D6D0();
     sub_0801B6EC((void *)(0x06001000 + (gUnknown_03002B6C.bits.chr_block << 14)));

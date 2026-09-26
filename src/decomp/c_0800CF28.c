@@ -1,10 +1,11 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800CF28.
- * sub_0800CF28 @ 0x0800CF28
+ * MakeForest @ 0x0800CF28
  */
 
 /* The full "a cell changed" refresh, and the widest of the family: it is
@@ -23,35 +24,26 @@
  * r3 across the u16 cells load and reuses it for the u8 terrain load, so the
  * two accesses share the index rather than recomputing it. */
 
-struct MapScreen
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 4];
-    /* 0x0A22 */ u16 cells[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct MapScreen *)gUnknown_08499590)
+#define MAP gMap
 
-void sub_0800CF28(int x, int y)
+void MakeForest(int x, int y)
 {
     int off;
 
-    if (sub_0800C840(x, y))
+    if (GetPropertyKindAt(x, y))
     {
         sub_0800C608(x, y);
-        sub_080011F4(x, y, 1);
+        SetTerrainAt(x, y, 1);
     }
 
     off = MAP->rowOffset[y] + x;
 
-    if (MAP->cells[off] == 0x86 || MAP->cells[off] == 0x87 || MAP->terrain[off] != 4)
+    if (MAP->tile[off] == 0x86 || MAP->tile[off] == 0x87 || MAP->terrain[off] != 4)
     {
-        sub_0800CEF8(x, y);
-        sub_080011F4(x, y, 4);
-        sub_08007F14(x, y, 0x87);
-        sub_08007D70(x, y);
+        RepaintTileRight(x, y);
+        SetTerrainAt(x, y, 4);
+        MakeTile2(x, y, 0x87);
+        MakeForestSimple(x, y);
     }
 
     sub_0800CFDC(x, y);
@@ -60,3 +52,5 @@ void sub_0800CF28(int x, int y)
     sub_08007F9C(x, y);
     sub_0800BEE4(x, y);
 }
+
+asm(".global sub_0800CF28\n.thumb_set sub_0800CF28, MakeForest\n");

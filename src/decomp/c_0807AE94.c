@@ -86,9 +86,9 @@ void sub_0807AE94(struct Unk0807AE94Proc * proc)
         proc->unk4c = 0;
 
         if (proc->unk3c == 0)
-            Decompress(gUnknown_0822B944, gUnknown_0849957C);
+            Decompress(gUnknown_0822B944, gBG1TilemapBuffer);
         else
-            Decompress(gUnknown_0822BCF0, gUnknown_0849957C);
+            Decompress(gUnknown_0822BCF0, gBG1TilemapBuffer);
 
         sub_08013AFC();
 

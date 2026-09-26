@@ -16,7 +16,7 @@
  * keeps the `adds r0, #4` at runtime, where gUnknown_02027F78 (the ROM's own
  * name for that address) or a member array would fold it into the pool word.
  *
- * `(u8)sub_0803CA54(...)` is the caller's own narrowing -- src/decomp is
+ * `(u8)IsCampaignMapUnlocked(...)` is the caller's own narrowing -- src/decomp is
  * promoted with an `int` return, and include/unknown-functions.h records why
  * the `lsls #0x18` belongs here. No argument setup appears because the byte is
  * already in r0 from the `ldrb` that the `<= 0xb3` test just read.
@@ -33,7 +33,7 @@ struct Unk86EB0Proc
 };
 
 /* Fills the first ten entries of each of the first eight 32-halfword rows of
- * *gUnknown_0849957C with consecutive tile ids from 0x6200 up, then sets the
+ * *gBG1TilemapBuffer with consecutive tile ids from 0x6200 up, then sets the
  * two window-size globals sub_08086DF4 reads out of gUnknown_03003F68 and
  * flushes.
  *
@@ -59,7 +59,7 @@ void sub_08086E54(void)
     n = 0;
     for (i = 0; i <= 7; i++)
         for (j = 0; j <= 9; j++)
-            gUnknown_0849957C[i * 32 + j] = (n++ + 0x200) | 0x6000;
+            gBG1TilemapBuffer[i * 32 + j] = (n++ + 0x200) | 0x6000;
 
     gUnknown_03005918 = 0x14;
     gUnknown_030058F4 = 0x10;
@@ -75,7 +75,7 @@ void sub_08086EB0(int a1)
     p = (u8 *)&gUnknown_02027F74;
     p += 4;
 
-    if (p[a1] <= 0xb3 && (u8)sub_0803CA54(p[a1]))
+    if (p[a1] <= 0xb3 && (u8)IsCampaignMapUnlocked(p[a1]))
     {
         Proc_EndEach(gUnknown_08616D1C);
         Proc_EndEach(gUnknown_08616D6C);

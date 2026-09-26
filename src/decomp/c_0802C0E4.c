@@ -18,7 +18,7 @@ void sub_0802C0E4(void)
 {
 }
 
-/* A three-way dispatch on the mode selector gUnknown_03003FC0.unk01 -- the
+/* A three-way dispatch on the mode selector gPlaySt.gameMode -- the
  * same 1/2/3 the three sub_0803Bxxx starters write into it. The
  * `cmp #2; beq / cmp #2; bgt / cmp #1; beq` tree with the literal pool sitting
  * INSIDE it is agbcc's balanced switch over three case values, not an if-chain,
@@ -26,7 +26,7 @@ void sub_0802C0E4(void)
  * sub_0803B828(). Case 3 is a separate block calling the same function, so the
  * source lists it separately rather than folding it into case 2.
  *
- * The parameter is never read -- the body opens by loading gUnknown_03003FC0
+ * The parameter is never read -- the body opens by loading gPlaySt
  * straight over r0 -- so its width is settled entirely at the only call site,
  * sub_0802C118, which hands it the u16 global gUnknown_030033EC with a bare
  * `ldrb`. A byte load out of a halfword global is what a u8 parameter costs;
@@ -35,7 +35,7 @@ void sub_0802C0E4(void)
 
 void sub_0802C0E8(u8 a)
 {
-    switch (gUnknown_03003FC0.unk01)
+    switch (gPlaySt.gameMode)
     {
     case 1:
         sub_08016ED8();

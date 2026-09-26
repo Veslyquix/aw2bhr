@@ -41,7 +41,7 @@
  * after it.
  *
  * The `? :` on sub_08043070's fifth argument is NOT a `? :`. The ROM duplicates
- * the whole gUnknown_08499598 subscript and both `ldrb`s into each arm and
+ * the whole gPlayers subscript and both `ldrb`s into each arm and
  * cross-jumps only from `str r2,[sp]` onward, which an argument-position
  * COND_EXPR cannot produce -- gcc evaluates that argument into one pseudo and
  * the other arguments outside the branch. Two full calls in an if/else is what
@@ -115,9 +115,9 @@ void sub_08060AB0(void)
     if (gUnknown_03004674 == 0)
         v = 100;
     else
-        v = sub_08057F00(4) * 100 / gUnknown_03004674;
+        v = CountUnitsWithTypeTag(4) * 100 / gUnknown_03004674;
 
-    sub_08060F00();
+    AiCalcBuildPriorities();
     sub_08062C94();
 
 retry:
@@ -146,20 +146,20 @@ retry:
 
         if (((struct Unk60AB0Tbl *)gUnknown_085766E0)->rows[i - 1].unk07 != 0)
         {
-            a = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                             gUnknown_08499598[gUnknown_030033EC].unk1e,
+            a = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                             gPlayers[gUnknown_030033EC].coMode,
                              i, pick, 0);
-            b = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                             gUnknown_08499598[gUnknown_030033EC].unk1e,
+            b = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                             gPlayers[gUnknown_030033EC].coMode,
                              i, pick, 1);
 
             if (a > b)
-                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                                 gUnknown_08499598[gUnknown_030033EC].unk1e,
+                r = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                                 gPlayers[gUnknown_030033EC].coMode,
                                  i, pick, 0);
             else
-                r = sub_08043070(gUnknown_08499598[gUnknown_030033EC].unk1d,
-                                 gUnknown_08499598[gUnknown_030033EC].unk1e,
+                r = sub_08043070(gPlayers[gUnknown_030033EC].co,
+                                 gPlayers[gUnknown_030033EC].coMode,
                                  i, pick, 1);
 
             if (r >= thr)
@@ -192,7 +192,7 @@ again:
     {
         buf[sel - 1] = 0;
 
-        switch (gUnknown_085D5ABC[sel].unk1a)
+        switch (gUnknown_085D5ABC[sel].deployLocation)
         {
         case 0x10:
             k = 4;
@@ -205,12 +205,12 @@ again:
             break;
         }
 
-        cost = sub_08042C9C(gUnknown_030033EC, sel) * 10;
+        cost = GetCoPriceMultiplier(gUnknown_030033EC, sel) * 10;
 
-        if (sub_08060ED4(k) == 0)
+        if (CountBuildablePropertiesOfKind(k) == 0)
             goto again;
 
-        funds = gUnknown_08499598[gUnknown_030033EC].unk00;
+        funds = gPlayers[gUnknown_030033EC].funds;
 
         if (cost > funds)
             goto again;

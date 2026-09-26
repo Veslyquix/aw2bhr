@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08076298.
  * sub_08076298 @ 0x08076298
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -16,7 +20,7 @@ struct Unk8076298
     /* 0x40 */ int unk40;
 };
 
-void sub_08076298(ProcPtr procv)
+void WM_Listener_IDLE_08076299(ProcPtr procv)
 {
     struct Unk8076298 *proc = procv;
     int n;
@@ -24,9 +28,9 @@ void sub_08076298(ProcPtr procv)
     u32 b;
 
     a = 0;
-    CpuFastSet(&a, gUnknown_08499578 + 0x200, 0x01000040);
+    CpuFastSet(&a, gBG0TilemapBuffer + 0x200, 0x01000040);
     b = 0;
-    CpuFastSet(&b, gUnknown_08499580 + 0x200, 0x01000040);
+    CpuFastSet(&b, gBG2TilemapBuffer + 0x200, 0x01000040);
 
     sub_08013AEC();
     sub_08013B0C();
@@ -35,16 +39,16 @@ void sub_08076298(ProcPtr procv)
 
     if (proc->unk3a < 0)
     {
-        sub_08071900(gUnknown_08551A00 + (0x14D - n), gUnknown_08499578 + 0x200,
+        sub_08071900(gUnknown_08551A00 + (0x14D - n), gBG0TilemapBuffer + 0x200,
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + (0x14D - n), gUnknown_08499580 + 0x200,
+        sub_08071900(gUnknown_08551A04 + (0x14D - n), gBG2TilemapBuffer + 0x200,
                      n, 4);
     }
     else
     {
-        sub_08071900(gUnknown_08551A00 + 0x140, gUnknown_08499578 + (0x21E - n),
+        sub_08071900(gUnknown_08551A00 + 0x140, gBG0TilemapBuffer + (0x21E - n),
                      n, 4);
-        sub_08071900(gUnknown_08551A04 + 0x140, gUnknown_08499580 + (0x21E - n),
+        sub_08071900(gUnknown_08551A04 + 0x140, gBG2TilemapBuffer + (0x21E - n),
                      n, 4);
     }
 
@@ -56,3 +60,5 @@ void sub_08076298(ProcPtr procv)
         Proc_Break(proc);
     }
 }
+
+asm(".global sub_08076298\n.thumb_set sub_08076298, WM_Listener_IDLE_08076299\n");

@@ -86,5 +86,5 @@ void sub_08041DD8(void)
 void sub_08041DE8(void)
 {
     sub_080258CC();
-    sub_08034F48();
+    LockUnitSelection();
 }

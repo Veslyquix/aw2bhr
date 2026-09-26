@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -34,21 +35,6 @@
  *
  * MATCHED. */
 
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x1928];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 /* The file-local view of gUnknown_030046C0 that c_0805D5EC.c's header comment
  * describes: +0x04/+0x05, +0x08 and +0x12 are still filler in the shared
  * struct Unk030046C0 and nothing here discriminates the members it would have
@@ -75,38 +61,38 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
     int x;
     int y;
     int count;
-    struct Unk08499594 *e;
+    struct Unit *e;
     struct Unk0805D648Cmd *d;
 
     count = 0;
 
     if (gUnknown_030040D8->unk00 == 0x18 && a3 == 2)
     {
-        sub_0801F838(0xff);
+        FillMovementMap(0xff);
         sub_0801F9C0(a1, a2, 9, 0);
 
-        for (y = 0; y < ((struct Map *)gUnknown_08499590)->unk02; y++)
+        for (y = 0; y < gMap->height; y++)
         {
-            for (x = 0; x < ((struct Map *)gUnknown_08499590)->unk00; x++)
+            for (x = 0; x < gMap->width; x++)
             {
                 if ((s8)gUnknown_03003340[y][x] < 0)
                     continue;
-                if (((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x] == 0)
+                if (gMap->unit[gMap->rowOffset[y] + x] == 0)
                     continue;
-                if (sub_08026F9C(gUnknown_03003F38, ((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x]))
+                if (sub_08026F9C(gUnknown_03003F38, gMap->unit[gMap->rowOffset[y] + x]))
                     continue;
-                e = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[y] + x]];
-                if (gUnknown_03003FC0.unk0d == 0)
+                e = &gUnits[gMap->unit[gMap->rowOffset[y] + x]];
+                if (gPlaySt.fog == 0)
                 {
-                    if ((u8)(e->unk00 - 0xa) <= 1)
+                    if ((u8)(e->type - 0xa) <= 1)
                         continue;
-                    if (e->unk00 == 0x11)
+                    if (e->type == 0x11)
                         continue;
-                    if (e->unk00 == 0x15)
+                    if (e->type == 0x15)
                         continue;
-                    if (e->unk00 == 0x16)
+                    if (e->type == 0x16)
                         continue;
-                    if (e->unk00 == 0x18)
+                    if (e->type == 0x18)
                         continue;
                 }
                 count++;
@@ -139,7 +125,7 @@ void sub_0805D648(s16 a1, s16 a2, u8 a3, u8 a4, u8 a5)
     d->unk12 = gUnknown_030040D8->unk06 - gUnknown_03004074;
     d->unk13 = 1;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_0805D5EC();
 
     sub_08071910(gUnknown_03004680, 1);

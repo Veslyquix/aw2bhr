@@ -11,23 +11,23 @@
  * own predicate, and reports whether it moved.
  *
  * gUnknown_08091388 is NOT a global -- baserom.gba holds 0x08499598 there, so
- * it is agbcc's `-fforce-addr` word for &gUnknown_08499598 and the double
+ * it is agbcc's `-fforce-addr` word for &gPlayers and the double
  * `ldr` is that indirection, not a pointer-to-pointer in the source.
  *
- * sub_08044280 and sub_080442AC are declared `int` but both results are tested
+ * sub_08044280 and IsCoPowerAvailable are declared `int` but both results are tested
  * as BYTES (`lsls r0,#0x18; cmp r0,#0`), hence the casts. Their own bodies are
  * still asm, so the declarations are left alone rather than retyped. */
 bool8 sub_080442E4(int a)
 {
-    if (gUnknown_08499598[a].unk24 <= 1 && (u8)sub_08044280(a))
+    if (gPlayers[a].unk24 <= 1 && (u8)sub_08044280(a))
     {
-        gUnknown_08499598[a].unk24 = 2;
+        gPlayers[a].unk24 = 2;
         return TRUE;
     }
 
-    if (gUnknown_08499598[a].unk24 == 0 && (u8)sub_080442AC(a))
+    if (gPlayers[a].unk24 == 0 && (u8)IsCoPowerAvailable(a))
     {
-        gUnknown_08499598[a].unk24 = 1;
+        gPlayers[a].unk24 = 1;
         return TRUE;
     }
 

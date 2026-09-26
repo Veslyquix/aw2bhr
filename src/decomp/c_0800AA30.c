@@ -7,7 +7,7 @@
  * sub_0800AA30 @ 0x0800AA30
  */
 
-/* Sums sub_080015E4 over the five in-bounds cells of one half-plane around
+/* Sums IsTerrainLand over the five in-bounds cells of one half-plane around
  * (x, y): the whole neighbouring column (dir 0 = west, 1 = east) or row
  * (2 = north, 4 = south), plus the two cells beside (x, y) on the other axis.
  * The map descriptor is `**pp` == gUnknown_08499590, whose header is
@@ -54,15 +54,15 @@ int sub_0800AA30(int x, int y, int dir)
         {
             int t = x - 1;
             if (y > 0)
-                r += sub_080015E4(t, y - 1);
-            r += sub_080015E4(t, y);
+                r += IsTerrainLand(t, y - 1);
+            r += IsTerrainLand(t, y);
             if (y < *(u16 *)(**pp + 2) - 1)
-                r += sub_080015E4(t, y + 1);
+                r += IsTerrainLand(t, y + 1);
         }
         if (y > 0)
-            r += sub_080015E4(x, y - 1);
+            r += IsTerrainLand(x, y - 1);
         if (y < *(u16 *)(**pp + 2) - 1)
-            r += sub_080015E4(x, y + 1);
+            r += IsTerrainLand(x, y + 1);
         break;
 
     case 1:
@@ -78,15 +78,15 @@ int sub_0800AA30(int x, int y, int dir)
         {
             int t = x + 1;
             if (y > 0)
-                r += sub_080015E4(t, y - 1);
-            r += sub_080015E4(t, y);
+                r += IsTerrainLand(t, y - 1);
+            r += IsTerrainLand(t, y);
             if (y < *(u16 *)(*q + 2) - 1)
-                r += sub_080015E4(t, y + 1);
+                r += IsTerrainLand(t, y + 1);
         }
         if (y > 0)
-            r += sub_080015E4(x, y - 1);
+            r += IsTerrainLand(x, y - 1);
         if (y < *(u16 *)(**pp + 2) - 1)
-            r += sub_080015E4(x, y + 1);
+            r += IsTerrainLand(x, y + 1);
         break;
     }
 
@@ -97,15 +97,15 @@ int sub_0800AA30(int x, int y, int dir)
         {
             int t = y - 1;
             if (x > 0)
-                r += sub_080015E4(x - 1, t);
-            r += sub_080015E4(x, t);
+                r += IsTerrainLand(x - 1, t);
+            r += IsTerrainLand(x, t);
             if (x < *(u16 *)**pp - 1)
-                r += sub_080015E4(x + 1, t);
+                r += IsTerrainLand(x + 1, t);
         }
         if (x > 0)
-            r += sub_080015E4(x - 1, y);
+            r += IsTerrainLand(x - 1, y);
         if (x < *(u16 *)**pp - 1)
-            r += sub_080015E4(x + 1, y);
+            r += IsTerrainLand(x + 1, y);
         break;
 
     case 4:
@@ -121,15 +121,15 @@ int sub_0800AA30(int x, int y, int dir)
         {
             int t = y + 1;
             if (x > 0)
-                r += sub_080015E4(x - 1, t);
-            r += sub_080015E4(x, t);
+                r += IsTerrainLand(x - 1, t);
+            r += IsTerrainLand(x, t);
             if (x < *(u16 *)*q - 1)
-                r += sub_080015E4(x + 1, t);
+                r += IsTerrainLand(x + 1, t);
         }
         if (x > 0)
-            r += sub_080015E4(x - 1, y);
+            r += IsTerrainLand(x - 1, y);
         if (x < *(u16 *)**pp - 1)
-            r += sub_080015E4(x + 1, y);
+            r += IsTerrainLand(x + 1, y);
         break;
     }
     }

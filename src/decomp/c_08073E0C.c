@@ -94,7 +94,7 @@
  * one sample per scanline, the top channel becomes REG_WIN1H via DMA0 (X1 =
  * (sample >> 1) - 0x20, X2 = 0xF0), and each channel's peak-to-peak range is
  * published in gUnknown_0202FDE8 / gUnknown_0202FDEA. proc->unk58 is the read
- * cursor, wrapping modulo 0x630; when gUnknown_03004008 is odd the whole render
+ * cursor, wrapping modulo 0x630; when gGameClock is odd the whole render
  * is skipped and the cursor just advances a frame's worth (0xE0). */
 
 struct Unk73E0CProc
@@ -132,7 +132,7 @@ void sub_08073E0C(struct Unk73E0CProc *proc)
     minb = 0xFF;
     mina = 0xFF;
 
-    if ((gUnknown_03004008 & 1) == 0)
+    if ((gGameClock & 1) == 0)
     {
         for (y = 0; y <= 0xDF; y++)
         {

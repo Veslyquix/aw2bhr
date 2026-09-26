@@ -19,8 +19,8 @@
  * include/unknown-functions.h. */
 void sub_08026588(u8 a, u8 b, u8 c)
 {
-    gUnknown_08499598[a].unk16++;
+    gPlayers[a].destroyedThisTurn++;
 
-    if (gUnknown_08499598[a].unk16 > gUnknown_08499598[a].unk18)
-        gUnknown_08499598[a].unk18 = gUnknown_08499598[a].unk16;
+    if (gPlayers[a].destroyedThisTurn > gPlayers[a].totalDestroyed)
+        gPlayers[a].totalDestroyed = gPlayers[a].destroyedThisTurn;
 }

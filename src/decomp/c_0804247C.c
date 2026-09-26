@@ -1,17 +1,18 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0804247C.
- * sub_0804247C @ 0x0804247C
+ * IsTerrainSilo @ 0x0804247C
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0804247C.
- * sub_0804247C @ 0x0804247C
+ * IsTerrainSilo @ 0x0804247C
  */
 
 /* The c_08001158.c map-cell idiom: gUnknown_08499590 is a `u8 *` whose +0x417A
@@ -24,22 +25,16 @@
  * returns literal 0/1), but the sole caller sub_08041758 re-narrows the result
  * with `lsls #0x18; lsrs #0x18` before `cmp #1`, which agbcc emits only for a
  * narrow-returning callee. See include/unknown-functions.h. */
-bool8 sub_0804247C(s16 a, s16 b)
+bool8 IsTerrainSilo(s16 a, s16 b)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
-    t = b * 2;
-    rows = p + 0x417a;
-    off = *(u16 *)(rows + t) + a;
-    cells = p + 0x1432;
+    off = gMap->rowOffset[b] + a;
 
-    if ((cells[off] & 0x1f) == 0x11)
+    if ((gMap->terrain[off] & 0x1f) == TERRAIN_SILO)
         return 1;
     else
         return 0;
 }
+
+asm(".global sub_0804247C\n.thumb_set sub_0804247C, IsTerrainSilo\n");

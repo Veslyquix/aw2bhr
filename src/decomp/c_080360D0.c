@@ -17,7 +17,7 @@ struct Unk360D0Proc
     /* 0x00 */ PROC_HEADER;
     /* 0x29 */ STRUCT_PAD(0x29, 0x2c);
     /* 0x2c */ struct Unk0801C210 *unk2c;
-    /* 0x30 */ struct Unk08499594 *unk30;
+    /* 0x30 */ struct Unit *unk30;
     /* 0x34 */ u8 unk34;
     /* 0x35 */ u8 unk35;
     /* 0x36 */ u8 filler_36[0x02];
@@ -54,10 +54,10 @@ void sub_080360D0(ProcPtr procArg)
             proc->unk35 = 5;
             sub_08027278(proc->unk42 >> 4, proc->unk44 >> 4);
             sub_0803B4DC(0x7d);
-            if (gUnknown_03003FC0.unk32 != 0
+            if (gPlaySt.savingEnabled != 0
                 && gUnknown_030032D8 != 0x13
                 && (u8)sub_0805C974() == 0)
-                sub_08034534(2, proc->unk30 - gUnknown_08499594, 0, 0);
+                sub_08034534(2, proc->unk30 - gUnits, 0, 0);
             return;
 
         case 4:
@@ -75,7 +75,7 @@ void sub_080360D0(ProcPtr procArg)
         case 3:
             sub_080360A4(proc);
             proc->unk39++;
-            if ((gUnknown_08499598[gUnknown_030033EC].unk1c & 2) == 0)
+            if ((gPlayers[gUnknown_030033EC].turnState & 2) == 0)
             {
                 t = proc->unk44 + 8;
                 while (t == 0)

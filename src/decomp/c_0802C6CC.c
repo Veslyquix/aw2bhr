@@ -8,7 +8,7 @@
  */
 
 /* Family F046: four copies of one predicate whose whole difference is the
- * constant gUnknown_03003FC0.unk09 is compared against (0, 1, 2, 3) -- the
+ * constant gPlaySt.unk09 is compared against (0, 1, 2, 3) -- the
  * single entry in data/families.json's `varies` for this family.
  *
  * The explicit `if (...) return TRUE;` chain and not `return a || b || c;`:
@@ -34,14 +34,14 @@ bool8 sub_0802C6CC(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gUnknown_03003FC0.unk09 != 0)
+    if (gPlaySt.animOpts != 0)
         return TRUE;
 
     return FALSE;
 }
 
 /* Family F046: four copies of one predicate whose whole difference is the
- * constant gUnknown_03003FC0.unk09 is compared against (0, 1, 2, 3) -- the
+ * constant gPlaySt.unk09 is compared against (0, 1, 2, 3) -- the
  * single entry in data/families.json's `varies` for this family.
  *
  * The explicit `if (...) return TRUE;` chain and not `return a || b || c;`:
@@ -67,14 +67,14 @@ bool8 sub_0802C6FC(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gUnknown_03003FC0.unk09 != 1)
+    if (gPlaySt.animOpts != 1)
         return TRUE;
 
     return FALSE;
 }
 
 /* Family F046: four copies of one predicate whose whole difference is the
- * constant gUnknown_03003FC0.unk09 is compared against (0, 1, 2, 3) -- the
+ * constant gPlaySt.unk09 is compared against (0, 1, 2, 3) -- the
  * single entry in data/families.json's `varies` for this family.
  *
  * The explicit `if (...) return TRUE;` chain and not `return a || b || c;`:
@@ -100,14 +100,14 @@ bool8 sub_0802C72C(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gUnknown_03003FC0.unk09 != 2)
+    if (gPlaySt.animOpts != 2)
         return TRUE;
 
     return FALSE;
 }
 
 /* Family F046: four copies of one predicate whose whole difference is the
- * constant gUnknown_03003FC0.unk09 is compared against (0, 1, 2, 3) -- the
+ * constant gPlaySt.unk09 is compared against (0, 1, 2, 3) -- the
  * single entry in data/families.json's `varies` for this family.
  *
  * The explicit `if (...) return TRUE;` chain and not `return a || b || c;`:
@@ -133,7 +133,7 @@ bool8 sub_0802C75C(void)
     if (sub_0802C660())
         return TRUE;
 
-    if (gUnknown_03003FC0.unk09 != 3)
+    if (gPlaySt.animOpts != 3)
         return TRUE;
 
     return FALSE;

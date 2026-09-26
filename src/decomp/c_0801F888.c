@@ -1,19 +1,12 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801F888.
- * sub_0801F888 @ 0x0801F888, sub_0801F92C @ 0x0801F92C, sub_0801F98C @ 0x0801F98C
+ * CacheUnitMovementCosts @ 0x0801F888, sub_0801F92C @ 0x0801F92C, sub_0801F98C @ 0x0801F98C
  */
-
-struct Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 pad04[0x417A - 4];
-    /* 0x417A */ u16 rowOffset[1];
-};
 
 /* Loads the terrain movement-cost row for unit type a1 into the flood fill's
  * 0x20-byte cost table at gUnknown_084999C8->unk00 -- the table sub_0801F6F0
@@ -47,7 +40,7 @@ struct Map
  *     target-reuse swap and emits `adds r0, r0, r4` -- the operands come out
  *     reversed no matter which order the source writes them in. Same lever
  *     c_08038848.c records for the same subexpression. */
-void sub_0801F888(int a1)
+void CacheUnitMovementCosts(int a1)
 {
     int i;
     u8 *dst;
@@ -56,17 +49,19 @@ void sub_0801F888(int a1)
 
     for (i = 0; i < 32; i++) {
         dst = &gUnknown_084999C8->unk00[i];
-        costs = gUnknown_085D3DD0[gUnknown_03003FC0.unk08
-                    ? gUnknown_08499598[gUnknown_03004480].unk1d
+        costs = gUnknown_085D3DD0[gPlaySt.coAbilities
+                    ? gPlayers[gUnknown_03004480].co
                     : 1]
-                .unk38[gUnknown_08499598[gUnknown_03004480].unk1e]
-                .unk18[gUnknown_03003FC0.unk2c];
-        c = i + gUnknown_085D5ABC[a1].unk19 * 32;
+                .power[gPlayers[gUnknown_03004480].coMode]
+                .movementChart[gPlaySt.weather];
+        c = i + gUnknown_085D5ABC[a1].movementType * 32;
         *dst = costs[c];
     }
 }
 
-/* Rebuilds the gUnknown_03003340 row-pointer table sub_0801F838 and friends
+asm(".global sub_0801F888\n.thumb_set sub_0801F888, CacheUnitMovementCosts\n");
+
+/* Rebuilds the gUnknown_03003340 row-pointer table FillMovementMap and friends
  * write through: row y of the caller's plane starts at `a1 + rowOffset[y]`,
  * where rowOffset is the +0x417A halfword table of the gUnknown_08499590 map.
  * Then it publishes the map's width and height as the u8 pair at
@@ -99,13 +94,13 @@ void sub_0801F92C(u8 *a1)
 {
     int y;
 
-    for (y = 0; y < ((struct Map *)gUnknown_08499590)->height; y++)
-        gUnknown_03003340[y] = a1 + ((struct Map *)gUnknown_08499590)->rowOffset[y];
-    gUnknown_084999C8->unk28 = ((struct Map *)gUnknown_08499590)->width;
-    gUnknown_084999C8->unk29 = ((struct Map *)gUnknown_08499590)->height;
+    for (y = 0; y < gMap->height; y++)
+        gUnknown_03003340[y] = a1 + gMap->rowOffset[y];
+    gUnknown_084999C8->unk28 = gMap->width;
+    gUnknown_084999C8->unk29 = gMap->height;
 }
 
-/* A busy-wait sized by the gUnknown_08499590 screen: the nested loop has an
+/* A busy-wait sized by the gMap screen: the nested loop has an
  * EMPTY body and exists only to burn width * height iterations.
  *
  * The inner loop reads as a countdown (`subs r0,#1; cmp r0,#0; bne`) but the
@@ -126,7 +121,7 @@ void sub_0801F98C(void)
     int x;
     int y;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+    for (y = 0; y < gMap->height; y++)
+        for (x = 0; x < gMap->width; x++)
             ;
 }

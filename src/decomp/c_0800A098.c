@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -11,7 +12,7 @@
  *
  * Four one-sided repairs around (x, y), gated on the cell's own tile: the two
  * horizontal neighbours when it is 0x39, the two vertical ones when it is
- * 0x18.  Each arm needs the neighbour to be free (sub_0800164C), the ORIGINAL
+ * 0x18.  Each arm needs the neighbour to be free (IsTerrainWater), the ORIGINAL
  * cell still to read as that tile, and sub_0800AA30 for that direction to be
  * clear; then it stamps kind 2 with a fixed tile and, when the terrain byte one
  * row up and one column left/right is 0xD, calls sub_0800BA9C on it.
@@ -31,8 +32,8 @@
  *     two 0x39 arms (2 bytes short each, 592 of 596) and with sub_0800BA9C's
  *     own argument in the two 0x18 arms (right size, wrong registers);
  *   - binding `int row = rowOffset[ny] - 1;` as a STATEMENT fixes the
- *     arithmetic but hoists the whole row load above the sub_080011F4 /
- *     sub_08001158 pair, where the ROM has it after them.
+ *     arithmetic but hoists the whole row load above the SetTerrainAt /
+ *     MakeTileSimple pair, where the ROM has it after them.
  * `(t = <row expr>, t + x)` is the only spelling that keeps the association
  * AND the position; `t` is declared per-arm so each is its own short-lived
  * allocno and stays in r0.
@@ -41,33 +42,24 @@
  * for the first statement, and that .rodata word is the ROM's
  * gUnknown_0808D834 (promotion needs "rodata": ["0x0808D834"]); the later arms
  * use the plain literal-pool address, which is exactly the mix the ROM has. */
-struct MapScreen
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x0A22 - 4];
-    /* 0x0A22 */ u16 cells[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 terrain[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-#define MAP ((struct MapScreen *)gUnknown_08499590)
+#define MAP gMap
 
 void sub_0800A098(int x, int y)
 {
-    int c = MAP->cells[MAP->rowOffset[y] + x];
+    int c = MAP->tile[MAP->rowOffset[y] + x];
 
     if (c == 0x39)
     {
         if (x > 0)
         {
             int nx = x - 1;
-            if (sub_0800164C(nx, y) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x39
+            if (IsTerrainWater(nx, y) == 0
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x39
              && sub_0800AA30(nx, y, 0) == 0)
             {
                 int t;
-                sub_080011F4(nx, y, 2);
-                sub_08001158(nx, y, 0x11d);
+                SetTerrainAt(nx, y, 2);
+                MakeTileSimple(nx, y, 0x11d);
                 if (MAP->terrain[(t = MAP->rowOffset[y - 1] - 1, t + x)] == 0xd)
                     sub_0800BA9C(nx, y - 1);
             }
@@ -75,13 +67,13 @@ void sub_0800A098(int x, int y)
         if (x < MAP->width - 1)
         {
             int nx = x + 1;
-            if (sub_0800164C(nx, y) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x39
+            if (IsTerrainWater(nx, y) == 0
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x39
              && sub_0800AA30(nx, y, 1) == 0)
             {
                 int t;
-                sub_080011F4(nx, y, 2);
-                sub_08001158(nx, y, 0xfd);
+                SetTerrainAt(nx, y, 2);
+                MakeTileSimple(nx, y, 0xfd);
                 if (MAP->terrain[(t = MAP->rowOffset[y - 1] + 1, t + x)] == 0xd)
                     sub_0800BA9C(nx, y - 1);
             }
@@ -92,13 +84,13 @@ void sub_0800A098(int x, int y)
         if (y > 0)
         {
             int ny = y - 1;
-            if (sub_0800164C(x, ny) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x18
+            if (IsTerrainWater(x, ny) == 0
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x18
              && sub_0800AA30(x, ny, 2) == 0)
             {
                 int t;
-                sub_080011F4(x, ny, 2);
-                sub_08001158(x, ny, 0xfc);
+                SetTerrainAt(x, ny, 2);
+                MakeTileSimple(x, ny, 0xfc);
                 if (MAP->terrain[(t = MAP->rowOffset[ny] - 1, t + x)] == 0xd)
                     sub_0800BA9C(x - 1, ny);
             }
@@ -106,13 +98,13 @@ void sub_0800A098(int x, int y)
         if (y < MAP->height - 1)
         {
             int ny = y + 1;
-            if (sub_0800164C(x, ny) == 0
-             && MAP->cells[MAP->rowOffset[y] + x] == 0x18
+            if (IsTerrainWater(x, ny) == 0
+             && MAP->tile[MAP->rowOffset[y] + x] == 0x18
              && sub_0800AA30(x, ny, 4) == 0)
             {
                 int t;
-                sub_080011F4(x, ny, 2);
-                sub_08001158(x, ny, 0x11c);
+                SetTerrainAt(x, ny, 2);
+                MakeTileSimple(x, ny, 0x11c);
                 if (MAP->terrain[(t = MAP->rowOffset[ny] - 1, t + x)] == 0xd)
                     sub_0800BA9C(x - 1, ny);
             }
@@ -127,8 +119,8 @@ void sub_0800A2EC(int x, int y)
         int n = y - 1;
         if (sub_08009B38(x, n))
         {
-            sub_080011F4(x, n, 1);
-            sub_08001158(x, n, 1);
+            SetTerrainAt(x, n, 1);
+            MakeTileSimple(x, n, 1);
         }
     }
 
@@ -137,8 +129,8 @@ void sub_0800A2EC(int x, int y)
         int n = y + 1;
         if (sub_08009B38(x, n))
         {
-            sub_080011F4(x, n, 1);
-            sub_08001158(x, n, 1);
+            SetTerrainAt(x, n, 1);
+            MakeTileSimple(x, n, 1);
         }
     }
 
@@ -147,8 +139,8 @@ void sub_0800A2EC(int x, int y)
         int n = x - 1;
         if (sub_08009B38(n, y))
         {
-            sub_080011F4(n, y, 1);
-            sub_08001158(n, y, 1);
+            SetTerrainAt(n, y, 1);
+            MakeTileSimple(n, y, 1);
         }
     }
 
@@ -157,8 +149,8 @@ void sub_0800A2EC(int x, int y)
         int n = x + 1;
         if (sub_08009B38(n, y))
         {
-            sub_080011F4(n, y, 1);
-            sub_08001158(n, y, 1);
+            SetTerrainAt(n, y, 1);
+            MakeTileSimple(n, y, 1);
         }
     }
 }

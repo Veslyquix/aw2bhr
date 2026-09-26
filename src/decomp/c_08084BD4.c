@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08084BD4.
  * sub_08084BD4 @ 0x08084BD4
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -25,7 +29,7 @@ struct UnkBD4Proc
     /* 66 */ s16 unk66;
 };
 
-void sub_08084BD4(struct UnkBD4Proc *proc)
+void CoInfo_08084BD5(struct UnkBD4Proc *proc)
 {
     proc->unk64 = 0;
     proc->unk66 = gUnknown_030033EC;
@@ -36,3 +40,16 @@ void sub_08084BD4(struct UnkBD4Proc *proc)
     sub_080852A8((struct Unk080852A8 *)proc);
     sub_08043834(proc->unk66);
 }
+
+asm(".global sub_08084BD4\n.thumb_set sub_08084BD4, CoInfo_08084BD5\n");
+
+extern void sub_08084C14(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoInfo[] =
+{
+    PROC_CALL(CoInfo_08084BD5),
+    PROC_REPEAT(sub_08084C14),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616BE4\n.set gUnknown_08616BE4, ProcScr_CoInfo\n");

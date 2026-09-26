@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -10,14 +11,14 @@
 #include "hardware.h"
 
 /* One arm of the 0x08060 cursor state machine: if the cell under the CURRENT
- * UNIT (gUnknown_030046C0.unk06 indexes gUnknown_08499594, and the unit carries
- * its own column/row in unk02/unk03) is occupied on the +0x234A plane, hand it
+ * UNIT (gUnknown_030046C0.unk06 indexes gUnits, and the unit carries
+ * its own column/row in unk02/unk03) is occupied on the gMap->unk234A plane, hand it
  * to sub_08029088 and advance to state 7; otherwise state 3.
  *
  * NO POINTER IS BOUND. The unit element is named twice and CSE gives it one
  * address -- and that is the whole difference between this and a candidate that
- * is 96.6% right. `u = &gUnknown_08499594[i]` puts the table's DEREF after the
- * `* 12` (91.4%); adding `tbl = gUnknown_08499594;` to pull the deref forward
+ * is 96.6% right. `u = &gUnits[i]` puts the table's DEREF after the
+ * `* 12` (91.4%); adding `tbl = gUnits;` to pull the deref forward
  * fixes the order but then the declared local takes r1 where the ROM wants r0,
  * because a declared local's quantity is created at expand_decl and sorts ahead
  * of the unnamed product. Two levers that each fix half. Naming the element
@@ -28,24 +29,18 @@
  * c_08001158.c's idiom with the plane at +0x234A. */
 void sub_080601F0(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
+    struct Map *map;
     int i;
     int x;
     int y;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
+    map = gMap;
     i = gUnknown_030046C0.unk06;
-    y = gUnknown_08499594[i].unk03;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + (x = gUnknown_08499594[i].unk02);
-    cells = p + 0x234A;
+    y = gUnits[i].y;
+    off = map->rowOffset[y] + (x = gUnits[i].x);
 
-    if (cells[off] != 0)
+    if (map->unk234A[off] != 0)
     {
         sub_08029088(x, y);
         gUnknown_030046D4 = 0;
@@ -56,7 +51,7 @@ void sub_080601F0(void)
 }
 
 /* One arm of the 0x08060 cursor state machine: if the cursor's own cell
- * (gUnknown_030046C0.unk06/.unk07) is occupied on the +0x234A plane, hand it to
+ * (gUnknown_030046C0.unk06/.unk07) is occupied on the gMap->unk234A plane, hand it to
  * sub_08029088 and advance to state 8; otherwise state 4.
  *
  * THE COLUMN IS ASSIGNED INSIDE THE OFFSET EXPRESSION. It has to be read after
@@ -65,25 +60,19 @@ void sub_080601F0(void)
  * `sub_08029088(gUnknown_030046C0.unk06, y)` sets up r1 before r0 while the ROM
  * sets r0 first. The embedded assignment is the only spelling that gets both.
  *
- * Row/tile arithmetic is c_08001158.c's idiom with the plane at +0x234A. */
+ * The cell is gMap->unk234A[gMap->rowOffset[y] + x]. */
 void sub_08060264(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
+    struct Map *map;
     int x;
     int y;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
+    map = gMap;
     y = gUnknown_030046C0.unk07;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + (x = gUnknown_030046C0.unk06);
-    cells = p + 0x234A;
+    off = map->rowOffset[y] + (x = gUnknown_030046C0.unk06);
 
-    if (cells[off] != 0)
+    if (map->unk234A[off] != 0)
     {
         sub_08029088(x, y);
         gUnknown_030046D4 = 0;
@@ -100,23 +89,17 @@ void sub_08060264(void)
  * that are not the same spelling; see c_08060264.c. */
 void sub_080602C4(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
+    struct Map *map;
     int x;
     int y;
-    int t;
     int off;
 
     x = gUnknown_030046C0.unk06;
     y = gUnknown_030046C0.unk07;
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + x;
-    cells = p + 0x234A;
+    map = gMap;
+    off = map->rowOffset[y] + x;
 
-    if (cells[off] != 0)
+    if (map->unk234A[off] != 0)
     {
         sub_08029088(x, y);
         gUnknown_030046D4 = 0;
@@ -128,27 +111,27 @@ void sub_080602C4(void)
 
 /* sub_08060384's variant that parks gUnknown_030033E4 on the CURRENT UNIT's
  * cell instead of the cursor's: gUnknown_030046C0.unk06 indexes
- * gUnknown_08499594 and unk02/unk03 are the unit's own column and row.
+ * gUnits and unk02/unk03 are the unit's own column and row.
  *
  * THE UNIT POINTER MUST BE BOUND here, unlike in c_080601F0.c where naming the
  * element twice is what works. The difference is the store in between: `strh`
- * into gUnknown_030033E4 may alias the pointer global gUnknown_08499594, so
+ * into gUnknown_030033E4 may alias the pointer global gUnits, so
  * agbcc rebuilds the whole subscript for the second member and the function
  * comes out 12 bytes long. c_080601F0.c has no store between its two reads. */
 void sub_08060324(void)
 {
-    struct Unk08499594 *u;
+    struct Unit *u;
 
-    u = &gUnknown_08499594[gUnknown_030046C0.unk06];
+    u = &gUnits[gUnknown_030046C0.unk06];
 
-    gUnknown_030033E4.unk00 = u->unk02;
-    gUnknown_030033E4.unk02 = u->unk03;
+    gUnknown_030033E4.unk00 = u->x;
+    gUnknown_030033E4.unk02 = u->y;
 
     sub_08023274(2);
 
     gUnknown_030046D4++;
 
-    if (gUnknown_030046D4 > 0x1e || (gpKeySt->unk00 & 1))
+    if (gUnknown_030046D4 > 0x1e || (gpKeySt->held & 1))
         gUnknown_030045D4 = 3;
 }
 
@@ -173,7 +156,7 @@ void sub_08060384(void)
 
     gUnknown_030046D4++;
 
-    if (gUnknown_030046D4 > 0x1e || (gpKeySt->unk00 & 1))
+    if (gUnknown_030046D4 > 0x1e || (gpKeySt->held & 1))
         gUnknown_030045D4 = 4;
 }
 
@@ -189,6 +172,6 @@ void sub_080603D4(void)
 
     gUnknown_030046D4++;
 
-    if (gUnknown_030046D4 > 0x1e || (gpKeySt->unk00 & 1))
+    if (gUnknown_030046D4 > 0x1e || (gpKeySt->held & 1))
         gUnknown_030045D4 = 5;
 }

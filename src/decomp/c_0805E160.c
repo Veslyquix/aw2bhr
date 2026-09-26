@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -37,7 +38,14 @@
  * because src/decomp/c_0805A268.c, c_0805A514.c and c_0805A744.c all define it
  * file-locally; sub_0805A514's promoted definition takes it, so the cast on
  * gUnknown_03003F20 is what keeps this unit in agreement with that definition.
- * See the note at sub_0805A5E0 in include/unknown-functions.h. */
+ * See the note at sub_0805A5E0 in include/unknown-functions.h.
+ *
+ * Uses `gMap` (include/map.h) for the +0x12/+0x417A reads, but the
+ * `sub_0801F92C` setup call must pass `gMap->move` (the plane's own array
+ * member, decays to `u8 *`), not `gUnknown_08499590 + 0x2852` or a cast --
+ * agbcc's CSE only reuses a pointer load across identical symbols, so mixing
+ * in the raw name anywhere forces a second pool load and breaks the match
+ * (see sub_08057D90 for the fuller writeup of this). */
 
 struct Unk5A514Cell
 {
@@ -46,21 +54,6 @@ struct Unk5A514Cell
     /* 0x02 */ s16 v;
 };
 void sub_0805A514(struct Unk5A514Cell *);
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x1928];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 struct CellXY
 {
     /* 0x00 */ u16 x;
@@ -74,7 +67,7 @@ void sub_0805E160(void)
     u8 r;
 
     list = gUnknown_03003F20;
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_0801F92C(gMap->move);
 
     if ((gUnknown_030040D8->unk07[2] & 0xc0) == 0)
     {
@@ -90,14 +83,14 @@ void sub_0805E160(void)
             sub_0805E2AC();
             return;
         }
-        gUnknown_03004730[((struct Map *)gUnknown_08499590)->unk0012[((struct Map *)gUnknown_08499590)->unk417A[pos.y] + pos.x] & 0x3f]++;
+        gUnknown_03004730[gMap->unit[gMap->rowOffset[pos.y] + pos.x] & 0x3f]++;
         r = sub_0805ACA8(pos.x, pos.y, (u16 *)&pos);
         if (r != 1)
             goto loop;
 
         gUnknown_030013EC(pos.x, pos.y, gUnknown_030040D8->unk00, 0x78, 1);
 
-        if ((s8)gUnknown_03003340[gUnknown_030040D8->unk03][gUnknown_030040D8->unk02] > sub_08058224((struct Unk08499594 *)gUnknown_030040D8))
+        if ((s8)gUnknown_03003340[gUnknown_030040D8->unk03][gUnknown_030040D8->unk02] > sub_08058224((struct Unit *)gUnknown_030040D8))
             sub_080591E4(&pos);
         else
             sub_0805D648(pos.x, pos.y, 2, 0, 0);

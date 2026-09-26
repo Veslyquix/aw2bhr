@@ -48,7 +48,7 @@ void sub_0802E278(void)
 
     if (sub_0802DBF8())
     {
-        k = gpKeySt->unk00 & 2;
+        k = gpKeySt->held & 2;
 
         if (k == 0)
         {

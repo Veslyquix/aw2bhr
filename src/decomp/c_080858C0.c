@@ -7,7 +7,7 @@
  * sub_080858C0 @ 0x080858C0, sub_08085908 @ 0x08085908
  */
 
-/* Decompresses a tile blob into *gUnknown_08499580 and biases every one of the
+/* Decompresses a tile blob into *gBG2TilemapBuffer and biases every one of the
  * 0x400 halfwords by 0x360. Byte-identical duplicate of sub_08085908, which
  * names gUnknown_0823DF48 instead.
  *
@@ -21,10 +21,10 @@ void sub_080858C0(void)
     int i;
 
     gUnknown_030030A0 = 0;
-    Decompress(gUnknown_0823DE38, gUnknown_08499580);
+    Decompress(gUnknown_0823DE38, gBG2TilemapBuffer);
 
     for (i = 0; i <= 0x3ff; i++)
-        gUnknown_08499580[i] = 0x360 + gUnknown_08499580[i];
+        gBG2TilemapBuffer[i] = 0x360 + gBG2TilemapBuffer[i];
 
     sub_08013B0C();
 }
@@ -35,10 +35,10 @@ void sub_08085908(void)
     int i;
 
     gUnknown_030030A0 = 0;
-    Decompress(gUnknown_0823DF48, gUnknown_08499580);
+    Decompress(gUnknown_0823DF48, gBG2TilemapBuffer);
 
     for (i = 0; i <= 0x3ff; i++)
-        gUnknown_08499580[i] = 0x360 + gUnknown_08499580[i];
+        gBG2TilemapBuffer[i] = 0x360 + gBG2TilemapBuffer[i];
 
     sub_08013B0C();
 }

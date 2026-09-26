@@ -44,14 +44,14 @@ int sub_0806AF44(ProcPtr a1)
     if ((((struct Unk806AF44Proc *)a1)->unk2c & 1) == 0)
     {
         child->unk30 = (void *)(0x06000000 + gUnknown_0300251C.bits.chr_block * 0x4000);
-        child->unk34 = gUnknown_08499584;
+        child->unk34 = gBG3TilemapBuffer;
         child->unk38 = 0;
         child->unk39 = 3;
     }
     else
     {
         child->unk30 = (void *)(0x06000000 + gUnknown_03001FE8.bits.chr_block * 0x4000);
-        child->unk34 = gUnknown_0849957C;
+        child->unk34 = gBG1TilemapBuffer;
         child->unk38 = 7;
         child->unk39 = 1;
     }

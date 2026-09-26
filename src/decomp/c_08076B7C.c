@@ -75,7 +75,7 @@ void sub_08076C1C(ProcPtr parent)
 /* sub_08076BC4 behind a guard, with a different (x, y). */
 void sub_08076C64(ProcPtr parent)
 {
-    if (sub_0803866C())
+    if (IsHardCampaignMode())
         sub_080785CC(0x50, 0x70, 0, gUnknown_084BA6D0, parent);
 }
 

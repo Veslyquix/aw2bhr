@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08049928.
  * sub_08049928 @ 0x08049928
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -20,8 +24,10 @@
  * would reach the same bytes without touching the callee, so this one site
  * proves nothing on its own. Retyped in c_08019260.c and re-verified there. */
 
-void sub_08049928(ProcPtr proc)
+void BattleMaps_IDLE_08049929(ProcPtr proc)
 {
     if (sub_08019260() == 0)
         Proc_Break(proc);
 }
+
+asm(".global sub_08049928\n.thumb_set sub_08049928, BattleMaps_IDLE_08049929\n");

@@ -14,7 +14,7 @@
  * NEEDS ITS .rodata POOL WORDS PLACED. promoted.json entry:
  *   "rodata": ["0x0812A274", "0x0812A278", "0x0812A27C"]
  * Those three words are agbcc's own `-fforce-addr` address constants for
- * gUnknown_030044E0, gUnknown_0849957C and gUnknown_02028E48 -- the same
+ * gUnknown_030044E0, gBG1TilemapBuffer and gUnknown_02028E48 -- the same
  * mechanism the note on gUnknown_0813204C records for 0x0812A290/94/98/9C.
  * asm/ prints them as though objects lived at 0x0812A274/78/7C; they do not.
  * Dumped from baserom.gba they hold 0x030044E0, 0x0849957C and 0x02028E48.
@@ -44,7 +44,7 @@
  *    it to sub_08013034, and then copies it back into unk2c stopping at the
  *    first zero.
  *
- * The `?:` picking gUnknown_08499580 / gUnknown_0849957C is an if/else here for
+ * The `?:` picking gBG2TilemapBuffer / gBG1TilemapBuffer is an if/else here for
  * the same reason the one in sub_08047C04 is: the front end folds `x == 0 ? a :
  * b` into `x ? b : a` and inverts the branch, and the statement form is not
  * folded.
@@ -93,7 +93,7 @@ void sub_0804A260(void)
     ApplyPaletteExt(gUnknown_0809165C, 0x140, 0x20);
     gUnknown_03002B6C.bits.size = 1;
     gDispIo.disp_ct.bg1_enable = 0;
-    sub_08012BC8(gUnknown_0849957C, 0, 0, 0x1E, 0x14, 0x360);
+    sub_08012BC8(gBG1TilemapBuffer, 0, 0, 0x1E, 0x14, 0x360);
 
     if (gUnknown_02028E48 != 0 || gUnknown_030044E0->unk5c != 0)
     {
@@ -109,14 +109,14 @@ void sub_0804A260(void)
     }
 
     sub_08013C00();
-    sub_08011C68(gUnknown_08499578, (void *)0x06007800, 0x800);
+    sub_08011C68(gBG0TilemapBuffer, (void *)0x06007800, 0x800);
     sub_08013CA8();
     sub_080616F0();
-    sub_080149C0(6, 6, gUnknown_08499578, gUnknown_084C3B3C[0], 0x8000, 0);
-    sub_080149C0(6, 8, gUnknown_08499578, gUnknown_084C3B3C[1], 0x8000, 0);
-    sub_080149C0(6, 0xA, gUnknown_08499578, gUnknown_084C3B3C[2], 0x8000, 0);
-    sub_080149C0(6, 0xC, gUnknown_08499578, gUnknown_084C3B3C[3], 0x8000, 0);
-    sub_080149C0(6, 0xE, gUnknown_08499578, gUnknown_084C3B3C[4], 0x8000, 0);
+    sub_080149C0(6, 6, gBG0TilemapBuffer, gUnknown_084C3B3C[0], 0x8000, 0);
+    sub_080149C0(6, 8, gBG0TilemapBuffer, gUnknown_084C3B3C[1], 0x8000, 0);
+    sub_080149C0(6, 0xA, gBG0TilemapBuffer, gUnknown_084C3B3C[2], 0x8000, 0);
+    sub_080149C0(6, 0xC, gBG0TilemapBuffer, gUnknown_084C3B3C[3], 0x8000, 0);
+    sub_080149C0(6, 0xE, gBG0TilemapBuffer, gUnknown_084C3B3C[4], 0x8000, 0);
 
     src = (u8 *)gUnknown_030044E0->unk58;
 
@@ -146,9 +146,9 @@ void sub_0804A260(void)
     ApplyPaletteExt(gUnknown_0812B21C, 0x2A0, 0x20);
 
     if (gUnknown_02028E48 != 0 || gUnknown_030044E0->unk5c != 0)
-        p = gUnknown_08499580;
+        p = gBG2TilemapBuffer;
     else
-        p = gUnknown_0849957C;
+        p = gBG1TilemapBuffer;
 
     sub_08071948(p, gUnknown_030044E0->unk61 - 1, 1, gUnknown_0812AD2C, 0x8360);
 

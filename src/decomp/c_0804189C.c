@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -36,11 +37,6 @@
  * `ldr r0,=gUnknown_030013D0`, and the binding is needed at all because
  * gUnknown_030013D0 is declared `u8 []`, so an inline `*(s16 *)(g + 0x14)`
  * folds the offset into the relocation and loses the clean pool word. */
-struct Unk4189CMap
-{
-    /* 0x0000 */ u8 filler_0000[0x417A];
-    /* 0x417A */ u16 rowOffset[1];
-};
 struct Unk4189CProc
 {
     /* 00 */ u8 filler_00[0x2c];
@@ -68,9 +64,9 @@ void sub_0804189C(int a1, int a2, int a3)
     sub_080251D8(gUnknown_03003F38);
 
     v = gUnknown_020288B4[
-        ((struct Unk4189CMap *)gUnknown_08499590)->rowOffset[a2] + a1];
+        gMap->rowOffset[a2] + a1];
 
-    lim = gUnknown_030013D0;
+    lim = (u8 *)gBattleAttacker;
 
     if (v < *(s16 *)(lim + 0x14))
         v = 0;
@@ -78,7 +74,7 @@ void sub_0804189C(int a1, int a2, int a3)
         v -= *(s16 *)(lim + 0x14);
 
     gUnknown_020288B4[
-        ((struct Unk4189CMap *)gUnknown_08499590)->rowOffset[a2] + a1] = v;
+        gMap->rowOffset[a2] + a1] = v;
 
     sub_0802DCA4();
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -42,23 +43,6 @@
  * the index and does not match.
  */
 
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x08];
-    /* 0x0010 */ u16 unk10;
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x0A10];
-    /* 0x3262 */ u8 unk3262[0x0F18];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 struct Unk8062DF0Bits
 {
     /* 0x00 */ u8 filler_00[0x09];
@@ -66,7 +50,7 @@ struct Unk8062DF0Bits
                u8 unk09_3 : 3;
                u8 unk09_6 : 2;
 };
-#define MAP ((struct Map *)gUnknown_08499590)
+#define MAP gMap
 #define BITS(p) ((struct Unk8062DF0Bits *)(p))
 
 void sub_08062DF0(void)
@@ -84,7 +68,7 @@ void sub_08062DF0(void)
 
     if ((MAP->unk10 & 0xF) == 0)
     {
-        if (gpKeySt->held == 1)
+        if (gpKeySt->pressed == 1)
         {
             gUnknown_03004780 = gUnknown_030045DC;
             sub_08024584();
@@ -93,19 +77,19 @@ void sub_08062DF0(void)
             return;
         }
 
-        if ((gpKeySt->unk00 & 4)
-            && MAP->unk0012[MAP->unk417A[gUnknown_030033E4.unk02]
+        if ((gpKeySt->held & 4)
+            && gMap->unit[MAP->rowOffset[gUnknown_030033E4.unk02]
                             + gUnknown_030033E4.unk00] != 0)
         {
-            gUnknown_03003F38 = MAP->unk0012[MAP->unk417A[gUnknown_030033E4.unk02]
+            gUnknown_03003F38 = gMap->unit[MAP->rowOffset[gUnknown_030033E4.unk02]
                                              + gUnknown_030033E4.unk00];
-            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+            gUnknown_030040D8 = (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
 
             if (gUnknown_030040D8->unk07[0] != 0)
-                a = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_030040D8->unk07[0]];
+                a = (struct Unk030040D8 *)&gUnits[gUnknown_030040D8->unk07[0]];
 
             if (gUnknown_030040D8->unk07[1] != 0)
-                b = (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_030040D8->unk07[1]];
+                b = (struct Unk030040D8 *)&gUnits[gUnknown_030040D8->unk07[1]];
 
             sub_08013428(2, 4, gUnknown_0816DB40);
             sub_08013428(2, 5, gUnknown_0816DB50, BITS(gUnknown_030040D8)->unk09_0);

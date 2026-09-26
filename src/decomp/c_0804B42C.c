@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,7 +8,7 @@
  * sub_0804B42C @ 0x0804B42C, sub_0804B4C4 @ 0x0804B4C4
  */
 
-/* Scores the four cardinal neighbours of (x, y) on the gUnknown_08499590 map
+/* Scores the four cardinal neighbours of (x, y) on the gMap
  * and returns the terrain code of the best-scoring in-bounds one. Byte-
  * identical twin of sub_0804B4C4, which reads the adjacent table
  * gUnknown_08551CBD instead of gUnknown_08551CA0.
@@ -20,16 +21,16 @@
  * Anything wider is a `mov` off the value CSE already has, which is the same
  * size and the wrong two bytes. Suspect the TYPE before the allocation.
  *   `d` walks gUnknown_08551CDC and is materialised BEFORE `rows`/`terrain`.
- * The .rodata address-constant order in the ROM (08499590, 08551CDC, 0x417a,
- * 0x1432, 08551CA0) is the readout: a `gUnknown_08551CDC[i]` subscript inside
+ * The .rodata address-constant order in the ROM (gMap, 08551CDC, rowOffset,
+ * terrain, 08551CA0) is the readout: a `gUnknown_08551CDC[i]` subscript inside
  * the loop is strength-reduced into the same pointer but creates its address
  * LAST, after the two loop-invariant sums.
  */
 int sub_0804B42C(int x, int y)
 {
-    u8 *p;
+    struct Map *p;
     const s32 *d;
-    u8 *rows;
+    u16 *rows;
     u8 *terrain;
     u8 best;
     int result;
@@ -40,19 +41,19 @@ int sub_0804B42C(int x, int y)
 
     best = 0;
     result = 0;
-    p = gUnknown_08499590;
+    p = gMap;
     d = gUnknown_08551CDC[0];
-    rows = p + 0x417A;
-    terrain = p + 0x1432;
+    rows = p->rowOffset;
+    terrain = p->terrain;
 
     for (i = 0; i < 4; i++)
     {
         nx = x + d[0];
         ny = y + d[1];
 
-        if (nx <= *(u16 *)p && nx >= 0 && ny <= *(u16 *)(p + 2) && ny >= 0)
+        if (nx <= p->width && nx >= 0 && ny <= p->height && ny >= 0)
         {
-            t = *(terrain + (*(u16 *)(rows + ny * 2) + nx)) & 0x1f;
+            t = *(terrain + (rows[ny] + nx)) & 0x1f;
 
             if (best < gUnknown_08551CA0[t])
             {
@@ -75,9 +76,9 @@ int sub_0804B42C(int x, int y)
  */
 int sub_0804B4C4(int x, int y)
 {
-    u8 *p;
+    struct Map *p;
     const s32 *d;
-    u8 *rows;
+    u16 *rows;
     u8 *terrain;
     u8 best;
     int result;
@@ -88,19 +89,19 @@ int sub_0804B4C4(int x, int y)
 
     best = 0;
     result = 0;
-    p = gUnknown_08499590;
+    p = gMap;
     d = gUnknown_08551CDC[0];
-    rows = p + 0x417A;
-    terrain = p + 0x1432;
+    rows = p->rowOffset;
+    terrain = p->terrain;
 
     for (i = 0; i < 4; i++)
     {
         nx = x + d[0];
         ny = y + d[1];
 
-        if (nx <= *(u16 *)p && nx >= 0 && ny <= *(u16 *)(p + 2) && ny >= 0)
+        if (nx <= p->width && nx >= 0 && ny <= p->height && ny >= 0)
         {
-            t = *(terrain + (*(u16 *)(rows + ny * 2) + nx)) & 0x1f;
+            t = *(terrain + (rows[ny] + nx)) & 0x1f;
 
             if (best < gUnknown_08551CBD[t])
             {

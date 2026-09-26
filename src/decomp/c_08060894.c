@@ -18,7 +18,7 @@
  * constant plus the volatile read. Every one of the four reads is its own
  * `ldr`, which is the volatile behaviour and not a missing CSE.
  *
- * The final compare is `bhs`, i.e. UNSIGNED, because sub_080129E0 returns `u32`
+ * The final compare is `bhs`, i.e. UNSIGNED, because GetNextRandomNumber returns `u32`
  * and the usual arithmetic conversions carry that through the `% 100` and into
  * the comparison against the sign-extended `s16` parameter. */
 void sub_08060894(s16 a)
@@ -28,7 +28,7 @@ void sub_08060894(s16 a)
 
     r = 0;
 
-    if (!sub_08060ED4(2))
+    if (!CountBuildablePropertiesOfKind(2))
         return;
 
     if (gUnknown_03004674 != 0)
@@ -48,7 +48,7 @@ void sub_08060894(s16 a)
             return;
     }
 
-    if (sub_080129E0() % 100 < a)
+    if (GetNextRandomNumber() % 100 < a)
         gUnknown_030046C0.unk06 = 2;
     else
         gUnknown_030046C0.unk06 = 1;

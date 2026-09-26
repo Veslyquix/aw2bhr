@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,7 +29,7 @@
  *     the call instead. The load itself stays after the call either way.
  *
  * `ldrb r1, [r5]` on a u16 global is the u8 conversion of a halfword on a
- * little-endian target -- sub_08029CB8's unused second parameter is u8, and
+ * little-endian target -- StartSupplyAnimation's unused second parameter is u8, and
  * this call site is the only thing in the tree that shows its width. */
 /* WAVE 35: CANONICAL `struct Map`. Eight drafts across blocks 0x08029-0x0802B
  * each invented their own body for this tag, with 2 to 7 named fields. Every
@@ -40,21 +41,6 @@
  * OFFSET enters the address arithmetic, never its declared length, and no
  * draft referenced any filler. Keep the drafts in sync; sync_work.py
  * reintroduces whatever the drafts say. */
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x1928];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 struct Unk2A38C
 {
     /* 0x00 */ u8 filler_00[0x02];
@@ -69,8 +55,8 @@ bool8 sub_0802A38C(struct Unk2A38C *p, int (*fn)(struct Unk2A38C *))
     int v;
     int t;
 
-    if (((struct Map *)gUnknown_08499590)->unk234A[
-            ((struct Map *)gUnknown_08499590)->unk417A[p->unk03] + p->unk02] == 0)
+    if (gMap->unk234A[
+            gMap->rowOffset[p->unk03] + p->unk02] == 0)
     {
         fn(p);
         return 0;
@@ -84,6 +70,6 @@ bool8 sub_0802A38C(struct Unk2A38C *p, int (*fn)(struct Unk2A38C *))
 
     t = p->unk03 << 16;
     v = p->unk02 | t;
-    sub_08029CB8((struct Unk802C57C *)&v, *q, r, 0);
+    StartSupplyAnimation((struct Unk802C57C *)&v, *q, r, 0);
     return 1;
 }

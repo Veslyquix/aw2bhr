@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806A2F8.
  * sub_0806A2F8 @ 0x0806A2F8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 struct Unk806A2F8
@@ -15,8 +19,10 @@ struct Unk806A2F8
 
 /* The same ticket-taking opening as sub_0806A054, without the screen setup:
  * post-increment the counter, pass the OLD value, stash the result. */
-void sub_0806A2F8(struct Unk806A2F8 *proc)
+void IntroT3_0806A2F9(struct Unk806A2F8 *proc)
 {
     proc->unk2c = sub_080674F4(gUnknown_0202F204++);
     sub_0801237C();
 }
+
+asm(".global sub_0806A2F8\n.thumb_set sub_0806A2F8, IntroT3_0806A2F9\n");

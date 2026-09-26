@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -38,7 +39,7 @@ struct Unk6A7B4Proc
  * byte path gUnknown_08581608; the pair positions the map origin, the two
  * window shadows and the Q12 camera at +0x40/+0x44, and dy > 0x5a ends it.
  *
- * The whole body is skipped when bit 0 of gUnknown_03004008 is set -- the frame
+ * The whole body is skipped when bit 0 of gGameClock is set -- the frame
  * parity gate -- but the sprite redraw at the bottom runs every frame, which is
  * why the early exit is a branch to the tail and not a `return`.
  *
@@ -97,14 +98,14 @@ void sub_0806A8E4(struct Unk6A8E4Proc *proc)
 {
     int x;
     int y;
-    u8 *map;
+    struct Map *map;
 
     proc->unk5c--;
 
     if (proc->unk5c == 0)
         Proc_Start(gUnknown_085815E8, proc);
 
-    if ((gUnknown_03004008 & 1) == 0)
+    if ((gGameClock & 1) == 0)
     {
         x = gUnknown_08581608[proc->unk5a * 2];
         y = gUnknown_08581608[proc->unk5a * 2 + 1];
@@ -120,9 +121,9 @@ void sub_0806A8E4(struct Unk6A8E4Proc *proc)
             proc->unk5a++;
         }
 
-        map = gUnknown_08499590;
-        *(u16 *)(map + 4) = proc->unk5e + x;
-        *(u16 *)(map + 6) = proc->unk60 + y;
+        map = gMap;
+        map->scrollX = proc->unk5e + x;
+        map->scrollY = proc->unk60 + y;
 
         sub_08023860();
         sub_0801237C();

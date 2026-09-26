@@ -5,13 +5,17 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080111AC.
  * sub_080111AC @ 0x080111AC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080111AC.
- * sub_080111AC @ 0x080111AC
+ * FadeScreenLines_CB_080111AD @ 0x080111AC
  */
 
 /* Family F000 (tools/families.py): `push {lr}; ldr r0,=X; bl S;
@@ -31,7 +35,9 @@
  * either way, so naming the symbol is load-bearing and the cast is free.
  */
 
-void sub_080111AC(void)
+void FadeScreenLines_CB_080111AD(void)
 {
     sub_08011AAC((void *)sub_080111BC);
 }
+
+asm(".global sub_080111AC\n.thumb_set sub_080111AC, FadeScreenLines_CB_080111AD\n");

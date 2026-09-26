@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,12 +8,7 @@
  * sub_0800ABD0 @ 0x0800ABD0
  */
 
-struct Map0800ABD0
-{
-    u16 width;
-    u16 height;
-};
-#define MAP0800ABD0 ((struct Map0800ABD0 *)gUnknown_08499590)
+#define MAP0800ABD0 gMap
 
 /* VERIFIED MATCH, 732/732 bytes under configured try_match.  Casting
  * gUnknown_08499590 to the map-header aggregate fixes the older pool-address
@@ -38,8 +34,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(x, bandY) == 0
              || sub_08009538(x, bandY) == 0)
             {
-                sub_080011F4(x, bandY, 7);
-                sub_08001158(x, bandY, 0x2a);
+                SetTerrainAt(x, bandY, 7);
+                MakeTileSimple(x, bandY, 0x2a);
                 sub_0800A3D4(x, bandY);
             }
         }
@@ -52,8 +48,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -67,8 +63,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -88,8 +84,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(x, bandY) == 0
              || sub_08009538(x, bandY) == 0)
             {
-                sub_080011F4(x, bandY, 7);
-                sub_08001158(x, bandY, 0x2a);
+                SetTerrainAt(x, bandY, 7);
+                MakeTileSimple(x, bandY, 0x2a);
                 sub_0800A3D4(x, bandY);
             }
         }
@@ -102,8 +98,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -117,8 +113,8 @@ void sub_0800ABD0(int x, int y)
                  || sub_08009BF4(m, bandY) == 0
                  || sub_08009538(m, bandY) == 0)
                 {
-                    sub_080011F4(m, bandY, 7);
-                    sub_08001158(m, bandY, 0x2a);
+                    SetTerrainAt(m, bandY, 7);
+                    MakeTileSimple(m, bandY, 0x2a);
                     sub_0800A3D4(m, bandY);
                 }
             }
@@ -133,8 +129,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(m, y) == 0
              || sub_08009538(m, y) == 0)
             {
-                sub_080011F4(m, y, 7);
-                sub_08001158(m, y, 0x2a);
+                SetTerrainAt(m, y, 7);
+                MakeTileSimple(m, y, 0x2a);
                 sub_0800A3D4(m, y);
             }
         }
@@ -148,8 +144,8 @@ void sub_0800ABD0(int x, int y)
              || sub_08009BF4(m, y) == 0
              || sub_08009538(m, y) == 0)
             {
-                sub_080011F4(m, y, 7);
-                sub_08001158(m, y, 0x2a);
+                SetTerrainAt(m, y, 7);
+                MakeTileSimple(m, y, 0x2a);
                 sub_0800A3D4(m, y);
             }
         }

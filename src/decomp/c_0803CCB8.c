@@ -20,6 +20,6 @@ bool8 sub_0803CCB8(int id, u8 *dst)
 
     if (gUnknown_020280C0[i].unk13 == 0xff)
         return 0;
-    sub_0803CC84(dst, gUnknown_020280C0[i].unk02);
+    CopyString(dst, gUnknown_020280C0[i].unk02);
     return 1;
 }

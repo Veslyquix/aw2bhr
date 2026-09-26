@@ -1,4 +1,5 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -15,7 +16,7 @@
  * exemplar for this shape. */
 void sub_0803C2E8(void)
 {
-    sub_080152EC(gUnknown_0849ECE0, 0);
+    sub_080152EC(ProcScr_Versus, 0);
 }
 
 /* Family F020 (tools/families.py): seven 32-byte leaves that are all
@@ -33,5 +34,5 @@ void sub_0803C2E8(void)
  */
 bool8 sub_0803C2FC(void)
 {
-    return sub_08015BD0((s32)gUnknown_0849ECE0) != -1;
+    return sub_08015BD0((s32)ProcScr_Versus) != -1;
 }

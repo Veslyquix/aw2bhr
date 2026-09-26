@@ -24,11 +24,11 @@ void sub_08065C9C(int a1)
 {
     int v = gUnknown_08580934->unk32;
 
-    if (gpKeySt->unk02 & 0x20)
+    if (gpKeySt->repeated & DPAD_LEFT)
     {
         if (v == 0)
         {
-            if (gpKeySt->unk02 != 0 && gpKeySt->held != 0)
+            if (gpKeySt->repeated != 0 && gpKeySt->pressed != 0)
                 v = a1 - 1;
         }
         else
@@ -37,11 +37,11 @@ void sub_08065C9C(int a1)
         }
     }
 
-    if (gpKeySt->unk02 & 0x10)
+    if (gpKeySt->repeated & DPAD_RIGHT)
     {
         if (v == a1 - 1)
         {
-            if (gpKeySt->unk02 != 0 && gpKeySt->held != 0)
+            if (gpKeySt->repeated != 0 && gpKeySt->pressed != 0)
                 v = 0;
         }
         else

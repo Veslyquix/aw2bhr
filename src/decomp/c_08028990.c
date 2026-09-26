@@ -15,7 +15,7 @@
  * the call as the fall-through. */
 u8 sub_08028990(u16 a1)
 {
-    if ((gUnknown_03003FC0.unk04 & 1) == 0)
+    if ((gPlaySt.event20 & 1) == 0)
         return 1;
 
     return sub_080271CC(a1);
@@ -28,7 +28,7 @@ u8 sub_08028990(u16 a1)
  * cannot distinguish the two. */
 u8 sub_080289BC(int a1)
 {
-    if (gUnknown_08499598[a1].unk1b == 1 && (gUnknown_03003FC0.unk04 & 0x10))
+    if (gPlayers[a1].aiControlled == 1 && (gPlaySt.event20 & 0x10))
         return sub_080271CC(a1);
 
     return 1;

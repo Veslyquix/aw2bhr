@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -8,7 +9,7 @@
  */
 
 /* Rebuilds the map's terrain plane from its tile-id table: for every cell,
- * plane[idx] = gUnknown_0849959C[tile[idx]], where idx = rowOffset[y] + x.
+ * terrain[idx] = gUnknown_0849959C[tile[idx]], where idx = rowOffset[y] + x.
  *
  * Two authoring points the diff insisted on:
  *  - The RHS lookup is its own statement, evaluated BEFORE the store address.
@@ -20,57 +21,35 @@
  *  - The seven zeroed fields at +4..+0x10 are seven separate assignments, one
  *    `strh` each -- an array plus a loop would not unroll.
  *
- * gUnknown_08499590 is named nine times here and still gets an ordinary inline
- * pool word rather than a -fforce-addr .rodata word, so reference count alone
- * does not decide that; contrast sub_08022580 in this same block, which names
- * it twice and does get one.
+ * Uses the canonical gMap struct fields directly; this keeps the member
+ * references that prevent agbcc from folding the plane constants into load
+ * displacements.
  *
  * The parameter is an int, not a pointer: `adds r0,#0x4c` runs on it before the
  * `lsls #0x18; lsrs #0x18`, and that truncation is the conversion to
  * sub_0803CF3C's already-promoted `u8` first parameter. */
-struct Unk21750Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u16 unk08;
-    /* 0x000a */ u16 unk0a;
-    /* 0x000c */ u16 unk0c;
-    /* 0x000e */ u16 unk0e;
-    /* 0x0010 */ u16 unk10;
-    /* 0x0012 */ u8 filler_0012[0x0A22 - 0x12];
-    /* 0x0A22 */ u16 tile[(0x1432 - 0x0A22) / 2];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[(0x421A - 0x417A) / 2];
-    /* 0x421A */ u8 buf[1];
-};
-
 void sub_08021750(int a)
 {
     int x;
     int y;
     u16 t;
 
-    sub_0803CF3C((u8)(a + 0x4c), (int)(gUnknown_08499590 + 0x421A));
+    sub_0803CF3C((u8)(a + 0x4c), (int)gMap->unk421a);
 
-    ((struct Unk21750Map *)gUnknown_08499590)->unk04 = 0;
-    ((struct Unk21750Map *)gUnknown_08499590)->unk06 = 0;
-    ((struct Unk21750Map *)gUnknown_08499590)->unk08 = 0;
-    ((struct Unk21750Map *)gUnknown_08499590)->unk0a = 0;
-    ((struct Unk21750Map *)gUnknown_08499590)->unk0c = 0;
-    ((struct Unk21750Map *)gUnknown_08499590)->unk0e = 0;
-    ((struct Unk21750Map *)gUnknown_08499590)->unk10 = 0;
+    gMap->scrollX = 0;
+    gMap->scrollY = 0;
+    gMap->unk08 = 0;
+    gMap->unk0a = 0;
+    gMap->camX = 0;
+    gMap->camY = 0;
+    gMap->unk10 = 0;
 
-    for (y = 0; y < ((struct Unk21750Map *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk21750Map *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
-            t = ((struct Unk21750Map *)gUnknown_08499590)->tile[
-                    ((struct Unk21750Map *)gUnknown_08499590)->rowOffset[y] + x];
-            ((struct Unk21750Map *)gUnknown_08499590)->plane[
-                ((struct Unk21750Map *)gUnknown_08499590)->rowOffset[y] + x] =
-                gUnknown_0849959C[t];
+            t = gMap->tile[gMap->rowOffset[y] + x];
+            gMap->terrain[gMap->rowOffset[y] + x] = gUnknown_0849959C[t];
         }
     }
 }

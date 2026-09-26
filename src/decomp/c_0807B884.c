@@ -24,7 +24,7 @@
  *    wrong way round. Read the body order off the jump-table TARGETS, not off
  *    the table's index order.
  *
- * 2. Case 5 is `if (sub_08078E14() == 0x22) song = 0x19f; else song = 0x198;`,
+ * 2. Case 5 is `if (GetCampaignMissionId() == 0x22) song = 0x19f; else song = 0x198;`,
  *    with the CALL first. agbcc presets 0x198 and reaches 0x19f with
  *    `adds r4, #7`; writing `song = 0x198;` before the `if` instead puts the
  *    constant ahead of the `bl`, which the ROM does not.
@@ -44,7 +44,7 @@ void sub_0807B884(ProcPtr proc)
     sub_0807898C(proc);
 
     Decompress(gUnknown_0822FEF0, (void *)((gUnknown_03001FE8.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0822F9AC, gUnknown_0849957C);
+    Decompress(gUnknown_0822F9AC, gBG1TilemapBuffer);
 
     sub_08013AFC();
 
@@ -52,7 +52,7 @@ void sub_0807B884(ProcPtr proc)
 
     Proc_Start(gUnknown_086165B0, proc);
 
-    switch (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk58)
+    switch (gUnknown_085C77A0[gPlaySt.mapID].unk58)
     {
     case 1:
         song = 0x194;
@@ -75,7 +75,7 @@ void sub_0807B884(ProcPtr proc)
         break;
 
     case 5:
-        if (sub_08078E14() == 0x22)
+        if (GetCampaignMissionId() == 0x22)
             song = 0x19f;
         else
             song = 0x198;
@@ -84,7 +84,7 @@ void sub_0807B884(ProcPtr proc)
         break;
     }
 
-    switch (sub_08078E14())
+    switch (GetCampaignMissionId())
     {
     case 8:
     case 16:

@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801C70C.
  * sub_0801C70C @ 0x0801C70C, sub_0801C754 @ 0x0801C754
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -28,7 +32,7 @@ struct Unk0801C70CProc
     /* 54 */ int unk54;
     /* 58 */ int unk58;
 };
-/* The per-frame callback of the gUnknown_0848B5AC proc sub_0801C70C starts:
+/* The per-frame callback of the ProcScr_WaitForLaser proc sub_0801C70C starts:
  * the three fields it reads (+0x50, +0x54, +0x58) are exactly the three that
  * function writes, which is what pins the parameter as that proc and fixes the
  * struct below. */
@@ -50,7 +54,7 @@ int sub_0801C70C(const void *a1, int a2, int a3, int a4, int a5, u16 a6)
     sub_0801C4D4(h, a5);
     h->unk22 = a4;
 
-    proc = Proc_Start(gUnknown_0848B5AC, PROC_TREE_3);
+    proc = Proc_Start(ProcScr_WaitForLaser, PROC_TREE_3);
     proc->unk50 = h;
     proc->unk54 = a2;
     proc->unk58 = a3;
@@ -58,7 +62,7 @@ int sub_0801C70C(const void *a1, int a2, int a3, int a4, int a5, u16 a6)
     return (int)proc;
 }
 
-void sub_0801C754(struct Unk0801C754Proc *proc)
+void WaitForLaser_IDLE_0801C755(struct Unk0801C754Proc *proc)
 {
     if (sub_0801C254(proc->unk50, proc->unk54, proc->unk58) == 0)
     {
@@ -66,3 +70,5 @@ void sub_0801C754(struct Unk0801C754Proc *proc)
             Proc_End(proc);
     }
 }
+
+asm(".global sub_0801C754\n.thumb_set sub_0801C754, WaitForLaser_IDLE_0801C755\n");

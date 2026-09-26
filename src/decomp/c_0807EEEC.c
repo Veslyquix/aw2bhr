@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807EEEC.
  * sub_0807EEEC @ 0x0807EEEC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* MATCHED in wave 79 (W79-A). Parked at 97.6% in waves 66 and 71 as
@@ -45,7 +49,7 @@ struct Unk807EEEC
     /* 4c */ s16 unk4c;
 };
 
-void sub_0807EEEC(struct Unk807EEEC *proc)
+void CoSelect_IDLE_0807EEED(struct Unk807EEEC *proc)
 {
     int i;
     register int n asm("r1");
@@ -138,3 +142,5 @@ void sub_0807EEEC(struct Unk807EEEC *proc)
     else
         Proc_Break(proc);
 }
+
+asm(".global sub_0807EEEC\n.thumb_set sub_0807EEEC, CoSelect_IDLE_0807EEED\n");

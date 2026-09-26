@@ -19,7 +19,7 @@
  *
  * The other three words this unit carves ARE agbcc -fforce-addr address
  * constants: 0x0812A130 holds &gUnknown_02028DD8, 0x0812A134 holds
- * &gUnknown_08499578 and 0x0812A138 holds &gUnknown_085D5ABC. Naming the real
+ * &gBG0TilemapBuffer and 0x0812A138 holds &gUnknown_085D5ABC. Naming the real
  * globals is what reproduces the double load.
  *
  * `(s16)(i * 2 + 7)` is spelled at every use rather than bound to a local: the
@@ -32,7 +32,7 @@
  *
  * The unk01 bit-0 test respells the whole subscript instead of using `u`
  * because the intervening sub_0804769C call kills the address expression's CSE
- * class -- gUnknown_08499594 and gUnknown_03003F2C are both plain (non-const)
+ * class -- gUnits and gUnknown_03003F2C are both plain (non-const)
  * memory. The later field reads keep using `u`, which is what proves `u` is a
  * real local and that one access is a separate spelling.
  *
@@ -62,7 +62,7 @@ void sub_08047920(void *arg)
     int f;
     register int k asm("r0");
     int v;
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     sub_0808B6E8(pal, gUnknown_0812A12C, 4);
 
@@ -71,13 +71,13 @@ void sub_08047920(void *arg)
          i++)
     {
         id = gUnknown_02028DD8[i + ((struct Unk0804769C *)arg)->unk20];
-        u = &gUnknown_08499594[gUnknown_03003F2C + id];
-        if (u->unk00 == 0)
+        u = &gUnits[gUnknown_03003F2C + id];
+        if (u->type == 0)
             break;
 
         n = sub_0804769C(arg, id) + 1;
 
-        f = gUnknown_08499594[id + gUnknown_03003F2C].unk01;
+        f = gUnits[id + gUnknown_03003F2C].flags;
         k = 1;
         m = k;
         k &= f;
@@ -86,43 +86,43 @@ void sub_08047920(void *arg)
         else
             c = gUnknown_03003F2C;
 
-        sub_0802239C(gUnknown_08499578, n + 3, i * 2 + 7, u->unk00, c, u->unk07,
+        sub_0802239C(gBG0TilemapBuffer, n + 3, i * 2 + 7, u->type, c, u->unk07,
                      u->unk05_3);
-        b = (u->unk01 >> 3) & m;
-        sub_08014A5C(8, (s16)(i * 2 + 7), gUnknown_08499578,
-                     gUnknown_085D5ABC[u->unk00].unk00, 0x8000, pal[b]);
+        b = (u->flags >> 3) & m;
+        sub_08014A5C(8, (s16)(i * 2 + 7), gBG0TilemapBuffer,
+                     gUnknown_085D5ABC[u->type].unk00, 0x8000, pal[b]);
 
-        if (u->unk04_0 != 0)
-            v = Div(u->unk04_0 - 1, 10) + 1;
+        if (u->hp != 0)
+            v = Div(u->hp - 1, 10) + 1;
         else
             v = 0;
 
-        sub_08014B0C(0x10, (s16)(i * 2 + 7), gUnknown_08499578, v, 0x8000,
+        sub_08014B0C(0x10, (s16)(i * 2 + 7), gBG0TilemapBuffer, v, 0x8000,
                      pal[b]);
-        sub_08014B0C(0x13, (s16)(i * 2 + 7), gUnknown_08499578, u->unk06_0,
+        sub_08014B0C(0x13, (s16)(i * 2 + 7), gBG0TilemapBuffer, u->fuel,
                      0x8000, pal[b]);
-        sub_080149C0(0x14, (s16)(i * 2 + 7), gUnknown_08499578,
+        sub_080149C0(0x14, (s16)(i * 2 + 7), gBG0TilemapBuffer,
                      gUnknown_084C3F38, 0x8000, pal[b]);
-        sub_08014B0C(0x16, (s16)(i * 2 + 7), gUnknown_08499578,
-                     gUnknown_085D5ABC[u->unk00].unk10, 0x8000, pal[b]);
+        sub_08014B0C(0x16, (s16)(i * 2 + 7), gBG0TilemapBuffer,
+                     gUnknown_085D5ABC[u->type].maxFuel, 0x8000, pal[b]);
 
-        if (gUnknown_085D5ABC[u->unk00].unk0b == 0)
+        if (gUnknown_085D5ABC[u->type].maxAmmo == 0)
         {
-            if (gUnknown_085D5ABC[u->unk00].unk11 != 0)
-                sub_08014A5C(0x18, (s16)(i * 2 + 7), gUnknown_08499578, 0x962,
+            if (gUnknown_085D5ABC[u->type].unk11 != 0)
+                sub_08014A5C(0x18, (s16)(i * 2 + 7), gBG0TilemapBuffer, 0x962,
                              0x8000, pal[b]);
             else
-                sub_08014A5C(0x18, (s16)(i * 2 + 7), gUnknown_08499578, 0x966,
+                sub_08014A5C(0x18, (s16)(i * 2 + 7), gBG0TilemapBuffer, 0x966,
                              0x8000, pal[b]);
         }
         else
         {
-            sub_08014B0C(0x19, (s16)(i * 2 + 7), gUnknown_08499578, u->unk04_7,
+            sub_08014B0C(0x19, (s16)(i * 2 + 7), gBG0TilemapBuffer, u->ammo,
                          0x8000, pal[b]);
-            sub_080149C0(0x1a, (s16)(i * 2 + 7), gUnknown_08499578,
+            sub_080149C0(0x1a, (s16)(i * 2 + 7), gBG0TilemapBuffer,
                          gUnknown_084C3F3C, 0x8000, pal[b]);
-            sub_08014B0C(0x1b, (s16)(i * 2 + 7), gUnknown_08499578,
-                         gUnknown_085D5ABC[u->unk00].unk0b, 0x8000, pal[b]);
+            sub_08014B0C(0x1b, (s16)(i * 2 + 7), gBG0TilemapBuffer,
+                         gUnknown_085D5ABC[u->type].maxAmmo, 0x8000, pal[b]);
         }
     }
 }

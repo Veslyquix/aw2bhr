@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -23,29 +24,29 @@ void sub_08023518(void)
     int dir;
     int n;
 
-    if ((*(u16 *)(gUnknown_08499590 + 0x10) & 0xf) != 0)
+    if ((gMap->unk10 & 0xf) != 0)
         return;
 
-    dir = (gpKeySt->unk00 >> 4) & 0xf;
+    dir = (gpKeySt->held >> 4) & 0xf;
 
     if (gUnknown_08499C7C[dir][0] < 0)
-        gUnknown_030033E4.unk00 = ((s16)*(u16 *)(gUnknown_08499590 + 4) >> 4) + 2;
+        gUnknown_030033E4.unk00 = (gMap->scrollX >> 4) + 2;
     if (gUnknown_08499C7C[dir][0] > 0)
-        gUnknown_030033E4.unk00 = ((s16)*(u16 *)(gUnknown_08499590 + 4) >> 4) + 0xc;
+        gUnknown_030033E4.unk00 = (gMap->scrollX >> 4) + 0xc;
     if (gUnknown_08499C7C[dir][1] < 0)
-        gUnknown_030033E4.unk02 = ((s16)*(u16 *)(gUnknown_08499590 + 6) >> 4) + 2;
+        gUnknown_030033E4.unk02 = (gMap->scrollY >> 4) + 2;
     if (gUnknown_08499C7C[dir][1] > 0)
-        gUnknown_030033E4.unk02 = ((s16)*(u16 *)(gUnknown_08499590 + 6) >> 4) + 7;
+        gUnknown_030033E4.unk02 = (gMap->scrollY >> 4) + 7;
 
     n = gUnknown_030033E4.unk00 + gUnknown_08499C7C[dir][0];
-    if (n >= 0 && n < *(u16 *)gUnknown_08499590)
+    if (n >= 0 && n < gMap->width)
     {
         gUnknown_030032C4.unk00 += gUnknown_08499C7C[dir][0] * 4;
         gUnknown_030033E4.unk00 = n;
     }
 
     n = gUnknown_030033E4.unk02 + gUnknown_08499C7C[dir][1];
-    if (n >= 0 && n < *(u16 *)(gUnknown_08499590 + 2))
+    if (n >= 0 && n < gMap->height)
     {
         gUnknown_030032C4.unk02 += gUnknown_08499C7C[dir][1] * 4;
         gUnknown_030033E4.unk02 = n;

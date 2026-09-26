@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -33,26 +34,18 @@
  * form; the compares are signed, so `cell & 0x1f` is an int. */
 u8 sub_08042424(s16 x, s16 y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417a;
-    off = *(u16 *)(rows + t) + x;
-    cells = p + 0x1432;
+    off = gMap->rowOffset[y] + x;
 
-    if ((cells[off] & 0xe0) != gUnknown_03004084)
+    if ((gMap->terrain[off] & 0xe0) != gUnknown_03004084)
         return FALSE;
 
-    switch (cells[off] & 0x1f)
+    switch (gMap->terrain[off] & 0x1f)
     {
-    case 0xa:
-    case 0xb:
-    case 0xe:
+    case TERRAIN_AIRPORT:
+    case TERRAIN_PORT:
+    case TERRAIN_BASE:
         return TRUE;
     default:
         return FALSE;

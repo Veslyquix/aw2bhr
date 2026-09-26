@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080733B8.
  * sub_080733B8 @ 0x080733B8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
@@ -16,7 +20,9 @@
 
 #include "proc.h"
 
-void sub_080733B8(void)
+void EndCoSelect_080733B9(void)
 {
-    Proc_EndEach(gUnknown_086140D4);
+    Proc_EndEach(ProcScr_MainMenuPutSelectModeSprite);
 }
+
+asm(".global sub_080733B8\n.thumb_set sub_080733B8, EndCoSelect_080733B9\n");

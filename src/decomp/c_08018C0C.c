@@ -11,8 +11,8 @@ bool8 sub_08018C0C(s16 a)
 {
     u8 i = gUnknown_0200C528[a].unk04->unk08;
 
-    gUnknown_03003FC0.unk38[i] = gUnknown_0200C528[a].unk04->unk0a;
-    gUnknown_08499598[i].unk1b = gUnknown_0200C528[a].unk04->unk0a;
+    gPlaySt.aiControlled[i] = gUnknown_0200C528[a].unk04->unk0a;
+    gPlayers[i].aiControlled = gUnknown_0200C528[a].unk04->unk0a;
     gUnknown_0200C528[a].unk04++;
     return TRUE;
 }

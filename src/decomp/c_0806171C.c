@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806171C.
- * sub_0806171C @ 0x0806171C, sub_08061788 @ 0x08061788, sub_08061868 @ 0x08061868
+ * sub_0806171C @ 0x0806171C, sub_08061788 @ 0x08061788, RunAiTurn @ 0x08061868
  */
 
 /* The destination record is at 0x02029C54, which aw2bhr.lds does NOT name --
@@ -47,7 +47,7 @@ void sub_0806171C(void)
     switch ((s16)*(volatile u16 *)&gUnknown_03004780)
     {
     case 0:
-        sub_08061868();
+        RunAiTurn();
         break;
     case 1:
         sub_08061B00();
@@ -75,10 +75,10 @@ void sub_08061788(u16 a)
 {
     u8 v;
 
-    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk27 != 0)
+    if (gUnknown_085C77A0[gPlaySt.mapID].unk27 != 0)
     {
         sub_08061A40(SCRATCH,
-            &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk27][gUnknown_08499598[a].unk1d]]);
+            &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gPlaySt.mapID].unk27][gPlayers[a].co]]);
     }
     else
     {
@@ -88,7 +88,7 @@ void sub_08061788(u16 a)
             v = 4;
 
         sub_08061A40(SCRATCH,
-            &gUnknown_085771C4[gUnknown_0857690C[v][gUnknown_08499598[a].unk1d]]);
+            &gUnknown_085771C4[gUnknown_0857690C[v][gPlayers[a].co]]);
     }
 
     sub_08061A40(&gUnknown_02029D84, SCRATCH);
@@ -104,15 +104,15 @@ void sub_08061788(u16 a)
  * emits both pool `ldr`s first (0x030044D8's, then 0x03004770's), then the
  * single `movs r0,#0`, then the `str` and the `strb` in that order. Two
  * separate statements interleave the pool loads with their stores instead. */
-void sub_08061868(void)
+void RunAiTurn(void)
 {
-    gUnknown_030046B4 = sub_0803866C()
-        ? gUnknown_08615194[gUnknown_03003FC0.unk02 - 0x8a].unk28
-        : gUnknown_08615194[gUnknown_03003FC0.unk02 - 0x8a].unk24;
+    gFactoryUnitSchedule = IsHardCampaignMode()
+        ? gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptHc
+        : gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptNc;
 
     sub_08061CDC();
     sub_08061CF8();
-    sub_08061F34();
+    AiScanBuildableFacilities();
     sub_08061788(gUnknown_030033EC);
     sub_08062028();
     sub_0806279C();
@@ -122,6 +122,8 @@ void sub_08061868(void)
     gUnknown_03004780 = 1;
     gUnknown_030044D8 = gUnknown_03004770 = 0;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk1a == 5 && gUnknown_030046B4 != 0)
+    if (gPlayers[gUnknown_030033EC].teamColor == 5 && gFactoryUnitSchedule != 0)
         sub_080607E8();
 }
+
+asm(".global sub_08061868\n.thumb_set sub_08061868, RunAiTurn\n");

@@ -10,7 +10,7 @@
 #include "proc.h"
 #include "hardware.h"
 /* Keep the scroll in step, and break the proc on ANY key -- the test is
- * `gpKeySt->held != 0` against the whole mask, not a single bit, which is the
+ * `gpKeySt->pressed != 0` against the whole mask, not a single bit, which is the
  * "press anything to continue" shape. */
 struct Unk77C70Proc
 {
@@ -22,7 +22,7 @@ void sub_08077C70(struct Unk77C70Proc *proc)
 {
     sub_08077620(0, 0xA8 - gUnknown_0300064C);
 
-    if (gpKeySt->held != 0)
+    if (gpKeySt->pressed != 0)
     {
         proc->unk44 = 0;
         sub_0803B4DC(0x66);

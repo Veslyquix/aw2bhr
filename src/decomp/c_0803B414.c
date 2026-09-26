@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803B414.
- * sub_0803B414 @ 0x0803B414, sub_0803B48C @ 0x0803B48C
+ * sub_0803B414 @ 0x0803B414, PlayMusicOrSfx @ 0x0803B48C
  */
 
 /* Seven identical sub_08071420 calls over the 0x03005xxx object group, all
@@ -30,13 +30,17 @@ void sub_0803B414(void)
  * The three tests NEST rather than chaining with `&&`: the first two failures
  * go to the epilogue but the `a != 0` failure goes to the SECOND test, which
  * an `&&` could not produce. `lsls r0,r1,#0x10; cmp r0,#0` is the `!= 0` on
- * the parameter's low halfword and is the same for s16 and u16. */
-void sub_0803B48C(s16 a)
+ * the parameter's low halfword and is the same for s16 and u16.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Music/SFX player subroutine".
+ * The old PlayMusicOrSfx symbol is kept as a linker alias below so every
+ * other unit keeps resolving it unchanged. */
+void PlayMusicOrSfx(s16 a)
 {
     if (gUnknown_030005CC != 0)
     {
         if (a != 0)
-            sub_08070478(a);
+            ActivateMusicOrSoundId(a);
 
         if (gUnknown_030005CC != 0x100)
         {
@@ -45,3 +49,5 @@ void sub_0803B48C(s16 a)
         }
     }
 }
+
+asm(".global sub_0803B48C\n.thumb_set sub_0803B48C, PlayMusicOrSfx\n");

@@ -13,7 +13,7 @@
  *   relocs: name different symbols that resolve to the same address
  *     +0x098  original gUnknown_081D943C  candidate .rodata
  * which is a match, not a difference: gUnknown_081D943C is not an object, it is
- * agbcc's own -fforce-addr address constant for the `u16 *` gUnknown_08499578
+ * agbcc's own -fforce-addr address constant for the `u16 *` gBG0TilemapBuffer
  * (the word at 0x081D943C in baserom.gba is 0x08499578).  This function's
  * data/promoted.json entry must carry
  *   "rodata": ["0x081D943C"]
@@ -37,7 +37,7 @@ void sub_08086BF8(u32 a1, int a2, int a3)
 
     sub_08013C00();
 
-    sub_08014A5C(1, 5, gUnknown_08499578, gUnknown_08499CE4[gUnknown_0300596C], 0, 0);
+    sub_08014A5C(1, 5, gBG0TilemapBuffer, gUnknown_08499CE4[gUnknown_0300596C], 0, 0);
 
     if (gUnknown_02027F74.unk37 < a2)
         a2 = gUnknown_02027F74.unk37 + 1;
@@ -53,12 +53,12 @@ void sub_08086BF8(u32 a1, int a2, int a3)
             flag = 0;
 
         if (gUnknown_02027F74.unk04[a1 + i] <= 0xb3
-            && (u8)sub_0803CA54(gUnknown_02027F74.unk04[a1 + i]) == 0)
+            && (u8)IsCampaignMapUnlocked(gUnknown_02027F74.unk04[a1 + i]) == 0)
         {
             int k = i * 2;
             y = a3 + 9;
             z = k + y;
-            sub_080149C0(1, (s16)z, gUnknown_08499578, gUnknown_084C3F50, 0, flag);
+            sub_080149C0(1, (s16)z, gBG0TilemapBuffer, gUnknown_084C3F50, 0, flag);
         }
         else
         {
@@ -66,7 +66,7 @@ void sub_08086BF8(u32 a1, int a2, int a3)
             int k = i * 2;
             y = a3 + 9;
             z = k + y;
-            sub_080149C0(1, (s16)z, gUnknown_08499578, p, 0, flag);
+            sub_080149C0(1, (s16)z, gBG0TilemapBuffer, p, 0, flag);
         }
     }
 }
@@ -106,12 +106,12 @@ void sub_08086CE0(u32 a1, int a2, int a3)
       {
         flag = 0;
       }
-      if ((gUnknown_02027F74.unk04[a1 + i] <= 0xb3) && (((u8) sub_0803CA54(gUnknown_02027F74.unk04[a1 + i])) == 0))
+      if ((gUnknown_02027F74.unk04[a1 + i] <= 0xb3) && (((u8) IsCampaignMapUnlocked(gUnknown_02027F74.unk04[a1 + i])) == 0))
       {
         int k = i * 2;
         y = a3 + 9;
         z = k + y;
-        sub_080149C0(1, (s16) z, gUnknown_08499578, gUnknown_084C3F50, 0, flag);
+        sub_080149C0(1, (s16) z, gBG0TilemapBuffer, gUnknown_084C3F50, 0, flag);
       }
       else
       {
@@ -120,7 +120,7 @@ void sub_08086CE0(u32 a1, int a2, int a3)
         y = a3;
         y = y + 9;
         z = k + y;
-        sub_080149C0(1, (s16) z, gUnknown_08499578, p, 0, flag);
+        sub_080149C0(1, (s16) z, gBG0TilemapBuffer, p, 0, flag);
       }
     }
 

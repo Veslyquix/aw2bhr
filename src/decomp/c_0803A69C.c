@@ -45,7 +45,7 @@ void sub_0803A69C(void)
   int new_var;
   u16 *map;
   sub_08023274(2);
-  if (gpKeySt->unk02 & 0x60)
+  if (gpKeySt->repeated & (DPAD_LEFT | DPAD_UP))
   {
     sub_0803B4DC(0x67);
     gUnknown_0849D89C->unk09--;
@@ -53,7 +53,7 @@ void sub_0803A69C(void)
     {
       gUnknown_0849D89C->unk09 = 0xf;
     }
-    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->unk00] - 1][gUnknown_0849D89C->unk09] == 0)
+    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->type] - 1][gUnknown_0849D89C->unk09] == 0)
     {
       gUnknown_0849D89C->unk09--;
       if (gUnknown_0849D89C->unk09 < 0)
@@ -63,7 +63,7 @@ void sub_0803A69C(void)
     }
 
   }
-  if (gpKeySt->unk02 & 0x90)
+  if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_DOWN))
   {
     sub_0803B4DC(0x67);
     gUnknown_0849D89C->unk09++;
@@ -71,7 +71,7 @@ void sub_0803A69C(void)
     {
       gUnknown_0849D89C->unk09 = 0;
     }
-    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->unk00] - 1][gUnknown_0849D89C->unk09] == 0)
+    while (gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->type] - 1][gUnknown_0849D89C->unk09] == 0)
     {
       gUnknown_0849D89C->unk09++;
       if (gUnknown_0849D89C->unk09 > 0xf)
@@ -92,7 +92,7 @@ void sub_0803A69C(void)
         new_var = 32;
         dx = gUnknown_0849D89C->unk02;
         dy = gUnknown_0849D89C->unk03;
-        map = gUnknown_08499578;
+        map = gBG0TilemapBuffer;
         col = x + dx;
         map[(col + ((y + dy) * new_var)) + 0x21] = 0;
       }
@@ -100,10 +100,10 @@ void sub_0803A69C(void)
     }
 
     sub_08013AD4(0);
-    sub_080146D4(gUnknown_0849D89C->unk02 + 1, gUnknown_0849D89C->unk03 + 1, gUnknown_08499578, gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->unk00] - 1][gUnknown_0849D89C->unk09], 0x8000, 0xf8);
+    sub_080146D4(gUnknown_0849D89C->unk02 + 1, gUnknown_0849D89C->unk03 + 1, gBG0TilemapBuffer, gUnknown_0849E398[gUnknown_081BA068[gUnknown_0849D89C->unk04->type] - 1][gUnknown_0849D89C->unk09], 0x8000, 0xf8);
   }
   else
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
   {
     sub_0803B4DC(0x66);
     sub_08014878();
@@ -112,7 +112,7 @@ void sub_0803A69C(void)
     sub_08015C30(gUnknown_03001FBC);
   }
   else
-    if (gpKeySt->held & 0x100)
+    if (gpKeySt->pressed & R_BUTTON)
   {
     sub_08014878();
     sub_0803A59C();

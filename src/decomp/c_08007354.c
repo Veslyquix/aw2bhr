@@ -9,37 +9,37 @@
 
 void sub_08007354(void)
 {
-    struct Unk0200B0B0 *p = gUnknown_0200B0B0;
+    struct ActiveMap *p = gActiveMap;
     int i;
 
-    if (p->unk07 == 0)
+    if (p->editMode == 0)
     {
-        if (p->unk00 & 1)
+        if (p->flags & 1)
             return;
 
-        p->unk00 |= 1;
+        p->flags |= 1;
 
-        i = p->unk3a + 4;
+        i = p->ringIndex + 4;
         if (i > 9)
-            i = p->unk3a - 6;
+            i = p->ringIndex - 6;
 
-        p->unk2c = gUnknown_0200B0D0[i].unk04;
-        p->unk37 = p->unk36;
-        gUnknown_0200B0B0->unk30 = gUnknown_0200B0B0->unk2e;
+        p->savedTerrain = gDesignRing[i].itemId;
+        p->savedTerrainListIndex = p->terrainListIndex;
+        gActiveMap->savedPropertyArmy = gActiveMap->propertyArmy;
     }
     else
     {
-        if (p->unk00 & 2)
+        if (p->flags & 2)
             return;
 
-        p->unk00 |= 2;
+        p->flags |= 2;
 
-        i = p->unk3a + 3;
+        i = p->ringIndex + 3;
         if (i > 7)
-            i = p->unk3a - 5;
+            i = p->ringIndex - 5;
 
-        p->unk26 = gUnknown_0200B0D0[i].unk04;
-        p->unk39 = p->unk38;
-        gUnknown_0200B0B0->unk31 = gUnknown_0200B0B0->unk2f;
+        p->savedUnit = gDesignRing[i].itemId;
+        p->savedUnitListIndex = p->unitListIndex;
+        gActiveMap->savedUnitArmy = gActiveMap->unitArmy;
     }
 }

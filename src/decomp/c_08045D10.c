@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08045D10.
- * sub_08045D10 @ 0x08045D10
+ * HasNoPlayer2Battleship @ 0x08045D10
  */
 
 /* "Is army 2 free of any unit whose unk00 is 0x15?"  The same 0x32-slot scan the
@@ -22,18 +22,20 @@
  * Nothing stores in the loop, so the bound and the array deref are hoisted and
  * strength_reduce gives the r0 pointer giv; the ascending `blt` at the bottom is
  * the source's own direction (no dbra reversal, because the giv keeps i live). */
-bool8 sub_08045D10(void)
+bool8 HasNoPlayer2Battleship(void)
 {
     int i;
 
     for (i = (u16)gUnknown_084995FE[2] + 1; i < (u16)gUnknown_084995FE[2] + 0x33; i++)
     {
-        if (gUnknown_08499594[i].unk00 == 0)
+        if (gUnits[i].type == 0)
             continue;
 
-        if (gUnknown_08499594[i].unk00 == 0x15)
+        if (gUnits[i].type == 0x15)
             return FALSE;
     }
 
     return TRUE;
 }
+
+asm(".global sub_08045D10\n.thumb_set sub_08045D10, HasNoPlayer2Battleship\n");

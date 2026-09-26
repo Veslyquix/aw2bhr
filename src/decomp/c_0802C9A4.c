@@ -7,10 +7,10 @@
  * sub_0802C9A4 @ 0x0802C9A4, sub_0802C9E8 @ 0x0802C9E8
  */
 
-/* An `if (...) return TRUE;` chain in sub_0802CC90's layout: the merged
+/* An `if (...) return TRUE;` chain in CanShowSubMenuItem's layout: the merged
  * `movs r0, #1` sits after the pool.
  *
- * gUnknown_08499598 is a POINTER to the 0x3c-byte records, so the index
+ * gPlayers is a POINTER to the 0x3c-byte records, so the index
  * expansion is the usual `lsls #4; subs; lsls #2` (i * 60) added to the loaded
  * base, and unk1d is already named on the struct. gUnknown_030033EC indexes it
  * directly as a u16, no narrowing.
@@ -22,13 +22,13 @@
 
 bool8 sub_0802C9A4(void)
 {
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return TRUE;
 
     if (sub_0802C958())
         return TRUE;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk1d != 4)
+    if (gPlayers[gUnknown_030033EC].co != 4)
         return TRUE;
 
     return FALSE;
@@ -49,10 +49,10 @@ bool8 sub_0802C9E8(void)
     if (sub_0802C958())
         return TRUE;
 
-    if (gUnknown_03003FC0.unk08 == 0)
+    if (gPlaySt.coAbilities == 0)
         return FALSE;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk1d == 4)
+    if (gPlayers[gUnknown_030033EC].co == 4)
         return TRUE;
 
     return FALSE;

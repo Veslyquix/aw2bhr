@@ -7,7 +7,7 @@
  * sub_0802D76C @ 0x0802D76C
  */
 
-/* Blanks columns 1..15 of rows 5..18 of the 32-wide tilemap gUnknown_08499578
+/* Blanks columns 1..15 of rows 5..18 of the 32-wide tilemap gBG0TilemapBuffer
  * points at, then hands the buffer to sub_08013AEC.
  *
  * Both counters are s16, which is what puts them in the HIGH half of a register
@@ -26,7 +26,7 @@ void sub_0802D76C(void)
     for (y = 5; y <= 0x12; y++)
     {
         for (x = 1; x <= 0xf; x++)
-            gUnknown_08499578[y * 32 + x] = 0;
+            gBG0TilemapBuffer[y * 32 + x] = 0;
     }
 
     sub_08013AEC();

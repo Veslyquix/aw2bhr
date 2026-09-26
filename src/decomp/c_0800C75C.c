@@ -1,15 +1,16 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800C75C.
- * sub_0800C75C @ 0x0800C75C, sub_0800C7A4 @ 0x0800C7A4, sub_0800C7E8 @ 0x0800C7E8, sub_0800C840 @ 0x0800C840
+ * sub_0800C75C @ 0x0800C75C, sub_0800C7A4 @ 0x0800C7A4, GetPropertyKindForTerrain @ 0x0800C7E8, GetPropertyKindAt @ 0x0800C840
  */
 
 /* The SET half of the pair sub_0800C7A4 clears: the same binary-search switch
  * mapping 0x28/0x48/0x68/0x88 to a slot index 0..3, then the caller's two
- * values into gUnknown_0200B0B0's unk17 and unk1b planes at that index.
+ * values into gActiveMap's unk17 and unk1b planes at that index.
  *
  * The extra `push {r4, lr}` over sub_0800C7A4 is the second argument being
  * carried across the decision tree; the third needs no saving because nothing
@@ -37,8 +38,8 @@ void sub_0800C75C(int a, int b, int c)
         return;
     }
 
-    gUnknown_0200B0B0->unk17[i] = b;
-    gUnknown_0200B0B0->unk1b[i] = c;
+    gActiveMap->hqX[i] = b;
+    gActiveMap->hqY[i] = c;
 }
 
 /* The CLEAR half of the sub_0800C75C pair: same switch, same two planes, but
@@ -79,8 +80,8 @@ void sub_0800C7A4(int a)
         return;
     }
 
-    gUnknown_0200B0B0->unk17[i] = 0xFF;
-    gUnknown_0200B0B0->unk1b[i] = -1;
+    gActiveMap->hqX[i] = 0xFF;
+    gActiveMap->hqY[i] = -1;
 }
 
 /* A classification of the low five bits of a terrain byte into 0, 1 or 2.
@@ -101,12 +102,12 @@ void sub_0800C7A4(int a)
  * falling through; writing the group first is 9 bytes different with the jump
  * table pointing the other way.
  *
- * The mask is this function's own: its caller sub_0800C840 masks too, but the
+ * The mask is this function's own: its caller GetPropertyKindAt masks too, but the
  * `movs r1,#0x1f; ands r1,r0` here is inside the callee, so the parameter is
  * unconstrained and `int`.
  *
  * A leaf: no `push`, and the epilogue is a bare `bx lr`. */
-int sub_0800C7E8(int a)
+int GetPropertyKindForTerrain(int a)
 {
     int r;
 
@@ -132,27 +133,22 @@ int sub_0800C7E8(int a)
 
 /* sub_080016D0's shape over the BYTE plane instead of the halfword one: the
  * same `rowOffset[y] + x` addressing off gUnknown_08499590, the terrain byte
- * at +0x1432, and the low five bits of that byte handed to sub_0800C7E8.
+ * at +0x1432, and the low five bits of that byte handed to GetPropertyKindForTerrain.
  *
- * It RETURNS what sub_0800C7E8 returns, and the epilogue is the only thing
+ * It RETURNS what GetPropertyKindForTerrain returns, and the epilogue is the only thing
  * that says so: `pop {r4}; pop {r1}; bx r1` keeps r0 intact, where a void
  * function would have popped the return address into r0 itself.
  *
  * The three binding locals are what keep the row table and the terrain plane
  * as separate address computations off one `p`; see c_0800164C.c for the same
  * arithmetic written the same way. */
-int sub_0800C840(int x, int y)
+int GetPropertyKindAt(int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + x;
-    tiles = p + 0x1432;
-    return sub_0800C7E8(tiles[off] & 0x1F);
+    off = gMap->rowOffset[y] + x;
+    return GetPropertyKindForTerrain(gMap->terrain[off] & 0x1F);
 }
+
+asm(".global sub_0800C7E8\n.thumb_set sub_0800C7E8, GetPropertyKindForTerrain\n"
+    ".global sub_0800C840\n.thumb_set sub_0800C840, GetPropertyKindAt\n");

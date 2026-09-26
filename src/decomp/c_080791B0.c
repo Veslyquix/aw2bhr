@@ -59,7 +59,7 @@ void sub_080791B0(struct Unk80791B0 *proc)
     sub_08071B88();
     ApplyPaletteExt(gUnknown_0822AA80, 0x280, 0xc0);
 
-    n = gUnknown_08499598[sub_0807A908()].unk33;
+    n = gPlayers[sub_0807A908()].rank;
     q = &proc->unk52;
     *q = 5 - n;
     if (*q > 3)

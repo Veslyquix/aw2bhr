@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,38 +8,31 @@
  * sub_080211DC @ 0x080211DC
  */
 
-struct Unk211DCMap
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_080211DC(u8 a1, s8 a2)
 {
-    struct Unk08499594 *e;
-    struct Unk211DCMap *map;
+    struct Unit *e;
+    struct Map *map;
     int bonus;
 
-    e = &gUnknown_08499594[a1];
+    e = &gUnits[a1];
     bonus = 0;
 
-    if (e->unk00 == 0)
+    if (e->type == 0)
         return;
 
-    if ((e->unk01 & 6) == 2)
+    if ((e->flags & 6) == 2)
         return;
 
-    if (e->unk00 <= 2)
+    if (e->type <= 2)
     {
-        map = (struct Unk211DCMap *)gUnknown_08499590;
+        map = gMap;
 
-        if ((map->plane[map->rowOffset[e->unk03] + e->unk02] & 0x1f) == 3)
+        if ((map->terrain[map->rowOffset[e->y] + e->x] & 0x1f) == 3)
             bonus = 3;
     }
 
-    sub_080210C8(e->unk02, e->unk03,
-                 bonus + sub_08042D84(((e - gUnknown_08499594) >> 6) + 1, e->unk00),
-                 gUnknown_08499598[(a1 >> 6) + 1].unk1c,
+    sub_080210C8(e->x, e->y,
+                 bonus + GetUnitVisionWithCoBonus(((e - gUnits) >> 6) + 1, e->type),
+                 gPlayers[(a1 >> 6) + 1].turnState,
                  a2, (a1 >> 6) + 1);
 }

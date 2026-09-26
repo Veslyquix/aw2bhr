@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080348B4.
- * sub_080348B4 @ 0x080348B4
+ * ShouldPromptCountryName @ 0x080348B4
  */
 
 /* MATCHED byte-for-byte, wave 43 (W43-C), first attempt.
@@ -23,36 +23,36 @@
  *
  * The three guards are one `&&` chain rather than three early returns; both
  * spellings cross-jump onto the same `movs r0,#0`, so that is a readability
- * choice and not a measured one. `gUnknown_08499598` is the pointer-to-array
+ * choice and not a measured one. `gPlayers` is the pointer-to-array
  * global, so a plain `[i]` subscript is what produces the
  * `ldr rN,=sym; ldr rN,[rN]` pair -- see its note in unknown-globals.h. The
  * `(x*16 - x)*4` synthesis is agbcc's 60-byte stride multiply. */
 
-bool8 sub_080348B4(void)
+bool8 ShouldPromptCountryName(void)
 {
     u8 i;
     u8 v;
     int found;
 
-    if (gUnknown_03003FC0.unk32 == 0 && gUnknown_03003FC0.unk0d != 0
-        && gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.savingEnabled == 0 && gPlaySt.fog != 0
+        && gPlaySt.gameMode == 3)
     {
         v = 0;
         found = 0;
 
         for (i = 1; i <= 4; i++)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 if (found != 0)
                 {
-                    if (gUnknown_08499598[i].unk1b == 1
-                        && v != gUnknown_08499598[i].unk2a)
+                    if (gPlayers[i].aiControlled == 1
+                        && v != gPlayers[i].team)
                         return 1;
                 }
-                else if (gUnknown_08499598[i].unk1b == 1)
+                else if (gPlayers[i].aiControlled == 1)
                 {
-                    v = gUnknown_08499598[i].unk2a;
+                    v = gPlayers[i].team;
                     found = 1;
                 }
             }
@@ -61,3 +61,5 @@ bool8 sub_080348B4(void)
 
     return 0;
 }
+
+asm(".global sub_080348B4\n.thumb_set sub_080348B4, ShouldPromptCountryName\n");

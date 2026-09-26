@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08021D64.
- * sub_08021D64 @ 0x08021D64
+ * LoadSeaAnimFrame @ 0x08021D64
  */
 
 #include "hardware.h"
@@ -26,7 +26,7 @@
  * Wave 31 tried this shape with the casts the other way round
  * (`(u8 *)(0x06002000 + ((n & 1) << 12)) + chr`), which is the same rule
  * pushing the constant the wrong way. */
-void sub_08021D64(int a1)
+void LoadSeaAnimFrame(int a1)
 {
     u8 n = a1;
 
@@ -35,3 +35,5 @@ void sub_08021D64(int a1)
                      + ((n & 1) << 12),
                  0x1000);
 }
+
+asm(".global sub_08021D64\n.thumb_set sub_08021D64, LoadSeaAnimFrame\n");

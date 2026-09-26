@@ -16,7 +16,7 @@
  * round. The shared `strh r0,[r1]` tail is agbcc cross-jumping the two stores
  * to gUnknown_030032D8, which is why the pool word for it appears twice.
  *
- * gUnknown_03003FC0.unk30 is loaded through an address held in r4 rather than
+ * gPlaySt.unk30 is loaded through an address held in r4 rather than
  * a displacement because +0x30 is outside `ldrb`'s imm5 range (max 31).
  *
  * FIRST LOOP NEEDS THE `v` BINDING, SECOND ONE MUST NOT HAVE IT. Written as
@@ -27,7 +27,7 @@
  * changes nothing. That asymmetry is the whole difference between this and a
  * near-miss.
  *
- * `gUnknown_08499598` is the pointer-to-array global, so the plain `[i]`
+ * `gPlayers` is the pointer-to-array global, so the plain `[i]`
  * subscript is what emits the `ldr rN,=sym; ldr rN,[rN]` pair -- see its note
  * in unknown-globals.h; it is on wave 50's pool-word ALLOWLIST and is NOT a
  * -fforce-addr word. `(i*16 - i)*4` is agbcc's 60-byte stride multiply. */
@@ -37,8 +37,8 @@ void sub_08034938(void)
     u8 i;
     u8 best;
 
-    if (gUnknown_03003FC0.unk30 == 0 || !sub_0802672C()
-        || gUnknown_03003FC0.unk30 != gUnknown_03004080)
+    if (gPlaySt.turnLimit == 0 || !sub_0802672C()
+        || gPlaySt.turnLimit != gUnknown_03004080)
     {
         gUnknown_030032D8 = 2;
     }
@@ -48,9 +48,9 @@ void sub_08034938(void)
 
         for (i = 1; i <= 4; i++)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
-                u8 v = gUnknown_08499598[i].unk11;
+                u8 v = gPlayers[i].captures;
 
                 if (best < v)
                     best = v;
@@ -59,11 +59,11 @@ void sub_08034938(void)
 
         for (i = 1; i <= 4; i++)
         {
-            if (sub_080266DC(i) && best > gUnknown_08499598[i].unk11)
+            if (IsPlayerAliveAndActive(i) && best > gPlayers[i].captures)
                 sub_08028874(i, 0x20);
         }
 
-        sub_08028568();
+        FinalizeBattleResult();
         gUnknown_030032D8 = 0x12;
     }
 }

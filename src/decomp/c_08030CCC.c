@@ -17,8 +17,8 @@ void sub_08030CCC(void)
         gUnknown_0849B018->unk1e = 0;
         gUnknown_0849B018->unk04 = 4;
         gUnknown_0849B018->unk04 = 5;
-        gUnknown_03003FC0.unk32 = v;
-        sub_0802F8FC((u16 *)&gUnknown_03004008, 1);
+        gPlaySt.savingEnabled = v;
+        sub_0802F8FC((u16 *)&gGameClock, 1);
         sub_08015C30(gUnknown_03001FBC);
     }
 }

@@ -32,19 +32,19 @@ u16 sub_0804769C(struct Unk0804769C *p, u16 idx)
 {
     u16 count;
     u16 i;
-    struct Unk08499594 *r;
+    struct Unit *r;
 
     count = 0;
-    r = &gUnknown_08499594[gUnknown_03003F2C + idx];
-    if (r->unk01 & 8)
+    r = &gUnits[gUnknown_03003F2C + idx];
+    if (r->flags & 8)
     {
         count = 1;
-        if (!(r->unk01 & 0x10))
+        if (!(r->flags & 0x10))
         {
             for (i = 0; i < p->unk21; i++)
             {
-                r = &gUnknown_08499594[gUnknown_03003F2C + gUnknown_02028DD8[i]];
-                if (r->unk01 & 8)
+                r = &gUnits[gUnknown_03003F2C + gUnknown_02028DD8[i]];
+                if (r->flags & 8)
                 {
                     if (idx == r->unk07 - gUnknown_03003F2C
                      || idx == r->unk08 - gUnknown_03003F2C)

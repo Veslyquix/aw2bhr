@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0802A838.
- * sub_0802A838 @ 0x0802A838, sub_0802A85C @ 0x0802A85C
+ * sub_0802A838 @ 0x0802A838, GetTerrainNameGraphic @ 0x0802A85C
  */
 
 const u8 * sub_0802A838(int a1)
@@ -12,7 +12,9 @@ const u8 * sub_0802A838(int a1)
     return gUnknown_08108264[(gUnknown_0849A354[a1].unk00 * 8) & 0x3ff];
 }
 
-const u8 * sub_0802A85C(int a1)
+const u8 * GetTerrainNameGraphic(int a1)
 {
-    return gUnknown_08106A64[(gUnknown_0849A2C8[a1].unk00 * 8) & 0x3ff];
+    return gUnknown_08106A64[(gUnknown_0849A2C8[a1].nameGraphic * 8) & 0x3ff];
 }
+
+asm(".global sub_0802A85C\n.thumb_set sub_0802A85C, GetTerrainNameGraphic\n");

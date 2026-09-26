@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08075008.
  * sub_08075008 @ 0x08075008, sub_08075058 @ 0x08075058
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* The +0x34 counter is UNSIGNED -- the ROM shifts it with `lsrs`, and an `s32`
@@ -25,7 +29,7 @@ struct Unk8075008
     /* 0x34 */ u32 unk34;
 };
 #include "proc.h"
-/* The per-entry child spawner of the gUnknown_08614390 menu proc: sub_0807519C
+/* The per-entry child spawner of the ProcScr_WM_MoveScope menu proc: sub_0807519C
  * calls this once per frame-group and keeps the returned proc in the ten-entry
  * pointer table at +0x3c of its own proc, which is why this starter RETURNS the
  * proc where the rest of the family drops it. The parameter widths are read off
@@ -44,7 +48,7 @@ struct Unk08075058
     /* 0x34 */ int unk34;
 };
 
-void sub_08075008(struct Unk8075008 *proc)
+void WM_DrawDifficultyStars_IDLE_08075009(struct Unk8075008 *proc)
 {
     int d = gUnknown_0861436C[(proc->unk34 >> 3) & 3];
 
@@ -55,7 +59,7 @@ void sub_08075008(struct Unk8075008 *proc)
 
 void *sub_08075058(ProcPtr parent, u16 a2, s16 a3, s16 a4, u16 a5)
 {
-    struct Unk08075058 *proc = Proc_Start(gUnknown_08614370, parent);
+    struct Unk08075058 *proc = Proc_Start(ProcScr_WM_DrawDifficultyStars, parent);
 
     proc->unk2c = a3;
     proc->unk2e = a4;
@@ -65,3 +69,5 @@ void *sub_08075058(ProcPtr parent, u16 a2, s16 a3, s16 a4, u16 a5)
 
     return proc;
 }
+
+asm(".global sub_08075008\n.thumb_set sub_08075008, WM_DrawDifficultyStars_IDLE_08075009\n");

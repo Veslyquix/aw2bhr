@@ -39,7 +39,7 @@ struct UnkPos5BC7C
 
 u8 sub_0805BC7C(int x, int y, u16 *out)
 {
-    struct Unk08499594 *e;
+    struct Unit *e;
     struct UnkPos5BC7C loc;
     struct UnkPos5BC7C *p;
     int best;
@@ -47,12 +47,12 @@ u8 sub_0805BC7C(int x, int y, u16 *out)
     if (gUnknown_030040D8->unk07[1] == 0)
         return 0;
 
-    e = &gUnknown_08499594[gUnknown_030040D8->unk07[1]];
+    e = &gUnits[gUnknown_030040D8->unk07[1]];
 
-    if (sub_0805BD40(x - 1, y, e->unk00, 4, (s16 *)(p = &loc))
-        + sub_0805BD40(x + 1, y, e->unk00, 2, (s16 *)&loc)
-        + sub_0805BD40(x, y - 1, e->unk00, 1, (s16 *)&loc)
-        + sub_0805BD40(x, y + 1, e->unk00, 3, (s16 *)&loc) == 0)
+    if (sub_0805BD40(x - 1, y, e->type, 4, (s16 *)(p = &loc))
+        + sub_0805BD40(x + 1, y, e->type, 2, (s16 *)&loc)
+        + sub_0805BD40(x, y - 1, e->type, 1, (s16 *)&loc)
+        + sub_0805BD40(x, y + 1, e->type, 3, (s16 *)&loc) == 0)
         return 0;
 
     best = 9999;

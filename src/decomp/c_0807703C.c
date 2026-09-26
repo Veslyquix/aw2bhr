@@ -21,7 +21,7 @@
  * share one constant (`movs r0, #0` then `subs r0, #1`). */
 void sub_0807703C(ProcPtr proc)
 {
-    u16 k = gpKeySt->unk00;
+    u16 k = gpKeySt->held;
 
     sub_08076E20(k);
 
@@ -43,7 +43,7 @@ void sub_0807703C(ProcPtr proc)
         sub_08075304();
     }
 
-    if ((gpKeySt->held & 1) && gUnknown_0202FDFC.unk10 != 0)
+    if ((gpKeySt->pressed & 1) && gUnknown_0202FDFC.unk10 != 0)
     {
         sub_080733A0(5);
         sub_080752D8(2);
@@ -52,7 +52,7 @@ void sub_0807703C(ProcPtr proc)
         sub_0803B4DC(0x71);
         Proc_Break(proc);
     }
-    else if (gpKeySt->held & 2)
+    else if (gpKeySt->pressed & 2)
     {
         sub_0803B4DC(0x66);
         Proc_Goto(proc, 5);

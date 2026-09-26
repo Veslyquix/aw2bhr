@@ -133,7 +133,7 @@ s16 sub_08014084(struct Unk08014074 *p, u16 *dst)
     int lo;
     u16 q30;
     register int zero asm("r1");
-    struct Unk08499594 *e;
+    struct Unit *e;
     struct Unk8014084Slot *q;
 
 entry_loop:
@@ -238,25 +238,25 @@ entry_done:
     case 10:
         if (s[1] == 0x80)
         {
-            e = &gUnknown_08499594[gUnknown_030040D8->unk07[0]];
-            if (e->unk04_0 != 0)
-                n = Div(e->unk04_0 - 1, 10) + 1;
+            e = &gUnits[gUnknown_030040D8->unk07[0]];
+            if (e->hp != 0)
+                n = Div(e->hp - 1, 10) + 1;
             else
                 n = 0;
             s2 = (u8 *)p + 0x32;
-            sub_0802216C(p->unk28 + s2[0] + p->unk33 * 32, e->unk00,
+            sub_0802216C(p->unk28 + s2[0] + p->unk33 * 32, e->type,
                          gUnknown_03003F2C, e->unk07, 0, n, 0, 0);
             s2[0] += 2;
             p->unk20 += 2;
             return 3;
         }
-        e = &gUnknown_08499594[gUnknown_030040D8->unk07[1]];
-        if (e->unk04_0 != 0)
-            n = Div(e->unk04_0 - 1, 10) + 1;
+        e = &gUnits[gUnknown_030040D8->unk07[1]];
+        if (e->hp != 0)
+            n = Div(e->hp - 1, 10) + 1;
         else
             n = 0;
         s2 = (u8 *)p + 0x32;
-        sub_0802216C(p->unk28 + s2[0] + p->unk33 * 32, e->unk00,
+        sub_0802216C(p->unk28 + s2[0] + p->unk33 * 32, e->type,
                      gUnknown_03003F2C, e->unk07, 0, n, 0, 0);
         s2[0] += 2;
         p->unk20 += 2;

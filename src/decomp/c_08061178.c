@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08061178.
- * sub_08061178 @ 0x08061178
+ * PickWeightedAiUnit @ 0x08061178
  */
 
 /* One row of the 12-byte-strided table that *gUnknown_085766E0 addresses,
@@ -25,7 +25,7 @@
  * keeps the component-ref order (`adds r0,r3,#0; adds r0,#0x14; adds r0,r1,r0`).
  *
  * `% 100` goes through __umodsi3, the UNSIGNED helper, which is what makes
- * sub_080129E0's u32 result and the u8 truncation of the remainder the right
+ * GetNextRandomNumber's u32 result and the u8 truncation of the remainder the right
  * reading. The `(u8)` narrowings on the parameter, on the remainder and on the
  * returned `i + 1` are all PROMOTE_MODE/return-width, not source casts. */
 struct Unk61178Row
@@ -39,13 +39,13 @@ struct Unk61178Tbl
     /* 0x14 */ struct Unk61178Row rows[1];
 };
 
-u8 sub_08061178(u8 a1)
+u8 PickWeightedAiUnit(u8 a1)
 {
     struct Unk61178Tbl *tbl;
     u8 r;
     int i;
 
-    r = sub_080129E0() % 100;
+    r = GetNextRandomNumber() % 100;
     tbl = (struct Unk61178Tbl *)gUnknown_085766E0;
 
     if (tbl->rows[a1].v[0] == 0xff)
@@ -64,3 +64,5 @@ u8 sub_08061178(u8 a1)
 
     return 1;
 }
+
+asm(".global sub_08061178\n.thumb_set sub_08061178, PickWeightedAiUnit\n");

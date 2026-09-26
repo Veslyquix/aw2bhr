@@ -16,7 +16,7 @@
 
 int sub_080485C4(void)
 {
-    if (sub_0803CBD8(0x21) != 0)
+    if (IsCampaignCompletionFlagSet(0x21) != 0)
         return 1;
 
     return 0;

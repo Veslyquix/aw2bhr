@@ -12,28 +12,28 @@
  * 3-bit field equal to 1, and stand on a map cell whose signed terrain byte is
  * not -1.
  *
- * No store anywhere in the loop, so agbcc hoists the `ldr` of gUnknown_08499594
+ * No store anywhere in the loop, so agbcc hoists the `ldr` of gUnits
  * and the `ldrh` of gUnknown_03003F2C into the preheader and check_dbra_loop
  * turns the exit test into a countdown -- none of which is authored. -1 lands
  * in a register (`movs #1; rsbs #0`) because `cmp` has no negative immediate.
  *
- * `gUnknown_03003340[p->unk03][p->unk02]` is the c_0804151C.c cell idiom: row
+ * `gUnknown_03003340[p->y][p->x]` is the c_0804151C.c cell idiom: row
  * pointer first (`lsls #2; adds`), column added to the loaded pointer.
  */
 
 int sub_080586CC(void)
 {
-    struct Unk08499594 *p;
+    struct Unit *p;
     int count;
     int i;
 
     count = 0;
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        p = &gUnknown_08499594[i];
-        if (p->unk00 != 0 && gUnknown_0857680F[p->unk00] == 2
+        p = &gUnits[i];
+        if (p->type != 0 && gUnknown_0857680F[p->type] == 2
             && (p->unk09 & 7) == 1
-            && (s8)gUnknown_03003340[p->unk03][p->unk02] != -1)
+            && (s8)gUnknown_03003340[p->y][p->x] != -1)
             count++;
     }
 

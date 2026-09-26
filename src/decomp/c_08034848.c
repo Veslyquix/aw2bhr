@@ -12,12 +12,12 @@
  * `push {r4, r5, lr}` -- plain literals reproduce it. */
 void sub_08034848(void)
 {
-    gUnknown_03003FC0.unk0c = 1;
-    gUnknown_03003FC0.unk01 = 3;
-    gUnknown_03003FC0.unk02 = 1;
-    sub_08034780();
+    gPlaySt.bgmOn = 1;
+    gPlaySt.gameMode = 3;
+    gPlaySt.mapID = 1;
+    SetDefaultRules();
     sub_08034838();
-    gUnknown_03003FC0.unk09 = 1;
+    gPlaySt.animOpts = 1;
 }
 
 /* TWO statements, not `a = b = v`. The chained form hoists all three pool words
@@ -33,8 +33,8 @@ void sub_0803486C(void)
 
 void sub_08034890(void)
 {
-    sub_0802150C();
-    sub_0802163C(gUnknown_03003FC0.unk02);
+    InitGameSettings();
+    sub_0802163C(gPlaySt.mapID);
     sub_08021598();
     sub_080215B8();
     sub_080267AC();

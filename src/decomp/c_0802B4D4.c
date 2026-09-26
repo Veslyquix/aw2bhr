@@ -17,13 +17,13 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
     if (Proc_Find(gUnknown_0849A02C) != 0)
         return;
 
-    if (gUnknown_03003FC0.unk31 != 0)
+    if (gPlaySt.captureLimit != 0)
     {
         acc = 7;
 
         for (i = 4; i > 0; i--)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 sub_0801BD00((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
                              (a2 - acc) & 0xFF,
@@ -31,7 +31,7 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
                              ((i + 8) << 12) | 0x361);
                 sub_0802BAFC(a1 + gUnknown_0849A2A6[a3 * 3] + 0x15,
                              a2 - acc,
-                             gUnknown_03003FC0.unk31 - gUnknown_08499598[i].unk11);
+                             gPlaySt.captureLimit - gPlayers[i].captures);
                 acc += 7;
             }
         }
@@ -41,13 +41,13 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
                      gUnknown_0848B6B0,
                      0x1362);
     }
-    else if (gUnknown_03003FC0.unk30 != 0)
+    else if (gPlaySt.turnLimit != 0)
     {
         acc = 7;
 
         for (i = 4; i > 0; i--)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 sub_0801BD00((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
                              (a2 - acc) & 0xFF,
@@ -55,7 +55,7 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
                              ((i + 8) << 12) | 0x361);
                 sub_0802BAFC(a1 + gUnknown_0849A2A6[a3 * 3] + 0x15,
                              a2 - acc,
-                             gUnknown_08499598[i].unk11);
+                             gPlayers[i].captures);
                 acc += 7;
             }
         }

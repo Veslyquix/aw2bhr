@@ -34,6 +34,7 @@ gcc's cse_end_of_basic_block follows a conditional jump only when the target lab
 - The two `= 1` arms as an `else if` chain: puts `= 1` first in the layout, and the ROM's `= 0` arm is first.
 - `continue` in the `= 0` arm: gives that arm its own `strb` plus a branch to the loop increment, where the ROM shares one `strb` with the `= 1` arm.
 - `(u32)(unk00 - 0x10) > 4` in place of the `(u8)` cast: drops the two shifts the ROM has. The `(u8)` spelling is settled.
+- WAVE 61: permuter 2400s / 4 threads from the work draft (216 bytes, +8, 23.1%). The search DID improve on its seed, reaching 42.8% at the same +8 size, but that is still short of the 52.4% best.c on disk, so best.c was left alone and the work file restored. The +8 never closed, which points at a structural difference rather than register allocation.
 
 ### Settled
 

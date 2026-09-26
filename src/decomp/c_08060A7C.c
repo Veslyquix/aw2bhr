@@ -13,10 +13,10 @@ void sub_08060A7C(void)
 
     if (gUnknown_030046C0.unk06 == 0)
     {
-        r = sub_08057FA8(0x18);
+        r = CountUnitsOfType(0x18);
         if (gUnknown_030045D8 > r)
         {
-            if (sub_08060ED4(6) != 0)
+            if (CountBuildablePropertiesOfKind(6) != 0)
                 gUnknown_030046C0.unk06 = 0x18;
         }
     }

@@ -61,7 +61,7 @@ void sub_08019D48(ProcPtr proc)
 
     sub_08022ADC();
     sub_08019C24();
-    sub_08011E54(gUnknown_08499578, (void *)0x06007000, 0x800);
+    sub_08011E54(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
     sub_080153B8(p->unk44);
 }
 
@@ -70,7 +70,7 @@ void sub_08019D48(ProcPtr proc)
 void sub_08019D78(ProcPtr proc)
 {
     sub_08019D48(proc);
-    sub_08012BC8(gUnknown_08499580, 0, 0, 0x20, 0x14, 0x360);
+    sub_08012BC8(gBG2TilemapBuffer, 0, 0, 0x20, 0x14, 0x360);
     sub_08013AD4(2);
 }
 
@@ -80,7 +80,7 @@ void sub_08019DA8(ProcPtr proc)
     sub_0801A538(0, 1, 6, 0xc);
     sub_08022580();
     sub_080227A8();
-    sub_08034F8C();
+    DecrementMapLock();
 }
 
 /* This call site is the only evidence for sub_08022AD0's parameter widths, and

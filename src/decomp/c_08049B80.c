@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08049B80.
  * sub_08049B80 @ 0x08049B80
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* gUnknown_084C30F8 is a POINTER VARIABLE in ROM (`ldr rN,=sym; ldr rN,[rN]`),
@@ -12,10 +16,12 @@
  * built with its own `adds`. The ROM shares one pool word for the constant and
  * bumps it (`ldr r2,=0x836; adds r1,r0,r2; adds r2,#1; adds r0,r0,r2`), which
  * is CSE on the displacement rather than anything in the source. */
-void sub_08049B80(void)
+void BattleMaps_08049B81(void)
 {
     if (gUnknown_084C30F8->unk836 == gUnknown_084C30F8->unk837)
-        sub_0803BD60();
+        UnlockMainMenu();
     else
-        sub_0803BD54();
+        LockMainMenu();
 }
+
+asm(".global sub_08049B80\n.thumb_set sub_08049B80, BattleMaps_08049B81\n");

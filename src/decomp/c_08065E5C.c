@@ -13,7 +13,7 @@
  * that slot's key state and whether the slot is the one unk25 selects.
  *
  * gUnknown_03002040 is the same 20-byte-per-slot KeySt array c_08064410.c
- * indexes (0x14 stride, `ldrh [rN, #2]` = KeySt.unk02).
+ * indexes (0x14 stride, `ldrh [rN, #2]` = KeySt.repeated).
  *
  * The base binding MUST be block-scoped INSIDE the loop body. Written that way
  * it is loop-invariant, LICM hoists it into the preheader AFTER the
@@ -33,6 +33,6 @@ void sub_08065E5C(void)
         struct KeySt *ks = (struct KeySt *)&gUnknown_03002040;
 
         if ((s8)gUnknown_08580934->unk70[i] == 0)
-            sub_08065DAC(i, ks[i].unk02, i == gUnknown_08580934->unk25);
+            sub_08065DAC(i, ks[i].repeated, i == gUnknown_08580934->unk25);
     }
 }

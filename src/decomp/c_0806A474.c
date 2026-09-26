@@ -15,5 +15,5 @@
  * Same predicate as sub_0806AAC4 over gUnknown_0858168C. */
 int sub_0806A474(void)
 {
-    return Proc_Find(gUnknown_08581500) != 0;
+    return Proc_Find(ProcScr_IntroT3) != 0;
 }

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -50,16 +51,9 @@
  * 0x20` as the first test (14.1%); `u16` for the row offset (byte-identical);
  * a flat `u8 *cells = p + 0x1432` local. 0x4186/0x4188/0x418E/0x4190 are
  * rowOffset[6]/[7]/[10]/[11]. */
-struct Unk45BMap
-{
-    /* 0x0000 */ u8 filler_0000[0x1432];
-    /* 0x1432 */ u8 terrain[0x2D48];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 int sub_08045B30(void)
 {
-    struct Unk45BMap *m = (struct Unk45BMap *)gUnknown_08499590;
+    struct Map *m = gMap;
     int b;
     int c;
     int d;

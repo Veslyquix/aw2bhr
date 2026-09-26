@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -10,7 +11,7 @@
 void sub_0805B3F4(void)
 {
     u8 buf[0x19];
-    struct Unk08499594 *u;
+    struct Unit *u;
 
     sub_0808B6C4(buf, 0, 0x19);
     buf[1] = 8;
@@ -18,11 +19,11 @@ void sub_0805B3F4(void)
     buf[7] = 8;
     buf[9] = 9;
 
-    sub_080581A4(gUnknown_08499590 + 0x3c72, 0);
-    sub_0801F92C(gUnknown_08499590 + 0x2852);
+    sub_080581A4(gMap->unk3C72, 0);
+    sub_0801F92C(gMap->move);
 
-    u = &gUnknown_08499594[gUnknown_030040D8->unk07[0]];
-    gUnknown_030046D4 = u->unk00;
+    u = &gUnits[gUnknown_030040D8->unk07[0]];
+    gUnknown_030046D4 = u->type;
 
     if (gUnknown_030040D8->unk07[4] > 7)
         gUnknown_030040D8->unk07[4] = 1;

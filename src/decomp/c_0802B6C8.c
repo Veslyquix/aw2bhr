@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,13 +10,13 @@
 
 /* Classifies the cell at (x, y). The `* 0x55555555; rsbs; asrs #8` run is ONE
  * expression, not two: agbcc folds the exact division by the 0x0c element
- * stride that `unit - gUnknown_08499594` needs into the `>> 6` that recovers
+ * stride that `unit - gUnits` needs into the `>> 6` that recovers
  * the army, so the whole thing lands as a single shift-and-add chain.
  *
  * `army` has to be a BINDING LOCAL. Written inline as the third argument the
  * instructions are identical but agbcc emits it AFTER the two simple
  * arguments, where the ROM computes it first; the local also moves the
- * gUnknown_08499594 base from r3 to the r1 the ROM uses.
+ * gUnits base from r3 to the r1 the ROM uses.
  *
  * The (u8) is real, not a tidy-up: sub_0802706C's third parameter is u16 and
  * the ROM truncates with `lsls #0x18; lsrs #0x18`. The prototype is right --
@@ -30,37 +31,22 @@
  * OFFSET enters the address arithmetic, never its declared length, and no
  * draft referenced any filler. Keep the drafts in sync; sync_work.py
  * reintroduces whatever the drafts say. */
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x1928];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 
 u8 sub_0802B6C8(u8 x, u8 y)
 {
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     u8 army;
     int idx;
 
-    idx = x + ((struct Map *)gUnknown_08499590)->unk417A[y];
+    idx = x + gMap->rowOffset[y];
 
-    if (((struct Map *)gUnknown_08499590)->unk0012[idx] == 0)
+    if (gMap->unit[idx] == 0)
         return 0;
 
-    unit = &gUnknown_08499594[((struct Map *)gUnknown_08499590)->unk0012[idx]];
-    army = ((unit - gUnknown_08499594) >> 6) + 1;
+    unit = &gUnits[gMap->unit[idx]];
+    army = ((unit - gUnits) >> 6) + 1;
 
-    if (sub_0802706C(unit->unk00, gUnknown_030033EC, army))
+    if (sub_0802706C(unit->type, gUnknown_030033EC, army))
         return 2;
 
     if (unit->unk07 | unit->unk08)

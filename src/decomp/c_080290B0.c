@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -70,8 +71,8 @@ void sub_080290B0(int a1, int a2, u8 a3)
     dx = 0;
     dy = 0;
 
-    cx = *(s16 *)(gUnknown_08499590 + 4) / 16;
-    cy = *(s16 *)(gUnknown_08499590 + 6) / 16;
+    cx = gMap->scrollX / 16;
+    cy = gMap->scrollY / 16;
 
     if (a3 != 0)
     {
@@ -84,11 +85,11 @@ void sub_080290B0(int a1, int a2, u8 a3)
         if (a2 < 0)
             a2 = 0;
 
-        if (a1 + 15 > *(u16 *)gUnknown_08499590)
-            a1 = *(u16 *)gUnknown_08499590 - 15;
+        if (a1 + 15 > gMap->width)
+            a1 = gMap->width - 15;
 
-        if (a2 + 10 > *(u16 *)(gUnknown_08499590 + 2))
-            a2 = *(u16 *)(gUnknown_08499590 + 2) - 10;
+        if (a2 + 10 > gMap->height)
+            a2 = gMap->height - 10;
 
         if (cx == a1 && cy == a2)
             return;
@@ -98,13 +99,13 @@ void sub_080290B0(int a1, int a2, u8 a3)
         if (a1 < cx + 2 && cx != 0)
             dx = -2;
 
-        if (a1 > cx + 12 && cx + 15 < *(u16 *)gUnknown_08499590)
+        if (a1 > cx + 12 && cx + 15 < gMap->width)
             dx = -12;
 
         if (a2 < cy + 2 && cy != 0)
             dy = -2;
 
-        if (a2 > cy + 7 && cy + 10 < *(u16 *)(gUnknown_08499590 + 2))
+        if (a2 > cy + 7 && cy + 10 < gMap->height)
             dy = -7;
 
         if (dx != 0)
@@ -123,20 +124,20 @@ void sub_080290B0(int a1, int a2, u8 a3)
         if (a2 < 0)
             a2 = 0;
 
-        if (a1 + 15 > *(u16 *)gUnknown_08499590)
-            a1 = *(u16 *)gUnknown_08499590 - 15;
+        if (a1 + 15 > gMap->width)
+            a1 = gMap->width - 15;
 
-        if (a2 + 10 > *(u16 *)(gUnknown_08499590 + 2))
-            a2 = *(u16 *)(gUnknown_08499590 + 2) - 10;
+        if (a2 + 10 > gMap->height)
+            a2 = gMap->height - 10;
 
         if (dx == 0 && dy == 0)
             return;
     }
 
-    *(u16 *)(gUnknown_08499590 + 0x10) = 0;
+    gMap->unk10 = 0;
 
     proc = sub_080152EC(gUnknown_0849A00C, 0);
     proc->unk22 = a1 << 4;
     proc->unk24 = a2 << 4;
-    sub_08034F7C();
+    IncrementMapLock();
 }

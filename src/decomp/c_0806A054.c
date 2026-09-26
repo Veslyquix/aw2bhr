@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806A054.
  * sub_0806A054 @ 0x0806A054
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -28,7 +32,7 @@ struct Unk0806A054
     /* 0x2c */ u32 unk2c;
 };
 
-void sub_0806A054(struct Unk0806A054 *proc)
+void IntroT3_0806A055(struct Unk0806A054 *proc)
 {
     proc->unk2c = sub_080674F4(gUnknown_0202F204++);
     sub_080670F8(gUnknown_085814A8);
@@ -41,7 +45,7 @@ void sub_0806A054(struct Unk0806A054 *proc)
     sub_08012358();
     ApplyPalettes(gUnknown_0822FE50, 1, 5);
     Decompress(gUnknown_0822FEF0, (void *)0x06000000);
-    Decompress(gUnknown_0822F9AC, gUnknown_0849957C);
+    Decompress(gUnknown_0822F9AC, gBG1TilemapBuffer);
     sub_08013AFC();
     sub_08069FD0();
     sub_08072C40(0, 0, 0);
@@ -50,3 +54,5 @@ void sub_0806A054(struct Unk0806A054 *proc)
     sub_08072C40(3, 0, 0);
     sub_080677BC(1, 2, 1, proc);
 }
+
+asm(".global sub_0806A054\n.thumb_set sub_0806A054, IntroT3_0806A055\n");

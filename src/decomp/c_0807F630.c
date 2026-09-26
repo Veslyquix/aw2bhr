@@ -14,20 +14,20 @@
  * then tools/split_rodata.py and tools/gen_lds.py before building.
  *
  * Confirms a selected batting order and hands it to the gUnknown_086165C0 proc:
- * fills gUnknown_08499598[1..n]'s unk1d / unk1a / unk00 from the picked list,
+ * fills gPlayers[1..n]'s unk1d / unk1a / unk00 from the picked list,
  * then copies eleven fields of this proc onto the one it starts.
  *
  * `struct Unk807CE5C` is copied VERBATIM from src/decomp/c_0807CE5C.c, which is
  * the sole caller and already declares `void sub_0807F630(struct Unk807CE5C *)`
  * locally. Same tag, same layout, nothing reshaped.
  *
- * The `+ 1` on every gUnknown_08499598 subscript rides in the 0x56 / 0x59 / 0x3c
+ * The `+ 1` on every gPlayers subscript rides in the 0x56 / 0x59 / 0x3c
  * displacements (0x3c + 0x1a, 0x3c + 0x1d, 0x3c + 0x00) -- the one-based
  * indexing that array carries everywhere.
  *
  * gUnknown_081D9378 IS NOT A GLOBAL. It is this unit's -fforce-addr .rodata
- * word holding &gUnknown_08499598, which is why the ROM's chain is three deep
- * (`ldr rN,=word; ldr rM,[rN]; ldr rK,[rM]`). Naming gUnknown_08499598 honestly
+ * word holding &gPlayers, which is why the ROM's chain is three deep
+ * (`ldr rN,=word; ldr rM,[rN]; ldr rK,[rM]`). Naming gPlayers honestly
  * emits exactly that: agbcc parks one `.LC` word in this unit's .rodata and all
  * five inline pool slots point at it. Do not declare a gUnknown_081D93xx
  * symbol -- see the wave-53 note in include/unknown-globals.h.
@@ -93,28 +93,28 @@ void sub_0807F630(struct Unk807CE5C *p)
     {
         k = 0;
 
-        for (i = 0; i < sub_0802490C(gUnknown_03003FC0.unk02); i++)
+        for (i = 0; i < sub_0802490C(gPlaySt.mapID); i++)
         {
-            if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i] == 0xff)
+            if (gUnknown_085C77A0[gPlaySt.mapID].unk3c[i] == 0xff)
             {
                 if (i == p->unk64)
                 {
-                    gUnknown_08499598[i + 1].unk1d =
+                    gPlayers[i + 1].co =
                         gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c];
                 }
                 else if (i < p->unk64)
                 {
-                    gUnknown_08499598[i + 1].unk1d = gUnknown_030058D4[k];
+                    gPlayers[i + 1].co = gUnknown_030058D4[k];
                     k++;
                 }
                 else
                 {
                     if (gUnknown_030059C0[i] == 0)
-                        gUnknown_08499598[i + 1].unk1a = gUnknown_03005958[i] + 1;
+                        gPlayers[i + 1].teamColor = gUnknown_03005958[i] + 1;
                     else
-                        gUnknown_08499598[i + 1].unk1a = sub_08026AC0(i + 1, 1);
+                        gPlayers[i + 1].teamColor = sub_08026AC0(i + 1, 1);
 
-                    switch (gUnknown_08499598[i + 1].unk1a)
+                    switch (gPlayers[i + 1].teamColor)
                     {
                     case 1:
                     default:
@@ -134,18 +134,18 @@ void sub_0807F630(struct Unk807CE5C *p)
                         break;
                     }
 
-                    gUnknown_08499598[i + 1].unk1d = v;
+                    gPlayers[i + 1].co = v;
                 }
             }
             else
             {
-                gUnknown_08499598[i + 1].unk1d =
-                    gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i];
+                gPlayers[i + 1].co =
+                    gUnknown_085C77A0[gPlaySt.mapID].unk3c[i];
             }
 
-            gUnknown_08499598[i + 1].unk1a =
-                sub_08026AC0(i + 1, sub_08042E18(gUnknown_08499598[i + 1].unk1d));
-            gUnknown_08499598[i + 1].unk00 = 0;
+            gPlayers[i + 1].teamColor =
+                sub_08026AC0(i + 1, sub_08042E18(gPlayers[i + 1].co));
+            gPlayers[i + 1].funds = 0;
         }
 
         gUnknown_030033EC = p->unk64 + 1;

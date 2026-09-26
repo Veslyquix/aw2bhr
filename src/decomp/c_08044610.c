@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -58,7 +59,7 @@
  *   - the inner test is spelled with `||`, not `&&`. The ROM's unk08-only arm
  *     is the FALL-THROUGH and the sub_08029088 arm is forward past the pool;
  *     `if (cell != 0 && (unk01 & 8) == 0)` lays them out the other way round.
- *   - sub_08044B08's first two arguments are bound to locals BEFORE the flag
+ *   - AnimateUnitCreation's first two arguments are bound to locals BEFORE the flag
  *     is computed. The ROM loads unk02/unk03 into r3/r4 (clobbering the unit
  *     pointer), then builds the flag in r5, then copies all three into r0-r2.
  *     Naming them at the call site instead loads them straight into r0/r1 and
@@ -76,17 +77,10 @@ struct Unk08044610Proc
     /* 0x66 */ u8 filler_66[0x02];
     /* 0x68 */ s16 unk68;
 };
-struct Unk08044610Map
-{
-    /* 0x0000 */ u8 filler_0000[0x234A];
-    /* 0x234A */ u8 unk234A[0x1E30];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_08044610(struct Unk08044610Proc *proc)
 {
-    struct Unk08499594 *unit;
-    struct Unk08044610Map *m;
+    struct Unit *unit;
+    struct Map *m;
     int idx;
     u8 x;
     u8 y;
@@ -104,44 +98,44 @@ void sub_08044610(struct Unk08044610Proc *proc)
 
     while (proc->unk68 <= 0x32)
     {
-        unit = &gUnknown_08499594[gUnknown_03003F2C + proc->unk68];
+        unit = &gUnits[gUnknown_03003F2C + proc->unk68];
 
-        if (unit->unk00 != 0
-            && gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].unk1d]
-                   .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1]
-                   .unk04(unit) != 0)
+        if (unit->type != 0
+            && gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
+                   .power[gPlayers[gUnknown_030033EC].coActivationMode - 1]
+                   .animationCondition(unit) != 0)
         {
-            m = (struct Unk08044610Map *)gUnknown_08499590;
-            idx = m->rowOffset[unit->unk03] + unit->unk02;
+            m = gMap;
+            idx = m->rowOffset[unit->y] + unit->x;
 
-            if (m->unk234A[idx] == 0 || (unit->unk01 & 8) != 0)
+            if (m->unk234A[idx] == 0 || (unit->flags & 8) != 0)
             {
-                gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].unk1d]
-                    .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1]
-                    .unk08(unit);
+                gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
+                    .power[gPlayers[gUnknown_030033EC].coActivationMode - 1]
+                    .onEachUnit(unit);
 
                 proc->unk68++;
                 break;
             }
             else
             {
-                sub_08029088(unit->unk02, unit->unk03);
+                sub_08029088(unit->x, unit->y);
 
                 if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
                     return;
 
-                gUnknown_084A0090[gUnknown_08499598[gUnknown_030033EC].unk1d]
-                    .unk1c[gUnknown_08499598[gUnknown_030033EC].unk1f - 1]
-                    .unk08(unit);
+                gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
+                    .power[gPlayers[gUnknown_030033EC].coActivationMode - 1]
+                    .onEachUnit(unit);
 
-                x = unit->unk02;
-                y = unit->unk03;
+                x = unit->x;
+                y = unit->y;
                 flag = 0;
 
-                if (gUnknown_08499598[gUnknown_030033EC].unk1f == 2)
+                if (gPlayers[gUnknown_030033EC].coActivationMode == 2)
                     flag = 1;
 
-                sub_08044B08(x, y, flag);
+                AnimateUnitCreation(x, y, flag);
 
                 proc->unk68++;
                 break;

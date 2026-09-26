@@ -44,9 +44,9 @@ void sub_0806D688(struct Unk6D688 *p)
     p->unk28 = y;
 
     if (p->unk3c == gUnknown_08581F12)
-        sub_0801F34C(0x8c, x & 0x1ff, y & 0xff, 0, 1);
+        DrawOamObject(0x8c, x & 0x1ff, y & 0xff, 0, 1);
     else
-        sub_0801F34C(0x8d, x & 0x1ff, y & 0xff, 0, 1);
+        DrawOamObject(0x8d, x & 0x1ff, y & 0xff, 0, 1);
 
     p->unk2c = gUnknown_08580934->unk30;
 

@@ -29,13 +29,13 @@ void sub_08044AB8(int a)
     int b0;
     int b1;
 
-    i = gUnknown_08499598[a].unk1d;
-    j = gUnknown_08499598[a].unk1f;
+    i = gPlayers[a].co;
+    j = gPlayers[a].coActivationMode;
     p = (const u8 *)gUnknown_084A0090;
     m = (j - 1) * 5;
     p += (i * 17 + m) * 4;
     b0 = p[0x1c];
     b1 = p[0x1d];
 
-    sub_08039A5C(sub_08043A80(b0), sub_08043A90(b1), 0x1ca, 5);
+    sub_08039A5C(GetCoPowerAnimation(b0), GetCoPowerAnimationPalette(b1), 0x1ca, 5);
 }

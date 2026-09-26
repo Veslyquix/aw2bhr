@@ -12,9 +12,9 @@
  * addresses; read that one for the derivation. */
 void sub_08007B74(void)
 {
-    if (gUnknown_0200B0B0->unk6b != -1)
+    if (gActiveMap->spriteId != -1)
     {
-        sub_08015328(gUnknown_0200B0B0->unk6b);
-        gUnknown_0200B0B0->unk6b = 0xFF;
+        sub_08015328(gActiveMap->spriteId);
+        gActiveMap->spriteId = 0xFF;
     }
 }

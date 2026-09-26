@@ -29,17 +29,17 @@
  */
 int sub_08043DAC(u8 a)
 {
-    switch (gUnknown_08499598[a].unk1e)
+    switch (gPlayers[a].coMode)
     {
     case 0:
     default:
-        sub_0803B4EC((s16)sub_08043D84(a));
+        sub_0803B4EC((s16)GetCoMusic(a));
         break;
     case 1:
-        sub_08043DF4(gUnknown_08499598[a].unk1d);
+        sub_08043DF4(gPlayers[a].co);
         break;
     case 2:
-        sub_08043E18(gUnknown_08499598[a].unk1d);
+        sub_08043E18(gPlayers[a].co);
         break;
     }
 }

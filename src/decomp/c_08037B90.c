@@ -31,7 +31,7 @@ struct Unk37C34Map
     /* 0x02 */ u16 tile[1];
 };
 
-/* Clears the whole 0x400-entry buffer gUnknown_0849957C points at, then lays a
+/* Clears the whole 0x400-entry buffer gBG1TilemapBuffer points at, then lays a
  * fresh 2x2-metatile grid over it and kicks the consumer.
  *
  * The two clamped extents are `u8` LOCALS, not `int`: the ROM compares them
@@ -49,7 +49,7 @@ struct Unk37C34Map
  * a register (two instructions, no pool word) and leaves `adds #1` inline.
  * Spelled `... + i + 1 + 0x1000` the two fold to 0x1001 and need a pool word.
  *
- * gUnknown_0849957C is reloaded inside the loop because it is a POINTER
+ * gBG1TilemapBuffer is reloaded inside the loop because it is a POINTER
  * global, not an array -- do not bind it to a local. */
 void sub_08037B90(void)
 {
@@ -59,7 +59,7 @@ void sub_08037B90(void)
     u8 h;
 
     for (i = 0; i <= 0x3ff; i++)
-        gUnknown_0849957C[i] = 0;
+        gBG1TilemapBuffer[i] = 0;
 
     w = ((u8 *)gUnknown_03003F68)[0];
     h = ((u8 *)gUnknown_03003F68)[1];
@@ -70,7 +70,7 @@ void sub_08037B90(void)
 
     for (i = 0; i < (w + 1) >> 1; i++)
         for (j = 0; j < ((h + 1) >> 1) * 16; j += 16)
-            gUnknown_0849957C[j * 2 + i] = j + 1 + i + 0x1000;
+            gBG1TilemapBuffer[j * 2 + i] = j + 1 + i + 0x1000;
 
     sub_08013AFC();
 }

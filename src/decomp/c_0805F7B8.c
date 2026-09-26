@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -50,15 +51,6 @@
  * there is no epilogue.
  */
 
-struct MapF7B8
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142E];
-    /* 0x1432 */ u8 unk1432[0x2D48];
-    /* 0x417A */ u16 unk417A[0x100];
-};
-
 void sub_0805F7B8(void)
 {
     int x;
@@ -79,17 +71,17 @@ void sub_0805F7B8(void)
     {
         sub_080202A4(gUnknown_030040D8);
 
-        for (y = 0; y < ((struct MapF7B8 *)gUnknown_08499590)->unk02; y++)
+        for (y = 0; y < gMap->height; y++)
         {
-            for (x = 0; x < ((struct MapF7B8 *)gUnknown_08499590)->unk00; x++)
+            for (x = 0; x < gMap->width; x++)
             {
                 cell = gUnknown_03003340[y] + x;
                 if (*(s8 *)cell < 0)
                     continue;
                 v = *(s8 *)cell;
                 if (gUnknown_030040D8->unk00 == 0
-                 || gUnknown_085D5ABC[gUnknown_030040D8->unk00].unk1a != 0x10)
-                    score = gUnknown_085D584C[((struct MapF7B8 *)gUnknown_08499590)->unk1432[((struct MapF7B8 *)gUnknown_08499590)->unk417A[y] + x] & 0x1f].unk00 * 10 - (n = v - 0x14);
+                 || gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation != 0x10)
+                    score = gUnknown_085D584C[gMap->terrain[gMap->rowOffset[y] + x] & 0x1f].unk00 * 10 - (n = v - 0x14);
                 else
                     score = 0x14 - v;
                 if (score <= best)
@@ -106,7 +98,7 @@ void sub_0805F7B8(void)
             sub_0805D648(bestX, bestY, 2, 0, 0);
     }
 
-    if (sub_08035000(gUnknown_03003FC0.unk02)->unk28 & 1)
+    if (sub_08035000(gPlaySt.mapID)->unk28 & 1)
         sub_0805F6D4();
     sub_08071910(gUnknown_03004680, 1);
 }

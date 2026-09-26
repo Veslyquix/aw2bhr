@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -20,29 +21,21 @@
  * measured it); case-BODY order is the lever. See the wave-80 chapter in
  * docs/agbcc-codegen.md. */
 
-struct Unk242B0Map
-{
-    /* 0x0000 */ u8 filler_0000[0x12];
-    /* 0x0012 */ u8 unit[0x1432 - 0x12];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 u8 sub_080242B0(s16 a1, s16 a2)
 {
-    struct Unk242B0Map *map;
+    struct Map *map;
     int idx;
     int cell;
     int hi;
     int lo;
 
-    map = (struct Unk242B0Map *)gUnknown_08499590;
+    map = gMap;
     idx = map->rowOffset[a2] + a1;
-    cell = map->plane[idx];
+    cell = map->terrain[idx];
     hi = cell & 0xe0;
     lo = cell & 0x1f;
 
-    if (map->unit[idx] != 0)
+    if (gMap->unit[idx] != 0)
         return FALSE;
 
     if (hi != gUnknown_03004084)
@@ -56,7 +49,7 @@ u8 sub_080242B0(s16 a1, s16 a2)
         return TRUE;
 
     case 6:
-        if (sub_08043050(gUnknown_030033EC) & 2)
+        if (GetPlayerSpecialAbilities(gUnknown_030033EC) & 2)
             return TRUE;
         break;
     }

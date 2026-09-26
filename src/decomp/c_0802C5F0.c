@@ -9,7 +9,7 @@
 
 bool8 sub_0802C5F0(void)
 {
-    if (gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.gameMode == 3)
         return FALSE;
 
     return TRUE;

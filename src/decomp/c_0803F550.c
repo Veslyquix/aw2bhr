@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -14,12 +15,6 @@
  * Decompress; leaving them inline in the call puts the descriptor first and
  * interleaves each mask with its own subtraction (which is what its twin
  * sub_0803F2F4 does, and that one is inline for exactly that reason). */
-struct MapScrollF550
-{
-    /* 0x00 */ u8 filler_00[0x04];
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-};
 struct UnkF550Sub
 {
     /* 0x00 */ u8 filler_00[0x24];
@@ -45,8 +40,8 @@ void sub_0803F550(struct UnkF550Proc *proc)
     Decompress(gUnknown_08117380, gUnknown_0200FC50);
     ApplyPaletteExt(gUnknown_081190D8, 0x260, 0x40);
 
-    x = proc->unk2c * 16 - ((struct MapScrollF550 *)gUnknown_08499590)->unk04;
-    y = proc->unk30 * 16 - ((struct MapScrollF550 *)gUnknown_08499590)->unk06;
+    x = proc->unk2c * 16 - gMap->scrollX;
+    y = proc->unk30 * 16 - gMap->scrollY;
 
     ((struct UnkF550Ret *)sub_0801C70C(gUnknown_081183EC, (x + 0x18) & 0x1FF,
                                        (y + 0x4E) & 0xFF, 0x31CA, 0, 0))->unk50->unk24 = gUnknown_0200FC50;

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,80 +8,47 @@
  * sub_0800C124 @ 0x0800C124
  */
 
-/* Exact configured match. The register-allocation lever is lifetime identity,
- * not declaration order: the map pointer and its derived rows/offset values
- * must be distinct locals in the true arm, the false arm before sub_08007CA0,
- * and the false arm after that call. A single shared p/rows/off set preserves
- * the instruction stream but scores 89.4%; splitting only by branch fixes the
- * true arm but leaves the false-arm pointer in r1. Splitting again at the call
- * gives the ROM's r0-before/r1-after allocation without changing any opcode.
- * The retained 91.67% best.c is not the right base: its q assignment is inside
- * the sub_0800C840 arm and changes the branch target as well as semantics. */
+/* Exact configured match. Repaints the cell at (x, y) after a change: if it is
+ * a road tile, record its tile in gActiveMap->cursorTerrain and repaint; else
+ * switch on its terrain byte. All map reads go straight through
+ * gMap->tile[] / gMap->terrain[] / gMap->rowOffset[]; `q` is bound once in the
+ * true arm. */
 void sub_0800C124(int x, int y)
 {
-    struct Unk0200B0B0 *q;
-    u8 *pThen;
-    u8 *rowsThen;
-    int t;
-    int offThen;
-    u8 *pElse;
-    u8 *rowsElse;
-    int u;
-    int idx;
-    int offElse;
-    u8 *pAfter;
-    u8 *rowsAfter;
-    int offAfter;
+    struct ActiveMap *q;
 
-    if (sub_0800164C(x, y))
+    if (IsTerrainWater(x, y))
     {
         if (sub_08008C34(x, y))
             return;
-        if (sub_0800C840(x, y))
+        if (GetPropertyKindAt(x, y))
             sub_0800C608(x, y);
-        q = gUnknown_0200B0B0;
-        pThen = gUnknown_08499590;
-        t = y * 2;
-        rowsThen = pThen + 0x417A;
-        offThen = (*(u16 *)(rowsThen + t) + x) * 2;
-        pThen += 0xA22;
-        pThen += offThen;
-        q->unk20 = *(u16 *)pThen;
+        q = gActiveMap;
+        q->cursorTerrain = gMap->tile[gMap->rowOffset[y] + x];
         sub_0800EC20(x, y);
-        sub_08001158(x, y, 0x2A);
-        sub_080011F4(x, y, 7);
+        MakeTileSimple(x, y, 0x2A);
+        SetTerrainAt(x, y, 7);
         sub_08007F9C(x, y);
     }
     else
     {
-        pElse = gUnknown_08499590;
-        u = y * 2;
-        rowsElse = pElse + 0x417A;
-        idx = *(u16 *)(rowsElse + u) + x;
-        pElse += 0x1432;
-        pElse += idx;
-        switch (*pElse)
+        switch (gMap->terrain[gMap->rowOffset[y] + x])
         {
-        case 7:
-            sub_08007CA0(x, y);
-            pAfter = gUnknown_08499590;
-            rowsAfter = pAfter + 0x417A;
-            offAfter = (*(u16 *)(rowsAfter + u) + x) * 2;
-            pAfter += 0xA22;
-            pAfter += offAfter;
-            if (*(u16 *)pAfter != 0x2A)
+        case TERRAIN_SEA:
+            MakeSeaSafest(x, y);
+            if (gMap->tile[gMap->rowOffset[y] + x] != 0x2A)
             {
-                sub_08001158(x, y, 0x2A);
-                sub_080011F4(x, y, 7);
+                MakeTileSimple(x, y, 0x2A);
+                SetTerrainAt(x, y, 7);
             }
             break;
 
-        case 0xD:
+        case TERRAIN_SHOAL:
             break;
 
-        case 0x13:
+        case TERRAIN_REEF:
             break;
         }
     }
-    sub_08008BB8(x, y);
+    EnsureValidTile(x, y);
 }

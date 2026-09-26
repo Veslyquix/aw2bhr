@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -19,15 +20,15 @@
  * result is the truth test of its s8 return. */
 void sub_08016D30(u16 a, u8 b)
 {
-    if (a != 0 && gUnknown_03003FC0.unk32 == 0) {
+    if (a != 0 && gPlaySt.savingEnabled == 0) {
         sub_08016A14();
         if (sub_08016CD8(a) == 0)
             sub_08016CEC(a, 1);
-        if ((u8)(gUnknown_03003FC0.unk02 + 0x4c) <= 0xb)
-            sub_0803CF54(3, gUnknown_08499590 + 0x421A, 1);
+        if ((u8)(gPlaySt.mapID + 0x4c) <= 0xb)
+            sub_0803CF54(3, gMap->unk421a, 1);
         sub_08016F38(b);
         sub_0801A7D8(a, gUnknown_02000000, 0xE28);
-        if (gUnknown_03003FC0.unk01 == 1)
+        if (gPlaySt.gameMode == 1)
             sub_08016E74();
     }
 }
@@ -37,7 +38,7 @@ void sub_08016D30(u16 a, u8 b)
  * the sub_0801AC58 call is the callee's declared u8 parameter, not a cast --
  * the surviving `lsls #0x10; lsrs #0x10` at entry is the u16 one.
  *
- * `(u8)(gUnknown_03003FC0.unk02 + 0x4c) <= 0xb` is a wrapping RANGE TEST on the
+ * `(u8)(gPlaySt.mapID + 0x4c) <= 0xb` is a wrapping RANGE TEST on the
  * mode byte, and the u8 cast is what makes it `lsls #0x18; lsrs #0x18; cmp
  * #0xb; bhi` rather than a pair of signed compares. Same guard as sub_08016D30's
  * sub_0803CF54 call, one address block up. */
@@ -46,8 +47,8 @@ void sub_08016DB8(u16 a)
     if (a != 0) {
         sub_0801AC58(a, gUnknown_02000000);
         sub_08017208();
-        if ((u8)(gUnknown_03003FC0.unk02 + 0x4c) <= 0xb)
-            sub_0803CF04(3, (int)(gUnknown_08499590 + 0x421A));
+        if ((u8)(gPlaySt.mapID + 0x4c) <= 0xb)
+            sub_0803CF04(3, (int)gMap->unk421a);
         sub_0801759C();
     }
 }

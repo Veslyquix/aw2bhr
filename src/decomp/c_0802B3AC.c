@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -47,33 +48,13 @@
  * recorded residual was never fake in the W77-A sense -- but this body is not
  * plausible original source, and promotion should be a coordinator decision.
  *
- * Keep the clean-symbol Unk30013D0 member access and the `||` guard shape;
+ * Keep the clean-symbol BattleUnit member access and the `||` guard shape;
  * both remain required. */
 #include "proc.h"
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u16 unk04;
-    /* 0x0006 */ u16 unk06;
-    /* 0x0008 */ u8 filler_0008[0x0A];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 unk051A[0x0F18];
-    /* 0x1432 */ u8 unk1432[0x0A10];
-    /* 0x1E42 */ u8 unk1E42[0x0508];
-    /* 0x234A */ u8 unk234A[0x0508];
-    /* 0x2852 */ u8 unk2852[0x1928];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 struct Tbl49A2A6
 {
     /* 0x00 */ s16 unk00;
     /* 0x02 */ s16 unk02[0x100];
-};
-struct Unk30013D0
-{
-    /* 0x00 */ u8 filler_00[0x14];
-    /* 0x14 */ u16 unk14;
 };
 
 void sub_0802B3AC(s16 a, s16 b, s16 c)
@@ -92,20 +73,20 @@ void sub_0802B3AC(s16 a, s16 b, s16 c)
 
     if (sub_0803DE94(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02) != NULL
         || gUnknown_020288B4[idx =
-               ((struct Map *)gUnknown_08499590)->unk417A[gUnknown_030033E4.unk02]
+               gMap->rowOffset[gUnknown_030033E4.unk02]
                + gUnknown_030033E4.unk00] != 0)
     {
         sub_080251D8(gUnknown_03003F38);
         x = (u16)gUnknown_0849A2A6[c * 3] + a + 0x18;
         sub_08037200(x, b - 0x14 - (s8)d,
-                     ((struct Unk30013D0 *)gUnknown_030013D0)->unk14, 0x1a6);
+                     gBattleAttacker->displayDamage, 0x1a6);
         return;
     }
 
     sub_080251BC(gUnknown_03003F38,
-                 ((struct Map *)gUnknown_08499590)->unk0012[idx],
+                 gMap->unit[idx],
                  &gUnknown_03003100.pos);
     x = (u16)((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[c * 3] + a + 0x1b;
     sub_08037200(x, b - 0x14 - (s8)d,
-                 ((struct Unk30013D0 *)gUnknown_030013D0)->unk14, 0x1a6);
+                 gBattleAttacker->displayDamage, 0x1a6);
 }

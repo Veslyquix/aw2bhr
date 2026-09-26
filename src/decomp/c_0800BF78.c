@@ -4,11 +4,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0800BF78.
- * sub_0800BF78 @ 0x0800BF78
+ * MakeReefSafe @ 0x0800BF78
  */
 
 /* Commits a tile edit at (x, y): stash the cell's current tile in
- * gUnknown_0200B0B0->unk20, repaint it, then re-run sub_0800C124 and then
+ * gActiveMap->cursorTerrain, repaint it, then re-run sub_0800C124 and then
  * sub_0800C22C over the cell and its four cardinal neighbours, and repaint
  * once more.  Returns 0 if sub_0800BC98 rejects the cell, 1 otherwise.  The
  * `bl sub_0800BC98` is reached with r0/r1 untouched from entry -- a
@@ -35,7 +35,7 @@
  *  - `**pp` is right, and a local is wrong, at exactly one site: the SECOND
  *    half's `if (y > 0)` inner read, where the ROM re-derives both levels.
  *
- *  - `b` is bound before `q` because the ROM loads gUnknown_0200B0B0's pool
+ *  - `b` is bound before `q` because the ROM loads gActiveMap's pool
  *    word first.  That is the LHS-expands-first rule, but it only reaches the
  *    top of the block if the destination is a local: with the RHS split into
  *    statements (which the c_08001158 idiom requires) the store's own
@@ -43,12 +43,12 @@
  *  - `pp = &gUnknown_0808D86C` sits after sub_0800EC20, not at the top, because
  *    that is where the ROM emits `mov r8, r4`; the pool word itself is loaded
  *    once, at the top, and r4 carries it across the three intervening calls. */
-int sub_0800BF78(int x, int y)
+int MakeReefSafe(int x, int y)
 {
     u8 **const *pp;
     u8 **q;
     u8 **s;
-    struct Unk0200B0B0 *b;
+    struct ActiveMap *b;
     u8 *p;
     u8 *rows;
     u8 *tiles;
@@ -59,20 +59,20 @@ int sub_0800BF78(int x, int y)
     if (sub_0800BC98(x, y) == 0)
         return 0;
 
-    if (sub_0800C840(x, y))
+    if (GetPropertyKindAt(x, y))
         sub_0800C608(x, y);
 
-    b = gUnknown_0200B0B0;
+    b = gActiveMap;
     q = gUnknown_0808D86C;
     p = *q;
     t = y * 2;
     rows = p + 0x417A;
     off = (*(u16 *)(rows + t) + x) * 2;
     tiles = p + 0xA22;
-    b->unk20 = *(u16 *)(tiles + off);
+    b->cursorTerrain = *(u16 *)(tiles + off);
 
-    sub_080011F4(x, y, 0x13);
-    sub_08001158(x, y, 0x168);
+    SetTerrainAt(x, y, 0x13);
+    MakeTileSimple(x, y, 0x168);
     sub_0800EC20(x, y);
 
     pp = &gUnknown_0808D86C;
@@ -129,7 +129,9 @@ int sub_0800BF78(int x, int y)
             sub_0800C22C(x + 1, n);
     }
 
-    sub_080011F4(x, y, 0x13);
-    sub_08001158(x, y, 0x168);
+    SetTerrainAt(x, y, 0x13);
+    MakeTileSimple(x, y, 0x168);
     return 1;
 }
+
+asm(".global sub_0800BF78\n.thumb_set sub_0800BF78, MakeReefSafe\n");

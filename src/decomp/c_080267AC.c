@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -9,7 +10,7 @@
 
 /* gUnknown_08090A74 and gUnknown_08090A78 are NOT globals: they are
  * `-fforce-addr` .rodata address-constant words holding &gUnknown_030033EC and
- * &gUnknown_08499598 (dumped from baserom.gba), so both globals are named
+ * &gPlayers (dumped from baserom.gba), so both globals are named
  * directly here and agbcc rebuilds the pool. Each is read on both sides of the
  * gUnknown_03004080 test, which is the control-flow merge that forces the
  * words in the first place.
@@ -30,24 +31,24 @@ void sub_080267AC(void)
     gUnknown_03003F2C = (gUnknown_030033EC - 1) * 0x40;
     gUnknown_03004480 = n;
     gUnknown_030032C0 = 0;
-    gUnknown_08499598[gUnknown_030033EC].unk16 = 0;
-    gUnknown_08499598[gUnknown_030033EC].unk24 = 0;
+    gPlayers[gUnknown_030033EC].destroyedThisTurn = 0;
+    gPlayers[gUnknown_030033EC].unk24 = 0;
     sub_08020984();
-    sub_08026F04();
+    AddPlayerIncomeToFunds();
     sub_0801A548(gUnknown_030033EC);
     sub_0801A57C(gUnknown_030033EC);
     sub_08043834(gUnknown_030033EC);
     if (gUnknown_03004080 == 1)
     {
         if (sub_08026D44(gUnknown_030033EC))
-            sub_08022AAC(gUnknown_08499598[gUnknown_030033EC].unk2d & 0x7f,
-                         gUnknown_08499598[gUnknown_030033EC].unk2e & 0x7f);
+            sub_08022AAC(gPlayers[gUnknown_030033EC].hqX & 0x7f,
+                         gPlayers[gUnknown_030033EC].hqY & 0x7f);
         else
-            sub_08022AAC(*(s16 *)(gUnknown_08499590 + 4) / 16 + 7,
-                         *(s16 *)(gUnknown_08499590 + 6) / 16 + 4);
-        gUnknown_08499598[gUnknown_030033EC].unk2f = gUnknown_030033E4.unk00;
-        gUnknown_08499598[gUnknown_030033EC].unk30 = gUnknown_030033E4.unk02;
+            sub_08022AAC(gMap->scrollX / 16 + 7,
+                         gMap->scrollY / 16 + 4);
+        gPlayers[gUnknown_030033EC].cursorX = gUnknown_030033E4.unk00;
+        gPlayers[gUnknown_030033EC].cursorY = gUnknown_030033E4.unk02;
     }
-    sub_08022AAC(gUnknown_08499598[gUnknown_030033EC].unk2f,
-                 gUnknown_08499598[gUnknown_030033EC].unk30);
+    sub_08022AAC(gPlayers[gUnknown_030033EC].cursorX,
+                 gPlayers[gUnknown_030033EC].cursorY);
 }

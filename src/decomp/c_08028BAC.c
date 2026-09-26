@@ -17,7 +17,7 @@
  * of the body, before the first `bl`, is what forces that spelling rather than
  * `buf[i] = (a && b && ...)`. The five predicates take three DIFFERENT widths
  * and every narrowing comes from the declared prototype, not from a cast here:
- * `lsls/lsrs #0x18` for sub_080266DC's u8, ONE `lsls/lsrs #0x10` pair CSEd
+ * `lsls/lsrs #0x18` for IsPlayerAliveAndActive's u8, ONE `lsls/lsrs #0x10` pair CSEd
  * across all three u16 predicates (r4), and a bare `adds r0,r5,#0` for
  * sub_080289BC's int. Flattening them to one width loses the r4 reuse.
  *
@@ -28,7 +28,7 @@
  * i and j are all `int`: bare `adds #1` and a signed `ble` with no narrowing
  * anywhere. r6 = i << 16 in pass 2 and the two walking `* 0x3c` offsets in
  * pass 3 (r2, r8) are strength_reduce givs and LICM hoists, not source --
- * pass 3 is written with the ordinary gUnknown_08499598[i] subscript.
+ * pass 3 is written with the ordinary gPlayers[i] subscript.
  *
  * sub_08026F28 had no declaration before this function; added to
  * include/unknown-functions.h from the promoted src/decomp/c_08026F28.c. An
@@ -46,12 +46,12 @@ u8 sub_08028BAC(void)
     {
         buf[i] = 0;
 
-        if (sub_080266DC(i) && sub_08028904(i) && sub_080289BC(i)
+        if (IsPlayerAliveAndActive(i) && sub_08028904(i) && sub_080289BC(i)
          && sub_08028990(i) && sub_08028944(i))
             buf[i] = 1;
     }
 
-    if (gUnknown_03003FC0.unk04 & 4)
+    if (gPlaySt.event20 & 4)
     {
         for (i = 1; i <= 4; i++)
         {
@@ -59,7 +59,7 @@ u8 sub_08028BAC(void)
             {
                 for (j = 1; j <= 4; j++)
                 {
-                    if (i != j && sub_080266DC(j) && sub_08026F28(i, j) && !buf[j])
+                    if (i != j && IsPlayerAliveAndActive(j) && sub_08026F28(i, j) && !buf[j])
                     {
                         buf[i] = 0;
                         sub_0802C154(i);
@@ -78,7 +78,7 @@ u8 sub_08028BAC(void)
             for (j = 1; j <= 4; j++)
             {
                 if (i != j && buf[j]
-                 && gUnknown_08499598[i].unk2a != gUnknown_08499598[j].unk2a)
+                 && gPlayers[i].team != gPlayers[j].team)
                     count++;
             }
 

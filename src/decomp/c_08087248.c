@@ -11,7 +11,7 @@ int sub_08087248(void)
 {
     int y;
 
-    if (gUnknown_03003FC0.unk01 == 2)
+    if (gPlaySt.gameMode == 2)
     {
         y = (int)(gUnknown_03005918 * 4) >> 1;
         if (y + 0xab > 0xf0)

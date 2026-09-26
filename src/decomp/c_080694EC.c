@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080694EC.
  * sub_080694EC @ 0x080694EC
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -15,7 +19,7 @@ struct Unk694ECProc
     /* 0x2c */ int unk2c;
 };
 
-void sub_080694EC(struct Unk694ECProc *proc)
+void IntroT3_IDLE_080694ED(struct Unk694ECProc *proc)
 {
     int i;
 
@@ -57,9 +61,9 @@ void sub_080694EC(struct Unk694ECProc *proc)
         sub_08012C48((struct Unk8012C30 *)&gUnknown_03002B6C, 2);
         sub_08012C1C((struct Unk8012C30 *)&gUnknown_03002B6C, 0x0600D000);
         Decompress(gUnknown_08183CA8, (void *)0x06004800);
-        Decompress(gUnknown_08184A74, gUnknown_08499578);
+        Decompress(gUnknown_08184A74, gBG0TilemapBuffer);
         for (i = 0; i < 0x400; i++)
-            gUnknown_08499578[i] += 0x140;
+            gBG0TilemapBuffer[i] += 0x140;
         sub_08013AEC();
         break;
 
@@ -77,3 +81,5 @@ void sub_080694EC(struct Unk694ECProc *proc)
     else
         Proc_Break(proc);
 }
+
+asm(".global sub_080694EC\n.thumb_set sub_080694EC, IntroT3_IDLE_080694ED\n");

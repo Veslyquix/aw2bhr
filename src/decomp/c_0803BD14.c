@@ -19,7 +19,7 @@ int sub_0803BD14(void)
 
     for (i = 0; i < 4; i++)
     {
-        if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk3c[i] != 0xff)
+        if (gUnknown_085C77A0[gPlaySt.mapID].unk3c[i] != 0xff)
             break;
     }
 

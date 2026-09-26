@@ -5,9 +5,13 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08085AF4.
  * sub_08085AF4 @ 0x08085AF4
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
-void sub_08085AF4(void)
+void MainMenu_08085AF5(void)
 {
     u8 *base;
     u8 *p;
@@ -37,3 +41,5 @@ void sub_08085AF4(void)
     gUnknown_03005980 = z;
     gUnknown_03005930 = z;
 }
+
+asm(".global sub_08085AF4\n.thumb_set sub_08085AF4, MainMenu_08085AF5\n");

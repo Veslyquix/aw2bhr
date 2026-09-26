@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080849C8.
  * sub_080849C8 @ 0x080849C8
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -27,8 +31,8 @@
  *
  * SETTLED (each read out of baserom.gba, and all four are -fforce-addr pool
  * words, NOT objects -- do not declare a gUnknown_081D93xx for any of them):
- *   0x081D93DC -> 0x08499598  gUnknown_08499598 (already `struct Unk08499598 *`)
- *   0x081D93E0 -> 0x03003FC0  gUnknown_03003FC0
+ *   0x081D93DC -> 0x08499598  gPlayers (already `struct PlayerStruct *`)
+ *   0x081D93E0 -> 0x03003FC0  gPlaySt
  *   0x081D93E4 -> 0x08616BE4  the Proc_Start script
  *   0x081D93E8 -> 0x08043591  sub_08043590, THUMB bit set
  * The loop's `+0x56` off a 0x3c-stride element is `[i + 1].unk1a`, i.e. armies
@@ -37,14 +41,14 @@
  * RULED OUT by compile_probe: binding the script and the function pointer to
  * locals before the loop. It does move `parent` out of r7 -- but into sl, with
  * a THIRD high register saved -- and, worse, it DEFEATS -fforce-addr: agbcc
- * then emits plain `.word gUnknown_08616BE4` / `.word sub_08043590` pool words
+ * then emits plain `.word ProcScr_CoInfo` / `.word sub_08043590` pool words
  * where the ROM has the double indirection through 0x081D93E4/E8. The naming-
  * the-symbol-directly spelling below is the one that reproduces those.
  * NOT tried: decomp-permuter. This is exactly its case (same instructions,
  * same order, wrong registers) and is the first thing to try on this function.
  */
 
-void sub_080849C8(ProcPtr parent)
+void StartCoInfoScreen_080849C9(ProcPtr parent)
 {
     int i;
     register ProcPtr savedParent asm("r9") = parent;
@@ -54,12 +58,12 @@ void sub_080849C8(ProcPtr parent)
     sub_08078D80(savedParent);
     sub_08085950(0, gUnknown_030033EC);
     sub_0802D5A0((void *)(gUnknown_030030B4.bits.chr_block * 0x4000 + 0x06006C00),
-                 gUnknown_08616B1C[gUnknown_08499598[gUnknown_030033EC].unk1a], 0);
+                 gUnknown_08616B1C[gPlayers[gUnknown_030033EC].teamColor], 0);
     sub_080858C0();
-    sub_08043BA4(gUnknown_08499598[gUnknown_030033EC].unk1d, 0xB6 * 2, 5);
-    sub_08043FA8(gUnknown_08499598[gUnknown_030033EC].unk1d, (void *)0x06015700, 0x16);
+    sub_08043BA4(gPlayers[gUnknown_030033EC].co, 0xB6 * 2, 5);
+    sub_08043FA8(gPlayers[gUnknown_030033EC].co, (void *)0x06015700, 0x16);
     sub_08043B44(8);
-    sub_08043B14(gUnknown_08499598[gUnknown_030033EC].unk1d, 0xAB * 4);
+    sub_08043B14(gPlayers[gUnknown_030033EC].co, 0xAB * 4);
     sub_0801F114();
     sub_0801F150(0, (void *)0x06010000, 0xB1 * 4, 0x12);
     sub_0801F150(1, (void *)0x06010000, 0xB3 * 4, 0x13);
@@ -68,10 +72,10 @@ void sub_080849C8(ProcPtr parent)
     sub_0801F234(0x14);
 
     for (i = 0;
-         i < (gUnknown_03003FC0.unk01 == 2 ? sub_0802490C(gUnknown_03003FC0.unk02)
+         i < (gPlaySt.gameMode == 2 ? sub_0802490C(gPlaySt.mapID)
                                            : sub_080248F8());
          i++)
-        sub_0801F234(gUnknown_08499598[i + 1].unk1a + 0x3D);
+        sub_0801F234(gPlayers[i + 1].teamColor + 0x3D);
 
     sub_0801F234(0x9B);
     sub_0801F234(0x9C);
@@ -100,6 +104,8 @@ void sub_080849C8(ProcPtr parent)
     sub_0801F234(0x67);
     sub_0801F234(0x92);
 
-    Proc_Start(gUnknown_08616BE4, savedParent);
+    Proc_Start(ProcScr_CoInfo, savedParent);
     sub_08011B34((void *)sub_08043590);
 }
+
+asm(".global sub_080849C8\n.thumb_set sub_080849C8, StartCoInfoScreen_080849C9\n");

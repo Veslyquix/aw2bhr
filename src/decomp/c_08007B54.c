@@ -17,5 +17,5 @@
  * displacement because strb's imm5 stops at 31. */
 void sub_08007B54(void)
 {
-    gUnknown_0200B0B0->unk6b = sub_080152C0((s32)gUnknown_08488890, 0);
+    gActiveMap->spriteId = sub_080152C0((s32)gUnknown_08488890, 0);
 }

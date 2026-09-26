@@ -18,10 +18,10 @@ void sub_0803AAC0(u8 a1, u8 a2, u8 a3, s8 a4)
 
     x = (a2 >> 1) * 2;
     t = a3 + 0xac;
-    sub_0801F34C(x + t,
+    DrawOamObject(x + t,
                  gUnknown_0849D89C->unk00 + gUnknown_0849E2F8[a1 * 2] + 1,
                  gUnknown_0849E2F8[a1 * 2 + 1], 0, 0);
-    sub_0801F34C(a2 + 0xb2,
+    DrawOamObject(a2 + 0xb2,
                  gUnknown_0849D89C->unk00 + gUnknown_0849E2F8[a1 * 2] + 1,
                  gUnknown_0849E2F8[a1 * 2 + 1], 0, 0);
 }

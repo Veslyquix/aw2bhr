@@ -11,10 +11,10 @@
 
 void sub_0808A638(void)
 {
-    Proc_Start(gUnknown_08616DFC, PROC_TREE_3);
+    Proc_Start(ProcScr_CoDesignC1, PROC_TREE_3);
 }
 
 int sub_0808A64C(void)
 {
-    return Proc_Find(gUnknown_08616DFC) != 0;
+    return Proc_Find(ProcScr_CoDesignC1) != 0;
 }

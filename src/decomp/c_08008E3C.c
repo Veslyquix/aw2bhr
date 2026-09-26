@@ -1,26 +1,20 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08008E3C.
- * sub_08008E3C @ 0x08008E3C, sub_08008F6C @ 0x08008F6C
+ * sub_08008E3C @ 0x08008E3C, MakeBridge @ 0x08008F6C
  */
 
-struct Map08008E3C
-{
-    u8 filler[0x417A];
-    u16 rowOffset[1];
-};
-
-/* MATCHED in wave 67 (304/304).  The local aggregate view is load-bearing:
- * member indexing expands y * 2 before the +0x417A base is formed, while the
- * separate rows pointer preserves the later reuse.  Promotion also needs the
- * ROM pool word at 0x0808D80C. */
+/* MATCHED in wave 67 (304/304). The struct Map rowOffset member index expands
+ * y * 2 before the rowOffset base is formed, while the separate rows pointer
+ * preserves the later reuse. */
 
 void sub_08008E3C(int x, int y)
 {
-    u8 *p;
+    struct Map *p;
     u16 *rows;
     u8 *tiles;
     int row;
@@ -31,11 +25,11 @@ void sub_08008E3C(int x, int y)
     if (sub_08008CB8(x, y))
         return;
 
-    p = gUnknown_08499590;
-    row = ((struct Map08008E3C *)p)->rowOffset[y];
-    rows = (u16 *)(p + 0x417A);
+    p = gMap;
+    row = p->rowOffset[y];
+    rows = p->rowOffset;
     off = (row + x) * 2;
-    tiles = p + 0xA22;
+    tiles = (u8 *)p->tile;
     v = *(u16 *)(tiles + off);
 
     if (v == 0x13)
@@ -47,30 +41,30 @@ void sub_08008E3C(int x, int y)
 
             if (*(u16 *)(tiles + off) == 0x13)
             {
-                sub_08001158(x, y, 0x16);
-                sub_08001158(x, n, 0x16);
+                MakeTileSimple(x, y, 0x16);
+                MakeTileSimple(x, n, 0x16);
             }
         }
 
-        if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+        if (y < gMap->height - 1)
         {
-            u8 *q;
+            struct Map *q;
             u8 *qrows;
             u8 *qtiles;
             int qt;
             int qoff;
 
             n = y + 1;
-            q = gUnknown_08499590;
+            q = gMap;
             qt = n * 2;
-            qrows = q + 0x417A;
+            qrows = (u8 *)q->rowOffset;
             qoff = (*(u16 *)(qrows + qt) + x) * 2;
-            qtiles = q + 0xA22;
+            qtiles = (u8 *)q->tile;
 
             if (*(u16 *)(qtiles + qoff) == 0x13)
             {
-                sub_08001158(x, y, 0x16);
-                sub_08001158(x, n, 0x16);
+                MakeTileSimple(x, y, 0x16);
+                MakeTileSimple(x, n, 0x16);
             }
         }
     }
@@ -84,52 +78,49 @@ void sub_08008E3C(int x, int y)
 
             if (*(u16 *)(tiles + off) == 0x16)
             {
-                sub_08001158(x, y, 0x13);
-                sub_08001158(x - 1, y, 0x13);
+                MakeTileSimple(x, y, 0x13);
+                MakeTileSimple(x - 1, y, 0x13);
             }
         }
 
-        if (x < *(u16 *)gUnknown_08499590 - 1)
+        if (x < gMap->width - 1)
         {
-            u8 *q;
+            struct Map *q;
             u8 *qrows;
             u8 *qtiles;
             int qoff;
 
-            q = gUnknown_08499590;
-            qrows = q + 0x417A;
+            q = gMap;
+            qrows = (u8 *)q->rowOffset;
             qoff = (*(u16 *)(qrows + y * 2) + (x + 1)) * 2;
-            qtiles = q + 0xA22;
+            qtiles = (u8 *)q->tile;
 
             if (*(u16 *)(qtiles + qoff) == 0x16)
             {
-                sub_08001158(x, y, 0x13);
-                sub_08001158(x + 1, y, 0x13);
+                MakeTileSimple(x, y, 0x13);
+                MakeTileSimple(x + 1, y, 0x13);
             }
         }
     }
 }
 
-/* MATCHED, wave 66.  The local struct view is load-bearing: direct member
- * indexing expands y * 2 before materialising the +0x417A member base, while
- * the following flat `rows` binding lets CSE retain that base in ip.  The old
- * flat `rows[y]` spelling emitted the same operations in the opposite order
- * and differed by nine bytes.  Promotion needs the pool word at 0x0808D80C. */
+/* MATCHED, wave 66. The typed gMap spelling is byte-exact here as long as the
+ * rowOffset/terrain byte-pointer locals stay scoped per use. */
 
-void sub_08008F6C(int x, int y)
+void MakeBridge(int x, int y)
 {
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
     int t;
     int idx;
     int cell;
 
-    p = gUnknown_08499590;
+    p = gMap;
     t = y * 2;
-    rows = p + 0x417A;
+    rows = (u8 *)p->rowOffset;
     idx = *(u16 *)(rows + t) + x;
-    cells = p + 0x1432;
+    cells = p->terrain;
     cell = *(cells + idx);
 
     if (cell == 7 || cell == 0xD || cell == 0x13)
@@ -150,9 +141,9 @@ void sub_08008F6C(int x, int y)
         case 9:
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x36);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x36);
             sub_08007F9C(x, y);
             break;
 
@@ -171,9 +162,9 @@ void sub_08008F6C(int x, int y)
         }
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x36);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x36);
             sub_08007F9C(x, y);
             break;
 
@@ -181,9 +172,9 @@ void sub_08008F6C(int x, int y)
         case 13:
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x36);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x36);
             sub_08007F9C(x, y);
             break;
 
@@ -193,9 +184,9 @@ void sub_08008F6C(int x, int y)
         tile14:
             sub_0800C608(x, y);
             if (cell == 0xD)
-                sub_08007CA0(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, 0x14);
+                MakeSeaSafest(x, y);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, 0x14);
             sub_08007F9C(x, y);
             break;
 
@@ -212,7 +203,7 @@ void sub_08008F6C(int x, int y)
             if (cell == 0xD)
             {
                 sub_0800C608(x, y);
-                sub_08007CA0(x, y);
+                MakeSeaSafest(x, y);
             }
 
             k = sub_08008D70(x, y);
@@ -220,8 +211,8 @@ void sub_08008F6C(int x, int y)
             if (k > 0)
             {
                 sub_0800C608(x, y);
-                sub_080011F4(x, y, 0xC);
-                sub_08001158(x, y, k);
+                SetTerrainAt(x, y, 0xC);
+                MakeTileSimple(x, y, k);
             }
             break;
         }
@@ -248,35 +239,35 @@ void sub_08008F6C(int x, int y)
 
             if (x > 0)
             {
-                u8 *q;
+                struct Map *q;
                 u8 *qrows;
                 u8 *qcells;
                 int qt;
                 int qidx;
 
-                q = gUnknown_08499590;
+                q = gMap;
                 qt = y * 2;
-                qrows = q + 0x417A;
+                qrows = (u8 *)q->rowOffset;
                 qidx = *(u16 *)(qrows + qt) + (x - 1);
-                qcells = q + 0x1432;
+                qcells = q->terrain;
 
                 if (*(qcells + qidx) == 0xC)
                     goto set13;
             }
 
-            if (x < *(u16 *)gUnknown_08499590 - 1)
+            if (x < gMap->width - 1)
             {
-                u8 *q;
+                struct Map *q;
                 u8 *qrows;
                 u8 *qcells;
                 int qt;
                 int qidx;
 
-                q = gUnknown_08499590;
+                q = gMap;
                 qt = y * 2;
-                qrows = q + 0x417A;
+                qrows = (u8 *)q->rowOffset;
                 qidx = *(u16 *)(qrows + qt) + (x + 1);
-                qcells = q + 0x1432;
+                qcells = q->terrain;
 
                 if (*(qcells + qidx) == 0xC)
                     goto set13;
@@ -299,39 +290,39 @@ void sub_08008F6C(int x, int y)
 
             if (y > 0)
             {
-                u8 *q;
+                struct Map *q;
                 u8 *qrows;
                 u8 *qcells;
                 int n;
                 int qt;
                 int qidx;
 
-                q = gUnknown_08499590;
+                q = gMap;
                 n = y - 1;
                 qt = n * 2;
-                qrows = q + 0x417A;
+                qrows = (u8 *)q->rowOffset;
                 qidx = *(u16 *)(qrows + qt) + x;
-                qcells = q + 0x1432;
+                qcells = q->terrain;
 
                 if (*(qcells + qidx) == 0xC)
                     goto set16;
             }
 
-            if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+            if (y < gMap->height - 1)
             {
-                u8 *q;
+                struct Map *q;
                 u8 *qrows;
                 u8 *qcells;
                 int n;
                 int qt;
                 int qidx;
 
-                q = gUnknown_08499590;
+                q = gMap;
                 n = y + 1;
                 qt = n * 2;
-                qrows = q + 0x417A;
+                qrows = (u8 *)q->rowOffset;
                 qidx = *(u16 *)(qrows + qt) + x;
-                qcells = q + 0x1432;
+                qcells = q->terrain;
 
                 if (*(qcells + qidx) == 0xC)
                     goto set16;
@@ -346,11 +337,13 @@ void sub_08008F6C(int x, int y)
         if (v > 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, v);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, v);
         }
     }
 }
+
+asm(".global sub_08008F6C\n.thumb_set sub_08008F6C, MakeBridge\n");
 
 /* MATCHED, wave 66. The missing 12 bytes were the two inner predicates, not
  * duplicated repaint bodies. Each predicate is a three-case switch: agbcc's

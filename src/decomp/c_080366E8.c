@@ -14,7 +14,9 @@
  * sub_080366E8 @ 0x080366E8
  */
 
-void (*sub_080366E8(void))(void)
+void (*GetVBlankCallback(void))(void)
 {
     return gUnknown_030040D0;
 }
+
+asm(".global sub_080366E8\n.thumb_set sub_080366E8, GetVBlankCallback\n");

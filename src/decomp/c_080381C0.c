@@ -10,8 +10,8 @@
 /* MATCHED byte-for-byte (wave 43, W43-E).
  *
  * NEEDS ITS .rodata POOL WORD PLACED: "rodata": ["0x08090EFC"]. That ROM word
- * holds 0x08499598, i.e. &gUnknown_08499598, so it is agbcc's own -fforce-addr
- * address constant and not a global. The honest `gUnknown_08499598[i]`
+ * holds 0x08499598, i.e. &gPlayers, so it is agbcc's own -fforce-addr
+ * address constant and not a global. The honest `gPlayers[i]`
  * subscript emits the full three-level chain (`ldr rA,=<pool>; ldr rB,[rA];
  * ldr rC,[rB]`) by itself -- see the note above the declaration in
  * include/unknown-globals.h. trymatch reports only `relocs: name different
@@ -19,13 +19,13 @@
  *
  * The else arm's spelling is load-bearing and cost this function its one miss.
  * The ROM has ONE `movs r0,#0` block, at the end of the `unk01 == 3` path and
- * before the literal pool, which the sub_0803861C path reaches by branching
+ * before the literal pool, which the IsPlayer1TeamAlive path reaches by branching
  * BACKWARDS into it (`beq _08038220`). Writing that arm as
- * `else if (sub_0803861C() == 0) return 0;` emits a `bne` to the return-1 tail
+ * `else if (IsPlayer1TeamAlive() == 0) return 0;` emits a `bne` to the return-1 tail
  * plus a SECOND copy of the return-0 block: +4 bytes, 89.1%. Writing it as
  * `if (...) return 1; return 0;` -- the early return spelled with the value
  * the fall-through does NOT use -- makes agbcc invert the branch, and the
- * duplicate block cross-jumps into the shared one. Same rule as sub_0803861C
+ * duplicate block cross-jumps into the shared one. Same rule as IsPlayer1TeamAlive
  * in this block; see docs/agbcc-codegen.md.
  *
  * `buf` is 5 bytes, not 4: the frame is `sub sp, #8` and agbcc rounds to the
@@ -49,7 +49,7 @@
  * literal), and re-verified as still MATCHED after the change.
  *
  * W43-E re-verified this independently and found the CONTROL PAIR that settles
- * it, inside that one caller: sub_08038240 calls sub_0803866C at 0x08038302 and
+ * it, inside that one caller: sub_08038240 calls IsHardCampaignMode at 0x08038302 and
  * sub_080381C0 at 0x0803830E, sixteen bytes apart, and truth-tests both results
  * directly with no intervening local. The first is `cmp r0,#0` with NO shift
  * and is declared `int`; the second is `lsls r0,#0x18; cmp r0,#0`. Same
@@ -62,25 +62,25 @@ bool8 sub_080381C0(void)
     u8 n;
     u8 i;
 
-    if (gUnknown_03003FC0.unk32 == 0)
+    if (gPlaySt.savingEnabled == 0)
     {
-        if (gUnknown_03003FC0.unk01 == 3)
+        if (gPlaySt.gameMode == 3)
         {
             n = 0;
             for (i = 1; i <= 4; i++)
             {
-                if (gUnknown_08499598[i].unk1b == 1)
+                if (gPlayers[i].aiControlled == 1)
                 {
                     buf[n] = i;
                     n++;
                 }
             }
-            if (n == 1 && gUnknown_08499598[buf[0]].unk31 == 1)
+            if (n == 1 && gPlayers[buf[0]].unk31 == 1)
                 return 0;
         }
         else
         {
-            if (sub_0803861C() != 0)
+            if (IsPlayer1TeamAlive() != 0)
                 return 1;
             return 0;
         }
@@ -89,17 +89,17 @@ bool8 sub_080381C0(void)
 }
 
 /* Per-map setup: registers the two slot callbacks, clears gUnknown_0202FDEC,
- * then partitions armies 1..4 into its two 4-entry lists on sub_080266DC's
+ * then partitions armies 1..4 into its two 4-entry lists on IsPlayerAliveAndActive's
  * predicate before publishing the funds figure and the turn limit.
  *
  * TWO -fforce-addr pool words, and they must stay in this order: 0x08090F00
- * holds &gUnknown_0202FDEC and 0x08090F04 holds &gUnknown_08499598. Both are
+ * holds &gUnknown_0202FDEC and 0x08090F04 holds &gPlayers. Both are
  * agbcc's own address constants, so the honest spelling emits them and the
  * promotion carries "rodata": ["0x08090F00", "0x08090F04"].
  *
  * THE LAST `if` IS WRITTEN INVERTED ON PURPOSE. The ROM branches `bne` to the
- * sub_080176C0 block and reaches sub_0803BD60 by falling through, so the
- * sub_0803BD60 arm has to be the THEN arm in the source; spelling it the
+ * sub_080176C0 block and reaches UnlockMainMenu by falling through, so the
+ * UnlockMainMenu arm has to be the THEN arm in the source; spelling it the
  * natural way round emits the same instructions in the opposite order. Same
  * lever W43-E recorded on sub_080381C0 in this block.
  *
@@ -112,7 +112,7 @@ void sub_08038240(void)
 {
     int i;
 
-    sub_0803BD54();
+    LockMainMenu();
     sub_080366D0(sub_08036884);
     sub_080366C4(sub_080368E8);
     sub_08011B18();
@@ -128,9 +128,9 @@ void sub_08038240(void)
 
     for (i = 1; i <= 4; i++)
     {
-        if (gUnknown_08499598[i].unk1b)
+        if (gPlayers[i].aiControlled)
         {
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
             {
                 if (gUnknown_0202FDEC.unk08 > 3)
                     break;
@@ -149,20 +149,20 @@ void sub_08038240(void)
 
     gUnknown_0202FDEC.unk0c = gUnknown_0200C420.unk00;
 
-    if (gUnknown_03003FC0.unk01 == 3)
+    if (gPlaySt.gameMode == 3)
     {
         gUnknown_0202FDEC.unk0a = 0;
     }
     else
     {
-        gUnknown_0202FDEC.unk0a = gUnknown_08499598[sub_0807A908()].unk38;
+        gUnknown_0202FDEC.unk0a = gPlayers[sub_0807A908()].totalScore;
 
-        if (sub_0803866C())
+        if (IsHardCampaignMode())
             gUnknown_0202FDEC.unk0a = gUnknown_0202FDEC.unk0a * 2;
     }
 
     if (!sub_080381C0())
-        sub_0803BD60();
+        UnlockMainMenu();
     else
         sub_080176C0(gUnknown_0202FDEC.unk0a);
 }

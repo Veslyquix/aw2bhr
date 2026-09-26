@@ -41,14 +41,14 @@ void sub_080228D8(struct Unk80228D8Proc *proc)
     {
         u32 i;
 
-        i = ((u32)gUnknown_03004008 >> 2) % 15;
+        i = ((u32)gGameClock >> 2) % 15;
         sub_08013664((u16 *)(i * 2 + (u32)gUnknown_08091C9E), 0x102, 0x1e);
     }
     else
     {
         u32 i;
 
-        i = ((u32)gUnknown_03004008 >> 2) % 15;
+        i = ((u32)gGameClock >> 2) % 15;
         sub_08013664((u16 *)(i * 2 + (u32)gUnknown_08091C5E), 0x102, 0x1e);
     }
 }

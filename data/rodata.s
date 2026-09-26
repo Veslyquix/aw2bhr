@@ -683,3 +683,11 @@ gUnknown_0808F08C:  @ 0x0808F08C
 	.global gUnknown_0808F090
 gUnknown_0808F090:  @ 0x0808F090
 	.incbin "baserom.gba", 0x8F090, 0x4    @ 0x8F094 - 0x8F090
+
+	.global gUnknown_0808F094
+gUnknown_0808F094:  @ 0x0808F094
+	.incbin "baserom.gba", 0x8F094, 0x4    @ 0x8F098 - 0x8F094
+
+	.global gUnknown_0808F098
+gUnknown_0808F098:  @ 0x0808F098
+	.incbin "baserom.gba", 0x8F098, 0x4    @ 0x8F09C - 0x8F098

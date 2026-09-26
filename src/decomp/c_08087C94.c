@@ -5,13 +5,17 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08087C94.
  * sub_08087C94 @ 0x08087C94
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08087C94.
- * sub_08087C94 @ 0x08087C94
+ * CoDesignC1_08087C95 @ 0x08087C94
  */
 
 #include "proc.h"
@@ -53,7 +57,7 @@ struct Unk87C94Proc
  *
  * sub_0807898C's ProcPtr parameter: see work/sub_0808A6CC/sub_0808A6CC.c. Here
  * it is invisible, because r0 already holds proc at the call. */
-void sub_08087C94(struct Unk87C94Proc *proc)
+void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
 {
     int i;
     u16 zero;
@@ -89,10 +93,10 @@ void sub_08087C94(struct Unk87C94Proc *proc)
 
     Decompress(gUnknown_0823A3D4,
         (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06000000));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
 
     for (i = 0; i < 0x400; i++)
-        gUnknown_08499584[i] += 0x2000;
+        gBG3TilemapBuffer[i] += 0x2000;
 
     ApplyPaletteExt(gUnknown_0823BE20, 0x40, 0x20);
     sub_08013B1C();
@@ -104,7 +108,7 @@ void sub_08087C94(struct Unk87C94Proc *proc)
            0x01000800);
     Decompress(gUnknown_0823468C,
         (void *)(gUnknown_03001FE8.bits.chr_block * 0x4000 + 0x06000000));
-    Decompress(gUnknown_0823456C, gUnknown_0849957C);
+    Decompress(gUnknown_0823456C, gBG1TilemapBuffer);
     sub_08013AFC();
     sub_0802D5CC(0, 0);
 
@@ -151,5 +155,22 @@ void sub_08087C94(struct Unk87C94Proc *proc)
     sub_0801F234(0x8a);
     sub_0801F234(0x8b);
 
-    Proc_Start(gUnknown_08616EFC, proc);
+    Proc_Start(ProcScr_PutFace, proc);
 }
+
+asm(".global sub_08087C94\n.thumb_set sub_08087C94, CoDesignC1_08087C95\n");
+
+extern void CoDesignC1_08088005(void);
+extern void CoDesignC1_IDLE_08088041(void);
+
+struct ProcCmd CONST_DATA ProcScr_CoDesignC1[] =
+{
+    PROC_1D(30),
+    PROC_CALL(CoDesignC1_08087C95),
+    PROC_1E(30),
+    PROC_CALL(CoDesignC1_08088005),
+    PROC_REPEAT(CoDesignC1_IDLE_08088041),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616DFC\n.set gUnknown_08616DFC, ProcScr_CoDesignC1\n");

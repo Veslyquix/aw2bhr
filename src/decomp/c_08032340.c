@@ -27,11 +27,11 @@ void sub_08032340(ProcPtr procArg, s16 a, s16 b)
     y = v;
     x = gUnknown_0849B108[proc->unk58 * 2] + 0x48;
 
-    sub_0801F34C(0x50, y + x,
+    DrawOamObject(0x50, y + x,
         gUnknown_0849B108[proc->unk58 * 2 + 1] + 0x58,
         0, 0);
 
-    sub_0801F34C(0x50,
+    DrawOamObject(0x50,
         (y - gUnknown_0849B108[proc->unk58 * 2] + 0x78) | 0x3000,
         0x3c - gUnknown_0849B108[proc->unk58 * 2 + 1],
         0, 0);

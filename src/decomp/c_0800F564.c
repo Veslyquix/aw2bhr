@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -11,11 +12,9 @@
  * 0 = off the map or not a road tile, 1 = road, 2 = road that continues along
  * `dir`, 3 = road that continues on the perpendicular axis.
  *
- * The row offset is loaded into `off` on its own line before `nx` is computed.
- * That is forced: folding the load into `off = (*(u16 *)(rows + t) + nx) * 2`
- * hoists the whole of `nx` above the `ldrh`, and dropping `rows` reassociates
- * `p + 0x417A + t` into `(t + p) + 0x417A`. Only this split reproduces
- * `lsls; ldr =0x417A; adds; adds; ldrh`.
+ * The row offset is loaded into `off` on its own line before `nx` is computed;
+ * folding the load into the tile index hoists the whole of `nx` above the
+ * `ldrh` and changes the instruction order.
  *
  * The first `||` chain starts with 0x142, 0x143 because that pair is the only
  * one agbcc folds into a range (`tile - 0x142 <= 1u`): `fold` merges two
@@ -30,28 +29,22 @@
  * copies survive in the ROM rather than one or four. */
 int sub_0800F564(int x, int y, int dir)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
+    struct Map *map;
     int nx;
     int ny;
-    int t;
     int off;
     int tile;
     int result;
 
-    p = gUnknown_08499590;
+    map = gMap;
     ny = y + gUnknown_08488954[dir];
-    t = ny * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t);
+    off = map->rowOffset[ny];
     nx = x + gUnknown_0848894C[dir];
-    off = (off + nx) * 2;
-    tiles = p + 0xA22;
-    tile = *(u16 *)(tiles + off);
+    off = off + nx;
+    tile = map->tile[off];
     result = 0;
 
-    if (nx >= 0 && nx < *(u16 *)p && ny >= 0 && ny < *(u16 *)(p + 2))
+    if (nx >= 0 && nx < map->width && ny >= 0 && ny < map->height)
     {
         if (tile == 0x142 || tile == 0x143 || tile == 0x140 || tile == 0x141
             || tile == 0x160 || tile == 0x161 || tile == 0x162 || tile == 0x163

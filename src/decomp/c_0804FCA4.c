@@ -23,13 +23,13 @@ void sub_0804FCA4(void)
     w = sub_0804BDD8(c, e, gUnknown_03001FBC);
     if (t == 0x1B)
     {
-        sub_0803B48C(gUnknown_085D6C88[gUnknown_03004580[c][1]].unk0c[1]
+        PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[c][1]].unk0c[1]
                                       [gUnknown_020296B0[c].unk1a & 1]);
         gUnknown_020296B0[c].unk1a++;
     }
     if (t == 0x1C)
     {
-        sub_0803B48C(gUnknown_085D6C88[gUnknown_03004580[c][1]]
+        PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[c][1]]
                                       .unk0c[gUnknown_03004580[c][2] - 1]
                                       [gUnknown_020296B0[c].unk1a & 1]);
         gUnknown_020296B0[c].unk1a++;

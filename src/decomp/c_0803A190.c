@@ -18,7 +18,7 @@ struct Unk0803A190Tbl
     void *unk14[1];
 };
 
-void sub_0803A190(int a1, struct Unk08499594 *a2)
+void sub_0803A190(int a1, struct Unit *a2)
 {
   u8 v;
   u8 new_var2;
@@ -28,22 +28,22 @@ void sub_0803A190(int a1, struct Unk08499594 *a2)
   s16 x;
   s16 y;
   v = a1;
-  new_var2 = gUnknown_08499598[gUnknown_0849D89C->unk08].unk1a;
+  new_var2 = gPlayers[gUnknown_0849D89C->unk08].teamColor;
   n = new_var2;
   n = n - 1;
   k = sub_08042DE0(gUnknown_0849D89C->unk08) - 1;
-  new_var = ((struct Unk0803A190Tbl *) gUnknown_0849DC18)->unk14[(a2->unk00 * 15) + k];
+  new_var = ((struct Unk0803A190Tbl *) gUnknown_0849DC18)->unk14[(a2->type * 15) + k];
   Decompress(new_var, gUnknown_0200FD50);
   sub_08011AAC((void *) sub_0803A174);
-  ApplyPaletteExt(gUnknown_08555D30[a2->unk00 - 1][n], 0x260, 0x40);
+  ApplyPaletteExt(gUnknown_08555D30[a2->type - 1][n], 0x260, 0x40);
   for (y = 0; y < 20; y++)
   {
     for (x = 0; x < 15; x++)
     {
-      gUnknown_08499578[((y * 32) + (v / 8)) + x] = 0;
+      gBG0TilemapBuffer[((y * 32) + (v / 8)) + x] = 0;
     }
   }
 
-  sub_08014B0C((u8)((v + 0x60) / 8), 1, gUnknown_08499578, sub_08042D1C(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
-  sub_08014B0C((u8)((v + 0x60) / 8), 3, gUnknown_08499578, sub_08042D84(gUnknown_0849D89C->unk08, a2->unk00), 0x8000, 0);
+  sub_08014B0C((u8)((v + 0x60) / 8), 1, gBG0TilemapBuffer, GetUnitMovementWithCoBonus(gUnknown_0849D89C->unk08, a2->type), 0x8000, 0);
+  sub_08014B0C((u8)((v + 0x60) / 8), 3, gBG0TilemapBuffer, GetUnitVisionWithCoBonus(gUnknown_0849D89C->unk08, a2->type), 0x8000, 0);
 }

@@ -12,12 +12,12 @@
 
 void sub_0807BA3C(void)
 {
-    if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk58 == 3)
+    if (gUnknown_085C77A0[gPlaySt.mapID].unk58 == 3)
         sub_0803B524(0x195);
 }
 
 void sub_0807BA68(ProcPtr proc)
 {
-    if (gpKeySt->held & 8)
+    if (gpKeySt->pressed & 8)
         Proc_Start(gUnknown_08616570, proc);
 }

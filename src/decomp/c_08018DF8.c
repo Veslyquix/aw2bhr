@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -26,7 +27,7 @@ void sub_08018DF8(struct Unk0200C528 *slot)
     struct Unk0200C528Node *p;
 
     p = (struct Unk0200C528Node *)slot->unk14;
-    sub_08043418((s16)p->unk08 - *(s16 *)(gUnknown_08499590 + 4),
-                 (s16)p->unk0a - *(s16 *)(gUnknown_08499590 + 6),
+    sub_08043418((s16)p->unk08 - gMap->scrollX,
+                 (s16)p->unk0a - gMap->scrollY,
                  p->unk0c);
 }

@@ -16,8 +16,8 @@
 
 void sub_080215B8(void)
 {
-    sub_080219AC();
+    RecountArmyProperties();
     sub_08026D68();
-    sub_08061F34();
+    AiScanBuildableFacilities();
     sub_08062038();
 }

@@ -1,10 +1,11 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08061E98.
- * sub_08061E98 @ 0x08061E98, sub_08061F34 @ 0x08061F34
+ * sub_08061E98 @ 0x08061E98, AiScanBuildableFacilities @ 0x08061F34
  */
 
 /* Runs one handler over every unit record of the current army window.
@@ -25,7 +26,7 @@
  * shift.
  *
  * The unit record is reached through a file-local bitfield view cast onto the
- * shared symbol: struct Unk08499594 declares +0x09 as a plain byte, and only a
+ * shared symbol: struct Unit declares +0x09 as a plain byte, and only a
  * real bitfield produces the ROM's SImode `movs #8; rsbs; ands` clear. Its
  * filler is padded to the shared struct's 12-byte stride, which is what the
  * loop's `adds r5, #0xc` giv confirms.
@@ -68,15 +69,6 @@ struct Unk61E98Unit
  * The two clears are ONE chained assignment: the ROM loads both pool addresses
  * before materialising the 0, which is the operand-class grouping of a single
  * statement. Written as two statements agbcc interleaves the ldr/strb pairs. */
-struct Unk61F34Map
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0x1432 - 0x0004];
-    /* 0x1432 */ u8 plane[0x417A - 0x1432];
-    /* 0x417A */ u16 rowOffset[1];
-};
-
 void sub_08061E98(void)
 {
     void (*fns[3])() = {sub_08061DCC, sub_08061E54, sub_08061E80};
@@ -85,7 +77,7 @@ void sub_08061E98(void)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        p = &((struct Unk61E98Unit *)gUnknown_08499594)[i];
+        p = &((struct Unk61E98Unit *)gUnits)[i];
         if (p->unk00 != 0)
         {
             gUnknown_03004784 = (u8 *)gUnknown_085766E0 + (p->unk00 * 12 + 4);
@@ -96,7 +88,7 @@ void sub_08061E98(void)
     }
 }
 
-void sub_08061F34(void)
+void AiScanBuildableFacilities(void)
 {
     u8 v[5];
     int x;
@@ -106,14 +98,16 @@ void sub_08061F34(void)
 
     gUnknown_030046B8 = gUnknown_030045C0 = 0;
 
-    for (y = 0; y < ((struct Unk61F34Map *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk61F34Map *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if (sub_0802700C(gUnknown_030033EC, x, y) == 0)
-                gUnknown_030045C0 |= v[gUnknown_085767F2[((struct Unk61F34Map *)gUnknown_08499590)->plane[((struct Unk61F34Map *)gUnknown_08499590)->rowOffset[y] + x] & 0x1f] >> 1];
+                gUnknown_030045C0 |= v[gUnknown_085767F2[gMap->terrain[gMap->rowOffset[y] + x] & 0x1f] >> 1];
 
-            gUnknown_030046B8 |= v[gUnknown_085767F2[((struct Unk61F34Map *)gUnknown_08499590)->plane[((struct Unk61F34Map *)gUnknown_08499590)->rowOffset[y] + x] & 0x1f] >> 1];
+            gUnknown_030046B8 |= v[gUnknown_085767F2[gMap->terrain[gMap->rowOffset[y] + x] & 0x1f] >> 1];
         }
     }
 }
+
+asm(".global sub_08061F34\n.thumb_set sub_08061F34, AiScanBuildableFacilities\n");

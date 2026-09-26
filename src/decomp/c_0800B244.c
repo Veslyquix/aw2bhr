@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,7 +8,7 @@
  * sub_0800B244 @ 0x0800B244
  */
 
-/* The screen-descriptor address computation of sub_08001158, done twice: once
+/* The screen-descriptor address computation of MakeTileSimple, done twice: once
  * for (x, y) at entry and once for (x, y - 1) in the 0x23 branch.
  *
  * Two spellings here are load-bearing and neither is guessable:
@@ -25,28 +26,17 @@
  * ROM branches past them. */
 void sub_0800B244(int x, int y)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
-    int off;
     int tile;
     int v;
 
-    p = gUnknown_08499590;
-    t = y * 2;
-    rows = p + 0x417A;
-    off = (*(u16 *)(rows + t) + x) * 2;
-    tiles = p + 0xA22;
-    tiles += off;
-    tile = *(u16 *)tiles;
+    tile = gMap->tile[gMap->rowOffset[y] + x];
 
     if (sub_0800B1FC(x, y) == 0)
     {
         if (y <= 0)
             return;
 
-        if (sub_0800119C(x, y - 1, 1) != 0)
+        if (IsTerrainAtCoordsType(x, y - 1, 1) != 0)
         {
             switch (sub_0800B1FC(x, y - 1))
             {
@@ -63,9 +53,9 @@ void sub_0800B244(int x, int y)
                 goto skip1;
             }
 
-            sub_08001158(x, y - 1, v);
-            v = sub_08001704(x, y - 1, v);
-            sub_08001158(x, y - 1, v);
+            MakeTileSimple(x, y - 1, v);
+            v = GetTileWithShadow(x, y - 1, v);
+            MakeTileSimple(x, y - 1, v);
 
         skip1:
             switch (sub_0800B1FC(x, y + 1))
@@ -84,11 +74,11 @@ void sub_0800B244(int x, int y)
                 break;
             }
 
-            sub_08001158(x, y, v);
+            MakeTileSimple(x, y, v);
         }
         else
         {
-            if (sub_0800119C(x, y - 1, 3) == 0)
+            if (IsTerrainAtCoordsType(x, y - 1, 3) == 0)
                 return;
 
             switch (sub_0800B1FC(x, y - 1))
@@ -106,9 +96,9 @@ void sub_0800B244(int x, int y)
                 goto skip2;
             }
 
-            sub_08001158(x, y - 1, v);
-            v = sub_08001704(x, y - 1, v);
-            sub_08001158(x, y - 1, v);
+            MakeTileSimple(x, y - 1, v);
+            v = GetTileWithShadow(x, y - 1, v);
+            MakeTileSimple(x, y - 1, v);
 
         skip2:
             switch (sub_0800B1FC(x, y + 1))
@@ -127,59 +117,52 @@ void sub_0800B244(int x, int y)
                 break;
             }
 
-            sub_08001158(x, y, v);
+            MakeTileSimple(x, y, v);
         }
     }
     else if (tile == 0x23)
     {
-        if (sub_0800119C(x, y - 1, 3) == 0)
+        if (IsTerrainAtCoordsType(x, y - 1, 3) == 0)
         {
-            sub_08001158(x, y - 1, 1);
+            MakeTileSimple(x, y - 1, 1);
 
             if (x > 0 && sub_0800AFCC(x - 1, y - 1) != 0)
-                sub_08001158(x, y - 1, 0x21);
+                MakeTileSimple(x, y - 1, 0x21);
 
-            sub_08001158(x, y, 0x20);
-            v = sub_08001A04(x, y - 1, 1);
-            sub_08001158(x, y - 1, v);
+            MakeTileSimple(x, y, 0x20);
+            v = GetTileWithShadow2(x, y - 1, 1);
+            MakeTileSimple(x, y - 1, v);
         }
         else
         {
             int up;
 
-            tiles = gUnknown_08499590;
-            p = tiles;
-            t = (y - 1) * 2;
-            rows = p + 0x417A;
-            off = (*(u16 *)(rows + t) + x) * 2;
-            tiles = tiles + 0xA22;
-            tiles += off;
-            up = *(u16 *)tiles;
+            up = gMap->tile[gMap->rowOffset[y - 1] + x];
 
             if (up == 0x20 || up == 2)
-                sub_08001158(x, y - 1, 0x20);
+                MakeTileSimple(x, y - 1, 0x20);
             else
-                sub_08001158(x, y - 1, 0x23);
+                MakeTileSimple(x, y - 1, 0x23);
 
-            sub_08001158(x, y, 0x20);
+            MakeTileSimple(x, y, 0x20);
         }
     }
     else if (tile == 0x22)
     {
-        if (sub_0800119C(x, y - 1, 1) != 0)
+        if (IsTerrainAtCoordsType(x, y - 1, 1) != 0)
         {
             if (x > 0 && sub_0800AFCC(x - 1, y - 1) != 0)
                 v = 0x21;
             else
                 v = 1;
 
-            sub_08001158(x, y - 1, v);
-            v = sub_08001A04(x, y - 1, 1);
-            sub_08001158(x, y - 1, v);
+            MakeTileSimple(x, y - 1, v);
+            v = GetTileWithShadow2(x, y - 1, 1);
+            MakeTileSimple(x, y - 1, v);
         }
-        else if (sub_0800119C(x, y - 1, 3) != 0)
+        else if (IsTerrainAtCoordsType(x, y - 1, 3) != 0)
         {
-            sub_08001158(x, y - 1, sub_0800B1FC(x, y - 1) == 0 ? 0x20 : 0x23);
+            MakeTileSimple(x, y - 1, sub_0800B1FC(x, y - 1) == 0 ? 0x20 : 0x23);
         }
 
         switch (sub_0800B1FC(x, y + 1))
@@ -193,6 +176,6 @@ void sub_0800B244(int x, int y)
             break;
         }
 
-        sub_08001158(x, y, v);
+        MakeTileSimple(x, y, v);
     }
 }

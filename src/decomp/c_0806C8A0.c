@@ -14,7 +14,7 @@ void sub_0806C8A0(void)
 
     for (i = 0; i <= 0x13; i++)
         for (j = 8; j <= 0x1d; j++)
-            gUnknown_08499578[i * 32 + j] = 0;
+            gBG0TilemapBuffer[i * 32 + j] = 0;
 
     sub_08013AEC();
 }

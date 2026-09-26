@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -21,8 +22,8 @@ void sub_08007F9C(int x, int y)
 
             ret = sub_08007DD0(m, n);
             asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-            sub_08001158(m, n, v);
-            sub_080080F8(m, n);
+            MakeTileSimple(m, n, v);
+            RepaintTile(m, n);
         }
 
         {
@@ -31,11 +32,11 @@ void sub_08007F9C(int x, int y)
 
             ret = sub_08007DD0(x, n);
             asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-            sub_08001158(x, n, v);
-            sub_080080F8(x, n);
+            MakeTileSimple(x, n, v);
+            RepaintTile(x, n);
         }
 
-        if (x < *(u16 *)gUnknown_08499590 - 1)
+        if (x < gMap->width - 1)
         {
             int m = x + 1;
             register s16 ret asm("r0");
@@ -43,8 +44,8 @@ void sub_08007F9C(int x, int y)
 
             ret = sub_08007DD0(m, n);
             asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-            sub_08001158(m, n, v);
-            sub_080080F8(m, n);
+            MakeTileSimple(m, n, v);
+            RepaintTile(m, n);
         }
     }
 
@@ -56,11 +57,11 @@ void sub_08007F9C(int x, int y)
 
         ret = sub_08007DD0(m, y);
         asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-        sub_08001158(m, y, v);
-        sub_080080F8(m, y);
+        MakeTileSimple(m, y, v);
+        RepaintTile(m, y);
     }
 
-    if (x < *(u16 *)gUnknown_08499590 - 1)
+    if (x < gMap->width - 1)
     {
         int m = x + 1;
         register s16 ret asm("r0");
@@ -68,11 +69,11 @@ void sub_08007F9C(int x, int y)
 
         ret = sub_08007DD0(m, y);
         asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-        sub_08001158(m, y, v);
-        sub_080080F8(m, y);
+        MakeTileSimple(m, y, v);
+        RepaintTile(m, y);
     }
 
-    if (y < *(u16 *)(gUnknown_08499590 + 2) - 1)
+    if (y < gMap->height - 1)
     {
         int n = y + 1;
 
@@ -84,8 +85,8 @@ void sub_08007F9C(int x, int y)
 
             ret = sub_08007DD0(m, n);
             asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-            sub_08001158(m, n, v);
-            sub_080080F8(m, n);
+            MakeTileSimple(m, n, v);
+            RepaintTile(m, n);
         }
 
         {
@@ -94,11 +95,11 @@ void sub_08007F9C(int x, int y)
 
             ret = sub_08007DD0(x, n);
             asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-            sub_08001158(x, n, v);
-            sub_080080F8(x, n);
+            MakeTileSimple(x, n, v);
+            RepaintTile(x, n);
         }
 
-        if (x < *(u16 *)gUnknown_08499590 - 1)
+        if (x < gMap->width - 1)
         {
             int m = x + 1;
             register s16 ret asm("r0");
@@ -106,8 +107,8 @@ void sub_08007F9C(int x, int y)
 
             ret = sub_08007DD0(m, n);
             asm("lsl %0, %0, #16\n\tasr %1, %0, #16" : "+r"(ret), "=r"(v));
-            sub_08001158(m, n, v);
-            sub_080080F8(m, n);
+            MakeTileSimple(m, n, v);
+            RepaintTile(m, n);
         }
     }
 
@@ -133,7 +134,7 @@ void sub_08007F9C(int x, int y)
  *     int v; v = (s16)f(x, y); g(x, y, v);
  *
  * The discriminator is not the spelling, it is whether the narrowed value has
- * a SECOND use. sub_080080F8 and sub_08007BA4 (both worked this wave) produce
+ * a SECOND use. RepaintTile and MakeSea (both worked this wave) produce
  * the ROM lsls r0 / asrs rN exactly, and in both the value is COMPARED before
  * it is passed. Where the only use is the argument, agbcc inserts the copy.
  * So either the original compared this value too -- nothing in the ROM stream

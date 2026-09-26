@@ -81,20 +81,20 @@ void sub_080897C8(struct Unk080897C8 *proc)
         gUnknown_03002B34 = 0;
 
         for (i = 0; i < 4; i++)
-            sub_0801F34C(i + 0x83, i * 0x18 + 8,
+            DrawOamObject(i + 0x83, i * 0x18 + 8,
                          (i * 6 - (y0 = proc->unk30 - 0x28)) & 0xFF, 0x800, 4);
 
         for (i = 0; i < 4; i++)
-            sub_0801F34C(i + 0x87, i * 0x18 + 0x10,
+            DrawOamObject(i + 0x87, i * 0x18 + 0x10,
                          (i * 6 - (y1 = proc->unk30 - 0x4A)) & 0xFF, 0x800, 4);
 
         if (gUnknown_03005964 <= 3)
-            sub_0801F34C(0x8B,
+            DrawOamObject(0x8B,
                          (gUnknown_03005964 * 0x18) & 0x1FF,
                          (gUnknown_03005964 * 6 - (y2 = proc->unk30 - 0x20)) & 0xFF,
                          0x800, 5);
         else
-            sub_0801F34C(0x8B,
+            DrawOamObject(0x8B,
                          ((gUnknown_03005964 - 4) * 0x18 + 8) & 0x1FF,
                          ((gUnknown_03005964 - 4) * 6 - (y3 = proc->unk30 - 0x42)) & 0xFF,
                          0x800, 5);
@@ -123,20 +123,20 @@ void sub_08089A04(struct Unk08089A04 *proc)
         gUnknown_03002F18 = proc->unk30 + 0x160;
 
         for (i = 0; i < 4; i++)
-            sub_0801F34C(i + 0x83, i * 0x18 + 8,
+            DrawOamObject(i + 0x83, i * 0x18 + 8,
                          (i * 6 - (y0 = proc->unk30 - 0x28)) & 0xFF, 0x800, 4);
 
         for (i = 0; i < 4; i++)
-            sub_0801F34C(i + 0x87, i * 0x18 + 0x10,
+            DrawOamObject(i + 0x87, i * 0x18 + 0x10,
                          (i * 6 - (y1 = proc->unk30 - 0x4A)) & 0xFF, 0x800, 4);
 
         if (gUnknown_03005964 <= 3)
-            sub_0801F34C(0x8B,
+            DrawOamObject(0x8B,
                          (gUnknown_03005964 * 0x18) & 0x1FF,
                          (gUnknown_03005964 * 6 - (y2 = proc->unk30 - 0x20)) & 0xFF,
                          0x800, 5);
         else
-            sub_0801F34C(0x8B,
+            DrawOamObject(0x8B,
                          ((gUnknown_03005964 - 4) * 0x18 + 8) & 0x1FF,
                          ((gUnknown_03005964 - 4) * 6 - (y3 = proc->unk30 - 0x42)) & 0xFF,
                          0x800, 5);

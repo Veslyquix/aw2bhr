@@ -33,7 +33,7 @@ int sub_0801AD70(u8 id)
     if (id == 0xff)
         return 1;
 
-    if (sub_0801B120(id) == 0xffff)
+    if (FindNewestCompleteSave(id) == 0xffff)
         return 1;
 
     for (i = 0; i < 0x10; i++)

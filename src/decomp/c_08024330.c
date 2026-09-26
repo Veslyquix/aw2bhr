@@ -13,7 +13,7 @@
  * body in the fall-through and the second compare after it -- measured, and it
  * is a different instruction order, not just different labels.
  *
- * `__umodsi3` and not `__modsi3`, so the dividend is UNSIGNED. gUnknown_03004008
+ * `__umodsi3` and not `__modsi3`, so the dividend is UNSIGNED. gGameClock
  * is declared `s32` in unknown-globals.h (inherited from src/title-screen.c,
  * where nothing settles it), hence the explicit cast rather than a retype --
  * every other access is `ldr` plus a mask and cannot tell the two apart.
@@ -23,7 +23,7 @@
 
 void sub_08024330(void)
 {
-    switch ((u32)gUnknown_03004008 % 40)
+    switch ((u32)gGameClock % 40)
     {
     case 0:
         sub_08011C68(gUnknown_0810E6E0, (void *)(PLTT + 0x1C0), 0x20);

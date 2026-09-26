@@ -24,7 +24,7 @@ struct Unk0806C52CProc
  * ands; subs r1, #4; ands` is three consecutive 1-bit CLEARS on gDispIo's byte
  * 1, sharing their masks by `subs` from the second on (~0x02, ~0x04, ~0x08) --
  * the bitfield-clear signature -- so this is SetDispEnable(1, 0, 0, 0, 1) and
- * not a mask. And the else arm stores `r5`, the value sub_0803866C returned,
+ * not a mask. And the else arm stores `r5`, the value IsHardCampaignMode returned,
  * rather than materialising a zero: on that path cse's record_jump_equiv knows
  * r5 == 0 from the `cmp r5, #0; beq`, so the plain `proc->unk38 = 0` is what
  * produces it and nothing has to be spelled with the variable.
@@ -43,7 +43,7 @@ void sub_0806C52C(struct Unk0806C52CProc *proc)
     gUnknown_030030B4.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
 
-    v = sub_0803866C();
+    v = IsHardCampaignMode();
 
     if (v != 0)
     {

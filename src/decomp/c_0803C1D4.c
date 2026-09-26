@@ -7,7 +7,7 @@
  * sub_0803C1D4 @ 0x0803C1D4
  */
 
-/* The four-array copy in the middle is what settles gUnknown_03003FC0's 0x33 /
+/* The four-array copy in the middle is what settles gPlaySt's 0x33 /
  * 0x38 / 0x3d / 0x42 as four parallel 5-byte per-slot arrays indexed 1..4: the
  * loop increment `adds r2, r6, #1` is computed once and used as the index
  * against all four bases, which no 0x34/0x39/0x3e/0x43-based spelling can
@@ -29,48 +29,48 @@ void sub_0803C1D4(void)
 {
     u8 i;
 
-    gUnknown_03003FC0.unk09 = gUnknown_08580934->unk02;
+    gPlaySt.animOpts = gUnknown_08580934->unk02;
     gUnknown_0200C420.unk0e = gUnknown_08580934->unk02;
-    gUnknown_03003FC0.unk0d = gUnknown_08580934->unk00;
-    gUnknown_03003FC0.unk30 = gUnknown_08580934->unk03;
-    gUnknown_03003FC0.unk28 = gUnknown_08580934->unk04;
-    gUnknown_03003FC0.unk31 = gUnknown_08580934->unk07;
-    gUnknown_03003FC0.unk08 = gUnknown_08580934->unk01;
+    gPlaySt.fog = gUnknown_08580934->unk00;
+    gPlaySt.turnLimit = gUnknown_08580934->unk03;
+    gPlaySt.propertyFunds = gUnknown_08580934->unk04;
+    gPlaySt.captureLimit = gUnknown_08580934->unk07;
+    gPlaySt.coAbilities = gUnknown_08580934->unk01;
 
     for (i = 0; i < 4; i++)
     {
-        gUnknown_03003FC0.unk3d[i + 1] = gUnknown_08580934->unk20[i];
-        gUnknown_03003FC0.unk38[i + 1] = gUnknown_08580934->unk09[i];
-        gUnknown_03003FC0.unk33[i + 1] = gUnknown_08580934->unk0d[i];
-        gUnknown_03003FC0.unk42[i + 1] = gUnknown_08580934->unk11[i];
+        gPlaySt.co[i + 1] = gUnknown_08580934->unk20[i];
+        gPlaySt.aiControlled[i + 1] = gUnknown_08580934->unk09[i];
+        gPlaySt.armyColor[i + 1] = gUnknown_08580934->unk0d[i];
+        gPlaySt.unk42[i + 1] = gUnknown_08580934->unk11[i];
     }
 
     switch (gUnknown_08580934->unk06)
     {
     case 0:
-        gUnknown_03003FC0.unk2d = 1;
-        gUnknown_03003FC0.unk2c = 0;
-        gUnknown_03003FC0.unk2e = 0;
-        gUnknown_03003FC0.unk2f = 0;
+        gPlaySt.randomWeatherOn = 1;
+        gPlaySt.weather = 0;
+        gPlaySt.unk2e = 0;
+        gPlaySt.defaultWeather = 0;
         break;
     case 2:
-        gUnknown_03003FC0.unk2d = 3;
-        gUnknown_03003FC0.unk2c = 2;
-        gUnknown_03003FC0.unk2e = 2;
-        gUnknown_03003FC0.unk2f = 2;
+        gPlaySt.randomWeatherOn = 3;
+        gPlaySt.weather = 2;
+        gPlaySt.unk2e = 2;
+        gPlaySt.defaultWeather = 2;
         break;
     case 3:
-        gUnknown_03003FC0.unk2d = 3;
-        gUnknown_03003FC0.unk2c = 1;
-        gUnknown_03003FC0.unk2e = 1;
-        gUnknown_03003FC0.unk2f = 1;
+        gPlaySt.randomWeatherOn = 3;
+        gPlaySt.weather = 1;
+        gPlaySt.unk2e = 1;
+        gPlaySt.defaultWeather = 1;
         break;
     case 1:
     default:
-        gUnknown_03003FC0.unk2d = 0;
-        gUnknown_03003FC0.unk2c = 0;
-        gUnknown_03003FC0.unk2e = 0;
-        gUnknown_03003FC0.unk2f = 0;
+        gPlaySt.randomWeatherOn = 0;
+        gPlaySt.weather = 0;
+        gPlaySt.unk2e = 0;
+        gPlaySt.defaultWeather = 0;
         break;
     }
 }

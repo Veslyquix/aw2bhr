@@ -15,7 +15,7 @@ struct Unk37CF8
 
 void sub_08037CF8(struct Unk37CF8 *a)
 {
-    sub_080247A4(a->unk1e);
+    LoadMapData(a->unk1e);
     sub_080378A8((void *)0x06000020);
     sub_08037B90();
 

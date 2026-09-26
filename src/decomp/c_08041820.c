@@ -39,7 +39,7 @@ void sub_08041820(int a1, int a2, int a3)
     sub_080251D8(gUnknown_03003F38);
 
     hp = ent->unk04;
-    lim = gUnknown_030013D0;
+    lim = (u8 *)gBattleAttacker;
 
     if (hp < *(s16 *)(lim + 0x14))
         ent->unk04 = 0;

@@ -66,7 +66,7 @@
  *  2. `mov sb,r4` is one `mov` in the ROM at that point and two here
  *     (`mov r8,r5; mov r9,r4`) -- the ROM copies the 0x0808E56C pool address
  *     into r8 immediately after its `ldr`, this draft defers it.
- *  3. `v * 24 + gUnknown_08499598[i].unk1d` evaluates the multiply first here
+ *  3. `v * 24 + gPlayers[i].unk1d` evaluates the multiply first here
  *     and the array address first in the ROM (same instruction count).
  * All three are the same register-allocation residual: one value too many is
  * live across 0x08018326. Size is already exact, so this is an allocation
@@ -118,7 +118,7 @@ void sub_08018254(s16 a)
     {
         if (((s16)raw & 0x8000) != 0)
         {
-            gUnknown_03002F08.unk02 = gUnknown_08499598[i].unk1d;
+            gUnknown_03002F08.unk02 = gPlayers[i].co;
             gUnknown_03002F08.unk02 += v * 24;
         }
         else

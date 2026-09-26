@@ -43,7 +43,7 @@ void sub_0806B708(struct Unk0806B708 *proc)
     CpuFastSet(&fill,
                (void *)(0x06005000 + gUnknown_03001FE8.bits.chr_block * 0x4000),
                0x01000008);
-    sub_08072C28(gUnknown_0849957C, 0x400, 0x280);
+    sub_08072C28(gBG1TilemapBuffer, 0x400, 0x280);
     Decompress(gUnknown_081918A4, (void *)0x06016000);
     SetDispEnable(0, 1, 0, 1, 1);
     gUnknown_03001FE8.bits.priority = 0;

@@ -5,12 +5,16 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08049360.
  * sub_08049360 @ 0x08049360
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
 #include "hardware.h"
 
-/* sub_08049360 @ 0x08049360, 1480 bytes, THUMB.
+/* BattleMaps_IDLE_08049361 @ 0x08049360, 1480 bytes, THUMB.
  *
  * The unit-list proc's per-frame state machine: a twelve-case switch on
  * gUnknown_084C30F8->unk834, ending in a common "redraw if the list is not
@@ -23,7 +27,7 @@
  * 0x00590005 and the function hands the ADDRESS to sub_0808B6E8 as a copy
  * source, so it is a data template and must be named -- see W56-G.
  */
-void sub_08049360(ProcPtr proc)
+void BattleMaps_IDLE_08049361(ProcPtr proc)
 {
     u16 steps[2];
     int flag = 0;
@@ -48,12 +52,12 @@ void sub_08049360(ProcPtr proc)
             break;
         if (gUnknown_084C30F8->unk836 != 0)
         {
-            if ((gpKeySt->held & 2) != 0)
+            if ((gpKeySt->pressed & 2) != 0)
                 flag = 1;
         }
         else
         {
-            if ((gpKeySt->last & 2) != 0)
+            if ((gpKeySt->unk0c & 2) != 0)
                 sub_080485F8();
             if (sub_08019260())
                 break;
@@ -67,7 +71,7 @@ void sub_08049360(ProcPtr proc)
         }
         if (gUnknown_084C30F8->unk836 == 0)
             return;
-        if ((gpKeySt->held & 1) == 0)
+        if ((gpKeySt->pressed & 1) == 0)
             break;
         gUnknown_084C30F8->unk834++;
         break;
@@ -82,7 +86,7 @@ void sub_08049360(ProcPtr proc)
         break;
 
     case 2:
-        if ((gpKeySt->last & 2) != 0)
+        if ((gpKeySt->unk0c & 2) != 0)
         {
             sub_080485F8();
             gUnknown_084C30F8->unk834 = 8;
@@ -121,7 +125,7 @@ void sub_08049360(ProcPtr proc)
         sub_080487B4(0,
                      (gUnknown_084C30F8->unk01e - gUnknown_084C30F8->unk020) * 2
                          + 7,
-                     gUnknown_08499578,
+                     gBG0TilemapBuffer,
                      gUnknown_02028E1C[gUnknown_084C30F8->unk01e], 4);
         sub_08013AEC();
         gUnknown_084C30F8->unk834++;
@@ -132,7 +136,7 @@ void sub_08049360(ProcPtr proc)
         gUnknown_084C30F8->unk834++;
         /* fallthrough */
     case 5:
-        if ((gUnknown_03004008 & 1) == 0)
+        if ((gGameClock & 1) == 0)
             break;
         gUnknown_084C30F8->unk028 -= steps
             [gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
@@ -143,10 +147,10 @@ void sub_08049360(ProcPtr proc)
         if (gUnknown_084C30F8->unk028 < gUnknown_084C30F8->unk02c)
         {
             gUnknown_084C30F8->unk028 = gUnknown_084C30F8->unk02c;
-            sub_08017704(
+            TrySpendBattleMapPoints(
                 gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
                     .unk04);
-            sub_08012BC8(gUnknown_08499578, 7, 0xf, 0x17, 4, 0);
+            sub_08012BC8(gBG0TilemapBuffer, 7, 0xf, 0x17, 4, 0);
             sub_0803B4DC(0x6c);
             gUnknown_084C30F8->unk834++;
         }
@@ -192,7 +196,7 @@ void sub_08049360(ProcPtr proc)
         break;
 
     case 7:
-        if ((gpKeySt->last & 2) != 0)
+        if ((gpKeySt->unk0c & 2) != 0)
             sub_080485F8();
         if (sub_08019260())
             break;
@@ -218,7 +222,7 @@ void sub_08049360(ProcPtr proc)
         {
             if (sub_08048F10() != 0)
                 break;
-            gUnknown_084C30F8->unk83a = gUnknown_03004008 & 3;
+            gUnknown_084C30F8->unk83a = gGameClock & 3;
             sub_080485DC(gUnknown_084C30E8[gUnknown_084C30F8->unk83a]);
         }
         gUnknown_084C30F8->unk834 = 0xb;
@@ -237,3 +241,5 @@ void sub_08049360(ProcPtr proc)
                              * 16
                          + 0x39);
 }
+
+asm(".global sub_08049360\n.thumb_set sub_08049360, BattleMaps_IDLE_08049361\n");

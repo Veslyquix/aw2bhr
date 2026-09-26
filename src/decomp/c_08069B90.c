@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08069B90.
  * sub_08069B90 @ 0x08069B90
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -20,7 +24,7 @@ struct Unk69B90Proc
     /* 2C */ int unk2c; /* frames remaining, counts down from 0x32 */
 };
 
-void sub_08069B90(struct Unk69B90Proc *proc)
+void IntroT3_IDLE_08069B91(struct Unk69B90Proc *proc)
 {
     switch (0x32 - proc->unk2c)
     {
@@ -63,3 +67,5 @@ void sub_08069B90(struct Unk69B90Proc *proc)
         SetDispEnable(0, 0, 0, 0, 0);
     }
 }
+
+asm(".global sub_08069B90\n.thumb_set sub_08069B90, IntroT3_IDLE_08069B91\n");

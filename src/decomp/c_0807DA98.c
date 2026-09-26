@@ -15,7 +15,7 @@
  * the double load; the promotion carries "rodata": ["0x081D9364"]. Exactly the
  * mechanism unknown-globals.h records for 0x081D946C. (wave 56, W56-B)
  *
- * The parameter is the same object sub_0807D800/D860/D918 take, seen through a
+ * The parameter is the same object IsCoSelectionUnique/D860/D918 take, seen through a
  * wider window: this function adds +0x2c..+0x40, +0x48, +0x4e, +0x64, +0x66 and
  * +0x6a to the s16 unk4c / u16 unk52 / int unk58,5c,60 those three already model.
  */
@@ -45,7 +45,6 @@ struct Unk7DA98
     /* 0x6a */ s16 unk6a;
 };
 /* Defined in src/decomp/c_0807D800.c over its own tag for this same object. */
-int sub_0807D800(struct Unk7DA98 *);
 
 void sub_0807DA98(struct Unk7DA98 *p)
 {
@@ -84,7 +83,7 @@ void sub_0807DA98(struct Unk7DA98 *p)
                     x = j * 0x48 - x;
                     x &= 0x1ff;
                     y = p->unk38 + 0x43;
-                    sub_0801F34C(i + 0x4a, x, (y - j * 0x18) | 0x400, 0, 0);
+                    DrawOamObject(i + 0x4a, x, (y - j * 0x18) | 0x400, 0, 0);
                 }
             }
         }
@@ -94,13 +93,13 @@ void sub_0807DA98(struct Unk7DA98 *p)
             for (i = 0; i < p->unk64; i++)
             {
                 if (gUnknown_030058D4[i] == gUnknown_030058E0[DivRem(p->unk52 - p->unk4e, gUnknown_03005948[p->unk58]) + p->unk5c])
-                    sub_0801F34C(i + 0x4a, (0x25 - p->unk2c * 3) & 0x1ff, (p->unk2c + 0x43) | 0x400, 0, 0);
+                    DrawOamObject(i + 0x4a, (0x25 - p->unk2c * 3) & 0x1ff, (p->unk2c + 0x43) | 0x400, 0, 0);
 
                 a = p->unk52;
                 b = p->unk4e - 3;
 
                 if (gUnknown_030058D4[i] == gUnknown_030058E0[DivRem(a - b, gUnknown_03005948[p->unk58]) + p->unk5c])
-                    sub_0801F34C(i + 0x4a, (0xfd - p->unk38 * 3) & 0x1ff, (p->unk38 - 5) | 0x400, 0, 0);
+                    DrawOamObject(i + 0x4a, (0xfd - p->unk38 * 3) & 0x1ff, (p->unk38 - 5) | 0x400, 0, 0);
             }
         }
         else if (p->unk4e < 0)
@@ -108,10 +107,10 @@ void sub_0807DA98(struct Unk7DA98 *p)
             for (i = 0; i < p->unk64; i++)
             {
                 if (gUnknown_030058D4[i] == gUnknown_030058E0[DivRem(p->unk52 - p->unk4e, gUnknown_03005948[p->unk58]) + p->unk5c])
-                    sub_0801F34C(i + 0x4a, (0x25 - p->unk38 * 3) & 0x1ff, (p->unk38 + 0x43) | 0x400, 0, 0);
+                    DrawOamObject(i + 0x4a, (0x25 - p->unk38 * 3) & 0x1ff, (p->unk38 + 0x43) | 0x400, 0, 0);
 
                 if (gUnknown_030058D4[i] == gUnknown_030058E0[DivRem(p->unk52 - p->unk4e - 1, gUnknown_03005948[p->unk58]) + p->unk5c])
-                    sub_0801F34C(i + 0x4a, (-0x23 - (p->unk2c + 5) * 3) & 0x1ff, (p->unk2c + 0x60) | 0x400, 0, 0);
+                    DrawOamObject(i + 0x4a, (-0x23 - (p->unk2c + 5) * 3) & 0x1ff, (p->unk2c + 0x60) | 0x400, 0, 0);
             }
         }
 
@@ -126,22 +125,22 @@ void sub_0807DA98(struct Unk7DA98 *p)
 
         if (p->unk4e < 0)
         {
-            sub_0801F34C(0x48,
+            DrawOamObject(0x48,
                          0x18 - Interpolate(4, Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20), 0x10, p->unk4c, 0x10),
                          Interpolate(4, Interpolate(4, 0, 4, DivRem((s16)p->unk48, 0x20), 0x20), 8, p->unk4c, 0x10) + 0x3c,
                          0, 0);
-            sub_0801F34C(0x49,
+            DrawOamObject(0x49,
                          Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20) + 0x58,
                          0x2c - Interpolate(4, 0, 4, DivRem((s16)p->unk48, 0x20), 0x20),
                          0, 0);
         }
         else
         {
-            sub_0801F34C(0x48,
+            DrawOamObject(0x48,
                          0x18 - Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20),
                          Interpolate(4, 0, 4, DivRem((s16)p->unk48, 0x20), 0x20) + 0x3c,
                          0, 0);
-            sub_0801F34C(0x49,
+            DrawOamObject(0x49,
                          Interpolate(4, Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20), 0x10, p->unk4c, 0x10) + 0x58,
                          0x2c - Interpolate(4, Interpolate(4, 0, 4, DivRem((s16)p->unk48, 0x20), 0x20), 8, p->unk4c, 0x10),
                          0, 0);
@@ -160,12 +159,12 @@ void sub_0807DA98(struct Unk7DA98 *p)
                 if (p->unk4c > 13)
                 {
                     if (gUnknown_030058D4[i] == gUnknown_030058E0[DivRem(p->unk52 + j, gUnknown_03005948[p->unk58]) + p->unk5c])
-                        sub_0801F34C(i + 0x4a, j * 0x48 + 0x25, ((0x43 - j * 0x18 - p->unk30) & 0xff) | 0x400, 0, 0);
+                        DrawOamObject(i + 0x4a, j * 0x48 + 0x25, ((0x43 - j * 0x18 - p->unk30) & 0xff) | 0x400, 0, 0);
                 }
                 else
                 {
                     if (gUnknown_030058D4[i] == gUnknown_030058E0[DivRem(gUnknown_03005938[0] + j, gUnknown_03005948[gUnknown_03005938[1]]) + gUnknown_03005938[2]])
-                        sub_0801F34C(i + 0x4a, j * 0x48 + 0x25, ((0x43 - j * 0x18 - p->unk30) & 0xff) | 0x400, 0, 0);
+                        DrawOamObject(i + 0x4a, j * 0x48 + 0x25, ((0x43 - j * 0x18 - p->unk30) & 0xff) | 0x400, 0, 0);
                 }
             }
         }
@@ -181,11 +180,11 @@ void sub_0807DA98(struct Unk7DA98 *p)
 
         p->unk60;
 
-        sub_0801F34C(0x48,
+        DrawOamObject(0x48,
                      0x18 - Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20),
                      Interpolate(4, 0, 4, DivRem((s16)p->unk48, 0x20), 0x20) + 0x3c,
                      0, 0);
-        sub_0801F34C(0x49,
+        DrawOamObject(0x49,
                      Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20) + 0x58,
                      0x2c - Interpolate(4, 0, 4, DivRem((s16)p->unk48, 0x20), 0x20),
                      0, 0);
@@ -201,7 +200,7 @@ void sub_0807DA98(struct Unk7DA98 *p)
             for (j = 0; j <= 2; j++)
             {
                 if (gUnknown_030058D4[i] == gUnknown_030058E0[DivRem(p->unk52 + j, gUnknown_03005948[p->unk58]) + p->unk5c])
-                    sub_0801F34C(i + 0x4a, j * 0x48 + 0x25, (0x43 - j * 0x18) | 0x400, 0, 0);
+                    DrawOamObject(i + 0x4a, j * 0x48 + 0x25, (0x43 - j * 0x18) | 0x400, 0, 0);
             }
         }
 
@@ -214,11 +213,11 @@ void sub_0807DA98(struct Unk7DA98 *p)
             gUnknown_03002B34 += 0xc;
         }
 
-        sub_0801F34C(0x48,
+        DrawOamObject(0x48,
                      0x18 - Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20),
                      Interpolate(4, 0, 4, DivRem(p->unk48, 0x20), 0x20) + 0x3c,
                      0, 0);
-        sub_0801F34C(0x49,
+        DrawOamObject(0x49,
                      Interpolate(4, 0, 8, DivRem(p->unk48, 0x20), 0x20) + 0x58,
                      0x2c - Interpolate(4, 0, 4, DivRem(p->unk48, 0x20), 0x20),
                      0, 0);
@@ -226,19 +225,19 @@ void sub_0807DA98(struct Unk7DA98 *p)
 
     if ((int)gUnknown_03005944 > 1 && gUnknown_030059C0[p->unk64] != 0)
     {
-        sub_0801F34C(0x43, 0x38, 0x1c, 0, 2);
-        sub_0801F34C(0x44, 0x38, 0x54, 0, 2);
+        DrawOamObject(0x43, 0x38, 0x1c, 0, 2);
+        DrawOamObject(0x44, 0x38, 0x54, 0, 2);
     }
 
     sub_08043C28(p->unk34 + 0xb0, 0xa0, 0x1040, 0, 1);
 
-    if ((u8)sub_0807D800(p) != 0 || p->unk4e != 0 || p->unk60 != 0)
-        sub_0801F34C(p->unk64 + 0x4a, 0x25, 0x43, 0, 0);
+    if ((u8)IsCoSelectionUnique((struct Unk807D800 *)p) != 0 || p->unk4e != 0 || p->unk60 != 0)
+        DrawOamObject(p->unk64 + 0x4a, 0x25, 0x43, 0, 0);
 
     PutSprite(1, 0x20, 0x1c, gUnknown_0848B6A0, 0);
-    sub_0801F34C(0x67, 0xb9, 0x86, 0, 0);
-    sub_0801F34C(0x62, 0xb9, 0x8e, 0, 0);
-    sub_0801F34C(0x65, 0xb9, 0x96, 0, 0);
+    DrawOamObject(0x67, 0xb9, 0x86, 0, 0);
+    DrawOamObject(0x62, 0xb9, 0x8e, 0, 0);
+    DrawOamObject(0x65, 0xb9, 0x96, 0, 0);
 
     for (i = 0; i < p->unk64; i++)
         sub_08043B60(0x2a, i * 0x10 + 0x68, (i * 0xc + 0x3c0) | 0x9000, 0);
@@ -276,15 +275,15 @@ void sub_0807DA98(struct Unk7DA98 *p)
     if (gUnknown_030059C0[p->unk64] != 0)
     {
         for (i = 0; i < p->unk64; i++)
-            sub_0801F34C(gUnknown_03005958[gUnknown_0300599C[i]] + 0x3e, 0x14, i * 0x10 + 0x68, 0, 2);
+            DrawOamObject(gUnknown_03005958[gUnknown_0300599C[i]] + 0x3e, 0x14, i * 0x10 + 0x68, 0, 2);
 
         if (i < sub_0803BD14())
-            sub_0801F34C(gUnknown_03005958[p->unk58] + 0x3e, 0x14, i * 0x10 + 0x68, 0, 2);
+            DrawOamObject(gUnknown_03005958[p->unk58] + 0x3e, 0x14, i * 0x10 + 0x68, 0, 2);
     }
     else
     {
         for (i = 0; i < sub_0803BD14(); i++)
-            sub_0801F34C(gUnknown_03005958[i] + 0x3e, 0x14, i * 0x10 + 0x68, 0, 2);
+            DrawOamObject(gUnknown_03005958[i] + 0x3e, 0x14, i * 0x10 + 0x68, 0, 2);
     }
 
     if (p->unk40 > 0)
@@ -296,19 +295,19 @@ void sub_0807DA98(struct Unk7DA98 *p)
                          Div(-gSinLut[0] * 16, Interpolate(1, 0x200, 0x100, p->unk4c, 7) != 0 ? Interpolate(1, 0x200, 0x100, p->unk4c, 7) : 2),
                          Div(gSinLut[0] * 16, Interpolate(1, 0x200, 0x100, p->unk4c, 7) != 0 ? Interpolate(1, 0x200, 0x100, p->unk4c, 7) : 2),
                          Div(gSinLut[0x40] * 16, Interpolate(1, 0x200, 0x100, p->unk4c, 7) != 0 ? Interpolate(1, 0x200, 0x100, p->unk4c, 7) : 2));
-            sub_0801F34C(0x4f, 0x24a, 0x360, 0, 0);
+            DrawOamObject(0x4f, 0x24a, 0x360, 0, 0);
         }
         else
         {
-            sub_0801F34C(0x4f, 0x5a, 0x68, 0, 0);
+            DrawOamObject(0x4f, 0x5a, 0x68, 0, 0);
         }
     }
     else
     {
-        sub_0801F34C(0x54, 0x5c, 0x68, 0, 0);
+        DrawOamObject(0x54, 0x5c, 0x68, 0, 0);
         c = sub_0803BD14();
         d = p->unk64 - 0x55;
-        sub_0801F34C(c - d, 0x65, 0x70, 0, 0);
-        sub_0801F34C(0x5f, 0x6d, 0x70, 0, 0);
+        DrawOamObject(c - d, 0x65, 0x70, 0, 0);
+        DrawOamObject(0x5f, 0x6d, 0x70, 0, 0);
     }
 }

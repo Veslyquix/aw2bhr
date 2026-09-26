@@ -80,16 +80,16 @@ void sub_08084600(struct Unk8084600 *p)
 
     i = DivRem(p->unk52, 6);
 
-    if (sub_0803CBD8(0x28) != 0 && DivRem(p->unk52 + 2, 6) == 2)
+    if (IsCampaignCompletionFlagSet(0x28) != 0 && DivRem(p->unk52 + 2, 6) == 2)
         i = 6;
 
-    if (sub_0803CBD8(0x20) != 0 && DivRem(p->unk52 + 2, 6) == 0)
+    if (IsCampaignCompletionFlagSet(0x20) != 0 && DivRem(p->unk52 + 2, 6) == 0)
         i = 7;
 
     if (gUnknown_0300591C[1] == 0)
-        sub_08014668(0, 0x12, gUnknown_08499578, gUnknown_08616FA4[i], 0x8000, 0x40);
+        sub_08014668(0, 0x12, gBG0TilemapBuffer, gUnknown_08616FA4[i], 0x8000, 0x40);
     else
-        sub_08014668(0, 0x12, gUnknown_08499578, gUnknown_08616FB4[i * 2 + DivRem(p->unk66, 2)], 0x8000, 0x40);
+        sub_08014668(0, 0x12, gBG0TilemapBuffer, gUnknown_08616FB4[i * 2 + DivRem(p->unk66, 2)], 0x8000, 0x40);
 
     sub_08013AEC();
 }

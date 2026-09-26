@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,7 +8,7 @@
  * sub_08020984 @ 0x08020984, sub_08020B88 @ 0x08020B88
  */
 
-/* Recomputes every army's gUnknown_08499598 unk1c "stance" byte for the current
+/* Recomputes every army's gPlayers unk1c "stance" byte for the current
  * army gUnknown_030033EC: clear all five, seed the current one from the
  * gUnknown_08090944 table (upgraded to 3 when sub_08020864 agrees), propagate it
  * to every army sub_08020824 rates 2, then -- unless sub_080208C8 vetoes -- paint
@@ -27,14 +28,14 @@ void sub_08020984(void)
     u16 t;
     u16 v;
 
-    gUnknown_08499598[0].unk1c = 0;
+    gPlayers[0].turnState = 0;
     for (i = 1; i <= 4; i++)
-        gUnknown_08499598[i].unk1c = 0;
+        gPlayers[i].turnState = 0;
 
-    v = gUnknown_08090944[gUnknown_08499598[gUnknown_030033EC].unk1b];
+    v = gUnknown_08090944[gPlayers[gUnknown_030033EC].aiControlled];
     if (v == 1 && (u8)sub_08020864(gUnknown_030033EC))
         v = 3;
-    gUnknown_08499598[gUnknown_030033EC].unk1c = v;
+    gPlayers[gUnknown_030033EC].turnState = v;
 
     for (i = 1; i <= 3; i++)
     {
@@ -42,7 +43,7 @@ void sub_08020984(void)
           ? gUnknown_030033EC + i
           : gUnknown_030033EC + i - 4;
         if ((u16)sub_08020824(gUnknown_030033EC, t) == 2)
-            gUnknown_08499598[t].unk1c = v;
+            gPlayers[t].turnState = v;
     }
 
     if (!(u8)sub_080208C8(gUnknown_030033EC))
@@ -53,13 +54,13 @@ void sub_08020984(void)
               ? gUnknown_030033EC + i
               : gUnknown_030033EC + i - 4;
             if ((u16)sub_08020824(gUnknown_030033EC, t) == 1
-             && gUnknown_08499598[t].unk1b == 1)
+             && gPlayers[t].aiControlled == 1)
             {
-                gUnknown_08499598[t].unk1c = v ^ 3;
+                gPlayers[t].turnState = v ^ 3;
                 for (j = 1; j <= 3; j++)
                 {
                     if ((u16)sub_08020824(t, t + j <= 4 ? t + j : t + j - 4) == 2)
-                        gUnknown_08499598[t + j <= 4 ? t + j : t + j - 4].unk1c = v ^ 3;
+                        gPlayers[t + j <= 4 ? t + j : t + j - 4].turnState = v ^ 3;
                 }
             }
         }
@@ -69,12 +70,12 @@ void sub_08020984(void)
     {
         if (i > 4)
         {
-            gUnknown_08499598[gUnknown_030033EC].unk1c |= 2;
+            gPlayers[gUnknown_030033EC].turnState |= 2;
             break;
         }
-        if (sub_080266DC(i) && gUnknown_08499598[i].unk1b == 1)
+        if (IsPlayerAliveAndActive(i) && gPlayers[i].aiControlled == 1)
             break;
-        if (sub_080266DC(i) && (gUnknown_08499598[i].unk1c & 2))
+        if (IsPlayerAliveAndActive(i) && (gPlayers[i].turnState & 2))
             break;
     }
 
@@ -93,19 +94,13 @@ void sub_08020984(void)
  * sign-extended form yet. Written after `yy = y - r` it costs a third
  * instruction and negates the sign-extended copy instead.
  *
- * `rows` must be its own local or agbcc reassociates the 0x417A constant to
- * last -- c_0805AD90.c's rule, and it applies to the `p + 0x12` unit-id plane
- * here for the same reason. */
+ * The map reads go straight through gMap->rowOffset[] and gMap->unit[]. */
 void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
 {
     s16 xx;
     s16 yy;
     s16 dy;
     struct Unk02028360 *u;
-    u8 *p;
-    u8 *rows;
-    u8 *ids;
-    int ty;
     int m;
     int n;
     int t;
@@ -116,7 +111,7 @@ void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
     {
         if (yy < 0)
             continue;
-        if (yy >= *(u16 *)(gUnknown_08499590 + 2))
+        if (yy >= gMap->height)
             continue;
 
         for (xx = x - r + (dy < 0 ? -dy : dy);
@@ -125,14 +120,11 @@ void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
         {
             if (xx < 0)
                 continue;
-            if (xx >= *(u16 *)gUnknown_08499590)
+            if (xx >= gMap->width)
                 continue;
 
             u = sub_0803DF54(xx, yy);
-            m = gUnknown_020288B4[(p = gUnknown_08499590,
-                                   ty = yy * 2,
-                                   rows = p + 0x417a,
-                                   *(u16 *)(rows + ty) + xx)];
+            m = gUnknown_020288B4[gMap->rowOffset[yy] + xx];
             n = 0;
             if (u != NULL)
                 n = u->unk02_6;
@@ -142,19 +134,18 @@ void sub_08020B88(s16 x, s16 y, s16 r, s16 v)
             if (n)
             {
                 sub_080251BC(gUnknown_03003F38, 0, &gUnknown_03003100.pos);
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 != 0)
+                if (gBattleAttacker->attackType != 0)
                     gUnknown_03003340[yy][xx] = v;
             }
             else
             {
-                ids = p + 0x12;
-                t = ids[*(u16 *)(rows + ty) + xx];
+                t = gMap->unit[gMap->rowOffset[yy] + xx];
                 if (t == 0)
                     continue;
                 if (sub_08026F9C(gUnknown_03003F38, t) == 1)
                     continue;
                 sub_080251BC(gUnknown_03003F38, t, &gUnknown_03003100.pos);
-                if (((struct Unk030013D0 *)gUnknown_030013D0)->unk18 != 0)
+                if (gBattleAttacker->attackType != 0)
                     gUnknown_03003340[yy][xx] = v;
             }
         }

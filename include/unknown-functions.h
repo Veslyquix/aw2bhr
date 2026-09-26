@@ -457,7 +457,11 @@ s8 sub_08015BD0(s32);
  * gUnknown_030040EC;` and that global is a `void (*)(void)`. Declared here in
  * wave 33 (W33-D) for sub_08014BE8, whose last test compares the result
  * against sub_080369BC. Only that symbol's ADDRESS is used anywhere, so
- * `void(void)` is what the comparison needs and nothing else constrains it. */
+ * `void(void)` is what the comparison needs and nothing else constrains it.
+ * The named alias below reflects AgbMain's permanent loop at 0x08036D1C:
+ * gUnknown_030040EC is called once per loop iteration before the soft-reset
+ * poll. */
+void (*GetMainLoopCallback(void))(void);
 void (*sub_080366DC(void))(void);
 void sub_080369BC(void);
 /* Three whole-list sweeps over gUnknown_0200E438, each reached only through a
@@ -497,7 +501,7 @@ void sub_08014ED4(void *);
 /* A pair always called together on the same object, each `(ptr, u8 flag)` and
  * each returning an accumulated total in r0.
  *
- * WAVE 38 (W38-J): the object IS modelled -- it is `struct Unk08499594`, and
+ * WAVE 38 (W38-J): the object IS modelled -- it is `struct Unit`, and
  * the note that used to stand here ("bytes at +0, +4, +6, a 4-bit and a 7-bit
  * field ... not modelled anywhere yet") was in fact a field-for-field
  * description of it. The three offsets it lists are unk00, the unk04 bitfield
@@ -507,8 +511,8 @@ void sub_08014ED4(void *);
  * the defining use of that member. Retyped from `void *`; sub_08029D1C and
  * sub_08044518 forward a `void *` and convert implicitly, so the change is free
  * at every existing caller (c_08029D1C.c re-verified byte-exact after it). */
-int sub_08029978(struct Unk08499594 *, u8);
-int sub_08029A48(struct Unk08499594 *, u8);
+int sub_08029978(struct Unit *, u8);
+int sub_08029A48(struct Unit *, u8);
 /* Both parameters are `s16`: the prologue sign-extends r0 and r1 with
  * `lsls #16; asrs #16` before forwarding to sub_080290B0. */
 void sub_08029088(s16, s16);
@@ -648,9 +652,9 @@ void sub_080135F4(u16 *, u32, u16);
 void sub_08030ED4(void);
 
 /* The gUnknown_085D3DD0 lookup family. Every one of them is
- * `if (!gUnknown_03003FC0.unk08) return <fallback>; return <table entry>;` and
+ * `if (!gPlaySt.unk08) return <fallback>; return <table entry>;` and
  * each has a one-line forwarder next to it that supplies (unk1d, unk1e) out of
- * gUnknown_08499598. sub_08042F34 and sub_08042F7C IGNORE their second
+ * gPlayers. sub_08042F34 and sub_08042F7C IGNORE their second
  * argument -- it is still declared, because their forwarders load and pass it.
  */
 int sub_08042DCC(int);
@@ -698,7 +702,7 @@ void sub_08044854(int, int, int);
  * `lsls #24`, which a bool8 return would have forced. */
 int sub_0803CBD8(int);
 /* CORRECTION, wave 32 (W32-A). Both were promoted as `u8 (int)` -- one-line
- * bodies returning gUnknown_08499598[i].unk3a / .unk3b, which are u8 members --
+ * bodies returning gPlayers[i].unk3a / .unk3b, which are u8 members --
  * and neither had a declaration or a C caller until now. sub_080264BC is the
  * first, and it takes BOTH results with a bare `adds r4, r0, #0` /
  * `adds r1, r0, #0` and no re-narrowing before comparing them against each
@@ -712,7 +716,7 @@ int sub_08025D08(int);
 /* Wave 41, W41-D. Copied VERBATIM from the promoted definition in
  * src/decomp/c_080260D0.c -- the definition wins. Declared now because
  * sub_08026040 is its only caller and had no prototype for it. */
-void sub_080260D0(struct Unk08499594 *, int);
+void sub_080260D0(struct Unit *, int);
 /* Wave 41, W41-D. sub_08026520's five callees, all of them already promoted
  * and none of them previously declared. Every signature below is COPIED FROM
  * THE DEFINITION (src/decomp/c_080263A4.c, c_080264BC.c, c_08026340.c,
@@ -882,7 +886,7 @@ void sub_08075AC4(int, int);
  * casts; every call site is byte-identical under both. */
 void sub_080795A8(ProcPtr, u32);
 /* sub_08079B04 IS DELIBERATELY NOT DECLARED HERE. It is `static` inside its
- * own unit -- see the paragraph above and src/decomp/c_08036B34.c's
+ * own unit -- see the paragraph above and src/main.c's
  * sub_08036B48 for the same construction. A non-static declaration would both
  * clash with the definition and, worse, make the assembler keep an
  * R_ARM_THM_CALL on each of the three `bl`s (a global symbol is preemptible),
@@ -1057,7 +1061,7 @@ u8 sub_080390CC(u8);
  * shared prototype. But it is NOT what blocks sub_08039188: with the caller's
  * narrowing removed the caller is still +4, and the whole of that is the
  * `ldrsb` fold on the two parallel s8 tables. See work/sub_08039188/. */
-u8 sub_08039140(u16, s16, u8, u8);
+u8 sub_08039140();
 void sub_0803941C(int, int);
 void sub_08039544(u8 *);
 void sub_08039930(int, ProcPtr);
@@ -1298,7 +1302,7 @@ bool8 sub_0803E388(int);
 /* Same 0/1-plus-`lsls #24` shape as sub_0803E388, at the call site in
  * sub_08045830. */
 bool8 sub_08045650(void);
-/* Indexes gUnknown_08499598 by its argument and ends `pop {r0}; bx r0`. */
+/* Indexes gPlayers by its argument and ends `pop {r0}; bx r0`. */
 void sub_08044AB8(int);
 
 /* NINE arguments -- four in registers and five on the stack -- behind the five
@@ -1659,9 +1663,16 @@ void sub_080252E8(void *);
  * because sub_080370F0 lives in another translation unit. They take
  * `void (*)(void)` and NOT `void *`, so their call sites pass a function by
  * name with no cast -- the opposite of the sub_08011AAC / sub_08011B34 /
- * sub_0801F024 convention a few lines up. sub_0803662C registers sub_08036944 /
- * sub_080369BC through the same pair, sub_080370F0 registers sub_08036884 /
- * sub_080368E8; the two wrappers are what fix which setter drives which slot. */
+ * sub_0801F024 convention a few lines up.
+ *
+ * gUnknown_030040D0 is the VBlank-side slot reached through RunVBlankCallback
+ * after AgbMain registers that wrapper with sub_0801BB00. gUnknown_030040EC is
+ * the main-loop slot that AgbMain calls directly. sub_0803662C registers
+ * sub_08036944 / sub_080369BC through the same pair, sub_080370F0 registers
+ * sub_08036884 / sub_080368E8; the two wrappers are what fix which setter
+ * drives which slot. */
+void SetMainLoopCallback(void (*)(void));
+void SetVBlankCallback(void (*)(void));
 void sub_080366C4(void (*)(void));
 void sub_080366D0(void (*)(void));
 void sub_08002D7C(void);
@@ -1805,7 +1816,7 @@ void sub_08021D10(void);
  * sub_08021750's parameter is an `int` whose only use is `+ 0x4c` narrowed to
  * u8 for sub_0803CF3C's first parameter; nothing dereferences it, so it is not
  * a pointer.  sub_080212AC's is `u16` -- the `lsls #0x10; lsrs #0x10` prologue
- * -- and it indexes both gUnknown_08499598 (0x3c stride) and the two
+ * -- and it indexes both gPlayers (0x3c stride) and the two
  * gUnknown_084995F4 / _FE halfword tables as an army slot.  Neither sets r0. */
 void sub_08021750(int);
 void sub_080212AC(u16);
@@ -2705,37 +2716,40 @@ void sub_08023860(void);
  * `ldrb [r3,#4]`, the unk00->unk04_0 chain c_08024DDC.c already models);
  * r1 is compared against 1 with no entry narrowing, so `int`; r2 opens
  * `lsls #0x18; lsrs #0x18`, so `u8`. */
-void sub_08024C58(struct Unk030013D0 *, int, u8);
+void sub_08024C58(struct BattleUnit *, int, u8);
 /* Wave 36 (W36-A). PROMOTED in src/decomp/c_08024A2C.c with no declaration
  * anywhere; signature copied verbatim from that definition, not re-derived.
  * It blocked sub_080251D8 and sub_08024F20. */
-void sub_08024A2C(struct Unk030013D0 *, s16);
+void sub_08024A2C(struct BattleUnit *, s16);
 /* Wave 36 (W36-A). Six more PROMOTED-but-undeclared callees, blocking
- * sub_08024C58. Signatures copied verbatim from src/decomp/c_08043304.c,
- * c_08042C24.c and c_08042E2C.c. `struct Unk43304` is a FILE-LOCAL tag in
- * c_08043304.c; declaring it incomplete here keeps that file compiling
- * unchanged and callers cast onto it -- do not invent a body for it. */
-struct Unk43304;
-struct Unk08024ABCArg;
-void sub_08024ABC(struct Unk08024ABCArg *, struct Unk08024ABCArg *, s16, u8);
+ * sub_08024C58. Signatures copied verbatim from src/unit.c.
+ * The three sub_080433xx accessors below took a file-local `struct Unk43304`
+ * in src/unit.c until they were RETYPED to the shared struct BattleUnit, on
+ * the same grounds as sub_08024ED8 below: every call site is in src/battle.c
+ * and passes gBattleAttacker or gBattleDefender, and the two models agree
+ * where they overlap -- Unk43304's `unk00` is BattleUnit's `unit` and its
+ * `unk06` is `terrainDefense`, the field sub_08024C58 assigns the result of
+ * sub_08043304 back into. Byte-verified against the canonical ROM. */
+struct BattleUnit;
+void sub_08024ABC(struct BattleUnit *, struct BattleUnit *, s16, u8);
 /* Wave 36 (W36-A) RETYPES sub_08024ED8 from the file-local `struct Unk8024ED8 *`
  * that c_08024ED8.c invented ("the record itself is not modelled -- only +8 is
- * reached here") to the shared struct Unk030013D0, and the evidence is a CALL
+ * reached here") to the shared struct BattleUnit, and the evidence is a CALL
  * SITE, which is the only place it could come from: sub_08024F20 hands it
  * gUnknown_030013D0 and gUnknown_030013B0, the same two records it has just
  * passed to sub_08024A2C, sub_08024ABC, sub_08024C58 and sub_08024E60. The two
  * models agree where they overlap -- Unk8024ED8's `s16 unk08` is
- * Unk030013D0's unk08, the field c_08024DDC.c writes and tests `>= 0`.
+ * BattleUnit's remainingHp, the field c_08024DDC.c writes and tests `>= 0`.
  *   It is BYTE-VISIBLE and that is how it was found: with two different tags
  * naming one symbol, agbcc emits a -fforce-addr .rodata word for one reference
  * and a plain inline pool word for the other, and the ROM shares ONE word
  * (0x08090A38) between them. Same tag on both references, one word, match.
  * c_08024ED8.c is edited to agree and re-verified byte-for-byte. */
-void sub_08024ED8(struct Unk030013D0 *, struct Unk030013D0 *);
-void sub_08024E60(struct Unk030013D0 *, struct Unk030013D0 *);
-int sub_08043304(struct Unk43304 *);
-int sub_0804334C(struct Unk43304 *);
-int sub_0804338C(struct Unk43304 *);
+void sub_08024ED8(struct BattleUnit *, struct BattleUnit *);
+void sub_08024E60(struct BattleUnit *, struct BattleUnit *);
+int sub_08043304(struct BattleUnit *);
+int sub_0804334C(struct BattleUnit *);
+int sub_0804338C(struct BattleUnit *);
 int sub_08042CF8(int, int);
 int sub_08042E64(int);
 int sub_08042EBC(int);
@@ -3022,10 +3036,10 @@ void sub_08038C98(void);
  *
  *   void sub_08024404(void);                        c_08024404.c   (guessed right)
  *   void sub_0802E2BC(void);                        c_0802E2BC.c   (guessed right)
- *   void sub_080201E0(s16, s16, struct Unk08499594 *);  c_080201E0.c
+ *   void sub_080201E0(s16, s16, struct Unit *);  c_080201E0.c
  *   int  sub_0803E9F8(struct Unk0803E9F8 *, u8 *, u8, u8);  c_0803E9F8.c
- *   int  sub_08041FE0(struct Unk08499594 *);        c_08041F38.c
- *   int  sub_0804203C(struct Unk08499594 *);        c_0804203C.c
+ *   int  sub_08041FE0(struct Unit *);        c_08041F38.c
+ *   int  sub_0804203C(struct Unit *);        c_0804203C.c
  *
  * sub_080201E0 is the sharp one: sub_0802E2D0's call site sets only r0 and r1
  * (`ldrb r0,[r2,#2]; ldrb r1,[r2,#3]`) and reads as two arguments, but r2 still
@@ -3033,7 +3047,7 @@ void sub_08038C98(void);
  * argument, costing zero instructions exactly as the "arity is invisible in a
  * pass-through" rule predicts. The three `int` returns likewise look narrow
  * from the call site (`lsls #0x18; lsrs #0x18`), and are not.
- *   The two 0x08042xxx functions take `struct Unk08499594 *`, not
+ *   The two 0x08042xxx functions take `struct Unit *`, not
  * `struct Unk030040D8 *`, so sub_0802E2D0 must hand them
  * `&gUnknown_08499594[*sel]` (or a cast) rather than gUnknown_030040D8.
  *
@@ -3111,7 +3125,7 @@ int sub_080208C8(int);
 /* Wave 49, W49-I: copied VERBATIM from the byte-verified definition in
  * src/decomp/c_08020634.c, which had no declaration anywhere. */
 void sub_08020634(u8 *, u8 *);
-/* sub_08034890 loads gUnknown_03003FC0.unk02 with `ldrb` and passes it with no
+/* sub_08034890 loads gPlaySt.unk02 with `ldrb` and passes it with no
  * further narrowing, which is byte-identical for `int` and `u8`, so `int` is
  * the weakest model. */
 void sub_0802163C(int);
@@ -3487,7 +3501,7 @@ void sub_080359A4(ProcPtr);
  * depends on the old spelling. */
 void sub_080358C4(s16, s16);
 /* CORRECTED in wave 18 (W18-C): sub_080255F4 is
- * `u8 (struct Unk08499594 *, s16, s16)`, not `(int, int, int)`.
+ * `u8 (struct Unit *, s16, s16)`, not `(int, int, int)`.
  *   - Parameter 0 is a POINTER, not an int: the body NULL-tests it
  *     (`cmp r3,#0`), reads `[r3,#1]`, and takes `r3 - gUnknown_08499594` as an
  *     exact pointer difference by 12 (the *0xAAAAAAAB;asr#2 magic). Its caller
@@ -3505,7 +3519,7 @@ void sub_080358C4(s16, s16);
  * which is a no-op for the same reason. Neither call site was ever evidence
  * against s16 -- READ AN ABSENT NARROWING AS PROOF ONLY WHEN THE VALUE'S RANGE
  * DOES NOT ALREADY FIT. Neither caller is promoted. */
-u8 sub_080255F4(struct Unk08499594 *, s16, s16);
+u8 sub_080255F4(struct Unit *, s16, s16);
 /* Wave 29 (C) retyped the return from `int` to `u8`, on two independent
  * readings that agree. CALLEE side: sub_0801C254's own tail is
  * `bl sub_0801C2DC; lsls r0,#0x18; lsrs r0,#0x18` before the shared epilogue,
@@ -3608,15 +3622,18 @@ void sub_08003910(void);
 int sub_08007328(void);
 /* Wave 56 (W56-D), from the one call site in sub_08005F4C -- still `asm`, not
  * matched, so this is a contract and not a measurement. r0 arrives as a bare
- * `ldrh` of gUnknown_0200B0D0[i].unk04 and r1 as a sign-extended
- * gUnknown_0200B0B0->unk32 (s8), which is exactly what two `int` parameters
+ * `ldrh` of gDesignRing[i].itemId and r1 as a sign-extended
+ * gActiveMap->selectionAnimKind (s8), which is exactly what two `int` parameters
  * produce; a narrow second parameter would zero-extend under agbcc's
  * PROMOTE_MODE and lose the `lsls #0x18; asrs #0x18`. The caller's next
  * instruction is `bl sub_08007B74`, so r0 is dead and the return is void. */
 void sub_080077EC(int, int);
-/* Matched and promoted in src/decomp/c_080078D4.c as `void sub_080078D4(u8)`;
- * declared in wave 56 (W56-D) because sub_08005F4C calls it. */
-void sub_080078D4(u8);
+/* Matched and promoted in src/decomp/c_080078D4.c; declared in wave 56 (W56-D)
+ * because sub_08005F4C calls it. SIGNED (2026-09-24): sub_08005F4C's call site
+ * passes gActiveMap->selectionAnimKind as `ldrb; lsls #0x18; asrs #0x18`, and
+ * a u8 parameter would zero-extend instead. The callee is a bare `strb` either
+ * way, so the promoted body is byte-identical as s8 (re-verified). */
+void sub_080078D4(s8);
 void sub_080078E4(int, int);
 void sub_08002EB4(void);
 
@@ -3670,7 +3687,7 @@ int sub_08009BF4(int, int);
 
 /* ---- wave 23 (W23-C) ----
  * sub_0801A368 draws a box into one of the four 0x800-byte tilemap buffers
- * (gUnknown_08499578/7C/80/84, `u16 *` per src/decomp/c_08023360.c): one call
+ * (gBG0TilemapBuffer/7C/80/84, `u16 *` per src/decomp/c_08023360.c): one call
  * for the top row, `height - 2` calls for the middle rows and one for the
  * bottom, each 32 entries apart, then it marks whichever of the four buffers
  * it wrote with sub_08013AD4(0..3).
@@ -3956,7 +3973,7 @@ void sub_080119D4(u16, u16, u32);
  * caller's second argument (the gUnknown_08580FCC entry noted in
  * unknown-globals.h) and its first argument is a literal 0 at the one call
  * site. sub_080718F8's first argument is a byte cursor into the
- * gUnknown_08499584 buffer, its second a ROM blob and its third a literal 0.
+ * gBG3TilemapBuffer buffer, its second a ROM blob and its third a literal 0.
  *
  * NOTE, so nobody tries to "fix" this: sub_080718F8 is not a function. It is a
  * linker THUMB->ARM interworking veneer for the ARM routine sub_0800043C -- see
@@ -4029,7 +4046,7 @@ void sub_08043BF8(int, int);
  * -- and sub_08043AC0 takes it AGAIN on its own parameter, which is why its
  * body opens with two chained __modsi3 calls on one value.
  * sub_08017860, sub_08042FFC and sub_08043D84 are already PROMOTED
- * (src/decomp/c_08017860.c, c_08042E2C.c, c_08043D84.c) and were never
+ * (src/decomp/c_08017860.c, src/unit.c, c_08043D84.c) and were never
  * declared here; the signatures are copied verbatim from those definitions.
  * sub_080436DC's third argument is `strh`-stored into the u16
  * gUnknown_030005D0 and its one readable caller (sub_0804360C) loads a u16
@@ -4077,7 +4094,7 @@ void sub_08067898(u32, u32, u32, ProcPtr);
 void sub_080678BC(u32);
 
 /* Three more of the sub_0806B708 group. sub_08072C28's first argument is the
- * gUnknown_0849957C buffer and the other two are byte counts/offsets (0x400
+ * gBG1TilemapBuffer buffer and the other two are byte counts/offsets (0x400
  * and 0x280 at the one call site). sub_0806AF44 takes the caller's proc. */
 void sub_08072C28(u16 *, u32, u16);
 void sub_0806B120(void);
@@ -4190,7 +4207,7 @@ u8 *sub_0801F494(void);
 /* Wave 32 (W32-C). Reads its first argument's +0x00 and +0x01 BYTES -- the
  * gUnknown_08499594 unit record's own unk00/unk01 -- and forwards r1 untouched
  * as Proc_Start's parent, then parks the record at the new proc's +0x4c. */
-void sub_0802A54C(struct Unk08499594 *, ProcPtr);
+void sub_0802A54C(struct Unit *, ProcPtr);
 /* Wave 32 (W32-C). The tail call of sub_080310D8 / sub_08031128 /
  * sub_0803117C, all three of which reach it with no argument setup at all.
  * Declared void(void) as the weakest model that fits -- NOT read off its own
@@ -4255,7 +4272,7 @@ void sub_08073CB8(u8 *, u32 *, int, int);
 /* Takes no arguments -- its first instruction writes r0 -- and `pop {r0}`
  * makes it void. Its one caller, sub_0806C8DC, happens to have a zero in r0 at
  * the call, which is a coincidence of the preceding store and not an argument.
- * It clears a 20x22 halfword window of *gUnknown_08499578 and flushes. */
+ * It clears a 20x22 halfword window of *gBG0TilemapBuffer and flushes. */
 void sub_0806C8A0(void);
 void sub_0806B9CC(int, int, int, int);
 /* Wave 48 (W48-C), matched byte-for-byte, so this is the definition's own
@@ -4354,7 +4371,7 @@ void sub_08086CE0(u32, int, int);
 
 /* Wave 46, W46-G.  Copied from the promoted definition in
  * src/decomp/c_0802490C.c, which is authoritative -- it returns a `u8 *` out of
- * gUnknown_08610A38 and nothing narrows it.  sub_08086BF8/sub_08086CE0 are the
+ * gTextTable and nothing narrows it.  sub_08086BF8/sub_08086CE0 are the
  * first callers to need it; they hand the result straight to sub_080149C0's
  * `u8 *` fourth parameter. */
 u8 *sub_08024944(u16);
@@ -4382,7 +4399,7 @@ int sub_08008C34(int, int);
  * and not a returned comparison.
  *
  * sub_08025308's result is stored with a bare `strb` into four consecutive
- * bytes of gUnknown_0200B0B0 by sub_080088F0, with NO `lsls #0x18; lsrs #0x18`
+ * bytes of gActiveMap by sub_080088F0, with NO `lsls #0x18; lsrs #0x18`
  * in front -- so `int`, per the re-narrowing rule. Its argument is the 1-based
  * army number, matching the note on gUnknown_08499594.
  *
@@ -4477,7 +4494,7 @@ void sub_08073574(int, int, int, int, int, int);
  * each -- r0..r3 plus two words at [sp] and [sp, #4]. They differ in the third
  * argument's type and that is real: sub_08014668 takes a u16 tile value read
  * with `ldrh`, sub_080149C0 takes a `u8 *` read with `ldr` out of
- * gUnknown_08610A38. */
+ * gTextTable. */
 /* Wave 21 (W21-A) corrects sub_08014668 on two axes, from the body rather than
  * from the call sites:
  *   Arguments 4..6 are `u16`, not `int`. They are narrowed `lsls #0x10;
@@ -4738,7 +4755,7 @@ void sub_08015568(int);
 void sub_08072BBC(int);
 
 /* The 0x08044 per-army funds block (wave 25). Every one of these takes the
- * army slot index that subscripts gUnknown_08499598, passed and compared as a
+ * army slot index that subscripts gPlayers, passed and compared as a
  * bare `int` at every call site in the block -- no prologue masking anywhere,
  * which per the PROMOTE_MODE rule is positive evidence for a wide parameter.
  *
@@ -4783,7 +4800,7 @@ void sub_0804438C(int, int);
  * sub_08025E08 takes three bytes of gUnknown_030046C0 and its result is
  * discarded (sub_080600F0 ends `pop {r0}`). sub_08042634 takes two, sub_08042C24
  * four in registers plus a fifth pushed as `str r4, [sp]` -- that fifth is the
- * `ProcPtr` parent its promoted definition in src/decomp/c_08042C24.c names,
+ * `ProcPtr` parent its promoted definition in src/unit.c names,
  * NOT an int, and sub_08060474 passes it as PROC_TREE_3 (wave 31 declared it
  * `int` first and proto_check caught it). sub_080425FC takes the one u8
  * recorded above with sub_08041978.
@@ -4890,7 +4907,7 @@ int sub_080444B4(struct Unk030040D8 *);
  * The parameter is `int`, not the `u8` its body suggests: the prologue is
  * `adds r4,r0,#0` THEN `lsls r0,r4,#0x18; lsrs r0,r0,#0x18` -- copy-then-narrow,
  * which per docs/agbcc-codegen.md is a cast at a use (it feeds
- * sub_0803CCB8(a, gUnknown_0200B204)) and not a narrow parameter; the saved r4
+ * sub_0803CCB8(a, gDesignRoomName)) and not a narrow parameter; the saved r4
  * is switched on unnarrowed as 0/1/2 immediately afterwards.
  *
  * It RETURNS a value and that is decisive rather than inferred: all three F058
@@ -5045,7 +5062,7 @@ bool8 sub_0802C660(void);
 /* The 0x0802C0E8 block's own callees and forwarders (wave 24, W24-A).
  *
  * sub_0802C0E8 takes a parameter it never reads -- its body opens by loading
- * gUnknown_03003FC0 straight over r0 -- so the width is settled entirely at its
+ * gPlaySt straight over r0 -- so the width is settled entirely at its
  * one call site, sub_0802C118: that hands it the u16 global gUnknown_030033EC
  * with a bare `ldrb`. A `u8` parameter is what turns a u16 load into a byte
  * load; an `int` one would have emitted `ldrh`. Returns nothing (`pop {r0};
@@ -5119,7 +5136,7 @@ void sub_080438FC(int, int, int);
 bool8 sub_080442E4(int);
 
 /* Wave 36 (W36-B), the sub_08042650 group. The first three are copied verbatim
- * out of src/decomp/ (c_08042E2C.c, c_080265B0.c, c_08024058.c) rather than
+ * from src/unit.c and src/decomp/ (c_080265B0.c, c_08024058.c) rather than
  * re-derived -- all three are promoted, byte-verified and were undeclared.
  * sub_080409E8 is the only one derived here, from sub_08042650's call site: it
  * is 0x08042's undeclared callee and nothing in src/decomp defines it. FIVE
@@ -5210,7 +5227,7 @@ void sub_08011C90(const void *, void *, u16);
  * with `bhi` -- an UNSIGNED compare, so the locals themselves are `u32` and
  * cannot be the source of the narrowing. agbcc re-narrows a narrow-returning
  * callee at every call site, which is exactly what is there. Its five
- * arguments arrive as two `ldrb`s off gUnknown_08499598[army], two more
+ * arguments arrive as two `ldrb`s off gPlayers[army], two more
  * `ldrb`s (or the literal 0x19), and one stack word; nothing narrows on the
  * caller side, so `int` throughout.
  *
@@ -5225,7 +5242,7 @@ int sub_080433F8(int, int, int);
  * pair and misses by 4 bytes. The call-site narrowing is real but comes from
  * an explicit (u16) cast in sub_08024ABC, which is forced independently: its
  * v1/v3 are compared `bhi`, so they are u32 and cannot themselves narrow.
- * c_08024ABC.c now spells the casts and was re-verified. */
+ * src/battle.c now spells the casts and was re-verified. */
 int sub_08043070(int, int, int, int, int);
 int sub_08042D50(int, int);
 /* Wave 34 (W34-H). A number/icon blitter sub_08039F80 calls four times. The
@@ -5251,11 +5268,11 @@ void sub_0802BCF0(u16, u16, u32);
  * stack word through `bl _call_via_r4`) and restores gUnknown_03004480 from
  * gUnknown_030033EC afterwards. Nothing narrows any of them, so `int`. */
 void sub_0802026C(int, int, int, int, int, int);
-/* Wave 32 (W32-B): one `struct Unk08499594 *`, read off its own body -- it
+/* Wave 32 (W32-B): one `struct Unit *`, read off its own body -- it
  * passes `unk00` to sub_08042D1C and compares the result against the 7-bit
  * bitfield at +6 (`ldrb; lsls #0x19; lsrs #0x19`), which is that type's
  * unk06_0. Returns the smaller of the two, so `int`. */
-int sub_08058224(struct Unk08499594 *);
+int sub_08058224(struct Unit *);
 /* Wave 32 (W32-B): four arguments, all forwarded to PutSpriteExt -- r3 becomes
  * its first, r2 its fifth, and r0/r1 are masked with 0xfffffe00 / 0xffffff00
  * and re-ORed, i.e. coordinates. Nothing narrows them, so `int` throughout. */
@@ -5292,7 +5309,7 @@ int sub_08038474(void);
  * one gUnknown_0200C420.unk38[] record -- a1 is the id it first searches the
  * live run for, a2 the bits-8..19 field and a3 the bits-20..31 field. a1 is
  * `int` and NOT `u8`: sub_08038484, its only caller, passes the int expression
- * `gUnknown_03003FC0.unk02 - 0x8a` with no re-narrowing before the `bl`, which
+ * `gPlaySt.unk02 - 0x8a` with no re-narrowing before the `bl`, which
  * a narrow parameter would force. a2 and a3 arrive as bare `ldrh` results, so
  * `u16` would fit them equally well (PROMOTE_MODE zero-extends either way and
  * the bitfield stores mask to 12 bits regardless) -- `int` is the weakest type
@@ -5338,7 +5355,7 @@ void sub_080176C0(u32);
  * sub_0807823C's whole body is `bx lr` -- it does nothing at all. Its arity is
  * therefore invisible from the body and comes from the one call site, which
  * sets up r0 only. `int` because that site passes the int expression
- * `gUnknown_03003FC0.unk02 - 0x8a` with no narrowing before the `bl`.
+ * `gPlaySt.unk02 - 0x8a` with no narrowing before the `bl`.
  *
  * sub_0807821C returns `gUnknown_08615194[a].unk02 & 0x10` as a literal 0 or 1
  * through two arms. Its parameter is scaled `(a * 2 + a) << 4`, a 0x30 stride,
@@ -5447,7 +5464,7 @@ void sub_0801FD9C(int);
  * shift-add chain for the 12-byte stride. sub_0802CA78 and sub_0802CB20 both
  * pass three arguments at the call site. No .c file used the old declaration,
  * so nothing had to be re-verified. */
-void sub_08020354(u16, u16, struct Unk08499594 *);
+void sub_08020354(u16, u16, struct Unit *);
 /* Wave 35 (W35-H): sub_080203C0's own prologue is `adds r3,r0,#0; adds r2,r1,#0;
  * cmp r3,#0; ble` -- two int parameters, signed. Its result is discarded at
  * sub_0802CC40's call site. */
@@ -5493,7 +5510,7 @@ void sub_08019E68(void);
  * emitted "`struct Unk8019A60' declared inside parameter list", and -Werror
  * made it fatal for EVERY compile in the tree. W40-H compiled inside that
  * window and read the state correctly. The struct has been in
- * unknown-globals.h since, next to gUnknown_08499578.
+ * unknown-globals.h since, next to gBG0TilemapBuffer.
  *
  * The forward declaration stays: it costs nothing and it makes this header
  * self-contained, so the same mistake cannot break the tree again if the
@@ -5559,7 +5576,7 @@ void sub_0802E278(void);
  * each parameter (`lsls #0x10` once, then `lsrs` into r7/r6 and `asrs` into
  * r0/r1), because it stores the unsigned view into gUnknown_03003100's u16
  * members and passes the signed view to sub_0802E724. */
-void sub_08020D50(s16, s16, struct Unk08499594 *);
+void sub_08020D50(s16, s16, struct Unit *);
 void sub_08024500(void);
 void sub_0802D67C(u8);
 void sub_0803AA78(u8);
@@ -5626,7 +5643,7 @@ bool8 sub_08042084(u8 *);
  * promoted when this was corrected, so the edit cost one trymatch on
  * c_08026F9C.c. */
 bool8 sub_08026FD0(s16, u8);
-/* Wave 34 (W34-I). sub_08026FD0's sibling -- gUnknown_08499598's unk2a comment
+/* Wave 34 (W34-I). sub_08026FD0's sibling -- gPlayers's unk2a comment
  * records the pair as comparing that field between two entries, and both take a
  * unit id and a second id truncated to a byte. sub_080422A8 is the only caller
  * in C so far and it hands the arguments the OTHER way round from sub_0804236C's
@@ -5661,7 +5678,7 @@ bool8 sub_0802571C(u16);
  * gUnknown_030033EC (u16, passed with a bare `adds r0, r4, #0`) and a `ldrb`,
  * neither narrowed at the call. */
 void sub_08025B58(u16, u32);
-void sub_08025B80(struct Unk08499594 *, u8);
+void sub_08025B80(struct Unit *, u8);
 void sub_080424E4(void);
 /* Both parameters CORRECTED to `int` (wave 26, W26-C). The paragraph above read
  * them off the CALL SITE, where neither is narrowed -- but that is byte-neutral,
@@ -5835,7 +5852,7 @@ void sub_080324C4(int, int, u8);
 /* Wave 38 (W38-J): same object as sub_08029978 / sub_08029A48 above, and
  * retyped on the same evidence -- it walks unk00 (the `* 0x5c` subscript into
  * gUnknown_085D5ABC) and the unk04_0:7 field, clamping the latter at 100. */
-int sub_08029AF8(struct Unk08499594 *, u16, u8);
+int sub_08029AF8(struct Unit *, u16, u8);
 void sub_08053670(u16);
 
 /* The three callees of sub_08043418.
@@ -6167,9 +6184,9 @@ void sub_08017870(int, u8);
  * is the `u8` gUnknown_0849D89C->unk00 (`ldrb` at the call); sub_0803A190 does
  * not narrow it at entry so it is `int` there, sub_0803A2BC narrows it
  * `lsls #0x18` in place so it is `u8`. Argument 2 is the same
- * struct Unk08499594 sub_08025BE0 initialises. */
-void sub_0803A190(int, struct Unk08499594 *);
-void sub_0803A2BC(u8, struct Unk08499594 *);
+ * struct Unit sub_08025BE0 initialises. */
+void sub_0803A190(int, struct Unit *);
+void sub_0803A2BC(u8, struct Unit *);
 /* A predicate over the gUnknown_0849EDB0 list; takes nothing (r0 is dead at
  * entry) and its one caller sub_08084920 tests the result `lsls #0x18;
  * cmp #0`. */
@@ -6244,7 +6261,7 @@ void sub_0804DC5C(u16, u16, int);
  * docs/agbcc-codegen.md. Types copied from the definition, not re-derived. */
 void sub_0803B3C8(void);
 
-/* Returns 1 when gUnknown_03003FC0's byte 1 is 1 and sub_0803CBD8(0x60) is
+/* Returns 1 when gPlaySt's byte 1 is 1 and sub_0803CBD8(0x60) is
  * non-zero, else 0. `int`, and this one is settled by population rather than by
  * the body: 20 call sites across asm/ and not one narrows the result -- 18 are
  * a bare `cmp r0, #0` (or a copy then a compare) and TWO use it directly as a
@@ -6328,11 +6345,12 @@ void sub_0800EAF4(int, int);
 void sub_0800EB5C(int, int);
 
 /* Wave 50 (W50-I). sub_0800CFDC itself, the 6,384-byte driver the four helpers
- * above belong to, was never declared. It is parked, not matched, but
- * work/sub_0800CFDC/sub_0800CFDC.c settled its shape as `void (int, int)` and
- * its ONE caller sub_0800CF28 agrees: `adds r0,r4,#0; adds r1,r5,#0;
- * bl sub_0800CFDC` with nothing read out of r0 afterwards. */
-void sub_0800CFDC(int, int);
+ * above belong to. Its ONE caller sub_0800CF28 (`adds r0,r4,#0; adds r1,r5,#0;
+ * bl sub_0800CFDC`) reads nothing out of r0 afterwards, which is why earlier
+ * drafts called it `void`. It is `int`: every exit, including the early
+ * returns, goes through a shared `movs r0, #0` epilogue at 0x0800E8BA.
+ * Changing the prototype does not change sub_0800CF28's code. */
+int sub_0800CFDC(int, int);
 
 /* ---- wave 21 (W21-A): the gUnknown_0200C020 pair ----
  * sub_08014074 is already matched in src/decomp/c_08014074.c and was simply
@@ -6351,7 +6369,7 @@ void sub_0800CFDC(int, int);
  * (`lsrs`). Parameter 4 is stored as a word at +0x28 and never narrowed, and
  * is `u16 *` only so that sub_08014668's third argument forwards without a
  * cast. Parameters 5 and 7 are `u16` on the body's own evidence (5 is
- * zero-extended and scaled `lsrs #0xe` into gUnknown_08610A38[]; 7 is
+ * zero-extended and scaled `lsrs #0xe` into gTextTable[]; 7 is
  * zero-extended and stored to two halfwords); 6 is only ever `strh`'d, so its
  * width is a floor and u16 is the weakest spelling that costs the callers
  * nothing. */
@@ -6585,7 +6603,7 @@ bool8 sub_080281A0(void);
 u16 sub_080206B0(u32);
 /* Its FIRST parameter is dead -- the body clobbers r0 with the
  * gUnknown_08499EE4 pool word before reading it -- and is readable only at
- * sub_08017B08, which loads it `ldrb` from gUnknown_03003FC0.unk02. The second
+ * sub_08017B08, which loads it `ldrb` from gPlaySt.unk02. The second
  * is stored whole with `str` into the resulting slot's +0x18. */
 void sub_080281D8(u8, u32);
 
@@ -6662,7 +6680,7 @@ void sub_080185BC(struct Unk0200C528 *);
 /* Wave 33, W33-G. The two gUnknown_0200C528 list-script handlers next door to
  * sub_08018758, and the same bool8 shape: `movs r3,#0` / `movs r3,#1` split
  * across a `b` into one `adds r0,r3,#0`. sub_08014004's argument is the
- * `u8 *` element of gUnknown_08610A38[] (the sub_080149C0 precedent above) and
+ * `u8 *` element of gTextTable[] (the sub_080149C0 precedent above) and
  * its result is re-narrowed `lsls #0x18` at the call site, which is a byte
  * return. */
 bool8 sub_08014004(u8 *);
@@ -6676,7 +6694,7 @@ void sub_08018DF8(struct Unk0200C528 *);
  *
  * sub_08043120 / sub_08043190 / sub_08043200 are sub_080430B0's siblings,
  * declared above as `int (int, int, int)`. Every one of them is reached from
- * the same call shape -- `ldrb` of gUnknown_08499598[a].unk1d and .unk1e into
+ * the same call shape -- `ldrb` of gPlayers[a].unk1d and .unk1e into
  * r0/r1 with the caller's second argument already parked in r2 -- so they take
  * the same three wide arguments and their results are added to or offset by a
  * constant, hence `int`. */
@@ -6706,7 +6724,7 @@ void sub_080425B8(void);
  * sub_080433E8 is the one-argument partner whose result is added to it, exactly
  * as sub_080433B8 / sub_080433C8 pair with theirs. sub_08043050's result is
  * masked `& 0x80` by sub_08042C68, so it is at least 8 bits wide; the promoted
- * definition in src/decomp/c_08042E2C.c names `u32`, and u32 vs int is
+ * definition in src/unit.c names `u32`, and u32 vs int is
  * word-width both ways -- byte-neutral at every call site -- so the definition
  * wins. Its argument is forwarded from a bare register. */
 int sub_080432A8(int, int);
@@ -6777,16 +6795,16 @@ void sub_08004DD4(int, int, u8 *, int);
 
 /* Two wide parameters -- `adds r5, r0, #0; mov r8, r1` with no narrowing. The
  * second is a VRAM destination sub_08004D90 computes as
- * `&gUnknown_08499578[...]`. */
+ * `&gBG0TilemapBuffer[...]`. */
 void sub_0801F2AC(int, u16 *);
 
 /* Wave 37, W37-A. The two forwarders described in the note above, declared for
  * their only callers sub_0800572C and sub_08005874. sub_08004D74 pushes only
  * {lr} and forwards r0/r1 into sub_08004DD4 untouched, adding
- * gUnknown_08610A38[0x9FA] and a literal 0 -- so two wide parameters. Both end
+ * gTextTable[0x9FA] and a literal 0 -- so two wide parameters. Both end
  * `pop {r0}; bx r0`, the VOID epilogue. sub_08004D90's third parameter is the
  * same `u8 *` sub_08004DD4 declares: both call sites hand it
- * `gUnknown_0200B204` straight through with `adds r2, rN, #0`. */
+ * `gDesignRoomName` straight through with `adds r2, rN, #0`. */
 void sub_08004D74(int, int);
 void sub_08004D90(int, int, u8 *);
 
@@ -6992,7 +7010,7 @@ int sub_0803CC64(u16);
 /* Matched in wave 27. `u8` and not `int`: the `lsls #0x18; lsrs #0x18` is in
  * the prologue operating on r0 IN PLACE, which is PROMOTE_MODE narrowing a
  * sub-word parameter, not a cast at a use (that would copy first). Its one
- * caller sub_08037E64 passes gUnknown_03003FC0.unk01, itself a `u8`. */
+ * caller sub_08037E64 passes gPlaySt.unk01, itself a `u8`. */
 void sub_080375A4(u8);
 
 /* The three arms of sub_080375D4's `switch (p->unk1e++ & 0x3f)`, each called as
@@ -7137,7 +7155,7 @@ s16 sub_08011D7C(void *, int);
 /* An (x, y) pair. Both prologues are a bare `adds r4, r0, #0` / `adds r5, r1,
  * #0` with no PROMOTE_MODE shift pair, so both parameters are `int`; both end
  * `pop {r0}; bx r0`, so void. They are twins -- same guard on
- * gUnknown_03004008, same `& 0x1FF` / `& 0xFF` wrap, differing only in the id
+ * gGameClock, same `& 0x1FF` / `& 0xFF` wrap, differing only in the id
  * they pass sub_0801F34C (0x43 vs 0x44) and sub_08064500's extra palette
  * write. */
 void sub_08064474(int, int);
@@ -7288,7 +7306,7 @@ void sub_08066B6C(void);
  * the ARM routine that follows it, and data/asm-resident.json already carries
  * it. Eleven callers, all passing four register arguments. r0 and r1 are
  * addresses (sub_0807606C passes `gUnknown_08551A00 + 0x140` and an offset into
- * gUnknown_08499578), r2 and r3 small counts. The result is discarded
+ * gBG0TilemapBuffer), r2 and r3 small counts. The result is discarded
  * everywhere it is called from so far. */
 void sub_08071900(void *, void *, int, int);
 /* Wave 35 (W35-B). sub_08071900's sibling one entry along, called by
@@ -7825,7 +7843,7 @@ void sub_08035828(struct Unk35828Proc *);
 
 /* The block's own helpers.
  *
- * sub_08035124 takes `u8`: sub_080351F0 reaches gUnknown_03003FC0.unk2e with a
+ * sub_08035124 takes `u8`: sub_080351F0 reaches gPlaySt.unk2e with a
  * plain `ldrb` and the callee's prologue is `lsls #0x18; lsrs #0x18` operating
  * on r0 IN PLACE before any global is touched, which is PROMOTE_MODE and not a
  * cast at a use.
@@ -7918,7 +7936,7 @@ void sub_08035760(ProcPtr, void *);
  * Its own fan-in is 0, so nothing constrains this from the caller side.
  *
  * The last three are the "PROMOTED BUT NEVER DECLARED" trap: all are already
- * matched, in src/decomp/c_0801BD00.c and src/decomp/c_08042E2C.c. The types
+ * matched, in src/decomp/c_0801BD00.c and src/unit.c. The types
  * below are COPIED FROM THOSE DEFINITIONS and were not re-derived. */
 void sub_08035850(int, int, int);
 void sub_08035BC4(s16, s16, s16);
@@ -7935,11 +7953,11 @@ void sub_08071488(struct MusicPlayerInfo *, u16, s16);
 
 /* Copied from the promoted definitions in src/decomp; the 0x08036000 block is
  * the first cross-file caller each of them has had.
- * sub_08036CB4 lives in the AgbMain unit (c_08036B34.c) but is an ordinary
+ * sub_08036CB4 lives in the AgbMain unit (src/main.c) but is an ordinary
  * global, so the relocation is real -- it is NOT the `static` sub_08036B48
  * hazard that unit carries. */
 bool8 sub_0802759C(void);    /* c_0802759C.c */
-void sub_08036CB4(void);     /* c_08036B34.c */
+void sub_08036CB4(void);     /* src/main.c */
 void sub_0804A010(void);     /* c_0804A010.c */
 /* The heap free's forwarder. Its own definition's comment already records the
  * evidence for `void *`: sub_080363D0 does `ldr r0, [r4, #0x48]` immediately
@@ -8388,7 +8406,7 @@ void sub_08040624(int, int, int, ProcPtr);
  * prologue narrows r0, r1, r3 and both stack arguments with `lsls #0x10;
  * lsrs #0x10`, which is PROMOTE_MODE and which an `int` parameter never
  * produces. The third is untouched and is forwarded as a pointer --
- * sub_0808A6A0 passes the dereferenced `u16 *` gUnknown_08499578. */
+ * sub_0808A6A0 passes the dereferenced `u16 *` gBG0TilemapBuffer. */
 void sub_0808A5C4(void);
 /* CORRECTION, wave 32 (W32-A): arguments ONE and TWO are `s16`, not `u16`.
  * The wave-29 reading above is right that the prologue narrows them -- but
@@ -8458,10 +8476,10 @@ void sub_080606A0(void);
  * (cases 0xd and 0xe) that had no declaration and no promoted body -- every
  * other arm of that dispatcher is either declared above or defined in
  * src/decomp (c_080600F0.c, c_080601C8.c, c_080601F0.c, c_080606BC.c,
- * c_0802C16C.c, c_08042B70.c), and all of those are `void (void)`.
+ * c_0802C16C.c, src/unit.c), and all of those are `void (void)`.
  * sub_0805FFA0 reaches both through `mov pc, r0` with no argument setup on
  * any path into the table and discards the result, and the two globals notes
- * on struct Unk08499594.unk09 (W32-A) and gUnknown_030046C0 (W49-E) describe
+ * on struct Unit.unk09 (W32-A) and gUnknown_030046C0 (W49-E) describe
  * both as reading their operands out of globals. */
 void sub_08060110(void);
 void sub_08060170(void);
@@ -8473,7 +8491,7 @@ void sub_08060170(void);
  *   sub_080601F0/08060264/080602C4  src/decomp/c_080601F0.c
  *   sub_080606BC            src/decomp/c_080606BC.c
  *   sub_0802C16C            src/decomp/c_0802C16C.c
- *   sub_08042B84            src/decomp/c_08042B70.c */
+ *   sub_08042B84            src/unit.c */
 void sub_080600F0(void);
 void sub_080601C8(void);
 void sub_080601DC(void);
@@ -8488,7 +8506,7 @@ void sub_08035810(void);
 /* Wave 34 (W34-I). All three are called argument-free by the block-0x08042
  * cursor helpers (sub_080424FC, sub_0804256C, sub_08042B9C). sub_080176A4 and
  * sub_080198D0 discard the result at every call site, so void.
- * sub_08035170's result is stored straight into gUnknown_03003FC0's byte at
+ * sub_08035170's result is stored straight into gPlaySt's byte at
  * +0x2e with a bare `strb` and no re-narrowing -- which does NOT discriminate
  * u8 from int, since `strb` truncates either way. u8 is the weaker guess of
  * the two and is recorded as UNPROVED. */
@@ -8531,7 +8549,7 @@ void sub_0802239C(u16 *, u16, u16, u8, u16, u8, u8);
  * `bl` needs no argument setup at all.
  *
  * sub_08025AEC and sub_080254AC both scan gUnknown_08499594 for a free slot and
- * return the element address or 0, so both return `struct Unk08499594 *`; both
+ * return the element address or 0, so both return `struct Unit *`; both
  * end `pop {r1}` / `bx lr` with r0 live. sub_08025BE0 initialises one of those
  * records field by field at +0..+0xb, which is the whole 0x0c-byte struct.
  *
@@ -8543,9 +8561,9 @@ void sub_0802239C(u16 *, u16, u16, u8, u16, u8, u8);
 void sub_08024F20(s16, s16, struct Unk802C57C *);
 void sub_080251D8(int);
 void sub_080211DC(u8, s8);
-struct Unk08499594 *sub_080254AC(void);
-struct Unk08499594 *sub_08025AEC(void);
-void sub_08025BE0(struct Unk08499594 *, u8);
+struct Unit *sub_080254AC(void);
+struct Unit *sub_08025AEC(void);
+void sub_08025BE0(struct Unit *, u8);
 void sub_08025D20(int);
 void sub_08035740(void *);
 /* Wave 29, W29-A. `s16` and not `u16`, and the discriminator is entirely on the
@@ -8555,13 +8573,13 @@ void sub_08035740(void *);
  * arguments before the `bl`; declaring the parameters `u16` makes those two
  * callers emit `lsrs` there instead and neither one matches. Returns the
  * gUnknown_08499594 slot sub_08025AEC handed out, or NULL. */
-struct Unk08499594 *sub_08025C5C(s16, s16, s16);
+struct Unit *sub_08025C5C(s16, s16, s16);
 /* Wave 32 (W32-B): the same three `s16` as sub_08025C5C, read straight off its
  * own prologue (`lsls #0x10; asrs #0x10` on r0, r1 and r2 -- SIGN extension, so
  * not PROMOTE_MODE's zero-extend), and it returns sub_08025C5C's slot unchanged
  * or 0. sub_08045564 writes through the result, which is what fixes the return
  * type rather than only the family resemblance. */
-struct Unk08499594 *sub_08025CC8(s16, s16, s16);
+struct Unit *sub_08025CC8(s16, s16, s16);
 
 /* Wave 29, W29-A. Both are already DEFINED (src/decomp/c_0803CD14.c,
  * src/decomp/c_0803CCEC.c) and were never declared; these publish the
@@ -8601,14 +8619,14 @@ void sub_08026584(u8, u16);
  *
  * sub_080265D0: r0 is the 1..4 slot counter narrowed with `lsls #0x18;
  * lsrs #0x18` (the same value the sub_080266DC(u8) guard immediately above the
- * call already fixed as u8), r1 is a plain `ldrb` of gUnknown_03003FC0.unk02.
+ * call already fixed as u8), r1 is a plain `ldrb` of gPlaySt.unk02.
  * The result is discarded -- the next instruction is the loop increment.  The
  * second parameter's width is NOT settled: an `ldrb` source needs no narrowing
  * for u8, u16 or int, so u8 is the load width and nothing more.
  *
  * sub_08017720: four arguments, each loaded at its member's own width and
- * handed over with no narrowing -- `ldrb` of gUnknown_08499598[n].unk1d,
- * `ldrb` of gUnknown_03003FC0.unk02, `ldrh` of gUnknown_08499598[n].unk38 and
+ * handed over with no narrowing -- `ldrb` of gPlayers[n].unk1d,
+ * `ldrb` of gPlaySt.unk02, `ldrh` of gPlayers[n].unk38 and
  * `ldrh` of gUnknown_03004080, where n is sub_0807A908() evaluated separately
  * for the first and third.  Result discarded (`bl sub_08030574` follows).
  * Same caveat: the widths are the loads', so they are a floor.  Wave 65 then
@@ -8834,7 +8852,7 @@ void sub_08032BA4(void);
 void sub_08044144(int);
 void sub_08044B28(int, int, ProcPtr);
 /* Same third-parameter proof from sub_08039650, where it additionally forces
- * the r2/r3 split between the proc pointer and the gUnknown_08499598 base. */
+ * the r2/r3 split between the proc pointer and the gPlayers base. */
 void sub_08080E74(int, int, ProcPtr);
 /* Wave 54, W54-C. Already promoted as `void sub_08080E40(ProcPtr proc)` in
  * src/decomp/c_08080DFC.c but never declared here; sub_08080BF0 is its only
@@ -8979,7 +8997,7 @@ int sub_08042DFC(int);
 /* Wave 41 (W41-C). The team-colour assignment pair, both from their own
  * definitions (now matched).
  *   sub_08026A88(slot, colour) answers whether `colour` is still free among
- * gUnknown_08499598[1 .. slot-1]. Its SECOND parameter is `int`, NOT `u8`:
+ * gPlayers[1 .. slot-1]. Its SECOND parameter is `int`, NOT `u8`:
  * sub_08026AC0 calls it twice, and the second call passes a plain int loop
  * counter with a bare `adds r1, r4, #0` -- a `u8` parameter would have forced
  * an `lsls #0x18; lsrs #0x18` there and none is present. The callee side cannot
@@ -9007,7 +9025,7 @@ void sub_08026B28(void);
  * to need a declaration. Copied verbatim from the definitions rather than
  * inferred: sub_08026C6C's is src/decomp/c_08026C6C.c (a leaf whose `u8`
  * parameter is fixed by its dense jump table over ids 6..20, returning the u32
- * gUnknown_03003FC0.unk28), and sub_08026CD0's is its own body, matched earlier
+ * gPlaySt.unk28), and sub_08026CD0's is its own body, matched earlier
  * this wave -- it reads and writes only globals and ends `pop {r0}; bx r0`. */
 u32 sub_08026C6C(u8);
 void sub_08026CD0(void);
@@ -9077,7 +9095,11 @@ void sub_080145BC(void);
  * `!= -1` gate is in the caller, not here -- and the caller's own argument
  * untouched in r1. sub_08014DCC's result is what sub_08014E44 returns, so
  * `void *`; sub_08014ED4 discards sub_08014E68's and ends `pop {r0}`. */
-void *sub_08014DCC(int, int);
+void *sub_08014DCC(int, u32);
+void *HeapAlloc(int, u32); /* sub_08014DCC's readable name; see
+                           * src/decomp/c_08014DCC.c. */
+void *HeapAllocAligned(int, u32); /* sub_08014FF8: align > 16, else defers
+                                  * to sub_08014E44. See c_08014FF8.c. */
 /* Wave 40 (W40-D): sub_08014E68 RETURNS int, corrected from the body. It sets
  * r0 to 1 on both refusal paths (null pointer, or a header already marked
  * free) and to 0 on the path that actually frees, and its epilogue is
@@ -9139,9 +9161,9 @@ void sub_0802361C(void);
  * stack word so it is taken wide, and the sixth is a plain count. Arguments 1,
  * 2 and 4 arrive as bare `ldrb`s. */
 /* Wave 33 orchestrator: second parameter is `int`, not `u8` --
- * src/decomp/c_08042C24.c is PROMOTED and defines it that way, and a `u8`
+ * src/unit.c is PROMOTED and defines it that way, and a `u8`
  * declaration makes every caller narrow. Its only promoted caller
- * (src/decomp/c_080433B8.c) re-verified byte-identical after this change. */
+ * (src/unit.c) re-verified byte-identical after this change. */
 int sub_08042D84(int, int);
 /* Wave 36 (W36-L): RETYPED from `void sub_080210C8(u8, u8, s16, u8, int, int)`
  * on the CALLEE's own prologue, which is the only side that can show this.
@@ -9176,7 +9198,7 @@ void sub_080030BC(int, int, int);
  * (u8), r3 and the stack argument at [sp, #0x28] with `lsls #0x10; lsrs #0x10`
  * (u16). r2 is kept whole and used as the base of `adds r1, r7, r1` after the
  * index is scaled `lsls #1`, so it is a halfword pointer -- and sub_0804931C
- * passes gUnknown_08499578, which is already declared `u16 *`. The stack slot
+ * passes gBG0TilemapBuffer, which is already declared `u16 *`. The stack slot
  * is argument five: `push {r4,r5,r6,r7,lr}` + `push {r5,r6,r7}` + `sub sp,#8`
  * is exactly 0x28. Return unused at all three call sites. */
 void sub_080487B4(u8, u8, u16 *, u16, u16);
@@ -9345,7 +9367,7 @@ void sub_080860DC(ProcPtr);       /* sub_0808603C hands it the same proc it
  * second argument with a bare `adds r6, r1, #0` and never narrows it: a u16
  * parameter would arrive with PROMOTE_MODE's `lsls #0x10; lsrs #0x10` instead,
  * which is +2 bytes and was measured as the function's only diff.
- * (gUnknown_0849957C, 0x6200) */
+ * (gBG1TilemapBuffer, 0x6200) */
 void sub_08037A20(u16 *, int);
 void sub_080620C0(void);
 void sub_080620FC(int, int);      /* (0,1) (1,6) (2,5) from sub_0806209C */
@@ -9391,7 +9413,7 @@ void sub_08062C94(void);
  * `gUnknown_030040D8` (declared `struct Unk030040D8 *`) as the first argument
  * and casts; the result is tested `lsls #0x18` at that site, so the caller
  * narrows the `int` return to u8 itself. */
-int sub_08062730(struct Unk08499594 *, struct Unk08499594 *);
+int sub_08062730(struct Unit *, struct Unit *);
 void sub_08077620(int, int);      /* (0, 0xA8 - gUnknown_0300064C), twice */
 
 /* Wave 54 (W54-F). sub_08077140 already has a promoted body in
@@ -9404,7 +9426,7 @@ void sub_08077620(int, int);      /* (0, 0xA8 - gUnknown_0300064C), twice */
  * and that definition wins: its parameter is `struct Unk080772B8 *`, a tag
  * defined inside that file. Declared here through an incomplete tag so the
  * declaration cannot disagree with it -- the caller (sub_08077304) passes
- * `gUnknown_08499578 + 0x280`, which is where that struct's +0x92 halfword
+ * `gBG0TilemapBuffer + 0x280`, which is where that struct's +0x92 halfword
  * grid lives. Do NOT retype this to `u16 *` from the call site. */
 struct Unk080772B8;
 void sub_08077140(u16 *, u16, int);
@@ -9542,7 +9564,7 @@ void sub_08063DDC(struct Vec3 *, struct Mtx43 *, struct Vec3 *);
  * with r0 written (`movs r0,#0`) before it is ever read. The call site is what
  * proves the arity: sub_08085244 sets up r0 (its own `s16 *`) and r1
  * (`p[0x33]`, the army index every one of the callees below takes) immediately
- * before the `bl`. r1 is used unnarrowed as a gUnknown_08499598 index and as
+ * before the `bl`. r1 is used unnarrowed as a gPlayers index and as
  * sub_08085410 / sub_08085638 / sub_080856A0's first argument, so `int`.
  * `pop {r4,r5,r6,r7}; pop {r0}` makes it void. */
 void sub_08085708(s16 *, int);
@@ -9561,7 +9583,7 @@ int sub_08085410(int, int);
 int sub_08085638(int, int);
 int sub_080856A0(int, int);
 /* Already MATCHED (32 bytes, never promoted or declared): returns
- * `&gUnknown_0810E6E0[(gUnknown_08499598[i].unk1a - 1) * 0x20]`, the stride-0x20
+ * `&gUnknown_0810E6E0[(gPlayers[i].unk1a - 1) * 0x20]`, the stride-0x20
  * palette row that table's note describes. `u16 *` rather than `u8 *` because
  * its only caller, sub_08085950, hands the result straight to
  * ApplyPaletteExt's `u16 *` first parameter with no arithmetic in between; the
@@ -9644,7 +9666,7 @@ void sub_080577E4(u16 *, int, struct Unk8057Pos *);
 void sub_08057860(u16 *, int, struct Unk8057Pos *);
 void sub_08057A24(u16 *, int, struct Unk8057Pos *);
 /* Wave 48, W48-G. The two per-side fan-outs over the four painters above, both
- * MATCHED with this signature. sub_08057AE8 hands each `gUnknown_08499578`,
+ * MATCHED with this signature. sub_08057AE8 hands each `gBG0TilemapBuffer`,
  * which is already a `u16 *`. */
 void sub_080579B8(u16 *);
 void sub_08057A80(u16 *);
@@ -9697,19 +9719,19 @@ void sub_08016974(int);
 void sub_08025D20(int);
 void sub_08025D40(int);
 void sub_08026588(u8, u8, u8);
-/* Promoted in src/decomp/c_08042C24.c as `int sub_08042C68(int, int)`; declared
+/* Promoted in src/unit.c as `int sub_08042C68(int, int)`; declared
  * here so sub_080253B0 can see it. */
 int sub_08042C68(int, int);
-void sub_08025B24(struct Unk08499594 *, int);
+void sub_08025B24(struct Unit *, int);
 /* One record pointer, result unused (sub_08025D60). */
-void sub_0802A5C4(struct Unk08499594 *);
+void sub_0802A5C4(struct Unit *);
 /* Wave 39, W39-F. The 0x0802A3FC unit-scan block.
  *
  * sub_0802A304 is a sub_0802A38C callback, the sibling of sub_0802A2E4, and
- * both are typed `void *` because the object -- a struct Unk08499594 record --
+ * both are typed `void *` because the object -- a struct Unit record --
  * is reached through a file-local view: sub_0802A304 indexes unk07/unk08 as a
  * 2-element cargo array, which the shared struct cannot express and which is
- * not worth reshaping it for (see the note on struct Unk08499594.unk07).
+ * not worth reshaping it for (see the note on struct Unit.unk07).
  *
  * sub_0802A38C and sub_0802A258 are DELIBERATELY NOT DECLARED HERE.
  * src/decomp/c_0802A38C.c defines sub_0802A38C with a file-local `struct
@@ -9738,10 +9760,10 @@ void sub_08025B28(u16, u32);
  * takes the record directly and sub_08025EF0 the two unit ids -- same three
  * tests, and sub_08025EF0 additionally requires the two ids to share an army
  * (`(a & 0xc0) == (b & 0xc0)`). Both return a byte. */
-bool8 sub_08025F74(struct Unk08499594 *, u8);
+bool8 sub_08025F74(struct Unit *, u8);
 bool8 sub_08025EF0(int, int);
-bool8 sub_08025FC0(struct Unk08499594 *, struct Unk08499594 *);
-bool8 sub_080253B0(struct Unk08499594 *);
+bool8 sub_08025FC0(struct Unit *, struct Unit *);
+bool8 sub_080253B0(struct Unit *);
 
 /* Wave 34, W34-K -- block 0x08069 / 0x0806B. Every signature below is read off
  * the CALL SITE, per wave 30; none of these had a declaration anywhere.
@@ -9795,7 +9817,7 @@ void sub_08067ED0(u8, u16, int, int, int, int, u8, u8, ProcPtr);
  * definition. Same shape as sub_08068810 below. */
 void sub_080686E8(int, int, u16, u8, ProcPtr);
 /* Wave 36, W36-K. The graphics loader both sub_080686E8 and sub_08068810 hand
- * a `gUnknown_08610A38[]` blob to. First parameter is `u8 *`: the body walks it
+ * a `gTextTable[]` blob to. First parameter is `u8 *`: the body walks it
  * with `ldrb [p]` and `ldrb [p + n]` as a 0xff-terminated id list. Second is
  * u16 (`lsls #0x10; lsrs #0x10` at entry, then `lsls #5` for a 0x20-byte VRAM
  * stride). Returns the loop counter held in ip -- an `int` count, not a u8;
@@ -9803,7 +9825,7 @@ void sub_080686E8(int, int, u16, u8, ProcPtr);
  * the weaker fit that costs no caller a re-narrowing. */
 int sub_08068038(u8 *, u16);
 /* Wave 36, W36-K. sub_080686E8's seven-argument sibling: same proc setup, same
- * gUnknown_085D3DD0 -> gUnknown_08610A38 -> sub_08068038 graphics chain, but it
+ * gUnknown_085D3DD0 -> gTextTable -> sub_08068038 graphics chain, but it
  * fills four more proc bytes (+0x38, +0x39, +0x4e, +0x4f) instead of +0x4d.
  * Arguments 5 and 6 narrow at entry exactly as sub_080686E8's 3 and 4 do. */
 void sub_08068810(int, int, int, int, u16, u8, ProcPtr);
@@ -9857,8 +9879,8 @@ void sub_0806B87C(ProcPtr);
 /* PARKED in data/parked.json (95.5%), so declared from its call site in
  * sub_0804365C rather than promoted. It reads NO argument register --
  * parked.json records its body as
- * `if (gUnknown_085C77A0[gUnknown_03003FC0.unk02].unk24) return it;
- *  if (gUnknown_03003FC0.unk30) return it; return 0;` -- and sub_0804365C
+ * `if (gUnknown_085C77A0[gPlaySt.unk02].unk24) return it;
+ *  if (gPlaySt.unk30) return it; return 0;` -- and sub_0804365C
  * uses the result (`adds r4,r0,#0; cmp r4,#0`), so it is not void. The
  * parked entry probed u16 and int and found them byte-identical, so `int`
  * is the weakest fit. */
@@ -9874,12 +9896,12 @@ void sub_080439A8(int *, int *, int *, int, int, int, int, int *);
 /* ---- wave 35 (W35-C): blocks 0x08021-0x08025 ---- */
 /* Promoted from the MATCHED sub_08024DDC; declared here so sub_08024E60 (which
  * calls it twice, the second time with its arguments swapped) can see it. Both
- * parameters are the gUnknown_030013D0 record -- see struct Unk030013D0 in
+ * parameters are the gUnknown_030013D0 record -- see struct BattleUnit in
  * unknown-globals.h for how the layout was measured. VOID, and that is settled
  * from the callee rather than guessed: sub_08024DDC ends `pop {r0}; bx r0`,
  * which overwrites any result, and sub_08024E60 reads nothing after either
  * `bl`. */
-void sub_08024DDC(struct Unk030013D0 *, struct Unk030013D0 *);
+void sub_08024DDC(struct BattleUnit *, struct BattleUnit *);
 /* TWO arguments, both materialised immediately before the `bl` as bare
  * `movs rN,#imm` (sub_080246B4 calls it as (1, 8) and (0, 8) from two arms of
  * one switch), and the result is discarded. `int` is the weakest type that
@@ -9914,10 +9936,10 @@ s16 sub_0802419C(s16, s16, u8);
 int sub_080249EC(int, s8, u8);
 /* Two more undeclared callees of block 0x08024, both from sub_080246B4 and
  * both with the SAME first argument, the literal 0x48. sub_0803F8E0's second
- * argument is `Div(gUnknown_03004008, 20) % 4` and sub_0803FE50's is
- * gUnknown_03004008 itself, each materialised in r1 immediately before its
+ * argument is `Div(gGameClock, 20) % 4` and sub_0803FE50's is
+ * gGameClock itself, each materialised in r1 immediately before its
  * `bl`; nothing reads r0 after either, so both are void. `int` throughout is
- * the weakest type that fits -- gUnknown_03004008 is already s32 and neither
+ * the weakest type that fits -- gGameClock is already s32 and neither
  * value is narrowed on the way in. (Neither was on the wave brief's
  * undeclared-callee list for this block, which listed only sub_080240B4,
  * sub_08024DDC and sub_0803F880 -- the list undercounts.) */
@@ -10092,6 +10114,8 @@ int sub_0801B018(u16);
  * tested for equality -- against 0xff and against a u8 array element -- so
  * nothing here discriminates its signedness; u16 agrees with the return. */
 u16 sub_0801B120(u16);
+u16 FindNewestCompleteSave(u16); /* sub_0801B120's readable name; see
+                                  * src/decomp/c_0801B120.c. */
 void sub_08022AF8(u8, u8, u8, u8); /* W35-E: signature copied from the
                                     * promoted definition in c_08022AF8.c. */
 
@@ -10312,7 +10336,7 @@ u16 sub_0807B7BC(u8 *, u16 *, u8 *, int, void *);
  * and its own prologue reads none. It ends by writing 2 into +0x3a of the
  * struct Unk03001470 sub_08014740 returns, so the result is discarded too. */
 void sub_0807A860(void);
-/* sub_0807A860 hands it the u8 at +0x1d of a gUnknown_08499598 record and
+/* sub_0807A860 hands it the u8 at +0x1d of a gPlayers record and
  * sub_08078E14's `int` result, and narrows the value it returns to u16 for
  * sub_08014740's fourth parameter. `int` both ways is the weakest model that
  * gives that single `lsls #0x10; lsrs #0x10` at the call site; a `u16` return
@@ -10379,7 +10403,7 @@ void sub_0803678C(void);
  *                 Nullary for real: sub_08037CF8's `bl sub_080378A8` /
  *                 `bl sub_08037B90` pair with nothing between it is TWO
  *                 statements, not a nested call.
- *   sub_08013D00  selects one of gUnknown_08499578/7C/80/84, derefs it and
+ *   sub_08013D00  selects one of gBG0TilemapBuffer/7C/80/84, derefs it and
  *                 returns `*p + y * 64 + x * 2` -- a u16 * into a tilemap.
  *                 r0 is compared against 1/2/3, r1 is the x term, r2 the y. */
 u16 *sub_08013D00(int, int, int);
@@ -10400,13 +10424,13 @@ void sub_080369BC(void);
  *                 discarded -- nullary void.
  *   sub_0800C8D8  likewise -- but see below, this one was WRONG.
  *   sub_0800C874  nullary; its r0 is `strb`d straight into
- *                 gUnknown_0200B0B0->unk12, so the return is at least a byte
+ *                 gActiveMap->propertyCount, so the return is at least a byte
  *                 and `int` is the weakest fit (no re-narrowing appears).
  *   sub_0800CAA0  nullary; its r0 is handed on as sub_0800CB30's second
  *                 argument with no narrowing between the two `bl`s.
  *   sub_0800CB30  called as (1, sub_0800CAA0()).
  *   sub_0808B694  two pointers -- a struct Unk03001470 field address and
- *                 &gUnknown_0200B0B0->unk9c -- and the result is a bare
+ *                 gActiveMap->designName -- and the result is a bare
  *                 `cmp r0,#0`, so a comparison predicate. */
 void sub_08002F1C(void);
 /* Wave 48 (W48-A) retypes sub_0800C8D8 from `void` to `int`.  W36-I inferred
@@ -10582,9 +10606,9 @@ void sub_0802E250(void);                             /* c_0802E250.c */
 void sub_0802A7C4(void);                             /* c_0802A7C4.c */
 void sub_0802DBE4(void);                             /* c_0802DBE4.c */
 void sub_0803A59C(void);                             /* c_0803A59C.c */
-void sub_0803A8F0(struct Unk08499594 *);             /* c_0803A8F0.c */
+void sub_0803A8F0(struct Unit *);             /* c_0803A8F0.c */
 void sub_080470F8(u16);                              /* c_080470F8.c */
-struct Unk08499594 *sub_08025580(void);              /* c_08025580.c */
+struct Unit *sub_08025580(void);              /* c_08025580.c */
 /* VARARGS, and that is the whole reason 0x08090AC4-0x08090B44 is full of
  * printf-style strings: the debug overlay in sub_080281F0 / sub_080283E4 is a
  * run of sub_08013428(x, y, "SNOW:%s", ...) calls. */
@@ -10654,7 +10678,7 @@ void sub_0800AF24(int, int);
  * so `void` is the return type unless noted.
  *
  * The seven nullary ones are sub_0800057C's jump-table arms (cases 0..7 of
- * gUnknown_0200B0B0->unk04); none of them reads r0-r3 before writing it. */
+ * gActiveMap->mode); none of them reads r0-r3 before writing it. */
 void sub_080005FC(void);
 void sub_08000650(void);
 void sub_08000664(void);
@@ -10688,7 +10712,7 @@ void sub_08002510(int, int);
  * `bl` each of them with no argument setup at all and discard r0, and neither
  * callee reads r0-r3 before writing them (sub_08007B54's first instruction
  * after the push loads its own pool word; sub_08007B74's loads
- * gUnknown_0200B0B0). */
+ * gActiveMap). */
 void sub_08007B54(void);
 void sub_08007B74(void);
 
@@ -10827,7 +10851,7 @@ void sub_0801BAB8(void);
 void IrqMain(void);
 /* Already DEFINED in src/decomp/c_0804B0CC.c; signature copied from the
  * definition, which wins. sub_080048D4 is its first cross-file caller and
- * passes `(int)&gUnknown_0200B0B0->unk9c` -- the int first parameter is the
+ * passes `(int)gActiveMap->designName` -- the int first parameter is the
  * definition's, so the pointer is cast at the call site. */
 void sub_0804B10C(int, u8);
 /* Already DEFINED in src/decomp/c_0801820C.c; sub_08018254 is its first
@@ -10898,18 +10922,18 @@ void sub_08012F6C(const void *src, void *dst, int size);
 /* Wave 37 (W37-I). sub_08034A7C is defined in src/decomp/c_08034A7C.c and was
  * never declared here; sub_08034AF8 is its first caller outside its own unit.
  * Both parameters are plain `int` -- the y arrives as a `movs #0x4e` immediate
- * and the second as a bare `ldrb` of gUnknown_08499598[i].unk1a. */
+ * and the second as a bare `ldrb` of gPlayers[i].unk1a. */
 void sub_08034A7C(int, int);
 /* Byte-returning predicate: every caller re-narrows the result with
  * `lsls #0x18` before testing it (sub_08034AF8, and the guard the
- * gUnknown_08499598.unk2d note describes). */
+ * gPlayers.unk2d note describes). */
 bool8 sub_08026D44(int);
 void sub_08026F04(void);
 void sub_080268F4(void);
 void sub_08044178(int);
 void sub_0802BFBC(void);
 void sub_08034C8C(void);
-/* sub_0803D788 calls it as (gUnknown_08499584, 0, 0x800) with the length built
+/* sub_0803D788 calls it as (gBG3TilemapBuffer, 0, 0x800) with the length built
  * once in a callee-saved register and copied into r2 -- arity 3, no width
  * evidence beyond the register.
  *
@@ -10921,7 +10945,7 @@ void sub_08034C8C(void);
  * error that broke wave 14's first SPLIT=1 build (`void *` declared as the weakest
  * model against a promoted named type).
  *
- * Agreeing costs nothing here and is strictly better: gUnknown_08499584 is itself
+ * Agreeing costs nothing here and is strictly better: gBG3TilemapBuffer is itself
  * declared `u16 *`, so the sole call site now type-checks exactly rather than
  * decaying through void *. */
 void sub_080130C8(u16 *, int, int);
@@ -11133,12 +11157,12 @@ int sub_080587FC(int);
  * `lsls #0x18; cmp #0`, so it returns a byte.
  *
  * sub_08058144 returns a POINTER: sub_0805DFF4 tests the result against 0 and
- * then reads bytes +1 and +2 off it, which is struct Unk08499594's unk01/unk02
+ * then reads bytes +1 and +2 off it, which is struct Unit's unk01/unk02
  * pair.
- * WAVE 45, W45-E: the `struct Unk08499594 *` here is WRONG and I left it alone
+ * WAVE 45, W45-E: the `struct Unit *` here is WRONG and I left it alone
  * rather than break a promoted file. The matched body returns
  * `&gUnknown_084995A0[v]` -- the ROM scales v by 8 (`lsls #3`) and reads
- * `unk03[a2]` at +3, which is struct Unk084995A0 (0x08), not Unk08499594
+ * `unk03[a2]` at +3, which is struct Unk084995A0 (0x08), not Unit
  * (0x0c, and it is reached by a *3*4 chain everywhere else). The +1/+2 evidence
  * above does not discriminate: Unk084995A0's filler_00[3] covers those bytes
  * too. Fixing this means retyping to `struct Unk084995A0 *`, naming
@@ -11232,7 +11256,7 @@ void sub_08059464(void *);
  * and re-verified. */
 int sub_08058058(int);
 int sub_08057F00(int);
-struct Unk08499594 *sub_08058144(int, int);
+struct Unit *sub_08058144(int, int);
 void sub_080591E4(void *);
 int sub_08059A0C(void *);
 void sub_0805BFDC(int, int, int, int);
@@ -11346,7 +11370,7 @@ int sub_0805BBF8(int, int);
  * +0 with 9999 before four calls and re-reads it afterwards with a plain
  * `ldrh` -- unsigned, so `u16 *` rather than `s16 *` even though the values
  * stored are map coordinates. Third argument is a unit-type id (`ldrb` off
- * struct Unk08499594's unk00 at the call site), passed full-width. */
+ * struct Unit's unk00 at the call site), passed full-width. */
 void sub_0805BAFC(int, int, int, u16 *);
 /* Wave 45, W45-F. Three nullary queries -- sub_0805BE10, sub_0805BE54 and
  * sub_0805BEF0 call each with no argument register written beforehand, and
@@ -11387,7 +11411,7 @@ void sub_08061A40(struct Unk085771C4 *, const struct Unk085771C4 *);
 /* Wave 50, W50-M, MATCHED. Builds one gUnknown_085771C4-shaped record into the
  * destination: the 0x10-byte header is copied from gUnknown_085771C4[a2] and
  * the 24 following 0xc-byte rows are that record summed byte-wise with
- * gUnknown_085771C4[gUnknown_0857690C[a3][gUnknown_08499598[a4].unk1d]]. The
+ * gUnknown_085771C4[gUnknown_0857690C[a3][gPlayers[a4].unk1d]]. The
  * pointee is the sized record for the same reason sub_08061A40's is -- the
  * 0x130 stride is what proves it. Parameter widths are read straight off the
  * entry narrowings: `lsls/lsrs #0x18` twice then `#0x10`. */
@@ -11409,7 +11433,7 @@ void sub_0806279C(void);
  * `&gUnknown_08499594[i]` with no arithmetic between the load and the call.
  * The tags below are the ones the promoted definitions in src/decomp/ already
  * use, and they stay INCOMPLETE here: each handler reads the record through its
- * own bitfield view because struct Unk08499594 declares +0x04 and +0x09 as
+ * own bitfield view because struct Unit declares +0x04 and +0x09 as
  * plain bytes, and splitting those would touch every other reader of that
  * shared struct (the same reasoning the sub_08061DCC note below records).
  * Declaring the tag incomplete lets every existing definition keep compiling
@@ -11436,13 +11460,13 @@ void sub_08061868(void);
 void sub_08061B00(void);
 void sub_08061CF8(void);
 /* sub_08061DCC is deliberately NOT declared here. Its parameter is one unit
- * record -- the same layout as struct Unk08499594 (unk00 subscripts
+ * record -- the same layout as struct Unit (unk00 subscripts
  * gUnknown_085D5ABC[] with the `* 0x5c` stride, unk04_0 and unk06_0 come out
  * with that struct's documented `ldrb; lsls #25; lsrs #25`) -- except that it
  * WRITES the low three bits of unk09, and only a real bitfield reproduces the
  * ROM's SImode `movs #8; rsbs; ands` mask; the hand-written `(x & ~7) | K`
  * narrows to `movs #0xf8; ands` and is two instructions, not three. Splitting
- * Unk08499594's plain `u8 unk09` would touch every other reader of that shared
+ * Unit's plain `u8 unk09` would touch every other reader of that shared
  * struct, so the draft carries its own tag and the prototype stays out of the
  * header until a caller needs it. Both callers are still assembly. */
 
@@ -11528,7 +11552,7 @@ void sub_0800CEF8(int, int);
 
 /* Wave 45, W45-G.  sub_0800C7A4 and sub_0800C75C are the clear and the set
  * half of one pair: both switch the same first parameter over
- * 0x28/0x48/0x68/0x88 to an index 0..3 and write gUnknown_0200B0B0's unk17
+ * 0x28/0x48/0x68/0x88 to an index 0..3 and write gActiveMap's unk17
  * and unk1b at that index.  The first parameter is not narrowed at entry, so
  * `int`; sub_0800C75C's second and third are stored with bare `strb`s, which
  * makes their width a floor only, and `int` is the weakest that fits.  Both
@@ -11709,7 +11733,7 @@ u8 sub_0805BB8C(int, int);
 
 /* Wave 50, W50-D. sub_08032484 is already PROMOTED (src/decomp/c_08032484.c)
  * but was never declared here; sub_080324C4 is its first caller outside its
- * own unit, and passes `gUnknown_08499578 + 0x221`. The promoted definition
+ * own unit, and passes `gBG0TilemapBuffer + 0x221`. The promoted definition
  * names the parameter type, so this must agree with it. */
 void sub_08032484(u16 *);
 /* Wave 50, W50-D. All four are void/void: sub_080324C4 and sub_08032BCC call
@@ -11806,10 +11830,10 @@ void sub_08086F3C(int);
  * (the preceding insn is `beq`, and r0-r3 are dead across it), and the next
  * instruction is another argument-free `bl sub_08021D10`, so r0 is neither
  * supplied nor read -- void(void). This agrees with the two existing notes on
- * struct Unk0200B0B0: unk2a is described as "the action code sub_080085E0
+ * struct ActiveMap: unk2a is described as "the action code sub_080085E0
  * dispatches on" and unk6a as "a one-byte result code sub_080085E0 leaves
  * behind", i.e. it takes its input and returns its output through the
- * gUnknown_0200B0B0 record, not through registers.
+ * gActiveMap record, not through registers.
  *
  * sub_0800AEAC: called as `ldrsh r0,[r3,#8]; ldrsh r1,[r3,#0xa]; bl`, the same
  * (x, y) cell pair sub_0800B528, sub_0800BC5C, sub_08009310 and sub_08010DD4

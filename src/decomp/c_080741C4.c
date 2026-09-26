@@ -30,7 +30,7 @@ void sub_080741C4(int a1, int a2, int a3)
 {
     Decompress(gUnknown_0823A3D4,
                (void *)(0x06000000 + (gUnknown_0300251C.bits.chr_block << 14)));
-    Decompress(gUnknown_08239FA4, gUnknown_08499584);
+    Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
     sub_08013B1C();
 }

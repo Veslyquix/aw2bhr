@@ -11,10 +11,10 @@
 
 void sub_080846C8(void)
 {
-    Proc_Start(gUnknown_08616990, PROC_TREE_3);
+    Proc_Start(ProcScr_MainMenuC1, PROC_TREE_3);
 }
 
 int sub_080846DC(void)
 {
-    return Proc_Find(gUnknown_08616990) != 0;
+    return Proc_Find(ProcScr_MainMenuC1) != 0;
 }

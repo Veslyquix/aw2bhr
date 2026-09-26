@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -13,12 +14,12 @@
  * terminates the array with 0xFFFF exactly as sub_0805A514 does.
  *
  * Two disjoint acceptance arms sharing one emit body. The first takes units
- * sub_08042084 accepts whose class byte is live in gUnknown_084995A8; the
+ * HasSupplyAbility accepts whose class byte is live in gUnknown_084995A8; the
  * second is the fallback and only opens when the active player's class byte is
  * 0x13 or 0x14 -- spelled as the ROM's `(u8)(c - 0x13) <= 1`, one subtract and
  * a byte truncation rather than two compares. THE EMIT BODY IS WRITTEN OUT
  * TWICE ON PURPOSE: agbcc cross-jumps the two copies and the shared tail it
- * produces (from the second `u->unk03` reload onward, reached by a `b`) is
+ * produces (from the second `u->y` reload onward, reached by a `b`) is
  * exactly the ROM's. A single shared body cannot produce that layout.
  *
  * NEITHER gUnknown_0816D984 NOR gUnknown_0816D988 IS A GLOBAL. The ROM words
@@ -42,7 +43,7 @@ struct Unk5A514Cell
 
 void sub_0805A268(struct Unk5A514Cell *out)
 {
-    struct Unk08499594 *u;
+    struct Unit *u;
     int i;
     int flag;
 
@@ -52,34 +53,34 @@ void sub_0805A268(struct Unk5A514Cell *out)
 
     for (i = gUnknown_03003F2C; i < gUnknown_03003F2C + 0x40; i++)
     {
-        u = &gUnknown_08499594[i];
-        if (u->unk00 == 0)
+        u = &gUnits[i];
+        if (u->type == 0)
             continue;
 
-        if (sub_08042084((u8 *)u) && gUnknown_084995A8[gUnknown_030040D8->unk00] != 0)
+        if (HasSupplyAbility((u8 *)u) && gUnknown_084995A8[gUnknown_030040D8->unk00] != 0)
         {
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] < 0)
+            if ((s8)gUnknown_03003340[u->y][u->x] < 0)
                 continue;
-            if (u->unk01 & 8)
+            if (u->flags & 8)
                 continue;
-            out->x = u->unk02;
-            out->y = u->unk03;
-            out->v = (s8)gUnknown_03003340[u->unk03][u->unk02];
+            out->x = u->x;
+            out->y = u->y;
+            out->v = (s8)gUnknown_03003340[u->y][u->x];
             out++;
         }
         else
         {
             if (flag == 0)
                 continue;
-            if (u->unk00 != 0x16)
+            if (u->type != 0x16)
                 continue;
             if (u->unk08 != 0)
                 continue;
-            if ((s8)gUnknown_03003340[u->unk03][u->unk02] < 0)
+            if ((s8)gUnknown_03003340[u->y][u->x] < 0)
                 continue;
-            out->x = u->unk02;
-            out->y = u->unk03;
-            out->v = (s8)gUnknown_03003340[u->unk03][u->unk02];
+            out->x = u->x;
+            out->y = u->y;
+            out->v = (s8)gUnknown_03003340[u->y][u->x];
             out++;
         }
     }
@@ -89,16 +90,10 @@ void sub_0805A268(struct Unk5A514Cell *out)
 
 void sub_0805A388(struct Unk5A514Cell *out)
 {
-    struct Unk08499594 *u;
-    u8 *q;
-    u8 *rows;
-    u8 *cells;
-    u8 *props;
-    u8 *cell;
+    struct Unit *u;
     u8 *tbl;
     int x;
     int y;
-    int t;
     int off;
     int flag;
     int key;
@@ -108,26 +103,21 @@ void sub_0805A388(struct Unk5A514Cell *out)
     if ((u8)(gUnknown_030040D8->unk00 - 0x13) <= 1)
         flag = -1;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
-            q = gUnknown_08499590;
-            t = y * 2;
-            rows = q + 0x417a;
-            off = *(u16 *)(rows + t) + x;
-            props = q + 0x12;
-            cell = props + off;
+            off = gMap->rowOffset[y] + x;
 
-            if (*cell != 0)
+            if (gMap->unit[off] != 0)
             {
-                if ((*cell & 0xc0) != gUnknown_03003F2C)
+                if ((gMap->unit[off] & 0xc0) != gUnknown_03003F2C)
                     continue;
-                u = &gUnknown_08499594[*cell];
-                if (flag == 0 && sub_08042084((u8 *)u)
+                u = &gUnits[gMap->unit[off]];
+                if (flag == 0 && HasSupplyAbility((u8 *)u)
                  && gUnknown_084995A8[gUnknown_030040D8->unk00] != 0)
                 {
                     out->x = x;
@@ -139,7 +129,7 @@ void sub_0805A388(struct Unk5A514Cell *out)
                 {
                     if (flag == 0)
                         continue;
-                    if (u->unk00 != 0x16)
+                    if (u->type != 0x16)
                         continue;
                     if (u->unk07 != 0)
                         continue;
@@ -152,10 +142,9 @@ void sub_0805A388(struct Unk5A514Cell *out)
             else
             {
                 tbl = gUnknown_0857685A;
-                cells = q + 0x1432;
-                if (tbl[cells[off] & 0x1f] != key)
+                if (tbl[gMap->terrain[off] & 0x1f] != key)
                     continue;
-                if ((cells[off] & 0xe0) != gUnknown_03004084)
+                if ((gMap->terrain[off] & 0xe0) != gUnknown_03004084)
                     continue;
                 out->x = x;
                 out->y = y;

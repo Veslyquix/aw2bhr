@@ -14,8 +14,8 @@
  * ones. */
 void sub_0801BCA8(void)
 {
-    sub_080718E8(gUnknown_03000268.unk00, gUnknown_03000268.unk0a);
-    gUnknown_03002F2C = gUnknown_03000268.unk00;
+    sub_080718E8(gOamTransferTail.src, gOamTransferTail.objectCount);
+    gUnknown_03002F2C = gOamTransferTail.src;
     gUnknown_030030D4 = gUnknown_03002520;
     gUnknown_030024C0 = 0;
 }

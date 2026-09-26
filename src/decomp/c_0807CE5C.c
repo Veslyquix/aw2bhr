@@ -5,14 +5,18 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807CE5C.
  * sub_0807CE5C @ 0x0807CE5C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
 #include "hardware.h"
-/* sub_0807CE5C @ 0x0807CE5C, 2468 bytes.
+/* CoSelect_IDLE_0807CE5D @ 0x0807CE5C, 2468 bytes.
  *
  * The per-frame update of the unit-select / group-cursor proc that
- * sub_0807D800, sub_0807D860 and sub_0807D918 (all promoted) service.  The
+ * IsCoSelectionUnique, sub_0807D860 and sub_0807D918 (all promoted) service.  The
  * parameter is the same object those three model; this is the widest window on
  * it so far, so struct Unk7D918's filler is widened here rather than
  * contradicted.
@@ -46,7 +50,6 @@ struct Unk807CE5C
 /* Promoted but undeclared; signatures taken from src/decomp/, not derived. */
 void sub_0803BCDC(u8 *);
 int sub_0807F618(void);
-int sub_0807D800(struct Unk807CE5C *);
 void sub_0807D860(struct Unk807CE5C *);
 void sub_0807D918(struct Unk807CE5C *);
 /* sub_0807DA98 is W56-B's; since wave 56 it is declared in
@@ -57,13 +60,13 @@ void sub_0807D918(struct Unk807CE5C *);
  * `adds r0, r7, #0; bl sub_0807F630` with the result never read. */
 void sub_0807F630(struct Unk807CE5C *);
 
-void sub_0807CE5C(struct Unk807CE5C *p)
+void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 {
     int i;
 
     if (!(u8)sub_0807F618() && p->unk4e == 0 && p->unk60 == 0 && p->unk66 == 0)
     {
-        if (p->unk40 == 0 && (gpKeySt->unk02 & 0x20))
+        if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_LEFT))
         {
             sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014200, 0x16);
             sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014680, 0x17);
@@ -82,7 +85,7 @@ void sub_0807CE5C(struct Unk807CE5C *p)
             sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06013D80, 0x15);
             sub_0803B4DC(0x67);
         }
-        else if (p->unk40 == 0 && (gpKeySt->unk02 & 0x10))
+        else if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_RIGHT))
         {
             sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014200, 0x16);
             sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014680, 0x17);
@@ -101,7 +104,7 @@ void sub_0807CE5C(struct Unk807CE5C *p)
             sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06013D80, 0x15);
             sub_0803B4DC(0x67);
         }
-        else if (p->unk40 == 0 && (gpKeySt->unk02 & 0x40) && (int)gUnknown_03005944 > 1 && gUnknown_030059C0[p->unk64] != 0)
+        else if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_UP) && (int)gUnknown_03005944 > 1 && gUnknown_030059C0[p->unk64] != 0)
         {
             gUnknown_03005938[0] = p->unk52;
             gUnknown_03005938[1] = p->unk58;
@@ -132,7 +135,7 @@ void sub_0807CE5C(struct Unk807CE5C *p)
             sub_0802D5CC(gUnknown_03005958[p->unk58], 8);
             sub_0803B4DC(0x67);
         }
-        else if (p->unk40 == 0 && (gpKeySt->unk02 & 0x80) && (int)gUnknown_03005944 > 1 && gUnknown_030059C0[p->unk64] != 0)
+        else if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_DOWN) && (int)gUnknown_03005944 > 1 && gUnknown_030059C0[p->unk64] != 0)
         {
             gUnknown_03005938[0] = p->unk52;
             gUnknown_03005938[1] = p->unk58;
@@ -163,21 +166,21 @@ void sub_0807CE5C(struct Unk807CE5C *p)
             sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
             sub_0803B4DC(0x67);
         }
-        else if (gpKeySt->held & 1)
+        else if (gpKeySt->pressed & 1)
         {
             if (p->unk40 > 0)
             {
                 p->unk4c = 0;
                 p->unk6a = 0;
                 sub_0803BCDC(gUnknown_030058D4);
-                sub_0803BD54();
+                LockMainMenu();
                 Proc_Start(gUnknown_08616690, p);
                 sub_080733A0(0x10);
                 Proc_Break(p);
                 sub_0803B4DC(0x71);
             }
 
-            if ((u8)sub_0807D800(p))
+            if ((u8)IsCoSelectionUnique((struct Unk807D800 *)p))
             {
                 gUnknown_030058D4[p->unk64] = gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c];
                 p->unk64++;
@@ -226,7 +229,7 @@ void sub_0807CE5C(struct Unk807CE5C *p)
                 sub_0803B4DC(0x71);
             }
         }
-        else if (gpKeySt->held & 2)
+        else if (gpKeySt->pressed & 2)
         {
             if (Proc_Find(gUnknown_086166A8) == 0)
                 sub_0803B4DC(0x66);
@@ -271,10 +274,10 @@ void sub_0807CE5C(struct Unk807CE5C *p)
             {
                 p->unk40--;
                 Proc_Start(gUnknown_086166A8, p);
-                sub_0803BD60();
+                UnlockMainMenu();
             }
         }
-        else if (gpKeySt->held & 0x100)
+        else if (gpKeySt->pressed & R_BUTTON)
         {
             sub_0807F630(p);
         }
@@ -331,3 +334,5 @@ void sub_0807CE5C(struct Unk807CE5C *p)
     sub_0807DA98((struct Unk7DA98 *)p);
     p->unk3c--;
 }
+
+asm(".global sub_0807CE5C\n.thumb_set sub_0807CE5C, CoSelect_IDLE_0807CE5D\n");

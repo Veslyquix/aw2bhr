@@ -60,7 +60,7 @@ void sub_08028F84(struct Unk28F84Proc *proc)
         gUnknown_0201E450.unk04 = proc->unk22;
         gUnknown_0201E450.unk06 = proc->unk24;
         sub_080153B8((struct Unk03001470 *)proc);
-        sub_08034F8C();
+        DecrementMapLock();
     }
     else
     {

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -49,31 +50,25 @@
  * was right about all six signatures; they are declared file-locally rather
  * than in the header because the promoted definitions in src/decomp/ own them.
  * The casts on gUnknown_030040D8 are because struct Unk030040D8 and
- * struct Unk08499594 are the same object under two names (see the note on
+ * struct Unit are the same object under two names (see the note on
  * Unk030040D8.unk01 in unknown-globals.h); they cost nothing.
  *
- * The map planes are reached as MEMBERS of a struct cast onto
- * gUnknown_08499590 and INLINE rather than through a `map` local, which is the
- * W34-F rule that c_08003DC4.c records; that is what gives `(p + K) + idx`
- * rather than `(p + idx) + K`. */
+ * The map planes are reached as MEMBERS of `gMap` (include/map.h) and INLINE
+ * rather than through a `map` local, which is the W34-F rule that
+ * c_08003DC4.c records; that is what gives `(p + K) + idx` rather than
+ * `(p + idx) + K`. Every use in the function -- including the
+ * `sub_0803E9F8`/`sub_0801F92C` setup calls -- must name `gMap`, since
+ * agbcc's CSE only reuses a pointer load across identical symbols (see
+ * sub_08057D90 for the fuller writeup). */
 
 struct Unk0803E9F8;
 void sub_08024404(void);
 void sub_0802E2BC(void);
-void sub_080201E0(s16, s16, struct Unk08499594 *);
+void sub_080201E0(s16, s16, struct Unit *);
 int sub_0803E9F8(struct Unk0803E9F8 *, u8 *, u8, u8);
-int sub_08041FE0(struct Unk08499594 *);
-int sub_0804203C(struct Unk08499594 *);
+int sub_08041FE0(struct Unit *);
+int sub_0804203C(struct Unit *);
 void sub_0801FE68(int);
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_0004[0x000E];
-    /* 0x0012 */ u8 unk0012[0x0508];
-    /* 0x051A */ u8 filler_051A[0x417A - 0x051A];
-    /* 0x417A */ u16 unk417A[0x100];
-};
 
 u8 sub_0802E2D0(s16 x, s16 y)
 {
@@ -85,26 +80,26 @@ u8 sub_0802E2D0(s16 x, s16 y)
 
     if (unit != NULL
      && (u8)sub_0803E9F8((struct Unk0803E9F8 *)unit,
-                         gUnknown_08499590 + 0x2852, 0xFF, 0))
+                         gMap->move, 0xFF, 0))
     {
         sub_08024404();
     }
     else
     {
-        gUnknown_03003F38 = ((struct Map *)gUnknown_08499590)->unk0012[
-            ((struct Map *)gUnknown_08499590)->unk417A[y] + x];
+        gUnknown_03003F38 = gMap->unit[
+            gMap->rowOffset[y] + x];
         gUnknown_030040D8 =
-            (struct Unk030040D8 *)&gUnknown_08499594[gUnknown_03003F38];
+            (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
 
-        if (((struct Map *)gUnknown_08499590)->unk0012[
-                ((struct Map *)gUnknown_08499590)->unk417A[y] + x] == 0)
+        if (gMap->unit[
+                gMap->rowOffset[y] + x] == 0)
         {
             sub_0802E2BC();
             return 1;
         }
 
-        a = sub_08041FE0((struct Unk08499594 *)gUnknown_030040D8);
-        b = sub_0804203C((struct Unk08499594 *)gUnknown_030040D8);
+        a = sub_08041FE0((struct Unit *)gUnknown_030040D8);
+        b = sub_0804203C((struct Unit *)gUnknown_030040D8);
 
         if (a == 0 && b == 0)
         {
@@ -112,7 +107,7 @@ u8 sub_0802E2D0(s16 x, s16 y)
             return 0;
         }
 
-        sub_0801F92C(gUnknown_08499590 + 0x2852);
+        sub_0801F92C(gMap->move);
         sub_08035584(gUnknown_030040D8);
         sub_08024404();
         sub_080258CC();
@@ -130,10 +125,10 @@ u8 sub_0802E2D0(s16 x, s16 y)
         if (b)
         {
             if (a == 0)
-                sub_0801F838(0xFF);
+                FillMovementMap(0xFF);
 
             sub_080201E0(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
-                         (struct Unk08499594 *)gUnknown_030040D8);
+                         (struct Unit *)gUnknown_030040D8);
 
             if (a)
             {

@@ -49,7 +49,7 @@ void sub_08027A50(u16 a1, u16 a2, u16 a3)
 
 void sub_08027B10(int a1, int a2, int a3, int a4, ProcPtr a5)
 {
-    struct Unk27B10Proc *proc = Proc_Start(gUnknown_08499E18, a5);
+    struct Unk27B10Proc *proc = Proc_Start(ProcScr_DayStart, a5);
 
     proc->unk2c = a1;
     proc->unk30 = a2;

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -7,8 +8,8 @@
  * sub_08045BF0 @ 0x08045BF0
  */
 
-/* Reads the byte at +0x19 of the gUnknown_08499590 record the halfword at
- * +0x417E points to, and returns whether its top two bits are 0 while the byte
+/* Reads unit[rowOffset[2] + 7] from gMap (the byte at +0x19 of the record
+ * that rowOffset[2] points to), and returns whether its top two bits are 0 while the byte
  * itself is non-zero.
  *
  * The cell is held in an `int`, not a `u8`, and that is measured rather than
@@ -19,11 +20,9 @@
  * the same expression.) */
 int sub_08045BF0(void)
 {
-    u8 *p;
     int v;
 
-    p = gUnknown_08499590;
-    v = (p + *(u16 *)(p + 0x417E))[0x19];
+    v = gMap->unit[gMap->rowOffset[2] + 7];
 
     if (v == 0)
         return 0;

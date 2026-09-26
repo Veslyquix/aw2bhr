@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801F34C.
- * sub_0801F34C @ 0x0801F34C
+ * DrawOamObject @ 0x0801F34C
  */
 
 /* Finds the gUnknown_0200F920 entry for tile id a1 and draws it as a sprite.
@@ -22,7 +22,7 @@
  * register (`push {r6,r7}` / `mov r9,r2`, +4 bytes). Assigning back over the
  * dead parameter keeps a1 in r6, a2 in r7, a3 in r8 and the OAM word in r5,
  * which is the ROM's allocation exactly. */
-void sub_0801F34C(int a1, int a2, int a3, int a4, int a5)
+void DrawOamObject(int a1, int a2, int a3, int a4, int a5)
 {
     struct Unk0200F920 *e;
     int i;
@@ -39,3 +39,5 @@ void sub_0801F34C(int a1, int a2, int a3, int a4, int a5)
         }
     }
 }
+
+asm(".global sub_0801F34C\n.thumb_set sub_0801F34C, DrawOamObject\n");

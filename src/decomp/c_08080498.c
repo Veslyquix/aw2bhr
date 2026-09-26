@@ -23,14 +23,14 @@ void sub_08080498(struct Unk08080498 *proc)
     sub_08013B0C();
     Decompress(gUnknown_08236294,
                (void *)(0x06000000 + gUnknown_0300251C.bits.chr_block * 0x4000));
-    Decompress(gUnknown_08235D30, gUnknown_08499584);
+    Decompress(gUnknown_08235D30, gBG3TilemapBuffer);
     ApplyPalettes(gUnknown_082391E8, 0, 1);
     sub_08013B1C();
     SetDispEnable(0, 1, 1, 1, 1);
     sub_08011E54(gUnknown_080A29A4,
                  (void *)(0x06005600 + gUnknown_03002B6C.bits.chr_block * 0x4000),
                  0x800);
-    sub_08012B70(gUnknown_08499578, gUnknown_080A31A4, 0, 0, 0x82B0);
+    sub_08012B70(gBG0TilemapBuffer, gUnknown_080A31A4, 0, 0, 0x82B0);
     ApplyPalettes(gUnknown_080A36C8, 8, 1);
     sub_08013AEC();
     sub_08043BA4(gUnknown_03005970, 0x1CA, 1);

@@ -27,7 +27,7 @@ void sub_08066A20(void)
 
     for (i = 0; i < gUnknown_08580934->unk08; i++)
     {
-        if (((struct KeySt *)&gUnknown_03002040)[i].held & 2)
+        if (((struct KeySt *)&gUnknown_03002040)[i].pressed & 2)
             cnt++;
 
         if ((s8)gUnknown_08580934->unk70[i] == -1)

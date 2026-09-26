@@ -34,7 +34,7 @@ void sub_080534A0(void)
 
     if (gUnknown_03004544 >= gUnknown_030045A4[t])
     {
-        sub_0803B48C(gUnknown_085643B0[gUnknown_03004580[t][3]]
+        PlayMusicOrSfx(gUnknown_085643B0[gUnknown_03004580[t][3]]
                                       [gUnknown_03004520]
                                       [gUnknown_03004530 & 1]);
         gUnknown_03004530++;

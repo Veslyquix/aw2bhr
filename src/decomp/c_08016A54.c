@@ -25,7 +25,7 @@ void sub_08016A54(void)
     gUnknown_0200C420.unk0b = 0;
     gUnknown_0200C420.unk0f = 0;
     for (i = 0; i <= 0x12; i++)
-        sub_08017870(i, 0);
+        SetLoadedCoPalette(i, 0);
     sub_0803BA1C();
     gUnknown_0200C420.unk10 = 0;
     gUnknown_0200C420.unk12 = 0;

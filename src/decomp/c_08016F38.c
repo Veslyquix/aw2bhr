@@ -39,21 +39,6 @@
  * gUnknown_030033EC copy takes r5 instead of ROM scratch r0). It also blocks
  * tools/permute.py — do not remove it to enable a permuter run. */
 
-struct Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ s16 unk04;
-    /* 0x0006 */ s16 unk06;
-    /* 0x0008 */ s16 unk08;
-    /* 0x000a */ s16 unk0a;
-    /* 0x000c */ s16 unk0c;
-    /* 0x000e */ s16 unk0e;
-    /* 0x0010 */ u16 unk10;
-    /* 0x0012 */ u8 filler_12[0xa22 - 0x12];
-    /* 0x0a22 */ u16 unk0a22[(0x417a - 0xa22) / 2];
-    /* 0x417a */ u16 unk417a[(0x421a - 0x417a) / 2];
-};
 struct SaveBlkRec
 {
     /* 0x00 */ u8 unk00;
@@ -65,10 +50,10 @@ struct SaveBlk
     /* 0x0000 */ u16 unk0000;
     /* 0x0002 */ u16 unk0002;
     /* 0x0004 */ struct Unk802C57C unk0004;
-    /* 0x0008 */ struct Unk08499594 unk0008;
+    /* 0x0008 */ struct Unit unk0008;
     /* 0x0014 */ u8 unk0014[0x140 - 0x14];
     /* 0x0140 */ u8 unk0140[0x48];
-    /* 0x0188 */ struct Unk08499594 unk0188[4 * 51];
+    /* 0x0188 */ struct Unit unk0188[4 * 51];
     /* 0x0b18 */ int unk0b18[4];
     /* 0x0b28 */ u8 filler_0b28[0xb98 - 0xb28];
     /* 0x0b98 */ struct Unk03002F08 unk0b98;
@@ -110,8 +95,8 @@ void sub_08016F38(u8 a1)
   p->unk0000 = gUnknown_03004080;
   asm volatile ("" : "=r" (k));
   p->unk0002 = gUnknown_030033EC;
-  sub_0808B6E8(p->unk0140, &gUnknown_03003FC0, 0x48);
-  p->unk0008 = *((struct Unk08499594 *) gUnknown_03004490);
+  sub_0808B6E8(p->unk0140, &gPlaySt, 0x48);
+  p->unk0008 = *((struct Unit *) gUnknown_03004490);
   for (i = 0; i < 4; i++)
   {
     p->unk0b18[i] = gUnknown_030033F4[i];
@@ -120,24 +105,24 @@ void sub_08016F38(u8 a1)
   p->unk0b98 = gUnknown_03002F08;
   p->unk0ba0 = gUnknown_03002F20;
   p->unk0ba4 = gUnknown_03001FF0;
-  p->unk0bae = ((struct Map *) gUnknown_08499590)->unk00;
-  p->unk0bb0 = ((struct Map *) gUnknown_08499590)->unk02;
-  p->unk0bb2 = ((struct Map *) gUnknown_08499590)->unk04;
-  p->unk0bb4 = ((struct Map *) gUnknown_08499590)->unk06;
-  p->unk0bb6 = ((struct Map *) gUnknown_08499590)->unk10;
-  if ((gUnknown_03003FC0.unk02 < 0xb4) || (gUnknown_03003FC0.unk02 > 0xbf))
+  p->unk0bae = gMap->width;
+  p->unk0bb0 = gMap->height;
+  p->unk0bb2 = gMap->scrollX;
+  p->unk0bb4 = gMap->scrollY;
+  p->unk0bb6 = gMap->unk10;
+  if ((gPlaySt.mapID < 0xb4) || (gPlaySt.mapID > 0xbf))
   {
-    sub_080247A4(gUnknown_03003FC0.unk02);
+    sub_080247A4(gPlaySt.mapID);
     k = 0;
-    for (y = 0; y < ((struct Map *) gUnknown_08499590)->unk00; y++)
+    for (y = 0; y < gMap->width; y++)
     {
-      for (x = 0; x < ((struct Map *) gUnknown_08499590)->unk02; x++)
+      for (x = 0; x < gMap->height; x++)
       {
-        idx = ((struct Map *) gUnknown_08499590)->unk417a[x] + y;
+        idx = gMap->rowOffset[x] + y;
         off = idx * 2;
-        if (((struct Map *) gUnknown_08499590)->unk0a22[idx] != *(u16 *)((u8 *)gUnknown_03003F68 + off + 2))
+        if (gMap->tile[idx] != *(u16 *)((u8 *)gUnknown_03003F68 + off + 2))
         {
-          p->unk0bb8[k].unk02 = ((struct Map *) gUnknown_08499590)->unk0a22[idx];
+          p->unk0bb8[k].unk02 = gMap->tile[idx];
           p->unk0bb8[k].unk00 = y;
           p->unk0bb8[k].unk01 = x;
           k++;

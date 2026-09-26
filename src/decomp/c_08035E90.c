@@ -18,7 +18,7 @@
 /* Fires the help line for the proc's current mode (unk36, the same
  * gUnknown_0849CD88 row index sub_08035F68 and sub_08035FA8 use).
  *
- * The two `sub_0803B48C(row->unk1a)` tails are written TWICE in the ROM, once
+ * The two `PlayMusicOrSfx(row->unk1a)` tails are written TWICE in the ROM, once
  * for case 0x18's fall-through and once for the default arm -- they are
  * separate blocks that cross-jumping could not merge because case 0x18 reaches
  * its copy from an inner `if`.  Same finding as src/decomp/c_08035F68.c.
@@ -33,7 +33,7 @@ struct Unk35E90Proc
 {
     /* 0x00 */ PROC_HEADER;
     /* 0x29 */ STRUCT_PAD(0x29, 0x30);
-    /* 0x30 */ struct Unk08499594 *unk30;
+    /* 0x30 */ struct Unit *unk30;
     /* 0x34 */ STRUCT_PAD(0x34, 0x36);
     /* 0x36 */ u8 unk36;
     /* 0x37 */ STRUCT_PAD(0x37, 0x39);
@@ -63,24 +63,24 @@ void sub_08035E90(ProcPtr procArg)
             t = sub_08035D0C(proc);
 
             if (t != 0)
-                sub_0803B48C(t + a + b);
+                PlayMusicOrSfx(t + a + b);
         }
         break;
 
     case 0x18:
-        if (proc->unk30 != NULL && (proc->unk30->unk01 & 0x20))
+        if (proc->unk30 != NULL && (proc->unk30->flags & 0x20))
         {
-            sub_0803B48C(0x38);
+            PlayMusicOrSfx(0x38);
             break;
         }
 
         if (gUnknown_0849CD88[proc->unk36].unk1a != 0)
-            sub_0803B48C(gUnknown_0849CD88[proc->unk36].unk1a);
+            PlayMusicOrSfx(gUnknown_0849CD88[proc->unk36].unk1a);
         break;
 
     default:
         if (gUnknown_0849CD88[proc->unk36].unk1a != 0)
-            sub_0803B48C(gUnknown_0849CD88[proc->unk36].unk1a);
+            PlayMusicOrSfx(gUnknown_0849CD88[proc->unk36].unk1a);
         break;
     }
 }

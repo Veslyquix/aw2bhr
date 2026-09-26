@@ -23,14 +23,14 @@ struct Unk130B0Proc
 
 void sub_08013098(int a, ProcPtr parent)
 {
-    struct Unk13098Proc *proc = Proc_StartBlocking(gUnknown_0848929C, parent);
+    struct Unk13098Proc *proc = Proc_StartBlocking(ProcScr_SomeFade, parent);
 
     proc->unk64 = a;
 }
 
 void sub_080130B0(int a, ProcPtr parent)
 {
-    struct Unk130B0Proc *proc = Proc_StartBlocking(gUnknown_084892C4, parent);
+    struct Unk130B0Proc *proc = Proc_StartBlocking(ProcScr_FadeLoadMap, parent);
 
     proc->unk64 = a;
 }

@@ -16,6 +16,6 @@
 
 void sub_08044354(int a1)
 {
-    if (gUnknown_08499598[a1].unk25 != 0xff)
-        gUnknown_08499598[a1].unk25++;
+    if (gPlayers[a1].unk25 != 0xff)
+        gPlayers[a1].unk25++;
 }

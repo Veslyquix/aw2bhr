@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0802CC90.
- * sub_0802CC90 @ 0x0802CC90, sub_0802CCCC @ 0x0802CCCC
+ * CanShowSubMenuItem @ 0x0802CC90, sub_0802CCCC @ 0x0802CCCC
  */
 
 /* Four guards, all of which must pass before this reports FALSE.
@@ -19,9 +19,15 @@
  * gUnknown_030040D8->unk00 is the byte at offset 0, newly named: sub_080421D0
  * and sub_0804223C read the same byte off the same pointer to index
  * gUnknown_085D5ABC by 0x5c, so it is a record selector rather than a flag.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Menu Item Visibility Check -
+ * Checks if a unit is a Sub (0x18)". TRUE means the menu item stays visible;
+ * it's hidden only when the unit's class IS 0x18 and the other three guards
+ * all fail too. The old CanShowSubMenuItem symbol is kept as a linker alias below
+ * so every other unit keeps resolving it unchanged.
  */
 
-bool8 sub_0802CC90(void)
+bool8 CanShowSubMenuItem(void)
 {
     if (gUnknown_030040D8->unk00 != 0x18)
         return TRUE;
@@ -38,7 +44,9 @@ bool8 sub_0802CC90(void)
     return FALSE;
 }
 
-/* sub_0802CC90's three-test twin, and the spelling is the OTHER one.
+asm(".global sub_0802CC90\n.thumb_set sub_0802CC90, CanShowSubMenuItem\n");
+
+/* CanShowSubMenuItem's three-test twin, and the spelling is the OTHER one.
  *
  * `if (A && B && C) return FALSE; return TRUE;` is semantically identical and
  * does NOT match: agbcc lays the THEN arm out inline and sends the

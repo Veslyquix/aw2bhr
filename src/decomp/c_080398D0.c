@@ -27,14 +27,14 @@ struct Unk398D0Proc
  * table symbol -- kept live in r4 across the __umodsi3 call -- is the
  * member-array hoist for unk20[], the same idiom sub_08039F18 uses for unk38.
  *
- * __umodsi3 rather than __modsi3 because sub_080129E0 returns u32. */
+ * __umodsi3 rather than __modsi3 because GetNextRandomNumber returns u32. */
 
 u8 sub_080398D0(ProcPtr procPtr)
 {
     struct Unk398D0Proc *proc = procPtr;
 
-    sub_080397F4(gUnknown_085D3DD0[gUnknown_08499598[proc->unk54].unk1d]
-                     .unk20[sub_080129E0() % 6]);
+    sub_080397F4(gUnknown_085D3DD0[gPlayers[proc->unk54].co]
+                     .copQuote[GetNextRandomNumber() % 6]);
 
     return 0;
 }

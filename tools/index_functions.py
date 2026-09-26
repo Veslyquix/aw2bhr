@@ -17,6 +17,7 @@ import sys
 import awlib
 
 OUT = os.path.join(awlib.DATA_DIR, "functions.json")
+PROMOTED_FILE = os.path.join(awlib.DATA_DIR, "promoted.json")
 
 # 4-8 byte `svc` thunks. These are BIOS entry points, not game code -- a port
 # reimplements them natively rather than decompiling them.
@@ -55,9 +56,20 @@ def parked():
     return _named_reasons(PARKED_FILE)
 
 
-def decompiled_symbols():
-    """Function names already living in src/*.c -- these are done."""
+def promoted_symbols():
+    """Assembly symbols replaced according to the split-build manifest."""
     names = set()
+    if os.path.isfile(PROMOTED_FILE):
+        with open(PROMOTED_FILE, encoding="utf-8") as fh:
+            for unit in json.load(fh):
+                names.update(unit.get("functions", []))
+    return names
+
+
+def decompiled_symbols():
+    """Function definitions already living in src/*.c."""
+    names = set()
+
     src = os.path.join(awlib.REPO, "src")
     if not os.path.isdir(src):
         return names
@@ -93,7 +105,11 @@ def decompiled_symbols():
 
 def build():
     files = awlib.load_all()
-    done = decompiled_symbols()
+    # The manifest is authoritative for renamed definitions whose original
+    # sub_XXXXXXXX symbol survives only as a linker alias. Source scanning
+    # still covers ordinary definitions and keeps the separate C-definition
+    # metric counting bodies rather than aliases.
+    done = decompiled_symbols() | promoted_symbols()
     resident = asm_resident()
     held = parked()
     records = []

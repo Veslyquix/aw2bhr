@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0801153C.
  * sub_0801153C @ 0x0801153C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "proc.h"
@@ -12,7 +16,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file .text as one
  * contiguous block at 0x0801153C.
- * sub_0801153C @ 0x0801153C
+ * SomeFade_IDLE_0801153D @ 0x0801153C
  */
 
 /* Family F062 (data/families.json): `push {r4,lr}; adds r4,r0,#0; bl A;
@@ -31,13 +35,15 @@
 /* The `bl sub_08011218` with r0 still holding the incoming proc looks exactly
  * like an argument pass and is not one: sub_08011218 is
  * `void sub_08011218(void)` in its promoted definition src/decomp/c_08011218.c
- * (`Proc_EndEach(gUnknown_0848927C)`), so it takes nothing. The
+ * (`Proc_EndEach(ProcScr_FadeScreenLines)`), so it takes nothing. The
  * `adds r4, r0, #0` is "save it because the call clobbers r0", exactly the
  * wave-14 F032 trap one shape up.
  */
 
-void sub_0801153C(ProcPtr proc)
+void SomeFade_IDLE_0801153D(ProcPtr proc)
 {
     sub_08011218();
     Proc_Break(proc);
 }
+
+asm(".global sub_0801153C\n.thumb_set sub_0801153C, SomeFade_IDLE_0801153D\n");

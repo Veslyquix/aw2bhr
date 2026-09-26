@@ -57,7 +57,7 @@ struct Unk8083A44
  *   unk4e != 0, unk64 > 0, unk68 > 0 -> the "leaving" leaf
  *   unk4e != 0, unk64 > 0, unk68 <=0 -> the "held" leaf, which is the only one
  *                                       that clears unk64/unk4e/unk68
- * Every leaf ends in the same pair of sub_0801F34C calls: argument 2 is an
+ * Every leaf ends in the same pair of DrawOamObject calls: argument 2 is an
  * x | flags word masked to 9 bits, argument 3 a y masked to 8, and the second
  * call always ORs 0x3000 into the x word. agbcc builds that constant as
  * `movs r0,#0xc0; lsls r0,r0,#6`, which is just how it makes an even constant
@@ -178,7 +178,7 @@ void sub_08083A44(struct Unk8083A44 *p)
 
         PutSpriteExt(1, 0x25B, 0x153, gUnknown_0848B6CE, 0xD2C8);
     }
-    else if (gUnknown_03005968 != 0 && sub_0803CBD8(0x20) != 0
+    else if (gUnknown_03005968 != 0 && IsCampaignCompletionFlagSet(0x20) != 0
              && gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0)
     {
         SetObjAffine(1,
@@ -255,8 +255,8 @@ void sub_08083EE0(struct Unk8083EE0 *p)
                     p->unk64 = 0;
             }
 
-            sub_0801F34C(0x50, p->unk2c & 0x1FF, p->unk30 & 0xFF, 0, 0);
-            sub_0801F34C(0x50, (p->unk3c & 0x1FF) | 0x3000, p->unk40 & 0xFF, 0, 0);
+            DrawOamObject(0x50, p->unk2c & 0x1FF, p->unk30 & 0xFF, 0, 0);
+            DrawOamObject(0x50, (p->unk3c & 0x1FF) | 0x3000, p->unk40 & 0xFF, 0, 0);
 
             if (p->unk4c == 8)
             {
@@ -285,8 +285,8 @@ void sub_08083EE0(struct Unk8083EE0 *p)
                 p->unk2c = 0;
             }
 
-            sub_0801F34C(0x50, p->unk2c & 0x1FF, (0x64 - p->unk30) & 0xFF, 0, 0);
-            sub_0801F34C(0x50, ((0xA0 - p->unk2c) & 0x1FF) | 0x3000, (p->unk30 + 0x3C) & 0xFF, 0, 0);
+            DrawOamObject(0x50, p->unk2c & 0x1FF, (0x64 - p->unk30) & 0xFF, 0, 0);
+            DrawOamObject(0x50, ((0xA0 - p->unk2c) & 0x1FF) | 0x3000, (p->unk30 + 0x3C) & 0xFF, 0, 0);
         }
     }
     else
@@ -304,13 +304,13 @@ void sub_08083EE0(struct Unk8083EE0 *p)
 
         if (p->unk64 != 0)
         {
-            sub_0801F34C(0x50, (p->unk2c + 0x80) & 0x1FF, (DivRem(p->unk66, 2) * 16 + 0x54 - p->unk30) & 0xFF, 0, 0);
-            sub_0801F34C(0x50, ((0xD0 - p->unk2c) & 0x1FF) | 0x3000, (DivRem(p->unk66, 2) * 16 + 0x3C + p->unk30) & 0xFF, 0, 0);
+            DrawOamObject(0x50, (p->unk2c + 0x80) & 0x1FF, (DivRem(p->unk66, 2) * 16 + 0x54 - p->unk30) & 0xFF, 0, 0);
+            DrawOamObject(0x50, ((0xD0 - p->unk2c) & 0x1FF) | 0x3000, (DivRem(p->unk66, 2) * 16 + 0x3C + p->unk30) & 0xFF, 0, 0);
         }
         else
         {
-            sub_0801F34C(0x50, p->unk2c & 0x1FF, (0x64 - p->unk30) & 0xFF, 0, 0);
-            sub_0801F34C(0x50, ((0xA0 - p->unk2c) & 0x1FF) | 0x3000, (p->unk30 + 0x3C) & 0xFF, 0, 0);
+            DrawOamObject(0x50, p->unk2c & 0x1FF, (0x64 - p->unk30) & 0xFF, 0, 0);
+            DrawOamObject(0x50, ((0xA0 - p->unk2c) & 0x1FF) | 0x3000, (p->unk30 + 0x3C) & 0xFF, 0, 0);
         }
     }
 }

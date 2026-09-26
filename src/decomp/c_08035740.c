@@ -13,7 +13,7 @@ void sub_08035740(void *a)
 {
     ProcPtr proc;
 
-    proc = Proc_Find(gUnknown_0849BE38);
+    proc = Proc_Find(ProcScr_SelectUnit);
     if (proc != NULL)
         sub_08035760(proc, a);
 }

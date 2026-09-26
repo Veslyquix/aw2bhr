@@ -18,5 +18,5 @@ void sub_08030ED4(void)
     sub_0801BB00(6, 0);
     sub_0801BB10(1, -0xC1);
     gUnknown_0849B018->unk06 = 0xff;
-    gUnknown_03003FC0.unk32 = 0;
+    gPlaySt.savingEnabled = 0;
 }

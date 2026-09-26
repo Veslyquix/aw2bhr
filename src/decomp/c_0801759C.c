@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,30 +29,20 @@
  * Both counters are plain `int`: neither the increment nor the exit test
  * carries a narrowing, and both bounds are `ldrh`ed and compared SIGNED. */
 
-struct Unk1759CMap
-{
-    /* 0x0000 */ u16 width;
-    /* 0x0002 */ u16 height;
-    /* 0x0004 */ u8 filler_0004[0xa1e];
-    /* 0x0a22 */ u16 tile[0x508];
-    /* 0x1432 */ u8 terrain[0x2d48];
-    /* 0x417a */ u16 rowOffset[1];
-};
-
 void sub_0801759C(void)
 {
     int x;
     int y;
 
-    for (y = 0; y < ((struct Unk1759CMap *)gUnknown_08499590)->height; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct Unk1759CMap *)gUnknown_08499590)->width; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             int idx;
 
-            idx = ((struct Unk1759CMap *)gUnknown_08499590)->rowOffset[y] + x;
-            ((struct Unk1759CMap *)gUnknown_08499590)->terrain[idx] =
-                gUnknown_0849959C[((struct Unk1759CMap *)gUnknown_08499590)->tile[idx]];
+            idx = gMap->rowOffset[y] + x;
+            gMap->terrain[idx] =
+                gUnknown_0849959C[gMap->tile[idx]];
         }
     }
 

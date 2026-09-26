@@ -47,7 +47,7 @@ void sub_0805414C(u16 a1)
 
 void sub_080541F0(u16 a1, u16 a2)
 {
-    sub_0803B48C(gUnknown_085D6C88[gUnknown_03004580[a1][1]]
+    PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[a1][1]]
                  .unk08[gUnknown_03004580[a1][3] == 2]);
     if (gUnknown_02029A10[a1].entries[a2].unk18 != -1
      && sub_080153F0(gUnknown_02029A10[a1].entries[a2].unk18))
@@ -102,7 +102,7 @@ void sub_080542EC(u16 a1, u16 a2)
         t = gUnknown_03004580[a1][1];
         if (t == 0xf || t == 0x12 || t == 3)
         {
-            sub_0803B48C(gUnknown_085D6C88[gUnknown_03004580[a1][1]]
+            PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[a1][1]]
                          .unk0c[gUnknown_03004580[a1][2] - 1]
                                [gUnknown_020296B0[a1].unk1a & 1]);
             gUnknown_020296B0[a1].unk1a++;

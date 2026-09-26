@@ -8,7 +8,7 @@
  */
 
 /* A screen/mode teardown-then-notify: six unconditional calls, then a guarded
- * sub_08034534 command. `gUnknown_03003FC0.unk32` is reached as
+ * sub_08034534 command. `gPlaySt.unk32` is reached as
  * `ldr rB,=g; adds rB,#0x32; ldrb` because 0x32 is past `ldrb`'s 5-bit
  * displacement -- addressing, not a member array; the field is already
  * declared in include/unknown-globals.h and is NOT re-typed here.
@@ -23,13 +23,13 @@
 
 void sub_0802D064(void)
 {
-    sub_08034F48();
+    LockUnitSelection();
     sub_0801A168();
     sub_0802C57C();
     sub_08042650();
     sub_080424FC();
     sub_0802C594();
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(3, gUnknown_03003F38, 0, 0);
 }

@@ -11,7 +11,7 @@ int sub_0805B4A8(void)
 {
     int v;
 
-    v = gUnknown_085D5ABC[gUnknown_030046D4].unk1a;
+    v = gUnknown_085D5ABC[gUnknown_030046D4].deployLocation;
 
     if (v == 2)
         goto one;

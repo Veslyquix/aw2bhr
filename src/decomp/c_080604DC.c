@@ -32,5 +32,5 @@
 void sub_080604DC(void)
 {
     sub_08023348();
-    Proc_Start(gUnknown_0848925C, PROC_TREE_3);
+    Proc_Start(ProcScr_DesignRoomFadeIn, PROC_TREE_3);
 }

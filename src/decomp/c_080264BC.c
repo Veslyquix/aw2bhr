@@ -4,10 +4,10 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080264BC.
- * sub_080264BC @ 0x080264BC
+ * GetTechScore @ 0x080264BC
  */
 
-/* The same percentage ramp as sub_080263A4, but over a unit's own current and
+/* The same percentage ramp as GetSpeedScore, but over a unit's own current and
  * maximum values instead of a chapter threshold, and with a mode-dependent
  * baseline of 10 or 20.
  *
@@ -20,17 +20,21 @@
  * subtracts 100 from the quotient and only then negates against n.
  *
  * The result is assigned back into `x`, not to a fresh local. That is what puts
- * it in r4 -- x's own register, dead by then -- rather than r0. */
-u8 sub_080264BC(u8 a)
+ * it in r4 -- x's own register, dead by then -- rather than r0.
+ *
+ * Named per Xenesis's AW2 Subroutine List: "Tech Scoring Subroutine". The
+ * old GetTechScore symbol is kept as a linker alias below so every other
+ * unit keeps resolving it unchanged. */
+u8 GetTechScore(u8 a)
 {
     int n;
     int x;
     int y;
     int p;
 
-    if (sub_080266DC(a))
+    if (IsPlayerAliveAndActive(a))
     {
-        n = gUnknown_03003FC0.unk01 == 1 ? 0x14 : 0xa;
+        n = gPlaySt.gameMode == 1 ? 0x14 : 0xa;
         x = sub_08025CF0(a);
         y = sub_08025D08(a);
 
@@ -46,3 +50,5 @@ u8 sub_080264BC(u8 a)
     }
     return 0;
 }
+
+asm(".global sub_080264BC\n.thumb_set sub_080264BC, GetTechScore\n");

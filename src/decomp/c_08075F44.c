@@ -66,6 +66,6 @@ void sub_08075F44(void *proc)
     sub_080135A4();
     sub_0801B780(0x340);
     sub_080149C0(3, 0xB, gUnknown_08551A00,
-                 gUnknown_08610A38[gUnknown_081CC578[t]], 0, 0);
+                 gTextTable[gUnknown_081CC578[t]], 0, 0);
     sub_0801F2AC(gUnknown_081CC538[v], gUnknown_08551A00 + 0x161);
 }

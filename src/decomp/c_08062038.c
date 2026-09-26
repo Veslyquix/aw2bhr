@@ -22,7 +22,7 @@ void sub_08062038(void)
             p = &gUnknown_03004480;
             gUnknown_030033EC = i;
             *p = i;
-            if (sub_080266DC(i))
+            if (IsPlayerAliveAndActive(i))
                 sub_0806209C();
         }
         gUnknown_03004480 = gUnknown_030033EC = saved;

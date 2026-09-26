@@ -21,7 +21,7 @@
  * Settled earlier and still load-bearing:
  *   - `(t + 0xa) * 0x421` is WRONG. agbcc expands a multiply by 0x421 with
  *     Horner; the ROM has the flat sum-of-shifts, so the source spells them.
- *   - the shift is LOGICAL even though gUnknown_03004008 is s32, so the source
+ *   - the shift is LOGICAL even though gGameClock is s32, so the source
  *     casts to u32. Plain `>> 1` gives `asrs`.
  *   - the `+ 0xa` must stay INSIDE the store expression; hoisting it moves the
  *     gPal pool load after it. */
@@ -32,7 +32,7 @@ void sub_08066EBC(void)
     int i;
     int m;
 
-    t = gUnknown_03004008 & 0x1f;
+    t = gGameClock & 0x1f;
 
     if (t > 0xf)
         t = 0x1f - t;
@@ -40,7 +40,7 @@ void sub_08066EBC(void)
     gPal[0x148] = ((t + 0xa) << 10) + ((t + 0xa) << 5) + (t + 0xa);
 
     m = 0xf;
-    i = (u32)gUnknown_03004008 >> 1;
+    i = (u32)gGameClock >> 1;
     i &= m;
 
     gPal[0x1d9] = gUnknown_0817AF18[0x20 + i];

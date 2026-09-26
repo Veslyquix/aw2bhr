@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -28,14 +29,6 @@
  * and the ROM's re-read of `->unk02` at the loop bottom disappears (-4 bytes).
  */
 
-struct Unk581A4Map
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x417a - 0x04];
-    /* 0x417a */ u16 unk417a[1];
-};
-
 void sub_080581A4(u8 *dst, int a2)
 {
     u8 *rows[40];
@@ -45,12 +38,12 @@ void sub_080581A4(u8 *dst, int a2)
 
     v = a2;
 
-    for (i = 0; i < ((struct Unk581A4Map *)gUnknown_08499590)->unk02; i++)
-        rows[i] = dst + ((struct Unk581A4Map *)gUnknown_08499590)->unk417a[i];
+    for (i = 0; i < gMap->height; i++)
+        rows[i] = dst + gMap->rowOffset[i];
 
-    for (i = 0; i < ((struct Unk581A4Map *)gUnknown_08499590)->unk02; i++)
+    for (i = 0; i < gMap->height; i++)
     {
-        for (j = 0; j < ((struct Unk581A4Map *)gUnknown_08499590)->unk00; j++)
+        for (j = 0; j < gMap->width; j++)
             rows[i][j] = v;
     }
 }

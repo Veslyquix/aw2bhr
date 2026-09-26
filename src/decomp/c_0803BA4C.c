@@ -9,7 +9,7 @@
 
 #include "proc.h"
 
-/* The tree-3 starter for gUnknown_0849EB34, mode 1 -- the fourth member of the
+/* The tree-3 starter for ProcScr_Campaign, mode 1 -- the fourth member of the
  * sub_0803B8C4 / sub_0803BA00 / sub_0803BADC family.
  *
  * The two sub_08038690 calls are an if/else and NOT a ternary: a ternary
@@ -24,6 +24,6 @@ void sub_0803BA4C(void)
     else
         sub_08038690(0);
     sub_08016E74();
-    gUnknown_03003FC0.unk01 = 1;
-    Proc_Start(gUnknown_0849EB34, PROC_TREE_3);
+    gPlaySt.gameMode = 1;
+    Proc_Start(ProcScr_Campaign, PROC_TREE_3);
 }

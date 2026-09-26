@@ -11,7 +11,7 @@
  * same global, same offset, same shape. A duplicate, not a family member. */
 bool8 sub_0802C644(void)
 {
-    if (gUnknown_03003FC0.unk32 == 0)
+    if (gPlaySt.savingEnabled == 0)
         return FALSE;
 
     return TRUE;

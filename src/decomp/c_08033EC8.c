@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08033EC8.
  * sub_08033EC8 @ 0x08033EC8, sub_08033F1C @ 0x08033F1C
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* MATCHED byte-for-byte, wave 43 (W43-C), in four attempts.
@@ -28,18 +32,18 @@ struct Unk33EC8Proc
  * -fforce-addr address constant. The honest spelling reproduces it here
  * because this loop body is under enough register pressure (r8, r9 and sl all
  * in use) that agbcc spills the address by itself. Its neighbour 0x08090D7C
- * is the SAME construct for sub_08033EC8 and does NOT behave this way; see
- * that function's note, which is the useful half of this pair.
+ * is the SAME construct for LinkC3_IDLE_08033EC9 and does NOT behave this
+ * way; see that function's note, which is the useful half of this pair.
  *
  * PROMOTION WARNING -- NON-CONSECUTIVE POOL WORDS. 0x08090D7C, 0x08090D80 and
  * 0x08090D8C are pool words of this one translation unit, but 0x08090D84 and
- * 0x08090D88 sitting between them belong to sub_080344F0 and sub_080345C8,
+ * 0x08090D88 sitting between them belong to sub_080344F0 and MapMainIdle,
  * which are promoted separately and reach them by name. split_rodata.py
  * requires a unit's claimed words to be CONSECUTIVE, so this unit and
- * sub_080346FC's may need to be carved or split together.
+ * ResetRulesAfterCampaignMap's may need to be carved or split together.
  *
  * Binding `gUnknown_0849BC30[proc->unk30[i]]` to `p` is load-bearing, and is
- * the same single fact as in sub_08033EC8: written inline the argument
+ * the same single fact as in LinkC3_IDLE_08033EC9: written inline the argument
  * expressions are emitted in the wrong order (the 0x1ff mask and the `& 0xff`
  * ahead of the table lookup), and it ALSO flipped r3/r5 between the two
  * branches. One binding fixed both, which is why the r3/r5 mirror was never a
@@ -65,7 +69,7 @@ struct Unk33F1CProc
     /* 0x4c */ u32 unk4c;
 };
 
-void sub_08033EC8(struct Unk33EC8Proc *proc)
+void LinkC3_IDLE_08033EC9(struct Unk33EC8Proc *proc)
 {
     int i;
 
@@ -80,7 +84,7 @@ void sub_08033EC8(struct Unk33EC8Proc *proc)
     }
 }
 
-void sub_08033F1C(struct Unk33F1CProc *proc)
+void LinkC3_IDLE_08033F1D(struct Unk33F1CProc *proc)
 {
     int i;
     int t;
@@ -116,3 +120,6 @@ void sub_08033F1C(struct Unk33F1CProc *proc)
         proc->unk4c++;
     }
 }
+
+asm(".global sub_08033EC8\n.thumb_set sub_08033EC8, LinkC3_IDLE_08033EC9\n"
+    ".global sub_08033F1C\n.thumb_set sub_08033F1C, LinkC3_IDLE_08033F1D\n");

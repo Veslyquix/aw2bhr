@@ -7,7 +7,7 @@
  * sub_0803BD78 @ 0x0803BD78, sub_0803BDBC @ 0x0803BDBC
  */
 
-/* A leaf -- no `push` at all -- that arms gUnknown_03003FC0 for mode 3.
+/* A leaf -- no `push` at all -- that arms gPlaySt for mode 3.
  *
  * The run of `adds r0,#1` / `subs r0,#1` steps on one address register is what
  * consecutive byte fields cost once the displacement leaves `strb`'s 5-bit
@@ -16,22 +16,22 @@
  * include/unknown-globals.h. */
 void sub_0803BD78(void)
 {
-    gUnknown_03003FC0.unk01 = 3;
-    gUnknown_03003FC0.unk0d = 1;
-    gUnknown_03003FC0.unk07 = 1;
-    gUnknown_03003FC0.unk08 = 1;
-    gUnknown_03003FC0.unk2d = 1;
-    gUnknown_03003FC0.unk2c = 0;
-    gUnknown_03003FC0.unk2e = 0;
-    gUnknown_03003FC0.unk2f = 0;
-    gUnknown_03003FC0.unk30 = 0;
-    gUnknown_03003FC0.unk28 = 1000;
-    gUnknown_03003FC0.unk31 = 0;
-    if (gUnknown_03003FC0.unk32 != 0)
-        gUnknown_03003FC0.unk09 = 1;
+    gPlaySt.gameMode = 3;
+    gPlaySt.fog = 1;
+    gPlaySt.coPowersEnabled = 1;
+    gPlaySt.coAbilities = 1;
+    gPlaySt.randomWeatherOn = 1;
+    gPlaySt.weather = 0;
+    gPlaySt.unk2e = 0;
+    gPlaySt.defaultWeather = 0;
+    gPlaySt.turnLimit = 0;
+    gPlaySt.propertyFunds = 1000;
+    gPlaySt.captureLimit = 0;
+    if (gPlaySt.savingEnabled != 0)
+        gPlaySt.animOpts = 1;
 }
 
-/* Re-arm gUnknown_03003FC0 across a sub_08034848 reset, carrying unk0c over it
+/* Re-arm gPlaySt across a sub_08034848 reset, carrying unk0c over it
  * by hand -- the byte is read into a callee-saved register before the call and
  * written straight back after, which is the whole reason r4 is pushed.
  *
@@ -41,18 +41,18 @@ void sub_0803BD78(void)
  * not disturb that model. */
 void sub_0803BDBC(void)
 {
-    u8 saved = gUnknown_03003FC0.unk0c;
+    u8 saved = gPlaySt.bgmOn;
 
     sub_08034848();
-    gUnknown_03003FC0.unk0c = saved;
-    gUnknown_03003FC0.unk38[1] = 0;
-    gUnknown_03003FC0.unk38[2] = 0;
-    gUnknown_03003FC0.unk38[3] = 0;
-    gUnknown_03003FC0.unk38[4] = 0;
-    gUnknown_03003FC0.unk0d = 1;
-    gUnknown_03003FC0.unk07 = 1;
-    gUnknown_03003FC0.unk08 = 1;
-    gUnknown_03003FC0.unk2c = 0;
-    gUnknown_03003FC0.unk2d = 1;
-    gUnknown_03003FC0.unk00 = 1;
+    gPlaySt.bgmOn = saved;
+    gPlaySt.aiControlled[1] = 0;
+    gPlaySt.aiControlled[2] = 0;
+    gPlaySt.aiControlled[3] = 0;
+    gPlaySt.aiControlled[4] = 0;
+    gPlaySt.fog = 1;
+    gPlaySt.coPowersEnabled = 1;
+    gPlaySt.coAbilities = 1;
+    gPlaySt.weather = 0;
+    gPlaySt.randomWeatherOn = 1;
+    gPlaySt.unk00 = 1;
 }

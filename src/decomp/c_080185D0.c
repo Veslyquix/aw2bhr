@@ -19,11 +19,11 @@
  * (dereferenced in baserom.gba); sub_08018694 has its own private pair at
  * 0x0808E588/_8C holding the SAME two addresses. The honest spelling is what
  * is written here, and the force-addr level appears exactly on the two
- * addresses named more than once -- gUnknown_08610A38, gUnknown_08499588 and
+ * addresses named more than once -- gTextTable, gUnknown_08499588 and
  * gUnknown_03002F08 are named once each and get ordinary direct pool words.
  *
  * `*(s16 *)&...->unk08` and not a retype: the SAME node member is read signed
- * here (`movs r1,#8; ldrsh`, an index into gUnknown_08610A38) and unsigned
+ * here (`movs r1,#8; ldrsh`, an index into gTextTable) and unsigned
  * three statements later (`ldrh`, sub_08014740's u16 fourth argument). The
  * member is `u16` on four promoted files' evidence, so the signed site takes a
  * pointer cast, which emits nothing; an `(s16)` value cast would add
@@ -37,7 +37,7 @@ bool8 sub_080185D0(s16 a)
     struct Unk03001470 *s;
     bool8 result;
 
-    if (sub_08014004(gUnknown_08610A38[*(s16 *)&gUnknown_0200C528[a].unk04->unk08]) == 0)
+    if (sub_08014004(gTextTable[*(s16 *)&gUnknown_0200C528[a].unk04->unk08]) == 0)
         gUnknown_03002514 = 2;
 
     if (gUnknown_03002514 != 1)
@@ -58,7 +58,7 @@ bool8 sub_080185D0(s16 a)
     return result;
 }
 
-/* sub_080185D0's twin, three constants apart: the gUnknown_08499578 tilemap
+/* sub_080185D0's twin, three constants apart: the gBG0TilemapBuffer tilemap
  * buffer instead of gUnknown_08499588, palette 0xf instead of 1, and
  * sub_08013AEC installed as the slot callback instead of sub_080185A0.
  * Everything else -- the signed/unsigned split on the node's unk08, the
@@ -70,12 +70,12 @@ bool8 sub_08018694(s16 a)
     struct Unk03001470 *s;
     bool8 result;
 
-    if (sub_08014004(gUnknown_08610A38[*(s16 *)&gUnknown_0200C528[a].unk04->unk08]) == 0)
+    if (sub_08014004(gTextTable[*(s16 *)&gUnknown_0200C528[a].unk04->unk08]) == 0)
         gUnknown_03002514 = 2;
 
     if (gUnknown_03002514 != 1)
     {
-        s = sub_08014740(7, 0xf, gUnknown_08499578, gUnknown_0200C528[a].unk04->unk08,
+        s = sub_08014740(7, 0xf, gBG0TilemapBuffer, gUnknown_0200C528[a].unk04->unk08,
                          gUnknown_03002F08.unk00 * 0x1000, 0x100);
         s->unk3c = sub_08013AEC;
         *(u8 *)&s->unk38 = 1;

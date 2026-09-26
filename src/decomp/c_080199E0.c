@@ -11,12 +11,12 @@
 
 void sub_080199E0(void)
 {
-    gUnknown_03003FC0.unk03 = gUnknown_03003FC0.unk02;
+    gPlaySt.unk03 = gPlaySt.mapID;
 }
 
 void sub_080199EC(void)
 {
-    gUnknown_03003FC0.unk02 = gUnknown_03003FC0.unk03;
+    gPlaySt.mapID = gPlaySt.unk03;
 }
 
 void sub_080199F8(void)

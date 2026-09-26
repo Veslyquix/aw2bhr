@@ -10,7 +10,7 @@
 void sub_0804438C(int a1, int a2)
 {
     sub_08044354(a1);
-    sub_080440A8(a1, a2);
-    gUnknown_08499598[a1].unk24 = 0;
+    SpendCoPowerCharge(a1, a2);
+    gPlayers[a1].unk24 = 0;
     sub_08039634(a1, a2);
 }

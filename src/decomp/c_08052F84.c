@@ -31,39 +31,39 @@ void sub_08052F84(ProcPtr proc)
 
     sub_08057464();
 
-    if (gpKeySt->held & 4)
+    if (gpKeySt->pressed & 4)
         sub_08052F3C();
 
-    if (gpKeySt->unk02 & 0xf0)
+    if (gpKeySt->repeated & DPAD_ANY)
         sub_08054BA0();
 
-    if (gpKeySt->held & 0x200)
+    if (gpKeySt->pressed & L_BUTTON)
         gUnknown_030045AC ^= 1;
 
-    if (gpKeySt->held & 0x100)
+    if (gpKeySt->pressed & R_BUTTON)
         gUnknown_03004540 = (gUnknown_03004540 + 1) % 3;
 
-    if (gpKeySt->unk02 & 1)
+    if (gpKeySt->repeated & 1)
     {
         gUnknown_03004550[gUnknown_03004514][gUnknown_03004524] +=
-            (gpKeySt->unk00 & 0x100) ? 10 : 1;
+            (gpKeySt->held & R_BUTTON) ? 10 : 1;
 
         if (gUnknown_03004550[gUnknown_03004514][gUnknown_03004524]
             > gUnknown_08551A28[gUnknown_03004514][gUnknown_03004524])
             gUnknown_03004550[gUnknown_03004514][gUnknown_03004524] = 0;
     }
 
-    if (gpKeySt->unk02 & 2)
+    if (gpKeySt->repeated & 2)
     {
         gUnknown_03004550[gUnknown_03004514][gUnknown_03004524] -=
-            (gpKeySt->unk00 & 0x100) ? 10 : 1;
+            (gpKeySt->held & R_BUTTON) ? 10 : 1;
 
         if (gUnknown_03004550[gUnknown_03004514][gUnknown_03004524] < 0)
             gUnknown_03004550[gUnknown_03004514][gUnknown_03004524] =
                 gUnknown_08551A28[gUnknown_03004514][gUnknown_03004524];
     }
 
-    if (gpKeySt->held & 8)
+    if (gpKeySt->pressed & 8)
     {
         for (i = 0; i < 2; i++)
             for (j = 0; j < 8; j++)

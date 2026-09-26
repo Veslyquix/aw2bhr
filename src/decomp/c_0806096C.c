@@ -4,11 +4,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806096C.
- * sub_0806096C @ 0x0806096C, sub_080609B8 @ 0x080609B8, sub_08060A20 @ 0x08060A20
+ * AiConsiderBuildingTCopter @ 0x0806096C, AiConsiderBuildingApc @ 0x080609B8, AiConsiderBuildingLander @ 0x08060A20
  */
 
 /* An AI candidate filter: if action 4 is available, work out what percentage of
- * the running total sub_08057FA8(0x14) represents and select action 0x14 when
+ * the running total CountUnitsOfType(0x14) represents and select action 0x14 when
  * that is below the difficulty table's threshold.
  *
  * The zero guard is not a division-by-zero check bolted on -- 100 is the
@@ -19,14 +19,14 @@
  * gUnknown_030046D4 is re-read inside the else arm (`ldr r1, [r1]`) after the
  * `cmp` already loaded it, which is the volatile behaviour c_08060384.c
  * measures. */
-void sub_0806096C(void)
+void AiConsiderBuildingTCopter(void)
 {
     int v;
     int r;
 
-    if (sub_08060ED4(4))
+    if (CountBuildablePropertiesOfKind(4))
     {
-        v = sub_08057FA8(0x14);
+        v = CountUnitsOfType(0x14);
 
         if (gUnknown_030046D4 == 0)
             r = 100;
@@ -38,20 +38,22 @@ void sub_0806096C(void)
     }
 }
 
-/* sub_0806096C's sibling for action 7, with the threshold chosen by bit 0 of
+asm(".global sub_0806096C\n.thumb_set sub_0806096C, AiConsiderBuildingTCopter\n");
+
+/* AiConsiderBuildingTCopter's sibling for action 7, with the threshold chosen by bit 0 of
  * gUnknown_030046B8 -- two different difficulty entries for the same test.
  * Both arms of that choice are separate `ldr`/`ldr`/`ldrb` runs off their own
  * pool word, so the ROM did not CSE the table pointer across the branch and
  * neither should the source bind it. */
-void sub_080609B8(void)
+void AiConsiderBuildingApc(void)
 {
     int v;
     int r;
     int lim;
 
-    if (sub_08060ED4(2))
+    if (CountBuildablePropertiesOfKind(2))
     {
-        v = sub_08057FA8(7);
+        v = CountUnitsOfType(7);
 
         if (gUnknown_030046D4 == 0)
             r = 100;
@@ -68,24 +70,26 @@ void sub_080609B8(void)
     }
 }
 
-/* sub_0806096C's sibling for action 0x17, with TWO gates: the raw count from
- * sub_08057F54(7) has to clear the difficulty table's +0x22 floor before the
+asm(".global sub_080609B8\n.thumb_set sub_080609B8, AiConsiderBuildingApc\n");
+
+/* AiConsiderBuildingTCopter's sibling for action 0x17, with TWO gates: the raw count from
+ * CountUnitsByDeployLocation(7) has to clear the difficulty table's +0x22 floor before the
  * percentage is compared at all, and the percentage threshold is halved.
  *
  * The denominator here is the second call's result rather than
  * gUnknown_030046D4, which is why this one keeps both counts in callee-saved
  * registers across the divide. `>> 1` on a u8 is `lsrs`, i.e. unsigned, so the
  * threshold is not sign-extended on the way in. */
-void sub_08060A20(void)
+void AiConsiderBuildingLander(void)
 {
     int a;
     int b;
     int r;
 
-    if (sub_08060ED4(6))
+    if (CountBuildablePropertiesOfKind(6))
     {
-        a = sub_08057FA8(0x17);
-        b = sub_08057F54(7);
+        a = CountUnitsOfType(0x17);
+        b = CountUnitsByDeployLocation(7);
 
         if (b == 0)
             r = 100;
@@ -97,3 +101,5 @@ void sub_08060A20(void)
             gUnknown_030046C0.unk06 = 0x17;
     }
 }
+
+asm(".global sub_08060A20\n.thumb_set sub_08060A20, AiConsiderBuildingLander\n");

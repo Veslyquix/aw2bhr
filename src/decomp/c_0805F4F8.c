@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -61,15 +62,7 @@
 
 struct Unk5A514Cell;
 void sub_0805A744(struct Unk5A514Cell *);
-struct MapF4F8
-{
-    /* 0x0000 */ u16 unk00;
-    /* 0x0002 */ u16 unk02;
-    /* 0x0004 */ u8 filler_04[0x142E];
-    /* 0x1432 */ u8 unk1432[0x2840];
-    /* 0x3C72 */ u8 unk3C72[0x0508];
-    /* 0x417A */ u16 unk417A[0x100];
-};
+
 /* The file-local bitfield view of gUnknown_030040D8 offset 0x09 that
  * include/unknown-globals.h's struct Unk030040D8 unk07[] note (wave 47, W47-G)
  * describes, and that src/decomp/c_0805BF3C.c already uses under the name
@@ -114,30 +107,30 @@ void sub_0805F4F8(void)
 
     cur.x = 0x270f;
 
-    for (y = 0; y < ((struct MapF4F8 *)gUnknown_08499590)->unk02; y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < ((struct MapF4F8 *)gUnknown_08499590)->unk00; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             cell = gUnknown_03003340[y] + x;
             if (*(s8 *)cell < 0)
                 continue;
-            t = ((struct MapF4F8 *)gUnknown_08499590)->unk1432[((struct MapF4F8 *)gUnknown_08499590)->unk417A[y] + x] & 0x1f;
+            t = gMap->terrain[gMap->rowOffset[y] + x] & 0x1f;
             if (t != 0xd && t != 0xb)
                 continue;
-            if (((struct MapF4F8 *)gUnknown_08499590)->unk3C72[((struct MapF4F8 *)gUnknown_08499590)->unk417A[y] + x] == 0x7f)
+            if (gMap->unk3C72[gMap->rowOffset[y] + x] == 0x7f)
                 continue;
-            if (*(s8 *)cell + ((struct MapF4F8 *)gUnknown_08499590)->unk3C72[((struct MapF4F8 *)gUnknown_08499590)->unk417A[y] + x] >= best)
+            if (*(s8 *)cell + gMap->unk3C72[gMap->rowOffset[y] + x] >= best)
                 continue;
             cur.x = x;
             cur.y = y;
-            best = gUnknown_03003340[y][x] + ((struct MapF4F8 *)gUnknown_08499590)->unk3C72[((struct MapF4F8 *)gUnknown_08499590)->unk417A[y] + x];
+            best = gUnknown_03003340[y][x] + gMap->unk3C72[gMap->rowOffset[y] + x];
         }
     }
 
     if (cur.x == 0x270f)
         sub_0805F7B8();
 
-    if ((s8)gUnknown_03003340[cur.y][cur.x] > sub_08058224((struct Unk08499594 *)gUnknown_030040D8))
+    if ((s8)gUnknown_03003340[cur.y][cur.x] > sub_08058224((struct Unit *)gUnknown_030040D8))
     {
         sub_080591E4(&cur);
     }

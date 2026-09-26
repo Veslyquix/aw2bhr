@@ -11,6 +11,6 @@
 
 void sub_0803B1CC(void)
 {
-    if (gpKeySt->unk00 & 0x100)
+    if (gpKeySt->held & R_BUTTON)
         gUnknown_03002F1C = 1;
 }

@@ -81,7 +81,7 @@ void sub_0806E780(struct Unk6E780Proc *proc)
     pal &= -(proc->unk34 != 0);
 
     sub_0803B4DC(0x67);
-    sub_08012BC8(gUnknown_08499578, pal, 0x10, 0x10, 2, 0);
+    sub_08012BC8(gBG0TilemapBuffer, pal, 0x10, 0x10, 2, 0);
     sub_08013AEC();
 }
 
@@ -103,12 +103,12 @@ void sub_0806E7C0(int a, int b, ProcPtr parent)
  * `(u32)x >> 1 << 1` it is the /2 fused with the u16 array's own scale, i.e.
  * the byte offset of element x/2, so the table is indexed at half rate and the
  * animation advances every other frame. The `(u32)` cast is load-bearing:
- * gUnknown_03004008 is `s32`, and without it the divide is `asrs`.
+ * gGameClock is `s32`, and without it the divide is `asrs`.
  *
  * THE TABLE BASE MUST BE BOUND TO A LOCAL, and this was the last two bytes.
  * The ROM's literal pool is ordered (gUnknown_081A47E4, gPal,
- * gUnknown_03004008); the natural one-statement spelling emits (gPal,
- * gUnknown_081A47E4, gUnknown_03004008) instead, because agbcc's
+ * gGameClock); the natural one-statement spelling emits (gPal,
+ * gUnknown_081A47E4, gGameClock) instead, because agbcc's
  * expand_assignment computes the DESTINATION address before the source, so the
  * LHS array's pool word is always created first. Binding the source table's
  * BASE -- not its value, and not the element's address -- moves that one
@@ -119,6 +119,6 @@ void sub_0806E7FC(void)
 {
     const u16 *tbl = gUnknown_081A47E4;
 
-    gPal[0x1EC] = tbl[((u32)gUnknown_03004008 & 0x1F) / 2];
+    gPal[0x1EC] = tbl[((u32)gGameClock & 0x1F) / 2];
     sub_080135A4();
 }

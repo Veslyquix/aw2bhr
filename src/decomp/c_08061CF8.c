@@ -16,15 +16,15 @@ void sub_08061CF8(void)
 {
     gUnknown_03004788 = 0;
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 1)
+    if (gPlayers[gUnknown_030033EC].unk2c & 1)
         gUnknown_03004788 += sub_08061DA8(1);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 2)
+    if (gPlayers[gUnknown_030033EC].unk2c & 2)
         gUnknown_03004788 += sub_08061DA8(2);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 4)
+    if (gPlayers[gUnknown_030033EC].unk2c & 4)
         gUnknown_03004788 += sub_08061DA8(3);
 
-    if (gUnknown_08499598[gUnknown_030033EC].unk2c & 8)
+    if (gPlayers[gUnknown_030033EC].unk2c & 8)
         gUnknown_03004788 += sub_08061DA8(4);
 }

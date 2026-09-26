@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0807D800.
- * sub_0807D800 @ 0x0807D800, sub_0807D860 @ 0x0807D860
+ * IsCoSelectionUnique @ 0x0807D800, sub_0807D860 @ 0x0807D860
  */
 
 #include "proc.h"
@@ -30,7 +30,7 @@ struct Unk807D860
     /* 0x5c */ int unk5c;
 };
 
-int sub_0807D800(struct Unk807D800 *p)
+int IsCoSelectionUnique(struct Unk807D800 *p)
 {
     int i;
 
@@ -42,6 +42,8 @@ int sub_0807D800(struct Unk807D800 *p)
 
     return 1;
 }
+
+asm(".global sub_0807D800\n.thumb_set sub_0807D800, IsCoSelectionUnique\n");
 
 void sub_0807D860(struct Unk807D860 *p)
 {

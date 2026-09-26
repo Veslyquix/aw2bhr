@@ -35,8 +35,8 @@ void sub_08009264(int x, int y)
         if (v > 0)
         {
             sub_0800C608(x, y);
-            sub_080011F4(x, y, 0xC);
-            sub_08001158(x, y, v);
+            SetTerrainAt(x, y, 0xC);
+            MakeTileSimple(x, y, v);
             sub_08007F9C(x, y);
         }
     }

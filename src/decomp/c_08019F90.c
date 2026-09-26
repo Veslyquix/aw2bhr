@@ -92,7 +92,7 @@ int sub_08019F90(const void *a1, u16 a2, u16 a3, u16 a4, u16 a5)
         {
             p->unk31[n++] = i;
 
-            t = sub_08014D20((const char *)gUnknown_08610A38[e->unk1c]);
+            t = sub_08014D20((const char *)gTextTable[e->unk1c]);
 
             if (maxw < t)
                 maxw = t;

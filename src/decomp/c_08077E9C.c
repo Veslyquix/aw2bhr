@@ -20,9 +20,9 @@
  */
 void sub_08077E9C(ProcPtr proc)
 {
-    sub_080758BC(gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk06
+    sub_080758BC(gUnknown_08615194[gUnknown_0202FDFC.unk0c].flagX
                      - gUnknown_0202FDFC.unk00 - 2,
-                 gUnknown_08615194[gUnknown_0202FDFC.unk0c].unk08
+                 gUnknown_08615194[gUnknown_0202FDFC.unk0c].flagY
                      - gUnknown_0202FDFC.unk02 + 7,
                  0x18, proc);
 }

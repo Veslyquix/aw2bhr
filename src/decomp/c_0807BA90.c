@@ -65,11 +65,11 @@ void sub_0807BA90(struct Unk0807BA90Proc * proc)
     struct BgAffineSrcData src;
 
     Decompress(gUnknown_0822BE1C, (void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06000000));
-    Decompress(gUnknown_0822D888, gUnknown_08499580);
+    Decompress(gUnknown_0822D888, gBG2TilemapBuffer);
 
     sub_08013B0C();
 
-    gUnknown_0300592C = sub_0807B7BC(sub_08024944(gUnknown_03003FC0.unk02), 0, gUnknown_0202FF78, 0x80, proc);
+    gUnknown_0300592C = sub_0807B7BC(sub_08024944(gPlaySt.mapID), 0, gUnknown_0202FF78, 0x80, proc);
     gUnknown_0202FF78[0] = 0;
 
     p = gUnknown_0202FF78;

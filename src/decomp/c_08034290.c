@@ -12,7 +12,7 @@
 void sub_08034290(void)
 {
     Proc_EndEach(gUnknown_0849BB80);
-    Proc_EndEach(gUnknown_08616EFC);
+    Proc_EndEach(ProcScr_PutFace);
     Proc_EndEach(gUnknown_0849BB68);
     sub_080638D0(0);
 }
@@ -20,7 +20,7 @@ void sub_08034290(void)
 /* sub_08034290 without the leading gUnknown_0849BB80 teardown. */
 void sub_080342BC(void)
 {
-    Proc_EndEach(gUnknown_08616EFC);
+    Proc_EndEach(ProcScr_PutFace);
     Proc_EndEach(gUnknown_0849BB68);
     sub_080638D0(0);
 }

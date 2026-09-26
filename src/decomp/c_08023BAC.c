@@ -1,10 +1,11 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08023BAC.
- * sub_08023BAC @ 0x08023BAC
+ * BlitMapRow @ 0x08023BAC
  */
 
 /* The wrap at the loop bottom is TWO statements, and that is the whole reason
@@ -35,33 +36,35 @@
  * same address (0x080BFBC4 + 6 == 0x080BFBCA) and contribute zero differing
  * bytes; they were never the residual, despite NOTES.md's reading. */
 
-void sub_08023BAC(u16 a1, u16 a2, u16 a3, u16 a4)
+void BlitMapRow(u16 a1, u16 a2, u16 a3, u16 a4)
 {
-    struct Unk08499590 *m;
+    struct Map *m;
     u16 *dst;
     u16 i;
 
     a1 = (a1 & 0xF) * 2;
-    dst = gUnknown_08499584 + (a2 & 0xF) * 64;
+    dst = gBG3TilemapBuffer + (a2 & 0xF) * 64;
 
     for (i = 0; i <= 15; i++)
     {
-        m = (struct Unk08499590 *)gUnknown_08499590;
-        if (m->unk234a[m->unk417a[a4] + (a3 + i)] == 0)
+        m = gMap;
+        if (m->unk234A[m->rowOffset[a4] + (a3 + i)] == 0)
         {
-            dst[a1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][0] + 0x4000;
-            dst[a1 + 1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][1] + 0x4000;
-            dst[a1 + 32] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][2] + 0x4000;
-            dst[a1 + 33] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][3] + 0x4000;
+            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_LEFT] + 0x4000;
+            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_RIGHT] + 0x4000;
+            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_LEFT] + 0x4000;
+            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_RIGHT] + 0x4000;
         }
         else
         {
-            dst[a1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][0];
-            dst[a1 + 1] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][1];
-            dst[a1 + 32] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][2];
-            dst[a1 + 33] = gUnknown_080BFBC4[m->unk0a22[m->unk417a[a4] + (a3 + i)]][3];
+            dst[a1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_LEFT];
+            dst[a1 + 1] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_TOP_RIGHT];
+            dst[a1 + 32] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_LEFT];
+            dst[a1 + 33] = gUnknown_080BFBC4[m->tile[m->rowOffset[a4] + (a3 + i)]][TILE_QUAD_BOTTOM_RIGHT];
         }
         a1 = a1 + 2;
         a1 &= 0x1F;
     }
 }
+
+asm(".global sub_08023BAC\n.thumb_set sub_08023BAC, BlitMapRow\n");

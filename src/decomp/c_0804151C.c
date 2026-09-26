@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -12,7 +13,7 @@
  * 0xFFFF value word. Returns how many were written.
  *
  * Byte-identical twin of sub_08041758 apart from the predicate: the two differ
- * in exactly one instruction, the `bl` target (sub_0804236C vs sub_0804247C).
+ * in exactly one instruction, the `bl` target (sub_0804236C vs IsTerrainSilo).
  *
  * gUnknown_03003F20 is declared `struct Unk03003338 *` -- a type inherited from
  * its only writer, sub_0803486C. This function reads it as a 4-byte
@@ -32,10 +33,10 @@ struct Unk4151CCell
 };
 /* Byte-identical twin of sub_0804151C -- 200 bytes, 87 instructions, the same
  * five pool words in the same order, differing in exactly ONE instruction: the
- * predicate called is sub_0804247C here and sub_0804236C there. See
+ * predicate called is IsTerrainSilo here and sub_0804236C there. See
  * src/decomp/c_0804151C.c for the read-out of the shape.
  *
- * That one-instruction equality is also what proves sub_0804247C returns bool8
+ * That one-instruction equality is also what proves IsTerrainSilo returns bool8
  * and not the `int` it was promoted as: the `lsls #0x18; lsrs #0x18` after the
  * `bl` is agbcc's re-narrowing of a narrow-returning callee, and an `int`
  * callee would not produce it. See include/unknown-functions.h. */
@@ -59,9 +60,9 @@ int sub_0804151C(void)
     if ((u8)(gUnknown_030040D8->unk00 - 1) > 1)
         return 0;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0 && sub_0804236C(x, y) == 1)
             {
@@ -89,36 +90,27 @@ int sub_0804151C(void)
  * ldr rK,[rM]` chain, including the reload at the end for the pointer
  * subtraction.
  *
- * Cell addressing is the c_0804247C.c idiom -- p, then t, then rows, then off,
- * then cells, each its own local -- which is what keeps 0x417A in a pool word
- * and 0x12 on an `adds` rather than folding either into a load displacement.
+ * Cell addressing now uses the canonical gMap unit and rowOffset fields
+ * directly.
  *
  * NOT a twin of sub_080416A4 despite the adjacency and the similar size. */
 int sub_080415E4(void)
 {
     struct Unk03003338 *out;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
     u8 cell;
     int x;
     int y;
 
     out = gUnknown_03003338;
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0)
             {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x12;
-                cell = cells[off];
+                off = gMap->rowOffset[y] + x;
+                cell = gMap->unit[off];
                 if (cell != 0 && sub_08025EF0(cell, gUnknown_03003F38))
                 {
                     out->unk00 = cell;
@@ -144,27 +136,19 @@ int sub_080415E4(void)
 int sub_080416A4(void)
 {
     struct Unk03003338 *out;
-    u8 *p;
-    u8 *rows;
-    u8 *cells;
-    int t;
     int off;
     int x;
     int y;
 
     out = gUnknown_03003338;
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
             if ((s8)gUnknown_03003340[y][x] >= 0 && sub_0804209C(x, y))
             {
-                p = gUnknown_08499590;
-                t = y * 2;
-                rows = p + 0x417a;
-                off = *(u16 *)(rows + t) + x;
-                cells = p + 0x12;
-                out->unk00 = cells[off];
+                off = gMap->rowOffset[y] + x;
+                out->unk00 = gMap->unit[off];
                 out++;
             }
         }
@@ -185,11 +169,11 @@ int sub_08041758(void)
     if ((u8)(gUnknown_030040D8->unk00 - 1) > 1)
         return 0;
 
-    for (y = 0; y < *(u16 *)(gUnknown_08499590 + 2); y++)
+    for (y = 0; y < gMap->height; y++)
     {
-        for (x = 0; x < *(u16 *)gUnknown_08499590; x++)
+        for (x = 0; x < gMap->width; x++)
         {
-            if ((s8)gUnknown_03003340[y][x] >= 0 && sub_0804247C(x, y) == 1)
+            if ((s8)gUnknown_03003340[y][x] >= 0 && IsTerrainSilo(x, y) == 1)
             {
                 count++;
                 out->x = x;

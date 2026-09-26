@@ -63,6 +63,7 @@ enum
 #define PROC_REPEAT(func)                 { PROC_CMD_REPEAT, 0, (func) }
 #define PROC_ONEND(func)                  { PROC_CMD_ONEND, 0, (func) }
 #define PROC_START_CHILD(procscr)         { PROC_CMD_START_CHILD, 0, (procscr) }
+#define PROC_START_CHILD_BLOCKING(procscr) { PROC_CMD_START_CHILD_BLOCKING, 1, (procscr) }
 #define PROC_START_CHILD_LOCKING(procscr) { PROC_CMD_START_CHILD_BLOCKING, 1, (procscr) }
 #define PROC_START_BUGGED(procscr, arg)   { PROC_CMD_START_BUGGED, (arg), (procscr) }
 #define PROC_WHILE_EXISTS(procscr)        { PROC_CMD_WHILE_EXISTS, 0, (procscr) }
@@ -84,10 +85,10 @@ enum
 #define PROC_CALL_ARG(func, arg)          { PROC_CMD_CALL_ARG, (arg), (func) }
 #define PROC_19                           { PROC_CMD_19, 0, 0 }
 // PROC_1A
-// PROC_1B
+#define PROC_1B(arg)                      { PROC_CMD_1B, (arg), 0 }
 // PROC_1C
 #define PROC_1D(arg)                      { PROC_CMD_1D, (arg), 0 }
-// PROC_1E
+#define PROC_1E(arg)                      { PROC_CMD_1E, (arg), 0 }
 // PROC_1F
 // PROC_20
 // PROC_21
@@ -96,12 +97,55 @@ enum
 // PROC_24
 // PROC_25
 // PROC_26
-// PROC_GOTO_IF_YES
-// PROC_GOTO_IF_NO
+#define PROC_GOTO_IF_YES(func, label)     { PROC_CMD_GOTO_IF_YES, (label), (func) }
+#define PROC_GOTO_IF_NO(func, label)      { PROC_CMD_GOTO_IF_NO, (label), (func) }
 #define PROC_29(arg)                      { PROC_CMD_29, (arg), 0 }
-// PROC_2A
+#define PROC_2A                           { PROC_CMD_2A, 0, 0 }
 
 #define PROC_YIELD                        PROC_SLEEP(0)
+
+extern struct ProcCmd ProcScr_IntroT0[];
+extern struct ProcCmd ProcScr_IntroT3Child[];
+extern struct ProcCmd ProcScr_IntroT3[];
+extern struct ProcCmd ProcScr_WM_DrawDifficultyStars[];
+extern struct ProcCmd ProcScr_WM_MoveScope[];
+extern struct ProcCmd ProcScr_WM_Listener[];
+extern struct ProcCmd ProcScr_WM_ConfirmExit[];
+extern struct ProcCmd ProcScr_Campaign[];
+extern struct ProcCmd ProcScr_CampaignIntro[];
+extern struct ProcCmd ProcScr_DialogueOnEnd[];
+extern struct ProcCmd ProcScr_WarRoom[];
+extern struct ProcCmd ProcScr_Versus[];
+extern struct ProcCmd ProcScr_BattleMaps[];
+extern struct ProcCmd ProcScr_Link[];
+extern struct ProcCmd ProcScr_CoDesign[];
+extern struct ProcCmd ProcScr_CoDesignC1[];
+extern struct ProcCmd ProcScr_CoDesignC2[];
+extern struct ProcCmd ProcScr_PutFace[];
+extern struct ProcCmd ProcScr_MainMenuPutSelectModeSprite[];
+extern struct ProcCmd ProcScr_MainMenuC3[];
+extern struct ProcCmd ProcScr_SoundRoom[];
+extern struct ProcCmd ProcScr_WaitForLaser[];
+extern struct ProcCmd ProcScr_FadeSound[];
+extern struct ProcCmd ProcScr_DesignRoomSave[];
+extern struct ProcCmd ProcScr_DesignRoomLoad2[];
+extern struct ProcCmd ProcScr_DesignRoomFadeIn[];
+extern struct ProcCmd ProcScr_FadeScreenLines[];
+extern struct ProcCmd ProcScr_SomeFade[];
+extern struct ProcCmd ProcScr_FadeLoadMap[];
+extern struct ProcCmd ProcScr_FadeScreenRelated[];
+extern struct ProcCmd ProcScr_DesignRoomPlaceUnit[];
+extern struct ProcCmd ProcScr_MainMenuC1[];
+extern struct ProcCmd ProcScr_MainMenuC2[];
+extern struct ProcCmd ProcScr_MainMenuC4[];
+extern struct ProcCmd ProcScr_MainMenu[];
+extern struct ProcCmd ProcScr_MainMenu2[];
+extern struct ProcCmd ProcScr_PutEnemyCoMinimug[];
+extern struct ProcCmd ProcScr_PutMapPropertiesPreview[];
+extern struct ProcCmd ProcScr_CoSelect[];
+extern struct ProcCmd ProcScr_CoInfo[];
+extern struct ProcCmd ProcScr_DayStart[];
+extern struct ProcCmd ProcScr_SelectUnit[];
 
 #define PROC_HEADER                                                                        \
     const struct ProcCmd * proc_script; /* pointer to proc script */                        \

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -11,10 +12,6 @@
 
 void sub_0802DE1C(void)
 {
-    u8 *p;
-    u8 *rows;
-    s8 *terrain;
-    int t;
     int off;
     int v;
 
@@ -22,13 +19,9 @@ void sub_0802DE1C(void)
     sub_080236E8();
     sub_08023908(4);
 
-    p = gUnknown_08499590;
-    t = gUnknown_030033E4.unk02 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + gUnknown_030033E4.unk00;
-    terrain = (s8 *)(p + 0x2852);
+    off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
 
-    if (terrain[off] < 0)
+    if (gMap->move[off] < 0)
         sub_08023274(1);
     else
         sub_08023274(1);
@@ -38,7 +31,7 @@ void sub_0802DE1C(void)
     if (!sub_0802DBF8())
         return;
 
-    v = gpKeySt->held & 1;
+    v = gpKeySt->pressed & 1;
 
     if (v != 0)
     {
@@ -47,10 +40,10 @@ void sub_0802DE1C(void)
         return;
     }
 
-    if (!(gpKeySt->held & 2))
+    if (!(gpKeySt->pressed & 2))
         return;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0x11, gUnknown_03003F38, 0, 0);
 
     sub_08029088(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
@@ -63,13 +56,9 @@ void sub_0802DE1C(void)
 
 void sub_0802DEFC(void)
 {
-    u8 *p;
-    u8 *rows;
-    u8 *tiles;
-    int t;
     int off;
     int id;
-    struct Unk08499594 *e;
+    struct Unit *e;
 
     sub_08023824();
     sub_0802361C();
@@ -79,19 +68,15 @@ void sub_0802DEFC(void)
     if (!sub_0802DBF8())
         return;
 
-    if (gpKeySt->held & 2)
+    if (gpKeySt->pressed & 2)
     {
         sub_0803B4DC(0x66);
         gUnknown_03003334 = 0;
         return;
     }
 
-    p = gUnknown_08499590;
-    t = gUnknown_030033E4.unk02 * 2;
-    rows = p + 0x417A;
-    off = *(u16 *)(rows + t) + gUnknown_030033E4.unk00;
-    tiles = p + 0x12;
-    id = tiles[off];
+    off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
+    id = gMap->unit[off];
 
     if (id == 0)
         return;
@@ -99,15 +84,15 @@ void sub_0802DEFC(void)
     if (((u32)id >> 6) + 1 != gUnknown_030033EC)
         return;
 
-    e = &gUnknown_08499594[id];
+    e = &gUnits[id];
 
-    if (e->unk01 & 1)
+    if (e->flags & 1)
         return;
 
-    if (!(gpKeySt->held & 1))
+    if (!(gpKeySt->pressed & 1))
         return;
 
-    if (gUnknown_03003FC0.unk32 != 0)
+    if (gPlaySt.savingEnabled != 0)
         sub_08034534(0x12, id, 0, 0);
 
     sub_0804018C(e);

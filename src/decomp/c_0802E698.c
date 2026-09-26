@@ -25,7 +25,7 @@ void sub_0802E698(void)
  * gUnknown_030040D8 sits INSIDE the then-arm and gUnknown_03003334's after the
  * else label.
  *
- * sub_08034F60's result is re-narrowed with `lsls #0x18` before the test --
+ * GetUnitSelectionLock's result is re-narrowed with `lsls #0x18` before the test --
  * that is the tell for a u8 return, and its body is a single `ldrb`.
  *
  * unk02/unk03 are the byte halves of the cursor position (see the note on
@@ -33,7 +33,7 @@ void sub_0802E698(void)
  * conversion because a u8 already arrives zero-extended. */
 void sub_0802E6C0(void)
 {
-    if (sub_08034F60() == 0)
+    if (GetUnitSelectionLock() == 0)
     {
         sub_08035810();
         sub_080258CC();
@@ -51,7 +51,7 @@ void sub_0802E6C0(void)
 void sub_0802E6F8(void)
 {
     sub_08022AAC(gUnknown_03003100.spos.unk00, gUnknown_03003100.spos.unk02);
-    sub_08034F48();
+    LockUnitSelection();
     sub_080424FC();
     gUnknown_03003334 = 0;
 }

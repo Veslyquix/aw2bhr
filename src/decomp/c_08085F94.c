@@ -1,10 +1,15 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08085F94.
  * sub_08085F94 @ 0x08085F94
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* MATCHED wave 34, W34-E.
@@ -56,7 +61,7 @@ struct Unk8085F94Proc
     /* 0x5c */ int unk5c;
 };
 
-void sub_08085F94(struct Unk8085F94Proc *proc)
+void PutMapPropertiesPreview_08085F95(struct Unk8085F94Proc *proc)
 {
     struct Unk081D940C **pp;
     int kind;
@@ -93,3 +98,19 @@ void sub_08085F94(struct Unk8085F94Proc *proc)
             sub_08087974(proc->unk58, proc);
     }
 }
+
+asm(".global sub_08085F94\n.thumb_set sub_08085F94, PutMapPropertiesPreview_08085F95\n");
+
+extern void PutMapPropertiesPreview_IDLE_08086059(void);
+extern void PutMapPropertiesPreview_IDLE_0808603D(void);
+
+struct ProcCmd CONST_DATA ProcScr_PutMapPropertiesPreview[] =
+{
+    PROC_CALL(PutMapPropertiesPreview_08085F95),
+    PROC_REPEAT(PutMapPropertiesPreview_IDLE_08086059),
+    PROC_REPEAT(PutMapPropertiesPreview_IDLE_0808603D),
+    PROC_REPEAT(PutMapPropertiesPreview_IDLE_08086059),
+    PROC_END,
+};
+
+asm(".global gUnknown_08616CF4\n.set gUnknown_08616CF4, ProcScr_PutMapPropertiesPreview\n");

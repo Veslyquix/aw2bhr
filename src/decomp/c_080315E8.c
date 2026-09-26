@@ -24,8 +24,8 @@ u16 sub_080315E8(u16 a, u16 b, int c)
 
     if (a != b)
     {
-        sub_08012BC8(gUnknown_08499578, 0, 0x12, 0x20, 2, 0);
-        sub_08014668(0, 0x12, gUnknown_08499578, gUnknown_0849B0E2[r], 0x3000, 0x40);
+        sub_08012BC8(gBG0TilemapBuffer, 0, 0x12, 0x20, 2, 0);
+        sub_08014668(0, 0x12, gBG0TilemapBuffer, gUnknown_0849B0E2[r], 0x3000, 0x40);
     }
 
     return r;

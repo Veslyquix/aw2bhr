@@ -5,6 +5,10 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080110A4.
  * sub_080110A4 @ 0x080110A4
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 #include "hardware.h"
@@ -25,7 +29,7 @@ struct Unk80110A4
     /* 0x66 */ s16 unk66;
 };
 
-void sub_080110A4(struct Unk80110A4 *proc)
+void FadePalBlack_IDLE_080110A5(struct Unk80110A4 *proc)
 {
     if (gUnknown_03001FFC == 0x10)
     {
@@ -40,3 +44,5 @@ void sub_080110A4(struct Unk80110A4 *proc)
 
     gUnknown_03001FFC = proc->unk66 >> 8;
 }
+
+asm(".global sub_080110A4\n.thumb_set sub_080110A4, FadePalBlack_IDLE_080110A5\n");

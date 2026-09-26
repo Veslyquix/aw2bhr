@@ -31,13 +31,13 @@ u8 sub_08039850(ProcPtr procPtr)
     struct Unk39850Proc *proc = procPtr;
     const struct Unk0849D62C *e;
 
-    e = gUnknown_0849D62C[gUnknown_03003FC0.unk02 - 0x8a];
+    e = gUnknown_0849D62C[gPlaySt.mapID - 0x8a];
 
     if (e != NULL)
     {
         while (e->unk01 != -1)
         {
-            if (e->unk01 == gUnknown_08499598[proc->unk54].unk1d
+            if (e->unk01 == gPlayers[proc->unk54].co
              && e->unk02 == sub_08044374(proc->unk54)
              && (e->unk00 == 0 || e->unk00 == proc->unk54))
             {

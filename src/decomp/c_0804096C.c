@@ -22,5 +22,5 @@ void sub_0804096C(ProcPtr proc)
     sub_0802C57C();
     sub_080424FC();
     sub_0802C594();
-    sub_08034F48();
+    LockUnitSelection();
 }

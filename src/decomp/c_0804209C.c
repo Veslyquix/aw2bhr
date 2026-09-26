@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -23,24 +24,24 @@
  * pairing gUnknown_085D5ABC's own comments record for sub_08042998. */
 bool8 sub_0804209C(s16 x, s16 y)
 {
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *units;
-    struct Unk08499594 *unit;
-    struct Unk085D5ABC *e;
+    struct Unit *unit;
+    struct UnitType *e;
     int y2;
     int off;
     int id;
 
-    if (x < 0 || x >= *(u16 *)gUnknown_08499590
-     || y < 0 || y >= *(u16 *)(gUnknown_08499590 + 2))
+    if (x < 0 || x >= gMap->width
+     || y < 0 || y >= gMap->height)
         return FALSE;
 
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = y * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    units = p + 0x51a;
+    units = p->unitUnk;
     id = units[off];
 
     if (id == 0)
@@ -49,20 +50,20 @@ bool8 sub_0804209C(s16 x, s16 y)
     if ((id & 0xc0) != gUnknown_03003F2C)
         return FALSE;
 
-    unit = &gUnknown_08499594[id];
+    unit = &gUnits[id];
 
-    if (unit == (struct Unk08499594 *)gUnknown_030040D8)
+    if (unit == (struct Unit *)gUnknown_030040D8)
         return FALSE;
 
-    if (gUnknown_084995A8[unit->unk00] == 0)
+    if (gUnknown_084995A8[unit->type] == 0)
         return FALSE;
 
-    e = &gUnknown_085D5ABC[unit->unk00];
+    e = &gUnknown_085D5ABC[unit->type];
 
-    if (e->unk0b != unit->unk04_7)
+    if (e->maxAmmo != unit->ammo)
         return TRUE;
 
-    if (e->unk10 != unit->unk06_0)
+    if (e->maxFuel != unit->fuel)
         return TRUE;
 
     return FALSE;
@@ -76,7 +77,7 @@ bool8 sub_0804209C(s16 x, s16 y)
 bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
     u8 *costs;
@@ -84,12 +85,12 @@ bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int off;
     int idx;
 
-    t = gUnknown_085D5ABC[a1->unk00].unk14;
-    p = gUnknown_08499590;
+    t = gUnknown_085D5ABC[a1->unk00].transportTable;
+    p = gMap;
     y2 = a3 * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + a2;
-    cells = p + 0x1432;
+    cells = p->terrain;
     idx = cells[off] & 0x1f;
     costs = t + 0x1a;
 
@@ -116,7 +117,7 @@ bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
 bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
     u8 *costs;
@@ -124,12 +125,12 @@ bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int off;
     int idx;
 
-    t = gUnknown_085D5ABC[a1->unk00].unk14;
-    p = gUnknown_08499590;
+    t = gUnknown_085D5ABC[a1->unk00].transportTable;
+    p = gMap;
     y2 = a3 * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + a2;
-    cells = p + 0x1432;
+    cells = p->terrain;
     idx = cells[off] & 0x1f;
     costs = t + 0x1a;
 
@@ -148,7 +149,7 @@ bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
 bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
     u8 *costs;
@@ -156,12 +157,12 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
     int off;
     int idx;
 
-    t = gUnknown_085D5ABC[a1->unk00].unk14;
-    p = gUnknown_08499590;
+    t = gUnknown_085D5ABC[a1->unk00].transportTable;
+    p = gMap;
     y2 = a3 * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + a2;
-    cells = p + 0x1432;
+    cells = p->terrain;
     idx = cells[off] & 0x1f;
     costs = t + 0x1a;
 
@@ -183,33 +184,33 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
  * (which consumes p in place) then comes out as a copy plus an add.
  *
  * unit is bound BEFORE the `id == 0` test, the same ordering sub_08041F38
- * uses, and the sub_08025F74 argument is respelled &gUnknown_08499594[id]
+ * uses, and the CanTransportCarry argument is respelled &gUnits[id]
  * rather than reusing unit: that global is a non-const pointer, so the first
  * `bl` kills its MEM and the ROM reloads it. */
 bool8 sub_080422A8(s16 x, s16 y)
 {
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *ids;
-    u8 *p2;
+    struct Map *p2;
     u8 *rows2;
     u8 *cells;
     u8 *costs;
     u8 *t;
-    struct Unk08499594 *unit;
+    struct Unit *unit;
     int y2;
     int off;
     int off2;
     int id;
     int idx;
 
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = y * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    ids = p + 0x12;
+    ids = p->unit;
     id = ids[off];
-    unit = &gUnknown_08499594[id];
+    unit = &gUnits[id];
 
     if (id == 0)
         return FALSE;
@@ -217,15 +218,15 @@ bool8 sub_080422A8(s16 x, s16 y)
     if (sub_08026F9C(id, gUnknown_03003F38) == 0)
         return FALSE;
 
-    if (sub_08025F74(&gUnknown_08499594[id], gUnknown_030040D8->unk00) == 0)
+    if (CanTransportCarry(&gUnits[id], gUnknown_030040D8->unk00) == 0)
         return FALSE;
 
-    t = gUnknown_085D5ABC[unit->unk00].unk14;
+    t = gUnknown_085D5ABC[unit->type].transportTable;
 
-    p2 = gUnknown_08499590;
-    rows2 = p2 + 0x417a;
+    p2 = gMap;
+    rows2 = (u8 *)p2->rowOffset;
     off2 = *(u16 *)(rows2 + y2) + x;
-    cells = p2 + 0x1432;
+    cells = p2->terrain;
     idx = cells[off2] & 0x1f;
     costs = t + 0x1a;
 
@@ -244,10 +245,10 @@ bool8 sub_080422A8(s16 x, s16 y)
 bool8 sub_0804236C(s16 x, s16 y)
 {
     u8 army;
-    u8 *p;
+    struct Map *p;
     u8 *rows;
     u8 *cells;
-    u8 *p2;
+    struct Map *p2;
     u8 *rows2;
     u8 *cells2;
     int y2;
@@ -255,19 +256,19 @@ bool8 sub_0804236C(s16 x, s16 y)
     int off2;
 
     army = gUnknown_03003F38;
-    p = gUnknown_08499590;
+    p = gMap;
     y2 = y * 2;
-    rows = p + 0x417a;
+    rows = (u8 *)p->rowOffset;
     off = *(u16 *)(rows + y2) + x;
-    cells = p + 0x1432;
+    cells = p->terrain;
 
     if (sub_08026FD0(army, cells[off]) == 1)
         return FALSE;
 
-    p2 = gUnknown_08499590;
-    rows2 = p2 + 0x417a;
+    p2 = gMap;
+    rows2 = (u8 *)p2->rowOffset;
     off2 = *(u16 *)(rows2 + y2) + x;
-    cells2 = p2 + 0x1432;
+    cells2 = p2->terrain;
 
     switch (cells2[off2] & 0x1f)
     {

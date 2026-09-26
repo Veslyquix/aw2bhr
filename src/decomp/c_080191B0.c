@@ -1,10 +1,15 @@
 #include "global.h"
+#include "proc.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080191B0.
  * sub_080191B0 @ 0x080191B0
+ *
+ * Named per src/aw2e-names.s (proc-table labels auto-generated from
+ * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
+ * below so every other unit keeps resolving them unchanged.
  */
 
 /* The reset for the whole gUnknown_0200C528 list system: clear the ten slots,
@@ -21,7 +26,7 @@
  * 0x200 is materialised once into r4 and copied into r2 for both
  * sub_08011C68 calls: it is not an imm8, so gcc CSEs the
  * `movs r4,#0x80; lsls r4,#2` pair across the pair of calls. */
-void sub_080191B0(void)
+void MainMenu_080191B1(void)
 {
     s16 i;
 
@@ -44,3 +49,38 @@ void sub_080191B0(void)
     sub_08011C68(gUnknown_08499588, (void *)0x06006800, 0x200);
     sub_08011C68(gUnknown_0849958C, (void *)0x0600E000, 0x200);
 }
+
+asm(".global sub_080191B0\n.thumb_set sub_080191B0, MainMenu_080191B1\n");
+
+extern void MainMenu_08085AF5(void);
+extern void MainMenu_08080F3D(void);
+extern void MainMenu_0803BBD5(void);
+extern void MainMenu2_08034839(void);
+extern void MainMenu2_0803D48D(void);
+extern u8 GetMainMenuLock(void);
+extern void MainMenu2_0803BBA9(void);
+extern void MainMenu2_0806A455(void);
+
+struct ProcCmd CONST_DATA ProcScr_MainMenu[] =
+{
+    PROC_CALL(MainMenu_080191B1),
+    PROC_CALL(MainMenu_08085AF5),
+    PROC_CALL(MainMenu_08080F3D),
+    PROC_CALL(MainMenu_0803BBD5),
+    PROC_GOTO_SCR(ProcScr_MainMenu2),
+};
+
+struct ProcCmd CONST_DATA ProcScr_MainMenu2[] =
+{
+    PROC_CALL(MainMenu2_08034839),
+    PROC_CALL(MainMenu2_0803D48D),
+    PROC_START_CHILD_BLOCKING(ProcScr_MainMenuC1),
+    PROC_GOTO_IF_NO(GetMainMenuLock, 0),
+    PROC_1D(30),
+    PROC_CALL(MainMenu2_0803BBA9),
+    PROC_GOTO(1),
+PROC_LABEL(0),
+    PROC_CALL(MainMenu2_0806A455),
+PROC_LABEL(1),
+    PROC_END,
+};

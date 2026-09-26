@@ -7,10 +7,10 @@
  * sub_080129F8 @ 0x080129F8
  */
 
-/* A percent-chance roll: draw from the sub_080129E0 LCG, reduce mod 10000 and
+/* A percent-chance roll: draw from the GetNextRandomNumber LCG, reduce mod 10000 and
  * compare against a * 100, so the parameter is a percentage in hundredths.
  * `__umodsi3` and `blo` make both sides unsigned, which follows from
- * sub_080129E0's declared u32 return.
+ * GetNextRandomNumber's declared u32 return.
  *
  * `movs #0; b` / `movs #1` split across the pool is the if/else-return form,
  * not a returned comparison -- a returned comparison would preset the false
@@ -20,7 +20,7 @@
  * produce. Byte-exact before and after -- both arms return a 0/1 constant. */
 u8 sub_080129F8(u16 a)
 {
-    if (sub_080129E0() % 10000 < a * 100)
+    if (GetNextRandomNumber() % 10000 < a * 100)
         return 1;
 
     return 0;

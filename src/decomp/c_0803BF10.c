@@ -11,7 +11,7 @@
  * wave 32 and re-derived from scratch in wave 35; what closed it was not a new
  * spelling of the address but the discovery that the DRAFT NO LONGER COMPILED.
  *
- * Wave 37 (W37-Q1) re-carved struct Unk03003FC0's tail into four parallel
+ * Wave 37 (W37-Q1) re-carved struct PlaySt's tail into four parallel
  * 5-byte slot arrays at 0x33/0x38/0x3d/0x42 and deleted the member `unk3e`
  * this draft was written against. The promoted files that used the old names
  * were re-verified at the time; the PARKED DRAFT WAS NOT, because nothing
@@ -20,12 +20,12 @@
  *
  * The fix is the access the header had already predicted in its own comment on
  * unk3d: this function's cursor is biased, so it addresses unk3d[1..] as the
- * old unk3e[0..]. Writing it that way -- `q->unk3d[i + 1]` -- produces the
+ * old unk3e[0..]. Writing it that way -- `q->co[i + 1]` -- produces the
  * ROM's five instructions exactly, and it is the same index expression the
  * MATCHED sub_0803C1D4 uses against all four of these arrays.
  *
  * WHY IT WORKS, and this is the transferable part. The wanted code is
- *     ldr r1,=gUnknown_03003FC0 ; ldrb r0,[..,#1] ; adds r1,r1,r0 ; adds r1,#0x3e
+ *     ldr r1,=gPlaySt ; ldrb r0,[..,#1] ; adds r1,r1,r0 ; adds r1,#0x3e
  * -- the variable index added to the base FIRST, the constant second, with the
  * base register winning the destination. Four spellings failed to produce it,
  * all of them trying to control the address arithmetic directly. What produces
@@ -42,7 +42,7 @@
  * variable. */
 void sub_0803BF10(void)
 {
-    struct Unk03003FC0 *q;
+    struct PlaySt *q;
 
     if (gUnknown_03002F1C != 0)
     {
@@ -53,8 +53,8 @@ void sub_0803BF10(void)
     }
     else
     {
-        q = &gUnknown_03003FC0;
-        q->unk3d[gUnknown_0849ECDC->unk01 + 1] = gUnknown_020288B0;
+        q = &gPlaySt;
+        q->co[gUnknown_0849ECDC->unk01 + 1] = gUnknown_020288B0;
 
         gUnknown_0849ECDC->unk01++;
 

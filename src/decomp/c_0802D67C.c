@@ -20,12 +20,12 @@ void sub_0802D67C(u8 mask)
     {
         id = gUnknown_081BA054[i];
 
-        if (gUnknown_085D5ABC[id].unk1a & mask)
+        if (gUnknown_085D5ABC[id].deployLocation & mask)
         {
-            if (id != 8 || sub_080261E8(gUnknown_030033EC))
+            if (id != 8 || IsNeotanksUnlocked(gUnknown_030033EC))
             {
-                if (gUnknown_08499598[gUnknown_030033EC].unk00
-                        < sub_08042C9C(gUnknown_030033EC, id) * 10)
+                if (gPlayers[gUnknown_030033EC].funds
+                        < GetCoPriceMultiplier(gUnknown_030033EC, id) * 10)
                 {
                     u8 *p = &gUnknown_02023830[n * 4];
 

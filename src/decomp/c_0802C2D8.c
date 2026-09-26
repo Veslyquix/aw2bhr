@@ -1,4 +1,5 @@
 #include "global.h"
+#include "map.h"
 
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
@@ -19,12 +20,12 @@ void sub_0802C2D8(struct Unk2C2D8Proc *proc)
 {
     sub_08024268();
 
-    proc->unk20 = *(u16 *)(gUnknown_08499590 + 4);
-    proc->unk22 = *(u16 *)(gUnknown_08499590 + 6);
+    proc->unk20 = gMap->scrollX;
+    proc->unk22 = gMap->scrollY;
 
     sub_0803D6D0();
     sub_08037638(0x06000000 + gUnknown_03002B6C.bits.chr_block * 0x4000,
-        (int)gUnknown_08499578, 1, 9);
+        (int)gBG0TilemapBuffer, 1, 9);
     sub_08013AD4(0);
     sub_0801237C();
     sub_08012358();

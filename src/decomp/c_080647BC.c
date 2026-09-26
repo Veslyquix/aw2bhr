@@ -17,13 +17,13 @@ void sub_080647BC(struct Unk08580934_Obj *obj)
     if (digits[1] == 1)
         n = 1;
 
-    sub_0801F34C(digits[1] + 0x55, (obj->unk28 + n) & 0x1FF,
+    DrawOamObject(digits[1] + 0x55, (obj->unk28 + n) & 0x1FF,
                  (obj->unk2a + 0xC) & 0xFF, 0, 0);
-    sub_0801F34C(digits[2] + 0x55, (obj->unk28 + 8) & 0x1FF,
+    DrawOamObject(digits[2] + 0x55, (obj->unk28 + 8) & 0x1FF,
                  (obj->unk2a + 0xC) & 0xFF, 0, 0);
-    sub_0801F34C(0x55, (obj->unk28 + 0x10) & 0x1FF,
+    DrawOamObject(0x55, (obj->unk28 + 0x10) & 0x1FF,
                  (obj->unk2a + 0xC) & 0xFF, 0, 0);
-    sub_0801F34C(0x55, (obj->unk28 + 0x18) & 0x1FF,
+    DrawOamObject(0x55, (obj->unk28 + 0x18) & 0x1FF,
                  (obj->unk2a + 0xC) & 0xFF, 0, 0);
 }
 
@@ -34,7 +34,7 @@ void sub_0806486C(struct Unk08580934_Obj *obj)
 
     if (obj->unk48 == 0)
     {
-        sub_0801F34C(0xCB, (obj->unk28 + 8) & 0x1FF,
+        DrawOamObject(0xCB, (obj->unk28 + 8) & 0x1FF,
                      (obj->unk2a + 0xC) & 0xFF, 0, 0);
     }
     else
@@ -45,10 +45,10 @@ void sub_0806486C(struct Unk08580934_Obj *obj)
             n = 1;
 
         if (digits[1] != 0xFF)
-            sub_0801F34C(digits[1] + 0x55, (obj->unk28 + 8 + n) & 0x1FF,
+            DrawOamObject(digits[1] + 0x55, (obj->unk28 + 8 + n) & 0x1FF,
                          (obj->unk2a + 0xC) & 0xFF, 0, 0);
 
-        sub_0801F34C(digits[2] + 0x55, (obj->unk28 + 0x10) & 0x1FF,
+        DrawOamObject(digits[2] + 0x55, (obj->unk28 + 0x10) & 0x1FF,
                      (obj->unk2a + 0xC) & 0xFF, 0, 0);
     }
 }
@@ -60,7 +60,7 @@ void sub_08064918(struct Unk08580934_Obj *obj)
 
     if (obj->unk48 == 0)
     {
-        sub_0801F34C(0xCB, (obj->unk28 + 8) & 0x1FF,
+        DrawOamObject(0xCB, (obj->unk28 + 8) & 0x1FF,
                      (obj->unk2a + 0xC) & 0xFF, 0, 0);
     }
     else
@@ -72,10 +72,10 @@ void sub_08064918(struct Unk08580934_Obj *obj)
             n = 1;
 
         if (digits[1] != 0xFF)
-            sub_0801F34C(digits[1] + 0x55, (obj->unk28 + 8 + n) & 0x1FF,
+            DrawOamObject(digits[1] + 0x55, (obj->unk28 + 8 + n) & 0x1FF,
                          (obj->unk2a + 0xC) & 0xFF, 0, 0);
 
-        sub_0801F34C(digits[2] + 0x55, (obj->unk28 + 0x10) & 0x1FF,
+        DrawOamObject(digits[2] + 0x55, (obj->unk28 + 0x10) & 0x1FF,
                      (obj->unk2a + 0xC) & 0xFF, 0, 0);
     }
 }

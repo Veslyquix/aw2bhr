@@ -19,5 +19,5 @@ void sub_08065EB4(void)
     if (gUnknown_08580934->unk32 & 1)
         sub_08065D20();
     else
-        sub_08065DAC(gUnknown_08580934->unk32 / 2, gpKeySt->unk02, 1);
+        sub_08065DAC(gUnknown_08580934->unk32 / 2, gpKeySt->repeated, 1);
 }

@@ -7,15 +7,15 @@
  * sub_0807A908 @ 0x0807A908
  */
 
-/* Return the first team index whose sub_080266DC predicate holds, or 0.
+/* Return the first team index whose IsPlayerAliveAndActive predicate holds, or 0.
  *
  * The preamble's three tests are one short-circuit `||`: the guarded block runs
- * when the mode byte is not 1 OR either sub_08078E14 reading is 0x21/0x22, and
+ * when the mode byte is not 1 OR either GetCampaignMissionId reading is 0x21/0x22, and
  * the loop is the fall-through of all three.
  *
  * `i + 1` is written twice on purpose. It is the loop's only non-test use of
  * the counter, and it is what puts the `adds r4, #1` at the TOP of the body;
- * sub_080266DC's `u8` parameter then makes `(i + 1) << 24` a giv, which
+ * IsPlayerAliveAndActive's `u8` parameter then makes `(i + 1) << 24` a giv, which
  * strength_reduce accumulates in r5 (init `movs #0x80; lsls #0x11` = 1 << 24,
  * step the same constant rematerialised in the loop) so the narrowing at the
  * call is a lone `lsrs r0, r5, #0x18` instead of a shift pair. Hoisting the
@@ -25,14 +25,14 @@ int sub_0807A908(void)
 {
     int i;
 
-    if (gUnknown_03003FC0.unk01 != 1 || sub_08078E14() == 0x21 || sub_08078E14() == 0x22)
-        if (sub_080266DC(gUnknown_030033EC))
+    if (gPlaySt.gameMode != 1 || GetCampaignMissionId() == 0x21 || GetCampaignMissionId() == 0x22)
+        if (IsPlayerAliveAndActive(gUnknown_030033EC))
             return gUnknown_030033EC;
 
     i = 0;
     while (i < sub_080248F8())
     {
-        if (sub_080266DC(i + 1))
+        if (IsPlayerAliveAndActive(i + 1))
             return i + 1;
         i++;
     }

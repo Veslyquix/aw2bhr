@@ -1,5 +1,5 @@
 #include "global.h"
-
+#include "map.h"
 /* Promoted from assembly; each function below is byte-for-byte
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
@@ -22,10 +22,10 @@
  * `ldrh` above the first compare and cost the extra register copy. */
 int sub_08029DBC(int x, int y)
 {
-    if (x < ((s16)*(u16 *)(gUnknown_08499590 + 4) >> 4)
-     || y < ((s16)*(u16 *)(gUnknown_08499590 + 6) >> 4)
-     || x > ((s16)*(u16 *)(gUnknown_08499590 + 4) >> 4) + 0xE
-     || y > ((s16)*(u16 *)(gUnknown_08499590 + 6) >> 4) + 9)
+    if (x < (gMap->scrollX >> 4)
+     || y < (gMap->scrollY >> 4)
+     || x > (gMap->scrollX >> 4) + 0xE
+     || y > (gMap->scrollY >> 4) + 9)
         return 0;
 
     return 1;
