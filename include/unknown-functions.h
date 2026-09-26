@@ -486,6 +486,8 @@ void sub_0801D924(void);
  * of their prologues. */
 void sub_0801D390(int, int);
 void sub_0801DCD4(int, int);
+void RunSimpleSpriteScript(int, int); /* sub_0801DCD4's readable name; see
+                                      * src/decomp/c_0801DCD4.c. */
 /* Wave 40, W40-I: both are already DEFINED in src/decomp (c_0801DB04.c and
  * c_0801DC50.c) and were simply never declared, because until now every caller
  * was still assembly. The signatures are copied from those definitions, not

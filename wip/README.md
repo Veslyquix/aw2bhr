@@ -28,7 +28,7 @@ it yourself as described under Contributing in the main README.
 
 ## Functions
 
-102 functions, 47396 bytes, closest first. The score is the share of
+101 functions, 46880 bytes, closest first. The score is the share of
 bytes identical to the original. A byte count after it means the attempt
 compiles to a different size.
 
@@ -130,7 +130,6 @@ compiles to a different size.
 | [sub_0804CA98](sub_0804CA98/) | 416 | 17.3%, -4 bytes (best.c) | parked |
 | [sub_0805D344](sub_0805D344/) | 244 | 16.4%, -8 bytes | parked |
 | [sub_0806F41C](sub_0806F41C/) | 308 | 15.6%, +4 bytes | parked |
-| [sub_0801DCD4](sub_0801DCD4/) | 516 | 14.7% (best.c) | parked |
 | [sub_08042998](sub_08042998/) | 472 | 14.2%, -28 bytes | parked |
 | [sub_080364F4](sub_080364F4/) | 296 | 9.5% (best.c) | parked |
 | [sub_0806FD98](sub_0806FD98/) | 76 | 9.2%, +24 bytes | parked |
