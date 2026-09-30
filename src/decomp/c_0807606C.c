@@ -23,7 +23,7 @@ struct Unk807606C
     /* 0x3a */ s8 unk3a;
 };
 
-void sub_0807606C(struct Unk807606C *proc)
+void WorldMapNationPanel_Draw(struct Unk807606C *proc)
 {
     int n;
 
@@ -33,6 +33,7 @@ void sub_0807606C(struct Unk807606C *proc)
         n = 0x11;
 
     sub_08071900(gUnknown_08551A00 + 0x140, gBG0TilemapBuffer + (n + 0x200), 0xd, 4);
-    sub_08013AEC();
-    sub_08013B0C();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG2();
 }
+asm(".global sub_0807606C\n.thumb_set sub_0807606C, WorldMapNationPanel_Draw\n");

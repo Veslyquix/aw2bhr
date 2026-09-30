@@ -17,7 +17,7 @@ struct Unk6B610Proc
     /* 0x58 */ int unk58;
 };
 
-void sub_0806B610(struct Unk6B610Proc *proc)
+void CreditsEpilogue_ScrollBg(struct Unk6B610Proc *proc)
 {
     int zero;
 
@@ -30,7 +30,8 @@ void sub_0806B610(struct Unk6B610Proc *proc)
     {
         zero = 0;
         CpuFastSet(&zero, gBG0TilemapBuffer, 0x01000200);
-        sub_08013AEC();
+        BG_EnableSyncBG0();
         Proc_Break(proc);
     }
 }
+asm(".global sub_0806B610\n.thumb_set sub_0806B610, CreditsEpilogue_ScrollBg\n");

@@ -9,26 +9,26 @@
 
 #include "hardware.h"
 
-void sub_080324C4(int a1, int a2, u8 a3)
+void LinkScreenInit(int a1, int a2, u8 a3)
 {
     int i;
     int zero;
 
-    sub_0801A5B0(0);
-    sub_08013C00();
-    sub_08013C54();
-    sub_08013CA8();
-    sub_08013AEC();
-    sub_08013AFC();
-    sub_08013B0C();
-    sub_08013B1C();
-    sub_08034290();
+    LoadBg1WindowFrame(0);
+    ClearBg0Tilemap();
+    ClearBg1Tilemap();
+    ClearBg2Tilemap();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
+    BG_EnableSyncBG2();
+    BG_EnableSyncBG3();
+    LinkC3_EndScreenProcs();
     sub_080733B8();
 
-    sub_08072C40(0, 0xFFD0, 8);
-    sub_08072C40(3, 0, 0);
+    SetBgScrollShadow(0, 0xFFD0, 8);
+    SetBgScrollShadow(3, 0, 0);
 
-    sub_0801237C();
+    ResetWindowShadows();
 
     if ((gGameClock & 1) || a2 == -1)
     {
@@ -56,18 +56,19 @@ void sub_080324C4(int a1, int a2, u8 a3)
     for (i = 0x80; i < 0x200; i++)
         gBG3TilemapBuffer[i] = i - 0x80;
 
-    sub_08073304(gUnknown_0849B644, gUnknown_02010C50, 0xec, 0xf, 0, a3, a1);
+    StartHeaderBanner(gUnknown_0849B644, gUnknown_02010C50, 0xec, 0xf, 0, a3, a1);
 
     if (a2 == -1)
     {
-        sub_08072C40(0, 0, 0);
-        sub_0802D5CC(0, 3);
+        SetBgScrollShadow(0, 0, 0);
+        ApplyWindowFramePalette(0, 3);
         Decompress(gUnknown_081D2660, (void *)0x06006280);
         sub_08032484(gBG0TilemapBuffer + 0x221);
     }
     else
     {
         ApplyPaletteExt(gUnknown_081320AC, 0x60, 0x20);
-        gUnknown_0849B060->unk00 = sub_080315E8(gUnknown_0849B060->unk00, a2, 2);
+        gUnknown_0849B060->unk00 = LinkScreenSetMessage(gUnknown_0849B060->unk00, a2, 2);
     }
 }
+asm(".global sub_080324C4\n.thumb_set sub_080324C4, LinkScreenInit\n");

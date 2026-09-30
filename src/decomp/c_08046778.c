@@ -29,13 +29,13 @@
  *     u8 + u8 * 8, so 0..2295, and gcc's nonzero_bits on the short proves it
  *     non-negative. The old draft reached the same instruction with
  *     `(u32)(a + gUnknown_084C211C[n * 2] * 8) / 8`; both are unsigned shifts
- *     with no round-toward-zero bias, unlike sub_080468D4's signed divide on
+ *     with no round-toward-zero bias, unlike ClearTerrainInfoMoveCosts's signed divide on
  *     the same table.
  *
  * The movement-cost row is the chain c_08038848.c and c_0801F888.c already
  * spell, and it is written out TWICE per iteration on purpose: the ROM
  * recomputes the whole gPlayers / gUnknown_085D3DD0 address chain for
- * the guard and again for sub_08014B0C's fourth argument. That is also why the
+ * the guard and again for DrawTallNumberRightAligned's fourth argument. That is also why the
  * two occurrences materialise the table base differently -- once as the folded
  * pool constant gen_lds.py names gUnknown_085D3E20
  * (= &gUnknown_085D3DD0[0].unk38[0].unk18[0]) and once as gUnknown_085D3DD0
@@ -44,7 +44,7 @@
  * argument. One source expression, two expansions.
  */
 
-void sub_08046778(u8 a, u8 b)
+void DrawTerrainInfoMoveCosts(u8 a, u8 b)
 {
   s8 *new_var3;
   u16 i;
@@ -62,10 +62,11 @@ void sub_08046778(u8 a, u8 b)
       new_var = gUnknown_084C211C[n * 2];
       new_var2 = a;
       new_var5 = new_var2 + (new_var * 8);
-      sub_08014B0C(new_var5 / 8, gUnknown_084C211C[(n * 2) + 1], gBG0TilemapBuffer, (new_var4 = gUnknown_085D3DD0[(gPlaySt.coAbilities) ? (gPlayers[gUnknown_030033EC].co) : (1)].power[gPlayers[gUnknown_030033EC].coMode].movementChart[gPlaySt.weather])[(gUnknown_084C212A[i] * 32) + b], 0x8000, 0);
+      DrawTallNumberRightAligned(new_var5 / 8, gUnknown_084C211C[(n * 2) + 1], gBG0TilemapBuffer, (new_var4 = gUnknown_085D3DD0[(gPlaySt.coAbilities) ? (gPlayers[gUnknown_030033EC].co) : (1)].power[gPlayers[gUnknown_030033EC].coMode].movementChart[gPlaySt.weather])[(gUnknown_084C212A[i] * 32) + b], 0x8000, 0);
       n++;
     }
   }
 
-  sub_08013AEC();
+  BG_EnableSyncBG0();
 }
+asm(".global sub_08046778\n.thumb_set sub_08046778, DrawTerrainInfoMoveCosts\n");

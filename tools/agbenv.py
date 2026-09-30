@@ -267,6 +267,37 @@ def profile_override(profile):
             for k, v in spec.items()}
 
 
+_FLAG_RE = re.compile(r'^-[A-Za-z0-9_=.+-]+$')
+
+
+def custom_profile(add=(), remove=(), base="configured", fn=None):
+    """Register the one-off profile "custom" and return its name.
+
+    Starts from `base` (for "configured", `fn`'s entry in
+    compiler-overrides.json, if any), then removes and adds single cflags.
+    The named profiles change several flags at once (o1 differs from -O2 in
+    about ten), so they cannot say which flag matters; `-O2 -fno-gcse` alone
+    is what matched sub_0805D438. Like every non-configured profile, a match
+    under it is provisional.
+    """
+    for opt in list(add) + list(remove):
+        if not _FLAG_RE.match(opt):
+            raise ValueError("not a compiler flag: %r" % opt)
+    if base == "configured":
+        spec = dict(compiler_overrides().get(fn) or {}) if fn else {}
+    else:
+        spec = profile_override(base) or {}
+    out = {}
+    if spec.get("cc1"):
+        out["cc1"] = spec["cc1"]
+    out["cflags_remove"] = list(dict.fromkeys(
+        [x for x in spec.get("cflags_remove", []) if x not in add] + list(remove)))
+    out["cflags_add"] = list(dict.fromkeys(
+        [x for x in spec.get("cflags_add", []) if x not in remove] + list(add)))
+    COMPILER_PROFILES["custom"] = out
+    return "custom"
+
+
 def _apply_override(f, ov):
     if not ov:
         return
@@ -338,6 +369,27 @@ def compile_c(src, out_o, out_s=None, extra_cflags="", fn=None,
         s=shlex.quote(out_s), as_=f["AS"], asflags=f["ASFLAGS"],
         o=shlex.quote(out_o), strip=f["STRIP"])
     return run(script)
+
+
+def uninitialized_reads(src, fn=None, profile="configured"):
+    """Names of locals agbcc says `src` might read before setting them.
+
+    The permuter's commonest wrong-C form reads a local before any assignment
+    reaches it; in wave 93 three of five kept "improvements" were that, and
+    they scored well because the undefined read reuses a register the ROM
+    also reuses. gcc's own flow analysis names them. The build's -Werror turns
+    the warning into a failed compile, so this compiles a throwaway object
+    under build/uninit/ and reads only the messages; it cannot change a verdict.
+    gcc can also warn about a local that is set on every path it cannot prove,
+    so compare against the draft's own list before calling a name wrong.
+    """
+    safe = re.sub(r'[^A-Za-z0-9_.-]', '_', os.path.relpath(src, awlib.REPO))
+    out = "build/uninit/%s.o" % safe
+    rel = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
+    rc, so, se = compile_c(rel, out, extra_cflags="-Wuninitialized",
+                           fn=fn, profile=profile)
+    names = re.findall(r"`(\w+)' might be used uninitialized", so + se)
+    return sorted(set(names))
 
 
 def assemble(src_s, out_o):

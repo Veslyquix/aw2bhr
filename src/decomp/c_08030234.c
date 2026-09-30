@@ -18,7 +18,7 @@
  * That is agbcc's own choice and needs no help from the source.
  *
  * gUnknown_03002040 is declared as a 0x58-byte struct, but this function walks
- * it with a 0x14 stride and hands each element to sub_0801348C(struct
+ * it with a 0x14 stride and hands each element to RefreshKeyStFromKeys(struct
  * Unk03002090 *, ...). 0x03002040 + 4 * 0x14 is exactly 0x03002090, so the
  * object is an array of struct Unk03002090 whose element [4] carries its own
  * name. Reached by cast, which is the idiom already used elsewhere in the tree
@@ -46,7 +46,7 @@
  * not `= 0` because the ROM stores the register, which is what the source
  * variable compiles to. */
 
-void sub_08030234(void)
+void LinkApplyKeySyncToKeySts(void)
 {
     struct Unk03002090 *p;
     s16 buf[4];
@@ -62,7 +62,7 @@ void sub_08030234(void)
     for (i = 0; i < 4; i++)
     {
         buf[i] = 0;
-        if (sub_0802F460(i))
+        if (SioIsPlayerLinked(i))
         {
             if (gUnknown_0849B01C->unk208[i] == 0xFFFF
              || gUnknown_0849B01C->unk208[i] == 0x5FFF
@@ -77,7 +77,7 @@ void sub_08030234(void)
     p = (struct Unk03002090 *)&gUnknown_03002040;
     for (i = 0; i < 4; i++)
     {
-        if (sub_0802F460(i))
+        if (SioIsPlayerLinked(i))
         {
             if (nBad == 0)
             {
@@ -101,5 +101,6 @@ zero:
         gUnknown_0849B018->unk1b = nSplit;
 
     for (i = 0; i < 4; i++)
-        sub_0801348C(&((struct Unk03002090 *)&gUnknown_03002040)[i], buf[i]);
+        RefreshKeyStFromKeys(&((struct Unk03002090 *)&gUnknown_03002040)[i], buf[i]);
 }
+asm(".global sub_08030234\n.thumb_set sub_08030234, LinkApplyKeySyncToKeySts\n");

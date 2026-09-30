@@ -11,8 +11,8 @@
  * 0x27 of it. */
 void sub_08017994(void)
 {
-    sub_080179D0(gUnknown_08499588 + 0x27);
-    sub_080185A0();
+    ClearTilemapRect23x4(gUnknown_08499588 + 0x27);
+    UploadEventTilemap();
 }
 
 /* Six arguments, the last two passed on the stack. r1 is left holding the 0 it
@@ -21,5 +21,5 @@ void sub_08017994(void)
  * own. */
 void sub_080179AC(void)
 {
-    sub_08012BC8(gUnknown_08499588, 0, 0, 0x1e, 6, 0);
+    FillTilemapRect(gUnknown_08499588, 0, 0, 0x1e, 6, 0);
 }

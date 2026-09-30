@@ -30,9 +30,9 @@ struct Unk678ECProc
  *
  * gUnknown_030024D0 is hardware.h's `volatile u32 [4]`, i.e. one
  * BgAffineDstData's worth of BG2 affine registers. It is cast at the call
- * rather than retyped, because its other readers (sub_08012420 copies it a
+ * rather than retyped, because its other readers (FlushDisplayRegisters copies it a
  * word at a time) depend on the array spelling. */
-void sub_080678EC(struct Unk678ECProc *proc)
+void IntroBgAffineTween_Init(struct Unk678ECProc *proc)
 {
     struct BgAffineSrcData src;
 
@@ -46,3 +46,4 @@ void sub_080678EC(struct Unk678ECProc *proc)
 
     BgAffineSet(&src, (struct BgAffineDstData *)gUnknown_030024D0, 1);
 }
+asm(".global sub_080678EC\n.thumb_set sub_080678EC, IntroBgAffineTween_Init\n");

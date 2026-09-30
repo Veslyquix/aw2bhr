@@ -43,7 +43,7 @@ struct Unk6F0ECProc
     /* 0x44 */ struct Unk6F0ECSubProc *unk44;
 };
 
-void sub_0806F0EC(struct Unk6F0ECProc *proc)
+void SoundRoomMusicPage_Input(struct Unk6F0ECProc *proc)
 {
     struct Unk6F0ECBlockProc *p;
     u16 held;
@@ -54,15 +54,15 @@ void sub_0806F0EC(struct Unk6F0ECProc *proc)
 
     if (held & 8)
     {
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
         proc->unk44->unk48 = 1;
-        sub_0803B5E8();
+        FadeOutMusicDefault();
         Proc_Goto(proc, 3);
         Proc_Break(proc);
     }
     else if (held & 4)
     {
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
         gUnknown_0202F2CC = proc->unk2c;
         gUnknown_0202F2D0 = proc->unk30;
         gUnknown_0202F2D4 = proc->unk34;
@@ -71,9 +71,9 @@ void sub_0806F0EC(struct Unk6F0ECProc *proc)
     }
     else if ((held & 1) && gUnknown_08582764[proc->unk30].unk02 != proc->unk2c)
     {
-        sub_0803B4DC(0x71);
+        PlayMusicOrSfx2(0x71);
         proc->unk3c->unk48 = 1;
-        sub_0806EB28(proc);
+        SoundRoomCycleBgPalette(proc);
 
         if (proc->unk2c != 0)
         {
@@ -84,12 +84,12 @@ void sub_0806F0EC(struct Unk6F0ECProc *proc)
         {
             Proc_Start(gUnknown_08582C5C, proc);
             proc->unk2c = gUnknown_08582764[proc->unk30].unk02;
-            sub_0803B524((s16)proc->unk2c);
+            PlayMusic((s16)proc->unk2c);
         }
     }
     else if ((held & 2) && proc->unk2c != 0)
     {
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
         proc->unk40->unk48 = 1;
         p = Proc_StartBlocking(gUnknown_08582E54, proc);
         p->unk58 = -1;
@@ -103,9 +103,9 @@ void sub_0806F0EC(struct Unk6F0ECProc *proc)
         if (proc->unk30 == 0)
             proc->unk30 = 0x2e;
 
-        sub_0806E8E4(1);
-        sub_0806F0A0((struct Unk0806F0A0Proc *)proc);
-        sub_0806E7C0(1, proc->unk30, proc);
+        FlickSoundRoomArrow(1);
+        SoundRoom_RefreshCoPortrait((struct Unk0806F0A0Proc *)proc);
+        StartSoundRoomTitleScroll(1, proc->unk30, proc);
     }
     else if (keys & 0x10)
     {
@@ -114,8 +114,9 @@ void sub_0806F0EC(struct Unk6F0ECProc *proc)
         if (proc->unk30 == 0x2f)
             proc->unk30 = 1;
 
-        sub_0806E8E4(0);
-        sub_0806F0A0((struct Unk0806F0A0Proc *)proc);
-        sub_0806E7C0(-1, proc->unk30, proc);
+        FlickSoundRoomArrow(0);
+        SoundRoom_RefreshCoPortrait((struct Unk0806F0A0Proc *)proc);
+        StartSoundRoomTitleScroll(-1, proc->unk30, proc);
     }
 }
+asm(".global sub_0806F0EC\n.thumb_set sub_0806F0EC, SoundRoomMusicPage_Input\n");

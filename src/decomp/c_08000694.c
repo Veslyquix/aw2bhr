@@ -9,27 +9,30 @@
 
 #include "hardware.h"
 
-/* MATCHES -- verified by exit status of tools/trymatch.py, which reports
- * `relocs: name different symbols that resolve to the same address` and the
- * `rodata: ["0x0808D6DC"]` entry to carry at promotion.
+/*
+ * sub_08000694 -- run one frame of the mode that fades a screen in, waits for
+ * a button, fades back out and returns to mode 1.
  *
- * This draft was PARKED in wave 13 and the block it was parked on no longer
- * exists: the single difference was that agbcc puts `.LC0: .word
- * gActiveMap` in this unit's own `.rodata` where the ROM relocates
- * against gUnknown_0808D6DC, and wave 18 taught the split to PLACE that word
- * (tools/split_rodata.py). Nothing about the C below changed; the harness
- * caught up with it.
+ * Driven by gActiveMap->state. The first frame after the mode change hides the
+ * map (DesignRoomHideTilePanel, DesignRoomHideCoordBox, sub_080039D0), arms a two-frame timer and
+ * plays sound 0x76. gUnknown_03001FFC is the fade level the screen waits on.
  *
- * It went unnoticed for two waves because it is NOT in data/parked.json --
- * only its own comment said "parked" -- so the pre-flight re-test of the
- * parked queue, which every wave since 18 has run by exit code, never covered
- * it. See docs/agbcc-codegen.md (wave 20, W20-A) for the sweep that found it
- * and the one-line command that repeats it.
- *
- * The wave-13 note kept for the record: the `struct ActiveMap **const
- * gUnknown_0808D6DC` workaround declaration reproduces the CSE exactly but
- * force-addr then fires on THAT symbol in turn -- 400 bytes against 392 --
- * which is why the honest spelling below is the right one and was all along. */
+ *   state 0:   count the timer down, then go to state 50.
+ *   state 50:  set the two view-offset globals to -40 and -60, fall into 60.
+ *   state 60:  once the fade level is past 5, start the screen with
+ *              DrawDesignRoomMapPreview and go to state 70.
+ *   state 70:  run the screen each frame; A, B or START arms a 10-frame timer
+ *              and goes to state 80.
+ *   state 80:  when the timer runs out, close the screen, blank the 15 x 10
+ *              tile window at the top left of BG0, flag BG0 for copying to
+ *              VRAM and play sound 0x66.
+ *   state 90:  once the fade level is back to 0, clear the mosaic bit in the
+ *              BG0 and BG2 control words, store 0xA0 in gUnknown_03002EFC and
+ *              zero gUnknown_030030C4's low byte (both purposes unknown), then
+ *              call RebuildMapUnitLayers2 and go to state 100.
+ *   state 100: bring the map back (DesignRoomShowTilePanel, DesignRoomShowCoordBox), switch to mode
+ *              1 and leave the state at 40, which no case here handles.
+ */
 
 void sub_08000694(void)
 {
@@ -37,11 +40,11 @@ void sub_08000694(void)
     {
         gActiveMap->stateChanged = 0;
         gActiveMap->state = 0;
-        sub_08001D9C();
-        sub_08003948();
+        DesignRoomHideTilePanel();
+        DesignRoomHideCoordBox();
         gActiveMap->stateTimer = 2;
         sub_080039D0();
-        sub_0803B4DC(0x76);
+        PlayMusicOrSfx2(0x76);
     }
 
     switch (gActiveMap->state)
@@ -58,24 +61,23 @@ void sub_08000694(void)
         /* fall through */
     case 60:
     {
-        /* The `int` temp is load-bearing: `gUnknown_03001FFC > 5` read straight
-         * off the u16 global is shortened by the C front end to an UNSIGNED
-         * compare (`bls`); binding it to an int first keeps the signed `ble`
-         * the ROM has. */
+        /* Read the fade level through an int first: comparing the u16 global
+         * directly makes the compare unsigned, and the original compares
+         * signed. */
         int blend = gUnknown_03001FFC;
 
         if (blend > 5)
         {
             gActiveMap->state = 70;
-            sub_0803CE28(0, 0);
+            DrawDesignRoomMapPreview(0, 0);
         }
         break;
     }
 
     case 70:
-        sub_08023824();
-        sub_08023518();
-        sub_08023908(8);
+        HandleMoveMapCursor();
+        MoveMapCursorFromHeldKeys();
+        HandleMoveCameraWithMapCursor(8);
         if (gpKeySt->pressed & (A_BUTTON | B_BUTTON | START_BUTTON))
         {
             gActiveMap->state = 80;
@@ -87,11 +89,11 @@ void sub_08000694(void)
         if (--gActiveMap->stateTimer < 0)
         {
             gActiveMap->state = 90;
-            sub_0803CEAC();
-            sub_08012BC8(gBG0TilemapBuffer, 0, 0, 15, 10, 0);
-            sub_08013AEC();
+            EndMapPreviewEffects();
+            FillTilemapRect(gBG0TilemapBuffer, 0, 0, 15, 10, 0);
+            BG_EnableSyncBG0();
             sub_080039BC();
-            sub_0803B4DC(0x66);
+            PlayMusicOrSfx2(0x66);
         }
         break;
 
@@ -103,15 +105,15 @@ void sub_08000694(void)
             gUnknown_03001FE8.bits.mosaic = 0;
             ((union BgCntBuf *)&gUnknown_0300251C)->bits.mosaic = 0;
             *(u8 *)&gUnknown_030030C4 = 0;
-            sub_08024268();
+            RebuildMapUnitLayers2();
         }
         break;
 
     case 100:
         gActiveMap->state = 40;
-        sub_08001D8C();
-        sub_08003934();
-        sub_0800056C(1);
+        DesignRoomShowTilePanel();
+        DesignRoomShowCoordBox();
+        DesignRoomSetMode(1);
         break;
     }
 }

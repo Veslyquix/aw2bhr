@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080345C8.
- * MapMainIdle @ 0x080345C8
+ * RunMapStateMachine @ 0x080345C8
  */
 
 /* The gUnknown_030032D8 state machine's per-frame tick.
@@ -26,7 +26,7 @@
  * `subs r0, #1`. The 19/16/18 order is likewise the source's: GCC lays case
  * bodies out in source order, and the ROM has 19's before 16's.
  */
-void MapMainIdle(void)
+void RunMapStateMachine(void)
 {
     u16 *const *state;
     int idle;
@@ -39,32 +39,32 @@ void MapMainIdle(void)
         switch (**state)
         {
         case 0:  break;
-        case 1:  sub_08034938(); break;
-        case 2:  sub_080349E4(); break;
-        case 3:  sub_08034AF8(); break;
-        case 4:  sub_08034DB0(); break;
-        case 5:  sub_08034DCC(); break;
+        case 1:  MapState_CheckTurnLimit(); break;
+        case 2:  MapState_PrepareTurnHandover(); break;
+        case 3:  MapState_TurnHandoverPrompt(); break;
+        case 4:  MapState_WaitForCampaignIntro(); break;
+        case 5:  MapState_PlayTurnMusic(); break;
         case 6:  sub_08034DF8(); break;
-        case 7:  sub_08034EA4(); break;
-        case 8:  sub_08034C90(); break;
-        case 9:  sub_08034CA4(); break;
+        case 7:  MapState_StartDayStartScreen(); break;
+        case 8:  MapState_StartFuelUpkeep(); break;
+        case 9:  MapState_StartTurnStartSupply(); break;
         case 10: sub_08034CB8(); break;
-        case 11: sub_08034CD4(); break;
-        case 12: sub_08034D18(); break;
-        case 13: sub_0802DC2C(); break;
-        case 14: sub_0806171C(); break;
-        case 19: sub_08034350(); break;
-        case 16: sub_08034ED0(); break;
-        case 18: sub_08034EF0(); break;
-        case 20: sub_08034F1C(); return;
+        case 11: MapState_StartInventionTurnScript(); break;
+        case 12: MapState_DispatchTurnByController(); break;
+        case 13: RunMapCursorState(); break;
+        case 14: AiDriverStep(); break;
+        case 19: MapState_RemoteTurn(); break;
+        case 16: MapState_RunParkedWinLossCheck(); break;
+        case 18: MapState_EndOfGame(); break;
+        case 20: MapState_ResumeCursorAfterCommand(); return;
         }
     }
 
     if (**state == 14 || gUnknown_030044DC == 14)
     {
-        if (sub_08015BD0((s32)gUnknown_0849A00C) != -1 || GetMapLock() == 0)
-            sub_0802776C(3);
+        if (FindSlotScript((s32)gUnknown_0849A00C) != -1 || GetMapLock() == 0)
+            SetInfoBoxMode(3);
     }
 }
 
-asm(".global sub_080345C8\n.thumb_set sub_080345C8, MapMainIdle\n");
+asm(".global sub_080345C8\n.thumb_set sub_080345C8, RunMapStateMachine\n");

@@ -25,7 +25,7 @@
  * draft referenced any filler. Keep the drafts in sync; sync_work.py
  * reintroduces whatever the drafts say. */
 
-void sub_0802BFD0(int a1)
+void StartSubmarineDiveEffect(int a1)
 {
     if (!(gPlayers[gUnknown_030033EC].turnState & 2)
         && gMap->unk234A[
@@ -46,14 +46,14 @@ void sub_0802BFD0(int a1)
         return;
 
     if (a1 == 0)
-        sub_0803B4DC(0x37);
+        PlayMusicOrSfx2(0x37);
 
     if (a1 == 1)
-        sub_0803B4DC(0x36);
+        PlayMusicOrSfx2(0x36);
 
     Decompress((u8 *)gUnknown_081248F8, (void *)0x06013940);
     ApplyPaletteExt((u16 *)gUnknown_08125190, 0x260, 0x20);
-    sub_0801C70C(gUnknown_08124FB8,
+    APProc_Create(gUnknown_08124FB8,
                  gUnknown_03003100.pos.unk00 * 16
                      - (s16)gMap->scrollX + 8,
                  gUnknown_03003100.pos.unk02 * 16
@@ -61,3 +61,4 @@ void sub_0802BFD0(int a1)
                  0x31CA, a1, 0);
     Proc_Start(gUnknown_0849A480, (ProcPtr)3);
 }
+asm(".global sub_0802BFD0\n.thumb_set sub_0802BFD0, StartSubmarineDiveEffect\n");

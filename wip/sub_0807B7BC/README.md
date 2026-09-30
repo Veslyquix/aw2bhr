@@ -2,7 +2,7 @@
 
 0x0807B7BC, 156 bytes, THUMB, parked.
 
-Best score so far: not measured.
+Best score so far: 66.7%.
 
 ## What it does
 
@@ -10,7 +10,7 @@ Loads a string's glyphs into sprite VRAM and measures its width. For each charac
 
 ## How close it is
 
-Compiles 12 bytes short (144 against 156), 9% of bytes match; the score means little because the difference starts in the function's opening (one fewer saved register) and shifts everything after it. Every statement is right: the original keeps outWidths and the total in saved registers and puts only the count on the stack, the draft puts both on the stack, and which loop gets its test duplicated follows from that.
+Compiles to the right size (156 bytes) with 51.3% of bytes identical. The outer loop body is wrapped in do { } while (0), total is an int, and the zero constant is held in its own variable; what is left is register assignment.
 
 ## What is left
 
@@ -58,5 +58,31 @@ SETTLED READOUTS, do not re-derive. FOUR parameters, in r0-r3; the draft's fifth
 ### Wave 87
 
 WAVE 87 (W87-F, do{}while(0) transfer test): THE LEVER WORKS HERE -- the only one of five that responded, the one whose mis-allocated values live across a `bl`. Thirteen placements, three outcomes: baseline / around Decompress / around the outTotal tail = outWidths and total both spilled, 144/-12, 9.0%; around the inner for / the match then-block / their composition = outWidths -> r7, count spilled, 148/-8; around the WHOLE OUTER while body (r3, and every composition on it) = outWidths -> r7, total -> r8, count AND str+1 spilled, 148/-8, 5.8% -- two of the ROM's three placements bought back, and `count` (the ROM's one spilled value) is now the spill. One try_match on r3 regressed by score (5.8% vs 9.0%, positional) and the draft was RESTORED to the wave-59 baseline (w87-start.c identical); the r3 form is the better starting point and should be reinstated by the next agent. BOUND: the wrapper re-ranks which values win the registers already being allocated; it does NOT change how many callee-saved registers the function spends (r3 still pushes two hi registers with an 8-byte frame vs the ROM's three and 4 bytes) -- that number is global_alloc's cost weighing, and outWidths/total are used in adds/lsrs forms that only encode LOW registers, so a hi register costs a mov per use. Next, sharper than the park's: with the r3 wrapper only `str + 1` remains in the spill set that the ROM keeps in r6, and str+1 is compiler-invented (must not be authored) -- so probe `str++` moved to the TOP of the outer body (before the inner for) with the compare re-read, composed with r3; and a permuter run from the r3 draft (never run; the wave-59 blocker is gone). Do not re-run r1/r5 (neutral) or r2/r4/r6/s2/s4 (worse than r3).
+
+### Wave 95
+
+Base: the `do { } while (0)` around the whole outer body (148, -8, 5.8%), kept as `sub_0807B7BC.w95-perm1-start.c`; original draft kept as `sub_0807B7BC.w95-start.c` (144, 9.0%). `str++` at the top with the compare re-read (136), `nx = str + 1` temp (144, 10.3%), bare copies of outWidths / outTotal (148): no gain; the copies propagate away.
+RESULT: SIZE-EXACT (156), 51.3%, first difference +0xa. Draft = `sub_0807B7BC.w95-perm3-start.c` = current `sub_0807B7BC.c`. Permuter chain (600 s each): 5.8 -> 46.8 -> 51.3 (both semantically identical to the start, checked by reading). What it changed: `total` is `int` (the u16 store at the end truncates identically), a variable `new_var = 0` stands for the zero in the two `!= 0` loop tests, `new_var2 = 0` stands for the NULL test on outTotal, and the return sits inside the `do { } while (0)`. Runs 3 and 4 (58.3, 59.0) were WRONG C: `new_var = tile;` is written inside the glyph loop over the very variable used as the zero constant. Kept as `.w95-WRONG-58.c` / `.w95-WRONG-59.c`. Rewriting that step with a distinct temp (`tc = tile`) is 51.3%, the same as before it, so the improvement was the clobber.
+The park's "one register short" is gone: the wrapper plus zero-variable form saves the third high register; what is left is register choice (str in r5 not r4, etc.) inside a size-exact body.
+Lever 1: does not transfer as a source form (copies fold away); the permuter's zero-variable is the working equivalent. Comments in the draft are the permuter's, not to be promoted as is.
+
+### Wave 97
+
+wave 97
+best.c is WRONG C (wrongc: `new_var = tile` inside the glyph loop, the same clobber as the wave-95 WRONG files); not used.
+Base: the size-exact 51.28% draft (w97-start). Rewriting from scratch with the wave-96/97 levers:
+* `u16 total` as the ROM has it (per-iteration `lsls/lsrs` into a hi register) and a copy-back step
+  (`nx = str + 1` at the top of the outer body, `str = nx` at the bottom) put in front of the wrapper draft: 25%, frame 8.
+* Removing the permuter's zero variable only in the inner `for` test (`g->unk00 != 0`) while keeping it in the outer `while`
+  and for the outTotal test, plus u16 total and the nx copy-back: **size-exact 156, 57.05%** (was 51.28); kept as e3 below if the
+  draft file is that version. Removing the zero variable from all three tests: 152/144 and worse.
+* `total = count = 0;` / `count = total = 0;`: byte-identical.
+Residual on the 57% form: the ROM keeps `str+1` in r6 and spills only `count` ([sp] = count); we keep `count` in r7, `tile`
+in r6 and spill `nx` in r3 across the Decompress call (frame 8 vs 4), and the zero variable still occupies `sl`.
+
+Update (end of wave 97): permuter from the 57.05% form: 57.05 -> 66.03 -> 66.67, size-exact 156, first diff +0xc. Both runs are
+valid C (read): `tile & 0x3ff` / `<< 1` / `<< 4` split into temporaries, `0x06010000` and `4` and `8` held in ints, `*str` read
+into a u8 before the compare, `nx = str + 1` inside the do-block. Names are still `new_var*`; the residual is unchanged in kind
+(callee-saved assignment: the ROM keeps `str+1` in a low register and spills only `count`). Draft file is the 66.67% form.
 
 </details>

@@ -7,11 +7,12 @@
  * sub_0807AA6C @ 0x0807AA6C
  */
 
-/* sub_0807A8F4's neighbour: same guard on the same predicate, but it plays a
- * sound instead of calling sub_0803B3C8. The two differ in the guarded call and
+/* ResultsScreen_FinishClose's neighbour: same guard on the same predicate, but it plays a
+ * sound instead of calling SetSoundMixerChannelCount8. The two differ in the guarded call and
  * nothing else. */
-void sub_0807AA6C(void)
+void MatchSummary_PlayMusic(void)
 {
-    if (sub_08078E20() == 0)
-        sub_0803B524(0xCD);
+    if (IsCampaignMilestoneMission() == 0)
+        PlayMusic(0xCD);
 }
+asm(".global sub_0807AA6C\n.thumb_set sub_0807AA6C, MatchSummary_PlayMusic\n");

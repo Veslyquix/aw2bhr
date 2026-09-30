@@ -72,7 +72,7 @@ void sub_0805BF3C(int x, int y, u16 *out)
         gUnknown_085768B8[buf[gUnknown_030046D4]](x, y, out);
 }
 
-void sub_0805BFDC(int x, int y, int a3, int a4)
+void AiTryRideInsteadOfWalk(int x, int y, int a3, int a4)
 {
     int v;
     u16 t;
@@ -83,7 +83,7 @@ void sub_0805BFDC(int x, int y, int a3, int a4)
 
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, a3,
                       0x78, 0);
-    sub_0801FD9C(0x79);
+    MapMarkHalo(0x79);
 
     t = ((s8)gUnknown_03003340[y][x] * 3) / GetUnitMovementWithCoBonus(gUnknown_030033EC, a3);
 
@@ -92,5 +92,6 @@ void sub_0805BFDC(int x, int y, int a3, int a4)
         return;
 
     ((struct Unk5BFDCCtl *)gUnknown_030040D8)->unk09_3 = a4;
-    sub_0805FB70();
+    AiBoardTransport();
 }
+asm(".global sub_0805BFDC\n.thumb_set sub_0805BFDC, AiTryRideInsteadOfWalk\n");

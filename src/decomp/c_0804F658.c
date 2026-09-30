@@ -7,7 +7,7 @@
  * sub_0804F658 @ 0x0804F658
  */
 
-/* MATCHED (wave 87, W87-B) -- see work/sub_0804F658/W87-notes.md.
+/* MATCHED (wave 87, W87-B) -- see work/FlyerFigure_Init/W87-notes.md.
  * Three constructs closed a 68-wave "register allocation only" park:
  *   1. oam.tileNum = g * 0x100 (W86-E's twin find, kept);
  *   2. the (s16)v + unk04 arithmetic written through a `static inline`
@@ -20,7 +20,7 @@
  *      this park's settled claim that only the single-local spelling gives
  *      the ROM's two separate mask tests.
  * The element address is bound with & and read through ->, as the sibling
- * sub_0804F18C does; the row-subscript form emits `adds r0,r0,r1`. */
+ * BomberFigure_Init does; the row-subscript form emits `adds r0,r0,r1`. */
 
 struct UnkPosPair
 {
@@ -32,7 +32,7 @@ static inline int inline_fn(int arg0, u16 arg1)
     return ((s16)arg0) + arg1;
 }
 
-void sub_0804F658(void)
+void FlyerFigure_Init(void)
 {
     struct OamData oam;
     u16 pal;
@@ -43,7 +43,7 @@ void sub_0804F658(void)
     int v;
     int flags;
 
-    sub_0801566C(gUnknown_03001FBC, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(gUnknown_03001FBC, (struct UnkVec *)&oam);
     gUnknown_03001470[gUnknown_03001FBC].unk28 = gUnknown_0300451C << 3;
     gUnknown_03001470[gUnknown_03001FBC].unk30 = gUnknown_0300453C;
     gUnknown_03001470[gUnknown_03001FBC].unk34 = gUnknown_0300451C;
@@ -53,8 +53,8 @@ void sub_0804F658(void)
     oam.tileNum = gUnknown_0300453C * 0x100;
     prio = gUnknown_085523A4[gUnknown_0300453C ^ gUnknown_0300450C];
     oam.priority = prio;
-    sub_08015608(gUnknown_03001FBC, *(struct UnkVec *)&oam);
-    pos = (struct UnkPosPair (*)[10])sub_08057D44(
+    SetSlotSpriteAttrs(gUnknown_03001FBC, *(struct UnkVec *)&oam);
+    pos = (struct UnkPosPair (*)[10])GetFigurePositionTable(
         gUnknown_085D6A48[gUnknown_03004580[gUnknown_0300453C][1]][0],
         gUnknown_03004580[gUnknown_0300453C][3]);
     v = gUnknown_085644E0[gUnknown_0300453C][gUnknown_0300450C];
@@ -74,9 +74,10 @@ void sub_0804F658(void)
             [gUnknown_0300453C * 5 + gUnknown_0300451C])->y;
     gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y =
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].unk06;
-    sub_0804BCB8(gUnknown_0300453C, gUnknown_0300451C,
+    StartFigureEntrySlide(gUnknown_0300453C, gUnknown_0300451C,
                  gUnknown_0855214C[gUnknown_0300453C], 0x32);
-    sub_080155C0(gUnknown_03001FBC,
+    SetSlotSpritePosition(gUnknown_03001FBC,
                  gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].x,
                  gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y);
 }
+asm(".global sub_0804F658\n.thumb_set sub_0804F658, FlyerFigure_Init\n");

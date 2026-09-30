@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080860DC.
- * sub_080860DC @ 0x080860DC
+ * MapSelectList_HandleInput @ 0x080860DC
  */
 
 #include "hardware.h"
@@ -22,11 +22,11 @@
  * say they should.
  *
  * Load-bearing, from earlier waves:
- *  - `sub_08087298() + p->unk4e * 0x100`, not `<< 8`: the multiply keeps
+ *  - `GetMapPreviewScrollY() + p->unk4e * 0x100`, not `<< 8`: the multiply keeps
  *    the signed HImode operand (`ldrsh`); the shift is narrowed to `ldrh`.
  *  - `*(u16 *)&p->unk4e = w;` with `w = 0xFFFF;` in an int local, in both
  *    arms, so the shared `strh` cross-jumps.
- *  - the `size = 2; sub_080876B4(); sub_0803B4DC(0x67)` tail written out at
+ *  - the `size = 2; MapSelectList_SetupWindows(); PlayMusicOrSfx2(0x67)` tail written out at
  *    the end of both of the first two arms, not once after the if-chain.
  * Promotion needs "rodata": ["0x081D9410", "0x081D9414", "0x081D9418",
  * "0x081D941C", "0x081D9420"]. */
@@ -46,7 +46,7 @@ struct Unk80860DCProc
     /* 0x5c */ int unk5c;
 };
 
-void sub_080860DC(ProcPtr procp)
+void MapSelectList_HandleInput(ProcPtr procp)
 {
     struct Unk80860DCProc *p = procp;
     int g;
@@ -67,7 +67,7 @@ void sub_080860DC(ProcPtr procp)
 
         if (gPlaySt.gameMode == 2)
         {
-            sub_08087B60(p->unk58);
+            RefreshMapSelectSidePanels(p->unk58);
 
             if (gUnknown_03005930 > 1 || p->unk5c == 0)
                 gUnknown_03005930--;
@@ -94,9 +94,9 @@ void sub_080860DC(ProcPtr procp)
 
         if (p->unk4e != 0 || p->unk52 != 0)
         {
-            sub_08013C54();
-            sub_08013AFC();
-            gUnknown_03002F18 = sub_08087298() + p->unk4e * 0x100;
+            ClearBg1Tilemap();
+            BG_EnableSyncBG1();
+            gUnknown_03002F18 = GetMapPreviewScrollY() + p->unk4e * 0x100;
             p->unk4c = 8;
             p->unk52 = 0;
         }
@@ -106,8 +106,8 @@ void sub_080860DC(ProcPtr procp)
         w = 0xFFFF;
         *(u16 *)&p->unk4e = w;
         gUnknown_03001FE8.bits.size = 2;
-        sub_080876B4();
-        sub_0803B4DC(0x67);
+        MapSelectList_SetupWindows();
+        PlayMusicOrSfx2(0x67);
         return;
     }
     else if (gpKeySt->repeated & 0x80)
@@ -119,7 +119,7 @@ void sub_080860DC(ProcPtr procp)
 
         if (gPlaySt.gameMode == 2)
         {
-            sub_08087B60(p->unk58);
+            RefreshMapSelectSidePanels(p->unk58);
 
             if (gUnknown_03005930 < (g = gUnknown_03005928) - 2
                 || p->unk5c == gUnknown_02027F74.unk37 - g + 1)
@@ -148,9 +148,9 @@ void sub_080860DC(ProcPtr procp)
 
         if (p->unk4e != 0 || p->unk52 != 0)
         {
-            sub_08013C54();
-            sub_08013AFC();
-            gUnknown_03002F18 = sub_08087298() + p->unk4e * 0x100;
+            ClearBg1Tilemap();
+            BG_EnableSyncBG1();
+            gUnknown_03002F18 = GetMapPreviewScrollY() + p->unk4e * 0x100;
             p->unk4c = 8;
             p->unk52 = 0;
         }
@@ -159,8 +159,8 @@ void sub_080860DC(ProcPtr procp)
 
         *(u16 *)&p->unk4e = 1;
         gUnknown_03001FE8.bits.size = 2;
-        sub_080876B4();
-        sub_0803B4DC(0x67);
+        MapSelectList_SetupWindows();
+        PlayMusicOrSfx2(0x67);
         return;
     }
     else if ((gpKeySt->pressed & 1) && p->unk4e == 0
@@ -175,10 +175,10 @@ void sub_080860DC(ProcPtr procp)
         else
             gUnknown_03005990[gUnknown_0300596C] = p->unk5c;
 
-        sub_0803BCD0(gUnknown_02027F74.unk04[p->unk58]);
+        SetMapId(gUnknown_02027F74.unk04[p->unk58]);
         sub_0803BD54();
-        sub_0803B4DC(0x71);
-        sub_08037780();
+        PlayMusicOrSfx2(0x71);
+        RemoveMapPreviewPaletteHook();
         Proc_Start(gUnknown_08616CCC, p);
         p->unk4e = 1;
         p->unk4c = 0x1E;
@@ -188,9 +188,9 @@ void sub_080860DC(ProcPtr procp)
     else if ((gpKeySt->pressed & 2) && Proc_Find(gUnknown_084892C4) == 0
              && Proc_Find(gUnknown_08616CCC) == 0)
     {
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
         sub_0803BD60();
-        sub_08037780();
+        RemoveMapPreviewPaletteHook();
         Proc_Start(gUnknown_08616CCC, p);
         p->unk4e = 1;
         p->unk4c = 0x1E;
@@ -205,11 +205,11 @@ void sub_080860DC(ProcPtr procp)
         gUnknown_0200C420.unk0c = 1 - gUnknown_0200C420.unk0c;
 
         if (gUnknown_0200C420.unk0c != 0)
-            sub_0803B4DC(0x65);
+            PlayMusicOrSfx2(0x65);
         else
-            sub_0803B4DC(0x66);
+            PlayMusicOrSfx2(0x66);
 
-        sub_08087974(p->unk58, p);
+        ToggleMapRecordsPanel(p->unk58, p);
         return;
     }
     else if (gpKeySt->pressed & 0x220)
@@ -220,7 +220,7 @@ void sub_080860DC(ProcPtr procp)
         if (gUnknown_0300596C <= 1)
             gUnknown_0300596C = 8;
 
-        while (!(u8)sub_08037448(gUnknown_0300596C))
+        while (!(u8)BuildMapListForCategory(gUnknown_0300596C))
         {
             gUnknown_0300596C--;
             if (gUnknown_0300596C <= 1)
@@ -236,9 +236,9 @@ void sub_080860DC(ProcPtr procp)
 
         if (p->unk4e != 0 || p->unk52 != 0)
         {
-            sub_08013C54();
-            sub_08013AFC();
-            gUnknown_03002B34 = sub_08087248() + (p->unk52 << 8);
+            ClearBg1Tilemap();
+            BG_EnableSyncBG1();
+            gUnknown_03002B34 = GetMapPreviewScrollX() + (p->unk52 << 8);
             p->unk4c = 8;
             p->unk4e = 0;
         }
@@ -248,8 +248,8 @@ void sub_080860DC(ProcPtr procp)
         p->unk2c = 0;
         p->unk52 = 0xFFFF;
         gUnknown_03001FE8.bits.size = 1;
-        sub_080876B4();
-        sub_0803B4DC(0x76);
+        MapSelectList_SetupWindows();
+        PlayMusicOrSfx2(0x76);
         return;
     }
     else if (gpKeySt->pressed & 0x110)
@@ -260,7 +260,7 @@ void sub_080860DC(ProcPtr procp)
         if (gUnknown_0300596C > 8)
             gUnknown_0300596C = 2;
 
-        while (!(u8)sub_08037448(gUnknown_0300596C))
+        while (!(u8)BuildMapListForCategory(gUnknown_0300596C))
         {
             gUnknown_0300596C++;
             if (gUnknown_0300596C > 8)
@@ -276,9 +276,9 @@ void sub_080860DC(ProcPtr procp)
 
         if (p->unk4e != 0 || p->unk52 != 0)
         {
-            sub_08013C54();
-            sub_08013AFC();
-            gUnknown_03002B34 = sub_08087248() + (p->unk52 << 8);
+            ClearBg1Tilemap();
+            BG_EnableSyncBG1();
+            gUnknown_03002B34 = GetMapPreviewScrollX() + (p->unk52 << 8);
             p->unk4c = 8;
             p->unk4e = 0;
         }
@@ -288,7 +288,8 @@ void sub_080860DC(ProcPtr procp)
         p->unk2c = 0;
         p->unk52 = 1;
         gUnknown_03001FE8.bits.size = 1;
-        sub_080876B4();
-        sub_0803B4DC(0x76);
+        MapSelectList_SetupWindows();
+        PlayMusicOrSfx2(0x76);
     }
 }
+asm(".global sub_080860DC\n.thumb_set sub_080860DC, MapSelectList_HandleInput\n");

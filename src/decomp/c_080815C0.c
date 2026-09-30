@@ -22,7 +22,7 @@
  * pseudo to the register the ROM gives it settles the tie that global_alloc
  * was resolving the other way; nothing else in the function changed. See the
  * "Three levers that move a PURE REGISTER-ALLOCATION residual" chapter of
- * docs/agbcc-codegen.md -- the same lever closed sub_08028EF0 and
+ * docs/agbcc-codegen.md -- the same lever closed CameraScroll_Init and
  * sub_0807EEEC in the same batch. */
 #include "global.h"
 #include "proc.h"
@@ -39,7 +39,7 @@ struct Unk80815C0
 };
 void sub_08084700(struct Unk80815C0 *);
 
-void MainMenuC2_IDLE_080815C1(struct Unk80815C0 *proc)
+void MainMenuCarouselWheel_TilesSlideInLoop(struct Unk80815C0 *proc)
 {
     int i;
     register int k asm("r5");
@@ -80,4 +80,4 @@ void MainMenuC2_IDLE_080815C1(struct Unk80815C0 *proc)
     sub_08084700(proc);
 }
 
-asm(".global sub_080815C0\n.thumb_set sub_080815C0, MainMenuC2_IDLE_080815C1\n");
+asm(".global sub_080815C0\n.thumb_set sub_080815C0, MainMenuCarouselWheel_TilesSlideInLoop\n");

@@ -20,7 +20,7 @@ u16 sub_0803EED4(int, int);
  * in NOTES.md. Code is still two bytes short and recovered as padding.
  *
  * PARKED at 79.5%, SIZE-EXACT (596/596). Wave 50, W50-B.
- * See work/sub_0803A69C/NOTES.md for the exact remaining diff.
+ * See work/UnitClassInfo_Loop/NOTES.md for the exact remaining diff.
  *
  * THE STRUCTURAL FINDING, worth more than the score: both stepper loops are
  * `body; while (cond) { body; }`, NOT `do { body } while (cond);`. The ROM
@@ -35,7 +35,7 @@ u16 sub_0803EED4(int, int);
  * byte-identical to a declared s8, because sign_extend of a QImode mem folds
  * to ldrsb either way. The evidence is recorded on the member itself. */
 
-void sub_0803A69C(void)
+void UnitClassInfo_Loop(void)
 {
   u8 x;
   u8 y;
@@ -44,10 +44,10 @@ void sub_0803A69C(void)
   int col;
   int new_var;
   u16 *map;
-  sub_08023274(2);
+  StepMapCursorAndDraw(2);
   if (gpKeySt->repeated & (DPAD_LEFT | DPAD_UP))
   {
-    sub_0803B4DC(0x67);
+    PlayMusicOrSfx2(0x67);
     gUnknown_0849D89C->unk09--;
     if (gUnknown_0849D89C->unk09 < 0)
     {
@@ -65,7 +65,7 @@ void sub_0803A69C(void)
   }
   if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_DOWN))
   {
-    sub_0803B4DC(0x67);
+    PlayMusicOrSfx2(0x67);
     gUnknown_0849D89C->unk09++;
     if (gUnknown_0849D89C->unk09 > 0xf)
     {
@@ -105,19 +105,20 @@ void sub_0803A69C(void)
   else
     if (gpKeySt->pressed & 2)
   {
-    sub_0803B4DC(0x66);
+    PlayMusicOrSfx2(0x66);
     sub_08014878();
-    sub_0803A59C();
+    EndUnitInfoPanelScripts();
     sub_0801537C(gUnknown_0849E2C0);
-    sub_08015C30(gUnknown_03001FBC);
+    ClearSlotScriptCallback(gUnknown_03001FBC);
   }
   else
     if (gpKeySt->pressed & R_BUTTON)
   {
     sub_08014878();
-    sub_0803A59C();
+    EndUnitInfoPanelScripts();
     sub_0801537C(gUnknown_0849E2C0);
-    sub_08015C30(gUnknown_03001FBC);
-    sub_080470F8(sub_0803EED4(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02));
+    ClearSlotScriptCallback(gUnknown_03001FBC);
+    ShowTerrainInfoWindow(sub_0803EED4(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02));
   }
 }
+asm(".global sub_0803A69C\n.thumb_set sub_0803A69C, UnitClassInfo_Loop\n");

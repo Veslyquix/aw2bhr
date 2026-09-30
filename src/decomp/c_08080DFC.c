@@ -10,7 +10,7 @@
 #include "hardware.h"
 #include "proc.h"
 
-void sub_08080DFC(void)
+void SuperCoPowerBg_Loop(void)
 {
     if (gUnknown_03002020 <= 7 && DivRem(gUnknown_03001FF8, 0x40) == 0)
     {
@@ -20,14 +20,16 @@ void sub_08080DFC(void)
 
     gUnknown_03001FF8 += 0x18;
 }
+asm(".global sub_08080DFC\n.thumb_set sub_08080DFC, SuperCoPowerBg_Loop\n");
 
-void sub_08080E40(ProcPtr proc)
+void StartSuperCoPowerWhiteFade(ProcPtr proc)
 {
-    sub_08071B0C(0, 0x10, proc);
-    sub_08071B0C(8, 0x10, proc);
-    sub_08071B0C(0x10, 0x10, proc);
-    sub_08071B0C(0x11, 0x10, proc);
+    StartPalFadeToWhite(0, 0x10, proc);
+    StartPalFadeToWhite(8, 0x10, proc);
+    StartPalFadeToWhite(0x10, 0x10, proc);
+    StartPalFadeToWhite(0x11, 0x10, proc);
 }
+asm(".global sub_08080E40\n.thumb_set sub_08080E40, StartSuperCoPowerWhiteFade\n");
 
 void StartCoPowerScript(int a, int b, ProcPtr proc)
 {

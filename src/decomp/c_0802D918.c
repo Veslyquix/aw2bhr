@@ -7,12 +7,12 @@
  * sub_0802D918 @ 0x0802D918
  */
 
-void sub_0802D918(void)
+void DeploymentScreen_Init(void)
 {
     struct Unk03001470 *proc;
 
-    sub_08024268();
-    sub_08024274();
+    RebuildMapUnitLayers2();
+    SaveMapCursorPosition();
 
     gUnknown_03001418 = gUnknown_03001FF8 = 0;
 
@@ -22,10 +22,11 @@ void sub_0802D918(void)
     proc->unk22 = gUnknown_0300055A - 1;
 
     sub_0802D7B0();
-    sub_0801A444(1, 4, 0xf, 0x10);
-    sub_0802D7B4(0);
-    sub_08022AD0(8, 0x28);
-    sub_0803B4DC(0x65);
-    sub_0803A9C8(gUnknown_02023830[0]);
-    sub_0802776C(1);
+    DrawWindowBackgroundOnBg2(1, 4, 0xf, 0x10);
+    DrawDeploymentList(0);
+    SetMapCursorDisplayPosition(8, 0x28);
+    PlayMusicOrSfx2(0x65);
+    StartDeploymentUnitInfo(gUnknown_02023830[0]);
+    SetInfoBoxMode(1);
 }
+asm(".global sub_0802D918\n.thumb_set sub_0802D918, DeploymentScreen_Init\n");

@@ -7,18 +7,11 @@
  * sub_0803B0EC @ 0x0803B0EC, sub_0803B118 @ 0x0803B118
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0803B0EC.
- * sub_0803B0EC @ 0x0803B0EC
- */
-
 #include "hardware.h"
 
 /* A per-frame hook: run sub_080116E8, then on L (0x200 in gpKeySt->held, the
  * same slot and the same test as sub_0803B1CC's 0x100/R next door) start the
- * gUnknown_0849E610 proc through sub_0803AF5C and raise gUnknown_03002F1C.
+ * gUnknown_0849E610 proc through StartDebugEditMenu and raise gUnknown_03002F1C.
  *
  * `movs r0,#0x80; lsls r0,r0,#2` is a PLAIN constant 0x200 and not wave 23's
  * named-constant-local shape: the shift is minimal for that value (0x200 needs
@@ -26,16 +19,17 @@
  * the `lsls` write the SAME register. Both tells are absent.
  * `pop {r0}; bx r0` -> void. */
 
-void sub_0803B0EC(void)
+void DebugEntry_Init(void)
 {
     sub_080116E8();
 
     if (gpKeySt->held & L_BUTTON)
     {
-        sub_0803AF5C();
+        StartDebugEditMenu();
         gUnknown_03002F1C = 1;
     }
 }
+asm(".global sub_0803B0EC\n.thumb_set sub_0803B0EC, DebugEntry_Init\n");
 
 /* The parameter is `struct Unk03001470 *` and that is forced rather than
  * chosen: the else arm forwards the incoming register UNCHANGED
@@ -47,17 +41,17 @@ void sub_0803B0EC(void)
  * the INCREMENTED object. The `lsls #0x10; asrs #0x10` on that value is what
  * types unk1e `s16` -- see the member comment in include/unknown-globals.h.
  * The `ldrb` on the `s16` global gUnknown_03001FBC is the s16 -> u8 conversion
- * for sub_08015C30's declared `u8` parameter, folded into the load.
+ * for ClearSlotScriptCallback's declared `u8` parameter, folded into the load.
  * `pop {r0}; bx r0` -> void. */
 
-void sub_0803B118(struct Unk03001470 *a)
+void DebugEntry_Loop(struct Unk03001470 *a)
 {
     if (gpKeySt->held & 4)
     {
         if (++a->unk1e > 0x5a)
         {
-            sub_0803B0D8();
-            sub_08015C30(gUnknown_03001FBC);
+            StartDebugBackupUtility();
+            ClearSlotScriptCallback(gUnknown_03001FBC);
         }
     }
     else
@@ -65,3 +59,4 @@ void sub_0803B118(struct Unk03001470 *a)
         sub_080153B8(a);
     }
 }
+asm(".global sub_0803B118\n.thumb_set sub_0803B118, DebugEntry_Loop\n");

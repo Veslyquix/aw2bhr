@@ -9,24 +9,25 @@
 
 #include "hardware.h"
 
-/* Two statements, no arguments to the second. sub_0802C2B4's own prologue
+/* Two statements, no arguments to the second. OpenMinimap's own prologue
  * reads no argument register, so r0 still holding 0x76 at the second bl is a
  * leftover, not a hidden parameter. */
-void sub_0802E250(void)
+void MapCursor_OnPressStart(void)
 {
-    sub_0803B4DC(0x76);
-    sub_0802C2B4();
+    PlayMusicOrSfx2(0x76);
+    OpenMinimap();
 }
+asm(".global sub_0802E250\n.thumb_set sub_0802E250, MapCursor_OnPressStart\n");
 
-/* A four-call teardown. sub_0802DBF8 returns u8 and the result is discarded
- * here -- sub_0802E278 next door is this function with 8 instead of 4 and the
+/* A four-call teardown. IsMapCursorSettled returns u8 and the result is discarded
+ * here -- MapCursorState_UnitsTranslucent next door is this function with 8 instead of 4 and the
  * result actually tested, which is what fixes the return type. */
 void sub_0802E260(void)
 {
-    sub_08023824();
-    sub_08023518();
-    sub_08023908(4);
-    sub_0802DBF8();
+    HandleMoveMapCursor();
+    MoveMapCursorFromHeldKeys();
+    HandleMoveCameraWithMapCursor(4);
+    IsMapCursorSettled();
 }
 
 /* sub_0802E260 with 8 for 4 and a guarded tail, and NOT a variant of it -- the
@@ -38,22 +39,23 @@ void sub_0802E260(void)
  *
  * The `lsls #0x10; lsrs #0x10` after the `ands` is the u16 local's own
  * truncation of the int the mask promotes to. */
-void sub_0802E278(void)
+void MapCursorState_UnitsTranslucent(void)
 {
     u16 k;
 
-    sub_08023824();
-    sub_08023518();
-    sub_08023908(8);
+    HandleMoveMapCursor();
+    MoveMapCursorFromHeldKeys();
+    HandleMoveCameraWithMapCursor(8);
 
-    if (sub_0802DBF8())
+    if (IsMapCursorSettled())
     {
         k = gpKeySt->held & 2;
 
         if (k == 0)
         {
-            sub_08012358();
+            SetDefaultColorEffects();
             gUnknown_03003334 = k;
         }
     }
 }
+asm(".global sub_0802E278\n.thumb_set sub_0802E278, MapCursorState_UnitsTranslucent\n");

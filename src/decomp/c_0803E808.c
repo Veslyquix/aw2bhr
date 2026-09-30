@@ -18,19 +18,19 @@
  *
  * Picks the highest-scoring occupied, visible cell on the map and appends it.
  * a3 is genuinely DEAD -- r2 is overwritten before it is ever read, and
- * sub_0803ED60's call site passes the record's s8 unk07 into it.
+ * InventionTurn_PrepareNextFire's call site passes the record's s8 unk07 into it.
  *
  * Readouts worth keeping:
  *  - `best`/`score` are unsigned (`cmp r0,r4; bhi`), while bestX/bestY/bestT are
  *    `u16` locals: PROMOTE_MODE keeps them in SImode stack slots (word `str`),
  *    so the narrowing shows up as `lsls #0x10; lsrs #0x10` AT EACH ASSIGNMENT
- *    and their reads at the sub_0803E560 call are free. Declaring them `int`
+ *    and their reads at the PushInventionFireEntry call are free. Declaring them `int`
  *    loses three shift pairs; declaring them `u16` is what puts the pairs where
  *    the ROM has them.
  *  - `(u16)a5` at sub_0801FAC4's third argument is a real narrowing in the
- *    source: the two sub_0803E7C0/E7E4 calls above it use a5 un-narrowed, so it
+ *    source: the two GetCannonFireCellOffsetX/E7E4 calls above it use a5 un-narrowed, so it
  *    cannot be a parameter declaration.
- *  - sub_0803E7C0/sub_0803E7E4 return `void *` per their promoted definition,
+ *  - GetCannonFireCellOffsetX/GetCannonFireCellOffsetY return `void *` per their promoted definition,
  *    and here the results are ADDED to cell coordinates. The `(int)` casts are
  *    what that costs. This is evidence that struct Unk0849F688's two word
  *    members are integer deltas rather than pointers, but the existing type is
@@ -40,7 +40,7 @@
 
 #define MAP gMap
 
-void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
+void PickBestInventionTarget(int a1, int a2, int a3, int a4, int a5)
 {
     struct Unit *u;
     u32 best;
@@ -57,10 +57,10 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
     bestX = 0;
     bestY = 0;
     bestT = 0;
-    sub_0801F92C(MAP->move);
+    SetWorkingMapPlane(MAP->move);
     FillMovementMap(0xff);
-    x = a1 + (int)sub_0803E7C0(a4, a5);
-    y = a2 + (int)sub_0803E7E4(a4, a5);
+    x = a1 + (int)GetCannonFireCellOffsetX(a4, a5);
+    y = a2 + (int)GetCannonFireCellOffsetY(a4, a5);
     sub_0801FAC4(x, y, (u16)a5, gUnknown_0849F6B8[a4][0], bestT);
     for (j = 0; j < MAP->height; j++)
     {
@@ -70,16 +70,16 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
                 continue;
             if (gMap->unit[MAP->rowOffset[j] + i] == 0)
                 continue;
-            if (sub_08026F28(gUnknown_030033EC, (gMap->unit[MAP->rowOffset[j] + i] >> 6) + 1) == 1)
+            if (AreArmiesOnSameTeam(gUnknown_030033EC, (gMap->unit[MAP->rowOffset[j] + i] >> 6) + 1) == 1)
                 continue;
-            if (!sub_08020DBC(gUnknown_030033EC, i, j))
+            if (!IsCellVisibleToArmy(gUnknown_030033EC, i, j))
                 continue;
             u = &gUnits[gMap->unit[MAP->rowOffset[j] + i]];
             if (u->type == 0x18)
             {
                 if ((u->flags & 0x20) != 0)
                     continue;
-                if (!sub_080257C0(gMap->unit[MAP->rowOffset[j] + i]))
+                if (!IsUnitVisibleToCurrentTeam(gMap->unit[MAP->rowOffset[j] + i]))
                     continue;
             }
             score = u->hp * (u16)(gUnknown_085D5ABC[u->type].cost / 10);
@@ -92,7 +92,8 @@ void sub_0803E808(int a1, int a2, int a3, int a4, int a5)
         }
     }
     if (bestT == 0)
-        sub_0803E554();
+        ClearInventionFireList();
     else
-        sub_0803E560(bestX, bestY, bestT, a4 == 3 ? 0x32 : 0x1e);
+        PushInventionFireEntry(bestX, bestY, bestT, a4 == 3 ? 0x32 : 0x1e);
 }
+asm(".global sub_0803E808\n.thumb_set sub_0803E808, PickBestInventionTarget\n");

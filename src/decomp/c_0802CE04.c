@@ -7,21 +7,22 @@
  * sub_0802CE04 @ 0x0802CE04
  */
 
-void sub_0802CE04(void)
+void OptionsMenu_ToggleMusic(void)
 {
     gPlaySt.bgmOn = 1 - gPlaySt.bgmOn;
 
     switch (gPlaySt.bgmOn)
     {
     case 0:
-        sub_0803B5E8();
+        FadeOutMusicDefault();
         break;
 
     case 1:
-        sub_08043DAC(gUnknown_030033EC);
+        PlayArmyCoMusic(gUnknown_030033EC);
         break;
     }
 
-    sub_08019E68();
+    RebuildMenuItems();
     gUnknown_0200C420.unk14 = (gPlaySt.bgmOn == 0);
 }
+asm(".global sub_0802CE04\n.thumb_set sub_0802CE04, OptionsMenu_ToggleMusic\n");

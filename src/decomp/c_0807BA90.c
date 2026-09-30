@@ -58,7 +58,7 @@ struct Unk0807BA90Proc
     /* 0x64 */ u16 unk64;
 };
 
-void sub_0807BA90(struct Unk0807BA90Proc * proc)
+void MissionTitleName_Init(struct Unk0807BA90Proc * proc)
 {
     int i;
     u8 * p;
@@ -67,9 +67,9 @@ void sub_0807BA90(struct Unk0807BA90Proc * proc)
     Decompress(gUnknown_0822BE1C, (void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06000000));
     Decompress(gUnknown_0822D888, gBG2TilemapBuffer);
 
-    sub_08013B0C();
+    BG_EnableSyncBG2();
 
-    gUnknown_0300592C = sub_0807B7BC(sub_08024944(gPlaySt.mapID), 0, gUnknown_0202FF78, 0x80, proc);
+    gUnknown_0300592C = sub_0807B7BC(GetMapName(gPlaySt.mapID), 0, gUnknown_0202FF78, 0x80, proc);
     gUnknown_0202FF78[0] = 0;
 
     p = gUnknown_0202FF78;
@@ -112,3 +112,4 @@ void sub_0807BA90(struct Unk0807BA90Proc * proc)
 
     BgAffineSet(&src, (struct BgAffineDstData *)gUnknown_030024D0, 1);
 }
+asm(".global sub_0807BA90\n.thumb_set sub_0807BA90, MissionTitleName_Init\n");

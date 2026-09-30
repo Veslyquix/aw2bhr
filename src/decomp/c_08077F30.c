@@ -7,7 +7,7 @@
  * sub_08077F30 @ 0x08077F30
  */
 
-/* A mode entry that shares its four-call tail with sub_08078018
+/* A mode entry that shares its four-call tail with EndAllWorldMapOverlayProcs
  * (src/decomp/c_08078018.c), where those four `void (void)` callees are already
  * settled as bare statements. What is new here is the record lookup ahead of
  * them.
@@ -23,9 +23,9 @@
  * The index is re-read from gUnknown_0202FDFC.unk0c after the `bl` because
  * IsHardCampaignMode may write it; the three pool bases live in r4/r5/r6 across the
  * call because they are callee-saved. */
-void sub_08077F30(void)
+void WorldMap_CommitMissionAndEndProcs(void)
 {
-    sub_080638D0(0);
+    SetVCountInterruptHandler(0);
 
     gPlaySt.mapID = gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
 
@@ -33,8 +33,9 @@ void sub_08077F30(void)
         ? gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptHc
         : gUnknown_08615194[gUnknown_0202FDFC.unk0c].factoryScriptNc;
 
-    sub_08074744();
-    sub_08074F1C();
-    sub_08075304();
-    sub_080755E0();
+    EndWorldMapMarkerDrawer();
+    EndWorldMapScope();
+    EndDifficultyStars();
+    EndWorldMapSelectionFrame();
 }
+asm(".global sub_08077F30\n.thumb_set sub_08077F30, WorldMap_CommitMissionAndEndProcs\n");

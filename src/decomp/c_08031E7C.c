@@ -7,25 +7,12 @@
  * sub_08031E7C @ 0x08031E7C, sub_08031E9C @ 0x08031E9C, sub_08031ED0 @ 0x08031ED0, sub_08031EE4 @ 0x08031EE4, sub_08031F10 @ 0x08031F10, sub_08031F28 @ 0x08031F28, sub_08031F5C @ 0x08031F5C, sub_08031F88 @ 0x08031F88, sub_08031FB8 @ 0x08031FB8
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031E7C.
- * sub_08031E7C @ 0x08031E7C
- */
-
 struct Unk31E7CProc
 {
     /* 0x00 */ u8 filler_00[0x58];
     /* 0x58 */ int unk58; /* a frame counter: sub_08031E9C decrements it every
                            * fourth frame and Proc_Break's when it reaches 0 */
 };
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031E9C.
- * sub_08031E9C @ 0x08031E9C
- */
 
 #include "proc.h"
 struct Unk31E9CProc
@@ -33,12 +20,6 @@ struct Unk31E9CProc
     /* 0x00 */ u8 filler_00[0x58];
     /* 0x58 */ int unk58;
 };
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031ED0.
- * sub_08031ED0 @ 0x08031ED0
- */
 
 /* +0x1e is BELOW PROC_HEADER's 0x29 bytes -- it lands inside proc_next -- so
  * whatever this callback is handed, it is not being read as a `struct Proc`.
@@ -52,62 +33,37 @@ struct Unk31ED0Proc
                            * with `lsls #0x10; cmp #0; bge`, i.e. bit 15 as a
                            * sign */
 };
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031EE4.
- * sub_08031EE4 @ 0x08031EE4
- */
 
 struct Unk31EE4Proc
 {
     /* 0x00 */ u8 filler_00[0x1e];
     /* 0x1e */ s16 unk1e;
 };
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031F10.
- * sub_08031F10 @ 0x08031F10
- */
 
 struct Unk31F10Proc
 {
     /* 0x00 */ u8 filler_00[0x1e];
     /* 0x1e */ s16 unk1e;
 };
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031F88.
- * sub_08031F88 @ 0x08031F88
- */
 
 struct Unk31F88Proc
 {
     /* 0x00 */ u8 filler_00[0x58];
     /* 0x58 */ int unk58;
 };
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031FB8.
- * sub_08031FB8 @ 0x08031FB8
- */
-
 
 /* `movs r1, #1; rsbs r1, r1, #0` here is the CONSTANT -1 handed to
- * sub_0801394C as its second argument, NOT the negate-and-subtract bitfield
+ * ColFadeFromWhiteRow as its second argument, NOT the negate-and-subtract bitfield
  * mask -- the value goes straight out with no `ands` anywhere. */
 
 void sub_08031E7C(struct Unk31E7CProc *proc)
 {
     proc->unk58 = 0x20;
 
-    sub_080136C4();
-    sub_0801394C(0x11, -1);
+    ColorFadeInit();
+    ColFadeFromWhiteRow(0x11, -1);
     sub_080718F0();
-    sub_080135A4();
+    EnablePaletteSync();
 }
 
 /* sub_08031E7C's repeat half: the counter it arms with 0x20 ticks down once
@@ -118,7 +74,7 @@ void sub_08031E9C(struct Unk31E9CProc *proc)
     if ((gGameClock & 3) == 0)
     {
         sub_080718F0();
-        sub_080135A4();
+        EnablePaletteSync();
 
         proc->unk58--;
     }
@@ -131,8 +87,8 @@ void sub_08031ED0(struct Unk31ED0Proc *proc)
 {
     proc->unk1e = 0x20;
 
-    sub_08013928(1);
-    sub_080135A4();
+    ColFadeToWhite(1);
+    EnablePaletteSync();
 }
 
 /* The test reads the DECREMENTED value out of the register rather than
@@ -143,50 +99,36 @@ void sub_08031ED0(struct Unk31ED0Proc *proc)
 void sub_08031EE4(struct Unk31EE4Proc *proc)
 {
     sub_080718F0();
-    sub_080135A4();
+    EnablePaletteSync();
 
     if (--proc->unk1e < 0)
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
 }
 
-/* sub_08031ED0 with the other direction: the same 0x20 arm, and sub_080139C4
- * instead of sub_08013928 with -1 instead of 1. `movs r0,#1; rsbs r0,r0,#0` is
+/* sub_08031ED0 with the other direction: the same 0x20 arm, and ColFadeFromWhite
+ * instead of ColFadeToWhite with -1 instead of 1. `movs r0,#1; rsbs r0,r0,#0` is
  * the constant, not a mask. */
 
 void sub_08031F10(struct Unk31F10Proc *proc)
 {
     proc->unk1e = 0x20;
 
-    sub_080139C4(-1);
-    sub_080135A4();
+    ColFadeFromWhite(-1);
+    EnablePaletteSync();
 }
-
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031F28.
- * sub_08031F28 @ 0x08031F28
- */
 
 void sub_08031F28(void)
 {
-    sub_0803B4DC(0x6c);
+    PlayMusicOrSfx2(0x6c);
 
     if (gUnknown_0849B018->unk00 == 3)
-        gUnknown_0849B060->unk00 = sub_080315E8(gUnknown_0849B060->unk00, 12, 2);
+        gUnknown_0849B060->unk00 = LinkScreenSetMessage(gUnknown_0849B060->unk00, 12, 2);
 }
-
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08031F5C.
- * sub_08031F5C @ 0x08031F5C
- */
 
 void sub_08031F5C(void)
 {
     if (gUnknown_0849B018->unk00 == 3)
-        gUnknown_0849B060->unk00 = sub_080315E8(gUnknown_0849B060->unk00, 13, 0);
+        gUnknown_0849B060->unk00 = LinkScreenSetMessage(gUnknown_0849B060->unk00, 13, 0);
 }
 
 /* The `lsls #0x18; lsrs #0x18` on `unk58 + 5` is sub_0801A7D8's declared u8
@@ -198,11 +140,11 @@ void sub_08031F88(struct Unk31F88Proc *proc)
         sub_0801A7D8(proc->unk58 + 5, gUnknown_02000000, 0x724);
 }
 
-/* The bare form of the sub_080315E8 round trip this block repeats eight times:
+/* The bare form of the LinkScreenSetMessage round trip this block repeats eight times:
  * the pointer global is reloaded after the call because the call may have
  * changed it, which is what makes r4 worth saving. */
 
 void sub_08031FB8(void)
 {
-    gUnknown_0849B060->unk00 = sub_080315E8(gUnknown_0849B060->unk00, 5, 2);
+    gUnknown_0849B060->unk00 = LinkScreenSetMessage(gUnknown_0849B060->unk00, 5, 2);
 }

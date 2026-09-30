@@ -81,7 +81,7 @@ struct Unk8081D30
     /* 68 */ s16 unk68;
     /* 6a */ s16 unk6a;
 };
-/* sub_080824D4 and sub_08084974 are already promoted -- signatures taken from
+/* sub_080824D4 and MainMenuCarousel_ShowOverwriteWarning are already promoted -- signatures taken from
  * src/decomp/c_080824D4.c and src/decomp/c_08084974.c rather than derived.
  * sub_08084700 is still `asm` and has no include/ entry; c_0808177C.c and
  * c_080819A0.c each declare it against their own tag for the same object, and
@@ -89,9 +89,9 @@ struct Unk8081D30
  * straight through in r0, and its result is never read. */
 void sub_080824D4(struct Unk8081D30 *);
 void sub_08084700(struct Unk8081D30 *);
-void sub_08084974(void);
+void MainMenuCarousel_ShowOverwriteWarning(void);
 
-void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
+void MainMenuCarouselWheel_InputLoop(struct Unk8081D30 *p)
 {
     int a;
     int b;
@@ -120,7 +120,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
 
                 p->unk4c = 0;
                 p->unk4e = p->unk4e - 1;
-                sub_0803B4DC(0x67);
+                PlayMusicOrSfx2(0x67);
                 gUnknown_03005920 = 0;
             }
             else if (gpKeySt->repeated & DPAD_DOWN)
@@ -132,7 +132,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
 
                 p->unk4c = 0;
                 p->unk4e = p->unk4e + 1;
-                sub_0803B4DC(0x67);
+                PlayMusicOrSfx2(0x67);
                 gUnknown_03005920 = 0;
             }
             else if (gpKeySt->pressed & (A_BUTTON | DPAD_RIGHT))
@@ -150,7 +150,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                             gUnknown_030033FC = 9;
 
                         gUnknown_03005934 = p->unk52;
-                        sub_0803B4DC(0x71);
+                        PlayMusicOrSfx2(0x71);
                         Proc_Start(gUnknown_08616A68, p);
                         LockMainMenu();
                     }
@@ -163,19 +163,19 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                     p->unk4c = 0;
                     p->unk4e = p->unk4e + 1;
 
-                    if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0 && sub_0803BC7C() == 0)
+                    if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0 && GetCampaignSaveFlag() == 0)
                         p->unk66 = 7;
 
-                    if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 1 && sub_0803BC88() == 0)
+                    if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 1 && GetVersusSaveFlag() == 0)
                         p->unk66 = 7;
 
-                    if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5 && sub_0803BC94() == 0)
+                    if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5 && GetWarRoomSaveFlag() == 0)
                         p->unk66 = 7;
 
                     if (gpKeySt->pressed & 1)
-                        sub_0803B4DC(0x71);
+                        PlayMusicOrSfx2(0x71);
                     else if (gpKeySt->pressed & DPAD_RIGHT)
-                        sub_0803B4DC(0x67);
+                        PlayMusicOrSfx2(0x67);
                 }
             }
             else if (gpKeySt->pressed & 2)
@@ -185,7 +185,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 gUnknown_03005934 = p->unk52;
                 gUnknown_03005924 = p->unk66;
                 Proc_Start(gUnknown_08616A68, p);
-                sub_0803B4DC(0x66);
+                PlayMusicOrSfx2(0x66);
                 UnlockMainMenu();
             }
         }
@@ -198,15 +198,15 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 else
                     p->unk66 = p->unk66 - 1;
 
-                if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0 && sub_0803BC7C() == 0)
+                if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0 && GetCampaignSaveFlag() == 0)
                     p->unk66 = 7;
-                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 1 && sub_0803BC88() == 0)
+                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 1 && GetVersusSaveFlag() == 0)
                     p->unk66 = 7;
-                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5 && sub_0803BC94() == 0)
+                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5 && GetWarRoomSaveFlag() == 0)
                     p->unk66 = 7;
                 else
                 {
-                    sub_0803B4DC(0x67);
+                    PlayMusicOrSfx2(0x67);
                     gUnknown_03005920 = 0;
                 }
             }
@@ -217,15 +217,15 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 else
                     p->unk66 = p->unk66 + 1;
 
-                if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0 && sub_0803BC7C() == 0)
+                if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 0 && GetCampaignSaveFlag() == 0)
                     p->unk66 = 7;
-                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 1 && sub_0803BC88() == 0)
+                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 1 && GetVersusSaveFlag() == 0)
                     p->unk66 = 7;
-                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5 && sub_0803BC94() == 0)
+                else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5 && GetWarRoomSaveFlag() == 0)
                     p->unk66 = 7;
                 else
                 {
-                    sub_0803B4DC(0x67);
+                    PlayMusicOrSfx2(0x67);
                     gUnknown_03005920 = 0;
                 }
             }
@@ -243,8 +243,8 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                     {
                         gUnknown_030033FC = 1;
 
-                        if (sub_0803BC7C() != 0)
-                            sub_08084974();
+                        if (GetCampaignSaveFlag() != 0)
+                            MainMenuCarousel_ShowOverwriteWarning();
                     }
                 }
                 else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 1)
@@ -257,8 +257,8 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                     {
                         gUnknown_030033FC = 3;
 
-                        if (sub_0803BC88() != 0)
-                            sub_08084974();
+                        if (GetVersusSaveFlag() != 0)
+                            MainMenuCarousel_ShowOverwriteWarning();
                     }
                 }
                 else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 5)
@@ -271,8 +271,8 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                     {
                         gUnknown_030033FC = 5;
 
-                        if (sub_0803BC94() != 0)
-                            sub_08084974();
+                        if (GetWarRoomSaveFlag() != 0)
+                            MainMenuCarousel_ShowOverwriteWarning();
                     }
                 }
                 else if (gUnknown_0861696C[DivRem(p->unk52 + 2, 6)] == 3)
@@ -285,7 +285,7 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
 
                 gUnknown_03005934 = p->unk52;
                 gUnknown_03005924 = p->unk66;
-                sub_0803B4DC(0x71);
+                PlayMusicOrSfx2(0x71);
                 Proc_Start(gUnknown_08616A68, p);
                 LockMainMenu();
             }
@@ -296,9 +296,9 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
                 p->unk4e = p->unk4e + 1;
 
                 if (gpKeySt->pressed & 2)
-                    sub_0803B4DC(0x66);
+                    PlayMusicOrSfx2(0x66);
                 else if (gpKeySt->pressed & DPAD_LEFT)
-                    sub_0803B4DC(0x67);
+                    PlayMusicOrSfx2(0x67);
             }
         }
 
@@ -316,9 +316,9 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
             gUnknown_03005920 = ~gUnknown_03005920 & 1;
 
             if (gUnknown_03005920 != 0)
-                sub_080845A8(6);
+                LoadMainMenuCentreTileGraphic(6);
             else
-                sub_080845A8(2);
+                LoadMainMenuCentreTileGraphic(2);
 
             p->unk4c = 0;
         }
@@ -344,4 +344,4 @@ void MainMenuC2_IDLE_08081D31(struct Unk8081D30 *p)
         p->unk58 = 0;
 }
 
-asm(".global sub_08081D30\n.thumb_set sub_08081D30, MainMenuC2_IDLE_08081D31\n");
+asm(".global sub_08081D30\n.thumb_set sub_08081D30, MainMenuCarouselWheel_InputLoop\n");

@@ -65,14 +65,14 @@
  * load/store with three ANDs, and gUnknown_030030E0's `& 0x3f` is
  * `union BlendCntBuf`'s two-bit `effect` field. */
 
-void BattleMaps_080489CD(void)
+void ShopScreen_Init(void)
 {
     struct Unk084C30F8 *p;
     u32 v;
     u16 i;
 
-    sub_0803B524(0x12e);
-    sub_0803C784(gUnknown_02028E1C);
+    PlayMusic(0x12e);
+    BuildShopItemList(gUnknown_02028E1C);
 
     gUnknown_084C30F8->unk030 = 0;
     gUnknown_084C30F8->unk834 = 0;
@@ -80,9 +80,9 @@ void BattleMaps_080489CD(void)
     gUnknown_084C30F8->unk832 = -0x38;
     gUnknown_084C30F8->unk838 = 0;
 
-    sub_0801A5B0(0);
-    sub_0802D5CC(0, 1);
-    sub_08022A34();
+    LoadBg1WindowFrame(0);
+    ApplyWindowFramePalette(0, 1);
+    LoadCursorSpriteGraphics();
 
     gUnknown_084C30F8->unk020 = 0;
     gUnknown_084C30F8->unk01e = 0;
@@ -90,7 +90,7 @@ void BattleMaps_080489CD(void)
     gUnknown_084C30F8->unk02c = v;
     gUnknown_084C30F8->unk028 = v;
 
-    sub_0801B780(0);
+    InitTextTileCache(0);
 
     for (i = 0; gUnknown_02028E1C[i] != 0xff; i++)
         ;
@@ -99,25 +99,25 @@ void BattleMaps_080489CD(void)
     p->unk837 = i;
     p->unk836 = i;
 
-    sub_08013C00();
-    sub_08013C54();
-    sub_08013CA8();
+    ClearBg0Tilemap();
+    ClearBg1Tilemap();
+    ClearBg2Tilemap();
 
     Decompress(gUnknown_0823A3D4,
                (void *)(0x06000000 + gUnknown_0300251C.bits.chr_block * 0x4000));
     Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     ApplyPaletteExt(gUnknown_0823BE00, 0, 0x20);
-    sub_08013B1C();
-    sub_0802D5CC(0, 3);
+    BG_EnableSyncBG3();
+    ApplyWindowFramePalette(0, 3);
     Decompress(gUnknown_0823E7D4, gBG2TilemapBuffer);
 
     for (i = 0; i <= 0x3ff; i++)
         gBG2TilemapBuffer[i] += 0x1360;
 
     gUnknown_03001400 = -0x30;
-    sub_08013B0C();
-    sub_08073304(gUnknown_085802B4, gUnknown_0200FC50, 0, 5, 1, 1, 3);
-    sub_08043E3C(0xf, (void *)0x06011560, 0x16);
+    BG_EnableSyncBG2();
+    StartHeaderBanner(gUnknown_085802B4, gUnknown_0200FC50, 0, 5, 1, 1, 3);
+    LoadCoFace(0xf, (void *)0x06011560, 0x16);
     Decompress(gUnknown_0823EA40, gUnknown_0200FC50);
 
     for (i = 0; i <= 7; i++)
@@ -136,27 +136,27 @@ void BattleMaps_080489CD(void)
 
     gUnknown_084C30F8->unk835 = 1;
 
-    sub_08013AEC();
-    sub_08013AFC();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
     sub_0801F114();
-    sub_0801F150(0,
+    InitTilePool(0,
                  (void *)(0x06000000 + gUnknown_03002B6C.bits.chr_block * 0x4000),
                  0x180, 9);
-    sub_0801F234(0x18);
-    sub_0801F234(0x19);
-    sub_0801F234(0x1a);
-    sub_0801F234(0x13);
-    sub_0801F234(0x14);
-    sub_0801F150(2, (void *)0x06010000, 0x7f, 0x14);
-    sub_0801F234(0x43);
-    sub_0801F234(0x44);
-    sub_0801F234(0x51);
+    LoadTilePoolGraphic(0x18);
+    LoadTilePoolGraphic(0x19);
+    LoadTilePoolGraphic(0x1a);
+    LoadTilePoolGraphic(0x13);
+    LoadTilePoolGraphic(0x14);
+    InitTilePool(2, (void *)0x06010000, 0x7f, 0x14);
+    LoadTilePoolGraphic(0x43);
+    LoadTilePoolGraphic(0x44);
+    LoadTilePoolGraphic(0x51);
     Decompress(gUnknown_0823E8E8, gUnknown_0200FC50);
     CpuFastSet(gUnknown_0200FC50, (void *)0x06011360, 0x20);
     CpuFastSet(gUnknown_0200FC50 + 0x400, (void *)0x060113E0, 0x20);
     CpuFastSet(gUnknown_0200FC50 + 0x80, (void *)0x06011460, 0x20);
     CpuFastSet(gUnknown_0200FC50 + 0x480, (void *)0x060114E0, 0x20);
-    sub_0802D5CC(0, 0x18);
+    ApplyWindowFramePalette(0, 0x18);
     Decompress(gUnknown_0823E140, gUnknown_0200FC50);
 
     for (i = 0; i <= 1; i++)
@@ -188,58 +188,58 @@ void BattleMaps_080489CD(void)
     gUnknown_03002B34 = 0;
 }
 
-asm(".global sub_080489CC\n.thumb_set sub_080489CC, BattleMaps_080489CD\n");
+asm(".global sub_080489CC\n.thumb_set sub_080489CC, ShopScreen_Init\n");
 
-extern bool8 CampaignIntro_WHILE_0803B629(void);
-extern void BattleMaps_08049B15(void);
-extern void BattleMaps_08049B71(void);
-extern void BattleMaps_IDLE_08048FD9(void);
-extern void BattleMaps_IDLE_080490BD(void);
-extern void BattleMaps_08049171(void);
-extern void BattleMaps_IDLE_08049179(void);
-extern void BattleMaps_IDLE_08049361(void);
-extern void BattleMaps_IDLE_08049929(void);
-extern void BattleMaps_08049B81(void);
+extern bool8 IsMusicFadeActive(void);
+extern void StartShopDrawScript(void);
+extern void ShopScreen_AddScrollBackgroundHook(void);
+extern void ShopScreen_PickGreeting(void);
+extern void ShopScreen_WaitGreetingThenSlide(void);
+extern void ShopList_ResetRise(void);
+extern void ShopList_RiseStep(void);
+extern void ShopScreen_Loop(void);
+extern void ShopScreen_WaitMessageEnd(void);
+extern void ShopScreen_UpdateMainMenuLock(void);
 extern u8 GetMainMenuLock(void);
-extern void WM_ConfirmExit_08011B19(void);
-extern void BattleMaps_08049B29(void);
-extern void BattleMaps_0803D961(void);
-extern void BattleMaps_0803B83D(void);
+extern void ClearVBlankHooks(void);
+extern void ShopScreen_EndMessageScripts(void);
+extern void StartProfileSaveScreen(void);
+extern void ReturnToMainMenu(void);
 
 struct ProcCmd CONST_DATA ProcScr_BattleMaps[] =
 {
     PROC_29(1),
     PROC_1D(30),
-    PROC_WHILE(CampaignIntro_WHILE_0803B629),
+    PROC_WHILE(IsMusicFadeActive),
     PROC_START_CHILD(ProcScr_DialogueOnEnd),
-    PROC_CALL(BattleMaps_080489CD),
-    PROC_CALL(BattleMaps_08049B15),
-    PROC_CALL(BattleMaps_08049B71),
+    PROC_CALL(ShopScreen_Init),
+    PROC_CALL(StartShopDrawScript),
+    PROC_CALL(ShopScreen_AddScrollBackgroundHook),
     PROC_1E(30),
     PROC_SLEEP(10),
-    PROC_REPEAT(BattleMaps_IDLE_08048FD9),
-    PROC_REPEAT(BattleMaps_IDLE_080490BD),
+    PROC_REPEAT(ShopScreen_PickGreeting),
+    PROC_REPEAT(ShopScreen_WaitGreetingThenSlide),
     PROC_END_EACH(ProcScr_DialogueOnEnd),
-    PROC_CALL(BattleMaps_08049171),
-    PROC_REPEAT(BattleMaps_IDLE_08049179),
-    PROC_REPEAT(BattleMaps_IDLE_08049361),
-    PROC_REPEAT(BattleMaps_IDLE_08049929),
-    PROC_CALL(BattleMaps_08049B81),
+    PROC_CALL(ShopList_ResetRise),
+    PROC_REPEAT(ShopList_RiseStep),
+    PROC_REPEAT(ShopScreen_Loop),
+    PROC_REPEAT(ShopScreen_WaitMessageEnd),
+    PROC_CALL(ShopScreen_UpdateMainMenuLock),
     PROC_GOTO_IF_NO(GetMainMenuLock, 0),
     PROC_1D(30),
-    PROC_CALL(WM_ConfirmExit_08011B19),
-    PROC_CALL(BattleMaps_08049B29),
-    PROC_CALL(BattleMaps_0803D961),
+    PROC_CALL(ClearVBlankHooks),
+    PROC_CALL(ShopScreen_EndMessageScripts),
+    PROC_CALL(StartProfileSaveScreen),
     PROC_YIELD,
     PROC_GOTO(1),
 PROC_LABEL(0),
     PROC_SLEEP(30),
     PROC_29(0),
     PROC_1D(30),
-    PROC_CALL(WM_ConfirmExit_08011B19),
-    PROC_CALL(BattleMaps_08049B29),
+    PROC_CALL(ClearVBlankHooks),
+    PROC_CALL(ShopScreen_EndMessageScripts),
 PROC_LABEL(1),
-    PROC_CALL(BattleMaps_0803B83D),
+    PROC_CALL(ReturnToMainMenu),
     PROC_END,
 };
 

@@ -7,14 +7,7 @@
  * sub_08012BC8 @ 0x08012BC8
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08012BC8.
- * sub_08012BC8 @ 0x08012BC8
- */
-
-void sub_08012BC8(u16 *dst, u16 x, u16 y, u16 width, u16 height, u16 value)
+void FillTilemapRect(u16 *dst, u16 x, u16 y, u16 width, u16 height, u16 value)
 {
     u16 i;
     u16 j;
@@ -38,3 +31,4 @@ void sub_08012BC8(u16 *dst, u16 x, u16 y, u16 width, u16 height, u16 value)
         offset += 0x20;
     }
 }
+asm(".global sub_08012BC8\n.thumb_set sub_08012BC8, FillTilemapRect\n");

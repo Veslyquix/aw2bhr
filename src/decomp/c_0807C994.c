@@ -83,7 +83,7 @@ void CoSelect_0807C9ED(struct Unk0807C9EC *proc)
     proc->unk2c = 0;
     proc->unk30 = 0;
 
-    if ((u8)sub_0807F8E4() != 0)
+    if ((u8)IsBlockWarRoomSelectionActive() != 0)
     {
         struct Unk0807C9EC *src = Proc_Find(gUnknown_086165C0);
 
@@ -119,7 +119,7 @@ void CoSelect_0807C9ED(struct Unk0807C9EC *proc)
             gUnknown_03005950[i] = 0;
     }
 
-    sub_08073304(gUnknown_085802D8 + 0xC, gUnknown_0200FC50, 0x2DC, 0xB, 0, 1, (int)proc);
+    StartHeaderBanner(gUnknown_085802D8 + 0xC, gUnknown_0200FC50, 0x2DC, 0xB, 0, 1, (int)proc);
 }
 
 void CoSelect_IDLE_0807CAFD(struct Unk807CAFC * proc)
@@ -142,8 +142,8 @@ void CoSelect_IDLE_0807CAFD(struct Unk807CAFC * proc)
 
         if (proc->unk4c >= 0xC && proc->unk4c <= 0x12)
         {
-            sub_0801A444(0x13 - proc->unk4c, 0xC, proc->unk4c * 2 - 0x15, sub_0803BD14() * 2 + 2);
-            sub_0807F238();
+            DrawWindowBackgroundOnBg2(0x13 - proc->unk4c, 0xC, proc->unk4c * 2 - 0x15, sub_0803BD14() * 2 + 2);
+            CoSelect_SetupBlend();
         }
     }
     else

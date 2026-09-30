@@ -19,7 +19,7 @@
  * label. Case 20 `return`s -- it must skip BOTH the draw and the unk2e
  * increment, and a `break` would fall into them.
  *
- * THE `(u8)` ON sub_0801306C IS A CAST AT THE USE, NOT THE RETURN TYPE.
+ * THE `(u8)` ON IsSpriteOnScreen IS A CAST AT THE USE, NOT THE RETURN TYPE.
  * src/decomp/c_0801306C.c returns `int`; the bare `lsls #0x18` here is a
  * low-byte truth test written in the source. Reading it as a `u8` return
  * instead is byte-identical at this one call site and disagrees with the
@@ -39,7 +39,7 @@ struct Unk39DBCProc
     /* 0x2e */ u16 unk2e;
 };
 
-void sub_08039DBC(struct Unk39DBCProc *proc)
+void SparkleEffect_StepFrames(struct Unk39DBCProc *proc)
 {
     switch (proc->unk2e)
     {
@@ -60,11 +60,11 @@ void sub_08039DBC(struct Unk39DBCProc *proc)
         return;
     }
 
-    if ((u8)sub_0801306C((proc->unk29 << 4) - gMap->scrollX,
+    if ((u8)IsSpriteOnScreen((proc->unk29 << 4) - gMap->scrollX,
                          (proc->unk2a << 4) - gMap->scrollY,
                          0x40))
     {
-        sub_0801BD00(((proc->unk29 << 4) - gMap->scrollX + 8) & 0x1ff,
+        PutOamHi(((proc->unk29 << 4) - gMap->scrollX + 8) & 0x1ff,
                      ((proc->unk2a << 4) - gMap->scrollY + 8) & 0xff,
                      gUnknown_0849D81C,
                      proc->unk2c);
@@ -72,3 +72,4 @@ void sub_08039DBC(struct Unk39DBCProc *proc)
 
     proc->unk2e++;
 }
+asm(".global sub_08039DBC\n.thumb_set sub_08039DBC, SparkleEffect_StepFrames\n");

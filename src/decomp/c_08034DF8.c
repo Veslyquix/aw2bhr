@@ -12,23 +12,23 @@ void sub_08034DF8(void)
     if (sub_08019260())
         return;
 
-    if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
+    if (FindSlotScript((s32)gUnknown_0849A00C) != -1)
         return;
 
-    sub_0801B780(0);
+    InitTextTileCache(0);
 
     if (gPlaySt.savingEnabled == 0
      || gPlayers[gUnknown_030033EC].aiControlled == 1)
     {
-        sub_08029088(gPlayers[gUnknown_030033EC].cursorX,
+        ScrollCameraToKeepCellInView(gPlayers[gUnknown_030033EC].cursorX,
                      gPlayers[gUnknown_030033EC].cursorY);
     }
 
-    if (sub_08015BD0((s32)gUnknown_0849A00C) == -1)
+    if (FindSlotScript((s32)gUnknown_0849A00C) == -1)
     {
-        sub_08043DAC(gUnknown_030033EC);
-        sub_0802BB98();
-        sub_080351F0();
+        PlayArmyCoMusic(gUnknown_030033EC);
+        InitCursorInfoPanelPosition();
+        StartPendingWeatherChange();
         gUnknown_030032D8 = 7;
     }
 }

@@ -8,8 +8,8 @@
  */
 
 #include "proc.h"
-/* sub_08078504 wrapped in a null check on the script pointer. The ROM re-loads
- * +0x54 after the sub_08014BC0 call rather than keeping the value it just
+/* BlockingEventScript_Init wrapped in a null check on the script pointer. The ROM re-loads
+ * +0x54 after the StartDialogueBlock call rather than keeping the value it just
  * tested, which is what an ordinary non-const field does across a call. */
 
 struct UnkProc8615AAC
@@ -18,12 +18,13 @@ struct UnkProc8615AAC
     /* 0x54 */ const u8 *unk_54;
 };
 
-void sub_08078588(struct UnkProc8615AAC *proc)
+void WorldMapScene_StartScript(struct UnkProc8615AAC *proc)
 {
     if (proc->unk_54 != NULL)
     {
         gUnknown_03002F08.unk00 = 0;
-        sub_08014BC0(proc);
-        sub_080193B0(proc->unk_54);
+        StartDialogueBlock(proc);
+        StartEventScript(proc->unk_54);
     }
 }
+asm(".global sub_08078588\n.thumb_set sub_08078588, WorldMapScene_StartScript\n");

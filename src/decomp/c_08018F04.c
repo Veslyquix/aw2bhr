@@ -28,11 +28,12 @@
  * global under a variable index -- so the plain subscript is the right
  * spelling and no pointer local is wanted.
  */
-bool8 sub_08018F04(s16 a)
+bool8 EventOp_EndCurrentArmyTurn(s16 a)
 {
-    sub_08042B9C();
+    EndCurrentArmyTurn();
 
     gUnknown_0200C528[a].unk04++;
 
     return FALSE;
 }
+asm(".global sub_08018F04\n.thumb_set sub_08018F04, EventOp_EndCurrentArmyTurn\n");

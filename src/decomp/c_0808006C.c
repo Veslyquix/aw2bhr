@@ -14,7 +14,7 @@ struct Unk0808006C
     /* 0x58 */ int unk58;
 };
 
-void sub_0808006C(struct Unk0808006C *proc)
+void CoPowerSceneEnd_WaitForBlend(struct Unk0808006C *proc)
 {
     if (Proc_Find(gUnknown_086167EC) == NULL)
     {
@@ -22,9 +22,11 @@ void sub_0808006C(struct Unk0808006C *proc)
         Proc_Break(proc);
     }
 }
+asm(".global sub_0808006C\n.thumb_set sub_0808006C, CoPowerSceneEnd_WaitForBlend\n");
 
-void sub_08080094(void)
+void CoPowerSceneEnd_ReloadCoPanel(void)
 {
-    sub_0801A5B0(gUnknown_030033EC);
-    sub_08043834(gUnknown_030033EC);
+    LoadBg1WindowFrame(gUnknown_030033EC);
+    LoadCoPanelGraphics(gUnknown_030033EC);
 }
+asm(".global sub_08080094\n.thumb_set sub_08080094, CoPowerSceneEnd_ReloadCoPanel\n");

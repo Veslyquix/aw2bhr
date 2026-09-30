@@ -7,21 +7,6 @@
  * sub_080051D4 @ 0x080051D4, sub_080051E0 @ 0x080051E0
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080051D4.
- * sub_080051D4 @ 0x080051D4
- */
-
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080051E0.
- * sub_080051E0 @ 0x080051E0
- */
-
-
 /* Family F003 (data/families.json): 34 twelve-byte forwarders shaped
  * `push {lr}; movs r0,#K; bl S; pop {r0}; bx r0`, i.e. one call with one
  * literal argument and nothing else. `pop {r0}; bx r0` fixes this as void.
@@ -32,7 +17,7 @@
 
 void sub_080051D4(void)
 {
-    sub_0803B4DC(0x85);
+    PlayMusicOrSfx2(0x85);
 }
 
 /* Family F003 (data/families.json): 34 twelve-byte forwarders shaped
@@ -45,5 +30,5 @@ void sub_080051D4(void)
 
 void sub_080051E0(void)
 {
-    sub_0803B4DC(0x86);
+    PlayMusicOrSfx2(0x86);
 }

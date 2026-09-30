@@ -9,7 +9,7 @@
 
 #include "proc.h"
 /* MATCHED (wave 66, W66-B), 968/968 bytes. The two remaining axes closed with
- * `gUnknown_03003F50 = (r = sub_08041D40(...))`, which materializes the store
+ * `gUnknown_03003F50 = (r = GetBattleSceneAttackerSide(...))`, which materializes the store
  * address before the call while preserving its return in r0 for `1 - r`, and
  * block-local `q`/`diff` temporaries, which put `t - 1` after Div without
  * fold reassociating it to `t - (q + 1)`. Promotion needs .rodata words
@@ -31,8 +31,8 @@
  * `gBattleAttacker->unit`. Both are the same runtime
  * value and both compile, but only gUnknown_030040D8 puts the five force-addr
  * words in the ROM's slots -- and it is what makes the two halves symmetric:
- * `GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00)` against
- * `GetCoPriceMultiplier(army2, unit->type)`. The cast is the merge
+ * `GetUnitCostWithCoBonus(army1, gUnknown_030040D8->unk00)` against
+ * `GetUnitCostWithCoBonus(army2, unit->type)`. The cast is the merge
  * include/unknown-globals.h already records for gUnknown_08091364, which is
  * typed `struct Unit **` for exactly this reason. Spelling the head
  * through gUnknown_030013D0 instead cost 8 bytes and two pool words.
@@ -72,9 +72,9 @@
  *    ahead of the `bl Div`, which the ROM does not do, so they need measuring
  *    rather than assuming.
  *
- * 2. `ldr r5, =gUnknown_03003F50` lands AFTER `bl sub_08041D40` here and
+ * 2. `ldr r5, =gUnknown_03003F50` lands AFTER `bl GetBattleSceneAttackerSide` here and
  *    BEFORE it in the ROM (1 instruction, size-neutral). The ROM keeps the
- *    address live across the call. `gUnknown_03003F50 = sub_08041D40(...)` as a
+ *    address live across the call. `gUnknown_03003F50 = GetBattleSceneAttackerSide(...)` as a
  *    single statement is the obvious lever (expand_assignment materialises the
  *    LHS address first) but it costs the `r` local, and `1 - r` must stay on
  *    the CALL'S RETURN -- the ROM does `movs r1,#1; subs r1,r1,r0` with no
@@ -101,10 +101,10 @@ struct Unk41978Proc
 };
 /* Promoted but undeclared; signatures taken from src/decomp/c_08041D40.c and
  * src/decomp/c_080440A8.c, not derived. */
-int sub_08041D40(struct Unit *, struct Unit *);
-void sub_080440E0(int, int);
+int GetBattleSceneAttackerSide(struct Unit *, struct Unit *);
+void AddCoPowerCharge(int, int);
 
-void sub_08041978(u8 a1, int a2)
+void StartUnitAttack(u8 a1, int a2)
 {
     struct Unit *unit;
     struct Unit *sel;
@@ -130,15 +130,15 @@ void sub_08041978(u8 a1, int a2)
     {
         ((struct Unit *)gUnknown_030040D8)->ammo--;
         LockUnitSelection();
-        sub_080424FC();
+        CommitUnitMove();
     }
     else
     {
         ((struct Unk41978Cmd *)gUnknown_030044B0)->unk08 = gUnknown_03001FD4;
-        sub_080251BC(gUnknown_03003F38, a1, &gUnknown_03003100.pos);
+        CalcAttackOutcome(gUnknown_03003F38, a1, &gUnknown_03003100.pos);
 
         gUnknown_03003F50 =
-            (r = sub_08041D40((struct Unit *)gUnknown_030040D8, unit));
+            (r = GetBattleSceneAttackerSide((struct Unit *)gUnknown_030040D8, unit));
         gUnknown_03004484 = 1 - r;
         gUnknown_0300450C = gUnknown_03003F50;
 
@@ -183,7 +183,7 @@ void sub_08041978(u8 a1, int a2)
         else
             t = 0;
 
-        c = GetCoPriceMultiplier(army1, gUnknown_030040D8->unk00);
+        c = GetUnitCostWithCoBonus(army1, gUnknown_030040D8->unk00);
 
         if (gBattleAttacker->remainingHp != 0)
         {
@@ -202,7 +202,7 @@ void sub_08041978(u8 a1, int a2)
         else
             t = 0;
 
-        c = GetCoPriceMultiplier(army2, unit->type);
+        c = GetUnitCostWithCoBonus(army2, unit->type);
 
         if (gBattleDefender->remainingHp != 0)
         {
@@ -216,8 +216,8 @@ void sub_08041978(u8 a1, int a2)
         else
             x2 = t * c;
 
-        sub_080440E0(army1, x1 + Div(x2, 2));
-        sub_080440E0(army2, x2 + Div(x1, 2));
+        AddCoPowerCharge(army1, x1 + Div(x2, 2));
+        AddCoPowerCharge(army2, x2 + Div(x1, 2));
 
         v = gPlaySt.animOpts;
 
@@ -226,13 +226,14 @@ void sub_08041978(u8 a1, int a2)
 
         if (v != 0)
         {
-            sub_0802DCA4();
+            ResetDisplayEffects();
             ((struct Unk41978Proc *)Proc_Start(gUnknown_0849FEF8, PROC_TREE_3))->unk64 = b;
         }
         else
         {
-            sub_0802DCA4();
+            ResetDisplayEffects();
             ((struct Unk41978Proc *)Proc_Start(gUnknown_0849FFB0, PROC_TREE_3))->unk64 = b;
         }
     }
 }
+asm(".global sub_08041978\n.thumb_set sub_08041978, StartUnitAttack\n");

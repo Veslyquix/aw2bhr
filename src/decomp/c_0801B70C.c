@@ -7,7 +7,7 @@
  * sub_0801B70C @ 0x0801B70C, sub_0801B724 @ 0x0801B724, sub_0801B738 @ 0x0801B738
  */
 
-/* An indirect call into the IWRAM overlay copied by sub_0801B6BC. The pool word
+/* An indirect call into the IWRAM overlay copied by StoreRoutinesToIRAM. The pool word
  * is the callee's VALUE, not a variable's address: 0x03006029 is odd, there is
  * no load through it, and aw2bhr.map allocates nothing there -- gen_lds.py
  * invented the symbol from the word itself. Same situation as sub_0801B6EC's
@@ -32,7 +32,7 @@ void sub_0801B724(int a, int b, u16 c)
     ((void (*)(int, int, u16))&gUnknown_03005E8D)(a, b, c);
 }
 
-/* The third entry point into the IWRAM overlay copied by sub_0801B6BC, at
+/* The third entry point into the IWRAM overlay copied by StoreRoutinesToIRAM, at
  * 0x03005C89 -- one byte past gUnknown_03005C88, the overlay's own base, with
  * the low bit set for THUMB. That adjacency is the clearest evidence in the
  * block that the region really is code: the copy's destination and this call's
@@ -47,7 +47,8 @@ void sub_0801B724(int a, int b, u16 c)
  * `pop {r1}; bx r1` preserves r0 across the return where the void form would
  * have popped into r0 and clobbered it. Both are 24 bytes, so size does not
  * discriminate -- the register does. No re-narrowing, so `int`. */
-int sub_0801B738(u8 a, int b, int c, int d)
+int DrawGlyphRam(u8 a, int b, int c, int d)
 {
     return ((int (*)(u8, int, int, int))&gUnknown_03005C89)(a, b, c, d);
 }
+asm(".global sub_0801B738\n.thumb_set sub_0801B738, DrawGlyphRam\n");

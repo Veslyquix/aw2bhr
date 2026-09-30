@@ -7,7 +7,7 @@
  * sub_0805131C @ 0x0805131C
  */
 
-void sub_0805131C(void)
+void TankHitEffect_Loop(void)
 {
     u16 a;
     u16 b;
@@ -26,7 +26,8 @@ void sub_0805131C(void)
 
     if (gUnknown_02029A10[a].entries[b].unk00 == 0
         && (r = gUnknown_085D6A48[gUnknown_03004580[a][1]])[1] == 1)
-        sub_08015328(gUnknown_03001FBC);
+        EndSlotScriptAt(gUnknown_03001FBC);
 
-    sub_080513FC(a, b, gUnknown_03001FBC);
+    RaiseHitDoneStageFlag(a, b, gUnknown_03001FBC);
 }
+asm(".global sub_0805131C\n.thumb_set sub_0805131C, TankHitEffect_Loop\n");

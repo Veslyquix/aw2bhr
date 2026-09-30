@@ -10,7 +10,7 @@
 #include "hardware.h"
 #include "proc.h"
 
-/* A mode-entry sequence: install the two sub_08036884 / sub_080368E8 handlers
+/* A mode-entry sequence: install the two DefaultVBlankCallback / DefaultMainLoopCallback handlers
  * through the setter pair documented on sub_080366C4 / sub_080366D0 in
  * include/unknown-functions.h, run three more `void (void)` leaves, drop
  * forced blank, and start gUnknown_086147FC on tree 3.
@@ -20,13 +20,14 @@
  * of the low half of a `struct DispCnt`, which is what the bitfield write emits
  * and what a `u16`-wide spelling would not. */
 
-void sub_080780E4(void)
+void BootIntoWorldMap(void)
 {
-    sub_0801F00C();
-    sub_080366D0(sub_08036884);
-    sub_080366C4(sub_080368E8);
-    sub_08036B4C();
-    sub_080745C0();
+    EnableSpriteLayerMode();
+    sub_080366D0(DefaultVBlankCallback);
+    sub_080366C4(DefaultMainLoopCallback);
+    InitGameSystems();
+    ClearWorldMapMarkers();
     gDispIo.disp_ct.forced_blank = 0;
     Proc_Start(gUnknown_086147FC, PROC_TREE_3);
 }
+asm(".global sub_080780E4\n.thumb_set sub_080780E4, BootIntoWorldMap\n");

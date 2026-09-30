@@ -17,7 +17,7 @@
  * the switch.
  *
  * unk14 is a POINTER, not the `int` its bare `ldr` suggests: it is handed to
- * sub_08013338's third and sub_080130DC's fourth parameters, both declared
+ * StartScreenShake's third and StartWhiteFlash's fourth parameters, both declared
  * pointers, and -Werror rejects the integer spelling. */
 struct Unk4009CProc
 {
@@ -27,30 +27,31 @@ struct Unk4009CProc
     /* 54 */ int unk54;
 };
 
-void sub_0804009C(struct Unk4009CProc *proc)
+void ExplosionEffect_StartSoundAndScreenFx(struct Unk4009CProc *proc)
 {
     switch (proc->unk54)
     {
     case -1:
-        sub_0803B4DC(0x1D5);
-        sub_08013338(2, 0x5A, proc->unk14);
-        sub_080130DC(0x5A, 0xF, 0x1E, proc->unk14);
+        PlayMusicOrSfx2(0x1D5);
+        StartScreenShake(2, 0x5A, proc->unk14);
+        StartWhiteFlash(0x5A, 0xF, 0x1E, proc->unk14);
         return;
     case -2:
-        sub_0803B4DC(0x1D5);
-        sub_08013338(2, 0xA0, proc->unk14);
-        sub_080130DC(0xA0, 0x1E, 0x32, proc->unk14);
+        PlayMusicOrSfx2(0x1D5);
+        StartScreenShake(2, 0xA0, proc->unk14);
+        StartWhiteFlash(0xA0, 0x1E, 0x32, proc->unk14);
         return;
     case -3:
-        sub_0803B4DC(0x1E2);
-        sub_08013338(1, 0x14, proc->unk14);
-        sub_080130DC(4, 0, 2, proc->unk14);
+        PlayMusicOrSfx2(0x1E2);
+        StartScreenShake(1, 0x14, proc->unk14);
+        StartWhiteFlash(4, 0, 2, proc->unk14);
         break;
     }
 
-    sub_0803B4DC(0x10);
-    sub_08013338(1, 0x14, proc->unk14);
+    PlayMusicOrSfx2(0x10);
+    StartScreenShake(1, 0x14, proc->unk14);
 
     if (gPlaySt.gameMode != 5)
-        sub_080130DC(4, 0, 2, proc->unk14);
+        StartWhiteFlash(4, 0, 2, proc->unk14);
 }
+asm(".global sub_0804009C\n.thumb_set sub_0804009C, ExplosionEffect_StartSoundAndScreenFx\n");

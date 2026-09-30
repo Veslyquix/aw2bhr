@@ -8,7 +8,7 @@
  */
 
 #include "proc.h"
-/* Same script as sub_080678BC (+0x60) and sub_080678D4 (+0x3c), which is what
+/* Same script as SetIntroBgZoomEnabled (+0x60) and SetIntroBgZoomAcceleration (+0x3c), which is what
  * fixes +0x3c and +0x60 as words rather than something narrower.
  */
 struct Unk67898Proc
@@ -25,7 +25,7 @@ struct Unk67898Proc
 /* Three payload words in r0-r2 and the parent in r3, so r1 is set up from the
  * fourth parameter rather than left alone.
  */
-void sub_08067898(u32 a, u32 b, u32 c, ProcPtr parent)
+void StartIntroBgZoom(u32 a, u32 b, u32 c, ProcPtr parent)
 {
     struct Unk67898Proc *proc = Proc_Start(gUnknown_08580FF4, parent);
 
@@ -34,3 +34,4 @@ void sub_08067898(u32 a, u32 b, u32 c, ProcPtr parent)
     proc->unk60 = 1;
     proc->unk3c = c;
 }
+asm(".global sub_08067898\n.thumb_set sub_08067898, StartIntroBgZoom\n");

@@ -4,21 +4,23 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08047094.
- * sub_08047094 @ 0x08047094
+ * TerrainInfoWindow_OnEnd @ 0x08047094
  */
 
-/* MATCHED. Byte-for-byte the same function as sub_0803A460 -- identical
+/* MATCHED. Byte-for-byte the same function as UnitInfoPanel_Init -- identical
  * instruction stream and identical pool words. One C body, two
  * addresses; read that one for the derivation. */
-void sub_08047094(void)
+void TerrainInfoWindow_OnEnd(void)
 {
     s16 i;
 
     for (i = 0; i <= 0x3FF; i++)
         gBG0TilemapBuffer[i] = 0;
 
-    sub_08013AEC();
-    sub_0801A538(0, 0, 0, 0);
-    sub_08022580();
-    sub_080227A8();
+    BG_EnableSyncBG0();
+    DisableWindow0AndResetMapLayers(0, 0, 0, 0);
+    RedrawUnitLayer();
+    RedrawUnitIconLayer();
 }
+
+asm(".global sub_08047094\n.thumb_set sub_08047094, TerrainInfoWindow_OnEnd\n");

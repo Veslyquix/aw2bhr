@@ -8,7 +8,7 @@
  */
 
 /* Latches "a flash chip was identified" into gUnknown_0200CD0C: the raw
- * sub_0808AB8C result first, then its logical negation.
+ * IdentifyFlash result first, then its logical negation.
  *
  * Two things here are spelling-sensitive and both were probed.
  *
@@ -22,14 +22,15 @@
  * materialised AFTER the `bl` into a caller-saved register; the ROM computes it
  * first and keeps it in r4 across the call, which costs the r4 push/pop pair
  * the two spellings differ by. */
-void sub_0801AFF4(void)
+void DetectFlash(void)
 {
     u8 *p = &gUnknown_0200CD0C;
 
-    *p = sub_0808AB8C();
+    *p = IdentifyFlash();
 
     if (*p == 0)
         *p = 1;
     else
         *p = 0;
 }
+asm(".global sub_0801AFF4\n.thumb_set sub_0801AFF4, DetectFlash\n");

@@ -11,7 +11,7 @@
 /* r1 is never written before the `bl`, so the parent is this starter's own
  * fourth parameter, passed straight through. `pop {r1}` rather than `pop {r0}`
  * says the proc pointer is returned.
- * Same script as sub_0806780C, which finds it and writes the same +0x5c = 1. */
+ * Same script as ResumeIntroBgScroll, which finds it and writes the same +0x5c = 1. */
 struct Unk677BCProc
 {
     /* 00 */ PROC_HEADER;
@@ -25,7 +25,7 @@ struct Unk677BCProc
     /* 5c */ s32 unk5c;
 };
 
-ProcPtr sub_080677BC(s32 a, s32 b, s32 c, ProcPtr parent)
+ProcPtr StartIntroBgScroll(s32 a, s32 b, s32 c, ProcPtr parent)
 {
     struct Unk677BCProc * proc = Proc_Start(gUnknown_08580FE4, parent);
 
@@ -38,3 +38,4 @@ ProcPtr sub_080677BC(s32 a, s32 b, s32 c, ProcPtr parent)
 
     return proc;
 }
+asm(".global sub_080677BC\n.thumb_set sub_080677BC, StartIntroBgScroll\n");

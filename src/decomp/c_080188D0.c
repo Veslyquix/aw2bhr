@@ -7,7 +7,7 @@
  * sub_080188D0 @ 0x080188D0
  */
 
-/* sub_08018838's conditional twin: the army whose palette is repainted comes
+/* EventOp_SetFramePaletteSlot15's conditional twin: the army whose palette is repainted comes
  * from the script node's own unk08 instead of gUnknown_030033EC, and 5 stands
  * in when that field is zero.
  *
@@ -18,7 +18,7 @@
  * the use, the same treatment it gets in c_08018DF8.c and c_08017C4C.c. Reading
  * it twice is what the ROM does: the else arm reloads it rather than keeping
  * the compare's value. */
-bool8 sub_080188D0(s16 a)
+bool8 EventOp_ApplyFramePaletteForArmy(s16 a)
 {
     struct Unk0200C528Node *p;
     int v;
@@ -30,8 +30,9 @@ bool8 sub_080188D0(s16 a)
             v = 5;
         else
             v = gPlayers[(s16)p->unk08].teamColor;
-        sub_0802D5CC(v - 1, gUnknown_03002F08.unk00);
+        ApplyWindowFramePalette(v - 1, gUnknown_03002F08.unk00);
     }
     gUnknown_0200C528[a].unk04++;
     return TRUE;
 }
+asm(".global sub_080188D0\n.thumb_set sub_080188D0, EventOp_ApplyFramePaletteForArmy\n");

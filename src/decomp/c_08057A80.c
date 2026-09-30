@@ -26,8 +26,8 @@ void sub_08057A80(u16 *dst)
     int i;
     int idx;
 
-    sub_08043E8C(gUnknown_03004580[0][4], (u16 *)0x060059C0, 0x050000E0);
-    sub_08043E8C(gUnknown_03004580[1][4], (u16 *)0x06005DC0, 0x05000100);
+    LoadCoMiniPortraitOpaque(gUnknown_03004580[0][4], (u16 *)0x060059C0, 0x050000E0);
+    LoadCoMiniPortraitOpaque(gUnknown_03004580[1][4], (u16 *)0x06005DC0, 0x05000100);
 
     for (i = 0; i <= 1; i++)
     {
@@ -68,7 +68,7 @@ void sub_08057A80(u16 *dst)
  *    statement.
  */
 
-void sub_08057AE8(void)
+void InitBattleHud(void)
 {
     int i;
     int d;
@@ -77,7 +77,7 @@ void sub_08057AE8(void)
     Decompress(gUnknown_0816CABC, (void *)0x06004000);
     CpuFastSet(gUnknown_0816D498 + gUnknown_03004500[0] * 32, (void *)0x05000140, 8);
     CpuFastSet(gUnknown_0816D498 + gUnknown_03004500[1] * 32, (void *)0x05000120, 8);
-    sub_08013C00();
+    ClearBg0Tilemap();
 
     for (i = 0; i <= 1; i++)
     {
@@ -88,6 +88,7 @@ void sub_08057AE8(void)
         gUnknown_030005E0[i] = ((s16)d << 16) / ((s16)((s16)d / 5) + 20);
     }
 
-    sub_080579B8(gBG0TilemapBuffer);
+    DrawBothSideHud(gBG0TilemapBuffer);
     sub_08057A80(gBG0TilemapBuffer);
 }
+asm(".global sub_08057AE8\n.thumb_set sub_08057AE8, InitBattleHud\n");

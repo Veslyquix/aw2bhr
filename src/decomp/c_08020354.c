@@ -16,12 +16,13 @@
  * tree -- the *5 / *17 / *257 / *65537 shift-add chain plus `neg; asr #8` is
  * agbcc's exact division by the 12-byte stride folded together with the `>> 6`
  * that groups 64 slots to an army. */
-void sub_08020354(u16 x, u16 y, struct Unit *e)
+void FillUnitAttackRange(u16 x, u16 y, struct Unit *e)
 {
-    sub_0801F9C0(x, y,
+    MapSetInRange(x, y,
                  GetUnitFiringRangeWithCoBonus(((e - gUnits) >> 6) + 1, e->type), 0);
-    sub_0801F9C0(x, y, gUnknown_085D5ABC[e->type].minRange - 1, 0xff);
+    MapSetInRange(x, y, gUnknown_085D5ABC[e->type].minRange - 1, 0xff);
 }
+asm(".global sub_08020354\n.thumb_set sub_08020354, FillUnitAttackRange\n");
 
 /* Clears the four orthogonal neighbours of cell (x, y) in the
  * gUnknown_03003340 row-pointer overlay, each guarded by the matching edge
@@ -32,7 +33,7 @@ void sub_08020354(u16 x, u16 y, struct Unit *e)
  * rather than a struct: two reads of one global, which is the documented case
  * where agbcc keeps the SYMBOL address in a callee-saved register (r4) and
  * reloads the pointer, exactly as the ROM does. */
-void sub_080203C0(int x, int y)
+void MapZeroNeighbors(int x, int y)
 {
     if (x > 0)
         gUnknown_03003340[y][x - 1] = 0;
@@ -43,3 +44,4 @@ void sub_080203C0(int x, int y)
     if (y <= gMap->height)
         gUnknown_03003340[y + 1][x] = 0;
 }
+asm(".global sub_080203C0\n.thumb_set sub_080203C0, MapZeroNeighbors\n");

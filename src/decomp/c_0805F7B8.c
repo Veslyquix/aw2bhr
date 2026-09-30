@@ -8,11 +8,11 @@
  * sub_0805F7B8 @ 0x0805F7B8
  */
 
-/* sub_0805F7B8 @ 0x0805F7B8, 348 bytes. MATCHED.
+/* AiFallbackMove @ 0x0805F7B8, 348 bytes. MATCHED.
  *
  * The "no order given -- pick a target yourself" fallback of the battle-cursor
  * block: it scans every cell, scores it, and issues the best one as an ordinary
- * sub_0805D648 move command before longjmping out through sub_08071910. Twenty
+ * AiPublishAction move command before longjmping out through sub_08071910. Twenty
  * functions tail-call it, which is why it reads as a bail-out everywhere else
  * in the block.
  *
@@ -51,7 +51,7 @@
  * there is no epilogue.
  */
 
-void sub_0805F7B8(void)
+void AiFallbackMove(void)
 {
     int x;
     int y;
@@ -67,9 +67,9 @@ void sub_0805F7B8(void)
     bestY = 0;
     best = 0;
 
-    if (!sub_08059674(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03))
+    if (!AiIsSettleCellOk(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03))
     {
-        sub_080202A4(gUnknown_030040D8);
+        GenerateUnitMovementMap(gUnknown_030040D8);
 
         for (y = 0; y < gMap->height; y++)
         {
@@ -86,7 +86,7 @@ void sub_0805F7B8(void)
                     score = 0x14 - v;
                 if (score <= best)
                     continue;
-                if (!sub_08059674(x, y))
+                if (!AiIsSettleCellOk(x, y))
                     continue;
                 bestX = x;
                 bestY = y;
@@ -95,10 +95,11 @@ void sub_0805F7B8(void)
         }
 
         if (bestX != -1)
-            sub_0805D648(bestX, bestY, 2, 0, 0);
+            AiPublishAction(bestX, bestY, 2, 0, 0);
     }
 
-    if (sub_08035000(gPlaySt.mapID)->unk28 & 1)
+    if (GetMapListEntry(gPlaySt.mapID)->unk28 & 1)
         sub_0805F6D4();
     sub_08071910(gUnknown_03004680, 1);
 }
+asm(".global sub_0805F7B8\n.thumb_set sub_0805F7B8, AiFallbackMove\n");

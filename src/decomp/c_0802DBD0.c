@@ -7,21 +7,23 @@
  * sub_0802DBD0 @ 0x0802DBD0, sub_0802DBE4 @ 0x0802DBE4
  */
 
-/* Three statements. sub_0802428C and DecrementMapLock take nothing, so the
- * sub_0802776C(1) result cannot be flowing into either of them. */
+/* Three statements. RestoreMapCursorPosition and DecrementMapLock take nothing, so the
+ * SetInfoBoxMode(1) result cannot be flowing into either of them. */
 
-void sub_0802DBD0(void)
+void DeploymentScreen_Finish(void)
 {
-    sub_0802776C(1);
-    sub_0802428C();
+    SetInfoBoxMode(1);
+    RestoreMapCursorPosition();
     DecrementMapLock();
 }
+asm(".global sub_0802DBD0\n.thumb_set sub_0802DBD0, DeploymentScreen_Finish\n");
 
-/* The same one-line forwarder as the sub_0802D40C group: 0xC9E is >255 so
+/* The same one-line forwarder as the OptionsMenu_HelpVisualA group: 0xC9E is >255 so
  * agbcc has no `movs #imm8` for it and the pool word is forced by the VALUE
  * alone -- no symbol and no type is involved. `pop {r0}`, so void. */
 
-void sub_0802DBE4(void)
+void ShowUnitLimitMessage(void)
 {
-    sub_08019818(0xC9E, 0, 0);
+    StartCoSpeechScript(0xC9E, 0, 0);
 }
+asm(".global sub_0802DBE4\n.thumb_set sub_0802DBE4, ShowUnitLimitMessage\n");

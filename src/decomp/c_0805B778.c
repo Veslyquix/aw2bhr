@@ -15,25 +15,26 @@
  * is re-emitted as an ordinary inline-pool reloc, DELETES gUnknown_03003340's
  * -fforce-addr .rodata word (0x0816D9CC).  Written as a goto loop there is no
  * NOTE_INSN_LOOP_BEG, LICM never runs, and all three come back at once.
- * This is wave 49's `sub_080309AC` / `sub_08030B00` finding applied to the
+ * This is wave 49's `LinkReceiveCommand` / `LinkReceiveBlock` finding applied to the
  * measurement the -fforce-addr chapter itself was still citing as open. */
 
-void sub_0805B778(void)
+void AiMoveTowardLandingCell(void)
 {
     union Unk802C57CBuf v;
     void *p;
 
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
-    sub_0805B980();
+    AiListLandingCells();
 loop:
     p = gUnknown_03003F20;
     v.pos.unk00 = 0x270F;
-    sub_08059C00(p, (u16 *)&v);
+    AiPopLastNearestCandidate(p, (u16 *)&v);
     if (v.pos.unk00 == 0x270F)
-        sub_0805F7B8();
+        AiFallbackMove();
     if ((s8)gUnknown_03003340[v.pos.unk02][v.pos.unk00]
-        <= sub_08058224((struct Unit *)gUnknown_030040D8))
+        <= GetUnitMovementBudget((struct Unit *)gUnknown_030040D8))
         goto loop;
-    sub_080591E4(&v);
+    AiAdvanceToward(&v);
 }
+asm(".global sub_0805B778\n.thumb_set sub_0805B778, AiMoveTowardLandingCell\n");

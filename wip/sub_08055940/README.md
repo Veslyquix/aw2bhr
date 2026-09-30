@@ -2,7 +2,7 @@
 
 0x08055940, 248 bytes, THUMB, parked.
 
-Best score so far: not measured.
+Best score so far: 96.4%.
 
 ## What it does
 
@@ -14,7 +14,7 @@ Compiles to the right size (248 bytes); 9 of 248 bytes differ (96.4% identical),
 
 ## What is left
 
-The original loads the address of row 1 (gUnknown_020296E4) and derives row 0 by subtracting 40, with the loop's four set-up values in a particular order; the draft loads row 0 and adds 40. Writing `row1 = gUnknown_020296E4[0]; row0 = row1 - 20;` as two statements gives the right load and subtraction but puts other set-up code in the wrong place. What remains is a loop body whose first loop-invariant value is the address of counts[0] and whose last is row 0 derived from row 1, so that the compiler moves them out of the loop in the original's order.
+The original loads the address of row 1 (gUnknown_020296E4) and derives row 0 by subtracting 40, with the loop's four set-up values in a particular order. The order half is now solved: reading the first count into a local at the top of the loop body puts the set-up values in the original's order. It is not usable as it stands, because holding that value across the body needs one more register than the original does and costs 12 bytes -- and that is the same 12 bytes every earlier attempt paid, so the real constraint is that nothing extra may be alive across the body. What is left is to reach the original's row-1 anchor and its runtime subtraction without keeping anything alive: every spelling that names row 1 so far folds the subtraction into the address the compiler stores instead of doing it at run time.
 
 ## Already tried
 
@@ -43,5 +43,26 @@ PARKED Wave 70 at exact size 248/248 with 9 differing bytes. ROM anchors row 1 a
 WAVE87: WAVE 87 (W87-E, preheader-order lever from W87-C's sub_08028D28 match): the lever REACHES what six waves (63/70/77/80/82/83) called unreachable -- variant a (work/sub_08055940/w87-variantA.c: hand-inverted loop, four preheader invariants bound as SOURCE statements inside the zero-trip `if` in the ROM's order `c0 = &counts[0]; row1 = gUnknown_020296E4[0]; c1 = &counts[1]; row0 = row1 - 20;`) is the FIRST spelling to produce the ROM's pure gUnknown_020296E4 pool word with the row-0 base derived at RUNTIME (`add r6,r5,#0 / sub r6,r6,#0x28`) AND the ROM's four-value preheader order [&counts0][E4][&counts1][E4-0x28]. Load-bearing: the TWO-STATEMENT split `row1 = E4[0]; row0 = row1 - 20;` -- as ONE statement (variants c/d, before the for or inside the if) the -0x28 folds into the pool word (the parked draft's shape); position does not defeat the fold, the split does. Variant b (binds before a `for`) puts `i = 0` after the binds (ROM has `movs r2,#0` first). Variant e (row0 left as `(row1 - 20)[i]` in the body) leaks the -0x28 into the loop body per iteration (confirms wave 82 for the bound-pseudo form). REFUTED as the ROM's mechanism: variant a's binds land on the wrong side (c0/c1 in r4/r3 where the ROM has r3/r4) and the body's invariants are then all source, not hoists; the ROM's preheader is LICM movables in the order [&counts0][E4][&counts1][E4-0x28], i.e. the current body order [row0][c0][row1][c1] rotated LEFT BY ONE. Active draft RESTORED to the 96.4% parked version (9/248 re-verified); do NOT re-rule-out the E4 anchor, it is reached. Next, a BODY question: a body whose first invariant reference is counts[0]'s address and whose last movable is the row-0 subtraction off the already-hoisted E4 pseudo.
 
 WAVE90: WAVE 90 (W90-A): unchanged 96.4%/9 bytes. Permuter undirected 11,463 it and DIRECTED (PERM_GENERAL over gUnknown_020296BC[0][i]/gUnknown_020296E4[-1][i] and gUnknown_020296BC[1][i]/gUnknown_020296E4[0][i] x four block orders, inside RANDOMIZE) 11,636 it: permuter score 680 -> 420 but EVERY improved candidate is WORSE by bytes (89.1-95.6%), so the corrected objective does not track the verdict on this preheader-order residual. .loop dump: all five preheader values are pass-1 LICM hoists in body order; pass 2 moves nothing. W87-E variant A re-measured 92.7% (order right; c0/c1 r4/r3 and the post-loop &counts[1] copy + gUnknown_08136158 hoist land after the binds). Run 3 undirected from W87-E variant A (92.7%, the order-right base) 15,557 it: best 95.97% by bytes (it moves `row0 = row1 - 20` into the loop body, a legal rewrite that LICM hoists back; kept as work/sub_08055940/w90-varA-perm3-9597.c), still below the 96.4% draft, which was restored from w90-start.c and re-verified 96.37%. Directed source: w90-directed.perm.txt.
+
+### Wave 92
+
+W92-C: unchanged 96.37%/9 bytes, first difference +0x28. RESIDUAL RESTATED, which collapses the wave-80 'deferred hoist' description into one requirement: the ROM's five preheader values are the candidate's SAME five ROTATED BY ONE. ROM [&counts0 = sp][row1 from pool][&counts1 copy][row0 = row1 - 0x28]; candidate [row0 from pool][&counts0][row1 = row0 + 0x28][&counts1]. Since cse2 always derives whichever row constant sits SECOND in the preheader from the first, the anchor direction and the hoist order are ONE fact (as W77-L said), and the requirement is: the loop body must MENTION counts[0] before row 1 and row 0 after counts[1] while the EMITTED body still reads row 0 first. NEWLY RULED OUT: the counter-first branchless body `counts[k] += (row[k][i] != 0xff);` -- 244 bytes (-4), 28.2% identical, first difference +0x21. It does reach a counts-first reference order, but it compiles both tests branchless and destroys the byte-exact body, so it separates nothing. No spelling measured to date separates the two requirements.
+
+### Wave 93
+
+W93-F: THE HOIST ORDER IS REACHABLE WITHOUT A POINTER LOCAL, AND IT COSTS A REGISTER. Wave 87 left the open problem as a rotation: the body refers to its four invariants as [row0][counts0][row1][counts1] and the ROM's preheader emits them rotated left by one. Reading counts[0] into an ordinary u16 local at the top of the body and writing it back through that local in the row-0 test (c = counts[0]; do {row-1 test} while (0); if (row0[i] != 0xff) counts[0] = c + 1;) moves counts[0]'s first reference ahead of every row reference and emits the preheader in the ROM's order, value class for value class: `mov r4,sp | ldr r7,<row> | mov r5,r8 | add r6,r7,#0 | add r6,#0x28` against the ROM's `mov r3,sp | ldr r5,<row> | adds r4,r7,#0 | adds r6,r5,#0 | subs r6,#0x28`. The old draft put the row anchor's ldr first; this does not. MEASURED: +12 bytes, 9.23% identical, first difference at +0x2 -- it loses, and the prologue says why. The ROM saves TWO high registers (mov r7,sb | mov r6,r8 | push {r6,r7}); this form saves three. Keeping the counts[0] value live across the row-1 test is one more simultaneously live value, so the address constant the ROM rematerialises takes a callee-saved register instead and the whole function shifts. THIS REINTERPRETS WAVES 70/77/80/87: those read the recurring 12-byte tax as pointer locals inhibiting the loop's induction variable. It is not about pointers -- an ordinary u16 VALUE local costs exactly the same 12. The tax is one extra simultaneously live value, whatever it holds, so any construct that buys the ROM's hoist order by keeping something alive across the body pays it. The ROM reaches that order with nothing extra alive. Left: the anchor direction only (ROM loads gUnknown_020296E4 and derives row 0 with a runtime subs #0x28; every row-1 spelling folds to one pool word of E4-0x28, wave 80). Draft restored unchanged; notes in work/sub_08055940/NOTES.md.
+
+### Wave 96
+
+Base: draft unchanged (96.37%, size+0, 9 bytes, first diff +0x28). Tried one new axis: swap the two row tests in the loop body (row 1 first, with and without the do/while(0) moving to row 0): 93.6% (first diff +0x21) and 95.6% (+0x28). Mechanism: row-1-first makes the row-1 constant the first LICM hoist, but the counts[0] address then also moves and the pair/anchor still comes out lower-address-first; it perturbs the counters without producing the deferred row-0 hoist. Mixed-bind/row-pointer hypothesis not run again: waves 63/70/77/80/87 measured row-pointer locals at -12 bytes (they inhibit the loop's GIV).
+Proposed status: unchanged; left = which row address the pool word holds (bare row 1 plus a subtract vs bare row 0 plus an add) and the preheader order of four hoists.
+
+### Wave 97
+
+wave 97 (W97-S)
+Draft unchanged (96.37%). gUnknown_020296E4 exists as its own extern (u16 [][20]). Probed spelling row 1 through it: `gUnknown_020296E4[0][i]` for row 1 with row 0 kept `gUnknown_020296BC[0][i]`: size-exact but 24.2% (two independent pool words, no run-time `subs #0x28`); `gUnknown_020296E4[-1][i]` for row 0: 236 bytes (-12), 8.5% (fold to one base). So the ROM's bare-E4-plus-subtract is neither the separate symbol nor the negative index.
+
+wave 97 (W97-PG)
+Permuter chain: 1 link, 96.37% -> 96.37%, NO-IMPROVEMENT.
 
 </details>

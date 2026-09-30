@@ -7,18 +7,19 @@
  * sub_0803D92C @ 0x0803D92C
  */
 
-/* The local is `int`, NOT `s8`. sub_08016D04 returns s8, so agbcc re-narrows
+/* The local is `int`, NOT `s8`. GetSuspendIdForGameMode returns s8, so agbcc re-narrows
  * its result at the call site -- that single `lsls #0x18; asrs #0x18` into r4
  * IS the narrowing, and r4 is then used sign-extended everywhere. Declaring the
  * local `s8` makes agbcc truncate with `lsls; lsrs` into the local and
  * sign-extend again at each read, four bytes longer. */
-void sub_0803D92C(void)
+void SaveScreenCampaign_StartMessage(void)
 {
     int v;
 
-    v = sub_08016D04(1);
+    v = GetSuspendIdForGameMode(1);
     if (v != 0)
-        sub_08016CEC(v, 0);
+        SetSuspendFlag(v, 0);
     if (IsPlayer1TeamAlive())
-        sub_080193B0(gUnknown_0849F3A8)->unk10 = v;
+        StartEventScript(gUnknown_0849F3A8)->unk10 = v;
 }
+asm(".global sub_0803D92C\n.thumb_set sub_0803D92C, SaveScreenCampaign_StartMessage\n");

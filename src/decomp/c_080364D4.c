@@ -16,14 +16,15 @@
  * the callee returned, so nothing about the callee is visible from
  * here. Everything below was read off the callee's own body instead.
  *
- * One pointer passed through to sub_08014ED4(void *), the heap free.
+ * One pointer passed through to HeapFree(void *), the heap free.
  * Confirmed at the call site: sub_080363D0 does `ldr r0,[r4,#0x48]`
- * immediately before `bl sub_080364D4`.
+ * immediately before `bl FreeMoveSlideGfxBuffer`.
  */
-void sub_080364D4(void * a)
+void FreeMoveSlideGfxBuffer(void * a)
 {
-    sub_08014ED4(a);
+    HeapFree(a);
 }
+asm(".global sub_080364D4\n.thumb_set sub_080364D4, FreeMoveSlideGfxBuffer\n");
 
 /* F002, but the callee is sub_080152C0 and NOT sub_080152EC -- the family is
  * defined by shape, and tools/families.py erases callee names from the

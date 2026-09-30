@@ -41,30 +41,30 @@ struct Unk8077A14Proc
     /* 0x4e */ s16 unk4e;
 };
 
-void sub_08077A14(struct Unk8077A14Proc * proc)
+void WorldMapMapPreview_Init(struct Unk8077A14Proc * proc)
 {
     int i;
     int y;
 
-    sub_08077620(0, 0xa8 - gUnknown_0300064C);
-    sub_08012358();
-    sub_080755E0();
-    sub_08013C54();
-    sub_08072C40(1, 0, 0);
+    WorldMapMissionInfo_PutSprites(0, 0xa8 - gUnknown_0300064C);
+    SetDefaultColorEffects();
+    EndWorldMapSelectionFrame();
+    ClearBg1Tilemap();
+    SetBgScrollShadow(1, 0, 0);
     ClearAllUnits();
-    sub_08011C68(gUnknown_080A0F38,
+    CpuCopyAuto(gUnknown_080A0F38,
                  (void *)(0x06001000 + (gUnknown_03002B6C.bits.chr_block << 14)),
                  0x200);
     ApplyPaletteExt(gUnknown_080A1138, 0x80, 0x40);
-    sub_08037750(4);
+    StartMapPreviewPalette(4);
 
     for (i = 0; i < 4; i++)
         gPlayers[i + 1].teamColor = gUnknown_085C77A0[proc->unk34].unk40[i];
 
-    sub_0803D6D0();
+    SnapshotTeamColorsFromPlayers();
     sub_0801B6EC((void *)(0x06001000 + (gUnknown_03002B6C.bits.chr_block << 14)));
     sub_0801B6FC((void *)(0x06001000 + (gUnknown_03002B6C.bits.chr_block << 14)));
-    sub_08037A20(gUnknown_08551A04 + 0x100, 0x4080);
+    FillMapPreviewTilemap(gUnknown_08551A04 + 0x100, 0x4080);
 
     proc->unk4c = ((u8 *)gUnknown_03003F68)[0];
     proc->unk4e = ((u8 *)gUnknown_03003F68)[1];
@@ -87,6 +87,7 @@ void sub_08077A14(struct Unk8077A14Proc * proc)
         proc->unk4a = 0;
 
     proc->unk44 = 0;
-    sub_080752D8(3);
-    sub_08074EEC(3);
+    SetDifficultyStarsPalette(3);
+    SetWorldMapScopePalette(3);
 }
+asm(".global sub_08077A14\n.thumb_set sub_08077A14, WorldMapMapPreview_Init\n");

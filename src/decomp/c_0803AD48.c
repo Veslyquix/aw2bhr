@@ -17,8 +17,8 @@
  *
  * gUnknown_08090FB0 is a REAL 9-element table, not a pool word: it is indexed
  * by a computed subscript BEFORE the dereference (`lsls #2; adds base; ldr`).
- * Contrast sub_0803AFA0, which reaches its own string table through one MORE
- * indirection -- see work/sub_0803AFA0/NOTES.md.
+ * Contrast DebugBackupUtility_Loop, which reaches its own string table through one MORE
+ * indirection -- see work/DebugBackupUtility_Loop/NOTES.md.
  *
  * The gpKeySt reloads between the guarded blocks are not a spelling choice:
  * each block stores through `p`, which may alias struct KeySt, so agbcc must
@@ -35,18 +35,18 @@ struct Unk0803AD48
     /* 0x20 */ u16 unk20[9];
 };
 
-void sub_0803AD48(struct Unk0803AD48 *p)
+void DebugEdit_Loop(struct Unk0803AD48 *p)
 {
     u8 i;
 
-    sub_080119D4(0xd8, 0x98, 0x188);
-    sub_0803ABD8();
-    sub_080119A0(0, 0, gUnknown_0809105C);
+    PutHexNumberSprites(0xd8, 0x98, 0x188);
+    DebugScreenNoOp();
+    PutAsciiStringSprites(0, 0, gUnknown_0809105C);
     for (i = 0; i <= 8; i++) {
-        sub_080119A0(0, i * 8 + 8, gUnknown_08090FB0[i]);
-        sub_0802BD54(0x68, i * 8 + 8, p->unk20[i]);
+        PutAsciiStringSprites(0, i * 8 + 8, gUnknown_08090FB0[i]);
+        DrawSpriteNumberFont2(0x68, i * 8 + 8, p->unk20[i]);
     }
-    sub_080119A0(0, p->unk1e * 8 + 8, gUnknown_08091064);
+    PutAsciiStringSprites(0, p->unk1e * 8 + 8, gUnknown_08091064);
     if (gpKeySt->pressed & 1) {
         p->unk08 = 0;
         return;
@@ -71,8 +71,8 @@ void sub_0803AD48(struct Unk0803AD48 *p)
     if (gpKeySt->pressed & L_BUTTON) {
         for (i = 0; i <= 8; i++)
             p->unk20[i] = 0;
-        sub_0803C670();
-        sub_0803BA1C();
+        ResetCampaignUnlocks();
+        ClearCampaignFlags60To9F();
     }
     if (gpKeySt->repeated & DPAD_RIGHT) {
         if (gUnknown_08091038[p->unk1e] - gUnknown_0809104A[p->unk1e] < p->unk20[p->unk1e])
@@ -87,3 +87,4 @@ void sub_0803AD48(struct Unk0803AD48 *p)
             p->unk20[p->unk1e] -= gUnknown_0809104A[p->unk1e];
     }
 }
+asm(".global sub_0803AD48\n.thumb_set sub_0803AD48, DebugEdit_Loop\n");

@@ -7,7 +7,7 @@
  * sub_08012F6C @ 0x08012F6C
  */
 
-/* sub_08011C68's SIGNED sibling -- same CpuSet-or-CpuFastSet choice on a
+/* CpuCopyAuto's SIGNED sibling -- same CpuSet-or-CpuFastSet choice on a
  * multiple-of-32 byte count, but the count is a signed int and the result is
  * masked to CpuSet's 21-bit length field.
  *
@@ -18,10 +18,11 @@
  * fused with the division's arithmetic shift -- count them as
  * `(u32)x << a >> b` and both come out as a 21-bit result, which is exactly
  * the width of the BIOS length field. */
-void sub_08012F6C(const void *src, void *dst, int size)
+void VramCopy(const void *src, void *dst, int size)
 {
     if (size & 0x1F)
         CpuSet(src, dst, (size / 2) & 0x1FFFFF);
     else
         CpuFastSet(src, dst, (size / 4) & 0x1FFFFF);
 }
+asm(".global sub_08012F6C\n.thumb_set sub_08012F6C, VramCopy\n");

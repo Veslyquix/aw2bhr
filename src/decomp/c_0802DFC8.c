@@ -17,23 +17,24 @@
  *
  * The key is read at gpKeySt->held, offset 0, not `held` at +4. */
 
-void sub_0802DFC8(void)
+void MapCursorState_RangeWhileBHeld(void)
 {
     u16 v;
 
-    sub_08023824();
-    sub_080236E8();
-    sub_08023908(4);
-    sub_08023274(1);
+    HandleMoveMapCursor();
+    HandleMoveMapCursorInMoveRange();
+    HandleMoveCameraWithMapCursor(4);
+    StepMapCursorAndDraw(1);
 
     v = gpKeySt->held & 2;
 
     if (v == 0)
     {
-        sub_08035810();
-        sub_080258CC();
-        sub_08022A08();
+        EndActiveMoveSlide();
+        RebuildMapUnitLayers();
+        HideRangeOverlay();
 
         gUnknown_03003334 = v;
     }
 }
+asm(".global sub_0802DFC8\n.thumb_set sub_0802DFC8, MapCursorState_RangeWhileBHeld\n");

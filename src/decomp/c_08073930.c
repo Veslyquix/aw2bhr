@@ -39,7 +39,7 @@
 #include "hardware.h"
 /* The scanline record gUnknown_0202FDE4 points at while this handler runs:
  * stride FOUR, and only the halfword at +2 is read. The global is declared
- * `void *` in unknown-globals.h because sub_080737EC's REG_DMA0SAD use of the
+ * `void *` in unknown-globals.h because CircleWipe_Loop's REG_DMA0SAD use of the
  * same slot needs no type; the cast lives here rather than in the header until
  * the two readings are reconciled. */
 struct Unk73930Row
@@ -54,7 +54,7 @@ struct Unk73930Row
  *
  * `movs r1, #0x80; lsls r1, r1, #1` is the constant 0x100. */
 
-void sub_08073930(void)
+void PolygonWipe_HBlankHandler(void)
 {
     u16 line = REG_VCOUNT + 1;
     u16 t;
@@ -68,3 +68,4 @@ void sub_08073930(void)
     REG_BG1HOFS = (t = ((struct Unk73930Row *)gUnknown_0202FDE4)[line].unk02,
         ((struct Unk73930Row *)gUnknown_0202FDE4)[0].unk02 - t + 0x100);
 }
+asm(".global sub_08073930\n.thumb_set sub_08073930, PolygonWipe_HBlankHandler\n");

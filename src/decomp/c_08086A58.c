@@ -14,13 +14,13 @@
  * entry `first`, onto BG0 at tile rows top + 5, + 7, ... (two rows each). A map
  * id up to 0xB3 that is not unlocked yet is drawn as the gUnknown_084C3F50
  * placeholder label, anything else as its name. The last argument to
- * sub_080149C0 is 1 when the map's bit in gUnknown_02028030.unk30 (tested by
- * sub_0803CB24) is clear.
+ * PutTextScriptImmediate is 1 when the map's bit in gUnknown_02028030.unk30 (tested by
+ * HasMapBeenPlayed) is clear.
  *
- * In game mode 2 the rows start at top + 5 and sub_08087548 draws the rest of
+ * In game mode 2 the rows start at top + 5 and DrawWarRoomRanks draws the rest of
  * the screen. Otherwise a header from gUnknown_08499CE4 goes on row 5, the rows
  * start at top + 9, and the count is clamped to the list's length
- * (unk37 + 1). sub_08086BF8 is the same list drawn two rows at most.
+ * (unk37 + 1). DrawMapListFirstTwoRows is the same list drawn two rows at most.
  *
  * Measured spelling notes:
  * - The entries are read through the struct's own member array,
@@ -46,14 +46,14 @@ void DrawMapList(int first, int count, int top)
     int row;
     int unlocked;
 
-    sub_08013C00();
+    ClearBg0Tilemap();
 
     if (gPlaySt.gameMode == 2)
     {
         for (i = 0; i < count; i++)
         {
             {
-                u8 bit = sub_0803CB24(gUnknown_02027F74.unk04[first + i]);
+                u8 bit = HasMapBeenPlayed(gUnknown_02027F74.unk04[first + i]);
                 unflagged = 1;
                 if (bit != 0)
                     unflagged = 0;
@@ -65,24 +65,24 @@ void DrawMapList(int first, int count, int top)
                 int rowOffset = i * 2;
                 rowTop = top + 5;
                 row = rowOffset + rowTop;
-                sub_080149C0(1, (s16)row, gBG0TilemapBuffer,
+                PutTextScriptImmediate(1, (s16)row, gBG0TilemapBuffer,
                              gUnknown_084C3F50, unlocked, unflagged);
             }
             else
             {
-                u8 *name = sub_08024944(gUnknown_02027F74.unk04[first + i]);
+                u8 *name = GetMapName(gUnknown_02027F74.unk04[first + i]);
                 int rowOffset = i * 2;
                 rowTop = top + 5;
                 row = rowOffset + rowTop;
-                sub_080149C0(1, (s16)row, gBG0TilemapBuffer, name, 0, unflagged);
+                PutTextScriptImmediate(1, (s16)row, gBG0TilemapBuffer, name, 0, unflagged);
             }
         }
 
-        sub_08087548(first, count, top);
+        DrawWarRoomRanks(first, count, top);
     }
     else
     {
-        sub_08014A5C(1, 5, gBG0TilemapBuffer,
+        PutTextTableEntryImmediate(1, 5, gBG0TilemapBuffer,
                      gUnknown_08499CE4[gUnknown_0300596C], 0, 0);
 
         if (gUnknown_02027F74.unk37 < count)
@@ -91,7 +91,7 @@ void DrawMapList(int first, int count, int top)
         for (i = 0; i < count; i++)
         {
             {
-                u8 bit = sub_0803CB24(gUnknown_02027F74.unk04[first + i]);
+                u8 bit = HasMapBeenPlayed(gUnknown_02027F74.unk04[first + i]);
                 unflagged = 1;
                 if (bit != 0)
                     unflagged = 0;
@@ -103,21 +103,21 @@ void DrawMapList(int first, int count, int top)
                 int rowOffset = i * 2;
                 rowTop = top + 9;
                 row = rowOffset + rowTop;
-                sub_080149C0(1, (s16)row, gBG0TilemapBuffer,
+                PutTextScriptImmediate(1, (s16)row, gBG0TilemapBuffer,
                              gUnknown_084C3F50, unlocked, unflagged);
             }
             else
             {
-                u8 *name = sub_08024944(gUnknown_02027F74.unk04[first + i]);
+                u8 *name = GetMapName(gUnknown_02027F74.unk04[first + i]);
                 int rowOffset = i * 2;
                 rowTop = top + 9;
                 row = rowOffset + rowTop;
-                sub_080149C0(1, (s16)row, gBG0TilemapBuffer, name, 0, unflagged);
+                PutTextScriptImmediate(1, (s16)row, gBG0TilemapBuffer, name, 0, unflagged);
             }
         }
     }
 
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
 
 asm(".global sub_08086A58\n.thumb_set sub_08086A58, DrawMapList\n");

@@ -19,7 +19,7 @@
  * NEEDS ITS POOL WORD PLACED. The data/promoted.json entry must carry
  *   "rodata": ["0x0812A158"]
  * then re-run tools/split_rodata.py and tools/gen_lds.py. The word holds
- * &gUnknown_084C30F8, exactly as sub_08048850's 0x0812A144 does.
+ * &gUnknown_084C30F8, exactly as RenderShopListBuffer's 0x0812A144 does.
  *
  * Picks the next script to run. unk839 starts as gUnknown_0200C420.unk0f; if
  * that is above 1 it either forces 2 (when unk836 is clear) or walks the
@@ -47,14 +47,14 @@
  * exist and why a single struct array at ...A0 would relocate the second use
  * wrongly. */
 
-void BattleMaps_IDLE_08048FD9(ProcPtr proc)
+void ShopScreen_PickGreeting(ProcPtr proc)
 {
     u8 n;
     u8 i;
 
     n = 1;
 
-    if (sub_08048F10() != 0)
+    if (ShopScreen_StepOffsetToZero() != 0)
         return;
 
     gUnknown_084C30F8->unk839 = gUnknown_0200C420.unk0f;
@@ -84,9 +84,9 @@ void BattleMaps_IDLE_08048FD9(ProcPtr proc)
     }
 
     if (n != 0)
-        sub_080485DC(gUnknown_084C24A0[gUnknown_084C30F8->unk839].unk00);
+        ShopScreen_StartMessage(gUnknown_084C24A0[gUnknown_084C30F8->unk839].unk00);
 
     Proc_Break(proc);
 }
 
-asm(".global sub_08048FD8\n.thumb_set sub_08048FD8, BattleMaps_IDLE_08048FD9\n");
+asm(".global sub_08048FD8\n.thumb_set sub_08048FD8, ShopScreen_PickGreeting\n");

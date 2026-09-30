@@ -14,7 +14,7 @@
 
 /* MATCHED wave 34, W34-E.
  *
- * Fills in the map/unit cursor pane's proc and hands it to sub_08087104,
+ * Fills in the map/unit cursor pane's proc and hands it to UpdateMapSelectPropertyCounts,
  * choosing between the gUnknown_03005900/30 pair and the
  * gUnknown_03005990[gUnknown_0300596C]/80 pair on `gUnknown_081D940C->unk01
  * == 2`. That choice is already described from the other side on the
@@ -61,7 +61,7 @@ struct Unk8085F94Proc
     /* 0x5c */ int unk5c;
 };
 
-void PutMapPropertiesPreview_08085F95(struct Unk8085F94Proc *proc)
+void MapSelectList_Init(struct Unk8085F94Proc *proc)
 {
     struct Unk081D940C **pp;
     int kind;
@@ -88,28 +88,28 @@ void PutMapPropertiesPreview_08085F95(struct Unk8085F94Proc *proc)
     proc->unk2c = 0x14;
     proc->unk4c = 0;
 
-    sub_08087104(proc);
+    UpdateMapSelectPropertyCounts(proc);
 
     if ((*pp)->unk01 == 2)
     {
-        sub_08087884(proc->unk58, proc);
+        StartEnemyCoMinimugs(proc->unk58, proc);
 
         if (gUnknown_0200C420.unk0c != 0)
-            sub_08087974(proc->unk58, proc);
+            ToggleMapRecordsPanel(proc->unk58, proc);
     }
 }
 
-asm(".global sub_08085F94\n.thumb_set sub_08085F94, PutMapPropertiesPreview_08085F95\n");
+asm(".global sub_08085F94\n.thumb_set sub_08085F94, MapSelectList_Init\n");
 
-extern void PutMapPropertiesPreview_IDLE_08086059(void);
-extern void PutMapPropertiesPreview_IDLE_0808603D(void);
+extern void MapSelectList_DrawLoop(void);
+extern void MapSelectList_InputLoop(void);
 
 struct ProcCmd CONST_DATA ProcScr_PutMapPropertiesPreview[] =
 {
-    PROC_CALL(PutMapPropertiesPreview_08085F95),
-    PROC_REPEAT(PutMapPropertiesPreview_IDLE_08086059),
-    PROC_REPEAT(PutMapPropertiesPreview_IDLE_0808603D),
-    PROC_REPEAT(PutMapPropertiesPreview_IDLE_08086059),
+    PROC_CALL(MapSelectList_Init),
+    PROC_REPEAT(MapSelectList_DrawLoop),
+    PROC_REPEAT(MapSelectList_InputLoop),
+    PROC_REPEAT(MapSelectList_DrawLoop),
     PROC_END,
 };
 

@@ -28,8 +28,8 @@
  * byte-identical to it, and using it for all six reads is worse (it sinks
  * +0x24 into a tail pool word). Everything else is as earlier waves recorded:
  * `a ^ 1`, `e` a local, 0x100 as movs/lsls, the control-flow merge being why
- * this twin has the .rodata word and sub_08052BBC does not. */
-void sub_08052718(u16 a, u16 b)
+ * this twin has the .rodata word and DeathHandler_Bomb does not. */
+void DeathHandler_Explosion(u16 a, u16 b)
 {
     u16 e;
     int k;
@@ -44,19 +44,20 @@ void sub_08052718(u16 a, u16 b)
         gUnknown_02029808[a].unk58[gUnknown_02029808[a].unk2e],
         0);
 
-    sub_08015504(gUnknown_02029808[a].unk24[b], 1);
+    SetSlotSpriteFlicker(gUnknown_02029808[a].unk24[b], 1);
 
     if (gUnknown_03004580[a ^ 1][1] == 0x14)
-        sub_080504A8(a, 0x23);
+        PlayFigureDestroySfx(a, 0x23);
     else
-        sub_080504A8(a, 0x10);
+        PlayFigureDestroySfx(a, 0x10);
 
     e = gUnknown_08553B14[a];
 
-    sub_08016824(gUnknown_02029808[a].unk24[b]);
-    sub_08016944(gUnknown_02029808[a].unk24[b]);
-    sub_080157A4(gUnknown_02029808[a].unk24[b], e);
-    sub_080157F4(gUnknown_02029808[a].unk24[b], 0x100);
+    EnableSlotSpriteAffine(gUnknown_02029808[a].unk24[b]);
+    SetSlotSpriteDoubleSize(gUnknown_02029808[a].unk24[b]);
+    SetSlotSpriteScaleX(gUnknown_02029808[a].unk24[b], e);
+    SetSlotSpriteScaleY(gUnknown_02029808[a].unk24[b], 0x100);
 
-    sub_08052818(a, b);
+    DeathHandler_CommonTail(a, b);
 }
+asm(".global sub_08052718\n.thumb_set sub_08052718, DeathHandler_Explosion\n");

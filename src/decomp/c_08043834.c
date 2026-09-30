@@ -7,18 +7,19 @@
  * sub_08043834 @ 0x08043834, DrawCoPowerLabel @ 0x08043898, sub_080438FC @ 0x080438FC
  */
 
-void sub_08043834(int a)
+void LoadCoPanelGraphics(int a)
 {
     u16 (*tbl)[16];
     int i;
 
     gUnknown_030005D0 = 0;
-    sub_08011E54(gUnknown_08102824, (void *)0x06010000, 0x740);
+    RegisterDataMove(gUnknown_08102824, (void *)0x06010000, 0x740);
     tbl = gUnknown_08104264;
     i = gPlayers[a].teamColor - 1;
     ApplyPaletteExt(tbl[i], 0x2e0, 0x20);
-    sub_08011E54(gUnknown_081259CC, (void *)0x06010840, 0xc0);
+    RegisterDataMove(gUnknown_081259CC, (void *)0x06010840, 0xc0);
 }
+asm(".global sub_08043834\n.thumb_set sub_08043834, LoadCoPanelGraphics\n");
 
 void DrawCoPowerLabel(int x, int y, int i)
 {
@@ -36,7 +37,7 @@ void DrawCoPowerLabel(int x, int y, int i)
 
 asm(".global sub_08043898\n.thumb_set sub_08043898, DrawCoPowerLabel\n");
 
-void sub_080438FC(int a, int b, int c)
+void DrawCoPowerStarBar(int a, int b, int c)
 {
     int va;
     int vy;
@@ -54,6 +55,7 @@ void sub_080438FC(int a, int b, int c)
     va = a;
     vy = b + 0x18;
 
-    sub_080439A8(&va, &vy, &vu, m, lo, 0, vu >= lo, &vt);
-    sub_080439A8(&va, &vy, &vu, m, hi, 1, vu >= hi, &vt);
+    DrawCoPowerStarBarSegment(&va, &vy, &vu, m, lo, 0, vu >= lo, &vt);
+    DrawCoPowerStarBarSegment(&va, &vy, &vu, m, hi, 1, vu >= hi, &vt);
 }
+asm(".global sub_080438FC\n.thumb_set sub_080438FC, DrawCoPowerStarBar\n");

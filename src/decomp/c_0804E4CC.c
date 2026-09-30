@@ -7,7 +7,7 @@
  * sub_0804E4CC @ 0x0804E4CC
  */
 
-void sub_0804E4CC(s16 a, u16 *p)
+void BattleshipPart2_StreamHook(s16 a, u16 *p)
 {
     struct OamData oam;
     u16 d;
@@ -15,7 +15,7 @@ void sub_0804E4CC(s16 a, u16 *p)
     u16 f;
     u16 side;
 
-    sub_0801566C(a, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(a, (struct UnkVec *)&oam);
     d = (p[2] - oam.tileNum) & 0x3ff;
     e = d >> 6;
     f = d & 0x3f;
@@ -23,6 +23,7 @@ void sub_0804E4CC(s16 a, u16 *p)
     p[2] = (p[2] & 0xfc00) + f + oam.tileNum;
 
     if (a == gUnknown_02029668[side][4] && d != gUnknown_03001470[a].unk28)
-        sub_08011E54((u8 *)gUnknown_08552FB0[side] + (e << 11),
+        RegisterDataMove((u8 *)gUnknown_08552FB0[side] + (e << 11),
                      (void *)(0x06011800 + (side << 13)), 0x800);
 }
+asm(".global sub_0804E4CC\n.thumb_set sub_0804E4CC, BattleshipPart2_StreamHook\n");

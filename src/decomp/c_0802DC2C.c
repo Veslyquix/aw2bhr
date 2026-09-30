@@ -7,36 +7,36 @@
  * sub_0802DC2C @ 0x0802DC2C
  */
 
-void sub_0802DC2C(void)
+void RunMapCursorState(void)
 {
     switch (gUnknown_03003334)
     {
     case 0:
-        sub_0802DCB4();
+        MapCursorIdle();
         break;
 
     case 1:
-        sub_0802DE1C();
+        MapCursorState_ChooseDestination();
         break;
 
     case 2:
-        sub_0802DEFC();
+        MapCursorState_DeleteUnit();
         break;
 
     case 3:
-        sub_0802E698();
+        MapCursorState_OpenUnitMenu();
         break;
 
     case 4:
-        sub_0802E6C0();
+        MapCursorState_UnitMenuOpen();
         break;
 
     case 5:
-        sub_0802E6F8();
+        MapCursorState_Ambushed();
         break;
 
     case 6:
-        sub_0802DFC8();
+        MapCursorState_RangeWhileBHeld();
         break;
 
     case 7:
@@ -44,7 +44,8 @@ void sub_0802DC2C(void)
         break;
 
     case 8:
-        sub_0802E278();
+        MapCursorState_UnitsTranslucent();
         break;
     }
 }
+asm(".global sub_0802DC2C\n.thumb_set sub_0802DC2C, RunMapCursorState\n");

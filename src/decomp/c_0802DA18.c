@@ -42,16 +42,16 @@ struct Unk2023830
     /* 0x02 */ u8 filler_02[0x02];
 };
 
-void sub_0802DA18(void)
+void DeploymentScreen_Loop(void)
 {
     struct Unk03001470 *ent;
     void *p;
     int t;
     struct Unk2023830 *tbl;
 
-    sub_0802776C(1);
+    SetInfoBoxMode(1);
 
-    if (sub_08019850())
+    if (IsCoSpeechScriptRunning())
         return;
 
     ent = &gUnknown_03001470[gUnknown_03001FBC];
@@ -60,15 +60,15 @@ void sub_0802DA18(void)
     {
         if ((tbl = (struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk01 == 2)
         {
-            sub_0803B4DC(0x68);
+            PlayMusicOrSfx2(0x68);
             return;
         }
 
-        sub_0803B4DC(0x65);
+        PlayMusicOrSfx2(0x65);
 
-        if (sub_08025AEC() == NULL)
+        if (FindFreeUnitSlot() == NULL)
         {
-            sub_0802DBE4();
+            ShowUnitLimitMessage();
             return;
         }
 
@@ -79,20 +79,20 @@ void sub_0802DA18(void)
         gUnknown_03003100.pos.unk02 = gUnknown_030040A4.unk02;
 
         if (gPlaySt.savingEnabled != 0)
-            sub_08034534(1, ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00,
+            SendActionCommand(1, ((struct Unk2023830 *)gUnknown_02023830)[ent->unk20].unk00,
                          0, 0);
 
-        sub_08074410(0xe, p);
+        RunMapEventsForAction(0xe, p);
     }
 
     if (gpKeySt->pressed & 2)
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
 
     if (gpKeySt->pressed & 3)
     {
-        sub_08015C30(gUnknown_03001FBC);
-        sub_0802D76C();
-        sub_0803A59C();
+        ClearSlotScriptCallback(gUnknown_03001FBC);
+        ClearDeploymentListArea();
+        EndUnitInfoPanelScripts();
         return;
     }
 
@@ -106,7 +106,7 @@ void sub_0802DA18(void)
         {
             ent->unk20 = v + 1;
             sub_0802D9B8(ent);
-            sub_0803B4DC(0x67);
+            PlayMusicOrSfx2(0x67);
         }
     }
 
@@ -120,7 +120,7 @@ void sub_0802DA18(void)
         {
             ent->unk20 = v - 1;
             sub_0802D9B8(ent);
-            sub_0803B4DC(0x67);
+            PlayMusicOrSfx2(0x67);
         }
     }
 
@@ -128,11 +128,12 @@ void sub_0802DA18(void)
 
     t = (u16)ent->unk20 - (u16)ent->unk1e + 2;
     gUnknown_030033E4.unk02 = t;
-    sub_0802323C(0x10, t * 16 + 8, 3);
+    EaseMapCursorAndDraw(0x10, t * 16 + 8, 3);
 
     if (ent->unk1e != 0)
-        sub_08043418(0x44, 0x2a, 0xe);
+        DrawMapCursorSprite(0x44, 0x2a, 0xe);
 
     if (ent->unk1e + 7 < *(s16 *)&gUnknown_0300055A)
-        sub_08043418(0x44, 0x96, 0xf);
+        DrawMapCursorSprite(0x44, 0x96, 0xf);
 }
+asm(".global sub_0802DA18\n.thumb_set sub_0802DA18, DeploymentScreen_Loop\n");

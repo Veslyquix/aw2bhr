@@ -16,26 +16,26 @@ struct Unk2C2D8Proc
     /* 0x22 */ u16 unk22;
 };
 
-void sub_0802C2D8(struct Unk2C2D8Proc *proc)
+void MinimapScreen_Init(struct Unk2C2D8Proc *proc)
 {
-    sub_08024268();
+    RebuildMapUnitLayers2();
 
     proc->unk20 = gMap->scrollX;
     proc->unk22 = gMap->scrollY;
 
-    sub_0803D6D0();
-    sub_08037638(0x06000000 + gUnknown_03002B6C.bits.chr_block * 0x4000,
+    SnapshotTeamColorsFromPlayers();
+    ShowMapPreview(0x06000000 + gUnknown_03002B6C.bits.chr_block * 0x4000,
         (int)gBG0TilemapBuffer, 1, 9);
     sub_08013AD4(0);
-    sub_0801237C();
-    sub_08012358();
+    ResetWindowShadows();
+    SetDefaultColorEffects();
 
     gUnknown_03002B6C.bits.priority = 0;
     gUnknown_03001FE8.bits.priority = 2;
     gUnknown_030030B4.bits.priority = 1;
     gUnknown_0300251C.bits.priority = 3;
 
-    sub_08012358();
+    SetDefaultColorEffects();
 
     gUnknown_030030E0.bits.effect = 3;
     gUnknown_030030E0.bits.target1_enable_bg1 = 1;
@@ -44,3 +44,4 @@ void sub_0802C2D8(struct Unk2C2D8Proc *proc)
 
     gUnknown_03001FFC = 0;
 }
+asm(".global sub_0802C2D8\n.thumb_set sub_0802C2D8, MinimapScreen_Init\n");

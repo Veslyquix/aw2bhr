@@ -13,15 +13,16 @@
  * flag would be backwards, the shift is on the CONSTANT.
  *
  * gUnknown_03001FBC is declared s16 and arrives as a plain `ldrb` because
- * sub_08015C30 takes u8; the truncation is free in that direction. */
-void sub_08000DC0(void)
+ * ClearSlotScriptCallback takes u8; the truncation is free in that direction. */
+void DesignRoomProc_Loop(void)
 {
-    sub_0800057C();
-    sub_08002EC8();
+    DesignRoomRunMode();
+    DesignRoomDrawUi();
 
     if (gActiveMap->flags & 0x4000)
     {
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
         gUnknown_030040A0 = 0;
     }
 }
+asm(".global sub_08000DC0\n.thumb_set sub_08000DC0, DesignRoomProc_Loop\n");

@@ -15,7 +15,7 @@
  * form. Both are the same 24-byte `movs`/`b`/`movs` shape, but agbcc emits the
  * `<=` spelling with `ble` reaching the 1-arm, while the ROM has `bgt` reaching
  * the 0-arm -- i.e. the source's if-body is the ZERO. */
-int sub_08062730(struct Unit *a, struct Unit *b)
+int AiIsEnemyThreatWindowNearUnit(struct Unit *a, struct Unit *b)
 {
     int dx;
     int dy;
@@ -33,12 +33,13 @@ int sub_08062730(struct Unit *a, struct Unit *b)
     dist = dx + dy;
 
     if (GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->type) == 1)
-        cost = sub_08058224(a) + sub_08058224(b) + 1;
+        cost = GetUnitMovementBudget(a) + GetUnitMovementBudget(b) + 1;
     else
-        cost = sub_08058224(a) + GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->type);
+        cost = GetUnitMovementBudget(a) + GetUnitFiringRangeWithCoBonus(gUnknown_030033EC, b->type);
 
     if (dist > cost)
         return 0;
     else
         return 1;
 }
+asm(".global sub_08062730\n.thumb_set sub_08062730, AiIsEnemyThreatWindowNearUnit\n");

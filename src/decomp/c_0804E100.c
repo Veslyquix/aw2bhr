@@ -7,16 +7,8 @@
  * sub_0804E100 @ 0x0804E100
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0804E100.
- * sub_0804E100 @ 0x0804E100
- */
-
-
 /* F087 -- three members that differ only in one size constant. The whole
- * function is one call to sub_08011E54(src, dest, size) with size 0x800.
+ * function is one call to RegisterDataMove(src, dest, size) with size 0x800.
  *
  * Both `lsls #N; lsrs #0x10` pairs are a MULTIPLY that agbcc shortened to
  * HImode, not a shift and not a mask: `shorten_binary_op` applies to
@@ -36,11 +28,12 @@
  * before any use -- so it is present in the signature and unused. The
  * destination base is a bare VRAM literal, not a symbol.
  */
-void sub_0804E100(u16 a, int unused, u16 c)
+void CopyFigurePose800(u16 a, int unused, u16 c)
 {
     u16 src = c * 0x800;
     u16 dest = a * 0x2000;
 
-    sub_08011E54((u8 *)gUnknown_02029BA8[a].unk18[0] + src,
+    RegisterDataMove((u8 *)gUnknown_02029BA8[a].unk18[0] + src,
                  (void *)(0x06010000 + dest), 0x800);
 }
+asm(".global sub_0804E100\n.thumb_set sub_0804E100, CopyFigurePose800\n");

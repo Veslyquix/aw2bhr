@@ -9,12 +9,13 @@
 
 #include "proc.h"
 
-/* Family F032, and byte-identical to sub_08039914 -- same nullary bool8
- * predicate, same break. See the note there on why sub_08019850 takes no
+/* Family F032, and byte-identical to BlockingCoSpeech_Wait2 -- same nullary bool8
+ * predicate, same break. See the note there on why IsCoSpeechScriptRunning takes no
  * argument despite the untouched r0. */
 
-void sub_080784C8(ProcPtr proc)
+void BlockingCoSpeech_Wait(ProcPtr proc)
 {
-    if (sub_08019850() == 0)
+    if (IsCoSpeechScriptRunning() == 0)
         Proc_Break(proc);
 }
+asm(".global sub_080784C8\n.thumb_set sub_080784C8, BlockingCoSpeech_Wait\n");

@@ -11,7 +11,7 @@
 /* gUnknown_08090978 in the asm is NOT a global: the ROM word at 0x08090978
  * holds 0x08499590, i.e. it is agbcc's own -fforce-addr address constant for
  * gUnknown_08499590 (same case as gUnknown_080909A4 / gUnknown_080909B0 in
- * sub_08022580 / sub_080227A8).  Naming the global honestly reproduces
+ * RedrawUnitLayer / RedrawUnitIconLayer).  Naming the global honestly reproduces
  * `ldr r6,=.LC; ldr r0,[r6]; ldr r1,[r0]`.
  *
  * +4 / +6 are the camera's pixel scroll, unwrapped to tile units by
@@ -22,8 +22,8 @@
  * picking each one up at its first use.
  *
  * The counter is s16 (`lsls #0x10; asrs #0x10` at the head, `ble` at the
- * bottom), unlike the u16 counters of the sub_08022580 twins. */
-void sub_08021D10(void)
+ * bottom), unlike the u16 counters of the RedrawUnitLayer twins. */
+void RenderMap(void)
 {
     s16 y;
 
@@ -35,5 +35,6 @@ void sub_08021D10(void)
                      (u16)(y + (gMap->scrollY >> 4)));
     }
 
-    sub_08013B1C();
+    BG_EnableSyncBG3();
 }
+asm(".global sub_08021D10\n.thumb_set sub_08021D10, RenderMap\n");

@@ -7,7 +7,7 @@
  * sub_0806D208 @ 0x0806D208
  */
 
-void sub_0806D208(struct Unk08580934_Obj *obj)
+void RulesScreenRuleOptionEnterSlide_Loop(struct Unk08580934_Obj *obj)
 {
     if (obj->unk24 != 0)
     {
@@ -17,12 +17,13 @@ void sub_0806D208(struct Unk08580934_Obj *obj)
     {
         obj->unk28 = obj->unk2c + gUnknown_08581E70[obj->unk26];
 
-        sub_0806D0D8(obj);
+        RulesScreenRuleOption_Draw(obj);
 
         if (--obj->unk26 < 0)
         {
             gUnknown_08580934->unk2d--;
-            sub_08015C30(gUnknown_03001FBC);
+            ClearSlotScriptCallback(gUnknown_03001FBC);
         }
     }
 }
+asm(".global sub_0806D208\n.thumb_set sub_0806D208, RulesScreenRuleOptionEnterSlide_Loop\n");

@@ -7,7 +7,7 @@
  * sub_0806C8A0 @ 0x0806C8A0
  */
 
-void sub_0806C8A0(void)
+void ClearCreditsPageArea(void)
 {
     int i;
     int j;
@@ -16,5 +16,6 @@ void sub_0806C8A0(void)
         for (j = 8; j <= 0x1d; j++)
             gBG0TilemapBuffer[i * 32 + j] = 0;
 
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_0806C8A0\n.thumb_set sub_0806C8A0, ClearCreditsPageArea\n");

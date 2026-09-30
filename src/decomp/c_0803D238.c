@@ -39,7 +39,7 @@ struct Rec
  * nothing needs to name the 0x0809 addresses. The save locals are `int`, not
  * `u16`: the ROM stores them with `str` and reads them back with `ldrh`,
  * which is a word-wide local narrowed by the u16 store at the far end. */
-void sub_0803D238(u8 *a1)
+void PlaceMapRecordUnits(u8 *a1)
 {
     int save0;
     int save1;
@@ -62,6 +62,7 @@ void sub_0803D238(u8 *a1)
     gUnknown_030033EC = save0;
     gUnknown_03003F2C = save1;
 }
+asm(".global sub_0803D238\n.thumb_set sub_0803D238, PlaceMapRecordUnits\n");
 
 /* The 5-byte copy loop REUSES `x` rather than taking a fresh `i`, and that is
  * a real byte difference, not a style choice: a fresh counter is a separate
@@ -70,7 +71,7 @@ void sub_0803D238(u8 *a1)
  * puts it in r4 in both. Declaration order does not reach this -- moving `i`
  * to the end of the declaration list, into its own block, or binding the
  * source base to a named pointer were all measured and none moved it. */
-void sub_0803D2F8(int a1, u8 *a2)
+void CopyMapRecordToGMap(int a1, u8 *a2)
 {
     int x, y, k;
 
@@ -80,7 +81,7 @@ void sub_0803D2F8(int a1, u8 *a2)
         gUnknown_03003FF3[x] = ((struct Rec *)a2)->unk4C4[x];
     gMap->width = ((struct Rec *)a2)->width;
     gMap->height = ((struct Rec *)a2)->height;
-    sub_080215FC();
+    InitMapRowOffsets();
     k = 0;
     for (y = 0; y < gMap->height; y++) {
         for (x = 0; x < gMap->width; x++) {
@@ -91,3 +92,4 @@ void sub_0803D2F8(int a1, u8 *a2)
         }
     }
 }
+asm(".global sub_0803D2F8\n.thumb_set sub_0803D2F8, CopyMapRecordToGMap\n");

@@ -20,13 +20,13 @@ struct Unk40BB8Proc
     /* 4c */ s16 unk4c;
 };
 
-void sub_08040BB8(struct Unk40BB8Proc *proc)
+void CaptureAnimPopup_Loop(struct Unk40BB8Proc *proc)
 {
     int t = Interpolate(1, 0, 0x100, proc->unk4c, 10);
     int xv = proc->unk3c & 0x1FF;
     int yv = (proc->unk3e - 0x10) & 0xFF;
 
-    sub_0801C254(proc->unk30, xv, yv | 0x100);
+    AP_Update(proc->unk30, xv, yv | 0x100);
 
     SetObjAffine(0,
                  Div(COS_Q12(0) * 16, t != 0 ? t : 2),
@@ -37,3 +37,4 @@ void sub_08040BB8(struct Unk40BB8Proc *proc)
     if (proc->unk4c <= 9)
         proc->unk4c++;
 }
+asm(".global sub_08040BB8\n.thumb_set sub_08040BB8, CaptureAnimPopup_Loop\n");

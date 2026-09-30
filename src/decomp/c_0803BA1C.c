@@ -25,13 +25,14 @@
  * this block use: the exit test is `cmp r4,#0x9f; ble` on a plain `adds r4,#1`
  * with no `lsls`/`lsrs` wraparound pair. */
 
-void sub_0803BA1C(void)
+void ClearCampaignFlags60To9F(void)
 {
     int i;
 
-    sub_080745C0();
+    ClearWorldMapMarkers();
     gUnknown_0200C420.unk38[0].unk00_08 = 0;
 
     for (i = 0x60; i <= 0x9f; i++)
-        sub_0803CBA0(i, 0);
+        SetCampaignCompletionFlag(i, 0);
 }
+asm(".global sub_0803BA1C\n.thumb_set sub_0803BA1C, ClearCampaignFlags60To9F\n");

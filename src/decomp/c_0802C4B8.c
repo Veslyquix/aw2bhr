@@ -13,26 +13,28 @@
  * The incoming r0 is saved into r4 across the first call and re-emerges as
  * Proc_StartBlocking's second argument, so the parameter is the parent -- and
  * the first call takes NOTHING. That is read off the callee, not off the call
- * site: sub_080413E8's first instruction is `bl sub_0804138C`, and
- * sub_0804138C only stores 0 to gUnknown_030040A8, so no argument register is
+ * site: BuildAttackTargetList's first instruction is `bl ClearAttackTargetList`, and
+ * ClearAttackTargetList only stores 0 to gUnknown_030040A8, so no argument register is
  * consumed anywhere in the chain. A pass-through would be byte-identical here,
  * which is exactly why the readout has to come from the callee side.
  *
- * gUnknown_0849A02C is newly declared `const struct ProcCmd []`: sub_0802B3AC
- * and sub_0802B4D4 hand it straight to Proc_Find, and it is the 0x20-byte slot
+ * gUnknown_0849A02C is newly declared `const struct ProcCmd []`: DrawCursorDamagePreview
+ * and DrawArmyCaptureCounters hand it straight to Proc_Find, and it is the 0x20-byte slot
  * immediately after gUnknown_0849A00C, which is already declared that way. */
 
-void sub_0802C4B8(ProcPtr parent)
+void StartTargetPickList(ProcPtr parent)
 {
-    sub_080413E8();
+    BuildAttackTargetList();
     Proc_StartBlocking(gUnknown_0849A02C, parent);
 }
+asm(".global sub_0802C4B8\n.thumb_set sub_0802C4B8, StartTargetPickList\n");
 
-/* Family F075, second member -- see sub_0802C4B8. Same teardown call, the next
+/* Family F075, second member -- see StartTargetPickList. Same teardown call, the next
  * proc script along. */
 
-void sub_0802C4D4(ProcPtr parent)
+void StartTargetPickCursor(ProcPtr parent)
 {
-    sub_080413E8();
+    BuildAttackTargetList();
     Proc_StartBlocking(gUnknown_0849A04C, parent);
 }
+asm(".global sub_0802C4D4\n.thumb_set sub_0802C4D4, StartTargetPickCursor\n");

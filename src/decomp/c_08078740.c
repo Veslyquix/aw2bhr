@@ -7,14 +7,7 @@
  * sub_08078740 @ 0x08078740
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08078740.
- * sub_08078740 @ 0x08078740
- */
-
-void sub_08078740(void)
+void SetCoSelectGroupSwitchNone(void)
 {
     u32 *base;
     u32 *p;
@@ -28,3 +21,4 @@ void sub_08078740(void)
         *p-- = v;
     while ((int)p >= (int)base);
 }
+asm(".global sub_08078740\n.thumb_set sub_08078740, SetCoSelectGroupSwitchNone\n");

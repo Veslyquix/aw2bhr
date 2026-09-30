@@ -1,1 +1,1 @@
-{"candidate_bytes": 108, "exact_size": false, "percent": 27.59, "size_delta": -8, "target_bytes": 116}
+{"candidate_bytes": 116, "exact_size": true, "origin": "permuter", "percent": 78.45, "scored_over": "max(candidate, target)", "size_delta": 0, "source_sha1": "6603c1fa4831404bc55ebe497ec1fa67f3588a6b", "target_bytes": 116}

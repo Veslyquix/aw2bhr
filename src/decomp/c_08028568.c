@@ -4,14 +4,14 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08028568.
- * FinalizeBattleResult @ 0x08028568
+ * FinalizeMatchResult @ 0x08028568
  */
 
-void FinalizeBattleResult(void)
+void FinalizeMatchResult(void)
 {
-    sub_08027118();
-    sub_0807443C();
+    ClearTeammateDefeats();
+    RunMapEventsAtMatchEnd();
     gUnknown_030032D8 = 0x12;
 }
 
-asm(".global sub_08028568\n.thumb_set sub_08028568, FinalizeBattleResult\n");
+asm(".global sub_08028568\n.thumb_set sub_08028568, FinalizeMatchResult\n");

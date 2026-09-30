@@ -10,11 +10,11 @@
 
 #include "hardware.h"
 
-void sub_0802C3D0(void)
+void MinimapScreen_Loop(void)
 {
-    sub_08023824();
-    sub_08023518();
-    sub_08023908(8);
+    HandleMoveMapCursor();
+    MoveMapCursorFromHeldKeys();
+    HandleMoveCameraWithMapCursor(8);
 
     if (gMap->unk10 & 0xf)
         return;
@@ -25,6 +25,7 @@ void sub_0802C3D0(void)
     if (!(gpKeySt->pressed & (A_BUTTON | B_BUTTON | START_BUTTON)))
         return;
 
-    sub_0803B4DC(0x66);
-    sub_08015C30(gUnknown_03001FBC);
+    PlayMusicOrSfx2(0x66);
+    ClearSlotScriptCallback(gUnknown_03001FBC);
 }
+asm(".global sub_0802C3D0\n.thumb_set sub_0802C3D0, MinimapScreen_Loop\n");

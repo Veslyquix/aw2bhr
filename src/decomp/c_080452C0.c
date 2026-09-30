@@ -7,13 +7,6 @@
  * sub_080452C0 @ 0x080452C0
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080452C0.
- * sub_080452C0 @ 0x080452C0
- */
-
 #include "proc.h"
 /* Only +0x2c, +0x3c and +0x40 are touched here; the rest of the proc is
  * whatever struct Proc already describes. The `adds r0, #0x2c` before the
@@ -28,7 +21,7 @@ struct Unk452C0Proc
     /* 40 */ int unk40;
 };
 
-void sub_080452C0(int a, int b, int c)
+void StartCoPowerUnitSparkle(int a, int b, int c)
 {
     struct Unk452C0Proc *proc = Proc_Start(gUnknown_084A096C, PROC_TREE_3);
 
@@ -36,3 +29,4 @@ void sub_080452C0(int a, int b, int c)
     proc->unk40 = b;
     proc->unk2c = c;
 }
+asm(".global sub_080452C0\n.thumb_set sub_080452C0, StartCoPowerUnitSparkle\n");

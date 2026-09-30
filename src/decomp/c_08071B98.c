@@ -7,14 +7,8 @@
  * sub_08071B98 @ 0x08071B98
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08071B98.
- * sub_08071B98 @ 0x08071B98
- */
-
-void sub_08071B98(u16 *p, int v)
+void SetPalFadeStop(u16 *p, int v)
 {
     p[0x16] = v;
 }
+asm(".global sub_08071B98\n.thumb_set sub_08071B98, SetPalFadeStop\n");

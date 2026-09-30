@@ -7,63 +7,72 @@
  * sub_08016824 @ 0x08016824, sub_080168BC @ 0x080168BC
  */
 
-/* The rotate/scale half of the pair with sub_080168BC: grab a free affine
- * matrix slot, record it on the OBJ's gUnknown_0200E438 entry, and switch the
- * sprite into affine mode with that matrix. Same fetch/poke/hand-back template
- * as src/decomp/c_08016944.c.
+
+/*
+ * EnableSlotSpriteAffine -- switch a sprite into rotate/scale mode.
  *
- * `sub_0801DAB0()` takes NO argument here -- the ROM leaves r0 holding this
- * function's own incoming parameter across the `bl`, which no spelling of
- * `sub_0801DAB0(a)` can produce once `a` is a declared-narrow parameter (the
- * value it would pass is the zero-extended pseudo in r5, and that needs an
- * `adds r0,r5,#0` the ROM does not have). See the note on the prototype in
- * include/unknown-functions.h.
+ * `a` is a gUnknown_03001470 slot, and its .unk26 names the OBJ in
+ * gUnknown_0200E438. AllocObjAffineSlot hands out a free affine matrix; the matrix
+ * index is recorded on the OBJ's .unk3a, and then the OBJ's OAM attributes are
+ * fetched with CopySlotSpriteAttrs, patched and handed back with SetSlotSpriteAttrs:
+ * affine mode on, and the matrix index split across three OAM fields -- its
+ * low 3 bits are matrixNum, bit 3 is hFlip and bit 4 is vFlip. DisableSlotSpriteAffine
+ * below undoes all of this.
  *
- * `s8 v` is a genuine s8 LOCAL and not an int with casts: the `lsls #0x18;
- * lsrs #0x18` right after the `strh` is PROMOTE_MODE zero-extending the
- * assignment, and the later `lsls #0x18; asrs #0x18` is the one signed use
- * re-extending it -- four instructions for one value, the shape wave 35's brief
- * records. The matrix index is unpacked out of it into three OAM fields: the
- * low 3 bits are matrixNum, bit 3 is hFlip and bit 4 is vFlip. */
-void sub_08016824(s16 a)
+ * Why the C looks odd: AllocObjAffineSlot is called with no argument at all, because
+ * the original passes on whatever the argument register already held, which
+ * here is this function's own parameter. Writing `AllocObjAffineSlot(a)` adds a
+ * register copy the original does not have; see the note on the prototype in
+ * include/unknown-functions.h. `v` is a real s8 local rather than an int with
+ * casts, which is what puts one sign-extension after the store and another at
+ * its one signed use.
+ */
+void EnableSlotSpriteAffine(s16 a)
 {
     struct OamData o;
     int m;
     s8 v;
 
-    m = sub_0801DAB0();
+    m = AllocObjAffineSlot();
     gUnknown_0200E438[gUnknown_03001470[a].unk26].unk3a = m;
     v = m;
-    sub_0801566C(a, (struct UnkVec *)&o);
+    CopySlotSpriteAttrs(a, (struct UnkVec *)&o);
     o.affineEnable = 1;
     o.matrixNum = v & 7;
     o.hFlip = (v & 8) >> 3;
     o.vFlip = (v & 0x10) >> 4;
-    sub_08015608(a, *(struct UnkVec *)&o);
+    SetSlotSpriteAttrs(a, *(struct UnkVec *)&o);
 }
+asm(".global sub_08016824\n.thumb_set sub_08016824, EnableSlotSpriteAffine\n");
 
-/* The un-rotate half of sub_08016824: release the affine matrix slot the OBJ
- * was holding (sub_0801DAE8 is sub_0801DAB0's free), mark the slot free with
- * -1, and clear the four OAM fields sub_08016824 set. Same fetch/poke/hand-back
- * template as src/decomp/c_08016944.c.
+
+/*
+ * DisableSlotSpriteAffine -- take a sprite back out of rotate/scale mode.
  *
- * The single `lsls #0x10; asrs #0x10` at entry is the `(s16)a` cast of an int
- * parameter, NOT a declared-narrow one -- sub_08016824 next door opens with the
- * zero-extending `lsrs` instead, which is what an s16 parameter gives.
- * `0xFFFF` rather than `-1`: the ROM materialises the constant from a
- * `.4byte 0x0000FFFF` pool word, which is the u16 spelling; `-1` builds it with
- * `movs #1; rsbs`. */
-void sub_080168BC(int a)
+ * Undoes EnableSlotSpriteAffine above: FreeObjAffineSlot releases the affine matrix the OBJ
+ * was holding, the OBJ's .unk3a goes to 0xFFFF to mark it as holding none, and
+ * the OAM fields EnableSlotSpriteAffine set are cleared through the same fetch, patch
+ * and hand-back pair. doubleSize is cleared here although EnableSlotSpriteAffine never
+ * sets it.
+ *
+ * Why the C looks odd: `a` is an int with `(s16)` casts rather than an s16
+ * parameter -- the casts sign-extend it, where a declared s16 parameter would
+ * arrive zero-extended -- and the "no matrix" value is written 0xFFFF and not
+ * -1, because the original loads it as a stored constant instead of building
+ * it out of 1.
+ */
+void DisableSlotSpriteAffine(int a)
 {
     struct OamData o;
 
-    sub_0801DAE8(gUnknown_0200E438[gUnknown_03001470[(s16)a].unk26].unk3a);
+    FreeObjAffineSlot(gUnknown_0200E438[gUnknown_03001470[(s16)a].unk26].unk3a);
     gUnknown_0200E438[gUnknown_03001470[(s16)a].unk26].unk3a = 0xFFFF;
-    sub_0801566C(a, (struct UnkVec *)&o);
+    CopySlotSpriteAttrs(a, (struct UnkVec *)&o);
     o.affineEnable = 0;
     o.doubleSize = 0;
     o.matrixNum = 0;
     o.hFlip = 0;
     o.vFlip = 0;
-    sub_08015608(a, *(struct UnkVec *)&o);
+    SetSlotSpriteAttrs(a, *(struct UnkVec *)&o);
 }
+asm(".global sub_080168BC\n.thumb_set sub_080168BC, DisableSlotSpriteAffine\n");

@@ -26,10 +26,10 @@ struct Mtx43 /* 0x30 */
     /* 0x00 */ s32 m[4][3];
 };
 
-void sub_08063FEC(struct Mtx43 *mtx, s16 a)
+void BuildRotationMatrixX(struct Mtx43 *mtx, s16 a)
 {
-    s16 c = sub_0801BAA8(a) >> 2;
-    int s = sub_0801BA4C(a);
+    s16 c = CosDegrees(a) >> 2;
+    int s = SinDegrees(a);
 
     mtx->m[0][0] = 0x1000;
     mtx->m[0][1] = 0;
@@ -41,3 +41,4 @@ void sub_08063FEC(struct Mtx43 *mtx, s16 a)
     mtx->m[2][1] = s >> 2;
     mtx->m[2][2] = c;
 }
+asm(".global sub_08063FEC\n.thumb_set sub_08063FEC, BuildRotationMatrixX\n");

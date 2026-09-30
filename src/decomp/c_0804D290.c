@@ -4,15 +4,15 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0804D290.
- * sub_0804D290 @ 0x0804D290
+ * CruiserFigure_Init @ 0x0804D290
  */
 
 /* MATCHED -- byte-for-byte identical to the original.
  *
  * Rebuilds the OBJ attributes of the current gUnknown_03001470 slot, reseeds
- * the gUnknown_02029A10 entry's position from the ROM table sub_08057D44 hands
+ * the gUnknown_02029A10 entry's position from the ROM table GetFigurePositionTable hands
  * back, then arms a continuation out of gUnknown_08552FB8. Same family as
- * sub_0804D928 / sub_0804E3B4 / sub_0804EEFC -- see those for the `* 0x100`,
+ * CruiserPart2_Init / BattleshipPart2_Init / WholeFigure_Init -- see those for the `* 0x100`,
  * the `pal`/`prio` temporaries and the `(e1 = &pos[...])` binding.
  *
  * TWO of the three constructs below are levers, not natural source, and both
@@ -20,7 +20,7 @@
  * exact to 588 bytes -- SMALLER than the ROM, which is the tell.
  *
  * 1. `ox` / `oy`. The ROM materialises BOTH camera-origin pointers, one of them
- *    into `ip`, before it computes even the first argument of sub_080155C0.
+ *    into `ip`, before it computes even the first argument of SetSlotSpritePosition.
  *    Only a pair of locals forces that order.
  *
  * 2. `do { } while (0)`. The wave-16 allocation lever: allocno_compare weights
@@ -55,7 +55,7 @@ struct UnkPosPair
     u16 y;
 };
 
-void sub_0804D290(void)
+void CruiserFigure_Init(void)
 {
     struct OamData oam;
     u16 pal;
@@ -67,7 +67,7 @@ void sub_0804D290(void)
     u16 *ox;
     u16 *oy;
 
-    sub_0801566C(gUnknown_03001FBC, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(gUnknown_03001FBC, (struct UnkVec *)&oam);
 
     gUnknown_03001470[gUnknown_03001FBC].unk2c = 0;
     gUnknown_03001470[gUnknown_03001FBC].unk30 = gUnknown_0300453C;
@@ -82,7 +82,7 @@ void sub_0804D290(void)
 
     do
     {
-        pos = (struct UnkPosPair *)sub_08057D44(
+        pos = (struct UnkPosPair *)GetFigurePositionTable(
             gUnknown_085D6A48[(meta = gUnknown_03004580,
                 gUnknown_03004582[gUnknown_0300453C][0])][0],
             gUnknown_03004580[gUnknown_0300453C][3]);
@@ -98,17 +98,19 @@ void sub_0804D290(void)
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].unk06;
     gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].unk1e = 0;
 
-    sub_0804BCB8(gUnknown_0300453C, 0, 0, 0);
+    StartFigureEntrySlide(gUnknown_0300453C, 0, 0, 0);
 
-    sub_08015608(gUnknown_03001FBC, *(struct UnkVec *)&oam);
+    SetSlotSpriteAttrs(gUnknown_03001FBC, *(struct UnkVec *)&oam);
 
     ox = gUnknown_084C3F70[gUnknown_0300453C];
     oy = gUnknown_084C3F78[gUnknown_0300453C];
-    sub_080155C0(gUnknown_03001FBC,
+    SetSlotSpritePosition(gUnknown_03001FBC,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].x - *ox,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y - *oy);
 
-    sub_08015928(gUnknown_03001FBC,
+    SetSlotSpriteHook(gUnknown_03001FBC,
         gUnknown_08552FB8[gUnknown_03004582[gUnknown_0300453C][0]]
                          [gUnknown_03004580[gUnknown_0300453C][2]][2]);
 }
+
+asm(".global sub_0804D290\n.thumb_set sub_0804D290, CruiserFigure_Init\n");

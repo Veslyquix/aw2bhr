@@ -11,22 +11,23 @@
  * exit path, so the whole tail after sub_080152C0 is a `while (1)` body.
  * sub_080152C0's first parameter is declared s32, so the ProcCmd table needs
  * the usual cast at the call. */
-void sub_08052EA8(void)
+void BattleAnimFrameDriver(void)
 {
     sub_0808BBA4();
-    sub_080123EC();
-    sub_08012420();
-    sub_08011C18();
-    sub_08015184();
+    ResetDisplayState();
+    FlushDisplayRegisters();
+    ClearTileRigistry();
+    InitSlotScripts();
     sub_080152C0((s32)gUnknown_08553754, 0);
 
     while (1)
     {
-        sub_0801E0F0();
-        sub_08015954();
-        sub_0801D924();
-        sub_08011FF0();
-        sub_08012420();
-        sub_0801D8E4();
+        ClearOamShadow();
+        RunAllSlotScripts();
+        DrawSpriteScripts();
+        FlushTiles();
+        FlushDisplayRegisters();
+        TickSpriteScripts();
     }
 }
+asm(".global sub_08052EA8\n.thumb_set sub_08052EA8, BattleAnimFrameDriver\n");

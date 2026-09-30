@@ -14,7 +14,7 @@
 #include "hardware.h"
 #include "proc.h"
 /* One of the block's sprite builders, and the closest relative of the
- * sub_080829B0 / sub_08082C0C / sub_08083034 group in src/decomp/c_080824D4.c:
+ * MainMenuCarouselWheel_DrawTileFlipIn / MainMenuCarouselWheel_DrawRotateWithFlip / MainMenuCarouselWheel_DrawRotate group in src/decomp/c_080824D4.c:
  * the same affine head and the same five-step PutSprite loop, but it owns its
  * own phase counter (+0x4c) rather than taking a step as a parameter, and it
  * ends the proc with Proc_Break when that counter runs past 0xB.
@@ -24,7 +24,7 @@
  * setup duplicated. That is NOT gcc cross-jumping the two arms of
  *     if (t <= 3) { unk38 = Interpolate(..); SetObjAffine(..); }
  *     else        { unk38 = Interpolate(..); SetObjAffine(..); }
- * the way sub_080829B0's head is -- that spelling was probed here and gcc
+ * the way MainMenuCarouselWheel_DrawTileFlipIn's head is -- that spelling was probed here and gcc
  * emitted BOTH affine tails in full (two gSinLut pool words, ~90 extra bytes).
  * The difference is that cross-jumping walks backwards from a jump and stops at
  * the first label, and this affine tail contains two of them (the `unk38 != 0 ?
@@ -46,7 +46,7 @@ struct Unk808177C
 };
 void sub_08084700(struct Unk808177C *);
 
-void MainMenuC2_IDLE_0808177D(struct Unk808177C *p)
+void MainMenuCarouselWheel_CentreTilePopLoop(struct Unk808177C *p)
 {
     int i;
 
@@ -95,4 +95,4 @@ void MainMenuC2_IDLE_0808177D(struct Unk808177C *p)
     sub_08084700(p);
 }
 
-asm(".global sub_0808177C\n.thumb_set sub_0808177C, MainMenuC2_IDLE_0808177D\n");
+asm(".global sub_0808177C\n.thumb_set sub_0808177C, MainMenuCarouselWheel_CentreTilePopLoop\n");

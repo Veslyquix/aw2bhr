@@ -11,13 +11,6 @@
  * below so every other unit keeps resolving them unchanged.
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0806938C.
- * IntroT3_0806938D @ 0x0806938C
- */
-
 #include "proc.h"
 #include "hardware.h"
 struct Unk6938CProc
@@ -29,7 +22,7 @@ struct Unk6938CProc
 /* Wave 53, W53-D. MATCHED first attempt; the whole function reads off
  * c_080691BC.c / c_080694EC.c, which are the same subsystem's already-promoted
  * neighbours and carry the identical `for (i = 0; i < 0x400; i++)
- * gBG0TilemapBuffer[i] += 0x140;` loop and the same 10-argument sub_080679D8
+ * gBG0TilemapBuffer[i] += 0x140;` loop and the same 10-argument StartIntroBgAffineTween
  * call.
  *
  * gBG0TilemapBuffer and gBG2TilemapBuffer are REAL ROM pointer variables, not
@@ -45,7 +38,7 @@ void IntroT3_0806938D(struct Unk6938CProc *proc)
 {
     int i;
 
-    proc->unk2c = sub_080674F4(gUnknown_0202F204++);
+    proc->unk2c = GetIntroSceneDuration(gUnknown_0202F204++);
 
     SetDispEnable(1, 1, 0, 0, 1);
 
@@ -54,9 +47,9 @@ void IntroT3_0806938D(struct Unk6938CProc *proc)
     gUnknown_03002B6C.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
 
-    sub_08012358();
-    sub_08063994();
-    sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 2);
+    SetDefaultColorEffects();
+    ResetBgAffineToScreenCentre();
+    SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_030030B4, 2);
 
     Decompress(gUnknown_08183B14, gBG2TilemapBuffer);
     ApplyPaletteExt(gUnknown_08183C28, 0, 0x80);
@@ -67,16 +60,16 @@ void IntroT3_0806938D(struct Unk6938CProc *proc)
     for (i = 0; i < 0x400; i++)
         gBG0TilemapBuffer[i] += 0x140;
 
-    sub_08013AEC();
-    sub_08013B0C();
-    sub_08013B1C();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG2();
+    BG_EnableSyncBG3();
 
-    sub_08072C40(0, 0, 0);
-    sub_08072C40(1, 0, 0);
-    sub_08072C40(2, 0, 0);
+    SetBgScrollShadow(0, 0, 0);
+    SetBgScrollShadow(1, 0, 0);
+    SetBgScrollShadow(2, 0, 0);
 
-    sub_080677BC(0, 0, -5, proc);
-    sub_080679D8(2, 1, 0, 0x88, 0x3800, 0, 0xc0, 0x100, 0xc, proc);
+    StartIntroBgScroll(0, 0, -5, proc);
+    StartIntroBgAffineTween(2, 1, 0, 0x88, 0x3800, 0, 0xc0, 0x100, 0xc, proc);
 }
 
 asm(".global sub_0806938C\n.thumb_set sub_0806938C, IntroT3_0806938D\n");

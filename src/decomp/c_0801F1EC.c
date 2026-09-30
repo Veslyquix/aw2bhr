@@ -13,16 +13,17 @@
  * hoisted local. The `b` out of the loop body after the call is a plain
  * `return`: the loop is counted and its exit test is NOT strength-reduced,
  * which is the wave-38 discriminator between `break`/`return` and `continue`. */
-void sub_0801F1EC(int a1, int a2)
+void ReloadTilePoolGraphic(int a1, int a2)
 {
     struct Unk0200F920 *e;
     int i;
 
-    e = &gUnknown_0200F920[sub_0801F3D4(a1)];
+    e = &gUnknown_0200F920[GetTilePoolForGraphic(a1)];
     for (i = 0; i < e->unk05; i++) {
         if (e->unk08[i].unk02 == a1) {
-            sub_0801F19C(a2, e->unk00, e->unk08[i].unk00);
+            CopyGraphicToPoolTiles(a2, e->unk00, e->unk08[i].unk00);
             return;
         }
     }
 }
+asm(".global sub_0801F1EC\n.thumb_set sub_0801F1EC, ReloadTilePoolGraphic\n");

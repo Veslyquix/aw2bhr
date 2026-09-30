@@ -17,7 +17,7 @@ struct Unk08087A10
     /* 0x54 */ int unk54;
 };
 
-void PreviewMapRecords_IDLE_08087A11(struct Unk08087A10 *proc)
+void PreviewMapRecords_Loop(struct Unk08087A10 *proc)
 {
     int v;
     int i;
@@ -37,16 +37,16 @@ void PreviewMapRecords_IDLE_08087A11(struct Unk08087A10 *proc)
     {
         if (gUnknown_0200C078[gUnknown_02027F74.unk04[v] - 0x6c].unk00[i].unk00_08 != 0)
         {
-            sub_08087B20(0xc4, i * 0x10 + 0x28,
+            DrawOamObjectNumber(0xc4, i * 0x10 + 0x28,
                 gUnknown_0200C078[gUnknown_02027F74.unk04[v] - 0x6c].unk00[i].unk00_08,
                 0x79);
-            sub_08087B20(0xe4, i * 0x10 + 0x28,
+            DrawOamObjectNumber(0xe4, i * 0x10 + 0x28,
                 gUnknown_0200C078[gUnknown_02027F74.unk04[v] - 0x6c].unk00[i].unk00_14,
                 0x6f);
-            sub_0804402C(0xa0, i * 0x10 + 0x38,
+            PutCoMinimugSprite(0xa0, i * 0x10 + 0x38,
                 0x400 | ((i + 0xa) << 12) | (i * 0xc + 0xb4), 6);
         }
     }
 }
 
-asm(".global sub_08087A10\n.thumb_set sub_08087A10, PreviewMapRecords_IDLE_08087A11\n");
+asm(".global sub_08087A10\n.thumb_set sub_08087A10, PreviewMapRecords_Loop\n");

@@ -7,13 +7,6 @@
  * sub_08012C1C @ 0x08012C1C
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08012C1C.
- * sub_08012C1C @ 0x08012C1C
- */
-
 struct Unk8012C30
 {
     u8 unk00_0 : 2;
@@ -24,7 +17,8 @@ struct Unk8012C30
     u8 unk01_6 : 2;
 };
 
-void sub_08012C1C(struct Unk8012C30 *s, u32 value)
+void SetBgCntTilemapBlock(struct Unk8012C30 *s, u32 value)
 {
     s->unk01_0 = value >> 11;
 }
+asm(".global sub_08012C1C\n.thumb_set sub_08012C1C, SetBgCntTilemapBlock\n");

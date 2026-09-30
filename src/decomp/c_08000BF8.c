@@ -8,12 +8,23 @@
  * sub_08000BF8 @ 0x08000BF8, sub_08000C68 @ 0x08000C68
  */
 
-/* Wave 37 (W37-E). Matched first attempt.
- * The terrain lookup is written through the shared local `struct Map` cast
- * (see include/unknown-globals.h on gUnknown_08499590 and the W34-F note):
- * `map->unk1432[x + map->unk417A[y]]`. Plain byte arithmetic on the `u8 *`
- * reassociates the 0x1432 / 0x417A constants past the index and does not match.
- * unk65 is the "cursor moved" flag this sets and sub_08001DAC consumes. */
+/*
+ * sub_08000BF8 -- flag that the selection and the tile under the cursor differ.
+ *
+ * Compares what the player has selected with what is under the cursor -- the
+ * terrain id in terrain mode, the unit type in unit mode -- and sets
+ * gActiveMap->cursorMoved when they are not the same. DesignRoomUpdateSelectionPanel reads that
+ * flag.
+ *
+ * DesignRoomPickUnderCursor below does the opposite: it plays sound 0x65 and makes whatever
+ * is under the cursor the new selection (DesignRoomSelectItem).
+ *
+ * Why the C looks odd: this spelling does not change what the code does, but
+ * the original compiler only produces identical output with it.
+ *   - The terrain byte must be reached as `gMap->terrain[x + gMap->rowOffset
+ *     [y]]`, not by byte arithmetic on a u8 pointer. The compiler folds the
+ *     two struct offsets into the index differently and the output changes.
+ */
 
 void sub_08000BF8(void)
 {
@@ -33,14 +44,15 @@ void sub_08000BF8(void)
     }
 }
 
-void sub_08000C68(void)
+void DesignRoomPickUnderCursor(void)
 {
-    sub_0803B4DC(0x65);
+    PlayMusicOrSfx2(0x65);
 
     if (gActiveMap->editMode == 0)
-        SetSelectedTile(gMap->terrain[
+        DesignRoomSelectItem(gMap->terrain[
             gActiveMap->cursorX
             + gMap->rowOffset[gActiveMap->cursorY]]);
     else
-        SetSelectedTile(GetUnitTypeAt(gActiveMap->cursorX, gActiveMap->cursorY));
+        DesignRoomSelectItem(GetUnitTypeAt(gActiveMap->cursorX, gActiveMap->cursorY));
 }
+asm(".global sub_08000C68\n.thumb_set sub_08000C68, DesignRoomPickUnderCursor\n");

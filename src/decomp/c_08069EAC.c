@@ -14,12 +14,12 @@
  *
  * unk2c/unk2e/unk30 are `u16` with explicit `(s16)` casts at the four bounds
  * tests, not `s16` members: the call sites emit a bare `ldrh` into
- * sub_08072C40, which an `s16` member could not do -- it would have to
+ * SetBgScrollShadow, which an `s16` member could not do -- it would have to
  * sign-extend and then re-narrow. The `lsl #16; asr #16` at each test is the
  * cast, applied to the value the `strh` just wrote rather than to a reload,
  * which is why no `ldrsh` appears anywhere. (This argument used to be stated
- * as "sub_08072C40's third parameter is u32". That was wrong -- wave 21
- * matched sub_08072C40 itself and all three of its parameters are u16. The
+ * as "SetBgScrollShadow's third parameter is u32". That was wrong -- wave 21
+ * matched SetBgScrollShadow itself and all three of its parameters are u16. The
  * conclusion is unchanged and the file still matches: a bare `ldrh` reaching
  * a u16 parameter needs no conversion either.)
  *
@@ -39,7 +39,7 @@ struct Unk08069EAC
     /* 0x40 */ int unk40;
 };
 
-void sub_08069EAC(struct Unk08069EAC *proc)
+void IntroCoReveal_Loop(struct Unk08069EAC *proc)
 {
     if (proc->unk38 == 0)
     {
@@ -47,16 +47,16 @@ void sub_08069EAC(struct Unk08069EAC *proc)
         proc->unk2e -= 2;
         if ((s16)proc->unk2e <= -0x28)
             proc->unk2e = 0;
-        sub_08072C40(2, proc->unk2a, proc->unk2e);
+        SetBgScrollShadow(2, proc->unk2a, proc->unk2e);
         proc->unk2c -= 8;
         proc->unk30 += 4;
         if ((s16)proc->unk30 <= 0x9F)
         {
             if ((s16)proc->unk2c <= -0x50)
                 proc->unk2c = 0;
-            sub_08072C40(3, proc->unk2c, proc->unk30);
+            SetBgScrollShadow(3, proc->unk2c, proc->unk30);
             if (proc->unk40 == 0x1E)
-                sub_08069D3C(0);
+                SetIntroSplitWindow(0);
         }
     }
     else
@@ -65,19 +65,20 @@ void sub_08069EAC(struct Unk08069EAC *proc)
         proc->unk2e += 2;
         if ((s16)proc->unk2e > 0x27)
             proc->unk2e = 0;
-        sub_08072C40(2, proc->unk2a, proc->unk2e);
+        SetBgScrollShadow(2, proc->unk2a, proc->unk2e);
         proc->unk2c += 8;
         proc->unk30 -= 4;
         if ((s16)proc->unk30 > -0x68)
         {
             if ((s16)proc->unk2c > 0x4F)
                 proc->unk2c = 0;
-            sub_08072C40(3, proc->unk2c, proc->unk30);
+            SetBgScrollShadow(3, proc->unk2c, proc->unk30);
             if (proc->unk40 == 0x1E)
-                sub_08069D3C(1);
+                SetIntroSplitWindow(1);
         }
     }
     proc->unk40++;
     if (proc->unk40 == proc->unk3c)
         Proc_Break(proc);
 }
+asm(".global sub_08069EAC\n.thumb_set sub_08069EAC, IntroCoReveal_Loop\n");

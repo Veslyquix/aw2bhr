@@ -27,7 +27,7 @@
  * the else) which is what preserves the guard's adds r0,r5,#0 copy and its
  * double read by compare + shift. */
 
-void sub_08024720(void)
+void AnimatePowerActiveCoPalettes(void)
 {
     u16 i;
     int idx;
@@ -41,18 +41,19 @@ void sub_08024720(void)
     {
         if (gPlayers[i].aiControlled != 0)
         {
-            if (sub_0804415C(i) && (j = idx) >= 0)
+            if (IsCoPowerActive(i) && (j = idx) >= 0)
             {
                 p = gUnknown_0809139C + j;
-                sub_0801368C(p, (i + 0xb) * 32 + 0x1e, 2);
+                ApplyPaletteAndUploadNow(p, (i + 0xb) * 32 + 0x1e, 2);
             }
             else
             {
                 j = -1;
                 v = (i + 0xb) * 32 + 0x1e;
                 p = gUnknown_0809139C;
-                sub_0801368C(p, v, 2);
+                ApplyPaletteAndUploadNow(p, v, 2);
             }
         }
     }
 }
+asm(".global sub_08024720\n.thumb_set sub_08024720, AnimatePowerActiveCoPalettes\n");

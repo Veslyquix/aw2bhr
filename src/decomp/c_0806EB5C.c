@@ -41,7 +41,7 @@ struct Unk0806ED7CProc
  *
  * That temp is one pseudo spanning both statements, and it is what pushes the
  * parameter out of r4. Written as two store statements through the scalar cast
- * -- the sub_08085F40 spelling -- the parameter keeps r4, the second zero's
+ * -- the MapSelect_SetBlend spelling -- the parameter keeps r4, the second zero's
  * `movs` lands back inside `proc->unk38 = 0`, and every byte falls out. See the
  * mask-and-set table under Bitfields: `.raw` here also ORs in the live zero
  * from `gUnknown_03001FFC = 0` as a spurious `orrs r0, r3`.
@@ -49,34 +49,34 @@ struct Unk0806ED7CProc
  * A `do { } while (0)` round the pair was tried and is NOT needed -- measured
  * both ways, byte-identical. This was not an allocation tie-break.
  */
-void sub_0806EB5C(struct Unk0806EB5CProc *proc)
+void SoundRoomMusicPage_Init(struct Unk0806EB5CProc *proc)
 {
-    sub_0801237C();
-    sub_08012358();
-    sub_08012C58(gUnknown_0849D16C);
+    ResetWindowShadows();
+    SetDefaultColorEffects();
+    SetupBackgrounds(gUnknown_0849D16C);
     gDispIo.disp_ct.obj_mapping = 1;
     SetDispEnable(1, 1, 1, 1, 1);
     gUnknown_03002B6C.bits.priority = 0;
     gUnknown_030030B4.bits.priority = 1;
     gUnknown_03001FE8.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
-    sub_08013C00();
-    sub_08013C54();
-    sub_08013CA8();
+    ClearBg0Tilemap();
+    ClearBg1Tilemap();
+    ClearBg2Tilemap();
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
-    sub_0802D5CC(0, 3);
+    ApplyWindowFramePalette(0, 3);
     Decompress(gUnknown_0823A3D4, (void *)0x06008000);
     Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     Decompress(gUnknown_081A3E28, (void *)0x06000400);
     sub_080718F8(gBG1TilemapBuffer, gUnknown_081A3E3C, 0x1020);
     Decompress(gUnknown_081A4000, (void *)0x06010000);
     Decompress(gUnknown_081A4450, (void *)0x06016000);
-    sub_0801A5B0(0);
-    sub_0801A444(6, 0xf, 0x12, 4);
-    sub_08013AEC();
-    sub_08013AFC();
-    sub_08013B0C();
-    sub_08013B1C();
+    LoadBg1WindowFrame(0);
+    DrawWindowBackgroundOnBg2(6, 0xf, 0x12, 4);
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
+    BG_EnableSyncBG2();
+    BG_EnableSyncBG3();
     gUnknown_030030E0.bits.effect = 1;
     gUnknown_03002020 = 0;
     gUnknown_03002B28 = 0x10;
@@ -86,21 +86,22 @@ void sub_0806EB5C(struct Unk0806EB5CProc *proc)
     proc->unk30 = 1;
     gUnknown_0202F2D8 = 0;
     proc->unk38 = 0;
-    sub_0806F000(proc->unk30, 0x40);
-    sub_08072C40(0, 0xFFC8, 0);
+    SoundRoomDrawTrackTitle(proc->unk30, 0x40);
+    SetBgScrollShadow(0, 0xFFC8, 0);
     proc->unk2c = 0;
     proc->unk34 = gUnknown_08582764[proc->unk30].unk04;
-    sub_0806EB28(proc);
-    sub_08073304(gUnknown_085826E0, gUnknown_02010C50, 0x50, 0xe, 0xa, 0, (int)proc);
-    sub_0806E5CC(proc->unk34, proc);
-    sub_0806E8C8(0, proc);
-    sub_0806E510(proc);
-    sub_0806E728(proc);
-    sub_08073FF4(8, gUnknown_08582C7C, proc);
+    SoundRoomCycleBgPalette(proc);
+    StartHeaderBanner(gUnknown_085826E0, gUnknown_02010C50, 0x50, 0xe, 0xa, 0, (int)proc);
+    StartSoundRoomCoPortrait(proc->unk34, proc);
+    StartSoundRoomArrows(0, proc);
+    SpawnSoundRoomButtons(proc);
+    StartSoundRoomLevelPulse(proc);
+    StartBgScrollAnimator(8, gUnknown_08582C7C, proc);
     Proc_Start(gUnknown_08614200, 0);
 }
+asm(".global sub_0806EB5C\n.thumb_set sub_0806EB5C, SoundRoomMusicPage_Init\n");
 
-/* The resume twin of sub_0806EB5C -- the first 27 statements are identical, and
+/* The resume twin of SoundRoomMusicPage_Init -- the first 27 statements are identical, and
  * the whole of this function was written by copying that one and substituting
  * the tail. Three things differ:
  *
@@ -116,34 +117,34 @@ void sub_0806EB5C(struct Unk0806EB5CProc *proc)
  * both sides of the DC group and agbcc merges the two into one
  * read-modify-write -- see the flush-routine caveat in docs/agbcc-codegen.md.
  */
-void sub_0806ED7C(struct Unk0806ED7CProc *proc)
+void SoundRoomMusicPage_Resume(struct Unk0806ED7CProc *proc)
 {
-    sub_0801237C();
-    sub_08012358();
-    sub_08012C58(gUnknown_0849D16C);
+    ResetWindowShadows();
+    SetDefaultColorEffects();
+    SetupBackgrounds(gUnknown_0849D16C);
     gDispIo.disp_ct.obj_mapping = 1;
     SetDispEnable(1, 1, 1, 1, 1);
     gUnknown_03002B6C.bits.priority = 0;
     gUnknown_030030B4.bits.priority = 1;
     gUnknown_03001FE8.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
-    sub_08013C00();
-    sub_08013C54();
-    sub_08013CA8();
+    ClearBg0Tilemap();
+    ClearBg1Tilemap();
+    ClearBg2Tilemap();
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
-    sub_0802D5CC(0, 3);
+    ApplyWindowFramePalette(0, 3);
     Decompress(gUnknown_0823A3D4, (void *)0x06008000);
     Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     Decompress(gUnknown_081A3E28, (void *)0x06000400);
     sub_080718F8(gBG1TilemapBuffer, gUnknown_081A3E3C, 0x1020);
     Decompress(gUnknown_081A4000, (void *)0x06010000);
     Decompress(gUnknown_081A4450, (void *)0x06016000);
-    sub_0801A5B0(0);
-    sub_0801A444(6, 0xf, 0x12, 4);
-    sub_08013AEC();
-    sub_08013AFC();
-    sub_08013B0C();
-    sub_08013B1C();
+    LoadBg1WindowFrame(0);
+    DrawWindowBackgroundOnBg2(6, 0xf, 0x12, 4);
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
+    BG_EnableSyncBG2();
+    BG_EnableSyncBG3();
     gUnknown_030030E0.bits.effect = 1;
     gUnknown_03002020 = 0;
     gUnknown_03002B28 = 0x10;
@@ -170,15 +171,16 @@ void sub_0806ED7C(struct Unk0806ED7CProc *proc)
     proc->unk2c = gUnknown_0202F2CC;
     proc->unk34 = gUnknown_0202F2D4;
     proc->unk36 = gUnknown_0202F2D6;
-    sub_0806F000(proc->unk30, 0x40);
-    sub_08072C40(0, 0x48 - ((proc->unk30 & 1) << 7), 0);
-    sub_0806EB28(proc);
-    sub_08073304(gUnknown_085826E0, gUnknown_02010C50, 0x50, 0xe, 0xa, 0, (int)proc);
-    sub_0806E5CC(proc->unk34, proc);
-    sub_0806E8C8(0, proc);
-    sub_0806E510(proc);
-    sub_0806E728(proc);
-    sub_08073FF4(8, gUnknown_08582C7C, proc);
+    SoundRoomDrawTrackTitle(proc->unk30, 0x40);
+    SetBgScrollShadow(0, 0x48 - ((proc->unk30 & 1) << 7), 0);
+    SoundRoomCycleBgPalette(proc);
+    StartHeaderBanner(gUnknown_085826E0, gUnknown_02010C50, 0x50, 0xe, 0xa, 0, (int)proc);
+    StartSoundRoomCoPortrait(proc->unk34, proc);
+    StartSoundRoomArrows(0, proc);
+    SpawnSoundRoomButtons(proc);
+    StartSoundRoomLevelPulse(proc);
+    StartBgScrollAnimator(8, gUnknown_08582C7C, proc);
     if (proc->unk2c != 0)
         Proc_Start(gUnknown_08582C5C, proc);
 }
+asm(".global sub_0806ED7C\n.thumb_set sub_0806ED7C, SoundRoomMusicPage_Resume\n");

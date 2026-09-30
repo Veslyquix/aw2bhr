@@ -11,13 +11,6 @@
  * below so every other unit keeps resolving them unchanged.
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08049B70.
- * BattleMaps_08049B71 @ 0x08049B70
- */
-
 /* Family F000 (tools/families.py): `push {lr}; ldr r0,=X; bl S;
  * pop {r0}; bx r0` -- a one-line forwarder. `pop {r0}` is the void epilogue
  * per docs/agbcc-codegen.md, so the callee's result is discarded and this
@@ -25,14 +18,14 @@
  */
 
 
-/* The insert half of the gUnknown_03000000 callback list, where sub_08037780
- * above is a remove. sub_08049BAC is already promoted as void(void) in
+/* The insert half of the gUnknown_03000000 callback list, where RemoveMapPreviewPaletteHook
+ * above is a remove. ShopScreen_ScrollBackgroundHook is already promoted as void(void) in
  * src/decomp/c_08049BAC.c.
  */
 
-void BattleMaps_08049B71(void)
+void ShopScreen_AddScrollBackgroundHook(void)
 {
-    sub_08011B34((void *)sub_08049BAC);
+    AddVBlankHook((void *)ShopScreen_ScrollBackgroundHook);
 }
 
-asm(".global sub_08049B70\n.thumb_set sub_08049B70, BattleMaps_08049B71\n");
+asm(".global sub_08049B70\n.thumb_set sub_08049B70, ShopScreen_AddScrollBackgroundHook\n");

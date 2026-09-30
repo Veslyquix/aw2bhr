@@ -714,6 +714,31 @@ def _write_atomic(path, text):
     os.replace(tmp, path)
 
 
+# Scores are taken over the LONGER of the two functions. They used to be taken
+# over the target only, so a draft that compiled too long was scored on its
+# first `size` bytes and could read 100% while 4 bytes too long. best.json
+# records written since carry "scored_over"; older ones are corrected on read.
+SCORED_OVER = "max(candidate, target)"
+
+
+byte_score = awlib.byte_score
+
+
+def recorded_percent(meta):
+    """best.json's percent on today's scale (see SCORED_OVER)."""
+    pct = meta.get("percent", -1.0)
+    cand, tgt = meta.get("candidate_bytes"), meta.get("target_bytes")
+    if meta.get("scored_over") != SCORED_OVER and cand and tgt and cand > tgt:
+        pct = pct * tgt / cand
+    return pct
+
+
+# Who wrote the source being scored; saved in best.json as "origin".
+# permute.py sets "permuter" while it scores candidates, so a later run knows
+# not to start from a mutation (which can be wrong C) as if a person wrote it.
+RECORD_ORIGIN = "draft"
+
+
 def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None,
                 compiled=None):
     """Keep the highest-scoring candidate seen, beside the current one.
@@ -735,7 +760,7 @@ def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None,
     if os.path.exists(meta):
         try:
             with open(meta, encoding="utf-8") as fh:
-                prev = json.load(fh).get("percent", -1.0)
+                prev = recorded_percent(json.load(fh))
         except (ValueError, OSError):
             prev = -1.0
     if pct <= prev:
@@ -759,6 +784,8 @@ def record_best(workdir, name, pct, candidate_bytes=None, target_bytes=None,
     # surrogateescape, and a plain .encode("utf-8") raises on any non-UTF-8
     # byte in a draft instead of hashing it.
     payload = {"percent": round(pct, 2),
+               "scored_over": SCORED_OVER,
+               "origin": RECORD_ORIGIN,
                "source_sha1": hashlib.sha1(
                    text.encode("utf-8", errors="surrogateescape")).hexdigest()}
     if candidate_bytes is not None and target_bytes is not None:
@@ -942,6 +969,8 @@ def _check(name, want_diff=False, keep_going=False, profile="configured"):
     if profile != "configured":
         print("  compiler profile: %s (TEMPORARY; canonical artifacts and "
               "best.c are untouched)" % profile)
+        if profile == "custom":
+            print("  cflags: %s" % agbenv.flags(fn, profile=profile)["CFLAGS"])
     if len(cand) != size:
         print("  size:  candidate is %d bytes, original is %d  (%+d)"
               % (len(cand), size, len(cand) - size))
@@ -1033,13 +1062,14 @@ def _check(name, want_diff=False, keep_going=False, profile="configured"):
             print("  Record an evidence-backed compiler override, regenerate "
                   "the build override file, then re-run with --profile "
                   "configured.")
+            print("  override for data/compiler-overrides.json: %s"
+                  % json.dumps(agbenv.profile_override(profile)))
         return 0
 
-    n_diff = sum(1 for a, b in zip(tgt_fn, cand_fn) if a != b)
-    common = min(len(tgt_fn), len(cand_fn))
-    pct = (common - n_diff) / size * 100 if size else 0
+    n_diff, common, pct = byte_score(tgt_fn, cand, size)
     LAST_PCT = pct
-    print("  bytes: %d of %d differ  (%.1f%% identical)" % (n_diff, common, pct))
+    print("  bytes: %d of %d differ  (%.1f%% identical)"
+          % (n_diff, max(size, len(cand)), pct))
     if profile == "configured":
         record_best(workdir, fn, pct, len(cand), size, compiled=compiled)
     else:
@@ -1292,10 +1322,11 @@ def self_test():
     """Both halves of the unit oracle, on the case that motivated it.
 
     A verifier that cannot fail is worse than none, so this asserts the
-    NEGATIVE as well: sub_08071918's unit must still be rejected. Its C is
-    byte-exact for the whole body and it fails only on four leading `movs
-    r0, r0` of veneer-table padding that no C emits -- exactly the kind of
-    near-miss a too-eager unit check would wave through.
+    NEGATIVE as well: sub_08071918's unit, with the file-scope asm that emits
+    its four leading `movs r0, r0` taken back out, must be rejected. The C body
+    is byte-exact and it fails only on those 8 bytes of veneer-table padding --
+    exactly the kind of near-miss a too-eager unit check would wave through.
+    The real draft now carries that asm and matches (see its file comment).
     """
     ok = True
 
@@ -1306,10 +1337,17 @@ def self_test():
     ok &= good
 
     print()
-    rc = check_unit("sub_08071918")
+    rc = _unit_without_padding_asm("sub_08071918", "sub_08071920")
     good = (rc == 1)
-    print("\n[self-test] sub_08071918's unit is still REJECTED (leading "
-          "veneer padding): %s" % ("PASS" if good else "FAIL"))
+    print("\n[self-test] sub_08071918's unit without its padding asm is "
+          "REJECTED (leading veneer padding): %s" % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    print()
+    rc = check_unit("sub_08071918")
+    good = (rc == 0)
+    print("\n[self-test] sub_08071918's unit WITH its padding asm verifies "
+          "(the padding is emitted, not hidden): %s" % ("PASS" if good else "FAIL"))
     ok &= good
 
     # Wave 28: a unit holding an asm-resident member must produce a VERDICT.
@@ -1372,6 +1410,29 @@ def self_test():
 
     print("\n[self-test] %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
+
+
+def _unit_without_padding_asm(name, body_name):
+    """check_unit(name) on the merged draft with its file-scope `asm(".text...`
+    padding and `.thumb_set` alias lines removed and the body renamed back to
+    `name` -- the draft as it stood before the padding could be spelled."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import promote as promote_mod
+    real = promote_mod.merge
+
+    def stripped(run, index):
+        text, err = real(run, index)
+        if text is not None:
+            text = "".join(ln for ln in text.splitlines(keepends=True)
+                           if not ln.startswith("asm(\""))
+            text = text.replace(body_name, name)
+        return text, err
+
+    promote_mod.merge = stripped
+    try:
+        return check_unit(name)
+    finally:
+        promote_mod.merge = real
 
 
 def _self_test_missing_draft():
@@ -1494,11 +1555,28 @@ def main():
     ap.add_argument("--self-test", action="store_true",
                     help="check the unit oracle still accepts AgbMain's unit "
                          "and still rejects sub_08071918's")
+    ap.add_argument("--cflags-add", action="append", default=[],
+                    metavar="=FLAG",
+                    help="add one compiler flag on top of --profile, e.g. "
+                         "--cflags-add=-fno-gcse (write it with '='; repeat "
+                         "or comma-separate for several). The result is the "
+                         "temporary profile 'custom'")
+    ap.add_argument("--cflags-remove", action="append", default=[],
+                    metavar="=FLAG",
+                    help="remove one compiler flag, e.g. --cflags-remove=-O2")
     args = ap.parse_args()
     if args.self_test:
         return self_test()
     if not args.name:
         ap.error("give a function name or address")
+    add = [x for v in args.cflags_add for x in v.split(",") if x]
+    remove = [x for v in args.cflags_remove for x in v.split(",") if x]
+    if add or remove:
+        try:
+            args.profile = agbenv.custom_profile(add, remove, base=args.profile,
+                                                 fn=args.name)
+        except ValueError as exc:
+            ap.error(str(exc))
     if args.unit:
         if args.profile != "configured":
             ap.error("--profile is currently a per-function experiment; "

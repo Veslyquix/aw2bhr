@@ -19,8 +19,8 @@
 void SetupCoSelectGreatSeaBattle(void)
 {
     ClearArmyCount();
-    sub_080786A4(sub_08078608(sub_080786F0(0)));
-    sub_08078740();
+    AddCoSelectGroupYellowComet(AddCoSelectGroupOrangeStar(AddCoSelectGroupGreenEarth(0)));
+    SetCoSelectGroupSwitchNone();
 }
 
 asm(".global sub_08078848\n.thumb_set sub_08078848, SetupCoSelectGreatSeaBattle\n");

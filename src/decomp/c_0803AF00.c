@@ -21,23 +21,24 @@ struct Unk0803ACF0
     /* 0x30 */ u16 unk30;
 };
 
-void sub_0803AF00(struct Unk0803ACF0 *p)
+void DebugEdit_Apply(struct Unk0803ACF0 *p)
 {
-    sub_0803CBA0(0x65, p->unk20);
-    sub_0803CBA0(0x66, p->unk22);
-    sub_0803CBA0(0x68, p->unk24);
-    sub_0803CBA0(0x67, p->unk26);
+    SetCampaignCompletionFlag(0x65, p->unk20);
+    SetCampaignCompletionFlag(0x66, p->unk22);
+    SetCampaignCompletionFlag(0x68, p->unk24);
+    SetCampaignCompletionFlag(0x67, p->unk26);
     gUnknown_0200C420.unk00 = p->unk28;
     if (p->unk2a < p->unk28)
         p->unk2a = p->unk28;
     gUnknown_0200C420.unk04 = p->unk2a;
     if (p->unk2c != 0)
-        sub_0803C890();
+        GrantAllShopItems();
     if (p->unk2e == 0)
     {
         gUnknown_0200C420.unk09 = 0;
         gUnknown_0200C420.unk0a = 0;
         gUnknown_0200C420.unk0b = 0;
     }
-    sub_08016E14();
+    WriteProfile();
 }
+asm(".global sub_0803AF00\n.thumb_set sub_0803AF00, DebugEdit_Apply\n");

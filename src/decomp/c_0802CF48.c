@@ -7,22 +7,23 @@
  * sub_0802CF48 @ 0x0802CF48, sub_0802CF6C @ 0x0802CF6C, sub_0802CF94 @ 0x0802CF94, sub_0802CFC0 @ 0x0802CFC0, sub_0802CFDC @ 0x0802CFDC
  */
 
-/* sub_0802CFC0's four-call sibling: the same `if (!(a3 & 2))` guard on the same
+/* MapMenu_Save's four-call sibling: the same `if (!(a3 & 2))` guard on the same
  * three-argument callback signature, with a longer body. See the note on
- * sub_0802CFC0 for why the third parameter is u8 and the first two are a floor
+ * MapMenu_Save for why the third parameter is u8 and the first two are a floor
  * rather than a reading.
  */
 
-void sub_0802CF48(int a1, int a2, u8 a3)
+void IntelMenu_Unit(int a1, int a2, u8 a3)
 {
     if (!(a3 & 2))
     {
-        sub_0801A614();
-        sub_0801A168();
-        sub_08034F10();
-        sub_080485AC();
+        PushMenu();
+        CloseTopMenu();
+        SetMapStateResumeCursor();
+        StartUnitListScreen();
     }
 }
+asm(".global sub_0802CF48\n.thumb_set sub_0802CF48, IntelMenu_Unit\n");
 
 /* Two teardown calls, then a guarded hand-off of gPlaySt.unk2e.
  *
@@ -30,22 +31,23 @@ void sub_0802CF48(int a1, int a2, u8 a3)
  * rather than an `ldrb` displacement, because 0x2e and 0x32 are both past
  * `ldrb`'s 5-bit offset field. That is addressing, NOT the member-array tell --
  * the `adds` lands on a fresh copy of the base each time, not on the base
- * register itself. sub_0802C184 reads unk32 the same way.
+ * register itself. YieldCurrentArmy reads unk32 the same way.
  *
- * unk32 is the same guard sub_0802C184 and sub_08042998 test, so this is the
+ * unk32 is the same guard YieldCurrentArmy and sub_08042998 test, so this is the
  * third independent reader of it, and unk2e is the payload it gates.
  */
 
-void sub_0802CF6C(void)
+void MapMenu_End(void)
 {
-    sub_0801A168();
-    sub_08042B9C();
+    CloseTopMenu();
+    EndCurrentArmyTurn();
 
     if (gPlaySt.savingEnabled != 0)
         sub_080344F0(gPlaySt.unk2e);
 }
+asm(".global sub_0802CF6C\n.thumb_set sub_0802CF6C, MapMenu_End\n");
 
-/* A wrapping 0-1-2 counter published to sub_08035020.
+/* A wrapping 0-1-2 counter published to ApplyWeatherPalette.
  *
  * gUnknown_08090C00 is NOT a global and must not be declared as one: the ROM
  * word at 0x08090C00 is 0x03003FC0, i.e. &gPlaySt, and its immediate
@@ -64,18 +66,19 @@ void sub_0802CF6C(void)
  * merge is agbcc cross-jumping the two stores, not a conditional expression.
  */
 
-void sub_0802CF94(void)
+void CycleWeather(void)
 {
     if (gPlaySt.weather > 1)
         gPlaySt.weather = 0;
     else
         gPlaySt.weather++;
 
-    sub_08035020(gPlaySt.weather);
+    ApplyWeatherPalette(gPlaySt.weather);
 }
+asm(".global sub_0802CF94\n.thumb_set sub_0802CF94, CycleWeather\n");
 
 /* A three-argument callback that acts only when bit 1 of its third argument is
- * clear. sub_0802CF48, sub_0802CD28, sub_0802CD54 and sub_0802CD78 in this same
+ * clear. IntelMenu_Unit, MapMenu_Co, IntelMenu_Status and IntelMenu_Rules in this same
  * block share the shape.
  *
  * The third parameter is u8 and this is the clean case of the wave-21 rule:
@@ -85,33 +88,35 @@ void sub_0802CF94(void)
  * count is a floor taken from the third one's register index, and `int` is the
  * weakest model for both.
  *
- * sub_0801A168 returns int and the result is discarded, so both calls are bare
+ * CloseTopMenu returns int and the result is discarded, so both calls are bare
  * statements and this is void.
  */
 
-void sub_0802CFC0(int a1, int a2, u8 a3)
+void MapMenu_Save(int a1, int a2, u8 a3)
 {
     if (!(a3 & 2))
     {
-        sub_0801A168();
-        sub_0802C280();
+        CloseTopMenu();
+        StartSaveConfirmScript();
     }
 }
+asm(".global sub_0802CFC0\n.thumb_set sub_0802CFC0, MapMenu_Save\n");
 
-/* sub_0802C1D0's twin, one block down: the same
- * `sub_08016D04(gPlaySt.gameMode)` result handed to a u16-taking
+/* WriteSuspendSaveForCurrentMode's twin, one block down: the same
+ * `GetSuspendIdForGameMode(gPlaySt.gameMode)` result handed to a u16-taking
  * sub_08016Dxx entry, with the fused `lsls #0x18; asrs #8; lsrs #0x10` s8-to-u16
- * conversion between the two `bl`s. sub_08016DB8's own prologue
+ * conversion between the two `bl`s. LoadSuspendSave's own prologue
  * (`lsls r0,#0x10; lsrs r0,#0x10`) confirms the u16 independently of the call
  * site.
  *
  * The narrowing is the only thing between the second and third calls, so that
- * pair is genuine nesting; sub_0801A168 in front of it is a separate statement
+ * pair is genuine nesting; CloseTopMenu in front of it is a separate statement
  * whose int result is discarded. `pop {r0}; bx r0`, so void.
  */
 
-void sub_0802CFDC(void)
+void LoadSuspendSaveForCurrentMode(void)
 {
-    sub_0801A168();
-    sub_08016DB8(sub_08016D04(gPlaySt.gameMode));
+    CloseTopMenu();
+    LoadSuspendSave(GetSuspendIdForGameMode(gPlaySt.gameMode));
 }
+asm(".global sub_0802CFDC\n.thumb_set sub_0802CFDC, LoadSuspendSaveForCurrentMode\n");

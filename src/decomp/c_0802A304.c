@@ -7,7 +7,7 @@
  * sub_0802A304 @ 0x0802A304
  */
 
-/* A callback handed to sub_0802A38C beside sub_0802A2E4, so its parameter is
+/* A callback handed to ResupplyUnitWithAnimation beside sub_0802A2E4, so its parameter is
  * the same object: a struct Unit unit record. It is NOT spelled that
  * way here on purpose. The loop reads the bytes at +7 and +8 through a
  * VARIABLE index, which the shared struct cannot express (they are the
@@ -33,7 +33,7 @@ struct Unk2A304
     /* 0x07 */ u8 unk07[2];
 };
 
-int sub_0802A304(void *arg)
+int CalcCargoResupplyCost(void *arg)
 {
     struct Unk2A304 *p = arg;
     int sum;
@@ -45,10 +45,11 @@ int sub_0802A304(void *arg)
     {
         if (p->unk07[i] != 0)
         {
-            sum += sub_08029978(&gUnits[p->unk07[i]], 0);
-            sum += sub_08029A48(&gUnits[p->unk07[i]], 0);
+            sum += ResupplyUnitAmmo(&gUnits[p->unk07[i]], 0);
+            sum += ResupplyUnitFuel(&gUnits[p->unk07[i]], 0);
         }
     }
 
     return sum;
 }
+asm(".global sub_0802A304\n.thumb_set sub_0802A304, CalcCargoResupplyCost\n");

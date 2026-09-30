@@ -31,48 +31,48 @@ void IntroT3_IDLE_080694ED(struct Unk694ECProc *proc)
         break;
 
     case 0xb:
-        sub_08067BD0(2, 1, 0x1e, proc);
+        StartIntroSlidePanel(2, 1, 0x1e, proc);
         break;
 
     case 0x1e:
-        sub_08067A24();
+        TriggerIntroBgAffineTween();
         break;
 
     case 0x2a:
         for (i = 1; i < 16; i++)
             gPal[i] = 0x7fff;
-        sub_080135A4();
-        sub_08067820();
+        EnablePaletteSync();
+        EndIntroBgScroll();
         break;
 
     case 0x2e:
         ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
-        sub_08067D04(2, 0, 0xc, proc);
-        sub_080679D8(2, 1, 0x120, 0x80, 0, -0x4000, 0x100, 0xc0, 0xc, proc);
+        StartIntroSlideSprite(2, 0, 0xc, proc);
+        StartIntroBgAffineTween(2, 1, 0x120, 0x80, 0, -0x4000, 0x100, 0xc0, 0xc, proc);
         break;
 
     case 0x5c:
         for (i = 1; i < 16; i++)
             gPal[i] = 0x7fff;
-        sub_080135A4();
+        EnablePaletteSync();
         break;
 
     case 0x5e:
-        sub_08012C48((struct Unk8012C30 *)&gUnknown_03002B6C, 2);
-        sub_08012C1C((struct Unk8012C30 *)&gUnknown_03002B6C, 0x0600D000);
+        SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_03002B6C, 2);
+        SetBgCntTilemapBlock((struct Unk8012C30 *)&gUnknown_03002B6C, 0x0600D000);
         Decompress(gUnknown_08183CA8, (void *)0x06004800);
         Decompress(gUnknown_08184A74, gBG0TilemapBuffer);
         for (i = 0; i < 0x400; i++)
             gBG0TilemapBuffer[i] += 0x140;
-        sub_08013AEC();
+        BG_EnableSyncBG0();
         break;
 
     case 0x60:
         ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
-        sub_08067C7C(0x32);
-        sub_08067A24();
-        sub_08067DD4(proc);
-        sub_08067D4C();
+        SetIntroSlidePanelExitFrames(0x32);
+        TriggerIntroBgAffineTween();
+        StartIntroBgBounceIn(proc);
+        EndIntroSlideSprite();
         break;
     }
 

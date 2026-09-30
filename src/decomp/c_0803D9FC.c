@@ -12,7 +12,7 @@
  *
  * PROMOTION REQUIRES THE WHOLE .rodata BLOB PLACED -- 105 words,
  * 0x08091154 through 0x080912F4 inclusive, contiguous. Run
- * `python tools/trymatch.py sub_0803D9FC --diff` and paste the "rodata": [...]
+ * `python tools/trymatch.py DebugArmyEditor_Loop --diff` and paste the "rodata": [...]
  * list it prints into this function's data/promoted.json entry, then re-run
  * tools/split_rodata.py and tools/gen_lds.py before building. trymatch reports
  * `relocs: name different symbols that resolve to the same address`, which is
@@ -42,7 +42,7 @@
  *  - 0x03002EE0 is `gpKeySt`, NOT an unnamed global. include/unknown-globals.h
  *    records that wave 20 invented a `gUnknown_03002EE0` for it and the SPLIT
  *    build caught it. Checked before writing, deliberately.
- *  - sub_0803D990 was already promoted (src/decomp/c_0803D990.c); its prototype
+ *  - StepClampedWithWrap was already promoted (src/decomp/c_0803D990.c); its prototype
  *    was copied from the definition, not guessed from the call sites.
  *
  * The parameter is modelled as a plain struct rather than a PROC: the two
@@ -67,7 +67,7 @@ static const char *const sCoNames[] = {
     "YAMA"
 };
 
-void sub_0803D9FC(struct Unk3D9FC *proc)
+void DebugArmyEditor_Loop(struct Unk3D9FC *proc)
 {
     int delta;
     u8 army;
@@ -75,27 +75,27 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
     delta = 0;
     army = proc->unk1E;
 
-    sub_080119A0(8, 0x00, "FORCE   /");
-    sub_080119A0(8, 0x08, "PLAY");
-    sub_080119A0(8, 0x10, "MONEY");
-    sub_080119A0(8, 0x18, "BREAK");
-    sub_080119A0(8, 0x20, "SYOGUN");
-    sub_080119A0(8, 0x28, "TEAM");
-    sub_080119A0(8, 0x30, "SAKU");
-    sub_080119A0(8, 0x38, "TURN");
-    sub_080119A0(8, 0x40, "COLOR");
+    PutAsciiStringSprites(8, 0x00, "FORCE   /");
+    PutAsciiStringSprites(8, 0x08, "PLAY");
+    PutAsciiStringSprites(8, 0x10, "MONEY");
+    PutAsciiStringSprites(8, 0x18, "BREAK");
+    PutAsciiStringSprites(8, 0x20, "SYOGUN");
+    PutAsciiStringSprites(8, 0x28, "TEAM");
+    PutAsciiStringSprites(8, 0x30, "SAKU");
+    PutAsciiStringSprites(8, 0x38, "TURN");
+    PutAsciiStringSprites(8, 0x40, "COLOR");
 
-    sub_0802BD54(0x50, 0x00, sub_0802490C(gPlaySt.mapID));
-    sub_0802BD54(0x40, 0x00, proc->unk1E);
-    sub_080119A0(0x40, 0x08, sCtrl[gPlayers[army].aiControlled]);
-    sub_0802BD54(0x68, 0x10, gPlayers[army].funds);
-    sub_0802BD54(0x68, 0x18, gPlayers[army].coCharge);
-    sub_080119A0(0x40, 0x20, sCoNames[gPlayers[army].co]);
-    sub_0802BD54(0x68, 0x28, gPlayers[army].team);
-    sub_080119A0(0x50, 0x30, sOnOff[gPlaySt.fog]);
-    sub_0802BD54(0x40, 0x38, gUnknown_03004080);
-    sub_080119A0(0x40, 0x40, sColors[gPlayers[army].teamColor]);
-    sub_080119A0(0, proc->unk20 * 8, "/");
+    DrawSpriteNumberFont2(0x50, 0x00, GetMapArmyCount(gPlaySt.mapID));
+    DrawSpriteNumberFont2(0x40, 0x00, proc->unk1E);
+    PutAsciiStringSprites(0x40, 0x08, sCtrl[gPlayers[army].aiControlled]);
+    DrawSpriteNumberFont2(0x68, 0x10, gPlayers[army].funds);
+    DrawSpriteNumberFont2(0x68, 0x18, gPlayers[army].coCharge);
+    PutAsciiStringSprites(0x40, 0x20, sCoNames[gPlayers[army].co]);
+    DrawSpriteNumberFont2(0x68, 0x28, gPlayers[army].team);
+    PutAsciiStringSprites(0x50, 0x30, sOnOff[gPlaySt.fog]);
+    DrawSpriteNumberFont2(0x40, 0x38, gUnknown_03004080);
+    PutAsciiStringSprites(0x40, 0x40, sColors[gPlayers[army].teamColor]);
+    PutAsciiStringSprites(0, proc->unk20 * 8, "/");
 
     if (gpKeySt->pressed & R_BUTTON)
     {
@@ -143,46 +143,47 @@ void sub_0803D9FC(struct Unk3D9FC *proc)
         {
         case 0:
             gPlayers[army].aiControlled =
-                sub_0803D990(gPlayers[army].aiControlled, (s8)delta, 1, 2, 1);
+                StepClampedWithWrap(gPlayers[army].aiControlled, (s8)delta, 1, 2, 1);
             break;
 
         case 1:
             gPlayers[army].funds =
-                sub_0803D990(gPlayers[army].funds,
+                StepClampedWithWrap(gPlayers[army].funds,
                              (s8)delta * 0xC350, 0, 0xF423F, 0);
             break;
 
         case 2:
             gPlayers[army].coCharge =
-                sub_0803D990(gPlayers[army].coCharge,
+                StepClampedWithWrap(gPlayers[army].coCharge,
                              (s8)delta * 0x2710, 0, GetSuperCoPowerCost(army), 0);
             break;
 
         case 3:
             gPlayers[army].co =
-                sub_0803D990(gPlayers[army].co, (s8)delta, 0, 0x12, 1);
+                StepClampedWithWrap(gPlayers[army].co, (s8)delta, 0, 0x12, 1);
             break;
 
         case 4:
             gPlayers[army].team =
-                sub_0803D990(gPlayers[army].team, (s8)delta, 0, 3, 0);
+                StepClampedWithWrap(gPlayers[army].team, (s8)delta, 0, 3, 0);
             break;
 
         case 5:
             gPlaySt.fog =
-                sub_0803D990(gPlaySt.fog, (s8)delta, 0, 1, 1);
+                StepClampedWithWrap(gPlaySt.fog, (s8)delta, 0, 1, 1);
             break;
 
         case 6:
             gUnknown_03004080 =
-                sub_0803D990(gUnknown_03004080, (s8)delta, 0, 0x3E7, 1);
+                StepClampedWithWrap(gUnknown_03004080, (s8)delta, 0, 0x3E7, 1);
             break;
         }
     }
 
     if (gpKeySt->pressed & 3)
     {
-        sub_08026B28();
-        sub_08015C30(gUnknown_03001FBC);
+        BuildEnemyArmyMasks();
+        ClearSlotScriptCallback(gUnknown_03001FBC);
     }
 }
+asm(".global sub_0803D9FC\n.thumb_set sub_0803D9FC, DebugArmyEditor_Loop\n");

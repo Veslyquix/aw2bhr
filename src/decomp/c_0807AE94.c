@@ -13,7 +13,7 @@
  * was NOT the pointer-binding class: it was the W54-B shared-local live web.
  * `t` and `v` were ONE local each across all three loops, which gave each
  * pseudo a three-range live web and cost the allocator the r0/r1 assignment at
- * every site (12 bytes, exactly the twelve W54-B measured on sub_080897C8).
+ * every site (12 bytes, exactly the twelve W54-B measured on CoDesignEditor_DrawEnterPicker).
  * The fix is that chapter's, verbatim: an inline ASSIGNMENT expression inside
  * the argument -- which is both the fold barrier for `A - (B - C)` / `X + (Y -
  * C)` and evaluated where it is written -- with a FRESH name per site
@@ -59,7 +59,7 @@ struct Unk0807B148Proc
     /* 0x3c */ int unk3c;
 };
 
-void sub_0807AE94(struct Unk0807AE94Proc * proc)
+void MatchSummary_SlideIn_Loop(struct Unk0807AE94Proc * proc)
 {
     int i;
     int t0;
@@ -90,7 +90,7 @@ void sub_0807AE94(struct Unk0807AE94Proc * proc)
         else
             Decompress(gUnknown_0822BCF0, gBG1TilemapBuffer);
 
-        sub_08013AFC();
+        BG_EnableSyncBG1();
 
         child = Proc_Start(gUnknown_08616034, proc);
         child->unk3c = proc->unk3c;
@@ -98,14 +98,14 @@ void sub_0807AE94(struct Unk0807AE94Proc * proc)
         gUnknown_030030B4.bits.tm_block = 15;
         gUnknown_030030B4.bits.chr_block = 2;
 
-        sub_08013CA8();
-        sub_08013B0C();
-        sub_0801A5B0(sub_0807A908());
+        ClearBg2Tilemap();
+        BG_EnableSyncBG2();
+        LoadBg1WindowFrame(GetResultsArmy());
         Proc_Break(proc);
     }
 
     if (proc->unk4c == 0x20)
-        sub_0803B4DC(0x78);
+        PlayMusicOrSfx2(0x78);
 
     gUnknown_03002B34 = 0xf0 - proc->unk34;
     gUnknown_030030A0 = proc->unk34 - 0xf0;
@@ -140,8 +140,9 @@ void sub_0807AE94(struct Unk0807AE94Proc * proc)
                          0);
     }
 }
+asm(".global sub_0807AE94\n.thumb_set sub_0807AE94, MatchSummary_SlideIn_Loop\n");
 
-void sub_0807B148(struct Unk0807B148Proc * proc)
+void MatchSummaryFaces_Loop(struct Unk0807B148Proc * proc)
 {
     int i;
 
@@ -171,3 +172,4 @@ void sub_0807B148(struct Unk0807B148Proc * proc)
                          0);
     }
 }
+asm(".global sub_0807B148\n.thumb_set sub_0807B148, MatchSummaryFaces_Loop\n");

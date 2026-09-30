@@ -7,13 +7,6 @@
  * sub_0803A42C @ 0x0803A42C
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file .text as one
- * contiguous block at 0x0803A42C.
- * sub_0803A42C @ 0x0803A42C
- */
-
 /* Family F035 (data/families.json): `push {lr}; bl A; movs r0,#0; bl B; bl C;
  * pop {r0}; bx r0` -- 20 bytes, five members, and `varies` lists only the three
  * `bl` targets, so the `movs r0, #0` is byte-identical in every member.
@@ -29,15 +22,16 @@
  */
 
 
-/* sub_08013B0C and sub_0802465C are both nullary (each writes r0 before any
+/* BG_EnableSyncBG2 and SetMapLayerPrioritiesDefault are both nullary (each writes r0 before any
  * read); sub_08013AD4 takes the u8 its promoted definition in
  * src/decomp/c_08013AD4.c declares. The same three-call sequence appears
  * open-coded at 0x0803A3B0 and 0x0801A414 in asm/.
  */
 
-void sub_0803A42C(void)
+void UnitInfoPanel_Close(void)
 {
-    sub_08013B0C();
+    BG_EnableSyncBG2();
     sub_08013AD4(0);
-    sub_0802465C();
+    SetMapLayerPrioritiesDefault();
 }
+asm(".global sub_0803A42C\n.thumb_set sub_0803A42C, UnitInfoPanel_Close\n");

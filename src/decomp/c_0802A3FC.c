@@ -7,7 +7,7 @@
  * sub_0802A3FC @ 0x0802A3FC
  */
 
-/* The gate is `s8 sub_08015BD0(s32)`, so agbcc re-narrows the result
+/* The gate is `s8 FindSlotScript(s32)`, so agbcc re-narrows the result
  * (`lsls #0x18; asrs #0x18`) before comparing it against -1.
  *
  * gUnknown_03001FBC is read three times across control-flow merges and so
@@ -33,7 +33,7 @@
  * src/decomp/c_0802A38C.c with a file-local `struct Unk2A38C *` parameter, so
  * a header declaration would be a conflicting type for that unit. This is the
  * weakest spelling that agrees with both call sites, and it matches how
- * sub_0802A2E4 and sub_0802A304 are declared (`void *`).
+ * sub_0802A2E4 and CalcCargoResupplyCost are declared (`void *`).
  *
  * sub_0802A258 is SIXTEEN bits, measured here and nowhere else: the truth
  * test is `lsls r0, #0x10`, where a bool8/u8 return gives `lsls #0x18`. The
@@ -42,12 +42,12 @@
 s16 sub_0802A258(struct Unit *);
 bool8 sub_0802A38C(void *, int (*)(void *));
 
-void sub_0802A3FC(void)
+void TurnStartSupply_Loop(void)
 {
     struct Unit *p;
     u16 i;
 
-    if (sub_08015BD0((s32)gUnknown_0849A0A8) != -1)
+    if (FindSlotScript((s32)gUnknown_0849A0A8) != -1)
         return;
 
     for (i = gUnknown_03001470[gUnknown_03001FBC].unk38; i <= 0x32; i++)
@@ -60,7 +60,7 @@ void sub_0802A3FC(void)
         if (p->flags & 9)
             continue;
 
-        if (p->type == 0x16 && sub_0802A38C(p, sub_0802A304))
+        if (p->type == 0x16 && sub_0802A38C(p, CalcCargoResupplyCost))
         {
             gUnknown_03001470[gUnknown_03001FBC].unk38 = i + 1;
             break;
@@ -74,5 +74,6 @@ void sub_0802A3FC(void)
     }
 
     if (i == 0x33)
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
 }
+asm(".global sub_0802A3FC\n.thumb_set sub_0802A3FC, TurnStartSupply_Loop\n");

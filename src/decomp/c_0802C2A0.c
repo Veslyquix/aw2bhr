@@ -8,14 +8,15 @@
  */
 
 /* The pool word is the symbol's ADDRESS, not its contents, so this compares a
- * pointer argument against the script itself -- the same object sub_0802C280
- * and sub_0802C290 hand to sub_080193B0 / sub_0801930C.
+ * pointer argument against the script itself -- the same object StartSaveConfirmScript
+ * and EndSaveConfirmScript hand to StartEventScript / EndEventScript.
  */
 
-bool8 sub_0802C2A0(const u8 *a)
+bool8 IsSaveConfirmScript(const u8 *a)
 {
     if (a == gUnknown_0849A8F0)
         return TRUE;
 
     return FALSE;
 }
+asm(".global sub_0802C2A0\n.thumb_set sub_0802C2A0, IsSaveConfirmScript\n");

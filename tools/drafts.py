@@ -41,6 +41,14 @@ CHANGED is the dangerous case: wave 90's KeySt reshape left old field names
 compiling at new offsets. Relocations are compared by resolved address, so a
 pure symbol rename (gUnknown_03003FC0 -> gPlaySt) is SAME.
 
+`audit [fn...]` recompiles each function's best.c (default: every parked
+function) and checks best.json against it: the hash, the size fields and the
+score. `--write` rewrites the stale records from best.c's score; it is the
+one command here that writes in work/, and only best.json.
+
+    python tools/drafts.py audit              # report
+    python tools/drafts.py audit --write      # and fix the stale records
+
 `--headers-at REV` compiles against include/ as it was at git revision REV
 (extracted once into build/headers/<sha>/, placed ahead of include/ on the
 quote-include path). With it a snapshot can be taken AFTER the fact, from the
@@ -52,6 +60,7 @@ Exit status: 0 on success, 1 if any draft failed to compile or changed
 """
 
 import argparse
+import collections
 import glob
 import hashlib
 import io
@@ -213,8 +222,14 @@ def build(fn, src_rel, label, include=None, profile="configured"):
     if rc != 0 or MARK not in so:
         b.err = (se or so).strip()
         return b
-    b.ok = True
     b.text = _read(absp(tb))
+    if not b.text:
+        # Without pipefail a failed cpp still "succeeds": agbcc reads nothing,
+        # `as` assembles an empty file. No draft compiles to zero bytes.
+        b.err = se.strip() or "the draft compiled to an empty .text " \
+                              "(the preprocessor probably failed)"
+        return b
+    b.ok = True
     b.rodata = _read(absp(rb))
     b.relocs = _parse_relocs(so.split(MARK, 1)[1])
     return b
@@ -292,8 +307,8 @@ def target(fn):
 def score(fn, b):
     """dict(state, pct, size_delta, first, n_diff) for a Build against the ROM.
 
-    Same arithmetic as trymatch.check(): identical bytes over the common
-    prefix, as a share of the TARGET size; relocations must agree or be
+    Same arithmetic as trymatch.check() (awlib.byte_score: identical bytes
+    as a share of the longer of candidate and target); relocations must agree or be
     equivalent under trymatch's own rules.
     """
     if not b.ok:
@@ -307,9 +322,7 @@ def score(fn, b):
     cand_fn = cand[:size]
     c_rel = [(o, ty, sy) for (sect, o, ty, sy) in b.relocs
              if sect == ".text" and o < size]
-    n_diff = sum(1 for x, y in zip(tgt_fn, cand_fn) if x != y)
-    common = min(len(tgt_fn), len(cand_fn))
-    pct = (common - n_diff) / size * 100 if size else 0.0
+    n_diff, common, pct = awlib.byte_score(tgt_fn, cand, size)
     first = next((i for i, (x, y) in enumerate(zip(tgt_fn, cand_fn)) if x != y),
                  common)
     same = tgt_fn == cand_fn and len(cand) == size
@@ -434,6 +447,17 @@ def cmd_score(args):
     return 0 if r["state"] == "MATCH" else 1
 
 
+def _wrongc_note(fn, cand, draft):
+    """What tools/wrongc.py's pattern rules (no compile) say `cand` adds or
+    changes relative to the draft that would make it wrong C, else ''."""
+    try:
+        import wrongc
+        return wrongc.rejects(fn, cand, draft, emu=False,
+                              only=wrongc.STRICT_RULES) or ""
+    except Exception:
+        return ""
+
+
 def cmd_bases(args):
     fn = args.fn
     wd = os.path.join(WORK, fn)
@@ -460,6 +484,13 @@ def cmd_bases(args):
     except (OSError, ValueError):
         pass
 
+    # Locals the draft itself might read before setting. A candidate that adds
+    # a name to this list is reading something no assignment reaches, which
+    # is wrong C whatever it scores (see agbenv.uninitialized_reads).
+    draft_path = os.path.join(wd, fn + ".c")
+    draft_uninit = set(agbenv.uninitialized_reads(draft_path, fn=fn)
+                       if os.path.exists(draft_path) else ())
+
     rows = []
     for p in cands:
         data = _read(p)
@@ -471,6 +502,17 @@ def cmd_bases(args):
             notes.append("new_var")
         if ".prepr" in label:
             notes.append("pre-rename source")
+        if not is_blob(data):
+            extra = sorted(set(agbenv.uninitialized_reads(p, fn=fn)) - draft_uninit)
+            if extra:
+                notes.append("reads before set: " + ", ".join(extra))
+        if os.path.abspath(p) != os.path.abspath(draft_path):
+            if re.search(r"wrong", label, re.I):
+                notes.append("wrong C: file is labelled wrong")
+            elif not is_blob(data) and os.path.exists(draft_path):
+                why = _wrongc_note(fn, p, draft_path)
+                if why:
+                    notes.append("wrong C: " + why)
         b = build(fn, rel(p), "base-" + label.replace("/", "_"))
         r = score(fn, b)
         rows.append((label, r, notes, data))
@@ -506,10 +548,12 @@ def cmd_bases(args):
 
     # `new_var` is only a note: it is the permuter's name for a local it
     # added, and that local is sometimes the real fix (wave 89's sub_080073F8
-    # rise came from one). Only header-expanded text is unusable as a base.
+    # rise came from one). Header-expanded text is unusable as a base, and so
+    # is a form that reads a local no assignment reaches.
     usable = [row for row in rows
               if row[1]["state"] in ("MATCH", "MISMATCH")
-              and "header-expanded" not in row[2]]
+              and "header-expanded" not in row[2]
+              and not any(n.startswith(("reads before set", "wrong C")) for n in row[2])]
     if not usable:
         print("NO USABLE BASE: nothing here compiles as a readable draft. "
               "Rebuild from the assembly or port a pre-rename source "
@@ -533,8 +577,83 @@ def cmd_bases(args):
         dr = next((row for row in rows if row[0] == draft_label), None)
         if dr is not None:
             print("      the draft is %s" % fmt(dr[1]))
+            # A higher score with an EARLIER first difference usually means
+            # bytes were gained after a point the candidate breaks. In wave 93
+            # this flagged four of five rejected bases (dead-store padding, a
+            # spelling measured and rejected in an earlier wave), though once
+            # (sub_0808A3DC) the earlier-differing file was the better base.
+            d1, b1 = dr[1].get("first"), r.get("first")
+            if (dr[1]["state"] == "MISMATCH" and r["state"] == "MISMATCH"
+                    and d1 is not None and b1 is not None and b1 < d1):
+                print("      CAUTION: its first difference (+0x%x) is EARLIER than "
+                      "the draft's (+0x%x). Read what it changed, and grep "
+                      "work/%s/NOTES.md and include/ for that spelling, before "
+                      "adopting it." % (b1, d1, fn))
         print("      to start from it:  cp work/%s/%s work/%s/%s.c   "
               "(back the draft up first)" % (fn, best[0], fn, fn))
+        print("      It is a measurement, not a verdict: read every statement "
+              "it changes first.")
+    return 0
+
+
+def cmd_audit(args):
+    """Recompile each function's best.c and check best.json against it."""
+    names = names_from(args)
+    if not names:
+        recs = json.load(open(os.path.join(awlib.DATA_DIR, "functions.json"),
+                              encoding="utf-8"))
+        names = [r["name"] for r in recs if r["status"] == "parked"]
+    counts = collections.Counter()
+    for fn in names:
+        wd = os.path.join(WORK, fn)
+        best_c, meta_p = os.path.join(wd, "best.c"), os.path.join(wd, "best.json")
+        if not os.path.exists(best_c):
+            counts["no best.c"] += 1
+            continue
+        try:
+            meta = json.load(open(meta_p, encoding="utf-8"))
+        except (OSError, ValueError):
+            meta = {}
+        data = _read(best_c)
+        b = build(fn, rel(best_c), "audit-best")
+        r = score(fn, b)
+        if r["state"] not in ("MATCH", "MISMATCH"):
+            counts["best.c does not compile"] += 1
+            print("%-16s BEST.C FAILS  %s" % (fn, r.get("error", "")))
+            continue
+        now = 100.0 if r["state"] == "MATCH" else r["pct"]
+        had = trymatch.recorded_percent(meta) if meta else None
+        problems = []
+        if not meta:
+            problems.append("no best.json")
+        else:
+            if meta.get("source_sha1") != sha1(data):
+                problems.append("hash missing" if not meta.get("source_sha1")
+                                else "hash is for another source")
+            if "size_delta" not in meta:
+                problems.append("no size")
+            if had is not None and abs(had - now) > 0.05:
+                problems.append("recorded %.2f%%" % had)
+        verdict = "OK" if not problems else "FIXED" if args.write else "STALE"
+        counts[verdict] += 1
+        print("%-16s %-5s %s%s" % (fn, verdict, fmt(r),
+                                   ("   (" + "; ".join(problems) + ")") if problems else ""))
+        if problems and args.write:
+            size = target(fn)[0]["size"]
+            payload = {"percent": round(now, 2),
+                       "scored_over": trymatch.SCORED_OVER,
+                       "source_sha1": sha1(data),
+                       "candidate_bytes": len(b.text), "target_bytes": size,
+                       "size_delta": len(b.text) - size,
+                       "exact_size": len(b.text) == size,
+                       "audited": True}
+            if meta.get("origin"):
+                payload["origin"] = meta["origin"]
+            atomic_write(meta_p, (json.dumps(payload, sort_keys=True) + "\n")
+                         .encode("utf-8"))
+    print("\n" + ", ".join("%s %d" % kv for kv in sorted(counts.items())))
+    if counts["STALE"]:
+        print("re-run with --write to rewrite the STALE records from best.c")
     return 0
 
 
@@ -644,6 +763,16 @@ def main():
     p.add_argument("--permuter-outputs", type=int, default=3,
                    help="newest-best permuter outputs to include (default 3)")
     p.set_defaults(func=cmd_bases)
+
+    p = sub.add_parser("audit", help="recompile best.c and check best.json "
+                                     "against it (default: every parked function)")
+    p.add_argument("names", nargs="*")
+    p.add_argument("--list", help="file of function names")
+    p.add_argument("--unmatched", action="store_true",
+                   help="every unmatched function that has a draft")
+    p.add_argument("--write", action="store_true",
+                   help="rewrite each stale best.json from best.c's score")
+    p.set_defaults(func=cmd_audit)
 
     for name, func, hlp in (("snapshot", cmd_snapshot, "store drafts' bytes under a tag"),
                             ("compare", cmd_compare, "recompile and diff against a tag")):

@@ -9,25 +9,27 @@
 
 #include "proc.h"
 
-int sub_080357E0(u16 a, u16 b, u16 c, u16 d, void *e)
+int CreateMoveSlideWithPath(u16 a, u16 b, u16 c, u16 d, void *e)
 {
     ProcPtr proc;
 
-    proc = sub_080355CC(a, b, c, d);
+    proc = CreateMoveSlide(a, b, c, d);
     if (proc == NULL)
         return 0;
     else
     {
-        sub_08035760(proc, e);
+        BeginMoveSlidePath(proc, e);
         return (int)proc;
     }
 }
+asm(".global sub_080357E0\n.thumb_set sub_080357E0, CreateMoveSlideWithPath\n");
 
-void sub_08035810(void)
+void EndActiveMoveSlide(void)
 {
     ProcPtr proc;
 
     proc = Proc_Find(ProcScr_SelectUnit);
     if (proc != NULL)
-        sub_08035828(proc);
+        EndMoveSlide(proc);
 }
+asm(".global sub_08035810\n.thumb_set sub_08035810, EndActiveMoveSlide\n");

@@ -10,32 +10,32 @@
 
 #include "hardware.h"
 
-void sub_0802DE1C(void)
+void MapCursorState_ChooseDestination(void)
 {
     int off;
     int v;
 
-    sub_08023824();
-    sub_080236E8();
-    sub_08023908(4);
+    HandleMoveMapCursor();
+    HandleMoveMapCursorInMoveRange();
+    HandleMoveCameraWithMapCursor(4);
 
     off = gMap->rowOffset[gUnknown_030033E4.unk02] + gUnknown_030033E4.unk00;
 
     if (gMap->move[off] < 0)
-        sub_08023274(1);
+        StepMapCursorAndDraw(1);
     else
-        sub_08023274(1);
+        StepMapCursorAndDraw(1);
 
-    sub_08039264();
+    UpdateMovePathAndQueueDraw();
 
-    if (!sub_0802DBF8())
+    if (!IsMapCursorSettled())
         return;
 
     v = gpKeySt->pressed & 1;
 
     if (v != 0)
     {
-        sub_0802E60C(((union Unk802C57CBuf *)&gUnknown_030033E4)->spos.unk00,
+        ConfirmUnitDestination(((union Unk802C57CBuf *)&gUnknown_030033E4)->spos.unk00,
             ((union Unk802C57CBuf *)&gUnknown_030033E4)->spos.unk02);
         return;
     }
@@ -44,33 +44,34 @@ void sub_0802DE1C(void)
         return;
 
     if (gPlaySt.savingEnabled != 0)
-        sub_08034534(0x11, gUnknown_03003F38, 0, 0);
+        SendActionCommand(0x11, gUnknown_03003F38, 0, 0);
 
-    sub_08029088(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
-    sub_08035810();
-    sub_080258CC();
-    sub_08022A08();
+    ScrollCameraToKeepCellInView(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
+    EndActiveMoveSlide();
+    RebuildMapUnitLayers();
+    HideRangeOverlay();
     gUnknown_03003334 = v;
-    sub_0803B4DC(0x66);
+    PlayMusicOrSfx2(0x66);
 }
+asm(".global sub_0802DE1C\n.thumb_set sub_0802DE1C, MapCursorState_ChooseDestination\n");
 
-void sub_0802DEFC(void)
+void MapCursorState_DeleteUnit(void)
 {
     int off;
     int id;
     struct Unit *e;
 
-    sub_08023824();
-    sub_0802361C();
-    sub_08023908(4);
-    sub_08023274(5);
+    HandleMoveMapCursor();
+    HandleGameMapCursorInput();
+    HandleMoveCameraWithMapCursor(4);
+    StepMapCursorAndDraw(5);
 
-    if (!sub_0802DBF8())
+    if (!IsMapCursorSettled())
         return;
 
     if (gpKeySt->pressed & 2)
     {
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
         gUnknown_03003334 = 0;
         return;
     }
@@ -93,7 +94,8 @@ void sub_0802DEFC(void)
         return;
 
     if (gPlaySt.savingEnabled != 0)
-        sub_08034534(0x12, id, 0, 0);
+        SendActionCommand(0x12, id, 0, 0);
 
-    sub_0804018C(e);
+    StartUnitDestroyed(e);
 }
+asm(".global sub_0802DEFC\n.thumb_set sub_0802DEFC, MapCursorState_DeleteUnit\n");

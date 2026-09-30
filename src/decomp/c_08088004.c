@@ -14,14 +14,14 @@
 #include "proc.h"
 #include "hardware.h"
 
-void CoDesignC1_08088005(ProcPtr proc)
+void CoDesignRoot_StartEditor(ProcPtr proc)
 {
     gUnknown_03005908 = 0;
-    sub_0808A5C4();
-    sub_0801A5B0(1);
-    sub_0802D5CC(gUnknown_03005958[0], 8);
-    sub_0808A47C();
+    CoDesignEditor_DrawHelpText();
+    LoadBg1WindowFrame(1);
+    ApplyWindowFramePalette(gUnknown_03005958[0], 8);
+    CoDesignEditor_SetupBlend();
     Proc_Start(ProcScr_CoDesignC2, proc);
 }
 
-asm(".global sub_08088004\n.thumb_set sub_08088004, CoDesignC1_08088005\n");
+asm(".global sub_08088004\n.thumb_set sub_08088004, CoDesignRoot_StartEditor\n");

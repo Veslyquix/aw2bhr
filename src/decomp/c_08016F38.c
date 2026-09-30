@@ -54,7 +54,7 @@ struct BattleSaveState
 };
 
 /* Saves the current battle/map state into the gUnknown_02000000 save block,
- * the mirror of sub_08017208 (restore). Map cells are stored as a list of the
+ * the mirror of RestoreBattleSaveState (restore). Map cells are stored as a list of the
  * cells that differ from the map's base layout, terminated by tile 0xffff.
  *
  * Matched by Eebit on decomp.me (scratch A6WrC). It replaces the wave-86
@@ -119,7 +119,7 @@ void CaptureBattleSaveState(u8 enabled)
             save->units[i * 51 + j] = gUnknown_02022684[i * 64 + j];
     for (i = 0; i < 16; i++)
         save->unk0d28[i] = gUnknown_02028360[i];
-    sub_08045700(save->unk0da8);
+    CompressPipeSeamHpPlane(save->unk0da8);
 }
 
 asm(".global sub_08016F38\n.thumb_set sub_08016F38, CaptureBattleSaveState\n");

@@ -9,7 +9,7 @@
 
 void sub_08034CB8(void)
 {
-    sub_0802776C(0);
-    sub_080742FC();
+    SetInfoBoxMode(0);
+    RunMapEventsAfterTurnSupply();
     gUnknown_030032D8 = 0xb;
 }

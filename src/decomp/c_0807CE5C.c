@@ -48,29 +48,29 @@ struct Unk807CE5C
     /* 0x6a */ u16 unk6a;
 };
 /* Promoted but undeclared; signatures taken from src/decomp/, not derived. */
-void sub_0803BCDC(u8 *);
-int sub_0807F618(void);
+void SetArmyCoIdsFromList(u8 *);
+int IsEndCoSelectRunning(void);
 void sub_0807D860(struct Unk807CE5C *);
 void sub_0807D918(struct Unk807CE5C *);
-/* sub_0807DA98 is W56-B's; since wave 56 it is declared in
- * include/unknown-functions.h as `void sub_0807DA98(struct Unk7DA98 *)`, so
+/* CoSelect_DrawSprites is W56-B's; since wave 56 it is declared in
+ * include/unknown-functions.h as `void CoSelect_DrawSprites(struct Unk7DA98 *)`, so
  * this unit casts its own proc pointer to that incomplete tag at the call site
  * rather than redeclaring it. */
 /* Not assigned to anyone this wave; signature read off the sole call site,
- * `adds r0, r7, #0; bl sub_0807F630` with the result never read. */
-void sub_0807F630(struct Unk807CE5C *);
+ * `adds r0, r7, #0; bl CoSelect_AssignRemainingAndFinish` with the result never read. */
+void CoSelect_AssignRemainingAndFinish(struct Unk807CE5C *);
 
 void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 {
     int i;
 
-    if (!(u8)sub_0807F618() && p->unk4e == 0 && p->unk60 == 0 && p->unk66 == 0)
+    if (!(u8)IsEndCoSelectRunning() && p->unk4e == 0 && p->unk60 == 0 && p->unk66 == 0)
     {
         if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_LEFT))
         {
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014200, 0x16);
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014680, 0x17);
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014B00, 0x18);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014200, 0x16);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014680, 0x17);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014B00, 0x18);
 
             p->unk4c = 0;
 
@@ -81,15 +81,15 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 
             p->unk4e = -1;
 
-            sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06013D80, 0x15);
-            sub_0803B4DC(0x67);
+            LoadCoNameGraphic(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06013D80, 0x15);
+            PlayMusicOrSfx2(0x67);
         }
         else if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_RIGHT))
         {
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014200, 0x16);
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014680, 0x17);
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014B00, 0x18);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014200, 0x16);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52 + 1, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014680, 0x17);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06014B00, 0x18);
 
             p->unk4c = 0;
 
@@ -100,9 +100,9 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 
             p->unk4e = 1;
 
-            sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
-            sub_08043E3C(gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06013D80, 0x15);
-            sub_0803B4DC(0x67);
+            LoadCoNameGraphic(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
+            LoadCoFace(gUnknown_030058E0[DivRem(p->unk52 + 2, gUnknown_03005948[p->unk58]) + p->unk5c], (void *)0x06013D80, 0x15);
+            PlayMusicOrSfx2(0x67);
         }
         else if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_UP) && (int)gUnknown_03005944 > 1 && gUnknown_030059C0[p->unk64] != 0)
         {
@@ -131,9 +131,9 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 
             p->unk60 = -1;
 
-            sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
-            sub_0802D5CC(gUnknown_03005958[p->unk58], 8);
-            sub_0803B4DC(0x67);
+            LoadCoNameGraphic(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
+            ApplyWindowFramePalette(gUnknown_03005958[p->unk58], 8);
+            PlayMusicOrSfx2(0x67);
         }
         else if (p->unk40 == 0 && (gpKeySt->repeated & DPAD_DOWN) && (int)gUnknown_03005944 > 1 && gUnknown_030059C0[p->unk64] != 0)
         {
@@ -162,9 +162,9 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 
             p->unk60 = 1;
 
-            sub_0802D5CC(gUnknown_03005958[p->unk58], 8);
-            sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
-            sub_0803B4DC(0x67);
+            ApplyWindowFramePalette(gUnknown_03005958[p->unk58], 8);
+            LoadCoNameGraphic(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
+            PlayMusicOrSfx2(0x67);
         }
         else if (gpKeySt->pressed & 1)
         {
@@ -172,12 +172,12 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
             {
                 p->unk4c = 0;
                 p->unk6a = 0;
-                sub_0803BCDC(gUnknown_030058D4);
+                SetArmyCoIdsFromList(gUnknown_030058D4);
                 LockMainMenu();
                 Proc_Start(gUnknown_08616690, p);
-                sub_080733A0(0x10);
+                SetHeaderBannerTransitionFrames(0x10);
                 Proc_Break(p);
-                sub_0803B4DC(0x71);
+                PlayMusicOrSfx2(0x71);
             }
 
             if ((u8)IsCoSelectionUnique((struct Unk807D800 *)p))
@@ -222,17 +222,17 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 
                     p->unk60 = 1;
 
-                    sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
-                    sub_0802D5CC(gUnknown_03005958[p->unk58], 8);
+                    LoadCoNameGraphic(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
+                    ApplyWindowFramePalette(gUnknown_03005958[p->unk58], 8);
                 }
 
-                sub_0803B4DC(0x71);
+                PlayMusicOrSfx2(0x71);
             }
         }
         else if (gpKeySt->pressed & 2)
         {
             if (Proc_Find(gUnknown_086166A8) == 0)
-                sub_0803B4DC(0x66);
+                PlayMusicOrSfx2(0x66);
 
             if (p->unk64 != 0)
             {
@@ -247,7 +247,7 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
                 else if (gUnknown_030059C0[p->unk64] != 0)
                 {
                     gUnknown_03005910[gUnknown_0300599C[p->unk64]] = 0;
-                    sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
+                    LoadCoNameGraphic(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
                 }
                 else
                 {
@@ -266,8 +266,8 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
 
                     p->unk60 = -1;
 
-                    sub_08043B14(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
-                    sub_0802D5CC(gUnknown_03005958[p->unk58], 8);
+                    LoadCoNameGraphic(gUnknown_030058E0[DivRem(p->unk52, gUnknown_03005948[p->unk58]) + p->unk5c], p->unk64 * 12 + 960);
+                    ApplyWindowFramePalette(gUnknown_03005958[p->unk58], 8);
                 }
             }
             else
@@ -279,7 +279,7 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
         }
         else if (gpKeySt->pressed & R_BUTTON)
         {
-            sub_0807F630(p);
+            CoSelect_AssignRemainingAndFinish(p);
         }
     }
 
@@ -331,7 +331,7 @@ void CoSelect_IDLE_0807CE5D(struct Unk807CE5C *p)
     }
 
     p->unk4c++;
-    sub_0807DA98((struct Unk7DA98 *)p);
+    CoSelect_DrawSprites((struct Unk7DA98 *)p);
     p->unk3c--;
 }
 

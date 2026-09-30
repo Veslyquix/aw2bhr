@@ -24,7 +24,7 @@ struct Unk8074670Proc
     /* 0x58 */ int unk58;
 };
 
-void sub_08074670(struct Unk8074670Proc *proc)
+void WorldMapMarkers_Draw(struct Unk8074670Proc *proc)
 {
     struct Unk0202FE38 *p;
 
@@ -38,8 +38,9 @@ void sub_08074670(struct Unk8074670Proc *proc)
             if (x >= -0x10 && x <= 0xf0 && y >= -0x10 && y <= 0xa0)
             {
                 p->unk08->unk22 = (p->unk08->unk22 & 0xf3ff) | proc->unk58;
-                sub_0801C254(p->unk08, x & 0x1ff, y & 0xff);
+                AP_Update(p->unk08, x & 0x1ff, y & 0xff);
             }
         }
     }
 }
+asm(".global sub_08074670\n.thumb_set sub_08074670, WorldMapMarkers_Draw\n");

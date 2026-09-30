@@ -7,12 +7,12 @@
  * sub_08064D74 @ 0x08064D74
  */
 
-/* Twin of sub_08064C34 -- see that file for why gUnknown_08580934's ADDRESS is
+/* Twin of TeamBadgeEnter_Loop -- see that file for why gUnknown_08580934's ADDRESS is
  * bound to a local at the top rather than named at its single deep use.
  * The sum is `obj->unk38 + gUnknown_085809F0[obj->unk26]` in that order: with
  * the table first, -fforce-addr computes the element address before loading
  * unk38, which is the reverse of the ROM. */
-void sub_08064D74(struct Unk08580934_Obj *obj)
+void TeamBadgeEnterAtBase_Loop(struct Unk08580934_Obj *obj)
 {
     struct Unk08580934 **stp;
 
@@ -25,7 +25,7 @@ void sub_08064D74(struct Unk08580934_Obj *obj)
     else
     {
         obj->unk2a = obj->unk38 + gUnknown_085809F0[obj->unk26];
-        sub_08064BF4(obj);
+        TeamBadge_Draw(obj);
 
         if (obj->unk26 != 0)
         {
@@ -34,8 +34,9 @@ void sub_08064D74(struct Unk08580934_Obj *obj)
         else
         {
             (*stp)->unk2d--;
-            sub_08030178();
-            sub_08015C30(gUnknown_03001FBC);
+            LinkRestartKeySync();
+            ClearSlotScriptCallback(gUnknown_03001FBC);
         }
     }
 }
+asm(".global sub_08064D74\n.thumb_set sub_08064D74, TeamBadgeEnterAtBase_Loop\n");

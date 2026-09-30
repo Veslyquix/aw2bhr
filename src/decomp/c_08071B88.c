@@ -7,13 +7,6 @@
  * sub_08071B88 @ 0x08071B88
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08071B88.
- * sub_08071B88 @ 0x08071B88
- */
-
 #include "proc.h"
 
 /* One of family F000's 16-byte forwarders: `push {lr}; ldr r0,=script;
@@ -23,7 +16,8 @@
  * include/unknown-globals.h.
  */
 
-void sub_08071B88(void)
+void EndPalFade(void)
 {
     Proc_EndEach(gUnknown_08613E54);
 }
+asm(".global sub_08071B88\n.thumb_set sub_08071B88, EndPalFade\n");

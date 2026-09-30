@@ -9,7 +9,7 @@
  */
 
 #include "proc.h"
-/* The pair starter behind the sub_080409D0 group: one proc on tree 3 and a
+/* The pair starter behind the SiloFire_StartStrike group: one proc on tree 3 and a
  * second parented on the first, both carrying the same clamped screen position
  * and the same three bytes. The map byte is split differently between them --
  * low five bits plus a5 in the top three on the parent, the whole byte and its
@@ -35,7 +35,7 @@ struct Unk409E8Proc
     /* 4a */ u8 unk4a;
 };
 
-void sub_080409E8(int a1, int a2, int a3, int a4, int a5)
+void StartCaptureAnimation(int a1, int a2, int a3, int a4, int a5)
 {
     struct Unk409E8Proc *p;
     struct Unk409E8Proc *q;
@@ -68,3 +68,4 @@ void sub_080409E8(int a1, int a2, int a3, int a4, int a5)
     q->unk45 = MAP->terrain[MAP->rowOffset[a2] + a1] >> 5;
     q->unk4a = MAP->terrain[MAP->rowOffset[a2] + a1];
 }
+asm(".global sub_080409E8\n.thumb_set sub_080409E8, StartCaptureAnimation\n");

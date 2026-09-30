@@ -2,7 +2,7 @@
 
 0x08020754, 208 bytes, THUMB, parked.
 
-Best score so far: 45.7%, +8 bytes (best.c).
+Best score so far: 44.2% (best.c).
 
 ## What it does
 
@@ -75,5 +75,30 @@ WAVE 87 (W87-C, unnamed-twin axis, J = 1.00 on the two map globals but no loops)
 ### Wave 91
 
 WAVE 91 (W91-A), pre-registered member-form test: NEGATIVE, BYTE-IDENTICAL. This draft was already a member form through its local struct Unk20754Map; respelled through the shared struct Map (`((struct Map *)gUnknown_08499590)->terrain[->rowOffset[y] + x]`, `->unitUnk[...]`) and through gMap, _cand.bin is cmp-identical to the wave-90 draft (220/208, +12, 27.9%). NEW MECHANISM READ OFF `rtldump.py --flags="-da -dp"` (dump.cse): the candidate's `= 0` arm reuses the index (reg 47) because CSE reaches that arm by -fcse-skip-blocks -- the `unit == 0` jump branches AROUND the unit-type block (no other entry) to a single-use label -- not by fall-through as this entry's why_it_is_close says; the `= 1` label has two uses, so it starts a fresh block and recomputes with a reload of gUnknown_08499590. The ROM is the mirror, so its source must at CSE time deny the skip-blocks path into `= 0` (a second use of that label, or a second entry into the type block) AND give `= 1` a single-use label behind a barrier. Measured, all byte-identical to the draft: negated tests each `goto one;` then `= 0; continue; one: = 1;`; nested ifs with a shared `zero:` label inside the inner if; `... && !(unit != 0 && (u8)(type - 0x10) <= 4)`. `if (cond) goto zero; = 1; continue; zero: = 0;` is +8/45.7% but puts `= 1` first, recomputes there, and grows the frame to sub sp,#8. Evidence: work/sub_08020754/NOTES.md.
+
+### Wave 93
+
+WAVE 93 (W93-C). UNCHANGED at 220/208 (+12), 26.36%, first difference +0xc. The recommended base is a shape this function's own notes had already measured and rejected.
+BASE REJECTED: `best.c` (43.98%, size+8) is, statement for statement, the `k3` variant recorded in work/sub_08020754/NOTES.md -- `if (cond) goto zero; = 1; continue; zero: = 0;` -- which that file describes as '+8, 45.7%, but it puts the `= 1` arm first, recomputes there, and grows the frame to `sub sp,#8`. Wrong direction.' Re-measured this wave: 43.98%, size+8, FIRST DIFFERENCE +0xa against the draft's +0xc, so it diverges EARLIER. It is correct C going the wrong way, and its higher percentage is entirely the 4 bytes it gives back on a draft that is already OVER size. Renamed `best.c.wrongc`.
+METHOD NOTE: on a draft that is over size, a candidate closer to the target size scores higher whatever it does to the code. This entry and sub_080303C8's are the same trap in opposite directions (over size and under size); in both, the first-difference offset gave the right answer and the percentage gave the wrong one.
+RESIDUAL unchanged: which arm CSE recomputes `rowOffset[y] + x` on.
+
+### Wave 97
+
+wave 97 (W97-L)
+Base unchanged (26.36%, +12). Lever 1 (respell ONE identical expression) applied to the "= 0" arm's index, six
+spellings (spellings.py): `dst[x + row]`, `*(dst + x + row)`, `(u16)(row + x)`, `row - ~x + 1` all 26.36% +12 (the
+compiler canonicalises them back to the same expression, no new value number); `*(volatile u16 *)&row[y]` 24.54% +8;
+`*(volatile u32 *)&gUnknown_08499590` as the map pointer in that arm 28.77% +4 but it makes BOTH arms recompute
+(reload of the map pointer, row table and an extra literal word) -- wrong direction (ROM: "= 0" arm recomputes,
+"= 1" arm reuses the loop-top sum). Mechanism unchanged from the wave-41/87 reading: the ROM's "= 0" block begins
+at a label (the `unit == 0` branch target), so cse starts a fresh block there and re-derives the address; the
+"= 1" arm stays inside the condition's block. A value-numbering respelling cannot create that; only a block
+structure change can, and the jump-pass merge of duplicated `= 1` stores blocks the nested form.
+Proposed summary tried: + "respelling the 0-arm index (4 pure commutations, a volatile row read, a volatile map
+pointer read) does not split it".
+
+wave 97 (W97-V)
+Base: levers 4a-31 (branch polarity: the `dst = 0` arm is the else of the negated condition). wrongc OK. 26.36% +12 -> 43.98% +8. Permuter run 1 only 44.23% via a macro-expanded `new_var = rowOffset` (rejected: unreadable, +0.25%); draft left at the 43.98% levers form. Residual: +8 bytes. ROM keeps dst in r5 and the gMap pointer in sl (one `mov sl, r0`) with only one stack slot; ours keeps dst in sl and spills the map pointer to [sp,#0], so one more live value than the ROM.
 
 </details>

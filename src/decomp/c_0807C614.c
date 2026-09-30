@@ -42,7 +42,7 @@
  * the roles swap to `mov r1, sp; movs r0, #0` and the argument copy comes
  * back. Only "array" is proved; the extent is not.
  *
- * sub_0807F8E4 returns `int` (src/decomp/c_0807F8E4.c). The `lsls #24;
+ * IsBlockWarRoomSelectionActive returns `int` (src/decomp/c_0807F8E4.c). The `lsls #24;
  * lsrs #24` after the `bl` is this caller storing the result in a u8, which is
  * the reading include/unknown-functions.h already records for sub_0807C9EC.
  *
@@ -69,12 +69,12 @@ void WarRoomMapSelected_0807C615(struct Unk807C614 *proc)
     u8 v;
     u16 clear[2];
 
-    sub_0807898C(proc);
-    sub_08078AF0();
+    SetupMenuScreenBgs(proc);
+    SyncAllBgTilemaps();
 
     gUnknown_0300251C.bits.tm_block = 0x1b;
 
-    sub_08078D80(proc);
+    StartScrollingBackdrop(proc);
 
     gUnknown_03001FE8.bits.size = 2;
     gUnknown_03001FE8.bits.chr_block = 1;
@@ -88,7 +88,7 @@ void WarRoomMapSelected_0807C615(struct Unk807C614 *proc)
     Decompress(gUnknown_0823456C, gBG1TilemapBuffer);
     ApplyPaletteExt((u16 *)8, 0, 0x20);
 
-    sub_08013AFC();
+    BG_EnableSyncBG1();
 
     Decompress(gUnknown_082346D0, gUnknown_0200FC50);
 
@@ -98,59 +98,59 @@ void WarRoomMapSelected_0807C615(struct Unk807C614 *proc)
     ApplyPaletteExt(gUnknown_08234AD0, 0x200, 0x20);
 
     sub_0801F114();
-    sub_0801F150(1, (void *)0x06010000, 0x3e4, 0x1c);
-    sub_0801F150(2, (void *)0x06010000, 0x344, 0x1d);
+    InitTilePool(1, (void *)0x06010000, 0x3e4, 0x1c);
+    InitTilePool(2, (void *)0x06010000, 0x344, 0x1d);
 
-    sub_0801F234(0x3e);
-    sub_0801F234(0x3f);
-    sub_0801F234(0x40);
-    sub_0801F234(0x41);
-    sub_0801F234(0x42);
-    sub_0801F234(0x43);
-    sub_0801F234(0x44);
-    sub_0801F234(0x48);
-    sub_0801F234(0x49);
-    sub_0801F234(0x4a);
-    sub_0801F234(0x4b);
-    sub_0801F234(0x4c);
-    sub_0801F234(0x4d);
-    sub_0801F234(0x54);
-    sub_0801F234(0x56);
-    sub_0801F234(0x57);
-    sub_0801F234(0x58);
-    sub_0801F234(0x5f);
-    sub_0801F234(0x4f);
-    sub_0801F234(0x67);
-    sub_0801F234(0x62);
-    sub_0801F234(0x65);
+    LoadTilePoolGraphic(0x3e);
+    LoadTilePoolGraphic(0x3f);
+    LoadTilePoolGraphic(0x40);
+    LoadTilePoolGraphic(0x41);
+    LoadTilePoolGraphic(0x42);
+    LoadTilePoolGraphic(0x43);
+    LoadTilePoolGraphic(0x44);
+    LoadTilePoolGraphic(0x48);
+    LoadTilePoolGraphic(0x49);
+    LoadTilePoolGraphic(0x4a);
+    LoadTilePoolGraphic(0x4b);
+    LoadTilePoolGraphic(0x4c);
+    LoadTilePoolGraphic(0x4d);
+    LoadTilePoolGraphic(0x54);
+    LoadTilePoolGraphic(0x56);
+    LoadTilePoolGraphic(0x57);
+    LoadTilePoolGraphic(0x58);
+    LoadTilePoolGraphic(0x5f);
+    LoadTilePoolGraphic(0x4f);
+    LoadTilePoolGraphic(0x67);
+    LoadTilePoolGraphic(0x62);
+    LoadTilePoolGraphic(0x65);
 
-    sub_0801A5B0(1);
+    LoadBg1WindowFrame(1);
 
-    sub_0802D5CC(gUnknown_03005958[proc->unk58], 8);
+    ApplyWindowFramePalette(gUnknown_03005958[proc->unk58], 8);
 
-    v = sub_0807F8E4();
+    v = IsBlockWarRoomSelectionActive();
 
     if (v != 0)
     {
         for (i = 0; i < proc->unk64; i++)
-            sub_08043B14(gUnknown_030058D4[i], i * 0xc + 0x3c0);
+            LoadCoNameGraphic(gUnknown_030058D4[i], i * 0xc + 0x3c0);
 
-        sub_08043B14(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c],
+        LoadCoNameGraphic(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c],
                      proc->unk64 * 0xc + 0x3c0);
     }
     else
     {
         proc->unk52 = 0;
-        sub_08043B14(gUnknown_030058E0[0], 0x3c0);
+        LoadCoNameGraphic(gUnknown_030058E0[0], 0x3c0);
     }
 
-    sub_08043BA4(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c], 0x40, 1);
-    sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013000, 0x12);
-    sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52 + 1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013480, 0x13);
-    sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52 + 2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013900, 0x14);
-    sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014200, 0x16);
-    sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52 + 1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014680, 0x17);
-    sub_08043E3C(gUnknown_030058E0[DivRem(proc->unk52 + 2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014B00, 0x18);
+    LoadCoFullBodyAndPalette(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c], 0x40, 1);
+    LoadCoFace(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013000, 0x12);
+    LoadCoFace(gUnknown_030058E0[DivRem(proc->unk52 + 1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013480, 0x13);
+    LoadCoFace(gUnknown_030058E0[DivRem(proc->unk52 + 2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013900, 0x14);
+    LoadCoFace(gUnknown_030058E0[DivRem(proc->unk52, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014200, 0x16);
+    LoadCoFace(gUnknown_030058E0[DivRem(proc->unk52 + 1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014680, 0x17);
+    LoadCoFace(gUnknown_030058E0[DivRem(proc->unk52 + 2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014B00, 0x18);
 }
 
 asm(".global sub_0807C614\n.thumb_set sub_0807C614, WarRoomMapSelected_0807C615\n");

@@ -11,13 +11,6 @@
  * below so every other unit keeps resolving them unchanged.
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08087C94.
- * CoDesignC1_08087C95 @ 0x08087C94
- */
-
 #include "proc.h"
 #include "hardware.h"
 struct Unk87C94Proc
@@ -55,15 +48,15 @@ struct Unk87C94Proc
  * counts 7 down to 0 -- check_dbra_loop reverses it, and the two `i * K` terms
  * become the two givs.
  *
- * sub_0807898C's ProcPtr parameter: see work/sub_0808A6CC/sub_0808A6CC.c. Here
+ * SetupMenuScreenBgs's ProcPtr parameter: see work/sub_0808A6CC/sub_0808A6CC.c. Here
  * it is invisible, because r0 already holds proc at the call. */
-void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
+void CoDesignRoot_Init(struct Unk87C94Proc *proc)
 {
     int i;
     u16 zero;
 
-    sub_0807898C(proc);
-    sub_08013B0C();
+    SetupMenuScreenBgs(proc);
+    BG_EnableSyncBG2();
 
     gUnknown_0300251C.bits.tm_block = 0x1b;
 
@@ -89,7 +82,7 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
 
     SetWinEnable(0, 1, 0);
 
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 
     Decompress(gUnknown_0823A3D4,
         (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06000000));
@@ -99,7 +92,7 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
         gBG3TilemapBuffer[i] += 0x2000;
 
     ApplyPaletteExt(gUnknown_0823BE20, 0x40, 0x20);
-    sub_08013B1C();
+    BG_EnableSyncBG3();
 
     gUnknown_03002F18 = 0xff28;
 
@@ -109,8 +102,8 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
     Decompress(gUnknown_0823468C,
         (void *)(gUnknown_03001FE8.bits.chr_block * 0x4000 + 0x06000000));
     Decompress(gUnknown_0823456C, gBG1TilemapBuffer);
-    sub_08013AFC();
-    sub_0802D5CC(0, 0);
+    BG_EnableSyncBG1();
+    ApplyWindowFramePalette(0, 0);
 
     Decompress(gUnknown_082346D0, gUnknown_0200FC50);
 
@@ -122,54 +115,54 @@ void CoDesignC1_08087C95(struct Unk87C94Proc *proc)
     proc->unk58 = 0;
     proc->unk5c = 0;
 
-    sub_08043BA4(gUnknown_030058E0[DivRem(0, gUnknown_03005948[proc->unk58]) + proc->unk5c], 0x40, 1);
-    sub_08043B14(gUnknown_030058E0[0], 0x2cc);
-    sub_08043E3C(gUnknown_030058E0[DivRem(0, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013000, 0x12);
-    sub_08043E3C(gUnknown_030058E0[DivRem(1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013480, 0x13);
-    sub_08043E3C(gUnknown_030058E0[DivRem(2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013900, 0x14);
-    sub_08043E3C(gUnknown_030058E0[DivRem(0, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014200, 0x16);
-    sub_08043E3C(gUnknown_030058E0[DivRem(1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014680, 0x17);
-    sub_08043E3C(gUnknown_030058E0[DivRem(2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014B00, 0x18);
+    LoadCoFullBodyAndPalette(gUnknown_030058E0[DivRem(0, gUnknown_03005948[proc->unk58]) + proc->unk5c], 0x40, 1);
+    LoadCoNameGraphic(gUnknown_030058E0[0], 0x2cc);
+    LoadCoFace(gUnknown_030058E0[DivRem(0, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013000, 0x12);
+    LoadCoFace(gUnknown_030058E0[DivRem(1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013480, 0x13);
+    LoadCoFace(gUnknown_030058E0[DivRem(2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06013900, 0x14);
+    LoadCoFace(gUnknown_030058E0[DivRem(0, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014200, 0x16);
+    LoadCoFace(gUnknown_030058E0[DivRem(1, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014680, 0x17);
+    LoadCoFace(gUnknown_030058E0[DivRem(2, gUnknown_03005948[proc->unk58]) + proc->unk5c], (void *)0x06014B00, 0x18);
 
     sub_0801F114();
-    sub_0801F150(1, (void *)0x06010000, 0x2d8, 0x1b);
-    sub_0801F150(2, (void *)0x06010000, 0x2ec, 0x1c);
+    InitTilePool(1, (void *)0x06010000, 0x2d8, 0x1b);
+    InitTilePool(2, (void *)0x06010000, 0x2ec, 0x1c);
 
-    sub_0801F234(0x3e);
-    sub_0801F234(0x3f);
-    sub_0801F234(0x40);
-    sub_0801F234(0x41);
-    sub_0801F234(0x42);
-    sub_0801F234(0x43);
-    sub_0801F234(0x44);
-    sub_0801F234(0x48);
-    sub_0801F234(0x49);
-    sub_0801F234(0x4f);
-    sub_0801F234(0x83);
-    sub_0801F234(0x84);
-    sub_0801F234(0x85);
-    sub_0801F234(0x86);
-    sub_0801F234(0x87);
-    sub_0801F234(0x88);
-    sub_0801F234(0x89);
-    sub_0801F234(0x8a);
-    sub_0801F234(0x8b);
+    LoadTilePoolGraphic(0x3e);
+    LoadTilePoolGraphic(0x3f);
+    LoadTilePoolGraphic(0x40);
+    LoadTilePoolGraphic(0x41);
+    LoadTilePoolGraphic(0x42);
+    LoadTilePoolGraphic(0x43);
+    LoadTilePoolGraphic(0x44);
+    LoadTilePoolGraphic(0x48);
+    LoadTilePoolGraphic(0x49);
+    LoadTilePoolGraphic(0x4f);
+    LoadTilePoolGraphic(0x83);
+    LoadTilePoolGraphic(0x84);
+    LoadTilePoolGraphic(0x85);
+    LoadTilePoolGraphic(0x86);
+    LoadTilePoolGraphic(0x87);
+    LoadTilePoolGraphic(0x88);
+    LoadTilePoolGraphic(0x89);
+    LoadTilePoolGraphic(0x8a);
+    LoadTilePoolGraphic(0x8b);
 
     Proc_Start(ProcScr_PutFace, proc);
 }
 
-asm(".global sub_08087C94\n.thumb_set sub_08087C94, CoDesignC1_08087C95\n");
+asm(".global sub_08087C94\n.thumb_set sub_08087C94, CoDesignRoot_Init\n");
 
-extern void CoDesignC1_08088005(void);
-extern void CoDesignC1_IDLE_08088041(void);
+extern void CoDesignRoot_StartEditor(void);
+extern void CoDesignRoot_Idle(void);
 
 struct ProcCmd CONST_DATA ProcScr_CoDesignC1[] =
 {
     PROC_1D(30),
-    PROC_CALL(CoDesignC1_08087C95),
+    PROC_CALL(CoDesignRoot_Init),
     PROC_1E(30),
-    PROC_CALL(CoDesignC1_08088005),
-    PROC_REPEAT(CoDesignC1_IDLE_08088041),
+    PROC_CALL(CoDesignRoot_StartEditor),
+    PROC_REPEAT(CoDesignRoot_Idle),
     PROC_END,
 };
 

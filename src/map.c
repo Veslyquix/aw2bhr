@@ -8,12 +8,12 @@ void LoadMapData(u16 a1)
 
     if (a1 >= 0xb4 && a1 <= 0xbf)
     {
-        sub_08037B84(sub_08014E44(0x724));
-        sub_0801AC58(8, (u8 *)gUnknown_03003F68);
+        SetLoadedMapBlob(HeapMalloc(0x724));
+        ReadSaveSlot(8, (u8 *)gUnknown_03003F68);
     }
     else
     {
-        sub_08037B84(sub_08014E44(0xa14));
+        SetLoadedMapBlob(HeapMalloc(0xa14));
 
         p = gUnknown_085C77A0[a1].mapData[IsHardCampaignMode()];
         if (p == NULL)
@@ -25,14 +25,14 @@ void LoadMapData(u16 a1)
 
 asm(".global sub_080247A4\n.thumb_set sub_080247A4, LoadMapData\n");
 
-void WarRoomScroll_CB_0802481D(void)
+void FreeMapLoadBuffer(void)
 {
-    sub_08014ED4(gUnknown_03003F68);
+    HeapFree(gUnknown_03003F68);
 }
 
-asm(".global sub_0802481C\n.thumb_set sub_0802481C, WarRoomScroll_CB_0802481D\n");
+asm(".global sub_0802481C\n.thumb_set sub_0802481C, FreeMapLoadBuffer\n");
 
-void sub_08024830(void)
+void ReloadGameplayPalettes(void)
 {
     ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gPlayers[1].teamColor - 1) * 0x20),
                     0x180, 0x20);
@@ -43,46 +43,51 @@ void sub_08024830(void)
     ApplyPaletteExt((u16 *)(gUnknown_0810E6E0 + (gPlayers[4].teamColor - 1) * 0x20),
                     0x1E0, 0x20);
 
-    sub_0803F80C(8);
+    LoadArmyObjPalettes(8);
     sub_0802D2EC();
 
     ApplyPaletteExt(gUnknown_0809163C, 0x240, 0x20);
 
-    sub_08035020(gPlaySt.weather);
-    sub_08022A34();
+    ApplyWeatherPalette(gPlaySt.weather);
+    LoadCursorSpriteGraphics();
 
-    sub_0801A5B0(gUnknown_030033EC);
-    sub_08043834(gUnknown_030033EC);
-    sub_0801A57C(gUnknown_030033EC);
+    LoadBg1WindowFrame(gUnknown_030033EC);
+    LoadCoPanelGraphics(gUnknown_030033EC);
+    LoadArmyObjPalette(gUnknown_030033EC);
 }
+asm(".global sub_08024830\n.thumb_set sub_08024830, ReloadGameplayPalettes\n");
 
-u8 *sub_080248E4(void)
+u8 *GetLoadedMapName(void)
 {
     return gMap->unk421a;
 }
+asm(".global sub_080248E4\n.thumb_set sub_080248E4, GetLoadedMapName\n");
 
-u8 sub_080248F8(void)
+u8 GetLoadedMapArmyCount(void)
 {
     return gMap->unk4233;
 }
+asm(".global sub_080248F8\n.thumb_set sub_080248F8, GetLoadedMapArmyCount\n");
 
-u8 sub_0802490C(u16 a1)
+u8 GetMapArmyCount(u16 a1)
 {
     if ((u16)(a1 - 0xB4) <= 0xB)
-        return sub_0803CD14(a1 + 0x4C);
+        return GetDesignRoomSlotArmyCount(a1 + 0x4C);
 
     return gUnknown_085C77A0[a1].unk18;
 }
+asm(".global sub_0802490C\n.thumb_set sub_0802490C, GetMapArmyCount\n");
 
-u8 *sub_08024944(u16 a1)
+u8 *GetMapName(u16 a1)
 {
     if ((u16)(a1 - 0xB4) <= 0xB)
-        return sub_0803CCEC(a1 + 0x4C);
+        return GetDesignRoomSlotName(a1 + 0x4C);
 
     return gTextTable[gUnknown_085C77A0[a1].nameIndex];
 }
+asm(".global sub_08024944\n.thumb_set sub_08024944, GetMapName\n");
 
-int sub_08024984(int a1)
+int GetCellCountry(int a1)
 {
     int r = gUnknown_085C77A0[gPlaySt.mapID].unk58;
 
@@ -91,15 +96,16 @@ int sub_08024984(int a1)
         int i = a1 & 0xE0;
 
         if (i != 0)
-            r = sub_08042DE0(i >> 5);
+            r = GetPlayerCoCountry(i >> 5);
         else
             r = 0;
     }
 
     return r;
 }
+asm(".global sub_08024984\n.thumb_set sub_08024984, GetCellCountry\n");
 
-int sub_080249C8(int a)
+int GetCellOwnerTeamColor(int a)
 {
     int i = a & 0xE0;
 
@@ -108,6 +114,7 @@ int sub_080249C8(int a)
 
     return gPlayers[i >> 5].teamColor;
 }
+asm(".global sub_080249C8\n.thumb_set sub_080249C8, GetCellOwnerTeamColor\n");
 
 int GetTerrainDefense(int a1, s8 a2, u8 a3)
 {
@@ -119,7 +126,7 @@ int GetTerrainDefense(int a1, s8 a2, u8 a3)
 
 asm(".global sub_080249EC\n.thumb_set sub_080249EC, GetTerrainDefense\n");
 
-void sub_08024A2C(struct BattleUnit *a1, s16 a2)
+void InitBattleUnit(struct BattleUnit *a1, s16 a2)
 {
     struct Unit *e;
     struct Map *map;
@@ -142,3 +149,4 @@ void sub_08024A2C(struct BattleUnit *a1, s16 a2)
     a1->baseDamage = 0;
     a1->hpLoss = 0;
 }
+asm(".global sub_08024A2C\n.thumb_set sub_08024A2C, InitBattleUnit\n");

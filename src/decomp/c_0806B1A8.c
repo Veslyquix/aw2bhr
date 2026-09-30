@@ -7,13 +7,6 @@
  * sub_0806B1A8 @ 0x0806B1A8
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0806B1A8.
- * sub_0806B1A8 @ 0x0806B1A8
- */
-
 #include "proc.h"
 #include "hardware.h"
 struct UnkB1A8Proc
@@ -34,7 +27,7 @@ struct UnkB1A8Proc
  *  - `gUnknown_0816E170` is NOT a global. The ROM word at 0x0816E170 is
  *    0x08499578, i.e. agbcc's own -fforce-addr address constant for
  *    gBG0TilemapBuffer, which this function reads twice (CpuFastSet and
- *    sub_08014668). Naming the global directly is what reproduces the
+ *    StartTextBoxViaRecord). Naming the global directly is what reproduces the
  *    `ldr rN,<pool>; ldr rM,[rN]; ldr rK,[rM]` double indirection. Note this
  *    is TWO uses, not four -- the "it needs four uses to hold" line in
  *    docs/agbcc-codegen.md does not apply to a word the ROM already carries.
@@ -62,16 +55,16 @@ struct UnkB1A8Proc
  *    pair -- the group masks 0xFFE0 and 0xE0FF are the tell, since five 1-bit
  *    field writes give five separate `mov #N; neg; and` steps.
  */
-void sub_0806B1A8(struct UnkB1A8Proc *proc)
+void CreditsEpilogue_Init(struct UnkB1A8Proc *proc)
 {
     int i;
     int x;
     int zero;
     u16 v;
 
-    sub_0801237C();
-    sub_08012358();
-    sub_08012C58(gUnknown_0849D16C);
+    ResetWindowShadows();
+    SetDefaultColorEffects();
+    SetupBackgrounds(gUnknown_0849D16C);
 
     gDispIo.disp_ct.obj_mapping = TRUE;
     SetDispEnable(1, 1, 1, 1, 0);
@@ -81,7 +74,7 @@ void sub_0806B1A8(struct UnkB1A8Proc *proc)
     gUnknown_0300251C.bits.priority = 2;
     gUnknown_03001FE8.bits.priority = 3;
 
-    sub_08072C40(0, 0, 0);
+    SetBgScrollShadow(0, 0, 0);
 
     zero = 0;
     CpuFastSet(&zero, gBG0TilemapBuffer, 0x01000200);
@@ -110,12 +103,12 @@ void sub_0806B1A8(struct UnkB1A8Proc *proc)
     Decompress(gUnknown_081933F4, (void *)0x0600CC00);
     Decompress(gUnknown_081942A0, gBG3TilemapBuffer);
     Decompress(gUnknown_081942A0, gBG2TilemapBuffer);
-    sub_08014668(4, 0x14, gBG0TilemapBuffer, 0x873, 0x3000, 0x40);
+    StartTextBoxViaRecord(4, 0x14, gBG0TilemapBuffer, 0x873, 0x3000, 0x40);
 
-    sub_08013AEC();
-    sub_08013AFC();
-    sub_08013B0C();
-    sub_08013B1C();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
+    BG_EnableSyncBG2();
+    BG_EnableSyncBG3();
 
     proc->unk58 = 0;
     proc->unk5c = 0;
@@ -127,3 +120,4 @@ void sub_0806B1A8(struct UnkB1A8Proc *proc)
     gUnknown_030030E0.raw = (gUnknown_030030E0.raw & 0xffe0) | 4;
     gUnknown_030030E0.raw = (gUnknown_030030E0.raw & 0xe0ff) | 0x800;
 }
+asm(".global sub_0806B1A8\n.thumb_set sub_0806B1A8, CreditsEpilogue_Init\n");

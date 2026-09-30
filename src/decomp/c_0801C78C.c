@@ -7,13 +7,6 @@
  * sub_0801C78C @ 0x0801C78C
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0801C78C.
- * sub_0801C78C @ 0x0801C78C
- */
-
 struct Unk_0801C78C_Obj
 {
     /* 0x00 */ u8 filler_00[0x22];
@@ -27,9 +20,10 @@ struct Unk_0801C78C_Proc
     /* 0x58 */ u32 unk58;
 };
 
-void sub_0801C78C(struct Unk_0801C78C_Proc *proc, u32 a, u32 b, u16 c)
+void APProc_SetParameters(struct Unk_0801C78C_Proc *proc, u32 a, u32 b, u16 c)
 {
     proc->unk54 = a;
     proc->unk58 = b;
     proc->unk50->unk22 = c;
 }
+asm(".global sub_0801C78C\n.thumb_set sub_0801C78C, APProc_SetParameters\n");

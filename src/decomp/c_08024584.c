@@ -13,12 +13,13 @@
  * `movs #4; rsbs; ands` chains. This permutation is the same one
  * src/decomp/c_08024378.c opens with -- 0/2/1/3 across BG0..BG3. */
 
-void sub_08024584(void)
+void SetMapLayersDefault(void)
 {
     gUnknown_03002B6C.bits.priority = 0;
     gUnknown_03001FE8.bits.priority = 2;
     gUnknown_030030B4.bits.priority = 1;
     gUnknown_0300251C.bits.priority = 3;
-    sub_08012358();
-    sub_0801237C();
+    SetDefaultColorEffects();
+    ResetWindowShadows();
 }
+asm(".global sub_08024584\n.thumb_set sub_08024584, SetMapLayersDefault\n");

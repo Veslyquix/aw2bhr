@@ -39,7 +39,7 @@
  * if/else -- rather than once after it -- is what closed it: it raises that
  * pseudo's reference count enough to win the low callee-saved register under
  *     priority ~ floor_log2(n_refs) * n_refs * freq / live_length
- * (the same model that closed sub_08045B30 this wave). It costs nothing in
+ * (the same model that closed MapEventCond_Army1OwnsEightFixedCells this wave). It costs nothing in
  * code, because gcc's cross-jumping merges the two identical `unk68++; break;`
  * tails back into the single block the ROM has at 0x080447A6 -- which is why
  * the if-arm still reaches it by `b` and not by fall-through.
@@ -57,9 +57,9 @@
  *
  * OTHER THINGS THE ASSEMBLY DOES NOT HAND YOU:
  *   - the inner test is spelled with `||`, not `&&`. The ROM's unk08-only arm
- *     is the FALL-THROUGH and the sub_08029088 arm is forward past the pool;
+ *     is the FALL-THROUGH and the ScrollCameraToKeepCellInView arm is forward past the pool;
  *     `if (cell != 0 && (unk01 & 8) == 0)` lays them out the other way round.
- *   - AnimateUnitCreation's first two arguments are bound to locals BEFORE the flag
+ *   - StartUnitSparkleEffect's first two arguments are bound to locals BEFORE the flag
  *     is computed. The ROM loads unk02/unk03 into r3/r4 (clobbering the unit
  *     pointer), then builds the flag in r5, then copies all three into r0-r2.
  *     Naming them at the call site instead loads them straight into r0/r1 and
@@ -77,7 +77,7 @@ struct Unk08044610Proc
     /* 0x66 */ u8 filler_66[0x02];
     /* 0x68 */ s16 unk68;
 };
-void sub_08044610(struct Unk08044610Proc *proc)
+void CoPowerUnitEffects_Loop(struct Unk08044610Proc *proc)
 {
     struct Unit *unit;
     struct Map *m;
@@ -88,7 +88,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
 
     proc->unk64++;
 
-    if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
+    if (FindSlotScript((s32)gUnknown_0849A00C) != -1)
         return;
 
     if (proc->unk64 <= 4)
@@ -119,9 +119,9 @@ void sub_08044610(struct Unk08044610Proc *proc)
             }
             else
             {
-                sub_08029088(unit->x, unit->y);
+                ScrollCameraToKeepCellInView(unit->x, unit->y);
 
-                if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
+                if (FindSlotScript((s32)gUnknown_0849A00C) != -1)
                     return;
 
                 gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
@@ -135,7 +135,7 @@ void sub_08044610(struct Unk08044610Proc *proc)
                 if (gPlayers[gUnknown_030033EC].coActivationMode == 2)
                     flag = 1;
 
-                AnimateUnitCreation(x, y, flag);
+                StartUnitSparkleEffect(x, y, flag);
 
                 proc->unk68++;
                 break;
@@ -148,5 +148,6 @@ void sub_08044610(struct Unk08044610Proc *proc)
     if (proc->unk68 == 0x33)
         Proc_Break(proc);
 
-    sub_08024268();
+    RebuildMapUnitLayers2();
 }
+asm(".global sub_08044610\n.thumb_set sub_08044610, CoPowerUnitEffects_Loop\n");

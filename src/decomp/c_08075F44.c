@@ -37,7 +37,7 @@ struct Unk8075F44
     /* 0x3c */ int unk3c;
 };
 
-void sub_08075F44(void *proc)
+void WorldMapNationPanel_Refresh(void *proc)
 {
     u16 *base;
     int v;
@@ -61,11 +61,12 @@ void sub_08075F44(void *proc)
     CpuFastSet(&zero, gUnknown_08551A00 + 0x140, 0x01000040);
 
     t = gUnknown_081CC4F8[v];
-    sub_0802D5CC(t, 0);
+    ApplyWindowFramePalette(t, 0);
     sub_080718F8(gUnknown_08551A04 + 0x140, gUnknown_081D22C4, 0x360);
-    sub_080135A4();
-    sub_0801B780(0x340);
-    sub_080149C0(3, 0xB, gUnknown_08551A00,
+    EnablePaletteSync();
+    InitTextTileCache(0x340);
+    PutTextScriptImmediate(3, 0xB, gUnknown_08551A00,
                  gTextTable[gUnknown_081CC578[t]], 0, 0);
-    sub_0801F2AC(gUnknown_081CC538[v], gUnknown_08551A00 + 0x161);
+    PutTilePoolGraphicTilemap(gUnknown_081CC538[v], gUnknown_08551A00 + 0x161);
 }
+asm(".global sub_08075F44\n.thumb_set sub_08075F44, WorldMapNationPanel_Refresh\n");

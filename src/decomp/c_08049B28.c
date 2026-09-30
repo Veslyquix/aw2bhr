@@ -11,14 +11,14 @@
  * below so every other unit keeps resolving them unchanged.
  */
 
-void BattleMaps_08049B29(void)
+void ShopScreen_EndMessageScripts(void)
 {
     sub_080733B8();
-    sub_0801930C(gUnknown_084C30E8[gUnknown_084C30F8->unk83a]);
+    EndEventScript(gUnknown_084C30E8[gUnknown_084C30F8->unk83a]);
     sub_0801537C(gUnknown_084C3128);
 
     if (gUnknown_0200C420.unk0f != 0xFF)
         gUnknown_0200C420.unk0f++;
 }
 
-asm(".global sub_08049B28\n.thumb_set sub_08049B28, BattleMaps_08049B29\n");
+asm(".global sub_08049B28\n.thumb_set sub_08049B28, ShopScreen_EndMessageScripts\n");

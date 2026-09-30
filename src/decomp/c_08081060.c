@@ -24,7 +24,7 @@
  * &gUnknown_03005934, which is why each is reached with TWO `ldr`s. See the
  * note in include/unknown-globals.h.
  *
- * sub_080845C4 and sub_080845E8 each take a SECOND argument that neither
+ * LoadMainMenuSideTileGraphic and LoadMainMenuLabelPlateGraphic each take a SECOND argument that neither
  * callee reads. src/decomp/c_08084580.c defined them without it, because an
  * ignored argument costs the callee nothing; this function is their only
  * caller in the ROM and sets up r1 at all ten call sites, so the caller is the
@@ -32,7 +32,7 @@
  *
  * The gDispIo byte-1 group is written on both sides of the two window-shadow
  * groups, so agbcc merges it into ONE read-modify-write and the `strb` sinks
- * past both -- the same merge hardware.h already records for sub_0806ED7C.
+ * past both -- the same merge hardware.h already records for SoundRoomMusicPage_Resume.
  * That is automatic; the source order is just the five display enables, then
  * the two shadows, then the four scalars, then the three window enables.
  *
@@ -46,12 +46,12 @@
  * is a third, also-wrong shape: it truncates at the INCREMENT instead.
  */
 
-void MainMenuC1_08081061(ProcPtr proc)
+void MainMenuCarousel_Init(ProcPtr proc)
 {
     int i;
 
-    sub_0807898C(proc);
-    sub_08078AF0();
+    SetupMenuScreenBgs(proc);
+    SyncAllBgTilemaps();
 
     SetDispEnable(1, 1, 0, 1, 1);
 
@@ -85,50 +85,50 @@ void MainMenuC1_08081061(ProcPtr proc)
     Decompress(gUnknown_08239FA4, gBG3TilemapBuffer);
     ApplyPaletteExt((u16 *)gUnknown_0823BDE0, 0, 0x20);
 
-    sub_08013B1C();
+    BG_EnableSyncBG3();
 
     Decompress(gUnknown_0823BF28, (void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06000000));
     Decompress(gUnknown_0823BE40, gBG2TilemapBuffer);
     ApplyPaletteExt(gUnknown_0823BFD4, 0x20, 0x20);
 
-    sub_08013B0C();
-    sub_08013AEC();
-    sub_08013AFC();
+    BG_EnableSyncBG2();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
 
     gUnknown_03005920 = 0;
 
-    sub_080845A8(gUnknown_0861696C[DivRem(gUnknown_03005934 + 2, 6)]);
+    LoadMainMenuCentreTileGraphic(gUnknown_0861696C[DivRem(gUnknown_03005934 + 2, 6)]);
 
     for (i = 0; i < 2; i++)
     {
-        sub_080845C4(0, 0x110);
-        sub_080845C4(1, 0x150);
-        sub_080845C4(2, 0x180);
-        sub_080845C4(3, 0x190);
-        sub_080845C4(4, 0x1c0);
-        sub_080845C4(5, 0x250);
+        LoadMainMenuSideTileGraphic(0, 0x110);
+        LoadMainMenuSideTileGraphic(1, 0x150);
+        LoadMainMenuSideTileGraphic(2, 0x180);
+        LoadMainMenuSideTileGraphic(3, 0x190);
+        LoadMainMenuSideTileGraphic(4, 0x1c0);
+        LoadMainMenuSideTileGraphic(5, 0x250);
     }
 
     for (i = 0; i < 2; i++)
     {
-        sub_080845E8(0, 0x1d0);
-        sub_080845E8(1, 0x1d6);
-        sub_080845E8(2, 0x212);
-        sub_080845E8(3, 0x20c);
+        LoadMainMenuLabelPlateGraphic(0, 0x1d0);
+        LoadMainMenuLabelPlateGraphic(1, 0x1d6);
+        LoadMainMenuLabelPlateGraphic(2, 0x212);
+        LoadMainMenuLabelPlateGraphic(3, 0x20c);
     }
 
     if (IsCampaignCompletionFlagSet(0x20) != 0)
         ApplyPaletteExt(gUnknown_0823DC38, 0x3a0, 0x20);
 
-    sub_08084804();
+    MainMenuCarousel_UpdateCompletionFlags();
 
     for (i = 0; i < 6; i++)
-        ApplyPaletteExt(sub_08084864(i), (u16)(0x20 * (i + 0x12)), 0x20);
+        ApplyPaletteExt(GetMainMenuTilePalette(i), (u16)(0x20 * (i + 0x12)), 0x20);
 
     ApplyPaletteExt(gUnknown_0823DDB8, 0x340, 0x60);
 
-    sub_08043BA4(0, 0, 1);
-    sub_0801B780(0);
+    LoadCoFullBodyAndPalette(0, 0, 1);
+    InitTextTileCache(0);
 
     ApplyPaletteExt(gUnknown_081320AC, 0x100, 0x20);
 
@@ -136,25 +136,25 @@ void MainMenuC1_08081061(ProcPtr proc)
 
     if (gUnknown_030058FC != 0)
     {
-        ApplyPaletteExt(sub_08084864(gUnknown_0861696C[DivRem(gUnknown_03005934 + 2, 6)]), 0x300, 0x20);
+        ApplyPaletteExt(GetMainMenuTilePalette(gUnknown_0861696C[DivRem(gUnknown_03005934 + 2, 6)]), 0x300, 0x20);
         Proc_Start(gUnknown_08616A40, proc);
     }
 }
 
-asm(".global sub_08081060\n.thumb_set sub_08081060, MainMenuC1_08081061\n");
+asm(".global sub_08081060\n.thumb_set sub_08081060, MainMenuCarousel_Init\n");
 
-extern void MainMenuC1_08081335(void);
-extern void MainMenuC1_IDLE_08081359(void);
+extern void MainMenuCarousel_StartWheelProc(void);
+extern void MainMenuCarousel_Idle(void);
 
 struct ProcCmd CONST_DATA ProcScr_MainMenuC1[] =
 {
     PROC_1D(30),
-    PROC_CALL(MainMenuC1_08081061),
+    PROC_CALL(MainMenuCarousel_Init),
     PROC_1E(30),
-    PROC_CALL(MainMenuC1_08081335),
+    PROC_CALL(MainMenuCarousel_StartWheelProc),
     PROC_SLEEP(6),
     PROC_1B(400),
-    PROC_REPEAT(MainMenuC1_IDLE_08081359),
+    PROC_REPEAT(MainMenuCarousel_Idle),
     PROC_END,
 };
 

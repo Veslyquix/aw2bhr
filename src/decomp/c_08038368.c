@@ -17,7 +17,7 @@
  *
  * NOTE FOR PROMOTION: 0x08090EFC (sub_080381C0's pool word, same block) and
  * 0x08090F08 are NOT adjacent -- 0x08090F00 and 0x08090F04 sit between them and
- * are sub_08038240's. AN EARLIER VERSION OF THIS NOTE WARNED THAT A UNIT
+ * are EndOfGame_PrepareSummary's. AN EARLIER VERSION OF THIS NOTE WARNED THAT A UNIT
  * HOLDING BOTH WOULD BE REJECTED BY tools/split_rodata.py. THAT WAS WRONG and
  * W43-F disproved it; the corrected rule is in docs/agbcc-codegen.md. Ownership
  * across this run is monotonic in .text address with no unclaimed word --
@@ -25,8 +25,8 @@
  * order -- and a promotion unit is a CONTIGUOUS .text range, so any unit
  * spanning two of these functions necessarily contains every function between
  * them and therefore claims every word between their words. Concretely:
- * 0x080381C0 + 0x80 = 0x08038240, so sub_08038240 immediately follows
- * sub_080381C0 and lies strictly inside any span reaching sub_08038368; a unit
+ * 0x080381C0 + 0x80 = 0x08038240, so EndOfGame_PrepareSummary immediately follows
+ * sub_080381C0 and lies strictly inside any span reaching SaveCampaignMissionResult; a unit
  * with both my words but not F00/F04 cannot be drawn.
  *   What the check actually needs is that no word in the span is unclaimed or
  * claimed out of order -- NOT that one function's own words are adjacent.
@@ -44,7 +44,7 @@
  * into the test, which is why it is emitted a second time at _080383BA.
  */
 
-void sub_08038368(int a1, int a2, int a3)
+void SaveCampaignMissionResult(int a1, int a2, int a3)
 {
     u8 found;
     u8 i;
@@ -70,6 +70,7 @@ void sub_08038368(int a1, int a2, int a3)
     if (found == 0)
         gUnknown_0200C420.unk38[i + 1].unk00_08 = 0;
 }
+asm(".global sub_08038368\n.thumb_set sub_08038368, SaveCampaignMissionResult\n");
 
 /* MATCHED byte-for-byte (wave 43, W43-E), first attempt. relocs: match.
  *
@@ -81,7 +82,7 @@ void sub_08038368(int a1, int a2, int a3)
  * The index is `u8`: it is truncated with an `lsls #0x18; lsrs #0x18` pair on
  * every iteration and the bound test is `bhi`, unsigned. It stays a real
  * counter rather than being strength-reduced into a pointer (which is what
- * happens to the identically-shaped guard in the adjacent sub_08038434)
+ * happens to the identically-shaped guard in the adjacent GetAverageCampaignScore)
  * precisely BECAUSE the index value is needed after the loop for `i + 1`.
  * Those two functions are one shape differing in what they do with the walk,
  * and the u8-vs-int index difference falls straight out of that.
@@ -91,7 +92,7 @@ void sub_08038368(int a1, int a2, int a3)
  * away on entry. Bound failure leaves i at 0x29, so the tail returns 0x2a.
  */
 
-int sub_0803840C(void)
+int GetCampaignResultCountPlusOne(void)
 {
     u8 i;
 
@@ -102,17 +103,18 @@ int sub_0803840C(void)
     }
     return i + 1;
 }
+asm(".global sub_0803840C\n.thumb_set sub_0803840C, GetCampaignResultCountPlusOne\n");
 
 /* MATCHED byte-for-byte (wave 43, W43-E), first attempt. relocs: match.
  *
  * The mean of the bits-20..31 field over the live run of
  * gUnknown_0200C420.unk38[] -- Div(sum, count), with the same run guard
- * sub_0803840C walks (bits 8..19 non-zero, index bounded at 0x28 inclusive).
+ * GetCampaignResultCountPlusOne walks (bits 8..19 non-zero, index bounded at 0x28 inclusive).
  * Diffing the two streams against each other before drafting is what made this
- * one free: it is sub_0803840C's loop with an accumulator instead of a
+ * one free: it is GetCampaignResultCountPlusOne's loop with an accumulator instead of a
  * returned index.
  *
- * The index is `int` here, not the `u8` sub_0803840C uses, and the difference
+ * The index is `int` here, not the `u8` GetCampaignResultCountPlusOne uses, and the difference
  * is not a choice: nothing reads the index after the loop, so strength_reduce
  * replaces it with a pointer walking the struct base (`adds r2,#4`) and the
  * bound becomes the address compare `cmp r2,r4; bgt` against a preheader
@@ -123,7 +125,7 @@ int sub_0803840C(void)
  * logical shift alone extracts it.
  */
 
-int sub_08038434(void)
+int GetAverageCampaignScore(void)
 {
     int sum;
     int count;
@@ -140,3 +142,4 @@ int sub_08038434(void)
     }
     return Div(sum, count);
 }
+asm(".global sub_08038434\n.thumb_set sub_08038434, GetAverageCampaignScore\n");

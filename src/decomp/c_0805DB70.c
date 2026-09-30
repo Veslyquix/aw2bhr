@@ -7,7 +7,7 @@
  * sub_0805DB70 @ 0x0805DB70
  */
 
-/* sub_0805DB70 @ 0x0805DB70, 308 bytes.
+/* AiDeliberateCoPower @ 0x0805DB70, 308 bytes.
  *
  * gUnknown_0816DA4C is not an object: the ROM word at 0x0816DA4C holds
  * 0x030033EC, agbcc's own -fforce-addr address constant for
@@ -23,20 +23,20 @@
  * `bl _call_via_r1`, and the veneer's register index is what fixes its arity at
  * one argument.
  */
-void sub_0805DB70(void)
+void AiDeliberateCoPower(void)
 {
     u8 (*fn)(int);
     int v;
     int n;
 
-    if ((u8)sub_08044280(gUnknown_030033EC))
+    if ((u8)IsSuperCoPowerReady(gUnknown_030033EC))
     {
         fn = gUnknown_085D3DD0[gPlayers[gUnknown_030033EC].co].unk1c;
         if (fn != 0 && fn(2) == 1)
         {
             if (gPlaySt.savingEnabled != 0)
-                sub_08034534(0x10, 0, gUnknown_030033EC, 0);
-            sub_0804438C(gUnknown_030033EC, 2);
+                SendActionCommand(0x10, 0, gUnknown_030033EC, 0);
+            PayForCoPower(gUnknown_030033EC, 2);
             return;
         }
     }
@@ -56,9 +56,10 @@ void sub_0805DB70(void)
             if (fn != 0 && fn(1) == 1)
             {
                 if (gPlaySt.savingEnabled != 0)
-                    sub_08034534(0xf, 0, gUnknown_030033EC, 0);
-                sub_0804438C(gUnknown_030033EC, 1);
+                    SendActionCommand(0xf, 0, gUnknown_030033EC, 0);
+                PayForCoPower(gUnknown_030033EC, 1);
             }
         }
     }
 }
+asm(".global sub_0805DB70\n.thumb_set sub_0805DB70, AiDeliberateCoPower\n");

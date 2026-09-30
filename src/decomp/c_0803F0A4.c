@@ -27,11 +27,11 @@ struct UnkF0A4Proc
  * a whole word and is read back with a single `ldrh [sp,#0x1c]` at its use.
  * Declaring either of them `u16` adds a PROMOTE_MODE narrowing in the prologue
  * and swaps which of the two gets preloaded into r7. */
-void sub_0803F0A4(int a1, int a2, int a3, int a4, int a5, int a6, ProcPtr parent)
+void StartCannonFire(int a1, int a2, int a3, int a4, int a5, int a6, ProcPtr parent)
 {
     struct UnkF0A4Proc *proc;
 
-    sub_08074410(0x2c, 0);
+    RunMapEventsForAction(0x2c, 0);
     proc = Proc_StartBlocking(gUnknown_0849F830, parent);
     proc->unk54 = a1;
     proc->unk58 = a2;
@@ -40,5 +40,6 @@ void sub_0803F0A4(int a1, int a2, int a3, int a4, int a5, int a6, ProcPtr parent
     proc->unk68 = a6;
     proc->unk6a = a5;
     proc->unk5c = 0;
-    sub_0802909C(a1 + 1, a2 + 1);
+    ScrollCameraToCenterCell(a1 + 1, a2 + 1);
 }
+asm(".global sub_0803F0A4\n.thumb_set sub_0803F0A4, StartCannonFire\n");

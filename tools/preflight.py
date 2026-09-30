@@ -17,6 +17,8 @@ What it does, in SKILL.md section-1 order:
   5. re-tests every data/parked.json entry BY EXIT CODE, and prints a draft
      that does not COMPILE as COMPILE-FAIL with its first error, never as an
      ordinary `still-fails` (wave 90: 46 of 101 drafts after PR #3's renames)
+  5b. lists parked drafts that read a compiler-made pool word instead of
+     naming the global it points at (tools/lc_screen.py --drafts)
   6. prints the current draft-residual queue (including unmeasured drafts)
   7. reminds you to inspect overlap_screen.py's full locality/shape report too
 
@@ -49,6 +51,36 @@ def sect(title):
     print("\n=== %s ===" % title)
 
 
+def better_base(name, v):
+    """A note when best.c (or a recovered.c) beats the draft just scored.
+
+    The re-test scores the draft only, and 2026-09-26 found 27 parked
+    functions whose draft sat below another file in the same folder --
+    sub_0801D390 at 8.76% beside a 62.97% size-exact best.c. An agent handed
+    the draft starts from the worse one unless something says so.
+    """
+    notes = []
+    try:
+        # A best.json outlives a best.c renamed *.wrongc after review; its
+        # score then describes a file judged wrong, so say nothing.
+        if not os.path.exists(os.path.join("work", name, "best.c")):
+            raise OSError("no best.c")
+        with open(os.path.join("work", name, "best.json"), encoding="utf-8") as fh:
+            b = json.load(fh)
+        sd = b.get("size_delta")
+        if sd is not None and (abs(sd) < abs(v["size"])
+                               or (abs(sd) == abs(v["size"])
+                                   and b.get("percent", 0) > v["pct"] + 0.5)):
+            notes.append("best.c %.2f%% size%+d" % (b["percent"], sd))
+    except (OSError, ValueError, KeyError):
+        pass
+    if os.path.exists(os.path.join("work", name, "recovered.c")):
+        notes.append("recovered.c")
+    if not notes:
+        return ""
+    return "   <- better: %s (drafts.py bases %s)" % (", ".join(notes), name)
+
+
 def retest_parked(names):
     """Re-test each name by EXIT CODE, telling a compile failure from a miss.
 
@@ -70,7 +102,8 @@ def retest_parked(names):
             print("  COMPILE-FAIL %s :: %s" % (name, err[:150]))
             compile_fail.append(name)
         elif v["state"] == "MISMATCH":
-            print("  still-fails %-16s %6.2f%% size%+d" % (name, v["pct"], v["size"]))
+            print("  still-fails %-16s %6.2f%% size%+d%s"
+                  % (name, v["pct"], v["size"], better_base(name, v)))
         else:
             print("  %s %s -- no verdict (exit %d)" % (v["state"], name, r.returncode))
             no_verdict.append(name)
@@ -241,8 +274,13 @@ def main():
     # A blob is ~50KB of expanded headers; a MUTATED draft can be normal-sized
     # and is only findable by the permuter's injected `new_var`, so check both.
     sect("permuter-contaminated drafts (wave 17 residue, still present)")
+    # Only unmatched functions: a matched function's draft is refreshed from
+    # src/decomp by sync_work.py, and a permuter-found match keeps its
+    # `new_var` there legitimately -- listing those buried the real cases.
     blobs, mutated = [], []
     for p in glob.glob("work/*/*.c"):
+        if st.get(os.path.basename(os.path.dirname(p))) == "matched":
+            continue
         try:
             with open(p, encoding="utf-8", errors="replace") as fh:
                 text = fh.read()
@@ -263,13 +301,14 @@ def main():
         # The dangerous case is the WORK DRAFT being gone, not best.c: promote
         # reads the draft, and best.c beside a good draft is merely ignorable.
         fn = os.path.basename(os.path.dirname(p))
-        tag = "DRAFT GONE" if os.path.basename(p) == fn + ".c" else "best.c only"
+        tag = "DRAFT" if os.path.basename(p) == fn + ".c" else "other file"
         print("  MUTATED  %-12s %s" % (tag, p))
-    print("%d blob(s), %d mutated file(s). `DRAFT GONE` means the readable C is"
+    print("%d blob(s), %d mutated file(s), unmatched functions only. `DRAFT`"
           % (len(blobs), len(mutated)))
-    print("lost and must be rebuilt from the assembly -- do not trust it as a")
-    print("starting point. `best.c only` means the draft beside it is probably")
-    print("fine; ignore the best.c. Nothing here is cleaned up automatically.")
+    print("means the draft itself carries permuter edits (`new_var`): read what")
+    print("they changed before building on it. A blob is header-expanded output;")
+    print("permute.splice() turns one back into a readable draft, and a blob")
+    print("kept for reference is named *.c.blob so nothing scans it.")
     print("For any function here, `python tools/drafts.py bases <fn>` compiles")
     print("every candidate file in work/<fn>/ and names the real base (read-only).")
 
@@ -303,6 +342,12 @@ def main():
         print("skipped (--skip-parked)")
     else:
         retest_parked([n for n in parked if n not in stale])
+
+    # 5b. Drafts that read a compiler-made pool word instead of naming the
+    # global it points at. Renaming moved 4 of 4 such drafts in wave 91.
+    sect("pool-word spellings in parked drafts (fix these first)")
+    r = run(["tools/lc_screen.py", "--drafts"])
+    print((r.stdout + r.stderr).rstrip())
 
     # 6. The residual kind is now the primary queue. Run it here so a plain
     # preflight cannot accidentally omit unmeasured drafts or loop candidates.

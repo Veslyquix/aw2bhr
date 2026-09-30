@@ -33,7 +33,7 @@ struct Unk0807A1B8Proc
  * carries "rodata": ["0x081D92F8"].
  *
  * Only bg2_enable is cleared -- `movs r0,#5; rsbs` is the single mask ~4. */
-void sub_0807A1B8(struct Unk0807A1B8Proc *proc)
+void ResultsVersus_WaitForButton_Loop(struct Unk0807A1B8Proc *proc)
 {
     int i;
 
@@ -51,7 +51,8 @@ void sub_0807A1B8(struct Unk0807A1B8Proc *proc)
         proc->unk4c = 0;
         gUnknown_03001400 = 0xFF10;
         gDispIo.disp_ct.bg2_enable = 0;
-        sub_0801A444(0, 0xE, 0x1E, 6);
+        DrawWindowBackgroundOnBg2(0, 0xE, 0x1E, 6);
         Proc_Break(proc);
     }
 }
+asm(".global sub_0807A1B8\n.thumb_set sub_0807A1B8, ResultsVersus_WaitForButton_Loop\n");

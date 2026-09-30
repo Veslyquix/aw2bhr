@@ -24,7 +24,7 @@ struct Unk086142CC
     /* 0x38 */ int unk38;
 };
 
-void sub_08074A28(struct Unk8074AAC *proc)
+void MarkerReveal_PopInNext(struct Unk8074AAC *proc)
 {
     struct Unk086142CC *child;
     const struct Unk08615194 *r;
@@ -50,7 +50,7 @@ void sub_08074A28(struct Unk8074AAC *proc)
     child->unk30 = v;
     child->unk38 = 0;
 
-    sub_08074754(id);
+    AddWorldMapMarker(id);
 
     proc->unk_2c++;
 
@@ -59,3 +59,4 @@ void sub_08074A28(struct Unk8074AAC *proc)
     else
         Proc_Goto(proc, 0);
 }
+asm(".global sub_08074A28\n.thumb_set sub_08074A28, MarkerReveal_PopInNext\n");

@@ -20,7 +20,7 @@
  * to `new_var` alone does NOT do it -- that was tested separately and still
  * scored 91.1%, so the wrapper is the whole effect. Found by the permuter.
  */
-void sub_08074754(s16 id)
+void AddWorldMapMarker(s16 id)
 {
   const struct Unk08615194 *r;
   struct Unk0202FE38 *p;
@@ -43,23 +43,24 @@ void sub_08074754(s16 id)
   {
     mode = 3;
   }
-  sprite = sub_0801C210(gUnknown_081D2930, 1, 1);
-  sub_0801C4D4(sprite, mode);
+  sprite = AP_Create(gUnknown_081D2930, 1, 1);
+  AP_SwitchAnimation(sprite, mode);
   p->unk08 = sprite;
  do { p->unk02 = r->flagX; p->unk04 = r->flagY; } while (0);
   p->unk00 = id;
   gUnknown_0202FDFC.unk12[id] |= r->specialProperty;
   p[1].unk00 = -1;
 }
+asm(".global sub_08074754\n.thumb_set sub_08074754, AddWorldMapMarker\n");
 
 /* Re-announces every already-live marker: one pass over the 42 owner bytes,
- * calling sub_08074754 for each that has bit 0 set. The `|= 1` afterwards is
+ * calling AddWorldMapMarker for each that has bit 0 set. The `|= 1` afterwards is
  * redundant against the test that guards it, but it is what the ROM does --
  * `movs r6,#1` is hoisted out of the loop and reused by the `orrs`.
  * The `lsls #0x10; asrs #0x10` in front of the `bl` is the s16 conversion of
- * the plain `int` counter; see sub_08074754 in include/unknown-functions.h.
+ * the plain `int` counter; see AddWorldMapMarker in include/unknown-functions.h.
  */
-void sub_080747FC(void)
+void RestoreWorldMapMarkers(void)
 {
     int i;
 
@@ -67,13 +68,14 @@ void sub_080747FC(void)
     {
         if (gUnknown_0202FDFC.unk12[i] & 1)
         {
-            sub_08074754(i);
+            AddWorldMapMarker(i);
             gUnknown_0202FDFC.unk12[i] |= 1;
         }
     }
 }
+asm(".global sub_080747FC\n.thumb_set sub_080747FC, RestoreWorldMapMarkers\n");
 
-/* The lookup-and-remove half of the 12-byte record list sub_08074754 appends
+/* The lookup-and-remove half of the 12-byte record list AddWorldMapMarker appends
  * to; see gUnknown_0202FE38 in include/unknown-globals.h. The record base is
  * reached through agbcc's own -fforce-addr word (the ROM's `gUnknown_081CC4C0`
  * is that word, not a table), which is why the second loop RELOADS the base
@@ -81,7 +83,7 @@ void sub_080747FC(void)
  * there. The compaction loop needs its OWN counter: sharing `i` with the
  * search loop makes one long-lived allocno and swaps three registers.
  */
-int sub_08074834(s32 id, struct Unk0202FE38 *out)
+int RemoveWorldMapMarker(s32 id, struct Unk0202FE38 *out)
 {
     struct Unk0202FE38 *p;
     int i;
@@ -113,3 +115,4 @@ int sub_08074834(s32 id, struct Unk0202FE38 *out)
 
     return 1;
 }
+asm(".global sub_08074834\n.thumb_set sub_08074834, RemoveWorldMapMarker\n");

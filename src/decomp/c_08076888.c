@@ -46,7 +46,7 @@
  * function over into, which is why the total still lands on 480.
  *
  * RULED OUT: the scheduler. agbcc for Thumb does not move instructions across
- * statements (measured on sub_08077CAC this wave -- moving one statement moved
+ * statements (measured on WorldMapMapPreview_CloseLoop this wave -- moving one statement moved
  * its instructions exactly), so the `ldr r7` at the top is NOT a sunk store or
  * a hoisted load; the SET really is generated there. No placement of
  * `gUnknown_0202FE38 = 0xFFFF;` in this statement order can produce it, and
@@ -62,7 +62,7 @@
  *     objects: they hold 0x03002B6C and 0x030030B4, and naming
  *     gUnknown_03002B6C / gUnknown_030030B4 directly reproduces both
  *     `ldr rN, =.LCn; ldr rM, [rN]` pairs. This continues the run W35-B
- *     audited at 0x081CC590/594/598/59C and 0x081CC584 (sub_08075F44, matched
+ *     audited at 0x081CC590/594/598/59C and 0x081CC584 (WorldMapNationPanel_Refresh, matched
  *     this wave). Each is referenced TWICE, which is the trigger.
  *   - `.bits.priority = 3` emits a bare `orrs #3` with no AND: a bitfield set
  *     to all ones drops the mask (store_fixed_bit_field's all_one case), the
@@ -70,9 +70,9 @@
  *   - gSmoothScroll's five zero stores really are in ROM order
  *     frameCounter, currentY, currentX, targetY, targetX -- reverse
  *     declaration order.
- *   - sub_08074714 takes a ProcPtr (promoted in c_08074714.c) and is called
+ *   - StartWorldMapMarkerDrawer takes a ProcPtr (promoted in c_08074714.c) and is called
  *     with a literal 4, hence the cast. */
-void sub_08076888(ProcPtr proc)
+void SetupWorldMapScreen(ProcPtr proc)
 {
     u16 *list;
     u32 a;
@@ -83,9 +83,9 @@ void sub_08076888(ProcPtr proc)
 
     list = (u16 *)&gUnknown_0202FDFC.unk3c;
 
-    sub_080366D0(sub_08036884);
-    sub_080366C4(sub_080368E8);
-    sub_08012C58(gUnknown_08614548);
+    sub_080366D0(DefaultVBlankCallback);
+    sub_080366C4(DefaultMainLoopCallback);
+    SetupBackgrounds(gUnknown_08614548);
 
     gDispIo.disp_ct.bg0_enable = 1;
     gDispIo.disp_ct.bg1_enable = 1;
@@ -105,9 +105,9 @@ void sub_08076888(ProcPtr proc)
     c = 0;
     CpuFastSet(&c, gBG2TilemapBuffer, 0x01000200);
 
-    sub_08013AEC();
-    sub_08013AFC();
-    sub_08013B0C();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
+    BG_EnableSyncBG2();
 
     Decompress(gUnknown_081CC5F0, (void *)0x06008000);
     ApplyPaletteExt(gUnknown_081D1504, 0xC0, 0x120);
@@ -121,7 +121,7 @@ void sub_08076888(ProcPtr proc)
     else
         ApplyPaletteExt(gUnknown_081D20CC, 0x220, 0x20);
 
-    sub_0802D5A0((void *)(gUnknown_030030B4.bits.chr_block * 0x4000 + 0x06006C00),
+    LoadWindowFrameGraphics((void *)(gUnknown_030030B4.bits.chr_block * 0x4000 + 0x06006C00),
                  0, 0);
 
     d = 0;
@@ -129,7 +129,7 @@ void sub_08076888(ProcPtr proc)
                (void *)(gUnknown_03002B6C.bits.chr_block * 0x4000 + 0x06000000),
                0x01000008);
 
-    sub_08072C40(3, gUnknown_0202FDFC.unk00, gUnknown_0202FDFC.unk02);
+    SetBgScrollShadow(3, gUnknown_0202FDFC.unk00, gUnknown_0202FDFC.unk02);
 
     end = 0xFFFF;
     *list = end;
@@ -140,7 +140,8 @@ void sub_08076888(ProcPtr proc)
     gSmoothScroll.targetY = 0;
     gSmoothScroll.targetX = 0;
 
-    sub_08074714((ProcPtr)4);
-    sub_0801237C();
-    sub_08012358();
+    StartWorldMapMarkerDrawer((ProcPtr)4);
+    ResetWindowShadows();
+    SetDefaultColorEffects();
 }
+asm(".global sub_08076888\n.thumb_set sub_08076888, SetupWorldMapScreen\n");

@@ -7,7 +7,7 @@
  * sub_08050528 @ 0x08050528
  */
 
-/* A trimmed sub_080155C0 call in the same idiom as c_0804E584.c: the two
+/* A trimmed SetSlotSpritePosition call in the same idiom as c_0804E584.c: the two
  * origin pointers come out of gUnknown_084C3F70 / gUnknown_084C3F78 and the
  * arguments are `pos - *origin` re-narrowed to s16 by the callee's prototype.
  * All four parameters are the header's declared (u16, s16, s16, s16); the four
@@ -21,7 +21,7 @@
  * member offset to it at each use (`adds r0, r3, #8` / `adds r0, r3, #2`),
  * which is 4 bytes long and puts v in the wrong register. Binding the row to a
  * `u16 *` is what folds the offsets into the load displacements. */
-void sub_08050528(u16 a1, s16 a2, s16 a3, s16 a4)
+void SetEffectScreenPosition(u16 a1, s16 a2, s16 a3, s16 a4)
 {
     u16 *ox;
     u16 *oy;
@@ -39,5 +39,6 @@ void sub_08050528(u16 a1, s16 a2, s16 a3, s16 a4)
     if (e[1] == 2)
         v = 0;
 
-    sub_080155C0(a2, a3 - v, a4 - *oy);
+    SetSlotSpritePosition(a2, a3 - v, a4 - *oy);
 }
+asm(".global sub_08050528\n.thumb_set sub_08050528, SetEffectScreenPosition\n");

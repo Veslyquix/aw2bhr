@@ -27,7 +27,7 @@ struct Unk86D98Proc
 };
 #include "hardware.h"
 
-void WarRoomScroll_08086D99(struct Unk86D98Proc *proc)
+void MapSelectPreview_LoadMap(struct Unk86D98Proc *proc)
 {
     u8 *p;
     int i;
@@ -46,17 +46,17 @@ void WarRoomScroll_08086D99(struct Unk86D98Proc *proc)
  * bit 2 comes out as `ldr` plus `lsls #0x1c; lsrs #0x1e`. Reading it as a mask
  * and a shift instead would be three instructions.
  *
- * WarRoomScroll_08086DD5 and sub_08086E2C repeat the same address expression
+ * MapSelectPreview_RunOverlayRoutine4 and MapSelectPreview_LoadPlaceholderPicture repeat the same address expression
  * with a different consumer. */
-void WarRoomScroll_08086DB5(void)
+void MapSelectPreview_RunOverlayRoutine3(void)
 {
     sub_0801B6EC((void *)(0x06004000 + gUnknown_03001FE8.bits.chr_block * 0x4000));
 }
 
-/* WarRoomScroll_08086DB5 with sub_0801B6FC instead of sub_0801B6EC, and
+/* MapSelectPreview_RunOverlayRoutine3 with sub_0801B6FC instead of sub_0801B6EC, and
  * nothing else -- diffed against it rather than derived from it. See that
  * file for why the bitfield read is a word load. */
-void WarRoomScroll_08086DD5(void)
+void MapSelectPreview_RunOverlayRoutine4(void)
 {
     sub_0801B6FC((void *)(0x06004000 + gUnknown_03001FE8.bits.chr_block * 0x4000));
 }
@@ -67,25 +67,26 @@ void WarRoomScroll_08086DD5(void)
  *
  * gUnknown_03003F68 is declared `void *`, so the two reads spell out the byte
  * view explicitly; 0x6200 is `movs #0xc4; lsls #7`. */
-void WarRoomScroll_08086DF5(void)
+void MapSelectPreview_FillTilemap(void)
 {
-    sub_08037A20(gBG1TilemapBuffer, 0x6200);
+    FillMapPreviewTilemap(gBG1TilemapBuffer, 0x6200);
     gUnknown_03005918 = ((u8 *)gUnknown_03003F68)[0];
     gUnknown_030058F4 = ((u8 *)gUnknown_03003F68)[1];
-    sub_08013AFC();
+    BG_EnableSyncBG1();
 }
 
-/* The third user of WarRoomScroll_08086DB5's address expression: unpack a
+/* The third user of MapSelectPreview_RunOverlayRoutine3's address expression: unpack a
  * blob into the tile block BG1 currently points at. Decompress takes the
  * destination second, so the address arithmetic lands in r1 here rather than
  * r0. */
-void sub_08086E2C(void)
+void MapSelectPreview_LoadPlaceholderPicture(void)
 {
     Decompress(gUnknown_0823FD7C,
                (void *)(0x06004000 + gUnknown_03001FE8.bits.chr_block * 0x4000));
 }
+asm(".global sub_08086E2C\n.thumb_set sub_08086E2C, MapSelectPreview_LoadPlaceholderPicture\n");
 
-asm(".global sub_08086D98\n.thumb_set sub_08086D98, WarRoomScroll_08086D99\n"
-    ".global sub_08086DB4\n.thumb_set sub_08086DB4, WarRoomScroll_08086DB5\n"
-    ".global sub_08086DD4\n.thumb_set sub_08086DD4, WarRoomScroll_08086DD5\n"
-    ".global sub_08086DF4\n.thumb_set sub_08086DF4, WarRoomScroll_08086DF5\n");
+asm(".global sub_08086D98\n.thumb_set sub_08086D98, MapSelectPreview_LoadMap\n"
+    ".global sub_08086DB4\n.thumb_set sub_08086DB4, MapSelectPreview_RunOverlayRoutine3\n"
+    ".global sub_08086DD4\n.thumb_set sub_08086DD4, MapSelectPreview_RunOverlayRoutine4\n"
+    ".global sub_08086DF4\n.thumb_set sub_08086DF4, MapSelectPreview_FillTilemap\n");

@@ -22,7 +22,7 @@
  * The two tail compares are the stat check: unk0b caps the 4-bit field at bit 7
  * of the unit's unk04 container and unk10 caps the 7-bit unk06, exactly the
  * pairing gUnknown_085D5ABC's own comments record for sub_08042998. */
-bool8 sub_0804209C(s16 x, s16 y)
+bool8 IsResupplyableAllyAt(s16 x, s16 y)
 {
     struct Map *p;
     u8 *rows;
@@ -68,13 +68,14 @@ bool8 sub_0804209C(s16 x, s16 y)
 
     return FALSE;
 }
+asm(".global sub_0804209C\n.thumb_set sub_0804209C, IsResupplyableAllyAt\n");
 
-/* The OR of sub_080421D0 and sub_0804223C: passable if EITHER flag byte
- * clears sub_08041F38. The `||` with an explicit `else` is what puts the
+/* The OR of CanDropFirstCargoAt and CanDropSecondCargoAt: passable if EITHER flag byte
+ * clears GetDropDirectionMask. The `||` with an explicit `else` is what puts the
  * `movs r0,#1` in the fallthrough slot after the second `beq`; the chained
  * `if (a) return TRUE; if (b) return TRUE;` spelling emits the zero arm
- * there instead, as sub_080421D0 does. */
-bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
+ * there instead, as CanDropFirstCargoAt does. */
+bool8 CanDropAnyCargoAt(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
     struct Map *p;
@@ -97,12 +98,13 @@ bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
     if (costs[idx] == 0)
         return FALSE;
 
-    if (sub_08041F38(a2, a3, a1->unk07[0]) != 0
-     || sub_08041F38(a2, a3, a1->unk07[1]) != 0)
+    if (GetDropDirectionMask(a2, a3, a1->unk07[0]) != 0
+     || GetDropDirectionMask(a2, a3, a1->unk07[1]) != 0)
         return TRUE;
     else
         return FALSE;
 }
+asm(".global sub_08042154\n.thumb_set sub_08042154, CanDropAnyCargoAt\n");
 
 /* The c_0804247C.c map-cell idiom plus a per-terrain movement-cost lookup:
  * gUnknown_085D5ABC[type].unk14 points at a blob whose +0x1a is a table of
@@ -114,7 +116,7 @@ bool8 sub_08042154(struct Unk030040D8 *a1, s16 a2, s16 a3)
  * `ldrb` displacement; binding `costs = t + 0x1a` earlier emits the
  * `adds r4,#0x1a` before the cell load. Only cells -> idx -> costs puts the
  * add between the `ands` and the `ldrb`, where the ROM has it. */
-bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
+bool8 CanDropFirstCargoAt(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
     struct Map *p;
@@ -137,16 +139,17 @@ bool8 sub_080421D0(struct Unk030040D8 *a1, s16 a2, s16 a3)
     if (costs[idx] == 0)
         return FALSE;
 
-    if (sub_08041F38(a2, a3, a1->unk07[0]) != 0)
+    if (GetDropDirectionMask(a2, a3, a1->unk07[0]) != 0)
         return TRUE;
 
     return FALSE;
 }
+asm(".global sub_080421D0\n.thumb_set sub_080421D0, CanDropFirstCargoAt\n");
 
-/* sub_080421D0's twin, differing only in which of the two adjacent flag bytes
- * at +7/+8 it hands to sub_08041F38. See c_080421D0.c for why `idx` and
+/* CanDropFirstCargoAt's twin, differing only in which of the two adjacent flag bytes
+ * at +7/+8 it hands to GetDropDirectionMask. See c_080421D0.c for why `idx` and
  * `costs` are separate statements in that order. */
-bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
+bool8 CanDropSecondCargoAt(struct Unk030040D8 *a1, s16 a2, s16 a3)
 {
     u8 *t;
     struct Map *p;
@@ -169,11 +172,12 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
     if (costs[idx] == 0)
         return FALSE;
 
-    if (sub_08041F38(a2, a3, a1->unk07[1]) != 0)
+    if (GetDropDirectionMask(a2, a3, a1->unk07[1]) != 0)
         return TRUE;
 
     return FALSE;
 }
+asm(".global sub_0804223C\n.thumb_set sub_0804223C, CanDropSecondCargoAt\n");
 
 /* Five values stay live across the two calls -- the address of
  * gUnknown_08499590, the 0x417A constant, y * 2, the narrowed x and the unit
@@ -183,11 +187,11 @@ bool8 sub_0804223C(struct Unk030040D8 *a1, s16 a2, s16 a3)
  * pre-call half keeps p live past `ids`, and the ROM's single `adds r2,#0x12`
  * (which consumes p in place) then comes out as a copy plus an add.
  *
- * unit is bound BEFORE the `id == 0` test, the same ordering sub_08041F38
+ * unit is bound BEFORE the `id == 0` test, the same ordering GetDropDirectionMask
  * uses, and the CanTransportCarry argument is respelled &gUnits[id]
  * rather than reusing unit: that global is a non-const pointer, so the first
  * `bl` kills its MEM and the ROM reloads it. */
-bool8 sub_080422A8(s16 x, s16 y)
+bool8 IsBoardableTransportAt(s16 x, s16 y)
 {
     struct Map *p;
     u8 *rows;
@@ -215,7 +219,7 @@ bool8 sub_080422A8(s16 x, s16 y)
     if (id == 0)
         return FALSE;
 
-    if (sub_08026F9C(id, gUnknown_03003F38) == 0)
+    if (AreUnitsOnSameTeam(id, gUnknown_03003F38) == 0)
         return FALSE;
 
     if (CanTransportCarry(&gUnits[id], gUnknown_030040D8->unk00) == 0)
@@ -235,14 +239,15 @@ bool8 sub_080422A8(s16 x, s16 y)
 
     return TRUE;
 }
+asm(".global sub_080422A8\n.thumb_set sub_080422A8, IsBoardableTransportAt\n");
 
-/* Reads the same cell TWICE around the sub_08026FD0 call, and the second read
+/* Reads the same cell TWICE around the IsTerrainOwnedByUnitsTeam call, and the second read
  * needs its own set of locals. Reusing p/rows/off/cells for both halves makes
  * each one pseudo whose live range spans the `bl`, which pushes the 0x1432
  * constant into a callee-saved register and adds r7 to the push list; the ROM
  * keeps it in scratch r0. Only y * 2 and the narrowed x survive the call, in
  * r5 and r4. */
-bool8 sub_0804236C(s16 x, s16 y)
+bool8 IsCellCapturableByCurrentArmy(s16 x, s16 y)
 {
     u8 army;
     struct Map *p;
@@ -262,7 +267,7 @@ bool8 sub_0804236C(s16 x, s16 y)
     off = *(u16 *)(rows + y2) + x;
     cells = p->terrain;
 
-    if (sub_08026FD0(army, cells[off]) == 1)
+    if (IsTerrainOwnedByUnitsTeam(army, cells[off]) == 1)
         return FALSE;
 
     p2 = gMap;
@@ -283,3 +288,4 @@ bool8 sub_0804236C(s16 x, s16 y)
         return FALSE;
     }
 }
+asm(".global sub_0804236C\n.thumb_set sub_0804236C, IsCellCapturableByCurrentArmy\n");

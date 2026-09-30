@@ -9,11 +9,11 @@
 
 #include "proc.h"
 
-void sub_0802C4F0(ProcPtr proc)
+void AttackTargetSelect_Resolve(ProcPtr proc)
 {
     struct Unk03003338 *p;
 
-    if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
+    if (FindSlotScript((s32)gUnknown_0849A00C) != -1)
         return;
 
     if (gUnknown_03003F40 < 0)
@@ -24,13 +24,14 @@ void sub_0802C4F0(ProcPtr proc)
     }
     else
     {
-        p = sub_080413A4(gUnknown_03003F40);
+        p = GetAttackTargetRecord(gUnknown_03003F40);
 
         if (p->unk02 == 0)
-            sub_080425E0(p->unk00);
+            StartRecordedUnitAttack(p->unk00);
         else
-            sub_08042618(p->unk04, p->unk06);
+            StartRecordedInventionAttack(p->unk04, p->unk06);
 
         Proc_Break(proc);
     }
 }
+asm(".global sub_0802C4F0\n.thumb_set sub_0802C4F0, AttackTargetSelect_Resolve\n");

@@ -7,12 +7,13 @@
  * sub_08021598 @ 0x08021598
  */
 
-void sub_08021598(void)
+void InitNewMapState(void)
 {
-    sub_08026BAC();
-    sub_08026924();
-    sub_08026768();
+    ResetAllPlayers();
+    InitPlayersFromSettings();
+    AdvanceToNextActiveArmy();
     CalcRandomWeatherChances();
-    sub_0803E3D8();
-    sub_080455CC();
+    SpawnInventionRecords();
+    InitPipeSeamHpPlane();
 }
+asm(".global sub_08021598\n.thumb_set sub_08021598, InitNewMapState\n");

@@ -19,9 +19,10 @@
  * m4aSoundMain. The callee is SoundMain (data/fe_matches.json, `full`),
  * which lives in the m4a_asm.s half of the driver and will never match --
  * this forwarder is the ordinary C beside it, and its own caller
- * sub_0803B408 is already promoted in src/decomp/c_0803B3C8.c.
+ * RunSoundMain is already promoted in src/decomp/c_0803B3C8.c.
  */
-void sub_0807046C(void)
+void m4aSoundMain(void)
 {
     sub_0806F744();
 }
+asm(".global sub_0807046C\n.thumb_set sub_0807046C, m4aSoundMain\n");

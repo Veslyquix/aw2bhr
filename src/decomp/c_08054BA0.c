@@ -19,7 +19,7 @@
  * value into a `u16` local instead forces a `lsls #16; lsrs #16` truncation on
  * the increment and pushes gUnknown_03004524's address into the .rodata pool
  * (+16 bytes). */
-void sub_08054BA0(void)
+void MoveBattleAnimParamCursor(void)
 {
     if (gUnknown_03004538 & 0x40)
     {
@@ -38,23 +38,25 @@ void sub_08054BA0(void)
     if (gUnknown_03004538 & 0x30)
         gUnknown_03004514 ^= 1;
 }
+asm(".global sub_08054BA0\n.thumb_set sub_08054BA0, MoveBattleAnimParamCursor\n");
 
 /* The two flag tests are NESTED IFS, not `bit0 && bit1` -- both bits live in the
  * same byte, so agbcc's fold_truthop would merge an `&&` into one
- * `movs r0,#3; ands; cmp r0,#3`. Same reading as sub_08053F0C. */
-void sub_08054C04(void)
+ * `movs r0,#3; ands; cmp r0,#3`. Same reading as RunBattleAnimStepHandler. */
+void LoadBattleAnimScene(void)
 {
-    sub_0804B744(gUnknown_03004580[0][3], gUnknown_03004580[1][3]);
+    SetUpBattleBackdrops(gUnknown_03004580[0][3], gUnknown_03004580[1][3]);
     if (gUnknown_03004504.bit0)
     {
         if (gUnknown_03004504.bit1)
-            sub_08057AE8();
+            InitBattleHud();
     }
     else
     {
-        sub_08057AE8();
+        InitBattleHud();
     }
-    sub_08057138();
+    LoadFigures();
     CpuFastSet(gUnknown_08551A04, (void *)0x06002800, 0x200);
     sub_08054C5C();
 }
+asm(".global sub_08054C04\n.thumb_set sub_08054C04, LoadBattleAnimScene\n");

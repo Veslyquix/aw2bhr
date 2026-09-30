@@ -13,9 +13,9 @@
  * map-plane setups and one indirect draw call.
  *
  * Uses `gMap` (include/map.h), the typed linker alias for `gUnknown_08499590`
- * -- but the two `sub_0801F92C` calls must pass `gMap->danger` /
+ * -- but the two `SetWorkingMapPlane` calls must pass `gMap->danger` /
  * `gMap->move` (the plane's OWN array member, which decays to the same
- * `u8 *` `sub_0801F92C` takes), not `gUnknown_08499590 + offset` or a
+ * `u8 *` `SetWorkingMapPlane` takes), not `gUnknown_08499590 + offset` or a
  * `(u8 *)gMap + offset` cast. agbcc's CSE unifies repeated loads of the SAME
  * symbol, not two symbols that happen to share an address, so every use in
  * the function has to name `gMap` for the compiler to reuse the one pointer
@@ -37,7 +37,7 @@
  * `bx = x` a zero-extending `lsrs` rather than a sign-extending `asrs`.
  *
  * MATCHED. */
-void sub_08057D90(s16 *px, s16 *py)
+void AiPickSafestReachableCell(s16 *px, s16 *py)
 {
     struct Map *map;
     s16 x;
@@ -51,10 +51,10 @@ void sub_08057D90(s16 *px, s16 *py)
     bx = 0;
     by = 0;
 
-    sub_0801F92C(gMap->danger);
+    SetWorkingMapPlane(gMap->danger);
     gUnknown_030013EC(*px, *py, gUnknown_030040D8->unk00, 0x78, by);
-    sub_0801F92C(gMap->move);
-    sub_080202A4(gUnknown_030040D8);
+    SetWorkingMapPlane(gMap->move);
+    GenerateUnitMovementMap(gUnknown_030040D8);
 
     best = 0x7FFF;
 
@@ -83,3 +83,4 @@ void sub_08057D90(s16 *px, s16 *py)
     *px = bx;
     *py = by;
 }
+asm(".global sub_08057D90\n.thumb_set sub_08057D90, AiPickSafestReachableCell\n");

@@ -15,7 +15,7 @@ struct Unk0806C52CProc
     /* 0x38 */ int unk38;
 };
 
-/* The same screen-setup shape as sub_0806BB08 / sub_0806EB5C -- one
+/* The same screen-setup shape as CreditsStaff_Init / SoundRoomMusicPage_Init -- one
  * SetDispEnable, four BgCnt priorities, then palettes and graphics -- but with
  * the graphics set chosen by a single `if`. The two arms are the same five calls
  * over ten different symbols.
@@ -29,13 +29,13 @@ struct Unk0806C52CProc
  * r5 == 0 from the `cmp r5, #0; beq`, so the plain `proc->unk38 = 0` is what
  * produces it and nothing has to be spelled with the variable.
  */
-void sub_0806C52C(struct Unk0806C52CProc *proc)
+void CreditsResult_Init(struct Unk0806C52CProc *proc)
 {
     int v;
 
     Proc_EndEach(gUnknown_085819D4);
-    sub_0801237C();
-    sub_08012358();
+    ResetWindowShadows();
+    SetDefaultColorEffects();
     SetDispEnable(1, 0, 0, 0, 1);
     gUnknown_03002B6C.bits.color_depth = 1;
     gUnknown_03002B6C.bits.priority = 0;
@@ -64,6 +64,7 @@ void sub_0806C52C(struct Unk0806C52CProc *proc)
         proc->unk38 = 0;
     }
 
-    sub_08072C40(0, 0, 0);
-    sub_0803B3C8();
+    SetBgScrollShadow(0, 0, 0);
+    SetSoundMixerChannelCount8();
 }
+asm(".global sub_0806C52C\n.thumb_set sub_0806C52C, CreditsResult_Init\n");

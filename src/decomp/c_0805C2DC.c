@@ -26,13 +26,13 @@
  *    declaration order, and the ROM's are 0x18 (n) then 0x1c (i). Same lever
  *    orders best/score/bestN into 0xc/0x10/0x14.
  *  - the score term is `unk04_0 * (call / 10)`, field FIRST. gcc 2.x's
- *    preexpand_calls hoists the GetCoPriceMultiplier call out ahead of the whole
+ *    preexpand_calls hoists the GetUnitCostWithCoBonus call out ahead of the whole
  *    expression, so the field load lands between it and __divsi3 exactly as the
  *    ROM has it; writing `call / 10 * unk04_0` puts the load after the divide.
  *
  * MATCHED. */
 
-u8 sub_0805C2DC(u16 a1, u8 a2)
+u8 AiPickMissileTargetByValue(u16 a1, u8 a2)
 {
     int n;
     int i;
@@ -59,7 +59,7 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
 
             score = 0;
             FillMovementMap(0xff);
-            sub_0801F9C0(e->x, e->y, 2, 0);
+            MapSetInRange(e->x, e->y, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
             {
@@ -69,22 +69,22 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
                         continue;
                     if (gMap->unitUnk[gMap->rowOffset[y] + x] == 0)
                         continue;
-                    if (a2 != 0 && !sub_08020DBC(a1, x, y))
+                    if (a2 != 0 && !IsCellVisibleToArmy(a1, x, y))
                         continue;
                     e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->type == 0x18)
                     {
                         if ((e->flags & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
+                        if (!IsUnitVisibleToCurrentTeam(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->hp <= 10)
                         continue;
-                    if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
-                        score -= e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10);
+                    if (AreArmiesOnSameTeam(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
+                        score -= e->hp * (GetUnitCostWithCoBonus(gUnknown_030033EC, e->type) / 10);
                     else
-                        score += e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10);
+                        score += e->hp * (GetUnitCostWithCoBonus(gUnknown_030033EC, e->type) / 10);
                 }
             }
 
@@ -98,8 +98,9 @@ u8 sub_0805C2DC(u16 a1, u8 a2)
 
     return bestN;
 }
+asm(".global sub_0805C2DC\n.thumb_set sub_0805C2DC, AiPickMissileTargetByValue\n");
 
-u8 sub_0805C514(u16 a1, u8 a2)
+u8 AiPickMissileTargetByHp(u16 a1, u8 a2)
 {
     int n;
     int i;
@@ -126,7 +127,7 @@ u8 sub_0805C514(u16 a1, u8 a2)
 
             score = 0;
             FillMovementMap(0xff);
-            sub_0801F9C0(e->x, e->y, 2, 0);
+            MapSetInRange(e->x, e->y, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
             {
@@ -136,19 +137,19 @@ u8 sub_0805C514(u16 a1, u8 a2)
                         continue;
                     if (gMap->unitUnk[gMap->rowOffset[y] + x] == 0)
                         continue;
-                    if (a2 != 0 && !sub_08020DBC(a1, x, y))
+                    if (a2 != 0 && !IsCellVisibleToArmy(a1, x, y))
                         continue;
                     e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->type == 0x18)
                     {
                         if ((e->flags & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
+                        if (!IsUnitVisibleToCurrentTeam(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->hp <= 10)
                         continue;
-                    if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
+                    if (AreArmiesOnSameTeam(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
                         score -= e->hp;
                     else
                         score += e->hp;
@@ -165,8 +166,9 @@ u8 sub_0805C514(u16 a1, u8 a2)
 
     return bestN;
 }
+asm(".global sub_0805C514\n.thumb_set sub_0805C514, AiPickMissileTargetByHp\n");
 
-u8 sub_0805C720(u16 a1, u8 a2)
+u8 AiPickMissileTargetWeightingIndirect(u16 a1, u8 a2)
 {
     int n;
     int i;
@@ -194,7 +196,7 @@ u8 sub_0805C720(u16 a1, u8 a2)
 
             score = 0;
             FillMovementMap(0xff);
-            sub_0801F9C0(e->x, e->y, 2, 0);
+            MapSetInRange(e->x, e->y, 2, 0);
 
             for (y = 0; y < gMap->height; y++)
             {
@@ -204,14 +206,14 @@ u8 sub_0805C720(u16 a1, u8 a2)
                         continue;
                     if (gMap->unitUnk[gMap->rowOffset[y] + x] == 0)
                         continue;
-                    if (a2 != 0 && !sub_08020DBC(a1, x, y))
+                    if (a2 != 0 && !IsCellVisibleToArmy(a1, x, y))
                         continue;
                     e = &gUnits[gMap->unitUnk[gMap->rowOffset[y] + x]];
                     if (e->type == 0x18)
                     {
                         if ((e->flags & 0x20) != 0)
                             continue;
-                        if (!sub_080257C0(gMap->unit[gMap->rowOffset[y] + x]))
+                        if (!IsUnitVisibleToCurrentTeam(gMap->unit[gMap->rowOffset[y] + x]))
                             continue;
                     }
                     if (e->hp <= 10)
@@ -219,10 +221,10 @@ u8 sub_0805C720(u16 a1, u8 a2)
                     mul = 1;
                     if (gUnknown_085D5ABC[e->type].minRange > 1)
                         mul = 2;
-                    if (sub_08026F28(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
-                        score -= e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10) * mul;
+                    if (AreArmiesOnSameTeam(a1, (gMap->unitUnk[gMap->rowOffset[y] + x] >> 6) + 1) == 1)
+                        score -= e->hp * (GetUnitCostWithCoBonus(gUnknown_030033EC, e->type) / 10) * mul;
                     else
-                        score += e->hp * (GetCoPriceMultiplier(gUnknown_030033EC, e->type) / 10) * mul;
+                        score += e->hp * (GetUnitCostWithCoBonus(gUnknown_030033EC, e->type) / 10) * mul;
                 }
             }
 
@@ -236,3 +238,4 @@ u8 sub_0805C720(u16 a1, u8 a2)
 
     return bestN;
 }
+asm(".global sub_0805C720\n.thumb_set sub_0805C720, AiPickMissileTargetWeightingIndirect\n");

@@ -9,15 +9,16 @@
 
 /* The parameter is `struct Unk03001470 *`: a bare `adds r4, r0, #0` prologue
  * with no narrowing, then `ldrh` at +0x1e, which is that struct's `s16 unk1e`
- * and is exactly the field sub_08017688 next door writes with `strh`.
- * gUnknown_030033EC is a u16 read `ldrb` -- the truncation sub_08043DAC's `u8`
+ * and is exactly the field StartResumeScript next door writes with `strh`.
+ * gUnknown_030033EC is a u16 read `ldrb` -- the truncation PlayArmyCoMusic's `u8`
  * parameter folds into the load. */
-void sub_08017658(struct Unk03001470 *proc)
+void ResumeScript_LoadSuspendSave(struct Unk03001470 *proc)
 {
     InitGameSettings();
-    sub_08016DB8(proc->unk1e);
-    sub_08026798();
+    LoadSuspendSave(proc->unk1e);
+    ResetUnitCycleAndVisionMasks();
     sub_08023348();
-    sub_0803662C();
-    sub_08043DAC(gUnknown_030033EC);
+    InstallMapFrameCallbacks();
+    PlayArmyCoMusic(gUnknown_030033EC);
 }
+asm(".global sub_08017658\n.thumb_set sub_08017658, ResumeScript_LoadSuspendSave\n");

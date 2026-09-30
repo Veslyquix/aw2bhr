@@ -7,24 +7,18 @@
  * sub_08012C30 @ 0x08012C30
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08012C30.
- * sub_08012C30 @ 0x08012C30
- */
-
 struct Unk8012C30
 {
     u8 unk00_0 : 2;
     u8 unk00_2 : 2;
     u8 unk00_4 : 4;
-    u8 unk01_0 : 5; /* sub_08012C1C */
+    u8 unk01_0 : 5; /* SetBgCntTilemapBlock */
     u8 unk01_5 : 1;
-    u8 unk01_6 : 2; /* sub_08012C48 */
+    u8 unk01_6 : 2; /* SetBgCntScreenSize */
 };
 
-void sub_08012C30(struct Unk8012C30 *s, u32 value)
+void SetBgCntChrBlock(struct Unk8012C30 *s, u32 value)
 {
     s->unk00_2 = value >> 14;
 }
+asm(".global sub_08012C30\n.thumb_set sub_08012C30, SetBgCntChrBlock\n");

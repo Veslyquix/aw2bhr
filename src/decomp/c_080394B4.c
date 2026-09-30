@@ -10,7 +10,7 @@
 /* The text proc's per-frame script step. The proc is sub_080152EC's slot seen
  * through this subsystem's own view: the halfwords struct Unk03001470 types as
  * unk1e/unk20/unk22/unk24 are the tick counter, the script cursor and the pen,
- * and everything from +0x26 on is the byte script sub_08039544 copied in. That
+ * and everything from +0x26 on is the byte script StartCoPowerNameBanner copied in. That
  * is the same reinterpretation of +0x26 c_08039544.c uses and NOT a claim that
  * Unk03001470's `u16 unk26` is wrong. */
 struct Unk394B4Proc
@@ -67,7 +67,7 @@ struct Unk39544Slot
  *    `beq; beq; <default>; <shared +6>`; in source order 0x6c-first the last
  *    dispatch test falls through into the 0x6c body and the 0x69 body is
  *    reached by the `beq`, which is the ROM's layout. */
-void sub_080394B4(struct Unk394B4Proc *proc)
+void CoPowerNameBanner_Loop(struct Unk394B4Proc *proc)
 {
     int again;
     u8 c;
@@ -94,7 +94,7 @@ void sub_080394B4(struct Unk394B4Proc *proc)
                 }
                 else
                 {
-                    sub_0803941C(proc->unk22, proc->unk24);
+                    SpawnCoPowerNameLetter(proc->unk22, proc->unk24);
                     proc->unk24++;
 
                     switch (proc->unk26[proc->unk20])
@@ -121,9 +121,10 @@ void sub_080394B4(struct Unk394B4Proc *proc)
         }
     } while (again);
 }
+asm(".global sub_080394B4\n.thumb_set sub_080394B4, CoPowerNameBanner_Loop\n");
 
 /* Start the text proc, then copy a NUL-terminated byte string into its script
- * buffer -- the buffer sub_080394B4 later walks.
+ * buffer -- the buffer CoPowerNameBanner_Loop later walks.
  *
  * THE BUFFER IS A MEMBER ARRAY, not `(u8 *)proc + 0x26`. Written with pointer
  * arithmetic, fold's `(A + C) + B -> (A + B) + C` reassociation moves the
@@ -137,9 +138,9 @@ void sub_080394B4(struct Unk394B4Proc *proc)
  * The parameter is real. unknown-functions.h declared this `void (void)`
  * because the caller "sets up no argument register at all"; r0 is read before
  * being written here, and the call site is
- * `sub_08039544(sub_08039F18(proc->unk54))` -- two sequential `bl`s carrying a
+ * `StartCoPowerNameBanner(GetArmyCoPowerName(proc->unk54))` -- two sequential `bl`s carrying a
  * nested call, which needs no instruction between them. */
-void sub_08039544(u8 *str)
+void StartCoPowerNameBanner(u8 *str)
 {
     struct Unk39544Slot *proc;
     u8 i;
@@ -151,3 +152,4 @@ void sub_08039544(u8 *str)
 
     proc->unk26[i] = 0;
 }
+asm(".global sub_08039544\n.thumb_set sub_08039544, StartCoPowerNameBanner\n");

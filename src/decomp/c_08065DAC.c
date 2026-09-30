@@ -7,7 +7,7 @@
  * sub_08065DAC @ 0x08065DAC
  */
 
-void sub_08065DAC(int a1, u16 a2, u8 a3)
+void MatchSetupCycleCo(int a1, u16 a2, u8 a3)
 {
     int v;
 
@@ -32,12 +32,13 @@ void sub_08065DAC(int a1, u16 a2, u8 a3)
     if (v != gUnknown_08580934->unk1c[a1])
     {
         if (a3 != 0)
-            sub_0803B4DC(0x64);
+            PlayMusicOrSfx2(0x64);
 
-        sub_08043E3C(gUnknown_08580934->unk18[v],
+        LoadCoFace(gUnknown_08580934->unk18[v],
                      (void *)(0x06010000 + (((a1 * 36 + 400) & 0x3ff) << 5)),
                      a1 + 0x10);
 
         gUnknown_08580934->unk1c[a1] = v;
     }
 }
+asm(".global sub_08065DAC\n.thumb_set sub_08065DAC, MatchSetupCycleCo\n");

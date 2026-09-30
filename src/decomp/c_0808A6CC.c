@@ -11,32 +11,25 @@
  * below so every other unit keeps resolving them unchanged.
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0808A6CC.
- * CampaignIntro_0808A6CD @ 0x0808A6CC
- */
-
 #include "proc.h"
 #include "hardware.h"
 
 /* Wave 53, W53-D. MATCHED.
  *
- * THIS FUNCTION RETYPED A PROTOTYPE. sub_0807898C was declared `void
- * sub_0807898C(void)` and promoted that way; it actually takes one argument.
+ * THIS FUNCTION RETYPED A PROTOTYPE. SetupMenuScreenBgs was declared `void
+ * SetupMenuScreenBgs(void)` and promoted that way; it actually takes one argument.
  * The body never reads r0, so at every previously-matched call site the
  * argument was already in the right register and cost zero instructions --
- * the wave-51 arity rule exactly. CampaignIntro_0808A6CD is the differently-shaped
+ * the wave-51 arity rule exactly. CampaignIntro_Init is the differently-shaped
  * caller that exposes it: it SPILLS its proc to [sp] because the two
  * CpuFastSet loops use every callee-saved register including r8/sb/sl, and
  * then reloads it into r0 for nothing but the `bl` --
- *   `str r0,[sp]; movs r0,#9; bl sub_0803B3D4; ldr r0,[sp]; bl sub_0807898C`
+ *   `str r0,[sp]; movs r0,#9; bl SetSoundMixerChannelCount; ldr r0,[sp]; bl SetupMenuScreenBgs`
  * A `(void)` callee emits no such reload. include/unknown-functions.h,
  * src/decomp/c_0807898C.c, src/decomp/c_08080498.c and
- * src/decomp/c_08078E20.c were all updated; sub_0807898C (356 B),
- * sub_08080498 (324 B) and sub_08078E48 (76 B) were each re-verified
- * byte-for-byte afterwards. Nothing in C calls sub_08078E48, so gaining its
+ * src/decomp/c_08078E20.c were all updated; SetupMenuScreenBgs (356 B),
+ * SuperCoPowerScene_StartNameStage (324 B) and ResultsScreen_Init (76 B) were each re-verified
+ * byte-for-byte afterwards. Nothing in C calls ResultsScreen_Init, so gaining its
  * own forwarded ProcPtr parameter cascaded no further.
  *
  * The two loops are tile-index arithmetic, not pointer arithmetic: the
@@ -44,17 +37,17 @@
  * c_08039A5C.c, c_08040430.c and c_08087B74.c, and writing it that way is
  * what produces the `lsl; and; lsl; add` group and the four separate givs
  * (8+4i, 0x40+8i, 0x28+4i, 0x44+8i) of the second loop. */
-void CampaignIntro_0808A6CD(ProcPtr proc)
+void CampaignIntro_Init(ProcPtr proc)
 {
     int i;
 
-    sub_0803B3D4(9);
-    sub_0807898C(proc);
+    SetSoundMixerChannelCount(9);
+    SetupMenuScreenBgs(proc);
 
     Decompress(gUnknown_0822FEF0,
         (void *)(gUnknown_0300251C.bits.chr_block * 0x4000 + 0x06000000));
     Decompress(gUnknown_0822F9AC, gBG3TilemapBuffer);
-    sub_08013B1C();
+    BG_EnableSyncBG3();
     ApplyPaletteExt(gUnknown_0822FE50, 0x20, 0xa0);
     Proc_Start(gUnknown_086170D4, proc);
     Decompress(gUnknown_0823FFBC, gUnknown_0200FC50);
@@ -74,34 +67,34 @@ void CampaignIntro_0808A6CD(ProcPtr proc)
     CpuFastSet(gUnknown_0200FED0, (void *)0x06010B00, 0x20);
     ApplyPaletteExt(gUnknown_08240AD4, 0x200, 0x20);
     Proc_Start(gUnknown_0861707C, proc);
-    sub_0801B780(0);
+    InitTextTileCache(0);
     ApplyPaletteExt(gUnknown_081320AC, 0x100, 0x20);
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
 
-asm(".global sub_0808A6CC\n.thumb_set sub_0808A6CC, CampaignIntro_0808A6CD\n");
+asm(".global sub_0808A6CC\n.thumb_set sub_0808A6CC, CampaignIntro_Init\n");
 
-extern bool8 CampaignIntro_WHILE_0803B629(void);
-extern void CampaignIntro_0808A821(void);
-extern void CampaignIntro_IDLE_0808A82D(void);
-extern void CampaignIntro_IDLE_0808A845(void);
-extern void CampaignIntro_IDLE_0808A885(void);
+extern bool8 IsMusicFadeActive(void);
+extern void CampaignIntro_StartPrologueText(void);
+extern void CampaignIntro_WaitForTextBoxes(void);
+extern void CampaignIntro_WaitForButtonA(void);
+extern void CampaignIntro_WaitForSkip(void);
 
 struct ProcCmd CONST_DATA ProcScr_CampaignIntro[] =
 {
     PROC_29(1),
-    PROC_WHILE(CampaignIntro_WHILE_0803B629),
+    PROC_WHILE(IsMusicFadeActive),
     PROC_1D(30),
     PROC_YIELD,
-    PROC_CALL(CampaignIntro_0808A6CD),
+    PROC_CALL(CampaignIntro_Init),
     PROC_1E(5),
     PROC_YIELD,
     PROC_1B(425),
-    PROC_CALL(CampaignIntro_0808A821),
-    PROC_REPEAT(CampaignIntro_IDLE_0808A82D),
+    PROC_CALL(CampaignIntro_StartPrologueText),
+    PROC_REPEAT(CampaignIntro_WaitForTextBoxes),
     PROC_SLEEP(90),
-    PROC_REPEAT(CampaignIntro_IDLE_0808A845),
-    PROC_REPEAT(CampaignIntro_IDLE_0808A885),
+    PROC_REPEAT(CampaignIntro_WaitForButtonA),
+    PROC_REPEAT(CampaignIntro_WaitForSkip),
     PROC_END,
 };
 

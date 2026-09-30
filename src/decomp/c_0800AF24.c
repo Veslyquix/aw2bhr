@@ -29,14 +29,14 @@ void sub_0800AF24(int x, int y)
 
 void sub_0800AF74(int x, int y)
 {
-    if (IsTerrainWaterOrRiver(x, y) == 0)
+    if (IsTerrainNotWaterOrRiver(x, y) == 0)
         SetTerrainAt(x, y, 1);
 
     SetTerrainAt(x, y, 3);
     MakeMountain(x, y);
     sub_0800A588(x, y);
     sub_0800ABD0(x, y);
-    sub_08007F9C(x, y);
+    RepaintNeighbours(x, y);
     sub_0800BEE4(x, y);
     sub_0800EC20(x, y);
 }

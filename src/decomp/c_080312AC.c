@@ -20,7 +20,7 @@ struct Unk080312ACProc
     /* 0x58 */ int unk58;
 };
 
-void sub_080312AC(struct Unk080312ACProc *proc)
+void LinkLobbySlots_Loop(struct Unk080312ACProc *proc)
 {
     int n;
     int i;
@@ -41,7 +41,7 @@ void sub_080312AC(struct Unk080312ACProc *proc)
 
     for (; i <= 3; i++)
     {
-        if (!sub_0802F460(i))
+        if (!SioIsPlayerLinked(i))
             goto done;
 
         PutSpriteExt(0, (0x50 + i * 0x28) & 0x1ff, 0x40, gUnknown_0849B258[i],
@@ -52,7 +52,7 @@ void sub_080312AC(struct Unk080312ACProc *proc)
         {
             DrawOamObject(gUnknown_0849B27C[i], 0x58 + i * 0x28, 0x58 - *p, 0, 0);
             *(u16 *)((u8 *)gPal + palOffset) = gUnknown_081D3E68[(x >> 1) & 0xf];
-            sub_080135A4();
+            EnablePaletteSync();
         }
 
         palOffset += 0x20;
@@ -68,7 +68,7 @@ done:
 
     if (proc->unk58 == 0)
     {
-        if (sub_0802F4A0())
+        if (SioAreAllLinkedPlayersStatus5())
         {
             proc->unk58 = 1;
             Proc_Start(gUnknown_0849B1A0, proc);
@@ -78,9 +78,10 @@ done:
             return;
     }
 
-    if (sub_0802F4A0() == 0)
+    if (SioAreAllLinkedPlayersStatus5() == 0)
     {
         proc->unk58 = 0;
         Proc_EndEach(gUnknown_0849B1A0);
     }
 }
+asm(".global sub_080312AC\n.thumb_set sub_080312AC, LinkLobbySlots_Loop\n");

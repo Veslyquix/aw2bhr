@@ -35,11 +35,12 @@
  * through trymatch and all three still match, so the cast below is now
  * redundant -- it is left in place because it is byte-identical either way and
  * removing it would be churn on a matched function. */
-void sub_080399F8(int a, int b)
+void LoadCoPowerPanelTiles(int a, int b)
 {
-    sub_08011E54(gUnknown_080A29A4,
+    RegisterDataMove(gUnknown_080A29A4,
                  (void *)(0x06000000 + gUnknown_03002B6C.bits.chr_block * 0x4000
                           + (a & 0x3ff) * 0x20),
                  0x800);
     sub_08012B70(gBG0TilemapBuffer, gUnknown_080A31A4, 0, 0, (u16)(b << 12 | a));
 }
+asm(".global sub_080399F8\n.thumb_set sub_080399F8, LoadCoPowerPanelTiles\n");

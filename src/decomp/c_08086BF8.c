@@ -20,14 +20,14 @@
  * and tools/split_rodata.py and tools/gen_lds.py must be re-run before building.
  * Do NOT declare gUnknown_081D943C as a global.
  *
- * The two levers that closed this (and its twin sub_08086CE0) are written up in
+ * The two levers that closed this (and its twin DrawMapListRowsFromThird) are written up in
  * docs/agbcc-codegen.md, "The ROM's y-offset is an EXPLICIT SOURCE BIV": the
  * `+2` counter is a strength-reduction giv and needs `int k = i * 2;` declared
  * in the ARM'S OWN BLOCK (function scope does not reduce), and the sum needs a
  * third local `z` so expand_binop does not swap the ADDS operands.
  */
 
-void sub_08086BF8(u32 a1, int a2, int a3)
+void DrawMapListFirstTwoRows(u32 a1, int a2, int a3)
 {
     int i;
     int flag;
@@ -35,9 +35,9 @@ void sub_08086BF8(u32 a1, int a2, int a3)
     int z;
     u8 t;
 
-    sub_08013C00();
+    ClearBg0Tilemap();
 
-    sub_08014A5C(1, 5, gBG0TilemapBuffer, gUnknown_08499CE4[gUnknown_0300596C], 0, 0);
+    PutTextTableEntryImmediate(1, 5, gBG0TilemapBuffer, gUnknown_08499CE4[gUnknown_0300596C], 0, 0);
 
     if (gUnknown_02027F74.unk37 < a2)
         a2 = gUnknown_02027F74.unk37 + 1;
@@ -47,7 +47,7 @@ void sub_08086BF8(u32 a1, int a2, int a3)
 
     for (i = 0; i < a2; i++)
     {
-        t = sub_0803CB24(gUnknown_02027F74.unk04[a1 + i]);
+        t = HasMapBeenPlayed(gUnknown_02027F74.unk04[a1 + i]);
         flag = 1;
         if (t)
             flag = 0;
@@ -58,20 +58,21 @@ void sub_08086BF8(u32 a1, int a2, int a3)
             int k = i * 2;
             y = a3 + 9;
             z = k + y;
-            sub_080149C0(1, (s16)z, gBG0TilemapBuffer, gUnknown_084C3F50, 0, flag);
+            PutTextScriptImmediate(1, (s16)z, gBG0TilemapBuffer, gUnknown_084C3F50, 0, flag);
         }
         else
         {
-            u8 *p = sub_08024944(gUnknown_02027F74.unk04[a1 + i]);
+            u8 *p = GetMapName(gUnknown_02027F74.unk04[a1 + i]);
             int k = i * 2;
             y = a3 + 9;
             z = k + y;
-            sub_080149C0(1, (s16)z, gBG0TilemapBuffer, p, 0, flag);
+            PutTextScriptImmediate(1, (s16)z, gBG0TilemapBuffer, p, 0, flag);
         }
     }
 }
+asm(".global sub_08086BF8\n.thumb_set sub_08086BF8, DrawMapListFirstTwoRows\n");
 
-/* MATCHES.  Wave 46, W46-L.  Twin of sub_08086BF8; relocs match, nothing to
+/* MATCHES.  Wave 46, W46-L.  Twin of DrawMapListFirstTwoRows; relocs match, nothing to
  * place at promotion.
  *
  * The asymmetry between the two arms is REAL and load-bearing, not an artefact:
@@ -84,7 +85,7 @@ void sub_08086BF8(u32 a1, int a2, int a3)
  * "tidy" the two arms into the same shape -- it un-matches the function.
  */
 
-void sub_08086CE0(u32 a1, int a2, int a3)
+void DrawMapListRowsFromThird(u32 a1, int a2, int a3)
 {
   int i;
   int flag;
@@ -95,12 +96,12 @@ void sub_08086CE0(u32 a1, int a2, int a3)
   {
     a2 = gUnknown_02027F74.unk37 + 1;
   }
-  sub_08013AEC();
+  BG_EnableSyncBG0();
   if (a2 > 2)
   {
     for (i = 2; i < a2; i++)
     {
-      t = sub_0803CB24(gUnknown_02027F74.unk04[a1 + i]);
+      t = HasMapBeenPlayed(gUnknown_02027F74.unk04[a1 + i]);
       flag = 1;
       if (t)
       {
@@ -111,18 +112,19 @@ void sub_08086CE0(u32 a1, int a2, int a3)
         int k = i * 2;
         y = a3 + 9;
         z = k + y;
-        sub_080149C0(1, (s16) z, gBG0TilemapBuffer, gUnknown_084C3F50, 0, flag);
+        PutTextScriptImmediate(1, (s16) z, gBG0TilemapBuffer, gUnknown_084C3F50, 0, flag);
       }
       else
       {
-        u8 *p = sub_08024944(gUnknown_02027F74.unk04[a1 + i]);
+        u8 *p = GetMapName(gUnknown_02027F74.unk04[a1 + i]);
         int k = i * 2;
         y = a3;
         y = y + 9;
         z = k + y;
-        sub_080149C0(1, (s16) z, gBG0TilemapBuffer, p, 0, flag);
+        PutTextScriptImmediate(1, (s16) z, gBG0TilemapBuffer, p, 0, flag);
       }
     }
 
   }
 }
+asm(".global sub_08086CE0\n.thumb_set sub_08086CE0, DrawMapListRowsFromThird\n");

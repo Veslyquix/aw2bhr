@@ -1880,7 +1880,8 @@ gcse for one function, and none is known. sub_0805D888 points the same way:
 without its asm barrier it is +36 / 33.1% configured, but size-exact and
 64.8% under `-fno-gcse`, with ONE 2-byte residual (the y-loop guard; see
 work/sub_0805D888/NOTES.md). **`--profile o1` is NOT this test**, because it
-changes ten flags. Test with `-fno-gcse` alone.
+changes ten flags. Test with `-fno-gcse` alone:
+`python tools/trymatch.py <fn> --cflags-add=-fno-gcse`.
 
 ## Six parks closed by W90-C, and what each one teaches (wave 90)
 
@@ -2700,6 +2701,54 @@ all emit the `lsl`/`lsr` pair ADJACENT — it is one merged `zero_extend` insn a
 no source-level lever splits it. decomp-permuter added 17,450 iterations and
 found nothing. If you meet a split truncation pair in a ROM, the question to ask
 is what made it two insns, not how to reorder two.
+
+## The preheader's hoist order follows the body's FIRST-REFERENCE order, and rotating it costs a register (wave 93, W93-F)
+
+The chapter above says where a hoisted invariant lands is set by pseudo
+creation order. Here is the source-level handle on that, and its price.
+
+LICM hoists a loop's invariants in the order the body first refers to them, so
+you can rotate that order by making the body touch a value earlier. Reading a
+value into an ordinary local at the top of the body is enough -- it does not
+have to be a pointer, and it does not have to be a new computation:
+
+```c
+for (i = 0; i < 5; i++)
+{
+    u16 c;
+
+    c = counts[0];                                /* counts[0] referred to first */
+    if (row1[i] != 0xff) counts[1]++;
+    if (row0[i] != 0xff) counts[0] = c + 1;       /* row0 referred to last */
+}
+```
+
+`sub_08055940`'s body referred to its four invariants in the order
+[row0][counts0][row1][counts1] and its preheader came out in that order; the
+ROM's is that rotated left by one. The read above produces the ROM's order
+exactly, value class for value class -- `mov r4,sp | ldr r7,<row> | mov r5,r8
+| add r6,r7,#0 | add r6,#0x28` against the ROM's `mov r3,sp | ldr r5,<row> |
+adds r4,r7,#0 | adds r6,r5,#0 | subs r6,#0x28`.
+
+**And it is 12 bytes worse (9.2% identical), because the local is then live
+across the body.** The ROM's prologue saves two high registers; this form
+saves three. One more simultaneously live value means an address constant the
+ROM rematerialises takes a callee-saved register instead, and every later byte
+shifts.
+
+That number is not incidental: it is the *same* 12 bytes four earlier waves
+measured on this function for row-POINTER locals, and those waves read it as
+pointer locals inhibiting the loop's induction variable. **It is not about
+pointers.** A plain `u16` value local costs exactly the same 12. The tax is
+one extra simultaneously live value, whatever it holds.
+
+So read this lever both ways. Forwards, it is the cheapest way to move a
+preheader hoist. Backwards, it says that when the ROM's hoist order differs
+from yours and the ROM's frame is no larger than yours, the original reached
+that order with **nothing extra alive** -- so any construct that buys the
+order by keeping a value live is the wrong shape however close it gets, and
+what you are looking for is a spelling that reorders the first references
+without adding a live range.
 
 ## A `u16` subscript's `lsls #0x10; lsrs #0xf` is a MERGED insn, and the base `ldr` lands relative to it by statement (wave 48, W48-I)
 
@@ -53872,6 +53921,477 @@ Three statement-level readouts from the same batch, each measured:
   after a3's copy. That is the ROM's `adds r3,r2,#0; mov sl,r0` order, which
   had been parked as "no source distinction" for three waves.
 
+## The force-addr declaration sweep is STILL not finished, and an unapplied rule cost `sub_08087040` five waves (wave 92, W92-B) � MATCHED
+
+`sub_08087040` matched on the first probe of wave 92 by deleting two declarations
+and naming the real arrays:
+
+    -   u16 **p = &gUnknown_081D9440, **q = &gUnknown_081D9444;
+    -   PutSprite(1, x, 0, *p, attr);
+    +   PutSprite(1, x, 0, gUnknown_0848B690, attr);
+
+23.33% at -4 bytes to `MATCH`, with `trymatch` reporting the expected
+same-address relocation difference and asking for
+`"rodata": ["0x081D9440", "0x081D9444"]`.
+
+**Nothing here is a new rule.** W40-H already gives the test (`ldr rN,=sym;
+ldr rM,[rN]` on a ROM word: TWO levels is an address constant, THREE means you
+invented a global), W38-E already says a force-addr word is not a pointer object
+*even when the ROM reloads it inside a loop*, and W33-G already says a
+force-addr word declared as a pointer is one indirection too many. The wave-44
+declaration of `gUnknown_081D9440` / `gUnknown_081D9444` as `u16 *` objects
+predates all three and nobody re-tested it. Its stated evidence � "the load is
+repeated every iteration rather than hoisted, which is what says the pointer
+objects themselves are non-const" � is exactly the inference W38-E refutes.
+
+Two things made it easy to miss, and both are worth knowing:
+
+- **The wave-53 audit of this run stopped four words short.** Its heading reads
+  `0x081D92xx-0x081D940F`, and these two words are at 0x081D9440 and 0x081D9444.
+  An audited range's *end* is not a boundary in the data; the pool block
+  continues.
+- **Dumping the ROM cannot settle it.** The function's own pool holds
+  0x081D9440/44 and the words there hold the array addresses, which is the same
+  byte pattern under both readings. Two levels from a pool word to the value the
+  code uses is the *normal* shape for an address constant spilled to `.rodata`.
+  The only decisive test is to compile the honest spelling and compare.
+
+### Measured both ways in one batch, so do not over-generalise
+
+Applying the same probe to three other parks in the same wave:
+
+- `sub_08087040` � honest spelling MATCHES (the words are cells).
+- `sub_08061DCC` � honest spelling is **-12 bytes** (5.15%), and -4 (22.79%)
+  when only one of the two is converted. `gUnknown_0816DB08` / `0x0816DB0C`
+  cannot be replaced.
+- `sub_0801A718` � declaring `gUnknown_0808E5CC` and reading
+  `gUnknown_030020A8` through it is **+4 bytes** (13.97%), and +8 when the
+  sentinel word is added, generalising W58-A from `gUnknown_0808E5D0`.
+
+So the declaration sweep needs a per-function probe, not a rule about an address
+range. The cheap screen is the honest spelling itself: one compile through
+`tools/drafts.py bases`, which scores every `.c` in `work/<fn>/` in one run and
+never touches the draft.
+
+### The open corollary, and it is a real lead
+
+`sub_08061DCC` is the interesting case, because under W40-H's test its draft is
+the thing W40-H warns about: the ROM reaches the data in THREE loads, and the
+draft models the first level as an object (`u8 **volatile gUnknown_0816DB08`).
+Read as an address constant instead, the ROM's three loads are exactly what
+`gUnknown_03004784[3]` produces **provided agbcc emits the `.rodata` cell** �
+and it does not, because (W37, re-confirmed this wave) cse merges the two
+references across `bl __divsi3`, since a libcall does not clobber memory, and one
+reference gets no cell.
+
+That leaves the draft reproducing the ROM's bytes with a model the project's own
+rules call invented. Both readings are consistent with the ROM, so nothing here
+is proven wrong � but the next attempt on that function should try to *earn the
+cell* (a third reference, or anything that defeats the cse merge) rather than
+respell the residual, because if the cell appears the honest spelling becomes
+available and the register pressure changes with it.
+
+## A VOLATILE READ OF A NARROW GLOBAL IS THE SOURCE-LEVEL `-fno-force-mem` (wave 92, W92-A)
+
+`sub_08050FF8`, 8 bytes short for five waves. The wave-91 flag sweep found one
+flag for it: `-fno-force-mem` made it SIZE-EXACT (15.42% -> 26.62%). Read
+forwards, that says the missing instructions are memory operands the candidate
+holds in a register and the original re-reads. The symbol is `gUnknown_0300453C`,
+a `u16` read six times across the first half of the function.
+
+    plain reads of gUnknown_0300453C                     796 / 804   -8   15.42%
+    #define SIDE (*(volatile u16 *)&gUnknown_0300453C)    800 / 804   -4   17.79%
+
+Half the gap, in one edit, on a function that had not moved since wave 89. And
+the flag confirms the mechanism from the other side: from the new fixpoint
+`-fno-force-mem` now OVERSHOOTS by +8, the same four bytes it used to supply.
+
+**This is a THIRD volatile mechanism and neither of the two recorded ones covers
+it.** The wave-88 chapter above is about defeating a gcse store-to-load forward
+(there is no store here). The wave-65 refutation in `sub_0802FACC`'s header is
+about a volatile cast on a POINTER-OBJECT read after a call, which does not
+change which register holds the base. This one is a plain narrow global whose
+VALUE `-fforce-mem` copies into a pseudo once; the volatile forces the `ldrh`
+back at each use.
+
+- **It works here because the reads are `ldrh`.** W89-A's volatile probe on the
+  same function failed against `gUnknown_03001FBC` for a reason that is specific
+  to that symbol: combine will not fold a volatile MEM into a `sign_extend`, so
+  a volatile read loses the ROM's `ldrsh` and pays `ldrh / lsl #16 / asr #16`.
+  An UNSIGNED narrow global has no such obstacle. **Check the load the ROM uses
+  before ruling the lever out -- the wave-89 negative is about `ldrsh`, not about
+  `volatile`.**
+- **Only the reads that the ROM spells directly want it.** This function reaches
+  the same variable a second way, through the force-addr cell 0x081360DC, from
+  the `03004580[side^1][2] == 1` test onward. Making that route volatile too is
+  +68 bytes.
+- Carry it as a file-local macro over a cast unless the whole repo is being
+  re-verified: 42 promoted files read this symbol, and retyping a shared
+  declaration is what has broken five builds.
+
+## NAMING THE TARGET GLOBAL BEATS CHASING THE CELL -- UNLESS THE LOADED VALUE IS AN INDEXED BASE (wave 92, W92-A)
+
+Wave 92 ran the same edit on four drafts that reached a global by hand through
+agbcc's own `-fforce-addr` cell, and got a 3-1 split that has a clean rule
+behind it.
+
+| function | cell | chased by hand | global named directly |
+|---|---|---|---|
+| `sub_080359A4` | 0x08090EA8 -> `&gMap` | 320 / -4, 45.06% | 320 / -4, **49.38%** |
+| `sub_0802F588` | 0x08090C80/84/88 | 280 / +0, 40.36% | 280 / +0, **40.71%** |
+| `sub_0802F6A0` | 0x08090C8C/90/94 | (already direct) | reproduces the ROM's cells exactly |
+| `sub_08050FF8` | 0x081360D8/DC/E0/E4 | 796 / -8, **15.42%** | 756 / -48, 11.82% |
+
+**The discriminator is what the loaded value is used AS.** In the first three the
+cell holds the address of a scalar or of an array that is then indexed, so
+naming the global makes agbcc rebuild the same chain by itself -- pool word ->
+`.rodata` cell -> the global's address -> the member load. In `sub_08050FF8` the
+loaded value is a BASE that every use would fold into a load displacement, so
+the honest spelling deletes the per-use re-chase that the wave-88 `c_local` bind
+installed on purpose, and 40 bytes go with it.
+
+So the wave-88 chapter above and this one are not in conflict, and the
+`sub_08050FF8` axis is now closed from BOTH ends: the bare pointer-object
+reference adds a `.rodata` word and a third load, and the target global deletes
+the second load. Neither is the ROM.
+
+**Cheap test before spending the edit: dereference the cell in `baserom.gba` and
+look at what the ROM does with the loaded value.** Two loads and then a member
+displacement off it means a scalar or array address and the honest spelling is
+worth trying. Two loads and then an index ADD means a base, and the bind stays.
+
+## RE-TEST EVERY ALLOCATION HACK AFTER A POOL-WORD FIX (wave 92, W92-A)
+
+`sub_080359A4` carried `register int y asm("r12")` from wave 71, where it was
+measured at 12 bytes against the draft of the day. Once the pool chase was
+replaced by `gMap->`, the same pin COST the last four bytes:
+
+    gMap-> with the wave-71 pin        320 / 324   -4   49.38%
+    gMap-> with the pin removed        324 / 324   +0   54.63%
+
+It also hid the function from the permuter for twenty waves: pycparser cannot
+parse `register ... asm("rN")`, and `permute.py` reports that as "the permuter
+could not score the starting point", which reads like a result rather than a
+syntax error. With the pin gone, one 900-second run took it to 56.17%.
+
+**A ruled-out axis is evidence about the exact spelling measured, and an
+ACCEPTED hack is evidence about the exact code it was measured against.** When a
+structural fix lands, re-measure the hacks the draft is carrying -- pins,
+`do/while(0)` wrappers, redundant copies -- before building on them.
+
+## Asking for a register by name (`register T x asm("rN")`)
+
+The project's standing advice is that these pins wreck new code, and the
+measurement behind it stands. But the advice is too broad as stated, and two
+facts bound it.
+
+**A promoted, byte-exact function uses them on purpose.** `sub_0807F8FC`
+(`src/decomp/c_0807F8FC.c`, `trymatch` exit 0) pins a loop counter to r2 and
+three call operands to r0/r1/r2, adds a `volatile int` to force an explicit
+save slot, and uses an empty `asm volatile ("" : "+r" (x))` as a barrier. That
+is how its frame and its counter-versus-parameter allocation were reproduced.
+So a pin is a legitimate tool, not a smell, once the allocation is understood.
+
+**Whether a pin does anything at all depends on what you pin.** Measured on
+`sub_0807E980`, same function, same wave:
+
+- Pinning three loop-carried locals (a source pointer, a destination pointer
+  and a counter) to the three registers the ROM uses for them is **completely
+  byte-neutral** — three variants, each byte-identical to the unpinned source.
+  The compiler was already free to honour the request, or free to ignore it,
+  and nothing downstream changed.
+- Pinning a **parameter** — renaming it and copying it into a pinned local — is
+  destructive: the same function went from 12 bytes long at 53% identical to 8
+  bytes short at 18.6% identical. The pin is live from function entry, so it
+  constrains every allocation in the function rather than one loop.
+
+Read together: a pin on a short-lived local is usually inert and costs nothing
+to try, and a pin on a value live across the whole function rewrites the whole
+function. Try the first freely; treat the second as a rewrite, not a tweak.
+
+**Neither kind of pin recovers a register the shape does not have.** The same
+measurement showed that a loop written with explicit stepped pointers needs one
+more callee-saved register than the ROM's shape, and asking for the registers
+by name does not create one — the pressure simply moves somewhere else.
+
+## A flag or permuter result that changes SIZE must be judged on its first-difference offset, not its percentage � `-fno-force-mem` measured on three functions (wave 92, W92-B)
+
+A flag sweep ranked `-fno-force-mem` as the best lead on three parks in the AI
+block. All three gains are size-realignment artefacts, and one of the three is
+structurally *worse* than the draft it beats by 36 points.
+
+    function        default                      with -fno-force-mem
+    sub_08061DCC    27.2%, size match, +0x4      66.9%, size match, +0x4
+    sub_08062FF4    22.3%, size -8,    +0x14     61.6%, size -4,    +0x14
+    sub_08061308    13.5%, size -20,   +0x1c     49.8%, size +4,    +0xa
+
+- `sub_08061DCC`: the entry block and the multiply block are byte-for-byte
+  identical under both settings. What the flag does is break the `unk04 & 0x780`
+  test, which the draft already matched exactly, emitting one extra instruction
+  there. The draft is one instruction short overall, the two cancel, every later
+  instruction lands on the ROM's address, and the whole tail after the division
+  call compares equal.
+- `sub_08062FF4`: the first difference does not move and the leading region is
+  instruction-for-instruction identical under both settings. The only visible
+  change there is a branch whose target label shifted by the four bytes the flag
+  added further down.
+- `sub_08061308`: the flag moves the first difference from +0x1c to +0xa � it
+  breaks eighteen bytes the draft had right � and overshoots the size from -20
+  to +4.
+
+The mechanism is what the flag's name says. `-fforce-mem` makes `expand_binop`
+copy a memory operand into a register before the other operand is expanded, so
+the load is emitted ahead of the constant beside it. Turning it off flips that
+order at *every* such site in the file: it breaks the sites the draft had right
+and fixes the ones it had wrong, and on a function short of the ROM's size the
+net byte change is what moves the score. Read the other way, the default is
+confirmed � `-fforce-mem` is what produces the ROM's load-before-constant order.
+
+### The general rule, which is not about this flag
+
+**Byte identity is positional, so on a candidate that is not yet the ROM's size,
+any change that moves the size toward the ROM's multiplies the percentage
+without fixing anything.** This has now fooled two different automated rankers
+in one wave: the flag sweep above, and the permuter on `sub_080607E8`, which
+reached the ROM's exact size and 80.8% by inserting a second call to a
+side-effecting function inside a loop � dead as an assignment, undeletable as a
+call, and worth exactly the eight missing bytes.
+
+Screen any size-changing result on two things before believing it:
+
+1. **Did the first-difference offset move later?** If it stayed put, or moved
+   earlier, the leading divergence is untouched and the gain is realignment.
+2. **Which instructions did it add?** Diff the two candidates against the ROM
+   side by side. If the added instructions are not the ones the ROM has at that
+   point, the size match is a coincidence.
+
+A candidate that is already size-exact is not exempt � there the same trap
+appears as a pair of cancelling errors, which is what `sub_08061DCC` is.
+
+## A FRAME-SLOT COUNT is a spelling lever: an ordinary local never makes a slot, a `volatile` local always does (wave 93, W93-B)
+
+Compare the candidate's `sub sp, #N` against the ROM's before reading any
+register. The difference is a count of addressable local objects, and it is
+directly reachable from the source — but only with `volatile`.
+
+Measured on two unrelated functions in one wave, in opposite directions:
+
+**`sub_080726E8` — the ROM has FEWER slots than the candidate wants.** The
+residual was that agbcc strength-reduces two pointers in one arm where the ROM
+recomputes both addresses every iteration. Four spellings of a temporary in that
+arm:
+
+    plain `int t; t = ix;` then index with `t` ......... byte-identical to no temp
+    `u16 *d;` assigned in its own statement ........... byte-identical to no temp
+    `volatile int t; t = ix;` ......................... +12 bytes -> size-EXACT
+    8-bit fold-proof mask on the index, no local ...... +12 bytes -> +4
+
+    ROM frame 8 bytes / volatile-temp frame 12 / `u16 ix` frame 4
+
+**`sub_0801FAC4` — the ROM has MORE slots than the candidate makes.** The ROM
+spends two stack slots on a loop's fixed bound and its stepped value; the
+candidate coalesced them into one and came out 4 bytes short. Wave 71 had
+measured a hoisted bound local, at case scope and at function scope, and recorded
+that it "still leaves a four-byte frame". Adding `volatile` to that same local:
+
+    `int bound = a2 + a4;`  (wave 71) ... one slot, 536/540 (-4), first diff +0xa
+    `volatile int bound;`   (wave 93) ... two slots, 540/540 EXACT, first diff +0x24
+
+Same source construct, same position, one qualifier, and it is the difference
+between a four-byte and an eight-byte frame.
+
+### Why
+
+`local_alloc` coalesces an ordinary local into a pseudo and the pseudo into a
+register; nothing in the source can keep a non-volatile local addressable if its
+live range fits. A `volatile` local is a MEM by definition — every read must come
+from memory — so it is allocated a frame slot and reloaded at each use, and it is
+the only C-level construct that forces one.
+
+### How to use it
+
+- Read the frame difference FIRST, as a signed count. It is cheap and it says
+  which direction to search in.
+- ROM has one more slot than you: try `volatile` on the local whose value the ROM
+  reloads. Expect it to also defeat CSE and strength reduction on that value,
+  which is usually what you wanted.
+- ROM has the same or fewer slots: `volatile` is the WRONG tool, because it
+  cannot add a slot without adding an object the ROM does not have. On
+  `sub_080726E8` the volatile form reaches the exact size only by trading the two
+  slots the hoisted giv inits needed for one slot of its own, and the frame stays
+  one object too large.
+- A `volatile` local reaching the right size is not by itself proof of the
+  original construct. Check the frame count too: on `sub_080726E8` two different
+  spellings both reach 216 bytes exactly, one with a 12-byte frame and one with a
+  4-byte frame, and the ROM's is 8.
+
+
+## A SPILLED COUNTER NEEDS THE ZERO-TRIP LOOP **AND** THE PRESSURE -- NEITHER ALONE DOES IT, AND EVERY NATURAL LOOP ROTATION IS BYTE-IDENTICAL (wave 93, W93-C)
+
+Two chapters above already say a zero-trip `do { } while (0)` re-orders register
+allocation by raising `loop_depth`. `sub_0801C090` measures what that is worth
+when the target is a SPILL rather than a re-ordering, and the answer sharpens the
+lever in two ways.
+
+The ROM's frame is `sub sp, #8` and the candidate's is `sub sp, #4`: the ROM
+spills the loop counter to `[sp,#4]` as well as the parameter to `[sp]`. By the
+W93-B frame rule that is "ROM has one more slot than you", which points at
+`volatile`. **It is the wrong tool here, and the ROM says so before any probe:**
+
+    ldrh r0, [r5]        count = *src++
+    str  r0, [sp, #4]    <- str, not strh
+    ldr  r3, [sp, #4]    <- ldr, not ldrh
+
+A `volatile u16` local is a 2-byte object and compiles to `strh`/`ldrh`. A word
+store of a zero-extended `u16` is a SImode pseudo that the ALLOCATOR spilled.
+**Read the access WIDTH in the ROM before applying the frame rule: a slot the
+size of the declared type is a volatile object, a slot the size of a register is
+a spill.** They need opposite levers.
+
+### The measurement
+
+Nine spellings, all against one draft, reported as (size delta, first differing
+byte). `sub sp` sits at +0xa in this prologue, so `+0xa` means the frame itself
+is wrong and `+0xe` means the frame is right:
+
+| spelling | size | first diff |
+|---|---|---|
+| draft | -16 | +0xa |
+| `do { } while (0)` round the loop, alone | -16 | +0xa |
+| `short count` instead of `u16 count`, alone | -8 | +0xa |
+| two extra value bindings in the loop body, alone | -16 | +0xa |
+| two source halfwords held in locals in one arm | -12 | +0xa |
+| `for (;;) { if (count == 0) break; ... }` | -12 | +0xa |
+| `if (count != 0) do { ... } while (count != 0);` | -12 | +0xa |
+| **arm locals + `do { } while (0)`** | **-8** | **+0xe** |
+| **`do { } while (0)` + the two bindings** | **-12** | **+0xe** |
+
+### The two rules
+
+1. **The nest and the pressure are a CONJUNCTION.** The zero-trip loop alone
+   changed nothing at all, and extra live values alone changed nothing. Together
+   they spill the counter. The nest is what takes the counter's live range out of
+   `local_alloc` (it now crosses an outer loop boundary and goes to
+   `global_alloc`, where it can be spilled at all); the pressure is what makes it
+   lose once it is there. A wave that tries one, sees no movement and records the
+   axis as dead has measured half of a lever.
+2. **DO NOT SPEND PROBES ROTATING THE LOOP.** `while`, `for(;;)` with a `break`
+   guard, and a guarded `do/while` produced byte-identical output here -- same
+   size, same first difference, same percentage to the hundredth. gcc normalises
+   loop rotation long before allocation, so the source's choice among them is
+   invisible. Only an extra loop NEST is visible, because only that changes
+   `loop_depth`. This is worth knowing in the negative direction too: if a park
+   lists "tried `for` / `while` / `do-while`" as three separate ruled-out axes,
+   it has one measurement, not three.
+
+
+## The order of LICM's hoists follows the order of first use in the loop body
+
+When two invariants are both hoisted into a loop's preheader, they appear
+there in the order their first reference appears in the loop body, because
+`move_movables` walks the movables list in the order `scan_loop` discovered
+them and emits each one immediately before `loop_start`.
+
+That makes the preheader order something you can choose from C. If the ROM
+hoists A before B and your candidate hoists B before A, add a reference to A
+ahead of B's first use inside the body. The reference is often free: reading a
+table entry into a local at the top of the body costs nothing when the loop
+already loads that entry into a register there.
+
+Measured on `sub_08039588`. Its inner search loop hoists two things, the
+address of `gUnknown_08090F30` and a `j << 8` computation. Written as
+
+    for (k = 0; gUnknown_08090F30[k] != 0; k++) {
+        dst = j * 0x100 + 0x6140;
+        if (str[i] == gUnknown_08090F30[k]) { ... }
+    }
+
+the preheader comes out `lsl` then `ldr`. Adding `c = gUnknown_08090F30[k];`
+as the first statement of the body, and comparing against `c`, flips it to
+`ldr` then `lsl`, which is the ROM's order, at no instruction cost.
+
+This is the companion to the rule above that anything after a hoisted
+invariant was written by the loop optimiser: that rule says which insns you
+must not author, and this one says how to order the ones you do not author.
+
+## A memory barrier does not stand in for -fno-gcse on address computations
+
+The GBA SDK's m4a source uses `asm("" ::: "memory")` where it wants gcse off,
+and it is tempting to reach for that whenever a function only matches under
+`-fno-gcse`. It works only when what gcse removed was a reloaded VALUE.
+
+It does nothing when what gcse unified was an ADDRESS computation. A memory
+clobber stops a value loaded from memory being reused across it; a literal
+pool address load is a constant, not a memory read, so the barrier has no
+purchase on it.
+
+Measured on `sub_0805D438`, which matches byte-for-byte under `-O2 -fno-gcse`
+and is 28 bytes too long under the normal flags. gcse's partial-redundancy
+pass unifies the pool address loads of `gUnknown_030046B0`,
+`gUnknown_030040D8` and `gUnknown_030046C0` across the half of the function
+after the call. Barriers at one point, at two points, and after every single
+statement give +28, +28, +24 and +32 bytes respectively -- the maximal
+placement makes the function LONGER. This confirms the wave-89 result that
+nothing in C splits gcse's unification of two identical register-level address
+computations, and it means a function in this situation needs a compiler
+override, not a spelling.
+
+
+
+
+## A TRAILING `lsrs` AFTER A NARROW DECREMENT IS TRUNCATION, NOT SIGNEDNESS -- READ THE ADDED CONSTANT INSTEAD (wave 93, W93-C)
+
+`sub_0801C090` sat parked for six waves partly on this misreading, and the
+correction is cheap enough to state as a rule.
+
+A 16-bit counter decremented in a loop compiles two different ways depending on
+the DECLARED type, and both of them end in an unsigned `lsrs #16`:
+
+    s16 / short:   lsls r0, r3, #0x10
+                   ldr  r5, =0xFFFF0000
+                   adds r0, r0, r5
+                   lsrs r1, r0, #0x10
+                   cmp  r0, #0          <- tests the SHIFTED value
+
+    u16:           sub  r0, r0, #1
+                   lsl  r0, r0, #0x10
+                   lsr  r0, r0, #0x10
+                   cmp  r0, #0          <- tests the truncated value
+
+The trailing `lsrs` is the 16-bit truncation of the result. It is unsigned in
+BOTH, because the only use of the value is a `!= 0` test, so the sign is never
+needed. **A trailing `lsrs` therefore says nothing at all about the declared
+signedness.** What discriminates is the `0xFFFF0000` literal: the signed form
+decrements in the high half and needs that constant in the pool, the unsigned
+form decrements first and never emits it. On this function the difference is
+worth 8 bytes and the frame.
+
+Wave 86 read the `lsrs` as proof of `u16`, recorded the matched twin's `s16`
+declaration as "REFUTED FROM THE ROM without a probe", and generalised it into
+"the ROM's own shift settles signedness in ten seconds". All three were wrong,
+and the twin's declaration was right. **A reading of the ROM is a hypothesis
+with a compiler sitting right there to test it.** `compile_probe` costs
+nothing and does not count as an attempt; a refutation recorded without one
+becomes a ruled-out axis that stops later waves from looking.
+- **`if ((id = m->unitUnk[off]) == 0 || ...)` is not `id = ...; if (id == 0
+  ...)` for an s16 `id`** (sub_08022618). The embedded assignment keeps the
+  def's `lsls r0,#16` shared by the store (`lsrs rV,r0,#16`) and the test
+  (`cmp r0,#0`), and the later u16 argument / s16 index re-narrow from the
+  variable (`lsls r6,rV,#16`) -- the ROM's shape. The separate statement lets
+  combine fold the def to the bare `ldrb` and CSE shares one `id << 16` between
+  the test and the call. Read `ldrb; lsls r0; lsrs rV,r0; cmp r0,#0` as an
+  assignment inside a condition.
+- **A narrowing `?:` copies its result at the join** (sub_08042998). With
+  `u8 n`, `n = c ? a + 1 + Div(...) : a;` narrows in EACH arm into a temporary
+  and then emits `adds r5,r0,#0` into n after the join; `if (c) n = ...; else
+  n = a;` writes n directly in both arms. A u8 value narrowed in both arms of a
+  diamond and then copied is a conditional expression.
+- **A parameter's entry copy can be moved after a later parameter's by one
+  assignment** (sub_0803E6C4). `col = a1;` as the first statement: combine
+  folds a1's assign_parms copy into it and emits it at the assignment, i.e.
+  after a3's copy. That is the ROM's `adds r3,r2,#0; mov sl,r0` order, which
+  had been parked as "no source distinction" for three waves.
+
 ## The W56-H loop-top residual is a `cmd` LOCAL: re-read `*p` instead (sub_0801DCD4)
 
 Solves the "UNSOLVED 4-byte residual" recorded under W56-H for
@@ -54082,7 +54602,7 @@ for the same address (+4).
 
 ## A caller's narrowing can be a cast, not the callee's parameter type (sub_08020EDC)
 
-sub_08020EDC (now `AddValueInRange`) sat from wave 49 as a "cross-TU
+sub_08020EDC (now `StampVisionDisc`) sat from wave 49 as a "cross-TU
 prototype contract". The permuter kept reaching past the draft only by
 widening the sixth parameter from `u8` to an int type. Wave 73 ruled that
 out: the matched caller sub_080210C8 truncates its `int a6` with
@@ -54139,7 +54659,7 @@ time. Add statements to stop a hoist, share tails to allow one.
 
 ## Re-measure a park whose blocker was a callee's prototype (sub_08039188)
 
-sub_08039188 (now `DrawMarkerSprites`) was parked from wave 57 to wave 88 at
+sub_08039188 (now `DrawMovePathArrow`) was parked from wave 57 to wave 88 at
 +4. The recorded blockers were a cross-TU conflict over sub_08039140's
 narrow first parameter and an `ldrsb` fold. Since then sub_08039140 was
 promoted as an old-style (K&R) definition, and the header declares it
@@ -54171,3 +54691,404 @@ one hoisted the middle `ldr`. Two facts explain why:
 So when a parked draft declares a pointer global to reach a `.rodata` word,
 dereference the word in the ROM first. If it holds a RAM address, that word
 is force-addr, and the lever is operand order, not a declaration.
+
+
+## An explicit narrowing cast folds away when the value is PROVABLY representable, so the wave-15 rule has a precondition (wave 94, W94-A)
+
+The wave-15 finding is that a probe cannot tell `u16 v` from `int v` with an
+explicit `(u16)` cast at each use, because both fold in straight-line code,
+yet in a real function they are different code: the cast expands to an
+`lsl #16` / `lsr #16` pair that survives. That is true, but only where the
+narrowing is not redundant. Measured on `sub_080607E8`, whose ROM
+sign-extends its second call argument with `lsls #0x10 / asrs #0x10` where the
+candidate emits a bare register move:
+
+- `int b = p->unk01 + 4;` passed to an `s16` parameter - no shifts;
+- `u16 b` - byte-identical, no shifts;
+- `(s16) b` written as an explicit cast at the call site - byte-identical, no
+  shifts;
+- `b = p->unk01; b += 4;` - byte-identical in the narrowing (the dead first
+  set is eliminated, so `b` is still single-set), and it costs allocation
+  elsewhere.
+
+The reason is `combine`'s `num_sign_bit_copies` / `nonzero_bits`, which are
+tracked only for a pseudo with ONE set. `b` is one set of `(u8 load) + 4`, so
+`nonzero_bits <= 0x1ff` and a 16-bit sign extension of it is provably the
+identity. `combine` then deletes it however the source spells it - conversion
+or cast, narrow local or int.
+
+So an explicit cast is not a lever for making a narrowing appear. To keep one,
+the VALUE has to be something agbcc cannot bound: a genuinely multiply-set
+pseudo (a loop counter is the common case, which is why the same call's first
+argument `a + i` does keep its shift pair), a memory read it cannot track, or
+a wider operand. Reach for the operand's provenance, not for a cast.
+
+The same measurement refutes one plausible-looking workaround: masking with
+`& 0xffff` to widen the range does nothing, because `nonzero_bits` already
+proves the AND is a no-op and it is folded along with the extension.
+
+## The same two-register sum spelled twice in one function is shared across blocks, and the shared temp costs a stack slot (wave 96, W96-A)
+
+`sub_0802216C` stores `t + r + 0x400` early and `t + r + 0x402` at the end of a
+later if/else chain, with `t` and `r` in callee-saved registers. Spelled the same
+way, global CSE computes `t + r` once, keeps it in a register across the calls
+in between, and that one extra live value pushes a parameter to a stack slot and
+moves the constants to different high registers: a 12-byte, 5-slot-vs-6-slot
+cascade that looked like a pure register-allocation residual for four waves.
+The ROM computes the sum again.
+
+Spell ONE of the two sums differently (`t + (r + 0x402)`) and the sharing stops:
+212 differing instruction lines drop to 102, the frame returns to the ROM's size
+and the parameter goes back to its high register. Commuting alone (`r + t` in
+both places) does nothing. The cost is that the changed sum compiles as
+`(t + 0x402) + r`, so this is a partial answer where the ROM needs `(r + t)`.
+
+Other measured spellings in the same function:
+
+* `a + (t + K)` with a u16 `t` versus `a + (u16)(t + K)`: same value, but the
+  cast form emits the store address (`dst + 0x42`) BEFORE the value, which is the
+  ROM's order, and loads `a` last. The cast only changes ordering here; it is
+  not creating a narrowing.
+* Inside `x + (y + K)`, the source association chooses which register gets the
+  constant first (`adds r0, rX, #K; adds r0, rY, r0`); try both associations per
+  sum, they are not equivalent even though `+` commutes.
+* A copy `u16 u = t;` taken after `r` to give the sums a higher-numbered operand
+  made things much worse; the copy gets its own register.
+
+To find this kind of sharing: count the distinct `adds rX, rY, rZ` sums in the
+ROM and in the candidate. A sum the candidate computes once and the ROM twice is
+a reuse; look for a register live across a call in the candidate that the ROM
+does not have.
+
+## A pointer-to-global bind used at ONE site, and u16 temps that make the mask-constant copy (wave 96, W96-A)
+
+Two levers from the 0x0801E-0x08022 block, both found by ablating permuter output:
+
+* `sub_0801F4B4`: `struct Unk300409C **pp = &gUnknown_0300409C;` assigned just
+  before the `do` and used ONLY in the `while` condition takes the function from
+  58.6% size-4 to 96.5% size-exact. Naming the same pointer in the empty test, in
+  the `switch`, or in all three (eight placements measured), or binding a second
+  pointer at the merge, is worse (70-100 instruction lines against 20). A bind
+  earns its second pseudo only where cse would otherwise fold the read into an
+  address load done earlier in the same block; give it one site, the last one.
+* `sub_0801E9B0`: `t0`, `t1`, `t2` and `h` read from u16 halfwords and declared
+  `u16`, not `int`, produce the ROM's `movs rA,#K; lsls; adds rB,rA,#0; ldr rC;
+  ands rC,rB` for every `x & K` test. The copy of the constant is what the ROM
+  has at those five sites; an `int` temp emits no copy. Five missing copies in a
+  function were narrow-type copies, not five extra source variables. The same
+  `u16` on `h` also copies `h` itself when `h` is live afterwards, which the ROM
+  does not do, so check that side before keeping it.
+
+A CELL ADDRESS BOUND ONCE HOISTS OUT OF A LOOP THAT CALLS; RE-BIND IT IN EACH ARM (sub_0804A760)
+
+The ROM often reaches a pointer global through its compiler-made cell every
+time it is used inside a loop (`ldr r0,[r7]; ldr r1,[r0]` in each arm), while
+the draft loads the cell once above the loop and keeps it in a register (a new
+pool word, +4 bytes). The chase is a loop-invariant memory read; move_movables
+hoists it when one pseudo carries it through several arms (savings of two or
+more). Binding the cell's address to a local once, before the loop, does not
+help: it is still one pseudo. What worked is assigning the local again at the
+top of each arm (`gp = &gUnknown_030044E0;` then reading through `(*gp)`): every
+arm gets its own single-use pseudo, below the threshold for a loop with a call,
+and the loads stay in the arms. sub_0804A760 went from 59% at +4 bytes to 92%
+at the exact size. Two limits: a read of the same field through the plain name
+in the SAME arm (`unk1e == 0` as an s16 test) brings the hoist back, and
+declaring the local at the top of the function moves the prologue. The opposite
+case is sub_08050FF8, where the ROM HOLDS the cell address in a hi register for
+the whole body: there, re-assigning per use is wrong (+12 bytes). Tell the two
+apart by the ROM: `ldr r0,[r7]` repeated inside the loop means re-derive;
+`mov r1,sl; ldr r2,[r1]` means held.
+
+A cell VALUE loaded eagerly and held (sub_0804CA98): declare the cell as an
+`extern T *const` object and bind its value, `base = gUnknown_08136060;` at the
+top and the second array's `b94 = gUnknown_08136064;` inside the guarded block.
+That reproduces the ROM's `ldr rA,=cell; ldr rB,[rA]; mov sl,rB` pair and its
+position; the array base is then spilled unless enough registers stay free.
+
+## A SHARED `i << 4` IS UN-SHARED BY SPELLING THE OTHER USE AS `(i * 2 + c) * 8` (wave 97)
+
+`sub_08045FC8` needed the ROM's recomputed `i << 4`: the player-record scale
+`i * 0x3c` (`((i << 4) - i) << 2`) and the row position `i * 16 + 0x30` shared one
+shift, so the record scale kept a 3-operand `lsl r2,r4,#4; sub r0,r2,r4` and the
+position reused r2. Writing the position as `(i * 2 + 6) * 8` matched the function
+byte for byte: same value, but the shifted factor is `i * 2 + 6`, which is a
+different rtx, so cse has nothing to share and combine leaves `lsls r2,r4,#4;
+adds r2,#0x30` after it. Neighbours that do NOT work: `i * 8 * 2 + 0x30`,
+`(i << 3) * 2 + 0x30`, `i * 4 * 4 + 0x30`, `i * 16 + 6 * 8` (combine folds them back
+to `i << 4` before cse sees a difference: 32.7%); `(i + 3) * 16` and `(i * 16) | 0x30`
+get close (96.2% / 94.2%) but put the add before the shift or use `orr`. Rule: keep
+an ADD inside the factor that is multiplied by a power of two. Try it on any park
+where the ROM computes one scaled index twice.
+
+## TOOLS FOR THE PERMUTER'S WRONG C, AND FOR COMPARING SPELLINGS (wave 97)
+
+`python tools/wrongc.py <fn> <candidate.c> [--base FILE]` prints `OK` or one
+`WRONG:` / `WARN:` line per finding and exits 1 on any WRONG. The base is the file
+the candidate came from when the name says so (`X-permK-out.c` -> `X-permK-start.c`),
+else `work/<fn>/<fn>.c`. `--no-emu` runs the pattern rules only (instant). Two layers:
+
+- **Pattern rules** over a pycparser parse of the function text (no compile, header-
+  expanded permuter output is fine). WRONG: `volatile` added, callee multiset
+  changed (a helper defined in the same file, e.g. `inline_fn`, is transparent),
+  a wide type used as an index, a base variable assigned a constant or stepped
+  inside an expression in a loop, a local assigned and never read, a scalar
+  local whose first use in the source is a read, statements after a `return`.
+  WARN only (they fire on ordinary respellings): operators, integer literals,
+  parameters, call order, a call moving across a store, `x += 0;` padding.
+- **Differential testing** (`tools/wrongc_emu.py`). Both versions are compiled with
+  the project pipeline and run in a small Thumb interpreter on the same seeded
+  inputs (typed arguments, constants the code compares against, a total
+  pseudo-random memory, every callee stubbed and logged with its prototype's
+  arguments, `__divsi3` and friends real). Compared: call log, non-frame bytes
+  written, memory at each call, return value. `behaviour` = they differ;
+  `uninit-dynamic` = the candidate's result changes when only the garbage in
+  registers and frame it never set is changed (a read before set on a path the
+  compiler's warning cannot see). Register allocation, frame layout, `volatile`
+  slots and spills are invisible to it, which is the point. It reports how much of
+  the function the inputs reached; a `same` at 40% is weak.
+
+**Benchmark** (`python tools/wrongc.py --self-test`, corpus in `tools/wrongc_corpus/`,
+about 70 s warm): 43 files a wave labelled wrong (the 42 `*wrong*` files plus
+sub_08046A84's volatile run) against the sibling draft they resemble most.
+Flagged 34 (79%): 9 by patterns, 31 by the emulator (6 of them as `uninit-dynamic`).
+Per WRONG rule, hits on those 43: behaviour 29, uninit-dynamic 6, volatile 3,
+uninit-textual 2, unreachable 2, loop-const 1, loop-nested 1. The 9 not flagged are
+not wrong in behaviour (an identity `inline_fn`, `+= 0` padding, "correct C going
+the wrong way", a longer-but-worse best.c) or need a path the random inputs never
+take (sub_0801D390's read across two switch arms, sub_0803CFA4's `k -> 0` in one
+arm): counting only the wrong-in-behaviour files, 34 of 37. Good set: the 10
+permuter outputs waves 95-96 read and adopted: 0 flagged WRONG (WARN-tier
+rules fire on them: literals 5, operators 3, shifts 2). Emulator soundness, same
+source compiled by two compilers (o1 / old-agbcc / default vs configured; 100
+parked drafts, 213 comparisons): 203 same, 4 not run (never terminates),
+3 differ: one undefined-behaviour case (a local array indexed out of range, whose
+neighbour depends on frame layout), one difference on 1 run in 100 that was not
+explained, and one real agbcc difference (old-agbcc skips the `& 0xFF` after `u8 ++`). So expect roughly 1 in 70 verdicts to be a false
+WRONG, always with a concrete seed and the differing byte or argument to read.
+Synthetic mutants (7 kinds, 115 mutants of 40 promoted functions): 83% flagged.
+
+Wiring: `permute.py` refuses to keep an improvement wrongc.py rejects (against the
+draft as the run found it; log line `not kept: wrong C (tools/wrongc.py): ...`) and
+warns on a MATCH that it rejects. `drafts.py bases` tags such files
+`[wrong C: ...]` (pattern rules volatile / loop-const / wide-type /
+uninit-textual only, plus any file whose name contains "wrong") and never
+names one as the base.
+
+`python tools/spellings.py <fn> a.c b.c ...` (or `<fn> f.c --variants 0,1,2` for
+`#if VARIANT == n` blocks) builds each spelling with the project path into
+`build/drafts/` and prints size vs the ROM, byte match, first difference, and the
+`sub sp` / `push` lists next to the ROM's; `--one-unit` compiles all spellings as
+`V_0..V_n` in one unit for a quick frame and size screen. It writes nothing in work/.
+
+`permute.py` scored its starting point WITHOUT `--stack-diffs` (the search itself
+used it), so a draft whose only residual was swapped spill slots printed
+`base score 0` and ended as BASE-SCORES-ZERO before searching: sub_08037A78 now
+scores 36 at the start (measured on a copy) and the search runs.
+
+## A running u16 coordinate: try `s16` before deeper shift-pair spellings (wave 97, sub_0806AB9C)
+
+A loop-carried `u16 x` whose increment and `x & mask` both truncate lets combine prove x fits in 16 bits and delete the
+truncation the ROM shares between the mask and the increment (`lsls #16` once, used twice). Declaring the variable `s16`
+kept it (360 B, byte-exact). Cheap to test whenever the ROM shows a shared `lsls #16` per pass and every u16/int/u32
+spelling was too short.
+
+## An empty `case N: break;` arm is pruned; `case N: x += 0; break;` on the switched field is not (wave 97, sub_08068A00)
+
+Size-exact only; the tree is still rooted by the nine-node rule (index 4). Ranges count 2 in balance_case_nodes and move the root left.
+
+## A COPY-BACK LOOP STEP (`ix = nx;`) STOPS STRENGTH REDUCTION WITHOUT A FRAME OBJECT (wave 97)
+
+`sub_080726E8` matched: the flipped inner loop strength-reduced two pointers where the ROM re-derives both
+addresses each pass. `volatile` fixed it at the price of a third frame slot. The clean spelling is
+`nx = ix + 1;` at the top of the body and `ix = nx;` at the bottom: loop.c only treats `ix = ix + const` as a
+basic induction variable, so no giv is derived from `ix` and the frame is the ROM's. The ROM's shared
+`adds r4, r2, #1` is exactly this temp. Two follow-ups: write the source index as `*((p + (w - nx)) + (iy * 0x20))`
+so `iy*0x20` stays a separate term (the folded `p[iy*0x20 + w - nx]` loses the hoisted row scale), and assign a
+`ux = x + ix;` before `nx` to fix the order of the two adds in the block head.
+
+## A scratch that reuses an already-declared variable shares its pseudo; a fresh one does not (wave 97)
+
+Three permuter gains this wave (sub_0801C01C +4.3 points, sub_0801C090 +0.8, sub_0801ADC8 +11) were the same shape: split a long expression into a statement whose result goes into a variable the function ALREADY has and no longer needs (`new_var = (x << 6) << 10; y = a | new_var;`, `remaining = sum;`). The same split into a fresh local (`u32 new_var5`) compiled byte-identically to the unsplit form. A statement boundary alone does nothing; it is the shared pseudo, and the register it pins, that changes what the allocator is handed.
+
+`(u16) x` on a `|=` result is not the same as declaring `x` u16: `remaining |= 0xffffff00; remaining = (u16) remaining;` keeps the `0xFFFFFF00` pool word and the OR at full width (the ROM's shape), while `remaining |= 0xffffff00 & 0xffff;` and a `u16` variable both fold the constant to `0xff00` (`movs #255; lsls #8`).
+
+`(sum + (s16) narrow) & 0x1ff` in ONE expression lets combine drop the sign extension of `narrow` (only the low 9 bits survive). Splitting `sum += (s16) narrow;` into its own statement keeps the `lsls/asrs` pair, which is how sub_0801C090 reproduced the ROM's extra three instructions.
+
+A `volatile` local that "helps" is wrong until its frame is compared: sub_0801ADC8's `volatile keptFlags` made `sub sp, #8` against the ROM's `#4` and was what kept the first difference at +0xa for three waves; the honest flag update with a self-assignment (`x = x | 8; x = x; x = (x | v) & 0xef;`) moves it to +0x80.
+
+## A linker-script ALIAS is a cse splitter (wave 97, W97-R)
+
+`aw2bhr.lds` defines aliases such as `gBG0TilemapBuffer = gUnknown_08499578;`. Both names are one address in the ROM, but to the compiler they are two different `symbol_ref`s, so cse cannot treat a load of one as equal to a load of the other. Naming the variable by its second name at only some of the uses re-creates the address load there instead of copying the earlier register, and gives that use a plain literal-pool word while the first name keeps its `.rodata` force-addr word. This is the mechanism behind the long-parked "early uses through the `.rodata` word, later uses plain literal" construct: sub_08046030 (42% -> 91%, size exact) and sub_08046914 (15% -> 81%, size exact) both moved this way. It splits only the ADDRESS: constants such as `0x8000` and `0` are still carried by cse (`-fno-cse-skip-blocks` proved that cse's skip-blocks path owns the carry over `if (x <= 0x63) a++;`), and the alias costs a second pool word. Check `grep aw2bhr.lds` for aliases of any global in a parked function before trying anything else.
+
+
+## Lever search (`tools/levers.py`, wave 97)
+
+Wave 96/97 matches came from a handful of semantics-preserving respellings applied at the right site. `python tools/levers.py <fn> [--draft F] [--rules 1,2,4a] [--seconds S]` enumerates every site where those respellings apply in the draft's function (pycparser tree, body regenerated, rest of the file untouched), compiles one candidate per (rule, site) on the project's own path (`tools/drafts.py`), then composes pairs of active singles (an active single changes the bytes; phase 2 also pairs each with every site within 6 tree nodes, because a lever that is inert alone can be the second half of a match). Ranking: size-exact, then byte score, then a later first difference. Improving candidates go to `work/<fn>/levers/<rule>-<node>.c` (`index.txt` names each) and get a `wrongc` verdict; nothing else in work/ is touched. `--all-parked` writes `build/levers/summary.md`; `--self-test` reruns the four wave-97 finds.
+
+Rules: 1a factor/expand a scaled sum (`i*16+0x30` -> `(i*2+6)*8`); 1b `x+1` -> `-~x`; 1c/1c' block-scoped copy of one use (`{ s16 tn = t; ... }`, same or opposite signedness); 1d re-associate/re-order a `+ -` chain or `* | & ^`; 2 flip a local's or parameter's signedness; 3a-3e loop step through a copy (for/while, top/bottom, uses rewritten, plain `x++;` statement); 4a swap if/else arms or an early return; 4b/4c comparison spelling; 5a/5f split an expression into `lv = E;` (fresh `__typeof__` local); 5b the same into an already-declared int local; 5c inline a single-use local; 5d `do { } while (0)` around a block.
+
+What it rediscovers (pre-match drafts): sub_08045FC8 (single lever 1a), sub_0806AB9C (single lever 2), sub_0802216C (pair 1d + 1c': `(r + t) + 0x402` with `{ s16 lv = t; }`). sub_080726E8 is NOT found: from `w93-start` it reaches 96.3% (`1d` on the source index plus `5a` on `iy * 0x20`), but the match needed the `nx`/`ux` copies together (three levers).
+
+Read the verdicts, not just the score. `?` marks a lever that is exact only under a range or liveness condition (1c', 2, 5b, 5c). `wrongc` rejects many of them (5b clobbering a live local is the usual reason). It also reports `loop-const` on 5d candidates, which is a false alarm: the `do { } while (0)` looks like a loop to the detector. Functions with inline asm are skipped (the tree rewrite would drop it).
+
+Rule 7 of `tools/levers.py` is the linker-alias lever: it writes the other name of an `aw2bhr.lds` alias (`a = b;`) at one use of a global, and adds `extern __typeof__(<used name>) <alias>;` above the function when the draft does not see the alias. By default it only fires where the function's own ROM pool has at least two words for that address (`--force-alias` lifts that filter). Composition: rule-7 actives are paired with each other and with the best 25 other actives first. Result on the 25 alias-referencing parked drafts: no valid improvement (the improving ones fail `wrongc`, or change nothing); sub_08046030 already contains the aliases wave-97 found by hand.
+
+
+## THE SPLIT ("`.rodata` word at one site, plain pool word at another") IS THE PRE COPY PSEUDO SURVIVING cse2 AT SOME USES; loop.c's 26-INSN LIMIT DECIDES WHICH (wave 97, W97-Z)
+
+Reproduced with a synthetic function (`build/probe/z/w97z_split_mixed.c`).
+It emits `ldr r4,=.LC0; ldr r6,[r4]` at the entry read of `gPlaySt` and a plain
+`ldr r3,=gPlaySt` inside the loop. Nothing in it is spelled two ways. The
+same function with ONE `t += a0 * 3;` statement fewer in the inner loop
+(`w97z_split_allplain.c`) has no `.LC0` word at all and every read is plain.
+Body: `a0 = sub_0802490C(0); n = sub_0802490C(gPlaySt.mapID);` an outer loop
+over `i`, `if (gPlaySt.aiControlled[i] == 0)`, a `do { v = call(); for (j...)
+{ t += a0*3 (x6); if (i != j && gPlaySt.aiControlled[j] && gPlaySt.co[j] == v)
+break; } } while (j != n + 1);`, then `gPlaySt.co[i] = v;`. Generator:
+`build/probe/z/gen3.py 1 6` (and `1 5`).
+
+**The mechanism, read off `-da` dumps of the two functions (pass order is
+cse, gcse, loop, cse2, flow, regmove, lreg, greg, combine):**
+
+1. The entry occurrence is `set P (symbol_ref .LC0); set Q (mem/u P)`. gcse's
+   PRE inserts `set N P` right after it (dump line `PRE/HOIST: end of bb 0
+   ... copying expression K to reg N`) and rewrites every later
+   `set P_k (symbol_ref .LC0)` as `set P_k N`. So P now has TWO uses, and
+   combine cannot fold it into `(mem/u (symbol_ref .LC0))`. **That second use
+   is what keeps the entry's `.rodata` word.** Every later read is
+   `mem/u N`.
+2. loop.c runs after gcse. Its second pass (`flag_rerun_loop_opt`) hoists an
+   invariant only if the loop is small enough (wave 90: threshold 26 insns for
+   a one-use movable). The `-dL` dump for the two files differs in exactly one
+   place: with `t += a0*3` x5 the innermost loop is "26 real insns" and
+   `Insn 144 ... savings 1  moved to 276` (the `mem/u N` load is hoisted out
+   of it); with x6 it is 27 and the same insn is `not desirable` and stays in
+   the loop.
+3. cse2 then folds `mem/u N` to the constant wherever the copy `N = P`'s
+   REG_EQUAL (`symbol_ref .LC0`) is still visible along its extended basic
+   block. A load hoisted into the preheader is visible, so every use is folded,
+   N dies, the copy insn is deleted before combine, P has one use again and
+   combine folds the entry word too: **no `.LC0` at all, all reads plain**.
+   A load left inside the loop is behind a join and is NOT folded. N survives
+   with that one use, so the entry keeps its `.LC0` word.
+4. greg decides the surviving use. If N gets a hard register the use is
+   `ldr rX,[rN]` (the "held" spelling, e.g. the draft of sub_08026290 with N in
+   `sl`). If N loses the allocation contest it has no register, and reload
+   replaces it with its REG_EQUAL/EQUIV constant, turning the use into
+   `mem/u (symbol_ref .LC0)`, which is the plain `ldr rX,=gPlaySt` literal.
+   (The dumps show it: `.greg` prints `(mem/u:SI (symbol_ref/u:SI ("*.LC0")) 0)`
+   at that insn.) **So "early `.rodata`, later plain" = P kept two uses AND N
+   was spilled.**
+
+**What this predicts, and the toggles (all measured on the synthetic):**
+- Filler in the innermost loop flips the split (5 -> 6 statements: all plain
+  -> mixed). The same six filler statements before the loop, after it, or in
+  the outer body after the inner loop change nothing. The lever is the
+  innermost loop's insn count at loop time, and it is one more instance of the
+  wave-90 "add insns that exist at loop time and are gone by the final code"
+  lever, now with a visible consequence on the pool.
+- With no competing live value across the call (`a0` removed) N is simply held
+  and every read is `ldr [rN]`; with one competitor and a small loop, all plain.
+  The mixed state needs BOTH the un-hoisted use and a lost allocation.
+- A `-da` reading rule: in `.cse2` count `mem/u (reg N)` uses that survive; in
+  `.greg` look for `mem/u (symbol_ref .LC0)` (spilled N: plain) versus
+  `mem/u (reg)` (held N).
+- Two NAMES for one object (`gUnknown_03003FC0` vs `gPlaySt`, same address)
+  split the PRE expression, but do NOT reproduce the ROM's split for
+  sub_08026290 (five entry/head/inner assignments measured: 184-192 bytes,
+  12-37%). They only add a second `.LC`.
+
+**sub_08026290 (176 B) NOT closed.** Draft re-measured 57.95%, size-exact. The
+first difference at +0xC is the ROM's entry `ldr r4,=.LC; ldr r0,[r4]` with
+nothing kept from it, where the draft keeps the entry's base in r6 and reuses
+it for the hoisted `base + 0x38`. That is the same mechanism seen from the
+other side: in the ROM the outer-loop reads are `mem/u N` uses that were not
+folded and N lost, so `base + 0x38` / `+ 0x3d` are re-derived from a fresh
+literal every outer iteration (`ldr r2,=g; adds r3,r2,#0; adds r3,#0x38`)
+instead of being hoisted. Pointer binds (`ai = g + 0x38`) fold to literals and
+drop to 160 bytes. What is left to try is making the innermost loop 27+ insns
+at loop time WITHOUT changing the final code (so the `mem/u N` for the `co[j]`
+read stays in the loop) while giving N a lower allocation priority than the
+ROM's three derived pointers.
+
+## One cell-address assignment in the loop condition feeds the code after the loop (sub_0804A760)
+
+When the ROM reloads a pointer global through its .rodata cell inside a loop and then reuses that one register for a switch after the loop, do not re-read the global bare after the loop. A second read gives cse a fresh pseudo it turns into a copy, and only some of the later uses are rewritten, so the function is 4 bytes long with an `adds rN, rM, #0` before the switch. Assign `gp = &g;` inside the loop's `while` condition and read the switch scrutinee and the case stores through `(*gp)`; gp then lives only from the condition to the end of the switch. A gp assigned in the loop arms instead is live across the whole loop and grows the frame. The arms that need a per-arm reload (to stop the hoist) then need their own pointer local, or they inherit the shared register. A local `z = 0;` written right after the first statement of a chain gives the zero its own pseudo defined early, which is where the ROM's early `movs rN, #0` comes from. Once the allocation is right, an `asm("rN")` pin that was only a costume can come off (its removal was the last 3 bytes).
+
+## Two counters that swap roles between loops; leading padding before a function
+
+Two findings from one batch, both about what the ROM shows that a whole-function score hides.
+
+- **A whole-function register exchange between two loop counters can mean the SOURCE swapped their roles.** sub_0802F03C had `i`/`j` in each other's registers from the first loop to the last, and no spelling of the first loop moved it. Tabulating the ROM's outer and inner counter register per loop showed loop 1 (outer r4, inner r5) and loops 3 and 6 (outer r5, inner r4): consistent with one variable pair only if `j` is the OUTER counter in loops 3 and 6. Writing those two nests with the roles swapped matched (each alone: 92.0% and 92.8%; both: exact). Allocation priority counts uses weighted by loop depth, so which name is inner decides who is allocated first. Do the per-loop table before trying fresh counters (a fresh `k` lowers priority and breaks the sharing).
+- **Padding between a function's entry label and its first instruction** (sub_08071918: four `movs r0, r0`, callers branch to the label) can be reproduced without touching asm/ or the split: one file-scope `asm()` emits the no-op halfwords, the C body is named for where its code starts, and a second `asm()` with `.thumb_set <label>, <body> - 8` puts the entry label at the padding. promote.py already follows a `.thumb_set` alias, so no tool change is needed. Check the callers' `bl` targets first: they decide where the label really is. Trailing `.align` padding after a body (sub_08035170, sub_08061DCC) is a different thing and is emitted by the compiler.
+
+## Operand order of a pointer + scaled-index add
+
+A lone `adds rD, rBase, rIdx` versus the ROM's `adds rD, rIdx, rBase` (same registers, two bytes) can be a source spelling. Scope: it applies to POINTER + INT. It does not overturn the older rule that commuting a `+` in an INT sum is byte-neutral.
+
+- **The lever** (sub_0806412C, 99.14% to exact): write the address as an int sum with the scaled index on the left and cast it back to a pointer: `q = (u8 *)((i * 8) + (int)(base + k));`. The plain pointer spellings (`(i * 8) + (base + k)`, `&(base + k)[i * 8]`) stay at the wrong order, and splitting the terms into separate statements or reassociating (`(i * 8) + base + k`) costs 4-8 bytes and a bigger frame.
+- **Why (inferred from the result, not confirmed in an RTL dump):** pointer + int is put in the pointer-first order; an int sum cast back keeps the index first, and local-alloc ties the destination to the first operand.
+- **It is not a general reorder tool.** Applied to sub_08055768's value address it did flip the operand order but moved the preheader `ldr`/`lsls` order away from the ROM (98.3% to 96-97.5%); the hoist order there is a separate decision.
+
+## A three-way table choice: `switch` with the bodies written 8, 6, default
+
+When the ROM tests `cmp #6; beq A6; cmp #8; bne Cdef`, then has the 8-arm inline, the 6-arm out of line and the default arm last, that is the layout of a `switch (b)` with `case 8:` first, `case 6:` second and `default:` last (tests come out in ascending value order, bodies in source order). A ternary chain cannot give it: tests follow source order and the first-tested arm is emitted inline. sub_08046A84 went from 86.3% to 90.3% (first difference +0x1E to +0x108) by writing the choice this way; the promoted sibling sub_08046D30 spells the same choice identically.
+
+- Assign the loaded VALUE in each arm (`v = table[i].member;`) and use `v` after the switch. Assigning a pointer to the member or to the record makes gcc hoist the index scaling to the join and merge the arms (-24 bytes).
+- Check the sibling that reads the same tables first; the layout is a sign the original was a `switch`.
+
+## cse's skip-blocks carry: what ends it, and what does not (sub_08046030, sub_08046914)
+
+Setting: a run of calls shares constants (`0x8000`, `0`, a buffer address), then `if (x <= 9) a = ..; if (x <= 0x63) a++;` (two branch-arounds, each label used once), then more calls. The draft's later calls reuse the earlier calls' registers; the ROM's later calls load fresh copies.
+
+- **The carry is cse's skip-blocks path.** `-fno-cse-skip-blocks` gives fresh copies; `-fno-cse-follow-jumps` does not. The ROM is NOT the `-fno-cse-skip-blocks` output either: with the flag the second read of the compared global is reloaded through its pool word, while the ROM compares both `cmp #9` and `cmp #0x63` against one `ldrh`. So in the ROM cse followed the FIRST branch-around and stopped later, somewhere between the `cmp #0x63` and the first later call.
+- **A real size cap exists.** Filling the path before the chain with live stores (`g = (x + k) ^ m`, about five insns each) breaks the carry between 150 and 250 statements; one-insn stores `g = k` between 450 and 750. Dead statements do not count (cse deletes trivially dead insns first). The chain is nowhere near that size in either function, so the cap is not the ROM's cause unless the ROM's source has a lot of code that vanishes only after cse.
+- **Does NOT end it (all measured, byte-identical or worse):** five extra chained branch-arounds; `goto` forms and a label between the two tests; `do{}while(0)`, `for(;;){..break;}`, `while(1)`, `switch(1)` and a one-trip counted `for` around the `a++`; the chain inside an inline helper with one return or with an early return; `a += cond ? 1 : 0`; `asm("")`, `asm volatile("")` and memory-clobber asm before the chain (agbcc does not flush the table on them); the constants respelled as `u16` / cast / product forms.
+- **What is still open:** which source construct ends the path after the second test. Untried: a nested `if` whose inner label sits directly before the outer label (cse's skip test refuses a skipped block whose last real insn is a used label).
+- **Address half only:** naming the buffer by its linker alias (`gBG0TilemapBuffer` for `gUnknown_08499578`) makes cse see two symbols, so the address is re-created, but the constants stay carried and the alias adds a second pool word, so the function cannot reach 100% that way.
+
+
+## A SWITCH ROOT THAT NO VISIBLE NODE COUNT EXPLAINS: SOLVE FOR HIDDEN DEAD CASES (wave 98, sub_08068A00)
+
+`balance_case_nodes` roots a list of N nodes at 0-based index (N+1)/2 - 1 (ranges count 2), then recurses on each side; a side of one or two nodes stays a chain. When the ROM's tree is rooted somewhere the count of its VISIBLE pivots cannot reach (nine pivots rooted at index 2), the original switch had more case values than the tree tests: dead leaves whose compares fold away after balancing. Solve for N from the root and the two side sizes (here N = 13: six nodes each side of the seventh, the right six visible, the left six = {0, one dead, 0x26, three dead}), then add `case K: goto done;` arms at sorted positions that give each sublist the right size. Their exact values are not recoverable; only the sort position matters. The arm body matters: bare `break;` on every dead arm merges them into one `b` stub (+4 bytes) and `goto done;` folds them fully. Result: sub_08068A00 matched with four extra arms (1, 0x28, 0x29, 0x2a).
+
+## `tools/regprio.py`: WHY the allocator gave the draft different registers than the ROM (wave 98, W98-F)
+
+    python tools/regprio.py <fn> [--src FILE] [--target FILE] [--keep DIR]
+    python tools/regprio.py --self-test
+
+For a size-exact draft whose residual is register names only. It compiles with `-dl -dg -dA`, aligns the draft's asm to `work/<fn>/target.s` by opcode shape, and blames each operand whose register differs on a pseudo (or on a reload scratch register), using the `.LMn` line chunks. A matched draft reports "no register mismatches" (checked on 80 promoted functions, all zero and all exactly aligned).
+
+Three sections in the output:
+
+1. **reload scratch registers.** A value that needed a low register for one insn (`mov r0, r8`, `ldr r0, =sym` that feeds a high register). reload's `find_reg` spills the hard register whose live pseudos cost least, ties to the LOWEST register. The tool prints the cost of each register at that insn (weighted refs of the pseudos living in it). The ROM took a higher register than the draft, so something must be live in the draft's register across that insn in the ROM, referenced at least "cost of the ROM's register minus cost of the draft's, plus one" weighted times. Read this as a liveness question, not an order one.
+2. **mismatched pseudos**, with refs, live_length and priority `floor_log2(refs) * refs / live_length` (`global.c` `allocno_compare`; ties go to the LOWER pseudo number, i.e. creation order). For each: the registers excluded at its turn (hard-reg conflict set, held by an earlier-placed pseudo, call-clobbered, or a register a LATER conflicting allocno prefers, which pass 0 of `find_reg` skips), the pseudo that HOLDS the register the ROM wants, and the change that flips the order: `+k` weighted uses on the loser, a `live_length` at most N, or the winner down to M refs. A refs unit is loop-depth weighted, so a use inside a loop is worth more than 1.
+3. **register trades**: the draft-reg to ROM-reg pairs, so a swap (`r6 -> r7` with `r7 -> r6`) reads at a glance.
+
+Facts the tool relies on, all read off these dumps: registers are offered LOWEST FIRST (r0, r1, ... ; the wave-51 note above that says r3 first was for a different case), preferences are tried before that order, local-alloc places every block-local pseudo before any global one whatever the priorities (so a global pseudo blocked by a local one needs a source change that makes it or the local span a different number of blocks), and the "replay" of `find_reg` from the conflict sets reproduced the dump's assignment for 21 of 21 global pseudos in sub_08031824 and about 85% in the two larger functions.
+
+Limits. The blame is by source-line chunk, so an operand can land on the wrong pseudo when several pseudos in one register share a line (flagged `(~)`), and a use of a reload register inside the original insn is blamed on a pseudo unless the chunk also holds the reload. Where the alignment reports opcode shapes that differ, the code itself differs and register blame there is unreliable. Local-alloc's order among block-local pseudos is not in the dump, so locals get only the conflict set. The reload cost uses block-level liveness (live-at-start plus in-block references), so it can miss a value that dies mid-block. It says which quantity has to change, not which source spelling changes it.
+
+## A pointer parameter that the ROM walks in place: use the parameter itself (wave 98, sub_0801E9B0)
+
+When the ROM's first instruction after the frame is a copy of an argument register into a hi register (`mov r9,r3`) and the same register later steps by the record size (`add r9,#2`), the source has no separate cursor: the parameter is the cursor (`n = *a4; a4++; ... a4 += 3;`). Writing `p = a4;` and walking `p` makes the cursor a new pseudo, assigned after the other parameters' prologue work, and the first difference lands at the prologue (+0xc). Using the parameter directly moved the first difference to +0x2c and let a wave-97 lever (`q2 = a1 + n` before the bounds test) be dropped. The header's parameter type may need retyping from `void *` to the element pointer for this; callers that cast to `void *` are unaffected.
+
+A permuter improvement that moves a read of a global struct's member before a call that takes the struct's address is wrong even when wrongc says OK: its emulated callee never writes the struct. Check by hand whether the ROM reloads after the call.
+
+## Reload picks a scratch register in TWO stages; `regprio.py --rr` replays both (wave 98, W98-G, sub_0805A0EC / sub_08031824)
+
+Read from a gdb run of the debug-info `agbcc` (the source is not in the repo), and reproduced 15/15 picks on sub_0805A0EC and 9/9 on sub_08031824.
+
+1. **Which registers an insn may use** (`find_reload_regs`, the `Spilling for insn N.` lines). Per insn, hard registers are sorted by the weighted refs of the pseudos live through it; registers with no such pseudo come first, ties to the LOWER number. The first k (k = the insn's needs) become that insn's `used_spill_regs`. A register that never wins here never becomes a spill register at all.
+2. **Which of those it gets** (`choose_reload_regs` -> `allocate_reload_reg`). The global `spill_regs[]` (in the order registers were first chosen) is scanned starting AFTER `last_spill_reg` (starts at -1, never reset inside a function). The first register that is in this insn's set, free for this reload, and in the reload's class wins (pass 0 prefers one already used in the insn). The winner's index becomes `last_spill_reg`.
+
+Consequences:
+- **The pointer is the register of the LAST allocating reload, not a count.** Adding or removing an earlier reload matters only if it is the last one before the site (or changes the order of `spill_regs[]`). One extra reload that takes r3 moves the pointer from r2 to r3; two extra reloads that end on r2 change nothing.
+- **A reload that inherits a value, or arrives with its register already fixed, never calls `allocate_reload_reg` and does not move the pointer.** The usual fixed case is `r6 = r6 + k` / `r0 = *(r0)`: reload reuses the destination register.
+- `python tools/regprio.py <fn> --rr` prints every allocation (insn, line, allowed set, pointer before, pick, ROM pick where the alignment finds one), checks its own replay against the compiler, and for each differing site lists the pointer value the ROM needs and the non-allocating reloads in between. It needs `gdb` inside WSL (`wsl -u root apt-get install -y gdb`). `--want UID:rN` pins the ROM's register for one alloc by hand.
+
+**sub_0805A0EC** is a pure pointer readout. The zero store (insn 297, line 179) is allocation #8 with allowed {r0, r2, r3}. The draft's pointer is r2 (the previous allocation is the `key` reload `ldr r2,[sp]` at line 161), so the scan starts at r3. The ROM's r0 needs the pointer at r3, and the following ip copy then takes r2 in both builds. So the ROM has ONE more allocating reload between line 161 and line 179 that takes r3 (untested conjecture: `add r3,r6,r4` at line 164 is a spilled `props+off` whose output reload gets r3 by the same rule and whose later uses inherit it; the draft instead gives that value to a global pseudo in r3); the literal-zero spelling drops the allocation at the store instead, leaves the pointer on r2, and the copy then gets r3. Neither respelling moves the previous allocation.
+
+**sub_08031824 is NOT a round-robin case.** Its `spill_regs` is [r0 r2]: r1 never enters any insn's `used_spill_regs`, so no pointer position reaches the ROM's r1. At insn 26 and insn 167 the draft's r0 and r1 both have zero weighted uses and stage 1 breaks the tie to the lower register. For the ROM to take r1 there, r0 must look dearer at those two insns (or each insn needs a second spill register), and r0 cannot be live across both because its own code reuses r0 in between. Treat these two sites as a stage-1 problem.
+
+Limits: `allowed` is the insn's stage-1 set minus registers other reloads of the same insn already hold; the replay takes `reload_reg_free_p` from the run rather than modelling it.

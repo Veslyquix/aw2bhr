@@ -20,7 +20,7 @@ struct Unk8076298
     /* 0x40 */ int unk40;
 };
 
-void WM_Listener_IDLE_08076299(ProcPtr procv)
+void WorldMapNationPanel_SlideOutLoop(ProcPtr procv)
 {
     struct Unk8076298 *proc = procv;
     int n;
@@ -32,8 +32,8 @@ void WM_Listener_IDLE_08076299(ProcPtr procv)
     b = 0;
     CpuFastSet(&b, gBG2TilemapBuffer + 0x200, 0x01000040);
 
-    sub_08013AEC();
-    sub_08013B0C();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG2();
 
     n = gUnknown_0861445C[proc->unk40];
 
@@ -61,4 +61,4 @@ void WM_Listener_IDLE_08076299(ProcPtr procv)
     }
 }
 
-asm(".global sub_08076298\n.thumb_set sub_08076298, WM_Listener_IDLE_08076299\n");
+asm(".global sub_08076298\n.thumb_set sub_08076298, WorldMapNationPanel_SlideOutLoop\n");

@@ -33,7 +33,7 @@
  * .rodata word plus a spilled pointer. The ROM has neither. */
 extern struct DesignRingEntry gUnknown_0200B0D0[];
 
-void sub_08005F4C(void)
+void DesignRoomMode_Ring(void)
 {
     struct DesignRingEntry *e;
     int count, visible;
@@ -49,10 +49,10 @@ void sub_08005F4C(void)
         gActiveMap->ringIndex = 0;
         gActiveMap->flags &= ~0x20;
         gActiveMap->flags &= ~3;
-        sub_080078E4(gActiveMap->editMode,
+        DesignRoomBuildItemList(gActiveMap->editMode,
                      gActiveMap->editMode == 0 ? gActiveMap->propertyArmy
                                                 : gActiveMap->unitArmy);
-        sub_08002DEC();
+        DesignRoomLoadTerrainNamePalettes();
         sub_08003A80(0, 0xF0, 0xA0, 0xA0);
         gUnknown_030030E0.bits.target1_enable_bg1 = 1;
         gUnknown_030030E0.bits.target1_enable_bg3 = 1;
@@ -81,11 +81,11 @@ void sub_08005F4C(void)
     case 0:
         gActiveMap->state = 2;
         gActiveMap->flags |= 0x40;
-        sub_080073F8(gActiveMap->editMode, -1);
-        sub_08001D9C();
-        sub_08003948();
-        sub_0803B4DC(0x65);
-        sub_08007354();
+        DesignRoomBuildRing(gActiveMap->editMode, -1);
+        DesignRoomHideTilePanel();
+        DesignRoomHideCoordBox();
+        PlayMusicOrSfx2(0x65);
+        DesignRoomSaveSelection();
         break;
 
     case 2:
@@ -94,7 +94,7 @@ void sub_08005F4C(void)
         {
             gUnknown_03002EFC = 0x78;
             gActiveMap->state = 4;
-            sub_08007328();
+            DesignRoomGetPreviousRingIndex();
             slot = gActiveMap->ringIndex;
             for (i = 0; i < visible; i++)
             {
@@ -145,13 +145,13 @@ void sub_08005F4C(void)
         break;
 
     case 0x32:
-        e = &gDesignRing[sub_08007328()];
+        e = &gDesignRing[DesignRoomGetPreviousRingIndex()];
         e->x = gUnknown_084886F8[gActiveMap->editMode]
                                 [gActiveMap->editMode == 0 ? 9 : 7] << 8;
         gActiveMap->flags |= 0x10;
         gActiveMap->state = 0x33;
         if (gActiveMap->editMode == 0)
-            sub_08002DEC();
+            DesignRoomLoadTerrainNamePalettes();
         /* fall through */
     case 0x33:
         if (gpKeySt->pressed & SELECT_BUTTON)
@@ -188,11 +188,11 @@ void sub_08005F4C(void)
                 if (slot > 19)
                     slot -= 20;
             }
-            i = sub_08007328();
+            i = DesignRoomGetPreviousRingIndex();
             gDesignRing[i].itemId = gUnknown_0200B224[slot].unk00;
             gDesignRing[i].spriteSlot = i;
             gDesignRing[i].flags |= 9;
-            sub_0803B4DC(100);
+            PlayMusicOrSfx2(100);
         }
         else if (gpKeySt->held & DPAD_LEFT)
         {
@@ -209,11 +209,11 @@ void sub_08005F4C(void)
                 if (slot < 0)
                     slot += 20;
             }
-            i = sub_08007328();
+            i = DesignRoomGetPreviousRingIndex();
             gDesignRing[i].itemId = gUnknown_0200B224[slot].unk00;
             gDesignRing[i].spriteSlot = i;
             gDesignRing[i].flags |= 9;
-            sub_0803B4DC(100);
+            PlayMusicOrSfx2(100);
         }
 
         if (gActiveMap->editMode == 0)
@@ -246,7 +246,7 @@ void sub_08005F4C(void)
     switch (gActiveMap->state)
     {
     case 0x34:
-        i = sub_08007328();
+        i = DesignRoomGetPreviousRingIndex();
         e = &gDesignRing[i];
         e->targetX = gUnknown_084886F8[gActiveMap->editMode]
                                       [gActiveMap->editMode == 0 ? 9 : 7];
@@ -278,7 +278,7 @@ void sub_08005F4C(void)
         break;
 
     case 0x35:
-        i = sub_08007328();
+        i = DesignRoomGetPreviousRingIndex();
         e = &gDesignRing[i];
         e->targetX = gUnknown_084886F8[gActiveMap->editMode][0]
                    - (gActiveMap->editMode == 0 ? 0x18 : 0x21);
@@ -367,7 +367,7 @@ void sub_08005F4C(void)
         break;
 
     case 0x3C:
-        sub_0803B4DC((gActiveMap->flags & 0x20) ? 0x66 : 0x65);
+        PlayMusicOrSfx2((gActiveMap->flags & 0x20) ? 0x66 : 0x65);
         for (i = 0; i < count; i++)
             gDesignRing[i].flags &= ~1;
         gActiveMap->flags &= ~0x10;
@@ -382,8 +382,8 @@ void sub_08005F4C(void)
         {
             gUnknown_03002EFC = 0xA0;
             gActiveMap->state = 0x46;
-            sub_08001D8C();
-            sub_08003934();
+            DesignRoomShowTilePanel();
+            DesignRoomShowCoordBox();
             if (gActiveMap->flags & 0x20)
             {
                 if (gActiveMap->flags & 1)
@@ -452,7 +452,7 @@ void sub_08005F4C(void)
     {
     case 0x46:
         if (gActiveMap->tilePanelY <= 0x6A)
-            sub_0800056C(1);
+            DesignRoomSetMode(1);
         break;
 
     case 0x50:
@@ -509,12 +509,12 @@ void sub_08005F4C(void)
     switch (gActiveMap->state)
     {
     case 0x64:
-        sub_080078E4(gActiveMap->editMode,
+        DesignRoomBuildItemList(gActiveMap->editMode,
                      gActiveMap->editMode == 0 ? gActiveMap->propertyArmy
                                                 : gActiveMap->unitArmy);
-        sub_080073F8(gActiveMap->editMode, -1);
-        sub_08007354();
-        sub_08002DEC();
+        DesignRoomBuildRing(gActiveMap->editMode, -1);
+        DesignRoomSaveSelection();
+        DesignRoomLoadTerrainNamePalettes();
         gActiveMap->state++;
         gActiveMap->stateTimer = 10;
         break;
@@ -525,12 +525,12 @@ void sub_08005F4C(void)
         break;
 
     case 0x66:
-        sub_0803B4DC(0x65);
+        PlayMusicOrSfx2(0x65);
         gActiveMap->state = 4;
-        sub_080078E4(gActiveMap->editMode,
+        DesignRoomBuildItemList(gActiveMap->editMode,
                      gActiveMap->editMode == 0 ? gActiveMap->propertyArmy
                                                 : gActiveMap->unitArmy);
-        sub_08007328();
+        DesignRoomGetPreviousRingIndex();
         slot = gActiveMap->ringIndex;
         for (i = 0; i < count - 1; i++)
         {
@@ -566,14 +566,14 @@ void sub_08005F4C(void)
                 kind++;
                 if (kind > 4)
                     kind = 0;
-                sub_0803B4DC(100);
+                PlayMusicOrSfx2(100);
             }
             else if (gpKeySt->repeated & DPAD_DOWN)
             {
                 kind--;
                 if (kind < 0)
                     kind = 4;
-                sub_0803B4DC(100);
+                PlayMusicOrSfx2(100);
             }
             gActiveMap->selectionAnimKind = kind;
             for (i = 0; i < 10; i++)
@@ -599,14 +599,14 @@ void sub_08005F4C(void)
                 kind++;
                 if (kind > 4)
                     kind = 1;
-                sub_0803B4DC(100);
+                PlayMusicOrSfx2(100);
             }
             else if (gpKeySt->repeated & DPAD_DOWN)
             {
                 kind--;
                 if (kind < 1)
                     kind = 4;
-                sub_0803B4DC(100);
+                PlayMusicOrSfx2(100);
             }
             gActiveMap->selectionAnimKind = kind;
             for (i = 0; i < 10; i++)
@@ -707,7 +707,7 @@ void sub_08005F4C(void)
         }
         else
         {
-            sub_080078D4(gActiveMap->selectionAnimKind);
+            DesignRoomSetUnitArmy(gActiveMap->selectionAnimKind);
             sub_08007B74();
         }
         if (frame != 0)
@@ -818,3 +818,4 @@ void sub_08005F4C(void)
         break;
     }
 }
+asm(".global sub_08005F4C\n.thumb_set sub_08005F4C, DesignRoomMode_Ring\n");

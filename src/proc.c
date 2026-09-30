@@ -815,7 +815,7 @@ bool8 ProcCmd_29_0801CF90(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_0803B5A4(p->proc_scrUnk->dataImm);
+    FadeOutMusic(p->proc_scrUnk->dataImm);
     p->proc_scrUnk++;
 
     return TRUE;
@@ -954,7 +954,7 @@ bool8 ProcCmd_1B_0801D0AC(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_0803B524(p->proc_scrUnk->dataImm);
+    PlayMusic(p->proc_scrUnk->dataImm);
     p->proc_scrUnk++;
 
     return TRUE;
@@ -964,7 +964,7 @@ bool8 ProcCmd_1C_0801D0C8(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_0803B4DC(p->proc_scrUnk->dataImm);
+    PlayMusicOrSfx2(p->proc_scrUnk->dataImm);
     p->proc_scrUnk++;
 
     return TRUE;
@@ -974,7 +974,7 @@ bool8 ProcCmd_1D_0801D0E4(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_08013098(p->proc_scrUnk->dataImm, p);
+    StartLockingWipeToBlack(p->proc_scrUnk->dataImm, p);
     p->proc_scrUnk++;
 
     return FALSE;
@@ -984,7 +984,7 @@ bool8 ProcCmd_1E_0801D104(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_080130B0(p->proc_scrUnk->dataImm, p);
+    StartLockingWipeFromBlack(p->proc_scrUnk->dataImm, p);
     p->proc_scrUnk++;
 
     return FALSE;
@@ -994,7 +994,7 @@ bool8 ProcCmd_1F_0801D124(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_08011550(p->proc_scrUnk->dataImm);
+    StartFadeToBlack(p->proc_scrUnk->dataImm);
     p->proc_scrUnk++;
 
     return TRUE;
@@ -1004,7 +1004,7 @@ bool8 ProcCmd_20_0801D140(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_0801156C(p->proc_scrUnk->dataImm);
+    StartFadeFromBlack(p->proc_scrUnk->dataImm);
     p->proc_scrUnk++;
 
     return TRUE;
@@ -1014,7 +1014,7 @@ bool8 ProcCmd_21_0801D15C(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_08011588(p->proc_scrUnk->dataImm);
+    StartFadeToWhite(p->proc_scrUnk->dataImm);
     p->proc_scrUnk++;
 
     return TRUE;
@@ -1024,7 +1024,7 @@ bool8 ProcCmd_22_0801D178(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_080115B4(p->proc_scrUnk->dataImm);
+    StartFadeFromWhite(p->proc_scrUnk->dataImm);
     p->proc_scrUnk++;
 
     return TRUE;
@@ -1034,7 +1034,7 @@ bool8 ProcCmd_23_0801D194(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_080115E0(p->proc_scrUnk->dataImm, p);
+    StartLockingFadeToBlack(p->proc_scrUnk->dataImm, p);
     p->proc_scrUnk++;
 
     return FALSE;
@@ -1044,7 +1044,7 @@ bool8 ProcCmd_24_0801D1B4(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_080115F8(p->proc_scrUnk->dataImm, p);
+    StartLockingFadeFromBlack(p->proc_scrUnk->dataImm, p);
     p->proc_scrUnk++;
 
     return FALSE;
@@ -1054,7 +1054,7 @@ bool8 ProcCmd_25_0801D1D4(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_08011610(p->proc_scrUnk->dataImm, p);
+    StartLockingFadeToWhite(p->proc_scrUnk->dataImm, p);
     p->proc_scrUnk++;
 
     return FALSE;
@@ -1064,7 +1064,7 @@ bool8 ProcCmd_26_0801D1F4(ProcPtr proc)
 {
     struct Proc * p = ((struct Proc *)proc);
 
-    sub_0801163C(p->proc_scrUnk->dataImm, p);
+    StartLockingFadeFromWhite(p->proc_scrUnk->dataImm, p);
     p->proc_scrUnk++;
 
     return FALSE;
@@ -1087,7 +1087,7 @@ bool8 ProcCmd_1A_0801D238(ProcPtr proc)
     struct Proc * p = ((struct Proc *)proc);
     s32 arg_0 = (s32)p->proc_scrUnk->dataPtr;
 
-    if (sub_08015BD0(arg_0) != -1)
+    if (FindSlotScript(arg_0) != -1)
     {
         return FALSE;
     }

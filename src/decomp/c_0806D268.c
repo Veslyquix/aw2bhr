@@ -7,7 +7,7 @@
  * sub_0806D268 @ 0x0806D268, sub_0806D34C @ 0x0806D34C
  */
 
-/* The install half of sub_0806D34C's teardown: seven sub_080152EC(3) objects
+/* The install half of RulesScreenDismissRuleOptions's teardown: seven sub_080152EC(3) objects
  * into gUnknown_08580934->unk54[], each wired up from five parallel
  * seven-entry ROM tables. See the gUnknown_085809B4 comment in
  * include/unknown-globals.h for the tables and for why two of them come
@@ -22,7 +22,7 @@
  * `unk2c = i * 0x20 + 7; unk2a = 0x54 - i * 8;` -- agbcc recomputes both from
  * `i` inside the loop and, with the two registers it frees, force-addrs three
  * more tables that the ROM reaches directly. Probed both ways. */
-void sub_0806D268(void)
+void RulesScreenSpawnRuleOptions(void)
 {
     struct Unk08580934 *g;
     struct Unk08580934_Obj *o;
@@ -56,22 +56,23 @@ void sub_0806D268(void)
     g = gUnknown_08580934;
     g->unk54[4]->unk4b = g->unk16 - g->unk15 + 2;
 }
+asm(".global sub_0806D268\n.thumb_set sub_0806D268, RulesScreenSpawnRuleOptions\n");
 
-/* sub_08064B68's twin -- byte-exact prologue, gate and tail, and the same
+/* MatchSetupDismissRuleOptions's twin -- byte-exact prologue, gate and tail, and the same
  * seven-iteration walk over unk54[]. The only differences are the blob
  * (0x08581E94, reached through the force-addr pool word at 0x0816E194) and the
  * last two stores: a constant 5 into the WORD unk34 and 0 into the word unk30,
- * where sub_08064B68 writes its parameter into the HALFWORD unk3c and 0 into
+ * where MatchSetupDismissRuleOptions writes its parameter into the HALFWORD unk3c and 0 into
  * unk3a. Different members, not the same field spelled differently, and this
  * one takes no parameter. */
-void sub_0806D34C(void)
+void RulesScreenDismissRuleOptions(void)
 {
     struct Unk08580934 *g;
     struct Unk08580934_Obj *o;
     u8 *p;
     int i;
 
-    if (sub_08015BD0((s32)gUnknown_08581E94) != -1)
+    if (FindSlotScript((s32)gUnknown_08581E94) != -1)
     {
         for (i = 0; i <= 6; i++)
         {
@@ -83,6 +84,7 @@ void sub_0806D34C(void)
             o->unk34 = 5;
             o->unk30 = 0;
         }
-        sub_0806377C(gUnknown_08581E94);
+        ClearCallbackOfSlotsRunningScript(gUnknown_08581E94);
     }
 }
+asm(".global sub_0806D34C\n.thumb_set sub_0806D34C, RulesScreenDismissRuleOptions\n");

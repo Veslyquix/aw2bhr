@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080290B0.
- * sub_080290B0 @ 0x080290B0
+ * StartCameraScroll @ 0x080290B0
  */
 
 /* MATCHED -- wave 60 (W60-D).  384/384 bytes.
@@ -24,9 +24,9 @@
  * -- and called the draft "INSTRUCTION-EXACT".  IT WAS NOT.  `s16 dx = 0;` and
  * `s16 dy = 0;` as declaration initialisers make agbcc emit
  *      movs r0,#0 ; mov r8,r0 ; mov sb,r0
- * BEFORE the `bl sub_08022AAC`, where the ROM emits it AFTER.  Writing them as
+ * BEFORE the `bl SetMapCursorPosition`, where the ROM emits it AFTER.  Writing them as
  * plain statements after the call:
- *      sub_08022AAC(a1, a2);
+ *      SetMapCursorPosition(a1, a2);
  *      dx = 0;
  *      dy = 0;
  * moves the initialisation past the call and the entire three-cycle unwinds by
@@ -58,7 +58,7 @@
  * signed use is PROMOTE_MODE on an s16 LOCAL), and `/ 16` rather than `>> 4`.
  */
 
-void sub_080290B0(int a1, int a2, u8 a3)
+void StartCameraScroll(int a1, int a2, u8 a3)
 {
     struct Unk03001470 *proc;
     s16 dx;
@@ -66,7 +66,7 @@ void sub_080290B0(int a1, int a2, u8 a3)
     s16 cx;
     s16 cy;
 
-    sub_08022AAC(a1, a2);
+    SetMapCursorPosition(a1, a2);
 
     dx = 0;
     dy = 0;
@@ -141,3 +141,5 @@ void sub_080290B0(int a1, int a2, u8 a3)
     proc->unk24 = a2 << 4;
     IncrementMapLock();
 }
+
+asm(".global sub_080290B0\n.thumb_set sub_080290B0, StartCameraScroll\n");

@@ -9,11 +9,12 @@
 
 #include "proc.h"
 
-void sub_08035740(void *a)
+void BeginActiveMoveSlidePath(void *a)
 {
     ProcPtr proc;
 
     proc = Proc_Find(ProcScr_SelectUnit);
     if (proc != NULL)
-        sub_08035760(proc, a);
+        BeginMoveSlidePath(proc, a);
 }
+asm(".global sub_08035740\n.thumb_set sub_08035740, BeginActiveMoveSlidePath\n");

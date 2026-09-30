@@ -13,7 +13,7 @@
 
 #include "hardware.h"
 /* The screen-setup half of a 0x0806A054 proc: takes a ticket from
- * sub_080674F4, installs a script, rebuilds the display state, loads the
+ * GetIntroSceneDuration, installs a script, rebuilds the display state, loads the
  * palette and two graphics blobs, resets the four scroll channels and starts
  * the follow-up proc under itself.
  *
@@ -34,25 +34,25 @@ struct Unk0806A054
 
 void IntroT3_0806A055(struct Unk0806A054 *proc)
 {
-    proc->unk2c = sub_080674F4(gUnknown_0202F204++);
-    sub_080670F8(gUnknown_085814A8);
+    proc->unk2c = GetIntroSceneDuration(gUnknown_0202F204++);
+    ApplyBgControlTable(gUnknown_085814A8);
     gDispIo.disp_ct.mode = 0;
     SetDispEnable(0, 1, 1, 1, 1);
     gUnknown_03002B6C.bits.priority = 0;
     gUnknown_0300251C.bits.priority = 1;
     gUnknown_030030B4.bits.priority = 2;
     gUnknown_03001FE8.bits.priority = 3;
-    sub_08012358();
+    SetDefaultColorEffects();
     ApplyPalettes(gUnknown_0822FE50, 1, 5);
     Decompress(gUnknown_0822FEF0, (void *)0x06000000);
     Decompress(gUnknown_0822F9AC, gBG1TilemapBuffer);
-    sub_08013AFC();
-    sub_08069FD0();
-    sub_08072C40(0, 0, 0);
-    sub_08072C40(1, 0, 0);
-    sub_08072C40(2, 0, 0);
-    sub_08072C40(3, 0, 0);
-    sub_080677BC(1, 2, 1, proc);
+    BG_EnableSyncBG1();
+    LoadIntroScreenGraphics();
+    SetBgScrollShadow(0, 0, 0);
+    SetBgScrollShadow(1, 0, 0);
+    SetBgScrollShadow(2, 0, 0);
+    SetBgScrollShadow(3, 0, 0);
+    StartIntroBgScroll(1, 2, 1, proc);
 }
 
 asm(".global sub_0806A054\n.thumb_set sub_0806A054, IntroT3_0806A055\n");

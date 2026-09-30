@@ -10,7 +10,7 @@
 /* The gUnknown_0200B3B4 deferred-copy queue DRAIN, the consumer for the six
  * pushes promoted in src/decomp/c_08011D10.c. It walks the queue backwards --
  * `for (count--; (s16)count >= 0; count--)` -- and dispatches on the tag at
- * +0x0a, then clears the queue with sub_08011C18 and blanks palette entry 0.
+ * +0x0a, then clears the queue with ClearTileRigistry and blanks palette entry 0.
  *
  * BOTH DATA REFS ARE agbcc -fforce-addr ADDRESS CONSTANTS, not globals:
  *   [0x0808E51C] = 0x03002F30 -> gUnknown_03002F30
@@ -31,7 +31,7 @@
  * address into its own pseudo first and re-materialises it for the argument.
  * `fill32` needs no such thing: Thumb `str` addresses sp directly, so no
  * reload is created and the plain local already matches. */
-void sub_08011FF0(void)
+void FlushTiles(void)
 {
     vu16 fill16;
     u32 fill32;
@@ -45,7 +45,7 @@ void sub_08011FF0(void)
         {
         case 0:
         case 1:
-            sub_08011C68((const void *)gUnknown_0200B3B4[(s16)gUnknown_03002F30].unk00,
+            CpuCopyAuto((const void *)gUnknown_0200B3B4[(s16)gUnknown_03002F30].unk00,
                          (void *)gUnknown_0200B3B4[(s16)gUnknown_03002F30].unk04,
                          gUnknown_0200B3B4[(s16)gUnknown_03002F30].unk08);
             break;
@@ -71,6 +71,7 @@ void sub_08011FF0(void)
         }
     }
 
-    sub_08011C18();
+    ClearTileRigistry();
     *(vu16 *)0x05000000 = 0;
 }
+asm(".global sub_08011FF0\n.thumb_set sub_08011FF0, FlushTiles\n");

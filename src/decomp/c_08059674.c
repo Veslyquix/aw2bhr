@@ -9,12 +9,12 @@
  */
 
 /* K&R declaration, deliberately file-local and deliberately without a
- * parameter list. sub_0805A8C0's definition takes `u16` parameters and narrows
+ * parameter list. AiIsNearEnemyHq's definition takes `u16` parameters and narrows
  * them itself in its prologue; this caller passes values it has just
  * sign-extended, with no conversion instruction before the `bl`. A prototyped
  * declaration in unknown-functions.h cannot satisfy both -- see the note there
  * for the four measurements. */
-int sub_0805A8C0();
+int AiIsNearEnemyHq();
 struct Unk0805DFF4Rec
 {
     /* 0x00 */ u8 filler_00[0x09];
@@ -23,7 +23,7 @@ struct Unk0805DFF4Rec
                u8 unk09_6 : 2;
 };
 
-u8 sub_08059674(s16 x, s16 y)
+u8 AiIsSettleCellOk(s16 x, s16 y)
 {
     if (gMap->unit[
             gMap->rowOffset[y] + x]
@@ -31,7 +31,7 @@ u8 sub_08059674(s16 x, s16 y)
         && gMap->unit[
             gMap->rowOffset[y] + x] != 0)
         return 0;
-    if ((u8)sub_0805C988(x, y))
+    if ((u8)AiIsOnLaserLine(x, y))
         return 0;
     if (gUnknown_085767D5[gMap->terrain[
             gMap->rowOffset[y] + x] & 0x1f] == 0)
@@ -45,7 +45,7 @@ u8 sub_08059674(s16 x, s16 y)
             return 0;
         if (gUnknown_030040D8->unk00 <= 2)
             return 1;
-        if ((u8)sub_0805A8C0(x, y) == 1)
+        if ((u8)AiIsNearEnemyHq(x, y) == 1)
             return 1;
         return 0;
     }
@@ -60,98 +60,103 @@ u8 sub_08059674(s16 x, s16 y)
         return 0;
     return 1;
 }
+asm(".global sub_08059674\n.thumb_set sub_08059674, AiIsSettleCellOk\n");
 
-void sub_08059760(void)
+void AiDeliberateApcPickup(void)
 {
     union Unk802C57CBuf v;
 
-    sub_0801F92C(gMap->danger);
+    SetWorkingMapPlane(gMap->danger);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, -1);
-    sub_0801FD9C(0x79);
+    MapMarkHalo(0x79);
     v.pos.unk00 = 0x270F;
     sub_0805A9AC(0, &v);
     if (v.pos.unk00 != 0x270F)
     {
-        sub_080591E4(&v);
+        AiAdvanceToward(&v);
     }
     else
     {
         if (gUnknown_03004784[1] > (u8)(gUnknown_030040D8->unk07[3] % 100))
-            sub_0805F914();
+            AiRetreat();
         if (gUnknown_03004784[0] > (u8)(gUnknown_030040D8->unk07[3] % 100)
-            || sub_0804415C(gUnknown_030033EC))
-            sub_0805E718();
+            || IsCoPowerActive(gUnknown_030033EC))
+            AiTryAttack();
     }
-    sub_0805F7B8();
+    AiFallbackMove();
 }
+asm(".global sub_08059760\n.thumb_set sub_08059760, AiDeliberateApcPickup\n");
 
-void sub_08059824(void)
+void AiDeliberateTCopterPickup(void)
 {
     union Unk802C57CBuf v;
 
-    sub_0801F92C(gMap->danger);
+    SetWorkingMapPlane(gMap->danger);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
-    sub_0801FD9C(0x79);
+    MapMarkHalo(0x79);
     v.pos.unk00 = 0x270F;
     sub_0805A9AC(1, &v);
     if (v.pos.unk00 != 0x270F)
     {
-        sub_080591E4(&v);
+        AiAdvanceToward(&v);
     }
     else
     {
         if (gUnknown_03004784[1] > (u8)(gUnknown_030040D8->unk07[3] % 100))
-            sub_0805F914();
+            AiRetreat();
     }
-    sub_0805EB58();
+    AiMoveToNearestNonTeamCell();
 }
+asm(".global sub_08059824\n.thumb_set sub_08059824, AiDeliberateTCopterPickup\n");
 
-void sub_080598BC(void)
+void AiDeliberateApcDeliver(void)
 {
     union Unk802C57CBuf v;
     struct Unk03003338 *p;
     int q;
 
     p = gUnknown_03003F20;
-    sub_0805DCD4();
-    sub_0801F92C(gMap->move);
+    AiDeliberateDrop();
+    SetWorkingMapPlane(gMap->move);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
-    sub_08059A0C(p);
+    AiListEnemyPropertyCells(p);
     q = CountUnitsWithTypeTag(1);
     v.pos.unk00 = 0x270F;
-    sub_08059B4C(q, gUnknown_085766E0->unk04[7], 0, p, &v);
+    AiAllocateTerritoryTarget(q, gUnknown_085766E0->unk04[7], 0, p, &v);
     if (v.pos.unk00 != 0x270F)
     {
-        sub_080591E4(&v);
+        AiAdvanceToward(&v);
     }
     else if (gUnknown_030046B8 == 2)
     {
         ((struct Unk0805DFF4Rec *)gUnknown_030040D8)->unk09_3 = 3;
-        sub_0805FB70();
-        sub_0805F4F8();
+        AiBoardTransport();
+        AiEmbarkOrFallback();
     }
-    sub_0805F7B8();
+    AiFallbackMove();
 }
+asm(".global sub_080598BC\n.thumb_set sub_080598BC, AiDeliberateApcDeliver\n");
 
-void sub_08059978(void)
+void AiDeliberateTCopterDeliver(void)
 {
     union Unk802C57CBuf v;
     struct Unk03003338 *p;
     int q;
 
     p = gUnknown_03003F20;
-    sub_0805DCD4();
-    sub_0801F92C(gMap->move);
+    AiDeliberateDrop();
+    SetWorkingMapPlane(gMap->move);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, 0x78, 0);
-    sub_08059A0C(p);
+    AiListEnemyPropertyCells(p);
     q = CountUnitsWithTypeTag(1);
     v.pos.unk00 = 0x270F;
-    sub_08059B4C(q, gUnknown_085766E0->unk04[6], 0, p, &v);
+    AiAllocateTerritoryTarget(q, gUnknown_085766E0->unk04[6], 0, p, &v);
     if (v.pos.unk00 == 0x270F)
-        sub_0805F7B8();
-    sub_080591E4(&v);
+        AiFallbackMove();
+    AiAdvanceToward(&v);
 }
+asm(".global sub_08059978\n.thumb_set sub_08059978, AiDeliberateTCopterDeliver\n");

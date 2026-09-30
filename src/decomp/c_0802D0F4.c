@@ -8,7 +8,7 @@
  */
 
 /* The same frame-entry shape as c_0802CFFC.c -- open with LockUnitSelection and
- * sub_0801A168, close with the sub_0802C57C / sub_080424FC / sub_0802C594
+ * CloseTopMenu, close with the BackupUnitStartPosition / CommitUnitMove / RestoreUnitStartPosition
  * bracket -- with a different middle and one extra call (sub_08042998) in the
  * tail.
  *
@@ -28,10 +28,10 @@
  * `struct Unit **` holding &gUnknown_030040D8).
  *
  * MATCHED first draft. */
-void sub_0802D0F4(void)
+void UnitMenu_Join(void)
 {
     LockUnitSelection();
-    sub_0801A168();
+    CloseTopMenu();
 
     if (gPlaySt.savingEnabled != 0)
     {
@@ -42,11 +42,12 @@ void sub_0802D0F4(void)
         }
 
         if (gPlaySt.savingEnabled != 0)
-            sub_08034534(0xa, gUnknown_03003F38, 0, 0);
+            SendActionCommand(0xa, gUnknown_03003F38, 0, 0);
     }
 
-    sub_0802C57C();
+    BackupUnitStartPosition();
     sub_08042998();
-    sub_080424FC();
-    sub_0802C594();
+    CommitUnitMove();
+    RestoreUnitStartPosition();
 }
+asm(".global sub_0802D0F4\n.thumb_set sub_0802D0F4, UnitMenu_Join\n");

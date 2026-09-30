@@ -4,10 +4,10 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803A460.
- * sub_0803A460 @ 0x0803A460
+ * UnitInfoPanel_Init @ 0x0803A460
  */
 
-/* MATCHED, and the first of a byte-identical pair with sub_08047094. Clears
+/* MATCHED, and the first of a byte-identical pair with TerrainInfoWindow_OnEnd. Clears
  * 0x400 halfwords through the gBG0TilemapBuffer pointer and restarts four
  * subsystems.
  *
@@ -17,18 +17,19 @@
  * re-loaded (`ldr r2,[r5]`) on every iteration, so the global is not bound to a
  * local.
  *
- * THE SECOND CALL IS `sub_0801A538(0, 0, 0, 0)`, and finding that is worth more
- * than this function: sub_0801A538 was promoted as `void (void)` and takes FOUR
+ * THE SECOND CALL IS `DisableWindow0AndResetMapLayers(0, 0, 0, 0)`, and finding that is worth more
+ * than this function: DisableWindow0AndResetMapLayers was promoted as `void (void)` and takes FOUR
  * parameters. See the correction in include/unknown-functions.h. */
-void sub_0803A460(void)
+void UnitInfoPanel_Init(void)
 {
     s16 i;
 
     for (i = 0; i <= 0x3FF; i++)
         gBG0TilemapBuffer[i] = 0;
 
-    sub_08013AEC();
-    sub_0801A538(0, 0, 0, 0);
-    sub_08022580();
-    sub_080227A8();
+    BG_EnableSyncBG0();
+    DisableWindow0AndResetMapLayers(0, 0, 0, 0);
+    RedrawUnitLayer();
+    RedrawUnitIconLayer();
 }
+asm(".global sub_0803A460\n.thumb_set sub_0803A460, UnitInfoPanel_Init\n");

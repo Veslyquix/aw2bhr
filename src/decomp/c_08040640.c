@@ -10,7 +10,7 @@
 
 #include "proc.h"
 /* Redraws the 13-cell diamond around (unk2c, unk30) and then re-places the
- * cursor sprite. Thirteen independent sub_08026100 calls, in the ROM's order:
+ * cursor sprite. Thirteen independent DamageUnitAtCell calls, in the ROM's order:
  * the row offsets run -2, -1, 0, +1, +2 and the column offsets fan out inside
  * each row, which is the source's order and the only thing to get right here.
  *
@@ -34,25 +34,25 @@ struct Unk40640Proc
 
 void ApplySiloDamage(struct Unk40640Proc *proc)
 {
-    sub_08026100(proc->unk2c,     proc->unk30 - 2, proc->unk44);
-    sub_08026100(proc->unk2c - 1, proc->unk30 - 1, proc->unk44);
-    sub_08026100(proc->unk2c,     proc->unk30 - 1, proc->unk44);
-    sub_08026100(proc->unk2c + 1, proc->unk30 - 1, proc->unk44);
-    sub_08026100(proc->unk2c - 2, proc->unk30,     proc->unk44);
-    sub_08026100(proc->unk2c - 1, proc->unk30,     proc->unk44);
-    sub_08026100(proc->unk2c,     proc->unk30,     proc->unk44);
-    sub_08026100(proc->unk2c + 1, proc->unk30,     proc->unk44);
-    sub_08026100(proc->unk2c + 2, proc->unk30,     proc->unk44);
-    sub_08026100(proc->unk2c - 1, proc->unk30 + 1, proc->unk44);
-    sub_08026100(proc->unk2c,     proc->unk30 + 1, proc->unk44);
-    sub_08026100(proc->unk2c + 1, proc->unk30 + 1, proc->unk44);
-    sub_08026100(proc->unk2c,     proc->unk30 + 2, proc->unk44);
-    sub_08024268();
-    sub_0801C70C(gUnknown_08111D94,
+    DamageUnitAtCell(proc->unk2c,     proc->unk30 - 2, proc->unk44);
+    DamageUnitAtCell(proc->unk2c - 1, proc->unk30 - 1, proc->unk44);
+    DamageUnitAtCell(proc->unk2c,     proc->unk30 - 1, proc->unk44);
+    DamageUnitAtCell(proc->unk2c + 1, proc->unk30 - 1, proc->unk44);
+    DamageUnitAtCell(proc->unk2c - 2, proc->unk30,     proc->unk44);
+    DamageUnitAtCell(proc->unk2c - 1, proc->unk30,     proc->unk44);
+    DamageUnitAtCell(proc->unk2c,     proc->unk30,     proc->unk44);
+    DamageUnitAtCell(proc->unk2c + 1, proc->unk30,     proc->unk44);
+    DamageUnitAtCell(proc->unk2c + 2, proc->unk30,     proc->unk44);
+    DamageUnitAtCell(proc->unk2c - 1, proc->unk30 + 1, proc->unk44);
+    DamageUnitAtCell(proc->unk2c,     proc->unk30 + 1, proc->unk44);
+    DamageUnitAtCell(proc->unk2c + 1, proc->unk30 + 1, proc->unk44);
+    DamageUnitAtCell(proc->unk2c,     proc->unk30 + 2, proc->unk44);
+    RebuildMapUnitLayers2();
+    APProc_Create(gUnknown_08111D94,
                  proc->unk54 - gMap->scrollX,
                  proc->unk58 - gMap->scrollY,
                  proc->unk4a, 3, 1);
-    sub_0803B4DC(0x1C7);
+    PlayMusicOrSfx2(0x1C7);
 }
 
 asm(".global sub_08040640\n.thumb_set sub_08040640, ApplySiloDamage\n");

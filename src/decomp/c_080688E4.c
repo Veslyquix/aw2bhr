@@ -33,24 +33,24 @@ void IntroT3_080688E5(struct Unk080688E4 *proc)
 {
     u32 zero;
 
-    proc->unk2c = sub_080674F4(gUnknown_0202F204++);
+    proc->unk2c = GetIntroSceneDuration(gUnknown_0202F204++);
     gDispIo.disp_ct.mode = 1;
     SetDispEnable(1, 1, 0, 0, 1);
     gUnknown_030030B4.bits.priority = 0;
     gUnknown_03001FE8.bits.priority = 1;
     gUnknown_03002B6C.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
-    sub_08063994();
-    sub_08012C30((struct Unk8012C30 *)&gUnknown_030030B4, 0x06008000);
-    sub_08012C1C((struct Unk8012C30 *)&gUnknown_030030B4, 0x0600F000);
-    sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 1);
+    ResetBgAffineToScreenCentre();
+    SetBgCntChrBlock((struct Unk8012C30 *)&gUnknown_030030B4, 0x06008000);
+    SetBgCntTilemapBlock((struct Unk8012C30 *)&gUnknown_030030B4, 0x0600F000);
+    SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_030030B4, 1);
     zero = 0;
     CpuFastSet(&zero, (void *)0x0600F000, 0x01000100);
     gUnknown_030030B4.bits.wrap = 0;
     Decompress(gUnknown_0817DA38, (void *)0x06008000);
     Decompress(gUnknown_0817E208, gBG2TilemapBuffer);
-    sub_08013B0C();
-    sub_08067898(0xC00, -0x28, 0, proc);
+    BG_EnableSyncBG2();
+    StartIntroBgZoom(0xC00, -0x28, 0, proc);
     proc->unk30 = 0;
     proc->unk34 = 0;
 }

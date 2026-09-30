@@ -11,19 +11,21 @@
 
 /* The FIRST parameter is dead: the body saves r1 into r4 and never reads r0
  * at all. It is kept because both of this pair's siblings in the block
- * (sub_08037FB4 below it, and the sub_080115E0 family) are `(int, ProcPtr)`
+ * (StartDefeatFlow below it, and the StartLockingFadeToBlack family) are `(int, ProcPtr)`
  * proc starters, and dropping it would leave callers passing an argument the
  * prototype does not declare. */
-void sub_08037F94(int a, ProcPtr parent)
+void StartVictoryFlow(int a, ProcPtr parent)
 {
-    sub_0801237C();
-    sub_08012358();
+    ResetWindowShadows();
+    SetDefaultColorEffects();
     Proc_StartBlocking(gUnknown_08615CB0, parent);
 }
+asm(".global sub_08037F94\n.thumb_set sub_08037F94, StartVictoryFlow\n");
 
-void sub_08037FB4(ProcPtr parent)
+void StartDefeatFlow(ProcPtr parent)
 {
-    sub_0801237C();
-    sub_08012358();
-    sub_08049F08(1, parent);
+    ResetWindowShadows();
+    SetDefaultColorEffects();
+    StartDefeatFlowProc(1, parent);
 }
+asm(".global sub_08037FB4\n.thumb_set sub_08037FB4, StartDefeatFlow\n");

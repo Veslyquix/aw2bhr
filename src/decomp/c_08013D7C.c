@@ -17,7 +17,7 @@
  * (pos * 2 + tilemap)`, operand order the ROM has, and a local reverses it and
  * shifts the allocation of the whole Shift-JIS branch. The same holds for the
  * table read, `tbl[idx]` / `(tbl + idx)[k]`. */
-void sub_08013D7C(int x, int y, u16 *tilemap, u8 *s, u16 attr)
+void DrawShiftJisText(int x, int y, u16 *tilemap, u8 *s, u16 attr)
 {
     struct Unit *e;
     u16 *tbl;
@@ -49,7 +49,7 @@ void sub_08013D7C(int x, int y, u16 *tilemap, u8 *s, u16 attr)
                 n = Div(e->hp - 1, 10) + 1;
             else
                 n = 0;
-            sub_0802216C(tilemap + (x + i) + y * 32, e->type,
+            WriteUnitTileQuad(tilemap + (x + i) + y * 32, e->type,
                          gUnknown_03003F2C, e->unk07, 0, n, 0, 0);
             i += 2;
             s += 2;
@@ -62,7 +62,7 @@ void sub_08013D7C(int x, int y, u16 *tilemap, u8 *s, u16 attr)
                 n = Div(e->hp - 1, 10) + 1;
             else
                 n = 0;
-            sub_0802216C(tilemap + (x + i) + y * 32, e->type,
+            WriteUnitTileQuad(tilemap + (x + i) + y * 32, e->type,
                          gUnknown_03003F2C, e->unk07, 0, n, 0, 0);
             i += 2;
             s += 2;
@@ -115,3 +115,4 @@ void sub_08013D7C(int x, int y, u16 *tilemap, u8 *s, u16 attr)
         i++;
     }
 }
+asm(".global sub_08013D7C\n.thumb_set sub_08013D7C, DrawShiftJisText\n");

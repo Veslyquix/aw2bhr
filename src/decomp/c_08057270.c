@@ -7,7 +7,7 @@
  * sub_08057270 @ 0x08057270
  */
 
-/* sub_08057270 @ 0x08057270 */
+/* SetUpBattleAnimDisplay @ 0x08057270 */
 
 #include "hardware.h"
 
@@ -23,17 +23,17 @@
  * has on each of them (hardware.h's own note on BgCntBuf predicts this).
  *
  * gUnknown_03004504's byte is loaded ONCE for the bit0/bit7 pair and then
- * RELOADED after sub_0801237C for the bit0/bit2/bit3 tree, which is the
+ * RELOADED after ResetWindowShadows for the bit0/bit2/bit3 tree, which is the
  * ordinary "non-const memory is dropped at every bl" reload and not a volatile
  * tell. The two `orrs` per byte of gUnknown_030030A4 are separate 1-bit field
  * writes; a scalar `|= 3` would fold to one.
  */
-void sub_08057270(void)
+void SetUpBattleAnimDisplay(void)
 {
     *(u16 *)&gDispIo.disp_ct = 0x7F60;
     *(u16 *)&gUnknown_03002B6C = 0x400;
     *(u16 *)&gUnknown_03001FE8 = 0x505;
-    sub_0805741C(gUnknown_0300450C);
+    SetBg2Bg3ControlBySide(gUnknown_0300450C);
 
     if (!gUnknown_03004504.bit0)
     {
@@ -53,7 +53,7 @@ void sub_08057270(void)
     gUnknown_03001400 = 0;
     gUnknown_0300200C = 0;
 
-    sub_0801237C();
+    ResetWindowShadows();
 
     gDispIo.disp_ct.win0_enable = 1;
     gDispIo.disp_ct.win1_enable = 1;
@@ -91,13 +91,14 @@ void sub_08057270(void)
         }
         else
         {
-            sub_080573F0();
+            EnableBattleAnimWindowLayers();
         }
     }
     else
     {
-        sub_080573F0();
+        EnableBattleAnimWindowLayers();
     }
 
-    sub_080128D0();
+    FlushLCDControl();
 }
+asm(".global sub_08057270\n.thumb_set sub_08057270, SetUpBattleAnimDisplay\n");

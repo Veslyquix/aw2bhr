@@ -9,8 +9,8 @@
  */
 
 /* Byte-identical duplicate of sub_0802D558 (gUnknown_0849AE28), and the
- * four-argument sibling of sub_0802D4B0 / sub_0802D504. */
-void sub_0802D458(void)
+ * four-argument sibling of OpenOptionsMenu / OpenIntelMenu. */
+void OpenMapMenu(void)
 {
     u16 v;
 
@@ -19,7 +19,8 @@ void sub_0802D458(void)
     if (gUnknown_030033E4.unk00 - gMap->scrollX / 16 <= 6)
         v = 0x14;
 
-    sub_08024268();
-    sub_0801A104(gUnknown_0849AAC0, v, 1, 1);
+    RebuildMapUnitLayers2();
+    CreateRootMenuWithSfx(gUnknown_0849AAC0, v, 1, 1);
     IncrementMapLock();
 }
+asm(".global sub_0802D458\n.thumb_set sub_0802D458, OpenMapMenu\n");

@@ -7,13 +7,6 @@
  * sub_080763B0 @ 0x080763B0
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080763B0.
- * sub_080763B0 @ 0x080763B0
- */
-
 #include "proc.h"
 
 /* One of family F000's 16-byte forwarders: `push {lr}; ldr r0,=script;
@@ -23,7 +16,8 @@
  * include/unknown-globals.h.
  */
 
-void sub_080763B0(void)
+void EndWorldMapNationPanel(void)
 {
     Proc_EndEach(ProcScr_WM_Listener);
 }
+asm(".global sub_080763B0\n.thumb_set sub_080763B0, EndWorldMapNationPanel\n");

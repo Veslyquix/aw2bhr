@@ -14,7 +14,7 @@ struct Unk32698Proc
     /* 0x58 */ int unk58;
 };
 
-void sub_08032698(ProcPtr parent)
+void LinkStartMapTransfer(ProcPtr parent)
 {
     struct Unk32698Proc *proc;
 
@@ -22,7 +22,7 @@ void sub_08032698(ProcPtr parent)
 
     if (gUnknown_0849B060->unk09 == gUnknown_0849B018->unk06)
     {
-        sub_0801AC58(gUnknown_0849B060->unk08 + 5, gUnknown_02000000);
+        ReadSaveSlot(gUnknown_0849B060->unk08 + 5, gUnknown_02000000);
         proc = Proc_StartBlocking(gUnknown_0849B868, parent);
     }
     else
@@ -32,3 +32,4 @@ void sub_08032698(ProcPtr parent)
 
     proc->unk58 = gUnknown_0849B060->unk08;
 }
+asm(".global sub_08032698\n.thumb_set sub_08032698, LinkStartMapTransfer\n");

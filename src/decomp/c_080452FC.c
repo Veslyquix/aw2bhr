@@ -27,13 +27,13 @@ struct Unk45358Proc
     /* 0x50 */ u16 *unk50;
 };
 
-void sub_080452FC(struct Unk452FC *proc)
+void CoPowerUnitSparkle_Loop(struct Unk452FC *proc)
 {
     u8 x;
     u8 y;
     u8 flag;
 
-    if (sub_08015BD0((s32)gUnknown_0849A00C) == -1)
+    if (FindSlotScript((s32)gUnknown_0849A00C) == -1)
     {
         x = proc->unk3c;
         y = proc->unk40;
@@ -42,18 +42,20 @@ void sub_080452FC(struct Unk452FC *proc)
         if (gPlayers[proc->unk2c].coActivationMode == 2)
             flag = 1;
 
-        AnimateUnitCreation(x, y, flag);
+        StartUnitSparkleEffect(x, y, flag);
         Proc_Break(proc);
     }
 }
+asm(".global sub_080452FC\n.thumb_set sub_080452FC, CoPowerUnitSparkle_Loop\n");
 
 /* `gUnknown_03002B6C.bits.chr_block * 0x4000` is the promoted c_08013C00.c
  * idiom; only the base differs (0x06005600 rather than 0x06000000). */
-void sub_08045358(struct Unk45358Proc *proc)
+void CoPowerOverlay_Init(struct Unk45358Proc *proc)
 {
     Decompress(gUnknown_08112704, (void *)(gUnknown_03002B6C.bits.chr_block * 0x4000 + 0x06005600));
     Decompress(proc->unk4c, gBG0TilemapBuffer);
-    sub_08012B00(gBG0TilemapBuffer, 0x800, 0x82b0);
+    AddToHalfwords(gBG0TilemapBuffer, 0x800, 0x82b0);
     ApplyPaletteExt(proc->unk50, 0x100, 0x20);
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_08045358\n.thumb_set sub_08045358, CoPowerOverlay_Init\n");

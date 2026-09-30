@@ -9,7 +9,7 @@
 
 #include "proc.h"
 /* Picks one of eight animation frames for the actor and hands it to
- * sub_08014668, bracketed by sub_08013C00 / sub_08013AEC. The selector starts as
+ * StartTextBoxViaRecord, bracketed by ClearBg0Tilemap / BG_EnableSyncBG0. The selector starts as
  * the phase DivRem(unk52, 6) and is then overridden to 6 or 7 by two independent
  * state tests, each of which re-reads unk52 -- the third read recomputes the
  * member ADDRESS (`adds r0, r6, #0; adds r0, #0x52`) where the first two share
@@ -28,28 +28,29 @@ struct Unk8084600
 
 /* The first call is genuinely peeled out of the loop: the loop counter starts
  * at 0x10 and the index 0 case has to happen too, so the source runs
- * sub_08071B0C(0, ...) before the `for (i = 0x10; i <= 0x1d; i++)` rather
+ * StartPalFadeToWhite(0, ...) before the `for (i = 0x10; i <= 0x1d; i++)` rather
  * than special-casing inside it. Matched off the first probe. */
 
 void sub_08084580(ProcPtr proc)
 {
     int i;
 
-    sub_08071B0C(0, 0x10, proc);
+    StartPalFadeToWhite(0, 0x10, proc);
 
     for (i = 0x10; i <= 0x1d; i++)
-        sub_08071B0C(i, 0x10, proc);
+        StartPalFadeToWhite(i, 0x10, proc);
 }
 
 /* gUnknown_08616AC0 is an array of two-pointer records; see the evidence
  * comment on it in include/unknown-globals.h. This one takes member 0. */
 
-void sub_080845A8(int i)
+void LoadMainMenuCentreTileGraphic(int i)
 {
     Decompress(gUnknown_08616AC0[i][0], (void *)0x06013300);
 }
+asm(".global sub_080845A8\n.thumb_set sub_080845A8, LoadMainMenuCentreTileGraphic\n");
 
-/* Member 1 of the same two-pointer record sub_080845A8 reads member 0 of, and
+/* Member 1 of the same two-pointer record LoadMainMenuCentreTileGraphic reads member 0 of, and
  * the destination is per-index: 1 KB of VRAM each, so entry i lands at
  * 0x06013B00 + i * 0x400. The `adds r0, #4` on the pool word rather than a
  * displacement in the `ldr` is what the record type buys -- a flat pointer
@@ -62,21 +63,23 @@ void sub_080845A8(int i)
  * promoted definitions could not see it and the CALLER is the only witness.
  * Both functions still match byte-for-byte with the parameter added. */
 
-void sub_080845C4(int i, int a2)
+void LoadMainMenuSideTileGraphic(int i, int a2)
 {
     Decompress(gUnknown_08616AC0[i][1], (void *)(0x06013B00 + (i << 0xa)));
 }
+asm(".global sub_080845C4\n.thumb_set sub_080845C4, LoadMainMenuSideTileGraphic\n");
 
-void sub_080845E8(int a1, int a2)
+void LoadMainMenuLabelPlateGraphic(int a1, int a2)
 {
     Decompress(gUnknown_0823D980, (void *)0x06015300);
 }
+asm(".global sub_080845E8\n.thumb_set sub_080845E8, LoadMainMenuLabelPlateGraphic\n");
 
-void sub_08084600(struct Unk8084600 *p)
+void MainMenuCarousel_DrawDescriptionText(struct Unk8084600 *p)
 {
     int i;
 
-    sub_08013C00();
+    ClearBg0Tilemap();
 
     i = DivRem(p->unk52, 6);
 
@@ -87,9 +90,10 @@ void sub_08084600(struct Unk8084600 *p)
         i = 7;
 
     if (gUnknown_0300591C[1] == 0)
-        sub_08014668(0, 0x12, gBG0TilemapBuffer, gUnknown_08616FA4[i], 0x8000, 0x40);
+        StartTextBoxViaRecord(0, 0x12, gBG0TilemapBuffer, gUnknown_08616FA4[i], 0x8000, 0x40);
     else
-        sub_08014668(0, 0x12, gBG0TilemapBuffer, gUnknown_08616FB4[i * 2 + DivRem(p->unk66, 2)], 0x8000, 0x40);
+        StartTextBoxViaRecord(0, 0x12, gBG0TilemapBuffer, gUnknown_08616FB4[i * 2 + DivRem(p->unk66, 2)], 0x8000, 0x40);
 
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_08084600\n.thumb_set sub_08084600, MainMenuCarousel_DrawDescriptionText\n");

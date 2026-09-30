@@ -13,14 +13,14 @@
  * 0x1ff and an `ands` instead. */
 void sub_0802BB74(u16 a1, u16 a2)
 {
-    sub_0801BD00(a1 & 0x1ff, a2 | 0x400, gUnknown_0849A3B8, 0x1c);
+    PutOamHi(a1 & 0x1ff, a2 | 0x400, gUnknown_0849A3B8, 0x1c);
 }
 
 /* gUnknown_08090BC0 and gUnknown_08090BC4 are agbcc address words, not globals
  * -- the ROM holds 0x030033E4 and 0x03003130 at those two addresses, and naming
  * the objects directly reproduces the three-level read exactly. See the note in
  * include/unknown-globals.h. */
-void sub_0802BB98(void)
+void InitCursorInfoPanelPosition(void)
 {
     if (gUnknown_030033E4.unk00 <= 7)
     {
@@ -37,3 +37,4 @@ void sub_0802BB98(void)
     gUnknown_03003130.unk10 = gUnknown_030033E4.unk00;
     gUnknown_03003130.unk11 = gUnknown_030033E4.unk02;
 }
+asm(".global sub_0802BB98\n.thumb_set sub_0802BB98, InitCursorInfoPanelPosition\n");

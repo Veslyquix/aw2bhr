@@ -15,7 +15,7 @@ struct Unk33470Proc
     /* 0x64 */ s16 unk64;
 };
 
-void sub_08033470(struct Unk33470Proc *proc)
+void LinkMultiboot_SendImageThenBoot(struct Unk33470Proc *proc)
 {
     vu32 *dma;
     u32 fill;
@@ -26,12 +26,12 @@ void sub_08033470(struct Unk33470Proc *proc)
 
     if (proc->unk64 == 1)
     {
-        sub_08063454((struct Unk08062FB8 *)gUnknown_03003F70,
+        MultiBootStartMaster((struct Unk08062FB8 *)gUnknown_03003F70,
             (int)(gUnknown_030032DC + 0xc0), gUnknown_03003F28 - 0xc0, 4, 1);
         proc->unk64 = 2;
     }
 
-    sub_08062FF4(gUnknown_03003F70);
+    MultiBootMain(gUnknown_03003F70);
 
     if (sub_08063518((struct Unk08062FB8 *)gUnknown_03003F70))
     {
@@ -59,3 +59,4 @@ void sub_08033470(struct Unk33470Proc *proc)
         Proc_Break(proc);
     }
 }
+asm(".global sub_08033470\n.thumb_set sub_08033470, LinkMultiboot_SendImageThenBoot\n");

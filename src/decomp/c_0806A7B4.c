@@ -65,7 +65,7 @@ struct Unk6A8E4Proc
     /* 0x60 */ u16 unk60;
 };
 
-void sub_0806A7B4(struct Unk6A7B4Proc *proc)
+void MeteorImpact_FallLoop(struct Unk6A7B4Proc *proc)
 {
     proc->unk40 += proc->unk48;
     proc->unk44 += proc->unk4c;
@@ -78,7 +78,7 @@ void sub_0806A7B4(struct Unk6A7B4Proc *proc)
         Div(COS_Q12(0) * 16, proc->unk58 != 0 ? proc->unk58 : 2));
 
     if ((proc->unk44 >> 12) > -0x40)
-        sub_0801BD00(((proc->unk40 >> 12) + 0x200) & 0x1FF,
+        PutOamHi(((proc->unk40 >> 12) + 0x200) & 0x1FF,
             ((proc->unk44 >> 12) + 0x100) & 0xFF, gUnknown_085815C0, 0);
 
     gUnknown_0300060C = proc->unk38 >> 12;
@@ -93,8 +93,9 @@ void sub_0806A7B4(struct Unk6A7B4Proc *proc)
         Proc_Break(proc);
     }
 }
+asm(".global sub_0806A7B4\n.thumb_set sub_0806A7B4, MeteorImpact_FallLoop\n");
 
-void sub_0806A8E4(struct Unk6A8E4Proc *proc)
+void MeteorImpact_ShakeLoop(struct Unk6A8E4Proc *proc)
 {
     int x;
     int y;
@@ -125,8 +126,8 @@ void sub_0806A8E4(struct Unk6A8E4Proc *proc)
         map->scrollX = proc->unk5e + x;
         map->scrollY = proc->unk60 + y;
 
-        sub_08023860();
-        sub_0801237C();
+        UpdateMapBgScroll();
+        ResetWindowShadows();
 
         gDispIo.disp_ct.win0_enable = 1;
 
@@ -166,6 +167,7 @@ void sub_0806A8E4(struct Unk6A8E4Proc *proc)
     gUnknown_0300060C = proc->unk40 >> 12;
     gUnknown_0202F210 = proc->unk44 >> 12;
 
-    sub_0801BD00((gUnknown_0300060C + 0x200) & 0x1FF,
+    PutOamHi((gUnknown_0300060C + 0x200) & 0x1FF,
         (gUnknown_0202F210 + 0x100) & 0xFF, gUnknown_085815C0, 0);
 }
+asm(".global sub_0806A8E4\n.thumb_set sub_0806A8E4, MeteorImpact_ShakeLoop\n");

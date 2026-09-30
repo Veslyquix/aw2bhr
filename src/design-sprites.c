@@ -20,7 +20,7 @@ void sub_080032EC(int a1, int a2, int a3)
     switch (gActiveMap->armyPanelAffineState[a1])
     {
     case 0:
-        if (sub_0800C6E8(kind[a1], &o1, &o2) != 0)
+        if (GetArmyHq(kind[a1], &o1, &o2) != 0)
         {
             gActiveMap->armyPanelAffineState[a1] = 0xA;
             gActiveMap->armyPanelScale[a1] = 5;
@@ -42,7 +42,7 @@ void sub_080032EC(int a1, int a2, int a3)
         gActiveMap->armyPanelScale[a1] = s;
         break;
     case 0x14:
-        if (sub_0800C6E8(kind[a1], &o1, &o2) == 0)
+        if (GetArmyHq(kind[a1], &o1, &o2) == 0)
         {
             gActiveMap->armyPanelAffineState[a1] = 0x1E;
             gActiveMap->armyPanelAngle[a1] = 0;
@@ -120,7 +120,7 @@ void sub_080035C8(void)
         "and r0, r1\n\t"
         "mov r1, r4\n\t"
         "mov r2, r5\n\t"
-        "bl sub_0801BD00\n\t"
+        "bl PutOamHi\n\t"
         "movs r0, #17\n\t"
         "add r8, r0\n\t"
         "cmp r6, #3\n\t"

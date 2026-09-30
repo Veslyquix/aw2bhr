@@ -8,13 +8,13 @@
  */
 
 /* One of four whole-list sweeps over the gUnknown_0200E438 slot array. The
- * bound is gUnknown_03003034, the high-water mark sub_0801DC50 maintains; it is
+ * bound is gUnknown_03003034, the high-water mark InitSpriteScriptFromTable maintains; it is
  * re-read every iteration because the call inside the loop can move it, so it
  * must not be hoisted into a local. The `=gUnknown_0808F0A4` in the ROM's
  * literal pool is NOT a global -- it is agbcc's own -fforce-addr address
  * constant for gUnknown_03003034, which is why the read costs two `ldr`s.
  */
-void sub_0801D8E4(void)
+void TickSpriteScripts(void)
 {
     int i;
 
@@ -22,8 +22,9 @@ void sub_0801D8E4(void)
         if (gUnknown_0200E438[i].unk08)
             sub_0801D390(i, 1);
 }
+asm(".global sub_0801D8E4\n.thumb_set sub_0801D8E4, TickSpriteScripts\n");
 
-void sub_0801D924(void)
+void DrawSpriteScripts(void)
 {
     int i;
 
@@ -32,7 +33,8 @@ void sub_0801D924(void)
         if (gUnknown_0200E438[i].unk08)
         {
             sub_0801D390(i, 0);
-            sub_0801DB04(i);
+            UpdateSpriteScriptAffine(i);
         }
     }
 }
+asm(".global sub_0801D924\n.thumb_set sub_0801D924, DrawSpriteScripts\n");

@@ -26,7 +26,7 @@
  * compare and takes the table base's register, giving the ROM's
  * `adds r1, r0, r1` where a `v` local produces `adds r0, r0, r1`. Two bytes,
  * and the only difference between a 99.1% draft and this one. */
-u16 sub_0804B55C(u16 a, u8 *p, int unused)
+u16 GetBattleBackdropId(u16 a, u8 *p, int unused)
 {
     struct Map *m;
     u16 *q;
@@ -40,12 +40,12 @@ u16 sub_0804B55C(u16 a, u8 *p, int unused)
     x = p[2];
     y = p[3];
     m = gMap;
-    t = sub_08024984(m->terrain[m->rowOffset[y] + x]);
+    t = GetCellCountry(m->terrain[m->rowOffset[y] + x]);
 
     switch (a)
     {
     case 1:
-        k = sub_0804B42C(x, y);
+        k = FindBestNeighborTerrainPlain(x, y);
         if (gUnknown_08551C00[k] != 0)
             result = gUnknown_08551C00[k];
         break;
@@ -54,7 +54,7 @@ u16 sub_0804B55C(u16 a, u8 *p, int unused)
         result = q[GetNextRandomNumber() & 1];
         break;
     case 5:
-        k = sub_0804B4C4(x, y);
+        k = FindBestNeighborTerrainRoad(x, y);
         if (gUnknown_08551C3A[k] != 0)
             result = gUnknown_08551C3A[k];
         break;
@@ -73,3 +73,4 @@ u16 sub_0804B55C(u16 a, u8 *p, int unused)
 
     return result;
 }
+asm(".global sub_0804B55C\n.thumb_set sub_0804B55C, GetBattleBackdropId\n");

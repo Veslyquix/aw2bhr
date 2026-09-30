@@ -8,7 +8,7 @@
  */
 
 /* Collects every gUnknown_085C77A0 row whose unk1a equals the requested id and
- * that sub_080373F0 accepts, into gUnknown_02027F78, then arms the
+ * that IsMapSelectableForSlots accepts, into gUnknown_02027F78, then arms the
  * gUnknown_02027F74 cursor pair over the result. Returns whether anything was
  * found.
  *
@@ -22,7 +22,7 @@
  * The `count > 0x31` bail sits AFTER the body and BEFORE the `i` increment, so
  * it is a `break` at the end of the loop body rather than part of the `for`
  * condition. */
-u8 sub_08037448(u8 a1)
+u8 BuildMapListForCategory(u8 a1)
 {
     u8 count;
     u8 i;
@@ -30,13 +30,13 @@ u8 sub_08037448(u8 a1)
 
     v = sub_08026340();
     if (gPlaySt.gameMode != 2 && gPlaySt.gameMode != 4
-        && sub_0803CA9C(a1) == 0)
+        && IsMapCategoryUnlocked(a1) == 0)
         return 0;
 
     count = 0;
     for (i = 0; i < 0xc0; i++)
     {
-        if (gUnknown_085C77A0[i].category == a1 && sub_080373F0(i, v))
+        if (gUnknown_085C77A0[i].category == a1 && IsMapSelectableForSlots(i, v))
             gUnknown_02027F78[count++] = i;
         if (count > 0x31)
             break;
@@ -48,3 +48,4 @@ u8 sub_08037448(u8 a1)
     gUnknown_02027F74.unk37 = count - 1;
     return 1;
 }
+asm(".global sub_08037448\n.thumb_set sub_08037448, BuildMapListForCategory\n");

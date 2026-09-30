@@ -7,7 +7,7 @@
  * sub_08051F4C @ 0x08051F4C
  */
 
-/* MATCHED. Not part of the sub_08051DE0 cluster -- a fresh function in the
+/* MATCHED. Not part of the SmokeEffect_Init cluster -- a fresh function in the
  * same neighbourhood that reuses its type vocabulary. It installs a unit's
  * sprite for one side/slot pair: reset the two per-side scratch words, publish
  * the side and slot into gUnknown_0300453C / gUnknown_0300451C, allocate the
@@ -27,20 +27,20 @@
  *    into the symbol's address (`adds r2,#4`) where the ROM wants it in the
  *    `ldrh` immediate; binding the row to a `u16 *` and subscripting that
  *    gives `ldrh [r0,#4]`. Same rule as the struct-vs-array choice on
- *    gUnknown_08552D80 in sub_08051DE0, reached from the other direction --
+ *    gUnknown_08552D80 in SmokeEffect_Init, reached from the other direction --
  *    here the shared declaration is an array and the local supplies the
  *    aggregate.
  *
  *  - `c` and `d` are real variables, not a spelling artefact. The parameters
  *    live in r7/sb for the body and the copies live in [sp,#4]/sl purely so
- *    the LAST sub_08051D74 call can use them; `sub_08051D74(a, b)` there
+ *    the LAST StartFigureFall call can use them; `StartFigureFall(a, b)` there
  *    coalesces the copies away and loses two instructions. Same
  *    two-variables-two-registers rule as sub_0800C124 in
  *    docs/agbcc-codegen.md.
  *
- * `entries[b].unk00 = 1` is measured, and its sibling sub_08051BEC needs
+ * `entries[b].unk00 = 1` is measured, and its sibling DeathHandler_Tank needs
  * `= unk01` for the identical-looking statement -- see the note there. */
-void sub_08051F4C(u16 a, u16 b)
+void DeathHandler_Air(u16 a, u16 b)
 {
     u16 c;
     u16 d;
@@ -63,21 +63,21 @@ void sub_08051F4C(u16 a, u16 b)
         gUnknown_02029808[a].unk58[gUnknown_02029808[a].unk2e],
         f);
 
-    sub_080504A8(a, 0x10);
+    PlayFigureDestroySfx(a, 0x10);
 
     e = gUnknown_08553B14[a];
 
-    sub_08016824(gUnknown_02029808[a].unk24[b]);
-    sub_08016944(gUnknown_02029808[a].unk24[b]);
-    sub_080157A4(gUnknown_02029808[a].unk24[b], e);
-    sub_080157F4(gUnknown_02029808[a].unk24[b], 0x100);
+    EnableSlotSpriteAffine(gUnknown_02029808[a].unk24[b]);
+    SetSlotSpriteDoubleSize(gUnknown_02029808[a].unk24[b]);
+    SetSlotSpriteScaleX(gUnknown_02029808[a].unk24[b], e);
+    SetSlotSpriteScaleY(gUnknown_02029808[a].unk24[b], 0x100);
 
     row = gUnknown_085D6A48[gUnknown_03004580[a][1]];
 
     if (row[2] == 1)
     {
         if (b == gUnknown_08552148[a] && gUnknown_03004580[a][6] == 0)
-            sub_08051D74(a, b);
+            StartFigureFall(a, b);
     }
     else if (gUnknown_02029A10[a].entries[b].unk01 == 1)
     {
@@ -85,6 +85,7 @@ void sub_08051F4C(u16 a, u16 b)
     }
     else if (gUnknown_02029A10[a].entries[b].unk01 == 0)
     {
-        sub_08051D74(c, d);
+        StartFigureFall(c, d);
     }
 }
+asm(".global sub_08051F4C\n.thumb_set sub_08051F4C, DeathHandler_Air\n");

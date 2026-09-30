@@ -116,8 +116,8 @@ void LinkC3_IDLE_08033C69(struct Unk33C68Proc *proc)
             proc->unk33[i] = proc->unk30[i];
         }
 
-        sub_0803388C(proc->unk36, proc);
-        sub_080315E8(0, gUnknown_0849BC3E[proc->unk36], 0x40);
+        LinkC4_StartCursorProc(proc->unk36, proc);
+        LinkScreenSetMessage(0, gUnknown_0849BC3E[proc->unk36], 0x40);
         Proc_Break(proc);
     }
 }

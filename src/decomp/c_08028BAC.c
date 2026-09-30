@@ -19,7 +19,7 @@
  * and every narrowing comes from the declared prototype, not from a cast here:
  * `lsls/lsrs #0x18` for IsPlayerAliveAndActive's u8, ONE `lsls/lsrs #0x10` pair CSEd
  * across all three u16 predicates (r4), and a bare `adds r0,r5,#0` for
- * sub_080289BC's int. Flattening them to one width loses the r4 reuse.
+ * CheckArmySurvivesHumanNoUnitsRule's int. Flattening them to one width loses the r4 reuse.
  *
  * Pass 2's `buf[i] = 0` reuses the register the `!buf[j]` test just loaded
  * (`strb r0,[r7]` where r0 is the zero from `ldrb r0,[sp+j]`) -- ordinary CSE
@@ -30,12 +30,12 @@
  * pass 3 (r2, r8) are strength_reduce givs and LICM hoists, not source --
  * pass 3 is written with the ordinary gPlayers[i] subscript.
  *
- * sub_08026F28 had no declaration before this function; added to
+ * AreArmiesOnSameTeam had no declaration before this function; added to
  * include/unknown-functions.h from the promoted src/decomp/c_08026F28.c. An
  * implicit declaration compiles but default-promotes both arguments to int and
  * drops the `lsls/lsrs #0x10` pairs the ROM has in front of that `bl`.
  */
-u8 sub_08028BAC(void)
+u8 IsOnlyOneTeamLeft(void)
 {
     u8 buf[8];
     int i;
@@ -46,8 +46,8 @@ u8 sub_08028BAC(void)
     {
         buf[i] = 0;
 
-        if (IsPlayerAliveAndActive(i) && sub_08028904(i) && sub_080289BC(i)
-         && sub_08028990(i) && sub_08028944(i))
+        if (IsPlayerAliveAndActive(i) && CheckArmySurvivesTeamRule(i) && CheckArmySurvivesHumanNoUnitsRule(i)
+         && CheckArmySurvivesNoUnitsRule(i) && CheckArmySurvivesHqRule(i))
             buf[i] = 1;
     }
 
@@ -59,10 +59,10 @@ u8 sub_08028BAC(void)
             {
                 for (j = 1; j <= 4; j++)
                 {
-                    if (i != j && IsPlayerAliveAndActive(j) && sub_08026F28(i, j) && !buf[j])
+                    if (i != j && IsPlayerAliveAndActive(j) && AreArmiesOnSameTeam(i, j) && !buf[j])
                     {
                         buf[i] = 0;
-                        sub_0802C154(i);
+                        MarkPlayerYielded(i);
                     }
                 }
             }
@@ -89,3 +89,4 @@ u8 sub_08028BAC(void)
 
     return 0;
 }
+asm(".global sub_08028BAC\n.thumb_set sub_08028BAC, IsOnlyOneTeamLeft\n");

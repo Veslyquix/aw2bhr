@@ -18,9 +18,9 @@ struct Unk080445A8Proc
     /* 0x68 */ u16 unk68;
 };
 
-void sub_080445A8(struct Unk080445A8Proc *proc)
+void CoPowerUnitEffects_Init(struct Unk080445A8Proc *proc)
 {
-    sub_0801DA94();
+    ClearObjAffineSlots();
 
     if (gUnknown_084A0090[gPlayers[gUnknown_030033EC].co]
             .power[gPlayers[gUnknown_030033EC].coActivationMode - 1].animationCondition == NULL)
@@ -29,8 +29,9 @@ void sub_080445A8(struct Unk080445A8Proc *proc)
     }
     else
     {
-        sub_08044AB8(gUnknown_030033EC);
+        StartCoPowerAnimation(gUnknown_030033EC);
         proc->unk68 = 1;
         proc->unk64 = 0;
     }
 }
+asm(".global sub_080445A8\n.thumb_set sub_080445A8, CoPowerUnitEffects_Init\n");

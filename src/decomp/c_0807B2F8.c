@@ -14,14 +14,15 @@ struct Unk807B2F8
     /* 0x30 */ int unk30;
 };
 
-void sub_0807B2F8(ProcPtr proc)
+void MatchSummaryPanel_DrawText(ProcPtr proc)
 {
     if (gPlaySt.gameMode == 3)
         Proc_Goto(proc, 0);
 
-    sub_080149C0(1, (s16)(((struct Unk807B2F8 *)proc)->unk30 + 1),
-                 gBG0TilemapBuffer, sub_080248E4(), 0x8000, 0);
-    sub_08014B0C(0xD, (s16)(((struct Unk807B2F8 *)proc)->unk30 + 1),
+    PutTextScriptImmediate(1, (s16)(((struct Unk807B2F8 *)proc)->unk30 + 1),
+                 gBG0TilemapBuffer, GetLoadedMapName(), 0x8000, 0);
+    DrawTallNumberRightAligned(0xD, (s16)(((struct Unk807B2F8 *)proc)->unk30 + 1),
                  gBG0TilemapBuffer, gUnknown_03004080, 0x8000, 0);
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_0807B2F8\n.thumb_set sub_0807B2F8, MatchSummaryPanel_DrawText\n");

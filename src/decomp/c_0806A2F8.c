@@ -21,8 +21,8 @@ struct Unk806A2F8
  * post-increment the counter, pass the OLD value, stash the result. */
 void IntroT3_0806A2F9(struct Unk806A2F8 *proc)
 {
-    proc->unk2c = sub_080674F4(gUnknown_0202F204++);
-    sub_0801237C();
+    proc->unk2c = GetIntroSceneDuration(gUnknown_0202F204++);
+    ResetWindowShadows();
 }
 
 asm(".global sub_0806A2F8\n.thumb_set sub_0806A2F8, IntroT3_0806A2F9\n");

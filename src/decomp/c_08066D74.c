@@ -9,18 +9,18 @@
 
 #include "hardware.h"
 
-void sub_08066D74(void)
+void MatchSetupHandleRulesStageInput(void)
 {
     int sc;
 
     gUnknown_08580934->unk2a++;
 
-    HandleRulesMenuInput();
-    sub_08066C70(gUnknown_08580934->unk54[gUnknown_08580934->unk33]);
-    sub_08066B8C(gUnknown_08580934->unk33);
-    sub_08066D30();
+    MatchSetupMoveRuleCursor();
+    RuleOption_ChangeValue(gUnknown_08580934->unk54[gUnknown_08580934->unk33]);
+    RuleOption_DrawArrows(gUnknown_08580934->unk33);
+    MatchSetupHighlightSelectedRuleOption();
 
-    sc = (sub_0801BA4C(gUnknown_08580934->unk2a * 16 % 360) >> 9) + 0x100;
+    sc = (SinDegrees(gUnknown_08580934->unk2a * 16 % 360) >> 9) + 0x100;
 
     SetObjAffine(0,
                  Div(gSinLut[0x40] * 16, sc != 0 ? sc : 2),
@@ -30,26 +30,27 @@ void sub_08066D74(void)
 
     if (gpKeySt->pressed & 1)
     {
-        sub_0806377C(gUnknown_08580DD8);
+        ClearCallbackOfSlotsRunningScript(gUnknown_08580DD8);
         LockMainMenu();
     }
     else if (gpKeySt->pressed & 2)
     {
         gUnknown_08580934->unk31 = 1;
         sub_080733B8();
-        sub_08064B68(2);
+        MatchSetupDismissRuleOptions(2);
         gUnknown_08580934->unk30 = 1;
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
 
         if (gUnknown_08580934->unk08 == 2)
         {
             gUnknown_08580934->unk26 = 0;
-            sub_0806540C();
+            MatchSetupSpawnArmyColumnsSlide();
         }
         else
         {
-            sub_0806530C();
+            MatchSetupSpawnArmyColumnsWithBadges();
             gUnknown_08580934->unk26 = 1;
         }
     }
 }
+asm(".global sub_08066D74\n.thumb_set sub_08066D74, MatchSetupHandleRulesStageInput\n");

@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08029948.
- * sub_08029948 @ 0x08029948
+ * StartDropCellPicker @ 0x08029948
  */
 
 /* MATCHED -- wave 60 (W60-D, from W60-A's and the orchestrator's exemplars).
@@ -34,7 +34,7 @@
  * This is the same recipe as the three already-promoted functions that
  * contain the identical interleave against the identical global -- read
  * src/decomp/c_08035BC4.c, whose own comment states the s8/int/s16 result
- * outright, and src/decomp/c_080149C0.c (sub_080149C0 and sub_08014A5C).
+ * outright, and src/decomp/c_080149C0.c (PutTextScriptImmediate and PutTextTableEntryImmediate).
  * W60-A's scan of asm/ found 92 interleaved extend pairs across 67 distinct
  * functions with the large majority already matched, so this placement is
  * ordinary compiler output, not an unreachable artefact.
@@ -51,7 +51,7 @@
  * the cast fold. An explicit `(s8)` on the call result changes nothing, since
  * the prototype already says s8.
  */
-void sub_08029948(int a)
+void StartDropCellPicker(int a)
 {
     u16 v;
     s16 id;
@@ -60,3 +60,4 @@ void sub_08029948(int a)
     id = sub_080152C0((s32)gUnknown_0849A080, 0);
     gUnknown_03001470[id].unk22 = v;
 }
+asm(".global sub_08029948\n.thumb_set sub_08029948, StartDropCellPicker\n");

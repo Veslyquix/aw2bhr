@@ -17,11 +17,11 @@
  * The ROM has one extra register-to-register COPY at the merge point:
  *     ROM   `adds r4, r7, #0`   (v copied into a second pseudo)
  *           `adds r0, r4, #0`   (argument taken from the copy)
- *           `bl sub_08074754`
+ *           `bl AddWorldMapMarker`
  *           `adds r0, r6, #0` / `adds r0, #0x12` / `adds r4, r4, r0`
  *           `ldrb r0, [r4]` / `movs r1, #1` / `orrs r0, r1` / `strb r0, [r4]`
  *     here  `adds r0, r7, #0`
- *           `bl sub_08074754`
+ *           `bl AddWorldMapMarker`
  *           `adds r0, r6, #0` / `adds r0, #0x12` / `adds r0, r7, r0`
  *           `ldrb r1, [r0]` / `movs r2, #1` / `orrs r1, r2` / `strb r1, [r0]`
  * so the ROM's address lands in the callee-saved r4 and its temporaries stay in
@@ -33,7 +33,7 @@
  *
  * The copy is the wave-17 "one local where the original had N" signature read
  * backwards, but the obvious cause is RULED OUT BY PROBE: introducing a second
- * local (`i = v; sub_08074754(i); ...unk12[i] |= 1;`) produces assembly
+ * local (`i = v; AddWorldMapMarker(i); ...unk12[i] |= 1;`) produces assembly
  * IDENTICAL to this one -- gcc 2.9 copy-propagates it away. Also ruled out by
  * probe: writing the subscript with v as the FIRST operand
  * (`v[gUnknown_0202FDFC.unk12] |= 1`), which was aimed at the c_0807610C.c
@@ -41,19 +41,19 @@
  * What has NOT been tried is anything that keeps both pseudos live across the
  * merge so the copy cannot be coalesced.
  *
- * WAVE 34 (W34-J) RETYPED sub_08076888 BECAUSE OF THIS FUNCTION. It calls that
+ * WAVE 34 (W34-J) RETYPED SetupWorldMapScreen BECAUSE OF THIS FUNCTION. It calls that
  * callee in the MIDDLE of its body, after two other calls have clobbered r0,
  * and the ROM spends `adds r0, r5, #0` putting the proc back -- an instruction
  * a `void(void)` prototype cannot emit. The callee's other two C callers both
  * had their proc already in r0, so the wrong prototype was invisible. See the
- * note in unknown-functions.h; sub_08076ADC and sub_08076B7C were re-verified
+ * note in unknown-functions.h; SetupWorldMapForResume and SetupWorldMapAfterMission were re-verified
  * byte-for-byte after the change.
  *
  * Resets gUnknown_0202FDFC's camera block, reloads the shared tile buffer, then
  * marks one of two fixed slots busy depending on IsHardCampaignMode. The `movs r7, #0`
  * at the top is one constant serving both the three `strh` zeroes and v's
  * initialiser, which is ordinary CSE and not a shared local. */
-void sub_08076A68(ProcPtr proc)
+void SetupWorldMapForNewCampaign(ProcPtr proc)
 {
     int v = 0;
 
@@ -66,15 +66,16 @@ void sub_08076A68(ProcPtr proc)
     gUnknown_0202FDFC.unk06 = 0x50;
 
     Decompress(gUnknown_081D0BAC, gUnknown_08614280);
-    sub_08011E54(gUnknown_08614280, (void *)0x0600F000, 0x1000);
-    sub_08076888(proc);
+    RegisterDataMove(gUnknown_08614280, (void *)0x0600F000, 0x1000);
+    SetupWorldMapScreen(proc);
 
     if (IsHardCampaignMode())
         v = 0x22;
 
-    sub_08074754(v);
+    AddWorldMapMarker(v);
     gUnknown_0202FDFC.unk12[v] |= 1;
 }
+asm(".global sub_08076A68\n.thumb_set sub_08076A68, SetupWorldMapForNewCampaign\n");
 
 /* WAVE 36 (W36-E): NOT re-attempted. Read in full against the ROM and the C
  * above is the natural spelling of every statement -- a restart from scratch
@@ -83,7 +84,7 @@ void sub_08076A68(ProcPtr proc)
  * attempt confirming that. The residual is still the one `adds r4, r7, #0`
  * copy at the merge and the two axes the note above rules out are still ruled
  * out. One thing this wave DID settle that touches it: gUnknown_08614280 is a
- * real ROM pointer VARIABLE, not a force-addr word -- sub_08075F44 matched
+ * real ROM pointer VARIABLE, not a force-addr word -- WorldMapNationPanel_Refresh matched
  * this wave with `(u16 *)gUnknown_08614280` and the ROM's own pool word is
  * `.word gUnknown_08614280`, so the `void *` declaration is right and the
  * five-symbols-hold-0x0200FC50 coincidence the wave-36 brief flagged is not a

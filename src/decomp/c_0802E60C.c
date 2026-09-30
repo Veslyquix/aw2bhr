@@ -7,15 +7,15 @@
  * sub_0802E60C @ 0x0802E60C
  */
 
-void sub_0802E60C(s16 a1, s16 a2)
+void ConfirmUnitDestination(s16 a1, s16 a2)
 {
-    if (!sub_0802E724(a1, a2))
+    if (!IsValidMoveDestination(a1, a2))
     {
-        sub_0803B4DC(0x68);
+        PlayMusicOrSfx2(0x68);
         return;
     }
 
-    sub_08022A08();
+    HideRangeOverlay();
 
     gUnknown_03003F24.pos.unk00 = gUnknown_030040D8->unk02;
     gUnknown_03003F24.pos.unk02 = gUnknown_030040D8->unk03;
@@ -28,11 +28,12 @@ void sub_0802E60C(s16 a1, s16 a2)
     if (gUnknown_03003F24.raw == gUnknown_03003100.raw)
         return;
 
-    sub_08038AD8();
+    EncodeMovePathDirections();
 
-    if ((u8)sub_0802E7C8(gUnknown_03003F24.spos.unk00, gUnknown_03003F24.spos.unk02,
+    if ((u8)TruncatePathAtHiddenEnemy(gUnknown_03003F24.spos.unk00, gUnknown_03003F24.spos.unk02,
             gUnknown_03003110, 4) == 1)
         gUnknown_03003334 = 5;
 
-    sub_08025BB4(gUnknown_03003110);
+    StartUnitMoveSlide(gUnknown_03003110);
 }
+asm(".global sub_0802E60C\n.thumb_set sub_0802E60C, ConfirmUnitDestination\n");

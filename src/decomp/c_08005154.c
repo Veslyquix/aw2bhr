@@ -9,18 +9,19 @@
 
 void sub_08005154(void)
 {
-    sub_0801A168();
+    CloseTopMenu();
     sub_080152EC(gUnknown_08487E8C, 0);
     gActiveMap->state = 7;
-    sub_08024268();
+    RebuildMapUnitLayers2();
 }
 
 /* A bare `strb` through `adds rN, #0x9c`, past `strb`'s imm5 range -- which is
  * the only reason the address arithmetic is a separate instruction. */
-void sub_0800517C(void)
+void DesignRoomClearName(void)
 {
     gActiveMap->designName[0] = 0;
 }
+asm(".global sub_0800517C\n.thumb_set sub_0800517C, DesignRoomClearName\n");
 
 /* gBG0TilemapBuffer and gBG2TilemapBuffer are POINTER variables, so each
  * argument is `ldr rN, =sym; ldr rN, [rN]`. The 0x14 that goes to [sp] is CSEd
@@ -28,8 +29,8 @@ void sub_0800517C(void)
  * `movs r1,#0xd8; lsls r1,#2` is just the constant 0x360. */
 void sub_0800518C(void)
 {
-    sub_08012BC8(gBG0TilemapBuffer, 0, 0xE, 0x1E, 0x14, 0);
-    sub_08012BC8(gBG2TilemapBuffer, 0, 0xE, 0x1E, 0x14, 0x360);
-    sub_08013AEC();
-    sub_08013B0C();
+    FillTilemapRect(gBG0TilemapBuffer, 0, 0xE, 0x1E, 0x14, 0);
+    FillTilemapRect(gBG2TilemapBuffer, 0, 0xE, 0x1E, 0x14, 0x360);
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG2();
 }

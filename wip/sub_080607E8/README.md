@@ -2,7 +2,7 @@
 
 0x080607E8, 172 bytes, THUMB, parked.
 
-Best score so far: 86.6% (best.c).
+Best score so far: 79.7% (best.c).
 
 ## What it does
 
@@ -29,6 +29,7 @@ Find a way of writing b (the row plus 4) whose 16-bit narrowing the compiler can
 
 - `sub_080607E8.c`: the current draft
 - `best.c`: the closest attempt, when it is not the draft
+- `NOTES.md`: working notes
 - `target.s`: the original assembly
 
 ## Technical history
@@ -64,5 +65,39 @@ The shape is fully derived and exactly ONE compiler decision is wrong. The lever
 ### Notes
 
 The gUnknown_08499590 access is settled and must not be re-litigated: the file-local `struct Map7E8` cast reproduces the ROM's `adds r0,r1,r3(=0x417A); adds r0,r0,r2` and `adds r1,#0x12; adds r1,r1,r0` associations exactly, per the wave-34 rule in include/unknown-globals.h. Byte arithmetic on the u8 * does not. WAVE 77: the goto-loop form is now load-bearing and must not be tidied back into a `for`. W73-D's test for the goto lever -- does the body need a giv? -- is NEGATIVE here: the ROM rematerialises every address from band and i each iteration and carries no strength-reduced giv at all, which is why the lever that is mutually exclusive with a giv on sub_0806412C is free on this function.
+
+### Wave 92
+
+WAVE 92 (W92-B): no movement (54.65%, -8), but the residual is now closed arithmetically and the permuter result was REJECTED as wrong C. THE -8 IS FULLY ACCOUNTED FOR: the ROM narrows b to 16 bits before sub_08025CC8's second argument (mov r2,r8 / lsls r1,r2,#16 / asrs r1,r1,#16) where the draft copies in one instruction, +4 bytes; the ROM materialises movs r0,#0 for u->unk09 = 0 where the draft reuses c's register, +2; the code then reaches 170 and the literal pool's alignment needs the ROM's .short 0x0000, +2, giving 172. Nothing else in the function differs. The narrowing is requested (the prototype is (s16, s16, s16)) and combine deletes it because b = zero-extended byte plus constant has 23 sign-bit copies. The contrast that names the mechanism is the FIRST argument a + i, whose narrowing survives in both, because the loop counter gives combine no range. CORRECTING THIS ENTRY: the recorded claim that splitting b's definition gets 4 bytes back is true of the size and false of the reason. Compiled and diffed, the narrowing is STILL absent; the split only moves b out of a high register so the copy becomes adds r1,r7,#0, and the four bytes come from an unrelated register shuffle earlier in the loop. It is not a partial fix and the draft is the better base. Also measured negative this wave: u->unk0a re-read from the map, 16.11% at +8; that plus the split, +12; the map cell's address bound to a local with unk0a re-read through it, 25.57% at +4; the two stores swapped in source order, BYTE-IDENTICAL, so store order is not a lever either. PERMUTER (900 s, 4 threads, the first run ever on this function): reported 54.65% -> 80.81% at the ROM's exact size and kept that source. The mutation inserts a second p = sub_0803E354(7) INSIDE THE LOOP -- a dead assignment whose call cannot be deleted, worth exactly the missing 8 bytes, after which every later instruction lands on the ROM's address. The ROM's loop body has no such call, so the candidate would call it four extra times per invocation: a behaviour change, not a spelling. Rejected; draft, best.c and best.json restored. NOTE the last pool word's relocation prints as a difference (gUnknown_030046B4 against gFactoryUnitSchedule) and is NOT one: the map puts gFactoryUnitSchedule at 0x030046b4.
+
+### Wave 94
+
+W94-A: Vesly's 86.63% size-exact file was judged wrong C and quarantined (vesly-best.c.wrongc), as was a permuter run's 79.65% form (w94-perm1-7965.c.wrongc). Draft unchanged at 54.65%, 8 bytes short.
+
+### Wave 97
+
+wave 97 (W97-G)
+Base: draft (54.65%, 164/172). `best.c` (79.65%) is WRONG C and stays rejected: it writes `band = c; i = band;`
+inside the loop body, so `band` (loop-invariant, used for `band * 3 + i` next iteration) and the loop counter `i`
+are both clobbered with the known-zero `c`. Its size-exact score comes from that clobber, not a valid twin.
+
+Residual re-read: (1) the ROM keeps `lsls #16; asrs #16` on `b` at the sub_08025CC8 call; the draft drops it
+(b = u8 field + 4, so nonzero_bits proves it fits). (2) `movs r0,#0; strb r0,[r4,#9]` vs draft `strb r6,[r4,#9]`
+(cse substitutes the known-zero `c`).
+
+Probes (trymatch, all restore to the draft): `b = p->unk01; b += 4;` -> 168 (-4) but 30% (i moves to r8, ext still
+folded); `(s8)` on the field -> 168; `*(u8 *)((u8 *)p + 1) + 4`, `(u16)(...)`, `(u32)p->unk01 + 4`: byte-identical
+to the draft (164). Two-set b does not restore the extension either, so the fold is not reg_n_sets-gated here.
+Unresolved: what makes the ROM's `b` non-provable (value not from a ldrb+4 chain visible to nonzero_bits).
+
+Proposed summary: does = spawns up to three factory units in a row at the map slot's row from the factory schedule.
+status = 54.65% draft, 8 bytes short. left = missing sign extension on the y argument, `unk09 = 0` uses the zero
+register instead of a literal. tried = see above plus waves 92/94; best.c is wrong C (clobbers band and i).
+
+wave 97 (W97-Y)
+Base: draft (54.65%, -8). levers.py's 81.4% (`s8` copies of d at both uses) is WRONG: the third argument of sub_08025CC8 becomes 0xFFFFFF8B for d >= 0x80 (wrongc, confirmed by reading); no other lever beat the draft.
+Probes for the missing sign extension on b (`s16 bs = b` at the call, `s16 b`, `u16 b`, `(s16)(...)` on the assignment or at the call): all 164 bytes, the extension stays folded (nonzero_bits proves b fits); `s16 b` plus a separate `s16 bs; bs = b;` gives 168 at 30.8%. So the fold is not a copy-count or type issue on b.
+Permuter (3 links, 500 s each): the kept "improvements" (63.4%, 65.7%, size 172) are PADDING, not progress: `new_var = i <= 2; if (new_var) goto` and a do { } while (0) around the loop make agbcc emit `movs r0,#0 / movs r0,#1 / cmp r0,#0 / bne` at the loop end (visible in the diff), replacing the ROM's `ble`. Rejected; draft restored. A size-exact score on this function is a padding artefact until the tail `ble` is reproduced.
+Residual unchanged from W97-G: b's `lsls/asrs` before the call, `movs r0,#0` for unk09, and the sb/r9 band allocation.
 
 </details>

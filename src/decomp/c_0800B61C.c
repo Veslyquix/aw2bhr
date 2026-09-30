@@ -8,59 +8,45 @@
  * sub_0800B61C @ 0x0800B61C
  */
 
-/* Wave 56, W56-P. MATCHED (relocs differ by NAME only and resolve to the same
- * address, which the tool accepts).
+/*
+ * GetShoalTile -- choose the tile for the shoreline at (x, y).
  *
- * PROMOTION NEEDS A .rodata POOL WORD PLACED:
- *   "rodata": ["0x0808D85C"]
- * then re-run tools/split_rodata.py and tools/gen_lds.py.
- * 0x0808D85C is NOT a global -- it holds 0x08499590, agbcc's -fforce-addr
- * address constant for the map POINTER. `MAP->width` therefore compiles to
- * THREE loads (pool word -> &gUnknown_08499590 -> the u8* -> ldrh), which is
- * correct and is what the ROM does; do not declare the pool word.
+ * The nine-bit mask of which cells of the 3 x 3 block around (x, y) are land
+ * (bit 8 the top left, bit 0 the bottom right, the centre bit dropped again
+ * with `& ~0x10`) indexes gUnknown_084861C4. A negative entry is returned as it
+ * stands. Otherwise bits 9 to 14 of the entry name one of nineteen shapes that
+ * need a closer look, and that case picks the tile:
+ *   - eleven of them ask IsShoalAt about the single neighbour on the side
+ *     the shape points at and choose between two tiles; off the edge of the map
+ *     counts as the plain one.
+ *   - the rest ask GetShoalNeighbourMask about the cell itself, mask its answer and
+ *     choose between four tiles. Case 0xA00 has two further tests on the
+ *     top-left diagonal.
+ * A positive result is finally masked down to nine bits.
  *
- * Same nine-bit 3x3 neighbourhood mask as sub_08007DD0 (W56-L, this wave) --
- * that function is the exemplar and its `int ny` locals are load-bearing. The
- * only addition here is `& ~0x10`, which drops the CENTRE cell; agbcc builds
- * 0xFFFFFFEF as `movs #0x11; rsbs`, so read the constant as ~0x10 and not -0x11.
+ * Case 0x800 tests `x > 0` and then looks at the cell above, where the other
+ * up/down cases test `y > 0`. The original does the same.
  *
- * THREE THINGS COST THE ATTEMPTS, all in the 19-arm switch, and all three are
- * layout facts rather than semantics:
- *
- *  1. gcc lays the case BODIES out in SOURCE order while the dispatch tree
- *     compares in VALUE order. The body order the ROM wants is
- *     0x400, 0x200, 0x800, 0x4a00, 0x4c00, 0x5200, 0x5400, 0x2c00, 0x3400,
- *     0x2a00, 0x3200, 0x4800, 0x5000, 0x2400, 0x2200, 0xc00, 0xa00, 0x1400,
- *     0x1200 -- not ascending, and reading it off the ROM's block addresses is
- *     the whole of step one. Value order was -44 bytes and 27%.
- *
- *  2. THE ELEVEN TWO-WAY `sub_0800B4F0` CASES NEED THE CALL RESULT BOUND TO A
- *     TEMP. `if (guard && call()) r = THEN; else r = ELSE;` puts THEN in the
- *     block before the compare and lets thread_jumps skip the `r > 0` test;
- *     the ROM assigns ELSE there instead and branches to THEN, which only
- *     happens when the assignment sits between the call and the test, i.e.
- *     when the source reads `u = call(); r = ELSE; if (u) r = THEN;`. The
- *     `else r = ELSE;` on the guard is a separate, cross-jumped block -- the
- *     ROM re-materialises the constant there, which is what proves `r` is
- *     never live across a call and pins it to the caller-saved r2.
- *
- *  3. THAT TEMP MUST BE ITS OWN LOCAL, not shared with the `t` the masked
- *     sub_0800B5C0 cases use. One pseudo for both gets r1 everywhere and costs
- *     an `adds r1, r0, #0` in each of the eleven cases (+28 bytes, 40.1%);
- *     splitting it lets the two-way temp coalesce onto r0 and took it to 82%.
- *     A shared temp is a REGISTER-ALLOCATION coupling between unrelated arms,
- *     and nothing in the diff points at the declaration -- worth remembering.
- *
- * Case 0xa00's inner chain reads like a nested `switch` (dispatch 2, 8, 0xa but
- * bodies 2, 0xa, 8) and is NOT one -- a 3-case switch balances its tree and
- * emits `cmp #8` first. It is a plain if/else-if in source order 2, 8, 0xa; the
- * apparent body reordering is cross-jumping, and it only resolves once the
- * function is the right length. Do not "fix" it into a switch.
+ * Why the C looks odd: these spellings do not change what the code does, but
+ * the original compiler only produces identical output with them.
+ *   - The cases are listed in the order the original's blocks appear in, which
+ *     is not ascending and follows no other obvious rule. The compiler compares
+ *     in value order but lays the bodies out in source order, so reordering
+ *     them rewrites the whole tail of the function.
+ *   - In the eleven two-way cases the call's result goes into `u` first, then
+ *     the plain tile is assigned, then `if (u)` overwrites it. Written as
+ *     `if (guard && call())` the compiler assigns the two the other way round
+ *     and drops a test the original keeps.
+ *   - `u` and `t` stay two separate locals although no arm uses both. Sharing
+ *     one costs a register copy in each of the eleven two-way cases.
+ *   - Case 0xA00's inner chain is an if/else-if, not a `switch`. A three-case
+ *     switch is compiled as a balanced comparison tree and tests the wrong
+ *     value first.
  */
 
 #define MAP gMap
 
-s16 sub_0800B61C(int x, int y)
+s16 GetShoalTile(int x, int y)
 {
     int mask = 0;
     int t;
@@ -100,7 +86,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x400:
         if (x > 0)
         {
-            u = sub_0800B4F0(x - 1, y);
+            u = IsShoalAt(x - 1, y);
             r = 0xb6;
             if (u)
                 r = 0xf3;
@@ -111,7 +97,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x200:
         if (x < MAP->width - 1)
         {
-            u = sub_0800B4F0(x + 1, y);
+            u = IsShoalAt(x + 1, y);
             r = 0xb7;
             if (u)
                 r = 0xf2;
@@ -122,7 +108,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x800:
         if (x > 0)
         {
-            u = sub_0800B4F0(x, y - 1);
+            u = IsShoalAt(x, y - 1);
             r = 0xb6;
             if (u)
                 r = 0xd2;
@@ -133,7 +119,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x4a00:
         if (x < MAP->width - 1)
         {
-            u = sub_0800B4F0(x + 1, y);
+            u = IsShoalAt(x + 1, y);
             r = 0x8f;
             if (u)
                 r = 0x6d;
@@ -144,7 +130,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x4c00:
         if (x > 0)
         {
-            u = sub_0800B4F0(x - 1, y);
+            u = IsShoalAt(x - 1, y);
             r = 0x8f;
             if (u)
                 r = 0x6e;
@@ -155,7 +141,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x5200:
         if (x < MAP->width - 1)
         {
-            u = sub_0800B4F0(x + 1, y);
+            u = IsShoalAt(x + 1, y);
             r = 0xef;
             if (u)
                 r = 0xcd;
@@ -166,7 +152,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x5400:
         if (x > 0)
         {
-            u = sub_0800B4F0(x - 1, y);
+            u = IsShoalAt(x - 1, y);
             r = 0xef;
             if (u)
                 r = 0xce;
@@ -177,7 +163,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x2c00:
         if (y > 0)
         {
-            u = sub_0800B4F0(x, y - 1);
+            u = IsShoalAt(x, y - 1);
             r = 0x92;
             if (u)
                 r = 0xcf;
@@ -188,7 +174,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x3400:
         if (y < MAP->height - 1)
         {
-            u = sub_0800B4F0(x, y + 1);
+            u = IsShoalAt(x, y + 1);
             r = 0x92;
             if (u)
                 r = 0xaf;
@@ -199,7 +185,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x2a00:
         if (y > 0)
         {
-            u = sub_0800B4F0(x, y - 1);
+            u = IsShoalAt(x, y - 1);
             r = 0x93;
             if (u)
                 r = 0xd0;
@@ -210,7 +196,7 @@ s16 sub_0800B61C(int x, int y)
     case 0x3200:
         if (y < MAP->height - 1)
         {
-            u = sub_0800B4F0(x, y + 1);
+            u = IsShoalAt(x, y + 1);
             r = 0x93;
             if (u)
                 r = 0xb0;
@@ -219,7 +205,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0x93;
         break;
     case 0x4800:
-        t = sub_0800B5C0(x, y) & 7;
+        t = GetShoalNeighbourMask(x, y) & 7;
         if (t == 6)
             r = 0x10;
         else if (t == 4)
@@ -230,7 +216,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0x8f;
         break;
     case 0x5000:
-        t = sub_0800B5C0(x, y) & 0xe;
+        t = GetShoalNeighbourMask(x, y) & 0xe;
         if (t == 6)
             r = 0x50;
         else if (t == 2)
@@ -241,7 +227,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0xef;
         break;
     case 0x2400:
-        t = sub_0800B5C0(x, y) & 9;
+        t = GetShoalNeighbourMask(x, y) & 9;
         if (t == 9)
             r = 0x2e;
         else if (t == 8)
@@ -252,7 +238,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0x92;
         break;
     case 0x2200:
-        t = sub_0800B5C0(x, y) & 9;
+        t = GetShoalNeighbourMask(x, y) & 9;
         if (t == 9)
             r = 0x32;
         else if (t == 8)
@@ -263,7 +249,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0x93;
         break;
     case 0xc00:
-        t = sub_0800B5C0(x, y);
+        t = GetShoalNeighbourMask(x, y);
         if (t == 4)
             r = 0xf3;
         else if (t == 8)
@@ -274,7 +260,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0xb6;
         break;
     case 0xa00:
-        t = sub_0800B5C0(x, y);
+        t = GetShoalNeighbourMask(x, y);
         if (t == 2)
             r = 0xf2;
         else if (t == 8)
@@ -295,7 +281,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0xb7;
         break;
     case 0x1400:
-        t = sub_0800B5C0(x, y);
+        t = GetShoalNeighbourMask(x, y);
         if (t == 4)
             r = 0x113;
         else if (t == 1)
@@ -306,7 +292,7 @@ s16 sub_0800B61C(int x, int y)
             r = 0xd6;
         break;
     case 0x1200:
-        t = sub_0800B5C0(x, y);
+        t = GetShoalNeighbourMask(x, y);
         if (t == 2)
             r = 0x112;
         else if (t == 1)
@@ -323,3 +309,4 @@ s16 sub_0800B61C(int x, int y)
 
     return r;
 }
+asm(".global sub_0800B61C\n.thumb_set sub_0800B61C, GetShoalTile\n");

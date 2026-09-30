@@ -12,12 +12,6 @@
  */
 
 #include "proc.h"
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file .text as one
- * contiguous block at 0x0801153C.
- * SomeFade_IDLE_0801153D @ 0x0801153C
- */
 
 /* Family F062 (data/families.json): `push {r4,lr}; adds r4,r0,#0; bl A;
  * adds r0,r4,#0; bl B; pop {r4}; pop {r0}; bx r0` -- 20 bytes, three members.
@@ -32,18 +26,18 @@
  */
 
 
-/* The `bl sub_08011218` with r0 still holding the incoming proc looks exactly
- * like an argument pass and is not one: sub_08011218 is
- * `void sub_08011218(void)` in its promoted definition src/decomp/c_08011218.c
+/* The `bl EndFadeScreenLines` with r0 still holding the incoming proc looks exactly
+ * like an argument pass and is not one: EndFadeScreenLines is
+ * `void EndFadeScreenLines(void)` in its promoted definition src/decomp/c_08011218.c
  * (`Proc_EndEach(ProcScr_FadeScreenLines)`), so it takes nothing. The
  * `adds r4, r0, #0` is "save it because the call clobbers r0", exactly the
  * wave-14 F032 trap one shape up.
  */
 
-void SomeFade_IDLE_0801153D(ProcPtr proc)
+void Wipe_End(ProcPtr proc)
 {
-    sub_08011218();
+    EndFadeScreenLines();
     Proc_Break(proc);
 }
 
-asm(".global sub_0801153C\n.thumb_set sub_0801153C, SomeFade_IDLE_0801153D\n");
+asm(".global sub_0801153C\n.thumb_set sub_0801153C, Wipe_End\n");

@@ -10,14 +10,15 @@
 /* The parameter is `s16`, and both halves of that are measured. The entry
  * `lsls #0x10; lsrs #0x10` is PROMOTE_MODE, which zero-extends regardless of
  * signedness and therefore says only "narrow"; the SIGN is in the second shift
- * pair, `lsls #0x10; asrs #0x10`, emitted at the use because sub_0802D7B4
+ * pair, `lsls #0x10; asrs #0x10`, emitted at the use because DrawDeploymentList
  * takes an `int` and the value has to be widened before the `bl`.
  *
  * Sequential `bl`s with nothing between them carry no nesting signal, and
- * sub_0802D76C reads no argument register, so these are two statements. */
+ * ClearDeploymentListArea reads no argument register, so these are two statements. */
 
-void sub_0802D99C(s16 a1)
+void RedrawDeploymentList(s16 a1)
 {
-    sub_0802D76C();
-    sub_0802D7B4(a1);
+    ClearDeploymentListArea();
+    DrawDeploymentList(a1);
 }
+asm(".global sub_0802D99C\n.thumb_set sub_0802D99C, RedrawDeploymentList\n");

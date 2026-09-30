@@ -105,59 +105,67 @@
 
 u16 sub_080303C8(void)
 {
-    int acc = 0;
-    int v;
-    int i;
-
-    if (gPlaySt.savingEnabled == 0)
-        goto reset;
-    if (gUnknown_0849B018->unk01 != 2)
-        goto reset;
-
-    if (gUnknown_0849B018->unk06 != 0)
-        while (gUnknown_02023894 == 0 && gUnknown_0849B018->unk04 != 2)
-            ;
-
-    REG_IME = 0;
-    gUnknown_02023894 = 0;
-    REG_IME = 1;
-    sub_080301E8();
-
-    v = (~REG_KEYINPUT & 0x3FF)
-      | ((gUnknown_0849B01C->unk00 << 10) | 0x8000)
-      | (gUnknown_0849B01C->unk02 << 13);
-    gUnknown_0849B01C->unk06 = v;
-
-    for (i = 0; i < 4; i++)
+  int allOnes;
+  int acc = 0;
+  int new_var2;
+  int v;
+  int i;
+  if (gPlaySt.savingEnabled == 0)
+  {
+    goto reset;
+  }
+  if (gUnknown_0849B018->unk01 != 2)
+  {
+    goto reset;
+  }
+  if ((gUnknown_0849B018->unk06 != 0) && (gUnknown_02023894 == 0))
+  {
+    do
     {
-        if (sub_0802F460(i))
-        {
-            if (gUnknown_0849B01C->unk208[i] == 0xFFFF
-             || gUnknown_0849B01C->unk208[i] == 0x5FFF
-             || gUnknown_0849B01C->unk208[i] == 0x7FFF
-             || !(gUnknown_0849B01C->unk208[i] & 0x8000))
-            {
-                gUnknown_0849B01C->unk210 |= 0xFFFF;
-                goto keys;
-            }
-            if (((gUnknown_0849B01C->unk208[i] & 0x1C00) >> 10) != gUnknown_0849B01C->unk00)
-            {
-                gUnknown_0849B018->unk1b++;
-                gUnknown_0849B01C->unk210 |= 0xFFFF;
-                return 0;
-            }
-            acc |= gUnknown_0849B01C->unk208[i] & 0x3FF;
-        }
+      if (gUnknown_02023894 != 0)
+      {
+        break;
+      }
     }
+    while (gUnknown_0849B018->unk04 != 2);
+  }
+  *((vu16 *) (0x04000000 + 0x208)) = 0;
+  gUnknown_02023894 = 0;
+  *((vu16 *) (0x04000000 + 0x208)) = 1;
+  sub_080301E8();
+  i = gUnknown_0849B01C->unk02 << 13;
+  v = (((gUnknown_0849B01C->unk00 << 10) | 0x8000) | ((~(*((vu16 *) (0x04000000 + 0x130)))) & 0x3FF)) | i;
+  gUnknown_0849B01C->unk06 = v;
+  for (i = 0; i < 4; i++)
+  {
+    if (sub_0802F460(i))
+    {
+      new_var2 = gUnknown_0849B01C->unk00;
+      if ((((gUnknown_0849B01C->unk208[i] == 0xFFFF) || (gUnknown_0849B01C->unk208[i] == 0x5FFF)) || (gUnknown_0849B01C->unk208[i] == 0x7FFF)) || (!(gUnknown_0849B01C->unk208[i] & 0x8000)))
+      {
+        gUnknown_0849B01C->unk210 |= 0xFFFF;
+        goto keys;
+      }
+      if (((gUnknown_0849B01C->unk208[i] & 0x1C00) >> 10) != new_var2)
+      {
+        allOnes = 0xFFFF;
+        gUnknown_0849B018->unk1b++;
+        gUnknown_0849B01C->unk210 |= allOnes;
+        return 0;
+      }
+      acc |= gUnknown_0849B01C->unk208[i] & 0x3FF;
+    }
+  }
 
-    gUnknown_0849B01C->unk210 = acc;
-    gUnknown_0849B018->unk1b = 0;
-    return gUnknown_0849B01C->unk210;
+  gUnknown_0849B01C->unk210 = acc;
+  gUnknown_0849B018->unk1b = 0;
+  return gUnknown_0849B01C->unk210;
+  reset:
+  gUnknown_0849B018->unk1b = 0;
 
-reset:
-    gUnknown_0849B018->unk1b = 0;
-keys:
-    return gpKeySt->previous;
+  keys:
+  return gpKeySt->previous;
+
 }
 
 

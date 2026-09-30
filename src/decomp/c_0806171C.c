@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0806171C.
- * sub_0806171C @ 0x0806171C, sub_08061788 @ 0x08061788, RunAiTurn @ 0x08061868
+ * sub_0806171C @ 0x0806171C, sub_08061788 @ 0x08061788, AiBeginTurn @ 0x08061868
  */
 
 /* The destination record is at 0x02029C54, which aw2bhr.lds does NOT name --
@@ -15,7 +15,7 @@
  * word at 0x0816DB00 (currently named gUnknown_0816DB00 in data/data.s). */
 #define SCRATCH ((struct Unk085771C4 *)(gUnknown_02029C20 + 0x34))
 
-/* sub_0806171C @ 0x0806171C, 108 bytes.
+/* AiDriverStep @ 0x0806171C, 108 bytes.
  *
  * The switch subject is read `ldrh; lsls #0x10; asrs #0x10` -- an UNSIGNED
  * halfword load followed by a separate sign extension. No plain read of a
@@ -28,7 +28,7 @@
  * -- a volatile-qualified read -- leaves the two halves apart.
  *
  * That is a REPRODUCTION, not a claim that the object is volatile:
- * src/decomp/c_08034394.c's sub_080343D8 reads the same symbol with the
+ * src/decomp/c_08034394.c's RemoteTurn_ExecuteCommand reads the same symbol with the
  * register-offset `ldrsh` that only a non-volatile s16 object gives, and it is
  * matched. The two readings cannot both come from one declaration, so the
  * original's two translation units declared gUnknown_03004780 differently. The
@@ -39,7 +39,7 @@
  * 0,1,2,3,5,4 is the order the arms are written in; case 4 is last and is the
  * only one without a trailing `b`.
  */
-void sub_0806171C(void)
+void AiDriverStep(void)
 {
     if (sub_08019260())
         return;
@@ -47,37 +47,38 @@ void sub_0806171C(void)
     switch ((s16)*(volatile u16 *)&gUnknown_03004780)
     {
     case 0:
-        RunAiTurn();
+        AiBeginTurn();
         break;
     case 1:
-        sub_08061B00();
+        AiStartNextPass();
         break;
     case 2:
-        sub_0805D438();
+        AiRunNextWorklistUnit();
         break;
     case 3:
-        sub_0805FD64();
+        AiExecuteActionStep();
         break;
     case 5:
-        sub_080606D0();
+        AiProduceUnits();
         break;
     case 4:
-        sub_08061AC4();
+        AiEndTurnStep();
         break;
     }
 }
+asm(".global sub_0806171C\n.thumb_set sub_0806171C, AiDriverStep\n");
 
-/* Two arms that do NOT cross-jump: both end in the same sub_08061A40 call but
+/* Two arms that do NOT cross-jump: both end in the same CopyAiPersonality call but
  * they compare different values (unk27 reloaded off the element address r3 vs
  * the local v), which is the documented condition for the tails to stay
  * separate. Only the third call, after the join, is shared. */
-void sub_08061788(u16 a)
+void AiLoadPersonality(u16 a)
 {
     u8 v;
 
     if (gUnknown_085C77A0[gPlaySt.mapID].unk27 != 0)
     {
-        sub_08061A40(SCRATCH,
+        CopyAiPersonality(SCRATCH,
             &gUnknown_085771C4[gUnknown_0857690C[gUnknown_085C77A0[gPlaySt.mapID].unk27][gPlayers[a].co]]);
     }
     else
@@ -87,15 +88,16 @@ void sub_08061788(u16 a)
         else
             v = 4;
 
-        sub_08061A40(SCRATCH,
+        CopyAiPersonality(SCRATCH,
             &gUnknown_085771C4[gUnknown_0857690C[v][gPlayers[a].co]]);
     }
 
-    sub_08061A40(&gUnknown_02029D84, SCRATCH);
+    CopyAiPersonality(&gUnknown_02029D84, SCRATCH);
 }
+asm(".global sub_08061788\n.thumb_set sub_08061788, AiLoadPersonality\n");
 
 /* The record selection is a TERNARY over one store, exactly as the matched
- * sub_08077F30 (src/decomp/c_08077F30.c) spells the same idiom: each arm
+ * WorldMap_CommitMissionAndEndProcs (src/decomp/c_08077F30.c) spells the same idiom: each arm
  * computes only `index * 0x30` and a base biased by 0x24 or 0x28, and the two
  * fall into a shared `adds r0,r0,r2; ldr r0,[r0]; str r0,[r5]`.
  *
@@ -104,20 +106,20 @@ void sub_08061788(u16 a)
  * emits both pool `ldr`s first (0x030044D8's, then 0x03004770's), then the
  * single `movs r0,#0`, then the `str` and the `strb` in that order. Two
  * separate statements interleave the pool loads with their stores instead. */
-void RunAiTurn(void)
+void AiBeginTurn(void)
 {
     gFactoryUnitSchedule = IsHardCampaignMode()
         ? gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptHc
         : gUnknown_08615194[gPlaySt.mapID - 0x8a].factoryScriptNc;
 
-    sub_08061CDC();
-    sub_08061CF8();
+    AiClearTerritoryCounters();
+    AiCountEnemyFacilities();
     AiScanBuildableFacilities();
-    sub_08061788(gUnknown_030033EC);
-    sub_08062028();
-    sub_0806279C();
-    sub_08062C7C(0);
-    sub_08061E98();
+    AiLoadPersonality(gUnknown_030033EC);
+    AiBuildCapturePlaneAndClearEscortTally();
+    AiClearInfluenceGrid();
+    AiUpdateInfluence(0);
+    AiUpdateUnitModes();
 
     gUnknown_03004780 = 1;
     gUnknown_030044D8 = gUnknown_03004770 = 0;
@@ -126,4 +128,4 @@ void RunAiTurn(void)
         sub_080607E8();
 }
 
-asm(".global sub_08061868\n.thumb_set sub_08061868, RunAiTurn\n");
+asm(".global sub_08061868\n.thumb_set sub_08061868, AiBeginTurn\n");

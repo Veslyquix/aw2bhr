@@ -8,13 +8,6 @@
  */
 
 #include "proc.h"
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0803B8A0.
- * sub_0803B8A0 @ 0x0803B8A0
- */
-
 
 /* Family F011: `push {lr}; bl f; ldr r0,=g; movs r1,#N; bl h; pop {r0}; bx r0`.
  * Two statements and NOT a nest -- r0 is overwritten by the pool `ldr` between
@@ -29,8 +22,9 @@
  * proc-starter table in docs/agbcc-codegen.md distinguishes by r1 being
  * WRITTEN rather than left alone. Proc_Start returns the proc; `pop {r0}` says
  * this discards it. */
-void sub_0803B8A0(void)
+void StartMainMenuAfterProgressLoad(void)
 {
-    sub_08016ED8();
+    ReloadProgressFromProfile();
     Proc_Start(ProcScr_MainMenu, PROC_TREE_3);
 }
+asm(".global sub_0803B8A0\n.thumb_set sub_0803B8A0, StartMainMenuAfterProgressLoad\n");

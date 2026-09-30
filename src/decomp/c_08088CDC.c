@@ -30,7 +30,7 @@ struct Unk08088DA4
     /* 0x60 */ int unk60;
 };
 
-void sub_08088CDC(struct Unk08088CDC *p)
+void CoDesignEditor_LoadCoGraphicsMidSlide(struct Unk08088CDC *p)
 {
     int v0;
     int v1;
@@ -44,23 +44,24 @@ void sub_08088CDC(struct Unk08088CDC *p)
     m = &p->unk4c;
 
     if (*m == 9)
-        sub_08043BC8(v0, 0x40);
+        LoadCoFullBodyPart0(v0, 0x40);
 
     if (*m == 0xa)
     {
-        sub_08043BF8(v0, 0x40);
-        sub_08043AA0(v0, 0x11);
+        LoadCoFullBodyPart1(v0, 0x40);
+        LoadCoPalette(v0, 0x11);
     }
 
     if (*m == 0x10)
     {
-        sub_08043E3C(v0, (void *)0x06013000, 0x12);
-        sub_08043E3C(v1, (void *)0x06013480, 0x13);
-        sub_08043E3C(v2, (void *)0x06013900, 0x14);
+        LoadCoFace(v0, (void *)0x06013000, 0x12);
+        LoadCoFace(v1, (void *)0x06013480, 0x13);
+        LoadCoFace(v2, (void *)0x06013900, 0x14);
     }
 }
+asm(".global sub_08088CDC\n.thumb_set sub_08088CDC, CoDesignEditor_LoadCoGraphicsMidSlide\n");
 
-void sub_08088DA4(struct Unk08088DA4 *p)
+void CoDesignEditor_LoadCoGraphicsMidGroupSlide(struct Unk08088DA4 *p)
 {
     int v0;
     int v1;
@@ -74,34 +75,35 @@ void sub_08088DA4(struct Unk08088DA4 *p)
     m = &p->unk4c;
 
     if (*m == 0xd)
-        sub_08043BC8(v0, 0x40);
+        LoadCoFullBodyPart0(v0, 0x40);
 
     if (*m == 0xe)
     {
-        sub_08043BF8(v0, 0x40);
-        sub_08043AA0(v0, 0x11);
+        LoadCoFullBodyPart1(v0, 0x40);
+        LoadCoPalette(v0, 0x11);
     }
 
     if (p->unk60 < 0)
     {
         if (*m == 0xd)
-            sub_08043E3C(v0, (void *)0x06013000, 0x12);
+            LoadCoFace(v0, (void *)0x06013000, 0x12);
 
         if (*m == 0xe)
-            sub_08043E3C(v1, (void *)0x06013480, 0x13);
+            LoadCoFace(v1, (void *)0x06013480, 0x13);
 
         if (*m == 0xf)
-            sub_08043E3C(v2, (void *)0x06013900, 0x14);
+            LoadCoFace(v2, (void *)0x06013900, 0x14);
     }
     else if (p->unk60 > 0)
     {
         if (*m == 0xd)
-            sub_08043E3C(v0, (void *)0x06013000, 0x12);
+            LoadCoFace(v0, (void *)0x06013000, 0x12);
 
         if (*m == 9)
-            sub_08043E3C(v1, (void *)0x06013480, 0x13);
+            LoadCoFace(v1, (void *)0x06013480, 0x13);
 
         if (*m == 6)
-            sub_08043E3C(v2, (void *)0x06013900, 0x14);
+            LoadCoFace(v2, (void *)0x06013900, 0x14);
     }
 }
+asm(".global sub_08088DA4\n.thumb_set sub_08088DA4, CoDesignEditor_LoadCoGraphicsMidGroupSlide\n");

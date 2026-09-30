@@ -27,57 +27,58 @@
  * `ldr rN,=<pool>; ldr rM,[rN]; ldr rM,[rM]`, so the address only ever appears
  * as pool-word content and never as a direct `ldr rN,=gpKeySt`.
  *
- * The two `sub_08015C30(gUnknown_03001FBC)` tails are written out twice
+ * The two `ClearSlotScriptCallback(gUnknown_03001FBC)` tails are written out twice
  * because they are two separate early returns in the source; agbcc's
  * cross-jumping merges them into the one block at _0806E03A. Likewise the
- * `1` stored to the stack for sub_08073304's fifth and sixth arguments in the
+ * `1` stored to the stack for StartHeaderBanner's fifth and sixth arguments in the
  * second branch is the SAME register the `unk30 == 1` test just proved to hold
  * 1 -- that is CSE on a known constant, not a different value.
  */
-void sub_0806DFF0(void)
+void RulesScreenUpdate(void)
 {
-    sub_0806DF20();
+    RulesScreenPulseGreyPaletteColor();
 
     if (gUnknown_08580934->unk2d != 0)
         return;
 
     if (gUnknown_0202F2C8 == 0 && (gpKeySt->pressed & 8))
     {
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
         return;
     }
 
     if (gpKeySt->held & 2)
     {
         gUnknown_0202F2C8 = 1;
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
         return;
     }
 
     if (gUnknown_08580934->unk30 == 0 && (gpKeySt->pressed & L_BUTTON))
     {
-        sub_0803B4DC(0x73);
+        PlayMusicOrSfx2(0x73);
         sub_080733B8();
-        sub_08073304(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
-        sub_0806D34C();
-        sub_0806D53C();
+        StartHeaderBanner(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
+        RulesScreenDismissRuleOptions();
+        RulesScreenSpawnArmyColumns();
         gUnknown_08580934->unk30 = 1;
         return;
     }
 
     if (gUnknown_08580934->unk30 == 1 && (gpKeySt->pressed & R_BUTTON))
     {
-        sub_0803B4DC(0x73);
+        PlayMusicOrSfx2(0x73);
         sub_080733B8();
-        sub_08073304(gUnknown_085802AC, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
-        sub_0806D620();
-        sub_0806D268();
+        StartHeaderBanner(gUnknown_085802AC, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
+        RulesScreenDismissArmyColumns();
+        RulesScreenSpawnRuleOptions();
         gUnknown_08580934->unk30 = 0;
         return;
     }
 
     if (gUnknown_08580934->unk30 == 0)
-        sub_0806DE38();
+        RulesScreenHandleRulesPageInput();
 
-    sub_0806DF58();
+    RulesScreenShowHelpText();
 }
+asm(".global sub_0806DFF0\n.thumb_set sub_0806DFF0, RulesScreenUpdate\n");

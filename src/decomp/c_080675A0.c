@@ -50,9 +50,9 @@ void IntroT0_IDLE_080675A1(struct Unk675A0Proc *proc)
         gPal[i] = 0x7fff;
     }
 
-    sub_080135A4();
-    sub_08012358();
-    sub_0801237C();
+    EnablePaletteSync();
+    SetDefaultColorEffects();
+    ResetWindowShadows();
 
     gDispIo.disp_ct.bg0_enable = 1;
     gDispIo.disp_ct.bg1_enable = 1;
@@ -60,7 +60,7 @@ void IntroT0_IDLE_080675A1(struct Unk675A0Proc *proc)
     gDispIo.disp_ct.bg3_enable = 1;
     gDispIo.disp_ct.forced_blank = 1;
 
-    sub_080638D0(0);
+    SetVCountInterruptHandler(0);
     Proc_EndEach(ProcScr_IntroT3);
 
     if (proc->unk64 != 0)

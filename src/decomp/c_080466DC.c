@@ -17,22 +17,22 @@
  * include/unknown-globals.h did until wave 34) costs one extra `ldr` at each of
  * the three read sites. The object is the same one src/decomp/c_080466A4.c
  * walks -- unk50 sits in the same record as its unk58/unk59. */
-void sub_080466DC(void)
+void IntelStatus_Loop(void)
 {
-    sub_080466A4();
+    IntelStatus_StepPhase();
 
     if (gUnknown_084C1430->unk50 != 0)
     {
         sub_08046030();
-        sub_08013AEC();
-        sub_08013B0C();
+        BG_EnableSyncBG0();
+        BG_EnableSyncBG2();
         gUnknown_084C1430->unk50 = 0;
     }
     else if (gpKeySt->pressed & 3)
     {
         sub_08014878();
-        sub_0803B4DC(0x66);
-        sub_08015C30(gUnknown_03001FBC);
+        PlayMusicOrSfx2(0x66);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
 
         if (gpKeySt->pressed & 2)
             gUnknown_03002F1C = 1;
@@ -41,5 +41,6 @@ void sub_080466DC(void)
     }
 
     if (gUnknown_084C1430->unk50 == 0)
-        sub_08045FC8();
+        DrawIntelStatusArmyIcons();
 }
+asm(".global sub_080466DC\n.thumb_set sub_080466DC, IntelStatus_Loop\n");

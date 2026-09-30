@@ -1,5 +1,4 @@
 #include "global.h"
-#include "map.h"
 
 /* Wave 76 advance: separate int copies plus empty-asm barriers at the two
  * s16 call sites prevent CSE from sharing the conversions across the loop.
@@ -65,6 +64,7 @@
  * the park: sub_0805D648's signature was corrected to (s16, s16, u8, u8, u8) and
  * sub_0802042C's to (int, int, u8 *), both in include/unknown-functions.h with
  * the evidence. sub_0805D648 itself MATCHED. */
+
 
 void sub_0805D888(void)
 {

@@ -5,7 +5,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0805ECDC.
- * AiChargeAggressively @ 0x0805ECDC, AiMoveWithFrontLine @ 0x0805ED70, sub_0805EE40 @ 0x0805EE40, sub_0805EF00 @ 0x0805EF00, sub_0805EF9C @ 0x0805EF9C, AiMoveUpConservatively @ 0x0805F074
+ * AiChargeAggressively @ 0x0805ECDC, AiMoveWithFrontLine @ 0x0805ED70, AiAdvanceToAllocatedEnemyProperty @ 0x0805EE40, AiAdvanceToAllocatedEnemyPropertyUsingReach @ 0x0805EF00, AiHuntNearestEnemy @ 0x0805EF9C, AiMoveUpConservatively @ 0x0805F074
  */
 
 void AiChargeAggressively(void)
@@ -19,18 +19,18 @@ void AiChargeAggressively(void)
     else
         t = gUnknown_030040D8->unk00;
 
-    sub_08058F30(&x);
+    AiGetReachBudget(&x);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, t, x, 0);
-    sub_08059AEC();
+    AiMarkAttackRings();
 
-    if (sub_08058F90(&v) == -1)
-        sub_0805F4F8();
+    if (AiFindNearestEnemyHq(&v) == -1)
+        AiEmbarkOrFallback();
     else if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation == 0x20)
         sub_080590DC(&v);
     else
-        sub_080591E4(&v);
+        AiAdvanceToward(&v);
 
-    sub_0805F7B8();
+    AiFallbackMove();
 }
 
 asm(".global sub_0805ECDC\n.thumb_set sub_0805ECDC, AiChargeAggressively\n");
@@ -42,28 +42,28 @@ void AiMoveWithFrontLine(void)
     u8 x;
 
     p = gUnknown_03003F20;
-    sub_08058F30(&x);
+    AiGetReachBudget(&x);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, x, 0);
-    sub_08059AEC();
+    AiMarkAttackRings();
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].deployLocation == 0x20)
-        sub_0805A008(p);
+        AiListUnescortedLanders(p);
     else
-        sub_08059F24(p);
+        AiListUnescortedFootUnits(p);
     v.pos.unk00 = 0x270F;
-    sub_08059C00(p, (u16 *)&v);
+    AiPopLastNearestCandidate(p, (u16 *)&v);
     if (v.pos.unk00 == 0x270F)
-        sub_0805F4F8();
+        AiEmbarkOrFallback();
     gUnknown_03004730[gMap->unit[
         gMap->rowOffset[v.pos.unk02]
         + v.pos.unk00] & 0x3f]++;
-    sub_080591E4(&v);
-    sub_0805F7B8();
+    AiAdvanceToward(&v);
+    AiFallbackMove();
 }
 
 asm(".global sub_0805ED70\n.thumb_set sub_0805ED70, AiMoveWithFrontLine\n");
 
-void sub_0805EE40(void)
+void AiAdvanceToAllocatedEnemyProperty(void)
 {
     union Unk802C57CBuf v;
     struct Unk03003338 *p;
@@ -73,11 +73,11 @@ void sub_0805EE40(void)
     int b;
 
     p = gUnknown_03003F20;
-    sub_08058F30(&x);
+    AiGetReachBudget(&x);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, x, 0);
-    sub_08059AEC();
-    sub_08059A0C(p);
+    AiMarkAttackRings();
+    AiListEnemyPropertyCells(p);
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange > 1)
     {
         q = CountUnitsWithTypeTag(4);
@@ -91,14 +91,15 @@ void sub_0805EE40(void)
         b = 2;
     }
     v.pos.unk00 = 0x270F;
-    sub_08059B4C(q, a, b, p, &v);
+    AiAllocateTerritoryTarget(q, a, b, p, &v);
     if (v.pos.unk00 == 0x270F)
-        sub_0805F4F8();
-    sub_080591E4(&v);
-    sub_0805F7B8();
+        AiEmbarkOrFallback();
+    AiAdvanceToward(&v);
+    AiFallbackMove();
 }
+asm(".global sub_0805EE40\n.thumb_set sub_0805EE40, AiAdvanceToAllocatedEnemyProperty\n");
 
-void sub_0805EF00(void)
+void AiAdvanceToAllocatedEnemyPropertyUsingReach(void)
 {
     union Unk802C57CBuf v;
     struct Unk03003338 *p;
@@ -107,7 +108,7 @@ void sub_0805EF00(void)
     int b;
 
     p = gUnknown_03003F20;
-    sub_08059A0C(p);
+    AiListEnemyPropertyCells(p);
     if (gUnknown_085D5ABC[gUnknown_030040D8->unk00].minRange > 1)
     {
         q = CountUnitsWithTypeTag(4);
@@ -121,36 +122,38 @@ void sub_0805EF00(void)
         b = 2;
     }
     v.pos.unk00 = 0x270F;
-    sub_08059B4C(q, a, b, p, &v);
+    AiAllocateTerritoryTarget(q, a, b, p, &v);
     if (v.pos.unk00 == 0x270F)
-        sub_0805F4F8();
-    sub_080591E4(&v);
-    sub_0805F7B8();
+        AiEmbarkOrFallback();
+    AiAdvanceToward(&v);
+    AiFallbackMove();
 }
+asm(".global sub_0805EF00\n.thumb_set sub_0805EF00, AiAdvanceToAllocatedEnemyPropertyUsingReach\n");
 
-void sub_0805EF9C(void)
+void AiHuntNearestEnemy(void)
 {
     union Unk802C57CBuf v;
     struct Unk03003338 *p;
     u8 x;
 
     p = gUnknown_03003F20;
-    sub_08058F30(&x);
+    AiGetReachBudget(&x);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, x, 0);
-    sub_08059AEC();
-    sub_08059C60(p);
+    AiMarkAttackRings();
+    AiListHuntTargets(p);
     v.pos.unk00 = 0x270F;
-    sub_08059C00(p, (u16 *)&v);
+    AiPopLastNearestCandidate(p, (u16 *)&v);
     if (v.pos.unk00 == 0x270F)
-        sub_0805F4F8();
+        AiEmbarkOrFallback();
     else if ((s8)gUnknown_03003340[v.pos.unk02][v.pos.unk00] <= 0x79)
-        sub_080591E4(&v);
-    sub_0801F92C(gMap->danger);
+        AiAdvanceToward(&v);
+    SetWorkingMapPlane(gMap->danger);
     gUnknown_030013EC(v.pos.unk00, v.pos.unk02, 0x10, 0x78, 0);
-    sub_08059464(&v);
-    sub_0805F7B8();
+    AiAdvanceTowardUnseeded(&v);
+    AiFallbackMove();
 }
+asm(".global sub_0805EF9C\n.thumb_set sub_0805EF9C, AiHuntNearestEnemy\n");
 
 void AiMoveUpConservatively(void)
 {
@@ -159,17 +162,17 @@ void AiMoveUpConservatively(void)
     u8 x;
 
     p = gUnknown_03003F20;
-    sub_08058F30(&x);
+    AiGetReachBudget(&x);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, x, 0);
-    sub_08059AEC();
-    sub_08059E3C(p);
+    AiMarkAttackRings();
+    AiListThreatenedProperties(p);
     v.pos.unk00 = 0x270F;
-    sub_08059C00(p, (u16 *)&v);
+    AiPopLastNearestCandidate(p, (u16 *)&v);
     if (v.pos.unk00 == 0x270F)
-        sub_0805EF00();
-    sub_080591E4(&v);
-    sub_0805F7B8();
+        AiAdvanceToAllocatedEnemyPropertyUsingReach();
+    AiAdvanceToward(&v);
+    AiFallbackMove();
 }
 
 asm(".global sub_0805F074\n.thumb_set sub_0805F074, AiMoveUpConservatively\n");

@@ -21,14 +21,15 @@
  * arises here: every access is `ldrb` + a byte mask, i.e. `.bits`.
  *
  * This is src/decomp/c_08024378.c's opening with a different permutation of the
- * four priorities; sub_08024584 and sub_0802465C are the other two. */
+ * four priorities; SetMapLayersDefault and SetMapLayerPrioritiesDefault are the other two. */
 
-void sub_08024404(void)
+void SetMapLayersRangeBehindUnits(void)
 {
     gUnknown_030030B4.bits.priority = 0;
     gUnknown_03001FE8.bits.priority = 1;
     gUnknown_03002B6C.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
-    sub_08012358();
-    sub_0801237C();
+    SetDefaultColorEffects();
+    ResetWindowShadows();
 }
+asm(".global sub_08024404\n.thumb_set sub_08024404, SetMapLayersRangeBehindUnits\n");

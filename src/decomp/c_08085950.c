@@ -11,9 +11,10 @@
  * not a mask plus a shift -- and it has to be spelled as a multiply: with the
  * (u16) cast, shorten_binary_op folds `x * 0x20` into the two instructions the
  * ROM has, where `x << 5` needs three. */
-void sub_08085950(int a1, int a2)
+void LoadCoInfoUnitSheet(int a1, int a2)
 {
-    sub_08011E54(sub_08026190(), (void *)0x06012000, (sub_080261A0() & 0x3FF) << 5);
+    RegisterDataMove(GetUnitSheetGraphics(), (void *)0x06012000, (GetUnitSheetFrameTileCount() & 0x3FF) << 5);
 
-    ApplyPaletteExt((u16 *)sub_080261C8(a2), (u16)((a1 + 0x10) * 0x20), 0x20);
+    ApplyPaletteExt((u16 *)GetArmyTeamColorPalette(a2), (u16)((a1 + 0x10) * 0x20), 0x20);
 }
+asm(".global sub_08085950\n.thumb_set sub_08085950, LoadCoInfoUnitSheet\n");

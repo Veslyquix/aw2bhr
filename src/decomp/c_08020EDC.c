@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08020EDC.
- * AddValueInRange @ 0x08020EDC
+ * StampVisionDisc @ 0x08020EDC
  *
  * Not a Xenesis-documented name. The old sub_08020EDC symbol is kept as a
  * linker alias below so every other unit keeps resolving it unchanged.
@@ -16,11 +16,11 @@
  * distance r of (x, y). r == 0 touches only the centre cell. Beyond distance
  * 1, when bit 3 of sub_08043050(flags) is clear, a cell of terrain type 4 or
  * 0x13 is skipped if it holds no unit or a unit whose type is outside
- * 0x10..0x14. sub_080210C8 calls it with planes in gMap->visible. Twin of
- * sub_08020B88, which writes an overlay instead of adding.
+ * 0x10..0x14. StampVisionByPlaneMask calls it with planes in gMap->visible. Twin of
+ * MarkAttackableCellsInRange, which writes an overlay instead of adding.
  *
  * Measured spelling notes (parked since wave 49 at 90.7%):
- * - `flags` is an INT parameter. The one caller, sub_080210C8, narrows its
+ * - `flags` is an INT parameter. The one caller, StampVisionByPlaneMask, narrows its
  *   own int with an explicit `(u8)` at the call; a u8 parameter here would
  *   narrow it a second time at entry, and that half-emitted narrowing is
  *   what slipped `lsls r4,#24` ahead of delta's group. Earlier waves read the
@@ -33,7 +33,7 @@
  *   `buf[gMap->rowOffset[y] + x]`, row first, and the swept cell reads its
  *   row into a u16 `row` before the add.
  */
-void AddValueInRange(s16 x, s16 y, s16 r, u8 *buf, int delta, int flags)
+void StampVisionDisc(s16 x, s16 y, s16 r, u8 *buf, int delta, int flags)
 {
     u32 d;
     u8 f;
@@ -93,4 +93,4 @@ void AddValueInRange(s16 x, s16 y, s16 r, u8 *buf, int delta, int flags)
     }
 }
 
-asm(".global sub_08020EDC\n.thumb_set sub_08020EDC, AddValueInRange\n");
+asm(".global sub_08020EDC\n.thumb_set sub_08020EDC, StampVisionDisc\n");

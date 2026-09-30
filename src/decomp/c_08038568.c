@@ -7,18 +7,19 @@
  * sub_08038568 @ 0x08038568
  */
 
-void sub_08038568(void)
+void EndOfGame_FinishVersusMap(void)
 {
     ResetRulesAfterCampaignMap();
 
     if (gPlaySt.savingEnabled == 0)
     {
-        sub_0803D73C(sub_08016D04(gPlaySt.gameMode), sub_0803B8B8);
+        StartSaveScreen(GetSuspendIdForGameMode(gPlaySt.gameMode), MainMenuVersus_NewGame);
     }
     else
     {
-        sub_0803BCB8();
-        sub_0803B828();
-        sub_08030ED4();
+        RestoreCampaignFlags();
+        StartMainMenu();
+        LinkShutdown();
     }
 }
+asm(".global sub_08038568\n.thumb_set sub_08038568, EndOfGame_FinishVersusMap\n");

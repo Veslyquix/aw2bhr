@@ -61,14 +61,14 @@ struct Unk08028D28Proc
     /* 0x66 */ s16 unk66;
 };
 
-void sub_08028D28(struct Unk08028D28Proc *proc)
+void RangeSpread_Init(struct Unk08028D28Proc *proc)
 {
     struct Unk08028D28Sprite *buf;
     u8 **ga;
     u8 *map;
     s16 x, y;
 
-    proc->unk4c = sub_08014E44(0x660);
+    proc->unk4c = HeapMalloc(0x660);
     buf = proc->unk4c;
     proc->unk64 = 0;
     proc->unk66 = 0;
@@ -100,3 +100,4 @@ void sub_08028D28(struct Unk08028D28Proc *proc)
         } while (y < *(u16 *)(map + 2));
     }
 }
+asm(".global sub_08028D28\n.thumb_set sub_08028D28, RangeSpread_Init\n");

@@ -8,20 +8,13 @@
  * sub_08035D0C @ 0x08035D0C
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08035D0C.
- * sub_08035D0C @ 0x08035D0C
- */
-
 #include "proc.h"
 /* Picks the help/message id for whatever the proc's cursor is standing on:
  * two overriding predicates first, then a table on the low five bits of the
  * gUnknown_08499590 terrain byte at the same `rowOffset[y] + x` key
- * sub_08035C90 uses (same `(v + 8) / 16` pixel-to-cell divide).
+ * IsMoveSlideOnRiver uses (same `(v + 8) / 16` pixel-to-cell divide).
  *
- * The 0x2d arm of the switch and the sub_08035C90 early return are ONE block in
+ * The 0x2d arm of the switch and the IsMoveSlideOnRiver early return are ONE block in
  * the ROM -- cross-jumping merged them, which is why the jump table's entries
  * for 2, 7 and 19 point back above the switch.
  *
@@ -37,14 +30,14 @@ struct Unk35D0CProc
     /* 0x44 */ s16 unk44;
 };
 
-u16 sub_08035D0C(ProcPtr proc)
+u16 GetMoveSlideFootstepSfx(ProcPtr proc)
 {
     struct Map *map;
 
-    if (sub_08035C90(proc))
+    if (IsMoveSlideOnRiver(proc))
         return 0x2d;
 
-    if (sub_08035CF4(proc))
+    if (IsWeatherSnowing(proc))
         return 0x43;
 
     map = gMap;
@@ -75,3 +68,4 @@ u16 sub_08035D0C(ProcPtr proc)
 
     return 0;
 }
+asm(".global sub_08035D0C\n.thumb_set sub_08035D0C, GetMoveSlideFootstepSfx\n");

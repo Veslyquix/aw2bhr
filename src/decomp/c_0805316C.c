@@ -18,8 +18,8 @@
  * shifted domain, which needs no `lsrs`; a reload would have emitted one. */
 void sub_0805316C(ProcPtr proc)
 {
-    sub_08053F0C();
-    sub_0804B3CC();
+    RunBattleAnimStepHandler();
+    StepPanelBounceBothSides();
 
     if (++gUnknown_03004508 == 0x12C)
         Proc_Break(proc);

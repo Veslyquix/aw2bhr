@@ -7,18 +7,19 @@
  * sub_08030CCC @ 0x08030CCC
  */
 
-void sub_08030CCC(void)
+void LinkPollHandshake(void)
 {
     u8 v;
 
-    v = sub_08030D1C();
+    v = LinkPollSelfId();
     if (v == 1)
     {
         gUnknown_0849B018->unk1e = 0;
         gUnknown_0849B018->unk04 = 4;
         gUnknown_0849B018->unk04 = 5;
         gPlaySt.savingEnabled = v;
-        sub_0802F8FC((u16 *)&gGameClock, 1);
-        sub_08015C30(gUnknown_03001FBC);
+        SioSend16((u16 *)&gGameClock, 1);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
     }
 }
+asm(".global sub_08030CCC\n.thumb_set sub_08030CCC, LinkPollHandshake\n");

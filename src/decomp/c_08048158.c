@@ -17,7 +17,7 @@ struct Unk08047B98
     /* 0x22 */ u8 unk22;
 };
 
-void sub_08048158(struct Unk08047B98 *p)
+void UnitList_DrawSprites(struct Unk08047B98 *p)
 {
     int i;
 
@@ -43,10 +43,10 @@ void sub_08048158(struct Unk08047B98 *p)
     }
 
     if (p->unk20 != 0)
-        sub_08043418(0x29, 0x38, 0xe);
+        DrawMapCursorSprite(0x29, 0x38, 0xe);
 
     if (p->unk21 > 5 && p->unk20 < p->unk21 - 6)
-        sub_08043418(0x29, 0x97, 0xf);
+        DrawMapCursorSprite(0x29, 0x97, 0xf);
 
     i = DivRem(Div(0x40 - DivRem(gGameClock, 0x40), 4), 0x10) * 2;
 
@@ -58,3 +58,4 @@ void sub_08048158(struct Unk08047B98 *p)
                     (u16)((0x10 - DivRem(Div(0x40 - DivRem(gGameClock, 0x40), 4), 0x10)) * 2 + 0x2a0),
                     DivRem(Div(0x40 - DivRem(gGameClock, 0x40), 4), 0x10) * 2);
 }
+asm(".global sub_08048158\n.thumb_set sub_08048158, UnitList_DrawSprites\n");

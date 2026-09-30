@@ -15,12 +15,13 @@
 /* Wave 32 (W32-B) UNIFIES the local struct with struct Unit: the two
  * members this body reads -- unk00 at +0x00 and the 7-bit bitfield at +0x06 --
  * are that type's unk00 and unk06_0 at the identical offsets and widths, and
- * sub_08062730 (promoted this wave) passes gUnits entries straight
+ * AiIsEnemyThreatWindowNearUnit (promoted this wave) passes gUnits entries straight
  * in. Byte-neutral; re-verified. The local model is removed rather than kept
  * so the shared type is the only one a future caller can see. */
-int sub_08058224(struct Unit *p)
+int GetUnitMovementBudget(struct Unit *p)
 {
     if (GetUnitMovementWithCoBonus(gUnknown_030033EC, p->type) > p->fuel)
         return p->fuel;
     return GetUnitMovementWithCoBonus(gUnknown_030033EC, p->type);
 }
+asm(".global sub_08058224\n.thumb_set sub_08058224, GetUnitMovementBudget\n");

@@ -7,9 +7,9 @@
  * sub_0805FE0C @ 0x0805FE0C
  */
 
-void sub_0805FE0C(void)
+void AiExecutorBegin(void)
 {
-    sub_080129D4(gUnknown_030046C0.unk08);
+    SetRandomSeed(gUnknown_030046C0.unk08);
 
     if (gUnknown_030046C0.unk00 == 1
      || gUnknown_030046C0.unk00 == 0xe
@@ -31,7 +31,7 @@ void sub_0805FE0C(void)
         {
             gUnknown_03003F38 = gUnknown_030046C0.unk01;
             gUnknown_030040D8 = (struct Unk030040D8 *)&gUnits[gUnknown_03003F38];
-            sub_08029088(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
+            ScrollCameraToKeepCellInView(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
         }
 
         gUnknown_030045D4 = 2;
@@ -56,7 +56,8 @@ void sub_0805FE0C(void)
     }
 
     if (gPlaySt.savingEnabled == 0 || gUnknown_03003F60 != 4)
-        sub_08029088(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
+        ScrollCameraToKeepCellInView(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03);
 
     gUnknown_030045D4 = 1;
 }
+asm(".global sub_0805FE0C\n.thumb_set sub_0805FE0C, AiExecutorBegin\n");

@@ -14,7 +14,7 @@
 #include "proc.h"
 #include "hardware.h"
 
-/* BattleMaps_IDLE_08049361 @ 0x08049360, 1480 bytes, THUMB.
+/* ShopScreen_Loop @ 0x08049360, 1480 bytes, THUMB.
  *
  * The unit-list proc's per-frame state machine: a twelve-case switch on
  * gUnknown_084C30F8->unk834, ending in a common "redraw if the list is not
@@ -27,7 +27,7 @@
  * 0x00590005 and the function hands the ADDRESS to sub_0808B6E8 as a copy
  * source, so it is a data template and must be named -- see W56-G.
  */
-void BattleMaps_IDLE_08049361(ProcPtr proc)
+void ShopScreen_Loop(ProcPtr proc)
 {
     u16 steps[2];
     int flag = 0;
@@ -37,9 +37,9 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
 
     if (gUnknown_084C30F8->unk83c != 0)
     {
-        if (sub_08048F10() != 0)
+        if (ShopScreen_StepOffsetToZero() != 0)
             return;
-        sub_080485DC(gUnknown_084C30E8[0]);
+        ShopScreen_StartMessage(gUnknown_084C30E8[0]);
         gUnknown_084C30F8->unk834 = 0xb;
     }
 
@@ -47,7 +47,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
     {
     case 0:
         if (gUnknown_084C30F8->unk836 != 0)
-            sub_08048F4C();
+            ShopList_HandleInput();
         if (gUnknown_084C30F8->unk030 != 0)
             break;
         if (gUnknown_084C30F8->unk836 != 0)
@@ -58,7 +58,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         else
         {
             if ((gpKeySt->unk0c & 2) != 0)
-                sub_080485F8();
+                ShopScreen_EndMessage();
             if (sub_08019260())
                 break;
             flag = 1;
@@ -77,9 +77,9 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         break;
 
     case 1:
-        if (sub_08048F10() != 0)
+        if (ShopScreen_StepOffsetToZero() != 0)
             break;
-        sub_080485DC(
+        ShopScreen_StartMessage(
             gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
                 .unk14);
         gUnknown_084C30F8->unk834++;
@@ -88,7 +88,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
     case 2:
         if ((gpKeySt->unk0c & 2) != 0)
         {
-            sub_080485F8();
+            ShopScreen_EndMessage();
             gUnknown_084C30F8->unk834 = 8;
             break;
         }
@@ -97,7 +97,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
         gUnknown_084C30F8->unk83b = 0;
         if (gUnknown_03002EE4 == 1)
         {
-            sub_080485DC(gUnknown_084C3028);
+            ShopScreen_StartMessage(gUnknown_084C3028);
             gUnknown_084C30F8->unk834 = 7;
             break;
         }
@@ -105,11 +105,11 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
             < gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
                   .unk04)
         {
-            sub_080485DC(gUnknown_084C3008);
+            ShopScreen_StartMessage(gUnknown_084C3008);
             gUnknown_084C30F8->unk834 = 7;
             break;
         }
-        sub_080485DC(gUnknown_084C2FE8);
+        ShopScreen_StartMessage(gUnknown_084C2FE8);
         gUnknown_084C30F8->unk834++;
         break;
 
@@ -121,18 +121,18 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
             = gUnknown_084C30F8->unk028
             - gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
                   .unk04;
-        sub_0803C864(gUnknown_02028E1C[gUnknown_084C30F8->unk01e]);
-        sub_080487B4(0,
+        GrantShopItem(gUnknown_02028E1C[gUnknown_084C30F8->unk01e]);
+        DrawShopItemRow(0,
                      (gUnknown_084C30F8->unk01e - gUnknown_084C30F8->unk020) * 2
                          + 7,
                      gBG0TilemapBuffer,
                      gUnknown_02028E1C[gUnknown_084C30F8->unk01e], 4);
-        sub_08013AEC();
+        BG_EnableSyncBG0();
         gUnknown_084C30F8->unk834++;
         break;
 
     case 4:
-        sub_0803B4DC(0x6b);
+        PlayMusicOrSfx2(0x6b);
         gUnknown_084C30F8->unk834++;
         /* fallthrough */
     case 5:
@@ -150,16 +150,16 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
             TrySpendBattleMapPoints(
                 gUnknown_0849EDB0[gUnknown_02028E1C[gUnknown_084C30F8->unk01e]]
                     .unk04);
-            sub_08012BC8(gBG0TilemapBuffer, 7, 0xf, 0x17, 4, 0);
-            sub_0803B4DC(0x6c);
+            FillTilemapRect(gBG0TilemapBuffer, 7, 0xf, 0x17, 4, 0);
+            PlayMusicOrSfx2(0x6c);
             gUnknown_084C30F8->unk834++;
         }
         gUnknown_084C30F8->unk835 = 1;
-        sub_08013AEC();
+        BG_EnableSyncBG0();
         break;
 
     case 6:
-        if (sub_08048EC4() != 0)
+        if (ShopScreen_StepOffsetToMinus38() != 0)
             break;
         if (gUnknown_084C30F8->unk83b != 0)
         {
@@ -186,7 +186,7 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
                 if (gUnknown_084C30F8->unk01e >= gUnknown_084C30F8->unk836)
                     gUnknown_084C30F8->unk01e--;
                 gUnknown_084C30F8->unk030 = 1;
-                sub_080488E0();
+                ShopList_StepScroll();
                 gUnknown_084C30F8->unk834++;
                 break;
             }
@@ -197,33 +197,33 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
 
     case 7:
         if ((gpKeySt->unk0c & 2) != 0)
-            sub_080485F8();
+            ShopScreen_EndMessage();
         if (sub_08019260())
             break;
         gUnknown_084C30F8->unk834 = 8;
         break;
 
     case 8:
-        if (sub_08048EC4() != 0)
+        if (ShopScreen_StepOffsetToMinus38() != 0)
             break;
-        sub_0804931C();
+        RedrawSelectedShopRow();
         gUnknown_084C30F8->unk834 = 0;
         break;
 
     case 9:
-        if (sub_08048F10() != 0)
+        if (ShopScreen_StepOffsetToZero() != 0)
             break;
-        sub_080485DC(gUnknown_084C3048);
+        ShopScreen_StartMessage(gUnknown_084C3048);
         gUnknown_084C30F8->unk834 = 0;
         break;
 
     case 10:
         if (gUnknown_084C30F8->unk836 == gUnknown_084C30F8->unk837)
         {
-            if (sub_08048F10() != 0)
+            if (ShopScreen_StepOffsetToZero() != 0)
                 break;
             gUnknown_084C30F8->unk83a = gGameClock & 3;
-            sub_080485DC(gUnknown_084C30E8[gUnknown_084C30F8->unk83a]);
+            ShopScreen_StartMessage(gUnknown_084C30E8[gUnknown_084C30F8->unk83a]);
         }
         gUnknown_084C30F8->unk834 = 0xb;
         break;
@@ -236,10 +236,10 @@ void BattleMaps_IDLE_08049361(ProcPtr proc)
     }
 
     if (gUnknown_084C30F8->unk836 != 0)
-        sub_08048644(2,
+        ShopScreen_DrawCursorSprites(2,
                      (gUnknown_084C30F8->unk01e - gUnknown_084C30F8->unk020)
                              * 16
                          + 0x39);
 }
 
-asm(".global sub_08049360\n.thumb_set sub_08049360, BattleMaps_IDLE_08049361\n");
+asm(".global sub_08049360\n.thumb_set sub_08049360, ShopScreen_Loop\n");

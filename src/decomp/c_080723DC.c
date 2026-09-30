@@ -52,7 +52,7 @@
  * consecutive writes that configure the blend registers, wrapped in the
  * canonical function-like-macro idiom, is what a `SetBlend(...)`-style macro
  * expands to. The same lever is recorded in the soft-float chapter of
- * docs/agbcc-codegen.md, and `sub_08073304` carries one too.
+ * docs/agbcc-codegen.md, and `StartHeaderBanner` carries one too.
  *
  * REFUTED EARLIER AND STILL REFUTED -- do not re-spend attempts on either:
  *  - NOT cse sharing the zero with the two earlier `= 0` stores. Changing
@@ -78,7 +78,7 @@
  *    container, and target1_enable_bd is a separate byte OR.
  * A 1-bit bitfield write and a `.raw` write to the same union are separate
  * accesses to agbcc, but two `.raw` writes are not. */
-void sub_080723DC(void)
+void Fade_CommonCallBack(void)
 {
     gUnknown_030030E0.bits.effect = 3;
     gUnknown_03002020 = 0;
@@ -91,10 +91,11 @@ void sub_080723DC(void)
     }
     while (0);
     gPal[0] = 0;
-    sub_080135A4();
+    EnablePaletteSync();
     gDispIo.disp_ct.bg0_enable = 0;
     gDispIo.disp_ct.bg1_enable = 0;
     gDispIo.disp_ct.bg2_enable = 0;
     gDispIo.disp_ct.bg3_enable = 0;
     gDispIo.disp_ct.obj_enable = 0;
 }
+asm(".global sub_080723DC\n.thumb_set sub_080723DC, Fade_CommonCallBack\n");

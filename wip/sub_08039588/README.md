@@ -2,7 +2,7 @@
 
 0x08039588, 172 bytes, THUMB, parked.
 
-Best score so far: 87.2% (best.c).
+Best score so far: 87.2%.
 
 ## What it does
 
@@ -29,7 +29,7 @@ The original computes the VRAM destination once per character in the setup of th
 ## Files
 
 - `sub_08039588.c`: the current draft
-- `best.c`: the closest attempt, when it is not the draft
+- `NOTES.md`: working notes
 - `target.s`: the original assembly
 
 ## Technical history
@@ -68,5 +68,47 @@ THE CONSTANT MERGE, which was the whole park for four waves, IS SOLVED. cse merg
 ### Why it is parked
 
 Wave 79 W79-E: THE SPAN IS CLOSED AT BOTH ENDS AND THERE IS NO POINT LEFT IN IT. The hoist needs the def to dominate the use (loop.c will not move a movable whose register is read before its set, nor one live on loop entry); the two-pool-word split needs the def to sit outside the use's extended basic block. The inner loop body contains no control-flow join, so no position satisfies both, and every position has now been measured: outside the loop (W73-G, foreclosed by liveness), top of the body (hoisted but merged, and ahead of the table base), inside the `if` at the use (merged), bottom of the body (W79-E, not hoisted at all). A SOURCE CONSTRUCT IS BEHIND THIS RESIDUAL -- the LICM hoist position of `dst` -- but it is not reachable from C without adding control flow the ROM does not have. Do not spend another wave on positioning. If this function is resumed, the only untried direction is that the ROM's `dst` is not this expression at all.
+
+### Wave 93
+
+WAVE 93 (W93-D): still 87.2%, size-exact, draft unchanged. HALF THE RESIDUAL IS SOLVED. Residual (a) had two parts, the hoist's POSITION and its ORDER; the order is now a solved, general lever. Reading the table entry into a local as the FIRST statement of the search loop body (c = gUnknown_08090F30[k]; then comparing against c) flips the preheader from `lsl` then `ldr` to `ldr` then `lsl`, which is the ROM's order, at no instruction cost -- the ROM loads tbl[k] into a register there anyway. General rule, now written into docs/agbcc-codegen.md: LICM emits its hoists in the order the invariants' first references appear in the loop body, so a leading reference decides the preheader order. WHAT IS LEFT is only the constant merge: the preheader gets `lsl r4, r4, #8` and the +0x6140 folds into the use as one `=0x6016140` pool word, 164 bytes (-8) at 43.0%. NEWLY REFUTED merge-blockers, all still producing the single 0x6016140 word: -fno-cse-follow-jumps (measured end to end, 43.0% / -8, unchanged); splitting the def into `dst = j * 0x100;` then `dst = dst + 0x6140;`; declaring dst a `u8 *` and adding the VRAM base as pointer arithmetic; and a volatile read of the table entry between the def and the use (which also reverses the hoist order again, so volatile does not split cse's REGISTER value numbering -- the wave-89 splitter is about memory). -fno-cse-follow-jumps cannot help in hindsight: gcc lays the if-body out as the FALL-THROUGH of the inverted compare, so def and use sit on one cse path with no jump followed. The impasse is now exact, and the two halves are mutually exclusive at every position in the body: the def must be INSIDE the inner loop and BEFORE any conditional branch or LICM will not hoist it (everything after the `if` is maybe_never, which is why the bottom-of-body spelling keeps both constants but never moves); and the def must be OUT of the use's fall-through path or cse reassociates 0x6140 with 0x06010000. Breaking it needs a JOIN between def and use inside the loop, and no C construct that survives the `jump` pass creates one here.
+
+### Wave 96
+
+Base: `sub_08039588.c` (87.2%, size-exact, first diff +0x17); confirmed the parked residual (ROM hoists `dst` after the
+zero-trip guard and table base; draft computes it before the guard, j/dst in r3/r4 instead of the shared r4).
+Pre-registration (same LICM first-use family as sub_08037A78) NOT confirmed: the def has to be inside the inner loop to
+hoist, and every form that puts it there merges the constants (-8). Probed: fold-proof mask on j (`((u32)j<<16 &
+0xffff0000)>>16`) in the def, in the use inline, and in the reordered-constant use: 40.7% / 43.0% (-8), the mask does not
+split cse's merge of `0x06010000 + dst` because j is re-derived (not a held narrow operand) here; def in the `for`
+condition as `k=0; a[k]!=0 && (dst=..,1)`: 6.4%; `(dst=..., a[k]!=0)`: 39.7% +12; def in the increment clause: 19.8%. No match.
+Residual unchanged: the def cannot be both out of the use's EBB (pool words) and an inner-loop invariant (hoist).
+
+### Wave 97
+
+wave 97 (W97-U)
+Base: `sub_08039588.c` (87.21%, size-exact, first diff +0x17), unchanged. Pre-registered hypothesis (a constant merged
+across the loop is a lever-1/lever-5 case) NOT confirmed. Probed with spellings.py (all 43.02% -8 unless noted):
+`dst` removed and the address written inline in the call as `(u8 *)(j*0x100 + 0x6140) + 0x06010000`,
+`(u32)(...) + 0x06010000`, `0x06010000 + (u32)(...)`, `(j<<8)` form, `(u8*)0x06010000 + (...)`: all fold back to the one
+`=0x6016140` word (cse folds `(x + C1) + C2` however the cast is placed). `dst` typed u32 / `(j<<8)`: same. `c = tbl[k]`
+first then `dst = ..` in the inner loop: same. Copy-back step `nj = j + 1; ... j = nj;` (before dst / after dst / at the
+top of the outer body): 35.2% / 36.4% / 24.4% at +4 (adds the copy the ROM has but moves the guard). `nj` before the inner
+loop with the address inline: 51.7% -4 (best of the new probes, still short). A `vram = (u8*)0x06010000` local used as
+`vram + dst`: 75.0% size-exact, first diff +0xC (the base gets held, worse than the draft).
+Mechanism note: the ROM keeps `j+1` (r6) computed before the zero-trip guard and the `dst` sum after it, i.e. both are
+loop.c hoists, and the two constants stay separate words. That needs the sum's def inside the loop AND out of the use's
+cse path; no spelling tried does both.
+Proposed summary tried: "inline / casted / u32 spellings of the VRAM address all fold to one constant word; copy-back
+step for j moves the guard but not the hoist".
+
+wave 97 (W97-AA)
+Base unchanged (87.21%). Checked the twin lead: the ROM pool here has only three words (gUnknown_08090F30, 0x00006140, 0x06010000);
+neither 0x6140 nor 0x06010000 is a neighbour symbol (no asm/ symbol at 0x0601xxxx, VRAM is not a linked object), so the sub_08073228
+trick (name a second symbol at offset 0) has nothing to name. Re-read the diff: the whole residual is the ROM computing
+`j*0x100 + 0x6140` AFTER the zero-trip guard and reusing j's register (r4) for it (j+1 kept in r6 across), while ours computes it before the
+guard into r4 with j in r3. No new probes beyond W97-U's list.
+
+Permuter (W97-AA, foreground, 500-560 s, 2 threads, from the current draft): NO-IMPROVEMENT.
 
 </details>

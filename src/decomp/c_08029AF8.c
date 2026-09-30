@@ -105,7 +105,7 @@
  *
  * NOT TRIED: decomp-permuter. Wave 37 lists a one-extra-instruction residual as
  * the case it cannot reach, but the wave-60 caveat stands -- it closed
- * sub_08029FE4 and did not move sub_080290B0 -- so a chained run is worth the
+ * TurnStartRepair_Loop and did not move StartCameraScroll -- so a chained run is worth the
  * budget if anyone has it.
  *
  * SETTLED, keep as-is: `gPlayers` is a POINTER to an array of 60-byte
@@ -124,7 +124,7 @@ int RepairUnit(struct Unit *p, u16 a2, u8 a3)
     int t;
 
     acc = 0;
-    v = GetCoPriceMultiplier(gUnknown_030033EC, p->type);
+    v = GetUnitCostWithCoBonus(gUnknown_030033EC, p->type);
 
     if (a2 != 0)
     {

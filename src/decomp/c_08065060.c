@@ -11,13 +11,14 @@
  * evaluates the second operand first, so the compound form is what loads
  * +0x3c ahead of +0x3a, the way the ROM has it. The `lsls #0x10; asrs #0x10`
  * before the compare is the signed read of the s16 unk2a it just stored. */
-void sub_08065060(struct Unk08580934_Obj *o)
+void ArmyColumnExitUp_Loop(struct Unk08580934_Obj *o)
 {
     o->unk3a += o->unk3c;
     o->unk2a += o->unk3a;
 
     if (o->unk2a < -0x28)
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
 
-    sub_08064E5C(o);
+    ArmyColumn_Draw(o);
 }
+asm(".global sub_08065060\n.thumb_set sub_08065060, ArmyColumnExitUp_Loop\n");

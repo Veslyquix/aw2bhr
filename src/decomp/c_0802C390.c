@@ -27,11 +27,11 @@
  * of gUnknown_03001FFC is the first pseudo created, so its `ldr` precedes the
  * `ldrh`, which is exactly the ROM's order.
  *
- * gDispIo byte 1 bit 0 is DISPCNT bit 8 = disp_ct.bg0_enable; sub_0802C2B4 in
+ * gDispIo byte 1 bit 0 is DISPCNT bit 8 = disp_ct.bg0_enable; OpenMinimap in
  * this block is the clearing half, which is what discriminates the bitfield
  * from a byte-wide `|= 1` on an opaque u8.
  *
- * gUnknown_03001FBC is s16 and sub_08015C30 takes u8, so the `ldrb` on it is
+ * gUnknown_03001FBC is s16 and ClearSlotScriptCallback takes u8, so the `ldrb` on it is
  * the parameter narrowing and not evidence about the global.
  */
 
@@ -41,17 +41,18 @@ struct Unk2C390Proc
     /* 0x1e */ s16 unk1e;
 };
 
-void sub_0802C390(struct Unk2C390Proc *proc)
+void MinimapScreen_FadeIn(struct Unk2C390Proc *proc)
 {
     gUnknown_03001FFC = proc->unk1e >> 1;
 
     if (proc->unk1e > 0xb)
     {
         gDispIo.disp_ct.bg0_enable = 1;
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
     }
     else
     {
         proc->unk1e = proc->unk1e + 1;
     }
 }
+asm(".global sub_0802C390\n.thumb_set sub_0802C390, MinimapScreen_FadeIn\n");

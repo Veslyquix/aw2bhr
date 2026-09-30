@@ -15,8 +15,8 @@
  *
  * gUnknown_0816E11C is agbcc's own -fforce-addr word holding &gUnknown_08580934
  * (the ROM word at 0x0816E11C is 0x08580934); the global is named honestly and
- * the pool word is left to the harness, as in sub_080658AC / sub_0806574C /
- * sub_080654E8 in this block.
+ * the pool word is left to the harness, as in MatchSetupUnpackRuleIndices / MatchSetupInitState /
+ * MatchSetupDismissArmyColumns in this block.
  *
  * The unk09[k] flip is TWO ASSIGNMENT STATEMENTS, and nothing else reaches the
  * ROM's shape. Both arms are small constants, so `x == 1 ? 2 : 1` and
@@ -32,7 +32,7 @@
  * search loop, costing a third callee-saved register and turning the loop's
  * two-level reload into one. Fixing the store shape fixed both -- they were
  * one fact, not two. */
-void sub_08065D20(void)
+void MatchSetupToggleController(void)
 {
     int k;
     int i;
@@ -58,6 +58,7 @@ void sub_08065D20(void)
                 gUnknown_08580934->unk09[0] = 1;
         }
 
-        sub_0803B4DC(0x64);
+        PlayMusicOrSfx2(0x64);
     }
 }
+asm(".global sub_08065D20\n.thumb_set sub_08065D20, MatchSetupToggleController\n");

@@ -27,7 +27,7 @@
  * result, then `adds r0, #4`) and lets `proc` die; that is strength_reduce
  * turning `&proc->unk3c[i]` into a giv, and the plain indexed source below is
  * what produces it. The `subs r2, #1; cmp r2, #0; bge` bottom is check_dbra_loop
- * on the ASCENDING loop, not a descending one -- same reading as sub_08074EB4.
+ * on the ASCENDING loop, not a descending one -- same reading as WorldMapScope_OnEnd.
  */
 struct Unk80752D8Child
 {
@@ -42,7 +42,7 @@ struct Unk80752D8
     /* 0x3c */ struct Unk80752D8Child *unk3c[10];
 };
 
-void sub_080752D8(int a1)
+void SetDifficultyStarsPalette(int a1)
 {
     struct Unk80752D8 *proc;
     u16 v;
@@ -59,3 +59,4 @@ void sub_080752D8(int a1)
             proc->unk3c[i]->unk30 = v;
     }
 }
+asm(".global sub_080752D8\n.thumb_set sub_080752D8, SetDifficultyStarsPalette\n");

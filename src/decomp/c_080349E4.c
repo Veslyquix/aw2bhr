@@ -7,19 +7,20 @@
  * sub_080349E4 @ 0x080349E4
  */
 
-void sub_080349E4(void)
+void MapState_PrepareTurnHandover(void)
 {
     u8 v;
 
     if (ShouldPromptCountryName())
-        sub_0802BFA8();
+        StartScreenCoverWipeLocked();
 
-    sub_08024584();
+    SetMapLayersDefault();
 
-    v = gPlayers[sub_08026704(gUnknown_030033EC)].teamColor;
+    v = gPlayers[GetNextActiveArmy(gUnknown_030033EC)].teamColor;
 
-    sub_0801F150(1, (void *)0x06010000, 0x1ca, 0x13);
-    sub_0801F234(v + 0x3d);
+    InitTilePool(1, (void *)0x06010000, 0x1ca, 0x13);
+    LoadTilePoolGraphic(v + 0x3d);
 
     gUnknown_030032D8 = 3;
 }
+asm(".global sub_080349E4\n.thumb_set sub_080349E4, MapState_PrepareTurnHandover\n");

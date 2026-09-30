@@ -48,19 +48,21 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
 {
   struct SaveSegments segments;
   int *offsets;
-  int new_var2;
+  int zero;
   u8 freeSlots[16];
   u8 writtenSlots[16];
   int segmentCount;
   int lastByte;
-  int *new_var;
+  int *segmentOffsets;
   u8 id;
+  u8 owner;
   u8 freeCount;
   u8 retryCount;
   int segment;
   int slot;
   int i;
   int j;
+  struct SaveSector *new_var;
   int length;
   int total;
   u8 checksum;
@@ -72,7 +74,8 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
   freeCount = 0;
   for (i = 0; i < 16; i++)
   {
-    if ((gUnknown_0200CC38.unk00[i] == saveId) || (gUnknown_0200CC38.unk00[i] == 0))
+    owner = gUnknown_0200CC38.unk00[i];
+    if ((owner == saveId) || (owner == 0))
     {
       gUnknown_0200CC38.unk10[i] = 0xff;
     }
@@ -93,7 +96,11 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
       {
         u8 oldSlot = freeSlots[i];
         freeSlots[i] = freeSlots[j];
-        freeSlots[j] = oldSlot;
+        do
+        {
+          freeSlots[j] = oldSlot;
+        }
+        while (0);
       }
     }
 
@@ -122,7 +129,7 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
     }
 
     retryCount = 0;
-    for (segment = segmentCount - 1; segment >= 0;)
+    for (segment = segmentCount - 1; (segment ^ 0) >= 0;)
     {
       switch (retryCount)
       {
@@ -151,15 +158,14 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
       {
         gUnknown_0200CC88.slotGeneration[slot]++;
       }
-      new_var = segments.offset;
+      segmentOffsets = segments.offset;
       gUnknown_0200CC38.unk10[slot] = id;
-      offsets = new_var;
+      offsets = segmentOffsets;
       for (i = 0; i <= 0xfff; i++)
       {
         gUnknown_02002000[i] |= 0xff;
       }
 
-      lastByte = 0xfff;
       (*((struct SaveSector *) gUnknown_02002000)).signature = 0x73726132;
       if (gUnknown_0200CC38.unk40[slot] == 0x55)
       {
@@ -171,13 +177,13 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
         (*((struct SaveSector *) gUnknown_02002000)).marker = 0xaa;
         gUnknown_02002000[0xfff] = 0x55;
       }
-      new_var2 = 0;
+      zero = 0;
       i = 0xf;
       (*((struct SaveSector *) gUnknown_02002000)).version = i;
-      (*((struct SaveSector *) gUnknown_02002000)).checksum = new_var2;
+      (*(new_var = (struct SaveSector *) gUnknown_02002000)).checksum = zero;
       (*((struct SaveSector *) gUnknown_02002000)).checksumInverse = 0xff;
       (*((struct SaveSector *) gUnknown_02002000)).generation = gUnknown_0200CD08;
-      (*((struct SaveSector *) gUnknown_02002000)).segmentTag = ((segment * 16) + segmentCount) - 1;
+      (*((struct SaveSector *) gUnknown_02002000)).segmentTag = ((segment * 16) + segmentCount) + (-1);
       (*((struct SaveSector *) gUnknown_02002000)).saveId = id;
       (*((struct SaveSector *) gUnknown_02002000)).dataOffset = offsets[segment];
       for (i = 0; i < 16; i++)
@@ -202,13 +208,18 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
         {
           for (i = 0; i < 16; i++)
           {
-            if ((writtenSlots[i] == 0) && (i != slot))
+            total = writtenSlots[i];
+            if ((total == 0) && (i != slot))
             {
               (*((struct SaveSector *) gUnknown_02002000)).slotOwners[i] |= 0xff;
             }
             else
             {
-              (*((struct SaveSector *) gUnknown_02002000)).slotOwners[i] = gUnknown_0200CC38.unk00[i];
+              do
+              {
+                (*((struct SaveSector *) gUnknown_02002000)).slotOwners[i] = gUnknown_0200CC38.unk00[i];
+              }
+              while (0);
             }
           }
 
@@ -232,6 +243,7 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
       (*((struct SaveSector *) gUnknown_02002000)).checksumInverse = ~checksum;
       preservedFlags = 0;
       sub_0801B618(slot, (int) (&(*((struct SaveSector *) gUnknown_02002000))));
+      lastByte = 0xfff;
       if (sub_0801B648(slot, (int) (&(*((struct SaveSector *) gUnknown_02002000)))) == 0)
       {
         j = slot;
@@ -252,7 +264,8 @@ int sub_0801A7D8(u8 saveId, void *unused, int byteCount)
       }
     }
 
-    if (gUnknown_0200CD08 <= ((u32) (-2)))
+    length = gUnknown_0200CD08;
+    if (length <= ((u32) (-2)))
     {
       gUnknown_0200CD08++;
     }

@@ -8,12 +8,6 @@
  */
 
 #include "proc.h"
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0801C7A4.
- * sub_0801C7A4 @ 0x0801C7A4
- */
 
 /* Family F000 (tools/families.py): `push {lr}; ldr r0,=X; bl S;
  * pop {r0}; bx r0` -- a one-line forwarder. `pop {r0}` is the void epilogue
@@ -34,16 +28,18 @@
  * One pointer passed through to Proc_End(ProcPtr). Unreferenced anywhere in
  * the ROM, so the arity is the callee's and nothing else.
  */
-void sub_0801C798(ProcPtr proc)
+void APProc_Delete(ProcPtr proc)
 {
     Proc_End(proc);
 }
+asm(".global sub_0801C798\n.thumb_set sub_0801C798, APProc_Delete\n");
 
 /* ProcScr_WaitForLaser was already typed `const struct ProcCmd []` by
- * sub_0801C7B4, the "is it running" predicate on the same script.
+ * APProc_Exists, the "is it running" predicate on the same script.
  */
 
-void sub_0801C7A4(void)
+void APProc_DeleteAll(void)
 {
     Proc_EndEach(ProcScr_WaitForLaser);
 }
+asm(".global sub_0801C7A4\n.thumb_set sub_0801C7A4, APProc_DeleteAll\n");

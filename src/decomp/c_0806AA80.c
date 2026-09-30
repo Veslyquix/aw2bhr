@@ -24,7 +24,7 @@
  * results in r4/r5 with `adds r1, r4, #0` copies at the call -- computing them
  * straight into the argument registers, as a single `x = a1 * 16 - d` does,
  * saves those two moves and is two instructions short. */
-void sub_0806AA80(int a1, int a2)
+void StartMeteorImpact(int a1, int a2)
 {
     ProcPtr proc;
     int x;
@@ -32,7 +32,7 @@ void sub_0806AA80(int a1, int a2)
     int dx;
     int dy;
 
-    sub_0803B4DC(0xC5);
+    PlayMusicOrSfx2(0xC5);
     proc = Proc_Start(gUnknown_0858168C, PROC_TREE_3);
 
     x = a1 * 16;
@@ -43,5 +43,6 @@ void sub_0806AA80(int a1, int a2)
     dy = gMap->scrollY - 8;
     y -= dy;
 
-    sub_0806A6F0(proc, x, y);
+    SetupMeteorImpact(proc, x, y);
 }
+asm(".global sub_0806AA80\n.thumb_set sub_0806AA80, StartMeteorImpact\n");

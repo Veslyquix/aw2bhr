@@ -38,13 +38,14 @@
  *   - the clamp is UNSIGNED (`bhi`), hence `u32` on the first parameter;
  *   - the row index must be written `b * 2 + 5 + c` and NOT `b * 2 + (c + 5)`;
  *   - the byte offset must sit INSIDE the pointer add, `p + (idx * 32 + 9)`. */
-void sub_08087514(u32 a, int b, int c)
+void DrawMapListRankIcon(u32 a, int b, int c)
 {
     if (a < 2)
         a = 2;
 
     a = 5 - a;
 
-    sub_0801F2AC(a + 0xB8,
+    PutTilePoolGraphicTilemap(a + 0xB8,
                  gBG0TilemapBuffer + ((b * 2 + 5 + c) * 32 + 9));
 }
+asm(".global sub_08087514\n.thumb_set sub_08087514, DrawMapListRankIcon\n");

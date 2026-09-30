@@ -13,7 +13,7 @@
  * otherwise it loads the map, tallies the properties on it per owner into a
  * six-byte scratch, and reports (largest single army's tally, total).
  *
- * The guard is the same fold range test sub_0802163C carries, but on a u8
+ * The guard is the same fold range test LoadMapIntoGMap carries, but on a u8
  * member: build_range_check keeps unsigned char as the working type, so the
  * subtraction truncates -- `adds #0x4c; lsls #0x18; lsrs #0x18; cmp #0xb; bhi`
  * is `unk02 >= 0xb4 && unk02 <= 0xbf` and nothing else.  (+0x4c is -0xb4 mod
@@ -47,14 +47,14 @@
  * is worth 4 bytes: with a separate `i` declared, x lands in ip and
  * the map pointer in r6, which is the reverse of the ROM. Merging them adds
  * the reset loop's references to x's allocno and moves it ahead of the address
- * constant they were tying with. sub_08021810 in this same block needed the
+ * constant they were tying with. LoadMapAndCountProperties in this same block needed the
  * identical fix; see docs/agbcc-codegen.md.
  *
  * Case 16 in pass two falls THROUGH into the main group when
  * gPlaySt.gameMode == 5; the ROM's `bne` to the skip label plus a
  * fall-in to the shared block is exactly a case label with no break. */
 
-void sub_08021810(u8 *a, u8 *b)
+void LoadMapAndCountProperties(u8 *a, u8 *b)
 {
     u8 x;
     u8 y;
@@ -66,7 +66,7 @@ void sub_08021810(u8 *a, u8 *b)
         return;
     }
 
-    sub_0802163C(gPlaySt.mapID);
+    LoadMapIntoGMap(gPlaySt.mapID);
 
     for (x = 0; x <= 5; x++)
         gUnknown_030032D0[x] = 0;
@@ -106,6 +106,7 @@ void sub_08021810(u8 *a, u8 *b)
 
     *a = gUnknown_030032D0[0];
 }
+asm(".global sub_08021810\n.thumb_set sub_08021810, LoadMapAndCountProperties\n");
 
 void RecountArmyProperties(void)
 {
@@ -115,7 +116,7 @@ void RecountArmyProperties(void)
 
     n = 0;
 
-    sub_0801F92C(gMap->property);
+    SetWorkingMapPlane(gMap->property);
     FillMovementMap(0xff);
 
     for (x = 0; x <= 4; x++)

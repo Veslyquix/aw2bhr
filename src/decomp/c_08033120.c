@@ -11,34 +11,36 @@
  * Both globals are `volatile u16` but the stores are bare scalar assignments,
  * which is byte-identical with or without the qualifier -- the volatile on
  * these two was settled elsewhere (see include/unknown-globals.h). */
-void sub_08033120(void)
+void LinkScreenClearBackgrounds(void)
 {
-    sub_08013C00();
-    sub_08013C54();
-    sub_08013CA8();
-    sub_08013AEC();
-    sub_08013AFC();
-    sub_08013B0C();
+    ClearBg0Tilemap();
+    ClearBg1Tilemap();
+    ClearBg2Tilemap();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG1();
+    BG_EnableSyncBG2();
 
     gUnknown_03002F18 = 0;
     gUnknown_03002B34 = 0;
 }
+asm(".global sub_08033120\n.thumb_set sub_08033120, LinkScreenClearBackgrounds\n");
 
-/* Seven bare `bl`s, every result discarded. Note the order: sub_08032D60 runs
- * BEFORE sub_08032468, which is not the address order the callee list is
+/* Seven bare `bl`s, every result discarded. Note the order: EndLinkMapPick runs
+ * BEFORE EndLinkPlayerCursor, which is not the address order the callee list is
  * printed in. */
-void sub_08033150(void)
+void LinkScreenEndAll(void)
 {
-    sub_08031430();
+    EndLinkLobbySlots();
     sub_08011B18();
-    sub_08031CE4();
+    EndLinkTransferPercent();
     sub_08031E6C();
-    sub_08032D60();
-    sub_08032468();
+    EndLinkMapPick();
+    EndLinkPlayerCursor();
     UnlockMainMenu();
 }
+asm(".global sub_08033150\n.thumb_set sub_08033150, LinkScreenEndAll\n");
 
-/* 0xFFD0 is a POSITIVE literal and not -48: sub_08072C40's second parameter is
+/* 0xFFD0 is a POSITIVE literal and not -48: SetBgScrollShadow's second parameter is
  * `u16`, and the ROM materialises the value with a pool `ldr`. A -48 would have
  * been `movs r1,#0x30; rsbs r1,r1,#0`, two instructions and no pool word.
  *
@@ -46,6 +48,6 @@ void sub_08033150(void)
  * operand class, not argument order. */
 void sub_08033174(void)
 {
-    sub_08072C40(0, 0xFFD0, 0);
-    sub_08072C40(3, 0, 0);
+    SetBgScrollShadow(0, 0xFFD0, 0);
+    SetBgScrollShadow(3, 0, 0);
 }

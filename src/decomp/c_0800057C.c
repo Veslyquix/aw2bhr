@@ -7,28 +7,33 @@
  * sub_0800057C @ 0x0800057C
  */
 
-/* Wave 37 (W37-E). Matched first attempt.
- * A ten-entry jump table (`cmp #9; bhi`) over gActiveMap->mode with only
- * seven arms. Cases 4 and 8 fall to the join because nothing is written for
- * them, but `case 9:` HAS to be spelled out even though its body is empty --
- * the table's extent is the largest case label, and without it agbcc emits
- * `cmp #7; bhi` and an eight-entry table. */
+/*
+ * DesignRoomRunMode -- run one frame of the handler for the current map mode.
+ *
+ * gActiveMap->mode picks the handler; modes 4, 8 and 9 do nothing.
+ *
+ * Why the C looks odd: this spelling does not change what the code does, but
+ * the original compiler only produces identical output with it.
+ *   - `case 9:` must stay although its body is empty. The compiler sizes the
+ *     jump table from the largest case label, so without it the table has
+ *     eight entries instead of ten and the bounds check changes with it.
+ */
 
-void sub_0800057C(void)
+void DesignRoomRunMode(void)
 {
     switch (gActiveMap->mode)
     {
     case 0:
-        sub_080005FC();
+        DesignRoomMode_Start();
         break;
     case 1:
-        sub_0800081C();
+        DesignRoomMode_Paint();
         break;
     case 2:
-        sub_08005F4C();
+        DesignRoomMode_Ring();
         break;
     case 3:
-        sub_08004CA0();
+        DesignRoomMode_Menu();
         break;
     case 5:
         sub_08000694();
@@ -43,3 +48,4 @@ void sub_0800057C(void)
         break;
     }
 }
+asm(".global sub_0800057C\n.thumb_set sub_0800057C, DesignRoomRunMode\n");

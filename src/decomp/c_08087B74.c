@@ -10,7 +10,7 @@
 #include "proc.h"
 /* Redraws the roster row for the unit list at gUnknown_02027F74.unk04[a]:
  * uploads each unit's tile blob into OBJ VRAM and, for the ones IsCampaignMapUnlocked
- * rejects, overwrites their 16-colour palette. The twin of sub_08087C14, which
+ * rejects, overwrites their 16-colour palette. The twin of LoadMapRecordMinimugs, which
  * reaches the same byte through the overlapping gUnknown_02027F78 extern.
  *
  * THE `+ 1` AND THE TABLE HOIST ARE ONE FACT, and wave 44 parked this function
@@ -41,7 +41,7 @@
  * Also settled and unchanged from wave 44's reading:
  *  - `gUnknown_02027F74.unk04[a]` written out at all three uses; CSE keeps the
  *    address in r6 and re-`ldrb`s across the calls, which is the ROM.
- *  - `i + 0x17` passed INLINE as sub_08043FA8's third argument; as a statement
+ *  - `i + 0x17` passed INLINE as LoadCoMiniPortrait's third argument; as a statement
  *    it is computed ahead of argument 1. CSE still carries it in r4 across the
  *    call for the ApplyPaletteExt use.
  *  - `lsls #0x15; lsrs #0x10` is `(u16)(pal * 0x20)`, a u16 truncation of the
@@ -63,7 +63,7 @@ struct Unk08087B74Proc
  *
  * src/decomp/c_08087B60.c already read this function's shape from its caller:
  * `a` is an INT used as an offset into a global's address, and it is stashed at
- * +0x54 of the proc found by script. This is the twin of sub_08087B74, which
+ * +0x54 of the proc found by script. This is the twin of LoadEnemyCoMinimugs, which
  * reaches the same byte as gUnknown_02027F74.unk04[a] instead -- the two symbols
  * overlap (0x02027F78 == gUnknown_02027F74 + 4) and each function names the one
  * its own CLEAN pool word records: `.4byte gUnknown_02027F78` here against
@@ -77,7 +77,7 @@ struct Unk08087B74Proc
  *
  * The record is struct Unk0200C078Rec, the 8/12/12 bitfield word wave 38 proved:
  * `ldr; lsls #0xc; lsrs #0x14` is unk00_08 (bits 8..19) read as the guard and
- * `ldrb` off the SAME address is unk00_00 (bits 0..7) handed to sub_08043FA8.
+ * `ldrb` off the SAME address is unk00_00 (bits 0..7) handed to LoadCoMiniPortrait.
  * Writing the subscript out twice is what CSEs the address into r1 across both.
  *
  * The flat index `[v - 0x6c].unk00[i]` is the 0x14-byte row form and it emits
@@ -92,7 +92,7 @@ struct Unk08087C14Proc
     /* 0x54 */ int unk54;
 };
 
-void sub_08087B74(int a)
+void LoadEnemyCoMinimugs(int a)
 {
     struct Unk08087B74Proc *proc;
     u8 *tbl;
@@ -100,7 +100,7 @@ void sub_08087B74(int a)
     int i;
     int k;
 
-    n = sub_0802490C(gUnknown_02027F74.unk04[a]);
+    n = GetMapArmyCount(gUnknown_02027F74.unk04[a]);
     proc = Proc_Find(ProcScr_PutEnemyCoMinimug);
 
     if (proc != NULL)
@@ -112,7 +112,7 @@ void sub_08087B74(int a)
             tbl = (u8 *)gUnknown_085C77DC;
             k = gUnknown_02027F74.unk04[a] * 0x5c + 1;
 
-            sub_08043FA8(tbl[i + k],
+            LoadCoMiniPortrait(tbl[i + k],
                 (void *)(((0x90 + i * 0xc) & 0x3FF) * 0x20 + 0x06010000), i + 0x17);
 
             if ((u8)IsCampaignMapUnlocked(gUnknown_02027F74.unk04[a]) == 0)
@@ -120,8 +120,9 @@ void sub_08087B74(int a)
         }
     }
 }
+asm(".global sub_08087B74\n.thumb_set sub_08087B74, LoadEnemyCoMinimugs\n");
 
-void sub_08087C14(int a)
+void LoadMapRecordMinimugs(int a)
 {
     struct Unk08087C14Proc *proc;
     int i;
@@ -135,9 +136,10 @@ void sub_08087C14(int a)
         for (i = 0; i < 5; i++)
         {
             if (gUnknown_0200C078[gUnknown_02027F78[a] - 0x6c].unk00[i].unk00_08 != 0)
-                sub_08043FA8(gUnknown_0200C078[gUnknown_02027F78[a] - 0x6c].unk00[i].unk00_00,
+                LoadCoMiniPortrait(gUnknown_0200C078[gUnknown_02027F78[a] - 0x6c].unk00[i].unk00_00,
                     (void *)(((0xb4 + i * 0xc) & 0x3FF) * 0x20 + 0x06010000),
                     i + 0x1a);
         }
     }
 }
+asm(".global sub_08087C14\n.thumb_set sub_08087C14, LoadMapRecordMinimugs\n");

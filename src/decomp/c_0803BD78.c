@@ -31,19 +31,19 @@ void sub_0803BD78(void)
         gPlaySt.animOpts = 1;
 }
 
-/* Re-arm gPlaySt across a sub_08034848 reset, carrying unk0c over it
+/* Re-arm gPlaySt across a InitVersusPlayState reset, carrying unk0c over it
  * by hand -- the byte is read into a callee-saved register before the call and
  * written straight back after, which is the whole reason r4 is pushed.
  *
  * The four zeroed bytes at 0x39..0x3c are spelled as unk38[1..4]: the array is
- * already proved by sub_08018C0C's variable index, and a constant index folds
+ * already proved by EventOp_SetArmyAiControlled's variable index, and a constant index folds
  * to the same displacement a separate scalar field would give, so this does
  * not disturb that model. */
-void sub_0803BDBC(void)
+void Versus_InitPlayState(void)
 {
     u8 saved = gPlaySt.bgmOn;
 
-    sub_08034848();
+    InitVersusPlayState();
     gPlaySt.bgmOn = saved;
     gPlaySt.aiControlled[1] = 0;
     gPlaySt.aiControlled[2] = 0;
@@ -56,3 +56,4 @@ void sub_0803BDBC(void)
     gPlaySt.randomWeatherOn = 1;
     gPlaySt.unk00 = 1;
 }
+asm(".global sub_0803BDBC\n.thumb_set sub_0803BDBC, Versus_InitPlayState\n");

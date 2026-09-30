@@ -28,7 +28,7 @@ struct Unk08032BCCProc
     /* 0x58 */ int unk58;
 };
 
-void sub_08032BCC(struct Unk08032BCCProc *proc)
+void LinkMapPick_Init(struct Unk08032BCCProc *proc)
 {
     int i;
     u8 *p;
@@ -40,11 +40,11 @@ void sub_08032BCC(struct Unk08032BCCProc *proc)
 
     gUnknown_0849B060->unk0c = 0;
 
-    sub_0801A444(0x10, 1, 0xe, 4);
-    sub_08013AEC();
-    sub_08013B0C();
-    sub_0801F234(0x45);
-    sub_0801F234(0x46);
+    DrawWindowBackgroundOnBg2(0x10, 1, 0xe, 4);
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG2();
+    LoadTilePoolGraphic(0x45);
+    LoadTilePoolGraphic(0x46);
     ApplyPaletteExt(gUnknown_081D2224, 0xc0, 0x20);
     Decompress(gUnknown_081D2554, (void *)0x06006000);
 
@@ -54,9 +54,9 @@ void sub_08032BCC(struct Unk08032BCCProc *proc)
 
     for (; i < 3; i++)
     {
-        if (sub_0803CCB8((u8)i, buf) == 1)
+        if (LoadDesignRoomName((u8)i, buf) == 1)
         {
-            sub_08031B6C(p, buf);
+            CopyNameString16(p, buf);
             gUnknown_0300449C[i]++;
             gUnknown_0849B060->unk0c++;
         }
@@ -80,17 +80,18 @@ void sub_08032BCC(struct Unk08032BCCProc *proc)
     }
 
     gUnknown_0849B060->unk10 = 1;
-    sub_08032A00();
+    LinkMapPick_Draw();
     gUnknown_0849B060->unk10 = 0;
     gUnknown_0849B060->unk0e = 0;
-    sub_08032AFC();
-    sub_080328EC();
+    LinkMapPick_SetupWindow();
+    LinkMapPick_DrawPreview();
     gUnknown_0849B060->unk0a = 0;
 
     Proc_Start(gUnknown_0849B670, 0);
 
-    sub_08063980(0);
-    sub_080638D0((int)sub_08032B84);
+    SetVCountCompareLine(0);
+    SetVCountInterruptHandler((int)LinkMapPick_OnVCountTop);
 
     proc->unk58 = 0;
 }
+asm(".global sub_08032BCC\n.thumb_set sub_08032BCC, LinkMapPick_Init\n");

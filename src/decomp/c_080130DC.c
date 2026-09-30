@@ -10,7 +10,7 @@
 #include "proc.h"
 /* The three halfwords land at +0x64/+0x66/+0x68 of the proc, and the ROM says
  * what reads them back: gUnknown_0848936C's second ProcCmd is PROC_CMD_ONEND
- * with dataPtr &sub_0801311C, and sub_0801311C's whole body is gated on an
+ * with dataPtr &WhiteFlash_OnEnd, and WhiteFlash_OnEnd's whole body is gated on an
  * `ldrsh` of +0x68. So these are one proc's fields and not a scratch array.
  *
  * The `adds r0, #2` chain between the stores is what a run of separate
@@ -26,16 +26,16 @@ struct Unk130DCProc
 };
 #include "hardware.h"
 /* The ONEND handler of gUnknown_0848936C -- the ROM says so: that script's
- * second ProcCmd is PROC_CMD_ONEND with dataPtr 0x0801311D. sub_080130DC is
+ * second ProcCmd is PROC_CMD_ONEND with dataPtr 0x0801311D. StartWhiteFlash is
  * the starter that fills +0x64/+0x66/+0x68, and this reads +0x68 back.
  *
- * Same shape as the promoted sub_08067410 with every value zeroed instead of
+ * Same shape as the promoted BlendToWhite_Init with every value zeroed instead of
  * set: `effect = 0` rather than 2, `raw & 0xffe0` with no `| 0x1f`, and
  * `target1_enable_bd = 0` rather than 1. That last one is why the ROM has
  * `movs r0, #0x21; rsbs r0, r0, #0` -- agbcc materialises the 32-bit mask
  * ~0x20 = 0xFFFFFFDF as the negation of 0x21, not as a `movs r0, #0xDF`.
  *
- * sub_08067410 needed a `do { } while (0)` around the raw read-modify-write to
+ * BlendToWhite_Init needed a `do { } while (0)` around the raw read-modify-write to
  * stop agbcc hoisting the trailing proc-field store into it. There is no
  * trailing store here, so the barrier is unnecessary and the plain statement
  * matches. */
@@ -45,7 +45,7 @@ struct Unk0801311C
     /* 0x68 */ s16 unk68;
 };
 
-void sub_080130DC(int a, int b, int c, ProcPtr parent)
+void StartWhiteFlash(int a, int b, int c, ProcPtr parent)
 {
     struct Unk130DCProc *proc;
 
@@ -58,8 +58,9 @@ void sub_080130DC(int a, int b, int c, ProcPtr parent)
     proc->unk66 = b;
     proc->unk68 = c;
 }
+asm(".global sub_080130DC\n.thumb_set sub_080130DC, StartWhiteFlash\n");
 
-void sub_0801311C(struct Unk0801311C *proc)
+void WhiteFlash_OnEnd(struct Unk0801311C *proc)
 {
     if (proc->unk68 != 0)
     {
@@ -71,3 +72,4 @@ void sub_0801311C(struct Unk0801311C *proc)
         gUnknown_030030E0.bits.target1_enable_bd = 0;
     }
 }
+asm(".global sub_0801311C\n.thumb_set sub_0801311C, WhiteFlash_OnEnd\n");

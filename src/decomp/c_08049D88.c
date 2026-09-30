@@ -29,21 +29,22 @@ struct Unk08049DE4Proc
  * already the returned pointer at the `bl`, and the destination's pool word is
  * materialised between the calls, which is the argument-setup order for a
  * nested call rather than a spill. */
-void sub_08049D88(void)
+void DefeatFlow_BannerInit(void)
 {
     gUnknown_02028E3D = 0;
 
     Decompress(sub_0801F494(), gUnknown_0200FC50);
 
-    sub_08027FBC(gUnknown_0200FC50, 0, 0);
-    sub_08027FBC(gUnknown_0200FC50, 1, 1);
-    sub_08027FBC(gUnknown_0200FC50, 2, 2);
-    sub_08027FBC(gUnknown_0200FC50, 3, 3);
+    CopyDayGlyphTiles(gUnknown_0200FC50, 0, 0);
+    CopyDayGlyphTiles(gUnknown_0200FC50, 1, 1);
+    CopyDayGlyphTiles(gUnknown_0200FC50, 2, 2);
+    CopyDayGlyphTiles(gUnknown_0200FC50, 3, 3);
 
     ApplyPaletteExt(gUnknown_081268B8, 0x260, 0x20);
 }
+asm(".global sub_08049D88\n.thumb_set sub_08049D88, DefeatFlow_BannerInit\n");
 
-void sub_08049DE4(struct Unk08049DE4Proc *proc)
+void DefeatFlow_BannerSpawner_Step(struct Unk08049DE4Proc *proc)
 {
     switch (proc->unk1e)
     {
@@ -55,9 +56,10 @@ void sub_08049DE4(struct Unk08049DE4Proc *proc)
         break;
 
     case 0x32:
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
         break;
     }
 
     proc->unk1e++;
 }
+asm(".global sub_08049DE4\n.thumb_set sub_08049DE4, DefeatFlow_BannerSpawner_Step\n");

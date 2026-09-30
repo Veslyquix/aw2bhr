@@ -27,7 +27,7 @@ struct Unk77B74Proc
     /* 4e */ s16 unk4e;
 };
 
-void sub_08077B74(struct Unk77B74Proc *proc)
+void WorldMapMapPreview_OpenLoop(struct Unk77B74Proc *proc)
 {
     int t;
     int n;
@@ -42,7 +42,7 @@ void sub_08077B74(struct Unk77B74Proc *proc)
     if (n > m)
         n = m;
 
-    sub_08072C40(0, 0, 0);
+    SetBgScrollShadow(0, 0, 0);
 
     gUnknown_030030E0.bits.effect = 3;
     gUnknown_03002020 = 0;
@@ -50,19 +50,19 @@ void sub_08077B74(struct Unk77B74Proc *proc)
     gUnknown_03001FFC = proc->unk44;
     *(u16 *)&gUnknown_030030E0 = (*(u16 *)&gUnknown_030030E0 & 0xFFE0) | 0x1D;
 
-    sub_08077620(0, 0xA8 - gUnknown_0300064C);
+    WorldMapMissionInfo_PutSprites(0, 0xA8 - gUnknown_0300064C);
 
     zero = 0;
     CpuFastSet(&zero, gBG1TilemapBuffer, 0x01000140);
 
     sub_08071900(gUnknown_08551A04 + 0x100,
                  gBG1TilemapBuffer + (proc->unk4a * 32 + t), n, proc->unk4e);
-    sub_08013AFC();
+    BG_EnableSyncBG1();
 
     if (proc->unk44 > 4)
     {
         proc->unk44 = 0;
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
         Proc_Break(proc);
     }
     else
@@ -70,3 +70,4 @@ void sub_08077B74(struct Unk77B74Proc *proc)
         proc->unk44++;
     }
 }
+asm(".global sub_08077B74\n.thumb_set sub_08077B74, WorldMapMapPreview_OpenLoop\n");

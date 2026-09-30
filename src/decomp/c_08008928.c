@@ -10,7 +10,7 @@
 
 #include "hardware.h"
 
-int sub_08008928(void)
+int DesignRoomPlaceUnitAtCursor(void)
 {
     int x;
     int y;
@@ -31,7 +31,7 @@ int sub_08008928(void)
     {
         if (RemoveUnitAt(1, x, y))
         {
-            sub_08024268();
+            RebuildMapUnitLayers2();
             result = 2;
         }
     }
@@ -55,10 +55,10 @@ int sub_08008928(void)
                 return -1;
             }
 
-            /* WAVE 37 final sweep: `.unk18` was `s8 *` when this function was
-             * verified; W37-H later widened it to `s8 *[3]`. Element 0 is at
-             * the same offset, so `[0]` is byte-identical to the spelling that
-             * matched -- this is a declaration change, not a behaviour one. */
+            /* The movement chart: the cost of entering each terrain, 32 terrain entries
+             * per movement type, so the index is terrain + movementType * 32. A
+             * cost of -1 means the unit cannot go there. movementChart holds three
+             * such tables and this is the first. */
             costs = gUnknown_085D3DD0[1].power[0].movementChart[0];
 
             idx = gMap->rowOffset[y] + x;
@@ -84,10 +84,11 @@ int sub_08008928(void)
     }
 
     if (result > 0)
-        sub_080088F0();
+        DesignRoomCountArmyUnits();
 
     return result;
 }
+asm(".global sub_08008928\n.thumb_set sub_08008928, DesignRoomPlaceUnitAtCursor\n");
 
 int RemoveUnitAt(int mode, int x, int y)
 {
@@ -127,14 +128,14 @@ int RemoveUnitAt(int mode, int x, int y)
             gUnknown_030030DC.bits.win0_enable_bg3 = 1;
             gUnknown_030030DC.bits.win0_enable_obj = 1;
 
-            sub_0804018C(e);
+            StartUnitDestroyed(e);
         }
         else
         {
             e->type = 0;
         }
 
-        sub_080088F0();
+        DesignRoomCountArmyUnits();
 
         result = 1;
     }

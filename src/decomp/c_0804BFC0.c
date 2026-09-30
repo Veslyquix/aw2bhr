@@ -7,9 +7,9 @@
  * sub_0804BFC0 @ 0x0804BFC0
  */
 
-/* The sub_0804EEFC OAM-rebuild idiom with the tail cut off: fetch the slot's
- * attributes with sub_0801566C, rewrite four bitfields, hand them back with
- * sub_08015608. Every global it touches is a strict subset of sub_0804EEFC's,
+/* The WholeFigure_Init OAM-rebuild idiom with the tail cut off: fetch the slot's
+ * attributes with CopySlotSpriteAttrs, rewrite four bitfields, hand them back with
+ * SetSlotSpriteAttrs. Every global it touches is a strict subset of WholeFigure_Init's,
  * so the type model came over whole and nothing here is newly declared -- the
  * data_refs-subset axis delivering exactly what it claims.
  *
@@ -52,7 +52,7 @@ struct Unk85D6A48Row
     /* 0x14 */ u8 filler_14[4];
 };
 
-void sub_0804BFC0(u16 a, u16 b, s16 c)
+void SetFigureObjAttrs(u16 a, u16 b, s16 c)
 {
     struct OamData oam;
     struct Unk85D6A48Row *rows;
@@ -61,7 +61,7 @@ void sub_0804BFC0(u16 a, u16 b, s16 c)
     u16 t;
     int s;
 
-    sub_0801566C(c, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(c, (struct UnkVec *)&oam);
 
     oam.hFlip = a ^ 1;
     pal = gUnknown_08551D0C[a][0];
@@ -75,5 +75,6 @@ void sub_0804BFC0(u16 a, u16 b, s16 c)
     prio = gUnknown_085523A4[(a + gUnknown_0300450C) & 1];
     oam.priority = prio;
 
-    sub_08015608(gUnknown_03001FBC, *(struct UnkVec *)&oam);
+    SetSlotSpriteAttrs(gUnknown_03001FBC, *(struct UnkVec *)&oam);
 }
+asm(".global sub_0804BFC0\n.thumb_set sub_0804BFC0, SetFigureObjAttrs\n");

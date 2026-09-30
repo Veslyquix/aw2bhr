@@ -8,11 +8,11 @@
  * AiProtectHq @ 0x0805F2B4
  */
 
-/* sub_0805F0EC's twin: same double scan over the map, same 4-byte (u16, u16)
- * buffer seeded with the 0x270F sentinel and handed to sub_080591E4, but the
+/* AiMoveToHighInfluence's twin: same double scan over the map, same 4-byte (u16, u16)
+ * buffer seeded with the 0x270F sentinel and handed to AiAdvanceToward, but the
  * ranking key is the +0x2D5A plane rather than the gUnknown_0202DAD8 influence
- * record, and it is gated on IsPlayerAliveAndActive plus two sub_0801F92C plane rebuilds.
- * Read work/sub_0805F0EC/sub_0805F0EC.c first -- every lever is documented
+ * record, and it is gated on IsPlayerAliveAndActive plus two SetWorkingMapPlane plane rebuilds.
+ * Read work/AiMoveToHighInfluence/AiMoveToHighInfluence.c first -- every lever is documented
  * there and all of them transferred.
  *
  * WAVE 66 PARK: 96.6%, size exact (536), 18 bytes different. One uninterrupted
@@ -82,7 +82,7 @@ void AiProtectHq(void)
 
     if (!IsPlayerAliveAndActive(gUnknown_030033EC))
     {
-        sub_0805F7B8();
+        AiFallbackMove();
         return;
     }
 
@@ -96,10 +96,10 @@ void AiProtectHq(void)
     a = gPlayers[gUnknown_030033EC].hqX & 0x7f;
     b = gPlayers[gUnknown_030033EC].hqY & 0x7f;
 
-    sub_0801F92C(gMap->danger);
+    SetWorkingMapPlane(gMap->danger);
     gUnknown_030013EC(a, b, t, 5, best);
-    sub_08058F30(&cost);
-    sub_0801F92C(gMap->move);
+    AiGetReachBudget(&cost);
+    SetWorkingMapPlane(gMap->move);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, cost, best);
     v.raw = (v.raw & 0xFFFF0000) | 0x270F;
@@ -138,9 +138,9 @@ void AiProtectHq(void)
     p = (u16 *)&v;
 
     if (p[0] == 0x270F)
-        sub_0805F7B8();
-    sub_080591E4(p);
-    sub_0805F7B8();
+        AiFallbackMove();
+    AiAdvanceToward(p);
+    AiFallbackMove();
 }
 
 asm(".global sub_0805F2B4\n.thumb_set sub_0805F2B4, AiProtectHq\n");

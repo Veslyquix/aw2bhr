@@ -8,7 +8,7 @@
  */
 
 #include "proc.h"
-/* Same proc as sub_0803F2D8: +0x4c is a cursor into a ROM script of u16 PAIRS,
+/* Same proc as VolcanoFire_ScrollToVolcano: +0x4c is a cursor into a ROM script of u16 PAIRS,
  * terminated by 0xFFFF. The compare is against a pool `0x0000FFFF` and the load
  * is a bare `ldrh`, so the sentinel is 65535 and not -1. */
 struct UnkF38CProc
@@ -31,9 +31,9 @@ struct UnkF3C8Proc
 /* The two `lsls #0x10; asrs #0x10` pairs come from re-reading the two word
  * fields that were just stored, not from the ldrh values: agbcc keeps the
  * stored register live and the pair is the implicit conversion to
- * sub_08029088's `s16` parameters. Writing `sub_08029088(p[0], p[1])` instead
+ * ScrollCameraToKeepCellInView's `s16` parameters. Writing `ScrollCameraToKeepCellInView(p[0], p[1])` instead
  * costs two `ldrsh` reloads. */
-void sub_0803F38C(struct UnkF38CProc *proc)
+void VolcanoFire_NextRock(struct UnkF38CProc *proc)
 {
     u16 *p = proc->unk4c;
 
@@ -46,18 +46,20 @@ void sub_0803F38C(struct UnkF38CProc *proc)
         proc->unk2c = p[0];
         proc->unk30 = p[1];
 
-        sub_08029088(proc->unk2c, proc->unk30);
+        ScrollCameraToKeepCellInView(proc->unk2c, proc->unk30);
 
         p += 2;
         proc->unk4c = p;
     }
 }
+asm(".global sub_0803F38C\n.thumb_set sub_0803F38C, VolcanoFire_NextRock\n");
 
 /* `movs r0, #0xec; lsls r0, r0, #1` is how agbcc materialises 0x1D8 -- a sound
- * id for sub_0803B4DC, which takes `int`. `adds r2, r4, #0` puts the proc
+ * id for PlayMusicOrSfx2, which takes `int`. `adds r2, r4, #0` puts the proc
  * itself in the third argument, so this proc is its own child's parent. */
-void sub_0803F3C8(struct UnkF3C8Proc *proc)
+void VolcanoFire_StartRock(struct UnkF3C8Proc *proc)
 {
-    sub_0803B4DC(0x1D8);
-    sub_0803F3E4(proc->unk2c, proc->unk30, proc);
+    PlayMusicOrSfx2(0x1D8);
+    StartVolcanoRock(proc->unk2c, proc->unk30, proc);
 }
+asm(".global sub_0803F3C8\n.thumb_set sub_0803F3C8, VolcanoFire_StartRock\n");

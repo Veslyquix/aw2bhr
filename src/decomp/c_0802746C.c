@@ -24,7 +24,7 @@ struct Unk27428Proc
     /* 64 */ s16 unk64;
 };
 
-void sub_0802746C(struct Unk27428Proc *proc)
+void SupplyIconEffect_Loop(struct Unk27428Proc *proc)
 {
     int v;
 
@@ -34,7 +34,7 @@ void sub_0802746C(struct Unk27428Proc *proc)
                  Div(SIN_Q12(0) * 16, proc->unk64 != 0 ? proc->unk64 : 2),
                  Div(COS_Q12(0) * 16, proc->unk64 != 0 ? proc->unk64 : 2));
 
-    sub_0801C254(proc->unk50, proc->unk2c & 0x1ff, (proc->unk30 & 0xff) | 0x300);
+    AP_Update(proc->unk50, proc->unk2c & 0x1ff, (proc->unk30 & 0xff) | 0x300);
 
     v = proc->unk64;
     v = v - (v - 0x100) / 2;
@@ -44,3 +44,4 @@ void sub_0802746C(struct Unk27428Proc *proc)
 
     proc->unk64 = v;
 }
+asm(".global sub_0802746C\n.thumb_set sub_0802746C, SupplyIconEffect_Loop\n");

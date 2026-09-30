@@ -9,22 +9,26 @@
 
 #include "hardware.h"
 
-/* Step the script in one gUnknown_0200C528 slot. The tail is the DISPATCHER
- * for the `s16 (s16)` command-handler family unknown-functions.h documents
- * beside sub_08017A80: the current node's byte 0 indexes gUnknown_0848A244,
- * the slot index goes in r0, and the loop runs while the handler's result is
- * nonzero after a 16-bit truncate (`lsls #0x10; cmp #0; bne`).
+/*
+ * StepEventScriptSlot -- run one gUnknown_0200C528 slot's script for this frame.
  *
- * The loop reloads `gUnknown_0200C528[a].unk04` every iteration off ONE CSEd
- * address in r4 -- the handlers advance that cursor, so the address is
- * invariant but the value is not. `adds r0,r4,#4` for &.unk04 against
- * `adds r0,r4,#0; adds r0,#8` for &.unk08 is only imm3 vs imm8, not two
- * different spellings.
+ * Gives up if the slot holds no script, if a callback is installed, or if the
+ * cursor is NULL. A nonzero delay counter is decremented here, one per frame,
+ * and the slot waits until it reaches 0.
  *
- * unk00 really is read TWICE: once as the entry guard and again after the
- * unk08 test, with the unk0c store in between. That store is what stops gcc
- * CSEing the two `ldr r0,[r1]`s. */
-void sub_08019404(s16 a)
+ * Otherwise this is the dispatcher for the script commands: byte 0 of the
+ * current node indexes the handler table gUnknown_0848A244, the handler is
+ * called with the slot index, and handlers keep being called for as long as one
+ * returns nonzero -- a handler returning 0 ends the slot's turn for this frame.
+ * Each handler moves the cursor itself. include/unknown-functions.h lists the
+ * family beside EventOp_CallFunction.
+ *
+ * Why the C looks odd: the loop re-reads `gUnknown_0200C528[a].unk04` every
+ * pass, which it has to, because the handlers move it. The slot's .unk00 is
+ * tested twice, before and after the callback test, as the original does; the
+ * store to .unk0c in between is what stops the compiler merging the two reads.
+ */
+void StepEventScriptSlot(s16 a)
 {
     if (gUnknown_0200C528[a].unk00 == NULL)
         return;
@@ -43,32 +47,33 @@ void sub_08019404(s16 a)
     while (gUnknown_0848A244[gUnknown_0200C528[a].unk04->filler_00[0]](a) != 0)
         ;
 }
+asm(".global sub_08019404\n.thumb_set sub_08019404, StepEventScriptSlot\n");
 
-/* The per-frame pump for the whole gUnknown_0200C528 list system: when
- * sub_08017988 says the system is idle, every one of the ten slots gets its
- * installed callback run and then its script stepped, and afterwards the key
- * state is force-fed from gUnknown_03002EF0.
+/*
+ * RunEventScripts -- run the whole gUnknown_0200C528 script system for one frame.
  *
- * The loop is the `s16 i` shape of src/decomp/c_08019260.c -- the counter is
- * carried as `i << 16` in r5 and re-derived with `asrs #0x10` at each use, so
- * the increment is `+0x10000` (`movs r1,#0x80; lsls r1,#9`) rather than +1.
- * `adds r7,r6,#0; adds r7,#8` in the preheader is LICM hoisting the constant
- * `&gUnknown_0200C528[0].unk08`, written by the loop optimiser and not by the
- * source (wave 37 preheader rule).
+ * Does nothing while AreEventScriptsPaused reports the system busy. Otherwise
+ * gUnknown_03002EF0 is cleared and each of the ten slots that holds a script
+ * gets its callback run, if it has one, and then its script stepped by
+ * StepEventScriptSlot above. Afterwards, when gUnknown_03001404 is set, all four key
+ * words in gpKeySt are forced to gUnknown_03002EF0 and two more globals are
+ * cleared -- so a running script can feed a button state to the rest of the
+ * game by writing that global.
  *
- * gUnknown_03002EF0 gets an agbcc `-fforce-addr` `.rodata` word (the ROM's
- * 0x0808E5A4, which holds 0x03002EF0) because it is referenced on both sides
- * of the loop; the address is parked in r8 and re-loaded from memory at each
- * use. gpKeySt, by contrast, has one reference and gets an ordinary pool word.
+ * The callback field is declared as a node pointer, so calling it needs the
+ * cast to a function pointer.
  *
- * gUnknown_03001404 had to be retyped u16 -> s16 for this function: the ROM
- * reads it `movs r2,#0; ldrsh r0,[r0,r2]`, and a `(s16)` cast on a u16 global
- * folds away at a zero test. */
-void sub_08019470(void)
+ * Why the C looks odd: the loop counter is an `s16`, so the compiler carries it
+ * pre-shifted and sign-extends it at each use; an int counter tidies that up
+ * and the output no longer matches. gUnknown_03001404 has to stay s16 for the
+ * same reason -- the original reads it as a signed halfword, and a `(s16)` cast
+ * on a u16 global would fold away at a zero test.
+ */
+void RunEventScripts(void)
 {
     s16 i;
 
-    if (sub_08017988() != 0)
+    if (AreEventScriptsPaused() != 0)
         return;
 
     gUnknown_03002EF0 = 0;
@@ -79,7 +84,7 @@ void sub_08019470(void)
         {
             if (gUnknown_0200C528[i].unk08 != NULL)
                 ((void (*)(struct Unk0200C528 *))gUnknown_0200C528[i].unk08)(&gUnknown_0200C528[i]);
-            sub_08019404(i);
+            StepEventScriptSlot(i);
         }
     }
 
@@ -93,3 +98,4 @@ void sub_08019470(void)
         gUnknown_03004518 = 0;
     }
 }
+asm(".global sub_08019470\n.thumb_set sub_08019470, RunEventScripts\n");

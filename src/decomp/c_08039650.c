@@ -7,20 +7,13 @@
  * sub_08039650 @ 0x08039650
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08039650.
- * sub_08039650 @ 0x08039650
- */
-
 #include "proc.h"
 struct Unk39650Proc
 {
     /* 0x00 */ PROC_HEADER;
     /* 0x29 */ STRUCT_PAD(0x29, 0x54);
     /* 0x54 */ int unk54; /* an army index: it is what indexes
-                           * gPlayers[] here and in sub_080397BC */
+                           * gPlayers[] here and in CoPowerSequence_Activate */
     /* 0x58 */ int unk58;
 };
 
@@ -33,7 +26,8 @@ struct Unk39650Proc
  * between the proc and the table base, and misses by five bytes in the same
  * 36. */
 
-void sub_08039650(struct Unk39650Proc *proc)
+void CoPowerSequence_StartPowerScript(struct Unk39650Proc *proc)
 {
     StartCoPowerScript(gPlayers[proc->unk54].co, proc->unk58, proc);
 }
+asm(".global sub_08039650\n.thumb_set sub_08039650, CoPowerSequence_StartPowerScript\n");

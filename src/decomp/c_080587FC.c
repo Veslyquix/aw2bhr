@@ -22,7 +22,7 @@
  * Splitting the packed word into `xp = (u32)x << 16`, then
  * `yp = (u32)y << 16`, then `(xp >> 16) | yp` makes the zero-extension two
  * RTL insns and schedules the y shift between them, matching the ROM. This is
- * the same measured lever used by promoted sub_0805EB58. Writing the OR the
+ * the same measured lever used by promoted AiMoveToNearestNonTeamCell. Writing the OR the
  * other way round
  * (`(y << 16) | (u16)x`) was TESTED and is worse -- it flips the `orrs` and
  * `str` operands as well, so the current order is right and the `lsrs`
@@ -46,11 +46,11 @@
  *
  *  - `u` is `u8`, not `int`. With `int` the value is kept as `u << 16` across
  *    the calls and every narrow-parameter call site pays a `lsrs r0,r6,#0x10`;
- *    a `u8` local is PROMOTE_MODE zero-extended, so `sub_08026F9C(g, u)` and
- *    `sub_080257C0(u)` need no conversion at all, which is the ROM's bare
+ *    a `u8` local is PROMOTE_MODE zero-extended, so `AreUnitsOnSameTeam(g, u)` and
+ *    `IsUnitVisibleToCurrentTeam(u)` need no conversion at all, which is the ROM's bare
  *    `adds r0,r4,#0`.
- *  - the results of sub_08058C54 and sub_08058BB4 are BOUND to `t` before the
- *    `== -1` test, and sub_08058A2C's is not. That is what decides which of the
+ *  - the results of AiPickFiringCellBeside and AiPickFiringCellBesideUnit are BOUND to `t` before the
+ *    `== -1` test, and AiScoreAttack's is not. That is what decides which of the
  *    two registers holds the result and which holds the -1: bound gives the
  *    ROM's `adds r1,r0,#0 / movs r0,#1 / rsbs r0,r0,#0 / cmp r1,r0`, unbound
  *    gives `movs r1,#1 / rsbs / cmp r0,r1`. Both spellings appear in this one
@@ -69,7 +69,7 @@
  * first write to `pos` really is one word store of `(u16)x | (y << 16)`, which
  * is why it is spelled through the `int *` cast rather than as two `strh`. */
 
-int sub_080587FC(int flag)
+int AiListAttackCandidates(int flag)
 {
     struct Unk03003338 *p;
     struct Unit *r;
@@ -93,19 +93,19 @@ int sub_080587FC(int flag)
             if ((s8)gUnknown_03003340[y][x] < 0)
                 continue;
 
-            if ((sub_08035000(gPlaySt.mapID)->unk28 & 1) == 0
+            if ((GetMapListEntry(gPlaySt.mapID)->unk28 & 1) == 0
              && gUnknown_020288B4[gMap->rowOffset[y] + x] != 0)
             {
                 xp = (u32)x << 16;
                 yp = (u32)y << 16;
                 *(int *)&pos = (xp >> 16) | yp;
-                sub_080251BC(gUnknown_03003F38, 0, &pos);
+                CalcAttackOutcome(gUnknown_03003F38, 0, &pos);
                 lim = (u8 *)gBattleAttacker;
                 if (*(s16 *)(lim + 0x18) == 0)
                     continue;
                 if (flag == 0)
                 {
-                    t = sub_08058C54(x, y, (u16 *)&pos);
+                    t = AiPickFiringCellBeside(x, y, (u16 *)&pos);
                     if (t == -1)
                         continue;
                 }
@@ -126,16 +126,16 @@ int sub_080587FC(int flag)
                 u = gMap->unit[idx];
                 if (u == 0)
                     continue;
-                if (sub_08026F9C(gUnknown_03003F38, u) == 1)
+                if (AreUnitsOnSameTeam(gUnknown_03003F38, u) == 1)
                     continue;
                 r = &gUnits[u];
-                if (r->type == 0x18 && !sub_080257C0(u))
+                if (r->type == 0x18 && !IsUnitVisibleToCurrentTeam(u))
                     continue;
-                if (!sub_08020DBC(gUnknown_030033EC, x, y))
+                if (!IsCellVisibleToArmy(gUnknown_030033EC, x, y))
                     continue;
                 if (flag == 0)
                 {
-                    t = sub_08058BB4(u, (u16 *)&pos);
+                    t = AiPickFiringCellBesideUnit(u, (u16 *)&pos);
                     if (t == -1)
                         continue;
                 }
@@ -144,11 +144,11 @@ int sub_080587FC(int flag)
                     pos.unk00 = gUnknown_030040D8->unk02;
                     pos.unk02 = gUnknown_030040D8->unk03;
                 }
-                sub_080251BC(gUnknown_03003F38, u, &pos);
+                CalcAttackOutcome(gUnknown_03003F38, u, &pos);
                 lim = (u8 *)gBattleAttacker;
                 if (*(s16 *)(lim + 0x18) == 0)
                     continue;
-                if (sub_08058A2C(&w) == -1)
+                if (AiScoreAttack(&w) == -1)
                     w = 0;
                 p->unk00 = u;
                 p->unk04 = pos.unk00;
@@ -162,3 +162,4 @@ int sub_080587FC(int flag)
     p->unk00 = 0;
     return p - gUnknown_03003338;
 }
+asm(".global sub_080587FC\n.thumb_set sub_080587FC, AiListAttackCandidates\n");

@@ -27,23 +27,24 @@ struct Unk80670F8
     /* 0x0c */ u32 unk0c;
 };
 
-void sub_080670F8(const u8 * a1)
+void ApplyBgControlTable(const u8 * a1)
 {
     const struct Unk80670F8 * cfg = (const struct Unk80670F8 *)a1;
 
-    sub_08012C30((struct Unk8012C30 *)&gUnknown_03002B6C, cfg[0].unk00);
-    sub_08012C1C((struct Unk8012C30 *)&gUnknown_03002B6C, cfg[0].unk04);
-    sub_08012C48((struct Unk8012C30 *)&gUnknown_03002B6C, cfg[0].unk0c);
+    SetBgCntChrBlock((struct Unk8012C30 *)&gUnknown_03002B6C, cfg[0].unk00);
+    SetBgCntTilemapBlock((struct Unk8012C30 *)&gUnknown_03002B6C, cfg[0].unk04);
+    SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_03002B6C, cfg[0].unk0c);
 
-    sub_08012C30((struct Unk8012C30 *)&gUnknown_03001FE8, cfg[1].unk00);
-    sub_08012C1C((struct Unk8012C30 *)&gUnknown_03001FE8, cfg[1].unk04);
-    sub_08012C48((struct Unk8012C30 *)&gUnknown_03001FE8, cfg[1].unk0c);
+    SetBgCntChrBlock((struct Unk8012C30 *)&gUnknown_03001FE8, cfg[1].unk00);
+    SetBgCntTilemapBlock((struct Unk8012C30 *)&gUnknown_03001FE8, cfg[1].unk04);
+    SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_03001FE8, cfg[1].unk0c);
 
-    sub_08012C30((struct Unk8012C30 *)&gUnknown_030030B4, cfg[2].unk00);
-    sub_08012C1C((struct Unk8012C30 *)&gUnknown_030030B4, cfg[2].unk04);
-    sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, cfg[2].unk0c);
+    SetBgCntChrBlock((struct Unk8012C30 *)&gUnknown_030030B4, cfg[2].unk00);
+    SetBgCntTilemapBlock((struct Unk8012C30 *)&gUnknown_030030B4, cfg[2].unk04);
+    SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_030030B4, cfg[2].unk0c);
 
-    sub_08012C30((struct Unk8012C30 *)&gUnknown_0300251C, cfg[3].unk00);
-    sub_08012C1C((struct Unk8012C30 *)&gUnknown_0300251C, cfg[3].unk04);
-    sub_08012C48((struct Unk8012C30 *)&gUnknown_0300251C, cfg[3].unk0c);
+    SetBgCntChrBlock((struct Unk8012C30 *)&gUnknown_0300251C, cfg[3].unk00);
+    SetBgCntTilemapBlock((struct Unk8012C30 *)&gUnknown_0300251C, cfg[3].unk04);
+    SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_0300251C, cfg[3].unk0c);
 }
+asm(".global sub_080670F8\n.thumb_set sub_080670F8, ApplyBgControlTable\n");

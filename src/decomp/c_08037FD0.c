@@ -4,11 +4,11 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08037FD0.
- * sub_08037FD0 @ 0x08037FD0
+ * EndOfGame_StartResultFlow @ 0x08037FD0
  */
 
-/* End-of-battle dispatch: picks the winning slot for sub_08037F94 or falls
- * back to sub_08037FB4.
+/* End-of-battle dispatch: picks the winning slot for StartVictoryFlow or falls
+ * back to StartDefeatFlow.
  *
  * The savingEnabled tail is written c-arm FIRST, each arm with its own fail
  * call. That is the order reload sees, and reload's spill-register choice is
@@ -21,11 +21,11 @@
  * Load-bearing, measured in earlier waves: `int m` with an explicit `(u8)m`
  * at each use; `a = b = c = d = 0;` as one chained assignment (stores
  * descending); `do { } while (0);` before `flag = 1;`; and a bare `break` on
- * `flag == 1` with the one sub_08037FB4 call after the loop. */
+ * `flag == 1` with the one StartDefeatFlow call after the loop. */
 #include "global.h"
 #include "proc.h"
 
-void sub_08037FD0(ProcPtr parent)
+void EndOfGame_StartResultFlow(ProcPtr parent)
 {
     int a;
     int b;
@@ -39,12 +39,12 @@ void sub_08037FD0(ProcPtr parent)
     for (i = 1; i <= 4; i++)
     {
         if (sub_080266DC(i))
-            sub_080265D0(i, gPlaySt.mapID);
+            AwardSpeedBonusPoints(i, gPlaySt.mapID);
     }
-    sub_08026520();
-    sub_08017720(gPlayers[sub_0807A908()].co,
+    UpdateAllArmyScores();
+    InsertBestScoreRecord(gPlayers[GetResultsArmy()].co,
                  gPlaySt.mapID,
-                 gPlayers[sub_0807A908()].totalScore,
+                 gPlayers[GetResultsArmy()].totalScore,
                  gUnknown_03004080);
     sub_08030574();
     switch (gPlaySt.gameMode)
@@ -53,9 +53,9 @@ void sub_08037FD0(ProcPtr parent)
     case 1:
     case 2:
         if (sub_080266DC(1))
-            sub_08037F94(1, parent);
+            StartVictoryFlow(1, parent);
         else
-            sub_08037FB4(parent);
+            StartDefeatFlow(parent);
         break;
     case 3:
         a = b = c = d = 0;
@@ -85,7 +85,7 @@ void sub_08037FD0(ProcPtr parent)
         }
         if (flag == 1)
         {
-            sub_08037FB4(parent);
+            StartDefeatFlow(parent);
             return;
         }
         for (m = 1; m <= 4; m++)
@@ -116,33 +116,35 @@ void sub_08037FD0(ProcPtr parent)
             {
                 if (c != 0)
                 {
-                    sub_08037F94(c, parent);
+                    StartVictoryFlow(c, parent);
                     return;
                 }
-                sub_08037FB4(parent);
+                StartDefeatFlow(parent);
                 return;
             }
             else
             {
                 if (d != 0)
                 {
-                    sub_08037F94(d, parent);
+                    StartVictoryFlow(d, parent);
                     return;
                 }
-                sub_08037FB4(parent);
+                StartDefeatFlow(parent);
                 return;
             }
         }
         {
             if (b == 0)
-                sub_08037F94(c, parent);
+                StartVictoryFlow(c, parent);
             else if (a == 0)
-                sub_08037F94(d, parent);
+                StartVictoryFlow(d, parent);
             else if (c != 0)
-                sub_08037F94(c, parent);
+                StartVictoryFlow(c, parent);
             else
-                sub_08037FB4(parent);
+                StartDefeatFlow(parent);
         }
         break;
     }
 }
+
+asm(".global sub_08037FD0\n.thumb_set sub_08037FD0, EndOfGame_StartResultFlow\n");

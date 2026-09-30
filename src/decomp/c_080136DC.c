@@ -9,7 +9,7 @@
 
 /* Unpacks `h` palettes of 16 colours from `src` into the RGB shadow
  * gUnknown_0200B614 (three bytes per colour at `(row * 16 + i) * 3`, the same
- * layout sub_08075A54 writes -- see src/decomp/c_08075904.c), and stamps `pal`
+ * layout LoadFadeComponentsFromPalette writes -- see src/decomp/c_08075904.c), and stamps `pal`
  * into gUnknown_0200B5F4 for each row touched.
  *
  * `pal` is SIGNED 8-bit and its sign bit is a flag: the ROM shares one
@@ -21,7 +21,7 @@
  * `p` must be a LOCAL copy of `src` rather than the parameter incremented in
  * place: a modified parameter is copied to its register in the prologue, where
  * the ROM emits `adds r4, r0, #0` after the `pal` statements. */
-void sub_080136DC(u16 *src, u16 y, u16 h, s8 pal)
+void ColFadeDirect(u16 *src, u16 y, u16 h, s8 pal)
 {
     u8 c;
     u8 base;
@@ -46,3 +46,4 @@ void sub_080136DC(u16 *src, u16 y, u16 h, s8 pal)
         }
     }
 }
+asm(".global sub_080136DC\n.thumb_set sub_080136DC, ColFadeDirect\n");

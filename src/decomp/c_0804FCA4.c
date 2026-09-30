@@ -19,8 +19,8 @@ void sub_0804FCA4(void)
     t = sub_080156C4(gUnknown_03001FBC);
     p1 = gUnknown_084C3F70[c];
     p2 = gUnknown_084C3F78[c];
-    sub_08056E9C(c, e);
-    w = sub_0804BDD8(c, e, gUnknown_03001FBC);
+    StepFigureSlide(c, e);
+    w = StepFigureHitFlash(c, e, gUnknown_03001FBC);
     if (t == 0x1B)
     {
         PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[c][1]].unk0c[1]
@@ -38,5 +38,5 @@ void sub_0804FCA4(void)
                                    + c * sizeof(struct Unk02029A10Group)
                                    + (u8 *)gUnknown_02029A10);
     entry->x += gUnknown_08553B28[c][w];
-    sub_080155C0(gUnknown_03001FBC, entry->x - *p1, entry->y - *p2);
+    SetSlotSpritePosition(gUnknown_03001FBC, entry->x - *p1, entry->y - *p2);
 }

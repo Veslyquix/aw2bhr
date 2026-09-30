@@ -21,7 +21,7 @@ struct Unk6407CMtx /* 0x30 */
 
 /* A rotation about the Y axis: cos on the two diagonal entries, sin at
  * m[2][0] and -sin at m[0][2], with m[1][1] the 20.12 one (0x1000).
- * sub_0801BAA8 is cos(deg) and sub_0801BA4C sin(deg); the `>> 2` scales the
+ * CosDegrees is cos(deg) and SinDegrees sin(deg); the `>> 2` scales the
  * table's 14-bit result down to 20.12.
  *
  * `c` and `s` are BOTH `s16`, and the asymmetry between them is agbcc's, not
@@ -30,10 +30,10 @@ struct Unk6407CMtx /* 0x30 */
  * (`lsls #0x10; asrs #0x10`), while `s` is defined and consumed with no call
  * in between and combine proves the round trip a no-op after `asrs #0x12` and
  * deletes it. Reproduced exactly by declaring both `s16`. */
-void sub_08064034(struct Unk64034Mtx *mtx, s16 angle)
+void BuildRotationMatrixY(struct Unk64034Mtx *mtx, s16 angle)
 {
-    s16 c = sub_0801BAA8(angle) >> 2;
-    s16 s = sub_0801BA4C(angle) >> 2;
+    s16 c = CosDegrees(angle) >> 2;
+    s16 s = SinDegrees(angle) >> 2;
 
     mtx->m[0][0] = c;
     mtx->m[0][1] = 0;
@@ -45,14 +45,15 @@ void sub_08064034(struct Unk64034Mtx *mtx, s16 angle)
     mtx->m[2][1] = 0;
     mtx->m[2][2] = c;
 }
+asm(".global sub_08064034\n.thumb_set sub_08064034, BuildRotationMatrixY\n");
 
-/* sub_08064034's Z-axis twin: the same cos/sin pair, placed at m[0][0]/m[1][1]
+/* BuildRotationMatrixY's Z-axis twin: the same cos/sin pair, placed at m[0][0]/m[1][1]
  * with -sin at m[0][1] and +sin at m[1][0], and the 0x1000 moved to m[2][2].
  * The row of stores is the whole difference between the two functions. */
-void sub_0806407C(struct Unk6407CMtx *mtx, s16 angle)
+void BuildRotationMatrixZ(struct Unk6407CMtx *mtx, s16 angle)
 {
-    s16 c = sub_0801BAA8(angle) >> 2;
-    s16 s = sub_0801BA4C(angle) >> 2;
+    s16 c = CosDegrees(angle) >> 2;
+    s16 s = SinDegrees(angle) >> 2;
 
     mtx->m[0][0] = c;
     mtx->m[0][1] = -s;
@@ -64,3 +65,4 @@ void sub_0806407C(struct Unk6407CMtx *mtx, s16 angle)
     mtx->m[2][1] = 0;
     mtx->m[2][2] = 0x1000;
 }
+asm(".global sub_0806407C\n.thumb_set sub_0806407C, BuildRotationMatrixZ\n");

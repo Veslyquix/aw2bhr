@@ -7,8 +7,8 @@
  * sub_08047F70 @ 0x08047F70
  */
 
-#define sub_08047F70 sub_08047F70_decl
-#undef sub_08047F70
+#define UnitList_HandleInput sub_08047F70_decl
+#undef UnitList_HandleInput
 #include "hardware.h"
 /* MATCHED (wave 77, W77-I), by decomp-permuter. Was parked at 98.8% since
  * wave 36 on SIX bytes -- three instances of one instruction, `mov r1, r8`
@@ -56,11 +56,11 @@
  *    shifted by one and twelve further instructions differed.
  *  - Local declaration order is byte-neutral (measured, wave 36).
  *
- * TOOLING NOTE: `python tools/permute.py sub_08047F70` aborts at setup with
- * `conflicting types for 'sub_08047F70'`. It seeds from best.c by default, and
+ * TOOLING NOTE: `python tools/permute.py UnitList_HandleInput` aborts at setup with
+ * `conflicting types for 'UnitList_HandleInput'`. It seeds from best.c by default, and
  * this function's best.c is an older hand file lacking the `#define` shadow
  * above, so after cpp the unit carries two conflicting declarations. Run it as
- * `python tools/permute.py sub_08047F70 --current` to seed from this file.
+ * `python tools/permute.py UnitList_HandleInput --current` to seed from this file.
  *
  * gUnknown_0812A13C is the -fforce-addr word holding &gpKeySt (dereferenced in
  * baserom.gba: 0x0812A13C -> 0x03002EE0, and aw2bhr.lds puts gpKeySt exactly
@@ -78,9 +78,9 @@ struct Unk08047B98
     /* 0x21 */ u8 unk21;
     /* 0x22 */ u8 unk22;
 };
-void sub_08047B98(struct Unk08047B98 *);
+void RefreshUnitList(struct Unk08047B98 *);
 
-void sub_08047F70(struct Unk08047B98 *p)
+void UnitList_HandleInput(struct Unk08047B98 *p)
 {
     int changed;
     s16 d;
@@ -101,7 +101,7 @@ void sub_08047F70(struct Unk08047B98 *p)
         else if (p->unk1f == (p->unk20 - 1))
             p->unk20 = p->unk1f;
 
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
     }
 
     if (gpKeySt->repeated & DPAD_DOWN)
@@ -128,7 +128,7 @@ void sub_08047F70(struct Unk08047B98 *p)
                 p->unk20 = v;
         }
 
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
     }
 
     if (gpKeySt->repeated & L_BUTTON)
@@ -150,7 +150,7 @@ void sub_08047F70(struct Unk08047B98 *p)
             p->unk20 -= 6;
         }
 
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
     }
 
     if (gpKeySt->repeated & R_BUTTON)
@@ -172,7 +172,7 @@ void sub_08047F70(struct Unk08047B98 *p)
             p->unk20 += 6;
         }
 
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
     }
 
     if (gpKeySt->repeated & DPAD_LEFT)
@@ -183,7 +183,7 @@ void sub_08047F70(struct Unk08047B98 *p)
             p->unk1e--;
 
         changed = 1;
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
     }
 
     if (gpKeySt->repeated & DPAD_RIGHT)
@@ -194,7 +194,7 @@ void sub_08047F70(struct Unk08047B98 *p)
             p->unk1e++;
 
         changed = 1;
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
     }
 
     if (gpKeySt->pressed & (SELECT_BUTTON | START_BUTTON))
@@ -204,9 +204,10 @@ void sub_08047F70(struct Unk08047B98 *p)
 
         gUnknown_02028E18 = (gUnknown_02028E18 + 1) & 1;
         changed = 1;
-        sub_0803B4DC(0x67);
+        PlayMusicOrSfx2(0x67);
     }
 
     if (changed == 1)
-        sub_08047B98(p);
+        RefreshUnitList(p);
 }
+asm(".global sub_08047F70\n.thumb_set sub_08047F70, UnitList_HandleInput\n");

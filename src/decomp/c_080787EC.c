@@ -7,13 +7,6 @@
  * SetupCoSelectNeotanksYc @ 0x080787EC
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file .text as one
- * contiguous block at 0x080787EC.
- * SetupCoSelectNeotanksYc @ 0x080787EC
- */
-
 /* Family F035 (data/families.json): `push {lr}; bl A; movs r0,#0; bl B; bl C;
  * pop {r0}; bx r0` -- 20 bytes, five members, and `varies` lists only the three
  * `bl` targets, so the `movs r0, #0` is byte-identical in every member.
@@ -30,8 +23,8 @@
 
 
 /* The gUnknown_030058E0 display-list variant: ClearArmyCount resets the cursor
- * and sub_08078740 clears the five words of gUnknown_030059C0, and both are
- * nullary. sub_080786A4 returns the advanced byte index (`pop {r1}; bx r1`) and
+ * and SetCoSelectGroupSwitchNone clears the five words of gUnknown_030059C0, and both are
+ * nullary. AddCoSelectGroupYellowComet returns the advanced byte index (`pop {r1}; bx r1`) and
  * that result is DISCARDED here -- unlike SetupCoSelectHotPursuit, which chains the four
  * builders and does consume it.
  */
@@ -39,8 +32,8 @@
 void SetupCoSelectNeotanksYc(void)
 {
     ClearArmyCount();
-    sub_080786A4(0);
-    sub_08078740();
+    AddCoSelectGroupYellowComet(0);
+    SetCoSelectGroupSwitchNone();
 }
 
 asm(".global sub_080787EC\n.thumb_set sub_080787EC, SetupCoSelectNeotanksYc\n");

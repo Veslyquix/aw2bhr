@@ -21,7 +21,7 @@ void sub_08005080(void)
     s16 t;
 
     a = sub_0800CB30(0, 0);
-    sub_0803CF54(gActiveMap->designSlot, gActiveMap->designName, sub_0800C9E8());
+    SaveDesignRoomSlot(gActiveMap->designSlot, gActiveMap->designName, sub_0800C9E8());
     sub_0800CB30(1, a);
     t = 7;
     switch ((s8)gActiveMap->designSlot)
@@ -35,9 +35,9 @@ void sub_08005080(void)
         t = 0xB;
         break;
     }
-    sub_08012BC8(gBG0TilemapBuffer, 5, t, 9, 2, 0);
-    sub_080149C0(5, t, gBG0TilemapBuffer, gActiveMap->designName, 0x8000, 0);
-    sub_08013AEC();
+    FillTilemapRect(gBG0TilemapBuffer, 5, t, 9, 2, 0);
+    PutTextScriptImmediate(5, t, gBG0TilemapBuffer, gActiveMap->designName, 0x8000, 0);
+    BG_EnableSyncBG0();
     if (gActiveMap->flags & 0x100)
     {
         gActiveMap->flags &= 0xFEFF;

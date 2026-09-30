@@ -8,7 +8,7 @@
  */
 
 /* Blanks columns 1..15 of rows 5..18 of the 32-wide tilemap gBG0TilemapBuffer
- * points at, then hands the buffer to sub_08013AEC.
+ * points at, then hands the buffer to BG_EnableSyncBG0.
  *
  * Both counters are s16, which is what puts them in the HIGH half of a register
  * for the whole loop: `lsls r4,r2,#0x10` / `asrs r3,r4,#0xb` is `y * 32` folded
@@ -18,7 +18,7 @@
  *
  * The tilemap pointer is re-`ldr`ed inside the inner loop because the store
  * through it may alias the pointer variable; that is free, not a spelling. */
-void sub_0802D76C(void)
+void ClearDeploymentListArea(void)
 {
     s16 x;
     s16 y;
@@ -29,5 +29,6 @@ void sub_0802D76C(void)
             gBG0TilemapBuffer[y * 32 + x] = 0;
     }
 
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_0802D76C\n.thumb_set sub_0802D76C, ClearDeploymentListArea\n");

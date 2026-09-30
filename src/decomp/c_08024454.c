@@ -9,14 +9,14 @@
 
 #include "hardware.h"
 
-void sub_08024454(void)
+void SetMapLayersRangeBlend(void)
 {
     gUnknown_030030B4.bits.priority = 0;
     gUnknown_03001FE8.bits.priority = 1;
     gUnknown_03002B6C.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
 
-    sub_08012358();
+    SetDefaultColorEffects();
 
     gUnknown_030030E0.bits.effect = 1;
     gUnknown_030030E0.bits.target1_enable_bg0 = 1;
@@ -34,5 +34,6 @@ void sub_08024454(void)
         gUnknown_03002B28 = 16;
     }
 
-    sub_0801237C();
+    ResetWindowShadows();
 }
+asm(".global sub_08024454\n.thumb_set sub_08024454, SetMapLayersRangeBlend\n");

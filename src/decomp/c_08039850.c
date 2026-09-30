@@ -10,9 +10,9 @@
 #include "proc.h"
 /* The scripted-line lookup for the current map: walk
  * gUnknown_0849D62C[map - 0x8a], a -1-terminated run of 8-byte records, and
- * play the first whose terrain, whatever sub_08044374 counts, and (when it is
+ * play the first whose terrain, whatever GetCoPowerUseCount counts, and (when it is
  * not the wildcard 0) army all match the proc's army. Returns whether one
- * fired -- sub_08039820 falls back to the random line on 0.
+ * fired -- CoPowerSequence_ShowQuote falls back to the random line on 0.
  *
  * The table pointer being NULL is a separate early-out from the run being
  * empty, and both land on the same `movs r0,#0`. The -1 sentinel is
@@ -26,7 +26,7 @@ struct Unk39850Proc
     /* 0x54 */ int unk54;
 };
 
-u8 sub_08039850(ProcPtr procPtr)
+u8 TryShowScriptedCoPowerQuote(ProcPtr procPtr)
 {
     struct Unk39850Proc *proc = procPtr;
     const struct Unk0849D62C *e;
@@ -38,10 +38,10 @@ u8 sub_08039850(ProcPtr procPtr)
         while (e->unk01 != -1)
         {
             if (e->unk01 == gPlayers[proc->unk54].co
-             && e->unk02 == sub_08044374(proc->unk54)
+             && e->unk02 == GetCoPowerUseCount(proc->unk54)
              && (e->unk00 == 0 || e->unk00 == proc->unk54))
             {
-                sub_080397F4(e->unk04);
+                ShowCoQuote(e->unk04);
                 return 1;
             }
 
@@ -51,3 +51,4 @@ u8 sub_08039850(ProcPtr procPtr)
 
     return 0;
 }
+asm(".global sub_08039850\n.thumb_set sub_08039850, TryShowScriptedCoPowerQuote\n");

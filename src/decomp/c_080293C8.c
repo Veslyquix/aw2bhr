@@ -24,15 +24,15 @@
  * draft referenced any filler. Keep the drafts in sync; sync_work.py
  * reintroduces whatever the drafts say. */
 
-void sub_080293C8(ProcPtr proc)
+void TargetPickCursor_Loop(ProcPtr proc)
 {
-    sub_08023824();
-    sub_080236E8();
-    sub_08023908(4);
+    HandleMoveMapCursor();
+    HandleMoveMapCursorInMoveRange();
+    HandleMoveCameraWithMapCursor(4);
 
     if (sub_08029490(proc))
     {
-        sub_08023274(2);
+        StepMapCursorAndDraw(2);
 
         if (gpKeySt->pressed & 1)
         {
@@ -46,7 +46,7 @@ void sub_080293C8(ProcPtr proc)
     }
     else
     {
-        sub_08023274(1);
+        StepMapCursorAndDraw(1);
     }
 
     if (gpKeySt->pressed & 2)
@@ -58,6 +58,7 @@ void sub_080293C8(ProcPtr proc)
         sub_08028EE4();
     }
 }
+asm(".global sub_080293C8\n.thumb_set sub_080293C8, TargetPickCursor_Loop\n");
 
 bool8 sub_08029490(ProcPtr proc)
 {
@@ -72,7 +73,7 @@ bool8 sub_08029490(ProcPtr proc)
             return 1;
 
         if (gMap->unit[idx] != 0
-            && sub_08026F5C(gMap->unit[idx]))
+            && IsUnitOnCurrentTeam(gMap->unit[idx]))
             return 1;
     }
 

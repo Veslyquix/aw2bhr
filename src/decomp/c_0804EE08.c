@@ -7,7 +7,7 @@
  * sub_0804EE08 @ 0x0804EE08
  */
 
-void sub_0804EE08(u16 a, u16 b, s16 c)
+void StepBomberBobOrKnock(u16 a, u16 b, s16 c)
 {
     struct Unk56E28 r;
     int v;
@@ -36,6 +36,7 @@ void sub_0804EE08(u16 a, u16 b, s16 c)
         r.unk08 = 0x10;
         r.unk0a = 8;
         r.unk0c = 0x64;
-        sub_08056E28(&r);
+        SetFigureSlide(&r);
     }
 }
+asm(".global sub_0804EE08\n.thumb_set sub_0804EE08, StepBomberBobOrKnock\n");

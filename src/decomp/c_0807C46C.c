@@ -7,13 +7,13 @@
  * sub_0807C46C @ 0x0807C46C
  */
 
-void sub_0807C46C(void *arg)
+void MissionTitleLetters_PutFinalLabelAndBar(void *arg)
 {
     int n;
     int i;
 
     PutSprite(0, 0x68, 8, gUnknown_08615C62, 0);
-    n = sub_0803840C();
+    n = GetCampaignResultCountPlusOne();
     if (n <= 9)
     {
         PutSprite(0, 0xca, 8, gUnknown_0848B690, n * 4 + 0x1c);
@@ -34,3 +34,4 @@ void sub_0807C46C(void *arg)
         PutSprite(0, i * 32, 0x32, gUnknown_0848B6BE, 0x18);
     }
 }
+asm(".global sub_0807C46C\n.thumb_set sub_0807C46C, MissionTitleLetters_PutFinalLabelAndBar\n");

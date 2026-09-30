@@ -8,7 +8,7 @@
  * sub_080258CC @ 0x080258CC
  */
 
-void sub_080258CC(void)
+void RebuildMapUnitLayers(void)
 {
     int i;
     int j;
@@ -19,8 +19,8 @@ void sub_080258CC(void)
     gMap->camY = gMap->scrollY / 16;
     gMap->unk08 = gMap->scrollX;
     gMap->unk0a = gMap->scrollY;
-    sub_08023860();
-    sub_080213AC();
+    UpdateMapBgScroll();
+    RebuildVisionPlanes();
 
     for (i = 0; i < gMap->height; i++)
     {
@@ -66,7 +66,7 @@ void sub_080258CC(void)
             continue;
         if (gPlayers[gUnknown_030033EC].aiControlled == 2)
             continue;
-        if (sub_0802571C(id))
+        if (IsUnitIdVisibleToViewer(id))
         {
             if (gMap->visible[gMap->rowOffset[gUnits[id].y]
                               + gUnits[id].x] != 0)
@@ -76,7 +76,8 @@ void sub_080258CC(void)
                    + gUnits[id].x] = 0;
     }
 
-    sub_08021D10();
-    sub_08022580();
-    sub_080227A8();
+    RenderMap();
+    RedrawUnitLayer();
+    RedrawUnitIconLayer();
 }
+asm(".global sub_080258CC\n.thumb_set sub_080258CC, RebuildMapUnitLayers\n");

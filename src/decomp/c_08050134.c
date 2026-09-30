@@ -4,18 +4,18 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x08050134.
- * sub_08050134 @ 0x08050134, sub_080501DC @ 0x080501DC, sub_08050364 @ 0x08050364
+ * sub_08050134 @ 0x08050134, FootFigure_Loop @ 0x080501DC, FigureTileHook_WholePose @ 0x08050364
  */
 
 #include "hardware.h"
 
-/* MATCHED, and the FIRST of a byte-identical pair -- sub_08050364 is the same
+/* MATCHED, and the FIRST of a byte-identical pair -- FigureTileHook_WholePose is the same
  * function again, same instruction stream and same pool words, found by
  * tools/overlap_screen.py rather than by reading the block. Both are
  * zero-fan-in callbacks.
  *
  * It re-syncs one OBJ's tile number against the slot's stashed attributes: read
- * the current attributes with sub_0801566C, take the 10-bit delta between the
+ * the current attributes with CopySlotSpriteAttrs, take the 10-bit delta between the
  * caller's attr2 and them, write the fetched tileNum back into the caller's
  * attr2, and if that delta is new for this proc AND the proc still owns the
  * gUnknown_02029A10 entry, publish it.
@@ -43,7 +43,7 @@ void sub_08050134(s16 a, u16 *p)
     u16 side;
     u16 slot;
 
-    sub_0801566C(a, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(a, (struct UnkVec *)&oam);
 
     v = (p[2] - oam.tileNum) & 0x3FF;
     w = v >> 4;
@@ -57,7 +57,7 @@ void sub_08050134(s16 a, u16 *p)
         && a == gUnknown_02029A10[side].entries[slot].unk18)
     {
         gUnknown_03001470[a].unk28 = v;
-        sub_08050424(side, slot, w);
+        StreamWholePose(side, slot, w);
     }
 }
 
@@ -84,7 +84,7 @@ void sub_08050134(s16 a, u16 *p)
  * computation), which no inline spelling reproduces -- with the whole
  * expression in the assignment, combine folds the truncation into the `strh`. */
 
-void sub_080501DC(void)
+void FootFigure_Loop(void)
 {
     struct Unk02029A10 *entry;
     u16 c, e, t, n;
@@ -95,7 +95,7 @@ void sub_080501DC(void)
     c = gUnknown_03001470[gUnknown_03001FBC].unk30;
     e = gUnknown_03001470[gUnknown_03001FBC].unk34;
     t = sub_080156C4(gUnknown_03001FBC);
-    sub_08056E9C(c, e);
+    StepFigureSlide(c, e);
 
     gUnknown_02029B94[c][e] += gUnknown_02029B80[c][e];
     if (gUnknown_02029B94[c][e] == 6)
@@ -129,7 +129,7 @@ void sub_080501DC(void)
     entry->x += dx;
     entry->y += dy;
 
-    sub_080155C0(gUnknown_03001FBC, entry->x - *p1, entry->y - *p2);
+    SetSlotSpritePosition(gUnknown_03001FBC, entry->x - *p1, entry->y - *p2);
 }
 
 /* MATCHED. Byte-for-byte the same function as sub_08050134 -- identical
@@ -137,7 +137,7 @@ void sub_080501DC(void)
  * second derivation. Read sub_08050134's comment; the `u16 *` second parameter
  * and the twice-read `oam.tileNum` are the only two things in it that are not
  * guessable. */
-void sub_08050364(s16 a, u16 *p)
+void FigureTileHook_WholePose(s16 a, u16 *p)
 {
     struct OamData oam;
     u16 v;
@@ -145,7 +145,7 @@ void sub_08050364(s16 a, u16 *p)
     u16 side;
     u16 slot;
 
-    sub_0801566C(a, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(a, (struct UnkVec *)&oam);
 
     v = (p[2] - oam.tileNum) & 0x3FF;
     w = v >> 4;
@@ -159,6 +159,9 @@ void sub_08050364(s16 a, u16 *p)
         && a == gUnknown_02029A10[side].entries[slot].unk18)
     {
         gUnknown_03001470[a].unk28 = v;
-        sub_08050424(side, slot, w);
+        StreamWholePose(side, slot, w);
     }
 }
+
+asm(".global sub_08050364\n.thumb_set sub_08050364, FigureTileHook_WholePose\n");
+asm(".global sub_080501DC\n.thumb_set sub_080501DC, FootFigure_Loop\n");

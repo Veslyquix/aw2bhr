@@ -8,14 +8,14 @@
  */
 
 #include "hardware.h"
-/* The two-option chooser on the sub_08019578 proc: Up/Down (or Select) moves
+/* The two-option chooser on the ChoiceBox_DrawCursor proc: Up/Down (or Select) moves
  * between entries 0 and 1, A commits, and anything else falls through.
  *
  * THE FIRST TEST IS `!= 0`, NOT `== 0`, and that is the whole difference
  * between this and a candidate that is otherwise instruction-exact. Both arms
  * end in the same commit-and-return block, so agbcc reverses a condition
  * written the natural way round -- the same reordering that decided
- * sub_0802F408 and IsNeotanksUnlocked this wave. Spelling the test to match the
+ * SioIsConnectionAlive and IsNeotanksUnlocked this wave. Spelling the test to match the
  * ROM's `beq` puts the `== 1` arm inline where the ROM has it.
  *
  * `gUnknown_0808E5A8` is agbcc's -fforce-addr address constant for gpKeySt
@@ -31,7 +31,7 @@ struct Unk80195F8
     /* 0x2c */ void (*unk2c)(void);
 };
 
-void sub_080195F8(void *proc)
+void ChoiceBox_Loop(void *proc)
 {
     struct Unk80195F8 *p = (struct Unk80195F8 *)proc;
 
@@ -42,25 +42,26 @@ void sub_080195F8(void *proc)
         if (p->unk1e == 1 && (gpKeySt->unk0c & DPAD_LEFT))
         {
             p->unk1e = 0;
-            sub_08019578(p);
-            sub_0803B4DC(0x67);
+            ChoiceBox_DrawCursor(p);
+            PlayMusicOrSfx2(0x67);
             return;
         }
     }
     else if (gpKeySt->unk0c & (B_BUTTON | DPAD_RIGHT))
     {
         p->unk1e = 1;
-        sub_08019578(p);
-        sub_0803B4DC(0x67);
+        ChoiceBox_DrawCursor(p);
+        PlayMusicOrSfx2(0x67);
         return;
     }
 
     if (gpKeySt->unk0c & 1)
     {
         gUnknown_03002EE4 = p->unk1e;
-        sub_080179D0(p->unk28);
+        ClearTilemapRect23x4(p->unk28);
         p->unk2c();
-        sub_08015C30(gUnknown_03001FBC);
-        sub_0803B4DC(0x65);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
+        PlayMusicOrSfx2(0x65);
     }
 }
+asm(".global sub_080195F8\n.thumb_set sub_080195F8, ChoiceBox_Loop\n");

@@ -9,14 +9,15 @@
 
 #include "hardware.h"
 
-void sub_08030ED4(void)
+void LinkShutdown(void)
 {
-    sub_0802F348();
+    LinkResetState();
     REG_RCNT = 0;
     REG_SIOCNT = 0;
-    sub_0801BB00(7, 0);
-    sub_0801BB00(6, 0);
-    sub_0801BB10(1, -0xC1);
+    SetIRQHandler(7, 0);
+    SetIRQHandler(6, 0);
+    UpdateInterruptEnable(1, -0xC1);
     gUnknown_0849B018->unk06 = 0xff;
     gPlaySt.savingEnabled = 0;
 }
+asm(".global sub_08030ED4\n.thumb_set sub_08030ED4, LinkShutdown\n");

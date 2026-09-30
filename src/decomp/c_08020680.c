@@ -8,7 +8,7 @@
  */
 
 /* Skips a byte-coded command stream until the terminator 4 -- the same
- * terminator sub_08020634 appends just above.  Nothing calls it and nothing in
+ * terminator RevertMovementScript appends just above.  Nothing calls it and nothing in
  * the ROM holds its address; r0 and r1 are never read, so both leading
  * parameters are dead, and so is everything the four non-terminating cases
  * once did.
@@ -24,7 +24,7 @@
  * first four table entries points at the loop head.  The values themselves are
  * not recoverable -- only the fact that the four cases were written out
  * separately is. */
-void sub_08020680(int a, int b, u8 *p)
+void ScanMovementScriptToEnd(int a, int b, u8 *p)
 {
     int x;
 
@@ -50,3 +50,4 @@ void sub_08020680(int a, int b, u8 *p)
         }
     }
 }
+asm(".global sub_08020680\n.thumb_set sub_08020680, ScanMovementScriptToEnd\n");

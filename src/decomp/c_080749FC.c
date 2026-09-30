@@ -19,7 +19,7 @@
  * statement and the pool `ldr` moves ahead of it, leave the subscript inline
  * in the call arguments and the pool `ldr` sinks past the whole (s8) cast.
  * The ROM has it between the two, which is one statement boundary and 6 bytes.
- * Same lever as sub_08043AC0 in the 0x08043000 block.
+ * Same lever as LoadCoPaletteVariant in the 0x08043000 block.
  */
 struct Unk8074AAC
 {
@@ -27,10 +27,11 @@ struct Unk8074AAC
     /* 0x2c */ const u8 *unk_2c;
 };
 
-void sub_080749FC(struct Unk8074AAC *proc)
+void MarkerReveal_PanToMarker(struct Unk8074AAC *proc)
 {
     const u8 *p = proc->unk_2c;
     const struct Unk08615194 *r = &gUnknown_08615194[(s8)*p];
 
-    sub_08074C84(proc, r->flagX, r->flagY, 1);
+    StartWorldMapCameraPan(proc, r->flagX, r->flagY, 1);
 }
+asm(".global sub_080749FC\n.thumb_set sub_080749FC, MarkerReveal_PanToMarker\n");

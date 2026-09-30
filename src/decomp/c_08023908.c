@@ -24,7 +24,7 @@
  * The `.rodata` relocation at +0x13c is the expected private force-address
  * word for gMap (original symbol gUnknown_08090A18). */
 
-void sub_08023908(int a1)
+void HandleMoveCameraWithMapCursor(int a1)
 {
     {
         register struct Map *map0 asm("r3");
@@ -178,5 +178,6 @@ void sub_08023908(int a1)
         }
     }
 
-    sub_08023860();
+    UpdateMapBgScroll();
 }
+asm(".global sub_08023908\n.thumb_set sub_08023908, HandleMoveCameraWithMapCursor\n");

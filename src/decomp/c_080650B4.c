@@ -7,9 +7,9 @@
  * sub_080650B4 @ 0x080650B4
  */
 
-/* sub_08065060's twin: the same velocity integration, the opposite screen edge,
+/* ArmyColumnExitUp_Loop's twin: the same velocity integration, the opposite screen edge,
  * and one extra bookkeeping decrement before the same teardown call. */
-void sub_080650B4(struct Unk08580934_Obj *o)
+void ArmyColumnExitDown_Loop(struct Unk08580934_Obj *o)
 {
     o->unk3a += o->unk3c;
     o->unk2a += o->unk3a;
@@ -17,9 +17,10 @@ void sub_080650B4(struct Unk08580934_Obj *o)
     if (o->unk2a > 0xA0)
     {
         gUnknown_08580934->unk2d--;
-        sub_08030178();
-        sub_08015C30(gUnknown_03001FBC);
+        LinkRestartKeySync();
+        ClearSlotScriptCallback(gUnknown_03001FBC);
     }
 
-    sub_08064E5C(o);
+    ArmyColumn_Draw(o);
 }
+asm(".global sub_080650B4\n.thumb_set sub_080650B4, ArmyColumnExitDown_Loop\n");

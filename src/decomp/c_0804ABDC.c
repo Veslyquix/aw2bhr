@@ -14,7 +14,7 @@
  * gUnknown_0813204C, 0x0812A298 -> &gUnknown_030030A0 and 0x0812A29C ->
  * gUnknown_0848B6C6. Every one is named directly here.
  *
- * unk1e is read BOTH ways off the same offset: as a byte for sub_0804A18C's u8
+ * unk1e is read BOTH ways off the same offset: as a byte for GetNameEntryGridChar's u8
  * argument and as a SIGNED HALFWORD (`movs rI,#0x1e; ldrsh`, the only thumb
  * ldrsh form) to index gUnknown_084C3D5C beside the s16 unk20 indexing
  * gUnknown_084C3D14. The declared u8 is kept and the halfword view is a cast.
@@ -28,7 +28,7 @@
  *     casted base. An `int` index used as `arr[f]` in two arms scales it twice.
  *   - the embedded `(sx = ...)` blocks fold from turning `t - (g - 0x30)` into
  *     `(t + 0x30) - g`. */
-void sub_0804ABDC(void)
+void NameEntry_DrawSprites(void)
 {
     int v;
     int i;
@@ -38,7 +38,7 @@ void sub_0804ABDC(void)
 
     if (gUnknown_030044E0->unk62 != 0)
     {
-        v = sub_0804A18C(gUnknown_030044E0->unk20 * 15 + gUnknown_030044E0->unk1e);
+        v = GetNameEntryGridChar(gUnknown_030044E0->unk20 * 15 + gUnknown_030044E0->unk1e);
 
         if (gUnknown_030044E0->unk22 > 0x78)
             gUnknown_030044E0->unk22 = 0;
@@ -93,7 +93,7 @@ void sub_0804ABDC(void)
             break;
 
         default:
-            sub_0801BD00((gUnknown_084C3D5C[*(s16 *)&gUnknown_030044E0->unk1e]
+            PutOamHi((gUnknown_084C3D5C[*(s16 *)&gUnknown_030044E0->unk1e]
                           - (sx = gUnknown_030030A0 - 0x30)) & 0x1ff,
                          gUnknown_084C3D14[gUnknown_030044E0->unk20] + 0x30,
                          gUnknown_084C3B72, 0x701d);
@@ -103,16 +103,17 @@ void sub_0804ABDC(void)
         y = gUnknown_030044E0->unk65;
         if (y > gUnknown_030044E0->unk60 - 8)
             y = gUnknown_030044E0->unk60 - 8;
-        sub_0801BD00((gUnknown_030044E0->unk61 * 8 + y - gUnknown_030030A0) & 0x1ff,
+        PutOamHi((gUnknown_030044E0->unk61 * 8 + y - gUnknown_030030A0) & 0x1ff,
                      0x20, gUnknown_0848B688, 0x401e);
     }
 
     if (gUnknown_030044E0->unk5c != 0)
-        sub_0801BD00(0x7c, 0x80, gUnknown_0848B6C6, 0x1000);
+        PutOamHi(0x7c, 0x80, gUnknown_0848B6C6, 0x1000);
 
-    sub_0801BD00(0x9e, 0x80, gUnknown_0848B6C6, 0x2008);
-    sub_0801BD00(0xc0, 0x80, gUnknown_0848B6C6, 0x3010);
+    PutOamHi(0x9e, 0x80, gUnknown_0848B6C6, 0x2008);
+    PutOamHi(0xc0, 0x80, gUnknown_0848B6C6, 0x3010);
 }
+asm(".global sub_0804ABDC\n.thumb_set sub_0804ABDC, NameEntry_DrawSprites\n");
 
 /* MATCHED in wave 66. The last two levers were an explicit nested if-chain for
  * the 0/1/2/3 selector (removing the four-byte duplicated decision tail) and a
@@ -124,14 +125,14 @@ void sub_0804ABDC(void)
  *     (`((unkN / 4) & 0xf) * 2`) and added to a `(u8 *)`-cast base. An `int`
  *     index used as `arr[f]` in two arms scales it twice, once per arm, where
  *     the ROM keeps `lsls r5,r0,#1` before the branch.
- *   - `v` is `int`, not the `u8` sub_0804A18C returns: the range tests are
+ *   - `v` is `int`, not the `u8` GetNameEntryGridChar returns: the range tests are
  *     `blt`/`ble`, i.e. SIGNED, and a u8 object gives `bls`.
  *   - the embedded `(sx = gUnknown_030030A0 - 0x30)` is what stops fold
  *     rewriting `t - (g - 0x30)` into `(t + 0x30) - g`. Same lever as the
  *     `(n = ...)` in src/decomp/c_080267AC.c.
  * What is LEFT is +4 bytes somewhere in the first half (the diff is already
  * shifted by 4 at offset 0xce, before the unk26 wrap test), plus one
- * same-size encoding difference at the sub_0801BD00 guard: the ROM has
+ * same-size encoding difference at the PutOamHi guard: the ROM has
  * `cmp r6,#0x23; blt` and this candidate `cmp r6,#0x22; ble`. Writing the
  * guard positively (`v < 0x23 || (v > 0x25 && v != 0x40)`) and as the negation
  * of `v >= 0x23 && (v <= 0x25 || v == 0x40)` produce the SAME `cmp #0x22; ble`,

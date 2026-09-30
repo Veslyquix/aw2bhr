@@ -14,7 +14,7 @@ struct Unk080800B0
     /* 0x4c */ u16 unk4c;
 };
 
-void sub_080800B0(struct Unk080800B0 *proc)
+void SuperCoPowerScene_InitBackground(struct Unk080800B0 *proc)
 {
     gUnknown_030030A4.bits.win0_enable_blend = 0;
     gUnknown_03002B6C.bits.tm_block = 0xE;
@@ -26,12 +26,13 @@ void sub_080800B0(struct Unk080800B0 *proc)
     Decompress(gUnknown_08235558,
                (void *)(0x06000020 + gUnknown_03002B6C.bits.chr_block * 0x4000));
     Decompress(gUnknown_082352FC, gUnknown_0200FC50);
-    sub_08012B00((u16 *)gUnknown_0200FC50, 0x800, 0x9001);
+    AddToHalfwords((u16 *)gUnknown_0200FC50, 0x800, 0x9001);
     ApplyPalettes(gUnknown_08235D10, 9, 1);
-    sub_08011AAC((void *)sub_080801A8);
+    QueueVBlankCallback((void *)SuperCoPowerScene_UploadBgTilemaps);
     gUnknown_03001FF8 = 0x100;
     gUnknown_03001418 = 0xFFF0;
     gUnknown_030030A0 = 0xFF00;
     gUnknown_03001400 = 0xFFF0;
     proc->unk4c = 0;
 }
+asm(".global sub_080800B0\n.thumb_set sub_080800B0, SuperCoPowerScene_InitBackground\n");

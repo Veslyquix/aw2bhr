@@ -14,7 +14,7 @@
 #include "hardware.h"
 #include "proc.h"
 /* A screen-setup proc entry in the sub_08068AC4 family: take a ticket, rebuild
- * the display state, load graphics through sub_080697CC and reset all four
+ * the display state, load graphics through LoadIntroScreenGraphicsWithBg1 and reset all four
  * scroll channels.
  *
  * The five bg/obj enables are ONE ldrb/strb pair around five `orr`s because
@@ -31,14 +31,14 @@ struct Unk69864Proc
     /* 0x2c */ int unk2c;
 };
 
-/* Graphics loader; sub_08069FD0 is its near-twin, differing only in the first
+/* Graphics loader; LoadIntroScreenGraphics is its near-twin, differing only in the first
  * Decompress destination (0x06000000 here, 0x06008000 there), one extra blob
- * into *gBG1TilemapBuffer, and the extra sub_08013AFC call.
+ * into *gBG1TilemapBuffer, and the extra BG_EnableSyncBG1 call.
  *
  * The zero word CpuFastSet fills from is a STACK local, which is what the
  * `sub sp, #4` and `mov r0, sp` are for. gUnknown_08580E60's address stays in
  * r4 across the whole body because it is dereferenced three times. */
-void sub_080697CC(void)
+void LoadIntroScreenGraphicsWithBg1(void)
 {
     int zero;
 
@@ -50,31 +50,32 @@ void sub_080697CC(void)
     Decompress(gUnknown_0818616C, gBG1TilemapBuffer);
     Decompress(gUnknown_0818633C, gBG2TilemapBuffer);
     Decompress(gUnknown_08186460, gUnknown_08580E60);
-    sub_08013AFC();
-    sub_08013B0C();
-    sub_08011E54(gUnknown_08580E60, (void *)0x0600F000, 0x1000);
+    BG_EnableSyncBG1();
+    BG_EnableSyncBG2();
+    RegisterDataMove(gUnknown_08580E60, (void *)0x0600F000, 0x1000);
 }
+asm(".global sub_080697CC\n.thumb_set sub_080697CC, LoadIntroScreenGraphicsWithBg1\n");
 
 void IntroT3_08069865(struct Unk69864Proc *proc)
 {
-    proc->unk2c = sub_080674F4(gUnknown_0202F204++);
-    sub_080670F8(gUnknown_08581438);
+    proc->unk2c = GetIntroSceneDuration(gUnknown_0202F204++);
+    ApplyBgControlTable(gUnknown_08581438);
     gDispIo.disp_ct.mode = 0;
     SetDispEnable(1, 1, 1, 1, 1);
     gUnknown_03002B6C.bits.priority = 0;
     gUnknown_03001FE8.bits.priority = 1;
     gUnknown_0300251C.bits.priority = 2;
     gUnknown_030030B4.bits.priority = 3;
-    sub_08012358();
-    sub_080697CC();
-    sub_08072C40(0, 0, 0);
-    sub_08072C40(1, 0, 0);
-    sub_08072C40(2, 0, 0);
-    sub_08072C40(3, 0, 0);
+    SetDefaultColorEffects();
+    LoadIntroScreenGraphicsWithBg1();
+    SetBgScrollShadow(0, 0, 0);
+    SetBgScrollShadow(1, 0, 0);
+    SetBgScrollShadow(2, 0, 0);
+    SetBgScrollShadow(3, 0, 0);
 }
 
 /* The mode-1 counterpart of IntroT3_08069865's setup: reorder the four BG
- * priorities, hand gUnknown_030030B4 to sub_08012C48, clear the tile buffer and
+ * priorities, hand gUnknown_030030B4 to SetBgCntScreenSize, clear the tile buffer and
  * load graphics. The one blob is conditional on the argument.
  *
  * The argument is `u8` -- the `lsl #0x18; lsr #0x18` at entry is PROMOTE_MODE
@@ -84,7 +85,7 @@ void IntroT3_08069865(struct Unk69864Proc *proc)
  * `ldrb [r,#1]; orr #0x20; strb` is bit 13 of the halfword, which is BgCnt's
  * `wrap`. Wave 23's note in hardware.h said nothing had yet reached that field;
  * this is the first site that does. */
-void sub_08069924(u8 a1)
+void SetupIntroBg2Screen(u8 a1)
 {
     int zero;
 
@@ -93,8 +94,8 @@ void sub_08069924(u8 a1)
     gUnknown_030030B4.bits.priority = 1;
     gUnknown_03001FE8.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
-    sub_08063994();
-    sub_08012C48((struct Unk8012C30 *)&gUnknown_030030B4, 1);
+    ResetBgAffineToScreenCentre();
+    SetBgCntScreenSize((struct Unk8012C30 *)&gUnknown_030030B4, 1);
     zero = 0;
     CpuFastSet(&zero, gBG2TilemapBuffer, 0x01000200);
     gUnknown_030030B4.bits.wrap = 1;
@@ -102,7 +103,8 @@ void sub_08069924(u8 a1)
     if (a1 != 0)
         Decompress(gUnknown_0817DA38, (void *)0x06008000);
     Decompress(gUnknown_0817E208, gBG2TilemapBuffer);
-    sub_08013B0C();
+    BG_EnableSyncBG2();
 }
+asm(".global sub_08069924\n.thumb_set sub_08069924, SetupIntroBg2Screen\n");
 
 asm(".global sub_08069864\n.thumb_set sub_08069864, IntroT3_08069865\n");

@@ -7,40 +7,33 @@
  * sub_08005B24 @ 0x08005B24
  */
 
-/* Wave 57 (W57-A). The A/B page-flip driver for the two-page help screen whose
- * pages are the promoted sub_080059FC / sub_08005AA0 in
- * src/decomp/c_080059FC.c -- both are this function's own callees, so their
- * prototypes and the gBG0TilemapBuffer window model came for free.  The nearer
- * exemplar for the KEY handling is src/decomp/c_08004970.c, which carries the
- * identical `(gpKeySt->pressed & 7) != 0` / `(gpKeySt->pressed & 2) == 0` pair and
- * the same trailing sub_08012BC8 / sub_08013B0C / sub_08015C30 teardown.
- * PROMOTION NEEDS BOTH POOL WORDS PLACED, in this order:
- *     "rodata": ["0x0808D7C8", "0x0808D7CC"]
+/*
+ * DesignRoomHelp_Loop -- run one frame of the two-page help screen.
  *
- * NEITHER POOL WORD IS A GLOBAL, and the second one is the trap this batch was
- * warned about.  Dereferenced in baserom.gba, 0x0808D7C8 holds 0x0200B0B0
- * (&gActiveMap) and 0x0808D7CC holds 0x03002EE0 -- and 0x03002EE0 is
- * `gpKeySt`, declared in include/hardware.h, NOT an unnamed global.  Wave 20
- * invented a gUnknown_03002EE0 for that address and the SPLIT build caught it
- * as an undefined reference, because aw2bhr.lds already binds it; the
- * unknown-globals.h comment at gUnknown_03005920 records the whole episode.
- * Both are ordinary -fforce-addr address constants and the honest
- * `gActiveMap` / `gpKeySt` spellings produce the ROM's
- * `ldr rN,=<pool>; ldr rM,[rN]; ldr rP,[rM]` triples.
+ * gActiveMap->state names the page: 0 and 1 are the first page, 0xA and 0xB
+ * the second, and 0x5A means leave. A, B or SELECT at any point jumps straight
+ * to 0x5A.
  *
- * global.h does NOT include hardware.h, so the `#include "hardware.h"` below
- * is required -- the same line c_08004970.c carries for the same reason.
+ *   states 0 and 0xA draw their page (DesignRoomDrawHelpPage1, DesignRoomDrawHelpPage2) and fall
+ *     into the matching key state on the same frame.
+ *   state 1 waits for DOWN and state 0xB for UP: the other page is selected,
+ *     the BG0 window is blanked and sound 0x67 plays. State 0xB also draws the
+ *     five sprites that belong to the second page.
+ *   state 0x5A tears the screen down -- both tilemaps blanked, BG0 and BG2
+ *     flagged for copying to VRAM -- and hands gUnknown_03001FBC, the screen
+ *     to return to, to ClearSlotScriptCallback. Leaving with anything other than B also
+ *     sets gUnknown_03002F1C.
  *
- * gUnknown_03001FBC stays `s16`: the ROM's `ldrb` is not a narrower object but
- * sub_08015C30's declared `u8` parameter narrowing the load at the call site.
+ * The first frame after the mode change clears the state, zeroes the two
+ * view-offset globals and opens the window with DrawWindowBackgroundOnBg2.
  *
- * The two `case` fallthroughs (0 -> 1 and 0xA -> 0xB) are real: each pair
- * shares one basic block, with the page draw running once and then dropping
- * into that page's key test on the same frame. */
+ * global.h does not include hardware.h, so the include below is needed for
+ * gpKeySt and the key names.
+ */
 
 #include "hardware.h"
 
-void sub_08005B24(void)
+void DesignRoomHelp_Loop(void)
 {
     if (gActiveMap->stateChanged != 0)
     {
@@ -48,8 +41,8 @@ void sub_08005B24(void)
         gActiveMap->state = 0;
         gUnknown_03001418 = 0;
         gUnknown_03001FF8 = 0;
-        sub_0801A444(2, 2, 0x1A, 0xF);
-        sub_0801B780(0);
+        DrawWindowBackgroundOnBg2(2, 2, 0x1A, 0xF);
+        InitTextTileCache(0);
     }
 
     if ((gpKeySt->pressed & 7) != 0)
@@ -58,35 +51,35 @@ void sub_08005B24(void)
     switch (gActiveMap->state)
     {
     case 0:
-        sub_0801B780(0);
+        InitTextTileCache(0);
         gActiveMap->state++;
-        sub_080059FC();
+        DesignRoomDrawHelpPage1();
         sub_08005EF0(1);
         /* fallthrough */
     case 1:
         if ((gpKeySt->pressed & DPAD_DOWN) != 0)
         {
             gActiveMap->state = 0xA;
-            sub_08012BC8(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
-            sub_08013AEC();
+            FillTilemapRect(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
+            BG_EnableSyncBG0();
             sub_08005F1C();
-            sub_0803B4DC(0x67);
+            PlayMusicOrSfx2(0x67);
         }
         break;
     case 0xA:
-        sub_0801B780(0);
+        InitTextTileCache(0);
         gActiveMap->state++;
-        sub_08005AA0();
+        DesignRoomDrawHelpPage2();
         sub_08005EF0(0);
         /* fallthrough */
     case 0xB:
         if ((gpKeySt->pressed & DPAD_UP) != 0)
         {
             gActiveMap->state = 0;
-            sub_08012BC8(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
-            sub_08013AEC();
+            FillTilemapRect(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
+            BG_EnableSyncBG0();
             sub_08005F1C();
-            sub_0803B4DC(0x67);
+            PlayMusicOrSfx2(0x67);
         }
         DrawOamObject(0x35, 0x28, 0x421, 0, 0);
         DrawOamObject(0x36, 0x28, 0x431, 0, 0);
@@ -101,10 +94,11 @@ void sub_08005B24(void)
         if ((gpKeySt->pressed & 2) == 0)
             gUnknown_03002F1C = 1;
         sub_08005F1C();
-        sub_08012BC8(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
-        sub_08012BC8(gBG2TilemapBuffer, 0, 0, 0x1E, 0x14, 0x360);
-        sub_08013AEC();
-        sub_08013B0C();
-        sub_08015C30(gUnknown_03001FBC);
+        FillTilemapRect(gBG0TilemapBuffer, 0, 0, 0x1E, 0x14, 0);
+        FillTilemapRect(gBG2TilemapBuffer, 0, 0, 0x1E, 0x14, 0x360);
+        BG_EnableSyncBG0();
+        BG_EnableSyncBG2();
+        ClearSlotScriptCallback(gUnknown_03001FBC);
     }
 }
+asm(".global sub_08005B24\n.thumb_set sub_08005B24, DesignRoomHelp_Loop\n");

@@ -9,7 +9,7 @@
 
 #include "hardware.h"
 #include "proc.h"
-/* Alpha-blend fade step, sibling of sub_08067A4C. Differences: the first
+/* Alpha-blend fade step, sibling of IntroSlidePanel_SlideIn. Differences: the first
  * Interpolate runs mode 4 from 0 down to -proc->unk30 (the `rsbs r2,r2,#0`),
  * the second ramps 0x10 -> 0, and the last frame does not clear the
  * counter pair before breaking. */
@@ -22,7 +22,7 @@ struct Unk08067AE8
     /* 0x3c */ int unk3c;
 };
 
-void sub_08067AE8(struct Unk08067AE8 *proc)
+void IntroSlidePanel_SlideOut(struct Unk08067AE8 *proc)
 {
     int a;
     int b;
@@ -33,10 +33,11 @@ void sub_08067AE8(struct Unk08067AE8 *proc)
     gUnknown_03002020 = b;
     gUnknown_03002B28 = 0x10 - b;
     gUnknown_03001FFC = 0;
-    sub_08072C40(1, a, 0);
+    SetBgScrollShadow(1, a, 0);
 
     if (proc->unk3c == proc->unk38)
         Proc_Break(proc);
 
     proc->unk3c++;
 }
+asm(".global sub_08067AE8\n.thumb_set sub_08067AE8, IntroSlidePanel_SlideOut\n");

@@ -14,7 +14,7 @@ struct Unk807C2D4
     /* 0x60 */ int unk60;
 };
 
-void sub_0807C2D4(void *arg)
+void MissionTitleLetters_PutMissionLabelAndBar(void *arg)
 {
     struct Unk807C2D4 *proc = arg;
     int n;
@@ -29,7 +29,7 @@ void sub_0807C2D4(void *arg)
                      proc->unk60 * 16 + 16 ? proc->unk60 * 16 + 16 : 2));
 
     PutSpriteExt(0, 0x68, 0x108, gUnknown_08615C62, 0);
-    n = sub_0803840C();
+    n = GetCampaignResultCountPlusOne();
     if (n <= 9)
     {
         PutSpriteExt(0, 0xca, 0x108, gUnknown_0848B690, n * 4 + 0x1c);
@@ -54,3 +54,4 @@ void sub_0807C2D4(void *arg)
         PutSprite(0, x - proc->unk60 * 8, 0x32, gUnknown_0848B6A8, 0x18);
     }
 }
+asm(".global sub_0807C2D4\n.thumb_set sub_0807C2D4, MissionTitleLetters_PutMissionLabelAndBar\n");

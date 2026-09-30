@@ -7,9 +7,9 @@
  * sub_08080FE0 @ 0x08080FE0
  */
 
-/* sub_08080FE0 @ 0x08080FE0, 128 bytes, THUMB. Matched.
+/* MainMenuCarouselShimmer_Loop @ 0x08080FE0, 128 bytes, THUMB. Matched.
  *
- * Applies one 0x10-byte palette per unit slot 0..5 whose sub_08084858(i) is
+ * Applies one 0x10-byte palette per unit slot 0..5 whose IsMainMenuTileComplete(i) is
  * truthy, then one more at the fixed slot 0x30A, then ticks the animation
  * counter at proc->unk64. The palette picked is always the same one --
  * `((s16)proc->unk64 >> 2) & 0xF` indexes gUnknown_0812598C -- so the loop
@@ -35,13 +35,13 @@ struct Unk08080FE0
     /* 0x64 */ u16 unk64;
 };
 
-void sub_08080FE0(struct Unk08080FE0 *proc)
+void MainMenuCarouselShimmer_Loop(struct Unk08080FE0 *proc)
 {
     int i;
 
     for (i = 0; i <= 5; i++)
     {
-        if (sub_08084858(i))
+        if (IsMainMenuTileComplete(i))
             ApplyPaletteExt(gUnknown_0812598C + (((s16)proc->unk64 >> 2) & 0xf),
                 (u32)((0x24a + i * 0x20) << 16) >> 16, 0x10);
     }
@@ -49,3 +49,4 @@ void sub_08080FE0(struct Unk08080FE0 *proc)
     ApplyPaletteExt(gUnknown_0812598C + (((s16)proc->unk64 >> 2) & 0xf), 0x30a, 0x10);
     proc->unk64++;
 }
+asm(".global sub_08080FE0\n.thumb_set sub_08080FE0, MainMenuCarouselShimmer_Loop\n");

@@ -18,9 +18,9 @@
  * arguments, where the ROM computes it first; the local also moves the
  * gUnits base from r3 to the r1 the ROM uses.
  *
- * The (u8) is real, not a tidy-up: sub_0802706C's third parameter is u16 and
+ * The (u8) is real, not a tidy-up: ShouldDrawTransportMarker's third parameter is u16 and
  * the ROM truncates with `lsls #0x18; lsrs #0x18`. The prototype is right --
- * the promoted sub_0802B91C passes an s16 there with no truncation at all. */
+ * the promoted DrawCursorInfoUnitIcon passes an s16 there with no truncation at all. */
 /* WAVE 35: CANONICAL `struct Map`. Eight drafts across blocks 0x08029-0x0802B
  * each invented their own body for this tag, with 2 to 7 named fields. Every
  * one compiles and byte-matches ALONE, so trymatch cannot see the problem;
@@ -32,7 +32,7 @@
  * draft referenced any filler. Keep the drafts in sync; sync_work.py
  * reintroduces whatever the drafts say. */
 
-u8 sub_0802B6C8(u8 x, u8 y)
+u8 GetCursorInfoPanelSizeClass(u8 x, u8 y)
 {
     struct Unit *unit;
     u8 army;
@@ -46,7 +46,7 @@ u8 sub_0802B6C8(u8 x, u8 y)
     unit = &gUnits[gMap->unit[idx]];
     army = ((unit - gUnits) >> 6) + 1;
 
-    if (sub_0802706C(unit->type, gUnknown_030033EC, army))
+    if (ShouldDrawTransportMarker(unit->type, gUnknown_030033EC, army))
         return 2;
 
     if (unit->unk07 | unit->unk08)
@@ -54,3 +54,4 @@ u8 sub_0802B6C8(u8 x, u8 y)
 
     return 1;
 }
+asm(".global sub_0802B6C8\n.thumb_set sub_0802B6C8, GetCursorInfoPanelSizeClass\n");

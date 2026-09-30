@@ -7,13 +7,6 @@
  * sub_080638A8 @ 0x080638A8
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080638A8.
- * sub_080638A8 @ 0x080638A8
- */
-
 #include "hardware.h"
 
 /* Clears one 4bpp tile (32 bytes) of VRAM with DMA3: fixed source pointing at
@@ -30,7 +23,7 @@
  * triggering a transfer, and it only survives because the pointer is volatile.
  */
 
-void sub_080638A8(int tile)
+void ClearVramTileDma(int tile)
 {
     vu16 fill = 0;
     vu32 *dma = (vu32 *)(REG_BASE + REG_OFFSET_DMA3SAD);
@@ -40,3 +33,4 @@ void sub_080638A8(int tile)
     dma[2] = 0x81000010;
     dma[2];
 }
+asm(".global sub_080638A8\n.thumb_set sub_080638A8, ClearVramTileDma\n");

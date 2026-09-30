@@ -33,9 +33,9 @@
  * splitting the constant's addition into its own statement does.
  *
  * The `x << 16` in r8 is strength_reduce's giv for the `(s16)x` that
- * sub_0804236C's declared parameters force; it is not authored. */
+ * IsCellCapturableByCurrentArmy's declared parameters force; it is not authored. */
 
-void sub_0805E440(void)
+void AiTryJoinUnitOnProperty(void)
 {
     int x;
     int y;
@@ -43,7 +43,7 @@ void sub_0805E440(void)
     int n;
     struct Unit *u;
 
-    sub_080202A4(gUnknown_030040D8);
+    GenerateUnitMovementMap(gUnknown_030040D8);
 
     for (y = 0; y < gMap->height; y++)
     {
@@ -56,7 +56,7 @@ void sub_0805E440(void)
                 continue;
             if ((id & 0xc0) != gUnknown_03003F2C)
                 continue;
-            if (sub_0804236C(x, y) == 0)
+            if (IsCellCapturableByCurrentArmy(x, y) == 0)
                 continue;
             u = gUnits + id;
             if (u->hp != 0)
@@ -85,12 +85,13 @@ void sub_0805E440(void)
                 if (n > 10)
                     continue;
             }
-            sub_0805D648(x, y, 10, 0, 0);
+            AiPublishAction(x, y, 10, 0, 0);
         }
     }
 }
+asm(".global sub_0805E440\n.thumb_set sub_0805E440, AiTryJoinUnitOnProperty\n");
 
-void sub_0805E5AC(void)
+void AiStayHomeIfEnemyInfantryNear(void)
 {
     s16 x;
     s16 y;
@@ -113,12 +114,13 @@ void sub_0805E5AC(void)
             if (gMap->unit[gMap->rowOffset[y] + x] != 0)
             {
                 u = gUnits + (id = gMap->unit[gMap->rowOffset[y] + x]);
-                if (sub_08026F9C(gUnknown_03003F38, u - gUnits) == 0)
+                if (AreUnitsOnSameTeam(gUnknown_03003F38, u - gUnits) == 0)
                 {
                     if (u->type == 1)
-                        sub_0805D648(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, 2, 0, 0);
+                        AiPublishAction(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03, 2, 0, 0);
                 }
             }
         }
     }
 }
+asm(".global sub_0805E5AC\n.thumb_set sub_0805E5AC, AiStayHomeIfEnemyInfantryNear\n");

@@ -91,7 +91,7 @@ struct Unk807AA84
     /* 0x4c */ u16 unk4c;
 };
 
-void sub_0807AA84(struct Unk807AA84 *proc)
+void MatchSummary_Init(struct Unk807AA84 *proc)
 {
     int i;
     int dst;
@@ -99,8 +99,8 @@ void sub_0807AA84(struct Unk807AA84 *proc)
     u16 b;
     u16 c;
 
-    sub_0807898C(proc);
-    sub_08013AEC();
+    SetupMenuScreenBgs(proc);
+    BG_EnableSyncBG0();
 
     gUnknown_03002B6C.bits.priority = 0;
     gUnknown_03001FE8.bits.priority = 1;
@@ -112,7 +112,7 @@ void sub_0807AA84(struct Unk807AA84 *proc)
     gUnknown_030030A0 = 0xFF10;
     gUnknown_0300251C.bits.tm_block = 0x1B;
 
-    sub_08078D80(proc);
+    StartScrollingBackdrop(proc);
 
     {
         u16 a;
@@ -187,12 +187,12 @@ void sub_0807AA84(struct Unk807AA84 *proc)
         ApplyPaletteExt(gUnknown_0822BB60, 0, 0x20);
 
         for (i = 0; i < gUnknown_0202FDEC.unk08; i++)
-            sub_08043E3C(gPlayers[(s8)gUnknown_0202FDEC.unk00[i]].co + 0x18,
+            LoadCoFace(gPlayers[(s8)gUnknown_0202FDEC.unk00[i]].co + 0x18,
                          (void *)(((i * 0x24 + 0x100) & 0x3FF) * 0x20 + 0x06010000),
                          i + 0x19);
 
         for (i = 0; i < gUnknown_0202FDEC.unk09; i++)
-            sub_08043E3C(gPlayers[(s8)gUnknown_0202FDEC.unk04[i]].co + 0x30,
+            LoadCoFace(gPlayers[(s8)gUnknown_0202FDEC.unk04[i]].co + 0x30,
                          (void *)(((i * 0x24 + 0x16C) & 0x3FF) * 0x20 + 0x06010000),
                          i + 0x1C);
     }
@@ -216,12 +216,13 @@ void sub_0807AA84(struct Unk807AA84 *proc)
         ApplyPaletteExt(gUnknown_0822BDFC, 0, 0x20);
 
         for (i = 0; i < gUnknown_0202FDEC.unk08; i++)
-            sub_08043E3C(gPlayers[(s8)gUnknown_0202FDEC.unk00[i]].co + 0x30,
+            LoadCoFace(gPlayers[(s8)gUnknown_0202FDEC.unk00[i]].co + 0x30,
                          (void *)(((i * 0x24 + 0x100) & 0x3FF) * 0x20 + 0x06010000),
                          i + 0x19);
     }
 
-    sub_0801B780(0);
+    InitTextTileCache(0);
     proc->unk4c = 0;
     }
 }
+asm(".global sub_0807AA84\n.thumb_set sub_0807AA84, MatchSummary_Init\n");

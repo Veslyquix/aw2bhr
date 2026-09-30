@@ -8,28 +8,35 @@
  * sub_0800A588 @ 0x0800A588, sub_0800A6AC @ 0x0800A6AC, sub_0800A798 @ 0x0800A798, sub_0800A884 @ 0x0800A884, sub_0800A95C @ 0x0800A95C
  */
 
-/* MATCHED (wave 37, W37-C).
+/*
+ * sub_0800A588 -- work out the tile for each of the four cells next to (x, y)
+ * again.
  *
- * The same four-cardinal-neighbour sweep as sub_0800A3D4, over a different
- * predicate: for each in-bounds neighbour sub_08009B38 accepts, classify it
- * with sub_0800A95C and either repair it (negative) or redraw it (positive).
+ * A neighbour is only looked at when it is on the map and IsPlainRiverAt accepts
+ * it. sub_0800A95C then classifies it: a negative answer means the cell is
+ * wrong and sub_08007F68 repairs it; a positive one is the new tile, which is
+ * stored, and sub_0800A098 then tidies that cell's own neighbours. Zero leaves
+ * the cell alone.
  *
- * `v` lives in r2 because it is MakeTileSimple's third argument -- the
- * `adds r2, r0, #0` after the `bl` is the copy into that parameter, not a
- * narrowing, and the two `cmp r2, #0` tests (`bge` then `ble`) are what make
- * sub_0800A95C's return signed and NOT s16 (an s16 return would add a
- * `lsls #16; asrs #16` here that the ROM does not have).
+ * The other four functions in this file all build the same nine-bit mask of the
+ * 3 x 3 block around (x, y) -- bit 8 the top left, bit 4 the centre, bit 0 the
+ * bottom right, cells off the map left at 0 -- and look it up in a table:
+ *   sub_0800A6AC: land bits with the centre forced to 1, table
+ *     gUnknown_08486BC4; -1 for a cell that is not land or that sub_080094EC
+ *     rejects.
+ *   sub_0800A798: the same table, but only for a water cell, and the centre bit
+ *     is set only when sub_080094EC returns 0; -1 otherwise.
+ *   sub_0800A884: land bits with the centre forced, table gUnknown_084867C4.
+ *   sub_0800A95C: bits from sub_08009918 rather than IsTerrainLand and no
+ *     centre bit at all, table gUnknown_08486BC4.
  *
- * The first block reaches `bl sub_08009B38` with r0 never written -- x is
- * still in it from the prologue -- exactly as in sub_0800A3D4.
- *
- * gUnknown_08499590 is named honestly; agbcc's own -fforce-addr copy is the
- * ROM's gUnknown_0808D840 pool word (promotion needs "rodata":
- * ["0x0808D840"]).  That is why no `u8 **const *pp` local is needed here,
- * unlike the older c_0800A3D4.c / c_0800AA30.c spelling, and why
- * `MAP->height - 1` needs no `lim` binding to place the pool register: with the
- * honest spelling agbcc emits the `adds r7, r1, #0` copy after the bound by
- * itself. */
+ * Why the C looks odd: these spellings do not change what the code does, but
+ * the original compiler only produces identical output with them.
+ *   - sub_0800A95C returns a plain `int`. Declared s16, its callers would have
+ *     to sign-extend the result, and the original does not.
+ *   - Each mask is built by writing the nine terms out, and each neighbour is
+ *     its own block with its own `n`, rather than as a loop.
+ */
 #define MAP gMap
 
 void sub_0800A588(int x, int y)
@@ -37,7 +44,7 @@ void sub_0800A588(int x, int y)
     if (y > 0)
     {
         int n = y - 1;
-        if (sub_08009B38(x, n))
+        if (IsPlainRiverAt(x, n))
         {
             int v = sub_0800A95C(x, n);
             if (v < 0)
@@ -53,7 +60,7 @@ void sub_0800A588(int x, int y)
     if (y < MAP->height - 1)
     {
         int n = y + 1;
-        if (sub_08009B38(x, n))
+        if (IsPlainRiverAt(x, n))
         {
             int v = sub_0800A95C(x, n);
             if (v < 0)
@@ -69,7 +76,7 @@ void sub_0800A588(int x, int y)
     if (x > 0)
     {
         int n = x - 1;
-        if (sub_08009B38(n, y))
+        if (IsPlainRiverAt(n, y))
         {
             int v = sub_0800A95C(n, y);
             if (v < 0)
@@ -85,7 +92,7 @@ void sub_0800A588(int x, int y)
     if (x < MAP->width - 1)
     {
         int n = x + 1;
-        if (sub_08009B38(n, y))
+        if (IsPlainRiverAt(n, y))
         {
             int v = sub_0800A95C(n, y);
             if (v < 0)
@@ -139,7 +146,7 @@ int sub_0800A798(int x, int y)
 {
     int m;
 
-    if (IsTerrainWater(x, y) == 0)
+    if (IsTerrainNotWater(x, y) == 0)
         return -1;
 
     m = 0;

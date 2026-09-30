@@ -7,7 +7,7 @@
  * sub_080270B8 @ 0x080270B8, sub_080270F0 @ 0x080270F0, sub_08027118 @ 0x08027118
  */
 
-bool8 sub_080270B8(void)
+bool8 IsAnyArmyDefeatedByCaptureLimit(void)
 {
     int i;
 
@@ -19,8 +19,9 @@ bool8 sub_080270B8(void)
 
     return FALSE;
 }
+asm(".global sub_080270B8\n.thumb_set sub_080270B8, IsAnyArmyDefeatedByCaptureLimit\n");
 
-u8 sub_080270F0(void)
+u8 GetFirstHumanArmy(void)
 {
     int i;
 
@@ -32,8 +33,9 @@ u8 sub_080270F0(void)
 
     return 0;
 }
+asm(".global sub_080270F0\n.thumb_set sub_080270F0, GetFirstHumanArmy\n");
 
-void sub_08027118(void)
+void ClearTeammateDefeats(void)
 {
     int i;
     int j;
@@ -51,3 +53,4 @@ void sub_08027118(void)
         }
     }
 }
+asm(".global sub_08027118\n.thumb_set sub_08027118, ClearTeammateDefeats\n");

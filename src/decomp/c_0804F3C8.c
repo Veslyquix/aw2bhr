@@ -19,7 +19,7 @@
  *    same pseudo as the first region's f, so it is global-by-flow and lands
  *    in r6 in both places; the addends in THIS order (the address is expanded
  *    first, then k * 5, then the load -- the ROM's instruction order); k is
- *    its own global pseudo (r4) and is what sub_080505A4 receives. The
+ *    its own global pseudo (r4) and is what SpawnThirdEffectAndProjectile receives. The
  *    draft's `u16 n` and `(f = k) * 5` were two pseudos where the ROM has
  *    one, and every earlier swap of the addends kept `(f = k)` and therefore
  *    kept a copy (that is the 78.2% waves 77 and 80 both measured).
@@ -30,12 +30,12 @@
  *    is used through a paradoxical SUBREG that local_alloc will not tie
  *    (`ands r0, r1` under every volatile spelling); an int-typed read is a
  *    `(zero_extend (mem))` that cse does not forward the store into, and it
- *    ties (`ands r1, r0`). See sub_0804EB78's header; measured on a
+ *    ties (`ands r1, r0`). See TCopterFigure_Loop's header; measured on a
  *    six-variant probe and on both twins.
  * Kept from waves 37/77: entry-first operand order in dst->x/y, the u16
  * `new_var` group stride, `[c * 10 + f * 2]`, the byte-offset-first `p`, the
  * gUnknown_085D6C88 argument expression shared with c_0804FCA4.c. */
-void sub_0804F3C8(void)
+void BomberFigure_Loop(void)
 {
   struct Unk02029A10 *e1;
   struct Unk02029A10 *entry;
@@ -65,7 +65,7 @@ void sub_0804F3C8(void)
     new_var = sizeof(struct Unk02029A10Group);
     dst->x = ((struct Unk02029A10 *) (((gUnknown_08552148[c] * (sizeof(struct Unk02029A10))) + (c * new_var)) + ((u8 *) gUnknown_02029A10)))->x + gUnknown_08553524[(c * 10) + (f * 2)];
     dst->y = ((struct Unk02029A10 *) (((gUnknown_08552148[c] * (sizeof(struct Unk02029A10))) + (c * new_var)) + ((u8 *) gUnknown_02029A10)))->y + gUnknown_08553524[((c * 10) + (f * 2)) + 1];
-    sub_080520B8(c, f);
+    SpawnDebrisEffect(c, f);
   }
   k = gUnknown_020296B0[c].unk18;
   f = gUnknown_020296B0[c].unk1e[k] + k * 5;
@@ -75,7 +75,7 @@ void sub_0804F3C8(void)
     if (f != 0xff)
     {
       struct Unk02029A10 *q;
-      sub_080505A4(c, k);
+      SpawnThirdEffectAndProjectile(c, k);
       q = (struct Unk02029A10 *) (((e * (sizeof(struct Unk02029A10))) + (c * (sizeof(struct Unk02029A10Group)))) + ((u8 *) gUnknown_02029A10));
       q->unk1e++;
       PlayMusicOrSfx(gUnknown_085D6C88[gUnknown_03004580[c][1]].unk0c[gUnknown_03004580[c][2] - 1][gUnknown_020296B0[c].unk1a & 1]);
@@ -85,19 +85,20 @@ void sub_0804F3C8(void)
     {
       struct Unk02029A10 *r;
       r = (struct Unk02029A10 *) ((c * (sizeof(struct Unk02029A10Group))) + ((u8 *) gUnknown_02029A10));
-      if ((r->unk18 != (-1)) && sub_080153F0(r->unk18))
+      if ((r->unk18 != (-1)) && IsSlotScriptActiveAt(r->unk18))
       {
         sub_080156E8(r->unk18, gUnknown_02029BA8[c].unk04);
       }
     }
     gUnknown_020296B0[c].unk18++;
   }
-  sub_08056E9C(c, e);
-  w = sub_0804BECC(c, e, gUnknown_03001FBC);
+  StepFigureSlide(c, e);
+  w = StepFigureHitFlash2(c, e, gUnknown_03001FBC);
   p = *((u16 **) ((c * (sizeof(u16 *))) + ((u8 *) gUnknown_084C3F78)));
   entry = (struct Unk02029A10 *) (((e * (sizeof(struct Unk02029A10))) + (c * (sizeof(struct Unk02029A10Group)))) + ((u8 *) gUnknown_02029A10));
   entry->x += gUnknown_08553B28[c][w];
   entry->y -= gUnknown_085644D4[(row = gUnknown_02028E5C[c])[1]];
-  sub_0804EE08(c, e, gUnknown_03001FBC);
-  sub_080155C0(gUnknown_03001FBC, entry->x, entry->y - (*p));
+  StepBomberBobOrKnock(c, e, gUnknown_03001FBC);
+  SetSlotSpritePosition(gUnknown_03001FBC, entry->x, entry->y - (*p));
 }
+asm(".global sub_0804F3C8\n.thumb_set sub_0804F3C8, BomberFigure_Loop\n");

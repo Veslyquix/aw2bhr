@@ -10,27 +10,27 @@
 
 #include "hardware.h"
 
-void sub_0802DCB4(void)
+void MapCursorIdle(void)
 {
     struct Unit *unit;
 
-    sub_08023824();
-    sub_0802361C();
-    sub_08023908(4);
-    sub_08023274(0);
+    HandleMoveMapCursor();
+    HandleGameMapCursorInput();
+    HandleMoveCameraWithMapCursor(4);
+    StepMapCursorAndDraw(0);
 
-    if (sub_0802DBF8())
+    if (IsMapCursorSettled())
     {
         if (gpKeySt->pressed & 8)
         {
-            sub_0802E250();
+            MapCursor_OnPressStart();
             return;
         }
 
         if (gpKeySt->pressed & 4)
         {
-            sub_0801B780(0);
-            sub_0802D458();
+            InitTextTileCache(0);
+            OpenMapMenu();
             return;
         }
 
@@ -40,31 +40,31 @@ void sub_0802DCB4(void)
                     gMap->rowOffset[gUnknown_030033E4.unk02]
                     + gUnknown_030033E4.unk00] != 0)
             {
-                sub_0801B780(0);
-                sub_0803A8F0(&gUnits[
+                InitTextTileCache(0);
+                ShowUnitClassInfoWindow(&gUnits[
                     gMap->unit[
                         gMap->rowOffset[gUnknown_030033E4.unk02]
                         + gUnknown_030033E4.unk00]]);
                 return;
             }
 
-            sub_0801B780(0);
-            sub_080470F8(sub_0803EED4(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02));
+            InitTextTileCache(0);
+            ShowTerrainInfoWindow(GetTerrainTypeAt(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02));
             return;
         }
 
         if (gpKeySt->pressed & L_BUTTON)
         {
-            sub_08025580();
-            unit = sub_080254AC();
+            PeekNextReadyUnit();
+            unit = GetNextReadyUnit();
 
             if (unit != NULL)
             {
-                sub_08029088(unit->x, unit->y);
+                ScrollCameraToKeepCellInView(unit->x, unit->y);
 
-                if (sub_08015BD0((s32)gUnknown_0849A00C) != -1)
+                if (FindSlotScript((s32)gUnknown_0849A00C) != -1)
                 {
-                    sub_0802DCA4();
+                    ResetDisplayEffects();
                     return;
                 }
             }
@@ -72,19 +72,20 @@ void sub_0802DCB4(void)
 
         if (gpKeySt->pressed & 1)
         {
-            sub_0802E4B4(((struct Unk802C57CS *)&gUnknown_030033E4)->unk00,
+            MapCursor_OnPressA(((struct Unk802C57CS *)&gUnknown_030033E4)->unk00,
                          ((struct Unk802C57CS *)&gUnknown_030033E4)->unk02);
             return;
         }
 
         if (gpKeySt->pressed & 2)
         {
-            if (sub_0802E2D0(((struct Unk802C57CS *)&gUnknown_030033E4)->unk00,
+            if (MapCursor_OnPressB(((struct Unk802C57CS *)&gUnknown_030033E4)->unk00,
                              ((struct Unk802C57CS *)&gUnknown_030033E4)->unk02))
                 return;
         }
     }
 
-    sub_0802A7C4();
-    sub_0802776C(0);
+    RefreshMapCursorInfoPanel();
+    SetInfoBoxMode(0);
 }
+asm(".global sub_0802DCB4\n.thumb_set sub_0802DCB4, MapCursorIdle\n");

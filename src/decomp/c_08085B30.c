@@ -39,45 +39,45 @@ void sub_08085B30(struct Unk8085B30 *proc)
     int i;
     u16 clear[2];
 
-    sub_0807898C(proc);
-    sub_08078AF0();
+    SetupMenuScreenBgs(proc);
+    SyncAllBgTilemaps();
 
     sub_0801F114();
-    sub_0801F150(2, (void *)0x06010000, 0xf0, 0x14);
+    InitTilePool(2, (void *)0x06010000, 0xf0, 0x14);
 
-    sub_0801F234(0x43);
-    sub_0801F234(0x44);
-    sub_0801F234(0x45);
-    sub_0801F234(0x46);
-    sub_0801F234(0x52);
-    sub_0801F234(0x69);
+    LoadTilePoolGraphic(0x43);
+    LoadTilePoolGraphic(0x44);
+    LoadTilePoolGraphic(0x45);
+    LoadTilePoolGraphic(0x46);
+    LoadTilePoolGraphic(0x52);
+    LoadTilePoolGraphic(0x69);
 
     for (i = 0; i <= 9; i++)
-        sub_0801F234(i + 0x55);
+        LoadTilePoolGraphic(i + 0x55);
 
-    sub_0801F150(4, (void *)((gUnknown_03002B6C.bits.chr_block << 14) + 0x06000000), 0x370, 9);
+    InitTilePool(4, (void *)((gUnknown_03002B6C.bits.chr_block << 14) + 0x06000000), 0x370, 9);
 
-    sub_0801F234(0xb8);
-    sub_0801F234(0xb9);
-    sub_0801F234(0xba);
-    sub_0801F234(0xbb);
+    LoadTilePoolGraphic(0xb8);
+    LoadTilePoolGraphic(0xb9);
+    LoadTilePoolGraphic(0xba);
+    LoadTilePoolGraphic(0xbb);
 
-    sub_08087938();
-    sub_0801B780(0);
-    sub_08037750(6);
+    LoadMapSelectPanelGraphics();
+    InitTextTileCache(0);
+    StartMapPreviewPalette(6);
 
     if (gPlaySt.gameMode == 2)
     {
         gUnknown_03005928 = 7;
-        sub_080375A4(2);
+        BuildMapListForMode(2);
         sub_08086A58(gUnknown_03005900, gUnknown_03005928, 0);
-        sub_08086F3C(gUnknown_03005900 + gUnknown_03005930);
+        BuildMapSelectPreviewNow(gUnknown_03005900 + gUnknown_03005930);
     }
     else
     {
         gUnknown_03005928 = 5;
 
-        while (sub_08037448(gUnknown_0300596C) == 0)
+        while (BuildMapListForCategory(gUnknown_0300596C) == 0)
         {
             gUnknown_0300596C--;
 
@@ -86,7 +86,7 @@ void sub_08085B30(struct Unk8085B30 *proc)
         }
 
         sub_08086A58(gUnknown_03005990[gUnknown_0300596C], gUnknown_03005928, 0);
-        sub_08086F3C(gUnknown_03005990[gUnknown_0300596C] + gUnknown_03005980);
+        BuildMapSelectPreviewNow(gUnknown_03005990[gUnknown_0300596C] + gUnknown_03005980);
     }
 
     gUnknown_0300251C.bits.tm_block = 0x1b;
@@ -95,11 +95,11 @@ void sub_08085B30(struct Unk8085B30 *proc)
     *(volatile u16 *)clear = 0;
     CpuSet(clear, (void *)((gUnknown_03001FE8.bits.tm_block << 11) + 0x06000000), 0x01000800);
 
-    sub_08078D80(proc);
+    StartScrollingBackdrop(proc);
 
-    sub_08073304(gUnknown_085802CC, gUnknown_0200FC50, 0, 0, 1, 1, (int)proc);
+    StartHeaderBanner(gUnknown_085802CC, gUnknown_0200FC50, 0, 0, 1, 1, (int)proc);
 
-    sub_0802D5A0((void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06006C00), 0, 0);
+    LoadWindowFrameGraphics((void *)((gUnknown_030030B4.bits.chr_block << 14) + 0x06006C00), 0, 0);
 
     if (gPlaySt.gameMode == 2)
     {
@@ -113,15 +113,15 @@ void sub_08085B30(struct Unk8085B30 *proc)
         sub_0801A368(0x12, 0, 0xd, 4, gUnknown_08499580, 0);
     }
 
-    sub_08013B0C();
+    BG_EnableSyncBG2();
     sub_080116E8();
 
     ApplyPaletteExt(gUnknown_084892EC, 0x220, 0x20);
 
-    sub_0803F6BC(6, 0, (void *)0x06010A00, 1);
-    sub_0803F6BC(0xe, 0, (void *)0x06010B00, 1);
-    sub_0803F6BC(0xa, 0, (void *)0x06010C00, 1);
-    sub_0803F6BC(0xb, 0, (void *)0x06010D00, 1);
+    LoadTerrainObjTiles(6, 0, (void *)0x06010A00, 1);
+    LoadTerrainObjTiles(0xe, 0, (void *)0x06010B00, 1);
+    LoadTerrainObjTiles(0xa, 0, (void *)0x06010C00, 1);
+    LoadTerrainObjTiles(0xb, 0, (void *)0x06010D00, 1);
 
     ApplyPaletteExt((u16 *)sub_0802A8AC(6, 0), 0x240, 0x20);
 
@@ -152,14 +152,14 @@ void sub_08085B30(struct Unk8085B30 *proc)
 
     {
         register int result asm("r0");
-        result = sub_08087248();
+        result = GetMapPreviewScrollX();
         gUnknown_03002B34 = result;
     }
-    gUnknown_03002F18 = sub_08087298();
+    gUnknown_03002F18 = GetMapPreviewScrollY();
 
-    sub_08085F40();
+    MapSelect_SetBlend();
 
-    sub_0803B524(0x190);
+    PlayMusic(0x190);
 
     Proc_Start(gUnknown_08616CF4, proc);
 }

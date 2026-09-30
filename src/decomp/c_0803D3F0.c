@@ -21,7 +21,7 @@
  * spends holding 0x417A and 0x1432 across the inner loop. Same finding as the
  * wave-34 note in include/unknown-globals.h, reached independently here.
  *
- * The member set is written to match sub_0803D2F8's copy of this declaration
+ * The member set is written to match CopyMapRecordToGMap's copy of this declaration
  * exactly, so the two survive being promoted into one translation unit. */
 /* The 0x02000000 staging record. Declared locally and cast onto the `u8 []`
  * global for the same reason src/decomp's `struct Map` files do it: the ROM
@@ -43,7 +43,7 @@ struct Rec
     /* 0x04CB */ u8 cell[1];
 };
 
-void sub_0803D3F0(void)
+void RebuildTerrainFromTiles(void)
 {
     int x, y;
 
@@ -56,25 +56,26 @@ void sub_0803D3F0(void)
         }
     }
     RecountArmyProperties();
-    sub_08024268();
+    RebuildMapUnitLayers2();
 }
+asm(".global sub_0803D3F0\n.thumb_set sub_0803D3F0, RebuildTerrainFromTiles\n");
 
-/* Drives sub_0803D4A8 over slots 0..11. The counter is `u8`: it is
+/* Drives LoadDesignRoomSlotEntry over slots 0..11. The counter is `u8`: it is
  * re-narrowed (`adds r0,r4,#1; lsls #0x18; lsrs #0x18`) on every increment,
  * which an `int` would not do, and `cmp r4,#0xb; bls` is the unsigned test
  * `i < 12` on that width. The result of each call is discarded, so nothing
- * here settles sub_0803D4A8's return type. */
-void MainMenu2_0803D48D(void)
+ * here settles LoadDesignRoomSlotEntry's return type. */
+void RefreshDesignRoomSlotDirectory(void)
 {
     u8 i;
 
     for (i = 0; i < 12; i++)
-        sub_0803D4A8(i);
+        LoadDesignRoomSlotEntry(i);
 }
 
 /* `p` must be bound BEFORE the guard, not at first use: the ROM loads
  * gUnknown_02000000 in the entry block, ahead of `cmp r5,#3`, which only
- * happens when the pseudo's live range crosses the `bl sub_0801AD70` and so
+ * happens when the pseudo's live range crosses the `bl IsSaveSlotInvalid` and so
  * earns a callee-saved register. Naming the global at each use instead puts
  * the `ldr` inside the success block and reorders the literal pool.
  *
@@ -83,17 +84,17 @@ void MainMenu2_0803D48D(void)
  * immediately after the two branches (`bhi` and `beq` both jumping over it),
  * which is the ROM's block order. The `&&` spelling emits the success path
  * first and the failure path last. */
-int sub_0803D4A8(u8 a)
+int LoadDesignRoomSlotEntry(u8 a)
 {
     struct Rec *p = (struct Rec *)gUnknown_02000000;
     u8 b;
     u8 i;
 
-    if (a > 3 || sub_0801AD70(b = a + 5) != 0) {
+    if (a > 3 || IsSaveSlotInvalid(b = a + 5) != 0) {
         gUnknown_020280C0[a].unk13 = 0xff;
         return 0;
     }
-    sub_0801AC58(b, (u8 *)p);
+    ReadSaveSlot(b, (u8 *)p);
     CopyString(gUnknown_020280C0[a].unk02, p->name);
     gUnknown_020280C0[a].unk13 = p->unk4C3;
     gUnknown_020280C0[a].filler_14[5] = p->unk4C9;
@@ -102,5 +103,6 @@ int sub_0803D4A8(u8 a)
         gUnknown_020280C0[a].filler_14[i] = p->unk4C4[i];
     return 1;
 }
+asm(".global sub_0803D4A8\n.thumb_set sub_0803D4A8, LoadDesignRoomSlotEntry\n");
 
-asm(".global sub_0803D48C\n.thumb_set sub_0803D48C, MainMenu2_0803D48D\n");
+asm(".global sub_0803D48C\n.thumb_set sub_0803D48C, RefreshDesignRoomSlotDirectory\n");

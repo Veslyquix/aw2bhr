@@ -7,13 +7,6 @@
  * sub_0803B4DC @ 0x0803B4DC
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file .text as one
- * contiguous block at 0x0803B4DC.
- * sub_0803B4DC @ 0x0803B4DC
- */
-
 /* Family F066 (data/families.json): `push {lr}; lsls r0,r0,#0x10;
  * asrs r0,r0,#0x10; bl S; pop {r0}; bx r0` -- 16 bytes, three members, and
  * `varies` has exactly one entry, the callee. `lsls`+`asrs` is a value-kept
@@ -35,12 +28,13 @@
  * conversion at a use inside the body but does not say the source has no cast.
  *
  * The `int` parameter is NOT a free choice and was settled before this wave:
- * sub_08016104/sub_08016130 pass a `u16` out of a script stream with a bare
+ * SlotOp_PlayMusic/SlotOp_PlaySfx pass a `u16` out of a script stream with a bare
  * `ldrh`, which an `s16` parameter would fold into `movs r1,#4; ldrsh`, and
  * src/proc.c passes an `s16` dataImm, which rules out `u16`.
  */
 
-void sub_0803B4DC(int a)
+void PlayMusicOrSfx2(int a)
 {
     PlayMusicOrSfx(a);
 }
+asm(".global sub_0803B4DC\n.thumb_set sub_0803B4DC, PlayMusicOrSfx2\n");

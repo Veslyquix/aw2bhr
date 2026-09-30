@@ -7,7 +7,7 @@
  * sub_080271CC @ 0x080271CC
  */
 
-u8 sub_080271CC(int a1)
+u8 DoesArmyHaveUnits(int a1)
 {
   int i;
   int new_var2;
@@ -21,7 +21,7 @@ u8 sub_080271CC(int a1)
   {
     return 0;
   }
-  if (sub_08025CF0(a1) == 0)
+  if (GetPlayerUnitsCreated(a1) == 0)
   {
     return 1;
   }
@@ -60,3 +60,4 @@ u8 sub_080271CC(int a1)
 
   return 0;
 }
+asm(".global sub_080271CC\n.thumb_set sub_080271CC, DoesArmyHaveUnits\n");

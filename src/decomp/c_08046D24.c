@@ -7,14 +7,6 @@
  * sub_08046D24 @ 0x08046D24
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08046D24.
- * sub_08046D24 @ 0x08046D24
- */
-
-
 /* Family F003 (data/families.json): 34 twelve-byte forwarders shaped
  * `push {lr}; movs r0,#K; bl S; pop {r0}; bx r0`, i.e. one call with one
  * literal argument and nothing else. `pop {r0}; bx r0` fixes this as void.
@@ -23,7 +15,8 @@
  * callee's declaration in unknown-functions.h and nothing else.
  * Exemplar: src/decomp/c_08004A60.c. */
 
-void sub_08046D24(void)
+void TerrainInfoInput_Init(void)
 {
-    sub_08023274(2);
+    StepMapCursorAndDraw(2);
 }
+asm(".global sub_08046D24\n.thumb_set sub_08046D24, TerrainInfoInput_Init\n");

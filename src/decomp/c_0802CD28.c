@@ -9,7 +9,7 @@
 
 #include "proc.h"
 
-/* sub_0802CD54 with a Proc_Start instead of the fourth teardown call. See that
+/* IntelMenu_Status with a Proc_Start instead of the fourth teardown call. See that
  * function for why the second parameter is u8 -- the word `str` into
  * gUnknown_030040F0 is what makes the PROMOTE_MODE shift pair live.
  *
@@ -17,17 +17,18 @@
  * src/proc.c documents, and the returned proc is discarded.
  */
 
-void sub_0802CD28(int a1, u8 a2)
+void MapMenu_Co(int a1, u8 a2)
 {
     gUnknown_030040F0 = a2;
-    sub_0801A614();
-    sub_0801A168();
-    sub_08034F10();
+    PushMenu();
+    CloseTopMenu();
+    SetMapStateResumeCursor();
     Proc_Start(gUnknown_0849AA68, PROC_TREE_3);
 }
+asm(".global sub_0802CD28\n.thumb_set sub_0802CD28, MapMenu_Co\n");
 
 /* Stash the u8 second argument in the word global gUnknown_030040F0, then run
- * four teardown calls. sub_0802CD28 and sub_0802CD78 are the same function with
+ * four teardown calls. MapMenu_Co and IntelMenu_Rules are the same function with
  * a different fifth statement.
  *
  * This is the discriminating case for the parameter width: the argument's only
@@ -41,27 +42,29 @@ void sub_0802CD28(int a1, u8 a2)
  * register index.
  */
 
-void sub_0802CD54(int a1, u8 a2)
+void IntelMenu_Status(int a1, u8 a2)
 {
     gUnknown_030040F0 = a2;
-    sub_0801A614();
-    sub_0801A168();
-    sub_08034F10();
-    sub_08046764();
+    PushMenu();
+    CloseTopMenu();
+    SetMapStateResumeCursor();
+    StartIntelStatusScreen();
 }
+asm(".global sub_0802CD54\n.thumb_set sub_0802CD54, IntelMenu_Status\n");
 
-/* sub_0802CD54 with a sub_080152EC install instead of the fourth teardown call,
+/* IntelMenu_Status with a sub_080152EC install instead of the fourth teardown call,
  * carrying the literal 0 second argument every other sub_080152EC wrapper in
- * this block passes. See sub_0802CD54 for why the second parameter is u8.
+ * this block passes. See IntelMenu_Status for why the second parameter is u8.
  *
  * sub_080152EC's returned slot is discarded, so the call is a bare statement.
  */
 
-void sub_0802CD78(int a1, u8 a2)
+void IntelMenu_Rules(int a1, u8 a2)
 {
     gUnknown_030040F0 = a2;
-    sub_0801A614();
-    sub_0801A168();
-    sub_08034F10();
+    PushMenu();
+    CloseTopMenu();
+    SetMapStateResumeCursor();
     sub_080152EC(gUnknown_0849ADD0, 0);
 }
+asm(".global sub_0802CD78\n.thumb_set sub_0802CD78, IntelMenu_Rules\n");

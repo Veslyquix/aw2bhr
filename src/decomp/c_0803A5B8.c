@@ -7,7 +7,7 @@
  * sub_0803A5B8 @ 0x0803A5B8
  */
 
-void sub_0803A5B8(void)
+void UnitClassInfo_DrawSelectionBrackets(void)
 {
     u8 d;
     u8 c;
@@ -21,11 +21,12 @@ void sub_0803A5B8(void)
     switch (gUnknown_0849D89C->unk09)
     {
     case 4:
-        c = sub_08014CEC(gTextTable[gUnknown_085D5ABC[gUnknown_0849D89C->unk04->type].unk02]);
+        c = GetStringPixelWidthSimple(gTextTable[gUnknown_085D5ABC[gUnknown_0849D89C->unk04->type].unk02]);
         break;
     case 0xb:
-        c = sub_08014CEC(gTextTable[gUnknown_085D5ABC[gUnknown_0849D89C->unk04->type].unk04]);
+        c = GetStringPixelWidthSimple(gTextTable[gUnknown_085D5ABC[gUnknown_0849D89C->unk04->type].unk04]);
         break;
     }
-    sub_08022AF8(a + gUnknown_0849D89C->unk00, b, c, d);
+    DrawCornerBracketSprites(a + gUnknown_0849D89C->unk00, b, c, d);
 }
+asm(".global sub_0803A5B8\n.thumb_set sub_0803A5B8, UnitClassInfo_DrawSelectionBrackets\n");

@@ -19,7 +19,7 @@ struct Unk8080794
     /* 58 */ int unk58;
 };
 
-void sub_08080794(struct Unk8080794 *proc)
+void SuperCoPowerName_LettersFlyInLoop(struct Unk8080794 *proc)
 {
     int i;
 
@@ -79,7 +79,7 @@ void sub_08080794(struct Unk8080794 *proc)
         else if (proc->unk4c >= i * 8 + 0xc)
         {
             if (proc->unk4c == i * 8 + 0xc)
-                sub_0803B4DC(0x1dd);
+                PlayMusicOrSfx2(0x1dd);
 
             PutSprite(0, gUnknown_030058D0 + gUnknown_030059A0[i], 0x40, gUnknown_0848B6E6,
                       i * 8 + 0x30a);
@@ -96,3 +96,4 @@ void sub_08080794(struct Unk8080794 *proc)
         Proc_Break(proc);
     }
 }
+asm(".global sub_08080794\n.thumb_set sub_08080794, SuperCoPowerName_LettersFlyInLoop\n");

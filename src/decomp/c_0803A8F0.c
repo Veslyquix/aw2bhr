@@ -8,9 +8,9 @@
  * sub_0803A8F0 @ 0x0803A8F0
  */
 
-void sub_0803A8F0(struct Unit *a)
+void ShowUnitClassInfoWindow(struct Unit *a)
 {
-    sub_08024268();
+    RebuildMapUnitLayers2();
     gUnknown_03001418 = 0;
     gUnknown_03001FF8 = 0;
     sub_080152EC(gUnknown_0849E2C8, 0);
@@ -31,5 +31,6 @@ void sub_0803A8F0(struct Unit *a)
         gUnknown_0849D89C->unk03 = 0;
     gUnknown_0849D89C->unk04 = a;
     gUnknown_0849D89C->unk08 = ((a - gUnits) >> 6) + 1;
-    sub_0803B4DC(0x65);
+    PlayMusicOrSfx2(0x65);
 }
+asm(".global sub_0803A8F0\n.thumb_set sub_0803A8F0, ShowUnitClassInfoWindow\n");

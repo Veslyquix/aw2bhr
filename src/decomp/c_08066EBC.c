@@ -26,7 +26,7 @@
  *   - the `+ 0xa` must stay INSIDE the store expression; hoisting it moves the
  *     gPal pool load after it. */
 
-void sub_08066EBC(void)
+void MatchSetupCyclePaletteColors(void)
 {
     int t;
     int i;
@@ -46,5 +46,6 @@ void sub_08066EBC(void)
     gPal[0x1d9] = gUnknown_0817AF18[0x20 + i];
     gPal[0x1df] = gUnknown_0817AF18[0x20 + i];
 
-    sub_080135A4();
+    EnablePaletteSync();
 }
+asm(".global sub_08066EBC\n.thumb_set sub_08066EBC, MatchSetupCyclePaletteColors\n");

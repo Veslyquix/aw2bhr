@@ -8,7 +8,7 @@
  * sub_08023EEC @ 0x08023EEC
  */
 
-void sub_08023EEC(void)
+void UpdateMapDisplay(void)
 {
     if ((gMap->scrollX < (s16)gMap->unk08
       && (gMap->scrollX >> 4) != ((s16)gMap->unk08 >> 4))
@@ -16,22 +16,22 @@ void sub_08023EEC(void)
       && (gMap->scrollX >> 4) != (((s16)gMap->unk08 - 1) >> 4)))
     {
         if (gMap->scrollX < (s16)gMap->unk08)
-            sub_08023DCC((gMap->scrollX >> 4) - gMap->camX,
+            RedrawMapColumnForScrollLeft((gMap->scrollX >> 4) - gMap->camX,
                          (gMap->scrollY >> 4) - gMap->camY,
                          gMap->scrollX >> 4,
                          gMap->scrollY >> 4);
         else
-            sub_08023E14(((gMap->scrollX >> 4) + 0xf) - gMap->camX,
+            RedrawMapColumnForScrollRight(((gMap->scrollX >> 4) + 0xf) - gMap->camX,
                          (gMap->scrollY >> 4) - gMap->camY,
                          (gMap->scrollX >> 4) + 0xf,
                          gMap->scrollY >> 4);
 
-        sub_08013AFC();
-        sub_08013B0C();
-        sub_08013B1C();
+        BG_EnableSyncBG1();
+        BG_EnableSyncBG2();
+        BG_EnableSyncBG3();
 
         if (gUnknown_03000559 == 1)
-            sub_08013AEC();
+            BG_EnableSyncBG0();
     }
 
     if ((gMap->scrollY < (s16)gMap->unk0a
@@ -40,24 +40,25 @@ void sub_08023EEC(void)
       && (gMap->scrollY >> 4) != (((s16)gMap->unk0a - 1) >> 4)))
     {
         if (gMap->scrollY < (s16)gMap->unk0a)
-            sub_08023E5C((gMap->scrollX >> 4) - gMap->camX,
+            RedrawMapRowForScrollUp((gMap->scrollX >> 4) - gMap->camX,
                          (gMap->scrollY >> 4) - gMap->camY,
                          gMap->scrollX >> 4,
                          gMap->scrollY >> 4);
         else
-            sub_08023EA4((gMap->scrollX >> 4) - gMap->camX,
+            RedrawMapRowForScrollDown((gMap->scrollX >> 4) - gMap->camX,
                          ((gMap->scrollY >> 4) + 0xa) - gMap->camY,
                          gMap->scrollX >> 4,
                          (gMap->scrollY >> 4) + 0xa);
 
-        sub_08013AFC();
-        sub_08013B0C();
-        sub_08013B1C();
+        BG_EnableSyncBG1();
+        BG_EnableSyncBG2();
+        BG_EnableSyncBG3();
 
         if (gUnknown_03000559 == 1)
-            sub_08013AEC();
+            BG_EnableSyncBG0();
     }
 
     gMap->unk08 = gMap->scrollX;
     gMap->unk0a = gMap->scrollY;
 }
+asm(".global sub_08023EEC\n.thumb_set sub_08023EEC, UpdateMapDisplay\n");

@@ -189,3 +189,94 @@ So the residual is now ONLY the pool direction plus where the `ldr` sits.
 **Classification: basic-block / instruction ORDER across a loop boundary** —
 the same unreachable family as `sub_080373F0`'s block layout and W58-A's LICM
 hoist. Instruction multiset is exact.
+
+## Wave 92 (W92-C) — the residual restated
+
+Still 248/248 with 9 bytes differing, first difference at +0x28. Nothing in
+the loop body differs; the whole residual is the order of the five values the
+compiler lifts out of the loop.
+
+Original, in order: address of `counts[0]` (which is `sp`), the address of
+row 1 loaded from the literal pool, a copy of the address of `counts[1]`, and
+finally row 0, worked out as row 1 minus 40.
+
+Draft, in order: row 0 loaded from the pool, address of `counts[0]`, row 1
+worked out as row 0 plus 40, address of `counts[1]`.
+
+Read as a list, the original's order is the draft's order **rotated by one**:
+the draft leads with row 0 and the original puts row 0 last. That also settles
+which row comes from the pool, because the compiler always derives whichever
+row address it lifted *second* from the one it lifted first. So there is one
+requirement, not two: the loop body has to mention `counts[0]` before it
+mentions row 1, and row 0 after `counts[1]`, while still reading row 0 before
+`counts[0]` in the emitted code. Every source order that produces the right
+lift order also reorders the body, which is currently byte-exact.
+
+No new spelling was measured this wave; the axes in `data/parked.json` cover
+row spellings, pointer locals inside and outside the loop, block swaps,
+opaque offsets and about 40,000 permuter attempts.
+
+## Wave 93 (W93-F): the hoist order is reachable, and it costs a register
+
+Wave 87 left the open problem as a rotation: the loop body refers to its four
+loop-invariant values in the order [row0][counts0][row1][counts1], and the
+original's preheader emits them rotated left by one,
+[counts0][row][counts1][row'].
+
+**That rotation is reachable, and it needs no pointer local.** Read counts[0]
+into an ordinary local at the top of the body, do the row-1 test, and write
+counts[0] back through the local in the row-0 test:
+
+    for (i = 0; i < 5; i++)
+    {
+        u16 c;
+
+        c = counts[0];
+        do { if (gUnknown_020296BC[1][i] != 0xff) counts[1]++; } while (0);
+        if (gUnknown_020296BC[0][i] != 0xff) counts[0] = c + 1;
+    }
+
+That is the same function -- counts[0] is not touched anywhere else in the
+body -- and it moves counts[0]'s first reference ahead of any row reference.
+The preheader comes out
+
+    mov r4, sp | ldr r7, <row anchor> | mov r5, r8 | add r6, r7, #0 | add r6, #0x28
+
+against the original's
+
+    mov r3, sp | ldr r5, <row anchor> | adds r4, r7, #0 | adds r6, r5, #0 | subs r6, #0x28
+
+which is the original's order, value class for value class. The old draft put
+the row anchor's `ldr` first; this one does not.
+
+**It still loses, and the reason is worth more than the order was: +12 bytes,
+9.23% identical, first difference at +0x2.** The prologue gives it away. The
+original saves two high registers (`mov r7, sb | mov r6, r8 | push {r6, r7}`);
+this form saves three. Keeping the counts[0] value live across the row-1 test
+is one more simultaneously live value, so the address constant that the
+original rematerialises gets a callee-saved register instead, and the whole
+function shifts.
+
+That is the **same 12 bytes** every row-pointer-local form costs (waves 70, 77,
+80, 87). Those waves read the tax as something about pointer locals inhibiting
+the loop's induction variable. This measurement says it is not about pointers
+at all: an ordinary `u16` value local costs exactly the same 12. **The tax is
+one extra simultaneously live value, whatever it holds.** So the constraint on
+this function is tighter than it looked -- any construct that reaches the
+original's hoist order by keeping something alive across the body pays 12
+bytes, and the original reaches that order with nothing extra alive.
+
+What is left is the anchor direction, unchanged: the original loads
+gUnknown_020296E4 (row 1) and derives row 0 with a runtime `subs #0x28`, and
+every spelling that names row 1 folds to a single pool word of
+gUnknown_020296E4-0x28 (wave 80). Draft restored unchanged.
+
+## wave 96
+Base: draft unchanged (96.37%, size+0, 9 bytes, first diff +0x28). Tried one new axis: swap the two row tests in the loop body (row 1 first, with and without the do/while(0) moving to row 0): 93.6% (first diff +0x21) and 95.6% (+0x28). Mechanism: row-1-first makes the row-1 constant the first LICM hoist, but the counts[0] address then also moves and the pair/anchor still comes out lower-address-first; it perturbs the counters without producing the deferred row-0 hoist. Mixed-bind/row-pointer hypothesis not run again: waves 63/70/77/80/87 measured row-pointer locals at -12 bytes (they inhibit the loop's GIV).
+Proposed status: unchanged; left = which row address the pool word holds (bare row 1 plus a subtract vs bare row 0 plus an add) and the preheader order of four hoists.
+
+## wave 97 (W97-S)
+Draft unchanged (96.37%). gUnknown_020296E4 exists as its own extern (u16 [][20]). Probed spelling row 1 through it: `gUnknown_020296E4[0][i]` for row 1 with row 0 kept `gUnknown_020296BC[0][i]`: size-exact but 24.2% (two independent pool words, no run-time `subs #0x28`); `gUnknown_020296E4[-1][i]` for row 0: 236 bytes (-12), 8.5% (fold to one base). So the ROM's bare-E4-plus-subtract is neither the separate symbol nor the negative index.
+
+## wave 97 (W97-PG)
+Permuter chain: 1 link, 96.37% -> 96.37%, NO-IMPROVEMENT.

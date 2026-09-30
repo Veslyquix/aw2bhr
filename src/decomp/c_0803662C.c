@@ -7,19 +7,20 @@
  * sub_0803662C @ 0x0803662C
  */
 
-void sub_0803662C(void)
+void InstallMapFrameCallbacks(void)
 {
-    sub_0801F00C();
-    sub_08024584();
+    EnableSpriteLayerMode();
+    SetMapLayersDefault();
     sub_08011B18();
-    sub_08011B34((void *)sub_08022048);
-    sub_08011B34((void *)sub_08021DD8);
-    sub_08011B34((void *)UpdateFuelAmmoGraphics);
-    sub_08011B34((void *)sub_0803550C);
-    sub_08011B34((void *)sub_080246B4);
-    sub_08011B34((void *)sub_08024720);
-    sub_08011B34((void *)sub_08022A6C);
-    sub_08011B34((void *)sub_08043590);
-    sub_080366D0(sub_08036944);
-    sub_080366C4(sub_080369BC);
+    AddVBlankHook((void *)UpdateUnitSheetAnimation);
+    AddVBlankHook((void *)UpdateTerrainAnimation);
+    AddVBlankHook((void *)UpdateFuelAmmoGraphics);
+    AddVBlankHook((void *)UpdateWeatherParticles);
+    AddVBlankHook((void *)sub_080246B4);
+    AddVBlankHook((void *)AnimatePowerActiveCoPalettes);
+    AddVBlankHook((void *)AnimateCursorPalette);
+    AddVBlankHook((void *)AnimateCoPowerStatusPalette);
+    sub_080366D0(MapVBlankCallback);
+    sub_080366C4(MapMainLoopCallback);
 }
+asm(".global sub_0803662C\n.thumb_set sub_0803662C, InstallMapFrameCallbacks\n");

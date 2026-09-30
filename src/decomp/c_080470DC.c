@@ -7,20 +7,6 @@
  * sub_080470DC @ 0x080470DC, sub_080470E8 @ 0x080470E8
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080470DC.
- * sub_080470DC @ 0x080470DC
- */
-
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080470E8.
- * sub_080470E8 @ 0x080470E8
- */
-
 /* Family F000 (tools/families.py): `push {lr}; ldr r0,=X; bl S;
  * pop {r0}; bx r0` -- a one-line forwarder. `pop {r0}` is the void epilogue
  * per docs/agbcc-codegen.md, so the callee's result is discarded and this
@@ -36,14 +22,16 @@
  * callee's declaration in unknown-functions.h and nothing else.
  * Exemplar: src/decomp/c_08004A60.c. */
 
-void sub_080470DC(void)
+void TerrainInfoInput_Finish(void)
 {
-    sub_0801B780(0);
+    InitTextTileCache(0);
 }
+asm(".global sub_080470DC\n.thumb_set sub_080470DC, TerrainInfoInput_Finish\n");
 
-/* Stop half of sub_080470F8's sub_080152EC. */
+/* Stop half of ShowTerrainInfoWindow's sub_080152EC. */
 
-void sub_080470E8(void)
+void EndTerrainInfoWindowScript(void)
 {
     sub_0801537C(gUnknown_084C2198);
 }
+asm(".global sub_080470E8\n.thumb_set sub_080470E8, EndTerrainInfoWindowScript\n");

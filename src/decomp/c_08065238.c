@@ -9,7 +9,7 @@
 
 /* Builds the gUnknown_08580934->unk34[] object row: one sub_080152EC slot per
  * live entry (->unk08 of them), each seeded with its index and handed to
- * sub_08043E3C with its own 0x24-tile VRAM window.
+ * LoadCoFace with its own 0x24-tile VRAM window.
  *
  * The two 0x24-stepped registers are ONE source expression each, not a shared
  * one. `i * 0x24 + 0x190` appears twice -- once inside the `& 0x3ff` for the
@@ -20,12 +20,12 @@
  * single local instead (`x = 0x190; ... x += 0x24;`) collapses both to one
  * register, hoists the constant into the preheader and loses one high
  * register from the prologue -- probed, and it is the wrong shape. */
-void sub_08065238(void)
+void MatchSetupSpawnArmyColumns(void)
 {
     struct Unk08580934_Obj *obj;
     int i;
 
-    sub_08073304(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
+    StartHeaderBanner(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
 
     for (i = 0; i < gUnknown_08580934->unk08; i++)
     {
@@ -33,29 +33,30 @@ void sub_08065238(void)
         obj->unk1c = i;
         gUnknown_08580934->unk34[i] = obj;
         obj->unk46 = 0;
-        obj->unk28 = sub_08065200(i);
+        obj->unk28 = GetArmyColumnX(i);
         obj->unk38 = 0x34;
         obj->unk24 = i * 2;
         obj->unk44 = i * 0x24 + 0x190 + (i << 12);
-        sub_08043E3C(gUnknown_08580934->unk18[gUnknown_08580934->unk1c[i]],
+        LoadCoFace(gUnknown_08580934->unk18[gUnknown_08580934->unk1c[i]],
                      (void *)(0x06010000 + (((i * 0x24 + 0x190) & 0x3ff) << 5)),
                      i + 0x10);
     }
 }
+asm(".global sub_08065238\n.thumb_set sub_08065238, MatchSetupSpawnArmyColumns\n");
 
-/* The third member of the sub_08065238 / sub_0806540C set in this block: same
- * loop, same two 0x24-stepped givs, same (0x230, 0xf, 1, 1, 3) sub_08073304
+/* The third member of the MatchSetupSpawnArmyColumns / MatchSetupSpawnArmyColumnsSlide set in this block: same
+ * loop, same two 0x24-stepped givs, same (0x230, 0xf, 1, 1, 3) StartHeaderBanner
  * call. It differs by allocating a SECOND Proc per slot (gUnknown_08580A08)
- * and handing it to sub_08064D44 -- the same shape sub_0806502C uses on
- * sub_08064BC8. `obj` is reused for both allocations, which is what puts both
- * in r5, and `i * 2` is written twice (the +0x24 field and sub_08064D44's
- * fourth argument) and CSEd into r4 across the sub_08043E3C call. */
-void sub_0806530C(void)
+ * and handing it to TeamBadge_SetupAtBase -- the same shape SpawnTeamBadgeForColumn uses on
+ * TeamBadge_Setup. `obj` is reused for both allocations, which is what puts both
+ * in r5, and `i * 2` is written twice (the +0x24 field and TeamBadge_SetupAtBase's
+ * fourth argument) and CSEd into r4 across the LoadCoFace call. */
+void MatchSetupSpawnArmyColumnsWithBadges(void)
 {
     struct Unk08580934_Obj *obj;
     int i;
 
-    sub_08073304(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
+    StartHeaderBanner(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
 
     for (i = 0; i < gUnknown_08580934->unk08; i++)
     {
@@ -63,29 +64,30 @@ void sub_0806530C(void)
         obj->unk1c = i;
         gUnknown_08580934->unk34[i] = obj;
         obj->unk46 = 0;
-        obj->unk28 = sub_08065200(i);
+        obj->unk28 = GetArmyColumnX(i);
         obj->unk38 = 0;
         obj->unk24 = i * 2;
         obj->unk44 = i * 0x24 + 0x190 + (i << 12);
-        sub_08043E3C(gUnknown_08580934->unk18[gUnknown_08580934->unk1c[i]],
+        LoadCoFace(gUnknown_08580934->unk18[gUnknown_08580934->unk1c[i]],
                      (void *)(0x06010000 + (((i * 0x24 + 0x190) & 0x3ff) << 5)),
                      i + 0x10);
         obj = (struct Unk08580934_Obj *)sub_080152EC(gUnknown_08580A08, 3);
-        sub_08064D44(obj, sub_08065200(i) + 8, i, i * 2);
+        TeamBadge_SetupAtBase(obj, GetArmyColumnX(i) + 8, i, i * 2);
     }
 }
+asm(".global sub_0806530C\n.thumb_set sub_0806530C, MatchSetupSpawnArmyColumnsWithBadges\n");
 
-/* The sibling of sub_08065238 (same block): identical statement for statement
+/* The sibling of MatchSetupSpawnArmyColumns (same block): identical statement for statement
  * apart from the Proc script (gUnknown_08580BC8 vs gUnknown_08580AF0) and the
  * +0x38 seed, which is 0 here and 0x34 there. That one constant is the whole
  * reason this function saves a third high register -- 0x38's zero cannot share
  * the pseudo holding 0x46's zero, so it gets its own callee-saved slot. */
-void sub_0806540C(void)
+void MatchSetupSpawnArmyColumnsSlide(void)
 {
     struct Unk08580934_Obj *obj;
     int i;
 
-    sub_08073304(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
+    StartHeaderBanner(gUnknown_085802A4, gUnknown_0200FC50, 0x230, 0xf, 1, 1, 3);
 
     for (i = 0; i < gUnknown_08580934->unk08; i++)
     {
@@ -93,25 +95,26 @@ void sub_0806540C(void)
         obj->unk1c = i;
         gUnknown_08580934->unk34[i] = obj;
         obj->unk46 = 0;
-        obj->unk28 = sub_08065200(i);
+        obj->unk28 = GetArmyColumnX(i);
         obj->unk38 = 0;
         obj->unk24 = i * 2;
         obj->unk44 = i * 0x24 + 0x190 + (i << 12);
-        sub_08043E3C(gUnknown_08580934->unk18[gUnknown_08580934->unk1c[i]],
+        LoadCoFace(gUnknown_08580934->unk18[gUnknown_08580934->unk1c[i]],
                      (void *)(0x06010000 + (((i * 0x24 + 0x190) & 0x3ff) << 5)),
                      i + 0x10);
     }
 }
+asm(".global sub_0806540C\n.thumb_set sub_0806540C, MatchSetupSpawnArmyColumnsSlide\n");
 
-/* Teardown for the three Proc scripts sub_08065238 / sub_0806530C /
- * sub_0806540C start: if none of them is running it returns at once, otherwise
+/* Teardown for the three Proc scripts MatchSetupSpawnArmyColumns / MatchSetupSpawnArmyColumnsWithBadges /
+ * MatchSetupSpawnArmyColumnsSlide start: if none of them is running it returns at once, otherwise
  * it snaps every unk34[] object to its final position and stops all five.
  *
  * gUnknown_0816E0F8 / _0816E0FC / _0816E100 are agbcc's own -fforce-addr words
  * holding &gUnknown_08580AF0, &gUnknown_08580B90 and &gUnknown_08580BC8 (read
  * straight out of baserom.gba at those addresses). Each of the three is
- * referenced TWICE across the control-flow merge -- once by sub_08015BD0 and
- * once by sub_0806377C -- which is exactly the documented trigger; the two
+ * referenced TWICE across the control-flow merge -- once by FindSlotScript and
+ * once by ClearCallbackOfSlotsRunningScript -- which is exactly the documented trigger; the two
  * scripts named only once (gUnknown_08580A38, gUnknown_08580A08) get plain
  * pool words instead. Naming all five honestly reproduces the split.
  *
@@ -119,16 +122,16 @@ void sub_0806540C(void)
  * than a fresh -1: inside the `&&` chain the earlier results are already known
  * to be -1 and CSE substitutes them. That is not a comparison between the
  * three results in the source. */
-void sub_080654E8(void)
+void MatchSetupDismissArmyColumns(void)
 {
     struct Unk08580934_Obj *obj;
     int i;
 
     sub_080733B8();
 
-    if (sub_08015BD0((s32)gUnknown_08580AF0) == -1
-        && sub_08015BD0((s32)gUnknown_08580B90) == -1
-        && sub_08015BD0((s32)gUnknown_08580BC8) == -1)
+    if (FindSlotScript((s32)gUnknown_08580AF0) == -1
+        && FindSlotScript((s32)gUnknown_08580B90) == -1
+        && FindSlotScript((s32)gUnknown_08580BC8) == -1)
         return;
 
     for (i = 0; i < gUnknown_08580934->unk08; i++)
@@ -139,9 +142,10 @@ void sub_080654E8(void)
         obj->unk30 = 0;
     }
 
-    sub_0806377C(gUnknown_08580AF0);
-    sub_0806377C(gUnknown_08580B90);
-    sub_0806377C(gUnknown_08580BC8);
-    sub_0806377C(gUnknown_08580A38);
-    sub_0806377C(gUnknown_08580A08);
+    ClearCallbackOfSlotsRunningScript(gUnknown_08580AF0);
+    ClearCallbackOfSlotsRunningScript(gUnknown_08580B90);
+    ClearCallbackOfSlotsRunningScript(gUnknown_08580BC8);
+    ClearCallbackOfSlotsRunningScript(gUnknown_08580A38);
+    ClearCallbackOfSlotsRunningScript(gUnknown_08580A08);
 }
+asm(".global sub_080654E8\n.thumb_set sub_080654E8, MatchSetupDismissArmyColumns\n");

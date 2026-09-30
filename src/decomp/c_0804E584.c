@@ -8,12 +8,12 @@
  */
 
 #include "hardware.h"
-/* Third member of the sub_0804D290 / sub_0804DCA8 family (both matched, both
- * 600 B) -- same subsystem, same `pos` reseed out of sub_08057D44, same
+/* Third member of the CruiserFigure_Init / BattleshipFigure_Init family (both matched, both
+ * 600 B) -- same subsystem, same `pos` reseed out of GetFigurePositionTable, same
  * `entry->x - *ox` tail. The two levers that closed those two do NOT transfer,
  * and that was measured rather than assumed (see docs/agbcc-codegen.md):
  * the wave-17 `(meta = gUnknown_03004580, ...)` comma anchor is BYTE-NEUTRAL
- * here, and the zero-trip `do { } while (0)` around the sub_08057D44 call is a
+ * here, and the zero-trip `do { } while (0)` around the GetFigurePositionTable call is a
  * REGRESSION. What does transfer is the `(e1 = &pos[..][..])->x` binding pair,
  * which is worth 3 instructions and takes the draft from 124 differing
  * instruction lines to 21.
@@ -30,7 +30,7 @@
  * rounds had failed on it, and it is the same "bind at the right depth" family
  * as the two levers above -- here the depth is the result, not an operand.
  *
- * `pos` rows are 40 bytes because sub_08057D44 hands back a 2-D view:
+ * `pos` rows are 40 bytes because GetFigurePositionTable hands back a 2-D view:
  * `pos[gUnknown_03004580[i][5]][i * 5 + j]` of 4-byte (x, y) pairs, the shape
  * data/parked.json records for sub_0804FA2C. The gUnknown_03004504 guard is
  * wave 19's nested-bitfield rule -- two separate mask tests, not an `&&`.
@@ -43,9 +43,9 @@ struct UnkPosPair
     u16 x;
     u16 y;
 };
-void sub_0804BFC0(u16, u16, s16);
+void SetFigureObjAttrs(u16, u16, s16);
 
-void sub_0804E584(void)
+void GroundFigure_Init(void)
 {
     int x0;
     struct UnkPosPair (*pos)[10];
@@ -58,9 +58,9 @@ void sub_0804E584(void)
     gUnknown_03001470[gUnknown_03001FBC].unk30 = gUnknown_0300453C;
     gUnknown_03001470[gUnknown_03001FBC].unk34 = gUnknown_0300451C;
 
-    sub_0804BFC0(gUnknown_0300453C, gUnknown_0300451C, gUnknown_03001FBC);
+    SetFigureObjAttrs(gUnknown_0300453C, gUnknown_0300451C, gUnknown_03001FBC);
 
-    pos = (struct UnkPosPair (*)[10])sub_08057D44(
+    pos = (struct UnkPosPair (*)[10])GetFigurePositionTable(
         gUnknown_085D6A48[gUnknown_03004580[gUnknown_0300453C][1]][0],
         gUnknown_03004580[gUnknown_0300453C][3]);
 
@@ -84,16 +84,17 @@ void sub_0804E584(void)
     gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y =
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].unk06;
 
-    sub_0804BCB8(gUnknown_0300453C, gUnknown_0300451C,
+    StartFigureEntrySlide(gUnknown_0300453C, gUnknown_0300451C,
                  gUnknown_0855214C[gUnknown_0300453C], 0x32);
 
     ox = gUnknown_084C3F70[gUnknown_0300453C];
     oy = gUnknown_084C3F78[gUnknown_0300453C];
-    sub_080155C0(gUnknown_03001FBC,
+    SetSlotSpritePosition(gUnknown_03001FBC,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].x - *ox,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y - *oy);
 
-    sub_08015928(gUnknown_03001FBC,
+    SetSlotSpriteHook(gUnknown_03001FBC,
         gUnknown_08552FB8[gUnknown_03004580[gUnknown_0300453C][1]]
                          [gUnknown_03004580[gUnknown_0300453C][2]][2]);
 }
+asm(".global sub_0804E584\n.thumb_set sub_0804E584, GroundFigure_Init\n");

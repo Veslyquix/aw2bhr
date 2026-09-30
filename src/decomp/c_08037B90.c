@@ -44,7 +44,7 @@
  *
  * gBG1TilemapBuffer is reloaded inside the loop because it is a POINTER
  * global, not an array -- do not bind it to a local. */
-void sub_08037B90(void)
+void LayoutMapPreviewTilemap(void)
 {
     u16 i;
     u16 j;
@@ -65,10 +65,11 @@ void sub_08037B90(void)
         for (j = 0; j < ((h + 1) >> 1) * 16; j += 16)
             gBG1TilemapBuffer[j * 2 + i] = j + 1 + i + 0x1000;
 
-    sub_08013AFC();
+    BG_EnableSyncBG1();
 }
+asm(".global sub_08037B90\n.thumb_set sub_08037B90, LayoutMapPreviewTilemap\n");
 
-void sub_08037C34(void)
+void CountMapPreviewProperties(void)
 {
     u16 base;
     u8 i;
@@ -103,3 +104,4 @@ void sub_08037C34(void)
         base += gUnknown_03003F68->width;
     }
 }
+asm(".global sub_08037C34\n.thumb_set sub_08037C34, CountMapPreviewProperties\n");

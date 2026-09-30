@@ -15,14 +15,14 @@ void sub_08005D14(void)
 {
     struct ActiveMap *p;
 
-    sub_0800056C(8);
+    DesignRoomSetMode(8);
 
     p = gActiveMap;
     p->menuCursorX = 0x15;
     p->menuCursorY = 0x10;
 
-    sub_0801A614();
-    sub_0801A168();
+    PushMenu();
+    CloseTopMenu();
     sub_080152EC(gUnknown_0848867C, 0);
-    sub_0800056C(8);
+    DesignRoomSetMode(8);
 }

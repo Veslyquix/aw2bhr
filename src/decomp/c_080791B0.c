@@ -49,17 +49,17 @@ struct Unk80791B0
     /* 0x52 */ u16 unk52;
 };
 
-void sub_080791B0(struct Unk80791B0 *proc)
+void ResultsScreen_LoadRankGraphics(struct Unk80791B0 *proc)
 {
     int i;
     int n;
     int t;
     u16 *q;
 
-    sub_08071B88();
+    EndPalFade();
     ApplyPaletteExt(gUnknown_0822AA80, 0x280, 0xc0);
 
-    n = gPlayers[sub_0807A908()].rank;
+    n = gPlayers[GetResultsArmy()].rank;
     q = &proc->unk52;
     *q = 5 - n;
     if (*q > 3)
@@ -132,3 +132,4 @@ void sub_080791B0(struct Unk80791B0 *proc)
                    (void *)(0x06016680 + i * 0x100), 0x20);
     }
 }
+asm(".global sub_080791B0\n.thumb_set sub_080791B0, ResultsScreen_LoadRankGraphics\n");

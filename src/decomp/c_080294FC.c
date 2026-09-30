@@ -7,7 +7,7 @@
  * sub_080294FC @ 0x080294FC, sub_08029570 @ 0x08029570
  */
 
-void sub_080294FC(void)
+void DropCellPicker_SelectNext(void)
 {
     u8 old;
     int v;
@@ -23,10 +23,11 @@ void sub_080294FC(void)
             (v = gUnknown_03001470[gUnknown_03001FBC].unk20) * 5]) == 0);
 
     if (old != v)
-        sub_0803B4DC(0x6a);
+        PlayMusicOrSfx2(0x6a);
 }
+asm(".global sub_080294FC\n.thumb_set sub_080294FC, DropCellPicker_SelectNext\n");
 
-void sub_08029570(void)
+void DropCellPicker_SelectPrevious(void)
 {
     u8 old;
     int v;
@@ -42,5 +43,6 @@ void sub_08029570(void)
             (v = gUnknown_03001470[gUnknown_03001FBC].unk20) * 5]) == 0);
 
     if (old != v)
-        sub_0803B4DC(0x6a);
+        PlayMusicOrSfx2(0x6a);
 }
+asm(".global sub_08029570\n.thumb_set sub_08029570, DropCellPicker_SelectPrevious\n");

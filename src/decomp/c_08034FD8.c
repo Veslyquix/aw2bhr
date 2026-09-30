@@ -21,8 +21,8 @@
 void BlockMapStartCoInfo_08034FD9(void)
 {
     sub_08023348();
-    sub_0803662C();
-    sub_08024268();
+    InstallMapFrameCallbacks();
+    RebuildMapUnitLayers2();
 }
 
 /* F018: `push {lr}; bl a; bl b; bl c; pop {r0}; bx r0`.
@@ -35,8 +35,8 @@ void BlockMapStartCoInfo_08034FD9(void)
 void sub_08034FEC(void)
 {
     sub_08023354();
-    sub_0803662C();
-    sub_08024268();
+    InstallMapFrameCallbacks();
+    RebuildMapUnitLayers2();
 }
 
 asm(".global sub_08034FD8\n.thumb_set sub_08034FD8, BlockMapStartCoInfo_08034FD9\n");

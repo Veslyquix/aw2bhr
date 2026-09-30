@@ -7,21 +7,6 @@
  * sub_0801B6EC @ 0x0801B6EC, sub_0801B6FC @ 0x0801B6FC
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0801B6EC.
- * sub_0801B6EC @ 0x0801B6EC
- */
-
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0801B6FC.
- * sub_0801B6FC @ 0x0801B6FC
- */
-
-
 /* Family F024's shape, but the `bl` target is `_call_via_r1` -- the ARMv4T
  * interworking veneer (`bx r1`), which is how gcc/agbcc compiles an INDIRECT
  * call in THUMB, since the GBA has no `blx rN`. There are 40 of these in the
@@ -39,12 +24,12 @@
  * 2. The register is r1 and not r0 because r0 is OCCUPIED. gcc puts the
  *    pointer in the first free scratch register, so `_call_via_r1` is itself
  *    evidence that this is a ONE-ARGUMENT call. There are SIX callers
- *    (sub_080375D4, sub_080376DC, sub_080377C4, sub_08077A14, sub_08086DB4,
- *    sub_08086F3C) and every one passes a word loaded from offset 0x18 of the
- *    struct in its own first parameter -- sub_080375D4 is `ldr r0,[r2,#0x18]`.
+ *    (MapPreviewPictureScript_Loop, DrawMapPreviewToBg, RenderMapPreviewToVram, WorldMapMapPreview_Init, sub_08086DB4,
+ *    BuildMapSelectPreviewNow) and every one passes a word loaded from offset 0x18 of the
+ *    struct in its own first parameter -- MapPreviewPictureScript_Loop is `ldr r0,[r2,#0x18]`.
  *    Hence `void *`.
  *
- *    That +0x18 field is written by sub_08037610, matched this same wave:
+ *    That +0x18 field is written by StartMapPreviewPictureScript, matched this same wave:
  *    `sub_080152EC(gUnknown_0849D41C, 0)->unk18 = arg`. Producer and consumer
  *    agree that the field holds a pointer, which is the discriminating use the
  *    type would otherwise lack -- the parameter is passed straight through
@@ -85,12 +70,12 @@ void sub_0801B6EC(void *dst)
  * 2. The register is r1 and not r0 because r0 is OCCUPIED. gcc puts the
  *    pointer in the first free scratch register, so `_call_via_r1` is itself
  *    evidence that this is a ONE-ARGUMENT call. There are SIX callers
- *    (sub_080375D4, sub_080376DC, sub_080377C4, sub_08077A14, sub_08086DD4,
- *    sub_08086F3C) and every one passes a word loaded from offset 0x18 of the
- *    struct in its own first parameter -- sub_080375D4 is `ldr r0,[r2,#0x18]`.
+ *    (MapPreviewPictureScript_Loop, DrawMapPreviewToBg, RenderMapPreviewToVram, WorldMapMapPreview_Init, sub_08086DD4,
+ *    BuildMapSelectPreviewNow) and every one passes a word loaded from offset 0x18 of the
+ *    struct in its own first parameter -- MapPreviewPictureScript_Loop is `ldr r0,[r2,#0x18]`.
  *    Hence `void *`.
  *
- *    That +0x18 field is written by sub_08037610, matched this same wave:
+ *    That +0x18 field is written by StartMapPreviewPictureScript, matched this same wave:
  *    `sub_080152EC(gUnknown_0849D41C, 0)->unk18 = arg`. Producer and consumer
  *    agree that the field holds a pointer, which is the discriminating use the
  *    type would otherwise lack -- the parameter is passed straight through

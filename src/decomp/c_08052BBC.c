@@ -19,10 +19,10 @@
  * called "why does the longer-ranged allocno win the lo register" was never
  * an allocation question: it was which operand of the sum local_alloc ties.
  * Wave-77 measurements that still stand: declaration order of j/k is
- * byte-neutral; gUnknown_0855371C is an animation descriptor; sub_08052818
+ * byte-neutral; gUnknown_0855371C is an animation descriptor; DeathHandler_CommonTail
  * narrows both u16 parameters in place; `e` is a local. See
  * docs/agbcc-codegen.md, "A DEAD `k = i * S;` statement is a hoist lever". */
-void sub_08052BBC(u16 a, u16 b)
+void DeathHandler_Bomb(u16 a, u16 b)
 {
     u16 e;
     int k;
@@ -39,17 +39,18 @@ void sub_08052BBC(u16 a, u16 b)
         gUnknown_02029808[a].unk58[gUnknown_02029808[a].unk2e],
         0);
 
-    sub_08015504(gUnknown_02029808[a].unk24[b], 1);
-    sub_080504A8(a, 0x23);
+    SetSlotSpriteFlicker(gUnknown_02029808[a].unk24[b], 1);
+    PlayFigureDestroySfx(a, 0x23);
 
     e = gUnknown_08553B10[a];
 
-    sub_08016824(gUnknown_02029808[a].unk24[b]);
-    sub_08016944(gUnknown_02029808[a].unk24[b]);
-    sub_080157A4(gUnknown_02029808[a].unk24[b], e);
-    sub_080157F4(gUnknown_02029808[a].unk24[b], 0x180);
+    EnableSlotSpriteAffine(gUnknown_02029808[a].unk24[b]);
+    SetSlotSpriteDoubleSize(gUnknown_02029808[a].unk24[b]);
+    SetSlotSpriteScaleX(gUnknown_02029808[a].unk24[b], e);
+    SetSlotSpriteScaleY(gUnknown_02029808[a].unk24[b], 0x180);
 
     gUnknown_02028E5C[a][0] = 1;
 
-    sub_08052818(a, b);
+    DeathHandler_CommonTail(a, b);
 }
+asm(".global sub_08052BBC\n.thumb_set sub_08052BBC, DeathHandler_Bomb\n");

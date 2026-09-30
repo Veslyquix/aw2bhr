@@ -20,20 +20,22 @@ struct Unk08075E3C
     /* 0x58 */ int unk58;
 };
 
-void sub_08075E0C(struct Unk08075E0C *proc)
+void WorldMapMissionClear_FadeInLoop(struct Unk08075E0C *proc)
 {
-    sub_08075AC4(proc->unk4c, 0x10);
-    sub_080135A4();
+    StepBank15WhiteFade(proc->unk4c, 0x10);
+    EnablePaletteSync();
 
     proc->unk4c++;
 
     if (proc->unk4c > 0x10)
         Proc_Break(proc);
 }
+asm(".global sub_08075E0C\n.thumb_set sub_08075E0C, WorldMapMissionClear_FadeInLoop\n");
 
-void sub_08075E3C(struct Unk08075E3C *proc)
+void WorldMapMissionClear_OnEnd(struct Unk08075E3C *proc)
 {
-    sub_08075904(proc->unk58);
-    sub_08011E54(gUnknown_08614280, (void *)0x0600F000, 0x1000);
-    sub_0801C240(proc->unk54);
+    ColorWorldMapSection(proc->unk58);
+    RegisterDataMove(gUnknown_08614280, (void *)0x0600F000, 0x1000);
+    AP_Delete(proc->unk54);
 }
+asm(".global sub_08075E3C\n.thumb_set sub_08075E3C, WorldMapMissionClear_OnEnd\n");

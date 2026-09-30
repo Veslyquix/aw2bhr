@@ -9,7 +9,7 @@
 
 #include "hardware.h"
 
-/* Per-slot tick: for every entry whose unk70 mark is clear, hand sub_08065DAC
+/* Per-slot tick: for every entry whose unk70 mark is clear, hand MatchSetupCycleCo
  * that slot's key state and whether the slot is the one unk25 selects.
  *
  * gUnknown_03002040 is the same 20-byte-per-slot KeySt array c_08064410.c
@@ -24,7 +24,7 @@
  * moves ahead of the guard (+2 bytes); written inline as
  * `((struct KeySt *)&gUnknown_03002040)[i]` the base is not folded into the giv
  * at all and is rematerialised inside the `if`. All three probed. */
-void sub_08065E5C(void)
+void MatchSetupCycleCosByOwnKeys(void)
 {
     int i;
 
@@ -33,6 +33,7 @@ void sub_08065E5C(void)
         struct KeySt *ks = (struct KeySt *)&gUnknown_03002040;
 
         if ((s8)gUnknown_08580934->unk70[i] == 0)
-            sub_08065DAC(i, ks[i].repeated, i == gUnknown_08580934->unk25);
+            MatchSetupCycleCo(i, ks[i].repeated, i == gUnknown_08580934->unk25);
     }
 }
+asm(".global sub_08065E5C\n.thumb_set sub_08065E5C, MatchSetupCycleCosByOwnKeys\n");

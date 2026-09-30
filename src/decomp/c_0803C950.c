@@ -7,7 +7,7 @@
  * sub_0803C950 @ 0x0803C950, sub_0803C97C @ 0x0803C97C, sub_0803C9A8 @ 0x0803C9A8, sub_0803C9D4 @ 0x0803C9D4
  */
 
-void sub_0803C950(u32 id, u8 value)
+void SetMapCategoryUnlocked(u32 id, u8 value)
 {
     struct Unk02028030 *s = &gUnknown_02028030;
     u32 idx = id >> 3;
@@ -17,8 +17,9 @@ void sub_0803C950(u32 id, u8 value)
 
     *p = (*p & ~(1 << bit)) | (value << bit);
 }
+asm(".global sub_0803C950\n.thumb_set sub_0803C950, SetMapCategoryUnlocked\n");
 
-void sub_0803C97C(u32 id, u8 value)
+void SetCoUnlocked(u32 id, u8 value)
 {
     struct Unk02028030 *s = &gUnknown_02028030;
     u32 idx = id >> 3;
@@ -28,8 +29,9 @@ void sub_0803C97C(u32 id, u8 value)
 
     *p = (*p & ~(1 << bit)) | (value << bit);
 }
+asm(".global sub_0803C97C\n.thumb_set sub_0803C97C, SetCoUnlocked\n");
 
-void sub_0803C9A8(u32 id, u8 value)
+void SetCoSelectable(u32 id, u8 value)
 {
     struct Unk02028030 *s = &gUnknown_02028030;
     u32 idx = id >> 3;
@@ -39,8 +41,9 @@ void sub_0803C9A8(u32 id, u8 value)
 
     *p = (*p & ~(1 << bit)) | (value << bit);
 }
+asm(".global sub_0803C9A8\n.thumb_set sub_0803C9A8, SetCoSelectable\n");
 
-void sub_0803C9D4(u32 id, u8 value)
+void SetCampaignFlagBank2(u32 id, u8 value)
 {
     struct Unk02028030 *s = &gUnknown_02028030;
     u32 idx = id >> 3;
@@ -50,3 +53,4 @@ void sub_0803C9D4(u32 id, u8 value)
 
     *p = (*p & ~(1 << bit)) | (value << bit);
 }
+asm(".global sub_0803C9D4\n.thumb_set sub_0803C9D4, SetCampaignFlagBank2\n");

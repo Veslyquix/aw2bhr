@@ -7,7 +7,7 @@
  * sub_0805DFF4 @ 0x0805DFF4
  */
 
-/* sub_0805DFF4 @ 0x0805DFF4, 364 bytes.
+/* AiDeliberateFootUnit @ 0x0805DFF4, 364 bytes.
  *
  * gUnknown_0816DA58 is not an object: the ROM word at 0x0816DA58 holds
  * 0x030040D8, i.e. it is agbcc's own -fforce-addr address constant for
@@ -28,12 +28,12 @@
  * Unk030040D8's unk07[5], which c_0802966C.c indexes with a runtime subscript.
  *
  * p->flags and p->x are NAMED LOCALS: the ROM loads them once into two
- * callee-saved registers before the sub_0805BFDC branch and reuses them for the
+ * callee-saved registers before the AiTryRideInsteadOfWalk branch and reuses them for the
  * `x | (y << 16)` word afterwards. That pair is why this function pushes r7.
  *
- * The trailing sub_0805F4F8() belongs to the p == NULL arm as a whole, not to
+ * The trailing AiEmbarkOrFallback() belongs to the p == NULL arm as a whole, not to
  * the gUnknown_030046B8 test inside it -- the `beq` when bit 0 is clear lands on
- * the single call, and the sub_08059A0C == 0 path reaches TWO consecutive calls
+ * the single call, and the AiListEnemyPropertyCells == 0 path reaches TWO consecutive calls
  * by falling through.
  */
 
@@ -45,7 +45,7 @@ struct Unk0805DFF4Rec
                u8 unk09_6 : 2;
 };
 
-void sub_0805DFF4(void)
+void AiDeliberateFootUnit(void)
 {
     u8 buf;
     union Unk802C57CBuf v;
@@ -54,55 +54,56 @@ void sub_0805DFF4(void)
     u8 x;
     u8 y;
 
-    sub_0805E440();
+    AiTryJoinUnitOnProperty();
     sub_0805D888();
 
     if (gUnknown_03004784[0] > (u8)(gUnknown_030040D8->unk07[3] % 100)
-        || sub_0804415C(gUnknown_030033EC))
-        sub_0805E718();
+        || IsCoPowerActive(gUnknown_030033EC))
+        AiTryAttack();
 
-    sub_08058F30(&buf);
+    AiGetReachBudget(&buf);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, buf, 0);
-    sub_08058058(sub_0804151C());
+    AiAppendSiloCandidates(BuildCapturableCellList());
     q = CountUnitsWithTypeTag(1) / gUnknown_085766E0->unk04[5];
     if (q == 0)
         q = gUnknown_085766E0->unk00;
-    p = sub_08058144(q, 0);
+    p = AiClaimTerritoryCandidate(q, 0);
     if (p != 0)
     {
         ((struct Unk0805DFF4Rec *)gUnknown_030040D8)->unk09_3 = 0;
         x = p->flags;
         y = p->x;
         if (gUnknown_030046B8 & 1)
-            sub_0805BFDC(x, y, 0x14, 2);
+            AiTryRideInsteadOfWalk(x, y, 0x14, 2);
         else
-            sub_0805BFDC(x, y, 7, 1);
+            AiTryRideInsteadOfWalk(x, y, 7, 1);
         v.raw = x | (y << 16);
-        sub_080591E4(&v);
+        AiAdvanceToward(&v);
     }
     else
     {
         if (gUnknown_030046B8 & 1)
         {
             ((struct Unk0805DFF4Rec *)gUnknown_030040D8)->unk09_3 = 2;
-            sub_0805FB70();
+            AiBoardTransport();
             gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                               0x14, 0x78, 0);
-            if (sub_08059A0C(gUnknown_03003F20))
+            if (AiListEnemyPropertyCells(gUnknown_03003F20))
             {
                 gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                                   gUnknown_030040D8->unk00, 0x78, -1);
                 v.pos.unk00 = 0x270F;
-                sub_0805C0AC(&v);
+                AiFindEmptyTCopter(&v);
                 if (v.pos.unk00 != 0x270F)
-                    sub_080591E4(&v);
+                    AiAdvanceToward(&v);
             }
             else
             {
-                sub_0805F4F8();
+                AiEmbarkOrFallback();
             }
         }
-        sub_0805F4F8();
+        AiEmbarkOrFallback();
     }
 }
+asm(".global sub_0805DFF4\n.thumb_set sub_0805DFF4, AiDeliberateFootUnit\n");

@@ -7,9 +7,9 @@
  * sub_080499F8 @ 0x080499F8
  */
 
-void sub_080499F8(void)
+void ShopScreen_DrawSprites(void)
 {
-    sub_0801BD00(0x7f, 0, gUnknown_084C30FC, 0x6ceb);
+    PutOamHi(0x7f, 0, gUnknown_084C30FC, 0x6ceb);
 
     sub_08043FD8((gUnknown_084C30F8->unk832 + 0x18) & 0x1ff, 0xa0, 0x60ab, 0);
 
@@ -18,7 +18,7 @@ void sub_080499F8(void)
     if (gUnknown_084C30F8->unk835 != 0)
     {
         gUnknown_084C30F8->unk835 = 0;
-        sub_08013AEC();
+        BG_EnableSyncBG0();
     }
 
     DrawOamObject(0x51, 4, 0x20, 0, 0);
@@ -33,3 +33,4 @@ void sub_080499F8(void)
     PutSprite(1, 0x40, 0x2c, gUnknown_0848B6BE, 0x8c9f);
     PutSprite(1, 0x60, 0x2c, gUnknown_0848B6BE, 0x8ca7);
 }
+asm(".global sub_080499F8\n.thumb_set sub_080499F8, ShopScreen_DrawSprites\n");

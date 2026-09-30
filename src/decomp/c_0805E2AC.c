@@ -8,7 +8,7 @@
  * sub_0805E2AC @ 0x0805E2AC
  */
 
-void sub_0805E2AC(void)
+void AiMoveLanderToNearestPort(void)
 {
   union Unk802C57CBuf v;
   u16 best;
@@ -50,10 +50,11 @@ void sub_0805E2AC(void)
 
   if (v.pos.unk00 == 0x270F)
   {
-    sub_0805F7B8();
+    AiFallbackMove();
   }
-  sub_0801F92C(gMap->danger);
+  SetWorkingMapPlane(gMap->danger);
   fn = &gUnknown_030013EC;
   (*(&gUnknown_030013EC))(v.pos.unk00, v.raw >> 16, 0x17, 0x78, 0);
-  sub_08059464(&v);
+  AiAdvanceTowardUnseeded(&v);
 }
+asm(".global sub_0805E2AC\n.thumb_set sub_0805E2AC, AiMoveLanderToNearestPort\n");

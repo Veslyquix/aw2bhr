@@ -11,7 +11,7 @@
 
 /* Clears one 4bpp tile row with a DMA3 halfword fill, then (only when a1 is
  * non-negative) pushes six 0xC0-byte blocks out of gUnknown_02017C50 into
- * consecutive VRAM tiles through sub_08011E54.
+ * consecutive VRAM tiles through RegisterDataMove.
  *
  * STILL PARKED, wave 46 (W46-K), at 97.4%: SIZE-EXACT at 116 bytes with THREE
  * bytes differing, all one register choice. The ROM builds the 0x100 stride in
@@ -38,7 +38,7 @@
  * ADD) does apply in principle but is about the address ADD, and this residual
  * has no address ADD -- it is a bare constant with no pool word.
  *   Lever 1 is additionally unreachable from C for a different reason: see
- * work/sub_08064500 and the pointer_int_sum chapter -- the front end rewrites
+ * work/DrawDownArrow and the pointer_int_sum chapter -- the front end rewrites
  * `int + ptr` to `ptr + int` before any tree survives, so the `*(i + p)`
  * spelling only bites where the two competing values are hoisted invariants,
  * never on an ordinary in-block access.
@@ -92,7 +92,7 @@ void sub_08063698(int a1, int a2, int a3)
         i = 5;
 
     loop:
-        sub_08011E54(p, (void *)(0x06000000 + (v & 0x1FFE0)), 0xC0);
+        RegisterDataMove(p, (void *)(0x06000000 + (v & 0x1FFE0)), 0xC0);
         {
             register int stride asm("r1") = 0x100;
             asm("" : "+r"(stride));

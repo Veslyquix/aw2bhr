@@ -7,14 +7,6 @@
  * sub_0802DCA4 @ 0x0802DCA4
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0802DCA4.
- * sub_0802DCA4 @ 0x0802DCA4
- */
-
-
 /* Family F005 (data/families.json): 19 sixteen-byte wrappers shaped
  * `push {lr}; bl S; bl S; pop {r0}; bx r0` -- two calls, nothing between
  * them, `pop {r0}` so void.
@@ -24,8 +16,9 @@
  * would be byte-identical only if `g` had a parameter, and none of the 19
  * second callees does -- see the F005 block in unknown-functions.h. */
 
-void sub_0802DCA4(void)
+void ResetDisplayEffects(void)
 {
-    sub_08012358();
-    sub_0801237C();
+    SetDefaultColorEffects();
+    ResetWindowShadows();
 }
+asm(".global sub_0802DCA4\n.thumb_set sub_0802DCA4, ResetDisplayEffects\n");

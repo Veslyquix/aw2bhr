@@ -141,7 +141,20 @@ def pick_source(workdir, name, prefer_best):
     cur = os.path.join(workdir, name + ".c")
     best = os.path.join(workdir, "best.c")
     if prefer_best and os.path.exists(best):
-        return best, "best.c"
+        # A best.c the permuter produced can be wrong C that happens to score
+        # well (a do/while(0) wrapper, `by = (ax *= 2)`). Starting from it
+        # builds on the mistake, so the draft is used instead unless asked.
+        try:
+            with open(os.path.join(workdir, "best.json"), encoding="utf-8") as fh:
+                origin = json.load(fh).get("origin")
+        except (OSError, ValueError):
+            origin = None
+        if origin != "permuter" or prefer_best == "any" or not os.path.exists(cur):
+            return best, "best.c"
+        print("  NOTE     best.c came from an earlier permuter run and may be "
+              "wrong C;")
+        print("           starting from %s.c instead (--from-permuter-best to "
+              "override)" % name)
     if os.path.exists(cur):
         return cur, name + ".c"
     return None, None
@@ -193,7 +206,7 @@ def setup(rec, unit, prefer_best):
     # reachable. Wave 47 (W47-F): sub_08070F44 had been permuted for 300 s under
     # default agbcc while its block is old_agbcc, and the flash trio at
     # 0x0808B had 38,000 iterations spent at -O2 against an -O1 library.
-    f = agbenv.flags(name)
+    f = agbenv.flags(name, profile=PROFILE)
     rel_src = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
     rel_base = os.path.relpath(os.path.join(pdir, "base.c"),
                                awlib.REPO).replace(os.sep, "/")
@@ -229,8 +242,6 @@ def setup(rec, unit, prefer_best):
     awlib.write_text(os.path.join(pdir, "settings.toml"),
                      'func_name = "%s"\ncompiler_type = "gcc"\n' % name)
 
-    check_scorer_patch()
-
     rel_pdir = os.path.relpath(pdir, awlib.REPO).replace(os.sep, "/")
     # The permuter checks the executable bit itself and refuses to start
     # without it. NTFS under WSL usually reports 0777 anyway, but not when the
@@ -254,6 +265,11 @@ def base_score(pdir):
     A failure here is a harness problem -- unparseable base.c, a broken
     compile.sh -- and is worth separating from "the search found nothing",
     because the two look identical from the outside.
+
+    Scored with --stack-diffs, the way run() searches. Without it the scorer
+    turns every sp offset into `addr(sp)`, so a draft whose only residual is
+    two swapped spill slots (sub_08037A78, sub_0802AA78) scored 0 here and the
+    run ended as BASE-SCORES-ZERO before a single mutation was tried.
     """
     rel = os.path.relpath(pdir, awlib.REPO).replace(os.sep, "/")
     # --debug writes debug_source.c and debug_compiled_object.o into the working
@@ -261,7 +277,7 @@ def base_score(pdir):
     # Makefile's source discovery (see the comment on C_SRCS). Move them into
     # the permuter directory, where they are still available and harmless.
     rc, so, se = agbenv.run(
-        "python3 tools/permuter_entry.py %s --debug; rc=$?\n"
+        "python3 tools/permuter_entry.py %s --debug --stack-diffs; rc=$?\n"
         "mv -f debug_source.c debug_compiled_object.o %s/ 2>/dev/null\n"
         "exit $rc" % (shq(rel), shq(rel)),
         timeout=300)
@@ -334,28 +350,35 @@ def harvest(pdir):
 
 
 def check_scorer_patch():
-    """Warn if the vendored scorer still carries upstream's penalty weights.
+    """False if the vendored scorer still carries upstream's penalty weights.
 
     vendor/ is gitignored, so a re-clone silently restores PENALTY_REGALLOC = 5
     and the search goes back to treating a wrong register as a twelfth of a
     reordering -- which for a byte verdict is the wrong objective and produced
     two documented cases where the best-SCORING candidate was a byte-level
-    regression. A run under the wrong objective still looks like it worked, so
-    this has to be checked rather than assumed.
+    regression. A run under the wrong objective still looks like it worked,
+    and a warning scrolls past at the start of a long run, so the caller
+    refuses to start unless --force is given.
     """
     p = os.path.join(PERMUTER_DIR, "src", "scorer.py")
     try:
         with open(p, encoding="utf-8") as fh:
             text = fh.read()
     except OSError:
-        return
+        return True          # no permuter at all; the caller reports that
+    if "AW2_PENALTY_REGALLOC" in text and "AW2_PENALTY_SIZE" in text:
+        return True
     if "AW2_PENALTY_REGALLOC" in text:
-        return
+        print("\n  !! vendor/decomp-permuter/src/scorer.py lacks the length penalty")
+        print("     (AW2_PENALTY_SIZE): a size-exact draft's search will drift to")
+        print("     shorter, worse candidates. See vendor/README.md.\n")
+        return False
     print("\n  !! vendor/decomp-permuter/src/scorer.py is UNPATCHED --")
     print("     PENALTY_REGALLOC is upstream's 5 against PENALTY_REORDERING 60,")
     print("     so this search will trade register correctness for ordering and")
     print("     its best-scoring candidate may be a byte-level regression.")
     print("     See vendor/README.md; re-apply the patch before trusting a result.\n")
+    return False
 
 
 def helper_run_start(cand_lines, b):
@@ -435,14 +458,36 @@ def splice(orig_lines, cand_lines, name):
     b = definition_line(cand_lines, name)
     if a is None or b is None:
         return None
-    return orig_lines[:a] + cand_lines[helper_run_start(cand_lines, b):]
+    a_end, b_end = definition_end(orig_lines, a), definition_end(cand_lines, b)
+    if a_end is None or b_end is None:
+        return None
+    # Whatever followed the function in the draft (a `.thumb_set` alias, a
+    # second function) comes from the draft. The permuter's copy of the file
+    # can stop at the function's closing brace, and taking the candidate's
+    # tail used to drop that code.
+    return (orig_lines[:a] + cand_lines[helper_run_start(cand_lines, b):b_end + 1]
+            + orig_lines[a_end + 1:])
+
+
+def definition_end(lines, start):
+    """Index of the line holding the closing brace of the definition that
+    starts at `start`, or None. Braces inside comments are ignored."""
+    from promote import strip_comments
+    depth, opened, in_comment = 0, False, False
+    for i in range(start, len(lines)):
+        code, in_comment = strip_comments(lines[i], in_comment)
+        depth += code.count("{") - code.count("}")
+        opened = opened or "{" in code
+        if opened and depth <= 0:
+            return i
+    return None
 
 
 def _check_quietly(name, log):
     """trymatch.check with its report appended to `log`; (rc, result dict)."""
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        rc = trymatch.check(name)
+        rc = trymatch.check(name, profile=PROFILE)
     with open(log, "a", encoding="utf-8") as fh:
         fh.write(buf.getvalue() + "\n")
     return rc, dict(trymatch.LAST_RESULT or {"state": "ERROR"})
@@ -481,8 +526,51 @@ def _restore(snap):
     return changed
 
 
+# How many of a run's outputs verify() re-checks, best permuter score first.
+# Each check is a full compile with the draft held as the candidate, and an
+# unlucky run can leave hundreds: sub_0802F6A0 left 854 in wave 92, hours of
+# checking with the draft sitting as expanded source the whole time. The rest
+# stay on disk under permuter/output-*/.
+MAX_VERIFY = 40
+
+# The compiler profile every compile in a run uses: the permuter's own
+# compile.sh, each trymatch check and the uninitialised-read check. A
+# function whose block needs another toolchain and has no override entry
+# yet (sub_08070F44, old_agbcc) could not be permuted at all before this.
+# Under a temporary profile trymatch leaves best.c alone, so the kept form
+# lives only in <fn>.c, and a match is provisional until an override
+# entry names the profile.
+PROFILE = "configured"
+
+
+def improves(pct, size, best_pct, best_size):
+    """Whether a candidate (pct, size delta) should replace the kept form.
+
+    The right size comes first, as in `drafts.py bases`: a size-exact form is
+    never given up for one of the wrong size, and it beats one of the wrong
+    size at any score. The percentage alone installed a +4-byte candidate over
+    a size-exact sub_0802F588 draft in wave 74 and again in wave 92.
+    """
+    if best_size == 0 and size != 0:
+        return False
+    if size == 0 and best_size not in (0, None):
+        return True
+    return pct > best_pct
+
+
+def _wrongc_reason(name, base_path, cand_path):
+    """Why tools/wrongc.py rejects `cand_path` against the run's starting draft
+    (a semantic change: volatile, a clobbered counter, a lost call, a different
+    result under differential testing), or None."""
+    try:
+        import wrongc
+        return wrongc.rejects(name, cand_path, base_path)
+    except Exception:
+        return None
+
+
 def verify(rec, pdir, keep_all):
-    """Run every candidate past trymatch and keep the first that matches.
+    """Run the best candidates past trymatch and keep the first that matches.
 
     Returns (exit status, final-line state, detail).
     """
@@ -497,6 +585,10 @@ def verify(rec, pdir, keep_all):
     if not cands:
         print("\nno candidate scored better than the starting point.")
         return 1, "NO-IMPROVEMENT", "no candidate scored better in the permuter"
+    if len(cands) > MAX_VERIFY:
+        print("\n%d outputs; checking the best %d by permuter score (--max-verify)."
+              % (len(cands), MAX_VERIFY))
+        cands = cands[:MAX_VERIFY]
 
     print("\n%d candidate(s) to check against trymatch (full reports: %s):"
           % (len(cands), os.path.relpath(vlog, awlib.REPO).replace(os.sep, "/")))
@@ -513,14 +605,23 @@ def verify(rec, pdir, keep_all):
     # against a number describing some other source.
     _, base = _check_quietly(name, vlog)
     base_pct = trymatch.LAST_PCT
+    base_size = base.get("size")
     print("  baseline  %s" % trymatch.format_result(base))
+    # Locals the draft itself might read before setting; a candidate may not
+    # add to them (agbenv.uninitialized_reads).
+    base_uninit = set(agbenv.uninitialized_reads(csrc, fn=name, profile=PROFILE))
+    # wrongc.py compares each kept candidate with the draft as the run found it.
+    wrongc_base = os.path.join(pdir, "wrongc-base.c")
+    awlib.write_text(wrongc_base, "".join(orig))
     if base_pct is None:
         print("  draft does not compile or cannot be scored; improvements "
               "cannot be judged, so the original will be restored as before.")
     best_pct, best_lines, best_label = base_pct, None, None
+    best_size = base_size
     raw_pct, raw_lines = base_pct, None
     best_files = [os.path.join(workdir, "best.c"), os.path.join(workdir, "best.json")]
     matched = False
+    trymatch.RECORD_ORIGIN = "permuter"     # best.c written below is a mutation
     try:
         for score, src in cands:
             rel = os.path.relpath(src, awlib.REPO).replace(os.sep, "/")
@@ -540,9 +641,15 @@ def verify(rec, pdir, keep_all):
                 # A raw form must never become best.c: that is how 36 best.c
                 # files turned into 190 KB header-expanded blobs. Its score is
                 # kept in permuter/best-raw.c instead.
-                snap = _snapshot(best_files) if label == "raw" else None
+                # Every form is checked with best.c snapshotted: trymatch
+                # records any higher score in best.c by itself, and a spliced
+                # form this loop then REFUSES (wrong size, or a read before a
+                # set) used to stay there as the recommended base. Wave 94 found
+                # three best.c files holding forms the permuter had rejected.
+                # best.c keeps a form only if it is kept below or matches.
+                snap = _snapshot(best_files)
                 rc, r = _check_quietly(name, vlog)
-                if snap is not None and _restore(snap):
+                if label == "raw" and _restore(snap):
                     r["note"] = "best.c left as it was"
                 print("  score %-6d %-7s %s%s" % (score, label, trymatch.format_result(r),
                                                   "  (" + r["note"] + ")" if r.get("note") else ""))
@@ -553,6 +660,17 @@ def verify(rec, pdir, keep_all):
                     if lines is cand:
                         print("      this is the header-expanded form; reduce it to")
                         print("      an include plus externs before promoting.")
+                    else:
+                        bad = sorted(set(agbenv.uninitialized_reads(csrc, fn=name, profile=PROFILE))
+                                     - base_uninit)
+                        if bad:
+                            print("      WARNING: it may read %s before setting it;"
+                                  " the bytes match but the C is wrong -- fix the"
+                                  " source before promoting." % ", ".join(bad))
+                        why = _wrongc_reason(name, wrongc_base, csrc)
+                        if why:
+                            print("      WARNING: wrongc.py says this changes what the function"
+                                  " does (%s); the bytes match but check the C." % why)
                     return 0, "MATCH", "%s form, permuter output %s" % (label, rel)
                 # Not a match, but it may still be an IMPROVEMENT, and until
                 # 2026-08-29 that was thrown away: the finally block restored
@@ -563,14 +681,32 @@ def verify(rec, pdir, keep_all):
                 # saved beside it, never written over the readable draft.
                 pct = trymatch.LAST_PCT
                 if pct is None or base_pct is None:
+                    _restore(snap)
                     continue
-                if label == "spliced" and pct > best_pct:
+                if label == "spliced" and not improves(pct, r.get("size"), best_pct, best_size):
+                    _restore(snap)
+                if label == "spliced" and improves(pct, r.get("size"), best_pct, best_size):
+                    bad = sorted(set(agbenv.uninitialized_reads(csrc, fn=name, profile=PROFILE))
+                                 - base_uninit)
+                    if bad:
+                        _restore(snap)
+                        print("             not kept: reads %s before setting it"
+                              % ", ".join(bad))
+                        break
+                    why = _wrongc_reason(name, wrongc_base, csrc)
+                    if why:
+                        _restore(snap)
+                        print("             not kept: wrong C (tools/wrongc.py): %s" % why)
+                        break
                     best_pct, best_lines, best_label = pct, lines, rel
-                    print("             improvement: %.2f%% -> %.2f%% (kept)" % (base_pct, pct))
+                    best_size = r.get("size")
+                    print("             improvement: %.2f%% -> %.2f%% size%+d (kept)"
+                          % (base_pct, pct, best_size or 0))
                     break   # the raw form of this candidate is the same code
                 if label == "raw" and pct > raw_pct:
                     raw_pct, raw_lines = pct, lines
     finally:
+        trymatch.RECORD_ORIGIN = "draft"
         if not matched:
             if best_lines is not None:
                 awlib.write_text(csrc, "".join(best_lines))
@@ -638,7 +774,16 @@ def self_test():
           % ("PASS" if good else "FAIL"))
     ok &= good
 
-    # 3. The default thread count is a share of the machine, not all of it.
+    # 3. The right size outranks the percentage when keeping an improvement.
+    good = (not improves(90.0, 4, 80.0, 0)       # never trade size-exact away
+            and improves(40.0, 0, 60.0, -4)      # size-exact wins at any score
+            and improves(81.0, 4, 80.0, 8)       # same side of exact: by score
+            and not improves(79.0, 0, 80.0, 0))
+    print("[self-test] a size-exact form is never replaced by a wrong-size one: %s"
+          % ("PASS" if good else "FAIL"))
+    ok &= good
+
+    # 4. The default thread count is a share of the machine, not all of it.
     good = DEFAULT_THREADS == 4
     print("[self-test] default threads = %d: %s" % (DEFAULT_THREADS, "PASS" if good else "FAIL"))
     ok &= good
@@ -662,10 +807,23 @@ def main():
                     help="build the permuter directory and stop")
     ap.add_argument("--current", action="store_true",
                     help="start from <name>.c rather than best.c")
+    ap.add_argument("--from-permuter-best", action="store_true",
+                    help="start from best.c even when an earlier permuter run "
+                         "wrote it (by default the draft is used then)")
+    ap.add_argument("--force", action="store_true",
+                    help="run even if the vendored scorer is unpatched")
     ap.add_argument("--keep", action="store_true",
                     help="keep output directories even on success")
     ap.add_argument("--live", action="store_true",
                     help="echo the permuter's raw progress (the pre-wave-90 output)")
+    ap.add_argument("--max-verify", type=int, default=MAX_VERIFY,
+                    help="check at most this many outputs, best permuter "
+                         "score first (default %(default)s)")
+    ap.add_argument("--profile", choices=agbenv.compiler_profiles(),
+                    default="configured",
+                    help="compile every candidate under this temporary profile "
+                         "(as trymatch --profile); a match is provisional until "
+                         "data/compiler-overrides.json names it")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     if args.self_test:
@@ -678,6 +836,9 @@ def main():
 
 
 def _main(args):
+    global MAX_VERIFY, PROFILE
+    MAX_VERIFY = max(1, args.max_verify)
+    PROFILE = args.profile
     if not os.path.isdir(PERMUTER_DIR):
         print(CLONE_HINT)
         return 2, "SETUP-FAILED", "vendor/decomp-permuter missing"
@@ -686,7 +847,69 @@ def _main(args):
     if rec is None or unit is None:
         return 2, "SETUP-FAILED", "unknown function"
 
-    pdir = setup(rec, unit, prefer_best=not args.current)
+    if not check_scorer_patch() and not args.force:
+        return 2, "SETUP-FAILED", "unpatched scorer (see above; --force to run anyway)"
+
+    lock, held = _take_lock(rec["name"], args.seconds)
+    if lock is None and not args.force:
+        print("\nanother permute.py run on %s holds %s (%s)." % (rec["name"],
+              os.path.relpath(_lock_path(rec["name"]), awlib.REPO), held))
+        print("Two runs on one function corrupt its draft: the second restores")
+        print("the first one's candidate. Wait for it, or pass --force if it died.")
+        return 2, "SETUP-FAILED", "another run on this function is live"
+    try:
+        return _run_locked(args, rec, unit)
+    finally:
+        if lock is not None:
+            try:
+                os.remove(lock)
+            except OSError:
+                pass
+
+
+def _lock_path(name):
+    return os.path.join(WORK, name, ".permute.lock")
+
+
+def _take_lock(name, seconds):
+    """(path, None) when this run now owns work/<fn>/.permute.lock, else
+    (None, description of the holder).
+
+    Wave 94 had two runs on one function at once: a launch wrapper reported
+    "failed" while its permute.py lived on, a second run started, and the
+    second verify phase restored the FIRST run's header-expanded candidate
+    (203 KB) over the draft while printing that it had restored it unchanged.
+    A lock older than its run's time budget plus an hour is treated as stale.
+    """
+    import time
+    path = _lock_path(name)
+    for _ in range(2):
+        try:
+            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    info = json.load(fh)
+                started = float(info.get("started", 0))
+                budget = float(info.get("seconds", 900)) + 3600
+            except (OSError, ValueError):
+                started, budget, info = 0.0, 0.0, {}
+            if time.time() < started + budget:
+                return None, "pid %s, started %s" % (
+                    info.get("pid"), time.strftime("%H:%M:%S",
+                                                   time.localtime(started)))
+            os.remove(path)          # stale: its run cannot still be going
+            continue
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump({"pid": os.getpid(), "started": time.time(),
+                       "seconds": seconds}, fh)
+        return path, None
+    return None, "could not create the lock file"
+
+
+def _run_locked(args, rec, unit):
+    prefer = False if args.current else ("any" if args.from_permuter_best else True)
+    pdir = setup(rec, unit, prefer_best=prefer)
     if pdir is None:
         return 2, "SETUP-FAILED", "see above"
 

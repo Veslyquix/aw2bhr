@@ -7,13 +7,6 @@
  * sub_080697BC @ 0x080697BC
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080697BC.
- * sub_080697BC @ 0x080697BC
- */
-
 #include "proc.h"
 
 /* One of family F000's 16-byte forwarders: `push {lr}; ldr r0,=script;
@@ -23,7 +16,8 @@
  * include/unknown-globals.h.
  */
 
-void sub_080697BC(void)
+void EndIntroParallaxScroll(void)
 {
     Proc_EndEach(gUnknown_08581420);
 }
+asm(".global sub_080697BC\n.thumb_set sub_080697BC, EndIntroParallaxScroll\n");

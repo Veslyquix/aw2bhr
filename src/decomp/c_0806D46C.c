@@ -7,7 +7,7 @@
  * sub_0806D46C @ 0x0806D46C
  */
 
-void sub_0806D46C(struct Unk08580934_Obj *obj)
+void RulesScreenArmyColumnExitLeft_Loop(struct Unk08580934_Obj *obj)
 {
     if (obj->unk24 == 0)
     {
@@ -19,11 +19,12 @@ void sub_0806D46C(struct Unk08580934_Obj *obj)
         obj->unk24--;
     }
 
-    sub_0806D3AC(obj);
+    RulesScreenArmyColumn_Draw(obj);
 
     if (obj->unk28 < 0)
     {
         gUnknown_08580934->unk2d--;
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
     }
 }
+asm(".global sub_0806D46C\n.thumb_set sub_0806D46C, RulesScreenArmyColumnExitLeft_Loop\n");

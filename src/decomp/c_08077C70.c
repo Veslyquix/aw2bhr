@@ -18,14 +18,15 @@ struct Unk77C70Proc
     /* 44 */ int unk44;
 };
 
-void sub_08077C70(struct Unk77C70Proc *proc)
+void WorldMapMapPreview_WaitLoop(struct Unk77C70Proc *proc)
 {
-    sub_08077620(0, 0xA8 - gUnknown_0300064C);
+    WorldMapMissionInfo_PutSprites(0, 0xA8 - gUnknown_0300064C);
 
     if (gpKeySt->pressed != 0)
     {
         proc->unk44 = 0;
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
         Proc_Break(proc);
     }
 }
+asm(".global sub_08077C70\n.thumb_set sub_08077C70, WorldMapMapPreview_WaitLoop\n");

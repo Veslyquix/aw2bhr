@@ -2,7 +2,7 @@
 
 0x0806412C, 232 bytes, THUMB, parked.
 
-Best score so far: not measured.
+Best score so far: 99.1%.
 
 ## What it does
 
@@ -10,7 +10,7 @@ Initialises two tables, gUnknown_0202F140 and gUnknown_0202F110, from ROM data (
 
 ## How close it is
 
-Right size (232 bytes), 56.9% of bytes in place. Two differences: the first loop ends with a `!= 8` test where the ROM tests `<= 7`, and its counter and row pointer sit in each other's registers; and the second loop's base comes from its own constant (table plus 2) where the ROM reuses the one table address for the loop and the six stores, so the draft has 7 constants to the ROM's 6.
+Compiles to the right size (232 bytes) with 99.1% of bytes identical. A constant local `new_var = 2` added to the row base moved it from 97.0%. What is left: a few bytes of register choice around the row address.
 
 ## What is left
 
@@ -28,6 +28,7 @@ Find what keeps the first loop's counter counting up with a `<= 7` test while th
 ## Files
 
 - `sub_0806412C.c`: the current draft
+- `NOTES.md`: working notes
 - `target.s`: the original assembly
 
 ## Technical history
@@ -37,7 +38,7 @@ Find what keeps the first loop's counter counting up with a `<= 7` test while th
 
 ### Best so far
 
-56.9% -- 232 bytes, SIZE-EXACT (was 52.2% before wave 77)
+90.95% -- 232 bytes, SIZE-EXACT (was 56.90% at wave 93 start)
 
 ### What still differs
 
@@ -71,5 +72,54 @@ Everything else is exact: the eight-parameter prologue with four u16s spilled to
 ### Why it is parked
 
 Two loop-optimiser facts, not source semantics. WAVE 77 (W77-J) moved this from 52.2% to 56.9% and split the first defect in two. The counter reversal is now KNOWN to be blockable -- an `i != 8` exit test blocks check_dbra_loop and produces the ROM's ascending counter next to the giv -- and the init position, previously believed unreachable, falls out of hoisting `i = 0;` above the v7/v8 statements once the init exists. What is left of defect (a) is exactly two things: the exit test is `cmp #8 / bne` where the ROM has `cmp #7 / ble`, and the outer loop's counter and row pointer hold the OPPOSITE registers from the ROM (candidate counter r3 / rowptr r1, ROM counter r1 / rowptr r3). The one question is what suppresses check_dbra_loop with a RELATIONAL test still in place; every relational form (`<= 7`, `< 8`, do/while, init hoisted or not) reverses, and NE is the only thing measured that does not. Defect (b), the `gUnknown_0202F110+0x2` pool word, is untouched and independent.
+
+### Wave 93
+
+- **result:** 56.90% -> 90.95%, still size-exact, first difference +0x40 -> +0x45
+- **base_adopted:** best.c/recovered.c (85.34%), audited as equivalent C and adopted. Its changes: the first loop rewritten for (i = 0; i <= 7; i++) where the draft had i != 8, the second loop's test written (i + 1) <= (5 + 1) where the draft had i <= 5, and a temporary holding gUnknown_0202F110's base (renamed new_var -> entries). All three preserve values: same iteration counts, an array address is a constant, no read before set, and this function calls nothing.
+- **permuter:** 900 s x 4 threads from the 85.34% base: 85.34% -> 88.79%. Three mutations, each audited as equivalent: v8 = a8 * 0x1000 sunk into the inner loop (both loops have constant bounds so it always runs and a8 never changes), j = i used as the row index before the inner for reassigns j, and i = 4 written before the [4] store. Do not tidy these.
+- **hand_gain:** 88.79% -> 90.95% by moving i = 0; out of the for-init to its own statement immediately before v7 = a7 * 0x1000;, with the loop written for (; i <= 7; i++). The ROM emits the counter's init one instruction earlier than the candidate did (ROM counter in r1 and row pointer in r3; the candidate had them swapped). Five positions measured: at the top 88.79%, after src 89.66%, after tbl 90.95%, after v7 88.79%, left in the for-init 88.79%. A single optimum, not a direction.
+- **negatives_corrected:** TWO recorded ruled-out axes here were combination-specific and are false as stated. (1) i <= 7 was recorded as always reversing the counter; it does not, once the second loop is spelled (i + 1) <= (5 + 1) -- worth 28 points. (2) i = 0 placed before or after the v7/v8 lines was recorded as ruled out; under the new base it is worth 2.2 points. Read every ruled-out line in this entry as scoped to the exact combination it was measured in.
+- **residual:** 232/232, 21 of 232 bytes differ, first difference +0x45, outer counter and row pointer transposed.
+
+### Wave 94
+
+W94-A: one run from the 90.95% draft returned no kept improvement.
+
+### Wave 97
+
+wave 97 (W97-G)
+Base: drafts.py named best.c (90.95%). Its second loop was written `(i + 1) <= (5 + 1)`. **Moved to 97.0% size-exact
+(7 of 232 bytes differ, first difference +0x71)** by respelling that loop as the ROM's own shape: the next index
+is computed FIRST and assigned back at the bottom, so the counter and the row pointer can share a register:
+
+    for (i = 0; i <= 5; ) { int k = i + 1; entries = gUnknown_0202F110; base = (u8 *)entries;
+                            q = base + 2 + i * 8; ...copy loop...; i = k; }
+
+That removed the `adds r3,r1,#1` reorder and the `cmp r0,#6` shape (90.95% -> 96.1%); binding the base as a `u8 *`
+and adding the 2 as its own term (`base + 2 + i * 8`) gave the last point (96.1 -> 97.0).
+Reading the file: the `v8 = a8 * 0x1000` sits inside the inner loop (same value each pass, kept from the permuter
+base; hoisting it was not re-tested); `i = 4; ...[i].unk00 = a5` is the same 96% file's costume. wrongc.py: OK (400 seeds).
+Permuter (900 s, 22,738 it, from the 96.1% file): no improvement.
+
+Residual (7 bytes): the ROM makes `entries + 2` a loop-invariant of its own (`ldr r0,=g; adds r4,r0,#2`, then
+`lsls r0,r1,#3; adds r1,r0,r4`); ours adds the 2 after the shift (`adds r0,#2`). Every spelling that makes the +2 a
+separate statement (`base += 2`, `base = base + 2`, `(u8 *)entries + 2` bound) is folded by cse into a
+`gUnknown_0202F110+0x2` pool word (60.8%, seven pool words) -- two states only: folded pool word, or +2 after the
+shift. `2 + base + i * 8` is byte-identical to `base + 2 + i * 8`.
+
+Proposed summary: does = fills the eight 3-word vectors from the ROM table scaled to 20.12, the six 4-byte rows,
+then stores the eight arguments. status = 97.0% size-exact. left = `+2` of the row base is added after the index
+shift instead of hoisted with the base. tried = loop-shape respelling (moved), base binds (above), permuter.
+
+wave 97 (second pass)
+Base: unchanged 97.0% draft. Goal: make `entries + 2` a loop-invariant of its own (`ldr r0,=g; adds r4,r0,#2`).
+Measured (spellings.py, 15 variants): `entries[i].unk02` / `gUnknown_0202F110[i].unk02` (array member): 60.8% (folded into a `g+0x2` pool word); `base = (u8 *)&g[0] + 2` and `base = g[0].unk02`: 59.9%; `base = (u8 *)g; base += 2`, `+ (u16)two` block local, entries bound before the first loop: size +8, frame 0x14 (the address goes through a `.LC` rodata word and a7 spills).
+ONE spelling produces the ROM's separate `adds r5,r4,#2`: bind `entries = gUnknown_0202F110; base = (u8 *)entries + 2;` between the loops AND write the six trailing stores through `entries[..]`. That gives `add r5,r4,#2` and `q = base + i*8` but the bound `entries` stays live to the stores (r4 held, size -4, 67.7%), where the ROM reloads `ldr r0,=g` after the loop (the pool word is shared). Any spelling that leaves the trailing stores bare (`gUnknown_0202F110[k]`) after the bind switches to the `.LC` indirect word (size +8). Re-binding `entries = gUnknown_0202F110` again before the stores (or a second pointer `e2`, or `entries = 0;` first) also switches to `.LC` (+8).
+Conclusion: the ROM needs the bound copy dead after the loop AND bare-global stores that share the same pool word; every spelling gets one of those two, not both. Not matched.
+Proposed summary addition (tried): `+2` as a member/array-member address, `(u8 *)` walker with `+= 2`, bind before either loop, bind between loops with the stores through the bind (-4), re-bind before the stores (+8).
+
+wave 97 (W97-PG)
+Permuter chain: 2 links, 96.98% -> 99.14%. Kept link1: constant new_var = 2 used in q = (base + new_var) + i*8 (benign constant). Link2 NO-IMPROVEMENT. Start files .w97pg-perm1/2-start.c.
 
 </details>

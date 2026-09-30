@@ -4,7 +4,7 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0803BFBC.
- * sub_0803BFBC @ 0x0803BFBC
+ * FillMatchSettingsRecord @ 0x0803BFBC
  */
 
 /* WAVE 87 (W87-E): **MATCHED**, 536/536 (`configured`). Parked waves 50, 62,
@@ -57,10 +57,10 @@
  * Everything settled in waves 73/80 is unchanged and still load-bearing: the
  * two if/else stores for `d->unk02` (cross-jumped into the ROM's arm order),
  * the int-typed switch subject with `case 0: default:` written first, and the
- * `do { d->unk08 = sub_080248F8(); d->unk15 = 0; } while (0);` wrapper that
+ * `do { d->unk08 = GetLoadedMapArmyCount(); d->unk15 = 0; } while (0);` wrapper that
  * puts d in r5 and &d->unk11 in r6. Do not tidy the wrapper away. */
 
-void sub_0803BFBC(void *a1)
+void FillMatchSettingsRecord(void *a1)
 {
   struct Unk08580934 *d = a1;
   int v;
@@ -109,8 +109,8 @@ void sub_0803BFBC(void *a1)
 
   }
   d->unk06 = v;
-  d->unk17 = sub_08043CA0();
-  d->unk18 = sub_08043C98();
+  d->unk17 = BuildUnlockedCoList();
+  d->unk18 = GetUnlockedCoList();
   for (i = 0; i <= 3; i++)
   {
     d->unk09[i] = gPlaySt.aiControlled[i + 1];
@@ -130,7 +130,7 @@ void sub_0803BFBC(void *a1)
       d->unk0d[i] = gPlayers[i + 1].teamColor;
     }
 
- do { d->unk08 = sub_080248F8(); d->unk15 = 0; } while (0);
+ do { d->unk08 = GetLoadedMapArmyCount(); d->unk15 = 0; } while (0);
     d->unk16 = 0x80;
   }
   else
@@ -181,7 +181,8 @@ void sub_0803BFBC(void *a1)
       }
 
     }
-    d->unk08 = sub_0802490C(gPlaySt.mapID);
-    sub_08021810(&d->unk15, &d->unk16);
+    d->unk08 = GetMapArmyCount(gPlaySt.mapID);
+    LoadMapAndCountProperties(&d->unk15, &d->unk16);
   }
 }
+asm(".global sub_0803BFBC\n.thumb_set sub_0803BFBC, FillMatchSettingsRecord\n");

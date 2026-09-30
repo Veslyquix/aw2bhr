@@ -8,7 +8,7 @@
  */
 
 /* Decompresses a tile blob into *gBG2TilemapBuffer and biases every one of the
- * 0x400 halfwords by 0x360. Byte-identical duplicate of sub_08085908, which
+ * 0x400 halfwords by 0x360. Byte-identical duplicate of CoInfoScreen_LoadBg2UnitBonusBackdrop, which
  * names gUnknown_0823DF48 instead.
  *
  * The pointer global is re-read INSIDE the loop (`ldr r0,[r4]` every
@@ -16,7 +16,7 @@
  * and binding it to a local would hoist the load out. The bias is written
  * `0x360 + x` and not `x + 0x360`: the constant is in the first operand of the
  * `adds`. */
-void sub_080858C0(void)
+void CoInfoScreen_LoadBg2Backdrop(void)
 {
     int i;
 
@@ -26,11 +26,12 @@ void sub_080858C0(void)
     for (i = 0; i <= 0x3ff; i++)
         gBG2TilemapBuffer[i] = 0x360 + gBG2TilemapBuffer[i];
 
-    sub_08013B0C();
+    BG_EnableSyncBG2();
 }
+asm(".global sub_080858C0\n.thumb_set sub_080858C0, CoInfoScreen_LoadBg2Backdrop\n");
 
-/* Byte-identical duplicate of sub_080858C0 -- only the source blob differs. */
-void sub_08085908(void)
+/* Byte-identical duplicate of CoInfoScreen_LoadBg2Backdrop -- only the source blob differs. */
+void CoInfoScreen_LoadBg2UnitBonusBackdrop(void)
 {
     int i;
 
@@ -40,5 +41,6 @@ void sub_08085908(void)
     for (i = 0; i <= 0x3ff; i++)
         gBG2TilemapBuffer[i] = 0x360 + gBG2TilemapBuffer[i];
 
-    sub_08013B0C();
+    BG_EnableSyncBG2();
 }
+asm(".global sub_08085908\n.thumb_set sub_08085908, CoInfoScreen_LoadBg2UnitBonusBackdrop\n");

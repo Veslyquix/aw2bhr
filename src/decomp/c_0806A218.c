@@ -26,15 +26,15 @@ void IntroT3_IDLE_0806A219(struct Unk806A218 *proc)
     switch (0x128 - proc->unk2c)
     {
     case 0:
-        sub_08069FAC(0, 1, 0x61, proc);
+        StartIntroCoReveal(0, 1, 0x61, proc);
         break;
 
     case 0x62:
-        sub_08069FAC(1, 4, 0x61, proc);
+        StartIntroCoReveal(1, 4, 0x61, proc);
         break;
 
     case 0xc4:
-        sub_08069FAC(0, 2, 0x61, proc);
+        StartIntroCoReveal(0, 2, 0x61, proc);
         break;
 
     case 0x11c:
@@ -43,7 +43,7 @@ void IntroT3_IDLE_0806A219(struct Unk806A218 *proc)
         ApplyPaletteExt(gUnknown_0817C3E8, 0, 0x20);
         Decompress(gUnknown_081866F8, (void *)0x06000000);
         Decompress(gUnknown_08186D4C, gBG0TilemapBuffer);
-        sub_08013AEC();
+        BG_EnableSyncBG0();
         break;
 
     case 0x11d:
@@ -63,7 +63,7 @@ void IntroT3_IDLE_0806A219(struct Unk806A218 *proc)
     else
     {
         Proc_Break(proc);
-        sub_08067820();
+        EndIntroBgScroll();
     }
 }
 

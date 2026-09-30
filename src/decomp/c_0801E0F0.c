@@ -8,17 +8,18 @@
  */
 
 /* Family F069: hide a run of OAM entries, then reset the matching counter.
- * sub_0801E0C8(a, n) is already promoted as `void (int, int)` and blanks `n`
+ * HideOamObjects(a, n) is already promoted as `void (int, int)` and blanks `n`
  * objects starting at object `a`, so the two literals are an OAM range and the
  * `strh 0` is the shadow counter for that range going back to empty.
  *
- * The near-twin sub_0801EF6C at 0x0801EF6C is the same call followed by BOTH
+ * The near-twin ClearOamShadowResetCursors at 0x0801EF6C is the same call followed by BOTH
  * stores (gUnknown_03002B54 = 0x10 and gUnknown_03001FE4 = 0), which is why it
  * is not in F069 -- and it is what shows the two globals are independent
  * counters rather than one being a mistake for the other. */
 
-void sub_0801E0F0(void)
+void ClearOamShadow(void)
 {
-    sub_0801E0C8(0, 0x80);
+    HideOamObjects(0, 0x80);
     gUnknown_03002B54 = 0;
 }
+asm(".global sub_0801E0F0\n.thumb_set sub_0801E0F0, ClearOamShadow\n");

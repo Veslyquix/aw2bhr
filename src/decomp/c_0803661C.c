@@ -7,14 +7,6 @@
  * sub_0803661C @ 0x0803661C
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0803661C.
- * sub_0803661C @ 0x0803661C
- */
-
-
 /* Family F005 (data/families.json): 19 sixteen-byte wrappers shaped
  * `push {lr}; bl S; bl S; pop {r0}; bx r0` -- two calls, nothing between
  * them, `pop {r0}` so void.
@@ -24,8 +16,9 @@
  * would be byte-identical only if `g` had a parameter, and none of the 19
  * second callees does -- see the F005 block in unknown-functions.h. */
 
-void sub_0803661C(void)
+void InitMapGameAndGraphics(void)
 {
-    sub_08034890();
+    InitMapGameState();
     sub_08023348();
 }
+asm(".global sub_0803661C\n.thumb_set sub_0803661C, InitMapGameAndGraphics\n");

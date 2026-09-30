@@ -9,13 +9,14 @@
 
 #include "proc.h"
 
-void sub_0807A860(void)
+void ResultsScreen_ShowVictoryQuote(void)
 {
     struct Unk03001470 *p;
 
-    p = sub_08014740(0x10, 0xF, gBG0TilemapBuffer,
-                     sub_0807A3AC(gPlayers[sub_0807A908()].co,
+    p = StartTextBox(0x10, 0xF, gBG0TilemapBuffer,
+                     GetVictoryQuoteTextId(gPlayers[GetResultsArmy()].co,
                                   GetCampaignMissionId()),
                      0x8000, 0x41);
     p->unk3a = 2;
 }
+asm(".global sub_0807A860\n.thumb_set sub_0807A860, ResultsScreen_ShowVictoryQuote\n");

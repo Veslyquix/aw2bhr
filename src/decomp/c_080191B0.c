@@ -6,27 +6,26 @@
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x080191B0.
  * sub_080191B0 @ 0x080191B0
- *
- * Named per src/aw2e-names.s (proc-table labels auto-generated from
- * AW2E.lua). The old sub_XXXXXXXX symbols are kept as linker aliases
- * below so every other unit keeps resolving them unchanged.
  */
 
-/* The reset for the whole gUnknown_0200C528 list system: clear the ten slots,
- * clear the eight gUnknown_0200C508 script pointers, then re-init the
- * subsystems and re-upload the two 0x200-byte tile blocks.
+/*
+ * ResetEventScriptsAndUiState -- reset the gUnknown_0200C528 script system.
  *
- * Both loops are the `s16 i` shape of the already-matched sub_08019260
- * (src/decomp/c_08019260.c): the counter is kept zero-extended and
- * sign-extended at each use, and `i < 10` / `i < 8` come out as `cmp #9` /
- * `cmp #7` with `ble`. Neither loop is strength-reduced -- the index math is
- * recomputed every iteration -- which is what the s16 round-trip costs and is
- * NOT something an index spelling can change (wave 37, W37-N).
+ * Clears all ten slots and the eight gUnknown_0200C508 script pointers,
+ * re-initialises the subsystems that hang off them, sets gUnknown_03002F08's
+ * palette and CO words to 8 and 0xFFFF, and re-uploads the two 0x200-byte tile
+ * blocks to BG VRAM. It is the first command of ProcScr_MainMenu below.
  *
- * 0x200 is materialised once into r4 and copied into r2 for both
- * sub_08011C68 calls: it is not an imm8, so gcc CSEs the
- * `movs r4,#0x80; lsls r4,#2` pair across the pair of calls. */
-void MainMenu_080191B1(void)
+ * The name comes from src/aw2e-names.s, where the proc-table labels are
+ * generated from AW2E.lua. The `.thumb_set` below keeps sub_080191B0 working as
+ * an alias, so other units resolve it unchanged.
+ *
+ * Why the C looks odd: both loops count an `s16`, which the compiler keeps
+ * zero-extended and sign-extends at each use, so the index arithmetic is
+ * recomputed every pass rather than being reduced to a running pointer. An int
+ * counter tidies that up and the output no longer matches.
+ */
+void ResetEventScriptsAndUiState(void)
 {
     s16 i;
 
@@ -38,49 +37,49 @@ void MainMenu_080191B1(void)
     for (i = 0; i < 8; i++)
         gUnknown_0200C508[i] = NULL;
 
-    sub_0803CB8C();
+    ClearCampaignFlagBank0();
     gUnknown_03002EF0 = 0;
     gUnknown_03001404 = 0;
-    sub_0801797C();
+    ResumeEventScripts();
     sub_080179AC();
-    sub_08017A0C();
+    FillBlankBgTilemapAndSetScroll();
     gUnknown_03002F08.unk00 = 8;
     gUnknown_03002F08.unk02 = 0xFFFF;
-    sub_08011C68(gUnknown_08499588, (void *)0x06006800, 0x200);
-    sub_08011C68(gUnknown_0849958C, (void *)0x0600E000, 0x200);
+    CpuCopyAuto(gUnknown_08499588, (void *)0x06006800, 0x200);
+    CpuCopyAuto(gUnknown_0849958C, (void *)0x0600E000, 0x200);
 }
 
-asm(".global sub_080191B0\n.thumb_set sub_080191B0, MainMenu_080191B1\n");
+asm(".global sub_080191B0\n.thumb_set sub_080191B0, ResetEventScriptsAndUiState\n");
 
-extern void MainMenu_08085AF5(void);
-extern void MainMenu_08080F3D(void);
+extern void ResetMapSelectState(void);
+extern void MainMenuCarousel_ResetSelection(void);
 extern void MainMenu_0803BBD5(void);
-extern void MainMenu2_08034839(void);
-extern void MainMenu2_0803D48D(void);
+extern void ClearSavingEnabled(void);
+extern void RefreshDesignRoomSlotDirectory(void);
 extern u8 GetMainMenuLock(void);
 extern void MainMenu2_0803BBA9(void);
-extern void MainMenu2_0806A455(void);
+extern void StartIntroSequence(void);
 
 struct ProcCmd CONST_DATA ProcScr_MainMenu[] =
 {
-    PROC_CALL(MainMenu_080191B1),
-    PROC_CALL(MainMenu_08085AF5),
-    PROC_CALL(MainMenu_08080F3D),
+    PROC_CALL(ResetEventScriptsAndUiState),
+    PROC_CALL(ResetMapSelectState),
+    PROC_CALL(MainMenuCarousel_ResetSelection),
     PROC_CALL(MainMenu_0803BBD5),
     PROC_GOTO_SCR(ProcScr_MainMenu2),
 };
 
 struct ProcCmd CONST_DATA ProcScr_MainMenu2[] =
 {
-    PROC_CALL(MainMenu2_08034839),
-    PROC_CALL(MainMenu2_0803D48D),
+    PROC_CALL(ClearSavingEnabled),
+    PROC_CALL(RefreshDesignRoomSlotDirectory),
     PROC_START_CHILD_BLOCKING(ProcScr_MainMenuC1),
     PROC_GOTO_IF_NO(GetMainMenuLock, 0),
     PROC_1D(30),
     PROC_CALL(MainMenu2_0803BBA9),
     PROC_GOTO(1),
 PROC_LABEL(0),
-    PROC_CALL(MainMenu2_0806A455),
+    PROC_CALL(StartIntroSequence),
 PROC_LABEL(1),
     PROC_END,
 };

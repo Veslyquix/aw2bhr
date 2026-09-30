@@ -7,15 +7,9 @@
  * sub_08013324 @ 0x08013324
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08013324.
- * sub_08013324 @ 0x08013324
- */
-
-void sub_08013324(void)
+void ResetScreenShakeOffset(void)
 {
     gUnknown_030030D0 = 0;
     gUnknown_03002B20 = 0;
 }
+asm(".global sub_08013324\n.thumb_set sub_08013324, ResetScreenShakeOffset\n");

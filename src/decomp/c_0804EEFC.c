@@ -9,7 +9,7 @@
 
 /* Rebuilds the OBJ attributes for the current gUnknown_03001470 slot and then
  * reseeds the entry's position from a ROM table of x/y pairs. Same family as
- * sub_0804D928 / sub_0804E3B4 -- see "Large functions" in
+ * CruiserPart2_Init / BattleshipPart2_Init -- see "Large functions" in
  * docs/agbcc-codegen.md for the `* 0x100` and the `pal`/`prio` temporaries.
  *
  * The two `e1 = &...` / `e2 = &...` bindings are load-bearing rather than
@@ -23,7 +23,7 @@ struct Unk4EEFCPair
     /* 0x02 */ u16 y;
 };
 
-void sub_0804EEFC(void)
+void WholeFigure_Init(void)
 {
     struct OamData oam;
     u16 pal;
@@ -32,7 +32,7 @@ void sub_0804EEFC(void)
     struct Unk4EEFCPair *e1;
     struct Unk4EEFCPair *e2;
 
-    sub_0801566C(gUnknown_03001FBC, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(gUnknown_03001FBC, (struct UnkVec *)&oam);
 
     gUnknown_03001470[gUnknown_03001FBC].unk28 = gUnknown_0300451C << 3;
     gUnknown_03001470[gUnknown_03001FBC].unk30 = gUnknown_0300453C;
@@ -45,9 +45,9 @@ void sub_0804EEFC(void)
     prio = gUnknown_085523A4[gUnknown_0300453C ^ gUnknown_0300450C];
     oam.priority = prio;
 
-    sub_08015608(gUnknown_03001FBC, *(struct UnkVec *)&oam);
+    SetSlotSpriteAttrs(gUnknown_03001FBC, *(struct UnkVec *)&oam);
 
-    pos = (struct Unk4EEFCPair *)sub_08057D44(
+    pos = (struct Unk4EEFCPair *)GetFigurePositionTable(
         gUnknown_085D6A48[gUnknown_03004580[gUnknown_0300453C][1]][0],
         gUnknown_03004580[gUnknown_0300453C][3]);
 
@@ -60,7 +60,8 @@ void sub_0804EEFC(void)
     gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y =
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].unk06;
 
-    sub_080155C0(gUnknown_03001FBC,
+    SetSlotSpritePosition(gUnknown_03001FBC,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].x,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y);
 }
+asm(".global sub_0804EEFC\n.thumb_set sub_0804EEFC, WholeFigure_Init\n");

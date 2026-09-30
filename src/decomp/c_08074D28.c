@@ -18,19 +18,20 @@ struct Unk8074D28Proc
     /* 0x54 */ int unk54;
 };
 
-void sub_08074D28(struct Unk8074D28Proc *proc)
+void WorldMapScope_Init(struct Unk8074D28Proc *proc)
 {
     struct Unk0801C210 *sprite;
     int i;
 
     for (i = 0; i <= 4; i++)
     {
-        sprite = sub_0801C210(gUnknown_081D2930, 0, 1);
+        sprite = AP_Create(gUnknown_081D2930, 0, 1);
         sprite->unk22 = gUnknown_0861433C[proc->unk54];
-        sub_0801C4D4(sprite, 0);
+        AP_SwitchAnimation(sprite, 0);
         sprite->unk0c += i;
         proc->unk40[i] = sprite;
         proc->unk2a[i] = gUnknown_0202FDFC.unk04 + gUnknown_0202FDFC.unk00;
         proc->unk34[i] = gUnknown_0202FDFC.unk06 + gUnknown_0202FDFC.unk02;
     }
 }
+asm(".global sub_08074D28\n.thumb_set sub_08074D28, WorldMapScope_Init\n");

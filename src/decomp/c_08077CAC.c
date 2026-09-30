@@ -8,7 +8,7 @@
  */
 
 /* WAVE 76: MATCHED. The final zero-placement residual requires making the
- * post-sub_08077620 zero an explicit r4 inline-asm output, immediately copying
+ * post-WorldMapMissionInfo_PutSprites zero an explicit r4 inline-asm output, immediately copying
  * it to a fixed r8 local for the later proc->unk44 store, and separately
  * storing it to the stack cell passed to CpuFastSet. This reproduces
  * `movs r4,#0; mov r8,r4; str r4,[sp,#4]` without letting GCSE hoist the zero
@@ -30,7 +30,7 @@
  *      r3, this candidate the other way round.
  *   2. `movs r4, #0; mov r8, r4` (the shared zero: CpuFastSet's source local
  *      and `proc->unk44 = 0`) lands BEFORE the `strh` that ends the
- *      gUnknown_030030E0 raw write here, and AFTER `bl sub_08077620` in the
+ *      gUnknown_030030E0 raw write here, and AFTER `bl WorldMapMissionInfo_PutSprites` in the
  *      ROM.
  *
  * MEASURED and worth keeping whatever happens to the rest:
@@ -50,14 +50,14 @@
  *   - `m = proc->unk4c;` as its own statement before `n = 0x1E - t;` is worth
  *     14 bytes: without it agbcc emits the subtraction first and the `ldrsh`
  *     is then forced into r0 instead of r1.
- *   - sub_0807548C is declared `(s16, s16, int, ProcPtr)`, so the two
+ *   - StartWorldMapSelectionFrame is declared `(s16, s16, int, ProcPtr)`, so the two
  *     `lsls #0x10; asrs #0x10` pairs come free from the prototype; no explicit
  *     cast is needed and adding one changes nothing.
  *
  * Per-frame handler for the closing wipe: interpolate the wipe width, clamp it
  * to +0x4c, set up the blend and the scroll, blit one column band, and on the
  * sixth frame tear the whole thing down and hand the map position to
- * sub_0807548C before breaking. */
+ * StartWorldMapSelectionFrame before breaking. */
 #include "global.h"
 #include "proc.h"
 #include "hardware.h"
@@ -71,7 +71,7 @@ struct Unk8077CAC
     /* 0x4e */ s16 unk4e;
 };
 
-void sub_08077CAC(struct Unk8077CAC *proc)
+void WorldMapMapPreview_CloseLoop(struct Unk8077CAC *proc)
 {
     int t;
     int n;
@@ -92,7 +92,7 @@ void sub_08077CAC(struct Unk8077CAC *proc)
     gUnknown_03001FFC = 5 - proc->unk44;
     gUnknown_030030E0.raw = (gUnknown_030030E0.raw & 0xFFE0) | 0x1D;
 
-    sub_08077620(0, 0xA8 - gUnknown_0300064C);
+    WorldMapMissionInfo_PutSprites(0, 0xA8 - gUnknown_0300064C);
 
     {
         register u32 zero asm("r4");
@@ -106,18 +106,18 @@ void sub_08077CAC(struct Unk8077CAC *proc)
     sub_08071900(gUnknown_08551A04 + 0x100,
                  gBG1TilemapBuffer + (proc->unk4a * 32 + t), n, proc->unk4e);
 
-    sub_08013AFC();
+    BG_EnableSyncBG1();
 
     if (proc->unk44 > 4)
     {
         proc->unk44 = zero_saved;
-        sub_0803CEAC();
-        sub_08012358();
-        sub_080752D8(2);
-        sub_08074EEC(2);
-        sub_08013C54();
-        sub_08037678();
-        sub_0807548C(gUnknown_08615194[gUnknown_0202FDFC.unk0c].flagX
+        EndMapPreviewEffects();
+        SetDefaultColorEffects();
+        SetDifficultyStarsPalette(2);
+        SetWorldMapScopePalette(2);
+        ClearBg1Tilemap();
+        HideMapPreview();
+        StartWorldMapSelectionFrame(gUnknown_08615194[gUnknown_0202FDFC.unk0c].flagX
                          - gUnknown_0202FDFC.unk00 + 1,
                      gUnknown_08615194[gUnknown_0202FDFC.unk0c].flagY
                          - gUnknown_0202FDFC.unk02 + 2,
@@ -129,3 +129,4 @@ void sub_08077CAC(struct Unk8077CAC *proc)
         proc->unk44++;
     }
 }
+asm(".global sub_08077CAC\n.thumb_set sub_08077CAC, WorldMapMapPreview_CloseLoop\n");

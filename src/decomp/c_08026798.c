@@ -7,10 +7,11 @@
  * sub_08026798 @ 0x08026798
  */
 
-/* Two statements; sub_08020984 takes nothing, so the store is not feeding it. */
+/* Two statements; RecomputeArmyVisionMasks takes nothing, so the store is not feeding it. */
 
-void sub_08026798(void)
+void ResetUnitCycleAndVisionMasks(void)
 {
     gUnknown_030032C0 = 0;
-    sub_08020984();
+    RecomputeArmyVisionMasks();
 }
+asm(".global sub_08026798\n.thumb_set sub_08026798, ResetUnitCycleAndVisionMasks\n");

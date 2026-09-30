@@ -42,7 +42,7 @@
  *   drop the two `register ... asm("rN")` pins    -> +4 bytes, 39.9%
  *   drop both                                     -> size-exact, 56.4%
  * The empty read/write constraint is the wave-75 lever (see the chapter in
- * docs/agbcc-codegen.md; it closed sub_08073E0C). The register pins are a
+ * docs/agbcc-codegen.md; it closed SoundScope_Loop). The register pins are a
  * measured COUNTEREXAMPLE to wave 77's "pinning is catastrophic" claim: here
  * they are worth the match. None of the three emits an instruction, so the
  * recorded residual was never fake in the W77-A sense -- but this body is not
@@ -57,36 +57,37 @@ struct Tbl49A2A6
     /* 0x02 */ s16 unk02[0x100];
 };
 
-void sub_0802B3AC(s16 a, s16 b, s16 c)
+void DrawCursorDamagePreview(s16 a, s16 b, s16 c)
 {
     u8 tmp;
     register int d asm("r8");
     int idx;
     register int x asm("r0");
 
-    tmp = sub_08012E4C();
+    tmp = GetClockPhase();
     asm("" : "+r" (tmp));
     d = tmp;
 
     if (Proc_Find(gUnknown_0849A02C) == NULL)
         return;
 
-    if (sub_0803DE94(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02) != NULL
+    if (FindInventionAt(gUnknown_030033E4.unk00, gUnknown_030033E4.unk02) != NULL
         || gUnknown_020288B4[idx =
                gMap->rowOffset[gUnknown_030033E4.unk02]
                + gUnknown_030033E4.unk00] != 0)
     {
-        sub_080251D8(gUnknown_03003F38);
+        CalcBattleDamageVsStructure(gUnknown_03003F38);
         x = (u16)gUnknown_0849A2A6[c * 3] + a + 0x18;
-        sub_08037200(x, b - 0x14 - (s8)d,
+        PutRightAlignedNumberSpritesPlusSprite(x, b - 0x14 - (s8)d,
                      gBattleAttacker->displayDamage, 0x1a6);
         return;
     }
 
-    sub_080251BC(gUnknown_03003F38,
+    CalcAttackOutcome(gUnknown_03003F38,
                  gMap->unit[idx],
                  &gUnknown_03003100.pos);
     x = (u16)((struct Tbl49A2A6 *)gUnknown_0849A2A6)->unk02[c * 3] + a + 0x1b;
-    sub_08037200(x, b - 0x14 - (s8)d,
+    PutRightAlignedNumberSpritesPlusSprite(x, b - 0x14 - (s8)d,
                  gBattleAttacker->displayDamage, 0x1a6);
 }
+asm(".global sub_0802B3AC\n.thumb_set sub_0802B3AC, DrawCursorDamagePreview\n");

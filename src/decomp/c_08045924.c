@@ -14,8 +14,8 @@
  *
  * gUnknown_084995FE is declared `const s16 []` but is really u16 -- the ROM
  * reads it with a bare `ldrh`, so the source has the `(u16)` cast; without it
- * agbcc emits `movs r1,#0; ldrsh`.  Same finding as work/sub_08045090 and
- * work/sub_080287D0.
+ * agbcc emits `movs r1,#0; ldrsh`.  Same finding as work/CoPowerDamageHeal_DamageLoopSimple and
+ * work/ArmyDefeat_Loop.
  *
  * The bound is NAMED TWICE (init and test) and CSEs to one `ldrh` chain; with no
  * call in the body everything is loop-invariant, so check_dbra_loop reverses the
@@ -26,7 +26,7 @@
  * `if (count == 0) return TRUE; return FALSE;` and not the inverse: agbcc
  * branches on the condition TRUE to the far arm and falls through to the
  * trailing return, so the constant the `beq` REACHES (1) is the `if` body. */
-bool8 sub_08045924(void)
+bool8 MapEventCond_CurrentArmyHasNoUnitWithFuel(void)
 {
     int i;
     int count;
@@ -45,3 +45,4 @@ bool8 sub_08045924(void)
 
     return FALSE;
 }
+asm(".global sub_08045924\n.thumb_set sub_08045924, MapEventCond_CurrentArmyHasNoUnitWithFuel\n");

@@ -30,10 +30,10 @@ void sub_0803670C(void)
         v = 1;
     }
 
-    sub_08011C68(gUnknown_081120B0 + (v & 0x3ff) * 32,
+    CpuCopyAuto(gUnknown_081120B0 + (v & 0x3ff) * 32,
                  (u8 *)(gUnknown_03002B6C.bits.chr_block * 0x4000) + 0x06004100,
                  0x20);
-    sub_08011C68(gUnknown_081120B0 + ((v * 2 + 3) & 0x3ff) * 32,
+    CpuCopyAuto(gUnknown_081120B0 + ((v * 2 + 3) & 0x3ff) * 32,
                  (u8 *)(gUnknown_03002B6C.bits.chr_block * 0x4000) + 0x06004120,
                  0x40);
 }
@@ -51,31 +51,31 @@ void UpdateFuelAmmoGraphics(void)
     switch (v)
     {
     case 0:
-        sub_08011C68(gUnknown_081251B0,
+        CpuCopyAuto(gUnknown_081251B0,
                      (u8 *)(gUnknown_030030B4.bits.chr_block * 0x4000) + 0x060067a0,
                      0x20);
-        sub_08011C68(gUnknown_081251B0 + 0x20,
+        CpuCopyAuto(gUnknown_081251B0 + 0x20,
                      (u8 *)(gUnknown_030030B4.bits.chr_block * 0x4000) + 0x060067c0,
                      0x20);
-        sub_08011C68(gUnknown_081251B0 + 0x20,
+        CpuCopyAuto(gUnknown_081251B0 + 0x20,
                      (u8 *)(gUnknown_030030B4.bits.chr_block * 0x4000) + 0x060067e0,
                      0x20);
         break;
 
     case 0x14:
-        sub_08011C68(gUnknown_081251B0,
+        CpuCopyAuto(gUnknown_081251B0,
                      (u8 *)(gUnknown_030030B4.bits.chr_block * 0x4000) + 0x060067e0,
                      0x20);
         break;
 
     case 0x28:
-        sub_08011C68(gUnknown_08090EC4,
+        CpuCopyAuto(gUnknown_08090EC4,
                      (u8 *)(gUnknown_030030B4.bits.chr_block * 0x4000) + 0x060067a0,
                      0x20);
-        sub_08011C68(gUnknown_08090EC4,
+        CpuCopyAuto(gUnknown_08090EC4,
                      (u8 *)(gUnknown_030030B4.bits.chr_block * 0x4000) + 0x060067c0,
                      0x20);
-        sub_08011C68(gUnknown_08090EC4,
+        CpuCopyAuto(gUnknown_08090EC4,
                      (u8 *)(gUnknown_030030B4.bits.chr_block * 0x4000) + 0x060067e0,
                      0x20);
         break;
@@ -84,154 +84,160 @@ void UpdateFuelAmmoGraphics(void)
 
 asm(".global sub_0803678C\n.thumb_set sub_0803678C, UpdateFuelAmmoGraphics\n");
 
-void sub_08036884(void)
+void DefaultVBlankCallback(void)
 {
-    sub_0803B3F8();
+    RunSoundVSync();
     sub_0802FACC();
     Proc_Run(gProcTreeRootArray[0]);
-    sub_08011B98();
-    sub_0801F0AC();
-    sub_0801F0C8();
+    RunVBlankHooks();
+    SyncLoOamForMode();
+    ClearLoOamForMode();
     if (gUnknown_03004094 != 0)
     {
         gUnknown_03004094 = 0;
-        sub_0801F0E0();
-        sub_080128D0();
-        sub_08011FF0();
+        SyncHiOamForMode();
+        FlushLCDControl();
+        FlushTiles();
         FlushBgTilemaps();
-        sub_08011AD8();
+        RunVBlankCallbackQueue();
     }
     else
     {
         gUnknown_03004094 = 0;
     }
-    sub_0801F0FC();
+    TickSimpleSpriteScriptsForMode();
     gGameClock++;
-    sub_0803B408();
+    RunSoundMain();
 }
+asm(".global sub_08036884\n.thumb_set sub_08036884, DefaultVBlankCallback\n");
 
-void sub_080368E8(void)
+void DefaultMainLoopCallback(void)
 {
     if (gUnknown_03004094 == 0)
     {
-        sub_0801F050();
-        sub_08013510();
-        sub_08054B7C();
-        sub_08019470();
-        sub_08015954();
+        BeginOamFrameForMode();
+        RefreshKeySt();
+        LatchBattleAnimKeys();
+        RunEventScripts();
+        RunAllSlotScripts();
         Proc_Run(gProcTreeRootArray[1]);
         Proc_Run(gProcTreeRootArray[2]);
         Proc_Run(gProcTreeRootArray[3]);
         Proc_Run(gProcTreeRootArray[5]);
         Proc_Run(gProcTreeRootArray[4]);
-        sub_0801F06C();
-        sub_0801F084();
-        sub_0803B404();
+        DrawSimpleSpriteScriptsForMode();
+        FlushSpritesForMode();
+        SoundMainLoopNoOp();
         gUnknown_03004094 = 1;
     }
 }
+asm(".global sub_080368E8\n.thumb_set sub_080368E8, DefaultMainLoopCallback\n");
 
-void sub_08036944(void)
+void MapVBlankCallback(void)
 {
     gUnknown_030044D0 = 1;
-    sub_0803B3F8();
+    RunSoundVSync();
     sub_0802FACC();
     Proc_Run(gProcTreeRootArray[0]);
-    sub_08011B98();
-    sub_0801F0AC();
-    sub_0801F0C8();
+    RunVBlankHooks();
+    SyncLoOamForMode();
+    ClearLoOamForMode();
     if (gUnknown_03004094 != 0)
     {
         gUnknown_03004094 = 0;
-        sub_0801F0E0();
-        sub_080128D0();
-        sub_08011FF0();
+        SyncHiOamForMode();
+        FlushLCDControl();
+        FlushTiles();
         FlushBgTilemaps();
-        sub_08011AD8();
+        RunVBlankCallbackQueue();
     }
     else
     {
         gUnknown_03004094 = 0;
     }
-    sub_0801F0FC();
+    TickSimpleSpriteScriptsForMode();
     gGameClock++;
-    sub_0803B408();
+    RunSoundMain();
     gUnknown_030044D0 = 0;
 }
+asm(".global sub_08036944\n.thumb_set sub_08036944, MapVBlankCallback\n");
 
-void sub_080369BC(void)
+void MapMainLoopCallback(void)
 {
     if (gUnknown_03004094 == 0 && (gGameClock & gUnknown_030043F4) == 0)
     {
-        sub_0801F050();
-        sub_08013510();
-        sub_08054B7C();
-        sub_08019470();
+        BeginOamFrameForMode();
+        RefreshKeySt();
+        LatchBattleAnimKeys();
+        RunEventScripts();
 
         if (gUnknown_03003F3C != 0)
         {
             if (gUnknown_03003F3C == 1)
-                MapMainIdle();
+                RunMapStateMachine();
         }
 
-        sub_08015954();
+        RunAllSlotScripts();
         Proc_Run(gProcTreeRootArray[1]);
         Proc_Run(gProcTreeRootArray[2]);
         Proc_Run(gProcTreeRootArray[3]);
         Proc_Run(gProcTreeRootArray[5]);
         Proc_Run(gProcTreeRootArray[4]);
-        sub_08023EEC();
-        sub_0803F990();
-        sub_0801F06C();
-        sub_0801F084();
-        sub_0803B404();
+        UpdateMapDisplay();
+        DrawMapObjectSprites();
+        DrawSimpleSpriteScriptsForMode();
+        FlushSpritesForMode();
+        SoundMainLoopNoOp();
         gUnknown_03004094 = 1;
     }
 }
+asm(".global sub_080369BC\n.thumb_set sub_080369BC, MapMainLoopCallback\n");
 
-void sub_08036A50(void)
+void QueuedSpritesVBlankCallback(void)
 {
-    sub_0803B3F8();
+    RunSoundVSync();
     sub_0802FACC();
     Proc_Run(gProcTreeRootArray[0]);
-    sub_08011B98();
-    sub_0801F0AC();
-    sub_0801F0C8();
+    RunVBlankHooks();
+    SyncLoOamForMode();
+    ClearLoOamForMode();
     if (gUnknown_03004094 != 0)
     {
         gUnknown_03004094 = 0;
-        sub_0801F0E0();
-        sub_080128D0();
-        sub_08011FF0();
+        SyncHiOamForMode();
+        FlushLCDControl();
+        FlushTiles();
         FlushBgTilemaps();
-        sub_08011AD8();
-        sub_0801F050();
+        RunVBlankCallbackQueue();
+        BeginOamFrameForMode();
     }
     else
     {
         gUnknown_03004094 = 0;
     }
-    sub_0801F0FC();
+    TickSimpleSpriteScriptsForMode();
     gGameClock++;
-    sub_0803B408();
+    RunSoundMain();
 }
+asm(".global sub_08036A50\n.thumb_set sub_08036A50, QueuedSpritesVBlankCallback\n");
 
-void sub_08036AB8(void)
+void QueuedSpritesMainLoopCallback(void)
 {
     if (gUnknown_03004094 == 0 && (gGameClock & gUnknown_030043F4) == 0)
     {
-        sub_08013510();
-        sub_08054B7C();
-        sub_08019470();
+        RefreshKeySt();
+        LatchBattleAnimKeys();
+        RunEventScripts();
         Proc_Run(gProcTreeRootArray[1]);
         Proc_Run(gProcTreeRootArray[2]);
         Proc_Run(gProcTreeRootArray[3]);
-        sub_08015954();
+        RunAllSlotScripts();
         Proc_Run(gProcTreeRootArray[5]);
         Proc_Run(gProcTreeRootArray[4]);
-        sub_0801F06C();
-        sub_0801F084();
-        sub_0803B404();
+        DrawSimpleSpriteScriptsForMode();
+        FlushSpritesForMode();
+        SoundMainLoopNoOp();
         gUnknown_03004094 = 1;
     }
 }
+asm(".global sub_08036AB8\n.thumb_set sub_08036AB8, QueuedSpritesMainLoopCallback\n");

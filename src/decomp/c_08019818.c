@@ -14,11 +14,12 @@
  * `a` is `u16` and not `s16`: PROMOTE_MODE zero-extends it at entry either way,
  * but it is then stored as a whole word at +0x14 with no second extension, and
  * an `s16` would have to be sign-extended there. */
-void sub_08019818(u16 a, u8 b, u8 c)
+void StartCoSpeechScript(u16 a, u8 b, u8 c)
 {
     if (b <= 0x17)
         b = b + c * 24;
 
     gUnknown_03002F08.unk02 = b;
-    sub_080193B0(gUnknown_0848A3EC)->unk14 = a;
+    StartEventScript(gUnknown_0848A3EC)->unk14 = a;
 }
+asm(".global sub_08019818\n.thumb_set sub_08019818, StartCoSpeechScript\n");

@@ -14,7 +14,7 @@ struct Unk8044994
     /* 0x66 */ s16 unk66;
 };
 
-void sub_08044994(struct Unk8044994 *proc)
+void CoPowerMeteor_ApplyDamage(struct Unk8044994 *proc)
 {
     struct Unit *e;
     int col;
@@ -26,24 +26,25 @@ void sub_08044994(struct Unk8044994 *proc)
         col = e->x;
         row = e->y;
 
-        sub_08044854(col, row - 2, proc->unk64);
+        DamageUnitAtCellCopy(col, row - 2, proc->unk64);
 
-        sub_08044854(col - 1, row - 1, proc->unk64);
-        sub_08044854(col, row - 1, proc->unk64);
-        sub_08044854(col + 1, row - 1, proc->unk64);
+        DamageUnitAtCellCopy(col - 1, row - 1, proc->unk64);
+        DamageUnitAtCellCopy(col, row - 1, proc->unk64);
+        DamageUnitAtCellCopy(col + 1, row - 1, proc->unk64);
 
-        sub_08044854(col - 2, row, proc->unk64);
-        sub_08044854(col - 1, row, proc->unk64);
-        sub_08044854(col, row, proc->unk64);
-        sub_08044854(col + 1, row, proc->unk64);
-        sub_08044854(col + 2, row, proc->unk64);
+        DamageUnitAtCellCopy(col - 2, row, proc->unk64);
+        DamageUnitAtCellCopy(col - 1, row, proc->unk64);
+        DamageUnitAtCellCopy(col, row, proc->unk64);
+        DamageUnitAtCellCopy(col + 1, row, proc->unk64);
+        DamageUnitAtCellCopy(col + 2, row, proc->unk64);
 
-        sub_08044854(col - 1, row + 1, proc->unk64);
-        sub_08044854(col, row + 1, proc->unk64);
-        sub_08044854(col + 1, row + 1, proc->unk64);
+        DamageUnitAtCellCopy(col - 1, row + 1, proc->unk64);
+        DamageUnitAtCellCopy(col, row + 1, proc->unk64);
+        DamageUnitAtCellCopy(col + 1, row + 1, proc->unk64);
 
-        sub_08044854(col, row + 2, proc->unk64);
+        DamageUnitAtCellCopy(col, row + 2, proc->unk64);
     }
 
-    sub_08039F58();
+    ApplyCoPowerStatus();
 }
+asm(".global sub_08044994\n.thumb_set sub_08044994, CoPowerMeteor_ApplyDamage\n");

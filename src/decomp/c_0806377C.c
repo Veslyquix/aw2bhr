@@ -13,21 +13,22 @@
  * than returning at the first. The cursor's `base + 0xAE0` init and the
  * `subs #0x60` step are strength_reduce's, not source: 0x1D * 0x60 == 0xAE0
  * exactly, so this is a plain `gUnknown_03001470[i]` subscript. */
-void sub_0806377C(const void *a)
+void ClearCallbackOfSlotsRunningScript(const void *a)
 {
     int i;
 
     for (i = 0x1d; i >= 0; i--)
     {
         if (gUnknown_03001470[i].unk00 == (u32)a)
-            sub_08015C30(i);
+            ClearSlotScriptCallback(i);
     }
 }
+asm(".global sub_0806377C\n.thumb_set sub_0806377C, ClearCallbackOfSlotsRunningScript\n");
 
-/* The same descending gUnknown_03001470[] scan as sub_0806377C, but it hands
+/* The same descending gUnknown_03001470[] scan as ClearCallbackOfSlotsRunningScript, but it hands
  * back the slot instead of acting on it -- so it returns at the first hit and
  * falls off the bottom of the loop to NULL. */
-struct Unk03001470 *sub_080637AC(const void *a)
+struct Unk03001470 *FindSlotRunningScript(const void *a)
 {
     int i;
 
@@ -39,16 +40,18 @@ struct Unk03001470 *sub_080637AC(const void *a)
 
     return NULL;
 }
+asm(".global sub_080637AC\n.thumb_set sub_080637AC, FindSlotRunningScript\n");
 
-/* sub_0806377C with sub_08015A30 in place of sub_08015C30 -- the two differ in
+/* ClearCallbackOfSlotsRunningScript with StepSlotScript in place of ClearSlotScriptCallback -- the two differ in
  * that one instruction and nothing else. */
-void sub_080637D8(const void *a)
+void StepSlotsRunningScript(const void *a)
 {
     int i;
 
     for (i = 0x1d; i >= 0; i--)
     {
         if (gUnknown_03001470[i].unk00 == (u32)a)
-            sub_08015A30(i);
+            StepSlotScript(i);
     }
 }
+asm(".global sub_080637D8\n.thumb_set sub_080637D8, StepSlotsRunningScript\n");

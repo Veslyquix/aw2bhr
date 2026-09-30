@@ -7,13 +7,6 @@
  * sub_08074744 @ 0x08074744
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08074744.
- * sub_08074744 @ 0x08074744
- */
-
 #include "proc.h"
 
 /* One of family F000's 16-byte forwarders: `push {lr}; ldr r0,=script;
@@ -23,7 +16,8 @@
  * include/unknown-globals.h.
  */
 
-void sub_08074744(void)
+void EndWorldMapMarkerDrawer(void)
 {
     Proc_EndEach(gUnknown_086142B4);
 }
+asm(".global sub_08074744\n.thumb_set sub_08074744, EndWorldMapMarkerDrawer\n");

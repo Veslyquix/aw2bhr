@@ -7,14 +7,8 @@
  * sub_08037B84 @ 0x08037B84
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08037B84.
- * sub_08037B84 @ 0x08037B84
- */
-
-void sub_08037B84(void *p)
+void SetLoadedMapBlob(void *p)
 {
     gUnknown_03003F68 = p;
 }
+asm(".global sub_08037B84\n.thumb_set sub_08037B84, SetLoadedMapBlob\n");

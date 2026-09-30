@@ -8,13 +8,6 @@
  * sub_08039C70 @ 0x08039C70
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08039C70.
- * sub_08039C70 @ 0x08039C70
- */
-
 #include "proc.h"
 #include "hardware.h"
 /* The animated half of src/decomp/c_08039BDC.c: where that one installs the
@@ -33,7 +26,7 @@
  * addends the other way round -- shorten_binary_op narrows the ADD, not the
  * division. Measured this wave.
  *
- * `(u8)sub_0801306C(...)` is a cast at the use, NOT a u8 return type -- see the
+ * `(u8)IsSpriteOnScreen(...)` is a cast at the use, NOT a u8 return type -- see the
  * note in src/decomp/c_08039DBC.c; src/decomp/c_0801306C.c returns `int`. */
 struct Unk39C70Proc
 {
@@ -47,7 +40,7 @@ struct Unk39C70Proc
     /* 0x32 */ s16 unk32;
 };
 
-void sub_08039C70(struct Unk39C70Proc *proc)
+void SparkleZoom_Loop(struct Unk39C70Proc *proc)
 {
     u16 step;
     int x;
@@ -65,7 +58,7 @@ void sub_08039C70(struct Unk39C70Proc *proc)
     if (proc->unk2e > 0xf9)
     {
         proc->unk2e = 0;
-        sub_0801DAE8(proc->unk32);
+        FreeObjAffineSlot(proc->unk32);
         Proc_Break(proc);
         return;
     }
@@ -73,8 +66,9 @@ void sub_08039C70(struct Unk39C70Proc *proc)
     x = (proc->unk29 << 4) - gMap->scrollX + 8;
     y = (proc->unk2a << 4) - gMap->scrollY + 8;
 
-    if ((u8)sub_0801306C(x, y, 0x40))
-        sub_0801BD00((x & 0x1ff) | (proc->unk32 << 9),
+    if ((u8)IsSpriteOnScreen(x, y, 0x40))
+        PutOamHi((x & 0x1ff) | (proc->unk32 << 9),
                      (y & 0xff) | 0x100,
                      gUnknown_0849D824, proc->unk2c);
 }
+asm(".global sub_08039C70\n.thumb_set sub_08039C70, SparkleZoom_Loop\n");

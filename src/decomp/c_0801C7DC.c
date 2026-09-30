@@ -11,15 +11,15 @@
  *
  * trymatch reports `+2` and simultaneously `bytes: 0 of 154 differ (100.0%
  * identical)` with `relocs: match`. The whole of the residual is a trailing
- * `.short 0x0000`: sub_0801C7DC is 154 bytes, THUMB code ending 2 mod 4 leaves
+ * `.short 0x0000`: AP_PutAnimFrameAtTime is 154 bytes, THUMB code ending 2 mod 4 leaves
  * `.text` short of its four-byte section alignment, and trymatch reads the
  * section with `objcopy --only-section=.text`, so the pad is inside the window
- * it compares. Nothing writable in C moves it. Same class as sub_0802C604 --
+ * it compares. Nothing writable in C moves it. Same class as OptionsMenu_DeleteUsability --
  * see the wave-24 chapter in docs/agbcc-codegen.md, amended by wave 42.
  *
  * The ROM spends those two bytes the same way. baserom.gba at 0x0801C876 reads
  * `00 00`, and the next function's `push {r4-r7,lr}` sits at the 4-aligned
- * 0x0801C878. Unlike sub_0802C604 the pad has NO symbol of its own -- this
+ * 0x0801C878. Unlike OptionsMenu_DeleteUsability the pad has NO symbol of its own -- this
  * function is the LAST in asm/code.s, whose final two lines are `.align 2, 0`,
  * so the padding is a section boundary rather than an inter-function stub.
  * Promotion therefore only has to carve the function; the promoted unit's own
@@ -63,7 +63,7 @@
  * because the value has to survive PutSpriteExt in a callee-saved register.
  */
 
-int sub_0801C7DC(const u16 *a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int AP_PutAnimFrameAtTime(const u16 *a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
     const u16 *base;
     const u16 *tbl;
@@ -120,3 +120,4 @@ int sub_0801C7DC(const u16 *a1, int a2, int a3, int a4, int a5, int a6, int a7)
     PutSpriteExt(a7, a4, a5, (u16 *)(base + (base[p[1]] >> 1)), a6);
     return (u8)ret;
 }
+asm(".global sub_0801C7DC\n.thumb_set sub_0801C7DC, AP_PutAnimFrameAtTime\n");

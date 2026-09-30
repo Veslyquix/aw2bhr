@@ -31,7 +31,7 @@ struct Unk36384Proc
     /* 0x3e */ u16 unk3e;
 };
 
-void sub_080362E0(struct Unk080362E0 *p)
+void MoveSlideState_Walk(struct Unk080362E0 *p)
 {
     p->unk3e += p->unk40;
     p->unk42 += p->unk40 * (u16)gUnknown_0849BE10[p->unk38 * 2];
@@ -45,8 +45,9 @@ void sub_080362E0(struct Unk080362E0 *p)
         p->unk3e = 0;
     }
 }
+asm(".global sub_080362E0\n.thumb_set sub_080362E0, MoveSlideState_Walk\n");
 
-void SelectUnit_IDLE_08036385(ProcPtr procArg)
+void MoveSlide_Loop(ProcPtr procArg)
 {
     struct Unk36384Proc *proc = procArg;
 
@@ -54,7 +55,7 @@ void SelectUnit_IDLE_08036385(ProcPtr procArg)
     {
         if ((u8)(proc->unk35 - 2) <= 1 && proc->unk3e == 0)
         {
-            sub_080360D0(proc);
+            RunMoveSlideCommand(proc);
 
             if (proc->proc_script == NULL)
                 return;
@@ -66,4 +67,4 @@ void SelectUnit_IDLE_08036385(ProcPtr procArg)
     sub_080359A4(proc);
 }
 
-asm(".global sub_08036384\n.thumb_set sub_08036384, SelectUnit_IDLE_08036385\n");
+asm(".global sub_08036384\n.thumb_set sub_08036384, MoveSlide_Loop\n");

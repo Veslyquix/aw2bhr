@@ -55,7 +55,7 @@
  * the loop exit so the tail has to load `*cursor` fresh. Writing the six tail
  * statements as `(*cursor)->unkNN` -- which is what this draft does -- is not
  * enough, because the loop has already put `*cursor` in a live pseudo. */
-bool8 sub_0808AB8C(void)
+bool8 IdentifyFlash(void)
 {
     u16 flashId;
     struct Unk0848548C **cursor;
@@ -63,7 +63,7 @@ bool8 sub_0808AB8C(void)
 
     REG_WAITCNT = (REG_WAITCNT & 0xFFFC) | 3;
 
-    flashId = sub_0808AAF4();
+    flashId = ReadFlashId();
 
     cursor = gUnknown_0848548C;
     result = TRUE;
@@ -87,3 +87,4 @@ done:
 
     return result;
 }
+asm(".global sub_0808AB8C\n.thumb_set sub_0808AB8C, IdentifyFlash\n");

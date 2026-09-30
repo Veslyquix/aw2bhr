@@ -12,7 +12,7 @@
  *
  * NEEDS THE FLASH BLOCK'S OVERRIDE -- -O2 AND -fforce-addr removed, -O1 added --
  * now recorded in data/compiler-overrides.json, the same entry its thirteen
- * neighbours sub_0808AB8C..sub_0808B540 carry.
+ * neighbours IdentifyFlash..sub_0808B540 carry.
  *
  * This function was parked for thirty-three waves behind "TOOLCHAIN AXIS RULED
  * OUT (wave 46, W46-I) ... do not re-run it". That sweep held the C constant
@@ -64,7 +64,7 @@
  * not restore it: agbcc still sees a store to the same object. Only the
  * post-increment on the global itself keeps both writes, because there the
  * write-back is part of the same expression as the aliasing store. That also
- * matches the `*g++ = 0; *g-- = 0;` idiom already recorded for sub_0808AD24 on
+ * matches the `*g++ = 0; *g-- = 0;` idiom already recorded for StopFlashTimer on
  * this same global. These are dead ends, not near misses -- do not re-run them.
  *
  * MEASURED AND WORSE for residual 2 (wave 34, 33.9%): binding the shifted bit
@@ -99,12 +99,12 @@
  * i.e. a timer-stop store that does not go through gUnknown_03000F78. Whether
  * the ROM even had one is unknown; the data_refs list offers no other pointer.
  *
- * NOTE the three-local address/value/read lever that closed sub_0807FF78,
- * sub_0807FFF0 and sub_08085F94 in wave 34 does NOT apply here: this function's
+ * NOTE the three-local address/value/read lever that closed CoPowerScreenBlend_FadeInLoop,
+ * CoPowerScreenBlend_FadeOutLoop and sub_08085F94 in wave 34 does NOT apply here: this function's
  * `mov r8, r0` already shows the address bound to a local, and the residual is
  * about a CSE of an offset expression rather than about which pseudo wins a
  * callee-saved register. */
-void sub_0808AC7C(u8 slot)
+void StartFlashTimer(u8 slot)
 {
     u16 *e;
 
@@ -124,3 +124,4 @@ void sub_0808AC7C(u8 slot)
     REG_IF = 8 << gUnknown_03000F70;
     REG_IME = 1;
 }
+asm(".global sub_0808AC7C\n.thumb_set sub_0808AC7C, StartFlashTimer\n");

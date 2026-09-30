@@ -7,13 +7,6 @@
  * sub_08087B60 @ 0x08087B60
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file .text as one
- * contiguous block at 0x08087B60.
- * sub_08087B60 @ 0x08087B60
- */
-
 /* Family F062 (data/families.json): `push {r4,lr}; adds r4,r0,#0; bl A;
  * adds r0,r4,#0; bl B; pop {r4}; pop {r0}; bx r0` -- 20 bytes, three members.
  * Both `adds` immediates are absent from `varies`, so only the two callees
@@ -29,13 +22,14 @@
 
 /* Third reading again: here the saved value is an INT, not a proc. Both callees
  * add it to a global's address as an offset (&gUnknown_02027F74 + 4 in
- * sub_08087B74, &gUnknown_02027F78 in sub_08087C14) and both stash it at +0x54
- * of the proc they find by script; sub_08087B74 was already declared `int` on
+ * LoadEnemyCoMinimugs, &gUnknown_02027F78 in LoadMapRecordMinimugs) and both stash it at +0x54
+ * of the proc they find by script; LoadEnemyCoMinimugs was already declared `int` on
  * that evidence.
  */
 
-void sub_08087B60(int a)
+void RefreshMapSelectSidePanels(int a)
 {
-    sub_08087B74(a);
-    sub_08087C14(a);
+    LoadEnemyCoMinimugs(a);
+    LoadMapRecordMinimugs(a);
 }
+asm(".global sub_08087B60\n.thumb_set sub_08087B60, RefreshMapSelectSidePanels\n");

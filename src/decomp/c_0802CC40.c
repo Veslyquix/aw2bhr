@@ -7,22 +7,23 @@
  * sub_0802CC40 @ 0x0802CC40
  */
 
-int sub_0802CC40(void)
+int UnitMenu_SupplyUsability(void)
 {
-    if (!sub_0802C8F8())
+    if (!UnitMenu_JoinUsability())
         return 1;
 
-    if (!sub_0802CBA0())
+    if (!UnitMenu_LoadUsability())
         return 1;
 
     if (!HasSupplyAbility((u8 *)gUnknown_030040D8))
         return 1;
 
     FillMovementMap(0xff);
-    sub_080203C0(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02);
+    MapZeroNeighbors(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02);
 
-    if (sub_080416A4())
+    if (BuildResupplyTargetList())
         return 0;
 
     return 1;
 }
+asm(".global sub_0802CC40\n.thumb_set sub_0802CC40, UnitMenu_SupplyUsability\n");

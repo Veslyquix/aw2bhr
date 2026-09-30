@@ -8,13 +8,6 @@
  * sub_08035C90 @ 0x08035C90
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08035C90.
- * sub_08035C90 @ 0x08035C90
- */
-
 #include "proc.h"
 /* "Is the cell under this proc terrain kind 2?"  The cell key is the standard
  * gUnknown_08499590 one -- `rowOffset[y] + x` off the +0x417A row table into
@@ -39,7 +32,7 @@ struct Unk35C90Proc
     /* 0x44 */ s16 unk44;
 };
 
-u8 sub_08035C90(ProcPtr procArg)
+u8 IsMoveSlideOnRiver(ProcPtr procArg)
 {
     struct Unk35C90Proc *proc = procArg;
     struct Map *map = gMap;
@@ -50,3 +43,4 @@ u8 sub_08035C90(ProcPtr procArg)
 
     return 0;
 }
+asm(".global sub_08035C90\n.thumb_set sub_08035C90, IsMoveSlideOnRiver\n");

@@ -19,11 +19,11 @@ struct Unk2A578Proc
     /* 4c */ struct Unk2A578Rec *unk4c;
 };
 
-/* MATCHED, and the first of a byte-identical pair with sub_080401A4. Reads a
+/* MATCHED, and the first of a byte-identical pair with UnitDestroyed_ScrollToUnit. Reads a
  * byte pair out of the record at +0x4c and forwards it. The two `ldrb`s come
  * off ONE `ldr` of the pointer, so the member really is a pointer and not two
  * inline bytes. */
 void sub_0802A578(struct Unk2A578Proc *p)
 {
-    sub_08029088(p->unk4c->unk02, p->unk4c->unk03);
+    ScrollCameraToKeepCellInView(p->unk4c->unk02, p->unk4c->unk03);
 }

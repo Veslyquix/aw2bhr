@@ -8,24 +8,25 @@
  * sub_0802CA2C @ 0x0802CA2C, sub_0802CA78 @ 0x0802CA78, sub_0802CB20 @ 0x0802CB20
  */
 
-int sub_0802CA2C(void)
+int UnitMenu_LaunchUsability(void)
 {
-    if (!sub_0802C8F8())
+    if (!UnitMenu_JoinUsability())
         return 1;
 
-    if (!sub_0802CBA0())
+    if (!UnitMenu_LoadUsability())
         return 1;
 
     FillMovementMap(0xff);
     gUnknown_03003340[gUnknown_03003100.pos.unk02][gUnknown_03003100.pos.unk00] = 0;
 
-    if (sub_08041758())
+    if (BuildSiloCellList())
         return 0;
 
     return 1;
 }
+asm(".global sub_0802CA2C\n.thumb_set sub_0802CA2C, UnitMenu_LaunchUsability\n");
 
-int sub_0802CA78(void)
+int UnitMenu_FireUsability(void)
 {
     int off;
     u32 cur;
@@ -48,16 +49,17 @@ int sub_0802CA78(void)
         return 1;
 
     FillMovementMap(0xff);
-    sub_08020354(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
+    FillUnitAttackRange(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
         (struct Unit *)gUnknown_030040D8);
 
-    if (!sub_080413E8())
+    if (!BuildAttackTargetList())
         return 1;
 
     return 0;
 }
+asm(".global sub_0802CA78\n.thumb_set sub_0802CA78, UnitMenu_FireUsability\n");
 
-int sub_0802CB20(void)
+int UnitMenu_FireNoTargetUsability(void)
 {
     int off;
     u32 cur;
@@ -79,11 +81,12 @@ int sub_0802CB20(void)
         return 1;
 
     FillMovementMap(0xff);
-    sub_08020354(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
+    FillUnitAttackRange(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
         (struct Unit *)gUnknown_030040D8);
 
-    if (!sub_080413E8())
+    if (!BuildAttackTargetList())
         return 2;
 
     return 1;
 }
+asm(".global sub_0802CB20\n.thumb_set sub_0802CB20, UnitMenu_FireNoTargetUsability\n");

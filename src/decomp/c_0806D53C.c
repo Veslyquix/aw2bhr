@@ -7,9 +7,9 @@
  * sub_0806D53C @ 0x0806D53C, sub_0806D620 @ 0x0806D620
  */
 
-/* The install half of sub_0806D620's teardown: one sub_080152EC(3) object per
+/* The install half of RulesScreenDismissArmyColumns's teardown: one sub_080152EC(3) object per
  * live gUnknown_08580934->unk08 slot into unk34[], each given a tile block
- * uploaded by sub_08043E3C.
+ * uploaded by LoadCoFace.
  *
  * The two accumulators are BOTH strength-reduced givs off `i`, not source
  * locals, and the preheader ordering is what says so: the source's own
@@ -17,7 +17,7 @@
  * (the constant 0 for unk46, and &gUnknown_08580934), and only then the giv
  * inits 0x190 and 0 -- the fixed three-pass order in docs/agbcc-codegen.md.
  * They are the same induction variable 0x190 apart, which is why `0x190 + i *
- * 0x24` appears once as a whole (the tile number handed to sub_08043E3C) and
+ * 0x24` appears once as a whole (the tile number handed to LoadCoFace) and
  * once as the sum `0x190 + (i * 0x24)` rebuilt in the loop for unk44.
  *
  * `i * 4` is shared with the unk34[] index scaling by CSE -- that is where
@@ -27,7 +27,7 @@
  * The `== 2` arm is the EARLIER one in the source: it is the arm carrying the
  * explicit `b` to the tail while the else arm falls through, which is the
  * wave-45 switch/if layout rule read backwards. */
-void sub_0806D53C(void)
+void RulesScreenSpawnArmyColumns(void)
 {
     struct Unk08580934_Obj *o;
     int i;
@@ -38,11 +38,11 @@ void sub_0806D53C(void)
         o->unk1c = i;
         gUnknown_08580934->unk34[i] = o;
         o->unk46 = 0;
-        o->unk2c = sub_08065200(i);
+        o->unk2c = GetArmyColumnX(i);
         o->unk2a = 0x28;
         o->unk24 = i * 2;
         o->unk44 = 0x190 + i * 0x24 + (i << 12);
-        sub_08043E3C(gUnknown_08580934->unk20[i],
+        LoadCoFace(gUnknown_08580934->unk20[i],
                      (void *)(((0x190 + i * 0x24) & 0x3ff) * 32 + 0x06010000),
                      i + 0x10);
         o->unk40 = i * 4 - 0x7d70;
@@ -52,9 +52,10 @@ void sub_0806D53C(void)
             o->unk42 = i * 4 + 0x42a0;
     }
 }
+asm(".global sub_0806D53C\n.thumb_set sub_0806D53C, RulesScreenSpawnArmyColumns\n");
 
-/* The third of the trio. It shares ONLY the frame with sub_08064B68 and
- * sub_0806D34C -- the loop body is genuinely different:
+/* The third of the trio. It shares ONLY the frame with MatchSetupDismissRuleOptions and
+ * RulesScreenDismissRuleOptions -- the loop body is genuinely different:
  *   - the table is unk34[], not unk54[];
  *   - the bound is DYNAMIC. `gUnknown_08580934->unk08` is re-read every
  *     iteration, so it stays in the `for` condition and must not be hoisted
@@ -63,13 +64,13 @@ void sub_0806D53C(void)
  *   - `o->unk28 / 32` on the s16 member is what emits `cmp #0; bge; adds #0x1f;
  *     asrs #5`. The +0x1f is agbcc's round-toward-zero bias for a signed power
  *     of two divide -- write the divide, not the bias. */
-void sub_0806D620(void)
+void RulesScreenDismissArmyColumns(void)
 {
     struct Unk08580934 *g;
     struct Unk08580934_Obj *o;
     int i;
 
-    if (sub_08015BD0((s32)gUnknown_08581ECC) != -1)
+    if (FindSlotScript((s32)gUnknown_08581ECC) != -1)
     {
         for (i = 0; i < gUnknown_08580934->unk08; i++)
         {
@@ -79,6 +80,7 @@ void sub_0806D620(void)
             o->unk34 = -5;
             o->unk30 = 0;
         }
-        sub_0806377C(gUnknown_08581ECC);
+        ClearCallbackOfSlotsRunningScript(gUnknown_08581ECC);
     }
 }
+asm(".global sub_0806D620\n.thumb_set sub_0806D620, RulesScreenDismissArmyColumns\n");

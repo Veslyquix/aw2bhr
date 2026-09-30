@@ -10,7 +10,7 @@
 
 /* Clamps the gUnknown_08499590 camera origin (+0x04, +0x06) so the point
  * (a1, a2) stays inside a 0x20..0xc0 by 0x20..0x70 window of the screen, then
- * calls sub_08023860 to re-scroll. 10000 is the "no change on this axis"
+ * calls UpdateMapBgScroll to re-scroll. 10000 is the "no change on this axis"
  * sentinel, and when BOTH axes are still 10000 the function returns without
  * storing anything.
  *
@@ -35,7 +35,7 @@
  * interchangeable). Naming the global honestly reproduces the ROM's
  * three-level `ldr rN,=<word>; ldr r0,[rN]; ldr r1,[r0]`, and the reload after
  * each two-arm clamp is the merge-point reload, not a second variable. */
-void sub_080358C4(s16 a1, s16 a2)
+void ScrollCameraToKeepPixelInView(s16 a1, s16 a2)
 {
     u16 nx;
     u16 ny;
@@ -78,5 +78,6 @@ void sub_080358C4(s16 a1, s16 a2)
     gMap->scrollX = nx;
     gMap->scrollY = ny;
 
-    sub_08023860();
+    UpdateMapBgScroll();
 }
+asm(".global sub_080358C4\n.thumb_set sub_080358C4, ScrollCameraToKeepPixelInView\n");

@@ -9,7 +9,7 @@
  */
 
 /* Scores every passable cell by the gUnknown_0202DAD8 influence record for its
- * 4x4 block, keeps the best, and hands the winning cell to sub_080591E4 -- the
+ * 4x4 block, keeps the best, and hands the winning cell to AiAdvanceToward -- the
  * same 4-byte (u16, u16) buffer contract the rest of the 0x08059/0x0805F block
  * uses. AiProtectHq is its twin; c_08058BB4.c is the vocabulary exemplar.
  *
@@ -33,7 +33,7 @@
  *     Wave 63 reached that order by making the two shifted values real
  *     temporaries before the store: `xp = x << 16; yp = y << 16;` followed by
  *     `(xp >> 16) | yp`. This is the same scheduling lever independently found
- *     on sub_0805EB58. Earlier one-expression, comma-anchor, split-store and
+ *     on AiMoveToNearestNonTeamCell. Earlier one-expression, comma-anchor, split-store and
  *     540-second permuter probes did not reach the interleaving.
  *
  *  3. WHAT THE PERMUTER FOUND, and it is a general result: `p` must be assigned
@@ -63,7 +63,7 @@
  * gUnknown_030040D8. Naming gUnknown_030040D8 honestly is correct and the
  * promotion carries "rodata": ["0x0816DAA4"] -- same reading as W48-J's
  * gUnknown_0816D93C -> gUnknown_08499590. */
-void sub_0805F0EC(void)
+void AiMoveToHighInfluence(void)
 {
     union Unk802C57CBuf v;
     u8 cost;
@@ -81,7 +81,7 @@ void sub_0805F0EC(void)
 
     best = 1;
     best2 = 0;
-    sub_08058F30(&cost);
+    AiGetReachBudget(&cost);
     gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                       gUnknown_030040D8->unk00, cost, best2);
     v.raw = (v.raw & 0xFFFF0000) | 0x270F;
@@ -132,7 +132,8 @@ void sub_0805F0EC(void)
     p = (u16 *)&v;
 
     if (p[0] == 0x270F)
-        sub_0805F4F8();
-    sub_080591E4(p);
-    sub_0805F7B8();
+        AiEmbarkOrFallback();
+    AiAdvanceToward(p);
+    AiFallbackMove();
 }
+asm(".global sub_0805F0EC\n.thumb_set sub_0805F0EC, AiMoveToHighInfluence\n");

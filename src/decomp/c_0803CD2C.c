@@ -18,15 +18,15 @@
  *     entry-order parameter conversion; an `int` with a `u16` local assigned as
  *     the first statement puts the narrowing after `lsls r1,r1,#0x18` instead.
  *     Its one caller (src/decomp/c_080328EC.c) passes the constant 0x200.
- *   - sub_08037B84 takes `void *`. It was declared `void (void)` while its own
+ *   - SetLoadedMapBlob takes `void *`. It was declared `void (void)` while its own
  *     promoted definition in src/decomp/c_08037B84.c has taken a pointer since
- *     it landed; this function and sub_0803CDBC / sub_0803CE28 all materialise
- *     the argument. Fixing it is what let sub_0803CDBC and sub_0803CE28 match.
+ *     it landed; this function and DrawDesignRoomSlotPreview / DrawDesignRoomMapPreview all materialise
+ *     the argument. Fixing it is what let DrawDesignRoomSlotPreview and DrawDesignRoomMapPreview match.
  *   - `p = gUnknown_02000000;` bound before the guard, not named at each call:
  *     the ROM loads that pool word ABOVE the `bne`, which no in-expression
- *     spelling reproduces. The same lever matched sub_0803CDBC and sub_0803CE28.
+ *     spelling reproduces. The same lever matched DrawDesignRoomSlotPreview and DrawDesignRoomMapPreview.
  *
- * THE WHOLE REMAINING DIFF IS THE SAVE/RESTORE PAIR AROUND sub_080376DC, and it
+ * THE WHOLE REMAINING DIFF IS THE SAVE/RESTORE PAIR AROUND DrawMapPreviewToBg, and it
  * is which of the two values gets the high register:
  *
  *   ROM:  ldr r0,=gUnknown_03001418 ; mov r8, r0 ; ldrh r5,[r0]
@@ -42,7 +42,7 @@
  *
  * RULED OUT with try_match and compile_probe:
  *   - declaring the locals in reverse order (u8 *p; u16 s2; u16 s1;). This is
- *     the lever that fixed sub_0803A5B8's register pair this wave, and it does
+ *     the lever that fixed UnitClassInfo_DrawSelectionBrackets's register pair this wave, and it does
  *     nothing here -- so it moves LOCALS, not compiler-created address pseudos.
  *   - u16 *g1 = &gUnknown_03001418; s1 = *g1; ... *g1 = s1;  is byte-identical
  *     to this draft, so the address pseudo already exists and the choice is
@@ -54,23 +54,24 @@
  * and check its other readers before believing a match that comes out of it,
  * since a wrong `volatile` is byte-neutral almost everywhere else.
  */
-u8 sub_0803CD2C(u16 a1, u8 a2)
+u8 DrawDesignRoomSlotPreviewBg1(u16 a1, u8 a2)
 {
     u16 s1;
     u16 s2;
     u8 *p;
 
     p = gUnknown_02000000;
-    if (sub_0801AD70(a2 + 5) != 0)
+    if (IsSaveSlotInvalid(a2 + 5) != 0)
         return 0;
-    sub_0801AC58(a2 + 5, p);
-    sub_08037B84(p);
-    sub_0803D6FC((struct Unk3D6FC *)p);
+    ReadSaveSlot(a2 + 5, p);
+    SetLoadedMapBlob(p);
+    SnapshotTeamColorsFromRecord((struct Unk3D6FC *)p);
     s1 = gUnknown_03001418;
     s2 = gUnknown_03001FF8;
-    sub_080376DC((void *)(0x06000000 + gUnknown_03001FE8.bits.chr_block * 0x4000),
+    DrawMapPreviewToBg((void *)(0x06000000 + gUnknown_03001FE8.bits.chr_block * 0x4000),
                  a1, 1, 0, 0, 5);
     gUnknown_03001418 = s1;
     gUnknown_03001FF8 = s2;
     return 1;
 }
+asm(".global sub_0803CD2C\n.thumb_set sub_0803CD2C, DrawDesignRoomSlotPreviewBg1\n");

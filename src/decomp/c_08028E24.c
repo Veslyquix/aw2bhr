@@ -46,14 +46,14 @@ struct Unk08028E24Proc
     /* 0x66 */ s16 unk66;
 };
 
-void sub_08028E24(struct Unk08028E24Proc *proc)
+void RangeSpread_Loop(struct Unk08028E24Proc *proc)
 {
     struct Unk08028E24Sprite *s = proc->unk4c;
     s16 i;
 
     if (proc->unk66 == 8)
     {
-        sub_08022990(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02, 1);
+        ShowRangeOverlay(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02, 1);
         Proc_End(proc);
         return;
     }
@@ -73,3 +73,4 @@ void sub_08028E24(struct Unk08028E24Proc *proc)
                   gUnknown_08499FE4, 0);
     }
 }
+asm(".global sub_08028E24\n.thumb_set sub_08028E24, RangeSpread_Loop\n");

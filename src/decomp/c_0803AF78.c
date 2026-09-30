@@ -7,14 +7,6 @@
  * sub_0803AF78 @ 0x0803AF78, sub_0803AF84 @ 0x0803AF84, sub_0803AF90 @ 0x0803AF90
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x0803AF90.
- * sub_0803AF90 @ 0x0803AF90
- */
-
-
 /* Family F001 forwarder, 12 bytes:
  *     push {lr}
  *     bl   <callee>
@@ -25,7 +17,7 @@
  * here. Everything below was read off the callee's own body instead.
  *
  * The callee is EMPTY -- a lone `bx lr`, four bytes. void(void) and not
- * void(int): at the only call site (sub_0803AFA0) r0 holds the `1 & flags`
+ * void(int): at the only call site (DebugBackupUtility_Loop) r0 holds the `1 & flags`
  * of the test that just branched, which is a leftover and not an argument
  * anyone set up.
  */
@@ -44,7 +36,7 @@ void sub_0803AF78(void)
  * here. Everything below was read off the callee's own body instead.
  *
  * Same as sub_0803AF78 twelve bytes above: the callee sub_0801B4BC is a
- * lone `bx lr`, and sub_0803AFA0 leaves `4 & flags` in r0 at the call.
+ * lone `bx lr`, and DebugBackupUtility_Loop leaves `4 & flags` in r0 at the call.
  */
 void sub_0803AF84(void)
 {
@@ -62,6 +54,6 @@ void sub_0803AF84(void)
 
 void sub_0803AF90(void)
 {
-    sub_0801B4C0();
-    sub_08016E3C();
+    FormatSaveSectors();
+    LoadProfile();
 }

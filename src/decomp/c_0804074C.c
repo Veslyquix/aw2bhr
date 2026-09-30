@@ -8,18 +8,15 @@
  */
 
 #include "proc.h"
-/* One of the two arms of sub_08041958. Resolves the entry's tile position with
- * sub_0803DFE0, starts the 0x0849FBEC proc under the caller's parent, and
+/* One of the two arms of InventionAttack_StartHit. Resolves the entry's tile position with
+ * GetInventionTargetCell, starts the 0x0849FBEC proc under the caller's parent, and
  * copies the position, the entry's 4-bit field and its unk04 byte into it,
  * keeping the entry itself at unk4c.
  *
  * `ldrh; lsls #0x16; lsrs #0x1c` is extract_bit_field on the unk02_6 bitfield,
  * not `(unk02 >> 6) & 0xf` on a plain u16 -- the latter gives
  * `lsr #6; movs #0xf; and`, which is longer. include/unknown-globals.h already
- * models unk02 as a 6/4/6 bitfield for exactly this reason.
- *
- * The declaration in include/unknown-functions.h is `void sub_0804074C();`
- * without a prototype, which is compatible with this definition. */
+ * models unk02 as a 6/4/6 bitfield for exactly this reason. */
 struct Unk4074CProc
 {
     /* 00 */ u8 filler_00[0x2c];
@@ -32,12 +29,12 @@ struct Unk4074CProc
     /* 66 */ s16 unk66;
 };
 
-void sub_0804074C(struct Unk02028360 *ent, ProcPtr parent)
+void StartInventionHit(struct Unk02028360 *ent, ProcPtr parent)
 {
     struct Unk02028360Pos pos;
     struct Unk4074CProc *proc;
 
-    sub_0803DFE0(ent, &pos);
+    GetInventionTargetCell(ent, &pos);
 
     proc = Proc_StartBlocking(gUnknown_0849FBEC, parent);
     proc->unk2c = pos.unk00;
@@ -46,3 +43,4 @@ void sub_0804074C(struct Unk02028360 *ent, ProcPtr parent)
     proc->unk66 = ent->unk04;
     proc->unk4c = ent;
 }
+asm(".global sub_0804074C\n.thumb_set sub_0804074C, StartInventionHit\n");

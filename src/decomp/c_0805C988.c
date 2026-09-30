@@ -7,7 +7,7 @@
  * sub_0805C988 @ 0x0805C988, sub_0805C9CC @ 0x0805C9CC
  */
 
-/* One of a near-twin pair with sub_0805C9CC: both call sub_0803F5C8(0) for the
+/* One of a near-twin pair with sub_0805C9CC: both call GetInventionRecordByIndex(0) for the
  * head of the 8-byte record list at 0x02028360 and walk it until unk02_6 is 0.
  *
  * The 0x3C0 MASK-AND-COMPARE is the bitfield read, not a plain u16 access:
@@ -25,11 +25,11 @@
  * 8-bit `cmp` immediate) does not, so only the twin gets a preheader and with
  * it the rotation. */
 
-int sub_0805C988(int x, int y)
+int AiIsOnLaserLine(int x, int y)
 {
     struct Unk02028360 *p;
 
-    for (p = sub_0803F5C8(0); p->unk02_6 != 0; p++)
+    for (p = GetInventionRecordByIndex(0); p->unk02_6 != 0; p++)
     {
         if (p->unk02_6 == 1)
         {
@@ -40,8 +40,9 @@ int sub_0805C988(int x, int y)
 
     return 0;
 }
+asm(".global sub_0805C988\n.thumb_set sub_0805C988, AiIsOnLaserLine\n");
 
-/* sub_0805C988's near-twin -- same list walk, different selector and hit test.
+/* AiIsOnLaserLine's near-twin -- same list walk, different selector and hit test.
  * See that function for why the 0x3C0 compare is a bitfield read and why this
  * one alone gets the guard-plus-do/while shape.
  *
@@ -56,7 +57,7 @@ int sub_0805C9CC(int x, int y)
 {
     struct Unk02028360 *p;
 
-    for (p = sub_0803F5C8(0); p->unk02_6 != 0; p++)
+    for (p = GetInventionRecordByIndex(0); p->unk02_6 != 0; p++)
     {
         if (p->unk02_6 == 5)
         {

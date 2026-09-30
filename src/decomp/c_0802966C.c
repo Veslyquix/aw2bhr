@@ -16,27 +16,27 @@
  * the four pool words come out in a different order. Operand order of a `+`
  * decides which addend's address is CSEd into a register first.
  */
-void sub_0802966C(void)
+void DropCellPicker_Loop(void)
 {
     struct Unit *unit;
     u8 r;
 
     if (gpKeySt->repeated & (DPAD_RIGHT | DPAD_UP))
-        sub_080294FC();
+        DropCellPicker_SelectNext();
 
     if (gpKeySt->repeated & (DPAD_LEFT | DPAD_DOWN))
-        sub_08029570();
+        DropCellPicker_SelectPrevious();
 
     gUnknown_030033E4.unk00 = gUnknown_03003100.pos.unk00
         + (s8)gUnknown_0849A06C[gUnknown_03001470[gUnknown_03001FBC].unk20 * 5 + 1];
     gUnknown_030033E4.unk02 = gUnknown_03003100.pos.unk02
         + (s8)gUnknown_0849A06C[gUnknown_03001470[gUnknown_03001FBC].unk20 * 5 + 2];
 
-    sub_08023274(1);
+    StepMapCursorAndDraw(1);
 
     if (gpKeySt->pressed & 2)
     {
-        sub_08015328(gUnknown_03001FBC);
+        EndSlotScriptAt(gUnknown_03001FBC);
         DecrementMapLock();
         sub_0802D558();
         gUnknown_030033E4.unk00 = gUnknown_03003F24.pos.unk00;
@@ -57,7 +57,7 @@ void sub_0802966C(void)
         gUnknown_03003110[1] =
             gUnknown_0849A06C[gUnknown_03001470[gUnknown_03001FBC].unk20 * 5 + 4];
 
-        r = sub_0802E7C8((s16)gUnknown_03003100.pos.unk00,
+        r = TruncatePathAtHiddenEnemy((s16)gUnknown_03003100.pos.unk00,
                          (s16)gUnknown_03003100.pos.unk02, gUnknown_03003110, -1);
 
         if (r == 1)
@@ -66,10 +66,11 @@ void sub_0802966C(void)
             gUnknown_030033E8[gUnknown_03000558] = 5;
         }
 
-        sub_080357E0(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
+        CreateMoveSlideWithPath(gUnknown_03003100.pos.unk00, gUnknown_03003100.pos.unk02,
                      (((struct Unit *)gUnknown_030040D8 - gUnits) & 0xc0) >> 6,
                      unit->type, gUnknown_03003110);
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
         sub_08029868(unit->type);
     }
 }
+asm(".global sub_0802966C\n.thumb_set sub_0802966C, DropCellPicker_Loop\n");

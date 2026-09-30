@@ -12,19 +12,20 @@
 
 /* The idle step of the gUnknown_0849B048 script: restart it if its slot is
  * gone, quit on B, and in either case advance gUnknown_0849B060->unk00 through
- * sub_080315E8. Neither `if` is exclusive -- both fall through to the
+ * LinkScreenSetMessage. Neither `if` is exclusive -- both fall through to the
  * round-trip, which is why the ROM has no branch over it. */
-void sub_08031440(ProcPtr proc)
+void LinkLobby_WaitForConnection(ProcPtr proc)
 {
-    if (sub_08015BD0((s32)gUnknown_0849B048) == -1)
+    if (FindSlotScript((s32)gUnknown_0849B048) == -1)
         Proc_Goto(proc, 0);
 
     if (gpKeySt->pressed & 2)
     {
-        sub_0803B4DC(0x66);
+        PlayMusicOrSfx2(0x66);
         sub_0801537C(gUnknown_0849B048);
         Proc_Break(proc);
     }
 
-    gUnknown_0849B060->unk00 = sub_080315E8(gUnknown_0849B060->unk00, 0, 2);
+    gUnknown_0849B060->unk00 = LinkScreenSetMessage(gUnknown_0849B060->unk00, 0, 2);
 }
+asm(".global sub_08031440\n.thumb_set sub_08031440, LinkLobby_WaitForConnection\n");

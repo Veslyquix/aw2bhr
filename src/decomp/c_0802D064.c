@@ -8,7 +8,7 @@
  */
 
 /* A screen/mode teardown-then-notify: six unconditional calls, then a guarded
- * sub_08034534 command. `gPlaySt.unk32` is reached as
+ * SendActionCommand command. `gPlaySt.unk32` is reached as
  * `ldr rB,=g; adds rB,#0x32; ldrb` because 0x32 is past `ldrb`'s 5-bit
  * displacement -- addressing, not a member array; the field is already
  * declared in include/unknown-globals.h and is NOT re-typed here.
@@ -17,19 +17,20 @@
  * docs/agbcc-codegen.md: the pool `ldr` for gUnknown_03003F38 first, then the
  * three `movs #imm8`, regardless of argument order.
  *
- * sub_0802D0B4 is the same function with sub_08042864 in place of
- * sub_08042650 and id 7; sub_0802D1C0 / sub_0802D1F8 are the two-call variants
+ * UnitMenu_Load is the same function with LoadUnitIntoTransport in place of
+ * ApplyCaptureProgress and id 7; UnitMenu_Dive / UnitMenu_Rise are the two-call variants
  * with ids 0xb / 0xc. */
 
-void sub_0802D064(void)
+void UnitMenu_Capture(void)
 {
     LockUnitSelection();
-    sub_0801A168();
-    sub_0802C57C();
-    sub_08042650();
-    sub_080424FC();
-    sub_0802C594();
+    CloseTopMenu();
+    BackupUnitStartPosition();
+    ApplyCaptureProgress();
+    CommitUnitMove();
+    RestoreUnitStartPosition();
 
     if (gPlaySt.savingEnabled != 0)
-        sub_08034534(3, gUnknown_03003F38, 0, 0);
+        SendActionCommand(3, gUnknown_03003F38, 0, 0);
 }
+asm(".global sub_0802D064\n.thumb_set sub_0802D064, UnitMenu_Capture\n");

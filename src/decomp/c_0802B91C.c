@@ -9,7 +9,7 @@
 
 /* Copies up to four 0x20-byte HP/status digit tiles plus one 0x80-byte block
  * into OBJ VRAM for a unit's map sprite, then puts the sprite out through
- * sub_0801BD00 with one of two 5-entry pointer tables depending on whether
+ * PutOamHi with one of two 5-entry pointer tables depending on whether
  * anything was drawn.
  *
  * Three source-level levers, none of which a straight transcription gets
@@ -17,7 +17,7 @@
  *
  * (1) a4 is s16, NOT u16 with (s16) casts at the uses. The ROM materialises
  *     `a4 << 16` once (`lsls r4, r3, #0x10`) and derives BOTH the u16 third
- *     argument of sub_0802706C (`lsrs r2, r4, #0x10`) and every `(s16)a4`
+ *     argument of ShouldDrawTransportMarker (`lsrs r2, r4, #0x10`) and every `(s16)a4`
  *     (`asrs`, six sites) from it. A u16 parameter hands the already
  *     zero-extended pseudo to the callee with no shift pair at all. Same for
  *     a1/a2: `(s16)a2 | 0x400` lets combine sink the extension past the OR
@@ -48,7 +48,7 @@
  * not one array: the ROM holds 5 words at each, and 0x0849A240 is unrelated
  * data (0x40000001). The index is `a4 - 1`, so a4 runs 1..5.
  */
-void sub_0802B91C(s16 a1, s16 a2, s16 a3, s16 a4, u8 a5, u8 a6, u8 a7, s16 a8)
+void DrawCursorInfoUnitIcon(s16 a1, s16 a2, s16 a3, s16 a4, u8 a5, u8 a6, u8 a7, s16 a8)
 {
     void *p;
     int n = 0;
@@ -56,16 +56,16 @@ void sub_0802B91C(s16 a1, s16 a2, s16 a3, s16 a4, u8 a5, u8 a6, u8 a7, s16 a8)
     if (a5 != 0)
         a5 = 1;
 
-    if (sub_0802706C(a3, gUnknown_030033EC, a4))
+    if (ShouldDrawTransportMarker(a3, gUnknown_030033EC, a4))
     {
         u8 *dst;
         int t;
         int u;
 
-        dst = sub_08026198() + (0x78 - sub_080261A0()) * 0x20;
+        dst = GetUnitExtraGraphics() + (0x78 - GetUnitSheetFrameTileCount()) * 0x20;
         t = a8 * 4;
         u = (a4 & 1) + 0x1dc;
-        sub_08011E54(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
+        RegisterDataMove(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
         n++;
     }
     else
@@ -76,10 +76,10 @@ void sub_0802B91C(s16 a1, s16 a2, s16 a3, s16 a4, u8 a5, u8 a6, u8 a7, s16 a8)
             int t;
             int u;
 
-            dst = sub_08026198() + (0x75 - sub_080261A0()) * 0x20;
+            dst = GetUnitExtraGraphics() + (0x75 - GetUnitSheetFrameTileCount()) * 0x20;
             t = a8 * 4;
             u = (a4 & 1) + 0x1dc;
-            sub_08011E54(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
+            RegisterDataMove(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
             n++;
         }
 
@@ -89,10 +89,10 @@ void sub_0802B91C(s16 a1, s16 a2, s16 a3, s16 a4, u8 a5, u8 a6, u8 a7, s16 a8)
             int t;
             int u;
 
-            dst = sub_08026198() + (0x76 - sub_080261A0()) * 0x20;
+            dst = GetUnitExtraGraphics() + (0x76 - GetUnitSheetFrameTileCount()) * 0x20;
             t = a8 * 4;
             u = (a4 & 1) + 0x1dc;
-            sub_08011E54(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
+            RegisterDataMove(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
             n++;
         }
 
@@ -102,15 +102,15 @@ void sub_0802B91C(s16 a1, s16 a2, s16 a3, s16 a4, u8 a5, u8 a6, u8 a7, s16 a8)
             int t;
             int u;
 
-            dst = sub_08026198() + (0x77 - sub_080261A0()) * 0x20;
+            dst = GetUnitExtraGraphics() + (0x77 - GetUnitSheetFrameTileCount()) * 0x20;
             t = a8 * 4;
             u = (a4 & 1) + 0x1dc;
-            sub_08011E54(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
+            RegisterDataMove(dst, (void *)(0x06010000 + (t + u) * 0x20), 0x20);
             n++;
         }
     }
 
-    sub_08011E54(sub_08026190() + (sub_080261A4(a4, a3) & 0x3ff) * 0x20,
+    RegisterDataMove(GetUnitSheetGraphics() + (GetUnitSpriteTile(a4, a3) & 0x3ff) * 0x20,
                  (void *)(0x06013B40 + a8 * 0x80), 0x80);
 
     if (n != 0)
@@ -118,5 +118,6 @@ void sub_0802B91C(s16 a1, s16 a2, s16 a3, s16 a4, u8 a5, u8 a6, u8 a7, s16 a8)
     else
         p = gUnknown_0849A22C[a4 - 1];
 
-    sub_0801BD00(a1, a2 | 0x400, p, (a8 * 4) | 0xf000);
+    PutOamHi(a1, a2 | 0x400, p, (a8 * 4) | 0xf000);
 }
+asm(".global sub_0802B91C\n.thumb_set sub_0802B91C, DrawCursorInfoUnitIcon\n");

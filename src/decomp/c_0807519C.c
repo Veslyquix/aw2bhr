@@ -44,7 +44,7 @@
  * use. That is four instructions per coordinate. Written as an `int` holding
  * `(s16)expr` the narrowing IS the sign extension: it happens once, at the
  * assignment, and lands straight in the argument register. The cast is pinned
- * to the ASSIGNMENT rather than to the call site by sub_08075058's third and
+ * to the ASSIGNMENT rather than to the call site by StartDifficultyStar's third and
  * fourth parameters being `int` -- nothing re-narrows after the merge.
  *
  * Each coordinate is a TWO-ARMED if, not a compound assignment. The x pair
@@ -74,7 +74,7 @@ struct Unk807519C
     /* 0x3c */ void *unk3c[10];
 };
 
-void WM_MoveScope_IDLE_0807519D(struct Unk807519C *proc)
+void DifficultyStars_SpawnLoop(struct Unk807519C *proc)
 {
     PutSprite(1, proc->unk34, proc->unk36, gUnknown_081CC4F0,
               gUnknown_0861433C[proc->unk38]);
@@ -114,7 +114,7 @@ void WM_MoveScope_IDLE_0807519D(struct Unk807519C *proc)
             }
 
             proc->unk3c[proc->unk30] =
-                sub_08075058(proc, n, x, y, proc->unk38);
+                StartDifficultyStar(proc, n, x, y, proc->unk38);
             proc->unk30++;
         }
     }
@@ -128,4 +128,4 @@ void WM_MoveScope_IDLE_0807519D(struct Unk807519C *proc)
     proc->unk3a++;
 }
 
-asm(".global sub_0807519C\n.thumb_set sub_0807519C, WM_MoveScope_IDLE_0807519D\n");
+asm(".global sub_0807519C\n.thumb_set sub_0807519C, DifficultyStars_SpawnLoop\n");

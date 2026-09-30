@@ -9,7 +9,7 @@
 
 #include "proc.h"
 
-void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
+void DrawArmyCaptureCounters(s16 a1, s16 a2, s16 a3)
 {
     s8 i;
     s8 acc;
@@ -25,18 +25,18 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
         {
             if (IsPlayerAliveAndActive(i))
             {
-                sub_0801BD00((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
+                PutOamHi((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
                              (a2 - acc) & 0xFF,
                              gUnknown_0848B688,
                              ((i + 8) << 12) | 0x361);
-                sub_0802BAFC(a1 + gUnknown_0849A2A6[a3 * 3] + 0x15,
+                DrawInfoPanelTwoDigitNumber(a1 + gUnknown_0849A2A6[a3 * 3] + 0x15,
                              a2 - acc,
                              gPlaySt.captureLimit - gPlayers[i].captures);
                 acc += 7;
             }
         }
 
-        sub_0801BD00((a1 + gUnknown_0849A2A6[a3 * 3] + 1) & 0x1FF,
+        PutOamHi((a1 + gUnknown_0849A2A6[a3 * 3] + 1) & 0x1FF,
                      (a2 - acc) & 0xFF,
                      gUnknown_0848B6B0,
                      0x1362);
@@ -49,11 +49,11 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
         {
             if (IsPlayerAliveAndActive(i))
             {
-                sub_0801BD00((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
+                PutOamHi((a1 + gUnknown_0849A2A6[a3 * 3] + 4) & 0x1FF,
                              (a2 - acc) & 0xFF,
                              gUnknown_0848B688,
                              ((i + 8) << 12) | 0x361);
-                sub_0802BAFC(a1 + gUnknown_0849A2A6[a3 * 3] + 0x15,
+                DrawInfoPanelTwoDigitNumber(a1 + gUnknown_0849A2A6[a3 * 3] + 0x15,
                              a2 - acc,
                              gPlayers[i].captures);
                 acc += 7;
@@ -61,3 +61,4 @@ void sub_0802B4D4(s16 a1, s16 a2, s16 a3)
         }
     }
 }
+asm(".global sub_0802B4D4\n.thumb_set sub_0802B4D4, DrawArmyCaptureCounters\n");

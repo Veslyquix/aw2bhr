@@ -7,14 +7,6 @@
  * sub_08085298 @ 0x08085298
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08085298.
- * sub_08085298 @ 0x08085298
- */
-
-
 /* Family F005 (data/families.json): 19 sixteen-byte wrappers shaped
  * `push {lr}; bl S; bl S; pop {r0}; bx r0` -- two calls, nothing between
  * them, `pop {r0}` so void.
@@ -32,11 +24,12 @@
  * 0x08084xxx), which is argument setup and nothing else. The parameter is dead
  * here -- the first `bl` overwrites r0 -- so this definition is byte-identical
  * before and after (re-verified with trymatch). Same correction as
- * sub_0801A538, and those two are the only F005 members whose callers set any
+ * DisableWindow0AndResetMapLayers, and those two are the only F005 members whose callers set any
  * argument register; the other seventeen really are nullary. */
 
-void sub_08085298(ProcPtr proc)
+void CoInfoScreen_ClearBg0(ProcPtr proc)
 {
-    sub_08013C00();
-    sub_08013AEC();
+    ClearBg0Tilemap();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_08085298\n.thumb_set sub_08085298, CoInfoScreen_ClearBg0\n");

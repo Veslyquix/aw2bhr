@@ -42,7 +42,7 @@ struct Unk396F4Proc
     /* 0x64 */ s16 unk64;
 };
 
-void sub_08039674(struct Unk39674Proc *proc)
+void CoPowerIntro_Init(struct Unk39674Proc *proc)
 {
     struct Unk39674Proc *p;
     int i;
@@ -53,8 +53,8 @@ void sub_08039674(struct Unk39674Proc *proc)
     p = Proc_Start(gUnknown_0849D6D4, proc);
     p->unk54 = gPlayers[i].co;
 
-    sub_08039930(gPlayers[i].co, proc);
-    sub_08024584();
+    StartCoPowerPanel(gPlayers[i].co, proc);
+    SetMapLayersDefault();
 
     gUnknown_030030E0.bits.effect = 1;
     gUnknown_030030E0.bits.target1_enable_bg0 = 1;
@@ -66,10 +66,11 @@ void sub_08039674(struct Unk39674Proc *proc)
     gUnknown_03002020 = 0;
     gUnknown_03002B28 = 0x10;
 
-    sub_0803B524(0xd0);
+    PlayMusic(0xd0);
 }
+asm(".global sub_08039674\n.thumb_set sub_08039674, CoPowerIntro_Init\n");
 
-void sub_080396F4(struct Unk396F4Proc *proc)
+void CoPowerIntro_FadeInLoop(struct Unk396F4Proc *proc)
 {
     if (proc->unk64++ > 2)
     {
@@ -81,7 +82,8 @@ void sub_080396F4(struct Unk396F4Proc *proc)
     if (gUnknown_03002020 == 8)
     {
         Proc_Break(proc);
-        sub_08039544(sub_08039F18(proc->unk54));
+        StartCoPowerNameBanner(GetArmyCoPowerName(proc->unk54));
         Proc_BreakEach(gUnknown_0849D6D4);
     }
 }
+asm(".global sub_080396F4\n.thumb_set sub_080396F4, CoPowerIntro_FadeInLoop\n");

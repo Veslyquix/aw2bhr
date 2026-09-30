@@ -26,7 +26,7 @@
  * The 085D6A48 ROW, by contrast, IS a local: the ROM holds &row[0] across the
  * whole function and reads it at [r3] and [r3,#4].
  */
-void sub_08052818(u16 a1, u16 a2)
+void DeathHandler_CommonTail(u16 a1, u16 a2)
 {
     u16 *row;
     u16 i;
@@ -50,7 +50,7 @@ void sub_08052818(u16 a1, u16 a2)
 
                 if (gUnknown_02029A10[a1].entries[a2].unk18 != -1)
                 {
-                    if (sub_080153F0(gUnknown_02029A10[a1].entries[a2].unk18))
+                    if (IsSlotScriptActiveAt(gUnknown_02029A10[a1].entries[a2].unk18))
                     {
                         sub_080156E8(gUnknown_02029A10[a1].entries[a2].unk18,
                                      gUnknown_02029BA8[a1].unk14);
@@ -77,10 +77,11 @@ void sub_08052818(u16 a1, u16 a2)
 
             if (gUnknown_02029A10[a1].entries[a2].unk18 != -1)
             {
-                if (sub_080153F0(gUnknown_02029A10[a1].entries[a2].unk18))
+                if (IsSlotScriptActiveAt(gUnknown_02029A10[a1].entries[a2].unk18))
                     sub_080156E8(gUnknown_02029A10[a1].entries[a2].unk18,
                                  gUnknown_02029BA8[a1].unk14);
             }
         }
     }
 }
+asm(".global sub_08052818\n.thumb_set sub_08052818, DeathHandler_CommonTail\n");

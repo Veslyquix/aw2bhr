@@ -9,8 +9,8 @@
 
 /* MATCHED (wave 37, W37-Q4), one attempt.
  *
- * The whole signature came off the already-promoted caller sub_080438FC:
- *   sub_080439A8(&va, &vy, &vu, m, lo, 0, vu >= lo, &vt);
+ * The whole signature came off the already-promoted caller DrawCoPowerStarBar:
+ *   DrawCoPowerStarBarSegment(&va, &vy, &vu, m, lo, 0, vu >= lo, &vt);
  * so a6 is a small selector, a7 a flag and a1/a2/a3/a8 are in-out `int *`.
  * Draws a bar: one PutSprite per pass, *a1 advancing 6 pixels each time,
  * while the remaining amount a5 is positive and stepping down by a4.
@@ -18,7 +18,7 @@
  * Three things that are not free choices:
  *
  * - The switch is `case 0: default:` sharing one label, exactly like
- *   sub_08043DAC next door.  The ROM tests `cmp #0; beq default`, then
+ *   PlayArmyCoMusic next door.  The ROM tests `cmp #0; beq default`, then
  *   `cmp #1; beq case1`, and FALLS THROUGH into the default block -- which
  *   only happens when case 0's body IS the default body and is written FIRST.
  *
@@ -34,7 +34,7 @@
  * hoist.  The switch and the a7 test are loop-invariant but stay INSIDE the
  * loop in the ROM, so they are source statements there too.
  */
-void sub_080439A8(int *a1, int *a2, int *a3, int a4, int a5, int a6, int a7, int *a8)
+void DrawCoPowerStarBarSegment(int *a1, int *a2, int *a3, int a4, int a5, int a6, int a7, int *a8)
 {
     int half;
     int n;
@@ -76,3 +76,4 @@ void sub_080439A8(int *a1, int *a2, int *a3, int a4, int a5, int a6, int a7, int
         a5 -= a4;
     }
 }
+asm(".global sub_080439A8\n.thumb_set sub_080439A8, DrawCoPowerStarBarSegment\n");

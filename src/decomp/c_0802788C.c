@@ -9,20 +9,22 @@
 
 #include "hardware.h"
 
-void sub_0802788C(void)
+void DayStartScreen_BlendIn(void)
 {
     gUnknown_03002020 = gUnknown_03001470[gUnknown_03001FBC].unk1e / 4;
     gUnknown_03002B28 = 0x10 - gUnknown_03001470[gUnknown_03001FBC].unk1e / 4;
 
     if (++gUnknown_03001470[gUnknown_03001FBC].unk1e > 0x20)
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
 }
+asm(".global sub_0802788C\n.thumb_set sub_0802788C, DayStartScreen_BlendIn\n");
 
-void sub_08027904(void)
+void DayStartScreen_BlendOut(void)
 {
     gUnknown_03002020 = 8 - gUnknown_03001470[gUnknown_03001FBC].unk1e / 4;
     gUnknown_03002B28 = gUnknown_03001470[gUnknown_03001FBC].unk1e / 4 + 8;
 
     if (++gUnknown_03001470[gUnknown_03001FBC].unk1e > 0x20)
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
 }
+asm(".global sub_08027904\n.thumb_set sub_08027904, DayStartScreen_BlendOut\n");

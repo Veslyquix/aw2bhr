@@ -13,7 +13,7 @@
 
 #include "hardware.h"
 #include "proc.h"
-/* The VRAM address handed to sub_0801F150 is built from the live BG control
+/* The VRAM address handed to InitTilePool is built from the live BG control
  * shadow: `lsls #0x1c; lsrs #0x1e` is the 2-bit field at bit 2 -- chr_block --
  * read out of a 32-bit `ldr`, which is the width hardware.h records this shadow
  * being used at for bitfield access. `lsls #0xe` then scales it by the 0x4000
@@ -31,43 +31,43 @@ struct Unk80760B4
     /* 0x40 */ int unk40;
 };
 
-void WM_Listener_080760B5(struct Unk80760B4 *proc)
+void WorldMapNationPanel_Init(struct Unk80760B4 *proc)
 {
     sub_0801F114();
-    sub_0801F150(1,
+    InitTilePool(1,
                  (void *)(0x6000000 + gUnknown_03002B6C.bits.chr_block * 0x4000),
                  0x29, 1);
-    sub_0801F234(0x3E);
-    sub_0801F234(0x3F);
-    sub_0801F234(0x40);
-    sub_0801F234(0x41);
-    sub_0801F234(0x42);
+    LoadTilePoolGraphic(0x3E);
+    LoadTilePoolGraphic(0x3F);
+    LoadTilePoolGraphic(0x40);
+    LoadTilePoolGraphic(0x41);
+    LoadTilePoolGraphic(0x42);
 
     proc->unk40 = 0;
     proc->unk3a = 1;
     proc->unk3c = 0;
 }
 
-asm(".global sub_080760B4\n.thumb_set sub_080760B4, WM_Listener_080760B5\n");
+asm(".global sub_080760B4\n.thumb_set sub_080760B4, WorldMapNationPanel_Init\n");
 
 extern struct ProcCmd WM_Listener_WHILE_EXISTS_08614314[];
-extern void WM_Listener_0807610D(void);
-extern void WM_Listener_IDLE_080761C9(void);
-extern void WM_Listener_IDLE_0807614D(void);
-extern void WM_Listener_IDLE_08076299(void);
+extern void WorldMapNationPanel_Setup(void);
+extern void WorldMapNationPanel_SlideInLoop(void);
+extern void WorldMapNationPanel_WatchLoop(void);
+extern void WorldMapNationPanel_SlideOutLoop(void);
 
 struct ProcCmd CONST_DATA ProcScr_WM_Listener[] =
 {
     PROC_2A,
     PROC_2A,
     PROC_YIELD,
-    PROC_CALL(WM_Listener_080760B5),
+    PROC_CALL(WorldMapNationPanel_Init),
 PROC_LABEL(0),
     PROC_WHILE_EXISTS(WM_Listener_WHILE_EXISTS_08614314),
-    PROC_CALL(WM_Listener_0807610D),
-    PROC_REPEAT(WM_Listener_IDLE_080761C9),
-    PROC_REPEAT(WM_Listener_IDLE_0807614D),
-    PROC_REPEAT(WM_Listener_IDLE_08076299),
+    PROC_CALL(WorldMapNationPanel_Setup),
+    PROC_REPEAT(WorldMapNationPanel_SlideInLoop),
+    PROC_REPEAT(WorldMapNationPanel_WatchLoop),
+    PROC_REPEAT(WorldMapNationPanel_SlideOutLoop),
     PROC_GOTO(0),
     PROC_END,
 };

@@ -10,7 +10,7 @@
 #include "hardware.h"
 #include "proc.h"
 
-void sub_0806C474(void)
+void CreditsClosingPicture_Init(void)
 {
     Proc_EndEach(gUnknown_085819D4);
 
@@ -25,12 +25,13 @@ void sub_0806C474(void)
     gUnknown_030030B4.bits.priority = 2;
     gUnknown_0300251C.bits.priority = 3;
 
-    sub_0801237C();
-    sub_08012358();
+    ResetWindowShadows();
+    SetDefaultColorEffects();
 
     ApplyPaletteExt(gUnknown_081A29E4, 0, 0x20);
     Decompress(gUnknown_081A23B4, (void *)0x06008000);
     Decompress(gUnknown_081A2854, (void *)0x0600F800);
 
-    sub_08072C40(3, 0, 0);
+    SetBgScrollShadow(3, 0, 0);
 }
+asm(".global sub_0806C474\n.thumb_set sub_0806C474, CreditsClosingPicture_Init\n");

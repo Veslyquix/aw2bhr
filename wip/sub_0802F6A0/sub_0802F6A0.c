@@ -1,41 +1,30 @@
 #include "global.h"
 
-/* Wave 74 (W74-C): two drained `--current` permuter runs found no match.
- * Independently reconstructing the strongest semantics-preserving size-exact
- * output by binding the wrapped cursor to `new_var` in the same assignment as
- * `t` improves the active draft from 337 to 327 differing bytes: 604/604,
- * 45.9% identical, first difference +0x0c.  The 49.7/49.8% outputs retained
- * by best.c are invalid because they initialize replacement locals only after
- * an unconditional return, then read those locals on earlier `goto found`
- * paths.  They were rejected.  The residual remains the dst/expSum register-
- * stack inversion; see NOTES.md. */
-
-/* Wave 72 (W72-C): repaired best.c to the proven void * contract and ran a
- * bounded 120-second, 8-thread allocator search.  No match was found, but its
- * strongest size-exact candidate improves configured identity from 26.3% to
- * 44.2% (337/604 bytes differ).  The residual remains the dst/expSum hard-
- * register/stack-slot inversion documented in NOTES.md. */
-
-/* Wave 65 (W65-O): widening only the spilled `expSum` local from u16 to int
- * was byte-neutral at 604/604 and left the same `dst`/`expSum` register-slot
- * inversion and extra gUnknown_03003128 pool word.  Local type width is not
- * the allocation lever here; the proven u16 model below is restored.
+/* Reads one packet for player `slot` out of that player's column of the link
+ * receive ring.
  *
- * Wave 62 (W62-A): the old draft no longer compiled because its u16 * parameter
- * contradicted the proven shared `void *` prototype.  Correcting the definition
- * and casting only the payload store restores a current size-exact 604/604
- * candidate.  It still has the documented dst/expSum allocation disagreement.
- * The permuter could not start because best.c retains the obsolete prototype.
+ * gUnknown_02025C18 is the ring: 1024 rows of one halfword per player, and
+ * gUnknown_03003128[slot] is that player's read cursor into it, wrapping at
+ * 0x400. gUnknown_03003F48[slot] is how far the writer has got. The function
+ * first walks the cursor forward to the next 0x4FFF start marker, then checks
+ * that enough halfwords have arrived, reads the payload length (0x80
+ * halfwords at most), the expected checksum and its complement, and copies the
+ * payload into dst while recomputing both. It returns the payload length in
+ * bytes, or -2 when not enough data has arrived yet, -3 when the checksums
+ * disagree, and -4 when there is no packet, the ring is empty or the length is
+ * out of range.
  *
- * Wave 50 (W50-D).  PARKED, size-exact instruction stream, ONE CONTESTED
- * REGISTER.  See NOTES.md for the residual.  This is a real compilable
- * attempt, not a write-up. */
+ * Why the C looks odd: the cursor entries are volatile, so each `+= 1` and
+ * `&= 0x3ff` is written as its own statement and every read of the cursor is
+ * spelled out again rather than held in a local.
+ */
 
 s16 sub_0802F6A0(s8 slot, void *dst)
 {
   int i;
+  u16 *q;
+  int wrapped;
   s16 len;
-  u16 new_var;
   u16 t;
   u16 avail;
   u16 sum;
@@ -54,7 +43,7 @@ s16 sub_0802F6A0(s8 slot, void *dst)
   }
   if (gUnknown_03003128[slot] == gUnknown_03003F48[slot])
   {
-    return -4;
+    goto fail4;
   }
   do
   {
@@ -66,11 +55,12 @@ s16 sub_0802F6A0(s8 slot, void *dst)
     }
   }
   while (gUnknown_03003128[slot] != gUnknown_03003F48[slot]);
-  return -4;
+  goto fail4;
   found:
   if (gUnknown_03003F48[slot] < gUnknown_03003128[slot])
   {
-    avail = gUnknown_03003F48[slot] - (gUnknown_03003128[slot] + 0xFFFFFC00);
+    wrapped = gUnknown_03003128[slot] + 0xFFFFFC00;
+    avail = gUnknown_03003F48[slot] - wrapped;
   }
   else
   {
@@ -79,39 +69,45 @@ s16 sub_0802F6A0(s8 slot, void *dst)
 
   if (((s16) avail) <= 1)
   {
+    fail4:
     return -4;
+
   }
-  t = (new_var = ((gUnknown_03003128[t = slot] + 1) > 0x3ff) ? (0) : (gUnknown_03003128[t] + 1));
-  len = gUnknown_02025C18[t][t];
+  t = ((gUnknown_03003128[slot] + 1) > 0x3ff) ? (0) : (gUnknown_03003128[slot] + 1);
+  len = gUnknown_02025C18[t][slot];
   if (len > 0x80)
   {
-    gUnknown_03003128[new_var]++;
-    gUnknown_03003128[new_var] &= 0x3ff;
-    return -4;
+    gUnknown_03003128[slot]++;
+    gUnknown_03003128[slot] &= 0x3ff;
+    goto fail4;
   }
   if ((len + 6) > ((s16) avail))
   {
     return -2;
   }
-  gUnknown_03003128[new_var] += 2;
-  gUnknown_03003128[new_var] &= 0x3ff;
-  expSum = gUnknown_02025C18[gUnknown_03003128[new_var]][new_var];
-  gUnknown_03003128[new_var]++;
-  gUnknown_03003128[new_var] &= 0x3ff;
-  expComp = gUnknown_02025C18[gUnknown_03003128[new_var]][new_var];
-  gUnknown_03003128[new_var]++;
-  gUnknown_03003128[new_var] &= 0x3ff;
-  sum += len + 0x4fff;
+  gUnknown_03003128[slot] += 2;
+  gUnknown_03003128[slot] &= 0x3ff;
+  expSum = gUnknown_02025C18[gUnknown_03003128[slot]][slot];
+  gUnknown_03003128[slot]++;
+  gUnknown_03003128[slot] &= 0x3ff;
+  expComp = gUnknown_02025C18[gUnknown_03003128[slot]][slot];
+  gUnknown_03003128[slot]++;
+  gUnknown_03003128[slot] &= 0x3ff;
+  {
+    u16 lv0 = len;
+    i = lv0 + 0x4fff;
+  }
+  sum += i;
   i = 0;
+  q = (u16 *) dst;
   while (i < len)
   {
-    i++;
-    sum += gUnknown_02025C18[gUnknown_03003128[new_var]][new_var] * i;
-    comp += ~(gUnknown_02025C18[gUnknown_03003128[new_var]][new_var] * i);
-    *((u16 *) dst) = gUnknown_02025C18[gUnknown_03003128[new_var]][new_var];
-    gUnknown_03003128[new_var]++;
-    gUnknown_03003128[new_var] &= 0x3ff;
-    dst = ((u16 *) dst) + 1;
+    sum += gUnknown_02025C18[gUnknown_03003128[slot]][slot] * (++i);
+    comp += ~(gUnknown_02025C18[gUnknown_03003128[slot]][slot] * i);
+    *q = gUnknown_02025C18[gUnknown_03003128[slot]][slot];
+    gUnknown_03003128[slot]++;
+    gUnknown_03003128[slot] &= 0x3ff;
+    q++;
   }
 
   if ((sum != expSum) || (comp != expComp))
@@ -120,9 +116,3 @@ s16 sub_0802F6A0(s8 slot, void *dst)
   }
   return len * 2;
 }
-
-
-
-
-
-

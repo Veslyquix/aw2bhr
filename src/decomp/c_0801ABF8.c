@@ -8,7 +8,7 @@
  */
 
 /* Tears down every gUnknown_0200CC38 slot tagged with `id`, then re-runs the
- * link scan. gUnknown_0200CC24 is the installed callback (sub_0801A79C parks
+ * link scan. gUnknown_0200CC24 is the installed callback (InitSaveSystem parks
  * an `int` there, so the call needs a cast rather than a retyped global) and
  * gUnknown_0200CC2C is its argument; naming the latter honestly gives the two
  * `ldr r0,[r0]` -- the outer one is agbcc's own -fforce-addr word, the ROM
@@ -18,7 +18,7 @@
  * early `if (id == 0) return 1;`. That is not cosmetic: the early form emits
  * the `movs r0,#1` inline after the guard, the nested form emits it past the
  * literal pools as the ROM does. */
-int sub_0801ABF8(u8 id)
+int EraseSaveSlot(u8 id)
 {
     int i;
     int r;
@@ -41,3 +41,4 @@ int sub_0801ABF8(u8 id)
 
     return 1;
 }
+asm(".global sub_0801ABF8\n.thumb_set sub_0801ABF8, EraseSaveSlot\n");

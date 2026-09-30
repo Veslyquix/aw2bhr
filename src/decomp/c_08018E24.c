@@ -7,17 +7,25 @@
  * sub_08018E24 @ 0x08018E24
  */
 
-/* A gUnknown_0200C528 list-script handler: starts the gUnknown_0848A378 script
- * and hands the new slot a pointer to THIS script's current node in its +0x14
- * word, which is where sub_08018DF8 and friends read their node from.
+/*
+ * EventOp_StartCursorScript -- script command: start the gUnknown_0848A378 script and pass
+ * it this node.
  *
- * The store is a whole word into a member declared `u32` (wave 26, from
- * sub_08019818's `str`), so the node pointer is cast rather than the member
- * retyped -- the same direction c_08018DF8.c casts it back. */
-bool8 sub_08018E24(s16 a)
+ * Skipped while gUnknown_03002514 is 1. StartEventScript puts the script in a free
+ * gUnknown_0200C528 slot, and that slot's .unk14 is pointed at this script's
+ * current node, which is where EventCursorScript_Draw and its neighbours read their
+ * parameters from. The cursor then steps one node on and TRUE comes back, so
+ * the dispatcher runs the next command in the same frame.
+ *
+ * .unk14 is declared u32 and takes a whole word, so the node pointer is cast
+ * rather than the member retyped; src/decomp/c_08018DF8.c casts it back the
+ * same way.
+ */
+bool8 EventOp_StartCursorScript(s16 a)
 {
     if (gUnknown_03002514 != 1)
-        sub_080193B0(gUnknown_0848A378)->unk14 = (u32)gUnknown_0200C528[a].unk04;
+        StartEventScript(gUnknown_0848A378)->unk14 = (u32)gUnknown_0200C528[a].unk04;
     gUnknown_0200C528[a].unk04++;
     return TRUE;
 }
+asm(".global sub_08018E24\n.thumb_set sub_08018E24, EventOp_StartCursorScript\n");

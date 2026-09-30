@@ -7,13 +7,6 @@
  * sub_08066470 @ 0x08066470
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08066470.
- * sub_08066470 @ 0x08066470
- */
-
 #include "hardware.h"
 
 /* The third member of the affine-sprite tick cluster (sub_08027B68 /
@@ -37,9 +30,9 @@
  * re-loads with `ldrsh` only because PutSpriteExt clobbers memory first.
  *
  * gUnknown_03001FBC is declared s16 and read here with `ldrb`; that is
- * sub_08015C30's u8 parameter folding the truncation into the load, not
+ * ClearSlotScriptCallback's u8 parameter folding the truncation into the load, not
  * evidence about the global. */
-void sub_08066470(struct Unk08580934_Obj *obj)
+void ReadyMarkerDisappear_Loop(struct Unk08580934_Obj *obj)
 {
     int sx = obj->unk26 * 64;
     int sy = (3 - obj->unk26) * 64 + 0x100;
@@ -50,7 +43,7 @@ void sub_08066470(struct Unk08580934_Obj *obj)
                  Div(SIN_Q12(0) * 16, sx != 0 ? sx : 2),
                  Div(COS_Q12(0) * 16, sy != 0 ? sy : 2));
 
-    sub_0801BD00((obj->unk28 + 0x200) & 0x1ff, (obj->unk2a + 0x100) & 0xff,
+    PutOamHi((obj->unk28 + 0x200) & 0x1ff, (obj->unk2a + 0x100) & 0xff,
                  gUnknown_08580CFC[obj->unk1c], 0);
 
     gUnknown_08580934->unk70[obj->unk1c] = 0xff;
@@ -60,6 +53,7 @@ void sub_08066470(struct Unk08580934_Obj *obj)
     if (obj->unk26 == 0)
     {
         gUnknown_08580934->unk70[obj->unk1c] = 0;
-        sub_08015C30(gUnknown_03001FBC);
+        ClearSlotScriptCallback(gUnknown_03001FBC);
     }
 }
+asm(".global sub_08066470\n.thumb_set sub_08066470, ReadyMarkerDisappear_Loop\n");

@@ -24,12 +24,12 @@
  * product puts the assignment second, where expand_expr emits it after the
  * multiply. */
 
-void sub_08023860(void)
+void UpdateMapBgScroll(void)
 {
     int x;
     int y;
 
-    if (sub_08015BD0((s32)gUnknown_08499B4C) != -1)
+    if (FindSlotScript((s32)gUnknown_08499B4C) != -1)
     {
         gUnknown_03001FF8 = (u16)gMap->scrollX - gMap->camX * 16;
         gUnknown_03001418 = (u16)gMap->scrollY - gMap->camY * 16;
@@ -42,3 +42,4 @@ void sub_08023860(void)
     gUnknown_0300200C = x - gMap->camX * 16;
     gUnknown_03002000 = y - gMap->camY * 16;
 }
+asm(".global sub_08023860\n.thumb_set sub_08023860, UpdateMapBgScroll\n");

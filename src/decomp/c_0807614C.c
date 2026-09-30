@@ -13,7 +13,7 @@
 
 #include "proc.h"
 /* Re-samples the camera-relative cursor cell each frame and, when it has moved,
- * either redraws (sub_08075F44 + sub_0807606C) or breaks the proc.
+ * either redraws (WorldMapNationPanel_Refresh + WorldMapNationPanel_Draw) or breaks the proc.
  *
  * The two sums are spelled with the FAR member first (`unk04 + unk00`), exactly
  * as c_0807610C.c spells its pair and for the reason that file records: agbcc
@@ -55,7 +55,7 @@ struct Unk80761C8
     /* 0x40 */ int unk40;
 };
 
-void WM_Listener_IDLE_0807614D(struct Unk807614C *proc)
+void WorldMapNationPanel_WatchLoop(struct Unk807614C *proc)
 {
     s16 ox;
     s16 oy;
@@ -70,12 +70,12 @@ void WM_Listener_IDLE_0807614D(struct Unk807614C *proc)
     if (proc->unk36 == ox && proc->unk38 == oy)
         return;
 
-    v = sub_08075EC4();
+    v = GetWorldMapNationPanelSide();
 
     if (proc->unk3a == v || v == 0)
     {
-        sub_08075F44(proc);
-        sub_0807606C((struct Unk807606C *)proc);
+        WorldMapNationPanel_Refresh(proc);
+        WorldMapNationPanel_Draw((struct Unk807606C *)proc);
     }
     else
     {
@@ -83,7 +83,7 @@ void WM_Listener_IDLE_0807614D(struct Unk807614C *proc)
     }
 }
 
-void WM_Listener_IDLE_080761C9(struct Unk80761C8 *proc)
+void WorldMapNationPanel_SlideInLoop(struct Unk80761C8 *proc)
 {
     int n = gUnknown_08614458[proc->unk40];
 
@@ -102,8 +102,8 @@ void WM_Listener_IDLE_080761C9(struct Unk80761C8 *proc)
                      n, 4);
     }
 
-    sub_08013AEC();
-    sub_08013B0C();
+    BG_EnableSyncBG0();
+    BG_EnableSyncBG2();
 
     proc->unk40++;
 
@@ -114,5 +114,5 @@ void WM_Listener_IDLE_080761C9(struct Unk80761C8 *proc)
     }
 }
 
-asm(".global sub_080761C8\n.thumb_set sub_080761C8, WM_Listener_IDLE_080761C9\n"
-    ".global sub_0807614C\n.thumb_set sub_0807614C, WM_Listener_IDLE_0807614D\n");
+asm(".global sub_080761C8\n.thumb_set sub_080761C8, WorldMapNationPanel_SlideInLoop\n"
+    ".global sub_0807614C\n.thumb_set sub_0807614C, WorldMapNationPanel_WatchLoop\n");

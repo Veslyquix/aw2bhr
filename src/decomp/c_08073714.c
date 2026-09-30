@@ -8,7 +8,7 @@
  */
 
 /* Bresenham circle rasteriser: walks the octant writing each row's x extent
- * through sub_080736F4 into the gUnknown_0202F8DC scanline table, twice per
+ * through SetCircleWindowEdge into the gUnknown_0202F8DC scanline table, twice per
  * step -- (x, y) and (y, x).
  *
  * TWO GIV LEVERS, and the function is exactly the interaction between them
@@ -34,16 +34,10 @@
  * take opposite sides on them. Same lever, opposite polarity. */
 
 #include "global.h"
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08073770.
- * sub_08073770 @ 0x08073770
- */
 
 #include "hardware.h"
 #include "proc.h"
-/* The HBlank window-table teardown, and sub_080735EC's opposite number: it
+/* The HBlank window-table teardown, and ScanlineDarkenBg0_Init's opposite number: it
  * re-points the gUnknown_0202FDE4 slot at gUnknown_0202F8DC and fills all 0xA0
  * scanlines with 0 rather than 0x10.  The fill re-loads the pointer from the
  * global on every pass for the reason recorded in include/unknown-globals.h --
@@ -51,7 +45,7 @@
  * hoisted (r4).  Writing the cast at the point of use reproduces that; a typed
  * local bound before the loop hoists and loses 4 bytes.
  *
- * The proc is sub_080737EC's, whose unk58 is the frame counter this resets.
+ * The proc is CircleWipe_Loop's, whose unk58 is the frame counter this resets.
  *
  * `movs #0x21; rsbs` is the single-bit bitfield tell (a scalar `&= ~0x20`
  * emits a bare `movs #0xdf`), and the bit is byte 1 of gDispIo.disp_ct, i.e.
@@ -67,7 +61,7 @@ struct Unk08073770Proc
     /* 0x58 */ int unk58;
 };
 
-void sub_08073714(int a1)
+void BuildCircleWindowTable(int a1)
 {
     int x;
     int y;
@@ -83,8 +77,8 @@ void sub_08073714(int a1)
 
     while (x >= y)
     {
-        sub_080736F4(x, y >> 1, gUnknown_0202FDE4);
-        sub_080736F4(y, x >> 1, gUnknown_0202FDE4);
+        SetCircleWindowEdge(x, y >> 1, gUnknown_0202FDE4);
+        SetCircleWindowEdge(y, x >> 1, gUnknown_0202FDE4);
 
         u = d + 1;
         d = u - y * 2;
@@ -100,8 +94,9 @@ void sub_08073714(int a1)
         y++;
     }
 }
+asm(".global sub_08073714\n.thumb_set sub_08073714, BuildCircleWindowTable\n");
 
-void sub_08073770(struct Unk08073770Proc *proc)
+void CircleWipe_Init(struct Unk08073770Proc *proc)
 {
     int i;
 
@@ -122,3 +117,4 @@ void sub_08073770(struct Unk08073770Proc *proc)
     gUnknown_030030A4.bits.win1_enable_blend = 1;
     gUnknown_030030DC.bits.win1_enable_blend = 1;
 }
+asm(".global sub_08073770\n.thumb_set sub_08073770, CircleWipe_Init\n");

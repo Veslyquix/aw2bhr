@@ -23,7 +23,7 @@
  *
  * Three readings that each cost an attempt:
  *
- *  - `v` is u16, not int.  It reaches sub_0802239C's u16 fifth parameter, and
+ *  - `v` is u16, not int.  It reaches WriteUnitTileQuadAt's u16 fifth parameter, and
  *    an int local spills SHIFTED (`lsls #16; str` / `ldr; lsrs #16`) where the
  *    ROM stores and reloads the value straight.  +4 bytes.
  *
@@ -42,7 +42,7 @@
  *
  * `i < 7` is the unsigned `cmp #6; bhi` at the loop bottom, and it is written
  * FIRST in the `&&` because the ROM tests it before re-reading the record. */
-void sub_0802D7B4(int a1)
+void DrawDeploymentList(int a1)
 {
     u8 buf[16];
     u16 base;
@@ -80,14 +80,15 @@ void sub_0802D7B4(int a1)
 
         row = i * 2 + 5;
 
-        sub_080149C0(4, row, gBG0TilemapBuffer, buf, 0x8000, flag);
-        sub_08014B0C(0xe, row, gBG0TilemapBuffer,
-                     GetCoPriceMultiplier(gUnknown_030033EC,
+        PutTextScriptImmediate(4, row, gBG0TilemapBuffer, buf, 0x8000, flag);
+        DrawTallNumberRightAligned(0xe, row, gBG0TilemapBuffer,
+                     GetUnitCostWithCoBonus(gUnknown_030033EC,
                                   gUnknown_02023830[((s16)base + i) * 4]) * 10,
                      0x8000, flag);
-        sub_0802239C(gBG0TilemapBuffer, 2, row,
+        WriteUnitTileQuadAt(gBG0TilemapBuffer, 2, row,
                      gUnknown_02023830[((s16)base + i) * 4], v, 0, 0);
     }
 
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_0802D7B4\n.thumb_set sub_0802D7B4, DrawDeploymentList\n");

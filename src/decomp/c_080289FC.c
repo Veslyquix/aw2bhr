@@ -43,22 +43,22 @@ bool8 sub_080289FC(int a1)
 }
 
 /* Runs the four per-army end-of-turn predicates over slots 1..4 and reports the
- * first one that fails to sub_08028894, with a reason code (8, 0x10, 1, 2).
- * MarkDefeatedArmies is the same function against sub_08028874 -- the two instruction
+ * first one that fails to DefeatArmy, with a reason code (8, 0x10, 1, 2).
+ * MarkDefeatedArmies is the same function against RecordArmyDefeat -- the two instruction
  * streams differ in nothing but that callee, at all four call sites.
  *
  * `i` is s16 and that is what the whole body's shift pattern is: agbcc keeps the
  * induction variable as `i << 16` in r6 and re-derives every argument from it
  * per the callee's own parameter type -- `lsls/lsrs #0x18` for IsPlayerAliveAndActive's
- * u8, `lsrs #0x10` for the three u16 predicates, `asrs #0x10` for sub_080289BC's
- * and sub_08028894's `int`. Nothing here is a mask and nothing is authored: the
+ * u8, `lsrs #0x10` for the three u16 predicates, `asrs #0x10` for CheckArmySurvivesHumanNoUnitsRule's
+ * and DefeatArmy's `int`. Nothing here is a mask and nothing is authored: the
  * `movs r1,#0x80; lsls #9` at the bottom is the loop optimiser adding 0x10000 to
  * the shifted biv, i.e. `i++`.
  *
  * r4 is a COUNTER, not a walking bitmask -- it holds 1,2,3,4,5 and the bottom
  * adds one, not doubles. Its reuse for the sign-extended copy inside the body is
  * register allocation reclaiming a dead range, not a second variable. */
-void sub_08028A68(void)
+void DefeatArmiesFailingRules(void)
 {
     s16 i;
 
@@ -66,22 +66,23 @@ void sub_08028A68(void)
     {
         if (IsPlayerAliveAndActive(i))
         {
-            if (!sub_08028904(i))
-                sub_08028894(i, 8);
-            else if (!sub_080289BC(i))
-                sub_08028894(i, 0x10);
-            else if (!sub_08028990(i))
-                sub_08028894(i, 1);
-            else if (!sub_08028944(i))
-                sub_08028894(i, 2);
+            if (!CheckArmySurvivesTeamRule(i))
+                DefeatArmy(i, 8);
+            else if (!CheckArmySurvivesHumanNoUnitsRule(i))
+                DefeatArmy(i, 0x10);
+            else if (!CheckArmySurvivesNoUnitsRule(i))
+                DefeatArmy(i, 1);
+            else if (!CheckArmySurvivesHqRule(i))
+                DefeatArmy(i, 2);
         }
     }
 }
+asm(".global sub_08028A68\n.thumb_set sub_08028A68, DefeatArmiesFailingRules\n");
 
-/* Byte-for-byte the same function as sub_08028A68 with sub_08028874 in place of
- * sub_08028894 at all four call sites -- 132 bytes and 56 instructions each,
+/* Byte-for-byte the same function as DefeatArmiesFailingRules with RecordArmyDefeat in place of
+ * DefeatArmy at all four call sites -- 132 bytes and 56 instructions each,
  * differing in nothing else, not a register, an immediate or a branch. See the
- * comment on sub_08028A68 for the readout of the s16 induction variable. */
+ * comment on DefeatArmiesFailingRules for the readout of the s16 induction variable. */
 void MarkDefeatedArmies(void)
 {
     s16 i;
@@ -90,14 +91,14 @@ void MarkDefeatedArmies(void)
     {
         if (IsPlayerAliveAndActive(i))
         {
-            if (!sub_08028904(i))
-                sub_08028874(i, 8);
-            else if (!sub_080289BC(i))
-                sub_08028874(i, 0x10);
-            else if (!sub_08028990(i))
-                sub_08028874(i, 1);
-            else if (!sub_08028944(i))
-                sub_08028874(i, 2);
+            if (!CheckArmySurvivesTeamRule(i))
+                RecordArmyDefeat(i, 8);
+            else if (!CheckArmySurvivesHumanNoUnitsRule(i))
+                RecordArmyDefeat(i, 0x10);
+            else if (!CheckArmySurvivesNoUnitsRule(i))
+                RecordArmyDefeat(i, 1);
+            else if (!CheckArmySurvivesHqRule(i))
+                RecordArmyDefeat(i, 2);
         }
     }
 }
@@ -116,7 +117,7 @@ asm(".global sub_08028AEC\n.thumb_set sub_08028AEC, MarkDefeatedArmies\n");
  * The `ldr r3, [gPlayers]` in the preheader is the loop optimiser's
  * LICM hoist of the pointer deref, not source -- the body is written with the
  * ordinary `gPlayers[i]` subscript. */
-int sub_08028B70(void)
+int GetCaptureLimitWinner(void)
 {
     u8 i;
 
@@ -131,3 +132,4 @@ int sub_08028B70(void)
 
     return 0;
 }
+asm(".global sub_08028B70\n.thumb_set sub_08028B70, GetCaptureLimitWinner\n");

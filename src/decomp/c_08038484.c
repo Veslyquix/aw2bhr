@@ -17,14 +17,14 @@
  * offset at runtime -- which is what an array member emits, because the
  * variable subscript stops the fold.
  *   Reshaping unk10/unk12 into `u16 unk10[2]` is the reading the codegen
- * actually supports, but it is a SHARED member (sub_0803C52C reads +0x10 twice,
- * sub_08016A54 zeroes both) and the brief forbids reshaping one to suit a
+ * actually supports, but it is a SHARED member (ShopAvail_CoNeedsRank reads +0x10 twice,
+ * ResetProfileToDefaults zeroes both) and the brief forbids reshaping one to suit a
  * single function, so the layout is spelled locally instead -- the same device
  * src/decomp/c_08038848.c uses for gUnknown_08499590. Recorded rather than
  * changed; if a second function turns up subscripting the same pair, that is
  * the evidence to promote it to an array in the header.
  *
- * `ok` is `int`: the `lsls #0x18; lsrs #0x18` after sub_0807821C is agbcc
+ * `ok` is `int`: the `lsls #0x18; lsrs #0x18` after MissionTriggersUnlockScript is agbcc
  * re-narrowing that function's bool8 return, not a narrow local. The else arm
  * stores `ok` rather than a literal 0 -- the ROM reuses r4 there instead of
  * emitting a fresh `movs r0,#0`, which is what naming the variable produces. */
@@ -34,7 +34,7 @@ struct Unk38484Tbl
     /* 0x10 */ u16 unk10[2];
 };
 
-void sub_08038484(void)
+void EndOfGame_FinishCampaignMap(void)
 {
     struct Unk38484Tbl *tbl;
     int ok;
@@ -43,12 +43,12 @@ void sub_08038484(void)
 
     if (IsPlayer1TeamAlive())
     {
-        sub_08038368(gPlaySt.mapID - 0x8a, gUnknown_03004080,
-                     gPlayers[sub_0807A908()].totalScore);
+        SaveCampaignMissionResult(gPlaySt.mapID - 0x8a, gUnknown_03004080,
+                     gPlayers[GetResultsArmy()].totalScore);
         CampaignMapNoOp(gPlaySt.mapID - 0x8a);
         gUnknown_0202FDFC.unk0c = gPlaySt.mapID - 0x8a;
         gUnknown_0202FDFC.unk11 = 1;
-        ok = sub_0807821C(gPlaySt.mapID - 0x8a);
+        ok = MissionTriggersUnlockScript(gPlaySt.mapID - 0x8a);
     }
     else
     {
@@ -62,13 +62,14 @@ void sub_08038484(void)
     {
         tbl = (struct Unk38484Tbl *)&gUnknown_0200C420;
 
-        if (tbl->unk10[IsHardCampaignMode()] < sub_08038434())
-            tbl->unk10[IsHardCampaignMode()] = sub_08038434();
+        if (tbl->unk10[IsHardCampaignMode()] < GetAverageCampaignScore())
+            tbl->unk10[IsHardCampaignMode()] = GetAverageCampaignScore();
 
         sub_08045790();
     }
     else
     {
-        sub_0803BADC();
+        StartCampaignAfterMap();
     }
 }
+asm(".global sub_08038484\n.thumb_set sub_08038484, EndOfGame_FinishCampaignMap\n");

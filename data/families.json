@@ -37,36 +37,11 @@
   "families": 102,
   "members": 724,
   "unmatched_members": 0,
-  "entirely_unmatched_families": 3,
+  "entirely_unmatched_families": 2,
   "fuzzy_clusters": 22
  },
  "batching_plan": {
   "cold": [
-   {
-    "id": "F041",
-    "n_members": 5,
-    "n_unmatched": 0,
-    "n_insns": 9,
-    "sizes": [
-     20
-    ],
-    "representative": "sub_08071868",
-    "exemplar_src": null,
-    "addr_span": [
-     "0x08071868",
-     "0x080718D0"
-    ],
-    "varies": [
-     "adds r2,#"
-    ],
-    "members": [
-     "sub_08071868",
-     "sub_0807187C",
-     "sub_08071890",
-     "sub_080718BC",
-     "sub_080718D0"
-    ]
-   },
    {
     "id": "F100",
     "n_members": 3,
@@ -1818,7 +1793,7 @@
    ],
    "representative": "sub_080005F0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080005F0.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -2162,7 +2137,7 @@
    ],
    "representative": "sub_0801C7B4",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801C7B4.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -2436,7 +2411,7 @@
    ],
    "representative": "sub_0800484C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/design-menus.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -2645,7 +2620,7 @@
    ],
    "representative": "sub_08014BC0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08014BB4.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "adds r1,r0,#",
@@ -2846,7 +2821,7 @@
    ],
    "representative": "sub_080720C8",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08071F88.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "adds r2,r0,#",
@@ -3013,7 +2988,7 @@
    ],
    "representative": "sub_08010F94",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08010F94.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "movs r0,#",
@@ -3158,7 +3133,7 @@
    ],
    "representative": "sub_08072050",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08071F88.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "adds r2,r0,#",
@@ -3767,7 +3742,7 @@
    ],
    "representative": "sub_08038690",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08038690.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "adds r1,r0,#",
@@ -3887,7 +3862,7 @@
    ],
    "representative": "sub_08002EB4",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/design.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -4013,7 +3988,7 @@
    ],
    "representative": "sub_080115E0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080115E0.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -4112,7 +4087,7 @@
    ],
    "representative": "sub_08015FE4",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08015FE4.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "lsls r0,r0,#",
@@ -4221,7 +4196,7 @@
    ],
    "representative": "sub_080198AC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080198AC.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "movs r0,#",
@@ -4440,7 +4415,7 @@
    ],
    "representative": "sub_08039930",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08039930.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -4663,7 +4638,7 @@
    ],
    "representative": "sub_08011550",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08011550.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -4755,7 +4730,7 @@
    ],
    "representative": "sub_08019850",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08019850.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -4985,7 +4960,7 @@
    ],
    "representative": "sub_0805CA60",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0805CA60.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "mov r7,sb",
@@ -5530,7 +5505,7 @@
    ],
    "representative": "sub_0802C5F0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802C5F0.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "ldrb r0,[r0,#]",
@@ -5651,7 +5626,7 @@
    ],
    "representative": "sub_08039914",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08039914.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -5736,7 +5711,7 @@
    ],
    "representative": "sub_0803C324",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803C324.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -5821,7 +5796,7 @@
    ],
    "representative": "sub_0803C48C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803C354.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -5912,7 +5887,7 @@
    ],
    "representative": "sub_0803C8F0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803C8F0.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "lsls r1,r1,#",
@@ -6164,7 +6139,7 @@
    ],
    "representative": "sub_08037610",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08037610.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -6275,7 +6250,7 @@
    ],
    "representative": "sub_0803A42C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803A42C.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -6372,7 +6347,7 @@
    ],
    "representative": "sub_0803C614",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803C354.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -6429,7 +6404,7 @@
    ],
    "representative": "sub_0803EB7C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803EB7C.c",
+   "exemplar_src": null,
    "shape": [
     "adds r0,#",
     "movs r1,#",
@@ -6593,13 +6568,13 @@
    "id": "F041",
    "n_members": 5,
    "n_unmatched": 0,
-   "n_matched": 0,
+   "n_matched": 5,
    "n_insns": 9,
    "sizes": [
     20
    ],
    "representative": "sub_08071868",
-   "exemplar_is_matched": false,
+   "exemplar_is_matched": true,
    "exemplar_src": null,
    "shape": [
     "ldr r0,[r1,#]",
@@ -6632,35 +6607,35 @@
      "addr": "0x08071868",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm-resident"
+     "status": "matched"
     },
     {
      "name": "sub_0807187C",
      "addr": "0x0807187C",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm-resident"
+     "status": "matched"
     },
     {
      "name": "sub_08071890",
      "addr": "0x08071890",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm-resident"
+     "status": "matched"
     },
     {
      "name": "sub_080718BC",
      "addr": "0x080718BC",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm-resident"
+     "status": "matched"
     },
     {
      "name": "sub_080718D0",
      "addr": "0x080718D0",
      "size": 20,
      "src": "code-0806CFC8.s",
-     "status": "asm-resident"
+     "status": "matched"
     }
    ]
   },
@@ -6726,7 +6701,7 @@
    ],
    "representative": "sub_08013AEC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/hardware.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "ldrh r1,[r0]",
@@ -6790,7 +6765,7 @@
    ],
    "representative": "sub_08017E8C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08017E8C.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -6879,7 +6854,7 @@
    ],
    "representative": "sub_0801DA68",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801DA54.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r2,L",
     "movs r1,#",
@@ -6965,7 +6940,7 @@
    ],
    "representative": "sub_08023DCC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08023DCC.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "lsls r0,r0,#",
@@ -7076,7 +7051,7 @@
    ],
    "representative": "sub_08024274",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08024274.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r2,L",
     "ldr r1,L",
@@ -7152,7 +7127,7 @@
    ],
    "representative": "sub_0802C5B8",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802C5B8.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "lsls r1,r1,#",
@@ -7230,7 +7205,7 @@
    ],
    "representative": "sub_0802C6CC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802C6CC.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -7381,7 +7356,7 @@
    ],
    "representative": "sub_0803C354",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803C354.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -7653,7 +7628,7 @@
    ],
    "representative": "sub_08045848",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08045848.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "ldr r0,[r0]",
@@ -7738,7 +7713,7 @@
    ],
    "representative": "sub_08049BAC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08049BAC.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "ldr r0,[r0]",
@@ -7822,7 +7797,7 @@
    ],
    "representative": "sub_080646BC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080646BC.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "ldr r2,[r1]",
@@ -7889,7 +7864,7 @@
    ],
    "representative": "sub_080670A0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080670A0.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -8055,7 +8030,7 @@
    ],
    "representative": "sub_0800483C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/design-menus.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -8131,7 +8106,7 @@
    ],
    "representative": "sub_08004EDC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08004EDC.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "lsls r2,r2,#",
@@ -8272,7 +8247,7 @@
    ],
    "representative": "sub_080055B8",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080055B8.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "sub sp,#",
@@ -8750,7 +8725,7 @@
    ],
    "representative": "sub_0801295C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801295C.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "ldrb r1,[r0]",
@@ -8816,7 +8791,7 @@
    ],
    "representative": "sub_08013D40",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08013D40.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "movs r0,#",
@@ -8870,7 +8845,7 @@
    ],
    "representative": "sub_08015568",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08015568.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "lsls r0,r0,#",
@@ -8926,7 +8901,7 @@
    ],
    "representative": "sub_08015E80",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08015E80.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "lsls r0,r0,#",
@@ -8995,7 +8970,7 @@
    ],
    "representative": "sub_080199A4",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080199A4.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -9071,7 +9046,7 @@
    ],
    "representative": "sub_0801E0F0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801E0F0.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "movs r0,#",
@@ -9160,7 +9135,7 @@
    ],
    "representative": "sub_0801F050",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801F050.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -9230,7 +9205,7 @@
    ],
    "representative": "sub_0801F06C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0801F050.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",
@@ -9288,7 +9263,7 @@
    ],
    "representative": "sub_080215B8",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080215B8.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -9375,7 +9350,7 @@
    ],
    "representative": "sub_08025CF0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08025CF0.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "ldr r2,[r1]",
@@ -9434,7 +9409,7 @@
    ],
    "representative": "sub_08025D20",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08025D20.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "ldr r2,[r1]",
@@ -9498,7 +9473,7 @@
    ],
    "representative": "sub_0802C4B8",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802C4B8.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -9577,7 +9552,7 @@
    ],
    "representative": "sub_0802C62C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802C62C.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "adds r0,#",
@@ -9666,7 +9641,7 @@
    ],
    "representative": "sub_0802E2BC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0802E2BC.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -9743,7 +9718,7 @@
    ],
    "representative": "sub_08031418",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08031418.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "adds r1,r0,#",
@@ -9989,7 +9964,7 @@
    ],
    "representative": "sub_0803BAFC",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803BAFC.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "bl S",
@@ -10050,7 +10025,7 @@
    ],
    "representative": "sub_0803BB44",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803BB44.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r0,L",
     "ldrb r0,[r0,#]",
@@ -10168,7 +10143,7 @@
    ],
    "representative": "sub_0803C574",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0803C354.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "movs r1,#",
@@ -10358,7 +10333,7 @@
    ],
    "representative": "sub_0804C488",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0804C488.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "lsls r0,r0,#",
@@ -10414,7 +10389,7 @@
    ],
    "representative": "sub_0804D25C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0804D25C.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "lsls r0,r0,#",
@@ -10494,7 +10469,7 @@
    ],
    "representative": "sub_0804D738",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0804D738.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,r5,r6,lr}",
     "sub sp,#",
@@ -10636,7 +10611,7 @@
    ],
    "representative": "sub_0805CB1C",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_0805CB1C.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,r5,r6,r7,lr}",
     "mov r7,sb",
@@ -10788,7 +10763,7 @@
    ],
    "representative": "sub_080604A4",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080604A4.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "movs r0,#",
@@ -10880,7 +10855,7 @@
    ],
    "representative": "sub_080646D4",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080646D4.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,lr}",
     "adds r4,r0,#",
@@ -10980,7 +10955,7 @@
    ],
    "representative": "sub_08064CE0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08064CE0.c",
+   "exemplar_src": null,
    "shape": [
     "ldr r1,L",
     "ldr r2,[r1]",
@@ -11061,7 +11036,7 @@
    ],
    "representative": "sub_080673B0",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_080673B0.c",
+   "exemplar_src": null,
    "shape": [
     "push {r4,r5,lr}",
     "adds r4,r0,#",
@@ -11124,7 +11099,7 @@
    ],
    "representative": "sub_08067A24",
    "exemplar_is_matched": true,
-   "exemplar_src": "src/decomp/c_08067A24.c",
+   "exemplar_src": null,
    "shape": [
     "push {lr}",
     "ldr r0,L",

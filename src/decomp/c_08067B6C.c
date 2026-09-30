@@ -20,16 +20,17 @@ struct Unk67B90Proc
  * source is a single stack word rather than a buffer. Same idiom as
  * src/decomp/c_080688E4.c, down to the `u32` local.
  *
- * The local is written AFTER the sub_08012358 call, which is the source order
+ * The local is written AFTER the SetDefaultColorEffects call, which is the source order
  * -- agbcc had no reason to sink a constant store past a call otherwise. */
-void sub_08067B6C(void)
+void IntroSlidePanel_Cleanup(void)
 {
     u32 zero;
 
-    sub_08012358();
+    SetDefaultColorEffects();
     zero = 0;
     CpuFastSet(&zero, (void *)0x0600E000, 0x01000400);
 }
+asm(".global sub_08067B6C\n.thumb_set sub_08067B6C, IntroSlidePanel_Cleanup\n");
 
 /* Loads one variant's tiles and tilemap. Both tables are indexed by the same
  * proc field, which is re-`ldr`ed for the second lookup because Decompress
@@ -40,9 +41,10 @@ void sub_08067B6C(void)
  * so `(void *)0x06001400` per the c_080116E8.c/c_0803A174.c precedent, while
  * the second goes through the gBG1TilemapBuffer tilemap POINTER and is a real
  * relocation plus a deref. */
-void sub_08067B90(struct Unk67B90Proc *proc)
+void IntroSlidePanel_LoadGraphics(struct Unk67B90Proc *proc)
 {
     Decompress(gUnknown_08581050[proc->unk2c], (void *)0x06001400);
     Decompress(gUnknown_0858105C[proc->unk2c], gBG1TilemapBuffer);
-    sub_08013AFC();
+    BG_EnableSyncBG1();
 }
+asm(".global sub_08067B90\n.thumb_set sub_08067B90, IntroSlidePanel_LoadGraphics\n");

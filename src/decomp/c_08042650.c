@@ -17,7 +17,7 @@
  * 0x08091354, 0x08091358 and 0x0809135C.
  *
  * SETTLED HERE, and none of it should be re-derived:
- *   - gUnknown_030040D8->unk04 is a 7-BIT BITFIELD. sub_08042650 reads it
+ *   - gUnknown_030040D8->unk04 is a 7-BIT BITFIELD. ApplyCaptureProgress reads it
  *     twice off ONE `ldrb` with two different extractions -- `movs r0,#0x7f;
  *     ands r0,r3` where it is only tested against zero, and `lsls r0,r3,#0x19;
  *     lsrs r0,r0,#0x19` where the value is used. No plain-u8 spelling gives
@@ -34,20 +34,20 @@
  *     `((p - base) & 0xc0) >> 6` (asrs #2, mask, asrs #6) and `(p - base) >> 6`
  *     (asrs #8), exactly as src/decomp/c_0802966C.c already had them.
  *   - four callees were promoted but undeclared and are now in
- *     unknown-functions.h; sub_080409E8 is derived from this call site alone
+ *     unknown-functions.h; StartCaptureAnimation is derived from this call site alone
  *     (five arguments, the `str r3,[sp]` being the fifth, and void).
  *   - gUnknown_03003100 is read BOTH ways in one function: `.pos` (u16, the
- *     `ldrh`s feeding address arithmetic and sub_080409E8) and `.spos` (s16,
- *     the `movs rI,#0; ldrsh` pair feeding sub_08024058). The union already
+ *     `ldrh`s feeding address arithmetic and StartCaptureAnimation) and `.spos` (s16,
+ *     the `movs rI,#0; ldrsh` pair feeding CapturePropertyAt). The union already
  *     models this; do not pick one view for the whole function.
  *   - `t` is a `u8` local, not an `int`: `t >> 5` is `lsrs`. That is the
- *     OPPOSITE of the neighbouring sub_08045BF0, whose `>> 6` is `asrs` and
+ *     OPPOSITE of the neighbouring MapEventCond_Army1UnitAtX7Y2, whose `>> 6` is `asrs` and
  *     needs an `int`; check the shift before copying that note.
  *   - `t & 0x1f` must be written INLINE at all three comparison sites. Bound
  *     to a `terr` local it hoists above the `gPlaySt.unk09` test;
  *     inline, CSE keeps it in r3 exactly where the ROM has it.
  */
-void sub_08042650(void)
+void ApplyCaptureProgress(void)
 {
     u8 t;
     int n;
@@ -60,7 +60,7 @@ void sub_08042650(void)
     else
         n = 0;
 
-    n = Div(n * sub_08042F14(gUnknown_030033EC), 100);
+    n = Div(n * GetPlayerCoCaptureRate(gUnknown_030033EC), 100);
 
     {
         struct Map *map;
@@ -70,8 +70,8 @@ void sub_08042650(void)
                     ->rowOffset[gUnknown_03003100.pos.unk02]
                 + gUnknown_03003100.pos.unk00];
     }
-    sub_080424BC();
-    sub_080424E4();
+    ResetCaptureProgressIfMoved();
+    RecordUnitActionCell();
 
     n += gUnknown_030040D8->unk05 >> 3;
     if (n > 0x13)
@@ -95,13 +95,13 @@ do_body:
     {
        if (gPlaySt.animOpts == 1 || (t & 0x1f) == 8
             || (t & 0x1f) == 0x14)
-            sub_080409E8(gUnknown_03003100.pos.unk00,
+            StartCaptureAnimation(gUnknown_03003100.pos.unk00,
                          gUnknown_03003100.pos.unk02,
                          gUnknown_030040D8->unk05 >> 3, n,
                          ((((struct Unit *)gUnknown_030040D8
                             - gUnits) & 0xc0) >> 6) + 1);
         else if (n > 0x13)
-            sub_08041258(((((struct Unit *)gUnknown_030040D8
+            PlayCaptureCompleteSound(((((struct Unit *)gUnknown_030040D8
                             - gUnits) & 0xc0) >> 6) + 1, t & 0x1f);
     }
 after_body:
@@ -112,14 +112,15 @@ after_body:
 
     if ((gUnknown_030040D8->unk05 >> 3) > 0x13)
     {
-        sub_080265B0((((struct Unit *)gUnknown_030040D8
+        AwardCapturePoints((((struct Unit *)gUnknown_030040D8
                        - gUnits) >> 6) + 1, t >> 5);
         gUnknown_030040D8->unk05 &= 7;
         if ((t & 0x1f) == 8 || (t & 0x1f) == 0x14)
             gPlayers[t >> 5].killOnEndTurn = 1;
-        sub_08024058(gUnknown_03003100.spos.unk00,
+        CapturePropertyAt(gUnknown_03003100.spos.unk00,
                      gUnknown_03003100.spos.unk02);
     }
 
-    sub_08028CD8();
+    ParkMapState();
 }
+asm(".global sub_08042650\n.thumb_set sub_08042650, ApplyCaptureProgress\n");

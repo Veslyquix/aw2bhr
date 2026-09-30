@@ -7,7 +7,7 @@
  * sub_0805198C @ 0x0805198C, sub_08051A44 @ 0x08051A44, sub_08051B30 @ 0x08051B30
  */
 
-void sub_0805198C(u16 a, u16 b)
+void SpawnFireEffect(u16 a, u16 b)
 {
     u16 t;
     int f;
@@ -24,13 +24,14 @@ void sub_0805198C(u16 a, u16 b)
             gUnknown_020297C0[a].unk18, gUnknown_020297C0[a].unk20, f);
     }
 }
+asm(".global sub_0805198C\n.thumb_set sub_0805198C, SpawnFireEffect\n");
 
-void sub_08051A44(void)
+void FireEffect_Init(void)
 {
     struct OamData oam;
     int tile;
 
-    sub_0801566C(gUnknown_03001FBC, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(gUnknown_03001FBC, (struct UnkVec *)&oam);
     gUnknown_03001470[gUnknown_03001FBC].unk30 = gUnknown_0300453C;
     gUnknown_03001470[gUnknown_03001FBC].unk34 = gUnknown_0300451C;
     oam.hFlip = gUnknown_0300453C ^ 1;
@@ -38,13 +39,14 @@ void sub_08051A44(void)
     tile = gUnknown_020297C0[gUnknown_0300453C].unk00;
     oam.tileNum = tile;
     oam.priority = 3;
-    sub_08015608(gUnknown_03001FBC, *(struct UnkVec *)&oam);
-    sub_08050528(gUnknown_0300453C, gUnknown_03001FBC,
+    SetSlotSpriteAttrs(gUnknown_03001FBC, *(struct UnkVec *)&oam);
+    SetEffectScreenPosition(gUnknown_0300453C, gUnknown_03001FBC,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].x,
         gUnknown_02029A10[gUnknown_0300453C].entries[gUnknown_0300451C].y);
 }
+asm(".global sub_08051A44\n.thumb_set sub_08051A44, FireEffect_Init\n");
 
-void sub_08051B30(void)
+void FireEffect_Loop(void)
 {
     u16 a;
     u16 b;
@@ -52,15 +54,16 @@ void sub_08051B30(void)
     a = gUnknown_03001470[gUnknown_03001FBC].unk30;
     b = gUnknown_03001470[gUnknown_03001FBC].unk34;
 
-    sub_08050528(a, gUnknown_03001FBC,
+    SetEffectScreenPosition(a, gUnknown_03001FBC,
         gUnknown_02029A10[a].entries[b].x,
         gUnknown_02029A10[a].entries[b].y);
 
     if (gUnknown_020297C0[a].unk0c[b] == 1)
     {
-        if (gUnknown_03001FBC != -1 && sub_080153F0(gUnknown_03001FBC))
+        if (gUnknown_03001FBC != -1 && IsSlotScriptActiveAt(gUnknown_03001FBC))
             sub_080156E8(gUnknown_03001FBC, gUnknown_020297C0[a].unk1c);
 
         gUnknown_020297C0[a].unk0c[b] = 0;
     }
 }
+asm(".global sub_08051B30\n.thumb_set sub_08051B30, FireEffect_Loop\n");

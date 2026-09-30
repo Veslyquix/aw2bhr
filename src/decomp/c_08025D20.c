@@ -12,14 +12,16 @@
  * incremented value in its own pseudo for a read-modify-write on a MEM, and
  * coalesces it away when the source names a local instead.
  */
-void sub_08025D20(int index)
+void IncrementPlayerUnitsCreated(int index)
 {
     if (gPlayers[index].unitCount != 0xff)
         gPlayers[index].unitCount++;
 }
+asm(".global sub_08025D20\n.thumb_set sub_08025D20, IncrementPlayerUnitsCreated\n");
 
-void sub_08025D40(int index)
+void IncrementPlayerUnitsLost(int index)
 {
     if (gPlayers[index].unitsLost != 0xff)
         gPlayers[index].unitsLost++;
 }
+asm(".global sub_08025D40\n.thumb_set sub_08025D40, IncrementPlayerUnitsLost\n");

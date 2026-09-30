@@ -9,7 +9,7 @@
 
 #include "hardware.h"
 
-void sub_08075AC4(int a1, int a2)
+void StepBank15WhiteFade(int a1, int a2)
 {
     int i;
     int n;
@@ -57,5 +57,6 @@ void sub_08075AC4(int a1, int a2)
         n--;
     }
 
-    sub_080135A4();
+    EnablePaletteSync();
 }
+asm(".global sub_08075AC4\n.thumb_set sub_08075AC4, StepBank15WhiteFade\n");

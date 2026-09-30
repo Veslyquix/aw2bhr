@@ -9,7 +9,7 @@
 
 #include "hardware.h"
 
-/* The `(u16)` cast on sub_080261A0's result is load-bearing and is NOT the
+/* The `(u16)` cast on GetUnitSheetFrameTileCount's result is load-bearing and is NOT the
  * same thing as declaring the callee `u16`: agbcc trusts a narrow RETURN
  * TYPE to have been narrowed by the callee and emits nothing, while an
  * explicit cast leaves both operands of the `&` in their own pseudos --
@@ -23,51 +23,51 @@ void LoadGameplayGraphics(int a)
     sub_08011B18();
 
     if (a == 1)
-        sub_08010FE0();
+        ForceScreenBlack();
 
     if (a == 0)
-        sub_08011018();
+        ForceScreenWhite();
 
-    sub_08012C58(gUnknown_0849D16C);
-    sub_08023860();
-    sub_080128D0();
+    SetupBackgrounds(gUnknown_0849D16C);
+    UpdateMapBgScroll();
+    FlushLCDControl();
 
-    sub_08011C68(gUnknown_0809175C, (void *)0x06003600, 0xa0);
-    sub_08011C68(sub_08026190(), (void *)0x060046A0, ((u16)sub_080261A0() & 0x3ff) * 0x20);
-    sub_08011C68(sub_08026198(), (void *)0x06005440, 0x200);
+    CpuCopyAuto(gUnknown_0809175C, (void *)0x06003600, 0xa0);
+    CpuCopyAuto(GetUnitSheetGraphics(), (void *)0x060046A0, ((u16)GetUnitSheetFrameTileCount() & 0x3ff) * 0x20);
+    CpuCopyAuto(GetUnitExtraGraphics(), (void *)0x06005440, 0x200);
 
     Decompress(gUnknown_080BD1EC, (void *)0x06008000);
 
-    sub_08011C68(gUnknown_0809175C + 0xa0, (void *)0x0600E780, 0x20);
-    sub_08011C68(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
-    sub_08011C68(gBG1TilemapBuffer, (void *)0x0600F000, 0x800);
-    sub_08011C68(gBG2TilemapBuffer, (void *)0x06007800, 0x800);
+    CpuCopyAuto(gUnknown_0809175C + 0xa0, (void *)0x0600E780, 0x20);
+    CpuCopyAuto(gBG0TilemapBuffer, (void *)0x06007000, 0x800);
+    CpuCopyAuto(gBG1TilemapBuffer, (void *)0x0600F000, 0x800);
+    CpuCopyAuto(gBG2TilemapBuffer, (void *)0x06007800, 0x800);
 
     ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[1].teamColor - 1) * 0x20), 12);
     ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[2].teamColor - 1) * 0x20), 13);
     ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[3].teamColor - 1) * 0x20), 14);
     ApplyPalette((u16 *)(gUnknown_0810E6E0 + (gPlayers[4].teamColor - 1) * 0x20), 15);
 
-    sub_0803F80C(8);
+    LoadArmyObjPalettes(8);
     sub_0802D2EC();
 
     ApplyPalette(gUnknown_0809163C, 18);
 
     sub_08037150(0x1a6);
-    sub_08024268();
-    sub_08022A08();
+    RebuildMapUnitLayers2();
+    HideRangeOverlay();
 
-    sub_08011C68(gBG3TilemapBuffer, (void *)0x0600F800, 0x800);
+    CpuCopyAuto(gBG3TilemapBuffer, (void *)0x0600F800, 0x800);
 
-    sub_08035568();
+    ClearMoveSlideSlots();
     sub_080116E8();
     LoadWeatherData();
-    sub_08035020(gPlaySt.weather);
-    sub_08022A34();
+    ApplyWeatherPalette(gPlaySt.weather);
+    LoadCursorSpriteGraphics();
 
-    sub_0801A5B0(gUnknown_030033EC);
-    sub_08043834(gUnknown_030033EC);
-    sub_0801A57C(gUnknown_030033EC);
+    LoadBg1WindowFrame(gUnknown_030033EC);
+    LoadCoPanelGraphics(gUnknown_030033EC);
+    LoadArmyObjPalette(gUnknown_030033EC);
 }
 
 asm(".global sub_08023360\n.thumb_set sub_08023360, LoadGameplayGraphics\n");

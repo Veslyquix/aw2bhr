@@ -7,14 +7,6 @@
  * LoadWeatherData @ 0x080354FC
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x080354FC.
- * LoadWeatherData @ 0x080354FC
- */
-
-
 /* Family F005 (data/families.json): 19 sixteen-byte wrappers shaped
  * `push {lr}; bl S; bl S; pop {r0}; bx r0` -- two calls, nothing between
  * them, `pop {r0}` so void.
@@ -29,8 +21,8 @@
  * alias below so every other unit keeps resolving it unchanged. */
 void LoadWeatherData(void)
 {
-    sub_08035224();
-    sub_08035354();
+    InitSnowParticles();
+    InitRainParticles();
 }
 
 asm(".global sub_080354FC\n.thumb_set sub_080354FC, LoadWeatherData\n");

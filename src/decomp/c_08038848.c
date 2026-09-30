@@ -8,13 +8,6 @@
  * sub_08038848 @ 0x08038848
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08038848.
- * sub_08038848 @ 0x08038848
- */
-
 /* Pushes one (x, y) step onto the gUnknown_0849D5F8 move stack and records the
  * fuel left after it: unk20/unk2c are the parallel coordinate tables the
  * wave-32 split of that struct predicted, unk38 is the running cost, and the
@@ -45,7 +38,7 @@
  *     the same expression. Inlining it into the subscript swaps r1 and r2 in
  *     the last block (6 bytes), and reversing the two addends reschedules the
  *     gUnknown_085D5ABC lookup ahead of the cell read. */
-void sub_08038848(s8 a, s8 b)
+void PushMovePathStep(s8 a, s8 b)
 {
     struct Map *map;
     s8 *costs;
@@ -77,3 +70,4 @@ void sub_08038848(s8 a, s8 b)
 
     *cur = *prev - costs[c];
 }
+asm(".global sub_08038848\n.thumb_set sub_08038848, PushMovePathStep\n");

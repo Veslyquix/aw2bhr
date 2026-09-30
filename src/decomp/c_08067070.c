@@ -8,21 +8,22 @@
  */
 
 /* The gUnknown_08580DD8 slot script's third wrapper, alongside the
- * sub_080670A0/sub_080670BC installer pair. gUnknown_0202F200 is the same 0/1
+ * StartMatchSetupScreen/sub_080670BC installer pair. gUnknown_0202F200 is the same 0/1
  * mode flag those two set, and here it GUARDS the removal: the mode-0 slot is
- * torn down (and sub_080658AC run first), the mode-1 slot is left alone.
+ * torn down (and MatchSetupUnpackRuleIndices run first), the mode-1 slot is left alone.
  *
  * `pop {r0}` fixes this as void even though sub_0801537C returns an int, so
  * both calls are bare statements. */
 
-void sub_08067070(void)
+void MatchSetupScreen_Finish(void)
 {
     sub_080733B8();
     sub_0801537C(gUnknown_08580CC4);
 
     if (gUnknown_0202F200 == 0)
     {
-        sub_080658AC();
+        MatchSetupUnpackRuleIndices();
         sub_0801537C(gUnknown_08580DD8);
     }
 }
+asm(".global sub_08067070\n.thumb_set sub_08067070, MatchSetupScreen_Finish\n");

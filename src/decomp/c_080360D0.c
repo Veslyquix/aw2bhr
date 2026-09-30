@@ -32,7 +32,7 @@ struct Unk360D0Proc
     /* 0x4c */ u8 unk4c[0x14];
 };
 
-void sub_080360D0(ProcPtr procArg)
+void RunMoveSlideCommand(ProcPtr procArg)
 {
     struct Unk360D0Proc *proc = procArg;
     u16 cmd;
@@ -50,30 +50,30 @@ void sub_080360D0(ProcPtr procArg)
             return;
 
         case 10:
-            sub_08036024(proc);
+            PlayMoveSlideStopSfx(proc);
             proc->unk35 = 5;
             sub_08027278(proc->unk42 >> 4, proc->unk44 >> 4);
-            sub_0803B4DC(0x7d);
+            PlayMusicOrSfx2(0x7d);
             if (gPlaySt.savingEnabled != 0
                 && gUnknown_030032D8 != 0x13
                 && (u8)sub_0805C974() == 0)
-                sub_08034534(2, proc->unk30 - gUnits, 0, 0);
+                SendActionCommand(2, proc->unk30 - gUnits, 0, 0);
             return;
 
         case 4:
-            sub_0803647C(proc);
+            StopMoveSlideWalk(proc);
             return;
 
         case -1:
-            sub_08036024(proc);
-            sub_08035828((struct Unk35828Proc *)proc);
+            PlayMoveSlideStopSfx(proc);
+            EndMoveSlide((struct Unk35828Proc *)proc);
             return;
 
         case 0:
         case 1:
         case 2:
         case 3:
-            sub_080360A4(proc);
+            PlayMoveSlideStepSfx(proc);
             proc->unk39++;
             if ((gPlayers[gUnknown_030033EC].turnState & 2) == 0)
             {
@@ -86,7 +86,7 @@ void sub_080360D0(ProcPtr procArg)
             }
             if ((s16)cmd != proc->unk38)
             {
-                sub_0801C4D4(proc->unk2c, (s16)cmd);
+                AP_SwitchAnimation(proc->unk2c, (s16)cmd);
                 proc->unk38 = cmd;
                 proc->unk35 = 2;
             }
@@ -99,10 +99,11 @@ void sub_080360D0(ProcPtr procArg)
             cmd = (u32)(cmd * 0x10000 + 0xfffb0000) >> 16;
             if ((s16)cmd != proc->unk38)
             {
-                sub_0801C4D4(proc->unk2c, (s16)cmd);
+                AP_SwitchAnimation(proc->unk2c, (s16)cmd);
                 proc->unk38 = cmd;
             }
             break;
         }
     }
 }
+asm(".global sub_080360D0\n.thumb_set sub_080360D0, RunMoveSlideCommand\n");

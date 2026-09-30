@@ -8,7 +8,7 @@
  * sub_08020DBC @ 0x08020DBC
  */
 
-bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
+bool8 IsCellVisibleToArmy(u8 a1, u8 x, u8 y)
 {
   struct Map **mapPtr;
   int new_var2;
@@ -43,19 +43,19 @@ bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
   }
   if (x != 0)
   {
-    n = sub_08025744(x - 1, y);
+    n = IsVisibleAllyUnitAtCell(x - 1, y);
   }
   if (y != 0)
   {
-    n += sub_08025744(x, y - 1);
+    n += IsVisibleAllyUnitAtCell(x, y - 1);
   }
   if (x < ((*mapPtr)->width - 1))
   {
-    n += sub_08025744(x + 1, y);
+    n += IsVisibleAllyUnitAtCell(x + 1, y);
   }
   if (y < ((*mapPtr)->height - 1))
   {
-    n += sub_08025744(x, y + 1);
+    n += IsVisibleAllyUnitAtCell(x, y + 1);
   }
   if (n != 0)
   {
@@ -73,3 +73,4 @@ bool8 sub_08020DBC(u8 a1, u8 x, u8 y)
   }
   return 0;
 }
+asm(".global sub_08020DBC\n.thumb_set sub_08020DBC, IsCellVisibleToArmy\n");

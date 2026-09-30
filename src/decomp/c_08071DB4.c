@@ -26,7 +26,7 @@
  * across the insert (it comes back as a dead `orrs r1, r3`), which shuffles
  * the whole allocation and pushes an extra literal into the pool. Same
  * family as the wave-15 rule -- a probe agreeing about two spellings is
- * evidence about the PROBE's context, not a general fact. sub_0807F2FC, two
+ * evidence about the PROBE's context, not a general fact. CoSelectConfirm_BeginFadeToWhite, two
  * functions along, matches with either spelling, so this is not a property
  * of the symbol.
  *
@@ -41,7 +41,7 @@ struct Unk08071DB4
     /* 0x66 */ u16 unk66;
 };
 
-void sub_08071DB4(struct Unk08071DB4 *proc)
+void FadeFromBlack_OnInitUnused(struct Unk08071DB4 *proc)
 {
     gUnknown_030030A4.bits.win0_enable_blend = 1;
     gUnknown_030030A4.bits.win1_enable_blend = 1;
@@ -61,3 +61,4 @@ void sub_08071DB4(struct Unk08071DB4 *proc)
     proc->unk64 = 0x10;
     proc->unk66 = 0x100;
 }
+asm(".global sub_08071DB4\n.thumb_set sub_08071DB4, FadeFromBlack_OnInitUnused\n");

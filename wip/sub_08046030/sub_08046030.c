@@ -53,6 +53,17 @@ struct Unk46030Map
 
 #define MAP ((struct Unk46030Map *)gUnknown_08499590)
 
+/* Draws one icon row of the tally page with the shared text buffer.
+ *
+ * gBG0TilemapBuffer is the same variable as gUnknown_08499578 (the linker
+ * script defines it as an alias). Naming it by the second name here keeps the
+ * compiler from reusing the earlier address load for these calls, as the ROM
+ * does not. */
+static inline void DrawIcon(int x, int y, int id)
+{
+    sub_08014A5C(x, y, gBG0TilemapBuffer, id, 0x8000, 0);
+}
+
 void sub_08046030(void)
 {
     s16 i;
@@ -110,11 +121,11 @@ void sub_08046030(void)
     a = gUnknown_03004080 <= 9 ? 0x18 : 0x17;
     if (gUnknown_03004080 <= 0x63)
         a++;
-    sub_08014A5C(a, 2, gUnknown_08499578, 0x967, 0x8000, 0);
-    sub_08014A5C(2, 6, gUnknown_08499578, 0x95d, 0x8000, 0);
-    sub_08014A5C(8, 6, gUnknown_08499578, 0x95e, 0x8000, 0);
-    sub_08014A5C(0xf, 6, gUnknown_08499578, 0x968, 0x8000, 0);
-    sub_08014A5C(0x16, 6, gUnknown_08499578, 0x96e, 0x8000, 0);
+    DrawIcon(a, 2, 0x967);
+    DrawIcon(2, 6, 0x95d);
+    DrawIcon(8, 6, 0x95e);
+    DrawIcon(0xf, 6, 0x968);
+    DrawIcon(0x16, 6, 0x96e);
 
     y = 8;
     for (k = 1; k <= sub_080248F8(); k++)
@@ -165,7 +176,7 @@ void sub_08046030(void)
             }
             else
             {
-                if ((gPlaySt.turnLimit | gPlaySt.captureLimit) != 0)
+                if ((gPlaySt.captureLimit | gPlaySt.turnLimit) != 0)
                 {
                     sub_08014B0C(0xd, (s16)y, gUnknown_08499578,
                                  gPlayers[k].captures, 0x8000, v);
@@ -187,7 +198,7 @@ void sub_08046030(void)
     }
 
     if (gPlaySt.fog == 0
-     || (gPlaySt.turnLimit | gPlaySt.captureLimit) != 0)
+     || (gPlaySt.captureLimit | gPlaySt.turnLimit) != 0)
         sub_08014B0C(0xd, 0x10, gUnknown_08499578, gPlayers->captures,
                      0x8000, 0);
     else

@@ -93,7 +93,7 @@ struct Unk8077304Proc
     /* 0x44 */ int unk44;
 };
 
-void sub_08077304(struct Unk8077304Proc * proc)
+void WorldMapMissionInfo_Init(struct Unk8077304Proc * proc)
 {
     int i;
     int j;
@@ -108,10 +108,10 @@ void sub_08077304(struct Unk8077304Proc * proc)
     u32 d;
 
     gUnknown_0300064C = 0;
-    sub_08063980(0xa0);
-    sub_080638D0((int)sub_080771F0);
-    sub_08072C40(0, 0, 0);
-    sub_08072C40(2, 0, 0);
+    SetVCountCompareLine(0xa0);
+    SetVCountInterruptHandler((int)SplitScroll_BottomHandler);
+    SetBgScrollShadow(0, 0, 0);
+    SetBgScrollShadow(2, 0, 0);
 
     proc->unk34 = (s16)gUnknown_08615194[gUnknown_0202FDFC.unk0c].mapID;
     proc->unk2c = gUnknown_085C77A0[proc->unk34].unk18;
@@ -120,7 +120,7 @@ void sub_08077304(struct Unk8077304Proc * proc)
     if (gUnknown_08615194[gUnknown_0202FDFC.unk0c].coSelect == NULL)
     {
         arg = gUnknown_085C77A0[proc->unk34].unk3c[0];
-        sub_08043E3C(arg,
+        LoadCoFace(arg,
                      (void *)(0x060008C0 + (gUnknown_03002B6C.bits.chr_block << 14)),
                      1);
         proc->unk3c = 1;
@@ -139,7 +139,7 @@ void sub_08077304(struct Unk8077304Proc * proc)
         if (gUnknown_085C77A0[proc->unk34].unk40[i] == 5)
         {
             arg = gUnknown_085C77A0[proc->unk34].unk3c[i];
-            sub_08043FA8(arg,
+            LoadCoMiniPortrait(arg,
                          (void *)0x06011300, 0x12);
         }
     }
@@ -166,33 +166,34 @@ void sub_08077304(struct Unk8077304Proc * proc)
         if (j != 0)
         {
             sub_0801F114();
-            sub_0801F150(4,
+            InitTilePool(4,
                          (void *)(0x06000000 + (gUnknown_03002B6C.bits.chr_block << 14)),
                          0x6a, 2);
-            sub_0801F234(gUnknown_086145CE[j]);
+            LoadTilePoolGraphic(gUnknown_086145CE[j]);
 
             p = gBG0TilemapBuffer;
 
             for (k = 0; k < 4; k++)
                 p[0x29a + k] = 0x29 + k;
 
-            sub_0801F2AC(gUnknown_086145CE[j], gBG0TilemapBuffer + 0x2bc);
+            PutTilePoolGraphicTilemap(gUnknown_086145CE[j], gBG0TilemapBuffer + 0x2bc);
         }
     }
 
     if (proc->unk3c != 0)
-        sub_08077140(gUnknown_08551A00 + 1, 0x46, 1);
+        PutTileBlock6x6(gUnknown_08551A00 + 1, 0x46, 1);
     else
-        sub_08077180(gUnknown_08551A00 + 0x41, 0x46, 1);
+        PutTileBlock6x4(gUnknown_08551A00 + 0x41, 0x46, 1);
 
     q = gBG0TilemapBuffer;
 
     for (m = 0; m < 4; m++)
         q[0x281 + m] = 0x2e + m;
 
-    sub_080772B8((struct Unk080772B8 *)(gBG0TilemapBuffer + 0x280));
+    WorldMapMissionInfo_DrawPropertyCounts((struct Unk080772B8 *)(gBG0TilemapBuffer + 0x280));
     sub_080718F8(gUnknown_08551A04 + 0x20, gUnknown_081D2330, 0x360);
     sub_080718F8(gBG2TilemapBuffer + 0x280, gUnknown_081D249C, 0x360);
 
     proc->unk44 = 0;
 }
+asm(".global sub_08077304\n.thumb_set sub_08077304, WorldMapMissionInfo_Init\n");

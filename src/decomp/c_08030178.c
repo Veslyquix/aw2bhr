@@ -9,13 +9,13 @@
 
 #include "hardware.h"
 
-void sub_08030178(void)
+void LinkRestartKeySync(void)
 {
     int i;
 
     gUnknown_0849B01C->unk00++;
     gUnknown_0849B01C->unk00 &= 7;
-    sub_08013434();
+    InitKeySt();
     REG_IME = 0;
     for (i = 0; i < 4; i++)
         gUnknown_0849B01C->unk08[0][i] |= 0xFFFF;
@@ -24,8 +24,9 @@ void sub_08030178(void)
     gUnknown_0849B01C->unk04 = 1;
     REG_IME = 1;
 }
+asm(".global sub_08030178\n.thumb_set sub_08030178, LinkRestartKeySync\n");
 
-void sub_080301E8(void)
+void LinkKeySyncPopRow(void)
 {
     int i;
 
@@ -34,3 +35,4 @@ void sub_080301E8(void)
     gUnknown_0849B01C->unk05++;
     gUnknown_0849B01C->unk05 &= 0x3F;
 }
+asm(".global sub_080301E8\n.thumb_set sub_080301E8, LinkKeySyncPopRow\n");

@@ -9,13 +9,14 @@
 
 #include "hardware.h"
 
-/* sub_08045358 with every proc field replaced by a ROM constant -- same five
+/* CoPowerOverlay_Init with every proc field replaced by a ROM constant -- same five
  * calls in the same order. */
-void sub_080453CC(void)
+void CoPowerOverlayFixed_Init(void)
 {
     Decompress(gUnknown_08112704, (void *)(gUnknown_03002B6C.bits.chr_block * 0x4000 + 0x06005600));
     Decompress(gUnknown_0811315C, gBG0TilemapBuffer);
-    sub_08012B00(gBG0TilemapBuffer, 0x800, 0x82b0);
+    AddToHalfwords(gBG0TilemapBuffer, 0x800, 0x82b0);
     ApplyPaletteExt(gUnknown_08113BA0, 0x100, 0x20);
-    sub_08013AEC();
+    BG_EnableSyncBG0();
 }
+asm(".global sub_080453CC\n.thumb_set sub_080453CC, CoPowerOverlayFixed_Init\n");

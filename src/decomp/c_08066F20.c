@@ -7,7 +7,7 @@
  * sub_08066F20 @ 0x08066F20
  */
 
-void sub_08066F20(void)
+void MatchSetupShowHelpText(void)
 {
     u16 id;
 
@@ -37,8 +37,9 @@ void sub_08066F20(void)
     if (id != gUnknown_08580934->unk2e)
     {
         sub_08014878();
-        sub_08012BC8(gBG0TilemapBuffer, 3, 0x11, 0x1a, 3, 0);
-        sub_08014740(3, 0x11, gBG0TilemapBuffer, id, 0x3000, 0x100)->unk3a = 2;
+        FillTilemapRect(gBG0TilemapBuffer, 3, 0x11, 0x1a, 3, 0);
+        StartTextBox(3, 0x11, gBG0TilemapBuffer, id, 0x3000, 0x100)->unk3a = 2;
         gUnknown_08580934->unk2e = id;
     }
 }
+asm(".global sub_08066F20\n.thumb_set sub_08066F20, MatchSetupShowHelpText\n");

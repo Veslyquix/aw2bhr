@@ -8,7 +8,7 @@
  */
 
 /* MATCHED. The representative of the wave-17 shape cluster
- * sub_08051DE0 / sub_080524C0 / sub_0805297C: rebuild the OBJ attributes of
+ * SmokeEffect_Init / SplashEffect_Init / BattleAnimExplosion_Init: rebuild the OBJ attributes of
  * the current gUnknown_03001470 slot, then re-place the sprite at a position
  * summed from three tables. The two siblings differ only in an extra
  * `unk28 = 0`, the paletteNum source and the priority constant.
@@ -19,7 +19,7 @@
  *    the same semantics and all three emit the same `ldrh`, but only the `int`
  *    temp produces the ROM's `ldr r2,=0x3FF; adds r0,r2,#0; ands r1,r0` --
  *    the bare expression and a `u16` temp both drop the register copy and come
- *    out two bytes short. Same discriminator as the matched sub_0804D928,
+ *    out two bytes short. Same discriminator as the matched CruiserPart2_Init,
  *    whose value arrives from arithmetic rather than a load.
  *
  *  - gUnknown_08552D80 and gUnknown_085D7E28 are STRUCT arrays, not `u16
@@ -33,14 +33,14 @@
  *    order (agbcc expands the addresses in source order and issues the loads in
  *    the opposite one), which shows up as gUnknown_08552D80's pool word landing
  *    ahead of gUnknown_02029A10's. */
-void sub_08051DE0(void)
+void SmokeEffect_Init(void)
 {
     struct OamData oam;
     int tile;
     u16 x;
     u16 y;
 
-    sub_0801566C(gUnknown_03001FBC, (struct UnkVec *)&oam);
+    CopySlotSpriteAttrs(gUnknown_03001FBC, (struct UnkVec *)&oam);
 
     gUnknown_03001470[gUnknown_03001FBC].unk30 = gUnknown_0300453C;
     gUnknown_03001470[gUnknown_03001FBC].unk34 = gUnknown_0300451C;
@@ -57,6 +57,7 @@ void sub_08051DE0(void)
         + gUnknown_08552D80[gUnknown_02029808[gUnknown_0300453C].unk30[gUnknown_0300451C]].unk06
         + gUnknown_085D7E28[gUnknown_03004580[gUnknown_0300453C][1]][gUnknown_0300451C].unk04;
 
-    sub_08015608(gUnknown_03001FBC, *(struct UnkVec *)&oam);
-    sub_08050528(gUnknown_0300453C, gUnknown_03001FBC, x, y);
+    SetSlotSpriteAttrs(gUnknown_03001FBC, *(struct UnkVec *)&oam);
+    SetEffectScreenPosition(gUnknown_0300453C, gUnknown_03001FBC, x, y);
 }
+asm(".global sub_08051DE0\n.thumb_set sub_08051DE0, SmokeEffect_Init\n");

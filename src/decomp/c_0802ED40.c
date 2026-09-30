@@ -4,10 +4,10 @@
  * identical to the original. Order is address order and must
  * stay that way -- the linker places this file's .text as one
  * contiguous block at 0x0802ED40.
- * sub_0802ED40 @ 0x0802ED40
+ * SioHandleIrq_Serial @ 0x0802ED40
  */
 
-/* sub_0802ED40 @ 0x0802ED40 -- the serial (multiplayer) interrupt body.
+/* SioHandleIrq_Serial @ 0x0802ED40 -- the serial (multiplayer) interrupt body.
  *
  * PROMOTION NEEDS A "rodata" ENTRY.  Three `-fforce-addr` address constants
  * live in this function's own .rodata and the ROM homes them at
@@ -28,7 +28,7 @@
 #include "hardware.h"
 /* A volatile view of struct Unk0849B01C's unk08 row array.  The member itself
  * cannot carry the qualifier -- see the note in include/unknown-globals.h:
- * sub_08030178's `unk08[0][i] |= 0xffff` goes +4 bytes if it does -- but the
+ * LinkRestartKeySync's `unk08[0][i] |= 0xffff` goes +4 bytes if it does -- but the
  * ROM's plain row store here carries the dead `ldrh` of the destination that
  * only a volatile AGGREGATE lvalue produces.  A `(volatile u16 *)` cast on the
  * row pointer is NOT equivalent: it folds the 0x8 into the store displacement
@@ -39,7 +39,7 @@ struct Unk0849B01CRows
     /* 0x008 */ volatile u16 unk08[64][4];
 };
 
-void sub_0802ED40(void)
+void SioHandleIrq_Serial(void)
 {
     u16 buf[4];
     u16 v;
@@ -69,7 +69,7 @@ void sub_0802ED40(void)
                     gUnknown_0849B018->unk0a[i] = 1;
                 gUnknown_0849B018->unk08 |= 1 << i;
             }
-            if (sub_0802F460(i) == 1)
+            if (SioIsPlayerLinked(i) == 1)
             {
                 if (gUnknown_0849B018->unk0e[i] == 0xFFFF)
                     gUnknown_0849B018->unk16[i]++;
@@ -91,17 +91,17 @@ void sub_0802ED40(void)
                     v = gUnknown_02025818[gUnknown_030040CC];
                     gUnknown_030040CC++;
                     gUnknown_030040CC &= 0x1FF;
-                    sub_0802F8FC(&v, 1);
+                    SioSend16(&v, 1);
                 }
                 if ((gUnknown_03000564 & 0xC000) == 0xC000
                  && gUnknown_0300055C == 0
                  && gUnknown_03003F6C->unk0a != 0)
-                    sub_0802ECEC(gUnknown_03003F6C->unk0a);
+                    SioStartTimer3(gUnknown_03003F6C->unk0a);
                 break;
             case 2:
                 if (gUnknown_0849B018->unk06 != 0)
                 {
-                    sub_0802F8FC((u16 *)&gUnknown_0849B01C->unk06, 1);
+                    SioSend16((u16 *)&gUnknown_0849B01C->unk06, 1);
                     gUnknown_0849B01C->unk06 = 0x5FFF;
                 }
                 for (i = 0; i < 4; i++)
@@ -112,12 +112,12 @@ void sub_0802ED40(void)
             case 3:
                 if (gUnknown_0849B018->unk06 != 0)
                 {
-                    sub_0802F8FC((u16 *)&gUnknown_0849B01C->unk06, 1);
+                    SioSend16((u16 *)&gUnknown_0849B01C->unk06, 1);
                     gUnknown_0849B01C->unk06 = 0x5FFF;
                 }
                 for (i = 0; i < 4; i++)
                 {
-                    if (sub_0802F460(i) && buf[i] != 0x9ABC)
+                    if (SioIsPlayerLinked(i) && buf[i] != 0x9ABC)
                         count++;
                 }
                 if (count == 0)
@@ -128,3 +128,5 @@ void sub_0802ED40(void)
     }
     gUnknown_0300333C = 0;
 }
+
+asm(".global sub_0802ED40\n.thumb_set sub_0802ED40, SioHandleIrq_Serial\n");

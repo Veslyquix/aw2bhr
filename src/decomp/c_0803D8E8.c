@@ -8,7 +8,7 @@
  */
 
 #include "proc.h"
-/* Runs the callback sub_0803D73C parked at +0x4c. `bl _call_via_r0` is a
+/* Runs the callback StartSaveScreen parked at +0x4c. `bl _call_via_r0` is a
  * NULLARY indirect call -- gcc puts the pointer in the first free scratch
  * register, so r0 means no arguments. */
 struct UnkD8E8Proc
@@ -18,20 +18,22 @@ struct UnkD8E8Proc
     /* 4c */ void (*unk4c)(void);
 };
 
-void sub_0803D8E8(struct UnkD8E8Proc *proc)
+void SaveScreen_RunCallback(struct UnkD8E8Proc *proc)
 {
     if (proc->unk4c != NULL)
         proc->unk4c();
 }
+asm(".global sub_0803D8E8\n.thumb_set sub_0803D8E8, SaveScreen_RunCallback\n");
 
-/* Reads the byte sub_0803D8C0/sub_0803D92C stashed at struct Unk0200C528's
+/* Reads the byte SaveScreen_StartMessage/SaveScreenCampaign_StartMessage stashed at struct Unk0200C528's
  * +0x10 -- signed for the `== 6` test (`ldrsb`), then re-loaded `ldrb` as
- * sub_08016C70's `u8` argument. The two loads are the member's own s8 type and
+ * DeleteSuspendSave's `u8` argument. The two loads are the member's own s8 type and
  * a cast at the second use. */
-void sub_0803D8F8(struct Unk0200C528 *p)
+void SaveMessage_CommitProgress(struct Unk0200C528 *p)
 {
     if (p->unk10 == 6)
-        sub_08016E14();
+        WriteProfile();
     else
-        sub_08016C70(p->unk10);
+        DeleteSuspendSave(p->unk10);
 }
+asm(".global sub_0803D8F8\n.thumb_set sub_0803D8F8, SaveMessage_CommitProgress\n");

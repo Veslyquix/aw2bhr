@@ -53,7 +53,7 @@ struct Unk60F00Tbl
  * Counts the entries of the 0xFF-terminated gUnknown_085766E4 list that name
  * class `a1` and have not been marked consumed. The 4-byte stride, the 0xFF
  * terminator on unk00 and the 0xFE "consumed" marker on unk03 are all
- * sub_08061668's -- see src/decomp/c_08061668.c, the writer this reader pairs
+ * AiPickBestScoredBuildSite's -- see src/decomp/c_08061668.c, the writer this reader pairs
  * with, which sets unk03 = 0xFE on the record it claims.
  *
  * The walk is a POINTER local here where c_08061668.c needed the subscript
@@ -119,7 +119,7 @@ asm(".global sub_08060F00\n.thumb_set sub_08060F00, AiCalcBuildPriorities\n");
  * which is sizeof(struct PlayerStruct) -- the same subscript
  * src/decomp/c_080610D0.c already writes as
  * `gPlayers[gUnknown_030033EC].unk00`, against the same
- * `GetCoPriceMultiplier(gUnknown_030033EC, type) * 10`. `bls` is unsigned because that
+ * `GetUnitCostWithCoBonus(gUnknown_030033EC, type) * 10`. `bls` is unsigned because that
  * member is, and gUnknown_030033EC is re-read for the subscript rather than
  * CSEd because it is named twice in the source.
  *
@@ -133,7 +133,7 @@ void AiMarkAffordableUnits(void)
     for (i = 1; i <= 24; i++)
     {
         if (CountBuildablePropertiesOfKind(gUnknown_0857680F[i]) == 0
-            || GetCoPriceMultiplier(gUnknown_030033EC, i) * 10
+            || GetUnitCostWithCoBonus(gUnknown_030033EC, i) * 10
                    > gPlayers[gUnknown_030033EC].funds)
             gUnknown_03004640[i] = 0xff;
 

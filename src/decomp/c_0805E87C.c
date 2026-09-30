@@ -52,8 +52,8 @@
  *
  * struct Unk5A514Cell is repeated here rather than declared in a shared header
  * because src/decomp/c_0805A268.c, c_0805A514.c and c_0805A744.c all define it
- * file-locally, and sub_0805A268/sub_0805A388's promoted definitions take it.
- * See the note at sub_0805A5E0 in include/unknown-functions.h. */
+ * file-locally, and AiListSuppliersInReach/AiListSuppliersAndSupplyProperties's promoted definitions take it.
+ * See the note at AiPickSupplyWard in include/unknown-functions.h. */
 
 struct Unk5A514Cell
 {
@@ -61,8 +61,8 @@ struct Unk5A514Cell
     /* 0x01 */ u8 y;
     /* 0x02 */ s16 v;
 };
-void sub_0805A268(struct Unk5A514Cell *);
-void sub_0805A388(struct Unk5A514Cell *);
+void AiListSuppliersInReach(struct Unk5A514Cell *);
+void AiListSuppliersAndSupplyProperties(struct Unk5A514Cell *);
 struct CellXY
 {
     /* 0x00 */ u16 x;
@@ -84,7 +84,7 @@ struct Unk5E87CCmd
     /* 0x09 */ u8 unk09_6 : 2;
 };
 
-void sub_0805E87C(void)
+void AiSeekSupplier(void)
 {
     int i;
     int id;
@@ -93,28 +93,28 @@ void sub_0805E87C(void)
     struct Unk5E87CUnit *u;
 
     list = gUnknown_03003F20;
-    sub_080202A4(gUnknown_030040D8);
-    sub_0801FD9C(0x79);
-    sub_0805A268((struct Unk5A514Cell *)list);
+    GenerateUnitMovementMap(gUnknown_030040D8);
+    MapMarkHalo(0x79);
+    AiListSuppliersInReach((struct Unk5A514Cell *)list);
 
     for (i = 0; i < 2; i++)
     {
         pos.x = 0x270F;
-        sub_08059C00(list, (u16 *)&pos);
+        AiPopLastNearestCandidate(list, (u16 *)&pos);
 
         if (pos.x == 0x270F)
         {
             gUnknown_030013EC(gUnknown_030040D8->unk02, gUnknown_030040D8->unk03,
                               gUnknown_030040D8->unk00, 0x78, 1);
             list = gUnknown_03003F20;
-            sub_0805A388((struct Unk5A514Cell *)list);
+            AiListSuppliersAndSupplyProperties((struct Unk5A514Cell *)list);
         }
         else
         {
             if (gMap->unit[gMap->rowOffset[pos.y] + pos.x] != 0)
             {
                 u = (struct Unk5E87CUnit *)(gUnits + (id = gMap->unit[gMap->rowOffset[pos.y] + pos.x]));
-                if ((s8)gUnknown_03003340[pos.y][pos.x] <= sub_08058224((struct Unit *)gUnknown_030040D8))
+                if ((s8)gUnknown_03003340[pos.y][pos.x] <= GetUnitMovementBudget((struct Unit *)gUnknown_030040D8))
                 {
                     if (u->unk00 == 0x16)
                     {
@@ -123,12 +123,13 @@ void sub_0805E87C(void)
                             u->unk09_6++;
                             ((struct Unk5E87CCmd *)gUnknown_030040D8)->unk09_3 = 0;
                             ((struct Unk5E87CCmd *)gUnknown_030040D8)->unk09_0 = 0;
-                            sub_0805D648(pos.x, pos.y, 7, 0, 0);
+                            AiPublishAction(pos.x, pos.y, 7, 0, 0);
                         }
                     }
                 }
             }
-            sub_080591E4(&pos);
+            AiAdvanceToward(&pos);
         }
     }
 }
+asm(".global sub_0805E87C\n.thumb_set sub_0805E87C, AiSeekSupplier\n");

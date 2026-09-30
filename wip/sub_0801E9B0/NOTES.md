@@ -1,77 +1,22 @@
-# sub_0801E9B0 — parked at 21.2%, size -20 (804 vs 824), wave 54, W54-G
+## wave 95
 
-**The decomposition is settled.** Score is meaningless here: the -20 makes it
-positional. Everything below is verified against the diff, not guessed.
+Base: sub_0801E9B0.w95-start not needed; draft unchanged (27.8%, size -12). Confirmed by diff that the allocation differs from the prologue (ROM: a4 in r9, a1 in ip, a2 spilled at [sp,#0]; draft: a2 in ip, a1 spilled). Not hand-probed and permuter not run this wave (ran out of time). Next step: chained permuter from this draft; the branch-merge hypothesis (different final update registers in the two scaling arms) is untested.
 
-## What is already byte-exact
+## wave 96
 
-- Prologue, frame (`sub sp, #44`) and the **whole stack-slot layout**:
-  `[sp,#0]`=a3, `#4`=n, `#8`=i, `#12/16/20`=t0/t1/t2, `#24/28`=sx/sy,
-  `#32`=flag, `#36`=hoisted `(s16)a2`, `#40`=`a6 << 16`.
-  Slot order is **declaration order**, not assignment order — sx/sy are
-  assigned before t0..t2 but declared after them. Getting the declaration list
-  into that order was worth ~30 bytes on its own.
-- The 0x80 guard, the `a6 != -1` scale lookup, the OAM triple build, the
-  `flag`/`prio` block, both sign-extend idioms, the `sub_080169A4` call and the
-  whole loop tail including `p += 3;` **before** `dst += 2;`.
+Base: the wave 95 draft (sub_0801E9B0.w96-start.c, 27.79%, size-12); final source is v13.c (copied to sub_0801E9B0.c): 10.7% size-12 by the score (the score falls because the shifted bytes moved, NOT progress or regression), but the register-blind instruction diff against the ROM fell from 52 differing lines to 20 and the whole flag/non-flag branch layout now agrees with the ROM. Judge it by `python tools/drafts.py score` plus a normalised diff, not by the percentage.
 
-## The entire remaining residual: the two scaling arms CROSS-JUMPED into one
+Changes that moved it, each with its mechanism:
+1. `t0`, `t1`, `t2` declared `u16` (they are read from u16 halfwords). This is the ROM's copy-of-the-mask-constant pattern (`movs rA,#0x80; lsls; adds rB,rA,#0; ldr rC,[sp]; ands rC,rB`): a masked test of a NARROW value copies the constant, an `int` does not. Four of the five missing `adds rX,rY,#0` came from this, not from separate source variables. (Pre-registered "several source temps" hypothesis: REFUTED for this function; the ROM's extra copies are constant copies from narrow operands.) The fifth site (`h & 0x100`, `h` = the u16 member just read) also wants `h` u16 and does then copy the constant, but a u16 `h` also copies `h` itself (`adds r0,r3,#0` before the `ands`) which the ROM does not; the two ROM registers for h/x are (h r4, x r3), the draft has them the other way round.
+2. `x = x + a2; y = y + a3;` (x first). With y first, the two zero-extended parameter copies land in the wrong slots (the ROM keeps a2 in ip and a3 in the stack slot). The order in the ROM's tail is y then x, so the emitted order and the source order are not the same thing here.
+3. Branch layout: `if (flag == 0 && (t1 & 0x1000)) x = -(...);` as its own statement, then `if (flag != 0) { if (t0 & 0x200) {...} else {...} } else { y += a3; x += a2; }`. This puts the non-flag tail after the two scaling arms as in the ROM (the earlier draft had it inline, which needed a `b` around it). Splitting only the first `if` into two, without turning the second into `if (flag != 0)`, was byte-identical to the old layout (jump threading undoes it).
+4. `x = *(u8 *)&gUnknown_03000548.unk02;` (byte read) instead of `(u8)gUnknown_03000548.unk02`; equal bytes to the cast form with `h` int, kept because the two-halfword read is then not merged with `h`.
 
-The ROM keeps `if (t0 & 0x200)` and its `else` (the `/ 2` variant) as two
-separate tails, sharing only the last three instructions
-(`asrs r0,#16; adds r0,r5,r0; subs r5,r0,r1`). The candidate merges the whole
-`x = x + a2 - dx; y = y + a3 - dy;` pair as well, which is the missing 20 bytes.
+Permuter (900 s from v13): 'improved' 10.68% -> 44.05% by rewriting `i < n` as `i <= n - 1` and `a1 + n > 0x80` as `a1 + n + 1 > 0x81`. Size became exact only because those two rewrites ADD instructions (a `subs` and two `asrs`) that make up for the real missing bytes. Discarded as a size-only gain; the permuter file is kept as sub_0801E9B0.w96-perm1-out.c.
 
-**It is a register-numbering tie, not a wrong decomposition.** gcc's
-cross-jumping compares instructions including hard registers. In the ROM the two
-arms differ in exactly one register — `dx` lives in r2 in the `& 0x200` arm and
-in r4 in the `/ 2` arm (`dy` is r1 in both), because the `/ 2` arm needs an extra
-scratch for the `lsrs #31; adds; asrs #1` rounding. The candidate allocates both
-arms identically, so the merge runs further.
+What is still missing (12 bytes): the ROM's prologue moves a4 to r9 before loading a6 (`mov r9,r3; ldr r3,[sp,#84]`), so a6 keeps r3 while the draft puts it in r4 and n in r5; the 0xFF00 / 0xC000 mask constants are materialised at different points (one `movs #255` and one `movs #192; lsls #6` are early in the ROM); the `(h & 0xC000) >> 12` half of the two-dimensional table index is computed BEFORE the `unk00 & 0xC000` half in the ROM and after it here (subscript order; a shared `jj` temp for the second subscript is much worse, 368 vs 394 instructions).
 
-## Tried and measured, in order
+Proposed summary: does = builds OAM entries for a list of sprite pieces, moving each by (a2, a3) and, when its flag bit is set, scaling it by the affine entry of a6; status = branch layout and copies match, register assignment of a6/n/h/x and mask-constant placement differ, 12 bytes short; left = the prologue register order and index-expression order; tried = u16 temps, tail layout, x/y order, permuter.
 
-1. Shared `dx`/`dy` locals across both arms — merged the tails, -72 bytes.
-2. **Distinct locals per arm (`dx`/`dy` vs `ex`/`ey`) — this is the wave-35
-   W35-C lever and it PARTLY worked**: -72 → -20. It split the arms but did not
-   split the final `x`/`y` update pair. W35-C says "write the two arms'
-   expressions INLINE and DISTINCT"; distinct *locals* are apparently weaker
-   than distinct *expressions* here.
-3. Interleaving `dx = …; x += dx; dy = …; y += dy;` (rather than both loads then
-   both adds) — required, matches the ROM, kept.
-
-## Untried, and the next thing to try
-
-- Write the two arms' `x`/`y` updates as **inline distinct expressions** rather
-  than through `ex`/`ey` locals, so the two tails are not textually identical —
-  the literal reading of W35-C, which attempt 2 only half-applied.
-- W34-E's "three locals, in order" and W34-H's rider (a pure register-numbering
-  tie is a different residual) both bear on this; W34-H says the three-local
-  lever needs an EXTRA instruction in the ROM to bite, and here the ROM's extra
-  instruction is the `/ 2` rounding, so the lever should be reachable.
-- The permuter is explicitly the right tool for this class (order-wrong /
-  slot-wrong); it has not been run.
-
-## Wave 65 final probe
-
-Binding `gUnknown_0848B6F6` to a block-local pointer in only the `t0 & 0x200`
-arm desynchronised the two arms after reload and recovered eight bytes: 812/824
-(-12), 27.79%, versus 804/824 (-20), 21.24%. The arms now keep more of their
-tails distinct, but still cross-jump the final signed-a2/a3 update and retain a
-register-numbering mismatch throughout the `/ 2` arm. This improved draft is
-active; no permuter pass was started because the wave's global slot was busy.
-
-## Header work done for this function, all verified separately
-
-- `gUnknown_03000548` retyped `u32` -> `struct Unk03000548 { u16 unk00, unk02,
-  unk04; }`. The old comment flagged the `u32` as an alignment guess.
-- `gUnknown_0848B6F6` / `gUnknown_0848B6F8` declared `const s16 [][8]` — the OBJ
-  width/height tables, confirmed against the ROM bytes.
-- `sub_080169A4` declared (promoted-but-undeclared).
-
-## Wave 78 result
-
-Configured reverified at 812/824 (-12), 27.8%. Replacing the final `dx/dy` and
-`ex/ey` updates with distinct inline table expressions compiled byte-identical
-to the active draft, so that documented axis is now ruled out. The established
-stack-slot order and readable transcription were restored unchanged.
+## wave 97 (W97-V)
+Base: levers 5a-416+5b-100f (`q2 = a1 + n; if (q2 > 0x80)` using the already-declared q2, and `h0 = gUnknown_03000548.unk00` bound before the second table lookup); wrongc OK. 10.68% -12 -> 31.55% size-exact. Permuter run 1 -> 32.04% (`(h0 & 0xC000) >> 14` -> `h0 >> 14`, equal for u16), and it reformatted the file (comments/blank lines lost, formatting only). First difference still +0xc; the size-exactness is probably the temp adding the 12 missing bytes rather than reproducing the ROM's copies. Not matched.

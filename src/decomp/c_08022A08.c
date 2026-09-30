@@ -11,15 +11,16 @@
  * sub_0801537C returns int and the result is discarded; the epilogue is
  * `pop {r0}; bx r0`, which is what makes this function void rather than a tail
  * forward. */
-void sub_08022A08(void)
+void HideRangeOverlay(void)
 {
-    sub_08013C00();
-    sub_08013AEC();
-    sub_080227A8();
-    sub_08024584();
+    ClearBg0Tilemap();
+    BG_EnableSyncBG0();
+    RedrawUnitIconLayer();
+    SetMapLayersDefault();
     gUnknown_03000559 = 0;
     sub_0801537C(gUnknown_08499B4C);
 }
+asm(".global sub_08022A08\n.thumb_set sub_08022A08, HideRangeOverlay\n");
 
 /* Two tile blobs and the palette between them, in that order -- the palette
  * store sits between the decompressions in the ROM and cannot be moved to
@@ -27,12 +28,13 @@ void sub_08022A08(void)
  *
  * 0x220 is `movs #0x88; lsls #2`: agbcc builds an even constant above 255 from
  * an 8-bit value and a shift rather than spending a pool word. */
-void sub_08022A34(void)
+void LoadCursorSpriteGraphics(void)
 {
     Decompress(gUnknown_081019C4, (void *)0x06016CA0);
     ApplyPaletteExt(gUnknown_08101904, 0x220, 0x20);
     Decompress(gUnknown_08124268, (void *)0x06016A40);
 }
+asm(".global sub_08022A34\n.thumb_set sub_08022A34, LoadCursorSpriteGraphics\n");
 
 /* Two colours per frame, both picked by the same 16-phase counter, into gPal
  * halfwords 0x228 and 0x238. The second table is the first plus 0x10 entries,
@@ -40,14 +42,15 @@ void sub_08022A34(void)
  * loading a second pool word.
  *
  * `lsrs #2` on gGameClock is a LOGICAL shift, and that is a second
- * independent proof -- alongside sub_0806F064's __umodsi3 -- that the counter
+ * independent proof -- alongside PickRandomCoFromList's __umodsi3 -- that the counter
  * is unsigned; the declaration is still `s32` for src/title-screen.c's sake, so
  * the cast carries it. See the note in unknown-globals.h.
  *
  * The mask constant is materialised once and held in a register across both
  * calls, which is what pays for r5. */
-void sub_08022A6C(void)
+void AnimateCursorPalette(void)
 {
-    sub_0801368C(gUnknown_08101984 + (((u32)gGameClock >> 2) & 0xF), 0x228, 2);
-    sub_0801368C(gUnknown_08101984 + 0x10 + (((u32)gGameClock >> 2) & 0xF), 0x238, 2);
+    ApplyPaletteAndUploadNow(gUnknown_08101984 + (((u32)gGameClock >> 2) & 0xF), 0x228, 2);
+    ApplyPaletteAndUploadNow(gUnknown_08101984 + 0x10 + (((u32)gGameClock >> 2) & 0xF), 0x238, 2);
 }
+asm(".global sub_08022A6C\n.thumb_set sub_08022A6C, AnimateCursorPalette\n");

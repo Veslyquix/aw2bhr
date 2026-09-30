@@ -11,7 +11,7 @@
  */
 
 #include "map.h"
-/* gUnknown_030040D8 points at the selected unit (sub_0802E4B4 sets it to
+/* gUnknown_030040D8 points at the selected unit (MapCursor_OnPressA sets it to
  * &gUnits[...]); the header types it as a layout-only mirror struct. */
 #define gSelectedUnit ((struct Unit *)gUnknown_030040D8)
 
@@ -87,7 +87,7 @@ void JoinUnits(void)
         gSelectedUnit->fuel = sum;
 
     joiner->type = 0;
-    sub_080424E4();
+    RecordUnitActionCell();
 }
 
 asm(".global sub_08042998\n.thumb_set sub_08042998, JoinUnits\n");

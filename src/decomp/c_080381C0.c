@@ -43,13 +43,13 @@
 
 
 /* Wave 43 (W43-F): return type changed from `int` to `bool8`. The note above
- * says nothing narrows the result; sub_08038240, the one caller, does -- it
+ * says nothing narrows the result; EndOfGame_PrepareSummary, the one caller, does -- it
  * truth-tests with `lsls r0,#0x18; cmp r0,#0`, and that shift only appears when
  * agbcc re-narrows a sub-word return. Byte-neutral here (both arms return a
  * literal), and re-verified as still MATCHED after the change.
  *
  * W43-E re-verified this independently and found the CONTROL PAIR that settles
- * it, inside that one caller: sub_08038240 calls IsHardCampaignMode at 0x08038302 and
+ * it, inside that one caller: EndOfGame_PrepareSummary calls IsHardCampaignMode at 0x08038302 and
  * sub_080381C0 at 0x0803830E, sixteen bytes apart, and truth-tests both results
  * directly with no intervening local. The first is `cmp r0,#0` with NO shift
  * and is declared `int`; the second is `lsls r0,#0x18; cmp r0,#0`. Same
@@ -98,7 +98,7 @@ bool8 sub_080381C0(void)
  * promotion carries "rodata": ["0x08090F00", "0x08090F04"].
  *
  * THE LAST `if` IS WRITTEN INVERTED ON PURPOSE. The ROM branches `bne` to the
- * sub_080176C0 block and reaches UnlockMainMenu by falling through, so the
+ * AddBattleMapPoints block and reaches UnlockMainMenu by falling through, so the
  * UnlockMainMenu arm has to be the THEN arm in the source; spelling it the
  * natural way round emits the same instructions in the opposite order. Same
  * lever W43-E recorded on sub_080381C0 in this block.
@@ -108,13 +108,13 @@ bool8 sub_080381C0(void)
  * clear loop reads as descending (`subs; cmp #0; bge`) but is an ascending
  * `for (i = 0; i < 4; i++)` -- check_dbra_loop rewrote the counter, and the
  * pointer still walks forwards with `adds r0,#1`. */
-void sub_08038240(void)
+void EndOfGame_PrepareSummary(void)
 {
     int i;
 
     LockMainMenu();
-    sub_080366D0(sub_08036884);
-    sub_080366C4(sub_080368E8);
+    sub_080366D0(DefaultVBlankCallback);
+    sub_080366C4(DefaultMainLoopCallback);
     sub_08011B18();
 
     for (i = 0; i < 4; i++)
@@ -155,7 +155,7 @@ void sub_08038240(void)
     }
     else
     {
-        gUnknown_0202FDEC.unk0a = gPlayers[sub_0807A908()].totalScore;
+        gUnknown_0202FDEC.unk0a = gPlayers[GetResultsArmy()].totalScore;
 
         if (IsHardCampaignMode())
             gUnknown_0202FDEC.unk0a = gUnknown_0202FDEC.unk0a * 2;
@@ -164,5 +164,6 @@ void sub_08038240(void)
     if (!sub_080381C0())
         UnlockMainMenu();
     else
-        sub_080176C0(gUnknown_0202FDEC.unk0a);
+        AddBattleMapPoints(gUnknown_0202FDEC.unk0a);
 }
+asm(".global sub_08038240\n.thumb_set sub_08038240, EndOfGame_PrepareSummary\n");

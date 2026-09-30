@@ -11,14 +11,7 @@
  * below so every other unit keeps resolving them unchanged.
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08011B18.
- * WM_ConfirmExit_08011B19 @ 0x08011B18
- */
-
-void WM_ConfirmExit_08011B19(void)
+void ClearVBlankHooks(void)
 {
     u8 i;
 
@@ -26,4 +19,4 @@ void WM_ConfirmExit_08011B19(void)
         gUnknown_03000000[i] = 0;
 }
 
-asm(".global sub_08011B18\n.thumb_set sub_08011B18, WM_ConfirmExit_08011B19\n");
+asm(".global sub_08011B18\n.thumb_set sub_08011B18, ClearVBlankHooks\n");

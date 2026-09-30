@@ -7,13 +7,6 @@
  * sub_08032D70 @ 0x08032D70
  */
 
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08032D70.
- * sub_08032D70 @ 0x08032D70
- */
-
 #include "proc.h"
 struct Unk32D70Proc
 {
@@ -32,7 +25,7 @@ struct Unk32D70Target
  * known to hold the constant rather than reloading it, so the literal 1 is
  * written twice in the source and once in the output. */
 
-void sub_08032D70(struct Unk32D70Proc *proc)
+void LinkConfirmDialog_Init(struct Unk32D70Proc *proc)
 {
     Decompress(gUnknown_081D3C34, (void *)0x06015780);
 
@@ -41,3 +34,4 @@ void sub_08032D70(struct Unk32D70Proc *proc)
     proc->unk2c = 0;
     proc->unk29 = 1;
 }
+asm(".global sub_08032D70\n.thumb_set sub_08032D70, LinkConfirmDialog_Init\n");

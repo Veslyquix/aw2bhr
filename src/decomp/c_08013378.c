@@ -8,12 +8,6 @@
  */
 
 #include "proc.h"
-/* Promoted from assembly; each function below is byte-for-byte
- * identical to the original. Order is address order and must
- * stay that way -- the linker places this file's .text as one
- * contiguous block at 0x08013378.
- * sub_08013378 @ 0x08013378
- */
 
 /* Family F000 (tools/families.py): `push {lr}; ldr r0,=X; bl S;
  * pop {r0}; bx r0` -- a one-line forwarder. `pop {r0}` is the void epilogue
@@ -22,11 +16,12 @@
  */
 
 
-/* The stop half of sub_08013338's start (Proc_StartBlocking or Proc_Start on
+/* The stop half of StartScreenShake's start (Proc_StartBlocking or Proc_Start on
  * tree 3, depending on its ProcPtr argument).
  */
 
-void sub_08013378(void)
+void EndScreenShake(void)
 {
     Proc_EndEach(gUnknown_084893AC);
 }
+asm(".global sub_08013378\n.thumb_set sub_08013378, EndScreenShake\n");

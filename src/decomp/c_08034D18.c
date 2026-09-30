@@ -7,9 +7,9 @@
  * sub_08034D18 @ 0x08034D18
  */
 
-void sub_08034D18(void)
+void MapState_DispatchTurnByController(void)
 {
-    sub_0802776C(0);
+    SetInfoBoxMode(0);
 
     switch (gPlayers[gUnknown_030033EC].aiControlled)
     {
@@ -18,7 +18,7 @@ void sub_08034D18(void)
         break;
 
     case 2:
-        if (gPlaySt.savingEnabled == 0 || !sub_0802F4F4())
+        if (gPlaySt.savingEnabled == 0 || !SioGetSelfId())
         {
             gUnknown_03004780 = 0;
             gUnknown_030032D8 = 0xe;
@@ -45,3 +45,4 @@ void sub_08034D18(void)
         break;
     }
 }
+asm(".global sub_08034D18\n.thumb_set sub_08034D18, MapState_DispatchTurnByController\n");
